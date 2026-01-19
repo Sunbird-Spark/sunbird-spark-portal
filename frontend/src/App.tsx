@@ -1,6 +1,6 @@
 import React from 'react';
-import SimpleApp from './SimpleApp';
+import AppRoutes from './AppRoutes';
 
 export default function App(): React.JSX.Element {
-  return <SimpleApp />;
+  return <AppRoutes />;
 }

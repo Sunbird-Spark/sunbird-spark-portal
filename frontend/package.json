@@ -27,6 +27,7 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-i18next": "^16.5.2",
+    "react-router-dom": "^7.12.0",
     "snyk": "^1.1301.2"
   },
   "devDependencies": {
