@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { envConfig } from '../config/env.js';
 
+const verificationUrl = envConfig.GOOGLE_RECAPTCHA_VERIFY_URL;
+
 export const verifyRecaptcha = async (captchaResponse: string): Promise<void> => {
 
-    const verificationUrl = `${envConfig.GOOGLE_RECAPTCHA_VERIFY_URL}?secret=${encodeURIComponent(
-                envConfig.GOOGLE_RECAPTCHA_SECRET
-            )}&response=${encodeURIComponent(captchaResponse)}`;
-    return axios.post(verificationUrl);
+    const params = new URLSearchParams();
+    params.append('secret', envConfig.GOOGLE_RECAPTCHA_SECRET);
+    params.append('response', captchaResponse);
+    return axios.post(verificationUrl, params);
 
 }

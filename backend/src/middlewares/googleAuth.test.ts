@@ -56,30 +56,31 @@ describe('validateRecaptcha middleware', () => {
 		await validateRecaptcha(mockRequest as Request, mockResponse as Response, mockNext);
 
 		expect(axios.post).toHaveBeenCalledWith(
-			`${baseEnvConfig.GOOGLE_RECAPTCHA_VERIFY_URL}?secret=test-secret&response=valid-token`
+			baseEnvConfig.GOOGLE_RECAPTCHA_VERIFY_URL,
+			expect.any(URLSearchParams)
 		);
 		expect(mockNext).toHaveBeenCalled();
 		expect(mockResponse.status as unknown as Mock).not.toHaveBeenCalled();
 	});
 
-	it('should return 418 when captchaResponse is missing', async () => {
+	it('should return 400 when captchaResponse is missing', async () => {
 		const validateRecaptcha = await importMiddleware();
 		mockRequest.query = {};
 
 		await validateRecaptcha(mockRequest as Request, mockResponse as Response, mockNext);
 
-		expect(mockResponse.status).toHaveBeenCalledWith(418);
+		expect(mockResponse.status).toHaveBeenCalledWith(400);
 		expect(mockResponse.send).toHaveBeenCalled();
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('should return 418 when secret is not configured', async () => {
+	it('should return 500 when secret is not configured', async () => {
 		const validateRecaptcha = await importMiddleware({ GOOGLE_RECAPTCHA_SECRET: '' });
 		mockRequest.query = { captchaResponse: 'some-token' };
 
 		await validateRecaptcha(mockRequest as Request, mockResponse as Response, mockNext);
 
-		expect(mockResponse.status).toHaveBeenCalledWith(418);
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
 		expect(mockResponse.send).toHaveBeenCalled();
 		expect(mockNext).not.toHaveBeenCalled();
 	});

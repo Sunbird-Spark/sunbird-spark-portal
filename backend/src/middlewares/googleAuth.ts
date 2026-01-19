@@ -5,6 +5,21 @@ import logger from '../utils/logger.js';
 import _ from 'lodash';
 import { verifyRecaptcha } from '../services/googleService.js';
 
+const recaptchaSecret = envConfig.GOOGLE_RECAPTCHA_SECRET;
+
+export class HttpError extends Error {
+	statusCode: number;
+	errorCode: string;
+	responseCode: string;
+
+	constructor(errorCode: string, statusCode: number, responseCode: string, message?: string) {
+		super(message ?? errorCode);
+		this.statusCode = statusCode;
+		this.errorCode = errorCode;
+		this.responseCode = responseCode;
+	}
+}
+
 export const validateRecaptcha = async (
 	req: Request,
 	res: Response,
@@ -14,37 +29,42 @@ export const validateRecaptcha = async (
 		const captchaResponse = _.get(req.query, 'captchaResponse', '') as string;
 		if (!captchaResponse) {
 			logger.error(`GOOGLE_RECAPTCHA :: missing captchaResponse in query params`);
-			throw new Error('MISSING_CAPTCHA_RESPONSE');
+			throw new HttpError('MISSING_CAPTCHA_RESPONSE', 400, 'BAD_REQUEST', 'Captcha response is required');
 		}
 
-		if (!envConfig.GOOGLE_RECAPTCHA_SECRET) {
+		if (!recaptchaSecret) {
 			logger.error(`GOOGLE_RECAPTCHA :: missing secret in config`);
-			throw new Error('GOOGLE_RECAPTCHA_SECRET not configured');
+			throw new HttpError('RECAPTCHA_SECRET_NOT_CONFIGURED', 500,'INTERNAL_SERVER_ERROR', 'Recaptcha secret is not configured');
 		}
 
 		const response = await verifyRecaptcha(captchaResponse);
 
 		if (!_.get(response, 'data.success')) {
-			logger.error(`GOOGLE_RECAPTCHA :: captcha validation failed`);
-			throw new Error('CAPTCHA_VALIDATION_FAILED');
+			logger.error(`GOOGLE_RECAPTCHA :: captcha validation failed`, response);
+			throw new HttpError('CAPTCHA_VALIDATION_FAILED', 418, 'I_AM_A_TEAPOT', 'Captcha validation failed');
 		}
 
-		return next();
+		next();
 	} catch (error: unknown) {
 		logger.error(`GOOGLE_RECAPTCHA :: validateRecaptcha caught exception`, error);
-		res.status(418).send({
+		const httpError = error instanceof HttpError ? error : new HttpError("CAPTCHA_VALIDATION_FAILED", 418, 'I_AM_A_TEAPOT', 'Recaptcha validation failed');
+
+		res.status(httpError.statusCode).send({
 			id: 'api.validate.recaptcha',
 			ts: new Date(),
 			params: {
 				resmsgid: uuidv1(),
 				msgid: uuidv1(),
-				err: "I'm a teapot",
-				status: "I'm a teapot",
-				errmsg: "I'm a teapot"
+				status: 'FAILED'
 			},
-			responseCode: "I'm a teapot",
-			result: {}
+			responseCode: httpError.responseCode,
+			result: {},
+			error: {
+				code: httpError.errorCode,
+				message: httpError.message
+			}
 		});
+
 	}
 };
 
