@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
@@ -7,7 +7,7 @@ import { verifyRecaptcha } from '../services/googleService.js';
 
 const recaptchaSecret = envConfig.GOOGLE_RECAPTCHA_SECRET;
 
-export class HttpError extends Error {
+class HttpError extends Error {
 	statusCode: number;
 	errorCode: string;
 	responseCode: string;
@@ -53,12 +53,11 @@ export const validateRecaptcha = async (
 			id: 'api.validate.recaptcha',
 			ts: new Date(),
 			params: {
-				resmsgid: uuidv1(),
-				msgid: uuidv1(),
+				resmsgid: uuidv4(),
+				msgid: uuidv4(),
 				status: 'FAILED'
 			},
 			responseCode: httpError.responseCode,
-			result: {},
 			error: {
 				code: httpError.errorCode,
 				message: httpError.message
