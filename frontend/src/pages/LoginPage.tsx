@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, Role, User } from '../auth/AuthContext';
 import { getDefaultRouteForRole } from '../rbac/roleConfig';
+import { v4 as uuidv4 } from "uuid";
 
 const LoginPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<Role>('guest');
@@ -16,7 +17,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
 
     const user: User = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       name: `User (${selectedRole})`,
       role: selectedRole,
     };
