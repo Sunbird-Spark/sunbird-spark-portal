@@ -67,7 +67,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
 
   it("redirect: / redirects to /workspace", () => {
     mockUseAuth.mockReturnValue({
-      user: { id: "1", name: "A", role: "content_creator" },
+      user: { id: "1", name: "Creator", role: "content_creator" },
       isAuthenticated: true,
       isLoading: false,
       login: vi.fn(),
@@ -81,7 +81,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
 
   it("catch-all: unknown route redirects to /workspace", () => {
     mockUseAuth.mockReturnValue({
-      user: { id: "1", name: "A", role: "content_creator" },
+      user: { id: "1", name: "Creator", role: "content_creator" },
       isAuthenticated: true,
       isLoading: false,
       login: vi.fn(),

@@ -12,7 +12,7 @@ import CreateContentPage from './pages/CreateContentPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
-const ReportsProtected = withRoles(['content_reviewer'])(ReportsPage);
+const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
 
 const AppRoutes: React.FC = () => {
@@ -29,7 +29,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentProtected />} />
 
-        {/* Redirect root to workspace */}
+        {/* Redirect root to workspace (accessible by content creators and reviewers) */}
         <Route path="/" element={<Navigate to="/workspace" replace />} />
 
         {/* Catch-all redirect */}

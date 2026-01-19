@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, Role, User } from '../auth/AuthContext';
+import { getDefaultRouteForRole } from '../rbac/roleConfig';
 
 const LoginPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<Role>('guest');
@@ -8,8 +9,8 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get the return path from location state, or default to /workspace
-  const from = (location.state as any)?.from?.pathname || '/workspace';
+  // Get the return path from location state, or use role's default route
+  const from = (location.state as any)?.from?.pathname || getDefaultRouteForRole(selectedRole);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +50,7 @@ const LoginPage: React.FC = () => {
         </button>
       </form>
 
-      {from !== '/workspace' && (
+      {location.state?.from && (
         <p>
           You will be redirected to: <strong>{from}</strong>
         </p>

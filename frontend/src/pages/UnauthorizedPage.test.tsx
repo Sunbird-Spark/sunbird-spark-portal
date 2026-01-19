@@ -96,7 +96,7 @@ describe('UnauthorizedPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
-  it('should navigate to /admin for admin user', () => {
+  it('should navigate to /reports for admin user', () => {
     const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
     mockUseAuth.mockReturnValue({
       user: { id: '1', name: 'Admin User', role: 'admin' },
@@ -116,7 +116,7 @@ describe('UnauthorizedPage', () => {
     const goHomeButton = screen.getByText('Go Home');
     fireEvent.click(goHomeButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/admin');
+    expect(mockNavigate).toHaveBeenCalledWith('/reports');
     mockUseAuth.mockRestore();
   });
 
