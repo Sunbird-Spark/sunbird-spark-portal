@@ -1,0 +1,31 @@
+{
+  "loading": "Carregando...",
+  "error": "Ocorreu um erro",
+  "success": "Sucesso",
+  "cancel": "Cancelar",
+  "save": "Salvar",
+  "delete": "Excluir",
+  "edit": "Editar",
+  "close": "Fechar",
+  "confirm": "Confirmar",
+  "back": "Voltar",
+  "next": "Próximo",
+  "changeLanguage": "Alterar idioma",
+
+  "home": "Início",
+  "dashboard": "Painel",
+  "profile": "Perfil",
+  "settings": "Configurações",
+  "logout": "Sair",
+
+  "login": "Entrar",
+  "email": "E-mail",
+  "password": "Senha",
+  "forgotPassword": "Esqueceu a senha?",
+  "invalidCredentials": "E-mail ou senha inválidos",
+  "loginSuccess": "Login realizado com sucesso",
+
+  "stats.users": "Total de usuários",
+  "stats.sessions": "Sessões ativas",
+  "stats.revenue": "Receita"
+}

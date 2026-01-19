@@ -1,0 +1,46 @@
+{
+  "loading": "Chargement...",
+  "error": "Une erreur s'est produite",
+  "success": "Succès",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "close": "Fermer",
+  "confirm": "Confirmer",
+  "back": "Retour",
+  "next": "Suivant",
+  "changeLanguage": "Changer de langue",
+
+  "home": "Accueil",
+  "dashboard": "Tableau de bord",
+  "profile": "Profil",
+  "settings": "Paramètres",
+  "logout": "Déconnexion",
+
+  "login": "Connexion",
+  "email": "E-mail",
+  "password": "Mot de passe",
+  "forgotPassword": "Mot de passe oublié ?",
+  "invalidCredentials": "E-mail ou mot de passe invalide",
+  "loginSuccess": "Connexion réussie",
+
+  "stats.users": "Nombre total d'utilisateurs",
+  "stats.sessions": "Sessions actives",
+  "stats.revenue": "Revenu",
+
+  "network": "Erreur réseau. Veuillez vérifier votre connexion.",
+  "server": "Erreur serveur. Veuillez réessayer plus tard.",
+  "validation": "Veuillez vérifier votre saisie et réessayer.",
+  "notFound": "La ressource demandée est introuvable.",
+  "unauthorized": "Vous n'êtes pas autorisé(e) à accéder à cette ressource.",
+
+  "title": "Portail SunbirdEd",
+  "subtitle": "Une plateforme éducative moderne et évolutive",
+  "description": "Conçue pour le XXIe siècle avec une technologie de pointe",
+  "welcome": "Bienvenue sur le Portail SunbirdEd",
+  "scalable": "Solution d’apprentissage évolutive",
+  "opensource": "Gouvernance Open Source",
+  "community": "Soutien communautaire à grande échelle",
+  "cloud": "Cloud/Mobile natif"
+}

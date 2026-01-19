@@ -1,0 +1,11 @@
+# Server Configuration
+ENVIRONMENT=local
+
+# Session Configuration
+SUNBIRD_ANONYMOUS_SESSION_SECRET=sunbird_anonymous_session_secret
+SUNBIRD_PORTAL_SESSION_STORE=memory
+
+# Kong Configuration
+KONG_ANONYMOUS_FALLBACK_TOKEN=your-fallback-token
+KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN=your-register-token
+KONG_ANONYMOUS_DEVICE_REGISTER_API=https://your-kong-api/register
