@@ -1,0 +1,60 @@
+name: Pull Request Quality Checks
+
+on:
+  pull_request:
+
+jobs:
+  quality-checks:
+    name: Code Quality & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # required for Sonar
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      # -----------------------------
+      # Frontend - Lint
+      # -----------------------------
+      - name: Frontend lint
+        working-directory: frontend
+        run: npm run lint
+
+      # -----------------------------
+      # Frontend - Tests
+      # -----------------------------
+      - name: Frontend tests
+        working-directory: frontend
+        run: npm run test:coverage
+
+      # -----------------------------
+      # Backend - Install
+      # -----------------------------
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      # -----------------------------
+      # Backend - Lint
+      # -----------------------------
+      - name: Backend lint
+        working-directory: backend
+        run: npm run lint
+
+      # -----------------------------
+      # Backend - Tests
+      # -----------------------------
+      - name: Backend tests
+        working-directory: backend
+        run: |
+            npm run test:coverage
