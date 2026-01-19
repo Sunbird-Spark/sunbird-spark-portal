@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import axios from 'axios';
 
 vi.mock('axios');
@@ -42,7 +42,7 @@ describe('validateRecaptcha middleware', () => {
 			envConfig: { ...baseEnvConfig, ...overrideEnv }
 		}));
 		const module = await import('./googleAuth.js');
-		return module.validateRecaptcha as (req: Request, res: Response, next: NextFunction) => Promise<void>;
+		return module.validateRecaptcha as RequestHandler;
 	};
 
 	it('captcha is valid: should call the next function', async () => {
