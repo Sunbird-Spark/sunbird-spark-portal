@@ -18,9 +18,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.resetModules();
-        
+
         app = express();
-        
+
         app.use(session({
             secret: 'test-secret',
             resave: false,
@@ -50,9 +50,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             app.use(registerDeviceWithKong());
-            
+
             app.get('/test', (req, res) => {
-                res.json({ 
+                res.json({
                     kongToken: req.session.kongToken,
                     roles: req.session.roles,
                     sessionID: req.sessionID
@@ -75,7 +75,7 @@ describe('Kong Auth Middleware Integration Tests', () => {
             expect(response.body.kongToken).toBe('new-integration-token');
             expect(response.body.roles).toEqual(['ANONYMOUS']);
             expect(response.headers['set-cookie']).toBeDefined();
-            
+
             expect(axios.post).toHaveBeenCalledWith(
                 'http://mock-kong-api',
                 { request: { key: expect.any(String) } },
@@ -100,12 +100,12 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const response1 = await agent.get('/test').expect(200);
             expect(response1.body.kongToken).toBe('reuse-token');
-            
+
             const firstCallCount = (axios.post as Mock).mock.calls.length;
 
             const response2 = await agent.get('/test').expect(200);
             expect(response2.body.kongToken).toBe('reuse-token');
-            
+
             expect((axios.post as Mock).mock.calls.length).toBe(firstCallCount);
         });
 
@@ -124,7 +124,7 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const response2 = await agent.get('/test').expect(200);
             expect(response2.body.kongToken).toBe('ttl-test-token');
-            
+
             expect(response1.body.sessionID).toBe(response2.body.sessionID);
         });
     });
@@ -142,9 +142,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             app.use(registerDeviceWithKong());
-            
+
             app.get('/test', (req, res) => {
-                res.json({ 
+                res.json({
                     kongToken: req.session.kongToken,
                     roles: req.session.roles
                 });
@@ -198,7 +198,7 @@ describe('Kong Auth Middleware Integration Tests', () => {
     describe('Configuration Issues', () => {
         it('should use fallback token when Kong API config is missing', async () => {
             vi.resetModules();
-            
+
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_ANONYMOUS_DEVICE_REGISTER_API: undefined,
@@ -218,9 +218,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             freshApp.use(registerDeviceWithKong());
-            
+
             freshApp.get('/test', (req, res) => {
-                res.json({ 
+                res.json({
                     kongToken: req.session.kongToken,
                     roles: req.session.roles
                 });
@@ -237,7 +237,7 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
         it('should handle missing fallback token', async () => {
             vi.resetModules();
-            
+
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_ANONYMOUS_DEVICE_REGISTER_API: 'http://mock-kong-api',
@@ -257,9 +257,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             freshApp.use(registerDeviceWithKong());
-            
+
             freshApp.get('/test', (req, res) => {
-                res.json({ 
+                res.json({
                     kongToken: req.session.kongToken,
                     roles: req.session.roles
                 });
@@ -273,6 +273,52 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             expect(response.body.kongToken).toBeUndefined();
             expect(response.body.roles).toEqual(['ANONYMOUS']);
+        });
+    });
+
+    describe('Logged-in User Token Generation', () => {
+        beforeEach(async () => {
+            vi.doMock('../config/env.js', () => ({
+                envConfig: {
+                    KONG_ANONYMOUS_DEVICE_REGISTER_API: 'http://mock-kong-api',
+                    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'mock-bearer-token',
+                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token',
+                    SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
+                    KONG_LOGGEDIN_DEVICE_REGISTER_API: 'http://mock-kong-loggedin-api',
+                    KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'mock-loggedin-bearer-token',
+                    KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
+                    SUNBIRD_LOGGEDIN_SESSION_TTL: 120000
+                }
+            }));
+
+            const { registerDeviceWithKong } = await import('./kongAuth.js');
+            app.use(registerDeviceWithKong());
+
+            app.get('/test', (req, res) => {
+                res.json({
+                    kongToken: req.session.kongToken,
+                    roles: req.session.roles,
+                    sessionID: req.sessionID,
+                    userId: req.session.userId
+                });
+            });
+        });
+
+        it('should generate anonymous token for users without userId', async () => {
+            (axios.post as Mock).mockResolvedValue({
+                data: {
+                    params: { status: 'successful' },
+                    result: { token: 'anonymous-user-token' }
+                }
+            });
+
+            const response = await request(app)
+                .get('/test')
+                .expect(200);
+
+            expect(response.body.kongToken).toBe('anonymous-user-token');
+            expect(response.body.roles).toEqual(['ANONYMOUS']);
+            expect(response.body.userId).toBeUndefined();
         });
     });
 });

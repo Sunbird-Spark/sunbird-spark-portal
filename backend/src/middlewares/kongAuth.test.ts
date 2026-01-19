@@ -157,7 +157,7 @@ describe('kongAuth middleware', () => {
 
             await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
 
-            expect(logger.error).toHaveBeenCalledWith('KONG_TOKEN :: failed to save session', saveError);
+            expect(logger.error).toHaveBeenCalledWith('ANONYMOUS_KONG_TOKEN :: failed to save session', saveError);
             expect(mockNext).toHaveBeenCalledWith(saveError);
         });
 

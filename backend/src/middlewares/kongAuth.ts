@@ -1,15 +1,28 @@
 import { Request, Response, NextFunction } from 'express';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
-import { generateKongToken, refreshSessionTTL, saveSession } from '../services/kongAuthService.js';
+import { generateKongToken, refreshSessionTTL } from '../services/kongAuthService.js';
 
 export const registerDeviceWithKong = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
 
+        if (req.session.userId) {
+            logger.info('sessionExists');
+            return next();
+        }
+
         if (req.session.kongToken) {
             logger.info('ANONYMOUS_KONG_TOKEN :: using existing token');
             refreshSessionTTL(req);
-            return saveSession(req, next);
+            req.session.save((err: Error) => {
+                if (err) {
+                    logger.error('ANONYMOUS_KONG_TOKEN :: failed to save session', err);
+                    return next(err);
+                }
+                logger.info(`ANONYMOUS_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
+                next();
+            });
+            return;
         }
 
         logger.info('ANONYMOUS_KONG_TOKEN :: requesting anonymous token from Kong');
@@ -34,6 +47,13 @@ export const registerDeviceWithKong = () => {
         refreshSessionTTL(req);
         req.session['roles'] = [];
         req.session.roles = ['ANONYMOUS'];
-        saveSession(req, next);
+        req.session.save((err: Error) => {
+            if (err) {
+                logger.error('ANONYMOUS_KONG_TOKEN :: failed to save session', err);
+                return next(err);
+            }
+            logger.info(`ANONYMOUS_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
+            next();
+        });
     };
 };
