@@ -4,25 +4,12 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { withRoles } from './withRoles';
 import { AuthProvider } from '../auth/AuthContext';
 import { ReactNode } from 'react';
+import * as AuthContext from '../auth/AuthContext';
 
 // Mock components
 const TestComponent = () => <div>Protected Content</div>;
 const LoginPage = () => <div>Login Page</div>;
-
-// Helper to render with routing and auth context
-const renderWithRouter = (
-  ui: ReactNode,
-  { initialRoute = '/', user = null }: { initialRoute?: string; user?: any } = {}
-) => {
-  return render(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      <AuthProvider>
-        {user && <div data-testid="mock-login">{JSON.stringify(user)}</div>}
-        {ui}
-      </AuthProvider>
-    </MemoryRouter>
-  );
-};
+const CustomUnauthorized = () => <div>Custom Unauthorized</div>;
 
 describe('withRoles HOC', () => {
   it('should redirect to login when user is not authenticated', () => {
@@ -42,7 +29,15 @@ describe('withRoles HOC', () => {
     expect(screen.getByText('Login Page')).toBeInTheDocument();
   });
 
-  it('should render component when user has correct role', () => {
+  it('should redirect to login when user has incorrect role', () => {
+    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
+    mockUseAuth.mockReturnValue({
+      user: { id: '1', name: 'Test User', role: 'guest' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+
     const ProtectedComponent = withRoles(['admin'])(TestComponent);
 
     render(
@@ -56,11 +51,19 @@ describe('withRoles HOC', () => {
       </MemoryRouter>
     );
 
-    // Since we can't easily mock useAuth here, we're just testing the redirect behavior
     expect(screen.getByText('Login Page')).toBeInTheDocument();
+    mockUseAuth.mockRestore();
   });
 
-  it('should redirect to login when user has incorrect role', () => {
+  it('should render component when user has correct role', () => {
+    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
+    mockUseAuth.mockReturnValue({
+      user: { id: '1', name: 'Test User', role: 'admin' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+
     const ProtectedComponent = withRoles(['admin'])(TestComponent);
 
     render(
@@ -74,10 +77,19 @@ describe('withRoles HOC', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Login Page')).toBeInTheDocument();
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+    mockUseAuth.mockRestore();
   });
 
   it('should accept multiple allowed roles', () => {
+    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
+    mockUseAuth.mockReturnValue({
+      user: { id: '1', name: 'Test User', role: 'content_reviewer' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+
     const ProtectedComponent = withRoles(['content_creator', 'content_reviewer'])(TestComponent);
 
     render(
@@ -91,7 +103,8 @@ describe('withRoles HOC', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Login Page')).toBeInTheDocument();
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+    mockUseAuth.mockRestore();
   });
 
   it('should use custom unauthenticatedTo path when provided', () => {
@@ -112,6 +125,34 @@ describe('withRoles HOC', () => {
     );
 
     expect(screen.getByText('Custom Login')).toBeInTheDocument();
+  });
+
+  it('should use custom redirectTo path when user has wrong role', () => {
+    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
+    mockUseAuth.mockReturnValue({
+      user: { id: '1', name: 'Test User', role: 'guest' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+
+    const ProtectedComponent = withRoles(['admin'], { redirectTo: '/custom-unauthorized' })(
+      TestComponent
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/protected']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/protected" element={<ProtectedComponent />} />
+            <Route path="/custom-unauthorized" element={<CustomUnauthorized />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Custom Unauthorized')).toBeInTheDocument();
+    mockUseAuth.mockRestore();
   });
 
   it('should preserve location state for return path', () => {
@@ -146,5 +187,48 @@ describe('withRoles HOC', () => {
     const ProtectedComponent = withRoles(['admin'])(AnonymousComponent);
 
     expect(ProtectedComponent.displayName).toContain('withRoles');
+  });
+
+  it('should allow first role in array', () => {
+    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
+    mockUseAuth.mockReturnValue({
+      user: { id: '1', name: 'Test User', role: 'content_creator' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+
+    const ProtectedComponent = withRoles(['content_creator', 'content_reviewer'])(TestComponent);
+
+    render(
+      <MemoryRouter initialEntries={['/protected']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/protected" element={<ProtectedComponent />} />
+            <Route path="/login" element={<LoginPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+    mockUseAuth.mockRestore();
+  });
+
+  it('should default to /login for unauthenticated when no custom path provided', () => {
+    const ProtectedComponent = withRoles(['admin'])(TestComponent);
+
+    render(
+      <MemoryRouter initialEntries={['/protected']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/protected" element={<ProtectedComponent />} />
+            <Route path="/login" element={<LoginPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Login Page')).toBeInTheDocument();
   });
 });

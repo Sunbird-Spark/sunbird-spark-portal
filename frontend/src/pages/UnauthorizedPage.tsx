@@ -1,15 +1,38 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 const UnauthorizedPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleGoBack = () => {
     navigate(-1);
   };
 
+  const handleGoToLogin = () => {
+    navigate('/login');
+  };
+
+  // Determine safe home page based on user role
+  const getSafeHomePage = (): string => {
+    if (!user) return '/login';
+
+    switch (user.role) {
+      case 'admin':
+        return '/admin';
+      case 'content_creator':
+        return '/workspace';
+      case 'content_reviewer':
+        return '/workspace';
+      case 'guest':
+      default:
+        return '/login';
+    }
+  };
+
   const handleGoHome = () => {
-    navigate('/workspace');
+    navigate(getSafeHomePage());
   };
 
   return (
@@ -25,7 +48,10 @@ const UnauthorizedPage: React.FC = () => {
           Go Back
         </button>
         <button onClick={handleGoHome}>
-          Go to Workspace
+          Go Home
+        </button>
+        <button onClick={handleGoToLogin}>
+          Change Role
         </button>
       </div>
     </div>
