@@ -9,18 +9,8 @@ vi.mock('./logger.js', () => ({
         warn: vi.fn()
     }
 }));
-/**
- * Test Suite for Proxy Utilities
- * 
- * This test suite provides comprehensive coverage for all proxy utility functions
- * used in the Kong proxy middleware, including:
- * 
- * - Token retrieval (session vs fallback)
- * - Request header decoration with session data
- * - Proxy request logging
- * 
- * Test Coverage: 100% statements, 95.45% branches, 100% functions
- */describe('proxyUtils', () => {
+
+describe('proxyUtils', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.resetModules();
@@ -230,6 +220,45 @@ vi.mock('./logger.js', () => ({
             decorateRequestHeaders(mockProxyReq, mockReq);
 
             expect(mockProxyReq.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+        });
+        
+        it('should not set X-App-Id when header is present', async () => {
+            const { decorateRequestHeaders } = await importProxyUtils();
+            const mockProxyReq = {
+                setHeader: vi.fn()
+            } as unknown as http.ClientRequest;
+            
+            const mockReq = {
+                session: {},
+                sessionID: 'session-123',
+                get: vi.fn((header: string) => {
+                    if (header === 'X-App-Id') return 'existing-app';
+                    return undefined;
+                })
+            } as unknown as Request;
+            
+            decorateRequestHeaders(mockProxyReq, mockReq);
+            
+            expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith('X-App-Id', expect.anything());
+        });
+        
+        it('should set authenticated user tokens when fallback token is present', async () => {
+            const module = await importProxyUtils();
+            const { decorateRequestHeaders } = module;
+            const mockProxyReq = {
+                setHeader: vi.fn()
+            } as unknown as http.ClientRequest;
+            
+            const mockReq = {
+                session: {},
+                sessionID: 'session-123',
+                get: vi.fn().mockReturnValue(undefined)
+            } as unknown as Request;
+            
+            decorateRequestHeaders(mockProxyReq, mockReq);
+            
+            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-authenticated-user-token', expect.any(String));
+            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-auth-token', expect.any(String));
         });
     });
 });

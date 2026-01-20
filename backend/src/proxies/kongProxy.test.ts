@@ -64,9 +64,17 @@ describe('Kong Proxy Integration', () => {
         vi.resetModules();
         vi.doUnmock('http-proxy-middleware');
         vi.doUnmock('../utils/proxyUtils.js');
+        vi.doUnmock('../utils/logger.js');
 
         mockKongServer = express();
         mockKongServer.use(express.json());
+        
+        mockKongServer.get('/api/unauthorized', (req: Request, res: Response) => {
+            res.status(401).json({ success: false });
+        });
+        mockKongServer.get('/api/forbidden', (req: Request, res: Response) => {
+            res.status(403).json({ success: false });
+        });
         
         mockKongServer.all('/api/*rest', (req: Request, res: Response) => {
             res.status(200).json({
@@ -203,5 +211,41 @@ describe('Kong Proxy Integration', () => {
             .expect(200);
 
         expect(response.body.success).toBe(true);
+    });
+    
+    it('should log error on 401 Unauthorized from upstream', async () => {
+        const logger = (await import('../utils/logger.js')).default;
+        const errorSpy = vi.spyOn(logger, 'error');
+        
+        await request(app)
+            .get('/portal/unauthorized')
+            .expect(401);
+        
+        expect(errorSpy).toHaveBeenCalled();
+        const call = errorSpy.mock.calls[0];
+        expect(call).toBeDefined();
+        const messageArg = call ? call[0] : '';
+        expect(String(messageArg)).toContain('Unauthorized access');
+        expect(String(messageArg)).toContain('Status: 401');
+        
+        errorSpy.mockRestore();
+    });
+    
+    it('should log error on 403 Forbidden from upstream', async () => {
+        const logger = (await import('../utils/logger.js')).default;
+        const errorSpy = vi.spyOn(logger, 'error');
+        
+        await request(app)
+            .get('/portal/forbidden')
+            .expect(403);
+        
+        expect(errorSpy).toHaveBeenCalled();
+        const call = errorSpy.mock.calls[0];
+        expect(call).toBeDefined();
+        const messageArg = call ? call[0] : '';
+        expect(String(messageArg)).toContain('Unauthorized access');
+        expect(String(messageArg)).toContain('Status: 403');
+        
+        errorSpy.mockRestore();
     });
 });

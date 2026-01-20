@@ -2,13 +2,15 @@ import { Request } from 'express';
 import * as http from 'http';
 import { envConfig } from '../config/env.js';
 
+const fallbackToken = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
+const appId = envConfig.APPID;
 
 export const getAuthToken = (req: Request): string => {
-    return req.session?.kongToken || envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
+    return req.session?.kongToken || fallbackToken;
 };
 
 export const getBearerToken = (req: Request): string => {
-    return req.session?.kongToken || envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
+    return req.session?.kongToken || fallbackToken;
 };
 
 export const decorateRequestHeaders = (proxyReq: http.ClientRequest, req: Request): void => {
@@ -28,7 +30,7 @@ export const decorateRequestHeaders = (proxyReq: http.ClientRequest, req: Reques
     }
      
     if (!req.get('X-App-Id')) {
-        proxyReq.setHeader('X-App-Id', envConfig.APPID);
+        proxyReq.setHeader('X-App-Id', appId);
     }
     
     if (req.session?.managedToken) {
