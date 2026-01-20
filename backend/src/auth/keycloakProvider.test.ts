@@ -10,7 +10,7 @@ vi.mock('../utils/sessionStore.js');
 vi.mock('../config/env.js', () => ({
     envConfig: {
         PORTAL_REALM: 'sunbird',
-        PORTAL_AUTH_SERVER_URL: 'http://localhost:8080',
+        KEYCLOAK_BASE_SERVER_URL: 'http://localhost:8080',
         PORTAL_AUTH_SERVER_CLIENT: 'portal',
         ENVIRONMENT: 'local'
     }
@@ -51,7 +51,7 @@ describe('Keycloak Configuration', () => {
     it('should use external SSL for non-local environment', async () => {
         // Mock production environment
         vi.mocked(envConfig).ENVIRONMENT = 'production';
-        
+
         const mockKeycloakInstance = {
             authenticated: vi.fn(),
             deauthenticated: vi.fn(),
