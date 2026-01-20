@@ -183,7 +183,7 @@ describe('proxyUtils', () => {
                 'X-Channel-Id',
                 'session-channel'
             );
-        })
+        });
 
         it('should not set X-Authenticated-Userid when userId is missing', async () => {
             const { decorateRequestHeaders } = await importProxyUtils();

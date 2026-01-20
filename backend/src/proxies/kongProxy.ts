@@ -24,7 +24,13 @@ export const kongProxy = createProxyMiddleware({
         },
         proxyRes: (proxyRes: http.IncomingMessage, req: Request, res: Response) => {
             if (proxyRes.statusCode === 401 || proxyRes.statusCode === 403) {
-                logger.error(`Unauthorized access: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`, proxyRes, res);
+                logger.error(`Unauthorized access: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`,
+                    {
+                        proxyStatusCode: proxyRes.statusCode,
+                        proxyHeaders: proxyRes.headers,
+                        clientStatusCode: res.statusCode,
+                    }
+                );
             }
         }
     },
