@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 
-const env = process.env;
-
 dotenv.config();
+
+const env = process.env;
 
 export const envConfig = {
     ENVIRONMENT: env.ENVIRONMENT || 'local',
