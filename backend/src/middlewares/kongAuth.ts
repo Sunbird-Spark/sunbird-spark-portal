@@ -6,9 +6,15 @@ import { saveSession } from '../utils/sessionUtils.js';
 
 export const registerDeviceWithKong = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
+        logger.info(`sessionid ${req.sessionID}`);
         if (req.session.userId) {
-            logger.info('sessionExists');
-            return next();
+            refreshSessionTTL(req);
+            try {
+                await saveSession(req);
+                return next();
+            } catch (err) {
+                return next(err);
+            }
         }
 
         if (req.session.kongToken) {
