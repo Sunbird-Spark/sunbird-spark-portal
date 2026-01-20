@@ -3,6 +3,7 @@ import { envConfig } from '../config/env.js';
 import { Request } from 'express';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
+import { saveSession } from '../utils/sessionUtils.js';
 
 const {
     KONG_ANONYMOUS_DEVICE_REGISTER_API: deviceRegisterAPI,
@@ -60,19 +61,8 @@ export const generateLoggedInKongToken = async (req: Request): Promise<void> => 
 
     if (req.session.kongToken) {
         refreshSessionTTL(req);
-
-        await new Promise<void>((resolve, reject) => {
-            req.session.save((err: Error) => {
-                if (err) {
-                    logger.error('LOGGEDIN_KONG_TOKEN :: failed to save session', err);
-                    reject(err);
-                } else {
-                    logger.info(`LOGGEDIN_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
-                    resolve();
-                }
-            });
-        });
-
+        await saveSession(req);
+        logger.info(`LOGGEDIN_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
         return;
     }
 
@@ -116,15 +106,6 @@ export const generateLoggedInKongToken = async (req: Request): Promise<void> => 
     req.session.kongToken = token;
     req.session['auth_redirect_uri'] = req.protocol + `://${req.get('host')}/resources?auth_callback=1`;
     refreshSessionTTL(req);
-    await new Promise<void>((resolve, reject) => {
-        req.session.save((err: Error) => {
-            if (err) {
-                logger.error('LOGGEDIN_KONG_TOKEN :: failed to save session', err);
-                reject(err);
-            } else {
-                logger.info(`LOGGEDIN_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
-                resolve();
-            }
-        });
-    });
+    await saveSession(req);
+    logger.info(`LOGGEDIN_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
 };
