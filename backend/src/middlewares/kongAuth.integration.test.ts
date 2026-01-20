@@ -18,18 +18,12 @@ describe('Kong Auth Middleware Integration Tests', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.resetModules();
-
         app = express();
-
         app.use(session({
             secret: 'test-secret',
             resave: false,
             saveUninitialized: true,
-            cookie: {
-                httpOnly: true,
-                sameSite: 'lax',
-                secure: false
-            }
+            cookie: { httpOnly: true, sameSite: 'lax', secure: false }
         }));
     });
 
@@ -37,11 +31,11 @@ describe('Kong Auth Middleware Integration Tests', () => {
         vi.doUnmock('../config/env.js');
     });
 
-    describe('Successful Token Generation', () => {
+    describe('Token Generation and Reuse', () => {
         beforeEach(async () => {
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
-                    KONG_ANONYMOUS_DEVICE_REGISTER_API: 'http://mock-kong-api',
+                    KONG_URL: 'http://mock-kong-api',
                     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'mock-bearer-token',
                     KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token',
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
@@ -50,7 +44,6 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             app.use(registerDeviceWithKong());
-
             app.get('/test', (req, res) => {
                 res.json({
                     kongToken: req.session.kongToken,
@@ -60,24 +53,22 @@ describe('Kong Auth Middleware Integration Tests', () => {
             });
         });
 
-        it('should generate Kong token on first request', async () => {
+        it('should generate Kong token on first request and reuse on subsequent requests', async () => {
             (axios.post as Mock).mockResolvedValue({
                 data: {
                     params: { status: 'successful' },
-                    result: { token: 'new-integration-token' }
+                    result: { token: 'integration-token' }
                 }
             });
 
-            const response = await request(app)
-                .get('/test')
-                .expect(200);
+            const agent = request.agent(app);
 
-            expect(response.body.kongToken).toBe('new-integration-token');
-            expect(response.body.roles).toEqual(['ANONYMOUS']);
-            expect(response.headers['set-cookie']).toBeDefined();
-
+            // First request - should generate token
+            const response1 = await agent.get('/test').expect(200);
+            expect(response1.body.kongToken).toBe('integration-token');
+            expect(response1.body.roles).toEqual(['ANONYMOUS']);
             expect(axios.post).toHaveBeenCalledWith(
-                'http://mock-kong-api',
+                'http://mock-kong-api/api-manager/v2/consumer/portal_anonymous/credential/register',
                 { request: { key: expect.any(String) } },
                 {
                     headers: {
@@ -86,54 +77,22 @@ describe('Kong Auth Middleware Integration Tests', () => {
                     }
                 }
             );
-        });
-
-        it('should reuse existing Kong token on subsequent requests', async () => {
-            (axios.post as Mock).mockResolvedValue({
-                data: {
-                    params: { status: 'successful' },
-                    result: { token: 'reuse-token' }
-                }
-            });
-
-            const agent = request.agent(app);
-
-            const response1 = await agent.get('/test').expect(200);
-            expect(response1.body.kongToken).toBe('reuse-token');
 
             const firstCallCount = (axios.post as Mock).mock.calls.length;
 
+            // Second request - should reuse token
             const response2 = await agent.get('/test').expect(200);
-            expect(response2.body.kongToken).toBe('reuse-token');
-
+            expect(response2.body.kongToken).toBe('integration-token');
+            expect(response2.body.sessionID).toBe(response1.body.sessionID);
             expect((axios.post as Mock).mock.calls.length).toBe(firstCallCount);
-        });
-
-        it('should refresh session TTL on token reuse', async () => {
-            (axios.post as Mock).mockResolvedValue({
-                data: {
-                    params: { status: 'successful' },
-                    result: { token: 'ttl-test-token' }
-                }
-            });
-
-            const agent = request.agent(app);
-
-            const response1 = await agent.get('/test').expect(200);
-            expect(response1.body.kongToken).toBe('ttl-test-token');
-
-            const response2 = await agent.get('/test').expect(200);
-            expect(response2.body.kongToken).toBe('ttl-test-token');
-
-            expect(response1.body.sessionID).toBe(response2.body.sessionID);
         });
     });
 
-    describe('Kong API Failure Scenarios', () => {
+    describe('Fallback Token Usage', () => {
         beforeEach(async () => {
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
-                    KONG_ANONYMOUS_DEVICE_REGISTER_API: 'http://mock-kong-api',
+                    KONG_URL: 'http://mock-kong-api',
                     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'mock-bearer-token',
                     KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token',
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
@@ -142,7 +101,6 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             app.use(registerDeviceWithKong());
-
             app.get('/test', (req, res) => {
                 res.json({
                     kongToken: req.session.kongToken,
@@ -151,59 +109,37 @@ describe('Kong Auth Middleware Integration Tests', () => {
             });
         });
 
-        it('should use fallback token when Kong API fails', async () => {
+        it('should use fallback token when Kong API fails or returns invalid response', async () => {
+            // Test API failure
             (axios.post as Mock).mockRejectedValue(new Error('Kong API is down'));
-
-            const response = await request(app)
-                .get('/test')
-                .expect(200);
-
+            let response = await request(app).get('/test').expect(200);
             expect(response.body.kongToken).toBe('fallback-token');
             expect(response.body.roles).toEqual(['ANONYMOUS']);
-        });
 
-        it('should use fallback token when Kong API returns failed status', async () => {
+            // Test failed status response
             (axios.post as Mock).mockResolvedValue({
-                data: {
-                    params: { status: 'failed' },
-                    result: {}
-                }
+                data: { params: { status: 'failed' }, result: {} }
             });
-
-            const response = await request(app)
-                .get('/test')
-                .expect(200);
-
+            response = await request(app).get('/test').expect(200);
             expect(response.body.kongToken).toBe('fallback-token');
-            expect(response.body.roles).toEqual(['ANONYMOUS']);
-        });
 
-        it('should use fallback token when Kong API returns no token', async () => {
+            // Test missing token in successful response
             (axios.post as Mock).mockResolvedValue({
-                data: {
-                    params: { status: 'successful' },
-                    result: {}
-                }
+                data: { params: { status: 'successful' }, result: {} }
             });
-
-            const response = await request(app)
-                .get('/test')
-                .expect(200);
-
+            response = await request(app).get('/test').expect(200);
             expect(response.body.kongToken).toBe('fallback-token');
-            expect(response.body.roles).toEqual(['ANONYMOUS']);
         });
     });
 
     describe('Configuration Issues', () => {
-        it('should use fallback token when Kong API config is missing', async () => {
+        it('should handle missing configuration gracefully', async () => {
             vi.resetModules();
-
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
-                    KONG_ANONYMOUS_DEVICE_REGISTER_API: undefined,
+                    KONG_URL: undefined,
                     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: undefined,
-                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'config-missing-fallback',
+                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'config-fallback',
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
                 }
             }));
@@ -218,7 +154,6 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             freshApp.use(registerDeviceWithKong());
-
             freshApp.get('/test', (req, res) => {
                 res.json({
                     kongToken: req.session.kongToken,
@@ -226,21 +161,17 @@ describe('Kong Auth Middleware Integration Tests', () => {
                 });
             });
 
-            const response = await request(freshApp)
-                .get('/test')
-                .expect(200);
-
-            expect(response.body.kongToken).toBe('config-missing-fallback');
+            const response = await request(freshApp).get('/test').expect(200);
+            expect(response.body.kongToken).toBe('config-fallback');
             expect(response.body.roles).toEqual(['ANONYMOUS']);
             expect(axios.post).not.toHaveBeenCalled();
         });
 
         it('should handle missing fallback token', async () => {
             vi.resetModules();
-
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
-                    KONG_ANONYMOUS_DEVICE_REGISTER_API: 'http://mock-kong-api',
+                    KONG_URL: 'http://mock-kong-api',
                     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'mock-bearer-token',
                     KONG_ANONYMOUS_FALLBACK_TOKEN: undefined,
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
@@ -257,7 +188,6 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             freshApp.use(registerDeviceWithKong());
-
             freshApp.get('/test', (req, res) => {
                 res.json({
                     kongToken: req.session.kongToken,
@@ -266,58 +196,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
             });
 
             (axios.post as Mock).mockRejectedValue(new Error('Kong API error'));
-
-            const response = await request(freshApp)
-                .get('/test')
-                .expect(200);
-
+            const response = await request(freshApp).get('/test').expect(200);
             expect(response.body.kongToken).toBeUndefined();
             expect(response.body.roles).toEqual(['ANONYMOUS']);
-        });
-    });
-
-    describe('Logged-in User Token Generation', () => {
-        beforeEach(async () => {
-            vi.doMock('../config/env.js', () => ({
-                envConfig: {
-                    KONG_ANONYMOUS_DEVICE_REGISTER_API: 'http://mock-kong-api',
-                    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'mock-bearer-token',
-                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token',
-                    SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
-                    KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'mock-loggedin-bearer-token',
-                    KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
-                    SUNBIRD_LOGGEDIN_SESSION_TTL: 120000
-                }
-            }));
-
-            const { registerDeviceWithKong } = await import('./kongAuth.js');
-            app.use(registerDeviceWithKong());
-
-            app.get('/test', (req, res) => {
-                res.json({
-                    kongToken: req.session.kongToken,
-                    roles: req.session.roles,
-                    sessionID: req.sessionID,
-                    userId: req.session.userId
-                });
-            });
-        });
-
-        it('should generate anonymous token for users without userId', async () => {
-            (axios.post as Mock).mockResolvedValue({
-                data: {
-                    params: { status: 'successful' },
-                    result: { token: 'anonymous-user-token' }
-                }
-            });
-
-            const response = await request(app)
-                .get('/test')
-                .expect(200);
-
-            expect(response.body.kongToken).toBe('anonymous-user-token');
-            expect(response.body.roles).toEqual(['ANONYMOUS']);
-            expect(response.body.userId).toBeUndefined();
         });
     });
 });

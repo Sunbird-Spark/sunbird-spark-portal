@@ -64,7 +64,7 @@ describe('kongAuth middleware', () => {
 
     describe('registerDeviceWithKong', () => {
         const mockEnvConfig = {
-            KONG_ANONYMOUS_DEVICE_REGISTER_API: 'http://kong-api.com/register',
+            KONG_URL: 'http://kong-api.com',
             KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'test-bearer-token',
             KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token',
             SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
@@ -100,7 +100,7 @@ describe('kongAuth middleware', () => {
             await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(logger.info).toHaveBeenCalledWith('ANONYMOUS_KONG_TOKEN :: requesting anonymous token from Kong');
-            expect(axios.post).toHaveBeenCalledWith('http://kong-api.com/register',
+            expect(axios.post).toHaveBeenCalledWith('http://kong-api.com/api-manager/v2/consumer/portal_anonymous/credential/register',
                 { request: { key: 'test-session-id' } },
                 { headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-bearer-token' } }
             );
@@ -202,7 +202,7 @@ describe('kongAuth middleware', () => {
 
         it('should handle missing device registration API config', async () => {
             vi.doMock('../config/env.js', () => ({
-                envConfig: { ...mockEnvConfig, KONG_ANONYMOUS_DEVICE_REGISTER_API: '' }
+                envConfig: { ...mockEnvConfig, KONG_URL: '' }
             }));
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             const logger = (await import('../utils/logger.js')).default;
