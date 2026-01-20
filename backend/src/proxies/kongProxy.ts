@@ -11,8 +11,8 @@ export const kongProxy = createProxyMiddleware({
     target: KONG_URL,
     changeOrigin: true,
     secure: false,
-    pathRewrite: (path, req) => {
-        return req.originalUrl.replace(/^\/portal/, '/api');
+    pathRewrite: {
+        '^/portal': '/api'
     },
     on: {
         proxyReq: (proxyReq: http.ClientRequest, req: Request): void => {

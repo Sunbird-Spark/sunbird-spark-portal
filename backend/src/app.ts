@@ -36,6 +36,6 @@ const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/get/email/*rest',
     '/portal/anonymous/otp/v1/generate',
 ];
-app.use(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
+app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
-app.use('/portal/*rest', kongProxy);
+app.all('/portal/*rest', kongProxy);
