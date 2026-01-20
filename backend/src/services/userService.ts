@@ -73,6 +73,23 @@ const resolveKongBearerToken = (req: Request): string => {
     return req.session.userId ? KONG_LOGGEDIN_FALLBACK_TOKEN : KONG_ANONYMOUS_FALLBACK_TOKEN;
 };
 
+export const fetchUserById = async (userId: string | number, req: Request): Promise<UserApiResponse> => {
+    const url = `${KONG_URL}/user/v5/read/${userId}`;
+    logger.info('fetchUserById :: calling user API', url);
+
+    const headers = {
+        'x-msgid': uuidv4(),
+        ts: dayjs(new Date()).format('yyyy-mm-dd HH:MM:ss:lo'),
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `Bearer ${resolveKongBearerToken(req)}`,
+        'x-authenticated-user-token': getKeycloakAccessToken(req)
+    };
+
+    const response = await axios.get(url, { headers });
+    return response.data;
+};
+
 export const getCurrentUser = async (req: Request): Promise<void> => {
     try {
         const userId = req.session.userId;
@@ -81,23 +98,10 @@ export const getCurrentUser = async (req: Request): Promise<void> => {
             throw new Error('fetchAndStoreCurrentUser :: userId missing from session');
         }
 
-        const url = `${KONG_URL}/user/v5/read/${userId}`;
-        logger.info('fetchAndStoreCurrentUser :: calling user API', url);
-
-        const headers = {
-            'x-msgid': uuidv4(),
-            ts: dayjs(new Date()).format('yyyy-mm-dd HH:MM:ss:lo'),
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${resolveKongBearerToken(req)}`,
-            'x-authenticated-user-token': getKeycloakAccessToken(req)
-        };
-
         req.session.roles = [];
         req.session.orgs = [];
 
-        const response = await axios.get(url, { headers });
-        const userApiResponse: UserApiResponse = response.data;
+        const userApiResponse = await fetchUserById(userId, req);
 
         if (userApiResponse?.responseCode === 'OK') {
             populateSessionFromUserProfile(req, userApiResponse);
