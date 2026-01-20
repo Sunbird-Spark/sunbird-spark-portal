@@ -21,7 +21,6 @@ vi.mock('../config/env.js', () => ({
         KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'test-anonymous-bearer-token',
         SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
         KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'test-loggedin-bearer-token',
-        SUNBIRD_LOGGEDIN_SESSION_TTL: 120000,
         KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
         KEYCLOAK_BASE_SERVER_URL: 'http://localhost:8080'
     }
@@ -177,7 +176,6 @@ describe('Kong Auth Service', () => {
                     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'test-anonymous-bearer-token',
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
                     KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'test-loggedin-bearer-token',
-                    SUNBIRD_LOGGEDIN_SESSION_TTL: 120000,
                     KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token'
                 }
             }));
