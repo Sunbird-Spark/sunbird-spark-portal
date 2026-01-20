@@ -189,10 +189,10 @@ describe('authenticated handler', () => {
 });
 
 describe('deauthenticated handler', () => {
-    it('should delete roles and userId from session', () => {
+    it('should destroy the session on deauthentication', async () => {
         const req = {
             session: {
-                regenerate: vi.fn().mockImplementation((cb: () => void) => {
+                destroy: vi.fn().mockImplementation((cb: () => void) => {
                     cb();
                 }),
                 roles: ['admin'],
@@ -202,10 +202,9 @@ describe('deauthenticated handler', () => {
 
         const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
 
-        (kc as any).deauthenticated(req);
+        await (kc as any).deauthenticated(req);
 
-        expect((req.session as any).roles).toBeUndefined();
-        expect((req.session as any).userId).toBeUndefined();
+        expect((req.session as any).destroy).toHaveBeenCalled();
     });
 
     it('should not throw if session properties do not exist', () => {
