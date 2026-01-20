@@ -3,11 +3,18 @@ import { getKeycloakClient } from './keycloakManager.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { envConfig } from '../config/env.js';
 
-vi.mock('./keycloakHelper.js', () => ({
+vi.mock('./keycloakManager.js', () => ({
     getKeycloakClient: vi.fn()
 }));
 vi.mock('../utils/sessionStore.js');
-vi.mock('../config/env.js');
+vi.mock('../config/env.js', () => ({
+    envConfig: {
+        PORTAL_REALM: 'sunbird',
+        PORTAL_AUTH_SERVER_URL: 'http://localhost:8080',
+        PORTAL_AUTH_SERVER_CLIENT: 'portal',
+        ENVIRONMENT: 'local'
+    }
+}));
 
 const mockGetKeycloakClient = vi.mocked(getKeycloakClient);
 const mockSessionStore = vi.mocked(sessionStore);
@@ -18,7 +25,7 @@ describe('Keycloak Configuration', () => {
         vi.resetModules();
     });
 
-    it('should create keycloak client with correct configuration', async () => {
+    it('should create keycloak client with correct configuration for local environment', async () => {
         const mockKeycloakInstance = {
             authenticated: vi.fn(),
             deauthenticated: vi.fn(),
@@ -29,10 +36,10 @@ describe('Keycloak Configuration', () => {
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             {
-                realm: envConfig.PORTAL_REALM,
-                'auth-server-url': envConfig.PORTAL_AUTH_SERVER_URL,
+                realm: 'sunbird',
+                'auth-server-url': 'http://localhost:8080',
                 'ssl-required': 'external',
-                resource: envConfig.PORTAL_AUTH_SERVER_CLIENT,
+                resource: 'portal',
                 'confidential-port': 0,
                 'public-client': true,
             },
@@ -41,47 +48,37 @@ describe('Keycloak Configuration', () => {
         expect(keycloak).toBe(mockKeycloakInstance);
     });
 
-    it('should use environment configuration values', async () => {
-        const testEnvConfig = {
-            PORTAL_REALM: 'test-realm',
-            PORTAL_AUTH_SERVER_URL: 'https://test-auth-server.com',
-            PORTAL_AUTH_SERVER_CLIENT: 'test-client',
-        };
-
-        vi.mocked(envConfig).PORTAL_REALM = testEnvConfig.PORTAL_REALM;
-        vi.mocked(envConfig).PORTAL_AUTH_SERVER_URL = testEnvConfig.PORTAL_AUTH_SERVER_URL;
-        vi.mocked(envConfig).PORTAL_AUTH_SERVER_CLIENT = testEnvConfig.PORTAL_AUTH_SERVER_CLIENT;
-
+    it('should use external SSL for non-local environment', async () => {
+        // Mock production environment
+        vi.mocked(envConfig).ENVIRONMENT = 'production';
+        
         const mockKeycloakInstance = {
             authenticated: vi.fn(),
             deauthenticated: vi.fn(),
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        await import('../types/keycloak.js');
+        await import('./keycloakProvider.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             expect.objectContaining({
-                realm: testEnvConfig.PORTAL_REALM,
-                'auth-server-url': testEnvConfig.PORTAL_AUTH_SERVER_URL,
-                resource: testEnvConfig.PORTAL_AUTH_SERVER_CLIENT,
+                'ssl-required': 'external',
             }),
             mockSessionStore
         );
     });
 
-    it('should have correct SSL and client configuration', async () => {
+    it('should have correct client configuration', async () => {
         const mockKeycloakInstance = {
             authenticated: vi.fn(),
             deauthenticated: vi.fn(),
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        await import('../types/keycloak.js');
+        await import('./keycloakProvider.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             expect.objectContaining({
-                'ssl-required': 'external',
                 'confidential-port': 0,
                 'public-client': true,
             }),

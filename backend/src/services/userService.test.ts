@@ -5,10 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { getCurrentUser } from './userService.js';
 import logger from '../utils/logger.js';
+import { saveSession } from '../utils/sessionUtils.js';
 
 vi.mock('axios');
 vi.mock('uuid');
-vi.mock('dateformat');
+vi.mock('dayjs');
 vi.mock('../config/env.js', () => ({
     envConfig: {
         KONG_URL: 'http://localhost:8000',
@@ -22,11 +23,15 @@ vi.mock('../utils/logger.js', () => ({
         error: vi.fn(),
     },
 }));
+vi.mock('../utils/sessionUtils.js', () => ({
+    saveSession: vi.fn().mockResolvedValue(undefined),
+}));
 
 const mockAxios = vi.mocked(axios);
 const mockUuidv4 = vi.mocked(uuidv4);
-const mockDateFormat = vi.mocked(dayjs);
+const mockDayjs = vi.mocked(dayjs);
 const mockLogger = vi.mocked(logger);
+const mockSaveSession = vi.mocked(saveSession);
 
 describe('UserService', () => {
     let mockRequest: any;
@@ -41,8 +46,11 @@ describe('UserService', () => {
             sessionID: 'test-session-id',
         };
 
-        (mockUuidv4 as any).mockReturnValue('test-uuid');
-        (mockDateFormat as any).mockReturnValue('2024-01-01 12:00:00:000');
+        mockUuidv4.mockReturnValue('test-uuid' as any);
+        mockDayjs.mockReturnValue({
+            format: vi.fn().mockReturnValue('2024-01-01 12:00:00:000')
+        } as any);
+        mockSaveSession.mockResolvedValue(undefined);
     });
 
     describe('getCurrentUser', () => {
@@ -120,7 +128,7 @@ describe('UserService', () => {
                 rootOrgId: 'root-org-id',
             });
 
-            expect(mockRequest.session.save).toHaveBeenCalled();
+            expect(mockSaveSession).toHaveBeenCalledWith(mockRequest);
             expect(result).toBeUndefined();
         });
 
