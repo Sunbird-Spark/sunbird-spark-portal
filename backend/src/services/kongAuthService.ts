@@ -6,12 +6,11 @@ import _ from 'lodash';
 import { saveSession } from '../utils/sessionUtils.js';
 
 const {
-    KONG_ANONYMOUS_DEVICE_REGISTER_API: deviceRegisterAPI,
-    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: bearerToken,
+    KONG_URL,
     SUNBIRD_ANONYMOUS_SESSION_TTL,
-    KONG_LOGGEDIN_DEVICE_REGISTER_API: loggedInDeviceRegistedAPI,
-    KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: loggedBearerToken,
     SUNBIRD_LOGGEDIN_SESSION_TTL,
+    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: bearerToken,
+    KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: loggedBearerToken,
 } = envConfig;
 
 export const refreshSessionTTL = (req: Request) => {
@@ -25,6 +24,7 @@ export const refreshSessionTTL = (req: Request) => {
 };
 
 export const generateKongToken = async (req: Request): Promise<string> => {
+    const deviceRegisterAPI = KONG_URL + '/api-manager/v2/consumer/portal_anonymous/credential/register';
     if (!deviceRegisterAPI || !bearerToken) {
         throw new Error('Device registration configuration missing');
     }
@@ -69,6 +69,8 @@ export const generateLoggedInKongToken = async (req: Request): Promise<void> => 
     logger.info('LOGGEDIN_KONG_TOKEN :: requesting logged-in token from Kong');
 
     let token = envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
+
+    const loggedInDeviceRegistedAPI = KONG_URL + '/api-manager/v2/consumer/portal_loggedin/credential/register';
 
     try {
         if (!loggedInDeviceRegistedAPI || !loggedBearerToken) {

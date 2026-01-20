@@ -11,7 +11,7 @@ vi.mock('uuid');
 vi.mock('dateformat');
 vi.mock('../config/env.js', () => ({
     envConfig: {
-        SUNBIRD_LEARNER_PLAYER_URL: 'http://localhost:8000',
+        KONG_URL: 'http://localhost:8000',
         KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-token-loggedin',
         KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token-anonymous',
     },

@@ -1,22 +1,21 @@
 # Server Configuration
 ENVIRONMENT=local
 
+DOMAIN_URL='https://dev.sunbirded.org'
+KONG_URL='http://localhost:8000'
+
 # Session Configuration
 SUNBIRD_ANONYMOUS_SESSION_SECRET=sunbird_anonymous_session_secret
 SUNBIRD_PORTAL_SESSION_STORE=memory
 SUNBIRD_LOGGEDIN_SESSION_SECRET=sunbird_loggedin_session_secret
 
 # Kong Configuration
-KONG_ANONYMOUS_FALLBACK_TOKEN=your-fallback-token
-KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN=your-register-token
-KONG_ANONYMOUS_DEVICE_REGISTER_API=https://your-kong-api/register
-KONG_LOGGEDIN_FALLBACK_TOKEN=your-loggedin-fallback-token
-KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN=your-loggedin-register-token
-KONG_LOGGEDIN_DEVICE_REGISTER_API=https://your-kong-api/loggedin/register
-KONG_REFRESH_TOKEN_API=https://your-kong-api/refresh
+KONG_ANONYMOUS_FALLBACK_TOKEN='your-fallback-token'
+KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN='your-register-token'
+KONG_LOGGEDIN_FALLBACK_TOKEN='your-loggedin-fallback-token'
+KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN='your-loggedin-register-token'
 
 # Keycloak Configuration
-PORTAL_REALM=sunbird
-PORTAL_AUTH_SERVER_URL=http://localhost:8080
-PORTAL_AUTH_SERVER_CLIENT=portal
-SUNBIRD_LEARNER_PLAYER_URL=http://localhost:8000
+PORTAL_REALM='sunbird'
+PORTAL_AUTH_SERVER_URL='http://localhost:8080'
+PORTAL_AUTH_SERVER_CLIENT='portal'

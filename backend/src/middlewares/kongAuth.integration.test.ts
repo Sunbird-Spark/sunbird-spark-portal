@@ -284,7 +284,6 @@ describe('Kong Auth Middleware Integration Tests', () => {
                     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'mock-bearer-token',
                     KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token',
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
-                    KONG_LOGGEDIN_DEVICE_REGISTER_API: 'http://mock-kong-loggedin-api',
                     KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'mock-loggedin-bearer-token',
                     KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
                     SUNBIRD_LOGGEDIN_SESSION_TTL: 120000

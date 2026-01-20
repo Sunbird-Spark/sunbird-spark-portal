@@ -9,7 +9,7 @@ import { saveSession } from '../utils/sessionUtils.js';
 import { UserApiResponse } from '../types/user.js';
 
 const {
-    SUNBIRD_LEARNER_PLAYER_URL,
+    KONG_URL,
     KONG_LOGGEDIN_FALLBACK_TOKEN,
     KONG_ANONYMOUS_FALLBACK_TOKEN
 } = envConfig;
@@ -70,9 +70,7 @@ const resolveKongBearerToken = (req: Request): string => {
         return kongDeviceToken;
     }
 
-    return req.session.userId
-        ? KONG_LOGGEDIN_FALLBACK_TOKEN
-        : KONG_ANONYMOUS_FALLBACK_TOKEN;
+    return req.session.userId ? KONG_LOGGEDIN_FALLBACK_TOKEN : KONG_ANONYMOUS_FALLBACK_TOKEN;
 };
 
 export const getCurrentUser = async (req: Request): Promise<void> => {
@@ -83,7 +81,7 @@ export const getCurrentUser = async (req: Request): Promise<void> => {
             throw new Error('fetchAndStoreCurrentUser :: userId missing from session');
         }
 
-        const url = `${SUNBIRD_LEARNER_PLAYER_URL}/user/v5/read/${userId}`;
+        const url = `${KONG_URL}/user/v5/read/${userId}`;
         logger.info('fetchAndStoreCurrentUser :: calling user API', url);
 
         const headers = {
