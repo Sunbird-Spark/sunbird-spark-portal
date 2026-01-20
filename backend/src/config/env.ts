@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
 
-const env = process.env;
 
 dotenv.config();
+
+const env = process.env;
 
 export const envConfig = {
     ENVIRONMENT: env.ENVIRONMENT || 'local',
@@ -11,6 +12,7 @@ export const envConfig = {
     KONG_ANONYMOUS_FALLBACK_TOKEN: env.KONG_ANONYMOUS_FALLBACK_TOKEN || '',
     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: env.KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN || '',
     KONG_ANONYMOUS_DEVICE_REGISTER_API: env.KONG_ANONYMOUS_DEVICE_REGISTER_API || '',
+    KONG_URL: env.KONG_URL || 'http://localhost:8000',
 
     // OPTIONAL ENVIRONMENT VARIABLES
     PORT: parseInt(env.PORT || '3000'),
@@ -22,5 +24,6 @@ export const envConfig = {
     SUNBIRD_YUGABYTE_PASSWORD: env.SUNBIRD_YUGABYTE_PASSWORD || 'yugabyte',
     SUNBIRD_PORTAL_SESSION_STORE: env.SUNBIRD_PORTAL_SESSION_STORE || 'in-memory',
     GOOGLE_RECAPTCHA_VERIFY_URL: env.GOOGLE_RECAPTCHA_VERIFY_URL || 'https://www.google.com/recaptcha/api/siteverify',
-    GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || ''
+    GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || '',
+    APPID: env.ENVIRONMENT + '.' + env.SUNBIRD_PORTAL_INSTANCE + '.portal'
 };

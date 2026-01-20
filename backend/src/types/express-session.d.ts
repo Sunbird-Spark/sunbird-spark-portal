@@ -18,5 +18,10 @@ declare module 'express-session' {
         count?: number;
         kongToken?: string;
         roles?: string[];
+        managedToken?: string;
+        rootOrghashTagId?: string;
+        rootOrgId?: string;
+        logSession?: boolean;
+        deviceId?: string;
     }
 }
