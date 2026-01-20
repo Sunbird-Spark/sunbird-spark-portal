@@ -10,12 +10,12 @@ export const getKeycloakClient = (config: Keycloak.KeycloakConfig, store: any) =
     const keycloak = new Keycloak({ store: store || sessionStore }, config);
     keycloak.authenticated = authenticated;
     keycloak.deauthenticated = deauthenticated;
-    return keycloak
+    return keycloak;
 }
 
 const deauthenticated = function (request: Request) {
-    delete request.session['roles']
-    delete request.session.userId
+    delete request.session['roles'];
+    delete request.session.userId;
 }
 
 const authenticated = async (request: Request) => {
