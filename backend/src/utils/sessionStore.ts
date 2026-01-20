@@ -22,7 +22,10 @@ export const getSessionStore = () => {
         ysqlPool.connect((err, client, release) => {
             if (err) {
                 logger.error('Failed to connect to YugabyteDB pool', err);
-                process.exit(1);
+                // Don't exit in test environment to prevent worker crashes
+                if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+                    process.exit(1);
+                }
             } else {
                 logger.info('Successfully connected to YugabyteDB pool');
                 release();

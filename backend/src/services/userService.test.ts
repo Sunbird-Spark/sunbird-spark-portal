@@ -121,7 +121,7 @@ describe('UserService', () => {
             });
 
             expect(mockRequest.session.save).toHaveBeenCalled();
-            expect(result).toBe(mockUserData);
+            expect(result).toBeUndefined();
         });
 
         it('should use userId from result.response.userId when id is not present', async () => {
@@ -206,7 +206,7 @@ describe('UserService', () => {
 
             (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
 
-            await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toThrow('userIdentifier is required');
+            await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toThrow('fetchAndStoreCurrentUser :: userId missing from session');
         });
 
         it('should handle organizations without roles', async () => {
@@ -310,7 +310,7 @@ describe('UserService', () => {
         it('should throw error when userId is missing', async () => {
             mockRequest.session.userId = undefined;
 
-            await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toThrow('userIdentifier is required');
+            await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toThrow('fetchAndStoreCurrentUser :: userId missing from session');
         });
 
         it('should handle API error response', async () => {
@@ -329,10 +329,7 @@ describe('UserService', () => {
 
             await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toEqual(mockErrorData);
 
-            expect(mockLogger.error).toHaveBeenCalledWith({
-                msg: 'getCurrentUser :: Error while reading user/v5/read',
-                body: mockErrorData,
-            });
+            expect(mockLogger.error).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: user API returned non-OK response', mockErrorData);
         });
 
         it('should handle axios network error', async () => {
@@ -350,10 +347,7 @@ describe('UserService', () => {
 
             await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toEqual(networkError);
 
-            expect(mockLogger.error).toHaveBeenCalledWith({
-                msg: 'getCurrentUser :: Error while calling user/v5/read with status 500',
-                error: { error: 'Internal Server Error' },
-            });
+            expect(mockLogger.error).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: user API call failed with status 500', { error: 'Internal Server Error' });
         });
 
         it('should handle axios error without response', async () => {
@@ -365,10 +359,7 @@ describe('UserService', () => {
 
             await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toEqual(error);
 
-            expect(mockLogger.error).toHaveBeenCalledWith({
-                msg: 'getCurrentUser :: Error while calling user/v5/read with status undefined',
-                error: 'Request timeout',
-            });
+            expect(mockLogger.error).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: user API call failed with status undefined', undefined);
         });
 
         it('should handle session save error', async () => {
@@ -503,15 +494,12 @@ describe('UserService', () => {
 
             await getCurrentUser(mockRequest as unknown as Request);
 
-            expect(mockLogger.info).toHaveBeenCalledWith({
-                msg: 'getCurrentUser :: Session data set success',
-                session: {
-                    userId: 'test-user-id',
-                    rootOrgId: 'root-org-id',
-                    roles: ['USER', 'ADMIN', 'PUBLIC', 'ANONYMOUS'],
-                    userSid: 'test-session-id',
-                    orgs: ['org1'],
-                },
+            expect(mockLogger.info).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: session data set successfully', {
+                userId: 'test-user-id',
+                rootOrgId: 'root-org-id',
+                roles: ['USER', 'ADMIN', 'PUBLIC', 'ANONYMOUS'],
+                userSid: 'test-session-id',
+                orgs: ['org1'],
             });
         });
     });
