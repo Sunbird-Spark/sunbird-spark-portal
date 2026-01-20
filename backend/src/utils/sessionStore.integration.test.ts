@@ -1,8 +1,17 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import session from 'express-session';
-import { sessionStore } from './sessionStore.js';
+
+// Mock the session store to use MemoryStore for integration tests
+vi.mock('./sessionStore.js', () => {
+    const session = require('express-session');
+    return {
+        sessionStore: new session.MemoryStore()
+    };
+});
+
+const { sessionStore } = await import('./sessionStore.js');
 
 const app = express();
 

@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-connect';
 import type { Request } from 'express';
 import logger from '../utils/logger.js';
-import { generateLoggedInKongToken } from '../services/kongAuthService.js'
+import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { getCurrentUser } from '../services/userService.js';
 import { regenerateSession } from '../utils/sessionUtils.js';

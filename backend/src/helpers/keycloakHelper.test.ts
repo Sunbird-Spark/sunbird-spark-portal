@@ -115,7 +115,7 @@ describe('authenticated handler', () => {
         expect((req.session as any)?.userId).toBe('12345');
         expect(generateLoggedInKongToken).toHaveBeenCalledWith(req);
         expect(getCurrentUser).toHaveBeenCalledWith(req);
-        expect(vi.mocked(logger.info)).toHaveBeenCalledWith({ msg: 'keycloak authenticated successfully' });
+        expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');
         expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
     });
 
@@ -144,10 +144,8 @@ describe('authenticated handler', () => {
         await new Promise(process.nextTick);
 
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-            expect.objectContaining({
-                msg: 'error logging in user',
-                error: expect.any(Error)
-            })
+            'error logging in user',
+            expect.any(Error)
         );
 
         expect(generateLoggedInKongToken).not.toHaveBeenCalled();
@@ -165,10 +163,8 @@ describe('authenticated handler', () => {
         await new Promise(process.nextTick);
 
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-            expect.objectContaining({
-                msg: 'error logging in user',
-                error: expect.any(Error)
-            })
+            'error logging in user',
+            expect.any(Error)
         );
 
         expect(getCurrentUser).not.toHaveBeenCalled();
@@ -186,10 +182,8 @@ describe('authenticated handler', () => {
 
         expect(generateLoggedInKongToken).toHaveBeenCalled();
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-            expect.objectContaining({
-                msg: 'error logging in user',
-                error: expect.any(Error)
-            })
+            'error logging in user',
+            expect.any(Error)
         );
     });
 });

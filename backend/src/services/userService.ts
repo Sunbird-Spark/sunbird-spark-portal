@@ -121,9 +121,9 @@ export const getCurrentUser = async (req: Request): Promise<void> => {
 
         throw userApiResponse;
 
-    } catch (error: any) {
+    } catch (error) {
         const statusCode = _.get(error, 'response.status');
-        logger.error(`fetchAndStoreCurrentUser :: user API call failed with status ${statusCode}`, _.get(error, 'response.data') || error.message || error);
+        logger.error(`fetchAndStoreCurrentUser :: user API call failed with status ${statusCode}`, _.get(error, 'response.data'));
         throw error;
     }
 };

@@ -32,7 +32,10 @@ process.on('unhandledRejection', (reason: Error | string | object) => {
 
 process.on('uncaughtException', (err: Error) => {
     logger.error('Uncaught Exception', err);
-    process.exit(1);
+    // Don't exit in test environment to prevent worker crashes
+    if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+        process.exit(1);
+    }
 });
 
 export default logger;
