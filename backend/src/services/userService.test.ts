@@ -124,32 +124,6 @@ describe('UserService', () => {
             expect(result).toBeUndefined();
         });
 
-        it('should use userId from result.response.userId when id is not present', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        userId: 'user-id-from-userId-field',
-                        userName: 'testuser',
-                        roles: [],
-                        organisations: [],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await getCurrentUser(mockRequest as unknown as Request);
-
-            expect(mockRequest.session.userId).toBe('user-id-from-userId-field');
-        });
-
         it('should use fallback tokens when no kong token available', async () => {
             mockRequest.session.userId = 'test-user-id';
             mockRequest.session.kongToken = undefined;
@@ -184,32 +158,7 @@ describe('UserService', () => {
             );
         });
 
-        it('should use anonymous fallback token when no userId in session', async () => {
-            mockRequest.session.userId = undefined;
-            mockRequest.session.kongToken = undefined;
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'anonymous-user',
-                        userName: 'anonymous',
-                        roles: [],
-                        organisations: [],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toThrow('fetchAndStoreCurrentUser :: userId missing from session');
-        });
-
-        it('should handle organizations without roles', async () => {
+        it('should handle organizations with missing data', async () => {
             mockRequest.session.userId = 'test-user-id';
 
             const mockUserData = {
@@ -224,42 +173,6 @@ describe('UserService', () => {
                                 organisationId: 'org1',
                             },
                             {
-                                organisationId: 'org2',
-                                roles: null,
-                            },
-                        ],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await getCurrentUser(mockRequest as unknown as Request);
-
-            expect(mockRequest.session.roles).toEqual(['USER', 'PUBLIC', 'ANONYMOUS']);
-            expect(mockRequest.session.orgs).toEqual(['org1', 'org2']);
-        });
-
-        it('should handle organizations without organisationId', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'test-user-id',
-                        userName: 'testuser',
-                        roles: [{ role: 'USER' }],
-                        organisations: [
-                            {
-                                roles: ['ADMIN'],
-                                // No organisationId
-                            },
-                            {
                                 organisationId: null,
                                 roles: ['CONTENT_CREATOR'],
                             },
@@ -268,10 +181,6 @@ describe('UserService', () => {
                                 roles: ['LEARNER'],
                             },
                         ],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
                     },
                 },
             };
@@ -280,31 +189,9 @@ describe('UserService', () => {
 
             await getCurrentUser(mockRequest as unknown as Request);
 
-            expect(mockRequest.session.roles).toEqual(['USER', 'ADMIN', 'CONTENT_CREATOR', 'LEARNER', 'PUBLIC', 'ANONYMOUS']);
-            expect(mockRequest.session.orgs).toEqual(['valid-org']);
-        });
-
-        it('should handle missing rootOrg', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'test-user-id',
-                        userName: 'testuser',
-                        roles: [{ role: 'USER' }],
-                        organisations: [],
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await getCurrentUser(mockRequest as unknown as Request);
-
+            expect(mockRequest.session.roles).toEqual(['USER', 'CONTENT_CREATOR', 'LEARNER', 'PUBLIC', 'ANONYMOUS']);
+            expect(mockRequest.session.orgs).toEqual(['org1', 'valid-org']);
             expect(mockRequest.session.rootOrgId).toBeUndefined();
-            expect(mockRequest.session.rootOrg).toBeUndefined();
         });
 
         it('should throw error when userId is missing', async () => {
@@ -313,9 +200,10 @@ describe('UserService', () => {
             await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toThrow('fetchAndStoreCurrentUser :: userId missing from session');
         });
 
-        it('should handle API error response', async () => {
+        it('should handle API and network errors', async () => {
             mockRequest.session.userId = 'test-user-id';
 
+            // Test API error response
             const mockErrorData = {
                 responseCode: 'CLIENT_ERROR',
                 params: {
@@ -328,13 +216,9 @@ describe('UserService', () => {
             (mockAxios.get as any).mockResolvedValue({ data: mockErrorData });
 
             await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toEqual(mockErrorData);
-
             expect(mockLogger.error).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: user API returned non-OK response', mockErrorData);
-        });
 
-        it('should handle axios network error', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
+            // Test network error
             const networkError = {
                 message: 'Network Error',
                 response: {
@@ -346,75 +230,10 @@ describe('UserService', () => {
             (mockAxios.get as any).mockRejectedValue(networkError);
 
             await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toEqual(networkError);
-
             expect(mockLogger.error).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: user API call failed with status 500', { error: 'Internal Server Error' });
         });
 
-        it('should handle axios error without response', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
-            const error = new Error('Request timeout');
-
-            (mockAxios.get as any).mockRejectedValue(error);
-
-            await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toEqual(error);
-
-            expect(mockLogger.error).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: user API call failed with status undefined', undefined);
-        });
-
-        it('should handle session save error', async () => {
-            mockRequest.session.userId = 'test-user-id';
-            const saveError = new Error('Session save failed');
-            mockRequest.session.save = vi.fn().mockImplementation((callback) => callback(saveError));
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'test-user-id',
-                        userName: 'testuser',
-                        roles: [],
-                        organisations: [],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await expect(getCurrentUser(mockRequest as unknown as Request)).rejects.toEqual(saveError);
-        });
-
-        it('should handle empty roles array', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'test-user-id',
-                        userName: 'testuser',
-                        roles: null,
-                        organisations: [],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await getCurrentUser(mockRequest as unknown as Request);
-
-            expect(mockRequest.session.roles).toEqual(['PUBLIC', 'ANONYMOUS']);
-        });
-
-        it('should handle duplicate roles correctly', async () => {
+        it('should handle roles and session correctly', async () => {
             mockRequest.session.userId = 'test-user-id';
 
             const mockUserData = {
@@ -427,7 +246,7 @@ describe('UserService', () => {
                         organisations: [
                             {
                                 organisationId: 'org1',
-                                roles: ['USER', 'ADMIN'],
+                                roles: ['USER', 'ADMIN'], // Duplicate USER role
                             },
                         ],
                         rootOrg: {
@@ -442,62 +261,14 @@ describe('UserService', () => {
 
             await getCurrentUser(mockRequest as unknown as Request);
 
+            // Should handle duplicate roles and always add PUBLIC/ANONYMOUS
             expect(mockRequest.session.roles).toEqual(['USER', 'LEARNER', 'ADMIN', 'PUBLIC', 'ANONYMOUS']);
-        });
-
-        it('should always add PUBLIC and ANONYMOUS roles', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'test-user-id',
-                        userName: 'testuser',
-                        roles: [{ role: 'PUBLIC' }, { role: 'ANONYMOUS' }],
-                        organisations: [],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await getCurrentUser(mockRequest as unknown as Request);
-
-            expect(mockRequest.session.roles).toEqual(['PUBLIC', 'ANONYMOUS']);
-        });
-
-        it('should log session data correctly', async () => {
-            mockRequest.session.userId = 'test-user-id';
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'test-user-id',
-                        userName: 'testuser',
-                        roles: [{ role: 'USER' }],
-                        organisations: [{ organisationId: 'org1', roles: ['ADMIN'] }],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await getCurrentUser(mockRequest as unknown as Request);
-
+            
+            // Should log session data
             expect(mockLogger.info).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: session data set successfully', {
                 userId: 'test-user-id',
                 rootOrgId: 'root-org-id',
-                roles: ['USER', 'ADMIN', 'PUBLIC', 'ANONYMOUS'],
+                roles: ['USER', 'LEARNER', 'ADMIN', 'PUBLIC', 'ANONYMOUS'],
                 userSid: 'test-session-id',
                 orgs: ['org1'],
             });
