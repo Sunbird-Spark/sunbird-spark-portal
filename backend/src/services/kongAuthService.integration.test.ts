@@ -21,7 +21,8 @@ vi.mock('../config/env.js', () => ({
         SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
         KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'test-loggedin-bearer-token',
         SUNBIRD_LOGGEDIN_SESSION_TTL: 120000,
-        KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token'
+        KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
+        KEYCLOAK_BASE_SERVER_URL: 'http://localhost:8080'
     }
 }));
 
@@ -132,7 +133,6 @@ describe('Kong Auth Service', () => {
             await generateLoggedInKongToken(mockRequest as Request);
 
             expect(mockRequest.session!.kongToken).toBe('new-loggedin-token');
-            expect(mockRequest.session!['auth_redirect_uri']).toBe('http://localhost:3000/resources?auth_callback=1');
             expect(mockedAxiosPost).toHaveBeenCalledWith(
                 'http://localhost:8000/api-manager/v2/consumer/portal_loggedin/credential/register',
                 { request: { key: 'test-session-id' } },

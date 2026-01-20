@@ -106,7 +106,6 @@ export const generateLoggedInKongToken = async (req: Request): Promise<void> => 
     }
 
     req.session.kongToken = token;
-    req.session['auth_redirect_uri'] = req.protocol + `://${req.get('host')}/resources?auth_callback=1`;
     refreshSessionTTL(req);
     await saveSession(req);
     logger.info(`LOGGEDIN_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);

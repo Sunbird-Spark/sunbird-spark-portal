@@ -4,7 +4,7 @@ import logger from '../utils/logger.js';
 import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { getCurrentUser } from '../services/userService.js';
-import { regenerateSession } from '../utils/sessionUtils.js';
+import { regenerateSession, destroySession } from '../utils/sessionUtils.js';
 
 export const getKeycloakClient = (config: Keycloak.KeycloakConfig, store: any) => {
     const keycloak = new Keycloak({ store: store || sessionStore }, config);
@@ -13,9 +13,12 @@ export const getKeycloakClient = (config: Keycloak.KeycloakConfig, store: any) =
     return keycloak;
 }
 
-const deauthenticated = function (request: Request) {
-    delete request.session['roles'];
-    delete request.session.userId;
+const deauthenticated = async function (request: Request) {
+    try {
+        await destroySession(request);
+    } catch (err) {
+        logger.error('Error destroying session during deauthentication', err);
+    }
 }
 
 const authenticated = async (request: Request) => {

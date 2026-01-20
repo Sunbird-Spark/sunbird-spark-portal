@@ -24,7 +24,6 @@ declare module 'express-session' {
         rootOrgId?: string;
         sessionEvents?: string[];
         realm?: string;
-        auth_redirect_uri?: string;
         orgs?: string[];
         userSid?: string;
         userName?: string;
