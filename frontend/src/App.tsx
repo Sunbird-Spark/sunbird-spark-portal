@@ -1,6 +1,10 @@
-import React from 'react';
-import SimpleApp from './SimpleApp';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './AppRoutes';
 
-export default function App(): React.JSX.Element {
-  return <SimpleApp />;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
 }
