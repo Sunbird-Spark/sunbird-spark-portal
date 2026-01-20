@@ -64,8 +64,6 @@ describe('UserService', () => {
                         id: 'test-user-id',
                         userId: 'test-user-id',
                         userName: 'testuser',
-                        managedBy: null,
-                        managedToken: null,
                         roles: [{ role: 'USER' }, { role: 'LEARNER' }],
                         organisations: [
                             {
@@ -124,35 +122,6 @@ describe('UserService', () => {
 
             expect(mockRequest.session.save).toHaveBeenCalled();
             expect(result).toBe(mockUserData);
-        });
-
-        it('should handle managed user with managedToken', async () => {
-            mockRequest.session.userId = 'managed-user-id';
-
-            const mockUserData = {
-                responseCode: 'OK',
-                result: {
-                    response: {
-                        id: 'managed-user-id',
-                        userName: 'manageduser',
-                        managedBy: 'parent-user-id',
-                        managedToken: 'managed-token-123',
-                        roles: [{ role: 'LEARNER' }],
-                        organisations: [],
-                        rootOrg: {
-                            id: 'root-org-id',
-                            hashTagId: 'root-hashtag',
-                        },
-                    },
-                },
-            };
-
-            (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
-
-            await getCurrentUser(mockRequest as unknown as Request);
-
-            expect(mockRequest.session.userSid).toBe('test-uuid');
-            expect(mockRequest.session.managedToken).toBe('managed-token-123');
         });
 
         it('should use userId from result.response.userId when id is not present', async () => {

@@ -28,7 +28,6 @@ declare module 'express-session' {
         orgs?: string[];
         userSid?: string;
         userName?: string;
-        managedToken?: string;
         rootOrghashTagId?: string;
         rootOrg?: {
             id?: string;
