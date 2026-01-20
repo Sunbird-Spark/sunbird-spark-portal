@@ -1,12 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import type { Server } from 'http';
 
-vi.mock('http-proxy-middleware');
-vi.mock('../utils/proxyUtils.js');
 vi.mock('../utils/logger.js', () => ({
     default: {
         info: vi.fn(),
@@ -21,6 +18,12 @@ describe('kongProxy', () => {
     });
 
     const importKongProxy = async (overrideEnv?: { KONG_URL?: string }) => {
+        vi.doMock('http-proxy-middleware', () => ({
+            createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next())
+        }));
+        vi.doMock('../utils/proxyUtils.js', () => ({
+            decorateRequestHeaders: vi.fn()
+        }));
         vi.doMock('../config/env.js', () => ({
             envConfig: {
                 KONG_URL: overrideEnv?.KONG_URL || 'http://localhost:8000',
@@ -33,8 +36,9 @@ describe('kongProxy', () => {
 
     it('should create proxy middleware with correct configuration', async () => {
         await importKongProxy();
+        const hpm = await import('http-proxy-middleware');
 
-        expect(createProxyMiddleware).toHaveBeenCalledWith(
+        expect(hpm.createProxyMiddleware).toHaveBeenCalledWith(
             expect.objectContaining({
                 target: 'http://localhost:8000',
                 changeOrigin: true,
@@ -45,8 +49,9 @@ describe('kongProxy', () => {
 
     it('should use custom KONG_URL when provided', async () => {
         await importKongProxy({ KONG_URL: 'https://custom-kong.example.com' });
+        const hpm = await import('http-proxy-middleware');
 
-        expect(createProxyMiddleware).toHaveBeenCalledWith(
+        expect(hpm.createProxyMiddleware).toHaveBeenCalledWith(
             expect.objectContaining({
                 target: 'https://custom-kong.example.com'
             })
@@ -124,7 +129,7 @@ describe('Kong Proxy Integration', () => {
             next();
         });
 
-        app.use('/portal/*rest', kongProxy);
+        app.all('/portal/*rest', kongProxy);
     });
 
     afterEach(() => {
