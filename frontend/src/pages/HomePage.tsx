@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, Role, User } from '../auth/AuthContext';
 import { getDefaultRouteForRole } from '../rbac/roleConfig';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
-const LoginPage: React.FC = () => {
+const HomePage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<Role>('guest');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -30,7 +30,14 @@ const LoginPage: React.FC = () => {
 
   return (
     <div>
-      <h1>Login</h1>
+      <h1>Welcome to Sunbird Portal</h1>
+      <h2>Available Courses</h2>
+      <ul>
+        <li>Course 1</li>
+        <li>Course 2</li>
+      </ul>
+
+      <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <div>
           <label htmlFor="role">Select Role:</label>
@@ -60,4 +67,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default HomePage;

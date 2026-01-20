@@ -30,8 +30,8 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
     displayName: 'Content Reviewer',
   },
   guest: {
-    defaultRoute: '/login',
-    allowedRoutes: ['/login', '/unauthorized'],
+    defaultRoute: '/home',
+    allowedRoutes: ['/home', '/unauthorized'],
     displayName: 'Guest',
   },
 };
@@ -40,7 +40,7 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
  * Get the default home route for a given role
  */
 export const getDefaultRouteForRole = (role: Role): string => {
-  return ROLE_CONFIGS[role]?.defaultRoute || '/login';
+  return ROLE_CONFIGS[role]?.defaultRoute || '/home';
 };
 
 /**

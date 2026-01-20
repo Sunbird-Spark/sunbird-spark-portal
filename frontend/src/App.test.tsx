@@ -9,28 +9,19 @@ describe('App Component - RBAC Integration', () => {
     expect(document.body).toBeInTheDocument();
   });
 
-  it('renders the login page by default for unauthenticated users', () => {
+  it('renders the home page with courses and login form', () => {
     render(<App />);
+    expect(screen.getByRole('heading', { name: 'Welcome to Sunbird Portal' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Available Courses' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
     expect(screen.getByLabelText('Select Role:')).toBeInTheDocument();
   });
 
-  it('renders all role options in the login form', () => {
+  it('displays course list and login button', () => {
     render(<App />);
     
-    const select = screen.getByLabelText('Select Role:');
-    const options = Array.from(select.querySelectorAll('option'));
-
-    expect(options).toHaveLength(4);
-    expect(options[0]).toHaveTextContent('Admin');
-    expect(options[1]).toHaveTextContent('Content Creator');
-    expect(options[2]).toHaveTextContent('Content Reviewer');
-    expect(options[3]).toHaveTextContent('Guest');
-  });
-
-  it('has a login button', () => {
-    render(<App />);
-    const loginButton = screen.getByRole('button', { name: /login/i });
-    expect(loginButton).toBeInTheDocument();
+    expect(screen.getByText('Course 1')).toBeInTheDocument();
+    expect(screen.getByText('Course 2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
   });
 });

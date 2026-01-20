@@ -46,24 +46,8 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Go Back')).toBeInTheDocument();
     expect(screen.getByText('Go Home')).toBeInTheDocument();
     expect(screen.getByText('Change Role')).toBeInTheDocument();
-  });
-
-  it('should navigate back when Go Back button is clicked', () => {
-    render(
-      <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
-      </MemoryRouter>
-    );
-
-    const goBackButton = screen.getByText('Go Back');
-    fireEvent.click(goBackButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 
   it('should navigate to login when Change Role button is clicked', () => {
@@ -78,10 +62,10 @@ describe('UnauthorizedPage', () => {
     const changeRoleButton = screen.getByText('Change Role');
     fireEvent.click(changeRoleButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 
-  it('should navigate to login when Go Home is clicked for unauthenticated user', () => {
+  it('should navigate to home when Go Home is clicked for unauthenticated user', () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -93,7 +77,7 @@ describe('UnauthorizedPage', () => {
     const goHomeButton = screen.getByText('Go Home');
     fireEvent.click(goHomeButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 
   it('should navigate to /reports for admin user', () => {
@@ -168,7 +152,7 @@ describe('UnauthorizedPage', () => {
     mockUseAuth.mockRestore();
   });
 
-  it('should navigate to /login for guest user', () => {
+  it('should navigate to /home for guest user', () => {
     const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
     mockUseAuth.mockReturnValue({
       user: { id: '1', name: 'Guest', role: 'guest' },
@@ -188,7 +172,7 @@ describe('UnauthorizedPage', () => {
     const goHomeButton = screen.getByText('Go Home');
     fireEvent.click(goHomeButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    expect(mockNavigate).toHaveBeenCalledWith('/home');
     mockUseAuth.mockRestore();
   });
 });

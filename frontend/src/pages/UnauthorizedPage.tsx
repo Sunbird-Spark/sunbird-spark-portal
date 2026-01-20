@@ -7,17 +7,13 @@ const UnauthorizedPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
   const handleGoToLogin = () => {
-    navigate('/login');
+    navigate('/home');
   };
 
   // Determine safe home page based on user role
   const getSafeHomePage = (): string => {
-    if (!user) return '/login';
+    if (!user) return '/home';
     return getDefaultRouteForRole(user.role);
   };
 
@@ -34,9 +30,6 @@ const UnauthorizedPage: React.FC = () => {
       </p>
 
       <div>
-        <button onClick={handleGoBack}>
-          Go Back
-        </button>
         <button onClick={handleGoHome}>
           Go Home
         </button>

@@ -19,9 +19,9 @@ export const withRoles = <P extends object>(
       const { user, isAuthenticated } = useAuth();
       const location = useLocation();
 
-      // 1) Redirect unauthenticated users to login
+      // 1) Redirect unauthenticated users to home
       if (!isAuthenticated) {
-        const loginPath = options?.unauthenticatedTo || '/login';
+        const loginPath = options?.unauthenticatedTo || '/home';
         return <Navigate to={loginPath} state={{ from: location }} replace />;
       }
 

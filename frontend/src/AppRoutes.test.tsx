@@ -7,7 +7,7 @@ import AppRoutes from "./AppRoutes";
 // --------------------
 // Mock Pages
 // --------------------
-vi.mock("./pages/LoginPage", () => ({ default: () => <div>Login Page</div> }));
+vi.mock("./pages/HomePage", () => ({ default: () => <div>Home Page</div> }));
 vi.mock("./pages/UnauthorizedPage", () => ({ default: () => <div>Unauthorized Page</div> }));
 vi.mock("./pages/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
 vi.mock("./pages/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
@@ -37,7 +37,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     mockUseAuth.mockReset();
   });
 
-  it("public route: /login renders LoginPage", () => {
+  it("public route: /home renders HomePage", () => {
     mockUseAuth.mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -47,8 +47,8 @@ describe("AppRoutes (RBAC routing tests)", () => {
       refetchUser: vi.fn(),
     });
 
-    renderWithRoute("/login");
-    expect(screen.getByText("Login Page")).toBeInTheDocument();
+    renderWithRoute("/home");
+    expect(screen.getByText("Home Page")).toBeInTheDocument();
   });
 
   it("public route: /unauthorized renders UnauthorizedPage", () => {
@@ -65,10 +65,10 @@ describe("AppRoutes (RBAC routing tests)", () => {
     expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
   });
 
-  it("redirect: / redirects to /workspace", () => {
+  it("redirect: / redirects to /home", () => {
     mockUseAuth.mockReturnValue({
-      user: { id: "1", name: "Creator", role: "content_creator" },
-      isAuthenticated: true,
+      user: null,
+      isAuthenticated: false,
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
@@ -76,13 +76,13 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
 
     renderWithRoute("/");
-    expect(screen.getByText("Workspace Page")).toBeInTheDocument();
+    expect(screen.getByText("Home Page")).toBeInTheDocument();
   });
 
-  it("catch-all: unknown route redirects to /workspace", () => {
+  it("catch-all: unknown route redirects to /home", () => {
     mockUseAuth.mockReturnValue({
-      user: { id: "1", name: "Creator", role: "content_creator" },
-      isAuthenticated: true,
+      user: null,
+      isAuthenticated: false,
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
@@ -90,10 +90,10 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
 
     renderWithRoute("/random-route");
-    expect(screen.getByText("Workspace Page")).toBeInTheDocument();
+    expect(screen.getByText("Home Page")).toBeInTheDocument();
   });
 
-  it("protected: unauthenticated user visiting /admin redirects to /login", () => {
+  it("protected: unauthenticated user visiting /admin redirects to /home", () => {
     mockUseAuth.mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -104,7 +104,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
 
     renderWithRoute("/admin");
-    expect(screen.getByText("Login Page")).toBeInTheDocument();
+    expect(screen.getByText("Home Page")).toBeInTheDocument();
   });
 
   it("protected: authenticated but wrong role visiting /admin redirects to /unauthorized", () => {
