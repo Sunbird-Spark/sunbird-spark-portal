@@ -4,6 +4,7 @@ import * as http from 'http';
 import { decorateRequestHeaders } from '../utils/proxyUtils.js';
 import logger from '../utils/logger.js';
 import { envConfig } from '../config/env.js';
+import _ from 'lodash';
 
 const KONG_URL = envConfig.KONG_URL;
 
@@ -23,7 +24,7 @@ export const kongProxy = createProxyMiddleware({
             }
         },
         proxyRes: (proxyRes: http.IncomingMessage, req: Request, res: Response) => {
-            if (proxyRes.statusCode === 401 || proxyRes.statusCode === 403) {
+            if (!_.includes([200, 201, 204], proxyRes.statusCode)) {
                 logger.error(`Unauthorized access: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`,
                     {
                         proxyStatusCode: proxyRes.statusCode,
