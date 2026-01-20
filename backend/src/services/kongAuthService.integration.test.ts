@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import { Request } from 'express';
 import { refreshSessionTTL, generateKongToken, generateLoggedInKongToken } from './kongAuthService.js';
+import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 vi.mock('axios');
 const mockedAxiosPost = vi.mocked(axios.post);
@@ -24,6 +25,13 @@ vi.mock('../config/env.js', () => ({
         KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
         KEYCLOAK_BASE_SERVER_URL: 'http://localhost:8080'
     }
+}));
+
+vi.mock('../utils/sessionTTLUtil.js', () => ({
+    setSessionTTLFromToken: vi.fn().mockImplementation((req: any) => {
+        req.session.cookie.maxAge = 120000;
+        req.session.cookie.expires = new Date(Date.now() + 120000);
+    })
 }));
 
 describe('Kong Auth Service', () => {
@@ -53,13 +61,19 @@ describe('Kong Auth Service', () => {
     });
 
     describe('refreshSessionTTL', () => {
-        it('should set correct session TTL based on user status', () => {
+        it('should call setSessionTTLFromToken for logged-in users', () => {
             mockRequest.session!.userId = 'test-user-id';
             refreshSessionTTL(mockRequest as Request);
-            expect(mockRequest.session!.cookie.maxAge).toBe(120000);
 
+            expect(setSessionTTLFromToken).toHaveBeenCalledWith(mockRequest);
+            expect(mockRequest.session!.cookie.maxAge).toBe(120000);
+        });
+
+        it('should set anonymous session TTL for non-logged-in users', () => {
             mockRequest.session!.userId = undefined;
             refreshSessionTTL(mockRequest as Request);
+
+            expect(setSessionTTLFromToken).not.toHaveBeenCalled();
             expect(mockRequest.session!.cookie.maxAge).toBe(60000);
         });
     });

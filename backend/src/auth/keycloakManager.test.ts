@@ -11,6 +11,7 @@ import logger from '../utils/logger.js';
 import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { getCurrentUser } from '../services/userService.js';
+import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 vi.mock('keycloak-connect', () => {
     const MockKeycloak = vi.fn().mockImplementation(function () {
@@ -42,6 +43,10 @@ vi.mock('../services/userService.js', () => ({
 
 vi.mock('../utils/sessionStore.js', () => ({
     sessionStore: {}
+}));
+
+vi.mock('../utils/sessionTTLUtil.js', () => ({
+    setSessionTTLFromToken: vi.fn()
 }));
 
 describe('getKeycloakClient', () => {
@@ -111,6 +116,7 @@ describe('authenticated handler', () => {
         // wait for the async IIFE inside authenticated()
         await new Promise(process.nextTick);
 
+        expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
         expect((req.session as any)?.userId).toBe('12345');
         expect(generateLoggedInKongToken).toHaveBeenCalledWith(req);
         expect(getCurrentUser).toHaveBeenCalledWith(req);

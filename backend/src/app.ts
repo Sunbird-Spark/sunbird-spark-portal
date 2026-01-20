@@ -51,7 +51,7 @@ app.get('/',
         cookie: {
             httpOnly: true,
             secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_LOGGEDIN_SESSION_TTL,
+            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
             sameSite: 'lax'
         }
     }), (req: express.Request, res: express.Response) => {

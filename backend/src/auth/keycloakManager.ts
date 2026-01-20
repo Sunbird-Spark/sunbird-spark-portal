@@ -5,6 +5,7 @@ import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { getCurrentUser } from '../services/userService.js';
 import { regenerateSession, destroySession } from '../utils/sessionUtils.js';
+import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 export const getKeycloakClient = (config: Keycloak.KeycloakConfig, store: any) => {
     const keycloak = new Keycloak({ store: store || sessionStore }, config);
@@ -24,6 +25,7 @@ const deauthenticated = async function (request: Request) {
 const authenticated = async (request: Request) => {
     try {
         await regenerateSession(request);
+        setSessionTTLFromToken(request);
         const sub = (request.kauth?.grant?.access_token as any)?.content?.sub;
         if (sub) {
             const parts = sub.split(':');

@@ -4,19 +4,18 @@ import { Request } from 'express';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
 import { saveSession } from '../utils/sessionUtils.js';
+import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 const {
     KONG_URL,
     SUNBIRD_ANONYMOUS_SESSION_TTL,
-    SUNBIRD_LOGGEDIN_SESSION_TTL,
     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: bearerToken,
     KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: loggedBearerToken,
 } = envConfig;
 
 export const refreshSessionTTL = (req: Request) => {
     if (req.session.userId) {
-        req.session.cookie.maxAge = SUNBIRD_LOGGEDIN_SESSION_TTL;
-        req.session.cookie.expires = new Date(Date.now() + SUNBIRD_LOGGEDIN_SESSION_TTL);
+        setSessionTTLFromToken(req);
     } else {
         req.session.cookie.maxAge = SUNBIRD_ANONYMOUS_SESSION_TTL;
         req.session.cookie.expires = new Date(Date.now() + SUNBIRD_ANONYMOUS_SESSION_TTL);
