@@ -25,7 +25,7 @@ describe('Keycloak Configuration', () => {
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        const { keycloak } = await import('./keyclok.js');
+        const { keycloak } = await import('./keycloak.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             {
@@ -58,7 +58,7 @@ describe('Keycloak Configuration', () => {
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        await import('./keyclok.js');
+        await import('./keycloak.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -77,7 +77,7 @@ describe('Keycloak Configuration', () => {
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        await import('./keyclok.js');
+        await import('./keycloak.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             expect.objectContaining({

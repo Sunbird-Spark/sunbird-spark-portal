@@ -4,7 +4,7 @@ import session from 'express-session';
 import { envConfig } from './config/env.js';
 import { sessionStore } from './utils/sessionStore.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
-import { keycloak } from './config/keyclok.js';
+import { keycloak } from './config/keycloak.js';
 import logger from './utils/logger.js';
 import { destroySession } from './utils/sessionUtils.js';
 
@@ -39,6 +39,23 @@ app.use('/resources',
             sameSite: 'lax'
         }
     }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: express.Request, res: express.Response) => {
+        res.redirect('http://localhost:5173/resources');
+    });
+
+app.get('/',
+    session({
+        store: sessionStore,
+        secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: envConfig.ENVIRONMENT !== 'local',
+            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
+            sameSite: 'lax'
+        }
+    }), (req: express.Request, res: express.Response) => {
+        logger.info('redirected to /')
         res.redirect('http://localhost:5173/resources');
     });
 
