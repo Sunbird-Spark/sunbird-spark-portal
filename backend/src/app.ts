@@ -39,7 +39,7 @@ app.use('/resources',
             sameSite: 'lax'
         }
     }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: express.Request, res: express.Response) => {
-        res.redirect('http://localhost:5173/resources');
+        res.redirect('/resources');
     });
 
 app.get('/',
@@ -55,7 +55,7 @@ app.get('/',
             sameSite: 'lax'
         }
     }), (req: express.Request, res: express.Response) => {
-        res.redirect('http://localhost:5173/resources');
+        res.redirect('/resources');
     });
 
 app.all('/logout', async (req, res) => {
@@ -65,5 +65,5 @@ app.all('/logout', async (req, res) => {
     } catch (err) {
         logger.error('Error destroying session', err);
     }
-    res.redirect(keycloak.logoutUrl('http://localhost:5173/'));
+    res.redirect(keycloak.logoutUrl('/'));
 })
