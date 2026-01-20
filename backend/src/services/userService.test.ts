@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request } from 'express';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import dateFormat from 'dateformat';
+import dayjs from 'dayjs';
 import { getCurrentUser } from './userService.js';
 import logger from '../utils/logger.js';
 
@@ -25,7 +25,7 @@ vi.mock('../utils/logger.js', () => ({
 
 const mockAxios = vi.mocked(axios);
 const mockUuidv4 = vi.mocked(uuidv4);
-const mockDateFormat = vi.mocked(dateFormat);
+const mockDateFormat = vi.mocked(dayjs);
 const mockLogger = vi.mocked(logger);
 
 describe('UserService', () => {
@@ -263,7 +263,7 @@ describe('UserService', () => {
 
             // Should handle duplicate roles and always add PUBLIC/ANONYMOUS
             expect(mockRequest.session.roles).toEqual(['USER', 'LEARNER', 'ADMIN', 'PUBLIC', 'ANONYMOUS']);
-            
+
             // Should log session data
             expect(mockLogger.info).toHaveBeenCalledWith('fetchAndStoreCurrentUser :: session data set successfully', {
                 userId: 'test-user-id',

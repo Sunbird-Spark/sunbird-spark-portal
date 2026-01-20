@@ -3,7 +3,7 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { Request } from 'express';
 import { envConfig } from '../config/env.js';
-import dateFormat from 'dateformat';
+import dayjs from 'dayjs';
 import logger from '../utils/logger.js';
 import { saveSession } from '../utils/sessionUtils.js';
 import { UserApiResponse } from '../types/user.js';
@@ -86,7 +86,7 @@ export const getCurrentUser = async (req: Request): Promise<void> => {
 
         const headers = {
             'x-msgid': uuidv4(),
-            ts: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss:lo'),
+            ts: dayjs(new Date()).format('yyyy-mm-dd HH:MM:ss:lo'),
             'Content-Type': 'application/json',
             accept: 'application/json',
             Authorization: `Bearer ${resolveKongBearerToken(req)}`,

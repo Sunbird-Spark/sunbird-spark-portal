@@ -25,7 +25,7 @@
     "axios": "^1.13.2",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.5",
-    "dateformat": "^5.0.3",
+    "dayjs": "^1.11.19",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-session": "^1.18.2",
