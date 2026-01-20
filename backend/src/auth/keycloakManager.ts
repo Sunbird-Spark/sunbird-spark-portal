@@ -21,7 +21,7 @@ const deauthenticated = function (request: Request) {
 const authenticated = async (request: Request) => {
     try {
         await regenerateSession(request);
-        const sub = request.kauth?.grant?.access_token?.content?.sub;
+        const sub = (request.kauth?.grant?.access_token as any)?.content?.sub;
         if (sub) {
             const parts = sub.split(':');
             request.session.userId = parts[parts.length - 1];

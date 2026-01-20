@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getKeycloakClient } from '../helpers/keycloakHelper.js';
+import { getKeycloakClient } from './keycloakManager.js';
 import { sessionStore } from '../utils/sessionStore.js';
-import { envConfig } from './env.js';
+import { envConfig } from '../config/env.js';
 
-vi.mock('../helpers/keycloakHelper.js', () => ({
+vi.mock('./keycloakHelper.js', () => ({
     getKeycloakClient: vi.fn()
 }));
 vi.mock('../utils/sessionStore.js');
-vi.mock('./env.js');
+vi.mock('../config/env.js');
 
 const mockGetKeycloakClient = vi.mocked(getKeycloakClient);
 const mockSessionStore = vi.mocked(sessionStore);
@@ -25,7 +25,7 @@ describe('Keycloak Configuration', () => {
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        const { keycloak } = await import('./keycloak.js');
+        const { keycloak } = await import('./keycloakProvider.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             {
@@ -58,7 +58,7 @@ describe('Keycloak Configuration', () => {
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        await import('./keycloak.js');
+        await import('../types/keycloak.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -77,7 +77,7 @@ describe('Keycloak Configuration', () => {
         };
         mockGetKeycloakClient.mockReturnValue(mockKeycloakInstance as any);
 
-        await import('./keycloak.js');
+        await import('../types/keycloak.js');
 
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             expect.objectContaining({

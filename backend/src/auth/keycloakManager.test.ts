@@ -1,4 +1,3 @@
-// getKeycloakClient.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request } from 'express';
 import type { Session } from 'express-session';
@@ -6,7 +5,7 @@ import type Keycloak from 'keycloak-connect';
 
 import KeycloakConnect from 'keycloak-connect';
 
-import { getKeycloakClient } from '../helpers/keycloakHelper.js';
+import { getKeycloakClient } from './keycloakManager.js';
 
 import logger from '../utils/logger.js';
 import { generateLoggedInKongToken } from '../services/kongAuthService.js';

@@ -1,6 +1,6 @@
-import { getKeycloakClient } from '../helpers/keycloakHelper.js';
+import { getKeycloakClient } from './keycloakManager.js';
 import { sessionStore } from '../utils/sessionStore.js';
-import { envConfig } from './env.js';
+import { envConfig } from '../config/env.js';
 
 const portalKeycloakConfig = {
     realm: envConfig.PORTAL_REALM,
