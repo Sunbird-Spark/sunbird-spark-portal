@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  yugabyte:
+    image: yugabytedb/yugabyte:2025.2.0.0-b131
+    container_name: yugabyte
+    ports:
+      - "7000:7000"  
+      - "9000:9000"  
+      - "9042:9042"   
+    restart: unless-stopped
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    command: [ 'bin/yugabyted', 'start', '--daemon=false', '--ui=false' ]
+    volumes:
+      - yugabyte_data:/var/lib/yugabyte
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z localhost 9042"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  yugabyte_data:
