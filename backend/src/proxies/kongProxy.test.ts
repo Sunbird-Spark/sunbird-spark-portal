@@ -230,7 +230,7 @@ describe('Kong Proxy Integration', () => {
         const call = errorSpy.mock.calls[0];
         expect(call).toBeDefined();
         const messageArg = call ? call[0] : '';
-        expect(String(messageArg)).toContain('Unauthorized access');
+        expect(String(messageArg)).toContain('Error proxying request');
         expect(String(messageArg)).toContain('Status: 401');
         
         errorSpy.mockRestore();
@@ -248,7 +248,7 @@ describe('Kong Proxy Integration', () => {
         const call = errorSpy.mock.calls[0];
         expect(call).toBeDefined();
         const messageArg = call ? call[0] : '';
-        expect(String(messageArg)).toContain('Unauthorized access');
+        expect(String(messageArg)).toContain('Error proxying request');
         expect(String(messageArg)).toContain('Status: 403');
         
         errorSpy.mockRestore();
