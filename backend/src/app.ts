@@ -3,7 +3,7 @@ import cors from 'cors';
 import session from 'express-session';
 import { envConfig } from './config/env.js';
 import { sessionStore } from './utils/sessionStore.js';
-import { registerDeviceWithKong } from './middlewares/kongAuth.js';
+// import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import formRoutes from './routes/formRoutes.js';
 
 export const app = express();
@@ -24,7 +24,7 @@ app.use(session({
     }
 }));
 
-app.use(registerDeviceWithKong());
+// app.use(registerDeviceWithKong());
 
 // Routes
 app.use('/api/data/v1/form', formRoutes);

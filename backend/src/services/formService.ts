@@ -1,4 +1,4 @@
-import { getCassandraClient } from '../utils/cassandraConnection.js';
+import { ysqlPool } from '../utils/sessionStore.js';
 import _ from 'lodash';
 
 export class FormService {
@@ -10,11 +10,11 @@ export class FormService {
         const subType = data.subType || '*';
         const component = data.component || '*';
 
-        const client = await getCassandraClient();
         const query = `
-      INSERT INTO form_data (root_org, type, subtype, action, component, framework, data, created_on)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO form_data (root_org, type, subtype, action, component, framework, data, created_on)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            ON CONFLICT (root_org, framework, type, subtype, action, component) DO NOTHING
+        `;
         const params = [
             rootOrgId,
             data.type,
@@ -22,23 +22,22 @@ export class FormService {
             data.action,
             component,
             framework,
-            JSON.stringify(data.data),
+            data.data,
             new Date()
         ];
         console.log('FormService.create - Query params:', params);
-        await client.execute(query, params, { prepare: true });
+        await ysqlPool.query(query, params);
         console.log('FormService.create - Success!');
         return { created: 'OK' };
     }
 
     async update(queryCtx: any, updateValue: any) {
-        const client = await getCassandraClient();
         const query = `
-      UPDATE form_data 
-      SET data = ?, last_modified_on = ?
-      WHERE root_org = ? AND framework = ? AND type = ? AND action = ? AND subtype = ? AND component = ?
-      IF EXISTS
-    `;
+            UPDATE form_data 
+            SET data = $1, last_modified_on = $2
+            WHERE root_org = $3 AND framework = $4 AND type = $5 AND action = $6 AND subtype = $7 AND component = $8
+            RETURNING *
+        `;
 
         const params = [
             updateValue.data,
@@ -51,13 +50,10 @@ export class FormService {
             queryCtx.component
         ];
 
-        const result = await client.execute(query, params, { prepare: true });
+        const result = await ysqlPool.query(query, params);
 
-        const row = result.first();
-        const applied = row ? row['[applied]'] : false;
-
-        if (!applied) {
-            throw { msg: `invalid request, no records found for the match to update!`, client_error: true };
+        if (result.rowCount === 0) {
+            throw { msg: `invalid request, no records found for the match to update!`, statusCode: 404 };
         }
 
         return {
@@ -68,11 +64,10 @@ export class FormService {
     }
 
     private async findOne(queryCtx: any): Promise<any> {
-        const client = await getCassandraClient();
         const query = `
-      SELECT * FROM form_data 
-      WHERE root_org = ? AND framework = ? AND type = ? AND action = ? AND subtype = ? AND component = ?
-    `;
+            SELECT * FROM form_data 
+            WHERE root_org = $1 AND framework = $2 AND type = $3 AND action = $4 AND subtype = $5 AND component = $6
+        `;
         const params = [
             queryCtx.root_org,
             queryCtx.framework,
@@ -82,9 +77,9 @@ export class FormService {
             queryCtx.component
         ];
 
-        const result = await client.execute(query, params, { prepare: true });
-        if (result.rowLength > 0) {
-            return result.first();
+        const result = await ysqlPool.query(query, params);
+        if (result.rows.length > 0) {
+            return result.rows[0];
         }
         return null;
     }
@@ -107,16 +102,14 @@ export class FormService {
     }
 
     async listAll(rootOrgId: string) {
-        const client = await getCassandraClient();
         const query = `
-      SELECT type, subtype, action, root_org, framework, data, component 
-      FROM form_data 
-      WHERE root_org = ? 
-      ALLOW FILTERING
-    `;
+            SELECT type, subtype, action, root_org, framework, data, component 
+            FROM form_data 
+            WHERE root_org = $1
+        `;
         const params = [rootOrgId || '*'];
 
-        const result = await client.execute(query, params, { prepare: true });
+        const result = await ysqlPool.query(query, params);
         return result.rows;
     }
 }

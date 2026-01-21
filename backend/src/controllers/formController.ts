@@ -60,20 +60,13 @@ export class FormController {
                 data: { "response": [result] }
             }));
         } catch (error: any) {
-            if (error.client_error) {
-                res.status(400).send(new FormResponse({ // Standard HTTP 400 for client error
-                    id: "api.form.update",
-                    err: "ERR_UPDATE_FORM_DATA",
-                    responseCode: "CLIENT_ERROR",
-                    errmsg: error.msg
-                }));
-            } else {
-                res.status(404).send(new FormResponse({ // Original caught 404 in second catch block
-                    id: "api.form.update",
-                    err: "ERR_UPDATE_FORM_DATA",
-                    errmsg: error
-                }));
-            }
+            const statusCode = error.statusCode || 500;
+            res.status(statusCode).send(new FormResponse({
+                id: "api.form.update",
+                err: "ERR_UPDATE_FORM_DATA",
+                responseCode: statusCode === 404 ? "RESOURCE_NOT_FOUND" : "SERVER_ERROR",
+                errmsg: error.msg || error.message || "Unknown error"
+            }));
         }
     }
 

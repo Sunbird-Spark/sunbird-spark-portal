@@ -9,15 +9,16 @@ const PgStore = connectPgSimple(session);
 /**
  * Initializes and returns the appropriate session store based on configuration.
  */
+export const ysqlPool = new pg.Pool({
+    host: envConfig.SUNBIRD_YUGABYTE_HOST,
+    port: envConfig.SUNBIRD_YUGABYTE_PORT,
+    database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
+    user: envConfig.SUNBIRD_YUGABYTE_USER,
+    password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
+});
+
 export const getSessionStore = () => {
     if (envConfig.SUNBIRD_PORTAL_SESSION_STORE === 'yugabyte') {
-        const ysqlPool = new pg.Pool({
-            host: envConfig.SUNBIRD_YUGABYTE_HOST,
-            port: envConfig.SUNBIRD_YUGABYTE_PORT,
-            database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
-            user: envConfig.SUNBIRD_YUGABYTE_USER,
-            password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
-        });
 
         ysqlPool.connect((err, client, release) => {
             if (err) {
