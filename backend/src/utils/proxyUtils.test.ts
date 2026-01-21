@@ -30,42 +30,48 @@ describe('proxyUtils', () => {
     };
 
     describe('getAuthToken', () => {
-        it('should return session kongToken when available', async () => {
+        it('should return Keycloak access token when available', async () => {
             const { getAuthToken } = await importProxyUtils();
             const mockReq = {
-                session: { kongToken: 'session-token' }
-            } as Partial<Request>;
+                kauth: {
+                    grant: {
+                        access_token: {
+                            token: 'kc-token'
+                        }
+                    }
+                }
+            } as any;
 
             const result = getAuthToken(mockReq as Request);
-            expect(result).toBe('session-token');
+            expect(result).toBe('kc-token');
         });
 
-        it('should return fallback token when session token is missing', async () => {
+        it('should return undefined when access token is missing', async () => {
             const { getAuthToken } = await importProxyUtils();
             const mockReq = {
                 session: {}
             } as Partial<Request>;
 
             const result = getAuthToken(mockReq as Request);
-            expect(result).toBe('fallback-token');
+            expect(result).toBeUndefined();
         });
 
-        it('should return fallback token when session is undefined', async () => {
+        it('should return undefined when request has no auth context', async () => {
             const { getAuthToken } = await importProxyUtils();
             const mockReq = {} as Partial<Request>;
 
             const result = getAuthToken(mockReq as Request);
-            expect(result).toBe('fallback-token');
+            expect(result).toBeUndefined();
         });
 
-        it('should use custom fallback token from env', async () => {
+        it('should not use env fallback token for getAuthToken', async () => {
             const { getAuthToken } = await importProxyUtils({
                 KONG_ANONYMOUS_FALLBACK_TOKEN: 'custom-fallback'
             });
             const mockReq = {} as Partial<Request>;
 
             const result = getAuthToken(mockReq as Request);
-            expect(result).toBe('custom-fallback');
+            expect(result).toBeUndefined();
         });
     });
 
@@ -242,7 +248,7 @@ describe('proxyUtils', () => {
             expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith('X-App-Id', expect.anything());
         });
         
-        it('should set authenticated user tokens when fallback token is present', async () => {
+        it('should set authenticated user tokens when Keycloak token is present', async () => {
             const module = await importProxyUtils();
             const { decorateRequestHeaders } = module;
             const mockProxyReq = {
@@ -251,14 +257,21 @@ describe('proxyUtils', () => {
             
             const mockReq = {
                 session: {},
+                kauth: {
+                    grant: {
+                        access_token: {
+                            token: 'kc-token'
+                        }
+                    }
+                },
                 sessionID: 'session-123',
                 get: vi.fn().mockReturnValue(undefined)
-            } as unknown as Request;
+            } as unknown as any;
             
             decorateRequestHeaders(mockProxyReq, mockReq);
             
-            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-authenticated-user-token', expect.any(String));
-            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-auth-token', expect.any(String));
+            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-authenticated-user-token', 'kc-token');
+            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-auth-token', 'kc-token');
         });
     });
 });

@@ -5,8 +5,8 @@ import { envConfig } from '../config/env.js';
 const fallbackToken = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
 const appId = envConfig.APPID;
 
-export const getAuthToken = (req: Request): string => {
-    return req.session?.kongToken || fallbackToken;
+export const getAuthToken = (req: any): string => {
+    return req.kauth?.grant?.access_token?.token;
 };
 
 export const getBearerToken = (req: Request): string => {
