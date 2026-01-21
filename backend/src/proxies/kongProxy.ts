@@ -4,7 +4,6 @@ import * as http from 'http';
 import { decorateRequestHeaders } from '../utils/proxyUtils.js';
 import logger from '../utils/logger.js';
 import { envConfig } from '../config/env.js';
-import _ from 'lodash';
 
 const KONG_URL = envConfig.KONG_URL;
 
