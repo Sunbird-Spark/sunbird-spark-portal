@@ -29,9 +29,9 @@ describe('proxyUtils', () => {
         return await import('./proxyUtils.js');
     };
 
-    describe('getAuthToken', () => {
+    describe('getUserToken', () => {
         it('should return Keycloak access token when available', async () => {
-            const { getAuthToken } = await importProxyUtils();
+            const { getUserToken } = await importProxyUtils();
             const mockReq = {
                 kauth: {
                     grant: {
@@ -42,35 +42,35 @@ describe('proxyUtils', () => {
                 }
             } as any;
 
-            const result = getAuthToken(mockReq as Request);
+            const result = getUserToken(mockReq as Request);
             expect(result).toBe('kc-token');
         });
 
         it('should return undefined when access token is missing', async () => {
-            const { getAuthToken } = await importProxyUtils();
+            const { getUserToken } = await importProxyUtils();
             const mockReq = {
                 session: {}
             } as Partial<Request>;
 
-            const result = getAuthToken(mockReq as Request);
+            const result = getUserToken(mockReq as Request);
             expect(result).toBeUndefined();
         });
 
         it('should return undefined when request has no auth context', async () => {
-            const { getAuthToken } = await importProxyUtils();
+            const { getUserToken } = await importProxyUtils();
             const mockReq = {} as Partial<Request>;
 
-            const result = getAuthToken(mockReq as Request);
+            const result = getUserToken(mockReq as Request);
             expect(result).toBeUndefined();
         });
 
-        it('should not use env fallback token for getAuthToken', async () => {
-            const { getAuthToken } = await importProxyUtils({
+        it('should not use env fallback token for getUserToken', async () => {
+            const { getUserToken } = await importProxyUtils({
                 KONG_ANONYMOUS_FALLBACK_TOKEN: 'custom-fallback'
             });
             const mockReq = {} as Partial<Request>;
 
-            const result = getAuthToken(mockReq as Request);
+            const result = getUserToken(mockReq as Request);
             expect(result).toBeUndefined();
         });
     });
