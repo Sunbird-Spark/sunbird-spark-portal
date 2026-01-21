@@ -10,7 +10,7 @@ export class FormController {
         this.formService = new FormService();
     }
 
-    private convertToLowerCase(obj: any, keys: Array<string>) {
+    private convertToLowerCase(obj: Record<string, any>, keys: Array<string>) {
         keys.forEach(element => obj[element] = obj[element] && obj[element].toLowerCase());
     }
 
@@ -92,8 +92,8 @@ export class FormController {
             if (responseData && typeof responseData.data === "string") {
                 try {
                     responseData.data = JSON.parse(responseData.data);
-                } catch (e) {
-
+                } catch {
+                    // ignore if parsing fails
                 }
             }
 

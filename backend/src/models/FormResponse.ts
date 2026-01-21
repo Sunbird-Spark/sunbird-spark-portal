@@ -5,11 +5,11 @@ export class FormResponse {
     public id: string;
     public ver: string;
     public ts: Date;
-    public params: any;
+    public params: Record<string, any>;
     public responseCode: string = "";
-    public result: any = {};
+    public result: Record<string, any> = {};
 
-    constructor(error?: any, result?: any) {
+    constructor(error?: Record<string, any>, result?: Record<string, any>) {
         this.id = _.get(result, 'id') || _.get(error, 'id') || 'api.form.response';
         this.ver = "1.0";
         this.ts = new Date();

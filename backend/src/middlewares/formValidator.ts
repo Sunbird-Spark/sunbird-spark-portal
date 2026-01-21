@@ -37,7 +37,7 @@ export class RequestValidator {
             res.status(400).send(new FormResponse({
                 id: "api.form.create",
                 err: "ERR_CREATE_FORM_DATA",
-                errmsg: validate.errors?.map((d: any) => d.message).join(', '),
+                errmsg: validate.errors?.map((d: unknown) => (d as any).message).join(', '),
                 responseCode: "CLIENT_ERROR"
             }));
         } else if (!req.body.request.framework && !req.body.request.rootOrgId) {
@@ -84,7 +84,7 @@ export class RequestValidator {
             res.status(400).send(new FormResponse({
                 id: "api.form.update",
                 err: "ERR_UPDATE_FORM_DATA",
-                errmsg: validate.errors?.map((d: any) => d.message).join(', '),
+                errmsg: validate.errors?.map((d: unknown) => (d as any).message).join(', '),
                 responseCode: "CLIENT_ERROR"
             }));
         } else if (!req.body.request.framework && !req.body.request.rootOrgId) {
@@ -130,7 +130,7 @@ export class RequestValidator {
             res.status(400).send(new FormResponse({
                 id: "api.form.read",
                 err: "ERR_READ_FORM_DATA",
-                errmsg: validate.errors?.map((d: any) => d.message).join(', '),
+                errmsg: validate.errors?.map((d: unknown) => (d as any).message).join(', '),
                 responseCode: "CLIENT_ERROR"
             }));
         } else if (!req.body.request.framework && !req.body.request.rootOrgId) {

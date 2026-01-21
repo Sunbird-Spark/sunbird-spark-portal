@@ -3,8 +3,8 @@ import cors from 'cors';
 import session from 'express-session';
 import { envConfig } from './config/env.js';
 import { sessionStore } from './utils/sessionStore.js';
-import formRoutes from './routes/formRoutes.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
+import formRoutes from './routes/formRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 

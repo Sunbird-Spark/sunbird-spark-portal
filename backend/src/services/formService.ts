@@ -1,9 +1,8 @@
 import { ysqlPool } from '../utils/sessionStore.js';
-import _ from 'lodash';
 
 export class FormService {
 
-    async create(data: any) {
+    public async create(data: Record<string, any>) {
         console.log('FormService.create - Input data:', JSON.stringify(data, null, 2));
         const rootOrgId = data.rootOrgId || '*';
         const framework = data.framework || '*';
@@ -31,7 +30,7 @@ export class FormService {
         return { created: 'OK' };
     }
 
-    async update(queryCtx: any, updateValue: any) {
+    public async update(queryCtx: Record<string, any>, updateValue: Record<string, any>) {
         const query = `
             UPDATE form_data 
             SET data = $1, last_modified_on = $2
@@ -63,7 +62,7 @@ export class FormService {
         };
     }
 
-    private async findOne(queryCtx: any): Promise<any> {
+    private async findOne(queryCtx: Record<string, any>): Promise<Record<string, any> | null> {
         const query = `
             SELECT * FROM form_data 
             WHERE root_org = $1 AND framework = $2 AND type = $3 AND action = $4 AND subtype = $5 AND component = $6
@@ -84,7 +83,7 @@ export class FormService {
         return null;
     }
 
-    async read(queryCtx: any) {
+    public async read(queryCtx: Record<string, any>) {
         let data = await this.findOne(queryCtx);
         if (data) return data;
 
@@ -101,7 +100,7 @@ export class FormService {
         return data;
     }
 
-    async listAll(rootOrgId: string) {
+    public async listAll(rootOrgId: string) {
         const query = `
             SELECT type, subtype, action, root_org, framework, data, component 
             FROM form_data 
