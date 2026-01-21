@@ -29,5 +29,6 @@ export const envConfig = {
     SUNBIRD_YUGABYTE_PASSWORD: env.SUNBIRD_YUGABYTE_PASSWORD || 'yugabyte',
     SUNBIRD_PORTAL_SESSION_STORE: env.SUNBIRD_PORTAL_SESSION_STORE || 'in-memory',
     GOOGLE_RECAPTCHA_VERIFY_URL: env.GOOGLE_RECAPTCHA_VERIFY_URL || 'https://www.google.com/recaptcha/api/siteverify',
-    GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || ''
+    GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || '',
+    APPID: (env.ENVIRONMENT || 'local') + '.' + (env.SUNBIRD_PORTAL_INSTANCE || 'sunbird') + '.portal'
 };
