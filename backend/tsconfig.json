@@ -30,7 +30,6 @@
   },
   "include": [
     "src",
-    "test/form.api.test.ts"
   ],
   "exclude": [
     "node_modules",
