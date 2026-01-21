@@ -17,11 +17,6 @@ services:
     command: [ 'bin/yugabyted', 'start', '--daemon=false', '--ui=false' ]
     volumes:
       - yugabyte_data:/var/lib/yugabyte
-    healthcheck:
-      test: ["CMD", "sh", "-c", "nc -z localhost 9042"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   yugabyte_data:
