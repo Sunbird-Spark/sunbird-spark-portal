@@ -218,7 +218,7 @@ describe('Kong Proxy Integration', () => {
         expect(response.body.success).toBe(true);
     });
     
-    it('should log error on 401 Unauthorized from upstream', async () => {
+    it('should log error on status code greater than 400', async () => {
         const logger = (await import('../utils/logger.js')).default;
         const errorSpy = vi.spyOn(logger, 'error');
         
