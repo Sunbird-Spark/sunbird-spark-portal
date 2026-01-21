@@ -5,7 +5,7 @@ import { envConfig } from '../config/env.js';
 const fallbackToken = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
 const appId = envConfig.APPID;
 
-export const getAuthToken = (req: any): string => {
+export const getUserToken = (req: any): string => {
     return req.kauth?.grant?.access_token?.token;
 };
 
@@ -37,10 +37,10 @@ export const decorateRequestHeaders = (proxyReq: http.ClientRequest, req: Reques
         proxyReq.setHeader('x-authenticated-for', req.session.managedToken);
     }
 
-    const authToken = getAuthToken(req);
-    if (authToken) {
-        proxyReq.setHeader('x-authenticated-user-token', authToken);
-        proxyReq.setHeader('x-auth-token', authToken);
+    const userToken = getUserToken(req);
+    if (userToken) {
+        proxyReq.setHeader('x-authenticated-user-token', userToken);
+        proxyReq.setHeader('x-auth-token', userToken);
     }
 
     proxyReq.setHeader('Authorization', 'Bearer ' + getBearerToken(req));
