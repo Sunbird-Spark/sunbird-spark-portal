@@ -3,6 +3,26 @@ import request from 'supertest';
 import { app } from '../app.js';
 import { FormService } from '../services/formService.js';
 
+vi.mock('../utils/sessionStore.js', () => ({
+    ysqlPool: {
+        query: vi.fn().mockImplementation((_query, params) => {
+            // Mock for update - return rowCount: 1 for success
+            // params array structure: [data, last_modified_on, root_org, framework, type, action, subtype, component]
+            // root_org is at index 2, framework at 3
+            if (params[4] === 'nonexistent') {
+                return Promise.resolve({ rowCount: 0, rows: [] });
+            }
+            return Promise.resolve({ rowCount: 1, rows: [] });
+        })
+    },
+    sessionStore: {
+        get: vi.fn(),
+        set: vi.fn(),
+        destroy: vi.fn(),
+        on: vi.fn()
+    }
+}));
+
 const api = request(app);
 
 describe('Form API Update Tests', () => {

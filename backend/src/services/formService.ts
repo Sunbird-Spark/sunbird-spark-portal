@@ -2,12 +2,12 @@ import { ysqlPool } from '../utils/sessionStore.js';
 
 export class FormService {
 
-    public async create(data: Record<string, any>) {
+    public async create(data: Record<string, unknown>) {
         console.log('FormService.create - Input data:', JSON.stringify(data, null, 2));
-        const rootOrgId = data.rootOrgId || '*';
-        const framework = data.framework || '*';
-        const subType = data.subType || '*';
-        const component = data.component || '*';
+        const rootOrgId = (data.rootOrgId as string) || '*';
+        const framework = (data.framework as string) || '*';
+        const subType = (data.subType as string) || '*';
+        const component = (data.component as string) || '*';
 
         const query = `
             INSERT INTO form_data (root_org, type, subtype, action, component, framework, data, created_on)
@@ -30,7 +30,7 @@ export class FormService {
         return { created: 'OK' };
     }
 
-    public async update(queryCtx: Record<string, any>, updateValue: Record<string, any>) {
+    public async update(queryCtx: Record<string, unknown>, updateValue: Record<string, unknown>) {
         const query = `
             UPDATE form_data 
             SET data = $1, last_modified_on = $2
@@ -62,7 +62,7 @@ export class FormService {
         };
     }
 
-    private async findOne(queryCtx: Record<string, any>): Promise<Record<string, any> | null> {
+    private async findOne(queryCtx: Record<string, unknown>): Promise<Record<string, unknown> | null> {
         const query = `
             SELECT * FROM form_data 
             WHERE root_org = $1 AND framework = $2 AND type = $3 AND action = $4 AND subtype = $5 AND component = $6
@@ -83,7 +83,7 @@ export class FormService {
         return null;
     }
 
-    public async read(queryCtx: Record<string, any>) {
+    public async read(queryCtx: Record<string, unknown>) {
         let data = await this.findOne(queryCtx);
         if (data) return data;
 

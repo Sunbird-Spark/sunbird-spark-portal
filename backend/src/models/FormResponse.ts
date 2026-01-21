@@ -1,15 +1,27 @@
 import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 
+interface ErrorObj {
+    id?: string;
+    err?: unknown;
+    errmsg?: unknown;
+    responseCode?: string;
+}
+
+interface ResultObj {
+    id?: string;
+    data?: unknown;
+}
+
 export class FormResponse {
     public id: string;
     public ver: string;
     public ts: Date;
-    public params: Record<string, any>;
+    public params: Record<string, unknown>;
     public responseCode: string = "";
-    public result: Record<string, any> = {};
+    public result: Record<string, unknown> = {};
 
-    constructor(error?: Record<string, any>, result?: Record<string, any>) {
+    constructor(error?: ErrorObj, result?: ResultObj) {
         this.id = _.get(result, 'id') || _.get(error, 'id') || 'api.form.response';
         this.ver = "1.0";
         this.ts = new Date();
@@ -31,7 +43,7 @@ export class FormResponse {
         if (result) {
             this.params.status = "successful";
             this.responseCode = "OK";
-            this.result = result.data;
+            this.result = result.data as Record<string, unknown>;
         }
     }
 }

@@ -10,8 +10,12 @@ export class FormController {
         this.formService = new FormService();
     }
 
-    private convertToLowerCase(obj: Record<string, any>, keys: Array<string>) {
-        keys.forEach(element => obj[element] = obj[element] && obj[element].toLowerCase());
+    private convertToLowerCase(obj: Record<string, unknown>, keys: Array<string>) {
+        keys.forEach(element => {
+            if (typeof obj[element] === 'string') {
+                obj[element] = (obj[element] as string).toLowerCase();
+            }
+        });
     }
 
     public async create(req: Request, res: Response) {
@@ -25,12 +29,12 @@ export class FormController {
                 id: 'api.form.create',
                 data: { created: 'OK' }
             }));
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error creating form:', error);
             res.status(500).send(new FormResponse({
                 id: "api.form.create",
                 err: "ERR_CREATE_FORM_DATA",
-                errmsg: error?.message || error?.toString() || 'Unknown error'
+                errmsg: (error as Error)?.message || String(error) || 'Unknown error'
             }));
         }
     }
@@ -59,13 +63,14 @@ export class FormController {
                 id: 'api.form.update',
                 data: { "response": [result] }
             }));
-        } catch (error: any) {
-            const statusCode = error.statusCode || 500;
+        } catch (error) {
+            const err = error as Record<string, unknown>;
+            const statusCode = (err.statusCode as number) || 500;
             res.status(statusCode).send(new FormResponse({
                 id: "api.form.update",
                 err: "ERR_UPDATE_FORM_DATA",
                 responseCode: statusCode === 404 ? "RESOURCE_NOT_FOUND" : "SERVER_ERROR",
-                errmsg: error.msg || error.message || "Unknown error"
+                errmsg: (err.msg as string) || (err.message as string) || "Unknown error"
             }));
         }
     }

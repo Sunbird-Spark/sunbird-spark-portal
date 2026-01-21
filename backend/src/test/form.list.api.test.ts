@@ -3,6 +3,21 @@ import request from 'supertest';
 import { app } from '../app.js';
 import { FormService } from '../services/formService.js';
 
+vi.mock('../utils/sessionStore.js', () => ({
+    ysqlPool: {
+        query: vi.fn().mockImplementation(() => {
+            // Mock for listAll - return sample rows
+            return Promise.resolve({ rows: [{ type: 'form', data: {} }] });
+        })
+    },
+    sessionStore: {
+        get: vi.fn(),
+        set: vi.fn(),
+        destroy: vi.fn(),
+        on: vi.fn()
+    }
+}));
+
 const api = request(app);
 
 describe('Form API List Tests', () => {

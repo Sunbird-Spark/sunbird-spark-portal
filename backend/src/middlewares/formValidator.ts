@@ -3,6 +3,7 @@ import { FormResponse } from '../models/FormResponse.js';
 import _ from 'lodash';
 import { Request, Response, NextFunction } from 'express';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ajv = new (Ajv as any)({ allErrors: true });
 
 export class RequestValidator {
@@ -37,7 +38,7 @@ export class RequestValidator {
             res.status(400).send(new FormResponse({
                 id: "api.form.create",
                 err: "ERR_CREATE_FORM_DATA",
-                errmsg: validate.errors?.map((d: unknown) => (d as any).message).join(', '),
+                errmsg: validate.errors?.map((d: unknown) => (d as { message: string }).message).join(', '),
                 responseCode: "CLIENT_ERROR"
             }));
         } else if (!req.body.request.framework && !req.body.request.rootOrgId) {
@@ -84,7 +85,7 @@ export class RequestValidator {
             res.status(400).send(new FormResponse({
                 id: "api.form.update",
                 err: "ERR_UPDATE_FORM_DATA",
-                errmsg: validate.errors?.map((d: unknown) => (d as any).message).join(', '),
+                errmsg: validate.errors?.map((d: unknown) => (d as { message: string }).message).join(', '),
                 responseCode: "CLIENT_ERROR"
             }));
         } else if (!req.body.request.framework && !req.body.request.rootOrgId) {
@@ -130,7 +131,7 @@ export class RequestValidator {
             res.status(400).send(new FormResponse({
                 id: "api.form.read",
                 err: "ERR_READ_FORM_DATA",
-                errmsg: validate.errors?.map((d: unknown) => (d as any).message).join(', '),
+                errmsg: validate.errors?.map((d: unknown) => (d as { message: string }).message).join(', '),
                 responseCode: "CLIENT_ERROR"
             }));
         } else if (!req.body.request.framework && !req.body.request.rootOrgId) {

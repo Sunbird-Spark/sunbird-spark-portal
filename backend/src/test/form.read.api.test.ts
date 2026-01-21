@@ -3,6 +3,24 @@ import request from 'supertest';
 import { app } from '../app.js';
 import { FormService } from '../services/formService.js';
 
+vi.mock('../utils/sessionStore.js', () => ({
+    ysqlPool: {
+        query: vi.fn().mockImplementation((_query, params) => {
+            // Mock for read - return success for known ID, empty for others
+            if (params[0] === 'readOrg') {
+                return Promise.resolve({ rows: [{ root_org: 'readOrg', data: '{}' }] });
+            }
+            return Promise.resolve({ rows: [] });
+        })
+    },
+    sessionStore: {
+        get: vi.fn(),
+        set: vi.fn(),
+        destroy: vi.fn(),
+        on: vi.fn()
+    }
+}));
+
 const api = request(app);
 
 describe('Form API Read Tests', () => {
