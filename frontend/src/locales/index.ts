@@ -3,12 +3,13 @@
  * This file provides convenient access to i18n utilities
  */
 
-// Re-export the main i18n configuration
-export { SUPPORTED_LANGUAGES, type SupportedLanguage, LANGUAGE_LABELS } from '../configs/i18n';
-
-
-// Re-export types and utilities
-export { supportedLanguages, type SupportedLanguage } from '../configs/i18n';
+// Re-export types and utilities from languages config
+export {
+  LANGUAGES as SUPPORTED_LANGUAGES,
+  LANGUAGES as supportedLanguages,
+  type SupportedLanguage,
+  LANGUAGE_MAP as LANGUAGE_LABELS
+} from '../configs/languages';
 
 // Re-export hooks (simple version only)
 export { useAppI18n } from '../hooks/useAppI18n';

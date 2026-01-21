@@ -1,0 +1,34 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.REGISTRY_NAME }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_NAME="sunbird-portal"
+          IMAGE_TAG="${{ github.ref_name }}"
+          # Ensure registry URL is lowercase
+          REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+          FULL_IMAGE_NAME="${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+          echo "Building Docker image: ${FULL_IMAGE_NAME}"
+          docker build -t ${FULL_IMAGE_NAME} .
+
+          echo "Pushing Docker image: ${FULL_IMAGE_NAME}"
+          docker push ${FULL_IMAGE_NAME}
