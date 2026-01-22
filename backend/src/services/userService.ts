@@ -38,18 +38,14 @@ export const setUserSession = (req: Request, userApiResponse: UserApiResponse) =
         ) as string[];
 
         const organisationIds: string[] = [];
-        const orgRoles: string[] = [];
 
         _.forEach(profile.organisations, (org) => {
             if (org.organisationId) {
                 organisationIds.push(org.organisationId);
             }
-            if (org.roles && Array.isArray(org.roles)) {
-                orgRoles.push(...org.roles);
-            }
         });
 
-        req.session.roles = _.uniq([...roles, ...orgRoles, 'PUBLIC']);
+        req.session.roles = _.uniq([...roles, 'PUBLIC']);
         req.session.orgs = _.compact(_.uniq(organisationIds));
 
         if (profile.rootOrg?.id) {
