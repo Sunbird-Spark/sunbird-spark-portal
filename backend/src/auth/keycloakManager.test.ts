@@ -8,7 +8,7 @@ import KeycloakConnect from 'keycloak-connect';
 import { getKeycloakClient } from './keycloakManager.js';
 
 import logger from '../utils/logger.js';
-import { generateLoggedInKongToken } from '../services/kongAuthService.js';
+import { generateLoggedInKongToken, saveKongTokenToSession } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
@@ -35,7 +35,8 @@ vi.mock('../utils/logger.js', () => ({
 }));
 
 vi.mock('../services/kongAuthService.js', () => ({
-    generateLoggedInKongToken: vi.fn()
+    generateLoggedInKongToken: vi.fn(),
+    saveKongTokenToSession: vi.fn()
 }));
 
 vi.mock('../services/userService.js', () => ({
@@ -110,7 +111,8 @@ describe('authenticated handler', () => {
         } as unknown as Request;
 
         vi.mocked(regenerateSession).mockResolvedValue(undefined as any);
-        vi.mocked(generateLoggedInKongToken).mockResolvedValue(undefined as any);
+        vi.mocked(generateLoggedInKongToken).mockResolvedValue('test-kong-token');
+        vi.mocked(saveKongTokenToSession).mockResolvedValue(undefined as any);
         vi.mocked(fetchUserById).mockResolvedValue({
             responseCode: 'OK',
             result: { response: { id: '12345', userName: 'testuser' } }
@@ -130,6 +132,7 @@ describe('authenticated handler', () => {
         expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
         expect((req.session as any)?.userId).toBe('12345');
         expect(generateLoggedInKongToken).toHaveBeenCalledWith(req);
+        expect(saveKongTokenToSession).toHaveBeenCalledWith(req, 'test-kong-token');
         expect(fetchUserById).toHaveBeenCalledWith('12345', req);
         expect(setUserSession).toHaveBeenCalledWith(req, expect.any(Object));
         expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');

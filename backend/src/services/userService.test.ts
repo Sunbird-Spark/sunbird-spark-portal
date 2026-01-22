@@ -184,7 +184,7 @@ describe('UserService', () => {
             expect(mockRequest.session.userId).toBe('test-user-id');
             expect(mockRequest.session.userName).toBe('testuser');
             expect(mockRequest.session.userSid).toBe('test-session-id');
-            expect(mockRequest.session.roles).toEqual(['USER', 'LEARNER', 'CONTENT_CREATOR', 'ADMIN', 'PUBLIC']);
+            expect(mockRequest.session.roles).toEqual(['USER', 'LEARNER', 'PUBLIC']);
             expect(mockRequest.session.orgs).toEqual(['org1', 'org2']);
             expect(mockRequest.session.rootOrgId).toBe('root-org-id');
             expect(mockRequest.session.rootOrg).toEqual({
@@ -224,7 +224,7 @@ describe('UserService', () => {
 
             setUserSession(mockRequest as Request, userApiResponse);
 
-            expect(mockRequest.session.roles).toEqual(['USER', 'CONTENT_CREATOR', 'LEARNER', 'PUBLIC']);
+            expect(mockRequest.session.roles).toEqual(['USER', 'PUBLIC']);
             expect(mockRequest.session.orgs).toEqual(['org1', 'valid-org']);
             expect(mockRequest.session.rootOrgId).toBeUndefined();
         });
