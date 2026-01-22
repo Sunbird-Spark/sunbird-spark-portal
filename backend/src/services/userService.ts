@@ -25,7 +25,7 @@ const resolveKongBearerToken = (req: Request): string => {
         : KONG_ANONYMOUS_FALLBACK_TOKEN;
 };
 
-export const populateSessionFromUserProfile = (req: Request, userApiResponse: UserApiResponse) => {
+export const setUserSession = (req: Request, userApiResponse: UserApiResponse) => {
     try {
         if (userApiResponse.responseCode !== 'OK') return;
 
@@ -66,7 +66,7 @@ export const populateSessionFromUserProfile = (req: Request, userApiResponse: Us
         }
 
     } catch (err) {
-        logger.error('populateSessionFromUserProfile :: Failed to persist user session data', err);
+        logger.error('setUserSession :: Failed to persist user session data', err);
     }
 };
 

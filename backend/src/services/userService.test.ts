@@ -3,7 +3,7 @@ import type { Request } from 'express';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
-import { fetchUserById, populateSessionFromUserProfile } from './userService.js';
+import { fetchUserById, setUserSession } from './userService.js';
 import logger from '../utils/logger.js';
 
 vi.mock('axios');
@@ -147,7 +147,7 @@ describe('UserService', () => {
         });
     });
 
-    describe('populateSessionFromUserProfile', () => {
+    describe('setUserSession', () => {
         it('should populate session with user profile data', () => {
             const userApiResponse = {
                 responseCode: 'OK',
@@ -179,7 +179,7 @@ describe('UserService', () => {
                 },
             };
 
-            populateSessionFromUserProfile(mockRequest as Request, userApiResponse);
+            setUserSession(mockRequest as Request, userApiResponse);
 
             expect(mockRequest.session.userId).toBe('test-user-id');
             expect(mockRequest.session.userName).toBe('testuser');
@@ -222,7 +222,7 @@ describe('UserService', () => {
                 },
             } as any;
 
-            populateSessionFromUserProfile(mockRequest as Request, userApiResponse);
+            setUserSession(mockRequest as Request, userApiResponse);
 
             expect(mockRequest.session.roles).toEqual(['USER', 'CONTENT_CREATOR', 'LEARNER', 'PUBLIC']);
             expect(mockRequest.session.orgs).toEqual(['org1', 'valid-org']);
@@ -242,7 +242,7 @@ describe('UserService', () => {
                 },
             };
 
-            populateSessionFromUserProfile(mockRequest as Request, userApiResponse);
+            setUserSession(mockRequest as Request, userApiResponse);
 
             expect(mockRequest.session.roles).toEqual(['USER', 'LEARNER', 'PUBLIC']);
         });
@@ -258,7 +258,7 @@ describe('UserService', () => {
                 },
             };
 
-            populateSessionFromUserProfile(mockRequest as Request, userApiResponse);
+            setUserSession(mockRequest as Request, userApiResponse);
 
             expect(mockRequest.session.userId).toBeUndefined();
             expect(mockRequest.session.userName).toBeUndefined();
@@ -272,11 +272,11 @@ describe('UserService', () => {
                 },
             } as any; 
             expect(() => {
-                populateSessionFromUserProfile(mockRequest as Request, userApiResponse);
+                setUserSession(mockRequest as Request, userApiResponse);
             }).not.toThrow();
 
             expect(mockLogger.error).toHaveBeenCalledWith(
-                'populateSessionFromUserProfile :: Failed to persist user session data',
+                'setUserSession :: Failed to persist user session data',
                 expect.any(Error)
             );
         });

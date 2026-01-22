@@ -10,7 +10,7 @@ import { getKeycloakClient } from './keycloakManager.js';
 import logger from '../utils/logger.js';
 import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
-import { fetchUserById, populateSessionFromUserProfile } from '../services/userService.js';
+import { fetchUserById, setUserSession } from '../services/userService.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 import { regenerateSession, destroySession } from '../utils/sessionUtils.js';
 
@@ -40,7 +40,7 @@ vi.mock('../services/kongAuthService.js', () => ({
 
 vi.mock('../services/userService.js', () => ({
     fetchUserById: vi.fn(),
-    populateSessionFromUserProfile: vi.fn()
+    setUserSession: vi.fn()
 }));
 
 vi.mock('../utils/sessionStore.js', () => ({
@@ -115,7 +115,7 @@ describe('authenticated handler', () => {
             responseCode: 'OK',
             result: { response: { id: '12345', userName: 'testuser' } }
         } as any);
-        vi.mocked(populateSessionFromUserProfile).mockImplementation(() => {});
+        vi.mocked(setUserSession).mockImplementation(() => {});
     });
 
     it('should regenerate session, extract userId, generate kong token and fetch user', async () => {
@@ -131,7 +131,7 @@ describe('authenticated handler', () => {
         expect((req.session as any)?.userId).toBe('12345');
         expect(generateLoggedInKongToken).toHaveBeenCalledWith(req);
         expect(fetchUserById).toHaveBeenCalledWith('12345', req);
-        expect(populateSessionFromUserProfile).toHaveBeenCalledWith(req, expect.any(Object));
+        expect(setUserSession).toHaveBeenCalledWith(req, expect.any(Object));
         expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');
         expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
     });

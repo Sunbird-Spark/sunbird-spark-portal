@@ -3,7 +3,7 @@ import type { Request } from 'express';
 import logger from '../utils/logger.js';
 import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
-import { fetchUserById, populateSessionFromUserProfile } from '../services/userService.js';
+import { fetchUserById, setUserSession } from '../services/userService.js';
 import { regenerateSession, destroySession } from '../utils/sessionUtils.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
@@ -39,7 +39,7 @@ const authenticated = async (request: Request) => {
         }
         
         const userApiResponse = await fetchUserById(userId, request);
-        populateSessionFromUserProfile(request, userApiResponse);
+        setUserSession(request, userApiResponse);
         logger.info('Keycloak authenticated successfully');
     } catch (err) {
         logger.error('error logging in user', err);
