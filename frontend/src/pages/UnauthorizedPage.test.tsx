@@ -3,13 +3,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import UnauthorizedPage from './UnauthorizedPage';
 import { AuthProvider } from '../auth/AuthContext';
-import type { User } from '../auth/AuthContext';
 import * as AuthContext from '../auth/AuthContext';
 
 const mockNavigate = vi.fn();
 
 vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal<typeof import('react-router-dom')>();
   return {
     ...actual,
     useNavigate: () => mockNavigate,
