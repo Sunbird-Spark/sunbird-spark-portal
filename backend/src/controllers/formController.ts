@@ -1,157 +1,161 @@
 import { Request, Response } from 'express';
 import { FormService } from '../services/formService.js';
-import { FormResponse } from '../models/FormResponse.js';
+import { Response as ApiResponse } from '../models/Response.js';
 import _ from 'lodash';
 import { logger } from '../utils/logger.js';
 
-export class FormController {
-    private formService: FormService;
+const formService = new FormService();
 
-    constructor() {
-        this.formService = new FormService();
-    }
-
-    private convertToLowerCase(obj: Record<string, unknown>, keys: Array<string>) {
-        keys.forEach(element => {
-            if (typeof obj[element] === 'string') {
-                obj[element] = (obj[element] as string).toLowerCase();
+const getSanitizedData = (req: Request) => {
+    return _.mapValues(
+        _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']),
+        (value, key) => {
+            if (_.isString(value)) {
+                const trimmed = _.trim(value);
+                return (['type', 'subType', 'action'].includes(key)) ? _.toLower(trimmed) : trimmed;
             }
+            return value;
+        }
+    );
+}
+
+export const create = async (req: Request, res: Response) => {
+    const apiId = 'api.form.create';
+    try {
+        const data = getSanitizedData(req);
+        await formService.create(data);
+
+        const response = new ApiResponse(apiId);
+        response.setResult({ data: { created: 'OK' } });
+        res.status(200).send(response);
+    } catch (error) {
+        logger.error('Error creating form:', error);
+        const response = new ApiResponse(apiId);
+        response.setError({
+            err: "ERR_CREATE_FORM_DATA",
+            errmsg: (error as Error)?.message || String(error) || 'Unknown error'
         });
+        res.status(500).send(response);
     }
+}
 
-    public async create(req: Request, res: Response) {
-        try {
-            const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
-            this.convertToLowerCase(data, ['type', 'subType', 'action']);
+export const update = async (req: Request, res: Response) => {
+    const apiId = 'api.form.update';
+    try {
+        const data = getSanitizedData(req);
 
-            await this.formService.create(data);
-            res.status(200).send(new FormResponse(undefined, {
-                id: 'api.form.create',
-                data: { created: 'OK' }
-            }));
-        } catch (error) {
-            logger.error('Error creating form:', error);
-            res.status(500).send(new FormResponse({
-                id: "api.form.create",
-                err: "ERR_CREATE_FORM_DATA",
-                errmsg: (error as Error)?.message || String(error) || 'Unknown error'
-            }));
-        }
+        const query = {
+            root_org: data.rootOrgId || '*',
+            framework: data.framework || '*',
+            type: data.type,
+            action: data.action,
+            subtype: data.subType || '*',
+            component: data.component || '*'
+        };
+
+        const updateValue = {
+            data: JSON.stringify(data.data),
+            last_modified_on: new Date()
+        };
+
+        const result = await formService.update(query, updateValue);
+
+        const response = new ApiResponse(apiId);
+        response.setResult({ data: { "response": [result] } });
+        res.status(200).send(response);
+    } catch (error) {
+        logger.error('Error updating form:', error);
+        const err = error as Record<string, unknown>;
+        const statusCode = (err.statusCode as number) || 500;
+
+        const response = new ApiResponse(apiId);
+        response.setError({
+            err: "ERR_UPDATE_FORM_DATA",
+            errmsg: (err.msg as string) || (err.message as string) || "Unknown error",
+            responseCode: statusCode === 404 ? "RESOURCE_NOT_FOUND" : "SERVER_ERROR"
+        });
+        res.status(statusCode).send(response);
     }
+}
 
-    public async update(req: Request, res: Response) {
-        try {
-            const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
-            this.convertToLowerCase(data, ['type', 'subType', 'action']);
+export const read = async (req: Request, res: Response) => {
+    const apiId = 'api.form.read';
+    try {
+        const data = getSanitizedData(req);
 
-            const query = {
-                root_org: data.rootOrgId || '*',
-                framework: data.framework || '*',
-                type: data.type,
-                action: data.action,
-                subtype: data.subType || '*',
-                component: data.component || '*'
-            };
+        const query = {
+            root_org: data.rootOrgId || '*',
+            framework: data.framework || '*',
+            type: data.type,
+            action: data.action,
+            subtype: data.subType || '*',
+            component: data.component || '*'
+        };
 
-            const updateValue = {
-                data: JSON.stringify(data.data),
-                last_modified_on: new Date()
-            };
+        let result = await formService.read(query);
 
-            const result = await this.formService.update(query, updateValue);
-            res.status(200).send(new FormResponse(undefined, {
-                id: 'api.form.update',
-                data: { "response": [result] }
-            }));
-        } catch (error) {
-            logger.error('Error updating form:', error);
-            const err = error as Record<string, unknown>;
-            const statusCode = (err.statusCode as number) || 500;
-            res.status(statusCode).send(new FormResponse({
-                id: "api.form.update",
-                err: "ERR_UPDATE_FORM_DATA",
-                responseCode: statusCode === 404 ? "RESOURCE_NOT_FOUND" : "SERVER_ERROR",
-                errmsg: (err.msg as string) || (err.message as string) || "Unknown error"
-            }));
-        }
-    }
+        if (!result) result = {};
 
-    public async read(req: Request, res: Response) {
-        try {
-            const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
-            this.convertToLowerCase(data, ['type', 'subType', 'action']);
-
-            const query = {
-                root_org: data.rootOrgId || '*',
-                framework: data.framework || '*',
-                type: data.type,
-                action: data.action,
-                subtype: data.subType || '*',
-                component: data.component || '*'
-            };
-
-            let result = await this.formService.read(query);
-
-            if (!result) result = {};
-
-            let responseData = { ...result };
-            if (typeof responseData.data === "string") {
-                try {
-                    responseData.data = JSON.parse(responseData.data);
-                } catch {
-                    // ignore if parsing fails
-                }
+        let responseData = { ...result };
+        if (_.isString(responseData.data)) {
+            try {
+                responseData.data = JSON.parse(responseData.data);
+            } catch (parseError) {
+                logger.debug('JSON parse failed, keeping data as string:', parseError);
             }
-
-            if (responseData.root_org) {
-                responseData.rootOrgId = responseData.root_org;
-                responseData = _.omit(responseData, ['root_org']);
-            }
-
-            res.status(200).send(new FormResponse(undefined, {
-                id: 'api.form.read',
-                data: { form: responseData }
-            }));
-
-        } catch (error) {
-            logger.error('Error reading form:', error);
-            res.status(404).send(new FormResponse({
-                id: "api.form.read",
-                err: "ERR_READ_FORM_DATA",
-                errmsg: (error as Error)?.message || 'Form data not found'
-            }));
         }
+
+        if (responseData.root_org) {
+            responseData.rootOrgId = responseData.root_org;
+            responseData = _.omit(responseData, ['root_org']);
+        }
+
+        const response = new ApiResponse(apiId);
+        response.setResult({ data: { form: responseData } });
+        res.status(200).send(response);
+
+    } catch (error) {
+        logger.error('Error reading form:', error);
+        const response = new ApiResponse(apiId);
+        response.setError({
+            err: "ERR_READ_FORM_DATA",
+            errmsg: (error as Error)?.message || 'Form data not found'
+        });
+        res.status(404).send(response);
     }
+}
 
-    public async listAll(req: Request, res: Response) {
-        try {
-            const data = _.pick(req.body.request, ['rootOrgId']);
-            const rootOrgId = data.rootOrgId as string;
+export const listAll = async (req: Request, res: Response) => {
+    const apiId = 'api.form.list';
+    try {
+        const data = _.pick(req.body.request, ['rootOrgId']);
+        const rootOrgId = _.isString(data.rootOrgId) ? _.trim(data.rootOrgId) : data.rootOrgId;
 
-            if (!rootOrgId || typeof rootOrgId !== 'string' || !rootOrgId.trim()) {
-                return res.status(400).send(new FormResponse({
-                    id: 'api.form.list',
-                    err: 'ERR_INVALID_ROOT_ORG_ID',
-                    errmsg: 'A valid non-empty rootOrgId must be provided.'
-                }));
-            }
-
-            const formDetails = await this.formService.listAll(rootOrgId);
-            const apiResponse = {
-                forms: formDetails,
-                count: formDetails ? formDetails.length : 0
-            };
-            res.status(200).send(new FormResponse(undefined, {
-                id: 'api.form.list',
-                data: apiResponse
-            }));
-        } catch (error) {
-            logger.error('Error listing forms:', error);
-            res.status(500).send(new FormResponse({
-                id: "api.form.list",
-                err: "ERR_LIST_ALL_FORM",
-                errmsg: (error as Error)?.message || String(error) || 'Unknown error'
-            }));
+        if (_.isNil(rootOrgId) || !_.isString(rootOrgId) || _.size(rootOrgId) === 0) {
+            const response = new ApiResponse(apiId);
+            response.setError({
+                err: 'ERR_INVALID_ROOT_ORG_ID',
+                errmsg: 'A valid non-empty rootOrgId must be provided.'
+            });
+            return res.status(400).send(response);
         }
+
+        const formDetails = await formService.listAll(rootOrgId);
+        const apiResponse = {
+            forms: formDetails,
+            count: formDetails ? formDetails.length : 0
+        };
+
+        const response = new ApiResponse(apiId);
+        response.setResult({ data: apiResponse });
+        res.status(200).send(response);
+    } catch (error) {
+        logger.error('Error listing forms:', error);
+        const response = new ApiResponse(apiId);
+        response.setError({
+            err: "ERR_LIST_ALL_FORM",
+            errmsg: (error as Error)?.message || String(error) || 'Unknown error'
+        });
+        res.status(500).send(response);
     }
 }

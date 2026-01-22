@@ -1,14 +1,12 @@
 import { Router } from 'express';
-import { FormController } from '../controllers/formController.js';
-import { RequestValidator } from '../middlewares/formValidator.js';
+import { create, read, update, listAll } from '../controllers/formController.js';
+import { validateCreateAPI, validateReadAPI, validateUpdateAPI, validateListAPI } from '../middlewares/formValidator.js';
 
 const router = Router();
-const formController = new FormController();
-const validator = new RequestValidator();
 
-router.post('/create', (req, res, next) => validator.validateCreateAPI(req, res, next), (req, res) => formController.create(req, res));
-router.post('/read', (req, res, next) => validator.validateReadAPI(req, res, next), (req, res) => formController.read(req, res));
-router.post('/update', (req, res, next) => validator.validateUpdateAPI(req, res, next), (req, res) => formController.update(req, res));
-router.post('/list', (req, res, next) => validator.validateListAPI(req, res, next), (req, res) => formController.listAll(req, res));
+router.post('/create', validateCreateAPI, create);
+router.post('/read', validateReadAPI, read);
+router.post('/update', validateUpdateAPI, update);
+router.post('/list', validateListAPI, listAll);
 
 export default router;
