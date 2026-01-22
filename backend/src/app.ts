@@ -7,11 +7,14 @@ import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
 import { destroySession } from './utils/sessionUtils.js';
+import { validateRecaptcha } from './middlewares/googleAuth.js';
+import { kongProxy } from './proxies/kongProxy.js';
 
 export const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded());
 
 app.use(session({
     store: sessionStore,
@@ -67,3 +70,16 @@ app.all('/logout', async (req, res) => {
     }
     res.redirect(keycloak.logoutUrl('/'));
 })
+app.use(registerDeviceWithKong());
+
+const recaptchaProtectedRoutes: string[] = [
+    '/portal/user/v1/exists/email/:emailId',
+    '/portal/user/v1/exists/phone/:phoneNumber',
+    '/portal/user/v1/fuzzy/search',
+    '/portal/user/v1/get/phone/*rest',
+    '/portal/user/v1/get/email/*rest',
+    '/portal/anonymous/otp/v1/generate',
+];
+app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
+
+app.all('/portal/*rest', kongProxy);

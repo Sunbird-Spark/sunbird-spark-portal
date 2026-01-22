@@ -36,5 +36,8 @@ declare module 'express-session' {
             hashTagId?: string;
             rootOrgId?: string;
         }
+        managedToken?: string;
+        logSession?: boolean;
+        deviceId?: string;
     }
 }
