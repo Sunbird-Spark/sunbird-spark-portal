@@ -18,7 +18,7 @@ app.use(express.urlencoded());
 
 app.use(session({
     store: sessionStore,
-    secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
+    secret: [envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET, envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET],
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -27,39 +27,19 @@ app.use(session({
         maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
         sameSite: 'lax'
     }
-}), registerDeviceWithKong());
+}));
+
+app.use(registerDeviceWithKong());
 
 app.use('/resources',
-    session({
-        store: sessionStore,
-        secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-            sameSite: 'lax'
-        }
-    }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: express.Request, res: express.Response) => {
+    keycloak.middleware({ admin: '/callback', logout: '/logout' }),
+    keycloak.protect(), (req: express.Request, res: express.Response) => {
         res.redirect('/resources');
     });
 
-app.get('/',
-    session({
-        store: sessionStore,
-        secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-            sameSite: 'lax'
-        }
-    }), (req: express.Request, res: express.Response) => {
-        res.redirect('/resources');
-    });
+app.get('/', (req: express.Request, res: express.Response) => {
+    res.redirect('/resources');
+});
 
 app.all('/logout', async (req, res) => {
     res.status(200).clearCookie('connect.sid', { path: '/' });
@@ -70,7 +50,6 @@ app.all('/logout', async (req, res) => {
     }
     res.redirect(keycloak.logoutUrl('/'));
 })
-app.use(registerDeviceWithKong());
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',
