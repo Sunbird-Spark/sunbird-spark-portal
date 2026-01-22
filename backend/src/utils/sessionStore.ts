@@ -1,3 +1,4 @@
+
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import pg from 'pg';
@@ -7,19 +8,26 @@ import { envConfig } from '../config/env.js';
 const PgStore = connectPgSimple(session);
 
 /**
- * Initializes and returns the appropriate session store based on configuration.
+ * Lazily initializes and returns the YugabyteDB pool if needed.
  */
-export const ysqlPool = new pg.Pool({
-    host: envConfig.SUNBIRD_YUGABYTE_HOST,
-    port: envConfig.SUNBIRD_YUGABYTE_PORT,
-    database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
-    user: envConfig.SUNBIRD_YUGABYTE_USER,
-    password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
-});
+let _ysqlPool: pg.Pool | null = null;
+export const getYsqlPool = (): pg.Pool => {
+    if (!_ysqlPool) {
+        _ysqlPool = new pg.Pool({
+            host: envConfig.SUNBIRD_YUGABYTE_HOST,
+            port: envConfig.SUNBIRD_YUGABYTE_PORT,
+            database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
+            user: envConfig.SUNBIRD_YUGABYTE_USER,
+            password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
+        });
+    }
+    return _ysqlPool;
+};
+
 
 export const getSessionStore = () => {
     if (envConfig.SUNBIRD_PORTAL_SESSION_STORE === 'yugabyte') {
-
+        const ysqlPool = getYsqlPool();
         ysqlPool.connect((err, client, release) => {
             if (err) {
                 logger.error('Failed to connect to YugabyteDB pool', err);
@@ -44,26 +52,13 @@ export const getSessionStore = () => {
 
         return store;
     }
-
     logger.info('Using MemoryStore for session management');
     return new session.MemoryStore();
 };
 
 export const sessionStore = getSessionStore();
 
-const gracefulShutdown = (signal: string) => {
-    logger.info(`Received ${signal}. Closing YugabyteDB pool gracefully...`);
-    ysqlPool
-        .end()
-        .then(() => {
-            logger.info('YugabyteDB pool has been closed. Exiting process.');
-            process.exit(0);
-        })
-        .catch((err) => {
-            logger.error('Error while closing YugabyteDB pool during shutdown', err);
-            process.exit(1);
-        });
-};
+// For backward compatibility, export ysqlPool as undefined unless Yugabyte is used
+export const ysqlPool: pg.Pool | undefined =
+    envConfig.SUNBIRD_PORTAL_SESSION_STORE === 'yugabyte' ? getYsqlPool() : undefined;
 
-process.on('SIGINT', gracefulShutdown);
-process.on('SIGTERM', gracefulShutdown);
