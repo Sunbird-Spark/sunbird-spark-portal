@@ -32,8 +32,10 @@ const authenticated = async (request: Request) => {
             request.session.userId = parts[parts.length - 1];
         }
         
-        const kongToken = await generateLoggedInKongToken(request);
-        await saveKongTokenToSession(request, kongToken);
+        if (!request.session.kongToken) {
+            const kongToken = await generateLoggedInKongToken(request);
+            await saveKongTokenToSession(request, kongToken);
+        }
         
         const userId = request.session.userId;
         if (!userId) {

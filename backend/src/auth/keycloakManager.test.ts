@@ -139,6 +139,29 @@ describe('authenticated handler', () => {
         expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
     });
 
+    it('should skip kong token generation if session already has one', async () => {
+        // Set existing kong token in session
+        (req.session as any).kongToken = 'existing-kong-token';
+
+        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
+
+        (kc as any).authenticated(req as Request);
+
+        // wait for the async IIFE inside authenticated()
+        await new Promise(process.nextTick);
+
+        expect(regenerateSession).toHaveBeenCalledWith(req);
+        expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
+        expect((req.session as any)?.userId).toBe('12345');
+        // Should NOT generate new kong token
+        expect(generateLoggedInKongToken).not.toHaveBeenCalled();
+        expect(saveKongTokenToSession).not.toHaveBeenCalled();
+        expect(fetchUserById).toHaveBeenCalledWith('12345', req);
+        expect(setUserSession).toHaveBeenCalledWith(req, expect.any(Object));
+        expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');
+        expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
+    });
+
     it('should handle missing sub gracefully', async () => {
         (req as any).kauth = {};
 
