@@ -72,5 +72,3 @@ pnpm-debug.log*
 # Misc
 # =========================
 *.local
-
-initdb.cjs
