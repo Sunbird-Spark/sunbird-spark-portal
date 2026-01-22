@@ -56,15 +56,7 @@ export const generateKongToken = async (req: Request): Promise<string> => {
     throw new Error('ANONYMOUS_KONG_TOKEN :: Anonymous Kong token generation failed with an unsuccessful response status');
 };
 
-export const generateLoggedInKongToken = async (req: Request): Promise<void> => {
-
-    if (req.session.kongToken) {
-        refreshSessionTTL(req);
-        await saveSession(req);
-        logger.info(`LOGGEDIN_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
-        return;
-    }
-
+export const generateLoggedInKongToken = async (req: Request): Promise<string> => {
     logger.info('LOGGEDIN_KONG_TOKEN :: requesting logged-in token from Kong');
 
     let token = envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
@@ -104,6 +96,10 @@ export const generateLoggedInKongToken = async (req: Request): Promise<void> => 
         );
     }
 
+    return token;
+};
+
+export const saveKongTokenToSession = async (req: Request, token: string): Promise<void> => {
     req.session.kongToken = token;
     refreshSessionTTL(req);
     await saveSession(req);

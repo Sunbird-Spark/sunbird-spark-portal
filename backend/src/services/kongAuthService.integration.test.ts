@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import { Request } from 'express';
-import { refreshSessionTTL, generateKongToken, generateLoggedInKongToken } from './kongAuthService.js';
+import { refreshSessionTTL, generateKongToken, generateLoggedInKongToken, saveKongTokenToSession } from './kongAuthService.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 vi.mock('axios');
@@ -31,6 +31,10 @@ vi.mock('../utils/sessionTTLUtil.js', () => ({
         req.session.cookie.maxAge = 120000;
         req.session.cookie.expires = new Date(Date.now() + 120000);
     })
+}));
+
+vi.mock('../utils/sessionUtils.js', () => ({
+    saveSession: vi.fn().mockResolvedValue(undefined)
 }));
 
 describe('Kong Auth Service', () => {
@@ -128,13 +132,7 @@ describe('Kong Auth Service', () => {
     });
 
     describe('generateLoggedInKongToken', () => {
-        it('should return early when kong token already exists', async () => {
-            mockRequest.session!.kongToken = 'existing-token';
-            await generateLoggedInKongToken(mockRequest as Request);
-            expect(mockedAxiosPost).not.toHaveBeenCalled();
-        });
-
-        it('should successfully generate logged-in Kong token', async () => {
+        it('should successfully generate logged-in Kong token without saving to session', async () => {
             const successResponse = {
                 data: {
                     params: { status: 'successful' },
@@ -143,9 +141,10 @@ describe('Kong Auth Service', () => {
             };
             mockedAxiosPost.mockResolvedValue(successResponse);
 
-            await generateLoggedInKongToken(mockRequest as Request);
+            const token = await generateLoggedInKongToken(mockRequest as Request);
 
-            expect(mockRequest.session!.kongToken).toBe('new-loggedin-token');
+            expect(token).toBe('new-loggedin-token');
+            expect(mockRequest.session!.kongToken).toBeUndefined();
             expect(mockedAxiosPost).toHaveBeenCalledWith(
                 'http://localhost:8000/api-manager/v2/consumer/portal_loggedin/credential/register',
                 { request: { key: 'test-session-id' } },
@@ -158,31 +157,21 @@ describe('Kong Auth Service', () => {
             );
         });
 
-        it('should use fallback token when API fails', async () => {
+        it('should return fallback token when API fails', async () => {
             mockedAxiosPost.mockRejectedValue(new Error('Network error'));
-            await generateLoggedInKongToken(mockRequest as Request);
-            expect(mockRequest.session!.kongToken).toBe('fallback-loggedin-token');
+            const token = await generateLoggedInKongToken(mockRequest as Request);
+            expect(token).toBe('fallback-loggedin-token');
         });
+    });
 
-        it('should handle session save error', async () => {
-            const saveError = new Error('Session save failed');
-            vi.resetModules();
-            vi.doMock('../utils/sessionUtils.js', () => ({
-                saveSession: vi.fn().mockRejectedValue(saveError)
-            }));
-            vi.doMock('../config/env.js', () => ({
-                envConfig: {
-                    KONG_URL: 'http://localhost:8000',
-                    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'test-anonymous-bearer-token',
-                    SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
-                    KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'test-loggedin-bearer-token',
-                    KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token'
-                }
-            }));
+    describe('saveKongTokenToSession', () => {
+        it('should save token to session and refresh TTL', async () => {
+            mockRequest.session!.userId = 'test-user-id'; // Add userId to trigger setSessionTTLFromToken
+            const token = 'test-token';
+            await saveKongTokenToSession(mockRequest as Request, token);
 
-            const { generateLoggedInKongToken } = await import('./kongAuthService.js');
-            await expect(generateLoggedInKongToken(mockRequest as Request))
-                .rejects.toThrow('Session save failed');
+            expect(mockRequest.session!.kongToken).toBe(token);
+            expect(setSessionTTLFromToken).toHaveBeenCalledWith(mockRequest);
         });
     });
 });
