@@ -40,7 +40,7 @@ describe('proxyUtils', () => {
                         }
                     }
                 }
-            } as unknown as Request;
+            } as any;
 
             const result = getUserToken(mockReq as Request);
             expect(result).toBe('kc-token');
@@ -227,13 +227,13 @@ describe('proxyUtils', () => {
 
             expect(mockProxyReq.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
         });
-
+        
         it('should not set X-App-Id when header is present', async () => {
             const { decorateRequestHeaders } = await importProxyUtils();
             const mockProxyReq = {
                 setHeader: vi.fn()
             } as unknown as http.ClientRequest;
-
+            
             const mockReq = {
                 session: {},
                 sessionID: 'session-123',
@@ -242,19 +242,19 @@ describe('proxyUtils', () => {
                     return undefined;
                 })
             } as unknown as Request;
-
+            
             decorateRequestHeaders(mockProxyReq, mockReq);
-
+            
             expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith('X-App-Id', expect.anything());
         });
-
+        
         it('should set authenticated user tokens when Keycloak token is present', async () => {
             const module = await importProxyUtils();
             const { decorateRequestHeaders } = module;
             const mockProxyReq = {
                 setHeader: vi.fn()
             } as unknown as http.ClientRequest;
-
+            
             const mockReq = {
                 session: {},
                 kauth: {
@@ -266,10 +266,10 @@ describe('proxyUtils', () => {
                 },
                 sessionID: 'session-123',
                 get: vi.fn().mockReturnValue(undefined)
-            } as unknown as Request;
-
+            } as unknown as any;
+            
             decorateRequestHeaders(mockProxyReq, mockReq);
-
+            
             expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-authenticated-user-token', 'kc-token');
             expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-auth-token', 'kc-token');
         });
