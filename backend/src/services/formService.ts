@@ -1,9 +1,10 @@
 import { ysqlPool } from '../utils/sessionStore.js';
+import { logger } from '../utils/logger.js';
 
 export class FormService {
 
     public async create(data: Record<string, unknown>) {
-        console.log('FormService.create - Input data:', JSON.stringify(data, null, 2));
+        logger.info('FormService.create - Input data:', JSON.stringify(data, null, 2));
         const rootOrgId = (data.rootOrgId as string) || '*';
         const framework = (data.framework as string) || '*';
         const subType = (data.subType as string) || '*';
@@ -21,12 +22,12 @@ export class FormService {
             data.action,
             component,
             framework,
-            data.data,
+            JSON.stringify(data.data),
             new Date()
         ];
-        console.log('FormService.create - Query params:', params);
+        logger.info('FormService.create - Query params:', params);
         await ysqlPool.query(query, params);
-        console.log('FormService.create - Success!');
+        logger.info('FormService.create - Success!');
         return { created: 'OK' };
     }
 
@@ -52,9 +53,11 @@ export class FormService {
         const result = await ysqlPool.query(query, params);
 
         if (result.rowCount === 0) {
-            throw { msg: `invalid request, no records found for the match to update!`, statusCode: 404 };
+            const error = new Error(`invalid request, no records found for the match to update!`) as Error & { statusCode: number; msg: string };
+            error.statusCode = 404;
+            error.msg = error.message;
+            throw error;
         }
-
         return {
             rootOrgId: queryCtx.root_org,
             key: `${queryCtx.type}.${queryCtx.subtype}.${queryCtx.action}.${queryCtx.component}`,
@@ -62,11 +65,29 @@ export class FormService {
         };
     }
 
-    private async findOne(queryCtx: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+    public async read(queryCtx: Record<string, unknown>) {
         const query = `
             SELECT * FROM form_data 
-            WHERE root_org = $1 AND framework = $2 AND type = $3 AND action = $4 AND subtype = $5 AND component = $6
+            WHERE type = $3 AND action = $4 AND subtype = $5
+            AND (
+                (root_org = $1 AND framework = $2 AND component = $6) OR
+                (root_org = $1 AND framework = '*' AND component = $6) OR
+                (root_org = '*' AND framework = $2 AND component = $6) OR
+                (root_org = '*' AND framework = '*' AND component = $6) OR
+                (root_org = '*' AND framework = '*' AND component = '*')
+            )
+            ORDER BY
+                CASE
+                    WHEN root_org = $1 AND framework = $2 AND component = $6 THEN 1
+                    WHEN root_org = $1 AND framework = '*' AND component = $6 THEN 2
+                    WHEN root_org = '*' AND framework = $2 AND component = $6 THEN 3
+                    WHEN root_org = '*' AND framework = '*' AND component = $6 THEN 4
+                    WHEN root_org = '*' AND framework = '*' AND component = '*' THEN 5
+                    ELSE 6
+                END ASC
+            LIMIT 1
         `;
+
         const params = [
             queryCtx.root_org,
             queryCtx.framework,
@@ -77,36 +98,23 @@ export class FormService {
         ];
 
         const result = await ysqlPool.query(query, params);
-        if (result.rows.length > 0) {
-            return result.rows[0];
-        }
-        return null;
-    }
-
-    public async read(queryCtx: Record<string, unknown>) {
-        let data = await this.findOne(queryCtx);
-        if (data) return data;
-
-        data = await this.findOne({ ...queryCtx, framework: "*" });
-        if (data) return data;
-
-        data = await this.findOne({ ...queryCtx, root_org: "*" });
-        if (data) return data;
-
-        data = await this.findOne({ ...queryCtx, root_org: "*", framework: "*" });
-        if (data) return data;
-
-        data = await this.findOne({ ...queryCtx, root_org: "*", framework: "*", component: "*" });
-        return data;
+        return result.rows[0] || null;
     }
 
     public async listAll(rootOrgId: string) {
+        if (!rootOrgId || typeof rootOrgId !== 'string' || rootOrgId.trim().length === 0) {
+            const error = new Error('rootOrgId must be a non-empty string') as Error & { statusCode: number; msg: string };
+            error.statusCode = 400;
+            error.msg = error.message;
+            throw error;
+        }
+
         const query = `
             SELECT type, subtype, action, root_org, framework, data, component 
             FROM form_data 
             WHERE root_org = $1
         `;
-        const params = [rootOrgId || '*'];
+        const params = [rootOrgId];
 
         const result = await ysqlPool.query(query, params);
         return result.rows;

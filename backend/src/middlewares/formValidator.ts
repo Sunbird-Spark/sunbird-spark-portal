@@ -1,10 +1,9 @@
-import Ajv from 'ajv';
+import { Ajv } from 'ajv';
 import { FormResponse } from '../models/FormResponse.js';
 import _ from 'lodash';
 import { Request, Response, NextFunction } from 'express';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ajv = new (Ajv as any)({ allErrors: true });
+const ajv = new Ajv({ allErrors: true });
 
 export class RequestValidator {
 
@@ -141,6 +140,38 @@ export class RequestValidator {
                 id: "api.form.read",
                 err: "ERR_READ_FORM_DATA",
                 errmsg: `specify "rootOrgId" along with "framework"`,
+                responseCode: "CLIENT_ERROR"
+            }));
+        } else {
+            next();
+        }
+    }
+
+    public validateListAPI(req: Request, res: Response, next: NextFunction) {
+        const schema = {
+            type: "object",
+            properties: {
+                request: {
+                    type: "object",
+                    properties: {
+                        rootOrgId: { type: "string", minLength: 1 }
+                    },
+                    required: ["rootOrgId"],
+                    additionalProperties: true
+                }
+            },
+            required: ["request"]
+        };
+
+        const validate = ajv.compile(schema);
+        const body = { request: _.pick(req.body.request, ['rootOrgId']) };
+        const valid = validate(body);
+
+        if (!valid) {
+            res.status(400).send(new FormResponse({
+                id: "api.form.list",
+                err: "ERR_LIST_ALL_FORM",
+                errmsg: validate.errors?.map((d: unknown) => (d as { message: string }).message).join(', '),
                 responseCode: "CLIENT_ERROR"
             }));
         } else {

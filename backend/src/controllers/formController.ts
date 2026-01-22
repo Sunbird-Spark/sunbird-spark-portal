@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { FormService } from '../services/formService.js';
 import { FormResponse } from '../models/FormResponse.js';
 import _ from 'lodash';
+import { logger } from '../utils/logger.js';
 
 export class FormController {
     private formService: FormService;
@@ -19,18 +20,17 @@ export class FormController {
     }
 
     public async create(req: Request, res: Response) {
-        const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
-        this.convertToLowerCase(data, ['type', 'subType', 'action']);
-
-
         try {
+            const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
+            this.convertToLowerCase(data, ['type', 'subType', 'action']);
+
             await this.formService.create(data);
             res.status(200).send(new FormResponse(undefined, {
                 id: 'api.form.create',
                 data: { created: 'OK' }
             }));
         } catch (error) {
-            console.error('Error creating form:', error);
+            logger.error('Error creating form:', error);
             res.status(500).send(new FormResponse({
                 id: "api.form.create",
                 err: "ERR_CREATE_FORM_DATA",
@@ -40,30 +40,31 @@ export class FormController {
     }
 
     public async update(req: Request, res: Response) {
-        const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
-        this.convertToLowerCase(data, ['type', 'subType', 'action']);
-
-        const query = {
-            root_org: data.rootOrgId || '*',
-            framework: data.framework || '*',
-            type: data.type,
-            action: data.action,
-            subtype: data.subType || '*',
-            component: data.component || '*'
-        };
-
-        const updateValue = {
-            data: JSON.stringify(data.data),
-            last_modified_on: new Date()
-        };
-
         try {
+            const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
+            this.convertToLowerCase(data, ['type', 'subType', 'action']);
+
+            const query = {
+                root_org: data.rootOrgId || '*',
+                framework: data.framework || '*',
+                type: data.type,
+                action: data.action,
+                subtype: data.subType || '*',
+                component: data.component || '*'
+            };
+
+            const updateValue = {
+                data: JSON.stringify(data.data),
+                last_modified_on: new Date()
+            };
+
             const result = await this.formService.update(query, updateValue);
             res.status(200).send(new FormResponse(undefined, {
                 id: 'api.form.update',
                 data: { "response": [result] }
             }));
         } catch (error) {
+            logger.error('Error updating form:', error);
             const err = error as Record<string, unknown>;
             const statusCode = (err.statusCode as number) || 500;
             res.status(statusCode).send(new FormResponse({
@@ -76,25 +77,25 @@ export class FormController {
     }
 
     public async read(req: Request, res: Response) {
-        const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
-        this.convertToLowerCase(data, ['type', 'subType', 'action']);
-
-        const query = {
-            root_org: data.rootOrgId || '*',
-            framework: data.framework || '*',
-            type: data.type,
-            action: data.action,
-            subtype: data.subType || '*',
-            component: data.component || '*'
-        };
-
         try {
+            const data = _.pick(req.body.request, ['type', 'subType', 'action', 'rootOrgId', 'framework', 'data', 'component']);
+            this.convertToLowerCase(data, ['type', 'subType', 'action']);
+
+            const query = {
+                root_org: data.rootOrgId || '*',
+                framework: data.framework || '*',
+                type: data.type,
+                action: data.action,
+                subtype: data.subType || '*',
+                component: data.component || '*'
+            };
+
             let result = await this.formService.read(query);
 
             if (!result) result = {};
 
             let responseData = { ...result };
-            if (responseData && typeof responseData.data === "string") {
+            if (typeof responseData.data === "string") {
                 try {
                     responseData.data = JSON.parse(responseData.data);
                 } catch {
@@ -113,18 +114,29 @@ export class FormController {
             }));
 
         } catch (error) {
+            logger.error('Error reading form:', error);
             res.status(404).send(new FormResponse({
                 id: "api.form.read",
                 err: "ERR_READ_FORM_DATA",
-                errmsg: error
+                errmsg: (error as Error)?.message || 'Form data not found'
             }));
         }
     }
 
     public async listAll(req: Request, res: Response) {
-        const data = _.pick(req.body.request, ['rootOrgId']);
         try {
-            const formDetails = await this.formService.listAll(data.rootOrgId);
+            const data = _.pick(req.body.request, ['rootOrgId']);
+            const rootOrgId = data.rootOrgId as string;
+
+            if (!rootOrgId || typeof rootOrgId !== 'string' || !rootOrgId.trim()) {
+                return res.status(400).send(new FormResponse({
+                    id: 'api.form.list',
+                    err: 'ERR_INVALID_ROOT_ORG_ID',
+                    errmsg: 'A valid non-empty rootOrgId must be provided.'
+                }));
+            }
+
+            const formDetails = await this.formService.listAll(rootOrgId);
             const apiResponse = {
                 forms: formDetails,
                 count: formDetails ? formDetails.length : 0
@@ -134,10 +146,11 @@ export class FormController {
                 data: apiResponse
             }));
         } catch (error) {
+            logger.error('Error listing forms:', error);
             res.status(500).send(new FormResponse({
                 id: "api.form.list",
                 err: "ERR_LIST_ALL_FORM",
-                errmsg: error
+                errmsg: (error as Error)?.message || String(error) || 'Unknown error'
             }));
         }
     }

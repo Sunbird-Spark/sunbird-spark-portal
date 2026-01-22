@@ -50,3 +50,20 @@ export const getSessionStore = () => {
 };
 
 export const sessionStore = getSessionStore();
+
+const gracefulShutdown = (signal: string) => {
+    logger.info(`Received ${signal}. Closing YugabyteDB pool gracefully...`);
+    ysqlPool
+        .end()
+        .then(() => {
+            logger.info('YugabyteDB pool has been closed. Exiting process.');
+            process.exit(0);
+        })
+        .catch((err) => {
+            logger.error('Error while closing YugabyteDB pool during shutdown', err);
+            process.exit(1);
+        });
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);

@@ -6,7 +6,7 @@ import { FormService } from '../services/formService.js';
 vi.mock('../utils/sessionStore.js', () => ({
     ysqlPool: {
         query: vi.fn().mockImplementation(() => {
-            // Basic mock implementation forcreate success
+            // Basic mock implementation for create success
             return Promise.resolve({ rowCount: 1, rows: [] });
         })
     },
