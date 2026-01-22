@@ -5,7 +5,6 @@ import { Request } from 'express';
 import { envConfig } from '../config/env.js';
 import dayjs from 'dayjs';
 import logger from '../utils/logger.js';
-import { saveSession } from '../utils/sessionUtils.js';
 import { UserApiResponse } from '../types/user.js';
 
 const {
@@ -14,7 +13,19 @@ const {
     KONG_ANONYMOUS_FALLBACK_TOKEN
 } = envConfig;
 
-const populateSessionFromUserProfile = (req: Request, userApiResponse: UserApiResponse) => {
+const getKeycloakAccessToken = (req: Request): string | undefined =>
+    (req.kauth?.grant?.access_token as any)?.token;
+
+const resolveKongBearerToken = (req: Request): string => {
+    const kongDeviceToken = _.get(req, 'session.kongToken');
+    if (kongDeviceToken) return kongDeviceToken;
+
+    return req.session?.userId
+        ? KONG_LOGGEDIN_FALLBACK_TOKEN
+        : KONG_ANONYMOUS_FALLBACK_TOKEN;
+};
+
+export const populateSessionFromUserProfile = (req: Request, userApiResponse: UserApiResponse) => {
     try {
         if (userApiResponse.responseCode !== 'OK') return;
 
@@ -22,23 +33,23 @@ const populateSessionFromUserProfile = (req: Request, userApiResponse: UserApiRe
         req.session.userId = profile.id ?? profile.userId;
         req.session.userName = profile.userName;
         req.session.userSid = req.sessionID;
-        const directRoles = _.map(profile.roles, (role: any) =>
+        const roles = _.map(profile.roles, (role: any) =>
             typeof role === 'string' ? role : role.role
         ) as string[];
-        let roles = [...directRoles];
 
         const organisationIds: string[] = [];
+        const orgRoles: string[] = [];
 
         _.forEach(profile.organisations, (org) => {
-            if (Array.isArray(org.roles)) {
-                roles = _.union(roles, org.roles);
-            }
             if (org.organisationId) {
                 organisationIds.push(org.organisationId);
             }
+            if (org.roles && Array.isArray(org.roles)) {
+                orgRoles.push(...org.roles);
+            }
         });
 
-        req.session.roles = _.uniq([...roles, 'PUBLIC', 'ANONYMOUS']);
+        req.session.roles = _.uniq([...roles, ...orgRoles, 'PUBLIC']);
         req.session.orgs = _.compact(_.uniq(organisationIds));
 
         if (profile.rootOrg?.id) {
@@ -59,20 +70,6 @@ const populateSessionFromUserProfile = (req: Request, userApiResponse: UserApiRe
     }
 };
 
-const getKeycloakAccessToken = (req: Request): string | undefined => {
-    return (req.kauth?.grant?.access_token as any)?.token;
-};
-
-const resolveKongBearerToken = (req: Request): string => {
-    const kongDeviceToken = _.get(req, 'session.kongToken');
-
-    if (kongDeviceToken) {
-        return kongDeviceToken;
-    }
-
-    return req.session.userId ? KONG_LOGGEDIN_FALLBACK_TOKEN : KONG_ANONYMOUS_FALLBACK_TOKEN;
-};
-
 export const fetchUserById = async (userId: string | number, req: Request): Promise<UserApiResponse> => {
     const url = `${KONG_URL}/user/v5/read/${userId}`;
     logger.info('fetchUserById :: calling user API', url);
@@ -90,44 +87,4 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
     return response.data;
 };
 
-export const getCurrentUser = async (req: Request): Promise<void> => {
-    try {
-        const userId = req.session.userId;
 
-        if (!userId) {
-            throw new Error('fetchAndStoreCurrentUser :: userId missing from session');
-        }
-
-        req.session.roles = [];
-        req.session.orgs = [];
-
-        const userApiResponse = await fetchUserById(userId, req);
-
-        if (userApiResponse?.responseCode === 'OK') {
-            populateSessionFromUserProfile(req, userApiResponse);
-
-            await saveSession(req);
-
-            const sessionSnapshot = {
-                userId: req.session.userId ?? null,
-                rootOrgId: req.session.rootOrgId ?? null,
-                roles: req.session.roles ?? null,
-                userSid: req.session.userSid ?? null,
-                orgs: req.session.orgs ?? null
-            };
-
-            logger.info('fetchAndStoreCurrentUser :: session data set successfully', sessionSnapshot);
-
-            return;
-        }
-
-        logger.error('fetchAndStoreCurrentUser :: user API returned non-OK response', userApiResponse);
-
-        throw userApiResponse;
-
-    } catch (error) {
-        const statusCode = _.get(error, 'response.status');
-        logger.error(`fetchAndStoreCurrentUser :: user API call failed with status ${statusCode}`, _.get(error, 'response.data'));
-        throw error;
-    }
-};

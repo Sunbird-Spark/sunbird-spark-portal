@@ -3,7 +3,7 @@ import type { Request } from 'express';
 import logger from '../utils/logger.js';
 import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
-import { getCurrentUser } from '../services/userService.js';
+import { fetchUserById, populateSessionFromUserProfile } from '../services/userService.js';
 import { regenerateSession, destroySession } from '../utils/sessionUtils.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
@@ -32,7 +32,14 @@ const authenticated = async (request: Request) => {
             request.session.userId = parts[parts.length - 1];
         }
         await generateLoggedInKongToken(request);
-        await getCurrentUser(request);
+        
+        const userId = request.session.userId;
+        if (!userId) {
+            throw new Error('userId missing from session');
+        }
+        
+        const userApiResponse = await fetchUserById(userId, request);
+        populateSessionFromUserProfile(request, userApiResponse);
         logger.info('Keycloak authenticated successfully');
     } catch (err) {
         logger.error('error logging in user', err);

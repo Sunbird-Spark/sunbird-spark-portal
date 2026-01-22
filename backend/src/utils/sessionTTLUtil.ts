@@ -1,16 +1,17 @@
 import type { Request } from 'express';
+import _ from 'lodash';
 import logger from './logger.js';
 
 export const extractTokenExpiration = (request: Request): number | null => {
     try {
-        const refreshTokenExp = (request.kauth?.grant?.refresh_token as any)?.content?.exp;
-        if (refreshTokenExp && typeof refreshTokenExp === 'number') {
+        const refreshTokenExp = _.get(request, 'kauth.grant.refresh_token.content.exp');
+        if (refreshTokenExp && _.isNumber(refreshTokenExp)) {
             logger.info(`Refresh token expiration: ${refreshTokenExp}`);
             return refreshTokenExp;
         }
 
-        const exp = (request.kauth?.grant?.access_token as any)?.content?.exp;
-        if (exp && typeof exp === 'number') {
+        const exp = _.get(request, 'kauth.grant.access_token.content.exp');
+        if (_.isFinite(exp)) {
             return exp;
         }
         return null;
@@ -24,7 +25,7 @@ export const calculateSessionTTL = (exp: number): number => {
     const now = Math.floor(Date.now() / 1000);
     const remainingSeconds = exp - now;
 
-    const ttlSeconds = Math.max(remainingSeconds, 60);
+    const ttlSeconds = _.max([remainingSeconds, 60]) || 60;
 
     return ttlSeconds * 1000;
 };
