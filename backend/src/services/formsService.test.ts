@@ -32,10 +32,11 @@ vi.mock('../utils/sessionStore.js', () => {
         ysqlPool: mockYsqlPool,
         getYsqlPool: () => mockYsqlPool,
         sessionStore: {
-            get: vi.fn(),
-            set: vi.fn(),
-            destroy: vi.fn(),
-            on: vi.fn()
+            get: vi.fn((sid, callback) => callback(null, null)),
+            set: vi.fn((sid, session, callback) => callback(null)),
+            destroy: vi.fn((sid, callback) => callback(null)),
+            on: vi.fn(),
+            touch: vi.fn((sid, session, callback) => callback(null))
         }
     };
 });

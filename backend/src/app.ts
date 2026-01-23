@@ -63,7 +63,6 @@ app.all('/portal/logout', async (req, res) => {
     res.redirect('/');
 })
 app.use('/api/data/v1/form', formRoutes);
-app.use(registerDeviceWithKong());
 
 if (envConfig.ENVIRONMENT !== 'local') {
     app.use(express.static(path.join(__dirname, 'public')));
