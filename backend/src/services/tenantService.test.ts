@@ -1,18 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as tenantService from './tenantService.js';
 import fs from 'fs/promises';
-import path from 'path';
 
 vi.mock('fs/promises');
-vi.mock('path');
 
 describe('TenantService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        // Mock path.join to just return valid strings or stub logic
-        (path.join as any).mockImplementation((...args: string[]) => args.join('/'));
-        // Mock dirname
-        (path.dirname as any).mockReturnValue('/mock/dir');
     });
 
     afterEach(() => {

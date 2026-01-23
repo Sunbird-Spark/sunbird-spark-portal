@@ -42,6 +42,15 @@ describe('TenantController', () => {
         redirectTenant(req, res);
 
         expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.send).toHaveBeenCalledWith('Not Found');
+        expect(res.send).toHaveBeenCalledWith('Tenant not found');
+    });
+
+    it('should return 404 if tenantName is missing', () => {
+        req.params.tenantName = undefined;
+
+        redirectTenant(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith('Tenant not found');
     });
 });
