@@ -54,10 +54,18 @@ describe('TenantService', () => {
         expect(p).toContain('ap/index.html');
     });
 
-    it('should return empty string for unsafe paths', () => {
-        const p1 = tenantService.getTenantPath('../test');
-        expect(p1).toBe('');
-        const p2 = tenantService.getTenantPath('test/path');
-        expect(p2).toBe('');
+    it('should throw error for unsafe paths', () => {
+        expect(() => tenantService.getTenantPath('../test')).toThrow('Invalid tenant name');
+        expect(() => tenantService.getTenantPath('test/path')).toThrow('Invalid tenant name');
+    });
+
+    it('should validate tenant name correctly', () => {
+        expect(tenantService.isValidTenantName('valid-name')).toBe(true);
+        expect(tenantService.isValidTenantName('valid_name')).toBe(true);
+        expect(tenantService.isValidTenantName('valid123')).toBe(true);
+
+        expect(tenantService.isValidTenantName('invalid/name')).toBe(false);
+        expect(tenantService.isValidTenantName('invalid..name')).toBe(false);
+        expect(tenantService.isValidTenantName('invalid name')).toBe(false);
     });
 });

@@ -29,15 +29,20 @@ export const loadTenants = async () => {
     }
 };
 
+export const isValidTenantName = (name: string): boolean => {
+    return /^[a-z0-9_-]+$/.test(name);
+};
+
 export const hasTenant = (tenantName: string): boolean => {
-    return tenantCache.has(tenantName);
+    return tenantCache.has(tenantName.toLowerCase());
 };
 
 export const getTenantPath = (tenantName: string): string => {
     tenantName = tenantName.toLowerCase();
-    // Prevent path traversal
-    if (tenantName.includes('..') || tenantName.includes('/') || tenantName.includes('\\')) {
-        return '';
+
+    if (!isValidTenantName(tenantName)) {
+        throw new Error('Invalid tenant name');
     }
+
     return path.join(tenantPath, tenantName, 'index.html');
 };

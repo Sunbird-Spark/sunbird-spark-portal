@@ -4,7 +4,8 @@ import * as tenantService from '../services/tenantService.js';
 
 vi.mock('../services/tenantService.js', () => ({
     hasTenant: vi.fn(),
-    getTenantPath: vi.fn()
+    getTenantPath: vi.fn(),
+    isValidTenantName: vi.fn().mockReturnValue(true)
 }));
 
 describe('TenantController', () => {
@@ -19,6 +20,8 @@ describe('TenantController', () => {
             send: vi.fn()
         };
         vi.clearAllMocks();
+        // Default valid behavior
+        (tenantService.isValidTenantName as any).mockReturnValue(true);
     });
 
     it('should redirect to tenant file if valid', () => {
@@ -31,12 +34,13 @@ describe('TenantController', () => {
         // Expect normalization
         expect(tenantService.hasTenant).toHaveBeenCalledWith('ap');
         expect(tenantService.getTenantPath).toHaveBeenCalledWith('ap');
+        expect(tenantService.isValidTenantName).toHaveBeenCalledWith('ap');
         expect(res.sendFile).toHaveBeenCalledWith('/mock/path/ap/index.html', expect.any(Function));
     });
 
     it('should return 404 if tenant is invalid', () => {
         req.params.tenantName = 'invalid';
-        (tenantService.hasTenant as any).mockReturnValue(false);
+        (tenantService.isValidTenantName as any).mockReturnValue(false);
 
         redirectTenant(req, res);
 
@@ -64,6 +68,7 @@ describe('TenantController', () => {
 
     it('should return 404 if tenant name is unsafe', () => {
         req.params.tenantName = '../invalid';
+        (tenantService.isValidTenantName as any).mockReturnValue(false);
 
         redirectTenant(req, res);
 

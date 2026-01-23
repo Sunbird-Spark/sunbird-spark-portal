@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { hasTenant, getTenantPath } from '../services/tenantService.js';
-
-const TENANT_NAME_REGEX = /^[a-z0-9_-]+$/;
+import { hasTenant, getTenantPath, isValidTenantName } from '../services/tenantService.js';
 
 export const redirectTenant = async (req: Request, res: Response) => {
     let tenantName = req.params.tenantName as string;
@@ -9,7 +7,7 @@ export const redirectTenant = async (req: Request, res: Response) => {
     if (tenantName) {
         tenantName = tenantName.trim().toLowerCase();
 
-        if (!TENANT_NAME_REGEX.test(tenantName)) {
+        if (!isValidTenantName(tenantName)) {
             res.status(404).send('Tenant not found');
             return;
         }
