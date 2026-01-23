@@ -11,7 +11,6 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -24,7 +23,6 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading] = useState<boolean>(false);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -37,7 +35,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
-    isLoading,
     login,
     logout,
   };

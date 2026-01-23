@@ -13,10 +13,8 @@ export function withAccessControl<P extends object>(
   rule: AccessControlRule
 ) {
   return function Wrapped(props: P) {
-    const { user, isLoading, isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const location = useLocation();
-
-    if (isLoading) return <div>Loading...</div>;
 
     if (!isAuthenticated || !user) {
       const next = encodeURIComponent(location.pathname + location.search);
