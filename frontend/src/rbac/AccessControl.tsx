@@ -1,11 +1,13 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth, Role } from '../auth/AuthContext';
-import { canRoleAccessRoute } from './roleConfig';
 
+/**
+ * Access control rule for protecting components
+ */
 interface AccessControlRule {
-  allowedRoles?: Role[];
-  requiredRoute?: string;
+  /** Only these roles can access this component */
+  allowedRoles: Role[];
 }
 
 export function withAccessControl<P extends object>(
@@ -22,12 +24,7 @@ export function withAccessControl<P extends object>(
     }
 
     // Check if user's role is allowed
-    if (rule.allowedRoles && !rule.allowedRoles.includes(user.role)) {
-      return <Navigate to="/unauthorized" replace />;
-    }
-
-    // Check if user's role can access the required route
-    if (rule.requiredRoute && !canRoleAccessRoute(user.role, rule.requiredRoute)) {
+    if (!rule.allowedRoles.includes(user.role)) {
       return <Navigate to="/unauthorized" replace />;
     }
 
