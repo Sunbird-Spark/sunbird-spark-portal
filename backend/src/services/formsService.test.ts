@@ -64,6 +64,14 @@ describe('FormService API Integration', () => {
             expect(response.status).toBe(500);
             expect(response.body.params.err).toBe('ERR_CREATE_FORM_DATA');
         });
+        it('should handle 404 error from service', async () => {
+            const error: any = new Error('Not found');
+            error.statusCode = 404;
+            vi.spyOn(FormService.prototype, 'create').mockRejectedValue(error);
+            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'save', data: {} } });
+            expect(response.status).toBe(404);
+            expect(response.body.responseCode).toBe('RESOURCE_NOT_FOUND');
+        });
     });
 
     describe('Read', () => {
@@ -134,12 +142,32 @@ describe('FormService API Integration', () => {
             expect(response.status).toBe(500);
             expect(response.body.params.err).toBe('ERR_LIST_ALL_FORM');
         });
+        it('should handle 404 error from service', async () => {
+            const error: any = new Error('Not found');
+            error.statusCode = 404;
+            vi.spyOn(FormService.prototype, 'listAll').mockRejectedValue(error);
+            const response = await api.post(endpoint).send({ request: { rootOrgId: 'test' } });
+            expect(response.status).toBe(404);
+            expect(response.body.responseCode).toBe('RESOURCE_NOT_FOUND');
+        });
         it.each([
             [{}],
             [{ rootOrgId: '' }]
         ])('should handle missing/empty rootOrgId %#', async (reqBody) => {
             const response = await api.post(endpoint).send({ request: reqBody });
             expect(response.status).toBe(400);
+        });
+    });
+
+    describe('Unit Tests: listAll Validation', () => {
+        it('should throw 400 if rootOrgId is missing/empty', async () => {
+            const service = new FormService();
+            // Test undefined
+            await expect(service.listAll(undefined as any)).rejects.toMatchObject({ statusCode: 400, message: 'rootOrgId must be a non-empty string' });
+            // Test empty string
+            await expect(service.listAll('')).rejects.toMatchObject({ statusCode: 400 });
+            // Test whitespace
+            await expect(service.listAll('   ')).rejects.toMatchObject({ statusCode: 400 });
         });
     });
 });

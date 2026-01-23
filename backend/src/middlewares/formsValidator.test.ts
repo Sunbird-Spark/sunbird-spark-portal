@@ -7,15 +7,17 @@ import { validateCreateAPI, validateReadAPI, validateUpdateAPI, validateListAPI 
 vi.mock('../models/Response.js', () => {
     return {
         Response: class {
-            constructor(public id: string) { }
-            setError(err: any) { this.err = err; }
-            err: any;
+            constructor() { }
+            setError(err: unknown) { this.err = err; }
+            err: unknown;
         }
     };
 });
 
 describe('Form Validator Middleware', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let req: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let res: any;
     let next: NextFunction;
 
@@ -32,6 +34,7 @@ describe('Form Validator Middleware', () => {
         vi.clearAllMocks();
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const runValidation = (validator: any, requestBody: any) => {
         req.body.request = requestBody;
         validator(req, res, next);
@@ -55,6 +58,15 @@ describe('Form Validator Middleware', () => {
             runValidation(validateCreateAPI, { type: 'content' }); // Missing action, data
             expect(res.status).toHaveBeenCalledWith(400);
             expect(next).not.toHaveBeenCalled();
+        });
+
+        it('should fail if request body is missing', () => {
+            req.body.request = undefined;
+            validateCreateAPI(req as any, res as any, next);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+                err: expect.objectContaining({ errmsg: 'Request body is missing' })
+            }));
         });
 
         it('should fail if type is not a string', () => {
@@ -82,6 +94,21 @@ describe('Form Validator Middleware', () => {
             expect(res.status).toHaveBeenCalledWith(400);
             const responseArg = res.send.mock.calls[0][0];
             expect(responseArg.err.errmsg).toContain('specify "rootOrgId" along with "framework"');
+        });
+
+        it('should handle internal server errors (catch block)', () => {
+            const throwingReq = {
+                body: {
+                    get request() {
+                        throw new Error("Internal failure");
+                    }
+                }
+            };
+            validateCreateAPI(throwingReq as any, res as any, next);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+                err: expect.objectContaining({ errmsg: 'Internal failure' })
+            }));
         });
     });
 
