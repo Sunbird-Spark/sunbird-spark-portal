@@ -53,6 +53,16 @@ describe('TenantController', () => {
         expect(res.send).toHaveBeenCalledWith('Tenant not found');
     });
 
+    it('should return 404 if tenant name is unsafe', () => {
+        req.params.tenantName = '../invalid';
+
+        redirectTenant(req, res);
+
+        expect(tenantService.hasTenant).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith('Tenant not found');
+    });
+
     it('should handle sendFile error', () => {
         req.params.tenantName = 'ap';
         (tenantService.hasTenant as any).mockReturnValue(true);

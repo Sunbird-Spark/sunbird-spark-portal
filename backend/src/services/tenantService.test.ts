@@ -48,4 +48,11 @@ describe('TenantService', () => {
         const p = tenantService.getTenantPath('ap');
         expect(p).toContain('ap/index.html');
     });
+
+    it('should return empty string for unsafe paths', () => {
+        const p1 = tenantService.getTenantPath('../test');
+        expect(p1).toBe('');
+        const p2 = tenantService.getTenantPath('test/path');
+        expect(p2).toBe('');
+    });
 });
