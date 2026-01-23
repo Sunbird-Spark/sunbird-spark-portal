@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
 export const app = express();
 
 // Initialize tenants
-loadTenants();
+await loadTenants();
 
 app.use(cors());
 app.use(express.json());

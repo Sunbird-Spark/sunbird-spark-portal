@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { logger } from '../utils/logger.js';
 import { fileURLToPath } from 'url';
@@ -9,13 +9,15 @@ const __dirname = path.dirname(__filename);
 const tenantCache: Set<string> = new Set();
 const tenantPath = path.join(__dirname, '../../tenant');
 
-export const loadTenants = () => {
+export const loadTenants = async () => {
     try {
-        if (!fs.existsSync(tenantPath)) {
+        try {
+            await fs.access(tenantPath);
+        } catch {
             logger.warn(`Tenant directory not found at ${tenantPath}`);
             return;
         }
-        const items = fs.readdirSync(tenantPath, { withFileTypes: true });
+        const items = await fs.readdir(tenantPath, { withFileTypes: true });
         items.forEach(item => {
             if (item.isDirectory()) {
                 tenantCache.add(item.name.toLowerCase());

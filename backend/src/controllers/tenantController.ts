@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { hasTenant, getTenantPath } from '../services/tenantService.js';
 
-export const redirectTenant = (req: Request, res: Response) => {
+export const redirectTenant = async (req: Request, res: Response) => {
     let tenantName = req.params.tenantName as string;
 
     if (tenantName) {
