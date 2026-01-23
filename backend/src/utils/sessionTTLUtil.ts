@@ -6,7 +6,6 @@ export const extractTokenExpiration = (request: Request): number | null => {
     try {
         const refreshTokenExp = _.get(request, 'kauth.grant.refresh_token.content.exp');
         if (refreshTokenExp && _.isNumber(refreshTokenExp)) {
-            logger.info(`Refresh token expiration: ${refreshTokenExp}`);
             return refreshTokenExp;
         }
 

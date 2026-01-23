@@ -6,6 +6,7 @@ import { envConfig } from '../config/env.js';
 import dayjs from 'dayjs';
 import logger from '../utils/logger.js';
 import { UserApiResponse } from '../types/user.js';
+import { saveSession } from '../utils/sessionUtils.js';
 
 const {
     KONG_URL,
@@ -25,7 +26,7 @@ const resolveKongBearerToken = (req: Request): string => {
         : KONG_ANONYMOUS_FALLBACK_TOKEN;
 };
 
-export const setUserSession = (req: Request, userApiResponse: UserApiResponse) => {
+export const setUserSession = async (req: Request, userApiResponse: UserApiResponse): Promise<void> => {
     try {
         if (userApiResponse.responseCode !== 'OK') return;
 
@@ -61,6 +62,8 @@ export const setUserSession = (req: Request, userApiResponse: UserApiResponse) =
             };
         }
 
+        await saveSession(req);
+
     } catch (err) {
         logger.error('setUserSession :: Failed to persist user session data', err);
     }
@@ -68,7 +71,6 @@ export const setUserSession = (req: Request, userApiResponse: UserApiResponse) =
 
 export const fetchUserById = async (userId: string | number, req: Request): Promise<UserApiResponse> => {
     const url = `${KONG_URL}/user/v5/read/${userId}`;
-    logger.info('fetchUserById :: calling user API', url);
 
     const headers = {
         'x-msgid': uuidv4(),
@@ -82,5 +84,3 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
     const response = await axios.get(url, { headers });
     return response.data;
 };
-
-

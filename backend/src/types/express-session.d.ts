@@ -39,5 +39,17 @@ declare module 'express-session' {
         managedToken?: string;
         logSession?: boolean;
         deviceId?: string;
+        'keycloak-token'?: {
+            access_token?: string;
+            refresh_token?: string;
+            id_token?: string;
+            expires_in?: number;
+            refresh_expires_in?: number;
+            token_type?: string;
+            session_state?: string;
+            scope?: string;
+            [key: string]: any;
+        };
+        auth_redirect_uri?: string;
     }
 }

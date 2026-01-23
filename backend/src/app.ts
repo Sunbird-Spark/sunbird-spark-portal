@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import { envConfig } from './config/env.js';
@@ -23,6 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(session({
+    name: 'anonymous_cookie',
     store: sessionStore,
     secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
     resave: false,
@@ -35,8 +36,9 @@ app.use(session({
     }
 }), registerDeviceWithKong());
 
-app.use('/resources',
+app.get('/portal/login',
     session({
+        name: 'auth_cookie',
         store: sessionStore,
         secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
         resave: false,
@@ -47,39 +49,25 @@ app.use('/resources',
             maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
             sameSite: 'lax'
         }
-    }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: express.Request, res: express.Response) => {
-        res.redirect('/resources');
+    }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: Request, res: Response) => {
+        res.redirect('/resourcepage');
     });
 
-app.get('/',
-    session({
-        store: sessionStore,
-        secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-            sameSite: 'lax'
-        }
-    }), (req: express.Request, res: express.Response) => {
-        res.redirect('/resources');
-    });
-
-app.all('/logout', async (req, res) => {
+app.all('/portal/logout', async (req, res) => {
     res.status(200).clearCookie('connect.sid', { path: '/' });
     try {
         await destroySession(req);
     } catch (err) {
         logger.error('Error destroying session', err);
     }
-    res.redirect(keycloak.logoutUrl('/'));
+    res.redirect('/');
 })
 app.use('/api/data/v1/form', formRoutes);
 app.use(registerDeviceWithKong());
 
-app.use(express.static(path.join(__dirname, 'public')));
+if (envConfig.ENVIRONMENT !== 'local') {
+    app.use(express.static(path.join(__dirname, 'public')));
+}
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',
@@ -93,6 +81,8 @@ app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
 app.all('/portal/*rest', kongProxy);
 
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+if (envConfig.ENVIRONMENT !== 'local') {
+    app.get(/.*/, (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+}

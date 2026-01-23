@@ -14,7 +14,7 @@ const {
 } = envConfig;
 
 export const refreshSessionTTL = (req: Request) => {
-    if (req.session.userId) {
+    if (req.session.userId && req.kauth) {
         setSessionTTLFromToken(req);
     } else {
         req.session.cookie.maxAge = SUNBIRD_ANONYMOUS_SESSION_TTL;

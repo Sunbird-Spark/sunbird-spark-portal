@@ -117,7 +117,7 @@ describe('authenticated handler', () => {
             responseCode: 'OK',
             result: { response: { id: '12345', userName: 'testuser' } }
         } as any);
-        vi.mocked(setUserSession).mockImplementation(() => {});
+        vi.mocked(setUserSession).mockResolvedValue(undefined as any);
     });
 
     it('should regenerate session, extract userId, generate kong token and fetch user', async () => {
