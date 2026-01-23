@@ -53,6 +53,15 @@ describe('TenantController', () => {
         expect(res.send).toHaveBeenCalledWith('Tenant not found');
     });
 
+    it('should return 404 if tenantName is null', () => {
+        req.params.tenantName = null;
+
+        redirectTenant(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith('Tenant not found');
+    });
+
     it('should return 404 if tenant name is unsafe', () => {
         req.params.tenantName = '../invalid';
 

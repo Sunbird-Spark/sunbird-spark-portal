@@ -34,6 +34,7 @@ export const hasTenant = (tenantName: string): boolean => {
 };
 
 export const getTenantPath = (tenantName: string): string => {
+    tenantName = tenantName.toLowerCase();
     // Prevent path traversal
     if (tenantName.includes('..') || tenantName.includes('/') || tenantName.includes('\\')) {
         return '';

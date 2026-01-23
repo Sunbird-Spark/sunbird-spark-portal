@@ -49,6 +49,11 @@ describe('TenantService', () => {
         expect(p).toContain('ap/index.html');
     });
 
+    it('should normalize tenant name to lowercase', () => {
+        const p = tenantService.getTenantPath('AP');
+        expect(p).toContain('ap/index.html');
+    });
+
     it('should return empty string for unsafe paths', () => {
         const p1 = tenantService.getTenantPath('../test');
         expect(p1).toBe('');

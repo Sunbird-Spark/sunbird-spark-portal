@@ -9,7 +9,12 @@ export const redirectTenant = async (req: Request, res: Response) => {
     if (tenantName) {
         tenantName = tenantName.trim().toLowerCase();
 
-        if (TENANT_NAME_REGEX.test(tenantName) && hasTenant(tenantName)) {
+        if (!TENANT_NAME_REGEX.test(tenantName)) {
+            res.status(404).send('Tenant not found');
+            return;
+        }
+
+        if (hasTenant(tenantName)) {
             const tenantFile = getTenantPath(tenantName);
             return res.sendFile(tenantFile, (err) => {
                 if (err) {
