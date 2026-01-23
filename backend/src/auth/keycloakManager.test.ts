@@ -120,7 +120,7 @@ describe('authenticated handler', () => {
         vi.mocked(setUserSession).mockResolvedValue(undefined as any);
     });
 
-    it('should regenerate session, extract userId, generate kong token and fetch user', async () => {
+    it('should regenerate session, extract userId and fetch user', async () => {
         const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
 
         (kc as any).authenticated(req as Request);
@@ -131,8 +131,6 @@ describe('authenticated handler', () => {
         expect(regenerateSession).toHaveBeenCalledWith(req);
         expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
         expect((req.session as any)?.userId).toBe('12345');
-        expect(generateLoggedInKongToken).toHaveBeenCalledWith(req);
-        expect(saveKongTokenToSession).toHaveBeenCalledWith(req, 'test-kong-token');
         expect(fetchUserById).toHaveBeenCalledWith('12345', req);
         expect(setUserSession).toHaveBeenCalledWith(req, expect.any(Object));
         expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');
@@ -153,9 +151,6 @@ describe('authenticated handler', () => {
         expect(regenerateSession).toHaveBeenCalledWith(req);
         expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
         expect((req.session as any)?.userId).toBe('12345');
-        // Should NOT generate new kong token
-        expect(generateLoggedInKongToken).not.toHaveBeenCalled();
-        expect(saveKongTokenToSession).not.toHaveBeenCalled();
         expect(fetchUserById).toHaveBeenCalledWith('12345', req);
         expect(setUserSession).toHaveBeenCalledWith(req, expect.any(Object));
         expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');
@@ -171,7 +166,6 @@ describe('authenticated handler', () => {
         await new Promise(process.nextTick);
 
         expect((req.session as any)?.userId).toBeUndefined();
-        expect(generateLoggedInKongToken).toHaveBeenCalledWith(req);
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
             'error logging in user',
             expect.any(Error)
@@ -195,24 +189,6 @@ describe('authenticated handler', () => {
         expect(fetchUserById).not.toHaveBeenCalled();
     });
 
-    it('should log error if generateLoggedInKongToken fails', async () => {
-        vi.mocked(generateLoggedInKongToken).mockRejectedValue(
-            new Error('kong failure')
-        );
-
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
-
-        expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-            'error logging in user',
-            expect.any(Error)
-        );
-
-        expect(fetchUserById).not.toHaveBeenCalled();
-    });
-
     it('should log error if fetchUserById fails', async () => {
         vi.mocked(fetchUserById).mockRejectedValue(
             new Error('user service failure')
@@ -223,7 +199,6 @@ describe('authenticated handler', () => {
         (kc as any).authenticated(req as Request);
         await new Promise(process.nextTick);
 
-        expect(generateLoggedInKongToken).toHaveBeenCalled();
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
             'error logging in user',
             expect.any(Error)
