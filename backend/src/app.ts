@@ -7,8 +7,14 @@ import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
 import { destroySession } from './utils/sessionUtils.js';
+import formRoutes from './routes/formsRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const app = express();
 
@@ -70,7 +76,10 @@ app.all('/logout', async (req, res) => {
     }
     res.redirect(keycloak.logoutUrl('/'));
 })
+app.use('/api/data/v1/form', formRoutes);
 app.use(registerDeviceWithKong());
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',
@@ -83,3 +92,7 @@ const recaptchaProtectedRoutes: string[] = [
 app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
 app.all('/portal/*rest', kongProxy);
+
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
