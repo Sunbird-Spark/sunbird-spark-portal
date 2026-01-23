@@ -6,6 +6,11 @@ import { sessionStore } from './utils/sessionStore.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const app = express();
 
@@ -28,6 +33,8 @@ app.use(session({
 
 app.use(registerDeviceWithKong());
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',
     '/portal/user/v1/exists/phone/:phoneNumber',
@@ -39,3 +46,7 @@ const recaptchaProtectedRoutes: string[] = [
 app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
 app.all('/portal/*rest', kongProxy);
+
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
