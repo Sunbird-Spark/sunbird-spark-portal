@@ -31,16 +31,15 @@ describe('TenantController', () => {
 
         redirectTenant(req, res);
 
-        // Expect normalization
-        expect(tenantService.hasTenant).toHaveBeenCalledWith('ap');
-        expect(tenantService.getTenantPath).toHaveBeenCalledWith('ap');
-        expect(tenantService.isValidTenantName).toHaveBeenCalledWith('ap');
+        // Controller now just passes the raw name to the service
+        expect(tenantService.hasTenant).toHaveBeenCalledWith(' AP ');
+        expect(tenantService.getTenantPath).toHaveBeenCalledWith(' AP ');
         expect(res.sendFile).toHaveBeenCalledWith('/mock/path/ap/index.html', expect.any(Function));
     });
 
     it('should return 404 if tenant is invalid', () => {
         req.params.tenantName = 'invalid';
-        (tenantService.isValidTenantName as any).mockReturnValue(false);
+        (tenantService.hasTenant as any).mockReturnValue(false);
 
         redirectTenant(req, res);
 
@@ -50,6 +49,7 @@ describe('TenantController', () => {
 
     it('should return 404 if tenantName is missing', () => {
         req.params.tenantName = undefined;
+        (tenantService.hasTenant as any).mockReturnValue(false);
 
         redirectTenant(req, res);
 
@@ -59,6 +59,7 @@ describe('TenantController', () => {
 
     it('should return 404 if tenantName is null', () => {
         req.params.tenantName = null;
+        (tenantService.hasTenant as any).mockReturnValue(false);
 
         redirectTenant(req, res);
 
@@ -68,11 +69,11 @@ describe('TenantController', () => {
 
     it('should return 404 if tenant name is unsafe', () => {
         req.params.tenantName = '../invalid';
-        (tenantService.isValidTenantName as any).mockReturnValue(false);
+        (tenantService.hasTenant as any).mockReturnValue(false);
 
         redirectTenant(req, res);
 
-        expect(tenantService.hasTenant).not.toHaveBeenCalled();
+        expect(tenantService.hasTenant).toHaveBeenCalledWith('../invalid');
         expect(res.status).toHaveBeenCalledWith(404);
         expect(res.send).toHaveBeenCalledWith('Tenant not found');
     });

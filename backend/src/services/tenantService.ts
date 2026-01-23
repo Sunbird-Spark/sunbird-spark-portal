@@ -33,17 +33,20 @@ export const isValidTenantName = (name: string): boolean => {
     return /^[a-z0-9_-]+$/.test(name);
 };
 
-export const hasTenant = (tenantName: string): boolean => {
-    return tenantCache.has(tenantName.toLowerCase());
+export const hasTenant = (tenantName: string | undefined | null): boolean => {
+    if (!tenantName) return false;
+    const normalized = tenantName.trim().toLowerCase();
+    if (!isValidTenantName(normalized)) return false;
+    return tenantCache.has(normalized);
 };
 
-export const getTenantPath = (tenantName: string): string => {
-    tenantName = tenantName.toLowerCase();
+export const getTenantPath = (tenantName: string | undefined | null): string => {
+    if (!tenantName) throw new Error('Invalid tenant name');
+    const normalized = tenantName.trim().toLowerCase();
 
-    if (!isValidTenantName(tenantName)) {
+    if (!isValidTenantName(normalized)) {
         throw new Error('Invalid tenant name');
     }
 
-    const fullPath = path.join(tenantPath, tenantName, 'index.html');
-    return fullPath;
+    return path.join(tenantPath, normalized, 'index.html');
 };

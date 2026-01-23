@@ -49,9 +49,20 @@ describe('TenantService', () => {
         expect(p).toContain('ap/index.html');
     });
 
-    it('should normalize tenant name to lowercase', () => {
-        const p = tenantService.getTenantPath('AP');
+    it('should normalize tenant name to lowercase internally', () => {
+        expect(tenantService.hasTenant(' AP ')).toBe(false); // Valid name but let's check cache
+        // If AP was loaded as ap, then hasTenant(' AP ') should be true now because of internal normalization
+        // Wait, the cache has 'tenant1' and 'tenant2' from the previous test
+        expect(tenantService.hasTenant(' TENANT1 ')).toBe(true);
+
+        const p = tenantService.getTenantPath(' AP ');
         expect(p).toContain('ap/index.html');
+    });
+
+    it('should handle undefined/null inputs gracefully', () => {
+        expect(tenantService.hasTenant(undefined)).toBe(false);
+        expect(tenantService.hasTenant(null as any)).toBe(false);
+        expect(() => tenantService.getTenantPath(undefined)).toThrow('Invalid tenant name');
     });
 
     it('should throw error for unsafe paths', () => {
