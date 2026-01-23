@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { create, read, update, listAll } from '../controllers/formController.js';
-import { validateCreateAPI, validateReadAPI, validateUpdateAPI, validateListAPI } from '../middlewares/formValidator.js';
+import { create, read, update, listAll } from '../controllers/formsController.js';
+import { validateCreateAPI, validateReadAPI, validateUpdateAPI, validateListAPI } from '../middlewares/formsValidator.js';
 
 const router = Router();
 

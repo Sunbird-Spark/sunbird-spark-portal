@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { FormService } from '../services/formService.js';
+import { FormService } from '../services/formsService.js';
 import { Response as ApiResponse } from '../models/Response.js';
 import _ from 'lodash';
 import { logger } from '../utils/logger.js';
@@ -18,29 +18,29 @@ const getSanitizedData = (req: Request) => {
         }
     );
 }
-
 export const create = async (req: Request, res: Response) => {
     const apiId = 'api.form.create';
+    const response = new ApiResponse(apiId);
     try {
         const data = getSanitizedData(req);
         await formService.create(data);
-
-        const response = new ApiResponse(apiId);
         response.setResult({ data: { created: 'OK' } });
         res.status(200).send(response);
     } catch (error) {
         logger.error('Error creating form:', error);
-        const response = new ApiResponse(apiId);
+        const statusCode = (error as any).statusCode || 500;
         response.setError({
             err: "ERR_CREATE_FORM_DATA",
-            errmsg: (error as Error)?.message || String(error) || 'Unknown error'
+            errmsg: (error as Error)?.message || String(error) || 'Unknown error',
+            responseCode: statusCode === 404 ? "RESOURCE_NOT_FOUND" : "SERVER_ERROR"
         });
-        res.status(500).send(response);
+        res.status(statusCode).send(response);
     }
 }
 
 export const update = async (req: Request, res: Response) => {
     const apiId = 'api.form.update';
+    const response = new ApiResponse(apiId);
     try {
         const data = getSanitizedData(req);
 
@@ -59,16 +59,12 @@ export const update = async (req: Request, res: Response) => {
         };
 
         const result = await formService.update(query, updateValue);
-
-        const response = new ApiResponse(apiId);
         response.setResult({ data: { "response": [result] } });
         res.status(200).send(response);
     } catch (error) {
         logger.error('Error updating form:', error);
         const err = error as Record<string, unknown>;
         const statusCode = (err.statusCode as number) || 500;
-
-        const response = new ApiResponse(apiId);
         response.setError({
             err: "ERR_UPDATE_FORM_DATA",
             errmsg: (err.msg as string) || (err.message as string) || "Unknown error",
@@ -80,6 +76,7 @@ export const update = async (req: Request, res: Response) => {
 
 export const read = async (req: Request, res: Response) => {
     const apiId = 'api.form.read';
+    const response = new ApiResponse(apiId);
     try {
         const data = getSanitizedData(req);
 
@@ -94,7 +91,11 @@ export const read = async (req: Request, res: Response) => {
 
         let result = await formService.read(query);
 
-        if (!result) result = {};
+        if (!result) {
+            const error: any = new Error("Form data not found");
+            error.statusCode = 404;
+            throw error;
+        }
 
         let responseData = { ...result };
         if (_.isString(responseData.data)) {
@@ -109,53 +110,43 @@ export const read = async (req: Request, res: Response) => {
             responseData.rootOrgId = responseData.root_org;
             responseData = _.omit(responseData, ['root_org']);
         }
-
-        const response = new ApiResponse(apiId);
         response.setResult({ data: { form: responseData } });
         res.status(200).send(response);
 
     } catch (error) {
         logger.error('Error reading form:', error);
-        const response = new ApiResponse(apiId);
+        const statusCode = (error as any).statusCode || 500;
         response.setError({
             err: "ERR_READ_FORM_DATA",
-            errmsg: (error as Error)?.message || 'Form data not found'
+            errmsg: (error as Error)?.message || 'Form data not found',
+            responseCode: statusCode === 404 ? "RESOURCE_NOT_FOUND" : "SERVER_ERROR"
         });
-        res.status(404).send(response);
+        res.status(statusCode).send(response);
     }
 }
 
 export const listAll = async (req: Request, res: Response) => {
     const apiId = 'api.form.list';
+    const response = new ApiResponse(apiId);
     try {
         const data = _.pick(req.body.request, ['rootOrgId']);
         const rootOrgId = _.isString(data.rootOrgId) ? _.trim(data.rootOrgId) : data.rootOrgId;
-
-        if (_.isNil(rootOrgId) || !_.isString(rootOrgId) || _.size(rootOrgId) === 0) {
-            const response = new ApiResponse(apiId);
-            response.setError({
-                err: 'ERR_INVALID_ROOT_ORG_ID',
-                errmsg: 'A valid non-empty rootOrgId must be provided.'
-            });
-            return res.status(400).send(response);
-        }
 
         const formDetails = await formService.listAll(rootOrgId);
         const apiResponse = {
             forms: formDetails,
             count: formDetails ? formDetails.length : 0
         };
-
-        const response = new ApiResponse(apiId);
         response.setResult({ data: apiResponse });
         res.status(200).send(response);
     } catch (error) {
         logger.error('Error listing forms:', error);
-        const response = new ApiResponse(apiId);
+        const statusCode = (error as any).statusCode || 500;
         response.setError({
             err: "ERR_LIST_ALL_FORM",
-            errmsg: (error as Error)?.message || String(error) || 'Unknown error'
+            errmsg: (error as Error)?.message || String(error) || 'Unknown error',
+            responseCode: statusCode === 404 ? "RESOURCE_NOT_FOUND" : "SERVER_ERROR"
         });
-        res.status(500).send(response);
+        res.status(statusCode).send(response);
     }
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import request from 'supertest';
 import { app } from '../app.js';
-import { FormService } from './formService.js';
+import { FormService } from './formsService.js';
 
 vi.mock('../utils/sessionStore.js', () => {
     const mockYsqlPool = {
@@ -75,15 +75,15 @@ describe('FormService API Integration', () => {
             expect(response.body.id).toBe('api.form.read');
             expect(response.body.result.form).toBeDefined();
         });
-        it('should return empty form when not found', async () => {
+        it('should return 404 when form not found', async () => {
             const response = await api.post(endpoint).send({ request: { type: 'nonexistent', action: 'nonexistent', framework: 'nonexistent', rootOrgId: 'nonexistent' } });
-            expect(response.status).toBe(200);
-            expect(response.body.result.form).toEqual({});
+            expect(response.status).toBe(404);
+            expect(response.body.params.err).toBe('ERR_READ_FORM_DATA');
         });
         it('should handle service errors gracefully', async () => {
             vi.spyOn(FormService.prototype, 'read').mockRejectedValue(new Error('Read failed'));
             const response = await api.post(endpoint).send({ request: { type: 'content', action: 'view' } });
-            expect(response.status).toBe(404);
+            expect(response.status).toBe(500);
             expect(response.body.params.err).toBe('ERR_READ_FORM_DATA');
         });
         it('should handle malformed data in DB', async () => {
