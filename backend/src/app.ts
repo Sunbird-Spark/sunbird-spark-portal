@@ -4,6 +4,7 @@ import session from 'express-session';
 import { envConfig } from './config/env.js';
 import { sessionStore } from './utils/sessionStore.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
+import formRoutes from './routes/formsRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 import path from 'path';
@@ -31,6 +32,7 @@ app.use(session({
     }
 }));
 
+app.use('/api/data/v1/form', formRoutes);
 app.use(registerDeviceWithKong());
 
 app.use(express.static(path.join(__dirname, 'public')));
