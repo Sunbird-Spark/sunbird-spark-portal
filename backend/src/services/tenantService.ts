@@ -44,5 +44,6 @@ export const getTenantPath = (tenantName: string): string => {
         throw new Error('Invalid tenant name');
     }
 
-    return path.join(tenantPath, tenantName, 'index.html');
+    const fullPath = path.join(tenantPath, tenantName, 'index.html');
+    return fullPath;
 };
