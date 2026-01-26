@@ -28,8 +28,6 @@ const resolveKongBearerToken = (req: Request): string => {
 
 export const setUserSession = async (req: Request, userApiResponse: UserApiResponse): Promise<void> => {
     try {
-        if (userApiResponse.responseCode !== 'OK') return;
-
         const profile = userApiResponse.result.response;
         req.session.userId = profile.id ?? profile.userId;
         req.session.userName = profile.userName;
@@ -82,5 +80,9 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
     };
 
     const response = await axios.get(url, { headers });
-    return response.data;
+    const result = response.data;
+    if (result.responseCode !== 'OK') {
+        throw new Error(`Failed to fetch user: ${result.responseCode}`);
+    }
+    return result;
 };

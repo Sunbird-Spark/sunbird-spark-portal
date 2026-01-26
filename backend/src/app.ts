@@ -12,6 +12,7 @@ import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { CookieNames } from './utils/cookieConstants.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(session({
-    name: 'anonymous_cookie',
+    name: CookieNames.ANONYMOUS,
     store: sessionStore,
     secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
     resave: false,
@@ -38,7 +39,7 @@ app.use(session({
 
 app.get('/portal/login',
     session({
-        name: 'auth_cookie',
+        name: CookieNames.AUTH,
         store: sessionStore,
         secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
         resave: false,
@@ -50,11 +51,21 @@ app.get('/portal/login',
             sameSite: 'lax'
         }
     }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: Request, res: Response) => {
-        res.redirect('/resourcepage');
+        res.clearCookie(CookieNames.ANONYMOUS);
+        if (req.session) {
+            req.session.save((err) => {
+                if (err) {
+                    logger.error('Error saving session', err);
+                }
+                res.redirect('/resourcepage');
+            });
+        } else {
+            res.redirect('/resourcepage');
+        }
     });
 
 app.all('/portal/logout', async (req, res) => {
-    res.status(200).clearCookie('connect.sid', { path: '/' });
+    res.status(200).clearCookie(CookieNames.SESSION_ID, { path: '/' });
     try {
         await destroySession(req);
     } catch (err) {

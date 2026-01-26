@@ -1,4 +1,5 @@
 import Keycloak from 'keycloak-connect';
+import _ from 'lodash';
 import type { Request } from 'express';
 import logger from '../utils/logger.js';
 import { sessionStore } from '../utils/sessionStore.js';
@@ -25,10 +26,12 @@ const authenticated = async (request: Request) => {
     try {
         await regenerateSession(request);
         setSessionTTLFromToken(request);
-        const sub = (request.kauth?.grant?.access_token as any)?.content?.sub;
-        if (sub) {
-            const parts = sub.split(':');
-            request.session.userId = parts[parts.length - 1];
+
+        const tokenSubject = _.get(request, 'kauth.grant.access_token.content.sub');
+
+        if (tokenSubject) {
+            const userIdFromToken = _.last(_.split(tokenSubject, ':'));
+            request.session.userId = userIdFromToken;
         }
 
         const userId = request.session.userId;
@@ -36,8 +39,8 @@ const authenticated = async (request: Request) => {
             throw new Error('userId missing from session');
         }
 
-        const userApiResponse = await fetchUserById(userId, request);
-        setUserSession(request, userApiResponse);
+        const userProfileResponse = await fetchUserById(userId, request);
+        setUserSession(request, userProfileResponse);
         logger.info('Keycloak authenticated successfully');
     } catch (err) {
         logger.error('error logging in user', err);

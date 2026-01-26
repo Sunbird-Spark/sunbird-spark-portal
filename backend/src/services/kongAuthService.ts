@@ -14,17 +14,18 @@ const {
 } = envConfig;
 
 export const refreshSessionTTL = (req: Request) => {
-    if (req.session.userId && req.kauth) {
+    if (req?.session?.userId && req?.kauth) {
         setSessionTTLFromToken(req);
     } else {
-        req.session.cookie.maxAge = SUNBIRD_ANONYMOUS_SESSION_TTL;
-        req.session.cookie.expires = new Date(Date.now() + SUNBIRD_ANONYMOUS_SESSION_TTL);
+        _.set(req, 'session.cookie.maxAge', SUNBIRD_ANONYMOUS_SESSION_TTL);
+        _.set(req, 'session.cookie.expires', new Date(Date.now() + SUNBIRD_ANONYMOUS_SESSION_TTL));
     }
 };
 
 export const generateKongToken = async (req: Request): Promise<string> => {
-    const deviceRegisterAPI = KONG_URL + '/api-manager/v2/consumer/portal_anonymous/credential/register';
-    if (!deviceRegisterAPI || !bearerToken) {
+    const apiEndpoint = `${KONG_URL}/api-manager/v2/consumer/portal_anonymous/credential/register`;
+
+    if (!KONG_URL || !bearerToken) {
         throw new Error('Device registration configuration missing');
     }
 
@@ -32,39 +33,40 @@ export const generateKongToken = async (req: Request): Promise<string> => {
         throw new Error('Session ID is missing');
     }
 
+    const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${bearerToken}`
+    };
+
     const response = await axios.post(
-        deviceRegisterAPI,
+        apiEndpoint,
         {
             request: { key: req.sessionID }
         },
-        {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${bearerToken}`
-            }
-        }
+        { headers }
     );
 
-    if (_.get(response.data, 'params.status') === 'successful') {
-        const token = _.get(response.data, 'result.token');
-        if (!token) {
-            throw new Error('ANONYMOUS_KONG_TOKEN :: Token not found in response');
-        }
-        return token;
+    const status = _.get(response.data, 'params.status');
+    const token = _.get(response.data, 'result.token');
+
+    if (status !== 'successful') {
+        throw new Error('ANONYMOUS_KONG_TOKEN :: Anonymous Kong token generation failed with an unsuccessful response status');
     }
 
-    throw new Error('ANONYMOUS_KONG_TOKEN :: Anonymous Kong token generation failed with an unsuccessful response status');
+    if (!token) {
+        throw new Error('ANONYMOUS_KONG_TOKEN :: Token not found in response');
+    }
+
+    return token;
 };
 
 export const generateLoggedInKongToken = async (req: Request): Promise<string> => {
     logger.info('LOGGEDIN_KONG_TOKEN :: requesting logged-in token from Kong');
 
-    let token = envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
-
-    const loggedInDeviceRegistedAPI = KONG_URL + '/api-manager/v2/consumer/portal_loggedin/credential/register';
+    const apiEndpoint = `${KONG_URL}/api-manager/v2/consumer/portal_loggedin/credential/register`;
 
     try {
-        if (!loggedInDeviceRegistedAPI || !loggedBearerToken) {
+        if (!KONG_URL || !loggedBearerToken) {
             throw new Error('Device registration configuration missing for logged-in user');
         }
 
@@ -72,23 +74,32 @@ export const generateLoggedInKongToken = async (req: Request): Promise<string> =
             throw new Error('Session ID is missing');
         }
 
+        const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${loggedBearerToken}`
+        };
+
         const response = await axios.post(
-            loggedInDeviceRegistedAPI,
+            apiEndpoint,
             { request: { key: req.sessionID } },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${loggedBearerToken}`
-                }
-            }
+            { headers }
         );
 
-        if (_.get(response.data, 'params.status') === 'successful') {
-            token = _.get(response.data, 'result.token');
-            if (!token) {
-                throw new Error('LOGGEDIN_KONG_TOKEN :: Token not found in response');
-            }
+        const status = _.get(response.data, 'params.status');
+        const token = _.get(response.data, 'result.token');
+
+        if (status === 'successful' && token) {
+            return token;
         }
+
+        if (status !== 'successful') {
+            throw new Error('Response status was not successful');
+        }
+
+        if (!token) {
+            throw new Error('Token not found in response');
+        }
+
     } catch (err) {
         logger.error(
             `LOGGEDIN_KONG_TOKEN :: token generation failed for session ${req.sessionID}`,
@@ -96,7 +107,7 @@ export const generateLoggedInKongToken = async (req: Request): Promise<string> =
         );
     }
 
-    return token;
+    return envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
 };
 
 export const saveKongTokenToSession = async (req: Request, token: string): Promise<void> => {
