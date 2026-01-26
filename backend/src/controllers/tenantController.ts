@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { hasTenant, getTenantPath } from '../services/tenantService.js';
 
-export const redirectTenant = async (req: Request, res: Response) => {
+export const redirectTenant = (req: Request, res: Response, next: any) => {
     const tenantName = req.params.tenantName as string;
 
     if (hasTenant(tenantName)) {
@@ -9,11 +9,10 @@ export const redirectTenant = async (req: Request, res: Response) => {
         return res.sendFile(tenantFile, (err) => {
             if (err) {
                 if (!res.headersSent) {
-                    res.status(404).send('Tenant not found');
+                    next();
                 }
             }
         });
     }
-    res.status(404).send('Tenant not found');
+    next();
 }
-

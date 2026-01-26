@@ -26,10 +26,11 @@ describe('TenantController', () => {
 
     it('should redirect to tenant file if valid', () => {
         req.params.tenantName = ' AP '; // With spaces and uppercase
+        const next = vi.fn();
         (tenantService.hasTenant as any).mockReturnValue(true);
         (tenantService.getTenantPath as any).mockReturnValue('/mock/path/ap/index.html');
 
-        redirectTenant(req, res);
+        redirectTenant(req, res, next);
 
         // Controller now just passes the raw name to the service
         expect(tenantService.hasTenant).toHaveBeenCalledWith(' AP ');
@@ -37,49 +38,41 @@ describe('TenantController', () => {
         expect(res.sendFile).toHaveBeenCalledWith('/mock/path/ap/index.html', expect.any(Function));
     });
 
-    it('should return 404 if tenant is invalid', () => {
+    it('should call next() if tenant is not found', () => {
         req.params.tenantName = 'invalid';
+        const next = vi.fn();
         (tenantService.hasTenant as any).mockReturnValue(false);
 
-        redirectTenant(req, res);
+        redirectTenant(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.send).toHaveBeenCalledWith('Tenant not found');
+        expect(next).toHaveBeenCalled();
+        expect(res.status).not.toHaveBeenCalled();
+        expect(res.send).not.toHaveBeenCalled();
     });
 
-    it('should return 404 if tenantName is missing', () => {
+    it('should call next() if tenantName is missing', () => {
         req.params.tenantName = undefined;
+        const next = vi.fn();
         (tenantService.hasTenant as any).mockReturnValue(false);
 
-        redirectTenant(req, res);
+        redirectTenant(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.send).toHaveBeenCalledWith('Tenant not found');
+        expect(next).toHaveBeenCalled();
     });
 
-    it('should return 404 if tenantName is null', () => {
+    it('should call next() if tenantName is null', () => {
         req.params.tenantName = null;
+        const next = vi.fn();
         (tenantService.hasTenant as any).mockReturnValue(false);
 
-        redirectTenant(req, res);
+        redirectTenant(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.send).toHaveBeenCalledWith('Tenant not found');
+        expect(next).toHaveBeenCalled();
     });
 
-    it('should return 404 if tenant name is unsafe', () => {
-        req.params.tenantName = '../invalid';
-        (tenantService.hasTenant as any).mockReturnValue(false);
-
-        redirectTenant(req, res);
-
-        expect(tenantService.hasTenant).toHaveBeenCalledWith('../invalid');
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.send).toHaveBeenCalledWith('Tenant not found');
-    });
-
-    it('should handle sendFile error', () => {
+    it('should call next() if sendFile fails', () => {
         req.params.tenantName = 'ap';
+        const next = vi.fn();
         (tenantService.hasTenant as any).mockReturnValue(true);
         (tenantService.getTenantPath as any).mockReturnValue('/path/to/ap/index.html');
 
@@ -88,9 +81,42 @@ describe('TenantController', () => {
             cb(new Error('File access error'));
         });
 
-        redirectTenant(req, res);
+        redirectTenant(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.send).toHaveBeenCalledWith('Tenant not found');
+        expect(next).toHaveBeenCalled();
+    });
+
+    it('should not call next() if headers sent when sendFile fails', () => {
+        req.params.tenantName = 'ap';
+        const next = vi.fn();
+        res.headersSent = true;
+        (tenantService.hasTenant as any).mockReturnValue(true);
+        (tenantService.getTenantPath as any).mockReturnValue('/path/to/ap/index.html');
+
+        // Mock sendFile to trigger callback with error
+        res.sendFile.mockImplementation((_path: string, cb: any) => {
+            cb(new Error('File access error'));
+        });
+
+        redirectTenant(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should handle successful sendFile (happy path)', () => {
+        req.params.tenantName = 'ap';
+        const next = vi.fn();
+        (tenantService.hasTenant as any).mockReturnValue(true);
+        (tenantService.getTenantPath as any).mockReturnValue('/path/to/ap/index.html');
+
+        // Mock sendFile to trigger callback successfully (no error)
+        res.sendFile.mockImplementation((_path: string, cb: any) => {
+            cb(null);
+        });
+
+        redirectTenant(req, res, next);
+
+        expect(res.sendFile).toHaveBeenCalled();
+        expect(next).not.toHaveBeenCalled(); // Should not call next on success
     });
 });

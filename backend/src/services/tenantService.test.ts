@@ -7,10 +7,12 @@ vi.mock('fs/promises');
 describe('TenantService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        tenantService.clearCache();
     });
 
     afterEach(() => {
         vi.resetModules();
+        tenantService.clearCache();
     });
 
     it('should not load tenants if directory does not exist', async () => {
@@ -41,7 +43,7 @@ describe('TenantService', () => {
         (fs.access as any).mockResolvedValue(undefined);
         (fs.readdir as any).mockRejectedValue(new Error('Access denied'));
 
-        await expect(tenantService.loadTenants()).resolves.not.toThrow();
+        await expect(tenantService.loadTenants()).rejects.toThrow('Access denied');
     });
 
     it('should return correct tenant path', () => {
@@ -49,10 +51,16 @@ describe('TenantService', () => {
         expect(p).toContain('ap/index.html');
     });
 
-    it('should normalize tenant name to lowercase internally', () => {
-        expect(tenantService.hasTenant(' AP ')).toBe(false); // Valid name but let's check cache
-        // If AP was loaded as ap, then hasTenant(' AP ') should be true now because of internal normalization
-        // Wait, the cache has 'tenant1' and 'tenant2' from the previous test
+    it('should normalize tenant name to lowercase internally', async () => {
+        // Setup cache for this specific test
+        (fs.access as any).mockResolvedValue(undefined);
+        (fs.readdir as any).mockResolvedValue([
+            { name: 'tenant1', isDirectory: () => true },
+            { name: 'ap', isDirectory: () => true }
+        ]);
+        await tenantService.loadTenants();
+
+        expect(tenantService.hasTenant(' AP ')).toBe(true);
         expect(tenantService.hasTenant(' TENANT1 ')).toBe(true);
 
         const p = tenantService.getTenantPath(' AP ');

@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,14 +9,20 @@ const __dirname = path.dirname(__filename);
 const tenantCache: Set<string> = new Set();
 const tenantPath = path.join(__dirname, '../../tenant');
 
+export const clearCache = () => {
+    tenantCache.clear();
+};
+
 export const loadTenants = async () => {
+    clearCache();
     try {
-        try {
-            await fs.access(tenantPath);
-        } catch {
-            logger.warn(`Tenant directory not found at ${tenantPath}`);
-            return;
-        }
+        await fs.access(tenantPath);
+    } catch {
+        logger.warn(`Tenant directory not found at ${tenantPath}`);
+        return;
+    }
+
+    try {
         const items = await fs.readdir(tenantPath, { withFileTypes: true });
         items.forEach(item => {
             if (item.isDirectory()) {
@@ -26,6 +32,7 @@ export const loadTenants = async () => {
         logger.info(`Loaded ${tenantCache.size} tenants: ${Array.from(tenantCache).join(', ')}`);
     } catch (error) {
         logger.error('Error loading tenants:', error);
+        throw error; // Re-throw to allow caller to handle critical failure
     }
 };
 
