@@ -16,13 +16,6 @@ export const clearCache = () => {
 export const loadTenants = async () => {
     clearCache();
     try {
-        await fs.access(tenantPath);
-    } catch {
-        logger.warn(`Tenant directory not found at ${tenantPath}`);
-        return;
-    }
-
-    try {
         const items = await fs.readdir(tenantPath, { withFileTypes: true });
         items.forEach(item => {
             if (item.isDirectory()) {
@@ -30,7 +23,11 @@ export const loadTenants = async () => {
             }
         });
         logger.info(`Loaded ${tenantCache.size} tenants: ${Array.from(tenantCache).join(', ')}`);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'ENOENT') {
+            logger.warn(`Tenant directory not found at ${tenantPath}`);
+            return;
+        }
         logger.error('Error loading tenants:', error);
         throw error; // Re-throw to allow caller to handle critical failure
     }

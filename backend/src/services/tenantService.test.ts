@@ -16,12 +16,13 @@ describe('TenantService', () => {
     });
 
     it('should not load tenants if directory does not exist', async () => {
-        (fs.access as any).mockRejectedValue(new Error('no access'));
+        const error: any = new Error('no access');
+        error.code = 'ENOENT';
+        (fs.readdir as any).mockRejectedValue(error);
 
         await tenantService.loadTenants();
 
-        expect(fs.access).toHaveBeenCalled();
-        expect(fs.readdir).not.toHaveBeenCalled();
+        expect(fs.readdir).toHaveBeenCalled();
     });
 
     it('should load tenants from directory', async () => {
