@@ -62,7 +62,6 @@ export default {
         },
         // Sunbird custom colors
         sunbird: {
-          blue: "hsl(var(--sunbird-blue))",
           "dark-blue": "hsl(var(--sunbird-dark-blue))",
           yellow: "hsl(var(--sunbird-yellow))",
           "light-blue": "hsl(var(--sunbird-light-blue))",
