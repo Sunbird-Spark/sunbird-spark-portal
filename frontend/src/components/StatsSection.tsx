@@ -37,10 +37,10 @@ const StatsSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary-foreground mb-4">
-            Trusted by Professionals Worldwide
+            {t("trustedByProfessionals")}
           </h2>
           <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-            Join thousands of professionals who have advanced their careers with our comprehensive training programs.
+            {t("joinThousands")}
           </p>
         </div>
 
