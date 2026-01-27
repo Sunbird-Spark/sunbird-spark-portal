@@ -33,11 +33,14 @@ export class Response {
         this.result = {};
     }
 
-    public setError(error: ErrorObj) {
+    public setError(error: ErrorObj, result?: ResultObj) {
         this.params.status = "failed";
         this.params.err = error.err;
         this.params.errmsg = error.errmsg;
         this.responseCode = error.responseCode || "SERVER_ERROR";
+        if (result && result.data) {
+            this.result = result.data as Record<string, unknown>;
+        }
     }
 
     public setResult(result: ResultObj) {

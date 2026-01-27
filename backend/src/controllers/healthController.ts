@@ -52,8 +52,7 @@ export const checkHealth = async (req: Request, res: ExpressResponse) => {
             err: 'SERVICE_UNAVAILABLE',
             errmsg: 'Health Service is unavailable',
             responseCode: 'SERVICE_UNAVAILABLE'
-        });
-        response.result = healthResult;
+        }, { data: healthResult });
 
         return res.status(503).send(response);
     }
