@@ -4,11 +4,10 @@
  */
 
 // Re-export the main i18n configuration
-export { SUPPORTED_LANGUAGES, type SupportedLanguage, LANGUAGE_LABELS } from '../configs/i18n';
-
-
-// Re-export types and utilities
-export { supportedLanguages, type SupportedLanguage } from '../configs/i18n';
+export {
+  type SupportedLanguage,
+  LANGUAGES as SUPPORTED_LANGUAGES,
+} from '../configs/languages';
 
 // Re-export hooks (simple version only)
 export { useAppI18n } from '../hooks/useAppI18n';
