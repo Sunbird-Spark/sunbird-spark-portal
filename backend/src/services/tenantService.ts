@@ -13,19 +13,23 @@ export const clearCache = () => {
     tenantCache.clear();
 };
 
+const loadTenant = async (itemName: string) => {
+    try {
+        await fs.stat(path.join(tenantPath, itemName, 'index.html'));
+        tenantCache.add(itemName.toLowerCase());
+    } catch {
+        // Ignore directories without index.html
+        logger.warn('Ignored tenant without index.html:', itemName);
+    }
+};
+
 export const loadTenants = async () => {
     clearCache();
     try {
         const items = await fs.readdir(tenantPath, { withFileTypes: true });
         for (const item of items) {
             if (item.isDirectory()) {
-                try {
-                    await fs.stat(path.join(tenantPath, item.name, 'index.html'));
-                    tenantCache.add(item.name.toLowerCase());
-                } catch {
-                    // Ignore directories without index.html
-                    logger.warn('Ignored tenant without index.html:', item.name);
-                }
+                await loadTenant(item.name);
             }
         }
         logger.info(`Loaded ${tenantCache.size} tenants: ${Array.from(tenantCache).join(', ')}`);
