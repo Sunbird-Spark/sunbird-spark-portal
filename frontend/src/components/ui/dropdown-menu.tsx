@@ -2,7 +2,7 @@ import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { FiCheck, FiChevronRight, FiCircle } from "react-icons/fi";
 
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
