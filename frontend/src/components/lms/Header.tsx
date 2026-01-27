@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiMenu, FiX, FiSearch, FiGlobe, FiChevronDown, FiBell, FiTrash2 } from "react-icons/fi";
+import { FiMenu, FiX, FiSearch, FiGlobe, FiChevronDown } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,13 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import sunbirdLogo from "@/assets/sunbird-logo.png";
-import { useAppI18n } from "@/hooks/useAppI18n";
+import { useAppI18n, type LanguageCode } from "@/hooks/useAppI18n";
+import { NotificationPopover } from "./NotificationPopover";
 
 interface Notification {
   id: string;
@@ -60,7 +56,7 @@ const Header = () => {
   }, [currentLanguage, dir]);
 
   const handleLanguageChange = (code: string) => {
-    changeLanguage(code as any);
+    changeLanguage(code as LanguageCode);
   };
 
   return (
@@ -101,69 +97,12 @@ const Header = () => {
             </div>
 
             {/* Notifications */}
-            <Popover open={isNotificationOpen} onOpenChange={setIsNotificationOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <FiBell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
-                      {notifications.length}
-                    </span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent 
-                align="end" 
-                className="w-96 p-0 bg-muted/95 border-border shadow-lg"
-              >
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-foreground">
-                      {notifications.length} New Notification(s)
-                    </h3>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-6 w-6"
-                      onClick={() => setIsNotificationOpen(false)}
-                    >
-                      <FiX className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="space-y-3 max-h-80 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="text-muted-foreground text-sm text-center py-4">
-                        No new notifications
-                      </p>
-                    ) : (
-                      notifications.map((notification) => (
-                        <div 
-                          key={notification.id}
-                          className="bg-card p-4 rounded-lg border border-border"
-                        >
-                          <p className="text-xs text-muted-foreground mb-1">
-                            {notification.date}
-                          </p>
-                          <p className="text-sm text-foreground">
-                            {notification.message}
-                          </p>
-                          <div className="flex justify-end mt-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => handleDeleteNotification(notification.id)}
-                            >
-                              <FiTrash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <NotificationPopover
+              notifications={notifications}
+              onDelete={handleDeleteNotification}
+              isOpen={isNotificationOpen}
+              onOpenChange={setIsNotificationOpen}
+            />
 
             {/* Language Dropdown */}
             <DropdownMenu>
@@ -197,59 +136,11 @@ const Header = () => {
           {/* Mobile Actions */}
           <div className="flex items-center gap-2 md:hidden">
             {/* Mobile Notifications */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <FiBell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
-                      {notifications.length}
-                    </span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent 
-                align="end" 
-                className="w-80 p-0 bg-muted/95 border-border shadow-lg"
-              >
-                <div className="p-3">
-                  <h3 className="font-semibold text-foreground text-sm mb-3">
-                    {notifications.length} New Notification(s)
-                  </h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="text-muted-foreground text-xs text-center py-3">
-                        No new notifications
-                      </p>
-                    ) : (
-                      notifications.map((notification) => (
-                        <div 
-                          key={notification.id}
-                          className="bg-card p-3 rounded-lg border border-border"
-                        >
-                          <p className="text-xs text-muted-foreground mb-1">
-                            {notification.date}
-                          </p>
-                          <p className="text-xs text-foreground">
-                            {notification.message}
-                          </p>
-                          <div className="flex justify-end mt-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => handleDeleteNotification(notification.id)}
-                            >
-                              <FiTrash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <NotificationPopover
+              notifications={notifications}
+              onDelete={handleDeleteNotification}
+              isMobile
+            />
 
             {/* Mobile Language Dropdown */}
             <DropdownMenu>
