@@ -15,6 +15,7 @@ import { loadTenants } from './services/tenantService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
+import { checkHealth } from './controllers/healthController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,7 +26,7 @@ loadTenants();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
-
+app.get('/health', checkHealth);
 app.use(session({
     name: CookieNames.ANONYMOUS,
     store: sessionStore,
@@ -77,6 +78,7 @@ app.all('/portal/logout', async (req, res) => {
     res.redirect('/');
 })
 app.use('/api/data/v1/form', formRoutes);
+
 
 if (envConfig.ENVIRONMENT !== 'local') {
     app.use(express.static(path.join(__dirname, 'public')));
