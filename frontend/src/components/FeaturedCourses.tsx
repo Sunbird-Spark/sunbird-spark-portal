@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { FiChevronLeft, FiChevronRight, FiArrowRight } from "react-icons/fi";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button";
 import CourseCard from "./CourseCard";
 import { featuredCourses } from "@/configs/mockData";
 import { useAppI18n } from "@/hooks/useAppI18n";

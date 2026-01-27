@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { FiMenu, FiX, FiSearch, FiGlobe, FiChevronDown } from "react-icons/fi";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/button";
+import { Input } from "@/components/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/dropdown-menu";
 import sunbirdLogo from "@/assets/sunbird-logo.png";
 import { useAppI18n, type LanguageCode } from "@/hooks/useAppI18n";
 import { NotificationPopover } from "./NotificationPopover";
