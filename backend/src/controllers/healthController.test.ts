@@ -34,7 +34,7 @@ describe('HealthController', () => {
                 id: 'api.portal.health',
                 responseCode: 'OK',
                 result: expect.objectContaining({
-                    name: 'Portal',
+                    name: 'portal',
                     healthy: true,
                     check: expect.arrayContaining([
                         expect.objectContaining({
@@ -58,7 +58,7 @@ describe('HealthController', () => {
                 id: 'api.portal.health',
                 responseCode: 'SERVICE_UNAVAILABLE',
                 result: expect.objectContaining({
-                    name: 'Portal',
+                    name: 'portal',
                     healthy: false,
                     check: expect.arrayContaining([
                         expect.objectContaining({
@@ -85,7 +85,7 @@ describe('HealthController', () => {
                 id: 'api.portal.health',
                 responseCode: 'SERVICE_UNAVAILABLE',
                 result: expect.objectContaining({
-                    name: 'Portal',
+                    name: 'portal',
                     healthy: false
                 })
             })

@@ -7,53 +7,54 @@ import { logger } from '../utils/logger.js';
  * Controller for health check operations.
  * Checks connectivity to YugabyteDB and other dependencies.
  */
-export const checkHealth = async (req: Request, res: ExpressResponse) => {
-    const response = new Response('api.portal.health');
-    const checksArrayObj = [];
-    let healthy = true;
-
+const checkYugabyteHealth = async () => {
     try {
-        if (ysqlPool) {
-            await ysqlPool.query('SELECT 1');
-            checksArrayObj.push({
-                name: 'YugabyteDB',
-                healthy: true,
-                err: '',
-                errmsg: ''
-            });
-        } else {
+        if (!ysqlPool) {
             throw new Error('YugabyteDB pool not initialized');
         }
+        await ysqlPool.query('SELECT 1');
+        return {
+            name: 'YugabyteDB',
+            healthy: true,
+            err: '',
+            errmsg: ''
+        };
     } catch (err) {
-        healthy = false;
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        checksArrayObj.push({
+        logger.error('Yugabyte Health Check Failed:', errorMessage);
+        return {
             name: 'YugabyteDB',
             healthy: false,
             err: 'YUGABYTE_HEALTH_FAILED',
-            errmsg: 'YugabyteDB is not connected' // Sanitized: Avoid exposing internal error details here
-        });
-        // Log the actual error for internal debugging using standard logger
-        logger.error('Yugabyte Health Check Failed:', errorMessage);
+            errmsg: 'YugabyteDB is not connected'
+        };
     }
+};
+
+export const checkHealth = async (req: Request, res: ExpressResponse) => {
+    const response = new Response('api.portal.health');
+
+    const yugabyteCheck = await checkYugabyteHealth();
+    const checksArrayObj = [yugabyteCheck];
+    const healthy = yugabyteCheck.healthy;
 
     const healthResult = {
-        name: 'Portal',
+        name: 'portal',
         version: '1.0',
-        healthy: healthy,
+        healthy,
         check: checksArrayObj
     };
 
     if (healthy) {
         response.setResult({ data: healthResult });
         return res.status(200).send(response);
-    } else {
-        response.setError({
-            err: 'SERVICE_UNAVAILABLE',
-            errmsg: 'Health Service is unavailable',
-            responseCode: 'SERVICE_UNAVAILABLE'
-        }, { data: healthResult });
-
-        return res.status(503).send(response);
     }
+
+    response.setError({
+        err: 'SERVICE_UNAVAILABLE',
+        errmsg: 'portal service is unavailable',
+        responseCode: 'SERVICE_UNAVAILABLE'
+    }, { data: healthResult });
+
+    return res.status(503).send(response);
 };
