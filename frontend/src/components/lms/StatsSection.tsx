@@ -1,13 +1,9 @@
 import { FiBookOpen, FiUsers, FiAward } from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
-interface StatsSectionProps {
-  currentLang: LanguageCode;
-}
-
-const StatsSection = ({ currentLang }: StatsSectionProps) => {
-  const t = (key: string) => getTranslation(currentLang, key);
+const StatsSection = () => {
+  const { t } = useAppI18n();
 
   const stats = [
     {

@@ -2,15 +2,11 @@ import { FiArrowRight } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import CategoryCard from "./CategoryCard";
 import { categories } from "@/configs/mockData";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { Link } from "react-router-dom";
 
-interface CategorySectionProps {
-  currentLang: LanguageCode;
-}
-
-const CategorySection = ({ currentLang }: CategorySectionProps) => {
-  const t = (key: string) => getTranslation(currentLang, key);
+const CategorySection = () => {
+  const { t } = useAppI18n();
 
   return (
     <section id="categories" className="py-16 md:py-24 bg-muted">
@@ -36,7 +32,7 @@ const CategorySection = ({ currentLang }: CategorySectionProps) => {
         {/* Category Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
           {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} currentLang={currentLang} />
+            <CategoryCard key={category.id} category={category} />
           ))}
         </div>
       </div>

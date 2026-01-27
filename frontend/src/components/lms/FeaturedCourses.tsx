@@ -3,16 +3,12 @@ import { FiChevronLeft, FiChevronRight, FiArrowRight } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import CourseCard from "./CourseCard";
 import { featuredCourses } from "@/configs/mockData";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { Link } from "react-router-dom";
 
-interface FeaturedCoursesProps {
-  currentLang: LanguageCode;
-}
-
-const FeaturedCourses = ({ currentLang }: FeaturedCoursesProps) => {
+const FeaturedCourses = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const t = (key: string) => getTranslation(currentLang, key);
+  const { t } = useAppI18n();
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -77,7 +73,7 @@ const FeaturedCourses = ({ currentLang }: FeaturedCoursesProps) => {
                 to={`/course/${course.id}`}
                 className="min-w-[280px] md:min-w-[320px] snap-start"
               >
-                <CourseCard course={course} currentLang={currentLang} />
+                <CourseCard course={course} />
               </Link>
             ))}
           </div>

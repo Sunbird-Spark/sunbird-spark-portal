@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import sunbirdLogo from "@/assets/sunbird-logo.png";
-import { languages, getTranslation, type Language, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface Notification {
   id: string;
@@ -35,24 +35,17 @@ const mockNotifications: Notification[] = [
   },
 ];
 
-interface HeaderProps {
-  currentLang: LanguageCode;
-  onLanguageChange: (lang: Language) => void;
-}
-
-const Header = ({ currentLang, onLanguageChange }: HeaderProps) => {
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
-  const t = (key: string) => getTranslation(currentLang, key);
+  
+  const { t, languages, currentLanguage, changeLanguage, dir } = useAppI18n();
 
   const handleDeleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
-
-  const currentLanguage = languages.find(l => l.code === currentLang) ?? languages[0]!;
 
   const navLinks = [
     { label: t("courses"), href: "/courses" },
@@ -62,12 +55,12 @@ const Header = ({ currentLang, onLanguageChange }: HeaderProps) => {
   ];
 
   useEffect(() => {
-    document.documentElement.dir = currentLanguage.dir;
+    document.documentElement.dir = dir;
     document.documentElement.lang = currentLanguage.code;
-  }, [currentLanguage]);
+  }, [currentLanguage, dir]);
 
-  const handleLanguageChange = (lang: Language) => {
-    onLanguageChange(lang);
+  const handleLanguageChange = (code: string) => {
+    changeLanguage(code as any);
   };
 
   return (
@@ -177,7 +170,7 @@ const Header = ({ currentLang, onLanguageChange }: HeaderProps) => {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
                   <FiGlobe className="w-4 h-4" />
-                  <span className="hidden lg:inline">{currentLanguage.nativeName}</span>
+                  <span className="hidden lg:inline">{currentLanguage.label}</span>
                   <FiChevronDown className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>
@@ -185,11 +178,10 @@ const Header = ({ currentLang, onLanguageChange }: HeaderProps) => {
                 {languages.map((lang) => (
                   <DropdownMenuItem
                     key={lang.code}
-                    onClick={() => handleLanguageChange(lang)}
-                    className={currentLang === lang.code ? "bg-muted" : ""}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className={currentLanguage.code === lang.code ? "bg-muted" : ""}
                   >
-                    <span className="mr-2">{lang.nativeName}</span>
-                    <span className="text-muted-foreground text-xs">({lang.name})</span>
+                    <span className="mr-2">{lang.label}</span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -270,11 +262,10 @@ const Header = ({ currentLang, onLanguageChange }: HeaderProps) => {
                 {languages.map((lang) => (
                   <DropdownMenuItem
                     key={lang.code}
-                    onClick={() => handleLanguageChange(lang)}
-                    className={currentLang === lang.code ? "bg-muted" : ""}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className={currentLanguage.code === lang.code ? "bg-muted" : ""}
                   >
-                    <span className="mr-2">{lang.nativeName}</span>
-                    <span className="text-muted-foreground text-xs">({lang.name})</span>
+                    <span className="mr-2">{lang.label}</span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

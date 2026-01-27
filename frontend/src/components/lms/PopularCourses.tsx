@@ -2,15 +2,11 @@ import { FiArrowRight } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import CourseCard from "./CourseCard";
 import { popularCourses } from "@/configs/mockData";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { Link } from "react-router-dom";
 
-interface PopularCoursesProps {
-  currentLang: LanguageCode;
-}
-
-const PopularCourses = ({ currentLang }: PopularCoursesProps) => {
-  const t = (key: string) => getTranslation(currentLang, key);
+const PopularCourses = () => {
+  const { t } = useAppI18n();
 
   return (
     <section className="py-16 md:py-24 bg-background">
@@ -37,7 +33,7 @@ const PopularCourses = ({ currentLang }: PopularCoursesProps) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {popularCourses.slice(0, 8).map((course) => (
             <Link key={course.id} to={`/course/${course.id}`}>
-              <CourseCard course={course} currentLang={currentLang} />
+              <CourseCard course={course} />
             </Link>
           ))}
         </div>

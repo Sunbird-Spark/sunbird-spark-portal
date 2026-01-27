@@ -1,7 +1,7 @@
 import { FiStar, FiClock, FiUsers, FiBookOpen } from "react-icons/fi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface Course {
   id: string;
@@ -20,11 +20,10 @@ export interface Course {
 
 interface CourseCardProps {
   course: Course;
-  currentLang: LanguageCode;
 }
 
-const CourseCard = ({ course, currentLang }: CourseCardProps) => {
-  const t = (key: string) => getTranslation(currentLang, key);
+const CourseCard = ({ course }: CourseCardProps) => {
+  const { t } = useAppI18n();
 
   return (
     <Card className="group overflow-hidden border-border hover:shadow-xl transition-all duration-300 bg-card h-full">

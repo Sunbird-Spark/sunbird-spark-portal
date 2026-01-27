@@ -1,14 +1,10 @@
 import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
 import sunbirdLogo from "@/assets/sunbird-logo.png";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
-interface FooterProps {
-  currentLang: LanguageCode;
-}
-
-const Footer = ({ currentLang }: FooterProps) => {
-  const t = (key: string) => getTranslation(currentLang, key);
+const Footer = () => {
+  const { t } = useAppI18n();
 
   const footerLinks = {
     courses: [

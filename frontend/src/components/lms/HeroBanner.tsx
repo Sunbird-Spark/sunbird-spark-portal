@@ -1,14 +1,10 @@
 import { FiArrowRight, FiPlay, FiUsers, FiAward, FiBookOpen } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { Link } from "react-router-dom";
 
-interface HeroBannerProps {
-  currentLang: LanguageCode;
-}
-
-const HeroBanner = ({ currentLang }: HeroBannerProps) => {
-  const t = (key: string) => getTranslation(currentLang, key);
+const HeroBanner = () => {
+  const { t } = useAppI18n();
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 py-16 md:py-24 lg:py-32">

@@ -1,6 +1,6 @@
 import { IconType } from "react-icons";
 import { Card } from "@/components/ui/card";
-import { getTranslation, type LanguageCode } from "@/configs/translations";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface Category {
   id: string;
@@ -12,12 +12,11 @@ export interface Category {
 
 interface CategoryCardProps {
   category: Category;
-  currentLang: LanguageCode;
 }
 
-const CategoryCard = ({ category, currentLang }: CategoryCardProps) => {
+const CategoryCard = ({ category }: CategoryCardProps) => {
   const Icon = category.icon;
-  const t = (key: string) => getTranslation(currentLang, key);
+  const { t } = useAppI18n();
 
   return (
     <Card className="group cursor-pointer overflow-hidden border-border hover:shadow-lg hover:border-primary/30 transition-all duration-300 bg-card">

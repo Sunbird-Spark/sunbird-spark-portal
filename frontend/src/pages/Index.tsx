@@ -7,15 +7,9 @@ import PopularCourses from "@/components/lms/PopularCourses";
 import StatsSection from "@/components/lms/StatsSection";
 import Footer from "@/components/lms/Footer";
 import PageLoader from "@/components/lms/PageLoader";
-import { type Language, type LanguageCode } from "@/configs/translations";
 
 const Index = () => {
-  const [currentLang, setCurrentLang] = useState<LanguageCode>("en");
   const [isLoading, setIsLoading] = useState(true);
-
-  const handleLanguageChange = (lang: Language) => {
-    setCurrentLang(lang.code);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,15 +24,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header currentLang={currentLang} onLanguageChange={handleLanguageChange} />
+      <Header />
       <main>
-        <HeroBanner currentLang={currentLang} />
-        <FeaturedCourses currentLang={currentLang} />
-        <CategorySection currentLang={currentLang} />
-        <PopularCourses currentLang={currentLang} />
-        <StatsSection currentLang={currentLang} />
+        <HeroBanner />
+        <FeaturedCourses />
+        <CategorySection />
+        <PopularCourses />
+        <StatsSection />
       </main>
-      <Footer currentLang={currentLang} />
+      <Footer />
     </div>
   );
 };
