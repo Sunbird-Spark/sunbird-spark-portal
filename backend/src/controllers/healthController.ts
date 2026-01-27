@@ -1,6 +1,7 @@
 import { Request, Response as ExpressResponse } from 'express';
 import { ysqlPool } from '../utils/sessionStore.js';
 import { Response } from '../models/Response.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Controller for health check operations.
@@ -32,8 +33,8 @@ export const checkHealth = async (req: Request, res: ExpressResponse) => {
             err: 'YUGABYTE_HEALTH_FAILED',
             errmsg: 'YugabyteDB is not connected' // Sanitized: Avoid exposing internal error details here
         });
-        // Log the actual error for internal debugging
-        console.error('Yugabyte Health Check Failed:', errorMessage);
+        // Log the actual error for internal debugging using standard logger
+        logger.error('Yugabyte Health Check Failed:', errorMessage);
     }
 
     const healthResult = {
@@ -53,6 +54,7 @@ export const checkHealth = async (req: Request, res: ExpressResponse) => {
             responseCode: 'SERVICE_UNAVAILABLE'
         });
         response.result = healthResult;
+
         return res.status(503).send(response);
     }
 };
