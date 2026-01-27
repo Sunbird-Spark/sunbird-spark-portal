@@ -1,8 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as tenantService from './tenantService.js';
 import fs from 'fs/promises';
+import path from 'path';
 
-vi.mock('fs/promises');
+vi.mock('fs/promises', () => ({
+    default: {
+        readdir: vi.fn(),
+        stat: vi.fn(),
+    }
+}));
 
 describe('TenantService', () => {
     beforeEach(() => {
@@ -26,7 +32,7 @@ describe('TenantService', () => {
     });
 
     it('should load tenants from directory', async () => {
-        (fs.access as any).mockResolvedValue(undefined);
+        (fs.stat as any).mockResolvedValue({});
         (fs.readdir as any).mockResolvedValue([
             { name: 'tenant1', isDirectory: () => true },
             { name: 'TENANT2', isDirectory: () => true },
@@ -40,11 +46,33 @@ describe('TenantService', () => {
         expect(tenantService.hasTenant('file.txt')).toBe(false);
     });
 
+    it('should ignore directories without index.html', async () => {
+        (fs.readdir as any).mockResolvedValue([
+            { name: 'goodTenant', isDirectory: () => true },
+            { name: 'badTenant', isDirectory: () => true }
+        ]);
+
+        (fs.stat as any).mockImplementation(async (filePath: string) => {
+            // Check if the path ends with goodTenant/index.html
+            const normalizedPath = filePath.toLowerCase();
+            // Use path separator agnostic check or just loose check but specific enough
+            if (normalizedPath.includes('goodtenant/index.html')) {
+                return {};
+            }
+            throw new Error('ENOENT');
+        });
+
+        await tenantService.loadTenants();
+
+        expect(tenantService.hasTenant('goodTenant')).toBe(true);
+        expect(tenantService.hasTenant('badTenant')).toBe(false);
+    });
+
     it('should handle errors during load', async () => {
-        (fs.access as any).mockResolvedValue(undefined);
+        (fs.stat as any).mockResolvedValue({});
         (fs.readdir as any).mockRejectedValue(new Error('Access denied'));
 
-        await expect(tenantService.loadTenants()).rejects.toThrow('Access denied');
+        await expect(tenantService.loadTenants()).resolves.toBeUndefined();
     });
 
     it('should return correct tenant path', () => {
@@ -53,8 +81,7 @@ describe('TenantService', () => {
     });
 
     it('should normalize tenant name to lowercase internally', async () => {
-        // Setup cache for this specific test
-        (fs.access as any).mockResolvedValue(undefined);
+        (fs.stat as any).mockResolvedValue({});
         (fs.readdir as any).mockResolvedValue([
             { name: 'tenant1', isDirectory: () => true },
             { name: 'ap', isDirectory: () => true }

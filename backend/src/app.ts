@@ -17,13 +17,7 @@ const __dirname = path.dirname(__filename);
 
 export const app = express();
 
-// Initialize tenants
-try {
-    await loadTenants();
-} catch (error) {
-    console.error('Failed to initialize tenants during application startup:', error);
-    throw error;
-}
+loadTenants();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
