@@ -20,7 +20,7 @@ const HeroBanner = () => {
           <div className="text-center lg:text-start">
             <div className="inline-flex items-center gap-2 bg-secondary/20 text-secondary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <FiAward className="w-4 h-4" />
-              <span>Certified Professional Training</span>
+              <span>{t("certifiedProfessionals")}</span>
             </div>
             
             <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-primary-foreground leading-tight mb-6">
@@ -47,7 +47,7 @@ const HeroBanner = () => {
                 className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold text-base"
               >
                 <FiPlay className="w-5 h-5 me-2" />
-                Watch Demo
+                {t("watchDemo")}
               </Button>
             </div>
 
@@ -68,7 +68,7 @@ const HeroBanner = () => {
               <div className="flex items-center gap-2">
                 <FiAward className="w-5 h-5 text-secondary" />
                 <span className="text-primary-foreground">
-                  <strong>100+</strong> Certifications
+                  <strong>100+</strong> {t("certifications")}
                 </span>
               </div>
             </div>
