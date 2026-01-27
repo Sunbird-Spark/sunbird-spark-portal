@@ -17,19 +17,24 @@ export const loadTenants = async () => {
     clearCache();
     try {
         const items = await fs.readdir(tenantPath, { withFileTypes: true });
-        items.forEach(item => {
+        for (const item of items) {
             if (item.isDirectory()) {
-                tenantCache.add(item.name.toLowerCase());
+                try {
+                    await fs.stat(path.join(tenantPath, item.name, 'index.html'));
+                    tenantCache.add(item.name.toLowerCase());
+                } catch {
+                    // Ignore directories without index.html
+                    logger.warn('Ignored tenant without index.html:', item.name);
+                }
             }
-        });
+        }
         logger.info(`Loaded ${tenantCache.size} tenants: ${Array.from(tenantCache).join(', ')}`);
     } catch (error: any) {
         if (error.code === 'ENOENT') {
-            logger.warn(`Tenant directory not found at ${tenantPath}`);
+            logger.warn(`Tenant directory not found at ${tenantPath}`, error?.message);
             return;
         }
-        logger.error('Error loading tenants:', error);
-        throw error; // Re-throw to allow caller to handle critical failure
+        logger.warn('Error loading tenants:', error);
     }
 };
 
