@@ -11,7 +11,7 @@ const HomePage: React.FC = () => {
   const location = useLocation();
 
   // Get the return path from location state, or use role's default route
-  const from = (location.state as any)?.from?.pathname || getDefaultRouteForRole(selectedRole);
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || getDefaultRouteForRole(selectedRole);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();

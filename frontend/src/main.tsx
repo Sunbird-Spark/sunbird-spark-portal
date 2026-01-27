@@ -4,10 +4,11 @@ import App from './App';
 import './configs/i18n';
 import './styles/global.css';
 import I18nDirectionProvider from './providers/I18nDirectionProvider';
+import "./index.css";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-       <I18nDirectionProvider>
+    <I18nDirectionProvider>
       <App />
     </I18nDirectionProvider>
   </React.StrictMode>,

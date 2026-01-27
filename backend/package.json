@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "npm run build && node dist/server.js",
+    "build:full": "npm run build && npm run copy:frontend",
+    "copy:frontend": "mkdir -p dist/public && [ -d ../frontend/dist ] && cp -r ../frontend/dist/* dist/public/ || echo 'Frontend dist not found, skipping copy'",
+    "start": "[ \"$NODE_ENV\" = \"production\" ] && npm run build:full && node dist/server.js || npm run build && node dist/server.js",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",

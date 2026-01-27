@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import '@testing-library/jest-dom';
@@ -126,7 +126,7 @@ describe('useAppI18n Hook', () => {
   });
 
   it('should fallback when i18n.language is empty string', () => {
-    const { result } = renderHook(() => useAppI18n(), { wrapper });
+    renderHook(() => useAppI18n(), { wrapper });
 
     // simulate empty i18n.language without risky getter spying
     (i18n as any).language = '';
