@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as tenantService from './tenantService.js';
 import fs from 'fs/promises';
-import path from 'path';
 
 vi.mock('fs/promises', () => ({
     default: {
