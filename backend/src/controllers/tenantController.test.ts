@@ -103,6 +103,26 @@ describe('TenantController', () => {
         expect(next).not.toHaveBeenCalled();
     });
 
+    it('should not call next() if headers sent during sendFile execution', () => {
+        req.params.tenantName = 'ap';
+        const next = vi.fn();
+        res.headersSent = false;
+        (tenantService.hasTenant as any).mockReturnValue(true);
+        (tenantService.getTenantPath as any).mockReturnValue('/path/to/ap/index.html');
+
+        // Mock sendFile to trigger callback with error after headers are sent
+        res.sendFile.mockImplementation((_path: string, cb: any) => {
+            res.headersSent = true;
+            cb(new Error('File access error'));
+        });
+
+        redirectTenant(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.status).not.toHaveBeenCalled();
+        expect(res.send).not.toHaveBeenCalled();
+    });
+
     it('should handle successful sendFile (happy path)', () => {
         req.params.tenantName = 'ap';
         const next = vi.fn();
