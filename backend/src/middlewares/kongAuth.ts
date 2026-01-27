@@ -6,7 +6,6 @@ import { saveSession } from '../utils/sessionUtils.js';
 
 export const registerDeviceWithKong = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        logger.info(`original_path ${req.originalUrl}`)
 
         if (req.session.kongToken) {
             const isAuthenticated = req.session.userId && req.kauth;
