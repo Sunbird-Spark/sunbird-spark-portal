@@ -60,14 +60,18 @@ describe('FeaturedCourses', () => {
     renderComponent();
     const buttons = screen.getAllByRole('button');
     const leftButton = buttons[0];
-    fireEvent.click(leftButton);
+    if (leftButton) {
+      fireEvent.click(leftButton);
+    }
   });
 
   it('scrolls right when right button clicked', () => {
     renderComponent();
     const buttons = screen.getAllByRole('button');
     const rightButton = buttons[1];
-    fireEvent.click(rightButton);
+    if (rightButton) {
+      fireEvent.click(rightButton);
+    }
   });
 
   it('renders view all button', () => {
