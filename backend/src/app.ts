@@ -7,6 +7,8 @@ import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import formRoutes from './routes/formsRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
+import { redirectTenant } from './controllers/tenantController.js';
+import { loadTenants } from './services/tenantService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -15,6 +17,7 @@ const __dirname = path.dirname(__filename);
 
 export const app = express();
 
+loadTenants();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
@@ -49,6 +52,8 @@ app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
 app.all('/portal/*rest', kongProxy);
 
+app.get('/:tenantName', redirectTenant);
+
 app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
