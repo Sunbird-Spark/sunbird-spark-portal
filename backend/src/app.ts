@@ -15,6 +15,7 @@ import { loadTenants } from './services/tenantService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
+import { checkHealth } from './controllers/healthController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +78,7 @@ app.all('/portal/logout', async (req, res) => {
     res.redirect('/');
 })
 app.use('/api/data/v1/form', formRoutes);
+app.get('/health', checkHealth);
 
 if (envConfig.ENVIRONMENT !== 'local') {
     app.use(express.static(path.join(__dirname, 'public')));

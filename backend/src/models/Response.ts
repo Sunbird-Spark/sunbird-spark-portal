@@ -11,12 +11,12 @@ interface ResultObj {
 }
 
 export class Response {
-    public id: string;
-    public ver: string;
-    public ts: Date;
-    public params: Record<string, unknown>;
-    public responseCode: string = "OK";
-    public result: Record<string, unknown> = {};
+    public id!: string;
+    public ver!: string;
+    public ts!: Date;
+    public params!: Record<string, unknown>;
+    public responseCode!: string;
+    public result!: Record<string, unknown>;
 
     constructor(id: string, ver: string = "1.0") {
         this.id = id;
@@ -29,6 +29,8 @@ export class Response {
             err: null,
             errmsg: null
         };
+        this.responseCode = "OK";
+        this.result = {};
     }
 
     public setError(error: ErrorObj) {
