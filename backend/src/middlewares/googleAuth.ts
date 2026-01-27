@@ -34,7 +34,7 @@ export const validateRecaptcha = async (
 
 		if (!recaptchaSecret) {
 			logger.error(`GOOGLE_RECAPTCHA :: missing secret in config`);
-			throw new HttpError('RECAPTCHA_SECRET_NOT_CONFIGURED', 500,'INTERNAL_SERVER_ERROR', 'Recaptcha secret is not configured');
+			throw new HttpError('RECAPTCHA_SECRET_NOT_CONFIGURED', 500, 'INTERNAL_SERVER_ERROR', 'Recaptcha secret is not configured');
 		}
 
 		const response = await verifyRecaptcha(captchaResponse);

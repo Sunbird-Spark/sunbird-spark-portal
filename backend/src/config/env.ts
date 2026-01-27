@@ -1,18 +1,23 @@
 import dotenv from 'dotenv';
 
-
 dotenv.config();
 
 const env = process.env;
 
 export const envConfig = {
     ENVIRONMENT: env.ENVIRONMENT || 'local',
+    DOMAIN_URL: env.DOMAIN_URL || 'https://dev.sunbirded.org',
+    KONG_URL: env.KONG_URL || 'http://localhost:8000',
     SUNBIRD_ANONYMOUS_SESSION_SECRET: env.SUNBIRD_ANONYMOUS_SESSION_SECRET || 'sunbird_anonymous_session_secret',
     SUNBIRD_YUGABYTE_HOST: env.SUNBIRD_YUGABYTE_HOST || 'localhost',
     KONG_ANONYMOUS_FALLBACK_TOKEN: env.KONG_ANONYMOUS_FALLBACK_TOKEN || '',
     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: env.KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN || '',
-    KONG_ANONYMOUS_DEVICE_REGISTER_API: env.KONG_ANONYMOUS_DEVICE_REGISTER_API || '',
-    KONG_URL: env.KONG_URL || 'http://localhost:8000',
+    SUNBIRD_LOGGEDIN_SESSION_SECRET: env.SUNBIRD_LOGGEDIN_SESSION_SECRET || 'sunbird_loggedin_session_secret',
+    KONG_LOGGEDIN_FALLBACK_TOKEN: env.KONG_LOGGEDIN_FALLBACK_TOKEN || '',
+    KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: env.KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN || '',
+    PORTAL_REALM: env.PORTAL_REALM || 'sunbird',
+    KEYCLOAK_BASE_SERVER_URL: env.KEYCLOAK_BASE_SERVER_URL || 'http://localhost:8080',
+    PORTAL_AUTH_SERVER_CLIENT: env.PORTAL_AUTH_SERVER_CLIENT || 'portal',
 
     // OPTIONAL ENVIRONMENT VARIABLES
     PORT: parseInt(env.PORT || '3000'),

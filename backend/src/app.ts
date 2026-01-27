@@ -1,9 +1,12 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import { envConfig } from './config/env.js';
 import { sessionStore } from './utils/sessionStore.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
+import { keycloak } from './auth/keycloakProvider.js';
+import logger from './utils/logger.js';
+import { destroySession } from './utils/sessionUtils.js';
 import formRoutes from './routes/formsRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
@@ -11,6 +14,7 @@ import { redirectTenant } from './controllers/tenantController.js';
 import { loadTenants } from './services/tenantService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { CookieNames } from './utils/cookieConstants.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(session({
+    name: CookieNames.ANONYMOUS,
     store: sessionStore,
     secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
     resave: false,
@@ -33,12 +38,49 @@ app.use(session({
         maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
         sameSite: 'lax'
     }
-}));
+}), registerDeviceWithKong());
 
+app.get('/portal/login',
+    session({
+        name: CookieNames.AUTH,
+        store: sessionStore,
+        secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: envConfig.ENVIRONMENT !== 'local',
+            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
+            sameSite: 'lax'
+        }
+    }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: Request, res: Response) => {
+        res.clearCookie(CookieNames.ANONYMOUS);
+        if (req.session) {
+            req.session.save((err) => {
+                if (err) {
+                    logger.error('Error saving session', err);
+                }
+                res.redirect('/resourcepage');
+            });
+        } else {
+            res.redirect('/resourcepage');
+        }
+    });
+
+app.all('/portal/logout', async (req, res) => {
+    res.status(200).clearCookie(CookieNames.SESSION_ID, { path: '/' });
+    try {
+        await destroySession(req);
+    } catch (err) {
+        logger.error('Error destroying session', err);
+    }
+    res.redirect('/');
+})
 app.use('/api/data/v1/form', formRoutes);
-app.use(registerDeviceWithKong());
 
-app.use(express.static(path.join(__dirname, 'public')));
+if (envConfig.ENVIRONMENT !== 'local') {
+    app.use(express.static(path.join(__dirname, 'public')));
+}
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',
@@ -54,6 +96,8 @@ app.all('/portal/*rest', kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 
-app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+if (envConfig.ENVIRONMENT !== 'local') {
+    app.get(/.*/, (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+}

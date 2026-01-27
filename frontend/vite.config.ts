@@ -18,7 +18,7 @@ export default defineConfig({
     port: 5173,
     open: true,
     proxy: {
-      '/api': {
+      '/portal': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,

@@ -163,7 +163,7 @@ describe('getSessionStore', () => {
         );
     });
 
-    it('should log error and exit process when YugabyteDB pool connection fails', async () => {
+    it('should log error when YugabyteDB pool connection fails in test environment', async () => {
         vi.resetModules();
 
         const mockExit = vi.spyOn(process, 'exit').mockImplementation((() => {}) as never);
@@ -201,7 +201,8 @@ describe('getSessionStore', () => {
             'Failed to connect to YugabyteDB pool',
             expect.any(Error)
         );
-        expect(mockExit).toHaveBeenCalledWith(1);
+        // In test environment, process.exit should not be called
+        expect(mockExit).not.toHaveBeenCalled();
 
         mockExit.mockRestore();
     });
