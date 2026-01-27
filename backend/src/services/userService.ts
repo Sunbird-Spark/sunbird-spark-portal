@@ -28,6 +28,11 @@ const resolveKongBearerToken = (req: Request): string => {
 
 export const setUserSession = async (req: Request, userApiResponse: UserApiResponse): Promise<void> => {
     try {
+        if (userApiResponse.responseCode !== 'OK') {
+            logger.error(`Failed to fetch user: ${userApiResponse.responseCode}`);
+            return;
+        }
+
         const profile = userApiResponse.result.response;
         req.session.userId = profile.id ?? profile.userId;
         req.session.userName = profile.userName;
