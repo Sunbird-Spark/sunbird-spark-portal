@@ -55,8 +55,9 @@ describe('NotificationPopover', () => {
       btn.querySelector('svg')
     );
     
-    if (deleteButtons.length > 2) {
-      fireEvent.click(deleteButtons[2]);
+    const deleteButton = deleteButtons[2];
+    if (deleteButton) {
+      fireEvent.click(deleteButton);
       expect(onDelete).toHaveBeenCalledWith('1');
     }
   });
