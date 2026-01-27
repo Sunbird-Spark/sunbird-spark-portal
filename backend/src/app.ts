@@ -26,7 +26,7 @@ loadTenants();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
-
+app.get('/health', checkHealth);
 app.use(session({
     name: CookieNames.ANONYMOUS,
     store: sessionStore,
@@ -78,7 +78,7 @@ app.all('/portal/logout', async (req, res) => {
     res.redirect('/');
 })
 app.use('/api/data/v1/form', formRoutes);
-app.get('/health', checkHealth);
+
 
 if (envConfig.ENVIRONMENT !== 'local') {
     app.use(express.static(path.join(__dirname, 'public')));
