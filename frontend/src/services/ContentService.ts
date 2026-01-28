@@ -1,9 +1,7 @@
-import { ApiResponse, IHttpClient } from '../api/types';
+import { getClient, ApiResponse } from '../lib/http-client';
 
 export class ContentService {
-  constructor(private client: IHttpClient) {}
-
   public async getContent<T = any>(): Promise<ApiResponse<T>> {
-    return this.client.get<T>('/content');
+    return getClient().get<T>('/content');
   }
 }
