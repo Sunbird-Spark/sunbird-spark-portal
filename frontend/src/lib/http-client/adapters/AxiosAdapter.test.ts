@@ -23,6 +23,28 @@ describe('AxiosAdapter', () => {
     adapter = new AxiosAdapter({ baseURL: 'http://test.com' });
   });
 
+  it('should use default apiPrefix /portal if not provided', () => {
+    // Re-create adapter without baseURL to test default prefix logic
+    new AxiosAdapter({});
+    expect(axios.create).toHaveBeenCalledWith(expect.objectContaining({
+      baseURL: '/portal'
+    }));
+  });
+
+  it('should use provided apiPrefix', () => {
+    new AxiosAdapter({ apiPrefix: '/api' });
+    expect(axios.create).toHaveBeenCalledWith(expect.objectContaining({
+      baseURL: '/api'
+    }));
+  });
+
+  it('should combine baseURL and apiPrefix', () => {
+    new AxiosAdapter({ baseURL: 'http://host.com', apiPrefix: '/api' });
+    expect(axios.create).toHaveBeenCalledWith(expect.objectContaining({
+      baseURL: 'http://host.com/api'
+    }));
+  });
+
   it('should return ApiResponse on successful get', async () => {
     const mockResponse = { data: { id: 1 }, status: 200, headers: {} };
     mockAxiosInstance.get.mockResolvedValue(mockResponse);

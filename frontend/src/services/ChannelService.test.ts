@@ -20,8 +20,9 @@ describe('ChannelService', () => {
     const service = new ChannelService();
     const id = '12345';
 
+    // Service calls client with stripped path
     await service.read(id);
 
-    expect(mockClient.get).toHaveBeenCalledWith(`/api/channel/v1/read/${id}`);
+    expect(mockClient.get).toHaveBeenCalledWith(`/channel/v1/read/${id}`);
   });
 });

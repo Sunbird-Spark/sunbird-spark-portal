@@ -20,8 +20,9 @@ describe('OrganizationService', () => {
     const service = new OrganizationService();
     const payload = { request: { filters: { slug: 'sunbird', isTenant: true } } };
 
+    // Service calls client with stripped path
     await service.search(payload);
 
-    expect(mockClient.post).toHaveBeenCalledWith('/api/org/v2/search', payload);
+    expect(mockClient.post).toHaveBeenCalledWith('/org/v2/search', payload);
   });
 });

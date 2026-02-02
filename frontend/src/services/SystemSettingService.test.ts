@@ -20,8 +20,10 @@ describe('SystemSettingService', () => {
     const service = new SystemSettingService();
     const id = 'sys-123';
 
+    // Service calls client with stripped path
+    // Note: SystemSettingService now uses /data/... not /portal/data/...
     await service.read(id);
 
-    expect(mockClient.get).toHaveBeenCalledWith(`portal/data/v1/system/settings/get/${id}`);
+    expect(mockClient.get).toHaveBeenCalledWith(`/data/v1/system/settings/get/${id}`);
   });
 });

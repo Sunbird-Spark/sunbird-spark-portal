@@ -20,8 +20,9 @@ describe('FrameworkService', () => {
     const service = new FrameworkService();
     const id = 'fw-123';
 
+    // Service calls client with stripped path
     await service.read(id);
 
-    expect(mockClient.get).toHaveBeenCalledWith(`/api/framework/v1/read/${id}`);
+    expect(mockClient.get).toHaveBeenCalledWith(`/framework/v1/read/${id}`);
   });
 });

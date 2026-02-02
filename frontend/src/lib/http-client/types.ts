@@ -8,6 +8,7 @@ export type StatusHandlerConfig = Record<number, (res: ApiResponse<any>) => void
 
 export interface HttpClientConfig {
   baseURL?: string;
+  apiPrefix?: string;
   defaultHeaders?: Record<string, string>;
   statusHandlers?: StatusHandlerConfig;
 }

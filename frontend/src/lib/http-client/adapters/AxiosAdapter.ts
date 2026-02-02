@@ -8,8 +8,14 @@ export class AxiosAdapter extends BaseClient {
 
   constructor(config: HttpClientConfig) {
     super(config);
+    // Combine baseURL and apiPrefix.
+    // If baseURL is provided, it's the host. apiPrefix is the path.
+    // If baseURL is empty/undefined, we just use apiPrefix as the baseURL for relative requests.
+    const prefix = config.apiPrefix ?? '/portal';
+    const baseURL = config.baseURL ? `${config.baseURL}${prefix}` : prefix;
+
     this.client = axios.create({
-      baseURL: config.baseURL,
+      baseURL,
       headers: config.defaultHeaders,
     });
   }
