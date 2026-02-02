@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { BaseClient } from '../BaseClient';
-import { ApiResponse, HttpClientConfig } from '../types';
+import { ApiResponse, HeaderOperation, HttpClientConfig } from '../types';
 
 export class AxiosAdapter extends BaseClient {
   private client: AxiosInstance;
@@ -49,11 +49,15 @@ export class AxiosAdapter extends BaseClient {
     return this.request(() => this.client.delete<T>(url, { headers }));
   }
 
-  public setAuthHeader(token: string): void {
-    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-
-  public clearAuthHeader(): void {
-    delete this.client.defaults.headers.common['Authorization'];
+  public updateHeaders(headers: HeaderOperation[]): void {
+    headers.forEach(({ key, value, action }) => {
+      if (action === 'add') {
+        if (value) {
+          this.client.defaults.headers.common[key] = value;
+        }
+      } else if (action === 'remove') {
+        delete this.client.defaults.headers.common[key];
+      }
+    });
   }
 }

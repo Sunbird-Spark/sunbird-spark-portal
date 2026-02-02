@@ -12,11 +12,18 @@ export interface HttpClientConfig {
   statusHandlers?: StatusHandlerConfig;
 }
 
+export type HeaderAction = 'add' | 'remove';
+
+export interface HeaderOperation {
+  key: string;
+  value?: string;
+  action: HeaderAction;
+}
+
 export interface IHttpClient {
   get<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   post<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   put<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
-  setAuthHeader(token: string): void;
-  clearAuthHeader(): void;
+  updateHeaders(headers: HeaderOperation[]): void;
 }

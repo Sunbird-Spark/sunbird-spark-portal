@@ -51,14 +51,24 @@ describe('AxiosAdapter', () => {
     expect(result.status).toBe(403);
   });
 
-  it('should set auth header', () => {
-    adapter.setAuthHeader('token123');
+  it('should add headers using updateHeaders', () => {
+    adapter.updateHeaders([
+      { key: 'Authorization', value: 'Bearer token123', action: 'add' },
+      { key: 'X-Custom-Header', value: 'CustomValue', action: 'add' },
+    ]);
     expect(mockAxiosInstance.defaults.headers.common['Authorization']).toBe('Bearer token123');
+    expect(mockAxiosInstance.defaults.headers.common['X-Custom-Header']).toBe('CustomValue');
   });
 
-  it('should clear auth header', () => {
+  it('should remove headers using updateHeaders', () => {
     mockAxiosInstance.defaults.headers.common['Authorization'] = 'Bearer token123';
-    adapter.clearAuthHeader();
+    mockAxiosInstance.defaults.headers.common['X-Custom-Header'] = 'CustomValue';
+
+    adapter.updateHeaders([
+      { key: 'Authorization', action: 'remove' },
+    ]);
+
     expect(mockAxiosInstance.defaults.headers.common['Authorization']).toBeUndefined();
+    expect(mockAxiosInstance.defaults.headers.common['X-Custom-Header']).toBe('CustomValue');
   });
 });

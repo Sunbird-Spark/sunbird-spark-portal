@@ -3,6 +3,7 @@ import {
   HttpClientConfig,
   IHttpClient,
   StatusHandlerConfig,
+  HeaderOperation,
 } from './types';
 
 export abstract class BaseClient implements IHttpClient {
@@ -25,8 +26,7 @@ export abstract class BaseClient implements IHttpClient {
   protected abstract _put<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   protected abstract _delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
 
-  public abstract setAuthHeader(token: string): void;
-  public abstract clearAuthHeader(): void;
+  public abstract updateHeaders(headers: HeaderOperation[]): void;
 
   // Public API methods
   public async get<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
