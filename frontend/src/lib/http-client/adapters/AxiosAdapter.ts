@@ -21,8 +21,12 @@ export class AxiosAdapter extends BaseClient {
   }
 
   private mapResponse<T>(axiosResponse: AxiosResponse<T>): ApiResponse<T> {
+    const result = _.get(axiosResponse.data, 'result');
+    // If result exists and is not null/undefined, return result. Otherwise return full data.
+    const data = !_.isNil(result) ? result : axiosResponse.data;
+
     return {
-      data: axiosResponse.data,
+      data: data as T,
       status: axiosResponse.status,
       headers: axiosResponse.headers as Record<string, any>,
     };

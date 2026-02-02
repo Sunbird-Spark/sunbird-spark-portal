@@ -45,12 +45,46 @@ describe('AxiosAdapter', () => {
     }));
   });
 
-  it('should return ApiResponse on successful get', async () => {
-    const mockResponse = { data: { id: 1 }, status: 200, headers: {} };
+  it('should return result object if present in successful response', async () => {
+    const mockResult = { id: 1, name: 'test' };
+    const mockResponse = {
+      data: {
+        id: "api.test",
+        responseCode: "OK",
+        result: mockResult
+      },
+      status: 200,
+      headers: {}
+    };
     mockAxiosInstance.get.mockResolvedValue(mockResponse);
 
     const result = await adapter.get('/test');
-    expect(result).toEqual(mockResponse);
+    expect(result.data).toEqual(mockResult);
+    expect(result.status).toBe(200);
+  });
+
+  it('should return full data if result is missing in successful response', async () => {
+    const mockData = { id: 1, name: 'test' }; // No 'result' key
+    const mockResponse = { data: mockData, status: 200, headers: {} };
+    mockAxiosInstance.get.mockResolvedValue(mockResponse);
+
+    const result = await adapter.get('/test');
+    expect(result.data).toEqual(mockData);
+  });
+
+  it('should return full data on error response (without result)', async () => {
+    const mockData = { id: "api.error", errmsg: "Something went wrong" };
+    const mockResponse = { data: mockData, status: 500, headers: {} };
+
+    const error: any = new Error('Server Error');
+    error.isAxiosError = true;
+    error.response = mockResponse;
+
+    mockAxiosInstance.get.mockRejectedValue(error);
+
+    const result = await adapter.get('/test');
+    expect(result.data).toEqual(mockData);
+    expect(result.status).toBe(500);
   });
 
   it('should trigger status handler on specific status', async () => {
@@ -61,7 +95,6 @@ describe('AxiosAdapter', () => {
     });
 
     const mockResponse = { data: null, status: 403, headers: {} };
-    // Simulate axios throwing an error with response property
     const error: any = new Error('Forbidden');
     error.isAxiosError = true;
     error.response = mockResponse;
