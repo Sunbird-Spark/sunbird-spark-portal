@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { BaseClient } from '../BaseClient';
 import { ApiResponse, HeaderOperation, HttpClientConfig } from '../types';
+import _ from 'lodash';
 
 export class AxiosAdapter extends BaseClient {
   private client: AxiosInstance;
@@ -50,13 +51,13 @@ export class AxiosAdapter extends BaseClient {
   }
 
   public updateHeaders(headers: HeaderOperation[]): void {
-    headers.forEach(({ key, value, action }) => {
+    _.forEach(headers, ({ key, value, action }) => {
       if (action === 'add') {
         if (value) {
-          this.client.defaults.headers.common[key] = value;
+          _.set(this.client.defaults.headers.common, key, value);
         }
       } else if (action === 'remove') {
-        delete this.client.defaults.headers.common[key];
+        _.unset(this.client.defaults.headers.common, key);
       }
     });
   }
