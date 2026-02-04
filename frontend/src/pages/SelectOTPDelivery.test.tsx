@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
+import { OtpIdentifier } from './forgotPasswordTypes';
 
 // Mock Recaptcha
 vi.mock('react-google-recaptcha', () => {
@@ -26,7 +27,7 @@ vi.mock('@/lib/auth-utils', () => ({
 describe('SelectOTPDelivery', () => {
     const mockGenerateOtp = vi.fn();
     const mockOnSuccess = vi.fn();
-    const validIdentifiers = [
+    const validIdentifiers: OtpIdentifier[] = [
         { id: 'u1', type: 'phone', value: '9876543210' },
         { id: 'u1', type: 'email', value: 'test@test.com' }
     ];

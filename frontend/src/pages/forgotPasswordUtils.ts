@@ -1,7 +1,7 @@
-import { OtpIdentifier } from './forgotPasswordTypes';
+import { OtpIdentifier, IdentifierType } from './forgotPasswordTypes';
 
 export const buildValidIdentifiers = (results: any[]): OtpIdentifier[] => {
-    const keys = [
+    const keys: IdentifierType[] = [
         'phone',
         'email',
         'prevUsedEmail',

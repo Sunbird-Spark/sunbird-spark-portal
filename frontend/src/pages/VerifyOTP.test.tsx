@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { VerifyOTP } from './VerifyOTP';
+import { OtpIdentifier } from './forgotPasswordTypes';
 
 // Mock all external dependencies
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));
@@ -37,7 +38,7 @@ describe('VerifyOTP', () => {
     const mockVerifyOtp = vi.fn();
     const mockResetPassword = vi.fn();
     const mockGenerateOtp = vi.fn();
-    const selectedIdentifier = { id: 'u1', type: 'phone', value: '9876543210' };
+    const selectedIdentifier: OtpIdentifier = { id: 'u1', type: 'phone', value: '9876543210' };
 
     beforeEach(() => {
         vi.clearAllMocks();
