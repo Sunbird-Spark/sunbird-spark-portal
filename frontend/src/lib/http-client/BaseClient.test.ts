@@ -38,7 +38,6 @@ describe('BaseClient', () => {
         const mockResponse: ApiResponse<any> = {
             data: null,
             status: 401,
-            statusText: 'Unauthorized',
             headers: {}
         };
 
@@ -54,7 +53,6 @@ describe('BaseClient', () => {
         const mockResponse: ApiResponse<string> = {
             data: 'test-data',
             status: 200,
-            statusText: 'OK',
             headers: {}
         };
 

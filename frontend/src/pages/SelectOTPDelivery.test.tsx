@@ -112,12 +112,12 @@ describe('SelectOTPDelivery', () => {
         };
         mockGenerateOtp.mockRejectedValue(mockError);
 
-        // Mock window.location for redirectWithError
-        const originalLocation = window.location;
-        const mockLocation = new URL('http://test.com/forgot-password?error_callback=http://test.com');
-        // @ts-ignore
-        delete (window as any).location;
-        window.location = mockLocation as any;
+        vi.stubGlobal('location', {
+            href: 'http://test.com/forgot-password?error_callback=http://test.com',
+            search: '?error_callback=http://test.com',
+            assign: vi.fn(),
+            replace: vi.fn(),
+        });
 
         render(
             <SelectOTPDelivery
@@ -134,7 +134,5 @@ describe('SelectOTPDelivery', () => {
         await waitFor(() => {
             expect(window.location.href).toContain('Too+many+attempts');
         });
-
-        window.location = originalLocation;
     });
 });

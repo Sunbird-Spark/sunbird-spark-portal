@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildValidIdentifiers, redirectWithError } from './forgotPasswordUtils';
 
 describe('forgotPasswordUtils', () => {
@@ -55,17 +55,13 @@ describe('forgotPasswordUtils', () => {
     });
 
     describe('redirectWithError', () => {
-        const originalLocation = window.location;
-
         beforeEach(() => {
-            const mockLocation = new URL('http://test.com/forgot-password?error_callback=http://test.com/login');
-            // @ts-ignore
-            delete (window as any).location;
-            window.location = mockLocation as any;
-        });
-
-        afterEach(() => {
-            window.location = originalLocation;
+            vi.stubGlobal('location', {
+                href: 'http://test.com/forgot-password?error_callback=http://test.com/login',
+                search: '?error_callback=http://test.com/login',
+                assign: vi.fn(),
+                replace: vi.fn(),
+            });
         });
 
         it('should redirect with error_message if error_callback exists', () => {
@@ -76,7 +72,12 @@ describe('forgotPasswordUtils', () => {
         });
 
         it('should not redirect if error_callback does not exist', () => {
-            window.location.search = '';
+            vi.stubGlobal('location', {
+                href: 'http://test.com/forgot-password',
+                search: '',
+                assign: vi.fn(),
+                replace: vi.fn(),
+            });
             const initialHref = window.location.href;
 
             redirectWithError('Test error message');
