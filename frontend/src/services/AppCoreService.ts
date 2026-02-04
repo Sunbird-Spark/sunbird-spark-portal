@@ -48,15 +48,6 @@ class AppCoreService {
                 // Store in localStorage
                 setStorageItem('deviceId', deviceId);
 
-                const fingerprintData: FingerprintData = {
-                    deviceId,
-                    components,
-                    version,
-                    timestamp: Date.now()
-                };
-
-                setStorageItem('deviceFingerprint', JSON.stringify(fingerprintData));
-
                 resolve(deviceId);
             });
         });
