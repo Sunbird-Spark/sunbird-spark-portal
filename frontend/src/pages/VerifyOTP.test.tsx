@@ -16,7 +16,7 @@ vi.mock('react-google-recaptcha', () => ({
         return <div />;
     })
 }));
-vi.mock('@/lib/auth-utils', () => ({ OTP_REGEX: /^\d{6}$/ }));
+vi.mock('@/utils/validation-utils', () => ({ OTP_REGEX: /^\d{6}$/ }));
 vi.mock('./ForgotPasswordComponents', () => ({
     Header: ({ title, subtitle }: any) => (
         <div>

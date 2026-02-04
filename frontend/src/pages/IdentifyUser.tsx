@@ -3,7 +3,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { Input } from '@/components/input';
 import { Header, InputLabel, PrimaryButton } from './ForgotPasswordComponents';
 import { IdentifierStatus, OtpIdentifier } from './forgotPasswordTypes';
-import { IDENTIFIER_REGEX } from '@/lib/auth-utils';
+import { IDENTIFIER_REGEX } from '@/utils/validation-utils';
 import { buildValidIdentifiers, redirectWithError } from './forgotPasswordUtils';
 
 interface IdentifyUserProps {

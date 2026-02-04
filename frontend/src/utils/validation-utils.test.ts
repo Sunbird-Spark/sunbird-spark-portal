@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { IDENTIFIER_REGEX, OTP_REGEX, PASSWORD_REGEX, maskIdentifier } from './auth-utils';
+import { IDENTIFIER_REGEX, OTP_REGEX, PASSWORD_REGEX, maskIdentifier } from './validation-utils';
 
 describe('auth-utils', () => {
     describe('IDENTIFIER_REGEX', () => {
