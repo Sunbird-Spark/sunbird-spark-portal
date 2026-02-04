@@ -32,7 +32,7 @@ export const StepIdentification = ({
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder="Enter Email ID / Mobile Number"
-                    className="h-12 !bg-white rounded-[0.625rem] border-sunbird-ink/50 focus:border-sunbird-brick focus:ring-0 focus:shadow-[0_0_0_0.125rem_white,0_0_0_0.25rem_theme(colors.sunbird.brick)] px-4 text-[0.875rem] placeholder:text-sunbird-ink/40"
+                    className="fp-input-field"
                 />
                 <p className="text-[0.75rem] text-sunbird-ink mt-1">
                     Email (e.g. user@example.com) or Mobile Number (10 digits starting with 6-9)
@@ -45,7 +45,7 @@ export const StepIdentification = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter name"
-                    className="h-12 !bg-white rounded-[0.625rem] border-sunbird-ink/50 focus:border-sunbird-brick focus:ring-0 focus:shadow-[0_0_0_0.125rem_white,0_0_0_0.25rem_theme(colors.sunbird.brick)] px-4 text-[0.875rem] placeholder:text-sunbird-ink/40"
+                    className="fp-input-field"
                 />
             </div>
 
@@ -80,14 +80,14 @@ export const StepDeliveryOption = ({
         />
 
         <div className="space-y-5">
-            <p className="text-[0.875rem] font-medium text-center text-sunbird-ink">
+            <p className="fp-input-label font-medium text-center">
                 Where would you like to receive the OTP?
             </p>
 
             <div
-                className={`flex items-center gap-3 p-4 border rounded-[0.625rem] cursor-pointer transition-all ${isOtpSourceSelected
-                    ? 'border-sunbird-brick bg-sunbird-ivory shadow-[0_0_0_0.125rem_white,0_0_0_0.25rem_theme(colors.sunbird.brick)]'
-                    : 'border-sunbird-ink/50 bg-white'
+                className={`fp-radio-option ${isOtpSourceSelected
+                    ? 'fp-radio-option-active'
+                    : 'fp-radio-option-inactive'
                     }`}
                 onClick={() => setIsOtpSourceSelected(!isOtpSourceSelected)}
             >
@@ -95,9 +95,9 @@ export const StepDeliveryOption = ({
                     type="radio"
                     checked={isOtpSourceSelected}
                     onChange={() => setIsOtpSourceSelected(!isOtpSourceSelected)}
-                    className="w-4 h-4 accent-sunbird-brick"
+                    className="fp-radio-input"
                 />
-                <span className="text-[0.875rem] font-medium text-sunbird-ink">{maskedIdentifier}</span>
+                <span className="fp-input-label mb-0">{maskedIdentifier}</span>
             </div>
 
             <PrimaryButton

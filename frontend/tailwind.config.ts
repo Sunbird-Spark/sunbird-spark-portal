@@ -80,6 +80,8 @@ export default {
           moss: "#66a682",
           jamun: "#540f3b",
           lavender: "#99708a",
+          "theme-teal": "#4A8C8C",
+          charcoal: "#333333",
         },
       },
       borderRadius: {

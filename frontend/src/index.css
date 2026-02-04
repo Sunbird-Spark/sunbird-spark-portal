@@ -141,10 +141,61 @@
   }
 
   .auth-bg-wave {
-    background-image: url('./assets/auth-wave-bg.png');
+    background-image: url('./assets/auth-wave-bg.svg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+  }
+
+  .login-split-container {
+    @apply flex flex-col md:flex-row m-[0.625rem] md:m-auto bg-white rounded-[4rem] p-[0.375rem] relative z-10 shadow-2xl overflow-hidden w-[73.375rem] h-[40.625rem] min-h-[40.625rem];
+  }
+
+  /* AuthLayout Component Styles */
+  /* AuthLayout Component Styles */
+  .auth-wrapper {
+    @apply font-rubik min-h-screen w-full flex items-center justify-center relative bg-sunbird-theme-teal auth-bg-wave overflow-x-hidden;
+  }
+
+  .auth-left-panel {
+    @apply hidden md:flex flex-1 relative items-center justify-center overflow-hidden rounded-[3.5rem] auth-bg-wave;
+  }
+
+  .auth-left-panel-frame {
+    @apply absolute inset-0 z-[3] border-0 rounded-[3.5rem];
+    box-shadow: 0 0 0 2rem rgba(255, 255, 255, 0.05);
+  }
+
+  .auth-left-panel-content {
+    @apply absolute z-[2] left-10 bottom-10 max-w-[calc(100%-5rem)];
+  }
+
+  .auth-left-panel-title {
+    @apply !font-rubik text-[1.875rem] font-semibold text-white leading-[2.625rem];
+  }
+
+  .auth-right-panel {
+    @apply flex-[0.85] p-6 md:p-10 relative flex flex-col justify-center md:pt-8 pt-8;
+  }
+
+  .auth-close-btn {
+    @apply absolute top-5 right-5 p-2 text-sunbird-charcoal hover:opacity-70 transition-opacity z-20;
+  }
+
+  .auth-content-wrapper {
+    @apply mx-auto w-full max-w-sm flex flex-col justify-start;
+  }
+
+  .auth-logo-container {
+    @apply text-center mb-0;
+  }
+
+  .auth-logo-wrapper {
+    @apply mb-5;
+  }
+
+  .auth-logo-img {
+    @apply h-10 w-auto mx-auto;
   }
 
 }

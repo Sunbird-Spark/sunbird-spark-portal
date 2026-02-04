@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { AuthLayout } from '@/components/AuthLayout';
+import './forgot-password.css';
 import {
   IDENTIFIER_REGEX,
   OTP_REGEX,
