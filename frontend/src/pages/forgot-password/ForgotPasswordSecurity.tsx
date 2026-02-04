@@ -24,7 +24,7 @@ export const StepOtpVerification = ({
 
         <div className="space-y-5">
             <div className="space-y-6">
-                <p className="otp-validity-text text-center text-[0.85rem] text-[#4A5568]">
+                <p className="otp-validity-text text-center text-[0.85rem] text-sunbird-ink">
                     OTP is valid for 30 minutes
                 </p>
 
@@ -35,7 +35,7 @@ export const StepOtpVerification = ({
                             id={`otp-${index}`}
                             type="text"
                             maxLength={1}
-                            className="otp-input w-[3.25rem] h-[3.25rem] border-2 border-[#A85236] !bg-white rounded-[0.25rem] text-center text-[1.25rem] focus:outline-none focus:shadow-[0_0_0_0.125rem_rgba(167,58,36,0.2)]"
+                            className="otp-input w-[3.25rem] h-[3.25rem] border-[0.125rem] border-sunbird-brick !bg-white rounded-[0.25rem] text-center text-[1.25rem] focus:outline-none focus:ring-[0.125rem] focus:ring-sunbird-brick/20"
                             value={digit}
                             onChange={(e) => {
                                 const val = e.target.value.replace(/\D/g, '');
@@ -65,9 +65,9 @@ export const StepOtpVerification = ({
                     ))}
                 </div>
 
-                <div className="resend-otp-container text-center text-[0.875rem] font-medium text-[#4A5568] mt-6">
+                <div className="resend-otp-container text-center text-[0.875rem] font-medium text-sunbird-ink mt-6">
                     <span>04:00 </span>
-                    <button className="text-[#A85236] hover:underline font-semibold ml-1">
+                    <button className="text-sunbird-brick hover:underline font-semibold ml-1">
                         Resend OTP
                     </button>
                 </div>
@@ -126,18 +126,18 @@ export const StepResetPassword = ({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter New Password"
-                        className="h-12 !bg-white rounded-[0.625rem] border-[#828282] focus:border-[#A85236] focus:ring-0 focus:shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236] pr-12 px-4 text-[0.875rem] placeholder:text-[#B2B2B2]"
+                        className="h-12 !bg-white rounded-[0.625rem] border-sunbird-ink/50 focus:border-sunbird-brick focus:ring-0 focus:shadow-[0_0_0_0.125rem_white,0_0_0_0.25rem_theme(colors.sunbird.brick)] pr-12 px-4 text-[0.875rem] placeholder:text-sunbird-ink/40"
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#718096] hover:text-[#333] p-1"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-sunbird-ink/50 hover:text-sunbird-ink p-1"
                     >
                         {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                     </button>
                 </div>
                 <div className="h-[1.25rem] mt-1">
-                    <p className={`passwderr text-[0.75rem] text-[#C53030] ${(!isPasswordValid && password) ? '' : 'invisible'}`}>
+                    <p className={`passwderr text-[0.75rem] text-sunbird-brick ${(!isPasswordValid && password) ? '' : 'invisible'}`}>
                         Password must be 8+ chars with upper, lower, number & special character
                     </p>
                 </div>
@@ -152,18 +152,18 @@ export const StepResetPassword = ({
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm New Password"
-                        className="h-12 !bg-white rounded-[0.625rem] border-[#828282] focus:border-[#A85236] focus:ring-0 focus:shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236] pr-12 px-4 text-[0.875rem] placeholder:text-[#B2B2B2]"
+                        className="h-12 !bg-white rounded-[0.625rem] border-sunbird-ink/50 focus:border-sunbird-brick focus:ring-0 focus:shadow-[0_0_0_0.125rem_white,0_0_0_0.25rem_theme(colors.sunbird.brick)] pr-12 px-4 text-[0.875rem] placeholder:text-sunbird-ink/40"
                     />
                     <button
                         type="button"
                         onClick={() => setShowConfirmPassword((v) => !v)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#718096] hover:text-[#333] p-1"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-sunbird-ink/50 hover:text-sunbird-ink p-1"
                     >
                         {showConfirmPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                     </button>
                 </div>
                 <div className="h-[1.25rem] mt-1">
-                    <p className={`confpasswderr text-[0.75rem] text-[#C53030] ${(confirmPassword && password !== confirmPassword) ? '' : 'invisible'}`}>
+                    <p className={`confpasswderr text-[0.75rem] text-sunbird-brick ${(confirmPassword && password !== confirmPassword) ? '' : 'invisible'}`}>
                         Passwords do not match
                     </p>
                 </div>
@@ -189,7 +189,7 @@ export const StepSuccess = ({ handleProceed }: { handleProceed: () => void }) =>
         />
 
         <div className="flex justify-center mb-10">
-            <div className="success-icon w-[4.5rem] h-[4.5rem] rounded-full bg-[#2ECC71] flex items-center justify-center shadow-md">
+            <div className="success-icon w-[4.5rem] h-[4.5rem] rounded-full bg-sunbird-moss flex items-center justify-center shadow-md">
                 <FiCheck className="text-white text-4xl" />
             </div>
         </div>

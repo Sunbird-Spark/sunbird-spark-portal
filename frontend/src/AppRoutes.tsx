@@ -10,7 +10,7 @@ import WorkspacePage from './pages/WorkspacePage';
 import ReportsPage from './pages/ReportsPage';
 import CreateContentPage from './pages/CreateContentPage';
 import Index from './pages/Index';
-import ForgotPassword from './pages/ForgotPassword';
+import ForgotPassword from './pages/forgot-password/ForgotPassword';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);

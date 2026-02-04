@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import ForgotPassword from '../pages/ForgotPassword';
+import ForgotPassword from './ForgotPassword'
 
 // Mock AuthLayout
 vi.mock('@/components/AuthLayout', () => ({
