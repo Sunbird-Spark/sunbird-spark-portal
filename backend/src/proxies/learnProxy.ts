@@ -5,10 +5,10 @@ import { decorateRequestHeaders } from '../utils/proxyUtils.js';
 import logger from '../utils/logger.js';
 import { envConfig } from '../config/env.js';
 
-const USER_ORG_BASE_URL = envConfig.USER_ORG_BASE_URL;
+const LEARN_BASE_URL = envConfig.LEARN_BASE_URL;
 
-export const userOrgProxy = createProxyMiddleware({
-    target: USER_ORG_BASE_URL,
+export const learnProxy = createProxyMiddleware({
+    target: LEARN_BASE_URL,
     changeOrigin: true,
     pathRewrite: (path) => {
         if (path.startsWith('/portal/user/v1/fuzzy/search')) {
@@ -27,14 +27,12 @@ export const userOrgProxy = createProxyMiddleware({
     },
     on: {
         proxyReq: (proxyReq: http.ClientRequest, req: Request): void => {
-            logger.info(`Proxying request: ${req.method} ${req.originalUrl} to ${proxyReq.path}`);
             decorateRequestHeaders(proxyReq, req);
             if (req.body) {
                 fixRequestBody(proxyReq, req);
             }
         },
         proxyRes: (proxyRes: http.IncomingMessage, req: Request, res: Response) => {
-            logger.info(`Response from userOrgProxy: ${proxyRes.statusCode} ${proxyRes.statusMessage}`);
             if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
                 logger.error(`Error proxying request: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`,
                     {

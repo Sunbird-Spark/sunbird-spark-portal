@@ -18,7 +18,7 @@ export const envConfig = {
     PORTAL_REALM: env.PORTAL_REALM || 'sunbird',
     KEYCLOAK_BASE_SERVER_URL: env.KEYCLOAK_BASE_SERVER_URL || 'http://localhost:8080',
     PORTAL_AUTH_SERVER_CLIENT: env.PORTAL_AUTH_SERVER_CLIENT || 'portal',
-    USER_ORG_BASE_URL: env.USER_ORG_BASE_URL || 'http://userorg-service:9000',
+    LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
 
     // OPTIONAL ENVIRONMENT VARIABLES
     PORT: parseInt(env.PORT || '3000'),
