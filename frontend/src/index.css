@@ -135,11 +135,6 @@
     font-weight: 600;
   }
 
-  .rounded-none {
-    border-radius: 0.625rem;
-    /* 10px */
-  }
-
   .auth-bg-wave {
     background-image: url('./assets/auth-wave-bg.png');
     background-size: cover;

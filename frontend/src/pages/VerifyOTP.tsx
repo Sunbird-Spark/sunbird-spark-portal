@@ -144,7 +144,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
         <>
             <Header
                 title="Enter the code"
-                subtitle="Enter the 6 digit code sent to your phone number and complete the verification"
+                subtitle="Enter the 6 digit code sent to your email/phone number and complete the verification"
             />
 
             <div className="space-y-5">
