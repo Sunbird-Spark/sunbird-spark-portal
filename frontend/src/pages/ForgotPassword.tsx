@@ -5,6 +5,7 @@ import { Step, OtpIdentifier } from './forgotPasswordTypes';
 import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
+import { SystemSettingService } from '@/services/SystemSettingService';
 
 const ForgotPassword: React.FC = () => {
   const { mutateAsync: searchUser } = useLearnerFuzzySearch();
@@ -15,8 +16,18 @@ const ForgotPassword: React.FC = () => {
   const [step, setStep] = useState<Step>(1);
   const [validIdentifiers, setValidIdentifiers] = useState<OtpIdentifier[]>([]);
   const [selectedIdentifier, setSelectedIdentifier] = useState<OtpIdentifier | null>(null);
+  const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
 
-  const googleCaptchaSiteKey = '';
+  React.useEffect(() => {
+    const systemSettingService = new SystemSettingService();
+    systemSettingService.read('google_recaptcha_site_key')
+      .then(res => {
+        if (res.data?.result?.value) {
+          setGoogleCaptchaSiteKey(res.data.result.value);
+        }
+      })
+      .catch(err => console.error('Error fetching captcha site key:', err));
+  }, []);
 
   const handleIdentifySuccess = (identifiers: OtpIdentifier[]) => {
     setValidIdentifiers(identifiers);

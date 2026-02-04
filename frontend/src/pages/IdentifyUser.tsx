@@ -80,18 +80,25 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
 
             onSuccess(identifiers);
         } catch (error: any) {
-            setErrorCount(prev => prev + 1);
+            captchaRef.current?.reset();
+
             if (error?.response?.status === 418) {
                 setIdentifierStatus('VALIDATING_FAILED');
             } else {
                 setIdentifierStatus('NOT_MATCHED');
             }
-            if (errorCount + 1 >= 2) {
-                redirectWithError('You have exceeded maximum retry. Please try after some time');
+
+            const newErrorCount = errorCount + 1;
+            setErrorCount(newErrorCount);
+
+            if (newErrorCount >= 2) {
+                const redirected = redirectWithError('You have exceeded maximum retry. Please try after some time');
+                if (!redirected) {
+                    setLoading(false);
+                }
+            } else {
+                setLoading(false);
             }
-            captchaRef.current?.reset();
-        } finally {
-            setLoading(false);
         }
     };
 

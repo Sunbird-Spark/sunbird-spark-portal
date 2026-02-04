@@ -2,11 +2,11 @@ import React from 'react';
 import { FiCheck } from 'react-icons/fi';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
 
-interface PasswordResetSuccessProps {
-    onProceedToLogin: () => void;
+const onProceedToLogin = () => {
+    window.location.href = '/home';
 }
 
-export const PasswordResetSuccess: React.FC<PasswordResetSuccessProps> = ({ onProceedToLogin }) => {
+const PasswordResetSuccess: React.FC = () => {
     return (
         <div className="flex flex-col items-center">
             <Header
@@ -26,3 +26,5 @@ export const PasswordResetSuccess: React.FC<PasswordResetSuccessProps> = ({ onPr
         </div>
     );
 };
+
+export default PasswordResetSuccess;
