@@ -18,7 +18,6 @@ export const envConfig = {
     PORTAL_REALM: env.PORTAL_REALM || 'sunbird',
     KEYCLOAK_BASE_SERVER_URL: env.KEYCLOAK_BASE_SERVER_URL || 'http://localhost:8080',
     PORTAL_AUTH_SERVER_CLIENT: env.PORTAL_AUTH_SERVER_CLIENT || 'portal',
-    LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
 
     // OPTIONAL ENVIRONMENT VARIABLES
     PORT: parseInt(env.PORT || '3000'),
@@ -31,5 +30,6 @@ export const envConfig = {
     SUNBIRD_PORTAL_SESSION_STORE: env.SUNBIRD_PORTAL_SESSION_STORE || 'in-memory',
     GOOGLE_RECAPTCHA_VERIFY_URL: env.GOOGLE_RECAPTCHA_VERIFY_URL || 'https://www.google.com/recaptcha/api/siteverify',
     GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || '',
-    APPID: (env.ENVIRONMENT || 'local') + '.' + (env.SUNBIRD_PORTAL_INSTANCE || 'sunbird') + '.portal'
+    APPID: (env.ENVIRONMENT || 'local') + '.' + (env.SUNBIRD_PORTAL_INSTANCE || 'sunbird') + '.portal',
+    LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
 };
