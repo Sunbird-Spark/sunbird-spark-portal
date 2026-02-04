@@ -13,6 +13,7 @@ export const buildValidIdentifiers = (results: any[]): OtpIdentifier[] => {
     const list: OtpIdentifier[] = [];
 
     results.forEach(user => {
+        if (!user.id) return;
         keys.forEach(key => {
             if (user[key]) {
                 list.push({

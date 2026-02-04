@@ -52,6 +52,19 @@ describe('forgotPasswordUtils', () => {
             expect(types).toContain('recoveryEmail');
             expect(types).toContain('recoveryPhone');
         });
+
+        it('should skip users without an id', () => {
+            const users = [
+                {
+                    phone: '9876543210',
+                    email: 'user@example.com'
+                }
+            ];
+
+            const result = buildValidIdentifiers(users);
+
+            expect(result).toHaveLength(0);
+        });
     });
 
     describe('redirectWithError', () => {
