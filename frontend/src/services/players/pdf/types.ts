@@ -1,4 +1,5 @@
 import { PdfPlayerConfig, PdfPlayerOptions } from '../types';
+import React from 'react';
 
 // Declare the custom element for React/TypeScript
 declare global {
@@ -59,5 +60,6 @@ export interface SunbirdPdfPlayerConfig {
     isAvailableLocally?: boolean;
     basePath?: string;
     baseDir?: string;
+    [key: string]: any;
   };
 }

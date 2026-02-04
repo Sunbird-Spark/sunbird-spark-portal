@@ -7,10 +7,6 @@ import { SunbirdPdfPlayerConfig } from './types';
  */
 export class ContentPlayerService {
     private eventHandlers = new WeakMap<HTMLElement, { playerHandler: EventListener; telemetryHandler: EventListener }>();
-
-    /**
-     * Default player options
-     */
     private static readonly DEFAULT_OPTIONS: Required<PdfPlayerOptions> = {
         showShare: true,
         showDownload: true,
@@ -18,12 +14,8 @@ export class ContentPlayerService {
         showReplay: true,
         showExit: false,
     };
-
-    /**
-     * Default context configuration for telemetry
-     */
     private static readonly DEFAULT_CONTEXT = {
-        mode: "play" as const,
+        mode: "play",
         authToken: "",
         channel: "portal",
         pdata: {
@@ -44,37 +36,20 @@ export class ContentPlayerService {
             lastName: "User"
         }
     };
-
-    /**
-     * Default metadata configuration
-     */
     private static readonly DEFAULT_METADATA = {
         compatibilityLevel: 4,
         pkgVersion: 1,
     };
 
-    /**
-     * Get default player options
-     */
     getDefaultOptions(): PdfPlayerOptions {
         return { ...ContentPlayerService.DEFAULT_OPTIONS };
     }
-
-    /**
-     * Get merged options (defaults + custom)
-     */
     private getMergedOptions(customOptions?: PdfPlayerOptions): Required<PdfPlayerOptions> {
         return {
             ...ContentPlayerService.DEFAULT_OPTIONS,
             ...customOptions,
         };
     }
-
-    /**
-     * Creates a PDF player element with merged configuration
-     * @param config - Player configuration (required fields)
-     * @param options - Optional UI options (merged with defaults)
-     */
     createElement(config: PdfPlayerConfig, options?: PdfPlayerOptions): HTMLElement {
         if (!this.validateConfig(config)) {
             throw new Error('Invalid PDF player configuration');
@@ -165,13 +140,14 @@ export class ContentPlayerService {
         return {
             context: {
                 ...ContentPlayerService.DEFAULT_CONTEXT,
-                // Generate unique session/device IDs
-                sid: crypto.randomUUID(),
-                did: crypto.randomUUID(),
+                // Use provided session/device IDs or empty string
+                sid: config.sid || "",
+                did: config.did || "",
                 // Override with user-provided values if available
                 uid: config.userId || "anonymous",
                 authToken: config.userToken || "",
                 host: window.location.origin,
+                ...config.context,
             },
             config: {
                 sideMenu: {
@@ -195,6 +171,7 @@ export class ContentPlayerService {
                 isAvailableLocally: config.isAvailableLocally,
                 basePath: config.basePath,
                 baseDir: config.baseDir,
+                ...config.metadata
             }
         };
     }
@@ -207,8 +184,8 @@ export class ContentPlayerService {
         return {
             context: {
                 ...ContentPlayerService.DEFAULT_CONTEXT,
-                sid: crypto.randomUUID(),
-                did: crypto.randomUUID(),
+                sid: "",
+                did: "",
                 uid: "anonymous",
                 host: window.location.origin,
             },

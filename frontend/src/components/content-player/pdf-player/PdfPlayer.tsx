@@ -1,200 +1,164 @@
-import React, { useEffect, useRef } from 'react';
-import { ContentPlayerService, PdfPlayerConfig, PdfPlayerOptions, PdfPlayerEvent, PdfTelemetryEvent } from '../../../services/players';
-
-// Legacy interface for backward compatibility
-interface PlayerEvent {
-  type: string;
-  [key: string]: any;
-}
-
-interface TelemetryEvent {
-  eid: string;
-  [key: string]: any;
-}
+import React, { useEffect, useRef, useState } from 'react';
+import appCoreService from '../../../services/AppCoreService';
+import authService from '../../../services/AuthService';
+import { ContentPlayerService } from '../../../services/players/pdf/ContentPlayerService';
+import { PdfPlayerConfig } from '../../../services/players/types';
 
 interface PdfPlayerProps {
-  pdfUrl: string;
-  contentName?: string;
-  contentId?: string;
-  userId?: string;
-  userToken?: string;
-  onPlayerEvent?: (event: PlayerEvent) => void;
-  onTelemetryEvent?: (event: TelemetryEvent) => void;
-  showShare?: boolean;
-  showDownload?: boolean;
-  showPrint?: boolean;
-  showReplay?: boolean;
-  showExit?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
+    pdfUrl: string;
+    contentName?: string;
+    onPlayerEvent?: (event: any) => void;
+    onTelemetryEvent?: (event: any) => void;
+    showShare?: boolean;
+    showDownload?: boolean;
+    showPrint?: boolean;
 }
 
 const PdfPlayer: React.FC<PdfPlayerProps> = ({
-  pdfUrl,
-  contentName = 'PDF Document',
-  contentId,
-  userId,
-  userToken,
-  onPlayerEvent,
-  onTelemetryEvent,
-  showShare,
-  showDownload,
-  showPrint,
-  showReplay,
-  showExit,
-  className,
-  style,
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  // Using ContentPlayerService which has default configs
-  const playerServiceRef = useRef<ContentPlayerService>(new ContentPlayerService());
-
-  // Store the latest callbacks in refs to avoid recreating event listeners
-  const onPlayerEventRef = useRef(onPlayerEvent);
-  const onTelemetryEventRef = useRef(onTelemetryEvent);
-
-  // Update refs when callbacks change
-  useEffect(() => {
-    onPlayerEventRef.current = onPlayerEvent;
-    onTelemetryEventRef.current = onTelemetryEvent;
-  }, [onPlayerEvent, onTelemetryEvent]);
-
-  useEffect(() => {
-    const playerService = playerServiceRef.current;
-
-    try {
-      // Create player configuration (required fields only)
-      const config: PdfPlayerConfig = {
-        contentId: contentId || `pdf_${Date.now()}`,
-        contentName,
-        contentUrl: pdfUrl,
-        userId,
-        userToken,
-      };
-
-      // Options will be merged with service defaults
-      // Only pass values that differ from defaults or are explicitly set
-      const options: PdfPlayerOptions = {};
-      if (showShare !== undefined) options.showShare = showShare;
-      if (showDownload !== undefined) options.showDownload = showDownload;
-      if (showPrint !== undefined) options.showPrint = showPrint;
-      if (showReplay !== undefined) options.showReplay = showReplay;
-      if (showExit !== undefined) options.showExit = showExit;
-
-      // Convert service events to legacy format for backward compatibility
-      // Use refs to get the latest callback without triggering re-renders
-      const handlePlayerEvent = (event: PdfPlayerEvent) => {
-        const callback = onPlayerEventRef.current;
-        if (callback) {
-          // Extract type from the correct location in Sunbird event structure
-          // Sunbird events have: { eid: "EVENT", edata: { type: "EVENT" } }
-          const eventType = event.type || (event as any).edata?.type || (event as any).eid || 'UNKNOWN';
-
-          const legacyEvent: PlayerEvent = {
-            type: eventType,
-            playerId: event.playerId,
-            timestamp: event.timestamp,
-            ...Object.fromEntries(
-              Object.entries(event).filter(([key]) => !['type', 'playerId', 'timestamp'].includes(key))
-            )
-          };
-          callback(legacyEvent);
-        }
-      };
-
-      const handleTelemetryEvent = (event: PdfTelemetryEvent) => {
-        const callback = onTelemetryEventRef.current;
-        if (callback) {
-          // Use eid as the primary event identifier
-          const eventId = event.eid || (event as any).edata?.type || 'UNKNOWN';
-
-          const legacyEvent: TelemetryEvent = {
-            eid: eventId,
-            playerId: event.playerId,
-            timestamp: event.timestamp,
-            ...Object.fromEntries(
-              Object.entries(event).filter(([key]) => !['eid', 'playerId', 'timestamp'].includes(key))
-            )
-          };
-          callback(legacyEvent);
-        }
-      };
-
-      // Create the player element
-      const playerElement = playerService.createElement(config, options);
-
-      // Set up event listeners
-      playerService.attachEventListeners(
-        playerElement,
-        handlePlayerEvent,
-        handleTelemetryEvent
-      );
-
-      // Add to container
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-        containerRef.current.appendChild(playerElement);
-      }
-
-      // Cleanup function
-      return () => {
-        playerService.removeEventListeners(playerElement);
-        if (containerRef.current?.contains(playerElement)) {
-          containerRef.current.removeChild(playerElement);
-        }
-      };
-
-    } catch (error) {
-      console.error('PDF Player Error:', error);
-      if (containerRef.current) {
-        containerRef.current.innerHTML = `
-          <div style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            border: 2px dashed #dc3545;
-            border-radius: 8px;
-            background-color: #f8d7da;
-            color: #721c24;
-            text-align: center;
-            padding: 20px;
-          ">
-            <div>
-              <h4>PDF Player Error</h4>
-              <p>${error instanceof Error ? error.message : 'Unknown error occurred'}</p>
-            </div>
-          </div>
-        `;
-      }
-    }
-  }, [
-    // REMOVED: onPlayerEvent, onTelemetryEvent
-    // These are now handled via refs to prevent infinite loops
     pdfUrl,
-    contentName,
-    contentId,
-    userId,
-    userToken,
-    showShare,
-    showDownload,
-    showPrint,
-    showReplay,
-    showExit
-  ]);
+    contentName = 'PDF Document',
+    onPlayerEvent,
+    onTelemetryEvent,
+    showShare = true,
+    showDownload = true,
+    showPrint = true,
+}) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const playerElementRef = useRef<HTMLElement | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-  return (
-    <div
-      ref={containerRef}
-      className={className}
-      style={{
-        width: '100%',
-        height: '100%',
-        minHeight: '500px',
-        ...style
-      }}
-    />
-  );
+    useEffect(() => {
+        let mounted = true;
+        const playerService = new ContentPlayerService(); // Instantiated ContentPlayerService
+
+        const initializePlayer = async () => {
+            if (!containerRef.current) {
+                return;
+            }
+
+            try {
+                // Get device ID and session ID from services
+                const deviceId = await appCoreService.getDeviceId();
+                const authInfo = await authService.getAuthStatus(deviceId);
+                const sessionId = authInfo?.sid || 'anonymous-session';
+                const userId = authInfo?.uid || 'anonymous';
+
+                if (!mounted) return;
+
+                // Create configuration object
+                const config: PdfPlayerConfig = {
+                    contentId: 'pdf-content-' + Date.now(),
+                    contentName: contentName,
+                    contentUrl: pdfUrl,
+                    streamingUrl: pdfUrl,
+                    userId: userId,
+                    sid: sessionId,
+                    did: deviceId,
+                    metadata: {
+                        mimeType: 'application/pdf',
+                        contentType: 'Resource',
+                        primaryCategory: 'Learning Resource',
+                        status: 'Live',
+                        license: 'CC BY 4.0',
+                        mediaType: 'content',
+                        osId: 'org.sunbird.quiz.app',
+                        languageCode: ['en'],
+                        visibility: 'Default',
+                        audience: ['Student'],
+                        resourceType: 'Read',
+                    },
+                    context: {
+                        channel: 'sunbird-portal',
+                        tags: ['pdf'],
+                        contextRollup: { l1: 'sunbird-portal' },
+                        objectRollup: {},
+                        userData: { firstName: 'Guest', lastName: '' }
+                    }
+                };
+
+                const options = {
+                    showShare,
+                    showDownload,
+                    showPrint,
+                    showExit: false
+                };
+
+                const pdfElement = playerService.createElement(config, options); // Used service to create element
+
+                // Attach event listeners via service
+                playerService.attachEventListeners(
+                    pdfElement,
+                    (event) => {
+                        if (onPlayerEvent) onPlayerEvent(event);
+                    },
+                    (event) => {
+                        if (onTelemetryEvent) onTelemetryEvent(event);
+                    }
+                );
+
+                // Store reference to player element
+                playerElementRef.current = pdfElement;
+
+                // Append to container
+                if (containerRef.current && mounted) {
+                    containerRef.current.appendChild(pdfElement);
+                    setIsLoading(false);
+                }
+            } catch (error) {
+                setIsLoading(false);
+            }
+        };
+
+        initializePlayer();
+
+        // Cleanup function
+        return () => {
+            mounted = false;
+
+            if (playerElementRef.current) {
+                // Remove listeners via service
+                playerService.removeEventListeners(playerElementRef.current);
+
+                // Remove from DOM if still attached
+                if (playerElementRef.current.parentNode) {
+                    playerElementRef.current.parentNode.removeChild(playerElementRef.current);
+                }
+
+                playerElementRef.current = null;
+            }
+        };
+    }, [pdfUrl, contentName, onPlayerEvent, onTelemetryEvent, showShare, showDownload, showPrint]);
+
+    return (
+        <div
+            ref={containerRef}
+            style={{
+                width: '100%',
+                height: '100%',
+                display: 'block',
+                position: 'relative',
+            }}
+        >
+            {isLoading && (
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#666',
+                    fontSize: '16px',
+                    backgroundColor: '#f9f9f9',
+                }}>
+                    Loading PDF Player...
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default PdfPlayer;
+

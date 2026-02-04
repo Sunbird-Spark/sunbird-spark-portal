@@ -6,7 +6,7 @@ This directory contains a simplified service-based architecture for handling PDF
 
 ### Core Components
 
-1. **PdfPlayerService** (`pdf/PdfPlayerService.ts`)
+1. **ContentPlayerService** (`pdf/ContentPlayerService.ts`)
    - Handles PDF content using Sunbird PDF Player web component
    - Manages player lifecycle and event handling
    - Converts between service and Sunbird player configurations
@@ -38,9 +38,9 @@ import PdfPlayer from '../components/PdfPlayer';
 #### Direct Service Usage
 
 ```tsx
-import { PdfPlayerService } from '../services/players';
+import { ContentPlayerService } from '../services/players';
 
-const pdfService = new PdfPlayerService();
+const pdfService = new ContentPlayerService();
 
 const config = {
   contentId: 'pdf-123',

@@ -8,6 +8,7 @@ import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
 import { destroySession } from './utils/sessionUtils.js';
 import formRoutes from './routes/formsRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 import { redirectTenant } from './controllers/tenantController.js';
@@ -78,6 +79,7 @@ app.all('/portal/logout', async (req, res) => {
     res.redirect('/');
 })
 app.use('/api/data/v1/form', formRoutes);
+app.use('/portal/user/v1/auth', authRoutes);
 
 
 if (envConfig.ENVIRONMENT !== 'local') {

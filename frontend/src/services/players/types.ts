@@ -11,6 +11,10 @@ export interface PdfPlayerConfig {
   isAvailableLocally?: boolean;
   basePath?: string;
   baseDir?: string;
+  metadata?: any;
+  context?: any;
+  sid?: string;
+  did?: string;
 }
 
 export interface PdfPlayerOptions {
