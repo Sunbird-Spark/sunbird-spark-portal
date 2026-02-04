@@ -1,3 +1,5 @@
+
+
 // TypeScript interfaces for device fingerprinting
 interface FingerprintData {
     deviceId: string;
@@ -12,7 +14,7 @@ interface SunbirdTelemetry {
 
 declare global {
     interface Window {
-        SunbirdTelemetry: SunbirdTelemetry;
+        EkTelemetry: SunbirdTelemetry;
     }
 }
 
@@ -23,9 +25,6 @@ declare global {
 class AppCoreService {
     private static instance: AppCoreService;
     private deviceId: string | null = null;
-    private isLoaded: boolean = false;
-    private isLoading: boolean = false;
-    private callbacks: (() => void)[] = [];
 
     private constructor() {
         // Private constructor for singleton pattern
@@ -36,48 +35,6 @@ class AppCoreService {
             AppCoreService.instance = new AppCoreService();
         }
         return AppCoreService.instance;
-    }
-
-    // Load the telemetry SDK from CDN
-    private async loadTelemetrySDK(): Promise<void> {
-        if (this.isLoaded) return Promise.resolve();
-        if (this.isLoading) {
-            return new Promise<void>(resolve => this.callbacks.push(resolve));
-        }
-
-        this.isLoading = true;
-
-        return new Promise<void>((resolve, reject) => {
-            // Check if already available
-            if (window.SunbirdTelemetry) {
-                this.isLoaded = true;
-                this.isLoading = false;
-                this.callbacks.forEach(cb => cb());
-                this.callbacks = [];
-                resolve();
-                return;
-            }
-
-            // Load script from CDN
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@project-sunbird/telemetry-sdk@0.0.29/index.js';
-            script.async = true;
-
-            script.onload = () => {
-                this.isLoaded = true;
-                this.isLoading = false;
-                this.callbacks.forEach(cb => cb());
-                this.callbacks = [];
-                resolve();
-            };
-
-            script.onerror = () => {
-                this.isLoading = false;
-                reject(new Error('Failed to load telemetry SDK from CDN'));
-            };
-
-            document.head.appendChild(script);
-        });
     }
 
     async getDeviceId(): Promise<string> {
@@ -93,16 +50,14 @@ class AppCoreService {
             return stored;
         }
 
-        // Load SDK and generate device ID
-        await this.loadTelemetrySDK();
-
+        // Generate device ID using telemetry SDK
         return new Promise<string>((resolve, reject) => {
-            if (!window.SunbirdTelemetry) {
-                reject(new Error('SunbirdTelemetry SDK not available'));
+            if (!window.EkTelemetry) {
+                reject(new Error('SunbirdTelemetry SDK not available (EkTelemetry not found on window)'));
                 return;
             }
 
-            window.SunbirdTelemetry.getFingerPrint((deviceId: string, components: any[], version: string) => {
+            window.EkTelemetry.getFingerPrint((deviceId: string, components: any[], version: string) => {
                 this.deviceId = deviceId;
 
                 // Store in localStorage
