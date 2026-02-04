@@ -74,7 +74,7 @@ const ForgotPassword: React.FC = () => {
   const captchaRefP2 = useRef<ReCAPTCHA>(null);
 
   // Use Google ReCAPTCHA v2 Test Key for development/localhost to avoid "Captcha encountered an error"
-  const googleCaptchaSiteKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+  const googleCaptchaSiteKey = '';
 
 
   /* -------------------- Validators ---------------------- */
