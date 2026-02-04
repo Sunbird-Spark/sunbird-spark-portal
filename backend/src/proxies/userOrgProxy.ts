@@ -5,26 +5,25 @@ import { decorateRequestHeaders } from '../utils/proxyUtils.js';
 import logger from '../utils/logger.js';
 import { envConfig } from '../config/env.js';
 
-const KONG_URL = envConfig.KONG_URL;
+const USER_ORG_BASE_URL = envConfig.USER_ORG_BASE_URL;
 
-export const kongProxy = createProxyMiddleware({
-    target: KONG_URL,
+export const userOrgProxy = createProxyMiddleware({
+    target: USER_ORG_BASE_URL,
     changeOrigin: true,
-    secure: false,
     pathRewrite: (path) => {
-        if (path.startsWith('/portal/anonymous/otp/v1/generate')) {
+        if (path.startsWith('/portal/user/v1/fuzzy/search')) {
             return path.replace(
-                '/portal/anonymous/otp/v1/generate',
-                '/otp/v1/generate'
+                '/portal/user/v1/fuzzy/search',
+                '/private/user/v1/search'
             );
         }
-        if (path.startsWith('/portal/otp/v1/verify')) {
+        if (path.startsWith('/portal/user/v1/password/reset')) {
             return path.replace(
-                '/portal/otp/v1/verify',
-                '/otp/v1/verify'
+                '/portal/user/v1/password/reset',
+                '/private/user/v1/password/reset'
             );
         }
-        return path.replace('/portal', '/api');
+        return path.replace('/portal', '');
     },
     on: {
         proxyReq: (proxyReq: http.ClientRequest, req: Request): void => {
@@ -35,6 +34,7 @@ export const kongProxy = createProxyMiddleware({
             }
         },
         proxyRes: (proxyRes: http.IncomingMessage, req: Request, res: Response) => {
+            logger.info(`Response from userOrgProxy: ${proxyRes.statusCode} ${proxyRes.statusMessage}`);
             if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
                 logger.error(`Error proxying request: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`,
                     {
@@ -44,6 +44,6 @@ export const kongProxy = createProxyMiddleware({
                     }
                 );
             }
-        }
+        },
     },
 });

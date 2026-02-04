@@ -16,6 +16,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
+import { userOrgProxy } from './proxies/userOrgProxy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,7 +42,7 @@ app.use(session({
     }
 }), registerDeviceWithKong());
 
-app.get('/portal/login',
+app.get('/home',
     session({
         name: CookieNames.AUTH,
         store: sessionStore,
@@ -61,10 +62,10 @@ app.get('/portal/login',
                 if (err) {
                     logger.error('Error saving session', err);
                 }
-                res.redirect('/resourcepage');
+                res.redirect('/onboarding');
             });
         } else {
-            res.redirect('/resourcepage');
+            res.redirect('/');
         }
     });
 
@@ -79,15 +80,15 @@ app.all('/portal/logout', async (req, res) => {
 })
 app.use('/api/data/v1/form', formRoutes);
 
+app.use(express.static(path.join(__dirname, 'public')));
 
-if (envConfig.ENVIRONMENT !== 'local') {
-    app.use(express.static(path.join(__dirname, 'public')));
-}
+app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userOrgProxy);
+app.post('/portal/user/v1/password/reset', userOrgProxy);
+app.post('/portal/otp/v1/verify', kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',
     '/portal/user/v1/exists/phone/:phoneNumber',
-    '/portal/user/v1/fuzzy/search',
     '/portal/user/v1/get/phone/*rest',
     '/portal/user/v1/get/email/*rest',
     '/portal/anonymous/otp/v1/generate',
@@ -98,8 +99,6 @@ app.all('/portal/*rest', kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 
-if (envConfig.ENVIRONMENT !== 'local') {
-    app.get(/.*/, (req, res) => {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    });
-}
+app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
