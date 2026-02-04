@@ -16,7 +16,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
-import { learnProxy } from './proxies/LearnProxy.js';
+import { learnProxy } from './proxies/learnProxy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
