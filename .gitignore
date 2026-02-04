@@ -72,3 +72,6 @@ pnpm-debug.log*
 # Misc
 # =========================
 *.local
+
+# PDF font maps
+*.bcmap
