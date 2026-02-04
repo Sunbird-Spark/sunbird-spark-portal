@@ -37,6 +37,31 @@ class AppCoreService {
         return AppCoreService.instance;
     }
 
+    private getStorageItem(key: string): string | null {
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+            console.warn('LocalStorage access failed:', e);
+            return null;
+        }
+    }
+
+    private setStorageItem(key: string, value: string): void {
+        try {
+            localStorage.setItem(key, value);
+        } catch (e) {
+            console.warn('LocalStorage write failed:', e);
+        }
+    }
+
+    private removeStorageItem(key: string): void {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {
+            console.warn('LocalStorage remove failed:', e);
+        }
+    }
+
     async getDeviceId(): Promise<string> {
         // Return cached device ID if available
         if (this.deviceId) {
@@ -44,7 +69,7 @@ class AppCoreService {
         }
 
         // Check localStorage first
-        const stored = localStorage.getItem('deviceId');
+        const stored = this.getStorageItem('deviceId');
         if (stored) {
             this.deviceId = stored;
             return stored;
@@ -61,7 +86,7 @@ class AppCoreService {
                 this.deviceId = deviceId;
 
                 // Store in localStorage
-                localStorage.setItem('deviceId', deviceId);
+                this.setStorageItem('deviceId', deviceId);
 
                 const fingerprintData: FingerprintData = {
                     deviceId,
@@ -70,7 +95,7 @@ class AppCoreService {
                     timestamp: Date.now()
                 };
 
-                localStorage.setItem('deviceFingerprint', JSON.stringify(fingerprintData));
+                this.setStorageItem('deviceFingerprint', JSON.stringify(fingerprintData));
 
                 resolve(deviceId);
             });
@@ -78,7 +103,7 @@ class AppCoreService {
     }
 
     getFingerprintData(): FingerprintData | null {
-        const stored = localStorage.getItem('deviceFingerprint');
+        const stored = this.getStorageItem('deviceFingerprint');
         if (stored) {
             try {
                 return JSON.parse(stored) as FingerprintData;
@@ -91,11 +116,9 @@ class AppCoreService {
 
     clearDeviceId(): void {
         this.deviceId = null;
-        localStorage.removeItem('deviceId');
-        localStorage.removeItem('deviceFingerprint');
+        this.removeStorageItem('deviceId');
+        this.removeStorageItem('deviceFingerprint');
     }
-
-
 
     async getDeviceInfo(): Promise<{
         deviceId: string;
@@ -114,7 +137,7 @@ class AppCoreService {
     }
 
     hasDeviceId(): boolean {
-        return localStorage.getItem('deviceId') !== null;
+        return this.getStorageItem('deviceId') !== null;
     }
 
     async initialize(): Promise<void> {
