@@ -1,15 +1,17 @@
 
 
 // TypeScript interfaces for device fingerprinting
+type FingerprintComponent = unknown;
+
 interface FingerprintData {
     deviceId: string;
-    components: any[];
+    components: FingerprintComponent[];
     version: string;
     timestamp: number;
 }
 
 interface SunbirdTelemetry {
-    getFingerPrint: (callback: (deviceId: string, components: any[], version: string) => void) => void;
+    getFingerPrint: (callback: (deviceId: string, components: FingerprintComponent[], version: string) => void) => void;
 }
 
 declare global {
@@ -82,7 +84,7 @@ class AppCoreService {
                 return;
             }
 
-            window.EkTelemetry.getFingerPrint((deviceId: string, components: any[], version: string) => {
+            window.EkTelemetry.getFingerPrint((deviceId: string, components: FingerprintComponent[], version: string) => {
                 this.deviceId = deviceId;
 
                 // Store in localStorage
