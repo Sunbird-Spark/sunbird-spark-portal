@@ -11,6 +11,8 @@ import ReportsPage from './pages/ReportsPage';
 import CreateContentPage from './pages/CreateContentPage';
 import Index from './pages/Index';
 
+import PdfPlayerDemo from './pages/PdfPlayerDemo';
+
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
@@ -30,6 +32,8 @@ const AppRoutes: React.FC = () => {
         <Route path="/workspace" element={<WorkspaceProtected />} />
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentProtected />} />
+        <Route path="/pdf-demo" element={<PdfPlayerDemo />} />
+        
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
