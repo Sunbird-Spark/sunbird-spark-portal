@@ -1,6 +1,6 @@
 import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
-import sunbirdLogo from "@/assets/sunbird-logo.png";
+import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 const Footer = () => {
@@ -51,9 +51,9 @@ const Footer = () => {
           {/* Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <a href="/" className="flex items-center gap-2 mb-4">
-              <img 
-                src={sunbirdLogo} 
-                alt="Sunbird Spark" 
+              <img
+                src={sunbirdLogo}
+                alt="Sunbird Spark"
                 className="h-10 w-auto brightness-0 invert"
               />
             </a>

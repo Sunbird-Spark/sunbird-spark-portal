@@ -1,5 +1,5 @@
 import { FiLoader } from "react-icons/fi";
-import sunbirdLogo from "@/assets/sunbird-logo.png";
+import sunbirdLogo from "@/assets/sunbird-logo.svg";
 
 interface PageLoaderProps {
   message?: string;
@@ -11,9 +11,9 @@ const PageLoader = ({ message = "Loading..." }: PageLoaderProps) => {
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-lg animate-pulse">
-            <img 
-              src={sunbirdLogo} 
-              alt="Loading" 
+            <img
+              src={sunbirdLogo}
+              alt="Loading"
               className="h-10 w-10 object-contain brightness-0 invert"
             />
           </div>
