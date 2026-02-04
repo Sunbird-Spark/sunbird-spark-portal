@@ -5,7 +5,6 @@ import { Step, OtpIdentifier } from './forgotPasswordTypes';
 import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
-import { PasswordResetSuccess } from './PasswordResetSuccess';
 
 const ForgotPassword: React.FC = () => {
   const { mutateAsync: searchUser } = useLearnerFuzzySearch();
@@ -59,11 +58,6 @@ const ForgotPassword: React.FC = () => {
           />
         )}
 
-        {step === 4 && (
-          <PasswordResetSuccess
-            onProceedToLogin={() => window.location.href = '/login'}
-          />
-        )}
       </div>
     </AuthLayout>
   );
