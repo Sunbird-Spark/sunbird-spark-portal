@@ -64,14 +64,15 @@ describe('forgotPasswordUtils', () => {
             });
         });
 
-        it('should redirect with error_message if error_callback exists', () => {
-            redirectWithError('Test error message');
+        it('should redirect and return true if error_callback exists', () => {
+            const result = redirectWithError('Test error message');
+            expect(result).toBe(true);
 
             const expectedUrl = 'http://test.com/login?error_callback=http%3A%2F%2Ftest.com%2Flogin&error_message=Test+error+message';
             expect(window.location.href).toBe(expectedUrl);
         });
 
-        it('should not redirect if error_callback does not exist', () => {
+        it('should not redirect and return false if error_callback does not exist', () => {
             vi.stubGlobal('location', {
                 href: 'http://test.com/forgot-password',
                 search: '',
@@ -80,7 +81,8 @@ describe('forgotPasswordUtils', () => {
             });
             const initialHref = window.location.href;
 
-            redirectWithError('Test error message');
+            const result = redirectWithError('Test error message');
+            expect(result).toBe(false);
 
             expect(window.location.href).toBe(initialHref);
         });

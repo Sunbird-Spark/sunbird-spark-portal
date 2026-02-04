@@ -27,11 +27,13 @@ export const buildValidIdentifiers = (results: any[]): OtpIdentifier[] => {
     return list;
 };
 
-export const redirectWithError = (message: string) => {
+export const redirectWithError = (message: string): boolean => {
     const params = new URLSearchParams(window.location.search);
     params.set('error_message', message);
     const errorCallback = params.get('error_callback');
     if (errorCallback) {
         window.location.href = `${errorCallback}?${params.toString()}`;
+        return true;
     }
+    return false;
 };

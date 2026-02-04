@@ -55,18 +55,27 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
 
             onSuccess(selectedIdentifier);
         } catch (error: any) {
+            captchaRef.current?.reset();
+
             if (error?.response?.status === 429) {
-                redirectWithError(error?.response?.data?.params?.errmsg || 'Too many requests. Please try again later.');
+                const redirected = redirectWithError(error?.response?.data?.params?.errmsg || 'Too many requests. Please try again later.');
+                if (!redirected) {
+                    setLoading(false);
+                }
                 return;
             }
 
-            setErrorCount(prev => prev + 1);
-            if (errorCount + 1 >= 2) {
-                redirectWithError('Generate OTP failed. Please try again later');
+            const newErrorCount = errorCount + 1;
+            setErrorCount(newErrorCount);
+
+            if (newErrorCount >= 2) {
+                const redirected = redirectWithError('Generate OTP failed. Please try again later');
+                if (!redirected) {
+                    setLoading(false);
+                }
+            } else {
+                setLoading(false);
             }
-            captchaRef.current?.reset();
-        } finally {
-            setLoading(false);
         }
     };
 

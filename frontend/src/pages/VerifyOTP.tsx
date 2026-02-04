@@ -86,16 +86,20 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             const remaining = err?.response?.data?.result?.remainingAttempt;
 
             if (remaining === 0) {
-                redirectWithError('You have exceeded maximum retry. Please login again.');
-            } else if (remaining) {
-                setOtpError(`Invalid OTP. You have ${remaining} attempt(s) remaining.`);
+                const redirected = redirectWithError('You have exceeded maximum retry. Please login again.');
+                if (!redirected) {
+                    setLoading(false);
+                }
             } else {
-                setOtpError('Invalid OTP. Please try again.');
+                if (remaining) {
+                    setOtpError(`Invalid OTP. You have ${remaining} attempt(s) remaining.`);
+                } else {
+                    setOtpError('Invalid OTP. Please try again.');
+                }
+                setLoading(false);
             }
 
             setOtp(new Array(6).fill(''));
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -130,12 +134,17 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
 
             setResendOtpCounter(prev => prev + 1);
         } catch (error: any) {
-            if (error?.response?.status === 429) {
-                setOtpError(error?.response?.data?.params?.errmsg || 'Too many requests. Please try again later.');
-            } else {
-                setOtpError('Resend OTP failed. Please try again.');
-            }
             captchaRef.current?.reset();
+
+            if (error?.response?.status === 429) {
+                const redirected = redirectWithError(error?.response?.data?.params?.errmsg || 'Too many requests. Please try again later.');
+                if (!redirected) {
+                    setDisableResendOtp(false);
+                }
+                return;
+            }
+
+            setOtpError('Resend OTP failed. Please try again.');
             setDisableResendOtp(false);
         }
     };
