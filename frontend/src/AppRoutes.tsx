@@ -12,8 +12,6 @@ import CreateContentPage from './pages/CreateContentPage';
 import Index from './pages/Index';
 import PdfPlayerDemo from './pages/PdfPlayerDemo';
 
-import PdfPlayerDemo from './pages/PdfPlayerDemo';
-
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
