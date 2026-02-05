@@ -65,7 +65,7 @@ app.get('/home',
                 if (err) {
                     logger.error('Error saving session', err);
                 }
-                res.redirect('/onboarding');
+                res.redirect('/home');
             });
         } else {
             res.redirect('/');
