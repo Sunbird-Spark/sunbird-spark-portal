@@ -7,7 +7,7 @@ export class OtpService {
     ): Promise<ApiResponse<any>> {
         const query = captchaResponse ? `?captchaResponse=${encodeURIComponent(captchaResponse)}` : '';
         return getClient().post(
-            `/anonymous/otp/v1/generate${query}`,
+            `/otp/v1/generate${query}`,
             request
         );
     }
