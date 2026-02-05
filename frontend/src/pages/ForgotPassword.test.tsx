@@ -14,8 +14,12 @@ vi.mock('@/components/AuthLayout', () => ({
 }));
 
 // Mock hooks
-vi.mock('@/hooks/useLearner', () => ({
+vi.mock('@/hooks/useUser', () => ({
     useLearnerFuzzySearch: vi.fn(() => ({ mutateAsync: vi.fn() })),
+    useResetPassword: vi.fn(() => ({ mutateAsync: vi.fn() })),
+}));
+
+vi.mock('@/hooks/useOtp', () => ({
     useGenerateOtp: vi.fn(() => ({ mutateAsync: vi.fn() })),
     useVerifyOtp: vi.fn(() => ({ mutateAsync: vi.fn() })),
     useResetPassword: vi.fn(() => ({ mutateAsync: vi.fn() }))
