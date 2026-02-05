@@ -92,9 +92,9 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
                         placeholder="Enter Email ID / Mobile Number"
-                        className="h-12 !bg-white rounded-[0.625rem] border-[#828282] focus:border-[#A85236] focus:ring-0 focus:shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236] px-4 text-[0.875rem] placeholder:text-[#B2B2B2]"
+                        className="login-input-field"
                     />
-                    <p className="text-[0.75rem] text-[#757575] mt-1">
+                    <p className="login-form-instruction">
                         Email (e.g. user@example.com) or Mobile Number (10 digits starting with 6-9)
                     </p>
                 </div>
@@ -105,10 +105,10 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Enter name"
-                        className="h-12 !bg-white rounded-[0.625rem] border-[#828282] focus:border-[#A85236] focus:ring-0 focus:shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236] px-4 text-[0.875rem] placeholder:text-[#B2B2B2]"
+                        className="login-input-field"
                     />
                     {identifierStatus && (
-                        <p className="text-red-600 text-sm mt-2">
+                        <p className="login-error-message">
                             {identifierStatus === 'NOT_MATCHED' && 'Email / mobile number or name does not match'}
                             {identifierStatus === 'MATCHED' && 'Name does not match our records'}
                             {identifierStatus === 'VALIDATING_FAILED' && 'Captcha validation failed'}

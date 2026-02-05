@@ -158,7 +158,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
 
             <div className="space-y-5">
                 <div className="space-y-6">
-                    <p className="otp-validity-text text-center text-[0.85rem] text-[#4A5568]">
+                    <p className="otp-validity-info">
                         OTP is valid for 30 minutes
                     </p>
 
@@ -168,7 +168,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                         <button
                             disabled={disableResendOtp}
                             onClick={handleResendOtp}
-                            className={`text-[#A85236] font-semibold ml-1 ${disableResendOtp ? 'opacity-50 cursor-not-allowed' : 'hover:underline'}`}
+                            className="resend-otp-btn"
                         >
                             Resend OTP {counter > 0 && `(${counter})`}
                         </button>

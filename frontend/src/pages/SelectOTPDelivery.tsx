@@ -87,25 +87,22 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
             />
 
             <div className="space-y-5">
-                <p className="text-[0.875rem] font-medium text-center text-[#222222]">
+                <p className="delivery-prompt">
                     Where would you like to receive the OTP?
                 </p>
                 {validIdentifiers.map(identifier => (
                     <div
                         key={`${identifier.type}-${identifier.value}`}
-                        className={`flex items-center gap-3 p-4 border rounded-[0.625rem] cursor-pointer
-              ${selectedIdentifier?.value === identifier.value
-                                ? 'border-[#A85236] bg-[#FFF5F2] shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236]'
-                                : 'border-[#828282] bg-[#ffffff]'}`}
+                        className={`delivery-option ${selectedIdentifier?.value === identifier.value ? 'delivery-option-selected' : ''}`}
                         onClick={() => setSelectedIdentifier(identifier)}
                     >
                         <input
                             type="radio"
                             checked={selectedIdentifier?.value === identifier.value}
                             readOnly
-                            className="w-4 h-4 accent-[#A85236]"
+                            className="delivery-radio"
                         />
-                        <span className="text-[0.875rem] font-medium text-[#4A5568]">{maskIdentifier(identifier.value)}</span>
+                        <span className="delivery-text">{maskIdentifier(identifier.value)}</span>
                     </div>
                 ))}
 

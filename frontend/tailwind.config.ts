@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Noto Sans', 'system-ui', 'sans-serif'],
+        rubik: ['Rubik', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

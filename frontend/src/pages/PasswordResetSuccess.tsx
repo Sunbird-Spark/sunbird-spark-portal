@@ -15,8 +15,8 @@ const PasswordResetSuccess: React.FC = () => {
             />
 
             <div className="flex justify-center mb-10">
-                <div className="success-icon w-[4.5rem] h-[4.5rem] rounded-full bg-[#2ECC71] flex items-center justify-center shadow-md">
-                    <FiCheck className="text-white text-4xl" />
+                <div className="success-icon-container">
+                    <FiCheck className="success-icon-check" />
                 </div>
             </div>
 
