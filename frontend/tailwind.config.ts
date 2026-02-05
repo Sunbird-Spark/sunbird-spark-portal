@@ -3,20 +3,20 @@ import animate from "tailwindcss-animate";
 
 export default {
   darkMode: "class",
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx,css}"],
   prefix: "",
   theme: {
     container: {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "87.5rem",
       },
     },
     extend: {
       fontFamily: {
-        sans: ['Rubik', 'system-ui', 'sans-serif'],
         rubik: ['Rubik', 'sans-serif'],
+        sans: ['Noto Sans', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -63,33 +63,42 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+
         // Sunbird custom colors
         sunbird: {
           "dark-blue": "hsl(var(--sunbird-dark-blue))",
           yellow: "hsl(var(--sunbird-yellow))",
           "light-blue": "hsl(var(--sunbird-light-blue))",
           "medium-blue": "hsl(var(--sunbird-medium-blue))",
-          ginger: "#cc8545",
-          brick: "#a85236",
-          sunflower: "#ffdb73",
-          ivory: "#fffef4",
-          ink: "#376673",
-          wave: "#70edbf",
-          leaf: "#a1a603",
-          forest: "#82a668",
-          moss: "#66a682",
-          jamun: "#540f3b",
-          lavender: "#99708a",
-          "theme-teal": "#4A8C8C",
-          charcoal: "#333333",
+          ginger: "hsl(var(--sunbird-ginger))",
+          brick: "hsl(var(--sunbird-brick))",
+          sunflower: "hsl(var(--sunbird-sunflower))",
+          ivory: "hsl(var(--sunbird-ivory))",
+          ink: "hsl(var(--sunbird-ink))",
+          wave: "hsl(var(--sunbird-wave))",
+          leaf: "hsl(var(--sunbird-leaf))",
+          forest: "hsl(var(--sunbird-forest))",
+          moss: "hsl(var(--sunbird-moss))",
+          jamun: "hsl(var(--sunbird-jamun))",
+          lavender: "hsl(var(--sunbird-lavender))",
+          "theme-teal": "hsl(var(--sunbird-theme-teal))",
+          charcoal: "hsl(var(--sunbird-charcoal))",
+          obsidian: "hsl(var(--sunbird-obsidian))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-        xl: "calc(var(--radius) + 4px)",
-        "2xl": "calc(var(--radius) + 8px)",
+        md: "calc(var(--radius) - 0.125rem)",
+        sm: "calc(var(--radius) - 0.25rem)",
+        xs: "0.625rem",
+        xxs: "0.25rem",
+        xl: "calc(var(--radius) + 0.25rem)",
+        "2xl": "calc(var(--radius) + 0.5rem)",
+      },
+      spacing: {
+        '13': '3.25rem',
+        '18': '4.5rem',
+        '100': '25rem',
       },
       keyframes: {
         "accordion-down": {
@@ -111,7 +120,7 @@ export default {
         "fade-in": {
           from: {
             opacity: "0",
-            transform: "translateY(10px)",
+            transform: "translateY(0.625rem)",
           },
           to: {
             opacity: "1",
