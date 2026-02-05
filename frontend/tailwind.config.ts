@@ -90,7 +90,7 @@ export default {
           "gray-4a": "hsl(var(--sunbird-gray-4a))",
           "success-green": "hsl(var(--sunbird-success-green))",
           "orange-light": "hsl(var(--sunbird-orange-light))",
-          "white": "hsl(var(--sunbird-white))",
+          "base-white": "hsl(var(--sunbird-white))",
         },
       },
       borderRadius: {
