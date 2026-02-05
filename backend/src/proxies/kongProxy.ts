@@ -11,20 +11,8 @@ export const kongProxy = createProxyMiddleware({
     target: KONG_URL,
     changeOrigin: true,
     secure: false,
-    pathRewrite: (path) => {
-        if (path.startsWith('/portal/anonymous/otp/v1/generate')) {
-            return path.replace(
-                '/portal/anonymous/otp/v1/generate',
-                '/otp/v1/generate'
-            );
-        }
-        if (path.startsWith('/portal/otp/v1/verify')) {
-            return path.replace(
-                '/portal/otp/v1/verify',
-                '/otp/v1/verify'
-            );
-        }
-        return path.replace('/portal', '/api');
+    pathRewrite: {
+        '^/portal': '/api'
     },
     on: {
         proxyReq: (proxyReq: http.ClientRequest, req: Request): void => {

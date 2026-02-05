@@ -20,7 +20,7 @@ const ForgotPassword: React.FC = () => {
 
   React.useEffect(() => {
     const systemSettingService = new SystemSettingService();
-    systemSettingService.read('google_recaptcha_site_key')
+    systemSettingService.read('portal_google_recaptcha_site_key')
       .then(res => {
         if (res.data?.result?.value) {
           setGoogleCaptchaSiteKey(res.data?.result?.value);

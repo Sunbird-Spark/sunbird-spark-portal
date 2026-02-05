@@ -22,6 +22,7 @@ vi.mock('../config/env.js', () => ({
         SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
         KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'test-loggedin-bearer-token',
         KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
+        KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-anonymous-token',
         KEYCLOAK_BASE_SERVER_URL: 'http://localhost:8080'
     }
 }));
@@ -107,28 +108,29 @@ describe('Kong Auth Service', () => {
             );
         });
 
-        it('should throw error when configuration is missing', async () => {
+        it('should return fallback token when configuration is missing', async () => {
             vi.resetModules();
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_URL: undefined,
-                    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: undefined
+                    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: undefined,
+                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-anonymous-token'
                 }
             }));
 
             const { generateKongToken } = await import('./kongAuthService.js');
-            await expect(generateKongToken(mockRequest as Request))
-                .rejects.toThrow('Device registration configuration missing');
+            const token = await generateKongToken(mockRequest as Request);
+            expect(token).toBe('fallback-anonymous-token');
         });
 
-        it('should throw error when API response fails', async () => {
+        it('should return fallback token when API response fails', async () => {
             const failureResponse = {
                 data: { params: { status: 'failed' }, result: {} }
             };
             mockedAxiosPost.mockResolvedValue(failureResponse);
 
-            await expect(generateKongToken(mockRequest as Request))
-                .rejects.toThrow('ANONYMOUS_KONG_TOKEN :: Anonymous Kong token generation failed with an unsuccessful response status');
+            const token = await generateKongToken(mockRequest as Request);
+            expect(token).toBe('fallback-anonymous-token');
         });
     });
 

@@ -82,6 +82,8 @@ app.use('/api/data/v1/form', formRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.post('/portal/data/v1/system/settings/get', kongProxy);
+
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, learnProxy);
 app.post('/portal/user/v1/password/reset', learnProxy);
 app.post('/portal/otp/v1/verify', kongProxy);
@@ -91,7 +93,7 @@ const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/phone/:phoneNumber',
     '/portal/user/v1/get/phone/*rest',
     '/portal/user/v1/get/email/*rest',
-    '/portal/anonymous/otp/v1/generate',
+    '/portal/otp/v1/generate',
 ];
 app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
