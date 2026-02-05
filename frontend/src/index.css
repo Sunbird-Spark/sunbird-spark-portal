@@ -61,6 +61,35 @@
     --sunbird-medium-blue: 210 40% 65%;
     /* #80A7CE */
 
+    --sunbird-ginger: 28 57% 54%;
+    /* #cc8545 */
+    --sunbird-brick: 15 51% 44%;
+    /* #a85236 */
+    --sunbird-sunflower: 45 100% 73%;
+    /* #ffdb73 */
+    --sunbird-ivory: 55 100% 98%;
+    /* #fffef4 */
+    --sunbird-ink: 193 35% 33%;
+    /* #376673 */
+    --sunbird-wave: 158 78% 68%;
+    /* #70edbf */
+    --sunbird-leaf: 62 96% 33%;
+    /* #a1a603 */
+    --sunbird-forest: 95 26% 53%;
+    /* #82a668 */
+    --sunbird-moss: 146 26% 53%;
+    /* #66a682 */
+    --sunbird-jamun: 322 70% 19%;
+    /* #540f3b */
+    --sunbird-lavender: 322 17% 52%;
+    /* #99708a */
+    --sunbird-theme-teal: 180 31% 42%;
+    /* #4A8C8C */
+    --sunbird-charcoal: 0 0% 20%;
+    /* #333333 */
+    --sunbird-obsidian: 0 0% 13%;
+    /* #222222 */
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 12 50% 45%;
@@ -69,6 +98,25 @@
     --sidebar-accent-foreground: 0 0% 20%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 12 50% 45%;
+
+    /* Additional Sunbird Grays & System Colors */
+    --sunbird-gray-75: 0 0% 46%;
+    /* #757575 */
+    --sunbird-gray-82: 0 0% 51%;
+    /* #828282 */
+    --sunbird-gray-b2: 0 0% 70%;
+    /* #B2B2B2 */
+    --sunbird-gray-4a: 218 17% 35%;
+    /* #4A5568 */
+    --sunbird-success-green: 145 63% 49%;
+    /* #2ECC71 */
+    --sunbird-orange-light: 13 100% 97%;
+    /* #FFF5F2 */
+    --sunbird-white: 0 0% 100%;
+    /* #FFFFFF */
+
+    /* Box Shadows */
+    --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
   }
 
   .dark {
@@ -118,7 +166,7 @@
 
 @layer components {
   .login-wrapper {
-    @apply font-rubik min-h-screen w-full flex items-center justify-center relative bg-[#4A8C8C] auth-bg-wave overflow-x-hidden;
+    @apply font-rubik min-h-screen w-full flex items-center justify-center relative bg-sunbird-theme-teal auth-bg-wave overflow-x-hidden;
   }
 
   .login-split-container {
@@ -131,7 +179,7 @@
 
   .login-left-panel-container {
     @apply absolute inset-0 z-[3] border-0 rounded-[3.5rem];
-    box-shadow: 0 0 0 2rem rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 2rem hsl(var(--sunbird-white) / 0.05);
   }
 
   .left-panel-content {
@@ -147,7 +195,7 @@
   }
 
   .close-button {
-    @apply absolute top-5 right-5 p-2 text-[#333333] hover:opacity-70 transition-opacity z-20;
+    @apply absolute top-5 right-5 p-2 text-sunbird-charcoal hover:opacity-70 transition-opacity z-20;
   }
 
   .login-inner-container {
@@ -168,47 +216,47 @@
 
   /* Header & Labels */
   .login-header-title {
-    @apply !font-rubik text-[1.875rem] font-semibold text-[#222222] leading-[1.875rem] mb-2;
+    @apply !font-rubik text-[1.875rem] font-semibold text-sunbird-obsidian leading-[1.875rem] mb-2;
   }
 
   .login-header-subtitle {
-    @apply text-[0.875rem] font-normal text-[#757575] leading-relaxed mx-auto w-full px-4;
+    @apply text-[0.875rem] font-normal text-sunbird-gray-75 leading-relaxed mx-auto max-w-[20rem];
   }
 
   .login-input-label {
-    @apply block text-[0.875rem] font-medium text-[#757575] mb-2;
+    @apply block text-[0.875rem] font-normal text-sunbird-gray-75 mb-2;
   }
 
   /* Buttons */
   .login-primary-button {
-    @apply w-full h-[3.25rem] bg-[#A85236] !bg-[#A85236] text-white text-[1rem] font-medium rounded-[0.625rem] shadow-none border-none transition-all;
+    @apply w-full h-13 bg-sunbird-brick !bg-sunbird-brick text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all;
   }
 
   /* OTP Input */
   .otp-input-container {
-    @apply flex justify-between gap-2 max-w-[25rem] mx-auto;
+    @apply flex justify-between gap-2 max-w-100 mx-auto;
   }
 
   .otp-digit-input {
-    @apply w-[3.25rem] h-[3.25rem] border-2 border-[#A85236] !bg-white rounded-[0.25rem] text-center text-[1.25rem] focus:outline-none;
+    @apply w-13 h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1.25rem] focus:outline-none;
   }
 
   .otp-digit-input:focus {
-    @apply w-[3.25rem] h-[3.25rem] border-2 border-[#A85236] !bg-white rounded-[0.25rem] text-center text-[1.25rem] focus:outline-none;
-    box-shadow: 0 0 0 0.125rem #fff, 0 0 0 0.25rem #A85236;
+    @apply w-13 h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1.25rem] focus:outline-none;
+    box-shadow: var(--sunbird-focus-ring-shadow);
   }
 
   /* Form Elements */
   .login-input-field {
-    @apply h-[2.5rem] !bg-white !rounded-[0.5rem] border-[#828282] focus:border-[#A85236] focus:ring-0 px-4 text-[0.875rem] placeholder:text-[#B2B2B2];
+    @apply h-[3rem] !bg-white rounded-xs border-sunbird-gray-82 focus:border-sunbird-brick focus:ring-0 px-4 text-[0.875rem] placeholder:text-sunbird-gray-b2;
   }
 
   .login-input-field:focus {
-    box-shadow: 0 0 0 0.125rem #fff, 0 0 0 0.25rem #A85236;
+    box-shadow: var(--sunbird-focus-ring-shadow);
   }
 
   .login-form-instruction {
-    @apply text-[0.75rem] text-[#757575] mt-1;
+    @apply text-[0.75rem] text-sunbird-gray-75 mt-1;
   }
 
   .login-error-message {
@@ -217,7 +265,7 @@
 
   /* Success Icon */
   .success-icon-container {
-    @apply w-[4.5rem] h-[4.5rem] rounded-full bg-[#2ECC71] flex items-center justify-center shadow-md;
+    @apply w-18 h-18 rounded-full bg-sunbird-success-green flex items-center justify-center shadow-md;
   }
 
   .success-icon-check {
@@ -226,33 +274,33 @@
 
   /* Delivery Selection */
   .delivery-prompt {
-    @apply text-[0.875rem] font-medium text-center text-[#222222];
+    @apply text-[0.875rem] font-medium text-center text-sunbird-obsidian;
   }
 
   .delivery-option {
-    @apply flex items-center gap-3 p-4 border rounded-[0.625rem] cursor-pointer border-[#828282] bg-[#ffffff];
+    @apply flex items-center gap-3 p-4 border rounded-xs cursor-pointer border-sunbird-gray-82 bg-sunbird-base-white;
   }
 
   .delivery-option-selected {
-    @apply border-[#A85236] bg-[#FFF5F2];
-    box-shadow: 0 0 0 0.125rem #fff, 0 0 0 0.25rem #A85236;
+    @apply border-sunbird-brick bg-sunbird-orange-light;
+    box-shadow: var(--sunbird-focus-ring-shadow);
   }
 
   .delivery-radio {
-    @apply w-4 h-4 accent-[#A85236];
+    @apply w-4 h-4 accent-sunbird-brick;
   }
 
   .delivery-text {
-    @apply text-[0.875rem] font-medium text-[#4A5568];
+    @apply text-[0.875rem] font-medium text-sunbird-gray-4a;
   }
 
   /* OTP Verification Extra */
   .otp-validity-info {
-    @apply text-center text-[0.85rem] text-[#4A5568];
+    @apply text-center text-[0.85rem] text-sunbird-gray-4a;
   }
 
   .resend-otp-btn {
-    @apply text-[#A85236] font-semibold ml-1 hover:underline;
+    @apply text-sunbird-brick font-semibold ml-1 hover:underline;
   }
 
   .resend-otp-btn:disabled {

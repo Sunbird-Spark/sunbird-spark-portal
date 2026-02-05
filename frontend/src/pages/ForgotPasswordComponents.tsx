@@ -11,7 +11,7 @@ export const Header = ({ title, subtitle }: { title: string; subtitle?: string }
 export const InputLabel = ({ children, htmlFor, required }: { children: React.ReactNode, htmlFor?: string, required?: boolean }) => (
     <label htmlFor={htmlFor} className="login-input-label">
         {children}
-        {required && <span className="text-[#757575] ml-1">*</span>}
+        {required && <span className="text-sunbird-gray-75 ml-1">*</span>}
     </label>
 );
 

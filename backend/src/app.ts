@@ -17,11 +17,14 @@ import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
 import { userProxy } from './proxies/userProxy.js';
+import helmet from 'helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const app = express();
+app.set('trust proxy', true);
+app.use(helmet());
 
 loadTenants();
 app.use(cors());
