@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './AppRoutes';
 import AppCoreService from './services/AppCoreService';
-
 export default function App() {
   useEffect(() => {
     // Initialize AppCoreService (device ID and auth status) when app loads
