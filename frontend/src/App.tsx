@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppRoutes from './AppRoutes';
 import AppCoreService from './services/AppCoreService';
+
+const queryClient = new QueryClient();
 export default function App() {
   useEffect(() => {
     // Initialize AppCoreService (device ID and auth status) when app loads
@@ -16,8 +19,10 @@ export default function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

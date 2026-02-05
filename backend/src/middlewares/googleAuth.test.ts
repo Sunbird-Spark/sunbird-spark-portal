@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import axios from 'axios';
 
-vi.mock('axios');
+vi.mock('../services/googleService.js');
 vi.mock('../utils/logger.js', () => ({
 	default: {
 		info: vi.fn(),
@@ -46,19 +45,17 @@ describe('validateRecaptcha middleware', () => {
 	};
 
 	it('captcha is valid: should call the next function', async () => {
-		const validateRecaptcha = await importMiddleware();
-		mockRequest.query = { captchaResponse: 'valid-token' };
-
-		(axios.post as ReturnType<typeof vi.fn>).mockResolvedValue({
+		const { verifyRecaptcha: mockVerifyRecaptcha } = await import('../services/googleService.js');
+		(mockVerifyRecaptcha as Mock).mockResolvedValue({
 			data: { success: true }
 		});
 
+		const validateRecaptcha = await importMiddleware();
+		mockRequest.query = { captchaResponse: 'valid-token' };
+
 		await validateRecaptcha(mockRequest as Request, mockResponse as Response, mockNext);
 
-		expect(axios.post).toHaveBeenCalledWith(
-			baseEnvConfig.GOOGLE_RECAPTCHA_VERIFY_URL,
-			expect.any(URLSearchParams)
-		);
+		expect(mockVerifyRecaptcha).toHaveBeenCalledWith('valid-token');
 		expect(mockNext).toHaveBeenCalled();
 		expect(mockResponse.status as unknown as Mock).not.toHaveBeenCalled();
 	});
@@ -86,12 +83,13 @@ describe('validateRecaptcha middleware', () => {
 	});
 
 	it('should return 418 when Google responds with failure', async () => {
-		const validateRecaptcha = await importMiddleware();
-		mockRequest.query = { captchaResponse: 'invalid-token' };
-
-		(axios.post as ReturnType<typeof vi.fn>).mockResolvedValue({
+		const { verifyRecaptcha: mockVerifyRecaptcha } = await import('../services/googleService.js');
+		(mockVerifyRecaptcha as Mock).mockResolvedValue({
 			data: { success: false }
 		});
+
+		const validateRecaptcha = await importMiddleware();
+		mockRequest.query = { captchaResponse: 'invalid-token' };
 
 		await validateRecaptcha(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -100,12 +98,13 @@ describe('validateRecaptcha middleware', () => {
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('should return 418 when axios throws an error', async () => {
+	it('should return 418 when verifyRecaptcha throws an error', async () => {
+		const { verifyRecaptcha: mockVerifyRecaptcha } = await import('../services/googleService.js');
+		const apiError = new Error('Network error');
+		(mockVerifyRecaptcha as Mock).mockRejectedValue(apiError);
+
 		const validateRecaptcha = await importMiddleware();
 		mockRequest.query = { captchaResponse: 'any-token' };
-
-		const apiError = new Error('Network error');
-		(axios.post as ReturnType<typeof vi.fn>).mockRejectedValue(apiError);
 
 		await validateRecaptcha(mockRequest as Request, mockResponse as Response, mockNext);
 
