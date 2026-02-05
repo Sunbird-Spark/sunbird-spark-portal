@@ -9,19 +9,27 @@ import {
 } from './useLearner';
 import React from 'react';
 
-// Use vi.hoisted to create a mock that can be used in vi.mock and tests
-const { mockLearnerService } = vi.hoisted(() => ({
-    mockLearnerService: {
-        fuzzyUserSearch: vi.fn(),
+// Use vi.hoisted to create mocks that can be used in vi.mock and tests
+const { mockOtpService, mockUserService } = vi.hoisted(() => ({
+    mockOtpService: {
         generateOtp: vi.fn(),
         verifyOtp: vi.fn(),
+    },
+    mockUserService: {
+        fuzzyUserSearch: vi.fn(),
         resetPassword: vi.fn()
     }
 }));
 
-vi.mock('../services/LearnerService', () => ({
-    LearnerService: vi.fn(function () {
-        return mockLearnerService;
+vi.mock('../services/OtpService', () => ({
+    OtpService: vi.fn(function () {
+        return mockOtpService;
+    })
+}));
+
+vi.mock('../services/UserService', () => ({
+    UserService: vi.fn(function () {
+        return mockUserService;
     })
 }));
 
@@ -45,43 +53,44 @@ describe('useLearner hooks', () => {
         const { result } = renderHook(() => useLearnerFuzzySearch(), { wrapper });
         const request = { name: 'test' };
 
-        mockLearnerService.fuzzyUserSearch.mockResolvedValue({ data: 'success' });
+        mockUserService.fuzzyUserSearch.mockResolvedValue({ data: 'success' });
 
         await result.current.mutateAsync({ request });
 
-        expect(mockLearnerService.fuzzyUserSearch).toHaveBeenCalled();
+        expect(mockUserService.fuzzyUserSearch).toHaveBeenCalled();
     });
 
     it('useGenerateOtp calls service', async () => {
         const { result } = renderHook(() => useGenerateOtp(), { wrapper });
         const request = { userId: 'u1' };
 
-        mockLearnerService.generateOtp.mockResolvedValue({ data: 'success' });
+        mockOtpService.generateOtp.mockResolvedValue({ data: 'success' });
 
         await result.current.mutateAsync({ request });
 
-        expect(mockLearnerService.generateOtp).toHaveBeenCalled();
+        expect(mockOtpService.generateOtp).toHaveBeenCalled();
     });
 
     it('useVerifyOtp calls service', async () => {
         const { result } = renderHook(() => useVerifyOtp(), { wrapper });
         const request = { otp: '123456' };
 
-        mockLearnerService.verifyOtp.mockResolvedValue({ data: 'success' });
+        mockOtpService.verifyOtp.mockResolvedValue({ data: 'success' });
 
         await result.current.mutateAsync({ request });
 
-        expect(mockLearnerService.verifyOtp).toHaveBeenCalled();
+        expect(mockOtpService.verifyOtp).toHaveBeenCalled();
     });
 
     it('useResetPassword calls service', async () => {
         const { result } = renderHook(() => useResetPassword(), { wrapper });
         const request = { password: 'new' };
 
-        mockLearnerService.resetPassword.mockResolvedValue({ data: 'success' });
+        mockUserService.resetPassword.mockResolvedValue({ data: 'success' });
 
         await result.current.mutateAsync({ request });
 
-        expect(mockLearnerService.resetPassword).toHaveBeenCalled();
+        expect(mockUserService.resetPassword).toHaveBeenCalled();
     });
 });
+

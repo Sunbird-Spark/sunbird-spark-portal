@@ -1,8 +1,10 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
-import { LearnerService } from '../services/LearnerService';
+import { OtpService } from '../services/OtpService';
+import { UserService } from '../services/UserService';
 import { ApiResponse } from '../lib/http-client';
 
-const learnerService = new LearnerService();
+const otpService = new OtpService();
+const userService = new UserService();
 
 export const useLearnerFuzzySearch = (): UseMutationResult<
   ApiResponse<any>,
@@ -11,7 +13,7 @@ export const useLearnerFuzzySearch = (): UseMutationResult<
 > => {
   return useMutation({
     mutationFn: (variables: { request: any; captchaResponse?: string }) =>
-      learnerService.fuzzyUserSearch(variables.request, variables.captchaResponse),
+      userService.fuzzyUserSearch(variables.request, variables.captchaResponse),
   });
 };
 
@@ -22,7 +24,7 @@ export const useGenerateOtp = (): UseMutationResult<
 > => {
   return useMutation({
     mutationFn: (variables: { request: any; captchaResponse?: string }) =>
-      learnerService.generateOtp(variables.request, variables.captchaResponse),
+      otpService.generateOtp(variables.request, variables.captchaResponse),
   });
 };
 
@@ -33,7 +35,7 @@ export const useVerifyOtp = (): UseMutationResult<
 > => {
   return useMutation({
     mutationFn: (variables: { request: any }) =>
-      learnerService.verifyOtp(variables.request),
+      otpService.verifyOtp(variables.request),
   });
 };
 
@@ -44,6 +46,7 @@ export const useResetPassword = (): UseMutationResult<
 > => {
   return useMutation({
     mutationFn: (variables: { request: any }) =>
-      learnerService.resetPassword(variables.request),
+      userService.resetPassword(variables.request),
   });
 };
+
