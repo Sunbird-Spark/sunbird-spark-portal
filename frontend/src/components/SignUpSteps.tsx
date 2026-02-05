@@ -62,7 +62,7 @@ export const SignUpStep1 = ({
             {/* Form Fields */}
             <div className="space-y-3">
                 {/* Email / Mobile */}
-                <div className="form-group">
+                <div className="form-group relative pb-4">
                     <InputLabel required>Email ID / Mobile Number</InputLabel>
                     <Input
                         value={emailOrMobile}
@@ -72,14 +72,14 @@ export const SignUpStep1 = ({
                     />
                     {/* Inline Error (Optional/Complementary) */}
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
-                        <p className="text-[0.75rem] text-red-500 mt-1">
+                        <p className="text-[0.75rem] text-red-500 absolute bottom-0 left-0 pt-[5px]">
                             Enter valid Email or 10-digit Mobile (6-9)
                         </p>
                     )}
                 </div>
 
                 {/* Password */}
-                <div className="form-group">
+                <div className="form-group relative pb-4">
                     <InputLabel required>Password</InputLabel>
                     <div className="relative">
                         <Input
@@ -97,16 +97,16 @@ export const SignUpStep1 = ({
                             {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
                         </button>
                     </div>
+                    {/* Password Requirements */}
+                    {password && !PASSWORD_REGEX.test(password) && (
+                        <p className="text-[0.75rem] text-red-500 absolute bottom-0 left-0 leading-tight pt-[5px]">
+                            Password must be 8+ chars (upper, lower, num, special)
+                        </p>
+                    )}
                 </div>
-                {/* Password Requirements */}
-                {password && !PASSWORD_REGEX.test(password) && (
-                    <p className="text-[0.75rem] text-red-500 mt-1">
-                        Password must be 8+ chars with upper, lower, number & special character
-                    </p>
-                )}
 
                 {/* Confirm Password */}
-                <div className="form-group">
+                <div className="form-group relative pb-4">
                     <InputLabel required>Confirm Password</InputLabel>
                     <div className="relative">
                         <Input
@@ -125,7 +125,7 @@ export const SignUpStep1 = ({
                         </button>
                     </div>
                     {confirmPassword && password !== confirmPassword && (
-                        <p className="text-[0.75rem] text-red-500 mt-1">
+                        <p className="text-[0.75rem] text-red-500 absolute bottom-0 left-0 pt-[5px]">
                             Passwords do not match
                         </p>
                     )}
