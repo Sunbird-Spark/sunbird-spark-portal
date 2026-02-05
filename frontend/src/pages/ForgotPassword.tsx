@@ -19,15 +19,14 @@ const ForgotPassword: React.FC = () => {
   const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
 
   React.useEffect(() => {
-    // const systemSettingService = new SystemSettingService();
-    // systemSettingService.read('google_recaptcha_site_key')
-    //   .then(res => {
-    //     if (res.data?.result?.value) {
-    //       setGoogleCaptchaSiteKey('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI');
-    //     }
-    //   })
-    //   .catch(err => console.error('Error fetching captcha site key:', err));
-    setGoogleCaptchaSiteKey('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI');
+    const systemSettingService = new SystemSettingService();
+    systemSettingService.read('google_recaptcha_site_key')
+      .then(res => {
+        if (res.data?.result?.value) {
+          setGoogleCaptchaSiteKey(res.data?.result?.value);
+        }
+      })
+      .catch(err => console.error('Error fetching captcha site key:', err));
   }, []);
 
   const handleIdentifySuccess = (identifiers: OtpIdentifier[]) => {
