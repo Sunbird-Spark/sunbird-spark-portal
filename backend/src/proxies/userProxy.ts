@@ -7,7 +7,7 @@ import { envConfig } from '../config/env.js';
 
 const LEARN_BASE_URL = envConfig.LEARN_BASE_URL;
 
-export const learnProxy = createProxyMiddleware({
+export const userProxy = createProxyMiddleware({
     target: LEARN_BASE_URL,
     changeOrigin: true,
     pathRewrite: (path) => {

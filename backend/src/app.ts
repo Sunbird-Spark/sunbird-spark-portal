@@ -16,7 +16,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
-import { learnProxy } from './proxies/learnProxy.js';
+import { userProxy } from './proxies/userProxy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -84,8 +84,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/portal/data/v1/system/settings/get', kongProxy);
 
-app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, learnProxy);
-app.post('/portal/user/v1/password/reset', learnProxy);
+app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
+app.post('/portal/user/v1/password/reset', userProxy);
 app.post('/portal/otp/v1/verify', kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [

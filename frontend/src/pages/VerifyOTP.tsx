@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Header, PrimaryButton, OTPInput } from './ForgotPasswordComponents';
-import { OTP_REGEX } from '@/utils/validation-utils';
+import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { OtpIdentifier } from './forgotPasswordTypes';
 import { redirectWithError } from './forgotPasswordUtils';
 
