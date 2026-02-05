@@ -5,7 +5,7 @@ import { decorateRequestHeaders } from '../utils/proxyUtils.js';
 import logger from '../utils/logger.js';
 import { envConfig } from '../config/env.js';
 
-const KONG_URL = envConfig.KONG_URL;
+const KONG_URL = envConfig.KONG_URL || 'http://localhost:8000';
 
 export const kongProxy = createProxyMiddleware({
     target: KONG_URL,
