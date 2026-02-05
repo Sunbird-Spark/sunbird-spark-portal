@@ -176,7 +176,7 @@
   }
 
   .login-input-label {
-    @apply block text-[0.875rem] font-medium text-[#333] mb-2;
+    @apply block text-[0.875rem] font-medium text-[#757575] mb-2;
   }
 
   /* Buttons */
