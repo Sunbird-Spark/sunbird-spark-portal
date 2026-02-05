@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AuthLayout } from '@/components/AuthLayout';
-import { useLearnerFuzzySearch, useGenerateOtp, useVerifyOtp, useResetPassword } from '@/hooks/useLearner';
+import { useLearnerFuzzySearch, useResetPassword } from '@/hooks/useUser';
+import { useGenerateOtp, useVerifyOtp } from '@/hooks/useOtp';
 import { Step, OtpIdentifier } from './forgotPasswordTypes';
 import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
