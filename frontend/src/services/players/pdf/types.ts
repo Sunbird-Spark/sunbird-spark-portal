@@ -1,4 +1,3 @@
-import { PdfPlayerConfig, PdfPlayerOptions } from '../types';
 import React from 'react';
 
 // Declare the custom element for React/TypeScript
