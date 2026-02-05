@@ -108,7 +108,7 @@ describe('Kong Auth Service', () => {
             );
         });
 
-        it('should return fallback token when configuration is missing', async () => {
+        it('should throw error when configuration is missing', async () => {
             vi.resetModules();
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
@@ -119,18 +119,16 @@ describe('Kong Auth Service', () => {
             }));
 
             const { generateKongToken } = await import('./kongAuthService.js');
-            const token = await generateKongToken(mockRequest as Request);
-            expect(token).toBe('fallback-anonymous-token');
+            await expect(generateKongToken(mockRequest as Request)).rejects.toThrow('Device registration configuration missing');
         });
 
-        it('should return fallback token when API response fails', async () => {
+        it('should throw error when API response fails', async () => {
             const failureResponse = {
                 data: { params: { status: 'failed' }, result: {} }
             };
             mockedAxiosPost.mockResolvedValue(failureResponse);
 
-            const token = await generateKongToken(mockRequest as Request);
-            expect(token).toBe('fallback-anonymous-token');
+            await expect(generateKongToken(mockRequest as Request)).rejects.toThrow('ANONYMOUS_KONG_TOKEN :: Anonymous Kong token generation failed with an unsuccessful response status');
         });
     });
 
