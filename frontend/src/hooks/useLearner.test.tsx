@@ -16,7 +16,7 @@ const { mockOtpService, mockUserService } = vi.hoisted(() => ({
         verifyOtp: vi.fn(),
     },
     mockUserService: {
-        fuzzyUserSearch: vi.fn(),
+        searchUser: vi.fn(),
         resetPassword: vi.fn()
     }
 }));
@@ -51,13 +51,14 @@ describe('useLearner hooks', () => {
 
     it('useLearnerFuzzySearch calls service', async () => {
         const { result } = renderHook(() => useLearnerFuzzySearch(), { wrapper });
-        const request = { name: 'test' };
+        const identifier = 'test@example.com';
+        const name = 'John';
 
-        mockUserService.fuzzyUserSearch.mockResolvedValue({ data: 'success' });
+        mockUserService.searchUser.mockResolvedValue({ data: 'success' });
 
-        await result.current.mutateAsync({ request });
+        await result.current.mutateAsync({ identifier, name });
 
-        expect(mockUserService.fuzzyUserSearch).toHaveBeenCalled();
+        expect(mockUserService.searchUser).toHaveBeenCalledWith(identifier, name, undefined);
     });
 
     it('useGenerateOtp calls service', async () => {

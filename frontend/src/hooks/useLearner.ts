@@ -9,11 +9,11 @@ const userService = new UserService();
 export const useLearnerFuzzySearch = (): UseMutationResult<
   ApiResponse<any>,
   Error,
-  { request: any; captchaResponse?: string }
+  { identifier: string; name: string; captchaResponse?: string }
 > => {
   return useMutation({
-    mutationFn: (variables: { request: any; captchaResponse?: string }) =>
-      userService.fuzzyUserSearch(variables.request, variables.captchaResponse),
+    mutationFn: (variables: { identifier: string; name: string; captchaResponse?: string }) =>
+      userService.searchUser(variables.identifier, variables.name, variables.captchaResponse),
   });
 };
 

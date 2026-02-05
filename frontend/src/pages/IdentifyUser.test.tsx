@@ -97,16 +97,11 @@ describe('IdentifyUser', () => {
         fireEvent.click(screen.getByRole('button', { name: /continue/i }));
 
         await waitFor(() => {
-            expect(mockSearchUser).toHaveBeenCalledWith(expect.objectContaining({
-                request: expect.objectContaining({
-                    request: expect.objectContaining({
-                        filters: expect.objectContaining({
-                            $or: { phone: '9876543210', prevUsedPhone: '9876543210' }
-                        })
-                    })
-                }),
+            expect(mockSearchUser).toHaveBeenCalledWith({
+                identifier: '9876543210',
+                name: 'Test User',
                 captchaResponse: 'mock-token'
-            }));
+            });
         });
 
         await waitFor(() => {
@@ -138,15 +133,11 @@ describe('IdentifyUser', () => {
         fireEvent.click(screen.getByRole('button', { name: /continue/i }));
 
         await waitFor(() => {
-            expect(mockSearchUser).toHaveBeenCalledWith(expect.objectContaining({
-                request: expect.objectContaining({
-                    request: expect.objectContaining({
-                        filters: expect.objectContaining({
-                            $or: { email: 'test@test.com', prevUsedEmail: 'test@test.com' }
-                        })
-                    })
-                })
-            }));
+            expect(mockSearchUser).toHaveBeenCalledWith({
+                identifier: 'test@test.com',
+                name: 'Test User',
+                captchaResponse: 'mock-token'
+            });
         });
     });
 

@@ -8,7 +8,7 @@ import { buildValidIdentifiers, redirectWithError } from './forgotPasswordUtils'
 
 interface IdentifyUserProps {
     googleCaptchaSiteKey: string;
-    searchUser: (payload: any) => Promise<any>;
+    searchUser: (params: { identifier: string; name: string; captchaResponse?: string }) => Promise<any>;
     onSuccess: (identifiers: OtpIdentifier[]) => void;
 }
 
@@ -38,31 +38,7 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
     const initiateFuzzySearch = async (captchaResponse?: string) => {
         setLoading(true);
         try {
-            const isPhone = /^[6-9]\d{9}$/.test(identifier.trim());
-
-            const payload: any = {
-                request: {
-                    filters: {
-                        isDeleted: 'false',
-                        fuzzy: { firstName: name.trim() },
-                        $or: {},
-                    },
-                },
-            };
-
-            if (isPhone) {
-                payload.request.filters.$or = {
-                    phone: identifier.trim(),
-                    prevUsedPhone: identifier.trim(),
-                };
-            } else {
-                payload.request.filters.$or = {
-                    email: identifier.trim(),
-                    prevUsedEmail: identifier.trim(),
-                };
-            }
-
-            const response = await searchUser({ request: payload, captchaResponse });
+            const response = await searchUser({ identifier, name, captchaResponse });
             const users = response?.data?.response?.content || [];
             const identifiers = buildValidIdentifiers(users);
 
