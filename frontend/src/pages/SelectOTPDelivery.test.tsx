@@ -20,7 +20,7 @@ vi.mock('react-google-recaptcha', () => {
 });
 
 // Mock maskIdentifier
-vi.mock('@/utils/validation-utils', () => ({
+vi.mock('@/utils/ValidationUtils', () => ({
     maskIdentifier: (val: string) => `masked-${val}`
 }));
 
