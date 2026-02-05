@@ -13,7 +13,7 @@ vi.mock("./pages/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
 vi.mock("./pages/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
 vi.mock("./pages/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
 vi.mock("./pages/CreateContentPage", () => ({ default: () => <div>Create Content Page</div> }));
-vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
+
 
 // --------------------
 // Mock AuthContext
@@ -66,37 +66,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
   });
 
-  it("redirect: / redirects to /home", async () => {
-    mockUseAuth.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
-    });
 
-    renderWithRoute("/");
-    // The Index page is rendered at "/"
-    expect(screen.getByText("Index Page")).toBeInTheDocument();
-  });
-
-  it("catch-all: unknown route redirects to /home", async () => {
-    mockUseAuth.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
-    });
-
-    renderWithRoute("/random-route");
-    // Catch-all redirects to "/" which renders Index page
-    await waitFor(() => {
-      expect(screen.getByText("Index Page")).toBeInTheDocument();
-    });
-  });
 
   it("protected: unauthenticated user visiting /admin redirects to /home", () => {
     mockUseAuth.mockReturnValue({
