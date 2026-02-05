@@ -16,11 +16,7 @@
     "lint": "eslint src --ext ts,tsx",
     "lint:fix": "eslint src --ext ts,tsx --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "setup-assets": "node scripts/setup-pdf-assets.js",
-    "predev": "npm run setup-assets",
-    "prebuild": "npm run setup-assets",
-    "postinstall": "npm run setup-assets"
+    "format:check": "prettier --check ."
   },
   "keywords": [],
   "author": "sunbird",
