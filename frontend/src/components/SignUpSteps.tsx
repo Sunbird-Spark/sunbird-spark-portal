@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Checkbox } from "@/components/checkbox";
-import { Header, InputLabel, PrimaryButton } from "./AuthComponent";
+import { Header, InputLabel, PrimaryButton, OTPInput } from "../pages/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/lib/auth-utils";
@@ -39,7 +39,6 @@ export const SignUpStep1 = ({
         <Header
             title="Welcome to Sunbird!"
             subtitle="Your learning journey starts here–log in to continue."
-            className="mb-4"
         />
 
         <div className="space-y-3">
@@ -64,12 +63,12 @@ export const SignUpStep1 = ({
             <div className="space-y-3">
                 {/* Email / Mobile */}
                 <div className="form-group">
-                    <InputLabel required className="mb-1">Email ID / Mobile Number</InputLabel>
+                    <InputLabel required>Email ID / Mobile Number</InputLabel>
                     <Input
                         value={emailOrMobile}
                         onChange={(e) => setEmailOrMobile(e.target.value)}
                         placeholder="Enter Email ID / Mobile Number"
-                        className="h-10 !bg-white rounded-[0.5rem] border-[#828282] focus:border-[#A85236] focus:ring-0 focus:shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236] px-3 text-[0.875rem] placeholder:text-[#B2B2B2]"
+                        className="login-input-field h-10 px-3"
                     />
                     {/* Inline Error (Optional/Complementary) */}
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
@@ -81,14 +80,14 @@ export const SignUpStep1 = ({
 
                 {/* Password */}
                 <div className="form-group">
-                    <InputLabel required className="mb-1">Password</InputLabel>
+                    <InputLabel required>Password</InputLabel>
                     <div className="relative">
                         <Input
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter Password"
-                            className="h-10 !bg-white rounded-[0.5rem] border-[#828282] focus:border-[#A85236] focus:ring-0 focus:shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236] pr-10 px-3 text-[0.875rem] placeholder:text-[#B2B2B2]"
+                            className="login-input-field h-10 pr-10 px-3"
                         />
                         <button
                             type="button"
@@ -108,14 +107,14 @@ export const SignUpStep1 = ({
 
                 {/* Confirm Password */}
                 <div className="form-group">
-                    <InputLabel required className="mb-1">Confirm Password</InputLabel>
+                    <InputLabel required>Confirm Password</InputLabel>
                     <div className="relative">
                         <Input
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Re-enter Password"
-                            className="h-10 !bg-white rounded-[0.5rem] border-[#828282] focus:border-[#A85236] focus:ring-0 focus:shadow-[0_0_0_0.125rem_#fff,0_0_0_0.25rem_#A85236] pr-10 px-3 text-[0.875rem] placeholder:text-[#B2B2B2]"
+                            className="login-input-field h-10 pr-10 px-3"
                         />
                         <button
                             type="button"
@@ -184,42 +183,7 @@ export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2P
                     OTP is valid for 30 minutes
                 </p>
 
-                <div className="otp-container flex justify-between gap-2 max-w-[25rem] mx-auto">
-                    {otp.map((digit, index) => (
-                        <input
-                            key={index}
-                            id={`otp-${index}`}
-                            type="text"
-                            maxLength={1}
-                            className="otp-input w-[3.25rem] h-[3.25rem] border-2 border-[#A85236] !bg-white rounded-[0.25rem] text-center text-[1.25rem] focus:outline-none focus:shadow-[0_0_0_0.125rem_rgba(167,58,36,0.2)]"
-                            value={digit}
-                            onChange={(e) => {
-                                const val = e.target.value.replace(/\D/g, '');
-                                // If deleting
-                                if (!val && !e.target.value) {
-                                    const newOtp = [...otp];
-                                    newOtp[index] = '';
-                                    setOtp(newOtp);
-                                    return;
-                                }
-
-                                if (val) {
-                                    const newOtp = [...otp];
-                                    newOtp[index] = val;
-                                    setOtp(newOtp);
-                                    if (index < 5) {
-                                        document.getElementById(`otp-${index + 1}`)?.focus();
-                                    }
-                                }
-                            }}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Backspace' && !otp[index] && index > 0) {
-                                    document.getElementById(`otp-${index - 1}`)?.focus();
-                                }
-                            }}
-                        />
-                    ))}
-                </div>
+                <OTPInput otp={otp} setOtp={setOtp} />
 
                 <div className="resend-otp-container text-center text-[0.875rem] font-medium text-[#4A5568] mt-6">
                     <span>04:00 </span>
