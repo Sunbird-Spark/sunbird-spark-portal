@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/dropdown-menu";
-import sunbirdLogo from "@/assets/sunbird-logo.png";
+import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import { useAppI18n, type LanguageCode } from "@/hooks/useAppI18n";
 import { NotificationPopover } from "./NotificationPopover";
 
@@ -36,7 +36,7 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  
+
   const { t, languages, currentLanguage, changeLanguage, dir } = useAppI18n();
 
   const handleDeleteNotification = (id: string) => {
@@ -65,9 +65,9 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <a href="/" className="flex items-center">
-            <img 
-              src={sunbirdLogo} 
-              alt="Sunbird Spark" 
+            <img
+              src={sunbirdLogo}
+              alt="Sunbird Spark"
               className="h-10 w-auto"
             />
           </a>
@@ -126,7 +126,7 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <a href="/auth">
+            <a href="/home">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 {t("login")}
               </Button>
@@ -207,7 +207,7 @@ const Header = () => {
                 </a>
               ))}
               <div className="mt-4 px-4">
-                <a href="/auth" className="block">
+                <a href="/home" className="block">
                   <Button className="w-full bg-primary hover:bg-primary/90">
                     {t("login")}
                   </Button>
