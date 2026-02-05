@@ -75,3 +75,6 @@ pnpm-debug.log*
 
 # PDF font maps
 *.bcmap
+
+# Ignore SVGs in assets folder
+assets/**/*.svg

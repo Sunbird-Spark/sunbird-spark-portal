@@ -77,8 +77,8 @@ export class PdfPlayerService {
       context: {
         mode: "play",
         authToken: config.userToken || "",
-        sid: crypto.randomUUID(),
-        did: crypto.randomUUID(),
+        sid: config.sid || "",
+        did: config.did || "",
         uid: config.userId || "anonymous",
         channel: "portal",
         pdata: {
