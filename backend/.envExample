@@ -1,24 +1,33 @@
 # Server Configuration
-ENVIRONMENT=local
+NODE_ENV=test
+ENVIRONMENT=test
+PORT=3000
 
-DOMAIN_URL='https://dev.sunbirded.org'
-KONG_URL='http://localhost:8000'
+DOMAIN_URL=http://localhost:3000
+KONG_URL=http://localhost:8000
+
+# Logging Configuration
+SUNBIRD_PORTAL_LOG_LEVEL=error
 
 # Session Configuration
-SUNBIRD_ANONYMOUS_SESSION_SECRET=sunbird_anonymous_session_secret
-SUNBIRD_PORTAL_SESSION_STORE=memory
-SUNBIRD_LOGGEDIN_SESSION_SECRET=sunbird_loggedin_session_secret
+SUNBIRD_ANONYMOUS_SESSION_TTL=60000
+SUNBIRD_ANONYMOUS_SESSION_SECRET=test_anonymous_session_secret
+SUNBIRD_LOGGEDIN_SESSION_SECRET=test_loggedin_session_secret
+SUNBIRD_PORTAL_SESSION_STORE=in-memory
 
-# Kong Configuration
-KONG_ANONYMOUS_FALLBACK_TOKEN='your-fallback-token'
-KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN='your-register-token'
-KONG_LOGGEDIN_FALLBACK_TOKEN='your-loggedin-fallback-token'
-KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN='your-loggedin-register-token'
+# Kong Configuration (test tokens)
+KONG_ANONYMOUS_FALLBACK_TOKEN=test_anonymous_fallback_token
+KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN=test_anonymous_register_token
+KONG_LOGGEDIN_FALLBACK_TOKEN=test_loggedin_fallback_token
+KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN=test_loggedin_register_token
 
 # Keycloak Configuration
-PORTAL_REALM='sunbird'
-KEYCLOAK_BASE_SERVER_URL='http://localhost:8080'
-PORTAL_AUTH_SERVER_CLIENT='portal'
+PORTAL_REALM=sunbird
+KEYCLOAK_BASE_SERVER_URL=http://localhost:8080
+PORTAL_AUTH_SERVER_CLIENT=portal
 
-# Learn ServiceConfiguration
-LEARN_BASE_URL='http://userorg-service:9000'
+# Learn Service Configuration
+LEARN_BASE_URL=http://localhost:9000
+
+# Google reCAPTCHA (test values)
+GOOGLE_RECAPTCHA_SECRET=test_recaptcha_secret
