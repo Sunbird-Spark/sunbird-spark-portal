@@ -136,7 +136,7 @@
   }
 
   .auth-bg-wave {
-    background-image: url('./assets/auth-wave-bg.png');
+    background-image: url('./assets/auth-wave-bg.svg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

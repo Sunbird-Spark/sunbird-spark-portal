@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import sunbirdLogo from '@/assets/sunbird-logo.png';
+import sunbirdLogo from '@/assets/sunbird-logo.svg';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -54,7 +54,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose }) => {
           </button>
 
           <div className="mx-auto w-full max-w-sm flex flex-col justify-start">
-            <div className="logo-container text-center mb-8">
+            <div className="logo-container text-center">
               <div className="sunbird-logo mb-5">
                 <a href="/">
                   <img
