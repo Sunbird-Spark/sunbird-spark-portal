@@ -142,7 +142,21 @@ cd backend
 cp .envExample .env
 ```
 
-Then edit `backend/.env` with your actual configuration values (database credentials, API tokens, etc.).
+**Important**: After copying, edit `backend/.env` and make these changes for local development:
+
+1. **Change `ENVIRONMENT`** from `test` to `local`:
+   ```bash
+   ENVIRONMENT=local
+   ```
+
+2. **Remove or comment out `NODE_ENV`**:
+   ```bash
+   # NODE_ENV=test  (comment out or delete this line)
+   ```
+
+3. **Update other values** with your actual configuration (database credentials, API tokens, etc.)
+
+> **Note**: The `.envExample` file is configured for automated testing (CI/CD). For local development, you must change `ENVIRONMENT=test` to `ENVIRONMENT=local` and remove the `NODE_ENV` variable.
 
 #### Environment Configuration Files
 

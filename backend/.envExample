@@ -1,4 +1,6 @@
 # Server Configuration
+# NOTE: For local development, change ENVIRONMENT to 'local' after copying this file to .env
+# Do NOT set NODE_ENV for local development (remove or comment out the line)
 NODE_ENV=test
 ENVIRONMENT=test
 PORT=3000
