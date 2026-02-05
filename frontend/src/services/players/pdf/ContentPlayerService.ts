@@ -6,7 +6,7 @@ import { SunbirdPdfPlayerConfig } from './types';
  * These can be overridden by passing custom values through props
  */
 export class ContentPlayerService {
-    private eventHandlers = new WeakMap<HTMLElement, { playerHandler: EventListener; telemetryHandler: EventListener }>();
+    private eventHandlers = new WeakMap<HTMLElement, { playerHandler: (event: Event) => void; telemetryHandler: (event: Event) => void }>();
     private static readonly DEFAULT_OPTIONS: Required<PdfPlayerOptions> = {
         showShare: true,
         showDownload: true,
