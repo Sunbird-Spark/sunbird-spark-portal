@@ -1,8 +1,6 @@
 import dotenv from 'dotenv';
 
-if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'test') {
-    dotenv.config();
-}
+dotenv.config();
 
 const env = process.env;
 
