@@ -31,21 +31,18 @@ jobs:
           docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
       - name: Login Docker Registry
-        if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
         run: |
-          echo "Pushing Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
-
           case "${{ vars.REGISTRY_PROVIDER }}" in
           "gcp")
             echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode > $HOME/gcloud-key.json
             gcloud auth activate-service-account --key-file=$HOME/gcloud-key.json
             gcloud auth configure-docker ${{ secrets.REGISTRY_NAME }}
-            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]') 
             ;;
           "azure" | "dockerhub")
             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ secrets.REGISTRY_NAME }}" \
-              --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
-            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+            REGISTRY_URL="$(echo "${{ secrets.REGISTRY_URL }}/$(basename "${{ github.workspace }}")" | tr '[:upper:]' '[:lower:]')"
             ;;
           *)
             REPO_NAME_LOWERCASE=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
