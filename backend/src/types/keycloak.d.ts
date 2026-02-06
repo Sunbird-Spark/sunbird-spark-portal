@@ -2,6 +2,7 @@ import 'keycloak-connect';
 
 declare module 'keycloak-connect' {
     interface Token {
+        token?: string;
         content?: {
             sub?: string;
             preferred_username?: string;
@@ -9,6 +10,7 @@ declare module 'keycloak-connect' {
             name?: string;
             given_name?: string;
             family_name?: string;
+            exp?: number;
             realm_access?: {
                 roles?: string[];
             };

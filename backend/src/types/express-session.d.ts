@@ -51,5 +51,12 @@ declare module 'express-session' {
             [key: string]: any;
         };
         auth_redirect_uri?: string;
+        googleOAuth?: {
+            nonce: string;
+            state: string;
+            client_id: string;
+            redirect_uri: string;
+            error_callback: string;
+        };
     }
 }
