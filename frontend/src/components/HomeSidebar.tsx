@@ -32,14 +32,31 @@ const ProfileNavIconOutline = ({ className }: { className?: string }) => (
     </svg>
 );
 
+// Custom Help and Support icon matching the design
+const HelpSupportIcon = ({ className }: { className?: string }) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <path d="M14.75 7.75C14.75 4.45038 14.75 2.80012 13.7262 1.7755C12.7025 0.749997 11.0487 0.75 7.75 0.75C4.45125 0.75 2.79754 0.749997 1.77379 1.7755C0.750038 2.80012 0.75 4.45038 0.75 7.75V13C0.75 13.8251 0.750034 14.2373 1.00378 14.4936C1.26628 14.75 1.6775 14.75 2.5 14.75H7.75C11.0487 14.75 12.7025 14.75 13.7262 13.7245C14.75 12.6999 14.75 11.0496 14.75 7.75Z" stroke="#CC8545" strokeWidth="1.5" />
+        <path d="M5.125 6H10.375" stroke="#CC8545" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M5.125 9.5H7.75" stroke="#CC8545" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// Custom My Learning icon matching the design
+const MyLearningIcon = ({ className }: { className?: string }) => (
+    <svg width="17" height="15" viewBox="0 0 17 15" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <path d="M2.41667 11.5833H5.75C7.13333 11.5833 8.25 12.7025 8.25 14.0833V5.75C8.25 3.39333 8.25 2.21416 7.51666 1.4825C6.78333 0.749998 5.60833 0.75 3.25 0.75H2.41667C1.63333 0.75 1.2417 0.749999 0.991699 0.994166C0.750033 1.23833 0.75 1.63083 0.75 2.41667V9.91667C0.75 10.7025 0.750033 11.095 0.991699 11.3392C1.2417 11.5833 1.63333 11.5833 2.41667 11.5833Z" stroke="#CC8545" strokeWidth="1.5" />
+        <path d="M14.0833 11.5833H10.75C9.36667 11.5833 8.25 12.7025 8.25 14.0833V5.75C8.25 3.39333 8.25 2.21416 8.98334 1.4825C9.71667 0.749998 10.8917 0.75 13.25 0.75H14.0833C14.8667 0.75 15.2583 0.749999 15.5083 0.994166C15.75 1.23833 15.75 1.63083 15.75 2.41667V9.91667C15.75 10.7025 15.75 11.095 15.5083 11.3392C15.2583 11.5833 14.8667 11.5833 14.0833 11.5833Z" stroke="#CC8545" strokeWidth="1.5" />
+    </svg>
+);
+
 const mainNavItems = [
     { id: "home", label: "Home", icon: FiHome, path: "/home" },
-    { id: "learning", label: "My Learning", icon: FiBook, path: "/my-learning" },
+    { id: "learning", label: "My Learning", icon: MyLearningIcon, path: "/my-learning" },
     { id: "explore", label: "Explore", icon: ExploreIcon, path: "/explore", isCustomIcon: true },
 ];
 
 const bottomNavItems = [
-    { id: "help", label: "Help and Support", icon: FiHelpCircle, path: "/help" },
+    { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help" },
     { id: "profile", label: "Profile", icon: ProfileNavIconOutline, path: "/profile" },
 ];
 

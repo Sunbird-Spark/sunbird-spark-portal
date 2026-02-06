@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiBell } from "react-icons/fi";
+import { FiSearch, FiBell } from "react-icons/fi";
 import { Input } from "@/components/input";
 import { Button } from "@/components/button";
 import {
@@ -26,6 +26,7 @@ import translationIcon from "@/assets/translation_icon.svg";
 const Home = () => {
     const navigate = useNavigate();
     const { t, languages, currentCode, changeLanguage, currentLanguage } = useAppI18n();
+    const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [activeNav, setActiveNav] = useState("home");
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -69,6 +70,7 @@ const Home = () => {
                         {/* Search Bar */}
                         <div
                             className="relative w-80 cursor-pointer"
+                            style={{ width: '400px' }}
                             onClick={() => navigate('/search')}
                         >
                             <Input
@@ -150,9 +152,6 @@ const Home = () => {
                             <div className="flex gap-6">
                                 <div className="w-[65%]">
                                     <HomeContinueLearning />
-                                </div>
-                                <div className="w-[35%]">
-                                    <HomePerformanceChart />
                                 </div>
                             </div>
                         </div>

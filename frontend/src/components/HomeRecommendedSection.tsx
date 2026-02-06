@@ -63,11 +63,19 @@ const HomeRecommendedSection = () => {
                             {/* Dark Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 flex flex-col justify-between p-6">
                                 {/* Badge */}
-                                <div>
-                                    <span className="inline-block text-[10px] font-bold px-3 py-1 rounded-[4px] bg-white border border-gray-200 text-[#222222]">
-                                        {item.type}
-                                    </span>
-                                </div>
+                                {item.isVideo ? (
+                                    <div>
+                                        <span className="flex items-center justify-center text-[11px] font-bold w-[54px] h-[24px] rounded-[4px] bg-white text-[#222222]">
+                                            {item.type}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <span className="flex items-center justify-center text-[10px] font-bold w-[78px] h-[30px] rounded-[36px] bg-[#FFF1C7] border border-[#CC8545] text-[#222222]">
+                                            {item.type}
+                                        </span>
+                                    </div>
+                                )}
 
                                 {/* Content */}
                                 <div>
@@ -104,10 +112,7 @@ const HomeRecommendedSection = () => {
                             <div className="p-4 flex-1 flex flex-col relative">
                                 {/* Type Badge */}
                                 <div className="mb-3">
-                                    <span className={`inline-block text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-[4px] border ${item.type === 'Course' || item.type === 'Textbook'
-                                        ? 'bg-[#FFF9F3] border-[#FFE7CC] text-[#A85236]'
-                                        : 'bg-gray-100 border-gray-200 text-gray-700'
-                                        }`}>
+                                    <span className="flex items-center justify-center text-[10px] font-bold w-[78px] h-[30px] rounded-[36px] bg-[#FFF1C7] border border-[#CC8545] text-[#222222]">
                                         {item.type}
                                     </span>
                                 </div>
