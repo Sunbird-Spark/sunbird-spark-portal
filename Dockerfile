@@ -18,7 +18,7 @@ RUN npm run build
 FROM node:24.12.0-slim
 WORKDIR /app
 
-# Copy package files and install production dependenies only
+# Copy package files and install production dependencies only
 COPY --from=backend-builder /app/backend/package*.json ./
 RUN npm i --only=production && npm cache clean --force
 
