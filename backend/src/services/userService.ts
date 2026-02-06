@@ -98,7 +98,7 @@ export const fetchUserByEmailId = async (emailId: string, req: Request): Promise
     const headers = {
         'x-device-id': req.get('x-device-id'),
         'x-msgid': uuidv4(),
-        ts: dayjs(new Date()).format('yyyy-mm-dd HH:MM:ss:lo'),
+        ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
         'Content-Type': 'application/json',
         accept: 'application/json',
         Authorization: `Bearer ${resolveKongBearerToken(req)}`,
@@ -122,7 +122,7 @@ export const createUserWithMailId = async (googleUser: any, client_id: string, r
     const headers = {
         'x-device-id': req.get('x-device-id'),
         'x-msgid': uuidv4(),
-        ts: dayjs(new Date()).format('yyyy-mm-dd HH:MM:ss:lo'),
+        ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
         'Content-Type': 'application/json',
         accept: 'application/json',
         Authorization: `Bearer ${resolveKongBearerToken(req)}`,
@@ -136,7 +136,7 @@ export const createUserWithMailId = async (googleUser: any, client_id: string, r
         },
         params: {
             source: client_id,
-            signupType: "google"
+            signupType: 'google'
         }
     }, { headers });
     const result = response.data;
