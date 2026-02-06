@@ -78,3 +78,6 @@ pnpm-debug.log*
 
 # Ignore SVGs in assets folder
 public/assets/**/*.svg
+
+# Ignore full PDF.js web viewer bundle
+frontend/public/assets/pdfjs/web/

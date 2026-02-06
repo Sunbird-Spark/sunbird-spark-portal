@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import appCoreService from '../../../services/AppCoreService';
-import authService from '../../../services/AuthService';
+import authService from '../../../services/userAuthInfoService/AuthService';
 import { ContentPlayerService } from '../../../services/players/pdf/ContentPlayerService';
 import { PdfPlayerConfig } from '../../../services/players/types';
 

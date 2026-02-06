@@ -3,12 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import PdfPlayer from './PdfPlayer';
 import appCoreService from '../../../services/AppCoreService';
-import authService from '../../../services/AuthService';
+import authService from '../../../services/userAuthInfoService/AuthService';
 import { ContentPlayerService } from '../../../services/players/pdf/ContentPlayerService';
 
 // Mock dependencies
 vi.mock('../../../services/AppCoreService');
-vi.mock('../../../services/AuthService');
+vi.mock('../../../services/userAuthInfoService/AuthService');
 vi.mock('../../../services/players/pdf/ContentPlayerService', () => {
     return {
         ContentPlayerService: vi.fn()

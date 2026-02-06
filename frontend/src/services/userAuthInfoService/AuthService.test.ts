@@ -143,8 +143,9 @@ describe('AuthService', () => {
                 // Expected error
             }
 
-            expect(consoleSpy).toHaveBeenCalledWith('❌ Error fetching auth status:', axiosError);
+            expect(consoleSpy).toHaveBeenCalledWith('Error fetching auth status:', axiosError);
             expect(consoleSpy).toHaveBeenCalledWith('   Status:', 400);
+            expect(consoleSpy).toHaveBeenCalledWith('   Data:', axiosError.response.data);
         });
     });
 

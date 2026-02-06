@@ -44,8 +44,6 @@ class AuthService {
      */
     async getAuthInfo(deviceId: string): Promise<AuthStatusResponse['result']> {
         try {
-            console.log('🔐 Fetching auth status with device ID:', deviceId);
-
             const response = await axios.get<AuthStatusResponse>(
                 '/portal/user/v1/auth/info',
                 {
@@ -66,7 +64,7 @@ class AuthService {
                 throw new Error(response.data.params.errmsg || 'Failed to fetch auth status');
             }
         } catch (error) {
-            console.error('❌ Error fetching auth status:', error);
+            console.error('Error fetching auth status:', error);
             if (axios.isAxiosError(error)) {
                 console.error('   Status:', error.response?.status);
                 console.error('   Data:', error.response?.data);
