@@ -45,7 +45,7 @@ app.use(session({
     }
 }), registerDeviceWithKong());
 
-app.get('/home',
+app.get('/profile',
     session({
         name: CookieNames.AUTH,
         store: sessionStore,
@@ -84,8 +84,6 @@ app.all('/portal/logout', async (req, res) => {
 app.use('/api/data/v1/form', formRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.post('/portal/data/v1/system/settings/get', kongProxy);
 
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
 app.post('/portal/user/v1/password/reset', userProxy);
