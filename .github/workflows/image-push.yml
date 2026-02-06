@@ -31,6 +31,7 @@ jobs:
           docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
       - name: Login Docker Registry
+        if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
         run: |
           case "${{ vars.REGISTRY_PROVIDER }}" in
           "gcp")
@@ -39,10 +40,18 @@ jobs:
             gcloud auth configure-docker ${{ secrets.REGISTRY_NAME }}
             REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
             ;;
-          "azure" | "dockerhub")
+          "azure")
+            # Azure ACR: registry host only, image repo handled by IMAGE_NAME
             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ secrets.REGISTRY_NAME }}" \
-            --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
-            REGISTRY_URL="$(echo "${{ secrets.REGISTRY_URL }}/$(basename "${{ github.workspace }}")" | tr '[:upper:]' '[:lower:]')"
+              --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            ;;
+          "dockerhub")
+            # Docker Hub: login without host and use username/image for IMAGE_NAME
+            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+            IMAGE_NAME="${{ secrets.REGISTRY_USERNAME }}/$IMAGE_NAME"
+            echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
+            REGISTRY_URL="docker.io"
             ;;
           *)
             REPO_NAME_LOWERCASE=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
