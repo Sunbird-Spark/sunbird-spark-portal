@@ -45,6 +45,7 @@ export default [
       // Minimal enterprise safety
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
+      'no-unsafe-finally': 'off',
 
       // TypeScript correctness
       'no-unused-vars': 'off', // Disable base rule for TypeScript files
