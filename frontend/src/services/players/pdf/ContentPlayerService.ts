@@ -51,9 +51,6 @@ export class ContentPlayerService {
         };
     }
     createElement(config: PdfPlayerConfig, options?: PdfPlayerOptions): HTMLElement {
-        if (!this.validateConfig(config)) {
-            throw new Error('Invalid PDF player configuration');
-        }
 
         // Merge options with defaults
         const mergedOptions = this.getMergedOptions(options);
@@ -115,18 +112,6 @@ export class ContentPlayerService {
             element.removeEventListener('telemetryEvent', handlers.telemetryHandler);
             this.eventHandlers.delete(element);
         }
-    }
-
-    /**
-     * Validate the player configuration
-     */
-    validateConfig(config: PdfPlayerConfig): boolean {
-        return !!(
-            config.contentId &&
-            config.contentName &&
-            config.contentUrl &&
-            config.contentUrl.toLowerCase().includes('.pdf')
-        );
     }
 
     /**

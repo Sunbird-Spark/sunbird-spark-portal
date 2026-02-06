@@ -16,21 +16,6 @@ describe('ContentPlayerService', () => {
     beforeEach(() => {
         service = new ContentPlayerService();
     });
-
-    describe('validateConfig', () => {
-        it('should return true for valid config', () => {
-            expect(service.validateConfig(mockConfig)).toBe(true);
-        });
-
-        it('should return false if contentId is missing', () => {
-            expect(service.validateConfig({ ...mockConfig, contentId: '' })).toBe(false);
-        });
-
-        it('should return false if contentUrl is not a pdf', () => {
-            expect(service.validateConfig({ ...mockConfig, contentUrl: 'http://example.com/video.mp4' })).toBe(false);
-        });
-    });
-
     describe('createElement', () => {
         it('should create a sunbird-pdf-player element with correct attributes', () => {
             const element = service.createElement(mockConfig);
@@ -45,12 +30,6 @@ describe('ContentPlayerService', () => {
             expect(parsedConfig.metadata.identifier).toBe(mockConfig.contentId);
             expect(parsedConfig.context.sid).toBe(mockConfig.sid);
         });
-
-        it('should throw error for invalid config', () => {
-            const invalidConfig = { ...mockConfig, contentUrl: '' };
-            expect(() => service.createElement(invalidConfig)).toThrow('Invalid PDF player configuration');
-        });
-
         it('should merge custom options correctly', () => {
             const element = service.createElement(mockConfig, { showShare: false });
             const parsedConfig = JSON.parse(element.getAttribute('player-config')!);
