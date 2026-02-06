@@ -9,7 +9,7 @@ import { saveSession } from '../utils/sessionUtils.js';
  * For authenticated users: returns both sid and uid
  * For anonymous users: returns sid with uid as null
  */
-export const getAuthStatus = async (req: Request, res: Response) => {
+export const getAuthInfo = async (req: Request, res: Response) => {
     const apiId = 'api.user.auth.info';
     const response = new ApiResponse(apiId);
 

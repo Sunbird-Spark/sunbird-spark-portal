@@ -42,7 +42,7 @@ class AuthService {
      * @param deviceId - The device ID to send in the x-device-id header
      * @returns Promise with the auth status response
      */
-    async getAuthStatus(deviceId: string): Promise<AuthStatusResponse['result']> {
+    async getAuthInfo(deviceId: string): Promise<AuthStatusResponse['result']> {
         try {
             console.log('🔐 Fetching auth status with device ID:', deviceId);
 

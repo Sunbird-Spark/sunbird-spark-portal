@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { getAuthStatus } from '../controllers/authController.js';
+import { getAuthInfo } from '../controllers/authController.js';
 
 const router = Router();
 
-router.get('/info', getAuthStatus);
+router.get('/info', getAuthInfo);
 
 export default router;

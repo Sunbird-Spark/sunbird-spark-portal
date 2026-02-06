@@ -18,7 +18,7 @@ describe('AuthService', () => {
         expect(instance1).toBe(authService);
     });
 
-    describe('getAuthStatus', () => {
+    describe('getAuthInfo', () => {
         const mockDeviceId = 'test-device-id';
         const mockSuccessResponse = {
             data: {
@@ -55,7 +55,7 @@ describe('AuthService', () => {
         it('should successfully fetch auth status and update state', async () => {
             (axios.get as any).mockResolvedValue(mockSuccessResponse);
 
-            const result = await authService.getAuthStatus(mockDeviceId);
+            const result = await authService.getAuthInfo(mockDeviceId);
 
             // Check axios call
             expect(axios.get).toHaveBeenCalledWith('/portal/user/v1/auth/info', {
@@ -75,7 +75,7 @@ describe('AuthService', () => {
         it('should handle anonymous user properly', async () => {
             (axios.get as any).mockResolvedValue(mockAnonymousResponse);
 
-            await authService.getAuthStatus(mockDeviceId);
+            await authService.getAuthInfo(mockDeviceId);
 
             expect(authService.getSessionId()).toBe('session-789');
             expect(authService.getUserId()).toBeNull();
@@ -93,18 +93,33 @@ describe('AuthService', () => {
             };
             (axios.get as any).mockResolvedValue(mockErrorResponse);
 
-            await expect(authService.getAuthStatus(mockDeviceId))
+            await expect(authService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Something went wrong');
 
             // State should not change
             expect(authService.getSessionId()).toBeNull();
         });
 
+        it('should use default error message when api returns failed status without errmsg', async () => {
+            const mockErrorResponse = {
+                data: {
+                    params: {
+                        status: 'failed',
+                        errmsg: null
+                    }
+                }
+            };
+            (axios.get as any).mockResolvedValue(mockErrorResponse);
+
+            await expect(authService.getAuthInfo(mockDeviceId))
+                .rejects.toThrow('Failed to fetch auth status');
+        });
+
         it('should throw error when axios fails', async () => {
             const networkError = new Error('Network Error');
             (axios.get as any).mockRejectedValue(networkError);
 
-            await expect(authService.getAuthStatus(mockDeviceId))
+            await expect(authService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Network Error');
         });
 
@@ -123,7 +138,7 @@ describe('AuthService', () => {
             const consoleSpy = vi.spyOn(console, 'error');
 
             try {
-                await authService.getAuthStatus(mockDeviceId);
+                await authService.getAuthInfo(mockDeviceId);
             } catch (e) {
                 // Expected error
             }
@@ -149,7 +164,7 @@ describe('AuthService', () => {
                 }
             };
             (axios.get as any).mockResolvedValue(mockResponse);
-            await authService.getAuthStatus('d1');
+            await authService.getAuthInfo('d1');
 
             expect(authService.isUserAuthenticated()).toBe(true);
 
