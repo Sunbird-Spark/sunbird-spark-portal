@@ -10,12 +10,12 @@ export const registerDeviceWithKong = () => {
         if (req.session.kongToken) {
             const isAuthenticated = req.session.userId && req.kauth;
             const isAnonymous = !req.session.userId;
-            
+
             if (isAuthenticated || isAnonymous) {
                 if (isAnonymous) {
                     logger.info('ANONYMOUS_KONG_TOKEN :: using existing token');
                 }
-                
+
                 refreshSessionTTL(req);
                 try {
                     await saveSession(req);
@@ -41,8 +41,6 @@ export const registerDeviceWithKong = () => {
             try {
                 token = await generateKongToken(req);
 
-                logger.info(`anonymous kong token ${token}`)
-
                 if (!token) {
                     logger.error('ANONYMOUS_KONG_TOKEN :: fallback token missing in config');
                 }
@@ -66,7 +64,7 @@ export const registerDeviceWithKong = () => {
                 return next(err);
             }
         }
-        
+
         next();
     };
 };
