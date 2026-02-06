@@ -92,7 +92,7 @@ const SignUp: React.FC = () => {
     };
 
     return (
-        <AuthLayout>
+        <AuthLayout isOtpPage={step === 2}>
             <div className="w-full font-rubik">
                 {step === 1 && (
                     <SignUpStep1

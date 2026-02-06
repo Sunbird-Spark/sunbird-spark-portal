@@ -43,8 +43,8 @@ describe('useToast', () => {
         });
 
         expect(result.current.toasts).toHaveLength(1);
-        expect(result.current.toasts[0].title).toBe('Test Toast');
-        expect(result.current.toasts[0].open).toBe(true);
+        expect(result.current.toasts[0]!.title).toBe('Test Toast');
+        expect(result.current.toasts[0]!.open).toBe(true);
     });
 
     it('should dismiss a toast', () => {
@@ -56,13 +56,13 @@ describe('useToast', () => {
             toastId = t.id;
         });
 
-        expect(result.current.toasts[0].open).toBe(true);
+        expect(result.current.toasts[0]!.open).toBe(true);
 
         act(() => {
             result.current.dismiss(toastId);
         });
 
-        expect(result.current.toasts[0].open).toBe(false);
+        expect(result.current.toasts[0]!.open).toBe(false);
     });
 
     it('should update a toast', () => {
@@ -74,13 +74,13 @@ describe('useToast', () => {
             updateFn = t.update;
         });
 
-        expect(result.current.toasts[0].title).toBe('Original');
+        expect(result.current.toasts[0]!.title).toBe('Original');
 
         act(() => {
             updateFn({ title: 'Updated' });
         });
 
-        expect(result.current.toasts[0].title).toBe('Updated');
+        expect(result.current.toasts[0]!.title).toBe('Updated');
     });
 
     it('should enforce toast limit', () => {
@@ -96,6 +96,6 @@ describe('useToast', () => {
 
         // Limit is 1
         expect(result.current.toasts).toHaveLength(1);
-        expect(result.current.toasts[0].title).toBe('Second');
+        expect(result.current.toasts[0]!.title).toBe('Second');
     });
 });

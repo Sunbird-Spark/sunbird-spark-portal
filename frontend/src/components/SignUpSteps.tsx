@@ -45,7 +45,7 @@ export const SignUpStep1 = ({
             {/* Google Sign In */}
             <Button
                 variant="outline"
-                className="w-full h-[2.5rem] bg-white border border-[#D0D5DD] text-[#344054] font-medium rounded-[0.5rem] flex items-center justify-center gap-2 hover:bg-gray-50 mb-0 text-[0.875rem]"
+                className="secondary-outline-button"
                 onClick={() => console.log('Google Sign In')}
             >
                 <FcGoogle className="w-5 h-5" />
@@ -53,10 +53,10 @@ export const SignUpStep1 = ({
             </Button>
 
             {/* Divider */}
-            <div className="flex items-center gap-4 my-1">
-                <div className="h-[1px] flex-1 bg-[#E0E0E0]"></div>
-                <span className="text-[#666666] text-[0.75rem] font-medium">OR</span>
-                <div className="h-[1px] flex-1 bg-[#E0E0E0]"></div>
+            <div className="form-divider-container">
+                <div className="form-divider-line"></div>
+                <span className="form-divider-text">OR</span>
+                <div className="form-divider-line"></div>
             </div>
 
             {/* Form Fields */}
@@ -72,7 +72,7 @@ export const SignUpStep1 = ({
                     />
                     {/* Inline Error (Optional/Complementary) */}
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
-                        <p className="text-[0.75rem] text-red-500 absolute bottom-[-8px] left-0">
+                        <p className="form-error-absolute form-error-offset-8">
                             Enter valid Email or 10-digit Mobile (6-9)
                         </p>
                     )}
@@ -92,14 +92,14 @@ export const SignUpStep1 = ({
                         <button
                             type="button"
                             onClick={() => setShowPassword((v) => !v)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#718096] hover:text-[#333] p-1"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
                             {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
                         </button>
                     </div>
                     {/* Password Requirements */}
                     {password && !PASSWORD_REGEX.test(password) && (
-                        <p className="text-[0.75rem] text-red-500 absolute bottom-[-4px] left-0 leading-tight">
+                        <p className="form-error-absolute form-error-offset-4">
                             Password must be 8+ chars (upper, lower, num, special)
                         </p>
                     )}
@@ -119,13 +119,13 @@ export const SignUpStep1 = ({
                         <button
                             type="button"
                             onClick={() => setShowConfirmPassword((v) => !v)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#718096] hover:text-[#333] p-1"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
                             {showConfirmPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
                         </button>
                     </div>
                     {confirmPassword && password !== confirmPassword && (
-                        <p className="text-[0.75rem] text-red-500 absolute bottom-[-2px] left-0">
+                        <p className="form-error-absolute form-error-offset-2">
                             Passwords do not match
                         </p>
                     )}
@@ -137,13 +137,13 @@ export const SignUpStep1 = ({
                         id="terms"
                         checked={isTermsAccepted}
                         onCheckedChange={(checked) => setIsTermsAccepted(checked === true)}
-                        className="data-[state=checked]:bg-[#A85236] data-[state=checked]:border-[#A85236] border-[#828282] w-4 h-4 rounded-[0.25rem]"
+                        className="themed-checkbox"
                     />
                     <label
                         htmlFor="terms"
-                        className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#333333]"
+                        className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sunbird-charcoal"
                     >
-                        I understand & <a href="#" className="font-bold text-[#A85236] underline">accept the SUNBIRD Terms of Use</a>.
+                        I understand & <a href="#" className="themed-link">accept the SUNBIRD Terms of Use</a>.
                     </label>
                 </div>
 
@@ -155,8 +155,8 @@ export const SignUpStep1 = ({
                     Continue
                 </PrimaryButton>
 
-                <div className="text-center mt-3 text-[0.75rem] text-[#333333] font-medium">
-                    Already have an account? <a href="/login" className="text-[#A85236] font-bold hover:underline">Login</a>
+                <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
+                    Already have an account? <a href="/onboarding" className="themed-link no-underline hover:underline">Login</a>
                 </div>
             </div>
         </div>
@@ -171,34 +171,37 @@ interface Step2Props {
 }
 
 export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2Props) => (
-    <>
+    <div className="flex flex-col h-full">
         <Header
             title="Enter the code"
-            subtitle="Enter the 6 digit code sent to your phone number and complete the verification"
+            subtitle="Enter the 6 digit code sent to your Email ID and complete the verification"
         />
 
-        <div className="space-y-5">
-            <div className="space-y-6">
-                <p className="otp-validity-text text-center text-[0.85rem] text-[#4A5568]">
+        <div className="flex flex-col flex-1 justify-between h-full">
+            <div className="text-center pt-2">
+                <p className="text-[0.75rem] font-medium text-sunbird-gray-75 mb-6">
                     OTP is valid for 30 minutes
                 </p>
 
                 <OTPInput otp={otp} setOtp={setOtp} />
 
-                <div className="resend-otp-container text-center text-[0.875rem] font-medium text-[#4A5568] mt-6">
-                    <span>04:00 </span>
-                    <button className="text-[#A85236] hover:underline font-semibold ml-1">
+                <div className="text-center text-[0.75rem] font-medium mt-8">
+                    <span className="text-sunbird-gray-75">04:00 </span>
+                    <button className="text-sunbird-brick font-bold hover:underline ml-1">
                         Resend OTP
                     </button>
                 </div>
             </div>
 
-            <PrimaryButton
-                disabled={!isOtpValid}
-                onClick={handleVerifyOtp}
-            >
-                Confirm and Proceed
-            </PrimaryButton>
+            <div className="pb-2 mt-20">
+                <PrimaryButton
+                    disabled={!isOtpValid}
+                    onClick={handleVerifyOtp}
+                    className="h-[3rem]"
+                >
+                    Submit
+                </PrimaryButton>
+            </div>
         </div>
-    </>
+    </div>
 );
