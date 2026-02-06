@@ -10,7 +10,6 @@ import WorkspacePage from './pages/WorkspacePage';
 import ReportsPage from './pages/ReportsPage';
 import CreateContentPage from './pages/CreateContentPage';
 import Index from './pages/Index';
-import PdfPlayerDemo from './pages/PdfPlayerDemo';
 import ForgotPassword from './pages/ForgotPassword';
 import PasswordResetSuccess from './pages/PasswordResetSuccess';
 
@@ -35,8 +34,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/workspace" element={<WorkspaceProtected />} />
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentProtected />} />
-        <Route path="/pdf-player" element={<PdfPlayerDemo />} />
-
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
