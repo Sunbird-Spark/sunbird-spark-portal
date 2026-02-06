@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
-import { Checkbox } from "@/components/checkbox";
+import { Checkbox } from "@/components/CheckBox";
 import { Header, InputLabel, PrimaryButton, OTPInput } from "../pages/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
