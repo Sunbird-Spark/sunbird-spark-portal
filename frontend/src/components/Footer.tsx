@@ -1,170 +1,96 @@
-import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
-import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
-import sunbirdLogo from "@/assets/sunbird-logo.png";
+import sunbirdFooterLogo from "@/assets/sunbird-footer-logo.svg";
+import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 const Footer = () => {
   const { t } = useAppI18n();
 
-  const footerLinks = {
-    courses: [
-      { label: "Leadership", href: "#" },
-      { label: "Project Management", href: "#" },
-      { label: "IT & Software", href: "#" },
-      { label: "Communication", href: "#" },
-      { label: "Data Analytics", href: "#" },
-    ],
-    company: [
-      { label: t("about"), href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Press", href: "#" },
-      { label: "Partners", href: "#" },
-    ],
-    support: [
-      { label: "Help Center", href: "#" },
-      { label: t("contact"), href: "#" },
-      { label: "FAQ", href: "#" },
-      { label: "Community", href: "#" },
-      { label: "Accessibility", href: "#" },
-    ],
-    legal: [
-      { label: "Terms of Service", href: "#" },
-      { label: "Privacy Policy", href: "#" },
-      { label: "Cookie Policy", href: "#" },
-      { label: "Refund Policy", href: "#" },
-    ],
-  };
+  const productLinks = [
+    { label: t("courses"), href: "/explore" },
+    { label: t("footer.resources"), href: "#" },
+    { label: t("footer.videos"), href: "#" },
+  ];
 
-  const socialLinks = [
-    { icon: FaFacebook, href: "#", label: "Facebook" },
-    { icon: FaTwitter, href: "#", label: "Twitter" },
-    { icon: FaLinkedin, href: "#", label: "LinkedIn" },
-    { icon: FaYoutube, href: "#", label: "YouTube" },
+  const companyLinks = [
+    { label: t("about"), href: "#about" },
+    { label: t("contact"), href: "#contact" },
   ];
 
   return (
-    <footer id="contact" className="bg-foreground text-background">
-      {/* Main Footer */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-3 lg:col-span-2">
-            <a href="/" className="flex items-center gap-2 mb-4">
-              <img 
-                src={sunbirdLogo} 
-                alt="Sunbird Spark" 
-                className="h-10 w-auto brightness-0 invert"
+    <footer className="bg-[#1C1C1C] font-rubik">
+      <div className="w-full py-12 pl-[108px] pr-[82px]">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-10">
+          {/* Logo */}
+          <div>
+            <Link to="/" className="inline-block">
+              <img
+                src={sunbirdFooterLogo}
+                alt="Sunbird"
+                className="h-8 w-auto"
+                style={{ width: '212px', paddingRight: '50px', height: '39px' }}
               />
-            </a>
-            <p className="text-background/70 mb-6 max-w-sm">
-              Empowering professionals worldwide with industry-leading training and certification programs.
-            </p>
-            <div className="space-y-3 text-sm text-background/70">
-              <div className="flex items-center gap-2">
-                <FiMail className="w-4 h-4" />
-                <span>contact@sunbirdspark.org</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FiPhone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FiMapPin className="w-4 h-4" />
-                <span>Global</span>
-              </div>
+            </Link>
+          </div>
+
+          {/* Links - Right aligned */}
+          <div className="flex gap-20 md:gap-28" style={{ paddingRight: '100px' }}>
+            {/* Products */}
+            <div>
+              <h4 className="font-semibold text-[14px] mb-4 text-white">
+                {t("footer.products")}
+              </h4>
+              <ul className="space-y-3">
+                {productLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      to={link.href}
+                      className="text-[14px] text-gray-400 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          {/* Courses */}
-          <div>
-            <h4 className="font-semibold mb-4">{t("courses")}</h4>
-            <ul className="space-y-2">
-              {footerLinks.courses.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-background/70 hover:text-secondary transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-background/70 hover:text-secondary transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2">
-              {footerLinks.support.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-background/70 hover:text-secondary transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2">
-              {footerLinks.legal.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-background/70 hover:text-secondary transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {/* Company */}
+            <div id="about">
+              <h4 className="font-semibold text-[14px] mb-4 text-white">
+                {t("footer.company")}
+              </h4>
+              <ul className="space-y-3">
+                {companyLinks.map((link) => (
+                  <li key={link.label} id={link.href === "#contact" ? "contact" : undefined}>
+                    <Link
+                      to={link.href}
+                      className="text-[14px] text-gray-400 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-background/10">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-background/60 text-center md:text-start">
-              © {new Date().getFullYear()} Sunbird Spark. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="w-10 h-10 rounded-lg bg-background/10 flex items-center justify-center hover:bg-secondary hover:text-secondary-foreground transition-colors"
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
+      {/* Bottom Bar - Darker strip */}
+      <div className="bg-[#000000]">
+        <div className="w-full py-4 pr-[82px] pl-[108px]">
+          <div className="flex flex-col md:flex-row items-center justify-end gap-6 text-[13px]" style={{ paddingRight: '104px' }}>
+            <a
+              href="#"
+              className="hover:opacity-80 transition-opacity text-sunbird-brick"
+            >
+              {t("footer.terms")}
+            </a>
+            <a
+              href="#"
+              className="hover:opacity-80 transition-opacity text-sunbird-brick"
+            >
+              {t("footer.privacy")}
+            </a>
           </div>
         </div>
       </div>
