@@ -72,7 +72,7 @@ export const SignUpStep1 = ({
                     />
                     {/* Inline Error (Optional/Complementary) */}
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
-                        <p className="text-[0.75rem] text-red-500 absolute bottom-0 left-0 pt-[5px]">
+                        <p className="text-[0.75rem] text-red-500 absolute bottom-[-8px] left-0">
                             Enter valid Email or 10-digit Mobile (6-9)
                         </p>
                     )}
@@ -99,7 +99,7 @@ export const SignUpStep1 = ({
                     </div>
                     {/* Password Requirements */}
                     {password && !PASSWORD_REGEX.test(password) && (
-                        <p className="text-[0.75rem] text-red-500 absolute bottom-0 left-0 leading-tight pt-[5px]">
+                        <p className="text-[0.75rem] text-red-500 absolute bottom-[-4px] left-0 leading-tight">
                             Password must be 8+ chars (upper, lower, num, special)
                         </p>
                     )}
@@ -125,7 +125,7 @@ export const SignUpStep1 = ({
                         </button>
                     </div>
                     {confirmPassword && password !== confirmPassword && (
-                        <p className="text-[0.75rem] text-red-500 absolute bottom-0 left-0 pt-[5px]">
+                        <p className="text-[0.75rem] text-red-500 absolute bottom-[-2px] left-0">
                             Passwords do not match
                         </p>
                     )}

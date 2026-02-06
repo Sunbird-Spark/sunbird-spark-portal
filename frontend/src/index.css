@@ -220,7 +220,7 @@
   }
 
   .login-header-subtitle {
-    @apply text-[0.875rem] font-normal text-sunbird-gray-75 leading-relaxed mx-auto max-w-[20rem];
+    @apply text-[0.875rem] font-normal text-sunbird-gray-75 leading-relaxed mx-auto;
   }
 
   .login-input-label {
