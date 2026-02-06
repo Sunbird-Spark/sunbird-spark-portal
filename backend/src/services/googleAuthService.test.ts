@@ -109,7 +109,7 @@ describe('GoogleAuthService', () => {
             get: vi.fn((header: string) => {
                 if (header === 'host') return 'example.com';
                 return undefined;
-            }),
+            }) as any,
             session: {} as any,
             kauth: undefined
         };
