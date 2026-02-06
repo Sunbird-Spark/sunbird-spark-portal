@@ -18,7 +18,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Generate Image Tag
+      - name: Build Docker Image
+        if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
         run: |
           IMAGE_NAME="sunbird-portal"
           # Tag format: tagname_commitsha (short)
@@ -26,6 +27,8 @@ jobs:
           echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
           echo "Generated tag: ${IMAGE_TAG}"
+
+          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
       - name: Login Docker Registry
         if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
@@ -37,10 +40,18 @@ jobs:
             gcloud auth configure-docker ${{ secrets.REGISTRY_NAME }}
             REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
             ;;
-          "azure" | "dockerhub")
+          "azure")
+            # Azure ACR: registry host only, image repo handled by IMAGE_NAME
             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ secrets.REGISTRY_NAME }}" \
               --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
             REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            ;;
+          "dockerhub")
+            # Docker Hub: login without host and use username/image for IMAGE_NAME
+            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+            IMAGE_NAME="${{ secrets.REGISTRY_USERNAME }}/$IMAGE_NAME"
+            echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
+            REGISTRY_URL="docker.io"
             ;;
           *)
             REPO_NAME_LOWERCASE=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
@@ -50,18 +61,9 @@ jobs:
           esac
           echo "REGISTRY_URL=${REGISTRY_URL}" >> $GITHUB_ENV
 
-      - name: Build Docker Image
-        if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
-        run: |
-          echo "Building image ${IMAGE_NAME}:${IMAGE_TAG}..."
-          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-
       - name: Push Docker image
         if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
         run: |
-          FULL_IMAGE_PATH="${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}"
-          echo "Pushing image to ${FULL_IMAGE_PATH}"
-
-          docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${FULL_IMAGE_PATH}
-          docker push ${FULL_IMAGE_PATH}
-          echo "Docker image pushed successfully: ${FULL_IMAGE_PATH}"
+          docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+          docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+          echo "Docker image pushed successfully: ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}"
