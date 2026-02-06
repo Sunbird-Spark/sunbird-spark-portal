@@ -92,12 +92,16 @@ export const SignUpStep1 = ({
                             className="login-input-field h-10 pr-10 px-3"
                         />
                         <button
+                            aria-label={showPassword ? "Hide password" : "Show password"}
                             type="button"
                             onClick={() => setShowPassword((v) => !v)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
-                            {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                            {showPassword ? (
+                                <FiEyeOff className="w-4 h-4" aria-hidden="true" />
+                            ) : (
+                                <FiEye className="w-4 h-4" aria-hidden="true" />
+                            )}
                         </button>
                     </div>
                     {/* Password Requirements */}
@@ -121,12 +125,16 @@ export const SignUpStep1 = ({
                             className="login-input-field h-10 pr-10 px-3"
                         />
                         <button
+                            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                             type="button"
                             onClick={() => setShowConfirmPassword((v) => !v)}
-                            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
-                            {showConfirmPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                            {showConfirmPassword ? (
+                                <FiEyeOff className="w-4 h-4" aria-hidden="true" />
+                            ) : (
+                                <FiEye className="w-4 h-4" aria-hidden="true" />
+                            )}
                         </button>
                     </div>
                     {confirmPassword && password !== confirmPassword && (
