@@ -38,7 +38,7 @@ describe('PdfPlayer Component', () => {
 
         // Setup default service responses
         (appCoreService.getDeviceId as any).mockResolvedValue('device-123');
-        (authService.getAuthStatus as any).mockResolvedValue({
+        (authService.getAuthInfo as any).mockResolvedValue({
             sid: 'session-123',
             uid: 'user-123',
             isAuthenticated: true
@@ -58,7 +58,7 @@ describe('PdfPlayer Component', () => {
 
         await waitFor(() => {
             expect(appCoreService.getDeviceId).toHaveBeenCalled();
-            expect(authService.getAuthStatus).toHaveBeenCalledWith('device-123');
+            expect(authService.getAuthInfo).toHaveBeenCalledWith('device-123');
             expect(mockCreateElement).toHaveBeenCalled();
             expect(screen.queryByText('Loading PDF Player...')).not.toBeInTheDocument();
         });
@@ -76,7 +76,7 @@ describe('PdfPlayer Component', () => {
 
     it('should handle anonymous user configuration', async () => {
         // Mock anonymous response (null uid/sid)
-        (authService.getAuthStatus as any).mockResolvedValue(null);
+        (authService.getAuthInfo as any).mockResolvedValue(null);
 
         render(<PdfPlayer pdfUrl={mockPdfUrl} />);
 

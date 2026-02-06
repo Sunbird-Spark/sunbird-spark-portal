@@ -39,7 +39,7 @@ const PdfPlayer: React.FC<PdfPlayerProps> = ({
             try {
                 // Get device ID and session ID from services
                 const deviceId = await appCoreService.getDeviceId();
-                const authInfo = await authService.getAuthStatus(deviceId);
+                const authInfo = await authService.getAuthInfo(deviceId);
                 const sessionId = authInfo?.sid || 'anonymous-session';
                 const userId = authInfo?.uid || 'anonymous';
 
