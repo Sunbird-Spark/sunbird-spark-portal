@@ -41,7 +41,7 @@ const statsData = [
         id: "total",
         value: "30",
         label: "Total Contents",
-        bgColor: "bg-sunbird-wave",
+        bgColor: "bg-[#70ADBF]",
         iconBg: "#3D8FA7",
         icon: TotalContentsIcon,
     },
