@@ -32,3 +32,9 @@ LEARN_BASE_URL=http://localhost:9000
 
 # Google reCAPTCHA (test values)
 GOOGLE_RECAPTCHA_SECRET=test_recaptcha_secret
+
+# Google OAuth Configuration
+GOOGLE_OAUTH_CLIENT_ID=test_client_id,
+GOOGLE_OAUTH_CLIENT_SECRET=test_client_secret,
+KEYCLOAK_GOOGLE_CLIENT_ID=test_keycloak_client_id,
+KEYCLOAK_GOOGLE_CLIENT_SECRET=test_keycloak_client_secret,
