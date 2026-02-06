@@ -93,7 +93,7 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
 };
 
 export const fetchUserByEmailId = async (emailId: string, req: Request): Promise<UserApiResponse> => {
-    const url = `${KONG_URL}user/v1/exists/email/${emailId}`;
+    const url = `${KONG_URL}/user/v1/exists/email/${emailId}`;
 
     const headers = {
         'x-device-id': req.get('x-device-id'),
