@@ -98,12 +98,13 @@ app.get('/google/auth/callback', async (req: Request, res: Response) => {
         }
 
         redirectUrl = userExists ? '/home' : '/onboarding';
+        return res.redirect(redirectUrl);
     } catch {
         redirectUrl =
             (req.session?.googleOAuth?.error_callback || '/') +
             '?error=GOOGLE_SIGN_IN_FAILED';
+        return res.redirect(redirectUrl);
     } finally {
         delete req.session.googleOAuth;
-        return res.redirect(redirectUrl);
     }
 });
