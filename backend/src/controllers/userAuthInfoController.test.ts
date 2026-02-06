@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
-import { getAuthInfo } from './authController.js';
+import { getAuthInfo } from './userAuthInfoController.js';
 import { Response as ApiResponse } from '../models/Response.js';
 import logger from '../utils/logger.js';
 import { saveSession } from '../utils/sessionUtils.js';
