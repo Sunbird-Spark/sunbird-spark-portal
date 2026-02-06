@@ -37,7 +37,7 @@ jobs:
             echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode > $HOME/gcloud-key.json
             gcloud auth activate-service-account --key-file=$HOME/gcloud-key.json
             gcloud auth configure-docker ${{ secrets.REGISTRY_NAME }}
-            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]') 
+            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
             ;;
           "azure" | "dockerhub")
             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ secrets.REGISTRY_NAME }}" \
