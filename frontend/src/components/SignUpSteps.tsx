@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Checkbox } from "@/components/checkbox";
@@ -38,7 +38,7 @@ export const SignUpStep1 = ({
     <>
         <Header
             title="Welcome to Sunbird!"
-            subtitle="Your learning journey starts here–log in to continue."
+            subtitle="Your learning journey starts here - sign up to get started."
         />
 
         <div className="space-y-3">
@@ -63,8 +63,9 @@ export const SignUpStep1 = ({
             <div className="space-y-3">
                 {/* Email / Mobile */}
                 <div className="form-group relative pb-4">
-                    <InputLabel required>Email ID / Mobile Number</InputLabel>
+                    <InputLabel htmlFor="emailOrMobile" required>Email ID / Mobile Number</InputLabel>
                     <Input
+                        id="emailOrMobile"
                         value={emailOrMobile}
                         onChange={(e) => setEmailOrMobile(e.target.value)}
                         placeholder="Enter Email ID / Mobile Number"
@@ -80,9 +81,10 @@ export const SignUpStep1 = ({
 
                 {/* Password */}
                 <div className="form-group relative pb-4">
-                    <InputLabel required>Password</InputLabel>
+                    <InputLabel htmlFor="password" required>Password</InputLabel>
                     <div className="relative">
                         <Input
+                            id="password"
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -92,6 +94,7 @@ export const SignUpStep1 = ({
                         <button
                             type="button"
                             onClick={() => setShowPassword((v) => !v)}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
                             {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
@@ -107,9 +110,10 @@ export const SignUpStep1 = ({
 
                 {/* Confirm Password */}
                 <div className="form-group relative pb-4">
-                    <InputLabel required>Confirm Password</InputLabel>
+                    <InputLabel htmlFor="confirmPassword" required>Confirm Password</InputLabel>
                     <div className="relative">
                         <Input
+                            id="confirmPassword"
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -119,6 +123,7 @@ export const SignUpStep1 = ({
                         <button
                             type="button"
                             onClick={() => setShowConfirmPassword((v) => !v)}
+                            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
                             {showConfirmPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
@@ -132,7 +137,7 @@ export const SignUpStep1 = ({
                 </div>
 
                 {/* Terms Checkbox */}
-                <div className="flex items-start items-center space-x-2 mt-1">
+                <div className="flex items-center space-x-2 mt-1">
                     <Checkbox
                         id="terms"
                         checked={isTermsAccepted}
@@ -143,7 +148,7 @@ export const SignUpStep1 = ({
                         htmlFor="terms"
                         className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sunbird-charcoal"
                     >
-                        I understand & <a href="#" className="themed-link">accept the SUNBIRD Terms of Use</a>.
+                        I understand & <a href="#" className="themed-link" onClick={(e) => e.preventDefault()}>accept the SUNBIRD Terms of Use</a>.
                     </label>
                 </div>
 
@@ -156,7 +161,7 @@ export const SignUpStep1 = ({
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
-                    Already have an account? <a href="/onboarding" className="themed-link no-underline hover:underline">Login</a>
+                    Already have an account? <a href="/login" className="themed-link no-underline hover:underline">Login</a>
                 </div>
             </div>
         </div>
@@ -170,38 +175,70 @@ interface Step2Props {
     handleVerifyOtp: () => void;
 }
 
-export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2Props) => (
-    <div className="flex flex-col h-full">
-        <Header
-            title="Enter the code"
-            subtitle="Enter the 6 digit code sent to your Email ID and complete the verification"
-        />
+export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2Props) => {
+    const [disableResendOtp, setDisableResendOtp] = useState(false);
+    const [counter, setCounter] = useState(20);
+    const [resendOtpCounter, setResendOtpCounter] = useState(1);
 
-        <div className="flex flex-col flex-1 justify-between h-full">
-            <div className="text-center pt-2">
-                <p className="text-[0.75rem] font-medium text-sunbird-gray-75 mb-6">
-                    OTP is valid for 30 minutes
-                </p>
+    useEffect(() => {
+        setDisableResendOtp(true);
+        setCounter(20);
 
-                <OTPInput otp={otp} setOtp={setOtp} />
+        const interval = setInterval(() => {
+            setCounter(prev => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    setDisableResendOtp(false);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
 
-                <div className="text-center text-[0.75rem] font-medium mt-8">
-                    <span className="text-sunbird-gray-75">04:00 </span>
-                    <button className="text-sunbird-brick font-bold hover:underline ml-1">
-                        Resend OTP
-                    </button>
+        return () => clearInterval(interval);
+    }, [resendOtpCounter]);
+
+    const handleResendOtp = () => {
+        setResendOtpCounter(prev => prev + 1);
+        console.log("Resending OTP...");
+    };
+
+    return (
+        <div className="flex flex-col h-full">
+            <Header
+                title="Enter the code"
+                subtitle="Enter the 6 digit code sent to your Email ID and complete the verification"
+            />
+
+            <div className="flex flex-col flex-1 justify-between h-full">
+                <div className="text-center pt-2">
+                    <p className="text-[0.75rem] font-medium text-sunbird-gray-75 mb-6">
+                        OTP is valid for 30 minutes
+                    </p>
+
+                    <OTPInput otp={otp} setOtp={setOtp} />
+
+                    <div className="text-center text-[0.75rem] font-medium mt-8">
+                        <button
+                            disabled={disableResendOtp}
+                            onClick={handleResendOtp}
+                            className="resend-otp-btn"
+                        >
+                            Resend OTP {counter > 0 && `(${counter})`}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="pb-2 mt-20">
+                    <PrimaryButton
+                        disabled={!isOtpValid}
+                        onClick={handleVerifyOtp}
+                        className="h-[3rem]"
+                    >
+                        Submit
+                    </PrimaryButton>
                 </div>
             </div>
-
-            <div className="pb-2 mt-20">
-                <PrimaryButton
-                    disabled={!isOtpValid}
-                    onClick={handleVerifyOtp}
-                    className="h-[3rem]"
-                >
-                    Submit
-                </PrimaryButton>
-            </div>
         </div>
-    </div>
-);
+    );
+};
