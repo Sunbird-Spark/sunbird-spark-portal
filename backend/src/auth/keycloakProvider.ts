@@ -4,7 +4,7 @@ import { envConfig } from '../config/env.js';
 
 const portalKeycloakConfig = {
     realm: envConfig.PORTAL_REALM,
-    'auth-server-url': envConfig.KEYCLOAK_BASE_SERVER_URL,
+    'auth-server-url': envConfig.DOMAIN_URL + '/auth',
     'ssl-required': 'external' as const,
     resource: envConfig.PORTAL_AUTH_SERVER_CLIENT,
     'confidential-port': 0,

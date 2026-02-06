@@ -10,7 +10,7 @@ vi.mock('../utils/sessionStore.js');
 vi.mock('../config/env.js', () => ({
     envConfig: {
         PORTAL_REALM: 'sunbird',
-        KEYCLOAK_BASE_SERVER_URL: 'http://localhost:8080',
+        DOMAIN_URL: 'http://localhost:8080',
         PORTAL_AUTH_SERVER_CLIENT: 'portal',
         ENVIRONMENT: 'local'
     }
@@ -37,7 +37,7 @@ describe('Keycloak Configuration', () => {
         expect(mockGetKeycloakClient).toHaveBeenCalledWith(
             {
                 realm: 'sunbird',
-                'auth-server-url': 'http://localhost:8080',
+                'auth-server-url': 'http://localhost:8080/auth',
                 'ssl-required': 'external',
                 resource: 'portal',
                 'confidential-port': 0,

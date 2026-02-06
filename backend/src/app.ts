@@ -16,11 +16,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
+import { userProxy } from './proxies/userProxy.js';
+import helmet from 'helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const app = express();
+app.set('trust proxy', true);
+app.use(helmet());
 
 loadTenants();
 app.use(cors());
@@ -41,7 +45,7 @@ app.use(session({
     }
 }), registerDeviceWithKong());
 
-app.get('/portal/login',
+app.get('/profile',
     session({
         name: CookieNames.AUTH,
         store: sessionStore,
@@ -61,10 +65,10 @@ app.get('/portal/login',
                 if (err) {
                     logger.error('Error saving session', err);
                 }
-                res.redirect('/resourcepage');
+                res.redirect('/home');
             });
         } else {
-            res.redirect('/resourcepage');
+            res.redirect('/');
         }
     });
 
@@ -79,18 +83,18 @@ app.all('/portal/logout', async (req, res) => {
 })
 app.use('/api/data/v1/form', formRoutes);
 
+app.use(express.static(path.join(__dirname, 'public')));
 
-if (envConfig.ENVIRONMENT !== 'local') {
-    app.use(express.static(path.join(__dirname, 'public')));
-}
+app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
+app.post('/portal/user/v1/password/reset', userProxy);
+app.post('/portal/otp/v1/verify', kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',
     '/portal/user/v1/exists/phone/:phoneNumber',
-    '/portal/user/v1/fuzzy/search',
     '/portal/user/v1/get/phone/*rest',
     '/portal/user/v1/get/email/*rest',
-    '/portal/anonymous/otp/v1/generate',
+    '/portal/otp/v1/generate',
 ];
 app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
@@ -98,8 +102,6 @@ app.all('/portal/*rest', kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 
-if (envConfig.ENVIRONMENT !== 'local') {
-    app.get(/.*/, (req, res) => {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    });
-}
+app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
