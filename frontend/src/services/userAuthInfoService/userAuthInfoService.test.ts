@@ -1,21 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import authService, { AuthService } from './AuthService';
+import userAuthInfoService, { userAuthInfoService as UserAuthInfoServiceClass } from './userAuthInfoService';
 import axios from 'axios';
 
 vi.mock('axios');
 
-describe('AuthService', () => {
+describe('userAuthInfoService', () => {
     // Reset singleton state before each test
     beforeEach(() => {
         vi.clearAllMocks();
-        authService.clearAuth();
+        userAuthInfoService.clearAuth();
     });
 
     it('should maintain singleton instance', () => {
-        const instance1 = AuthService.getInstance();
-        const instance2 = AuthService.getInstance();
+        const instance1 = UserAuthInfoServiceClass.getInstance();
+        const instance2 = UserAuthInfoServiceClass.getInstance();
         expect(instance1).toBe(instance2);
-        expect(instance1).toBe(authService);
+        expect(instance1).toBe(userAuthInfoService);
     });
 
     describe('getAuthInfo', () => {
@@ -55,7 +55,7 @@ describe('AuthService', () => {
         it('should successfully fetch auth status and update state', async () => {
             (axios.get as any).mockResolvedValue(mockSuccessResponse);
 
-            const result = await authService.getAuthInfo(mockDeviceId);
+            const result = await userAuthInfoService.getAuthInfo(mockDeviceId);
 
             // Check axios call
             expect(axios.get).toHaveBeenCalledWith('/portal/user/v1/auth/info', {
@@ -67,19 +67,19 @@ describe('AuthService', () => {
             expect(result).toEqual(mockSuccessResponse.data.result);
 
             // Check internal state update
-            expect(authService.getSessionId()).toBe('session-123');
-            expect(authService.getUserId()).toBe('user-456');
-            expect(authService.isUserAuthenticated()).toBe(true);
+            expect(userAuthInfoService.getSessionId()).toBe('session-123');
+            expect(userAuthInfoService.getUserId()).toBe('user-456');
+            expect(userAuthInfoService.isUserAuthenticated()).toBe(true);
         });
 
         it('should handle anonymous user properly', async () => {
             (axios.get as any).mockResolvedValue(mockAnonymousResponse);
 
-            await authService.getAuthInfo(mockDeviceId);
+            await userAuthInfoService.getAuthInfo(mockDeviceId);
 
-            expect(authService.getSessionId()).toBe('session-789');
-            expect(authService.getUserId()).toBeNull();
-            expect(authService.isUserAuthenticated()).toBe(false);
+            expect(userAuthInfoService.getSessionId()).toBe('session-789');
+            expect(userAuthInfoService.getUserId()).toBeNull();
+            expect(userAuthInfoService.isUserAuthenticated()).toBe(false);
         });
 
         it('should throw error when api returns unsuccessful status', async () => {
@@ -93,11 +93,11 @@ describe('AuthService', () => {
             };
             (axios.get as any).mockResolvedValue(mockErrorResponse);
 
-            await expect(authService.getAuthInfo(mockDeviceId))
+            await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Something went wrong');
 
             // State should not change
-            expect(authService.getSessionId()).toBeNull();
+            expect(userAuthInfoService.getSessionId()).toBeNull();
         });
 
         it('should use default error message when api returns failed status without errmsg', async () => {
@@ -111,7 +111,7 @@ describe('AuthService', () => {
             };
             (axios.get as any).mockResolvedValue(mockErrorResponse);
 
-            await expect(authService.getAuthInfo(mockDeviceId))
+            await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Failed to fetch auth status');
         });
 
@@ -119,7 +119,7 @@ describe('AuthService', () => {
             const networkError = new Error('Network Error');
             (axios.get as any).mockRejectedValue(networkError);
 
-            await expect(authService.getAuthInfo(mockDeviceId))
+            await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Network Error');
         });
 
@@ -138,7 +138,7 @@ describe('AuthService', () => {
             const consoleSpy = vi.spyOn(console, 'error');
 
             try {
-                await authService.getAuthInfo(mockDeviceId);
+                await userAuthInfoService.getAuthInfo(mockDeviceId);
             } catch (e) {
                 // Expected error
             }
@@ -151,9 +151,9 @@ describe('AuthService', () => {
 
     describe('State Management', () => {
         it('should return null for initial getters', () => {
-            expect(authService.getSessionId()).toBeNull();
-            expect(authService.getUserId()).toBeNull();
-            expect(authService.isUserAuthenticated()).toBe(false);
+            expect(userAuthInfoService.getSessionId()).toBeNull();
+            expect(userAuthInfoService.getUserId()).toBeNull();
+            expect(userAuthInfoService.isUserAuthenticated()).toBe(false);
         });
 
         it('should clear auth data correctly', async () => {
@@ -165,17 +165,17 @@ describe('AuthService', () => {
                 }
             };
             (axios.get as any).mockResolvedValue(mockResponse);
-            await authService.getAuthInfo('d1');
+            await userAuthInfoService.getAuthInfo('d1');
 
-            expect(authService.isUserAuthenticated()).toBe(true);
+            expect(userAuthInfoService.isUserAuthenticated()).toBe(true);
 
             // Clear
-            authService.clearAuth();
+            userAuthInfoService.clearAuth();
 
             // Verify reset
-            expect(authService.getSessionId()).toBeNull();
-            expect(authService.getUserId()).toBeNull();
-            expect(authService.isUserAuthenticated()).toBe(false);
+            expect(userAuthInfoService.getSessionId()).toBeNull();
+            expect(userAuthInfoService.getUserId()).toBeNull();
+            expect(userAuthInfoService.isUserAuthenticated()).toBe(false);
         });
     });
 });

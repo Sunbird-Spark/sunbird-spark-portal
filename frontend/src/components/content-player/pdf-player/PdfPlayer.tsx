@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import appCoreService from '../../../services/AppCoreService';
-import authService from '../../../services/userAuthInfoService/AuthService';
+import userAuthInfoService from '../../../services/userAuthInfoService/userAuthInfoService';
 import { ContentPlayerService } from '../../../services/players/pdf/ContentPlayerService';
 import { PdfPlayerConfig } from '../../../services/players/types';
 
@@ -39,7 +39,7 @@ const PdfPlayer: React.FC<PdfPlayerProps> = ({
             try {
                 // Get device ID and session ID from services
                 const deviceId = await appCoreService.getDeviceId();
-                const authInfo = await authService.getAuthInfo(deviceId);
+                const authInfo = await userAuthInfoService.getAuthInfo(deviceId);
                 const sessionId = authInfo?.sid || 'anonymous-session';
                 const userId = authInfo?.uid || 'anonymous';
 

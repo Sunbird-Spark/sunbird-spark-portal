@@ -3,12 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import PdfPlayer from './PdfPlayer';
 import appCoreService from '../../../services/AppCoreService';
-import authService from '../../../services/userAuthInfoService/AuthService';
+import userAuthInfoService from '../../../services/userAuthInfoService/userAuthInfoService';
 import { ContentPlayerService } from '../../../services/players/pdf/ContentPlayerService';
 
 // Mock dependencies
 vi.mock('../../../services/AppCoreService');
-vi.mock('../../../services/userAuthInfoService/AuthService');
+vi.mock('../../../services/userAuthInfoService/userAuthInfoService');
 vi.mock('../../../services/players/pdf/ContentPlayerService', () => {
     return {
         ContentPlayerService: vi.fn()
@@ -38,7 +38,7 @@ describe('PdfPlayer Component', () => {
 
         // Setup default service responses
         (appCoreService.getDeviceId as any).mockResolvedValue('device-123');
-        (authService.getAuthInfo as any).mockResolvedValue({
+        (userAuthInfoService.getAuthInfo as any).mockResolvedValue({
             sid: 'session-123',
             uid: 'user-123',
             isAuthenticated: true
@@ -58,7 +58,7 @@ describe('PdfPlayer Component', () => {
 
         await waitFor(() => {
             expect(appCoreService.getDeviceId).toHaveBeenCalled();
-            expect(authService.getAuthInfo).toHaveBeenCalledWith('device-123');
+            expect(userAuthInfoService.getAuthInfo).toHaveBeenCalledWith('device-123');
             expect(mockCreateElement).toHaveBeenCalled();
             expect(screen.queryByText('Loading PDF Player...')).not.toBeInTheDocument();
         });
@@ -76,7 +76,7 @@ describe('PdfPlayer Component', () => {
 
     it('should handle anonymous user configuration', async () => {
         // Mock anonymous response (null uid/sid)
-        (authService.getAuthInfo as any).mockResolvedValue(null);
+        (userAuthInfoService.getAuthInfo as any).mockResolvedValue(null);
 
         render(<PdfPlayer pdfUrl={mockPdfUrl} />);
 

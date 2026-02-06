@@ -19,8 +19,8 @@ interface AuthStatusResponse {
     };
 }
 
-class AuthService {
-    private static instance: AuthService;
+class userAuthInfoService {
+    private static instance: userAuthInfoService;
     private sessionId: string | null = null;
     private userId: string | null = null;
     private isAuthenticated: boolean = false;
@@ -29,11 +29,11 @@ class AuthService {
         // Private constructor for singleton pattern
     }
 
-    static getInstance(): AuthService {
-        if (!AuthService.instance) {
-            AuthService.instance = new AuthService();
+    static getInstance(): userAuthInfoService {
+        if (!userAuthInfoService.instance) {
+            userAuthInfoService.instance = new userAuthInfoService();
         }
-        return AuthService.instance;
+        return userAuthInfoService.instance;
     }
 
     /**
@@ -105,5 +105,5 @@ class AuthService {
 }
 
 // Export singleton instance
-export default AuthService.getInstance();
-export { AuthService };
+export default userAuthInfoService.getInstance();
+export { userAuthInfoService };
