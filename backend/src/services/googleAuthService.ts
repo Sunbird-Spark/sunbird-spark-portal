@@ -24,13 +24,9 @@ export const createSession = async (emailId: string, req: Request, res: Response
     let grant;
 
     try {
-        /**
-         * Create Keycloak session for web user
-         * This MUST be a trusted internal call
-         */
         grant = await keycloakGoogle.grantManager.obtainDirectly(
-            emailId,     // KC username or internal ID
-            ''           // Empty password for trusted internal call
+            emailId,
+            ''
         );
     } catch (error) {
         logger.error({
@@ -40,16 +36,9 @@ export const createSession = async (emailId: string, req: Request, res: Response
         throw new Error('GOOGLE_CREATE_SESSION_FAILED');
     }
 
-    /**
-     * Store grant in session cookie
-     * Keycloak adapter handles httpOnly + secure flags
-     */
     keycloakGoogle.storeGrant(grant, req, res);
     req.kauth = { grant };
 
-    /**
-     * Establish authenticated session
-     */
     try {
         await keycloakGoogle.authenticated(req);
         
@@ -70,62 +59,115 @@ export const createSession = async (emailId: string, req: Request, res: Response
     }
 };
 
-
-
 class GoogleOauth {
     createClient(req: Request) {
-        const redirect = `https://${req.get('host')}/google/auth/callback`;
-        return new google.auth.OAuth2(
-            envConfig.GOOGLE_OAUTH_CLIENT_ID,
-            envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
-            redirect
-        );
+        try {
+            const host = req.get('host');
+            if (!host) {
+                throw new Error('HOST_HEADER_MISSING');
+            }
+            
+            const redirect = `https://${host}/google/auth/callback`;
+            
+            if (!envConfig.GOOGLE_OAUTH_CLIENT_ID || !envConfig.GOOGLE_OAUTH_CLIENT_SECRET) {
+                throw new Error('GOOGLE_OAUTH_CONFIG_MISSING');
+            }
+            
+            return new google.auth.OAuth2(
+                envConfig.GOOGLE_OAUTH_CLIENT_ID,
+                envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
+                redirect
+            );
+        } catch (error) {
+            logger.error({
+                msg: 'GoogleOauth:createClient failed',
+                error
+            });
+            throw new Error('GOOGLE_CLIENT_CREATION_FAILED');
+        }
     }
 
     generateAuthUrl({ nonce, state, req }: { nonce: string; state: string; req: Request }) {
-        const client = this.createClient(req);
-        return client.generateAuthUrl({
-            access_type: 'offline',
-            response_type: 'code',
-            scope: ['openid', 'email', 'profile'],
-            state,
-            nonce,
-            prompt: 'consent'
-        });
+        try {
+            const client = this.createClient(req);
+            return client.generateAuthUrl({
+                access_type: 'offline',
+                response_type: 'code',
+                scope: ['openid', 'email', 'profile'],
+                state,
+                nonce,
+                prompt: 'consent'
+            });
+        } catch (error) {
+            logger.error({
+                msg: 'GoogleOauth:generateAuthUrl failed',
+                error
+            });
+            throw new Error('GOOGLE_AUTH_URL_GENERATION_FAILED');
+        }
     }
 
     async verifyAndGetProfile({ code, nonce, req }: { code: string; nonce: string; req: Request }) {
-        const client = this.createClient(req);
-        const { tokens } = await client.getToken(code);
+        try {
+            const client = this.createClient(req);
+            
+            let tokens;
+            try {
+                const tokenResponse = await client.getToken(code);
+                tokens = tokenResponse.tokens;
+            } catch (error) {
+                logger.error({
+                    msg: 'GoogleOauth:getToken failed',
+                    error
+                });
+                throw new Error('FAILED_TO_FETCH_TOKENS');
+            }
 
-        if (!tokens.id_token) {
-            throw new Error('FAILED_TO_FETCH_ID_TOKEN');
+            if (!tokens.id_token) {
+                throw new Error('FAILED_TO_FETCH_ID_TOKEN');
+            }
+
+            const verifier = new OAuth2Client(envConfig.GOOGLE_OAUTH_CLIENT_ID);
+            
+            let ticket;
+            try {
+                ticket = await verifier.verifyIdToken({
+                    idToken: tokens.id_token,
+                    audience: envConfig.GOOGLE_OAUTH_CLIENT_ID
+                });
+            } catch (error) {
+                logger.error({
+                    msg: 'GoogleOauth:verifyIdToken failed',
+                    error
+                });
+                throw new Error('ID_TOKEN_VERIFICATION_FAILED');
+            }
+
+            const payload = ticket.getPayload();
+
+            if (!payload) {
+                throw new Error('INVALID_ID_TOKEN');
+            }
+
+            if (!payload.email_verified) {
+                throw new Error('EMAIL_NOT_VERIFIED');
+            }
+
+            if (payload.nonce !== nonce) {
+                throw new Error('INVALID_NONCE');
+            }
+
+            return {
+                emailId: payload.email,
+                name: payload.name
+            };
+        } catch (error) {
+            logger.error({
+                msg: 'GoogleOauth:verifyAndGetProfile failed',
+                error
+            });
+            throw error;
         }
-
-        const verifier = new OAuth2Client(envConfig.GOOGLE_OAUTH_CLIENT_ID);
-        const ticket = await verifier.verifyIdToken({
-            idToken: tokens.id_token,
-            audience: envConfig.GOOGLE_OAUTH_CLIENT_ID
-        });
-
-        const payload = ticket.getPayload();
-
-        if (!payload) {
-            throw new Error('INVALID_ID_TOKEN');
-        }
-
-        if (!payload.email_verified) {
-            throw new Error('EMAIL_NOT_VERIFIED');
-        }
-
-        if (payload.nonce !== nonce) {
-            throw new Error('INVALID_NONCE');
-        }
-
-        return {
-            emailId: payload.email,
-            name: payload.name
-        };
     }
 }
 
