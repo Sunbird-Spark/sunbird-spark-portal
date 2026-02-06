@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/checkbox";
 import { Header, InputLabel, PrimaryButton, OTPInput } from "../pages/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/lib/auth-utils";
+import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 
 
 interface Step1Props {
