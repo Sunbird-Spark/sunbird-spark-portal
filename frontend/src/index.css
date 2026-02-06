@@ -108,6 +108,10 @@
     /* #B2B2B2 */
     --sunbird-gray-4a: 218 17% 35%;
     /* #4A5568 */
+    --sunbird-gray-d0: 214 15% 84%;
+    /* #D0D5DD */
+    --sunbird-gray-34: 221 23% 27%;
+    /* #344054 */
     --sunbird-success-green: 145 63% 49%;
     /* #2ECC71 */
     --sunbird-orange-light: 13 100% 97%;
@@ -170,7 +174,14 @@
   }
 
   .login-split-container {
-    @apply flex flex-col md:flex-row m-[0.625rem] md:m-auto bg-white rounded-[4rem] p-[0.375rem] relative z-10 shadow-2xl overflow-hidden w-[67.375rem] h-[35.625rem] min-h-[35.625rem];
+    @apply flex flex-col md:flex-row m-[0.625rem] md:m-auto bg-white rounded-[4rem] p-[0.375rem] relative z-10 shadow-2xl overflow-hidden w-[67.375rem] h-[41.625rem] min-h-[41.625rem];
+  }
+
+  /* Tablet view responsiveness */
+  @media (min-width: 640px) and (max-width: 1024px) {
+    .login-split-container {
+      margin: 1.5rem !important;
+    }
   }
 
   .login-left-panel {
@@ -207,7 +218,7 @@
   }
 
   .sunbird-logo-wrapper {
-    @apply mb-5;
+    @apply mb-2;
   }
 
   .logo-image {
@@ -220,7 +231,7 @@
   }
 
   .login-header-subtitle {
-    @apply text-[0.875rem] font-normal text-sunbird-gray-75 leading-relaxed mx-auto max-w-[20rem];
+    @apply text-[0.875rem] font-normal text-sunbird-gray-75 leading-relaxed mx-auto;
   }
 
   .login-input-label {
@@ -232,23 +243,78 @@
     @apply w-full h-13 bg-sunbird-brick !bg-sunbird-brick text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all;
   }
 
+  /* Global Signup/Auth Styles */
+  .secondary-outline-button {
+    @apply w-full !h-10 !bg-white border font-medium flex items-center justify-center gap-2 hover:bg-gray-50 mb-0 text-[0.875rem];
+    border-color: hsl(var(--sunbird-gray-d0)) !important;
+    color: hsl(var(--sunbird-gray-34)) !important;
+    border-radius: 0.5rem !important;
+  }
+
+  .form-divider-container {
+    @apply flex items-center gap-4 my-1;
+  }
+
+  .form-divider-line {
+    @apply h-[1px] flex-1 bg-gray-200;
+  }
+
+  .form-divider-text {
+    @apply text-gray-500 text-[0.75rem] font-medium;
+  }
+
+  .form-error-absolute {
+    @apply text-[0.75rem] text-red-500 absolute left-0 leading-tight;
+  }
+
+  .form-error-offset-8 {
+    @apply bottom-[-8px];
+  }
+
+  .form-error-offset-4 {
+    @apply bottom-[-4px];
+  }
+
+  .form-error-offset-2 {
+    @apply bottom-[-2px];
+  }
+
+  .themed-checkbox {
+    @apply w-4 h-4;
+    border-color: hsl(var(--sunbird-gray-82)) !important;
+    border-radius: 0.25rem !important;
+  }
+
+  .themed-checkbox[data-state="checked"] {
+    background-color: hsl(var(--sunbird-brick)) !important;
+    border-color: hsl(var(--sunbird-brick)) !important;
+  }
+
+  .themed-link {
+    @apply font-bold text-sunbird-brick underline hover:underline-offset-2;
+  }
+
+  .required-asterisk {
+    @apply text-sunbird-gray-75 ml-1;
+  }
+
   /* OTP Input */
   .otp-input-container {
-    @apply flex justify-between gap-2 max-w-100 mx-auto;
+    @apply flex justify-between gap-1 md:gap-2 max-w-full md:max-w-100 mx-auto;
   }
 
   .otp-digit-input {
-    @apply w-13 h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1.25rem] focus:outline-none;
+    @apply w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-semibold border border-sunbird-brick rounded-[0.25rem] focus:border-sunbird-brick focus:ring-1 focus:ring-sunbird-brick outline-none transition-all;
   }
 
   .otp-digit-input:focus {
-    @apply w-13 h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1.25rem] focus:outline-none;
+    @apply w-11 h-11 md:w-13 md:h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1rem] md:text-[1.25rem] focus:outline-none;
     box-shadow: var(--sunbird-focus-ring-shadow);
   }
 
   /* Form Elements */
   .login-input-field {
-    @apply h-[3rem] !bg-white rounded-xs border-sunbird-gray-82 focus:border-sunbird-brick focus:ring-0 px-4 text-[0.875rem] placeholder:text-sunbird-gray-b2;
+    @apply h-[2.5rem] !bg-white !rounded-xs border-sunbird-gray-82 focus:border-sunbird-brick focus:ring-0 px-4 text-[0.875rem] placeholder:text-sunbird-gray-b2;
   }
 
   .login-input-field:focus {
@@ -306,6 +372,8 @@
   .resend-otp-btn:disabled {
     @apply opacity-50 cursor-not-allowed no-underline;
   }
+
+
 }
 
 @layer base {

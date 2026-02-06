@@ -88,6 +88,8 @@ export default {
           "gray-82": "hsl(var(--sunbird-gray-82))",
           "gray-b2": "hsl(var(--sunbird-gray-b2))",
           "gray-4a": "hsl(var(--sunbird-gray-4a))",
+          "gray-d0": "hsl(var(--sunbird-gray-d0))",
+          "gray-34": "hsl(var(--sunbird-gray-34))",
           "success-green": "hsl(var(--sunbird-success-green))",
           "orange-light": "hsl(var(--sunbird-orange-light))",
           "base-white": "hsl(var(--sunbird-white))",

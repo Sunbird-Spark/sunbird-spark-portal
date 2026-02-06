@@ -6,9 +6,10 @@ import sunbirdLogo from '@/assets/sunbird-logo.svg';
 interface AuthLayoutProps {
   children: React.ReactNode;
   onClose?: () => void;
+  isOtpPage?: boolean;
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage }) => {
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -48,7 +49,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose }) => {
                   <img
                     src={sunbirdLogo}
                     alt="Sunbird Logo"
-                    className="logo-image"
+                    className={`logo-image ${isOtpPage ? '-translate-y-10' : ''}`}
                   />
                 </a>
               </div>
