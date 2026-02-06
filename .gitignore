@@ -77,4 +77,4 @@ pnpm-debug.log*
 *.bcmap
 
 # Ignore SVGs in assets folder
-assets/**/*.svg
+public/assets/**/*.svg
