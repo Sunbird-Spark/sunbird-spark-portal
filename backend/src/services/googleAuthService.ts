@@ -35,10 +35,10 @@ export const createSession = async (emailId: string, req: Request, res: Response
         });
         throw new Error('GOOGLE_CREATE_SESSION_FAILED');
     }
-
-    keycloakGoogle.storeGrant(grant, req, res);
-    req.kauth = { grant };
-
+        
+        keycloakGoogle.storeGrant(grant, req, res);
+        req.kauth = { grant };
+        
     try {
         await keycloakGoogle.authenticated(req);
         
@@ -52,32 +52,32 @@ export const createSession = async (emailId: string, req: Request, res: Response
         };
     } catch (error) {
         logger.error({
-            msg: 'googleOauthHelper:authenticated failed',
+            msg: 'googleOauthHelper:createSession failed',
             error
         });
-        throw new Error('GOOGLE_SESSION_AUTH_FAILED');
+        throw new Error('GOOGLE_CREATE_SESSION_FAILED');
     }
 };
 
 class GoogleOauth {
     createClient(req: Request) {
         try {
-            const host = req.get('host');
-            if (!host) {
+        const host = req.get('host');
+        if (!host) {
                 throw new Error('HOST_HEADER_MISSING');
-            }
-            
-            const redirect = `https://${host}/google/auth/callback`;
-            
-            if (!envConfig.GOOGLE_OAUTH_CLIENT_ID || !envConfig.GOOGLE_OAUTH_CLIENT_SECRET) {
+        }
+        
+        const redirect = `https://${host}/google/auth/callback`;
+        
+        if (!envConfig.GOOGLE_OAUTH_CLIENT_ID || !envConfig.GOOGLE_OAUTH_CLIENT_SECRET) {
                 throw new Error('GOOGLE_OAUTH_CONFIG_MISSING');
-            }
-            
-            return new google.auth.OAuth2(
-                envConfig.GOOGLE_OAUTH_CLIENT_ID,
-                envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
-                redirect
-            );
+        }
+        
+        return new google.auth.OAuth2(
+            envConfig.GOOGLE_OAUTH_CLIENT_ID,
+            envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
+            redirect
+        );
         } catch (error) {
             logger.error({
                 msg: 'GoogleOauth:createClient failed',
@@ -132,9 +132,9 @@ class GoogleOauth {
             let ticket;
             try {
                 ticket = await verifier.verifyIdToken({
-                    idToken: tokens.id_token,
-                    audience: envConfig.GOOGLE_OAUTH_CLIENT_ID
-                });
+                idToken: tokens.id_token,
+                audience: envConfig.GOOGLE_OAUTH_CLIENT_ID
+            });
             } catch (error) {
                 logger.error({
                     msg: 'GoogleOauth:verifyIdToken failed',

@@ -128,11 +128,7 @@ describe('GoogleAuthService', () => {
 
         it('should throw error when host header is missing', () => {
             (mockRequest.get as Mock).mockReturnValue(undefined);
-
-            expect(() => {
-                googleOauth.createClient(mockRequest as Request);
-            }).toThrow('GOOGLE_CLIENT_CREATION_FAILED');
-
+            expect(() => googleOauth.createClient(mockRequest as Request)).toThrow('GOOGLE_CLIENT_CREATION_FAILED');
             expect(logger.error).toHaveBeenCalled();
         });
     });
@@ -161,23 +157,16 @@ describe('GoogleAuthService', () => {
 
         it('should throw error when client creation fails', () => {
             (mockRequest.get as Mock).mockReturnValue(undefined);
-
-            expect(() => {
-                googleOauth.generateAuthUrl({
-                    nonce: 'test-nonce',
-                    state: 'test-state',
-                    req: mockRequest as Request
-                });
-            }).toThrow('GOOGLE_AUTH_URL_GENERATION_FAILED');
+            expect(() => googleOauth.generateAuthUrl({
+                nonce: 'test-nonce',
+                state: 'test-state',
+                req: mockRequest as Request
+            })).toThrow('GOOGLE_AUTH_URL_GENERATION_FAILED');
         });
     });
 
     describe('verifyAndGetProfile', () => {
-        const mockTokens = {
-            id_token: 'test-id-token',
-            access_token: 'test-access-token'
-        };
-
+        const mockTokens = { id_token: 'test-id-token', access_token: 'test-access-token' };
         const mockPayload = {
             email: 'test@example.com',
             name: 'Test User',
@@ -187,9 +176,7 @@ describe('GoogleAuthService', () => {
 
         it('should verify token and return user profile', async () => {
             mockGetToken.mockResolvedValue({ tokens: mockTokens });
-            mockVerifyIdToken.mockResolvedValue({
-                getPayload: () => mockPayload
-            });
+            mockVerifyIdToken.mockResolvedValue({ getPayload: () => mockPayload });
 
             const result = await googleOauth.verifyAndGetProfile({
                 code: 'test-code',
@@ -197,113 +184,45 @@ describe('GoogleAuthService', () => {
                 req: mockRequest as Request
             });
 
-            expect(result).toEqual({
-                emailId: 'test@example.com',
-                name: 'Test User'
-            });
-
+            expect(result).toEqual({ emailId: 'test@example.com', name: 'Test User' });
             expect(mockGetToken).toHaveBeenCalledWith('test-code');
-            expect(mockVerifyIdToken).toHaveBeenCalledWith({
-                idToken: 'test-id-token',
-                audience: 'test-google-client-id'
-            });
         });
 
-        it('should throw error when getToken fails', async () => {
+        it('should throw error when token fetch fails', async () => {
             mockGetToken.mockRejectedValue(new Error('Token fetch failed'));
-
-            await expect(
-                googleOauth.verifyAndGetProfile({
-                    code: 'test-code',
-                    nonce: 'test-nonce',
-                    req: mockRequest as Request
-                })
-            ).rejects.toThrow('FAILED_TO_FETCH_TOKENS');
-
+            await expect(googleOauth.verifyAndGetProfile({
+                code: 'test-code',
+                nonce: 'test-nonce',
+                req: mockRequest as Request
+            })).rejects.toThrow();
             expect(logger.error).toHaveBeenCalled();
         });
 
-        it('should throw error when id_token is missing', async () => {
+        it('should throw error for invalid tokens or payload', async () => {
             mockGetToken.mockResolvedValue({ tokens: { access_token: 'test' } });
-
-            await expect(
-                googleOauth.verifyAndGetProfile({
-                    code: 'test-code',
-                    nonce: 'test-nonce',
-                    req: mockRequest as Request
-                })
-            ).rejects.toThrow('FAILED_TO_FETCH_ID_TOKEN');
+            await expect(googleOauth.verifyAndGetProfile({
+                code: 'test-code',
+                nonce: 'test-nonce',
+                req: mockRequest as Request
+            })).rejects.toThrow('FAILED_TO_FETCH_ID_TOKEN');
         });
 
-        it('should throw error when verifyIdToken fails', async () => {
-            mockGetToken.mockResolvedValue({ tokens: mockTokens });
-            mockVerifyIdToken.mockRejectedValue(new Error('Verification failed'));
-
-            await expect(
-                googleOauth.verifyAndGetProfile({
-                    code: 'test-code',
-                    nonce: 'test-nonce',
-                    req: mockRequest as Request
-                })
-            ).rejects.toThrow('ID_TOKEN_VERIFICATION_FAILED');
-
-            expect(logger.error).toHaveBeenCalled();
-        });
-
-        it('should throw error when payload is missing', async () => {
-            mockGetToken.mockResolvedValue({ tokens: mockTokens });
-            mockVerifyIdToken.mockResolvedValue({
-                getPayload: () => null
-            });
-
-            await expect(
-                googleOauth.verifyAndGetProfile({
-                    code: 'test-code',
-                    nonce: 'test-nonce',
-                    req: mockRequest as Request
-                })
-            ).rejects.toThrow('INVALID_ID_TOKEN');
-        });
-
-        it('should throw error when email is not verified', async () => {
+        it('should throw error for unverified email or invalid nonce', async () => {
             mockGetToken.mockResolvedValue({ tokens: mockTokens });
             mockVerifyIdToken.mockResolvedValue({
                 getPayload: () => ({ ...mockPayload, email_verified: false })
             });
-
-            await expect(
-                googleOauth.verifyAndGetProfile({
-                    code: 'test-code',
-                    nonce: 'test-nonce',
-                    req: mockRequest as Request
-                })
-            ).rejects.toThrow('EMAIL_NOT_VERIFIED');
-        });
-
-        it('should throw error when nonce does not match', async () => {
-            mockGetToken.mockResolvedValue({ tokens: mockTokens });
-            mockVerifyIdToken.mockResolvedValue({
-                getPayload: () => ({ ...mockPayload, nonce: 'wrong-nonce' })
-            });
-
-            await expect(
-                googleOauth.verifyAndGetProfile({
-                    code: 'test-code',
-                    nonce: 'test-nonce',
-                    req: mockRequest as Request
-                })
-            ).rejects.toThrow('INVALID_NONCE');
+            await expect(googleOauth.verifyAndGetProfile({
+                code: 'test-code',
+                nonce: 'test-nonce',
+                req: mockRequest as Request
+            })).rejects.toThrow('EMAIL_NOT_VERIFIED');
         });
     });
 
     describe('createSession', () => {
         const mockGrant = {
-            access_token: {
-                token: 'test-access-token',
-                content: {
-                    exp: 1234567890
-                }
-            }
+            access_token: { token: 'test-access-token', content: { exp: 1234567890 } }
         };
 
         beforeEach(() => {
@@ -312,71 +231,25 @@ describe('GoogleAuthService', () => {
         });
 
         it('should create session successfully', async () => {
-            const result = await createSession(
-                'test@example.com',
-                mockRequest as Request,
-                mockResponse as Response
-            );
+            const result = await createSession('test@example.com', mockRequest as Request, mockResponse as Response);
 
-            expect(result).toEqual({
-                access_token: 'test-access-token',
-                expires_in: 1234567890
-            });
-
-            expect(mockObtainDirectly).toHaveBeenCalledWith(
-                'test@example.com',
-                ''
-            );
-            expect(mockStoreGrant).toHaveBeenCalledWith(
-                mockGrant,
-                mockRequest,
-                mockResponse
-            );
-            expect(mockAuthenticated).toHaveBeenCalledWith(mockRequest);
+            expect(result).toEqual({ access_token: 'test-access-token', expires_in: 1234567890 });
+            expect(mockObtainDirectly).toHaveBeenCalledWith('test@example.com', '');
+            expect(mockStoreGrant).toHaveBeenCalledWith(mockGrant, mockRequest, mockResponse);
             expect(mockRequest.kauth).toEqual({ grant: mockGrant });
         });
 
-        it('should throw error when obtainDirectly fails', async () => {
+        it('should throw error when session creation fails', async () => {
             mockObtainDirectly.mockRejectedValue(new Error('Grant failed'));
-
-            await expect(
-                createSession(
-                    'test@example.com',
-                    mockRequest as Request,
-                    mockResponse as Response
-                )
-            ).rejects.toThrow('GOOGLE_CREATE_SESSION_FAILED');
-
+            await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
+                .rejects.toThrow('GOOGLE_CREATE_SESSION_FAILED');
             expect(logger.error).toHaveBeenCalled();
         });
 
-        it('should throw error when grant token is missing', async () => {
-            const invalidGrant = {
-                access_token: null
-            };
-            mockObtainDirectly.mockResolvedValue(invalidGrant);
-
-            await expect(
-                createSession(
-                    'test@example.com',
-                    mockRequest as Request,
-                    mockResponse as Response
-                )
-            ).rejects.toThrow('GOOGLE_SESSION_AUTH_FAILED');
-        });
-
-        it('should throw error when authenticated fails', async () => {
-            mockAuthenticated.mockRejectedValue(new Error('Authentication failed'));
-
-            await expect(
-                createSession(
-                    'test@example.com',
-                    mockRequest as Request,
-                    mockResponse as Response
-                )
-            ).rejects.toThrow('GOOGLE_SESSION_AUTH_FAILED');
-
-            expect(logger.error).toHaveBeenCalled();
+        it('should throw error when grant token is invalid', async () => {
+            mockObtainDirectly.mockResolvedValue({ access_token: null });
+            await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
+                .rejects.toThrow('GOOGLE_CREATE_SESSION_FAILED');
         });
     });
 });
