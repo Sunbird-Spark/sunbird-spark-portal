@@ -112,5 +112,13 @@
   "joinThousands": "Rejoignez des milliers de professionnels qui ont fait progresser leur carrière grâce à nos programmes de formation complets.",
   "certifiedProfessionals": "Formation Professionnelle Certifiée",
   "watchDemo": "Regarder la démo",
-  "certifications": "Certifications"
+  "certifications": "Certifications",
+  "footer": {
+    "products": "Produits",
+    "resources": "Ressources",
+    "videos": "Vidéos",
+    "company": "Entreprise",
+    "terms": "Conditions Générales",
+    "privacy": "Politique de Confidentialité"
+  }
 }

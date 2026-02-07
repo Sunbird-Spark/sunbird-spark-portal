@@ -112,5 +112,13 @@
   "joinThousands": "Join thousands of professionals who have advanced their careers with our comprehensive training programs.",
   "certifiedProfessionals": "Certified Professional Training",
   "watchDemo": "Watch Demo",
-  "certifications": "Certifications"
+  "certifications": "Certifications",
+  "footer": {
+    "products": "Products",
+    "resources": "Resources",
+    "videos": "Videos",
+    "company": "Company",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy"
+  }
 }
