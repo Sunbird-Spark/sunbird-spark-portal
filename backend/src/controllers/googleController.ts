@@ -5,6 +5,7 @@ import { envConfig } from '@/config/env.js';
 import { fetchUserByEmailId, createUserWithMailId } from '@/services/userService.js';
 import { createSession } from '@/services/googleAuthService.js';
 import { Request, Response } from 'express';
+import logger from '../utils/logger.js';
 
 app.get('/google/auth', (req, res) => {
     try {
@@ -41,7 +42,8 @@ app.get('/google/auth', (req, res) => {
         });
 
         return res.redirect(authUrl);
-    } catch {
+    } catch (error) {
+        logger.error('Error initializing Google OAuth:', error);
         const errorCallback = req.query.error_callback as string || '/';
         return res.redirect(`${errorCallback}?error=GOOGLE_AUTH_INIT_FAILED`);
     }
@@ -75,14 +77,16 @@ app.get('/google/auth/callback', async (req: Request, res: Response) => {
         let userExists;
         try {
             userExists = await fetchUserByEmailId(googleUser.emailId, req);
-        } catch {
+        } catch (error) {
+            logger.error('Error fetching user by email:', error);
             throw new Error('FETCH_USER_FAILED');
         }
 
         if (!userExists) {
             try {
                 await createUserWithMailId(googleUser, client_id, req);
-            } catch {
+            } catch (error) {
+                logger.error('Error creating user:', error);
                 throw new Error('CREATE_USER_FAILED');
             }
         }
@@ -93,13 +97,15 @@ app.get('/google/auth/callback', async (req: Request, res: Response) => {
                 req,
                 res
             );
-        } catch {
+        } catch (error) {
+            logger.error('Error creating session:', error);
             throw new Error('SESSION_CREATION_FAILED');
         }
 
         redirectUrl = userExists ? '/home' : '/onboarding';
         return res.redirect(redirectUrl);
-    } catch {
+    } catch (error) {
+        logger.error('Error in Google OAuth callback:', error);
         redirectUrl =
             (req.session?.googleOAuth?.error_callback || '/') +
             '?error=GOOGLE_SIGN_IN_FAILED';
