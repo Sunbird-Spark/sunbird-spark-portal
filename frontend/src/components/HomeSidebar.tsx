@@ -106,7 +106,7 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
 
     return (
         <aside
-            className="w-[242px] bg-white flex flex-col shrink-0 z-20 relative h-[704px]"
+            className="w-[242px] bg-white flex flex-col shrink-0 z-20 relative h-full md:h-[calc(100vh-72px)]"
             style={{
                 boxShadow: '2px 2px 20px 0px rgba(0, 0, 0, 0.09)'
             }}

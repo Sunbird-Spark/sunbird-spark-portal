@@ -68,7 +68,7 @@
   "quizDesc": "Crie avaliações com múltiplos tipos de perguntas para avaliar o entendimento do aluno.",
   "collectionDesc": "Compile e organize múltiplos recursos de sua escolha em uma coleção estruturada.",
   "uploadContent": "Enviar Conteúdo",
-  "uploadContentDesc": "Você pode enviar arquivos de conteúdo diretamente para a plataforma.",
+  "uploadContentDesc": "Você peut enviar arquivos de conteúdo diretamente para a plataforma.",
   "uploadLargeVideos": "Enviar Vídeos Grandes",
   "uploadLargeVideosDesc": "Envie arquivos de vídeo grandes (>50 MB) com processamento otimizado.",
   "courseAssessment": "Avaliação do Curso",
@@ -99,5 +99,13 @@
   "joinThousands": "Junte-se a milhares de profissionais que avançaram em suas carreiras com nossos programas de treinamento abrangentes.",
   "certifiedProfessionals": "Formação Profissional Certificada",
   "watchDemo": "Assistir demonstração",
-  "certifications": "Certificações"
+  "certifications": "Certificações",
+  "footer": {
+    "products": "Produtos",
+    "resources": "Recursos",
+    "videos": "Vídeos",
+    "company": "Empresa",
+    "terms": "Termos e Condições",
+    "privacy": "Política de Privacidade"
+  }
 }
