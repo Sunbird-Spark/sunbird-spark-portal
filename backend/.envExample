@@ -25,7 +25,6 @@ KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN=test_loggedin_register_token
 
 # Keycloak Configuration
 PORTAL_REALM=sunbird
-KEYCLOAK_BASE_SERVER_URL=http://localhost:8080
 PORTAL_AUTH_SERVER_CLIENT=portal
 
 # Learn Service Configuration

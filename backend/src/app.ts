@@ -18,11 +18,14 @@ import { fileURLToPath } from 'url';
 import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
 import { userProxy } from './proxies/userProxy.js';
+import helmet from 'helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const app = express();
+app.set('trust proxy', true);
+app.use(helmet());
 
 loadTenants();
 app.use(cors());
@@ -43,7 +46,7 @@ app.use(session({
     }
 }), registerDeviceWithKong());
 
-app.get('/home',
+app.get('/profile',
     session({
         name: CookieNames.AUTH,
         store: sessionStore,
@@ -63,7 +66,7 @@ app.get('/home',
                 if (err) {
                     logger.error('Error saving session', err);
                 }
-                res.redirect('/onboarding');
+                res.redirect('/home');
             });
         } else {
             res.redirect('/');
@@ -83,8 +86,6 @@ app.use('/api/data/v1/form', formRoutes);
 app.use('/portal/user/v1/auth', authRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.post('/portal/data/v1/system/settings/get', kongProxy);
 
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
 app.post('/portal/user/v1/password/reset', userProxy);
