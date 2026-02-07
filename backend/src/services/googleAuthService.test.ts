@@ -128,7 +128,7 @@ describe('GoogleAuthService', () => {
 
         it('should throw error when host header is missing', () => {
             (mockRequest.get as Mock).mockReturnValue(undefined);
-            expect(() => googleOauth.createClient(mockRequest as Request)).toThrow('GOOGLE_CLIENT_CREATION_FAILED');
+            expect(() => googleOauth.createClient(mockRequest as Request)).toThrow('HOST_HEADER_MISSING');
             expect(logger.error).toHaveBeenCalled();
         });
     });
@@ -242,14 +242,14 @@ describe('GoogleAuthService', () => {
         it('should throw error when session creation fails', async () => {
             mockObtainDirectly.mockRejectedValue(new Error('Grant failed'));
             await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
-                .rejects.toThrow('GOOGLE_CREATE_SESSION_FAILED');
+                .rejects.toThrow('Grant failed');
             expect(logger.error).toHaveBeenCalled();
         });
 
         it('should throw error when grant token is invalid', async () => {
             mockObtainDirectly.mockResolvedValue({ access_token: null });
             await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
-                .rejects.toThrow('GOOGLE_CREATE_SESSION_FAILED');
+                .rejects.toThrow('INVALID_GRANT_TOKEN');
         });
     });
 });

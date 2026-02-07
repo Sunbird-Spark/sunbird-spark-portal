@@ -33,19 +33,19 @@ export const createSession = async (emailId: string, req: Request, res: Response
             msg: 'googleOauthHelper:createSession failed',
             error
         });
-        throw new Error('GOOGLE_CREATE_SESSION_FAILED');
+        throw error;
     }
-        
-        keycloakGoogle.storeGrant(grant, req, res);
-        req.kauth = { grant };
-        
+
+    keycloakGoogle.storeGrant(grant, req, res);
+    req.kauth = { grant };
+
     try {
         await keycloakGoogle.authenticated(req);
-        
+
         if (!grant.access_token?.token || !grant.access_token?.content?.exp) {
             throw new Error('INVALID_GRANT_TOKEN');
         }
-        
+
         return {
             access_token: grant.access_token.token,
             expires_in: grant.access_token.content.exp
@@ -55,35 +55,35 @@ export const createSession = async (emailId: string, req: Request, res: Response
             msg: 'googleOauthHelper:createSession failed',
             error
         });
-        throw new Error('GOOGLE_CREATE_SESSION_FAILED');
+        throw error;
     }
 };
 
 class GoogleOauth {
     createClient(req: Request) {
         try {
-        const host = req.get('host');
-        if (!host) {
+            const host = req.get('host');
+            if (!host) {
                 throw new Error('HOST_HEADER_MISSING');
-        }
-        
-        const redirect = `https://${host}/google/auth/callback`;
-        
-        if (!envConfig.GOOGLE_OAUTH_CLIENT_ID || !envConfig.GOOGLE_OAUTH_CLIENT_SECRET) {
+            }
+
+            const redirect = `https://${host}/google/auth/callback`;
+
+            if (!envConfig.GOOGLE_OAUTH_CLIENT_ID || !envConfig.GOOGLE_OAUTH_CLIENT_SECRET) {
                 throw new Error('GOOGLE_OAUTH_CONFIG_MISSING');
-        }
-        
-        return new google.auth.OAuth2(
-            envConfig.GOOGLE_OAUTH_CLIENT_ID,
-            envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
-            redirect
-        );
+            }
+
+            return new google.auth.OAuth2(
+                envConfig.GOOGLE_OAUTH_CLIENT_ID,
+                envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
+                redirect
+            );
         } catch (error) {
             logger.error({
                 msg: 'GoogleOauth:createClient failed',
                 error
             });
-            throw new Error('GOOGLE_CLIENT_CREATION_FAILED');
+            throw error;
         }
     }
 
@@ -110,38 +110,18 @@ class GoogleOauth {
     async verifyAndGetProfile({ code, nonce, req }: { code: string; nonce: string; req: Request }) {
         try {
             const client = this.createClient(req);
-            
-            let tokens;
-            try {
-                const tokenResponse = await client.getToken(code);
-                tokens = tokenResponse.tokens;
-            } catch (error) {
-                logger.error({
-                    msg: 'GoogleOauth:getToken failed',
-                    error
-                });
-                throw new Error('FAILED_TO_FETCH_TOKENS');
-            }
 
-            if (!tokens.id_token) {
+            const { tokens } = await client.getToken(code);
+
+            if (!tokens?.id_token) {
                 throw new Error('FAILED_TO_FETCH_ID_TOKEN');
             }
 
             const verifier = new OAuth2Client(envConfig.GOOGLE_OAUTH_CLIENT_ID);
-            
-            let ticket;
-            try {
-                ticket = await verifier.verifyIdToken({
+            const ticket = await verifier.verifyIdToken({
                 idToken: tokens.id_token,
                 audience: envConfig.GOOGLE_OAUTH_CLIENT_ID
             });
-            } catch (error) {
-                logger.error({
-                    msg: 'GoogleOauth:verifyIdToken failed',
-                    error
-                });
-                throw new Error('ID_TOKEN_VERIFICATION_FAILED');
-            }
 
             const payload = ticket.getPayload();
 
@@ -166,9 +146,15 @@ class GoogleOauth {
                 msg: 'GoogleOauth:verifyAndGetProfile failed',
                 error
             });
+
+            if (!(error instanceof Error)) {
+                throw new Error('GOOGLE_OAUTH_UNKNOWN_ERROR');
+            }
+
             throw error;
         }
     }
+
 }
 
 export default new GoogleOauth();
