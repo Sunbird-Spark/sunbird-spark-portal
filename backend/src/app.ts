@@ -11,6 +11,7 @@ import formRoutes from './routes/formsRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 import { redirectTenant } from './controllers/tenantController.js';
+import { setAnonymousOrg } from './middlewares/anonymousOrg.js';
 import { loadTenants } from './services/tenantService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,7 +44,7 @@ app.use(session({
         maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
         sameSite: 'lax'
     }
-}), registerDeviceWithKong());
+}), registerDeviceWithKong(), setAnonymousOrg());
 
 app.get('/profile',
     session({
