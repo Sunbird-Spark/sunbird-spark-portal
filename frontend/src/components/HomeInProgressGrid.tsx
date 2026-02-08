@@ -50,41 +50,39 @@ const HomeInProgressGrid = () => {
 
     return (
         <section className="mb-8">
-            <h3 className="text-lg font-semibold text-foreground mb-4">In Progress Contents</h3>
+            <h3 className="home-section-title-large mb-4">In Progress</h3>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="home-inprogress-grid">
                 {inProgressItems.map((item) => (
                     <div
                         key={item.id}
                         onClick={() => navigate(`/course/${item.id}`)}
-                        className="bg-white flex items-center gap-4 p-4 rounded-2xl shadow-[0_4px_14px_rgba(0,0,0,0.03)] border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[148px]"
+                        className="home-inprogress-card"
                     >
                         {/* Content */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-1">
                             <div>
-                                {/* Type Badge */}
-                                <span className="inline-block mb-3 text-[10px] px-3 py-1 rounded-full bg-[#FFF1C7] border border-[#CC8545] text-[#222222]">
-                                    {item.type}
-                                </span>
-
-                                {/* Title */}
-                                <h4 className="font-semibold text-[#222222] text-sm line-clamp-2 leading-snug h-[42px]">
-                                    {item.title}
-                                </h4>
-                            </div>
-
-                            {/* Progress Bar */}
-                            <div className="flex items-center gap-3">
-                                <div className="w-24 h-1.5 bg-[#F1F1F1] rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-[#A85236] rounded-full"
-                                        style={{ width: `${item.progress}%` }}
-                                    />
+                                <div className="flex-1 min-w-0">
+                                    <span className="home-inprogress-badge">
+                                        {item.type}
+                                    </span>
+                                    <h4 className="home-inprogress-title">
+                                        {item.title}
+                                    </h4>
+                                    <div className="flex items-center gap-3 mt-auto">
+                                        <div className="flex-1">
+                                            <div className="w-24 h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-sunbird-brick rounded-full"
+                                                    style={{ width: `${item.progress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <span className="text-[10px] font-medium text-sunbird-gray-77 shrink-0">{item.progress}%</span>
+                                    </div>
                                 </div>
-                                <span className="text-[10px] font-medium text-[#777777] shrink-0">{item.progress}%</span>
                             </div>
                         </div>
-
                         {/* Thumbnail */}
                         <div className="w-[88px] h-[88px] rounded-2xl overflow-hidden shrink-0">
                             <img
