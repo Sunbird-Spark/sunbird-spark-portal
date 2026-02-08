@@ -103,7 +103,7 @@ class GoogleOauth {
                 msg: 'GoogleOauth:generateAuthUrl failed',
                 error
             });
-            throw new Error('GOOGLE_AUTH_URL_GENERATION_FAILED');
+            throw error;
         }
     }
 
@@ -146,11 +146,6 @@ class GoogleOauth {
                 msg: 'GoogleOauth:verifyAndGetProfile failed',
                 error
             });
-
-            if (!(error instanceof Error)) {
-                throw new Error('GOOGLE_OAUTH_UNKNOWN_ERROR');
-            }
-
             throw error;
         }
     }
