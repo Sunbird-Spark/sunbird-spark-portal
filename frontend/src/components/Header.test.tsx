@@ -28,16 +28,16 @@ const renderHeader = () => {
 describe('Header', () => {
   it('renders logo', () => {
     renderHeader();
-    const logo = screen.getByAltText('Sunbird Spark');
+    const logo = screen.getByAltText('Sunbird');
     expect(logo).toBeInTheDocument();
   });
 
   it('toggles mobile menu', () => {
     renderHeader();
-    const menuButton = screen.getAllByRole('button').find(btn => 
+    const menuButton = screen.getAllByRole('button').find(btn =>
       btn.querySelector('svg')?.classList.contains('w-5')
     );
-    
+
     if (menuButton) {
       fireEvent.click(menuButton);
     }
@@ -50,7 +50,7 @@ describe('Header', () => {
       const svg = btn.querySelector('svg');
       return svg !== null;
     });
-    
+
     if (searchButton) {
       fireEvent.click(searchButton);
     }
@@ -58,16 +58,16 @@ describe('Header', () => {
 
   it('handles notification deletion', () => {
     renderHeader();
-    expect(screen.getByAltText('Sunbird Spark')).toBeInTheDocument();
+    expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
   });
 
   it('changes language', () => {
     renderHeader();
-    expect(screen.getByAltText('Sunbird Spark')).toBeInTheDocument();
+    expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
   });
 
   it('renders navigation links', () => {
     renderHeader();
-    expect(screen.getByAltText('Sunbird Spark')).toBeInTheDocument();
+    expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
   });
 });
