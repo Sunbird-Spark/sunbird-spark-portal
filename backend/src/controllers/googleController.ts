@@ -14,6 +14,8 @@ app.get('/google/auth', (req, res) => {
         }
 
         const redirectUrl = new URL(req.query.redirect_uri as string);
+        const errorCallbackUrl = new URL(req.query.error_callback as string);
+        
         if (!envConfig.DOMAIN_URL) {
             throw new Error('DOMAIN_URL is not defined');
         }
@@ -22,6 +24,10 @@ app.get('/google/auth', (req, res) => {
 
         if (!ALLOWED_HOSTS.includes(redirectUrl.hostname)) {
             return res.status(400).send('INVALID_REDIRECT_URI');
+        }
+
+        if (!ALLOWED_HOSTS.includes(errorCallbackUrl.hostname)) {
+            return res.status(400).send('INVALID_ERROR_CALLBACK_URI');
         }
 
         const nonce = crypto.randomBytes(32).toString('hex');
