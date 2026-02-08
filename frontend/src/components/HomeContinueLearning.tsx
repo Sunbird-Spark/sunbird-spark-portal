@@ -51,12 +51,11 @@ const HomeContinueLearning = () => {
 
     return (
         <div
-            className="bg-white rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.1)] border border-gray-100"
-            style={isMobile ? { padding: '16px', minHeight: '230px' } : { padding: '24px', height: '230px', paddingBottom: '32px' }}
+            className="bg-white rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.1)] border border-gray-100 p-4 min-h-[230px] lg:p-6 lg:h-[230px] lg:pb-8"
         >
-            <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-5`}>
+            <div className="flex flex-col lg:flex-row gap-5">
                 {/* Thumbnail */}
-                <div className={`${isMobile ? 'w-full h-48' : 'w-[11.25rem] h-[11.25rem]'} rounded-2xl overflow-hidden shrink-0`}>
+                <div className="w-full h-48 lg:w-[11.25rem] lg:h-[11.25rem] rounded-2xl overflow-hidden shrink-0">
                     <img
                         src={continueCourse.thumbnail}
                         alt={continueCourse.title}
@@ -67,12 +66,12 @@ const HomeContinueLearning = () => {
                 {/* Content */}
                 <div className="flex-1 flex flex-col justify-between">
                     <div>
-                        <h4 className={`font-semibold text-foreground mb-2 line-clamp-2 whitespace-pre-wrap ${isMobile ? 'text-base' : ''}`}>
+                        <h4 className="font-semibold text-foreground mb-2 line-clamp-2 whitespace-pre-wrap text-base lg:text-lg">
                             {continueCourse.title}
                         </h4>
 
                         {/* Progress */}
-                        <div className="flex items-center gap-2" style={{ paddingTop: isMobile ? '16px' : '20px' }}>
+                        <div className="flex items-center gap-2 pt-4 lg:pt-5">
                             <CircularProgress progress={continueCourse.progress} />
                             <span className="text-sm text-muted-foreground">
                                 Completed : {continueCourse.progress}%
@@ -81,10 +80,10 @@ const HomeContinueLearning = () => {
                     </div>
 
                     {/* CTA Button */}
-                    <div className={isMobile ? 'mt-6' : ''}>
+                    <div className="mt-6 lg:mt-0">
                         <Button
                             onClick={() => navigate(`/course/${continueCourse.id}`)}
-                            className={`${isMobile ? 'w-full' : 'w-[290px]'} mt-4 bg-sunbird-brick hover:bg-sunbird-brick/90 text-white rounded-[10px] py-6 h-10 text-sm font-semibold transition-all group shadow-[0_4px_14px_rgba(168,82,54,0.25)]`}
+                            className="w-full lg:w-[290px] mt-4 bg-sunbird-brick hover:bg-sunbird-brick/90 text-white rounded-[10px] py-6 h-10 text-sm font-semibold transition-all group shadow-[0_4px_14px_rgba(168,82,54,0.25)]"
                         >
                             Continue Learning
                             <FiArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />

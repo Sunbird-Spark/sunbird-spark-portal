@@ -35,7 +35,7 @@ const Footer = () => {
           </div>
 
           {/* Links - Right aligned */}
-          <div className="flex gap-20 md:gap-28" style={{ paddingRight: '100px' }}>
+          <div className="flex flex-col sm:flex-row gap-10 md:gap-20 lg:gap-28 lg:pr-[100px] w-full lg:w-auto">
             {/* Products */}
             <div>
               <h4 className="font-semibold text-[14px] mb-4 text-white">
@@ -79,8 +79,8 @@ const Footer = () => {
 
       {/* Bottom Bar - Darker strip */}
       <div className="bg-[#000000]">
-        <div className="w-full py-4 pr-[82px] pl-[108px]">
-          <div className="flex flex-col md:flex-row items-center justify-end gap-6 text-[13px]" style={{ paddingRight: '104px' }}>
+        <div className="w-full py-4 px-6 md:px-12 lg:pl-[108px] lg:pr-[82px]">
+          <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-4 md:gap-6 text-[13px] lg:pr-[104px]">
             <a
               href="#"
               className="hover:opacity-80 transition-opacity text-sunbird-brick"

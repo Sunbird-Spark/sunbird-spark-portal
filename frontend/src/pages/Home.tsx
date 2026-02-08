@@ -47,12 +47,14 @@ const Home = () => {
         <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
             {/* Top Header */}
             <header
-                className={isMobile ? "bg-white border-b border-gray-100 px-4 py-3 shadow-[0_4px_14px_rgba(0,0,0,0.05)] z-30 sticky top-0" : "bg-white border-b border-gray-100 px-6 py-4 shadow-[0_4px_14px_rgba(0,0,0,0.05)] z-30 sticky top-0"}
-                style={isMobile ? {} : { paddingRight: '100px' }}
+                className={`bg-white border-b border-gray-100 z-30 sticky top-0 transition-all ${isMobile ? "px-4 py-3 shadow-sm" : "px-6 py-4 shadow-sm lg:pr-[100px]"
+                    }`}
             >
                 <div className="flex items-center justify-between">
                     {/* Left: Sunbird Logo + Align with Sidebar */}
-                    <div className="flex items-center" style={{ width: (!isMobile && isSidebarOpen) ? '212px' : 'auto', paddingLeft: isMobile ? '0' : '30px' }}>
+                    <div
+                        className={`flex items-center transition-all ${!isMobile && isSidebarOpen ? 'w-[212px]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[30px]'}`}
+                    >
                         {isMobile ? (
                             <div className="flex items-center gap-2">
                                 <button
@@ -93,8 +95,7 @@ const Home = () => {
                             </button>
                         ) : (
                             <div
-                                className="relative w-80 cursor-pointer"
-                                style={{ width: '400px' }}
+                                className="relative w-full md:w-[400px] cursor-pointer"
                                 onClick={() => navigate('/search')}
                             >
                                 <Input
@@ -146,7 +147,7 @@ const Home = () => {
                 {/* Sidebar - Mobile */}
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                        <SheetContent className="p-0">
+                        <SheetContent side="left" className="p-0">
                             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                             <HomeSidebar
                                 activeNav={activeNav}
@@ -181,8 +182,7 @@ const Home = () => {
                 {/* Main Content Area */}
                 <main className="flex-1 bg-home-ivory relative">
                     <div
-                        className="p-4 md:p-6 lg:p-8"
-                        style={!isMobile ? { paddingRight: '100px', paddingLeft: '26px' } : {}}
+                        className={`p-4 md:p-6 lg:p-8 transition-all ${!isMobile ? 'lg:pr-[100px] lg:pl-[26px]' : ''}`}
                     >
                         {/* Welcome Section */}
                         <div className="mb-6 md:mb-8">
