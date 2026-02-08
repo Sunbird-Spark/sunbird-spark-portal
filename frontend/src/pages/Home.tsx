@@ -121,14 +121,14 @@ const Home = () => {
                                     <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="min-w-[150px] p-2">
+                            <DropdownMenuContent className="min-w-[150px] p-2 bg-white border-gray-100 z-50">
                                 {languages.map((lang) => (
                                     <DropdownMenuItem
                                         key={lang.code}
                                         onSelect={() => changeLanguage(lang.code)}
                                         className={`cursor-pointer p-2 rounded-md ${currentCode === lang.code ? "bg-sunbird-brick/10 text-sunbird-brick font-semibold" : ""}`}
                                     >
-                                        {lang.name}
+                                        {lang.label}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
