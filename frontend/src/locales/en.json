@@ -1,4 +1,7 @@
 {
+  "header": {
+    "search": "Search for content"
+  },
   "loading": "Loading...",
   "error": "An error occurred",
   "success": "Success",
@@ -118,7 +121,7 @@
     "resources": "Resources",
     "videos": "Videos",
     "company": "Company",
-    "terms": "Terms & Conditions",
+    "terms": "Terms and Conditions",
     "privacy": "Privacy Policy"
   }
 }
