@@ -45,6 +45,7 @@ export default [
       // Minimal enterprise safety
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
+
       // TypeScript correctness
       'no-unused-vars': 'off', // Disable base rule for TypeScript files
       '@typescript-eslint/no-explicit-any': 'warn',
