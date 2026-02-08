@@ -6,14 +6,23 @@ import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
 import { saveSession } from '../utils/sessionUtils.js';
 
+interface Organization {
+    id: string;
+    slug: string;
+    hashTagId?: string;
+    channel?: string;
+}
+
 /**
- * Fetch organization and store channel ID in session (for anonymous users)
+ * Fetch default organization by slug
+ * @param slug - Organization slug
+ * @param bearerToken - Authorization token
+ * @returns Organization details
  */
-export const fetchAndSetAnonymousOrg = async (
-    req: Request,
+export const getDefaultOrg = async (
     slug: string,
     bearerToken: string
-): Promise<void> => {
+): Promise<Organization> => {
     try {
         const { data } = await axios.post(
             `${envConfig.KONG_URL}/api/org/v2/search`,
@@ -37,12 +46,29 @@ export const fetchAndSetAnonymousOrg = async (
             throw new Error(`Organization not found for slug: ${slug}`);
         }
 
-        req.session.rootOrghashTagId = org.hashTagId || org.channel;
-        await saveSession(req);
-
-        logger.info('Anonymous org session set', { orgId: org.id, slug: org.slug });
+        logger.info('Organization fetched successfully', { orgId: org.id, slug: org.slug });
+        return org;
     } catch (error: any) {
-        logger.error('Failed to fetch and set org', { error: error.message, slug });
+        logger.error('Failed to fetch organization', { error: error.message, slug });
         throw error;
     }
+};
+
+/**
+ * Set organization information to session
+ * @param req - Express request object
+ * @param org - Organization details
+ */
+export const setOrgToSession = (req: Request, org: Organization): void => {
+    req.session.rootOrghashTagId = org.hashTagId || org.channel;
+    logger.info('Organization set to session', { orgId: org.id, slug: org.slug });
+};
+
+/**
+ * Save session with organization data
+ * @param req - Express request object
+ */
+export const saveOrgSession = async (req: Request): Promise<void> => {
+    await saveSession(req);
+    logger.info('Organization session saved');
 };

@@ -32,19 +32,25 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.get('/health', checkHealth);
-app.use(session({
-    name: CookieNames.ANONYMOUS,
-    store: sessionStore,
-    secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        secure: envConfig.ENVIRONMENT !== 'local',
-        maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-        sameSite: 'lax'
-    }
-}), registerDeviceWithKong(), setAnonymousOrg());
+
+// Anonymous session middleware for API routes only
+const anonymousSessionMiddleware = [
+    session({
+        name: CookieNames.ANONYMOUS,
+        store: sessionStore,
+        secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: envConfig.ENVIRONMENT !== 'local',
+            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
+            sameSite: 'lax'
+        }
+    }),
+    registerDeviceWithKong(),
+    setAnonymousOrg()
+];
 
 app.get('/profile',
     session({
@@ -82,9 +88,15 @@ app.all('/portal/logout', async (req, res) => {
     }
     res.redirect('/');
 })
+
+// Apply anonymous session middleware to API routes (once per route tree)
+app.use('/api', anonymousSessionMiddleware);
 app.use('/api/data/v1/form', formRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Apply anonymous session middleware to portal routes (once per route tree)
+app.use('/portal', anonymousSessionMiddleware);
 
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
 app.post('/portal/user/v1/password/reset', userProxy);
