@@ -57,6 +57,8 @@ declare module 'express-session' {
             client_id: string;
             redirect_uri: string;
             error_callback: string;
+            timestamp: number;
+            sessionUsed?: boolean;
         };
     }
 }

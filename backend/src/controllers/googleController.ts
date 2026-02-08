@@ -37,7 +37,9 @@ export const initiateGoogleAuth = (req: Request, res: Response) => {
             state,
             client_id: req.query.client_id as string,
             redirect_uri: req.query.redirect_uri as string,
-            error_callback: req.query.error_callback as string
+            error_callback: req.query.error_callback as string,
+            timestamp: Date.now(),
+            sessionUsed: false
         };
 
         const authUrl = googleOauth.generateAuthUrl({
@@ -62,8 +64,22 @@ export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
             throw new Error('OAUTH_SESSION_MISSING');
         }
 
-        const { state, nonce, client_id } =
+        const { state, nonce, client_id, timestamp, sessionUsed } =
             req.session.googleOAuth;
+
+        // Check if session has already been used (replay attack prevention)
+        if (sessionUsed) {
+            logger.error('Oauth session already used');
+            throw new Error('OAUTH_SESSION_ALREADY_USED');
+        }
+
+        const SESSION_TIMEOUT = 5 * 60 * 1000;
+        if (Date.now() - timestamp > SESSION_TIMEOUT) {
+            logger.error('Oauth session expired');
+            throw new Error('OAUTH_SESSION_EXPIRED');
+        }
+
+        req.session.googleOAuth.sessionUsed = true;
 
         if (req.query.state !== state) {
             throw new Error('INVALID_OAUTH_STATE');
