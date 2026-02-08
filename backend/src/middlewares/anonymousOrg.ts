@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { fetchAndSetAnonymousOrg } from '../controllers/organizationController.js';
+import { getDefaultOrg, setOrgToSession, saveOrgSession } from '../services/organizationService.js';
 import { getBearerToken } from '../utils/proxyUtils.js';
 import logger from '../utils/logger.js';
 
@@ -19,7 +19,9 @@ export const setAnonymousOrg = () => {
             const slug = 'sunbird';
             const bearerToken = getBearerToken(req);
 
-            await fetchAndSetAnonymousOrg(req, slug, bearerToken);
+            const org = await getDefaultOrg(slug, bearerToken);
+            setOrgToSession(req, org);
+            await saveOrgSession(req);
             
             next();
         } catch (error: any) {
