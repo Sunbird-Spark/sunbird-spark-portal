@@ -41,8 +41,8 @@ const statsData = [
         id: "total",
         value: "30",
         label: "Total Contents",
-        bgColor: "bg-[#70ADBF]",
-        iconBg: "#3D8FA7",
+        bgColor: "bg-sunbird-blue-light",
+        iconBg: "hsl(var(--sunbird-blue-medium))",
         icon: TotalContentsIcon,
     },
     {
@@ -50,7 +50,7 @@ const statsData = [
         value: "05",
         label: "Contents in Progress",
         bgColor: "bg-sunbird-ginger",
-        iconBg: "#B06624",
+        iconBg: "hsl(var(--sunbird-brown-dark))",
         icon: InProgressIcon,
     },
     {
@@ -58,7 +58,7 @@ const statsData = [
         value: "13",
         label: "Contents Completed",
         bgColor: "bg-sunbird-moss",
-        iconBg: "#318656",
+        iconBg: "hsl(var(--sunbird-green-dark))",
         icon: CompletedIcon,
     },
     {
@@ -66,37 +66,37 @@ const statsData = [
         value: "06",
         label: "Certifications Earned",
         bgColor: "bg-sunbird-lavender",
-        iconBg: "#744C65",
+        iconBg: "hsl(var(--sunbird-purple-dark))",
         icon: CertificationsIcon,
     },
 ];
 
 const HomeStatsCards = () => {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="home-stats-grid">
             {statsData.map((stat) => {
                 const Icon = stat.icon;
 
                 return (
                     <div
                         key={stat.id}
-                        className={`${stat.bgColor} rounded-[1.25rem] p-5 text-white relative h-[145px] flex flex-col justify-end shadow-[0px_4px_20px_0px_rgba(0,0,0,0.1)]`}
+                        className={`home-stat-card ${stat.bgColor}`}
                     >
                         {/* Icon in top right */}
                         <div
-                            className="absolute top-4 right-4 w-[46px] h-[46px] flex items-center justify-center rounded-[8px]"
+                            className="home-stat-icon-wrapper"
                             style={{ backgroundColor: stat.iconBg }}
                         >
                             <Icon />
                         </div>
 
                         {/* Value */}
-                        <div className="text-[2.5rem] font-bold mb-1 leading-none">
+                        <div className="home-stat-value">
                             {stat.value}
                         </div>
 
                         {/* Label */}
-                        <div className="text-sm text-white/90 whitespace-pre-line leading-tight">
+                        <div className="home-stat-label">
                             {stat.label}
                         </div>
                     </div>

@@ -20,7 +20,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#1C1C1C] font-rubik">
+    <footer className="bg-sunbird-footer-bg font-rubik">
       <div className="w-full py-12 px-6 md:px-12 lg:pl-[108px] lg:pr-[82px]">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-10">
           {/* Logo */}
@@ -29,8 +29,7 @@ const Footer = () => {
               <img
                 src={sunbirdFooterLogo}
                 alt="Sunbird"
-                className="h-8 w-auto md:w-[212px]"
-                style={{ height: '39px' }}
+                className="h-8 w-auto md:w-[212px] h-[39px]"
               />
             </Link>
           </div>
@@ -39,7 +38,7 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row gap-10 md:gap-20 lg:gap-28 lg:pr-[100px] w-full lg:w-auto">
             {/* Products */}
             <div>
-              <h4 className="font-semibold text-[14px] mb-4 text-white">
+              <h4 className="font-semibold text-sm mb-4 text-white">
                 {t("footer.products")}
               </h4>
               <ul className="space-y-3">
@@ -47,7 +46,7 @@ const Footer = () => {
                   <li key={link.label}>
                     <Link
                       to={link.href}
-                      className="text-[14px] text-gray-400 hover:text-white transition-colors"
+                      className="text-sm text-gray-400 hover:text-white transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -58,7 +57,7 @@ const Footer = () => {
 
             {/* Company */}
             <div id="about">
-              <h4 className="font-semibold text-[14px] mb-4 text-white">
+              <h4 className="font-semibold text-sm mb-4 text-white">
                 {t("footer.company")}
               </h4>
               <ul className="space-y-3">
@@ -66,7 +65,7 @@ const Footer = () => {
                   <li key={link.label} id={link.href === "#contact" ? "contact" : undefined}>
                     <Link
                       to={link.href}
-                      className="text-[14px] text-gray-400 hover:text-white transition-colors"
+                      className="text-sm text-gray-400 hover:text-white transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -79,7 +78,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar - Darker strip */}
-      <div className="bg-[#000000]">
+      <div className="bg-black">
         <div className="w-full py-4 px-6 md:px-12 lg:pl-[108px] lg:pr-[82px]">
           <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-4 md:gap-6 text-[13px] lg:pr-[104px]">
             <a

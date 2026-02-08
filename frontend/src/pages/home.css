@@ -1,0 +1,139 @@
+/* Home Container */
+.home-container {
+    @apply min-h-screen bg-white flex flex-col;
+}
+
+.home-main-content {
+    @apply flex-1 bg-[#F9F9F9] relative;
+}
+
+.home-content-wrapper {
+    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[100px] lg:pl-[26px];
+}
+
+/* Header */
+.home-header {
+    @apply bg-white border-b border-gray-100 z-30 sticky top-0 transition-all px-6 py-4 shadow-sm lg:pr-[100px];
+}
+
+.home-header-mobile {
+    @apply bg-white border-b border-gray-100 z-30 sticky top-0 transition-all px-4 py-3 shadow-sm;
+}
+
+/* Search */
+.home-search-container {
+    @apply relative w-full md:w-[314px];
+}
+
+.home-search-input {
+    @apply w-full h-[34px] pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-[10px] text-sm text-sunbird-obsidian placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-sunbird-brick transition-all bg-transparent;
+}
+
+/* Section Titles */
+.home-section-title {
+    @apply text-lg font-semibold text-sunbird-obsidian mb-4;
+}
+
+.home-section-title-large {
+    @apply text-xl font-bold text-sunbird-obsidian;
+}
+
+/* Stats Cards */
+.home-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
+}
+
+.home-stat-card {
+    @apply rounded-[1.25rem] p-5 text-white relative h-[145px] flex flex-col justify-end;
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.1);
+}
+
+.home-stat-icon-wrapper {
+    @apply absolute top-4 right-4 w-[46px] h-[46px] flex items-center justify-center rounded-[8px];
+}
+
+.home-stat-value {
+    @apply text-[2.5rem] font-bold mb-1 leading-none;
+}
+
+.home-stat-label {
+    @apply text-sm text-white/90 whitespace-pre-line leading-tight;
+}
+
+/* Continue Learning */
+.home-continue-learning-card {
+    @apply bg-white rounded-2xl border border-gray-100 p-4 flex-1 lg:p-6 lg:pb-8 flex flex-col lg:flex-row gap-6;
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.1);
+}
+
+.home-performance-chart {
+    @apply bg-white rounded-[1.25rem] p-6 border border-gray-100 flex flex-col;
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.1);
+}
+
+.home-continue-section {
+    @apply mb-8 md:mb-12;
+}
+
+.home-continue-grid {
+    @apply flex flex-col lg:flex-row gap-6;
+}
+
+.home-continue-learning-thumbnail {
+    @apply w-full h-48 lg:w-[11.25rem] lg:h-[11.25rem] rounded-2xl overflow-hidden shrink-0;
+}
+
+.home-continue-learning-title {
+    @apply font-semibold text-foreground mb-2 line-clamp-2 whitespace-pre-wrap text-base lg:text-lg;
+}
+
+.home-continue-learning-btn {
+    @apply w-full lg:w-[290px] mt-4 bg-sunbird-brick hover:bg-sunbird-brick/90 text-white rounded-[10px] py-6 h-10 text-sm font-semibold transition-all;
+    box-shadow: 0 4px 14px rgba(168, 82, 54, 0.25);
+}
+
+/* In Progress Grid */
+.home-inprogress-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6;
+}
+
+.home-inprogress-card {
+    @apply bg-white flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[148px];
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.home-inprogress-badge {
+    @apply inline-block mb-3 text-[10px] px-3 py-1 rounded-full bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian;
+}
+
+.home-inprogress-title {
+    @apply font-semibold text-sunbird-obsidian text-sm line-clamp-2 leading-snug h-[42px];
+}
+
+/* Recommended Section */
+.home-recommended-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6;
+}
+
+.home-recommended-card-video {
+    @apply relative rounded-[20px] overflow-hidden cursor-pointer h-[392px];
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.1);
+}
+
+.home-recommended-card-standard {
+    @apply bg-white rounded-[20px] overflow-hidden border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[392px] flex flex-col;
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.1);
+}
+
+.home-recommended-badge-video {
+    @apply flex items-center justify-center text-[11px] font-bold w-[54px] h-[24px] rounded-[4px] bg-white text-sunbird-obsidian;
+}
+
+.home-recommended-badge-standard {
+    @apply flex items-center justify-center text-[10px] font-bold w-[78px] h-[30px] rounded-[36px] bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian;
+}
+
+/* Footer */
+.sunbird-footer {
+    @apply bg-sunbird-footer-bg font-rubik !pr-[3.75rem];
+}

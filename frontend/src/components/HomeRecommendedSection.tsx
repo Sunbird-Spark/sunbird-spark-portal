@@ -40,20 +40,20 @@ const HomeRecommendedSection = () => {
     return (
         <section className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-xl font-bold text-[#222222]">Recommended Contents</h3>
-                <Link to="/explore" className="text-[#A85236] hover:text-[#A85236]/90 transition-colors">
+                <h3 className="home-section-title-large">Recommended Contents</h3>
+                <Link to="/explore" className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors">
                     <FiArrowRight className="w-5 h-5 stroke-[3px]" />
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="home-recommended-grid">
                 {recommendedItems.map((item) => (
                     item.isVideo ? (
                         // Video Card
                         <div
                             key={item.id}
                             onClick={() => navigate(`/course/${item.id}`)}
-                            className="relative rounded-[20px] overflow-hidden cursor-pointer h-[392px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.1)] group"
+                            className="home-recommended-card-video group"
                         >
                             <img
                                 src={item.thumbnail}
@@ -65,13 +65,13 @@ const HomeRecommendedSection = () => {
                                 {/* Badge */}
                                 {item.isVideo ? (
                                     <div>
-                                        <span className="flex items-center justify-center text-[11px] font-bold w-[54px] h-[24px] rounded-[4px] bg-white text-[#222222]">
+                                        <span className="home-recommended-badge-video">
                                             {item.type}
                                         </span>
                                     </div>
                                 ) : (
                                     <div>
-                                        <span className="flex items-center justify-center text-[10px] font-bold w-[78px] h-[30px] rounded-[36px] bg-[#FFF1C7] border border-[#CC8545] text-[#222222]">
+                                        <span className="home-recommended-badge-standard">
                                             {item.type}
                                         </span>
                                     </div>
@@ -95,7 +95,7 @@ const HomeRecommendedSection = () => {
                         <div
                             key={item.id}
                             onClick={() => navigate(`/course/${item.id}`)}
-                            className="bg-white rounded-[20px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.1)] border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[392px] flex flex-col"
+                            className="home-recommended-card-standard"
                         >
                             {/* Thumbnail */}
                             <div className="p-4 pb-0">
@@ -112,28 +112,28 @@ const HomeRecommendedSection = () => {
                             <div className="p-4 flex-1 flex flex-col relative">
                                 {/* Type Badge */}
                                 <div className="mb-3">
-                                    <span className="flex items-center justify-center text-[10px] font-bold w-[78px] h-[30px] rounded-[36px] bg-[#FFF1C7] border border-[#CC8545] text-[#222222]">
+                                    <span className="home-recommended-badge-standard">
                                         {item.type}
                                     </span>
                                 </div>
 
-                                <h4 className="font-bold text-[#222222] text-xl leading-tight line-clamp-3 mb-auto">
+                                <h4 className="font-bold text-sunbird-obsidian text-xl leading-tight line-clamp-3 mb-auto">
                                     {item.title}
                                 </h4>
 
                                 {/* Stats */}
                                 <div
-                                    className="flex items-center gap-2 text-sm text-[#777777] mt-4 pb-5"
+                                    className="flex items-center gap-2 text-sm text-sunbird-gray-77 mt-4 pb-5"
                                 >
                                     {item.rating && (
-                                        <div className="flex items-center gap-1 font-bold text-[#222222]">
+                                        <div className="flex items-center gap-1 font-bold text-sunbird-obsidian">
                                             <span>{item.rating}</span>
-                                            <FiStar className="w-4 h-4 fill-[#A85236] text-[#A85236]" />
+                                            <FiStar className="w-4 h-4 fill-sunbird-brick text-sunbird-brick" />
                                         </div>
                                     )}
 
                                     {(item.rating && (item.learners || item.lessons)) && (
-                                        <span className="text-[#D9D9D9]">•</span>
+                                        <span className="text-sunbird-gray-d9">•</span>
                                     )}
 
                                     {item.learners && (
@@ -141,7 +141,7 @@ const HomeRecommendedSection = () => {
                                     )}
 
                                     {(item.learners && item.lessons) && (
-                                        <span className="text-[#D9D9D9]">•</span>
+                                        <span className="text-sunbird-gray-d9">•</span>
                                     )}
 
                                     {item.lessons && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiBell, FiMenu } from "react-icons/fi";
+import { FiSearch, FiBell, FiMenu, FiChevronDown } from "react-icons/fi";
 import { Input } from "@/components/input";
 import { Button } from "@/components/button";
 import {
@@ -23,6 +23,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
+import "./home.css";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -44,11 +45,10 @@ const Home = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
+        <div className="home-container">
             {/* Top Header */}
             <header
-                className={`bg-white border-b border-gray-100 z-30 sticky top-0 transition-all ${isMobile ? "px-4 py-3 shadow-sm" : "px-6 py-4 shadow-sm lg:pr-[100px]"
-                    }`}
+                className={isMobile ? "home-header-mobile" : "home-header"}
             >
                 <div className="flex items-center justify-between">
                     {/* Left: Sunbird Logo + Align with Sidebar */}
@@ -59,11 +59,11 @@ const Home = () => {
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setIsSidebarOpen(true)}
-                                    className="text-home-ginger hover:text-home-brick transition-colors p-2 -ml-2"
+                                    className="text-sunbird-ginger hover:text-sunbird-brick transition-colors p-2 -ml-2"
                                 >
                                     <FiMenu className="w-6 h-6" />
                                 </button>
-                                <h1 className="text-lg font-semibold text-gray-900">Home</h1>
+                                <h1 className="text-lg font-semibold text-sunbird-obsidian">Home</h1>
                             </div>
                         ) : (
                             isSidebarOpen ? (
@@ -89,52 +89,46 @@ const Home = () => {
                         {isMobile ? (
                             <button
                                 onClick={() => navigate('/search')}
-                                className="text-sunbird-ginger hover:text-sunbird-brick p-2"
+                                className="text-sunbird-brick hover:text-sunbird-brick p-2"
                             >
                                 <FiSearch className="w-5 h-5" />
                             </button>
                         ) : (
                             <div
-                                className="relative w-full md:w-[400px] cursor-pointer"
+                                className="home-search-container"
                                 onClick={() => navigate('/search')}
                             >
+                                <FiSearch className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sunbird-brick w-4 h-4 cursor-pointer" />
                                 <Input
-                                    placeholder="Search for content"
+                                    type="text"
+                                    placeholder={t("header.search")}
+                                    className="home-search-input"
                                     readOnly
-                                    className="pl-4 pr-10 bg-white border-border focus:border-sunbird-ginger focus:ring-sunbird-ginger/20 rounded-[0.5625rem] h-[2.875rem] text-base cursor-pointer placeholder:text-[#222222]"
                                 />
-                                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-ginger hover:text-sunbird-brick">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M7.53333 14.0667C11.1416 14.0667 14.0667 11.1416 14.0667 7.53333C14.0667 3.92507 11.1416 1 7.53333 1C3.92507 1 1 3.92507 1 7.53333C1 11.1416 3.92507 14.0667 7.53333 14.0667Z" stroke="#A85236" strokeWidth="2" />
-                                        <path d="M15.0012 15.0002L12.2012 12.2002" stroke="#A85236" strokeWidth="2" strokeLinecap="round" />
-                                    </svg>
-                                </button>
                             </div>
                         )}
 
-                        {/* Bell Icon */}
-                        <button className="text-[#A85236] hover:text-sunbird-brick transition-colors">
-                            <FiBell className="w-5 h-5 md:w-6 md:h-6" />
+                        {/* Notifications */}
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <FiBell className="w-5 h-5 text-sunbird-brick" />
                         </button>
 
                         {/* Language Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="gap-1 text-sunbird-brick hover:bg-gray-50">
-                                    <img src={translationIcon} alt="Language" className="w-5 h-5 md:w-6 md:h-6" />
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="hidden md:block">
-                                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </Button>
+                                <button className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <img src={translationIcon} alt="Translate" className="w-5 h-5" />
+                                    <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
+                                </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-white border-gray-200">
+                            <DropdownMenuContent className="min-w-[150px] p-2">
                                 {languages.map((lang) => (
                                     <DropdownMenuItem
                                         key={lang.code}
-                                        onClick={() => changeLanguage(lang.code)}
-                                        className={currentCode === lang.code ? "bg-home-ivory" : ""}
+                                        onSelect={() => changeLanguage(lang.code)}
+                                        className={`cursor-pointer p-2 rounded-md ${currentCode === lang.code ? "bg-sunbird-brick/10 text-sunbird-brick font-semibold" : ""}`}
                                     >
-                                        <span className="mr-2 text-sm">{lang.label}</span>
+                                        {lang.name}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
@@ -143,11 +137,11 @@ const Home = () => {
                 </div>
             </header>
 
-            <div className="flex flex-1">
+            <div className="flex flex-1 relative transition-all">
                 {/* Sidebar - Mobile */}
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                        <SheetContent side="left" className="p-0">
+                        <SheetContent side="left" className="w-[280px] pt-10 px-0 pb-0">
                             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                             <HomeSidebar
                                 activeNav={activeNav}
@@ -167,7 +161,7 @@ const Home = () => {
                                 <div className="absolute -right-3 top-2 z-20">
                                     <button
                                         onClick={() => setIsSidebarOpen(false)}
-                                        className="w-6 h-6 bg-[#EFEFEF] rounded-full flex items-center justify-center shadow-sm text-[#A85236] hover:opacity-80 transition-opacity"
+                                        className="w-6 h-6 bg-sunbird-gray-100 rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
                                     >
                                         <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -180,10 +174,8 @@ const Home = () => {
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 bg-home-ivory relative">
-                    <div
-                        className={`p-4 md:p-6 lg:p-8 transition-all ${!isMobile ? 'lg:pr-[100px] lg:pl-[26px]' : ''}`}
-                    >
+                <main className="home-main-content">
+                    <div className="home-content-wrapper">
                         {/* Welcome Section */}
                         <div className="mb-6 md:mb-8">
                             <h2 className="text-xl md:text-2xl font-semibold text-gray-900">Hi John Deo</h2>
@@ -194,10 +186,10 @@ const Home = () => {
                         <HomeStatsCards />
 
                         {/* Continue Learning + Performance */}
-                        <div className="mb-8 md:mb-12">
-                            <h3 className="text-lg font-semibold text-[#222222] mb-4">Continue from where you left</h3>
-                            <div className="flex flex-col md:flex-row gap-6">
-                                <div className="w-full md:w-[65%]">
+                        <div className="home-continue-section">
+                            <h3 className="text-lg font-semibold text-sunbird-obsidian mb-4">Continue from where you left</h3>
+                            <div className="home-continue-grid">
+                                <div className="w-full lg:w-[65%]">
                                     <HomeContinueLearning />
                                 </div>
                             </div>

@@ -50,12 +50,10 @@ const HomeContinueLearning = () => {
     const isMobile = useIsMobile();
 
     return (
-        <div
-            className="bg-white rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.1)] border border-gray-100 p-4 min-h-[230px] lg:p-6 lg:h-[230px] lg:pb-8"
-        >
+        <div className="home-continue-learning-card">
             <div className="flex flex-col lg:flex-row gap-5">
                 {/* Thumbnail */}
-                <div className="w-full h-48 lg:w-[11.25rem] lg:h-[11.25rem] rounded-2xl overflow-hidden shrink-0">
+                <div className="home-continue-learning-thumbnail">
                     <img
                         src={continueCourse.thumbnail}
                         alt={continueCourse.title}
@@ -66,7 +64,7 @@ const HomeContinueLearning = () => {
                 {/* Content */}
                 <div className="flex-1 flex flex-col justify-between">
                     <div>
-                        <h4 className="font-semibold text-foreground mb-2 line-clamp-2 whitespace-pre-wrap text-base lg:text-lg">
+                        <h4 className="home-continue-learning-title">
                             {continueCourse.title}
                         </h4>
 
@@ -83,7 +81,7 @@ const HomeContinueLearning = () => {
                     <div className="mt-6 lg:mt-0">
                         <Button
                             onClick={() => navigate(`/course/${continueCourse.id}`)}
-                            className="w-full lg:w-[290px] mt-4 bg-sunbird-brick hover:bg-sunbird-brick/90 text-white rounded-[10px] py-6 h-10 text-sm font-semibold transition-all group shadow-[0_4px_14px_rgba(168,82,54,0.25)]"
+                            className="home-continue-learning-btn group"
                         >
                             Continue Learning
                             <FiArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
