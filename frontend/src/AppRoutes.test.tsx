@@ -7,7 +7,7 @@ import AppRoutes from "./AppRoutes";
 // --------------------
 // Mock Pages
 // --------------------
-vi.mock("./pages/HomePage", () => ({ default: () => <div>Home Page</div> }));
+vi.mock("./pages/Home", () => ({ default: () => <div>Home Page</div> }));
 vi.mock("./pages/UnauthorizedPage", () => ({ default: () => <div>Unauthorized Page</div> }));
 vi.mock("./pages/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
 vi.mock("./pages/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));

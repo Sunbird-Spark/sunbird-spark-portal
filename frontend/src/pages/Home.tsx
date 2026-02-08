@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiSearch, FiBell, FiMenu, FiChevronDown } from "react-icons/fi";
 import { Input } from "@/components/input";
-import { Button } from "@/components/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,7 +15,6 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/HomeSidebar";
 import HomeStatsCards from "@/components/HomeStatsCards";
 import HomeContinueLearning from "@/components/HomeContinueLearning";
-import HomePerformanceChart from "@/components/HomePerformanceChart";
 import HomeInProgressGrid from "@/components/HomeInProgressGrid";
 import HomeRecommendedSection from "@/components/HomeRecommendedSection";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -60,6 +58,7 @@ const Home = () => {
                                 <button
                                     onClick={() => setIsSidebarOpen(true)}
                                     className="text-sunbird-ginger hover:text-sunbird-brick transition-colors p-2 -ml-2"
+                                    aria-label="Open Menu"
                                 >
                                     <FiMenu className="w-6 h-6" />
                                 </button>
