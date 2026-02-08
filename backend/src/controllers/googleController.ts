@@ -79,14 +79,24 @@ export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
             throw new Error('OAUTH_SESSION_EXPIRED');
         }
 
-        req.session.googleOAuth.sessionUsed = true;
-
         if (req.query.state !== state) {
             throw new Error('INVALID_OAUTH_STATE');
         }
 
+        if (req.query.error) {
+            logger.error('Google OAuth error:', req.query.error);
+            throw new Error(`GOOGLE_OAUTH_ERROR: ${req.query.error}`);
+        }
+
+        if (!req.query.code || typeof req.query.code !== 'string' || Array.isArray(req.query.code)) {
+            throw new Error('OAUTH_CODE_INVALID');
+        }
+
+        // Mark session as used only after all validations pass
+        req.session.googleOAuth.sessionUsed = true;
+
         const googleUser = await googleOauth.verifyAndGetProfile({
-            code: req.query.code as string,
+            code: req.query.code,
             nonce,
             req
         });
