@@ -40,26 +40,18 @@ vi.mock('../services/kongAuthService.js', () => ({
     generateKongToken: vi.fn().mockResolvedValue('mock-kong-token')
 }));
 
-// Mock app to avoid full app initialization
-vi.mock('../app.js', () => ({
-    app: {
-        get: vi.fn()
-    }
-}));
-
 describe('GoogleController', () => {
     let mockReq: Partial<Request>;
     let mockRes: Partial<Response>;
-    let mockApp: any;
+    let handleGoogleAuthCallback: any;
 
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
         process.env.DOMAIN_URL = 'https://example.com';
         
-        // Import app mock
-        const { app } = await import('../app.js');
-        mockApp = app;
+        const controller = await import('../controllers/googleController.js');
+        handleGoogleAuthCallback = controller.handleGoogleAuthCallback;
         
         // Set up mock request and response
         mockReq = {
@@ -74,9 +66,6 @@ describe('GoogleController', () => {
             status: vi.fn().mockReturnThis(),
             send: vi.fn().mockReturnThis()
         };
-        
-        // Import controller to register routes
-        await import('../controllers/googleController.js');
     });
 
     // GET /google/auth tests moved to googleController.auth.test.ts
@@ -86,8 +75,7 @@ describe('GoogleController', () => {
             mockReq.query = { code: 'test-code', state: 'test-state' };
             mockReq.session = {} as any;
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('/?error=GOOGLE_SIGN_IN_FAILED');
         });
@@ -100,12 +88,13 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
@@ -118,7 +107,9 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
@@ -127,8 +118,7 @@ describe('GoogleController', () => {
                 name: 'Test User'
             });
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
@@ -141,7 +131,9 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
@@ -152,8 +144,7 @@ describe('GoogleController', () => {
             
             mockUserService.fetchUserByEmailId.mockRejectedValue(new Error('Fetch failed'));
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
@@ -166,7 +157,9 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
@@ -178,8 +171,7 @@ describe('GoogleController', () => {
             mockUserService.fetchUserByEmailId.mockResolvedValue(null);
             mockUserService.createUserWithMailId.mockRejectedValue(new Error('Create failed'));
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
@@ -192,7 +184,9 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
@@ -204,8 +198,7 @@ describe('GoogleController', () => {
             mockUserService.fetchUserByEmailId.mockResolvedValue(true);
             mockCreateSession.mockRejectedValue(new Error('Session creation failed'));
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
@@ -218,7 +211,9 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
@@ -233,8 +228,7 @@ describe('GoogleController', () => {
                 expires_in: 3600
             });
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('/home');
             expect(mockUserService.createUserWithMailId).not.toHaveBeenCalled();
@@ -248,7 +242,9 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
@@ -267,8 +263,7 @@ describe('GoogleController', () => {
                 expires_in: 3600
             });
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('/onboarding');
             expect(mockUserService.createUserWithMailId).toHaveBeenCalledWith(
@@ -286,7 +281,9 @@ describe('GoogleController', () => {
                     nonce: 'test-nonce',
                     client_id: 'test-client',
                     redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error'
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false
                 }
             } as any;
             
@@ -301,8 +298,7 @@ describe('GoogleController', () => {
                 expires_in: 3600
             });
             
-            const callbackHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth/callback')?.[1];
-            await callbackHandler(mockReq, mockRes);
+            await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockReq.session?.googleOAuth).toBeUndefined();
         });

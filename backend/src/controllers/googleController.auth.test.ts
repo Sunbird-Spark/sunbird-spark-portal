@@ -38,24 +38,18 @@ vi.mock('../services/kongAuthService.js', () => ({
   generateKongToken: vi.fn().mockResolvedValue('mock-kong-token'),
 }));
 
-vi.mock('../app.js', () => ({
-  app: {
-    get: vi.fn(),
-  },
-}));
-
 describe('GoogleController - /google/auth', () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
-  let mockApp: any;
+  let initiateGoogleAuth: any;
 
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
     process.env.DOMAIN_URL = 'https://example.com';
 
-    const { app } = await import('../app.js');
-    mockApp = app;
+    const controller = await import('../controllers/googleController.js');
+    initiateGoogleAuth = controller.initiateGoogleAuth;
 
     mockReq = {
       query: {},
@@ -69,8 +63,6 @@ describe('GoogleController - /google/auth', () => {
       status: vi.fn().mockReturnThis(),
       send: vi.fn().mockReturnThis(),
     };
-
-    await import('../controllers/googleController.js');
   });
 
   it('redirects to home when any required query param is missing', () => {
@@ -81,12 +73,9 @@ describe('GoogleController - /google/auth', () => {
       { client_id: 'test-client', redirect_uri: 'https://example.com/callback' },
     ];
 
-    const authHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth')?.[1];
-    expect(authHandler).toBeDefined();
-
     for (const q of cases) {
       mockReq.query = q;
-      authHandler(mockReq, mockRes);
+      initiateGoogleAuth(mockReq, mockRes);
       expect(mockRes.redirect).toHaveBeenCalledWith('/');
       (mockRes.redirect as any).mockClear();
     }
@@ -99,8 +88,7 @@ describe('GoogleController - /google/auth', () => {
       error_callback: 'https://example.com/error',
     };
 
-    const authHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth')?.[1];
-    authHandler(mockReq, mockRes);
+    initiateGoogleAuth(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.send).toHaveBeenCalledWith('INVALID_REDIRECT_URI');
@@ -116,8 +104,7 @@ describe('GoogleController - /google/auth', () => {
       error_callback: 'https://example.com/error',
     };
 
-    const authHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth')?.[1];
-    authHandler(mockReq, mockRes);
+    initiateGoogleAuth(mockReq, mockRes);
 
     expect(mockReq.session?.googleOAuth).toBeDefined();
     expect(mockReq.session?.googleOAuth?.client_id).toBe('test-client');
@@ -139,8 +126,7 @@ describe('GoogleController - /google/auth', () => {
       error_callback: 'https://example.com/error',
     };
 
-    const authHandler = mockApp.get.mock.calls.find((call: any) => call[0] === '/google/auth')?.[1];
-    authHandler(mockReq, mockRes);
+    initiateGoogleAuth(mockReq, mockRes);
 
     expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_AUTH_INIT_FAILED');
   });

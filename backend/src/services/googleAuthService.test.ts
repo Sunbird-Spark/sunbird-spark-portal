@@ -161,7 +161,7 @@ describe('GoogleAuthService', () => {
                 nonce: 'test-nonce',
                 state: 'test-state',
                 req: mockRequest as Request
-            })).toThrow('GOOGLE_AUTH_URL_GENERATION_FAILED');
+            })).toThrow('HOST_HEADER_MISSING');
         });
     });
 
