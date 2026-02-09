@@ -5,7 +5,7 @@ import googleOauth, {
     markSessionAsUsed,
     handleUserAuthentication
 } from '../services/googleAuthService.js';
-import { envConfig } from '@/config/env.js';
+import { envConfig } from '../config/env.js';
 import { Request, Response } from 'express';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
