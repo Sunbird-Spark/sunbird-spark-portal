@@ -50,10 +50,10 @@ const HomeRecommendedSection = () => {
                 {recommendedItems.map((item) => (
                     item.isVideo ? (
                         // Video Card
-                        <div
+                        <Link
                             key={item.id}
-                            onClick={() => navigate(`/course/${item.id}`)}
-                            className="home-recommended-card-video group"
+                            to={`/course/${item.id}`}
+                            className="home-recommended-card-video group no-underline"
                         >
                             <img
                                 src={item.thumbnail}
@@ -89,13 +89,13 @@ const HomeRecommendedSection = () => {
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ) : (
                         // Course/Textbook Card
-                        <div
+                        <Link
                             key={item.id}
-                            onClick={() => navigate(`/course/${item.id}`)}
-                            className="home-recommended-card-standard"
+                            to={`/course/${item.id}`}
+                            className="home-recommended-card-standard no-underline"
                         >
                             {/* Thumbnail */}
                             <div className="p-4 pb-0">
@@ -149,7 +149,7 @@ const HomeRecommendedSection = () => {
                                     )}
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     )
                 ))}
             </div>

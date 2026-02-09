@@ -33,8 +33,8 @@ const HomePerformanceChart = () => {
                             <path d="M10.2268 85.5L14.2407 83.4565C18.2546 81.413 26.2824 77.326 34.3101 74.4324C42.3379 71.5388 50.3657 69.8386 58.3935 64.7219C66.4212 59.6052 74.449 51.072 82.4768 45.4988C90.5046 39.9255 98.5324 37.3121 106.56 41.8882C114.588 46.4643 122.616 58.2299 130.643 57.5508C138.671 56.8717 146.699 43.7478 154.727 37.0323C162.755 30.3167 170.782 30.0095 178.81 33.8511C186.838 37.6928 194.866 45.6834 202.893 42.8485C210.921 40.0136 218.949 26.3532 226.977 23.0564C235.005 19.7596 243.032 26.8264 251.06 25.3917C259.088 23.957 267.116 14.0208 275.143 9.6623C283.171 5.30382 291.199 6.52304 295.213 7.13266L299.227 7.74227" stroke="var(--sunbird-ginger)" />
                         </g>
                         <defs>
-                            <filter id="filter0_d_382_1366" x="0" y="0" width="309.302" height="99.9458" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                            <filter id="filter0_d_382_1366" x="0" y="0" width="309.302" height="99.9458" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                                <feFlood floodOpacity="0" result="BackgroundImageFix" />
                                 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
                                 <feOffset dy="4" />
                                 <feGaussianBlur stdDeviation="5" />

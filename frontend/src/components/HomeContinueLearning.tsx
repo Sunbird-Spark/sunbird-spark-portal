@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FiArrowRight } from "react-icons/fi";
 import { Button } from "@/components/button";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const continueCourse = {
     id: "1",
@@ -47,7 +46,6 @@ const CircularProgress = ({ progress }: { progress: number }) => {
 
 const HomeContinueLearning = () => {
     const navigate = useNavigate();
-    const isMobile = useIsMobile();
 
     return (
         <div className="home-continue-learning-card">

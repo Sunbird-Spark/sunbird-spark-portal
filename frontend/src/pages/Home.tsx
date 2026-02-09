@@ -93,18 +93,19 @@ const Home = () => {
                                 <FiSearch className="w-5 h-5" />
                             </button>
                         ) : (
-                            <div
-                                className="home-search-container"
+                            <button
+                                type="button"
+                                className="home-search-container w-full md:w-[400px] h-[46px] text-left relative"
                                 onClick={() => navigate('/search')}
                             >
                                 <FiSearch className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sunbird-brick w-4 h-4 cursor-pointer" />
                                 <Input
                                     type="text"
                                     placeholder={t("header.search")}
-                                    className="home-search-input"
+                                    className="home-search-input pointer-events-none bg-transparent pl-4 pr-10 h-[46px]"
                                     readOnly
                                 />
-                            </div>
+                            </button>
                         )}
 
                         {/* Notifications */}

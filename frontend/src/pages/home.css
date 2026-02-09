@@ -22,11 +22,11 @@
 
 /* Search */
 .home-search-container {
-    @apply relative w-full md:w-[314px];
+    @apply relative;
 }
 
 .home-search-input {
-    @apply w-full h-[34px] pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-[10px] text-sm text-sunbird-obsidian placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-sunbird-brick transition-all bg-transparent;
+    @apply w-full pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-[10px] text-sm text-sunbird-obsidian placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-sunbird-brick transition-all bg-transparent;
 }
 
 /* Section Titles */
