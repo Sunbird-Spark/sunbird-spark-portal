@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FiHome, FiBook, FiUser, FiHelpCircle, FiSettings, FiLogOut } from "react-icons/fi";
+import { FiHome, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 
 interface HomeSidebarProps {
