@@ -190,8 +190,17 @@ const ProfileLearningList = () => {
                             <button
                                 className="flex items-center gap-2 text-[0.8125rem] font-normal text-sunbird-brick hover:opacity-80 transition-opacity"
                             >
-                                <FiEye className="w-4 h-4" />
-                                <span className="text-[#A85236] text-[0.75rem]">Certificate</span>
+                                {course.status === "completed" ? (
+                                    <>
+                                        <FiDownload className="w-4 h-4" />
+                                        <span className="text-sunbird-brick text-[0.75rem]">Download Certificate</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiEye className="w-4 h-4" />
+                                        <span className="text-sunbird-brick text-[0.75rem]">Preview Certificate</span>
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
