@@ -105,7 +105,7 @@ describe('EpubPlayer', () => {
 
     await waitFor(() => {
       expect(onPlayerEvent).toHaveBeenCalled();
-      expect(onPlayerEvent.mock.calls[0][0].type).toBe('START');
+      expect(onPlayerEvent.mock.calls[0]?.[0].type).toBe('START');
     });
   });
 
