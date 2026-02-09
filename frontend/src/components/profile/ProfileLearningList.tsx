@@ -79,7 +79,7 @@ const ProgressRing = ({ progress }: { progress: number }) => {
                 cy="13"
                 r={radius}
                 fill="none"
-                stroke="#F0CE94"
+                stroke="hsl(var(--sunbird-progress-bg))"
                 strokeWidth="3"
             />
             {/* Progress circle */}
@@ -88,7 +88,7 @@ const ProgressRing = ({ progress }: { progress: number }) => {
                 cy="13"
                 r={radius}
                 fill="none"
-                stroke="#A85236"
+                stroke="hsl(var(--sunbird-brick))"
                 strokeWidth="3"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
@@ -107,36 +107,35 @@ const ProfileLearningList = () => {
     });
 
     return (
-        <div className="bg-white rounded-[1.25rem] p-6">
+        <div className="learning-list-card">
             {/* Header with Filter */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-6 relative">
-                <div className="flex items-center">
-                    <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-[#CC8545]" />
-                    <h2 className="text-[1.375rem] font-medium text-foreground ml-2">
+            <div className="learning-header">
+                <div className="learning-title-wrapper">
+                    <div className="learning-title-accent" />
+                    <h2 className="learning-title">
                         My Learning
                     </h2>
                 </div>
 
-                <div className="flex items-center gap-2 pr-2">
-                    <span className="text-sm font-medium text-foreground">Filter :</span>
-                    <div className="relative flex items-center">
+                <div className="learning-filter-container">
+                    <span className="learning-filter-label">Filter :</span>
+                    <div className="learning-filter-select-wrapper">
                         <select
                             value={filter}
                             onChange={(e) => setFilter(e.target.value as FilterType)}
-                            className="text-sm text-foreground border-none bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 font-medium"
+                            className="learning-filter-select"
                         >
                             <option value="all">All</option>
                             <option value="ongoing">Ongoing</option>
                             <option value="completed">Completed</option>
                         </select>
-                        <FiChevronDown className="absolute right-0 pointer-events-none text-sunbird-brick w-4 h-4" />
-
+                        <FiChevronDown className="learning-filter-chevron" />
                     </div>
                 </div>
             </div>
 
             {/* Course List */}
-            <div className="space-y-3">
+            <div className="learning-list-container">
                 {filteredCourses.map((course) => (
                     <div
                         key={course.id}
@@ -164,7 +163,7 @@ const ProfileLearningList = () => {
                         {/* 2. Progress Ring + Percentage */}
                         <div className="profile-learning-stats">
                             <ProgressRing progress={course.progress} />
-                            <span className="text-[1rem] font-medium text-[#222222] w-10">
+                            <span className="text-[1rem] font-medium text-sunbird-obsidian w-10">
                                 {course.progress}%
                             </span>
                         </div>
@@ -173,8 +172,8 @@ const ProfileLearningList = () => {
                         <div className="profile-learning-status">
                             <div
                                 className={`px-4 md:px-5 py-1.5 rounded-full border ${course.status === "completed"
-                                    ? "bg-[#E6F3EA] border-[#B2DDBF] text-[#2D6A4F]"
-                                    : "bg-[#FFF8EB] border-[#FCE6BD] text-[#826404]"
+                                    ? "bg-sunbird-status-completed-bg border-sunbird-status-completed-border text-sunbird-status-completed-text"
+                                    : "bg-sunbird-status-ongoing-bg border-sunbird-status-ongoing-border text-sunbird-status-ongoing-text"
                                     }`}
                             >
                                 <span className="text-sm font-medium">
@@ -186,7 +185,7 @@ const ProfileLearningList = () => {
                         {/* 4. Certificate Action */}
                         <div className="profile-learning-actions">
                             <button
-                                className="flex items-center gap-2 text-[0.8125rem] font-medium text-[#A85236] hover:opacity-80 transition-opacity"
+                                className="flex items-center gap-2 text-[0.8125rem] font-medium text-sunbird-brick hover:opacity-80 transition-opacity"
                             >
                                 {course.status === "completed" ? (
                                     <>
@@ -206,10 +205,10 @@ const ProfileLearningList = () => {
             </div>
 
             {/* View More Link */}
-            <div className="text-center mt-6">
+            <div className="learning-view-more-container">
                 <Link
                     to="/my-learning"
-                    className="text-sm font-medium text-[#A85236] hover:opacity-80 transition-opacity"
+                    className="learning-view-more-link"
                 >
                     View More Courses
                 </Link>
