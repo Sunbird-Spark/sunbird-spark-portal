@@ -14,9 +14,9 @@ export const getAppInfo = (req: Request, res: Response) => {
     const response = new ApiResponse(apiId);
 
     const appInfo = {
-        version: version,
+        version,
         buildHash: finalBuildHash,
-        appId: appId
+        appId
     };
 
     response.setResult({ data: appInfo });
