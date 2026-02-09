@@ -86,7 +86,9 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
         }
       } catch (error) {
         console.error('EPUB Player initialization failed:', error);
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
