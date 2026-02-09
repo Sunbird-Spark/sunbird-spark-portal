@@ -55,7 +55,8 @@ describe('HomeInProgressGrid', () => {
         renderComponent();
 
         const firstCard = document.querySelectorAll('.home-inprogress-card')[0];
-        fireEvent.click(firstCard);
+        expect(firstCard).toBeDefined();
+        fireEvent.click(firstCard!);
 
         expect(mockNavigate).toHaveBeenCalled();
         // Since it's item 1, it should navigate to /course/1
