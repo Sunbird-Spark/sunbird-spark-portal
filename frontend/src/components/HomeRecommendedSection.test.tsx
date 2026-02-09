@@ -26,8 +26,9 @@ describe('HomeRecommendedSection', () => {
         renderComponent();
         expect(screen.getByText('Recommended Contents')).toBeInTheDocument();
 
-        const exploreLink = screen.getByRole('link');
-        expect(exploreLink).toHaveAttribute('href', '/explore');
+        const links = screen.getAllByRole('link');
+        const exploreLink = links.find(l => l.getAttribute('href') === '/explore');
+        expect(exploreLink).toBeInTheDocument();
     });
 
     it('renders all recommended items', () => {
@@ -59,15 +60,13 @@ describe('HomeRecommendedSection', () => {
     it('navigates when a card is clicked', () => {
         renderComponent();
 
-        // Click first item - use the card class
-        const firstCard = screen.getByText(/Complete AI Engineer Bootcamp/).closest('.home-recommended-card-standard');
-        if (firstCard) fireEvent.click(firstCard);
-        expect(mockNavigate).toHaveBeenCalledWith('/course/1');
+        // Check first item - it should be a link with correct href
+        const firstCard = screen.getByText(/Complete AI Engineer Bootcamp/).closest('a');
+        expect(firstCard).toHaveAttribute('href', '/course/1');
 
-        // Click video card - use the card class
-        const videoCard = screen.getByText('Generative AI for Cybersecurity Professionals').closest('.home-recommended-card-video');
-        if (videoCard) fireEvent.click(videoCard);
-        expect(mockNavigate).toHaveBeenCalledWith('/course/2');
+        // Check video card - it should be a link with correct href
+        const videoCard = screen.getByText('Generative AI for Cybersecurity Professionals').closest('a');
+        expect(videoCard).toHaveAttribute('href', '/course/2');
     });
 
     it('renders video CTA button on video card', () => {
