@@ -79,7 +79,7 @@ const HomeRecommendedSection = () => {
 
                                 {/* Content */}
                                 <div>
-                                    <h4 className="font-bold text-white text-[1.75rem] leading-tight mb-4 tracking-tight">
+                                    <h4 className="home-recommended-card-video-title">
                                         {item.title}
                                     </h4>
 
@@ -117,7 +117,7 @@ const HomeRecommendedSection = () => {
                                     </span>
                                 </div>
 
-                                <h4 className="font-bold text-sunbird-obsidian text-xl leading-tight line-clamp-3 mb-auto">
+                                <h4 className="home-recommended-card-title">
                                     {item.title}
                                 </h4>
 
@@ -126,7 +126,7 @@ const HomeRecommendedSection = () => {
                                     className="flex items-center gap-2 text-sm text-sunbird-gray-77 mt-4 pb-5"
                                 >
                                     {item.rating && (
-                                        <div className="flex items-center gap-1 font-bold text-sunbird-obsidian">
+                                        <div className="flex items-center gap-1 font-normal text-sunbird-obsidian">
                                             <span>{item.rating}</span>
                                             <FiStar className="w-4 h-4 fill-sunbird-brick text-sunbird-brick" />
                                         </div>
@@ -149,10 +149,10 @@ const HomeRecommendedSection = () => {
                                     )}
                                 </div>
                             </div>
-                        </Link>
+                        </Link >
                     )
                 ))}
-            </div>
+            </div >
         </section >
     );
 };

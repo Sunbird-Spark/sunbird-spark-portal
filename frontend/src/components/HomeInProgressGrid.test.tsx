@@ -24,7 +24,7 @@ describe('HomeInProgressGrid', () => {
 
     it('renders the section title', () => {
         renderComponent();
-        expect(screen.getByText('In Progress')).toBeInTheDocument();
+        expect(screen.getByText('In Progress Contents')).toBeInTheDocument();
     });
 
     it('renders all in-progress items', () => {

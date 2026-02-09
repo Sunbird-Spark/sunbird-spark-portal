@@ -8,6 +8,7 @@ import WorkspacePage from './pages/WorkspacePage';
 import ReportsPage from './pages/ReportsPage';
 import CreateContentPage from './pages/CreateContentPage';
 import Index from './pages/Index';
+import Home from './pages/Home';
 import ForgotPassword from './pages/ForgotPassword';
 import PasswordResetSuccess from './pages/PasswordResetSuccess';
 import SignUp from './pages/SignUp';

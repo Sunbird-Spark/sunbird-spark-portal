@@ -1,5 +1,3 @@
-import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
-import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
