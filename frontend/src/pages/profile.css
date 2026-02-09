@@ -289,14 +289,18 @@
     @apply text-[0.75rem] md:text-[0.875rem] text-sunbird-gray-66 font-normal;
 }
 
+.profile-learning-stats-badge-row {
+    @apply flex items-center justify-between xl:contents;
+}
+
 .profile-learning-stats {
-    @apply flex items-center justify-between xl:justify-start gap-4 xl:flex-[0.8];
+    @apply flex items-center gap-2 xl:flex-[0.8];
 }
 
 .profile-learning-actions {
-    @apply flex items-center justify-between xl:justify-end gap-2 xl:flex-[0.8] border-t xl:border-t-0 pt-3 xl:pt-0;
+    @apply flex items-center justify-start xl:justify-end gap-2 xl:flex-[0.8];
 }
 
 .profile-learning-status {
-    @apply flex-1 flex justify-center xl:justify-center;
+    @apply flex justify-end xl:flex-1 xl:justify-center;
 }
