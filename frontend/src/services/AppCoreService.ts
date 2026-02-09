@@ -94,8 +94,11 @@ class AppCoreService {
 
     async initialize(): Promise<void> {
         try {
+            console.log('Initializing AppCoreService...');
+
             // Preload device ID
-            await this.getDeviceId();
+            const deviceId = await this.getDeviceId();
+            console.log('Device ID initialized:', deviceId);
         } catch (error) {
             console.error('AppCoreService initialization failed:', error);
             throw error;
