@@ -34,39 +34,39 @@ const Header = () => {
 
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 pr-[56px] pl-[13px]">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 pr-[3.5rem] pl-[0.8125rem]">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-[72px] pl-[60px]" style={{
-          paddingLeft: '0px',
-          marginLeft: '0px',
-          paddingRight: '35px',
+        <div className="flex items-center justify-between h-16 md:h-[4.5rem] pl-[3.75rem]" style={{
+          paddingLeft: '0',
+          marginLeft: '0',
+          paddingRight: '2.1875rem',
         }}>
           {/* Logo */}
-          <Link to="/" className="flex items-center md:pl-[30px]">
+          <Link to="/" className="flex items-center md:pl-[1.875rem]">
             <img
               src={sunbirdLogo}
               alt="Sunbird"
               className="h-8 w-auto"
-              style={{ paddingRight: 0, width: '195px' }}
+              style={{ paddingRight: 0, width: '12.1875rem' }}
             />
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8" style={{
-            paddingRight: '80px',
+            paddingRight: '5rem',
           }}>
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`text-[15px] transition-colors ${isActive(link.href)
+                className={`text-[0.9375rem] transition-colors ${isActive(link.href)
                   ? 'text-sunbird-brick font-medium'
                   : 'text-gray-900 font-normal hover:text-sunbird-brick'
                   }`}
               >
                 <span className="flex items-center gap-1">
                   {link.label}
-                  {link.href === "/explore" && <FiChevronDown className={`w-4 h-4 pl-[5px] mt-[3px] ${isActive(link.href) ? 'text-sunbird-brick' : 'text-gray-400'}`} />}
+                  {link.href === "/explore" && <FiChevronDown className={`w-4 h-4 pl-[0.3125rem] mt-[0.1875rem] ${isActive(link.href) ? 'text-sunbird-brick' : 'text-gray-400'}`} />}
                 </span>
               </Link>
             ))}
@@ -77,12 +77,12 @@ const Header = () => {
             <div className="flex items-center gap-1">
               {/* Search */}
               <button className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors" onClick={() => { navigate("/search") }}>
-                <FiSearch className="w-[18px] h-[18px] stroke-[2]" />
+                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" />
               </button>
 
               {/* Notifications - Filled Bell */}
               <button className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors">
-                <FiBell className="w-[21px] h-[21px] fill-sunbird-brick" />
+                <FiBell className="w-[1.3125rem] h-[1.3125rem] fill-sunbird-brick" />
               </button>
 
               {/* Language Selector */}
@@ -93,7 +93,7 @@ const Header = () => {
                     <FiChevronDown className="w-3.5 h-3.5" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[150px] bg-white z-50">
+                <DropdownMenuContent align="end" className="w-[9.375rem] bg-white z-50">
                   {languages.map((lang) => (
                     <DropdownMenuItem
                       key={lang.code}
@@ -111,7 +111,7 @@ const Header = () => {
             {/* Login Button */}
             <Button
               onClick={() => navigate("/profile")}
-              className="flex items-center justify-center w-[72px] h-[30px] bg-sunbird-brick text-white rounded-[6px] text-sm font-medium p-0"
+              className="flex items-center justify-center w-[4.5rem] h-[1.875rem] bg-sunbird-brick text-white rounded-[0.375rem] text-sm font-medium p-0"
             >
               {t("login")}
             </Button>

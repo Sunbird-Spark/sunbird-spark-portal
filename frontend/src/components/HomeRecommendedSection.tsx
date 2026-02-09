@@ -99,7 +99,7 @@ const HomeRecommendedSection = () => {
                         >
                             {/* Thumbnail */}
                             <div className="p-4 pb-0">
-                                <div className="rounded-2xl overflow-hidden h-[190px] w-full">
+                                <div className="rounded-2xl overflow-hidden h-[11.875rem] w-full">
                                     <img
                                         src={item.thumbnail}
                                         alt={item.title}

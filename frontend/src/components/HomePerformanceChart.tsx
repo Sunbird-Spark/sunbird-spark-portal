@@ -1,13 +1,13 @@
 
 const HomePerformanceChart = () => {
     return (
-        <div className="home-performance-chart h-[230px] flex-1" style={{ paddingTop: '18px' }}>
-            <h3 className="text-lg font-bold text-sunbird-obsidian" style={{ marginBottom: '5px' }}>Performance</h3>
+        <div className="home-performance-chart h-[14.375rem] flex-1" style={{ paddingTop: '1.125rem' }}>
+            <h3 className="text-lg font-bold text-sunbird-obsidian" style={{ marginBottom: '0.3125rem' }}>Performance</h3>
 
             {/* Chart Area */}
             <div className="relative w-full mb-0">
                 {/* SVG Grid & Wave */}
-                <div className="relative w-full" style={{ height: '100px' }}>
+                <div className="relative w-full" style={{ height: '6.25rem' }}>
                     <svg viewBox="0 0 310 90" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
                         {/* Grid Lines */}
                         <g className="opacity-50">
@@ -43,7 +43,7 @@ const HomePerformanceChart = () => {
                 </div>
 
                 {/* X-Axis Labels */}
-                <div className="flex justify-between px-2" style={{ marginTop: '5px' }}>
+                <div className="flex justify-between px-2" style={{ marginTop: '0.3125rem' }}>
                     <span className="text-xs font-medium text-sunbird-obsidian">Jan</span>
                     <span className="text-xs font-medium text-sunbird-obsidian">Feb</span>
                     <span className="text-xs font-medium text-sunbird-obsidian">Mar</span>
@@ -54,9 +54,9 @@ const HomePerformanceChart = () => {
             </div>
 
             {/* Bottom Section */}
-            <div className="mt-auto flex items-start gap-4" style={{ paddingBottom: '20px', paddingTop: '18px' }}>
+            <div className="mt-auto flex items-start gap-4" style={{ paddingBottom: '1.25rem', paddingTop: '1.125rem' }}>
                 <span className="text-[1.75rem] font-bold text-sunbird-obsidian leading-none">40%</span>
-                <p className="text-[11px] text-sunbird-gray-77 leading-[1.3] max-w-[180px]">
+                <p className="text-[0.6875rem] text-sunbird-gray-77 leading-[1.3] max-w-[11.25rem]">
                     Your productivity is 40% higher as compared to last month
                 </p>
             </div>
