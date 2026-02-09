@@ -3,9 +3,9 @@ import googleOauth, {
     validateOAuthSession,
     validateOAuthCallback,
     markSessionAsUsed,
-    handleUserAuthentication
+    handleUserAuthentication,
+    validateRedirectUrl
 } from '../services/googleAuthService.js';
-import { envConfig } from '../config/env.js';
 import { Request, Response } from 'express';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
@@ -17,21 +17,14 @@ export const initiateGoogleAuth = (req: Request, res: Response) => {
             return res.redirect('/');
         }
 
-        const redirectUrl = new URL(req.query.redirect_uri as string);
-        const errorCallbackUrl = new URL(req.query.error_callback as string);
+        const redirectUri = req.query.redirect_uri as string;
+        const errorCallback = req.query.error_callback as string;
 
-        if (!envConfig.DOMAIN_URL) {
-            throw new Error('DOMAIN_URL is not defined');
-        }
-        const parsedUrl = new URL(envConfig.DOMAIN_URL);
-        const ALLOWED_HOSTS = [parsedUrl.hostname];
+        const validatedRedirectUri = validateRedirectUrl(redirectUri);
+        const validatedErrorCallback = validateRedirectUrl(errorCallback);
 
-        if (!ALLOWED_HOSTS.includes(redirectUrl.hostname)) {
-            return res.status(400).send('INVALID_REDIRECT_URI');
-        }
-
-        if (!ALLOWED_HOSTS.includes(errorCallbackUrl.hostname)) {
-            return res.status(400).send('INVALID_ERROR_CALLBACK_URI');
+        if (validatedRedirectUri === '/' || validatedErrorCallback === '/') {
+            return res.status(400).send('INVALID_REDIRECT_URI_OR_ERROR_CALLBACK');
         }
 
         const nonce = crypto.randomBytes(32).toString('hex');
@@ -41,8 +34,8 @@ export const initiateGoogleAuth = (req: Request, res: Response) => {
             nonce,
             state,
             client_id: req.query.client_id as string,
-            redirect_uri: req.query.redirect_uri as string,
-            error_callback: req.query.error_callback as string,
+            redirect_uri: validatedRedirectUri,
+            error_callback: validatedErrorCallback,
             timestamp: Date.now(),
             sessionUsed: false
         };
@@ -56,13 +49,13 @@ export const initiateGoogleAuth = (req: Request, res: Response) => {
         return res.redirect(authUrl);
     } catch (error) {
         logger.error('Error initializing Google OAuth:', error);
-        const errorCallback = req.query.error_callback as string || '/';
+        const errorCallback = validateRedirectUrl(req.query.error_callback as string);
         return res.redirect(`${errorCallback}?error=GOOGLE_AUTH_INIT_FAILED`);
     }
 };
 
 export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
-    let redirectUrl: string = '/?error=GOOGLE_SIGN_IN_FAILED';
+    let redirectUrl: string;
 
     try {
         const { state, nonce, client_id } = validateOAuthSession(req);
@@ -83,9 +76,8 @@ export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
         return res.redirect(redirectUrl);
     } catch (error) {
         logger.error('Error in Google OAuth callback:', error);
-        redirectUrl =
-            (req.session?.googleOAuth?.error_callback || '/') +
-            '?error=GOOGLE_SIGN_IN_FAILED';
+        const safeErrorCallback = validateRedirectUrl(req.session?.googleOAuth?.error_callback);
+        redirectUrl = `${safeErrorCallback}?error=GOOGLE_SIGN_IN_FAILED`;
         return res.redirect(redirectUrl);
     } finally {
         delete req.session.googleOAuth;

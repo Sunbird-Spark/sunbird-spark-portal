@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import { getKeycloakClient } from '../auth/keycloakManager.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import logger from '../utils/logger.js';
+import _ from 'lodash';
 
 const keycloakGoogleConfig = {
     realm: envConfig?.PORTAL_REALM,
@@ -20,7 +21,7 @@ const keycloakGoogleConfig = {
 
 const keycloakGoogle = getKeycloakClient(keycloakGoogleConfig, sessionStore);
 
-export const createSession = async (emailId: string, req: Request, res: Response): Promise<{ access_token: string; expires_in: number }> => {
+export const createSession = async (emailId: string, req: Request, res: Response): Promise<{ access_token: string; expires_at: number }> => {
     let grant;
 
     try {
@@ -40,7 +41,11 @@ export const createSession = async (emailId: string, req: Request, res: Response
     req.kauth = { grant };
 
     try {
+        const originalGoogleOAuth = req.session?.googleOAuth;
         await keycloakGoogle.authenticated(req);
+        if (req.session && originalGoogleOAuth && !req.session.googleOAuth) {
+            req.session.googleOAuth = originalGoogleOAuth;
+        }
 
         if (!grant.access_token?.token || !grant.access_token?.content?.exp) {
             throw new Error('INVALID_GRANT_TOKEN');
@@ -48,7 +53,7 @@ export const createSession = async (emailId: string, req: Request, res: Response
 
         return {
             access_token: grant.access_token.token,
-            expires_in: grant.access_token.content.exp
+            expires_at: grant.access_token.content.exp
         };
     } catch (error) {
         logger.error({
@@ -63,13 +68,25 @@ class GoogleOauth {
     createClient(req: Request) {
         try {
             const host = req.get('host');
-            if (!host) {
+            if (!_.isString(host) || _.isEmpty(host.trim())) {
                 throw new Error('HOST_HEADER_MISSING');
             }
+            if (!_.isString(envConfig.DOMAIN_URL) || _.isEmpty(envConfig.DOMAIN_URL.trim())) {
+                logger.error('GOOGLE_OAUTH_DOMAIN_URL_MISSING');
+                throw new Error('GOOGLE_OAUTH_DOMAIN_URL_MISSING');
+            }
+            
+            const domainHost = new URL(envConfig.DOMAIN_URL).host;
+            if (host !== domainHost) {
+                logger.error(`HOST_MISMATCH: Request host ${host} does not match domain URL host ${domainHost}`);
+                throw new Error('HOST_MISMATCH');
+            }
+            
+            const redirect = `${envConfig.DOMAIN_URL}/google/auth/callback`;
 
-            const redirect = `https://${host}/google/auth/callback`;
-
-            if (!envConfig.GOOGLE_OAUTH_CLIENT_ID || !envConfig.GOOGLE_OAUTH_CLIENT_SECRET) {
+            if (!_.isString(envConfig.GOOGLE_OAUTH_CLIENT_ID) || _.isEmpty(envConfig.GOOGLE_OAUTH_CLIENT_ID.trim()) ||
+                !_.isString(envConfig.GOOGLE_OAUTH_CLIENT_SECRET) || _.isEmpty(envConfig.GOOGLE_OAUTH_CLIENT_SECRET.trim())) {
+                logger.error('GOOGLE_OAUTH_CONFIG_MISSING');
                 throw new Error('GOOGLE_OAUTH_CONFIG_MISSING');
             }
 
@@ -161,6 +178,22 @@ export const validateOAuthSession = (req: Request): { state: string; nonce: stri
 
     const { state, nonce, client_id, timestamp, sessionUsed } = req.session.googleOAuth;
 
+    if (!_.isString(state) || _.isEmpty(state.trim())) {
+        throw new Error('OAUTH_SESSION_INVALID_STATE');
+    }
+
+    if (!_.isString(nonce) || _.isEmpty(nonce.trim())) {
+        throw new Error('OAUTH_SESSION_INVALID_NONCE');
+    }
+
+    if (!_.isString(client_id) || _.isEmpty(client_id.trim())) {
+        throw new Error('OAUTH_SESSION_INVALID_CLIENT_ID');
+    }
+
+    if (!_.isFinite(timestamp)) {
+        throw new Error('OAUTH_SESSION_INVALID_TIMESTAMP');
+    }
+
     if (sessionUsed) {
         logger.error('Oauth session already used');
         throw new Error('OAUTH_SESSION_ALREADY_USED');
@@ -195,6 +228,31 @@ export const validateOAuthCallback = (req: Request, expectedState: string): stri
 export const markSessionAsUsed = (req: Request): void => {
     if (req.session.googleOAuth) {
         req.session.googleOAuth.sessionUsed = true;
+    }
+};
+
+export const validateRedirectUrl = (url: string | undefined): string => {
+    if (!url) {
+        return '/';
+    }
+
+    try {
+        const parsedUrl = new URL(url, envConfig.DOMAIN_URL);
+
+        if (!envConfig.DOMAIN_URL) {
+            return '/';
+        }
+
+        const allowedHost = new URL(envConfig.DOMAIN_URL).hostname;
+
+        if (parsedUrl.hostname === allowedHost) {
+            return url;
+        }
+
+        return '/';
+    } catch (error) {
+        logger.error('Invalid redirect URL provided:', url, error);
+        return '/';
     }
 };
 

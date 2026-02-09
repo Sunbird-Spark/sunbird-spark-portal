@@ -1,5 +1,5 @@
-import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
-import { Request, Response } from 'express';
+import { createProxyMiddleware, fixRequestBody, responseInterceptor } from 'http-proxy-middleware';
+import { Request } from 'express';
 import * as http from 'http';
 import { decorateRequestHeaders } from '../utils/proxyUtils.js';
 import logger from '../utils/logger.js';
@@ -11,6 +11,7 @@ export const kongProxy = createProxyMiddleware({
     target: KONG_URL,
     changeOrigin: true,
     secure: false,
+    selfHandleResponse: true,
     pathRewrite: {
         '^/portal': '/api'
     },
@@ -22,23 +23,20 @@ export const kongProxy = createProxyMiddleware({
                 fixRequestBody(proxyReq, req);
             }
         },
-        proxyRes: (proxyRes: http.IncomingMessage, req: Request, res: Response) => {
-            if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
-                let body = '';
-                proxyRes.on('data', (chunk) => {
-                    body += chunk.toString();
-                });
-                proxyRes.on('end', () => {
-                    logger.error(`Error proxying request: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`,
-                        {
-                            proxyStatusCode: proxyRes.statusCode,
-                            proxyHeaders: proxyRes.headers,
-                            clientStatusCode: res.statusCode,
-                            errorMessage: body,
-                        }
-                    );
-                });
+        proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+            const statusCode = proxyRes.statusCode || 500;
+            if (statusCode >= 400) {
+                const body = responseBuffer.toString('utf8');
+                logger.error(`Error proxying request: ${req.method} ${req.url} - Status: ${statusCode}`,
+                    {
+                        proxyStatusCode: statusCode,
+                        proxyHeaders: proxyRes.headers,
+                        clientStatusCode: res.statusCode,
+                        errorMessage: body,
+                    }
+                );
             }
-        }
+            return responseBuffer;
+        }),
     },
 });
