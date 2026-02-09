@@ -18,25 +18,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Add buildHash to backend package.json
-        if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
-        run: |
-          COMMIT_HASH=$(echo "${GITHUB_SHA}" | cut -c1-7)
-          echo "Adding buildHash: $COMMIT_HASH to backend/package.json"
-          jq ".buildHash = \"$COMMIT_HASH\"" backend/package.json > backend/package.json.tmp && mv backend/package.json.tmp backend/package.json
-          cat backend/package.json
-
       - name: Build Docker Image
         if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
         run: |
           IMAGE_NAME="sunbird-portal"
           # Tag format: tagname_commitsha (short)
-          IMAGE_TAG=$(echo "${{ github.ref_name }}_$(echo $GITHUB_SHA | cut -c1-7)" | tr '[:upper:]' '[:lower:]')
+          COMMIT_HASH=$(echo $GITHUB_SHA | cut -c1-7)
+          IMAGE_TAG=$(echo "${{ github.ref_name }}_${COMMIT_HASH}" | tr '[:upper:]' '[:lower:]')
           echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
           echo "Generated tag: ${IMAGE_TAG}"
 
-          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+          docker build --build-arg COMMIT_HASH=${COMMIT_HASH} -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
       - name: Login Docker Registry
         if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
