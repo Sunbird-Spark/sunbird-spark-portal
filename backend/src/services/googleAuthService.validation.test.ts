@@ -68,7 +68,6 @@ import {
     markSessionAsUsed,
     handleUserAuthentication 
 } from './googleAuthService.js';
-import logger from '../utils/logger.js';
 
 describe('GoogleAuthService - Validation & Helpers', () => {
     let mockRequest: Partial<Request>;
