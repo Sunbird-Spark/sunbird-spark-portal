@@ -19,6 +19,7 @@ import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
 import { userProxy } from './proxies/userProxy.js';
 import helmet from 'helmet';
+import authRoutes from './routes/userAuthInfoRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -92,6 +93,7 @@ app.all('/portal/logout', async (req, res) => {
 // Apply anonymous session middleware to API routes (once per route tree)
 app.use('/api', anonymousSessionMiddleware);
 app.use('/api/data/v1/form', formRoutes);
+app.use('/portal/user/v1/auth', anonymousSessionMiddleware, authRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
