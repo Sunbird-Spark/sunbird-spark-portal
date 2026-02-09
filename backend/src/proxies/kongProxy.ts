@@ -24,13 +24,20 @@ export const kongProxy = createProxyMiddleware({
         },
         proxyRes: (proxyRes: http.IncomingMessage, req: Request, res: Response) => {
             if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
-                logger.error(`Error proxying request: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`,
-                    {
-                        proxyStatusCode: proxyRes.statusCode,
-                        proxyHeaders: proxyRes.headers,
-                        clientStatusCode: res.statusCode,
-                    }
-                );
+                let body = '';
+                proxyRes.on('data', (chunk) => {
+                    body += chunk.toString();
+                });
+                proxyRes.on('end', () => {
+                    logger.error(`Error proxying request: ${req.method} ${req.url} - Status: ${proxyRes.statusCode}`,
+                        {
+                            proxyStatusCode: proxyRes.statusCode,
+                            proxyHeaders: proxyRes.headers,
+                            clientStatusCode: res.statusCode,
+                            errorMessage: body,
+                        }
+                    );
+                });
             }
         }
     },
