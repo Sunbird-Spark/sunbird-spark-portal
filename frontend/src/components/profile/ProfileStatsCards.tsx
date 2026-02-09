@@ -45,61 +45,60 @@ const statsData = [
         id: "time-spent",
         value: "30",
         label: "Time Spent",
-        bgColor: "bg-[#70ADBF]",
-        iconBg: "#3D8FA7",
         icon: TimeSpentIcon,
     },
     {
         id: "badges",
         value: "05",
         label: "Badges",
-        bgColor: "bg-sunbird-ginger",
-        iconBg: "#B06624",
         icon: BadgesIcon,
     },
     {
         id: "completed",
         value: "13",
         label: "Contents Completed",
-        bgColor: "bg-sunbird-moss",
-        iconBg: "#318656",
         icon: ContentsCompletedIcon,
     },
     {
         id: "certs",
         value: "06",
         label: "Certifications Earned",
-        bgColor: "bg-sunbird-lavender",
-        iconBg: "#744C65",
         icon: CertificationsIcon,
     },
 ];
 
 const ProfileStatsCards = () => {
+    const getStatClass = (id: string) => {
+        switch (id) {
+            case "time-spent": return "stat-card-time-spent";
+            case "badges": return "stat-card-badges";
+            case "completed": return "stat-card-completed";
+            case "certs": return "stat-card-certs";
+            default: return "";
+        }
+    };
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="profile-stats-grid">
             {statsData.map((stat) => {
                 const IconComponent = stat.icon;
                 return (
                     <div
                         key={stat.id}
-                        className={`${stat.bgColor} rounded-[1.25rem] p-5 text-white relative h-[9.0625rem] flex flex-col justify-end shadow-[0px_0.25rem_1.25rem_0px_rgba(0,0,0,0.1)]`}
+                        className={`stat-card ${getStatClass(stat.id)}`}
                     >
                         {/* Icon in top-right */}
-                        <div
-                            className="absolute top-4 right-4 w-[2.875rem] h-[2.875rem] flex items-center justify-center rounded-[0.5rem]"
-                            style={{ backgroundColor: stat.iconBg }}
-                        >
+                        <div className="stat-icon-container">
                             <IconComponent />
                         </div>
 
                         {/* Value */}
-                        <div className="text-[2.5rem] font-bold mb-1 leading-none">
+                        <div className="stat-value">
                             {stat.value}
                         </div>
 
                         {/* Label */}
-                        <div className="text-sm text-white/90 whitespace-pre-line leading-tight">
+                        <div className="stat-label">
                             {stat.label}
                         </div>
                     </div>

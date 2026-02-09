@@ -145,6 +145,27 @@
 
     /* Box Shadows */
     --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
+    --sunbird-shadow-sm: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-md: 0 0.875rem 0.875rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-lg: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
+
+    /* Component Specific Colors */
+    --sunbird-progress-bg: 39 77% 76%;
+    /* #F0CE94 */
+
+    --sunbird-status-completed-bg: 140 31% 93%;
+    /* #E6F3EA */
+    --sunbird-status-completed-border: 140 31% 78%;
+    /* #B2DDBF */
+    --sunbird-status-completed-text: 153 43% 24%;
+    /* #2D6A4F */
+
+    --sunbird-status-ongoing-bg: 38 100% 96%;
+    /* #FFF8EB */
+    --sunbird-status-ongoing-border: 40 88% 87%;
+    /* #FCE6BD */
+    --sunbird-status-ongoing-text: 46 94% 26%;
+    /* #826404 */
   }
 
   .dark {
