@@ -87,7 +87,13 @@ vi.mock('../config/env.js', () => ({
     }
 }));
 
-import googleOauth, { createSession } from './googleAuthService.js';
+import googleOauth, { 
+    createSession, 
+    validateOAuthSession, 
+    validateOAuthCallback, 
+    markSessionAsUsed,
+    handleUserAuthentication 
+} from './googleAuthService.js';
 import logger from '../utils/logger.js';
 
 describe('GoogleAuthService', () => {
@@ -250,6 +256,243 @@ describe('GoogleAuthService', () => {
             mockObtainDirectly.mockResolvedValue({ access_token: null });
             await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
                 .rejects.toThrow('INVALID_GRANT_TOKEN');
+        });
+    });
+
+    describe('validateOAuthSession', () => {
+        it('should validate OAuth session successfully', () => {
+            mockRequest.session = {
+                googleOAuth: {
+                    state: 'test-state',
+                    nonce: 'test-nonce',
+                    client_id: 'test-client-id',
+                    timestamp: Date.now(),
+                    sessionUsed: false
+                }
+            } as any;
+
+            const result = validateOAuthSession(mockRequest as Request);
+            expect(result).toEqual({
+                state: 'test-state',
+                nonce: 'test-nonce',
+                client_id: 'test-client-id'
+            });
+        });
+
+        it('should throw error when OAuth session is missing', () => {
+            mockRequest.session = {} as any;
+            expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_MISSING');
+        });
+
+        it('should throw error when OAuth session is already used', () => {
+            mockRequest.session = {
+                googleOAuth: {
+                    state: 'test-state',
+                    nonce: 'test-nonce',
+                    client_id: 'test-client-id',
+                    timestamp: Date.now(),
+                    sessionUsed: true
+                }
+            } as any;
+
+            expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_ALREADY_USED');
+            expect(logger.error).toHaveBeenCalledWith('Oauth session already used');
+        });
+
+        it('should throw error when OAuth session is expired', () => {
+            mockRequest.session = {
+                googleOAuth: {
+                    state: 'test-state',
+                    nonce: 'test-nonce',
+                    client_id: 'test-client-id',
+                    timestamp: Date.now() - (6 * 60 * 1000), // 6 minutes ago
+                    sessionUsed: false
+                }
+            } as any;
+
+            expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_EXPIRED');
+            expect(logger.error).toHaveBeenCalledWith('Oauth session expired');
+        });
+    });
+
+    describe('validateOAuthCallback', () => {
+        it('should validate OAuth callback successfully', () => {
+            mockRequest.query = {
+                state: 'test-state',
+                code: 'test-code'
+            };
+
+            const result = validateOAuthCallback(mockRequest as Request, 'test-state');
+            expect(result).toBe('test-code');
+        });
+
+        it('should throw error when state does not match', () => {
+            mockRequest.query = {
+                state: 'wrong-state',
+                code: 'test-code'
+            };
+
+            expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('INVALID_OAUTH_STATE');
+        });
+
+        it('should throw error when OAuth error is present', () => {
+            mockRequest.query = {
+                state: 'test-state',
+                error: 'access_denied'
+            };
+
+            expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('GOOGLE_OAUTH_ERROR: access_denied');
+            expect(logger.error).toHaveBeenCalledWith('Google OAuth error:', 'access_denied');
+        });
+
+        it('should throw error when code is missing', () => {
+            mockRequest.query = {
+                state: 'test-state'
+            };
+
+            expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('OAUTH_CODE_INVALID');
+        });
+
+        it('should throw error when code is not a string', () => {
+            mockRequest.query = {
+                state: 'test-state',
+                code: 123 as any
+            };
+
+            expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('OAUTH_CODE_INVALID');
+        });
+
+        it('should throw error when code is an array', () => {
+            mockRequest.query = {
+                state: 'test-state',
+                code: ['test-code-1', 'test-code-2'] as any
+            };
+
+            expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('OAUTH_CODE_INVALID');
+        });
+    });
+
+    describe('markSessionAsUsed', () => {
+        it('should mark session as used', () => {
+            mockRequest.session = {
+                googleOAuth: {
+                    state: 'test-state',
+                    nonce: 'test-nonce',
+                    client_id: 'test-client-id',
+                    timestamp: Date.now(),
+                    sessionUsed: false
+                }
+            } as any;
+
+            markSessionAsUsed(mockRequest as Request);
+            expect(mockRequest.session.googleOAuth?.sessionUsed).toBe(true);
+        });
+
+        it('should handle missing googleOAuth session gracefully', () => {
+            mockRequest.session = {} as any;
+            expect(() => markSessionAsUsed(mockRequest as Request)).not.toThrow();
+        });
+    });
+
+    describe('handleUserAuthentication', () => {
+        const mockGetUserByEmail = vi.fn();
+        const mockCreateUserWithEmail = vi.fn();
+
+        beforeEach(() => {
+            vi.clearAllMocks();
+            mockGetUserByEmail.mockReset();
+            mockCreateUserWithEmail.mockReset();
+            
+            const mockGrant = {
+                access_token: { token: 'test-access-token', content: { exp: 1234567890 } }
+            };
+            mockObtainDirectly.mockResolvedValue(mockGrant);
+            mockAuthenticated.mockResolvedValue(undefined);
+
+            vi.doMock('./userService.js', () => ({
+                getUserByEmail: mockGetUserByEmail,
+                createUserWithEmail: mockCreateUserWithEmail
+            }));
+        });
+
+        it('should authenticate existing user successfully', async () => {
+            mockGetUserByEmail.mockResolvedValue({ email: 'test@example.com' });
+
+            const result = await handleUserAuthentication(
+                { emailId: 'test@example.com', name: 'Test User' },
+                'test-client-id',
+                mockRequest as Request,
+                mockResponse as Response
+            );
+
+            expect(result).toBe(true);
+            expect(mockCreateUserWithEmail).not.toHaveBeenCalled();
+        });
+
+        it('should create and authenticate new user successfully', async () => {
+            mockGetUserByEmail.mockResolvedValue(null);
+            mockCreateUserWithEmail.mockResolvedValue({ email: 'test@example.com' });
+
+            const result = await handleUserAuthentication(
+                { emailId: 'test@example.com', name: 'Test User' },
+                'test-client-id',
+                mockRequest as Request,
+                mockResponse as Response
+            );
+
+            expect(result).toBe(false);
+            expect(mockCreateUserWithEmail).toHaveBeenCalledWith(
+                { emailId: 'test@example.com', name: 'Test User' },
+                'test-client-id',
+                mockRequest
+            );
+        });
+
+        it('should throw error when emailId is missing', async () => {
+            await expect(handleUserAuthentication(
+                { name: 'Test User' },
+                'test-client-id',
+                mockRequest as Request,
+                mockResponse as Response
+            )).rejects.toThrow('GOOGLE_EMAIL_NOT_FOUND');
+        });
+
+        it('should throw error when fetching user fails', async () => {
+            mockGetUserByEmail.mockRejectedValue(new Error('Database error'));
+
+            await expect(handleUserAuthentication(
+                { emailId: 'test@example.com', name: 'Test User' },
+                'test-client-id',
+                mockRequest as Request,
+                mockResponse as Response
+            )).rejects.toThrow('FETCH_USER_FAILED');
+            expect(logger.error).toHaveBeenCalledWith('Error fetching user by email:', expect.any(Error));
+        });
+
+        it('should throw error when creating user fails', async () => {
+            mockGetUserByEmail.mockResolvedValue(null);
+            mockCreateUserWithEmail.mockRejectedValue(new Error('Create user error'));
+
+            await expect(handleUserAuthentication(
+                { emailId: 'test@example.com', name: 'Test User' },
+                'test-client-id',
+                mockRequest as Request,
+                mockResponse as Response
+            )).rejects.toThrow('CREATE_USER_FAILED');
+            expect(logger.error).toHaveBeenCalledWith('Error creating user:', expect.any(Error));
+        });
+
+        it('should throw error when session creation fails', async () => {
+            mockGetUserByEmail.mockResolvedValue({ email: 'test@example.com' });
+            mockObtainDirectly.mockRejectedValue(new Error('Session error'));
+
+            await expect(handleUserAuthentication(
+                { emailId: 'test@example.com', name: 'Test User' },
+                'test-client-id',
+                mockRequest as Request,
+                mockResponse as Response
+            )).rejects.toThrow('SESSION_CREATION_FAILED');
+            expect(logger.error).toHaveBeenCalledWith('Error creating session:', expect.any(Error));
         });
     });
 });
