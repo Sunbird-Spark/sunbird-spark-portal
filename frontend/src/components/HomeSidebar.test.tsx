@@ -72,10 +72,11 @@ describe('HomeSidebar', () => {
         renderSidebar({ ...defaultProps, activeNav: 'learning' });
 
         const learningButton = screen.getByText('My Learning').closest('button');
-        expect(learningButton).toHaveClass('text-sunbird-brick font-bold');
+        expect(learningButton).toHaveClass('text-sunbird-brick font-normal');
 
         const homeButton = screen.getByText('Home').closest('button');
         expect(homeButton).toHaveClass('text-sunbird-obsidian font-normal');
+        expect(homeButton).toHaveClass('px-6');
     });
 
     it('renders the correct icons for active/inactive states', () => {

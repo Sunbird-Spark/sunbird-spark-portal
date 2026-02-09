@@ -66,7 +66,7 @@ const HomeInProgressGrid = () => {
                                     <span className="home-inprogress-badge">
                                         {item.type}
                                     </span>
-                                    <h4 className="home-inprogress-title">
+                                    <h4 className="home-inprogress-card-title">
                                         {item.title}
                                     </h4>
                                     <div className="flex items-center gap-3 mt-auto">

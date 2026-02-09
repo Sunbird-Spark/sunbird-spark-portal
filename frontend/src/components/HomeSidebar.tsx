@@ -71,9 +71,9 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
                         <button
                             onClick={() => handleNavClick(item)}
                             className={`
-                                w-full flex items-center gap-3 px-10 py-4 text-sm transition-colors
+                                w-full flex items-center gap-3 px-6 py-4 text-[1.125rem] transition-colors
                                 ${isActive
-                                    ? "text-sunbird-brick font-bold"
+                                    ? "text-sunbird-brick font-normal"
                                     : "text-sunbird-obsidian font-normal hover:bg-gray-50"
                                 }
                             `}
@@ -94,7 +94,7 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
                 boxShadow: '0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09)'
             }}
         >
-            <nav className="flex flex-col justify-between h-full pt-[2.5rem] pb-4">
+            <nav className="flex flex-col justify-between h-full pt-[1.875rem] pb-4">
                 {/* Main Nav (Top) */}
                 {renderNavList(mainNavItems)}
 
