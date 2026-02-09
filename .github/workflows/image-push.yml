@@ -23,7 +23,7 @@ jobs:
         run: |
           IMAGE_NAME="sunbird-portal"
           # Tag format: tagname_commitsha (short)
-          COMMIT_HASH=$(echo $GITHUB_SHA | cut -c1-7)
+          COMMIT_HASH=$(echo "${GITHUB_SHA}" | cut -c1-7)
           IMAGE_TAG=$(echo "${{ github.ref_name }}_${COMMIT_HASH}" | tr '[:upper:]' '[:lower:]')
           echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
