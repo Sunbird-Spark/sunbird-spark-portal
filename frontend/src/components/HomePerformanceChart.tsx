@@ -1,11 +1,3 @@
-const performanceData = [
-    { month: "Jan", value: 20 },
-    { month: "Feb", value: 35 },
-    { month: "Mar", value: 25 },
-    { month: "Apr", value: 45 },
-    { month: "May", value: 40 },
-    { month: "Jun", value: 55 },
-];
 
 const HomePerformanceChart = () => {
     return (

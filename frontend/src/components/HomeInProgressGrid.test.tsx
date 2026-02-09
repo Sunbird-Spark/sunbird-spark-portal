@@ -51,16 +51,11 @@ describe('HomeInProgressGrid', () => {
         expect(screen.getAllByText('30%')[0]).toBeInTheDocument();
     });
 
-    it('navigates to the course page when a card is clicked', () => {
+    it('links to the course page when a card is clicked', () => {
         renderComponent();
 
         const firstCard = document.querySelectorAll('.home-inprogress-card')[0];
-        expect(firstCard).toBeDefined();
-        fireEvent.click(firstCard!);
-
-        expect(mockNavigate).toHaveBeenCalled();
-        // Since it's item 1, it should navigate to /course/1
-        expect(mockNavigate).toHaveBeenCalledWith('/course/1');
+        expect(firstCard).toHaveAttribute('href', '/course/1');
     });
 
     it('renders thumbnails with correct alt text', () => {
