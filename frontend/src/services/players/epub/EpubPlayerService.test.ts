@@ -182,7 +182,7 @@ describe('EpubPlayerService', () => {
       element.dispatchEvent(event);
 
       expect(callback).toHaveBeenCalled();
-      expect(callback.mock.calls[0][0].type).toBe('START');
+      expect(callback.mock.calls[0]?.[0].type).toBe('START');
     });
 
     it('should include playerId and timestamp in event', () => {
@@ -198,9 +198,9 @@ describe('EpubPlayerService', () => {
       element.dispatchEvent(event);
 
       expect(callback).toHaveBeenCalled();
-      const eventData = callback.mock.calls[0][0];
-      expect(eventData.playerId).toBe('test-123');
-      expect(eventData.timestamp).toBeGreaterThan(0);
+      const eventData = callback.mock.calls[0]?.[0];
+      expect(eventData?.playerId).toBe('test-123');
+      expect(eventData?.timestamp).toBeGreaterThan(0);
     });
   });
 
