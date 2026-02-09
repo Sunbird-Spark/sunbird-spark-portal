@@ -8,6 +8,7 @@ import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
 import { destroySession } from './utils/sessionUtils.js';
 import formRoutes from './routes/formsRoutes.js';
+import googleRoutes from './routes/googleRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 import { redirectTenant } from './controllers/tenantController.js';
@@ -94,6 +95,7 @@ app.all('/portal/logout', async (req, res) => {
 app.use('/api', anonymousSessionMiddleware);
 app.use('/api/data/v1/form', formRoutes);
 app.use('/portal/user/v1/auth', anonymousSessionMiddleware, authRoutes);
+app.use('/google', googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
