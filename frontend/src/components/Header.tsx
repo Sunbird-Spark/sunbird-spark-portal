@@ -22,10 +22,10 @@ const Header = () => {
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
 
   const navLinks = [
-    { label: t("nav.home"), href: "/" },
-    { label: t("nav.explore"), href: "/explore" },
-    { label: t("nav.about"), href: "#about" },
-    { label: t("nav.contact"), href: "#contact" },
+    { label: t("home"), href: "/" },
+    { label: t("explore"), href: "/explore" },
+    { label: t("about"), href: "#about" },
+    { label: t("contact"), href: "#contact" },
   ];
 
   const isActive = (href: string) => {

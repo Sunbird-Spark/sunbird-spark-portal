@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const inProgressItems = [
     {
@@ -54,10 +54,10 @@ const HomeInProgressGrid = () => {
 
             <div className="home-inprogress-grid">
                 {inProgressItems.map((item) => (
-                    <div
+                    <Link
                         key={item.id}
-                        onClick={() => navigate(`/course/${item.id}`)}
-                        className="home-inprogress-card"
+                        to={`/course/${item.id}`}
+                        className="home-inprogress-card no-underline"
                     >
                         {/* Content */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-1">
@@ -91,7 +91,7 @@ const HomeInProgressGrid = () => {
                                 className="w-full h-full object-cover"
                             />
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </section>
