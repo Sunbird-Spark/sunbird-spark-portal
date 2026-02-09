@@ -11,7 +11,7 @@ export const extractTokenExpiration = (request: Request): number | null => {
 
         const exp = _.get(request, 'kauth.grant.access_token.content.exp');
         if (_.isFinite(exp)) {
-            return exp;
+            return exp as number;
         }
         return null;
     } catch (error) {

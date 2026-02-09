@@ -91,3 +91,61 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
     }
     return result;
 };
+
+export const getUserByEmail = async (emailId: string, req: Request): Promise<boolean> => {
+    const url = `${KONG_URL}/user/v1/exists/email/${emailId}`;
+
+    const headers = {
+        'x-device-id': req.get('x-device-id'),
+        'x-msgid': uuidv4(),
+        ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `Bearer ${resolveKongBearerToken(req)}`,
+    };
+
+    const response = await axios.get(url, { headers });
+    const responseData = response.data;
+    if (responseData.responseCode !== 'OK') {
+        logger.error(`Failed to fetch user by google emailid: ${responseData.responseCode}`);
+        throw new Error(_.get(responseData, 'params.errmsg') || _.get(responseData, 'params.err'));
+    }
+    return responseData.result.exists;
+};
+
+export const createUserWithEmail = async (googleUser: any, client_id: string, req: Request): Promise<UserApiResponse> => {
+    if (_.isEmpty(googleUser.name)) {
+        throw new Error('USER_NAME_NOT_PRESENT');
+    }
+    if (!_.isString(googleUser.emailId) || _.isEmpty(googleUser.emailId.trim())) {
+        throw new Error('USER_EMAIL_NOT_PRESENT');
+    }
+    const url = `${KONG_URL}/user/v2/signup`;
+
+    const headers = {
+        'x-device-id': req.get('x-device-id'),
+        'x-msgid': uuidv4(),
+        ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `Bearer ${resolveKongBearerToken(req)}`,
+    };
+
+    const response = await axios.post(url, {
+        request: {
+            firstName: googleUser.name,
+            emailId: googleUser.emailId,
+            emailVerified: true
+        },
+        params: {
+            source: client_id,
+            signupType: 'google'
+        }
+    }, { headers });
+    const result = response.data;
+    if (result.responseCode !== 'OK') {
+        logger.error(`Failed to create user with google emailid, response: ${result.responseCode}`);
+        throw new Error(_.get(result, 'params.errmsg') || _.get(result, 'params.err'));
+    }
+    return result;
+};
