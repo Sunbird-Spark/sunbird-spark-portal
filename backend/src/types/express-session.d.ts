@@ -36,6 +36,13 @@ declare module 'express-session' {
             hashTagId?: string;
             rootOrgId?: string;
         }
+        anonymousOrg?: {
+            id?: string;
+            slug?: string;
+            channel?: string;
+            hashTagId?: string;
+            orgName?: string;
+        };
         managedToken?: string;
         logSession?: boolean;
         deviceId?: string;
