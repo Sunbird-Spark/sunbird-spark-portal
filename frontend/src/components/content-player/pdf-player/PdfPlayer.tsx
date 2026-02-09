@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import appCoreService from '../../../services/AppCoreService';
 import userAuthInfoService from '../../../services/userAuthInfoService/userAuthInfoService';
-import { ContentPlayerService } from '../../../services/players/pdf/ContentPlayerService';
+import { PdfPlayerService } from '../../../services/players/pdf/PdfPlayerService';
 import { PdfPlayerConfig } from '../../../services/players/types';
 
 interface PdfPlayerProps {
@@ -29,7 +29,7 @@ const PdfPlayer: React.FC<PdfPlayerProps> = ({
 
     useEffect(() => {
         let mounted = true;
-        const playerService = new ContentPlayerService(); // Instantiated ContentPlayerService
+        const playerService = new PdfPlayerService(); // Instantiated PdfPlayerService
 
         const initializePlayer = async () => {
             if (!containerRef.current) {

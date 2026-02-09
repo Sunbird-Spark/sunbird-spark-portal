@@ -4,14 +4,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import PdfPlayer from './PdfPlayer';
 import appCoreService from '../../../services/AppCoreService';
 import userAuthInfoService from '../../../services/userAuthInfoService/userAuthInfoService';
-import { ContentPlayerService } from '../../../services/players/pdf/ContentPlayerService';
+import { PdfPlayerService } from '../../../services/players/pdf/PdfPlayerService';
 
 // Mock dependencies
 vi.mock('../../../services/AppCoreService');
 vi.mock('../../../services/userAuthInfoService/userAuthInfoService');
-vi.mock('../../../services/players/pdf/ContentPlayerService', () => {
+vi.mock('../../../services/players/pdf/PdfPlayerService', () => {
     return {
-        ContentPlayerService: vi.fn()
+        PdfPlayerService: vi.fn()
     };
 });
 
@@ -28,7 +28,7 @@ describe('PdfPlayer Component', () => {
         vi.clearAllMocks();
 
         // Setup Player Service mock
-        (ContentPlayerService as any).mockImplementation(function (this: any) {
+        (PdfPlayerService as any).mockImplementation(function (this: any) {
             return {
                 createElement: mockCreateElement,
                 attachEventListeners: mockAttachEventListeners,
