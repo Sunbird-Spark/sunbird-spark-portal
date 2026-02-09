@@ -114,7 +114,7 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_MISSING');
 
             // Already used
-            mockRequest.session = { googleOAuth: { ...mockRequest.session.googleOAuth, sessionUsed: true, timestamp: Date.now() } } as any;
+            mockRequest.session = { googleOAuth: { state: 'test-state', nonce: 'test-nonce', client_id: 'test-client-id', sessionUsed: true, timestamp: Date.now() } } as any;
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_ALREADY_USED');
 
             // Expired session
@@ -152,7 +152,7 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             // Mark existing session
             mockRequest.session = { googleOAuth: { state: 'test-state', nonce: 'test-nonce', client_id: 'test-client-id', timestamp: Date.now(), sessionUsed: false } } as any;
             markSessionAsUsed(mockRequest as Request);
-            expect(mockRequest.session.googleOAuth?.sessionUsed).toBe(true);
+            expect(mockRequest.session?.googleOAuth?.sessionUsed).toBe(true);
 
             // Handle missing session
             mockRequest.session = {} as any;
