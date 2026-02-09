@@ -92,6 +92,9 @@ export class EpubPlayerService {
     element: HTMLElement,
     onPlayerEvent?: (event: EpubPlayerEvent) => void
   ): void {
+    // Remove any existing handler first to prevent memory leaks
+    this.removeEventListeners(element);
+
     const playerHandler = (event: Event) => {
       const customEvent = event as CustomEvent;
       if (onPlayerEvent) {

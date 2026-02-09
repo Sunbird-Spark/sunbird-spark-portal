@@ -202,6 +202,25 @@ describe('EpubPlayerService', () => {
       expect(eventData?.playerId).toBe('test-123');
       expect(eventData?.timestamp).toBeGreaterThan(0);
     });
+
+    it('should be idempotent - calling multiple times should not create duplicate listeners', () => {
+      const config = EpubPlayerService.createDefaultConfig('test', 'Test', '/test.epub');
+      const element = service.createElement(config);
+      const callback = vi.fn();
+
+      // Attach listeners multiple times
+      service.attachEventListeners(element, callback);
+      service.attachEventListeners(element, callback);
+      service.attachEventListeners(element, callback);
+
+      const event = new CustomEvent('playerEvent', {
+        detail: { eid: 'START' }
+      });
+      element.dispatchEvent(event);
+
+      // Should only be called once, not three times
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('removeEventListeners', () => {
