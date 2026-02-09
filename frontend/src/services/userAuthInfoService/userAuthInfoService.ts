@@ -55,16 +55,26 @@ class userAuthInfoService {
                 headers
             );
 
-            const data = response.data;
+            const data = response?.data;
 
-            if (data.params.status === 'successful') {
+            if (!data) {
+                throw new Error('No data received from auth API');
+            }
+
+            // Check if response has the expected structure
+            if (!data.params || typeof data.params.status !== 'string') {
+                console.warn('Auth API returned unexpected structure:', data);
+                throw new Error('Invalid response structure from auth API');
+            }
+
+            if (data.params.status === 'successful' && data.result) {
                 this.sessionId = data.result.sid;
                 this.userId = data.result.uid;
                 this.isAuthenticated = data.result.isAuthenticated;
 
                 return data.result;
             } else {
-                throw new Error(data.params.errmsg || 'Failed to fetch auth status');
+                throw new Error(data.params.errmsg as string || 'Failed to fetch auth status');
             }
         } catch (error) {
             console.error('Error fetching auth status:', error);
