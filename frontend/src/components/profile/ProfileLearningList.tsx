@@ -160,44 +160,38 @@ const ProfileLearningList = () => {
                             </div>
                         </div>
 
-                        {/* 2. Progress Ring + Percentage */}
-                        <div className="profile-learning-stats">
-                            <ProgressRing progress={course.progress} />
-                            <span className="text-[1rem] font-medium text-sunbird-obsidian w-10">
-                                {course.progress}%
-                            </span>
-                        </div>
-
-                        {/* 3. Status Badge */}
-                        <div className="profile-learning-status">
-                            <div
-                                className={`px-4 md:px-5 py-1.5 rounded-full border ${course.status === "completed"
-                                    ? "bg-sunbird-status-completed-bg border-sunbird-status-completed-border text-sunbird-status-completed-text"
-                                    : "bg-sunbird-status-ongoing-bg border-sunbird-status-ongoing-border text-sunbird-status-ongoing-text"
-                                    }`}
-                            >
-                                <span className="text-sm font-medium">
-                                    {course.status === "completed" ? "Completed" : "Ongoing"}
+                        {/* 2 & 3: Stats and Status grouped for mobile */}
+                        <div className="profile-learning-stats-badge-row">
+                            {/* Progress Ring + Percentage */}
+                            <div className="profile-learning-stats">
+                                <ProgressRing progress={course.progress} />
+                                <span className="text-[1rem] font-medium text-sunbird-obsidian w-10">
+                                    {course.progress}%
                                 </span>
+                            </div>
+
+                            {/* Status Badge */}
+                            <div className="profile-learning-status">
+                                <div
+                                    className={`px-4 md:px-5 py-1.5 rounded-full border ${course.status === "completed"
+                                        ? "bg-sunbird-status-completed-bg border-sunbird-status-completed-border text-sunbird-status-completed-text"
+                                        : "bg-sunbird-status-ongoing-bg border-sunbird-status-ongoing-border text-sunbird-status-ongoing-text"
+                                        }`}
+                                >
+                                    <span className="text-sm font-medium">
+                                        {course.status === "completed" ? "Completed" : "Ongoing"}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
                         {/* 4. Certificate Action */}
                         <div className="profile-learning-actions">
                             <button
-                                className="flex items-center gap-2 text-[0.8125rem] font-medium text-sunbird-brick hover:opacity-80 transition-opacity"
+                                className="flex items-center gap-2 text-[0.8125rem] font-normal text-sunbird-brick hover:opacity-80 transition-opacity"
                             >
-                                {course.status === "completed" ? (
-                                    <>
-                                        <FiDownload className="w-3.5 h-3.5" />
-                                        <span>Download Certificate</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <FiEye className="w-3.5 h-3.5" />
-                                        <span>Preview Certificate</span>
-                                    </>
-                                )}
+                                <FiEye className="w-4 h-4" />
+                                <span className="text-[#A85236] text-[0.75rem]">Certificate</span>
                             </button>
                         </div>
                     </div>
