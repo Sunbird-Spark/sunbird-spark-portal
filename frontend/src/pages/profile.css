@@ -249,7 +249,7 @@
 }
 
 .profile-dropdown-item.logout {
-    @apply text-red-500 hover:bg-red-50;
+    @apply text-destructive hover:bg-destructive/10;
 }
 
 .profile-dropdown-icon-wrapper {
@@ -261,7 +261,7 @@
 }
 
 .profile-dropdown-icon-wrapper.danger {
-    @apply bg-red-50 text-red-500;
+    @apply bg-destructive/10 text-destructive;
 }
 
 .profile-dropdown-indicator {
