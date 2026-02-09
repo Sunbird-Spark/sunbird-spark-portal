@@ -1,5 +1,5 @@
 // PDF Player Service exports
-export { ContentPlayerService } from './pdf/ContentPlayerService';
+export { PdfPlayerService } from './pdf/PdfPlayerService';
 export type {
   PdfPlayerConfig,
   PdfPlayerOptions,
