@@ -126,22 +126,6 @@ export class EpubPlayerService {
   }
 
   /**
-   * Merges custom config with the artifact URL
-   */
-  public static mergeConfigWithUrl(
-    baseConfig: Partial<EpubPlayerConfig>,
-    epubUrl: string
-  ): EpubPlayerConfig {
-    return {
-      ...baseConfig,
-      metadata: {
-        ...baseConfig.metadata,
-        artifactUrl: epubUrl,
-      },
-    } as EpubPlayerConfig;
-  }
-
-  /**
    * Validates if the URL is a valid EPUB file
    */
   public static isValidEpubUrl(url: string): boolean {

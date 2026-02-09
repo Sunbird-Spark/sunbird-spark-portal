@@ -2,19 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import appCoreService from '../services/AppCoreService';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { EpubPlayerService } from '../services/players/epub';
-import type { EpubPlayerConfig } from '../services/players/epub';
+import type { EpubPlayerConfig, EpubPlayerEvent } from '../services/players/epub';
 
 interface EpubPlayerProps {
   epubUrl: string;
   contentName?: string;
-  playerConfig?: Partial<EpubPlayerConfig>;
-  onPlayerEvent?: (event: any) => void;
+  onPlayerEvent?: (event: EpubPlayerEvent) => void;
 }
 
 export const EpubPlayer: React.FC<EpubPlayerProps> = ({
   epubUrl,
   contentName = 'EPUB Document',
-  playerConfig,
   onPlayerEvent,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,25 +46,17 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
 
         if (!mounted) return;
 
-        // Create configuration object
-        let config: EpubPlayerConfig;
+        // Create default config
+        const config = EpubPlayerService.createDefaultConfig(
+          'epub-content-' + Date.now(),
+          contentName,
+          epubUrl,
+          userId,
+          sessionId
+        );
         
-        if (playerConfig && Object.keys(playerConfig).length > 0) {
-          // Use provided config and merge with URL
-          config = EpubPlayerService.mergeConfigWithUrl(playerConfig, epubUrl);
-        } else {
-          // Create default config
-          config = EpubPlayerService.createDefaultConfig(
-            'epub-content-' + Date.now(),
-            contentName,
-            epubUrl,
-            userId,
-            sessionId
-          );
-          
-          // Update device ID
-          config.context.did = deviceId;
-        }
+        // Update device ID
+        config.context.did = deviceId;
 
         // Create player element via service
         const epubElement = playerService.createElement(config);
@@ -108,7 +98,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
         playerElementRef.current = null;
       }
     };
-  }, [epubUrl, contentName, playerConfig, onPlayerEvent]);
+  }, [epubUrl, contentName, onPlayerEvent]);
 
   return (
     <div ref={containerRef} className="epub-player-container">

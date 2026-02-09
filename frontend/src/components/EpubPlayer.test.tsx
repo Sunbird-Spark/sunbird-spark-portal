@@ -109,51 +109,6 @@ describe('EpubPlayer', () => {
     });
   });
 
-  it('should use custom playerConfig when provided', async () => {
-    const customConfig = {
-      context: {
-        mode: 'play' as const,
-        partner: [],
-        pdata: { id: 'custom', ver: '2.0', pid: 'custom-app' },
-        contentId: 'custom-123',
-        sid: 'custom-session',
-        uid: 'custom-user',
-        timeDiff: 0,
-        channel: 'custom-channel',
-        tags: [],
-        did: 'custom-device',
-        contextRollup: {},
-        objectRollup: {},
-        host: 'https://custom.com',
-        endpoint: '/custom/telemetry',
-      },
-      metadata: {
-        identifier: 'custom-123',
-        name: 'Custom EPUB',
-        artifactUrl: '',
-        streamingUrl: '',
-        compatibilityLevel: 2,
-        pkgVersion: 2,
-      },
-    };
-
-    const { container } = render(
-      <EpubPlayer 
-        epubUrl="/custom.epub" 
-        playerConfig={customConfig}
-      />
-    );
-
-    await waitFor(() => {
-      const playerElement = container.querySelector('sunbird-epub-player');
-      expect(playerElement).toBeTruthy();
-      
-      const config = JSON.parse(playerElement?.getAttribute('player-config') || '{}');
-      expect(config.context.contentId).toBe('custom-123');
-      expect(config.metadata.artifactUrl).toBe('/custom.epub');
-    });
-  });
-
   it('should cleanup on unmount', async () => {
     const { container, unmount } = render(
       <EpubPlayer epubUrl="/test.epub" />
