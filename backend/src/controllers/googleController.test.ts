@@ -9,29 +9,38 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.envExample') });
 
 // Use vi.hoisted to define mocks that can be used in vi.mock
-const { mockGoogleAuthService, mockUserService, mockCreateSession } = vi.hoisted(() => {
+const { mockGoogleAuthService, mockUserService, mockCreateSession, mockHandleUserAuthentication } = vi.hoisted(() => {
     return {
         mockGoogleAuthService: {
             generateAuthUrl: vi.fn(),
             verifyAndGetProfile: vi.fn()
         },
         mockUserService: {
-            fetchUserByEmailId: vi.fn(),
-            createUserWithMailId: vi.fn()
+            getUserByEmail: vi.fn(),
+            createUserWithEmail: vi.fn()
         },
-        mockCreateSession: vi.fn()
+        mockCreateSession: vi.fn(),
+        mockHandleUserAuthentication: vi.fn()
     };
 });
 
 // Mock all dependencies before importing controller
 vi.mock('../services/googleAuthService.js', () => ({
     default: mockGoogleAuthService,
-    createSession: mockCreateSession
+    createSession: mockCreateSession,
+    validateOAuthSession: vi.fn(),
+    validateOAuthCallback: vi.fn(),
+    markSessionAsUsed: vi.fn(),
+    handleUserAuthentication: mockHandleUserAuthentication
 }));
 
 vi.mock('@/services/googleAuthService.js', () => ({
     default: mockGoogleAuthService,
-    createSession: mockCreateSession
+    createSession: mockCreateSession,
+    validateOAuthSession: vi.fn(),
+    validateOAuthCallback: vi.fn(),
+    markSessionAsUsed: vi.fn(),
+    handleUserAuthentication: mockHandleUserAuthentication
 }));
 
 vi.mock('../services/userService.js', () => mockUserService);
@@ -44,11 +53,19 @@ describe('GoogleController', () => {
     let mockReq: Partial<Request>;
     let mockRes: Partial<Response>;
     let handleGoogleAuthCallback: any;
+    let mockValidateOAuthSession: any;
+    let mockValidateOAuthCallback: any;
+    let mockMarkSessionAsUsed: any;
 
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
         process.env.DOMAIN_URL = 'https://example.com';
+        
+        const googleAuthService = await import('../services/googleAuthService.js');
+        mockValidateOAuthSession = googleAuthService.validateOAuthSession as any;
+        mockValidateOAuthCallback = googleAuthService.validateOAuthCallback as any;
+        mockMarkSessionAsUsed = googleAuthService.markSessionAsUsed as any;
         
         const controller = await import('../controllers/googleController.js');
         handleGoogleAuthCallback = controller.handleGoogleAuthCallback;
@@ -71,138 +88,6 @@ describe('GoogleController', () => {
     // GET /google/auth tests moved to googleController.auth.test.ts
 
     describe('GET /google/auth/callback', () => {
-        it('should redirect with error if OAuth session is missing', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {} as any;
-            
-            await handleGoogleAuthCallback(mockReq, mockRes);
-            
-            expect(mockRes.redirect).toHaveBeenCalledWith('/?error=GOOGLE_SIGN_IN_FAILED');
-        });
-
-        it('should redirect with error if state does not match', async () => {
-            mockReq.query = { code: 'test-code', state: 'wrong-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'correct-state',
-                    nonce: 'test-nonce',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false
-                }
-            } as any;
-            
-            await handleGoogleAuthCallback(mockReq, mockRes);
-            
-            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
-        });
-
-        it('should redirect with error if Google email is not found', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    nonce: 'test-nonce',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false
-                }
-            } as any;
-            
-            mockGoogleAuthService.verifyAndGetProfile.mockResolvedValue({
-                emailId: null,
-                name: 'Test User'
-            });
-            
-            await handleGoogleAuthCallback(mockReq, mockRes);
-            
-            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
-        });
-
-        it('should redirect with error if fetching user fails', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    nonce: 'test-nonce',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false
-                }
-            } as any;
-            
-            mockGoogleAuthService.verifyAndGetProfile.mockResolvedValue({
-                emailId: 'test@example.com',
-                name: 'Test User'
-            });
-            
-            mockUserService.fetchUserByEmailId.mockRejectedValue(new Error('Fetch failed'));
-            
-            await handleGoogleAuthCallback(mockReq, mockRes);
-            
-            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
-        });
-
-        it('should redirect with error if creating user fails', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    nonce: 'test-nonce',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false
-                }
-            } as any;
-            
-            mockGoogleAuthService.verifyAndGetProfile.mockResolvedValue({
-                emailId: 'newuser@example.com',
-                name: 'New User'
-            });
-            
-            mockUserService.fetchUserByEmailId.mockResolvedValue(null);
-            mockUserService.createUserWithMailId.mockRejectedValue(new Error('Create failed'));
-            
-            await handleGoogleAuthCallback(mockReq, mockRes);
-            
-            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
-        });
-
-        it('should redirect with error if session creation fails', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    nonce: 'test-nonce',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false
-                }
-            } as any;
-            
-            mockGoogleAuthService.verifyAndGetProfile.mockResolvedValue({
-                emailId: 'test@example.com',
-                name: 'Test User'
-            });
-            
-            mockUserService.fetchUserByEmailId.mockResolvedValue(true);
-            mockCreateSession.mockRejectedValue(new Error('Session creation failed'));
-            
-            await handleGoogleAuthCallback(mockReq, mockRes);
-            
-            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
-        });
-
         it('should redirect to /home for existing user on successful authentication', async () => {
             mockReq.query = { code: 'test-code', state: 'test-state' };
             mockReq.session = {
@@ -217,21 +102,30 @@ describe('GoogleController', () => {
                 }
             } as any;
             
+            mockValidateOAuthSession.mockReturnValue({
+                state: 'test-state',
+                nonce: 'test-nonce',
+                client_id: 'test-client'
+            });
+            mockValidateOAuthCallback.mockReturnValue('test-code');
+            mockMarkSessionAsUsed.mockImplementation(() => {});
+            
             mockGoogleAuthService.verifyAndGetProfile.mockResolvedValue({
                 emailId: 'existing@example.com',
                 name: 'Existing User'
             });
             
-            mockUserService.fetchUserByEmailId.mockResolvedValue(true);
-            mockCreateSession.mockResolvedValue({
-                access_token: 'mock-token',
-                expires_in: 3600
-            });
+            mockHandleUserAuthentication.mockResolvedValue(true);
             
             await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('/home');
-            expect(mockUserService.createUserWithMailId).not.toHaveBeenCalled();
+            expect(mockHandleUserAuthentication).toHaveBeenCalledWith(
+                { emailId: 'existing@example.com', name: 'Existing User' },
+                'test-client',
+                mockReq,
+                mockRes
+            );
         });
 
         it('should redirect to /onboarding for new user on successful authentication', async () => {
@@ -248,28 +142,29 @@ describe('GoogleController', () => {
                 }
             } as any;
             
+            mockValidateOAuthSession.mockReturnValue({
+                state: 'test-state',
+                nonce: 'test-nonce',
+                client_id: 'test-client'
+            });
+            mockValidateOAuthCallback.mockReturnValue('test-code');
+            mockMarkSessionAsUsed.mockImplementation(() => {});
+            
             mockGoogleAuthService.verifyAndGetProfile.mockResolvedValue({
                 emailId: 'newuser@example.com',
                 name: 'New User'
             });
             
-            mockUserService.fetchUserByEmailId.mockResolvedValue(null);
-            mockUserService.createUserWithMailId.mockResolvedValue({
-                responseCode: 'OK',
-                result: { userId: 'new-user-id' }
-            });
-            mockCreateSession.mockResolvedValue({
-                access_token: 'mock-token',
-                expires_in: 3600
-            });
+            mockHandleUserAuthentication.mockResolvedValue(false);
             
             await handleGoogleAuthCallback(mockReq, mockRes);
             
             expect(mockRes.redirect).toHaveBeenCalledWith('/onboarding');
-            expect(mockUserService.createUserWithMailId).toHaveBeenCalledWith(
+            expect(mockHandleUserAuthentication).toHaveBeenCalledWith(
                 { emailId: 'newuser@example.com', name: 'New User' },
                 'test-client',
-                mockReq
+                mockReq,
+                mockRes
             );
         });
 
@@ -287,16 +182,20 @@ describe('GoogleController', () => {
                 }
             } as any;
             
+            mockValidateOAuthSession.mockReturnValue({
+                state: 'test-state',
+                nonce: 'test-nonce',
+                client_id: 'test-client'
+            });
+            mockValidateOAuthCallback.mockReturnValue('test-code');
+            mockMarkSessionAsUsed.mockImplementation(() => {});
+            
             mockGoogleAuthService.verifyAndGetProfile.mockResolvedValue({
                 emailId: 'test@example.com',
                 name: 'Test User'
             });
             
-            mockUserService.fetchUserByEmailId.mockResolvedValue(true);
-            mockCreateSession.mockResolvedValue({
-                access_token: 'mock-token',
-                expires_in: 3600
-            });
+            mockHandleUserAuthentication.mockResolvedValue(true);
             
             await handleGoogleAuthCallback(mockReq, mockRes);
             

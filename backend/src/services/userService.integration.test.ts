@@ -3,7 +3,7 @@ import type { Request } from 'express';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
-import { fetchUserByEmailId, createUserWithMailId } from './userService.js';
+import { getUserByEmail, createUserWithEmail } from './userService.js';
 import logger from '../utils/logger.js';
 
 vi.mock('axios');
@@ -48,13 +48,13 @@ describe('UserService integration', () => {
     } as any);
   });
 
-  describe('fetchUserByEmailId', () => {
+  describe('getUserByEmail', () => {
     it('returns true when user exists', async () => {
       const mockResponse = {
         data: { responseCode: 'OK', result: { exists: true } },
       };
       (mockAxios.get as any).mockResolvedValue(mockResponse);
-      const result = await fetchUserByEmailId('test@example.com', mockRequest as Request);
+      const result = await getUserByEmail('test@example.com', mockRequest as Request);
       expect(result).toBe(true);
     });
 
@@ -63,7 +63,7 @@ describe('UserService integration', () => {
         data: { responseCode: 'OK', result: { exists: false } },
       };
       (mockAxios.get as any).mockResolvedValue(mockResponse);
-      const result = await fetchUserByEmailId('nonexistent@example.com', mockRequest as Request);
+      const result = await getUserByEmail('nonexistent@example.com', mockRequest as Request);
       expect(result).toBe(false);
     });
 
@@ -72,7 +72,7 @@ describe('UserService integration', () => {
         data: { responseCode: 'CLIENT_ERROR', params: { errmsg: 'Invalid email format' } },
       };
       (mockAxios.get as any).mockResolvedValue(mockResponse);
-      await expect(fetchUserByEmailId('invalid-email', mockRequest as Request)).rejects.toThrow(
+      await expect(getUserByEmail('invalid-email', mockRequest as Request)).rejects.toThrow(
         'Invalid email format'
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -85,20 +85,20 @@ describe('UserService integration', () => {
         data: { responseCode: 'SERVER_ERROR', params: { err: 'INTERNAL_ERROR' } },
       };
       (mockAxios.get as any).mockResolvedValue(mockResponse);
-      await expect(fetchUserByEmailId('test@example.com', mockRequest as Request)).rejects.toThrow(
+      await expect(getUserByEmail('test@example.com', mockRequest as Request)).rejects.toThrow(
         'INTERNAL_ERROR'
       );
     });
   });
 
-  describe('createUserWithMailId', () => {
+  describe('createUserWithEmail', () => {
     it('creates user with email ID', async () => {
       const googleUser = { name: 'Test User', emailId: 'test@example.com' };
       const mockResponse = {
         data: { responseCode: 'OK', result: { userId: 'new-user-id', response: 'SUCCESS' } },
       };
       (mockAxios.post as any).mockResolvedValue(mockResponse);
-      const result = await createUserWithMailId(googleUser, 'test-client-id', mockRequest as Request);
+      const result = await createUserWithEmail(googleUser, 'test-client-id', mockRequest as Request);
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -109,7 +109,7 @@ describe('UserService integration', () => {
       ];
       for (const googleUser of cases) {
         await expect(
-          createUserWithMailId(googleUser, 'test-client-id', mockRequest as Request)
+          createUserWithEmail(googleUser, 'test-client-id', mockRequest as Request)
         ).rejects.toThrow('USER_NAME_NOT_PRESENT');
       }
     });
@@ -121,7 +121,7 @@ describe('UserService integration', () => {
       };
       (mockAxios.post as any).mockResolvedValue(mockResponse);
       await expect(
-        createUserWithMailId(googleUser, 'test-client-id', mockRequest as Request)
+        createUserWithEmail(googleUser, 'test-client-id', mockRequest as Request)
       ).rejects.toThrow('Email already exists');
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to create user with google emailid, response: CLIENT_ERROR'
@@ -135,7 +135,7 @@ describe('UserService integration', () => {
       };
       (mockAxios.post as any).mockResolvedValue(mockResponse);
       await expect(
-        createUserWithMailId(googleUser, 'test-client-id', mockRequest as Request)
+        createUserWithEmail(googleUser, 'test-client-id', mockRequest as Request)
       ).rejects.toThrow('DATABASE_ERROR');
     });
   });

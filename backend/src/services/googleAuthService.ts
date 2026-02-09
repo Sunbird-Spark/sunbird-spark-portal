@@ -153,3 +153,86 @@ class GoogleOauth {
 }
 
 export default new GoogleOauth();
+
+export const validateOAuthSession = (req: Request): { state: string; nonce: string; client_id: string } => {
+    if (!req.session.googleOAuth) {
+        throw new Error('OAUTH_SESSION_MISSING');
+    }
+
+    const { state, nonce, client_id, timestamp, sessionUsed } = req.session.googleOAuth;
+
+    if (sessionUsed) {
+        logger.error('Oauth session already used');
+        throw new Error('OAUTH_SESSION_ALREADY_USED');
+    }
+
+    const SESSION_TIMEOUT = 5 * 60 * 1000;
+    if (Date.now() - timestamp > SESSION_TIMEOUT) {
+        logger.error('Oauth session expired');
+        throw new Error('OAUTH_SESSION_EXPIRED');
+    }
+
+    return { state, nonce, client_id };
+};
+
+export const validateOAuthCallback = (req: Request, expectedState: string): string => {
+    if (req.query.state !== expectedState) {
+        throw new Error('INVALID_OAUTH_STATE');
+    }
+
+    if (req.query.error) {
+        logger.error('Google OAuth error:', req.query.error);
+        throw new Error(`GOOGLE_OAUTH_ERROR: ${req.query.error}`);
+    }
+
+    if (!req.query.code || typeof req.query.code !== 'string' || Array.isArray(req.query.code)) {
+        throw new Error('OAUTH_CODE_INVALID');
+    }
+
+    return req.query.code;
+};
+
+export const markSessionAsUsed = (req: Request): void => {
+    if (req.session.googleOAuth) {
+        req.session.googleOAuth.sessionUsed = true;
+    }
+};
+
+export const handleUserAuthentication = async (
+    googleUser: { emailId?: string; name?: string },
+    client_id: string,
+    req: Request,
+    res: Response
+): Promise<boolean> => {
+    if (!googleUser.emailId) {
+        throw new Error('GOOGLE_EMAIL_NOT_FOUND');
+    }
+
+    let userExists;
+    try {
+        const { getUserByEmail } = await import('./userService.js');
+        userExists = await getUserByEmail(googleUser.emailId, req);
+    } catch (error) {
+        logger.error('Error fetching user by email:', error);
+        throw new Error('FETCH_USER_FAILED');
+    }
+
+    if (!userExists) {
+        try {
+            const { createUserWithEmail } = await import('./userService.js');
+            await createUserWithEmail(googleUser, client_id, req);
+        } catch (error) {
+            logger.error('Error creating user:', error);
+            throw new Error('CREATE_USER_FAILED');
+        }
+    }
+
+    try {
+        await createSession(googleUser.emailId, req, res);
+    } catch (error) {
+        logger.error('Error creating session:', error);
+        throw new Error('SESSION_CREATION_FAILED');
+    }
+
+    return !!userExists;
+};

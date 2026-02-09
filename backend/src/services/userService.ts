@@ -92,7 +92,7 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
     return result;
 };
 
-export const fetchUserByEmailId = async (emailId: string, req: Request): Promise<UserApiResponse> => {
+export const getUserByEmail = async (emailId: string, req: Request): Promise<UserApiResponse> => {
     const url = `${KONG_URL}/user/v1/exists/email/${emailId}`;
 
     const headers = {
@@ -113,8 +113,8 @@ export const fetchUserByEmailId = async (emailId: string, req: Request): Promise
     return responseData.result.exists;
 };
 
-export const createUserWithMailId = async (googleUser: any, client_id: string, req: Request): Promise<UserApiResponse> => {
-    if (!googleUser.name || googleUser.name === '') {
+export const createUserWithEmail = async (googleUser: any, client_id: string, req: Request): Promise<UserApiResponse> => {
+    if (_.isEmpty(googleUser.name)) {
         throw new Error('USER_NAME_NOT_PRESENT');
     }
     const url = `${KONG_URL}/user/v2/signup`;
