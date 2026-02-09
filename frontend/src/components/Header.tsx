@@ -10,13 +10,10 @@ import {
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAppI18n, type LanguageCode } from "@/hooks/useAppI18n";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // const [isSearchOpen, setIsSearchOpen] = useState(false);
-  // const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
