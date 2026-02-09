@@ -161,7 +161,7 @@ const Home = () => {
                                 <div className="absolute -right-3 top-2 z-20">
                                     <button
                                         onClick={() => setIsSidebarOpen(false)}
-                                        className="w-6 h-6 bg-sunbird-gray-100 rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
+                                        className="w-6 h-6 bg-[#EFEFEF] rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
                                     >
                                         <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -178,8 +178,8 @@ const Home = () => {
                     <div className="home-content-wrapper">
                         {/* Welcome Section */}
                         <div className="mb-6 md:mb-8">
-                            <h2 className="text-xl md:text-2xl font-semibold text-gray-900">Hi John Deo</h2>
-                            <p className="text-gray-500 text-sm">Welcome to a learning experience made just for you.</p>
+                            <h2 className="home-welcome-title">Hi John Deo</h2>
+                            <p className="home-welcome-subtitle">Welcome to a learning experience made just for you.</p>
                         </div>
 
                         {/* Stats Cards */}
@@ -187,7 +187,7 @@ const Home = () => {
 
                         {/* Continue Learning + Performance */}
                         <div className="home-continue-section">
-                            <h3 className="text-lg font-semibold text-sunbird-obsidian mb-4">Continue from where you left</h3>
+                            <h3 className="home-continue-section-title">Continue from where you left</h3>
                             <div className="home-continue-grid">
                                 <div className="w-full lg:w-[65%]">
                                     <HomeContinueLearning />

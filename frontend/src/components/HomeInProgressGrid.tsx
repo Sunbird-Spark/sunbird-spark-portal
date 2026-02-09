@@ -50,7 +50,7 @@ const HomeInProgressGrid = () => {
 
     return (
         <section className="mb-8">
-            <h3 className="home-section-title-large mb-4">In Progress</h3>
+            <h3 className="home-inprogress-section-title">In Progress Contents</h3>
 
             <div className="home-inprogress-grid">
                 {inProgressItems.map((item) => (
@@ -66,7 +66,7 @@ const HomeInProgressGrid = () => {
                                     <span className="home-inprogress-badge">
                                         {item.type}
                                     </span>
-                                    <h4 className="home-inprogress-title">
+                                    <h4 className="home-inprogress-card-title">
                                         {item.title}
                                     </h4>
                                     <div className="flex items-center gap-3 mt-auto">

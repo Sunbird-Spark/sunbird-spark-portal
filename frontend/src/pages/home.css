@@ -4,11 +4,22 @@
 }
 
 .home-main-content {
-    @apply flex-1 bg-[#F9F9F9] relative;
+    @apply flex-1 bg-white relative;
+    box-shadow: inset 0px 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .home-content-wrapper {
     @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+}
+
+.home-welcome-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian mb-2;
+    letter-spacing: 0%;
+}
+
+.home-welcome-subtitle {
+    @apply font-rubik font-normal text-[0.875rem] leading-[1.25rem] text-sunbird-gray-75;
+    letter-spacing: 0%;
 }
 
 /* Header */
@@ -26,7 +37,13 @@
 }
 
 .home-search-input {
-    @apply w-full pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-[0.625rem] text-sm text-sunbird-obsidian placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-sunbird-brick transition-all bg-transparent;
+    @apply w-full pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-[0.625rem] font-rubik font-normal text-[1rem] leading-[1rem] text-sunbird-obsidian focus:outline-none focus:ring-1 focus:ring-sunbird-brick transition-all bg-transparent;
+    letter-spacing: 0px;
+}
+
+.home-search-input::placeholder {
+    color: #222222 !important;
+    opacity: 1;
 }
 
 /* Section Titles */
@@ -34,8 +51,17 @@
     @apply text-lg font-semibold text-sunbird-obsidian mb-4;
 }
 
+.home-continue-section-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian mb-4;
+}
+
 .home-section-title-large {
-    @apply text-xl font-bold text-sunbird-obsidian;
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian;
+}
+
+.home-inprogress-section-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian mb-6;
+    letter-spacing: 0%;
 }
 
 /* Stats Cards */
@@ -44,7 +70,7 @@
 }
 
 .home-stat-card {
-    @apply rounded-[1.25rem] p-5 text-white relative h-[9.0625rem] flex flex-col justify-end;
+    @apply rounded-[1.25rem] pt-5 pb-5 pr-5 pl-[1.5625rem] text-white relative h-[9.0625rem] flex flex-col justify-end;
     box-shadow: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
 }
 
@@ -53,11 +79,13 @@
 }
 
 .home-stat-value {
-    @apply text-[2.5rem] font-bold mb-1 leading-none;
+    @apply font-rubik font-semibold text-[2.5rem] leading-[2.375rem] mb-1;
+    letter-spacing: 0%;
 }
 
 .home-stat-label {
-    @apply text-sm text-white/90 whitespace-pre-line leading-tight;
+    @apply font-rubik font-normal text-[1.125rem] leading-[1.75rem] text-white/90 whitespace-pre-line;
+    letter-spacing: 0%;
 }
 
 /* Continue Learning */
@@ -84,11 +112,14 @@
 }
 
 .home-continue-learning-title {
-    @apply font-semibold text-foreground mb-2 line-clamp-2 whitespace-pre-wrap text-base lg:text-lg;
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] text-foreground mb-2 line-clamp-2 whitespace-pre-wrap;
+    letter-spacing: 0%;
 }
 
 .home-continue-learning-btn {
-    @apply w-full lg:w-[18.125rem] mt-4 bg-sunbird-brick hover:bg-sunbird-brick/90 text-white rounded-[0.625rem] py-6 h-10 text-sm font-semibold transition-all;
+    @apply w-full lg:w-[18.125rem] mt-4 bg-sunbird-brick hover:bg-sunbird-brick/90 text-white rounded-[0.625rem] py-6 h-10 transition-all flex items-center justify-center font-rubik font-medium;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
     box-shadow: 0 0.25rem 0.875rem rgba(168, 82, 54, 0.25);
 }
 
@@ -106,11 +137,22 @@
     @apply inline-block mb-3 text-[0.625rem] px-3 py-1 rounded-full bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian;
 }
 
-.home-inprogress-title {
-    @apply font-semibold text-sunbird-obsidian text-sm line-clamp-2 leading-snug h-[2.625rem];
+.home-inprogress-card-title {
+    @apply font-rubik font-medium text-[1rem] leading-[1.5rem] text-sunbird-obsidian mb-3 line-clamp-2;
+    letter-spacing: 0%;
 }
 
 /* Recommended Section */
+.home-recommended-card-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] text-sunbird-obsidian mb-auto;
+    letter-spacing: 0%;
+}
+
+.home-recommended-card-video-title {
+    @apply font-rubik font-medium text-[1.75rem] leading-tight mb-4 text-white;
+    letter-spacing: -0.02em;
+}
+
 .home-recommended-grid {
     @apply grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6;
 }
