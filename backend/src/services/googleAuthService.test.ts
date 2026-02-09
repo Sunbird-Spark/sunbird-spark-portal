@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { Request, Response } from 'express';
 
 // Use vi.hoisted to create mocks that can be used in vi.mock factories
-const { 
+const {
     mockGenerateAuthUrl,
     mockGetToken,
     mockVerifyIdToken,
@@ -18,18 +18,18 @@ const {
     const mockObtainDirectly = vi.fn();
     const mockStoreGrant = vi.fn();
     const mockAuthenticated = vi.fn();
-    const mockOAuth2Constructor = vi.fn(function() {
+    const mockOAuth2Constructor = vi.fn(function () {
         return {
             generateAuthUrl: mockGenerateAuthUrl,
             getToken: mockGetToken
         };
     });
-    const mockOAuth2ClientConstructor = vi.fn(function() {
+    const mockOAuth2ClientConstructor = vi.fn(function () {
         return {
             verifyIdToken: mockVerifyIdToken
         };
     });
-    
+
     return {
         mockGenerateAuthUrl,
         mockGetToken,
@@ -96,7 +96,7 @@ describe('GoogleAuthService - Core OAuth', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        
+
         // Reset mock implementations
         mockGenerateAuthUrl.mockReset();
         mockGetToken.mockReset();
@@ -233,7 +233,7 @@ describe('GoogleAuthService - Core OAuth', () => {
         it('should create session successfully', async () => {
             const result = await createSession('test@example.com', mockRequest as Request, mockResponse as Response);
 
-            expect(result).toEqual({ access_token: 'test-access-token', expires_in: 1234567890 });
+            expect(result).toEqual({ access_token: 'test-access-token', expires_at: 1234567890 });
             expect(mockObtainDirectly).toHaveBeenCalledWith('test@example.com', '');
             expect(mockStoreGrant).toHaveBeenCalledWith(mockGrant, mockRequest, mockResponse);
             expect(mockRequest.kauth).toEqual({ grant: mockGrant });
