@@ -12,6 +12,8 @@ WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm i && npm cache clean --force
 COPY backend/ .
+ARG COMMIT_HASH
+RUN node -e 'if (!process.env.COMMIT_HASH) { console.error("COMMIT_HASH is required"); process.exit(1); } const pkg = require("./package.json"); pkg.buildHash = process.env.COMMIT_HASH; require("fs").writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
 RUN npm run build
 
 # Stage 3: Final Production Image
