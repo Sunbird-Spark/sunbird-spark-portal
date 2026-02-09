@@ -12,6 +12,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import PasswordResetSuccess from './pages/PasswordResetSuccess';
 import SignUp from './pages/SignUp';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -31,6 +32,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/home" element={<Home />} />
         <Route path="/homePage" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />

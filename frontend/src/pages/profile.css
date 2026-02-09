@@ -1,0 +1,55 @@
+/* Profile Container */
+.profile-container {
+    @apply min-h-screen bg-white flex flex-col;
+}
+
+.profile-main-content {
+    @apply flex-1 bg-[#F9F9F9] relative;
+}
+
+.profile-content-wrapper {
+    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+}
+
+/* Section Titles matching Home page style */
+.profile-section-title {
+    @apply text-lg font-semibold text-sunbird-obsidian mb-4;
+}
+
+/* Stats Cards Grid - Reusing home-stats-grid pattern */
+.profile-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
+}
+
+/* Custom list items for ProfileLearningList */
+.profile-learning-item {
+    @apply flex flex-col xl:flex-row items-stretch xl:items-center p-4 md:p-5 bg-white border border-gray-100 rounded-[1.25rem] shadow-sm gap-4 xl:gap-6;
+}
+
+.profile-learning-info {
+    @apply flex items-center gap-4 xl:flex-[2.5] min-w-0;
+}
+
+.profile-learning-details {
+    @apply flex-1 min-w-0;
+}
+
+.profile-learning-title {
+    @apply text-[0.9375rem] md:text-[1.0625rem] font-medium text-foreground leading-snug mb-1 line-clamp-2;
+}
+
+.profile-learning-meta {
+    @apply text-[0.75rem] md:text-[0.875rem] text-[#666666] font-normal;
+}
+
+.profile-learning-stats {
+    @apply flex items-center justify-between xl:justify-start gap-4 xl:flex-[0.8];
+}
+
+.profile-learning-actions {
+    @apply flex items-center justify-between xl:justify-end gap-2 xl:flex-[0.8] border-t xl:border-t-0 pt-3 xl:pt-0;
+}
+
+.profile-learning-status {
+    @apply flex-1 flex justify-center xl:justify-center;
+}
