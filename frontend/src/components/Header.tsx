@@ -126,7 +126,7 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <a href="/home">
+            <a href="/profile">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 {t("login")}
               </Button>
@@ -207,7 +207,7 @@ const Header = () => {
                 </a>
               ))}
               <div className="mt-4 px-4">
-                <a href="/home" className="block">
+                <a href="/profile" className="block">
                   <Button className="w-full bg-primary hover:bg-primary/90">
                     {t("login")}
                   </Button>

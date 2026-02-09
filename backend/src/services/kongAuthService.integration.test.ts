@@ -23,7 +23,7 @@ vi.mock('../config/env.js', () => ({
         KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'test-loggedin-bearer-token',
         KONG_LOGGEDIN_FALLBACK_TOKEN: 'fallback-loggedin-token',
         KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-anonymous-token',
-        KEYCLOAK_BASE_SERVER_URL: 'http://localhost:8080'
+        DOMAIN_URL: 'http://localhost:8080'
     }
 }));
 

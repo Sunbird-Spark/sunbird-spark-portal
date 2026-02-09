@@ -41,7 +41,7 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <AuthLayout onClose={() => window.location.href = '/home'}>
+    <AuthLayout onClose={() => window.location.href = '/home'} isOtpPage={step === 3}>
       <div className="w-full font-rubik">
         {step === 1 && (
           <IdentifyUser

@@ -13,6 +13,7 @@ import Index from './pages/Index';
 import ForgotPassword from './pages/ForgotPassword';
 import PasswordResetSuccess from './pages/PasswordResetSuccess';
 import CollectionDetail from './pages/CollectionDetail';
+import SignUp from './pages/SignUp';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -29,7 +30,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
-        <Route path="/collection/:collectionId" element={<CollectionDetail />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
