@@ -77,7 +77,6 @@ const SignUp: React.FC = () => {
 
     const handleVerifyOtp = () => {
         // Verify OTP logic
-        console.log("OTP Verified");
 
         toast({
             title: "Account Created",
