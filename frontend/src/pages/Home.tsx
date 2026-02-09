@@ -51,7 +51,7 @@ const Home = () => {
                 <div className="flex items-center justify-between">
                     {/* Left: Sunbird Logo + Align with Sidebar */}
                     <div
-                        className={`flex items-center transition-all ${!isMobile && isSidebarOpen ? 'w-[212px]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[30px]'}`}
+                        className={`flex items-center transition-all ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'}`}
                     >
                         {isMobile ? (
                             <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ const Home = () => {
                             </div>
                         ) : (
                             isSidebarOpen ? (
-                                <img src={sunbirdLogo} alt="Sunbird" className="w-auto" style={{ height: '39px' }} />
+                                <img src={sunbirdLogo} alt="Sunbird" className="w-auto" style={{ height: '2.4375rem' }} />
                             ) : (
                                 <button
                                     onClick={() => setIsSidebarOpen(true)}
@@ -95,14 +95,14 @@ const Home = () => {
                         ) : (
                             <button
                                 type="button"
-                                className="home-search-container w-full md:w-[400px] h-[46px] text-left relative"
+                                className="home-search-container w-full md:w-[25rem] h-[2.875rem] text-left relative"
                                 onClick={() => navigate('/search')}
                             >
                                 <FiSearch className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sunbird-brick w-4 h-4 cursor-pointer" />
                                 <Input
                                     type="text"
                                     placeholder={t("header.search")}
-                                    className="home-search-input pointer-events-none bg-transparent pl-4 pr-10 h-[46px]"
+                                    className="home-search-input pointer-events-none bg-transparent pl-4 pr-10 h-[2.875rem]"
                                     readOnly
                                 />
                             </button>
@@ -121,7 +121,7 @@ const Home = () => {
                                     <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="min-w-[150px] p-2 bg-white border-gray-100 z-50">
+                            <DropdownMenuContent className="min-w-[9.375rem] p-2 bg-white border-gray-100 z-50">
                                 {languages.map((lang) => (
                                     <DropdownMenuItem
                                         key={lang.code}
@@ -141,7 +141,7 @@ const Home = () => {
                 {/* Sidebar - Mobile */}
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                        <SheetContent side="left" className="w-[280px] pt-10 px-0 pb-0">
+                        <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
                             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                             <HomeSidebar
                                 activeNav={activeNav}

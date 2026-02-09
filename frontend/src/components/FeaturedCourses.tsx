@@ -71,7 +71,7 @@ const FeaturedCourses = () => {
               <Link
                 key={course.id}
                 to={`/course/${course.id}`}
-                className="min-w-[280px] md:min-w-[320px] snap-start"
+                className="min-w-[17.5rem] md:min-w-[20rem] snap-start"
               >
                 <CourseCard course={course} />
               </Link>
