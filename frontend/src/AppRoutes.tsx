@@ -12,7 +12,6 @@ import Home from './pages/Home';
 import ForgotPassword from './pages/ForgotPassword';
 import PasswordResetSuccess from './pages/PasswordResetSuccess';
 import SignUp from './pages/SignUp';
-import Home from './pages/Home';
 import Profile from './pages/Profile';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
@@ -31,8 +30,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/homePage" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
 
         {/* Protected routes */}
@@ -43,8 +40,8 @@ const AppRoutes: React.FC = () => {
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AuthProvider>
+      </Routes >
+    </AuthProvider >
   );
 };
 
