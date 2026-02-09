@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import Avatar from "react-avatar";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiBell, FiMenu, FiChevronDown, FiChevronLeft } from "react-icons/fi";
+import { FiSearch, FiBell, FiMenu, FiChevronDown, FiChevronLeft, FiUser, FiLogOut } from "react-icons/fi";
 import { Input } from "@/components/input";
 import {
     DropdownMenu,
@@ -12,6 +13,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/sheet";
 import PageLoader from "@/components/PageLoader";
 import Footer from "@/components/Footer";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { LanguageConfig } from "@/configs/languages";
 import HomeSidebar from "@/components/HomeSidebar";
 import ProfileCard from "@/components/profile/ProfileCard"
 import PersonalInformation from "@/components/profile/PersonalInformation"
@@ -38,7 +40,7 @@ const Profile = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    const handleLanguageChange = (lang: { code: string; label: string }) => changeLanguage(lang.code);
+    const handleLanguageChange = (lang: LanguageConfig) => changeLanguage(lang.code);
 
     if (isLoading) {
         return <PageLoader message="Loading your profile..." />;
@@ -47,30 +49,34 @@ const Profile = () => {
     return (
         <div className="profile-container">
             {/* Top Header */}
-            <header className={isMobile ? "bg-white border-b border-gray-100 px-4 py-3 shadow-[0_0.125rem_0.625rem_rgba(0,0,0,0.05)] z-20 sticky top-0" : "bg-white border-b border-gray-100 px-6 py-4 shadow-[0_0.875rem_0.875rem_rgba(0,0,0,0.05)] z-10 sticky top-0 lg:pr-[6.25rem]"}>
-                <div className="flex items-center justify-between">
+            <header className={`profile-header ${isMobile ? 'mobile' : ''}`}>
+                <div className="profile-header-container">
                     {/* Left: Sunbird Logo + Align with Sidebar */}
-                    <div
-                        className={`flex items-center transition-all ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'}`}
-                    >
-                        {isMobile ? (
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setIsSidebarOpen(true)}
-                                    className="text-sunbird-ginger hover:text-sunbird-brick transition-colors p-2 -ml-2"
-                                    aria-label="Open Menu"
-                                >
-                                    <FiMenu className="w-6 h-6" />
-                                </button>
-                                <h1 className="text-lg font-semibold text-sunbird-obsidian">Profile</h1>
+                    <div className={`profile-logo-container ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'}`}>
+                        {!isMobile && isSidebarOpen && (
+                            <div className="w-full">
+                                <img
+                                    src={sunbirdLogo}
+                                    alt="Sunbird"
+                                    className="h-[2.4375rem] w-auto"
+                                    style={{ height: '2.4375rem' }}
+                                />
                             </div>
+                        )}
+                        {/* Sidebar Toggle */}
+                        {isMobile ? (
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="sidebar-toggle-btn"
+                                aria-label="Open Menu"
+                            >
+                                <FiMenu className="w-5 h-3.5" />
+                            </button>
                         ) : (
-                            isSidebarOpen ? (
-                                <img src={sunbirdLogo} alt="Sunbird" className="w-auto" style={{ height: '2.4375rem' }} />
-                            ) : (
+                            !isSidebarOpen && (
                                 <button
                                     onClick={() => setIsSidebarOpen(true)}
-                                    className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
+                                    className="sidebar-toggle-btn"
                                 >
                                     <FiMenu className="w-5 h-3.5" />
                                 </button>
@@ -79,17 +85,17 @@ const Profile = () => {
                     </div>
 
                     {/* Right: Search + Language */}
-                    <div className="flex items-center gap-4 flex-1 justify-end lg:justify-start">
+                    <div className="profile-header-actions">
                         {isMobile ? (
                             <button
                                 onClick={() => navigate('/search')}
-                                className="p-2 text-sunbird-brick"
+                                className="profile-search-btn-mobile"
                             >
                                 <FiSearch className="h-5 w-5" />
                             </button>
                         ) : (
                             <div
-                                className="relative w-full max-w-[25rem] cursor-pointer"
+                                className="profile-search-container"
                                 onClick={() => navigate('/search')}
                             >
                                 <Input
@@ -103,30 +109,34 @@ const Profile = () => {
                             </div>
                         )}
                         {/* Notifications */}
-                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                            <FiBell className="w-5 h-5 text-sunbird-brick" />
+                        <button className="profile-action-btn">
+                            <FiBell className="profile-action-icon" />
                         </button>
 
                         {/* Language Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <img src={translationIcon} alt="Language" className="w-5 h-5" />
+                                <button className="profile-lang-btn">
+                                    <img src={translationIcon} alt="Language" className="profile-action-icon" />
                                     <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-white border-gray-200">
-                                {languages.map((lang) => (
+                            <DropdownMenuContent align="end" className="profile-dropdown-content w-40">
+                                {languages.map((lng) => (
                                     <DropdownMenuItem
-                                        key={lang.code}
-                                        onClick={() => handleLanguageChange(lang)}
-                                        className={currentCode === lang.code ? "bg-sunbird-ivory" : ""}
+                                        key={lng.code}
+                                        className={`profile-dropdown-item ${currentCode === lng.code ? 'active' : ''}`}
+                                        onClick={() => changeLanguage(lng.code as any)}
                                     >
-                                        <span className="mr-2">{lang.label}</span>
+                                        <span>{lng.label}</span>
+                                        {currentCode === lng.code && (
+                                            <div className="profile-dropdown-indicator" />
+                                        )}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
+
                     </div>
                 </div>
             </header>
@@ -167,7 +177,7 @@ const Profile = () => {
 
                 {/* Main Content Area */}
                 <main className="profile-main-content">
-                    <div className="p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem]">
+                    <div className="profile-content-wrapper">
                         {/* Top Section: Profile Card + Personal Information */}
                         <div className="grid grid-cols-1 lg:grid-cols-[23.3125rem_1fr] gap-6 mb-8">
                             {/* Left: Profile Card */}
