@@ -89,12 +89,12 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
 
     return (
         <aside
-            className="w-[242px] bg-white flex flex-col shrink-0 z-20 relative h-full md:h-[calc(100vh-72px)]"
+            className="w-[15.125rem] bg-white flex flex-col shrink-0 z-20 relative h-full md:h-[calc(100vh-4.5rem)]"
             style={{
-                boxShadow: '2px 2px 20px 0px rgba(0, 0, 0, 0.09)'
+                boxShadow: '0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09)'
             }}
         >
-            <nav className="flex flex-col justify-between h-full pt-[40px] pb-4">
+            <nav className="flex flex-col justify-between h-full pt-[2.5rem] pb-4">
                 {/* Main Nav (Top) */}
                 {renderNavList(mainNavItems)}
 

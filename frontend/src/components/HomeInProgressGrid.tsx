@@ -78,13 +78,13 @@ const HomeInProgressGrid = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <span className="text-[10px] font-medium text-sunbird-gray-77 shrink-0">{item.progress}%</span>
+                                        <span className="text-[0.625rem] font-medium text-sunbird-gray-77 shrink-0">{item.progress}%</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {/* Thumbnail */}
-                        <div className="w-[88px] h-[88px] rounded-2xl overflow-hidden shrink-0">
+                        <div className="w-[5.5rem] h-[5.5rem] rounded-2xl overflow-hidden shrink-0">
                             <img
                                 src={item.thumbnail}
                                 alt={item.title}
