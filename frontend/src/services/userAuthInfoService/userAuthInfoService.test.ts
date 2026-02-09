@@ -1,14 +1,20 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userAuthInfoService, { userAuthInfoService as UserAuthInfoServiceClass } from './userAuthInfoService';
-import axios from 'axios';
+import * as httpClient from '../../lib/http-client';
 
-vi.mock('axios');
+vi.mock('../../lib/http-client', () => ({
+    getClient: vi.fn()
+}));
 
 describe('userAuthInfoService', () => {
-    // Reset singleton state before each test
+    const mockGet = vi.fn();
+
     beforeEach(() => {
         vi.clearAllMocks();
         userAuthInfoService.clearAuth();
+        (httpClient.getClient as any).mockReturnValue({
+            get: mockGet
+        });
     });
 
     it('should maintain singleton instance', () => {
@@ -38,7 +44,9 @@ describe('userAuthInfoService', () => {
                     uid: 'user-456',
                     isAuthenticated: true
                 }
-            }
+            },
+            status: 200,
+            headers: {}
         };
 
         const mockAnonymousResponse = {
@@ -49,18 +57,19 @@ describe('userAuthInfoService', () => {
                     uid: null,
                     isAuthenticated: false
                 }
-            }
+            },
+            status: 200,
+            headers: {}
         };
 
         it('should successfully fetch auth status and update state', async () => {
-            (axios.get as any).mockResolvedValue(mockSuccessResponse);
+            mockGet.mockResolvedValue(mockSuccessResponse);
 
             const result = await userAuthInfoService.getAuthInfo(mockDeviceId);
 
-            // Check axios call
-            expect(axios.get).toHaveBeenCalledWith('/portal/user/v1/auth/info', {
-                headers: { 'x-device-id': mockDeviceId },
-                withCredentials: true
+            // Check HTTP client call
+            expect(mockGet).toHaveBeenCalledWith('/user/v1/auth/info', {
+                'x-device-id': mockDeviceId
             });
 
             // Check result
@@ -73,13 +82,21 @@ describe('userAuthInfoService', () => {
         });
 
         it('should handle anonymous user properly', async () => {
-            (axios.get as any).mockResolvedValue(mockAnonymousResponse);
+            mockGet.mockResolvedValue(mockAnonymousResponse);
 
             await userAuthInfoService.getAuthInfo(mockDeviceId);
 
             expect(userAuthInfoService.getSessionId()).toBe('session-789');
             expect(userAuthInfoService.getUserId()).toBeNull();
             expect(userAuthInfoService.isUserAuthenticated()).toBe(false);
+        });
+
+        it('should call without device ID header when not provided', async () => {
+            mockGet.mockResolvedValue(mockSuccessResponse);
+
+            await userAuthInfoService.getAuthInfo();
+
+            expect(mockGet).toHaveBeenCalledWith('/user/v1/auth/info', {});
         });
 
         it('should throw error when api returns unsuccessful status', async () => {
@@ -89,9 +106,11 @@ describe('userAuthInfoService', () => {
                         status: 'failed',
                         errmsg: 'Something went wrong'
                     }
-                }
+                },
+                status: 200,
+                headers: {}
             };
-            (axios.get as any).mockResolvedValue(mockErrorResponse);
+            mockGet.mockResolvedValue(mockErrorResponse);
 
             await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Something went wrong');
@@ -107,32 +126,32 @@ describe('userAuthInfoService', () => {
                         status: 'failed',
                         errmsg: null
                     }
-                }
+                },
+                status: 200,
+                headers: {}
             };
-            (axios.get as any).mockResolvedValue(mockErrorResponse);
+            mockGet.mockResolvedValue(mockErrorResponse);
 
             await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Failed to fetch auth status');
         });
 
-        it('should throw error when axios fails', async () => {
+        it('should throw error when HTTP client fails', async () => {
             const networkError = new Error('Network Error');
-            (axios.get as any).mockRejectedValue(networkError);
+            mockGet.mockRejectedValue(networkError);
 
             await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
                 .rejects.toThrow('Network Error');
         });
 
-        it('should log detailed error info if axios error has response', async () => {
-            const axiosError = {
-                isAxiosError: true,
+        it('should log detailed error info if error has response', async () => {
+            const httpError = {
                 response: {
                     status: 400,
                     data: { message: 'Bad Request' }
                 }
             };
-            (axios.isAxiosError as any) = vi.fn().mockReturnValue(true);
-            (axios.get as any).mockRejectedValue(axiosError);
+            mockGet.mockRejectedValue(httpError);
 
             // Spy on console.error to verify logging
             const consoleSpy = vi.spyOn(console, 'error');
@@ -143,9 +162,9 @@ describe('userAuthInfoService', () => {
                 // Expected error
             }
 
-            expect(consoleSpy).toHaveBeenCalledWith('Error fetching auth status:', axiosError);
+            expect(consoleSpy).toHaveBeenCalledWith('Error fetching auth status:', httpError);
             expect(consoleSpy).toHaveBeenCalledWith('Status:', 400);
-            expect(consoleSpy).toHaveBeenCalledWith('Data:', axiosError.response.data);
+            expect(consoleSpy).toHaveBeenCalledWith('Data:', httpError.response.data);
         });
     });
 
@@ -162,9 +181,11 @@ describe('userAuthInfoService', () => {
                 data: {
                     params: { status: 'successful' },
                     result: { sid: 's1', uid: 'u1', isAuthenticated: true }
-                }
+                },
+                status: 200,
+                headers: {}
             };
-            (axios.get as any).mockResolvedValue(mockResponse);
+            mockGet.mockResolvedValue(mockResponse);
             await userAuthInfoService.getAuthInfo('d1');
 
             expect(userAuthInfoService.isUserAuthenticated()).toBe(true);

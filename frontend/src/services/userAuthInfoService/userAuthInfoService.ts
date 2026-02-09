@@ -1,4 +1,5 @@
-import axios from 'axios';
+import { getClient } from '../../lib/http-client';
+import type { ApiResponse } from '../../lib/http-client';
 
 interface AuthStatusResponse {
     id: string;
@@ -49,28 +50,28 @@ class userAuthInfoService {
                 headers['x-device-id'] = deviceId;
             }
 
-            const response = await axios.get<AuthStatusResponse>(
-                '/portal/user/v1/auth/info',
-                {
-                    headers,
-                    withCredentials: true
-                }
+            const response: ApiResponse<AuthStatusResponse> = await getClient().get<AuthStatusResponse>(
+                '/user/v1/auth/info',
+                headers
             );
 
-            if (response.data.params.status === 'successful') {
-                this.sessionId = response.data.result.sid;
-                this.userId = response.data.result.uid;
-                this.isAuthenticated = response.data.result.isAuthenticated;
+            const data = response.data;
 
-                return response.data.result;
+            if (data.params.status === 'successful') {
+                this.sessionId = data.result.sid;
+                this.userId = data.result.uid;
+                this.isAuthenticated = data.result.isAuthenticated;
+
+                return data.result;
             } else {
-                throw new Error(response.data.params.errmsg || 'Failed to fetch auth status');
+                throw new Error(data.params.errmsg || 'Failed to fetch auth status');
             }
         } catch (error) {
             console.error('Error fetching auth status:', error);
-            if (axios.isAxiosError(error)) {
-                console.error('Status:', error.response?.status);
-                console.error('Data:', error.response?.data);
+            if (error && typeof error === 'object' && 'response' in error) {
+                const httpError = error as { response?: { status?: number; data?: any } };
+                console.error('Status:', httpError.response?.status);
+                console.error('Data:', httpError.response?.data);
             }
             throw error;
         }
