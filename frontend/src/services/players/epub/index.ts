@@ -1,2 +1,7 @@
 export { EpubPlayerService } from './EpubPlayerService';
-export type { EpubPlayerConfig, EpubPlayerEvent } from './types';
+export type { 
+  EpubPlayerConfig, 
+  EpubPlayerEvent, 
+  EpubPlayerContextProps, 
+  EpubPlayerMetadata 
+} from './types';

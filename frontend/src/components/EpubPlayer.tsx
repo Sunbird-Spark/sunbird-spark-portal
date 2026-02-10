@@ -1,116 +1,105 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { EpubPlayerService } from '../services/players/epub';
-import type { EpubPlayerConfig, EpubPlayerEvent } from '../services/players/epub';
+import type { EpubPlayerEvent, EpubPlayerContextProps, EpubPlayerMetadata } from '../services/players/epub';
 
 interface EpubPlayerProps {
-  context: any;
-  contextRollup?: any;
-  cdata?: any;
-  objectRollup?: any;
-  mode?: any;
-  config?: any;
-  metadata?: any;
+  metadata: EpubPlayerMetadata; // Required - complete metadata object from backend
+  mode?: string; // Optional - default: 'play'
+  cdata?: any[]; // Optional - default: []
+  contextRollup?: { l1: string }; // Optional - default: { l1: channel }
+  objectRollup?: Record<string, any>; // Optional - default: {}
   onPlayerEvent?: (event: EpubPlayerEvent) => void;
   onTelemetryEvent?: (event: any) => void;
 }
 
+
 export const EpubPlayer: React.FC<EpubPlayerProps> = ({
-  context,
-  contextRollup,
-  cdata,
-  objectRollup,
-  mode,
-  config,
   metadata,
+  mode,
+  cdata,
+  contextRollup,
+  objectRollup,
   onPlayerEvent,
   onTelemetryEvent,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const playerElementRef = useRef<HTMLElement | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const serviceRef = useRef<EpubPlayerService>(new EpubPlayerService());
+
+  // Memoize context props to avoid recreating on every render
+  const contextProps = useMemo<EpubPlayerContextProps | undefined>(() => {
+    // Only create contextProps if at least one optional param is provided
+    if (mode === undefined && cdata === undefined && contextRollup === undefined && objectRollup === undefined) {
+      return undefined;
+    }
+    
+    return {
+      ...(mode !== undefined && { mode }),
+      ...(cdata !== undefined && { cdata }),
+      ...(contextRollup !== undefined && { contextRollup }),
+      ...(objectRollup !== undefined && { objectRollup }),
+    };
+  }, [mode, cdata, contextRollup, objectRollup]);
+
+  // Memoize event handlers to maintain referential equality
+  const handlePlayerEvent = useCallback((event: EpubPlayerEvent) => {
+    onPlayerEvent?.(event);
+  }, [onPlayerEvent]);
+
+  const handleTelemetryEvent = useCallback((event: any) => {
+    onTelemetryEvent?.(event);
+  }, [onTelemetryEvent]);
 
   useEffect(() => {
-    let mounted = true;
-    const playerService = new EpubPlayerService();
+    if (!containerRef.current) return;
 
-    const initializePlayer = async () => {
-      if (!containerRef.current) {
-        return;
-      }
+    const service = serviceRef.current;
+    let playerElement: HTMLElement | null = null;
+    let cancelled = false;
 
+    const initPlayer = async () => {
       try {
-        if (!mounted) return;
+        console.log('Initializing EPUB player with metadata:', {
+          identifier: metadata.identifier,
+          name: metadata.name,
+          artifactUrl: metadata.artifactUrl,
+        });
+        
+        const config = await service.createConfig(metadata, contextProps);
+        
+        if (cancelled) return;
 
-        // Build config - use context as-is, with optional overrides
-        const playerConfig: EpubPlayerConfig = {
-          context: {
-            ...context,
-            mode: mode !== undefined ? mode : context.mode,
-            contextRollup: contextRollup !== undefined ? contextRollup : context.contextRollup,
-            cdata: cdata !== undefined ? cdata : context.cdata,
-            objectRollup: objectRollup !== undefined ? objectRollup : context.objectRollup,
-          },
-          config: config || {},
-          metadata: metadata || {},
-        };
-
-        console.log('EPUB Player Config:', JSON.stringify(playerConfig, null, 2));
-
-        // Create player element via service
-        const epubElement = playerService.createElement(playerConfig);
-
-        // Attach event listeners via service
-        playerService.attachEventListeners(
-          epubElement,
-          (event) => {
-            if (onPlayerEvent) onPlayerEvent(event);
-          },
-          (event) => {
-            if (onTelemetryEvent) onTelemetryEvent(event);
-          }
-        );
-
-        // Store reference to player element
-        playerElementRef.current = epubElement;
-
-        // Append to container
-        if (containerRef.current && mounted) {
-          containerRef.current.appendChild(epubElement);
-          setIsLoading(false);
+        playerElement = service.createElement(config);
+        service.attachEventListeners(playerElement, handlePlayerEvent, handleTelemetryEvent);
+        
+        if (containerRef.current) {
+          containerRef.current.appendChild(playerElement);
+          console.log('EPUB player element added to DOM');
         }
       } catch (error) {
-        console.error('EPUB Player initialization failed:', error);
-        if (mounted) {
-          setIsLoading(false);
-        }
+        console.error('Failed to initialize EPUB player:', error);
       }
     };
 
-    initializePlayer();
+    initPlayer();
 
-    // Cleanup function
     return () => {
-      mounted = false;
-      if (playerElementRef.current) {
-        // Remove listeners via service
-        playerService.removeEventListeners(playerElementRef.current);
-        
-        // Remove from DOM if still attached
-        if (playerElementRef.current.parentNode) {
-          playerElementRef.current.parentNode.removeChild(playerElementRef.current);
-        }
-        playerElementRef.current = null;
+      cancelled = true;
+      if (playerElement) {
+        service.removeEventListeners(playerElement);
+        playerElement.remove();
       }
     };
-  }, [context, contextRollup, cdata, objectRollup, mode, config, metadata, onPlayerEvent, onTelemetryEvent]);
+  }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 
   return (
-    <div ref={containerRef} className="epub-player-container">
-      {isLoading && (
-        <div className="epub-player-loading">
-          Loading EPUB Player...
-        </div>
-      )}
-    </div>
+    <div 
+      ref={containerRef} 
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        minHeight: '600px',
+        position: 'relative' 
+      }} 
+    />
   );
 };

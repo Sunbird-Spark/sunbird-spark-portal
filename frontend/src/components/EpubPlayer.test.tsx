@@ -1,181 +1,237 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { EpubPlayer } from './EpubPlayer';
+import type { EpubPlayerMetadata } from '../services/players/epub';
 
-// Mock player config helper
-const createMockPlayerConfig = (epubUrl: string, contentName = 'EPUB Document') => ({
-  context: {
-    mode: 'play',
-    authToken: '',
-    sid: '7283cf2e-d215-9944-b0c5-269489c6fa56',
-    did: '3c0a3724311fe944dec5df559cc4e006',
-    uid: 'anonymous',
-    channel: '505c7c48ac6dc1edc9b08f21db5a571e',
-    pdata: {
-      id: 'sunbird.portal',
-      ver: '3.2.12',
-      pid: 'sunbird-portal.contentplayer',
-    },
-    tags: [''],
-    timeDiff: 0,
-    host: '',
-    endpoint: '',
-    userData: {
-      firstName: 'Test',
-      lastName: 'User',
-    },
+// Create mock service methods
+const mockCreateConfig = vi.fn();
+const mockCreateElement = vi.fn();
+const mockAttachEventListeners = vi.fn();
+const mockRemoveEventListeners = vi.fn();
+
+// Mock the EpubPlayerService
+vi.mock('../services/players/epub', () => ({
+  EpubPlayerService: class {
+    createConfig = mockCreateConfig;
+    createElement = mockCreateElement;
+    attachEventListeners = mockAttachEventListeners;
+    removeEventListeners = mockRemoveEventListeners;
   },
-  contextRollup: {
-    l1: '505c7c48ac6dc1edc9b08f21db5a571d',
-  },
-  cdata: [],
-  objectRollup: {},
-  config: {},
-  metadata: {
-    compatibilityLevel: 4,
-    artifactUrl: epubUrl,
-    contentType: 'FocusSpot',
-    identifier: 'test-epub-id',
-    audience: ['Teacher'],
-    visibility: 'Default',
-    mediaType: 'content',
-    osId: 'org.ekstep.quiz.app',
-    languageCode: ['en'],
-    license: 'CC BY 4.0',
-    name: contentName,
-    status: 'Live',
-    code: '43e68089-997e-49a4-902a-6262e5654515',
-    description: 'Test EPUB',
-    streamingUrl: epubUrl,
-    createdOn: '2019-12-16T07:59:53.154+0000',
-    copyrightYear: 2019,
-    additionalCategories: ['Focus Spot'],
-    lastUpdatedOn: '2019-12-16T11:52:56.405+0000',
-    creator: 'Test Creator',
-    pkgVersion: 1,
-    versionKey: '1576497176405',
-    framework: 'tn_k-12_5',
-    createdBy: 'test-user-id',
-    resourceType: 'Read',
-    licenseDetails: {
-      name: 'CC BY 4.0',
-      url: 'https://creativecommons.org/licenses/by/4.0/legalcode',
-      description: 'For details see below:',
-    },
-  },
-});
+}));
 
 describe('EpubPlayer', () => {
+  let mockPlayerElement: HTMLElement;
+
+  const mockMetadata: EpubPlayerMetadata = {
+    identifier: 'test-content-123',
+    name: 'Test EPUB Book',
+    artifactUrl: 'https://example.com/book.epub',
+  };
+
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Define custom element if not already defined
-    if (!customElements.get('sunbird-epub-player')) {
-      customElements.define('sunbird-epub-player', class extends HTMLElement {});
-    }
+    // Create mock player element
+    mockPlayerElement = document.createElement('div');
+    mockPlayerElement.setAttribute('data-player-id', 'test-content-123');
+
+    // Setup default mock behavior
+    mockCreateConfig.mockResolvedValue({
+      context: { mode: 'play' },
+      config: {},
+      metadata: mockMetadata,
+    });
+    mockCreateElement.mockReturnValue(mockPlayerElement);
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should render without crashing', async () => {
-    const config = createMockPlayerConfig('/test.epub');
-    const { container } = render(
-      <EpubPlayer 
-        context={config.context}
-        config={config.config}
-        metadata={config.metadata}
-      />
-    );
-    
+  it('should render without crashing', () => {
+    const { container } = render(<EpubPlayer metadata={mockMetadata} />);
+    expect(container.querySelector('div')).toBeInTheDocument();
+  });
+
+  it('should create config with metadata only when no optional props provided', async () => {
+    render(<EpubPlayer metadata={mockMetadata} />);
+
     await waitFor(() => {
-      expect(container.querySelector('sunbird-epub-player')).toBeTruthy();
+      expect(mockCreateConfig).toHaveBeenCalledWith(mockMetadata, undefined);
     });
   });
 
-  it('should show loading state initially', () => {
-    const config = createMockPlayerConfig('/test.epub');
-    const { container } = render(
-      <EpubPlayer 
-        context={config.context}
-        config={config.config}
-        metadata={config.metadata}
-      />
-    );
-    
-    // Check that the player container exists
-    expect(container.querySelector('.epub-player-container')).toBeTruthy();
-  });
+  it('should create config with optional props when provided', async () => {
+    const mode = 'preview';
+    const cdata = [{ id: 'test', type: 'course' }];
+    const contextRollup = { l1: 'test-channel' };
+    const objectRollup = { l1: 'test-object' };
 
-  it('should create player element with correct config', async () => {
-    const config = createMockPlayerConfig('/test.epub', 'Test EPUB');
-    const { container } = render(
-      <EpubPlayer 
-        context={config.context}
-        config={config.config}
-        metadata={config.metadata}
+    render(
+      <EpubPlayer
+        metadata={mockMetadata}
+        mode={mode}
+        cdata={cdata}
+        contextRollup={contextRollup}
+        objectRollup={objectRollup}
       />
     );
 
     await waitFor(() => {
-      const playerElement = container.querySelector('sunbird-epub-player');
-      expect(playerElement).toBeTruthy();
-      expect(playerElement?.getAttribute('player-config')).toBeTruthy();
-      
-      const playerConfig = JSON.parse(playerElement?.getAttribute('player-config') || '{}');
-      expect(playerConfig.context.mode).toBe('play');
-      expect(playerConfig.context.uid).toBe('anonymous');
+      expect(mockCreateConfig).toHaveBeenCalledWith(mockMetadata, {
+        mode,
+        cdata,
+        contextRollup,
+        objectRollup,
+      });
+    });
+  });
+
+  it('should create player element and append to container', async () => {
+    const { container } = render(<EpubPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockCreateElement).toHaveBeenCalled();
+      expect(container.querySelector('div')?.contains(mockPlayerElement)).toBe(true);
+    });
+  });
+
+  it('should attach event listeners', async () => {
+    const onPlayerEvent = vi.fn();
+    const onTelemetryEvent = vi.fn();
+
+    render(
+      <EpubPlayer
+        metadata={mockMetadata}
+        onPlayerEvent={onPlayerEvent}
+        onTelemetryEvent={onTelemetryEvent}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockAttachEventListeners).toHaveBeenCalledWith(
+        mockPlayerElement,
+        expect.any(Function),
+        expect.any(Function)
+      );
     });
   });
 
   it('should call onPlayerEvent when player event is triggered', async () => {
-    const config = createMockPlayerConfig('/test.epub');
     const onPlayerEvent = vi.fn();
-    const { container } = render(
-      <EpubPlayer 
-        context={config.context}
-        config={config.config}
-        metadata={config.metadata}
-        onPlayerEvent={onPlayerEvent}
-      />
-    );
+    let capturedHandler: any;
 
-    await waitFor(() => {
-      const playerElement = container.querySelector('sunbird-epub-player');
-      expect(playerElement).toBeTruthy();
+    mockAttachEventListeners.mockImplementation((_element: any, handler: any) => {
+      capturedHandler = handler;
     });
 
-    const playerElement = container.querySelector('sunbird-epub-player');
-    
+    render(<EpubPlayer metadata={mockMetadata} onPlayerEvent={onPlayerEvent} />);
+
+    await waitFor(() => {
+      expect(mockAttachEventListeners).toHaveBeenCalled();
+    });
+
     // Simulate player event
-    const mockEvent = new CustomEvent('playerEvent', {
-      detail: { eid: 'START', data: { test: 'data' } },
-    });
-    
-    playerElement?.dispatchEvent(mockEvent);
+    const mockEvent = { type: 'START', data: {}, playerId: 'test', timestamp: Date.now() };
+    capturedHandler(mockEvent);
 
-    await waitFor(() => {
-      expect(onPlayerEvent).toHaveBeenCalled();
-      expect(onPlayerEvent.mock.calls[0]?.[0].type).toBe('START');
-    });
+    expect(onPlayerEvent).toHaveBeenCalledWith(mockEvent);
   });
 
   it('should cleanup on unmount', async () => {
-    const config = createMockPlayerConfig('/test.epub');
-    const { container, unmount } = render(
-      <EpubPlayer 
-        context={config.context}
-        config={config.config}
-        metadata={config.metadata}
-      />
-    );
+    const { unmount } = render(<EpubPlayer metadata={mockMetadata} />);
 
     await waitFor(() => {
-      expect(container.querySelector('sunbird-epub-player')).toBeTruthy();
+      expect(mockCreateElement).toHaveBeenCalled();
     });
 
     unmount();
 
-    expect(container.querySelector('sunbird-epub-player')).toBeFalsy();
+    expect(mockRemoveEventListeners).toHaveBeenCalledWith(mockPlayerElement);
+  });
+
+  it('should handle initialization errors gracefully', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockCreateConfig.mockRejectedValue(new Error('Failed to create config'));
+
+    render(<EpubPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to initialize EPUB player:',
+        expect.any(Error)
+      );
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should not append player if component unmounts before config is created', async () => {
+    let resolveConfig: any;
+    mockCreateConfig.mockReturnValue(
+      new Promise((resolve) => {
+        resolveConfig = resolve;
+      })
+    );
+
+    const { unmount } = render(<EpubPlayer metadata={mockMetadata} />);
+
+    // Unmount before config resolves
+    unmount();
+
+    // Resolve config after unmount
+    resolveConfig({
+      context: { mode: 'play' },
+      config: {},
+      metadata: mockMetadata,
+    });
+
+    await waitFor(() => {
+      expect(mockCreateElement).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should only include defined optional props in contextProps', async () => {
+    render(
+      <EpubPlayer
+        metadata={mockMetadata}
+        mode="play"
+        // cdata, contextRollup, objectRollup not provided
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledWith(mockMetadata, {
+        mode: 'play',
+      });
+    });
+  });
+
+  it('should re-initialize player when metadata changes', async () => {
+    const { rerender } = render(<EpubPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledTimes(1);
+    });
+
+    const newMetadata = { ...mockMetadata, identifier: 'new-content-456' };
+    rerender(<EpubPlayer metadata={newMetadata} />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledTimes(2);
+      expect(mockCreateConfig).toHaveBeenCalledWith(newMetadata, undefined);
+    });
+  });
+
+  it('should re-initialize player when optional props change', async () => {
+    const { rerender } = render(<EpubPlayer metadata={mockMetadata} mode="play" />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(<EpubPlayer metadata={mockMetadata} mode="preview" />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledTimes(2);
+    });
   });
 });

@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EpubPlayerService } from './EpubPlayerService';
-import type { EpubPlayerConfig } from './types';
+import type { EpubPlayerMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
+import appCoreService from '../../AppCoreService';
+import { OrganizationService } from '../../OrganizationService';
 
-// Mock the auth service
+// Mock the services
 vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
   default: {
     getSessionId: vi.fn(() => null),
@@ -11,173 +13,272 @@ vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
   },
 }));
 
+vi.mock('../../AppCoreService', () => ({
+  default: {
+    getDeviceId: vi.fn(() => Promise.resolve('device-123')),
+  },
+}));
+
+// Create a mock search function that we can control
+const mockOrgSearch = vi.fn();
+
+vi.mock('../../OrganizationService', () => ({
+  OrganizationService: class {
+    search = mockOrgSearch;
+  },
+}));
+
 describe('EpubPlayerService', () => {
   let service: EpubPlayerService;
 
+  const mockMetadata: EpubPlayerMetadata = {
+    identifier: 'content-123',
+    name: 'Test EPUB',
+    artifactUrl: 'https://example.com/book.epub',
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    // Set default mock behavior for org service
+    mockOrgSearch.mockResolvedValue({
+      data: {
+        result: {
+          response: {
+            content: [
+              {
+                channel: 'test-channel-456',
+                identifier: 'org-123',
+              },
+            ],
+          },
+        },
+      },
+    });
+
     service = new EpubPlayerService();
   });
 
-  describe('createDefaultConfig', () => {
-    it('should create a default configuration with provided parameters', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub',
-        'user-456',
-        'session-789'
-      );
+  describe('createConfig', () => {
+    it('should create config with all required fields from services', async () => {
+      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('session-789');
+      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-456');
 
-      expect(config.context.contentId).toBe('content-123');
-      expect(config.context.uid).toBe('user-456');
+      const config = await service.createConfig(mockMetadata);
+
       expect(config.context.sid).toBe('session-789');
-      expect(config.metadata.name).toBe('Test EPUB');
-      expect(config.metadata.artifactUrl).toBe('https://example.com/book.epub');
+      expect(config.context.uid).toBe('user-456');
+      expect(config.context.did).toBe('device-123');
+      expect(config.context.channel).toBe('test-channel-456');
+      expect(config.metadata).toEqual(mockMetadata);
     });
 
-    it('should use anonymous for uid when not provided and auth service returns null', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub'
-      );
+    it('should use anonymous for uid when not available', async () => {
+      vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
+
+      const config = await service.createConfig(mockMetadata);
 
       expect(config.context.uid).toBe('anonymous');
+    });
+
+    it('should generate session ID when not available', async () => {
+      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
+
+      const config = await service.createConfig(mockMetadata);
+
       expect(config.context.sid).toMatch(/^session-\d+$/);
+    });
+
+    it('should fetch channel from organization service', async () => {
+      await service.createConfig(mockMetadata);
+
+      expect(mockOrgSearch).toHaveBeenCalledWith({
+        filters: {
+          isTenant: true,
+        },
+      });
+    });
+
+    it('should use random fallback channel when channel is not found', async () => {
+      mockOrgSearch.mockResolvedValue({
+        data: {
+          result: {
+            response: {
+              content: [],
+            },
+          },
+        },
+      });
+
+      const config = await service.createConfig(mockMetadata);
+      
+      // Should use random fallback channel
+      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+    });
+
+    it('should use random fallback channel when org response is invalid', async () => {
+      mockOrgSearch.mockResolvedValue({
+        data: {
+          result: {
+            response: {
+              content: [{ identifier: 'org-123' }], // No channel
+            },
+          },
+        },
+      });
+
+      const config = await service.createConfig(mockMetadata);
+      
+      // Should use random fallback channel
+      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+    });
+
+    it('should use random fallback channel when org service throws error', async () => {
+      mockOrgSearch.mockRejectedValue(new Error('Network error'));
+
+      const config = await service.createConfig(mockMetadata);
+      
+      // Should use random fallback channel
+      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+    });
+
+    it('should use fallback device ID when appCoreService fails', async () => {
+      vi.mocked(appCoreService.getDeviceId).mockRejectedValue(new Error('Device ID error'));
+
+      const config = await service.createConfig(mockMetadata);
+      
+      // Should use fallback device ID
       expect(config.context.did).toMatch(/^device-\d+$/);
     });
 
-    it('should use auth service values when available and not explicitly provided', () => {
-      // Mock auth service to return values
-      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('auth-session-123');
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('auth-user-456');
-
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub'
-      );
-
-      expect(config.context.sid).toBe('auth-session-123');
-      expect(config.context.uid).toBe('auth-user-456');
-      expect(userAuthInfoService.getSessionId).toHaveBeenCalled();
-      expect(userAuthInfoService.getUserId).toHaveBeenCalled();
-    });
-
-    it('should prefer explicitly provided values over auth service values', () => {
-      // Mock auth service to return values
-      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('auth-session-123');
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('auth-user-456');
-
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub',
-        'explicit-user',
-        'explicit-session'
-      );
-
-      expect(config.context.sid).toBe('explicit-session');
-      expect(config.context.uid).toBe('explicit-user');
-    });
-
-    it('should set window.location.origin as host', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub'
-      );
-
-      expect(config.context.host).toBe(window.location.origin);
-    });
-
-    it('should disable all side menu options by default', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub'
-      );
-
-      expect(config.config.sideMenu.showShare).toBe(false);
-      expect(config.config.sideMenu.showDownload).toBe(false);
-      expect(config.config.sideMenu.showReplay).toBe(false);
-      expect(config.config.sideMenu.showExit).toBe(false);
-    });
-
-    it('should set correct metadata defaults', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub'
-      );
-
-      expect(config.metadata.identifier).toBe('content-123');
-      expect(config.metadata.streamingUrl).toBe('');
-      expect(config.metadata.compatibilityLevel).toBe(1);
-      expect(config.metadata.pkgVersion).toBe(1);
-    });
-
-    it('should set correct context defaults', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'content-123',
-        'Test EPUB',
-        'https://example.com/book.epub'
-      );
+    it('should use default mode when not provided', async () => {
+      const config = await service.createConfig(mockMetadata);
 
       expect(config.context.mode).toBe('play');
-      expect(config.context.partner).toEqual([]);
-      expect(config.context.pdata.id).toBe('sunbird.portal');
-      expect(config.context.pdata.ver).toBe('1.0');
-      expect(config.context.pdata.pid).toBe('sunbird-portal');
-      expect(config.context.channel).toBe('sunbird-portal');
-      expect(config.context.tags).toEqual([]);
+    });
+
+    it('should override mode when provided in contextProps', async () => {
+      const config = await service.createConfig(mockMetadata, { mode: 'preview' });
+
+      expect(config.context.mode).toBe('preview');
+    });
+
+    it('should use default cdata when not provided', async () => {
+      const config = await service.createConfig(mockMetadata);
+
+      expect(config.context.cdata).toEqual([]);
+    });
+
+    it('should override cdata when provided in contextProps', async () => {
+      const cdata = [{ id: 'test', type: 'course' }];
+      const config = await service.createConfig(mockMetadata, { cdata });
+
+      expect(config.context.cdata).toEqual(cdata);
+    });
+
+    it('should use default contextRollup with channel when not provided', async () => {
+      const config = await service.createConfig(mockMetadata);
+
+      expect(config.context.contextRollup).toEqual({
+        l1: 'test-channel-456',
+      });
+    });
+
+    it('should override contextRollup when provided in contextProps', async () => {
+      const contextRollup = { l1: 'custom-channel' };
+      const config = await service.createConfig(mockMetadata, { contextRollup });
+
+      expect(config.context.contextRollup).toEqual(contextRollup);
+    });
+
+    it('should use default objectRollup when not provided', async () => {
+      const config = await service.createConfig(mockMetadata);
+
+      expect(config.context.objectRollup).toEqual({});
+    });
+
+    it('should override objectRollup when provided in contextProps', async () => {
+      const objectRollup = { l1: 'test-object' };
+      const config = await service.createConfig(mockMetadata, { objectRollup });
+
+      expect(config.context.objectRollup).toEqual(objectRollup);
+    });
+
+    it('should set fixed pdata values', async () => {
+      const config = await service.createConfig(mockMetadata);
+
+      expect(config.context.pdata).toEqual({
+        id: 'sunbird.portal',
+        ver: '3.2.12',
+        pid: 'sunbird-portal.contentplayer',
+      });
+    });
+
+    it('should set default values for timeDiff, host, and endpoint', async () => {
+      const config = await service.createConfig(mockMetadata);
+
       expect(config.context.timeDiff).toBe(0);
+      expect(config.context.host).toBe('');
       expect(config.context.endpoint).toBe('');
+    });
+
+    it('should set empty config object', async () => {
+      const config = await service.createConfig(mockMetadata);
+
+      expect(config.config).toEqual({});
+    });
+
+    it('should pass metadata as-is without modifications', async () => {
+      const config = await service.createConfig(mockMetadata);
+
+      expect(config.metadata).toBe(mockMetadata);
+      expect(config.metadata).toEqual(mockMetadata);
+    });
+
+    it('should call appCoreService.getDeviceId', async () => {
+      await service.createConfig(mockMetadata);
+
+      expect(appCoreService.getDeviceId).toHaveBeenCalled();
     });
   });
 
   describe('createElement', () => {
-    it('should create a sunbird-epub-player element', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'test-id',
-        'Test',
-        '/test.epub'
-      );
-      
+    it('should create sunbird-epub-player element', async () => {
+      const config = await service.createConfig(mockMetadata);
       const element = service.createElement(config);
-      
+
       expect(element.tagName.toLowerCase()).toBe('sunbird-epub-player');
-      expect(element.getAttribute('data-player-id')).toBe('test-id');
-      expect(element.getAttribute('player-config')).toBeTruthy();
     });
 
-    it('should set player-config attribute with JSON config', () => {
-      const config = EpubPlayerService.createDefaultConfig(
-        'test-id',
-        'Test',
-        '/test.epub'
-      );
-      
+    it('should set player-config attribute with JSON config', async () => {
+      const config = await service.createConfig(mockMetadata);
       const element = service.createElement(config);
+
       const configAttr = element.getAttribute('player-config');
-      
       expect(configAttr).toBeTruthy();
+      
       const parsedConfig = JSON.parse(configAttr!);
-      expect(parsedConfig.metadata.identifier).toBe('test-id');
+      expect(parsedConfig.metadata.identifier).toBe('content-123');
+    });
+
+    it('should set data-player-id attribute from metadata identifier', async () => {
+      const config = await service.createConfig(mockMetadata);
+      const element = service.createElement(config);
+
+      expect(element.getAttribute('data-player-id')).toBe('content-123');
     });
   });
 
   describe('attachEventListeners', () => {
-    it('should attach playerEvent listener', () => {
-      const config = EpubPlayerService.createDefaultConfig('test', 'Test', '/test.epub');
+    it('should attach playerEvent listener', async () => {
+      const config = await service.createConfig(mockMetadata);
       const element = service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
 
       const event = new CustomEvent('playerEvent', {
-        detail: { eid: 'START', data: {} }
+        detail: { eid: 'START', data: {} },
       });
       element.dispatchEvent(event);
 
@@ -185,47 +286,74 @@ describe('EpubPlayerService', () => {
       expect(callback.mock.calls[0]?.[0].type).toBe('START');
     });
 
-    it('should include playerId and timestamp in event', () => {
-      const config = EpubPlayerService.createDefaultConfig('test-123', 'Test', '/test.epub');
+    it('should attach telemetryEvent listener', async () => {
+      const config = await service.createConfig(mockMetadata);
+      const element = service.createElement(config);
+      const telemetryCallback = vi.fn();
+
+      service.attachEventListeners(element, undefined, telemetryCallback);
+
+      const event = new CustomEvent('telemetryEvent', {
+        detail: { event: 'IMPRESSION' },
+      });
+      element.dispatchEvent(event);
+
+      expect(telemetryCallback).toHaveBeenCalledWith({ event: 'IMPRESSION' });
+    });
+
+    it('should include playerId and timestamp in player event', async () => {
+      const config = await service.createConfig(mockMetadata);
       const element = service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
 
       const event = new CustomEvent('playerEvent', {
-        detail: { eid: 'LOADED' }
+        detail: { eid: 'LOADED' },
       });
       element.dispatchEvent(event);
 
-      expect(callback).toHaveBeenCalled();
       const eventData = callback.mock.calls[0]?.[0];
-      expect(eventData?.playerId).toBe('test-123');
+      expect(eventData?.playerId).toBe('content-123');
       expect(eventData?.timestamp).toBeGreaterThan(0);
     });
 
-    it('should be idempotent - calling multiple times should not create duplicate listeners', () => {
-      const config = EpubPlayerService.createDefaultConfig('test', 'Test', '/test.epub');
+    it('should handle events without eid', async () => {
+      const config = await service.createConfig(mockMetadata);
       const element = service.createElement(config);
       const callback = vi.fn();
 
-      // Attach listeners multiple times
+      service.attachEventListeners(element, callback);
+
+      const event = new CustomEvent('playerEvent', {
+        detail: { data: {} },
+      });
+      element.dispatchEvent(event);
+
+      expect(callback.mock.calls[0]?.[0].type).toBe('unknown');
+    });
+
+    it('should be idempotent - calling multiple times should not create duplicate listeners', async () => {
+      const config = await service.createConfig(mockMetadata);
+      const element = service.createElement(config);
+      const callback = vi.fn();
+
       service.attachEventListeners(element, callback);
       service.attachEventListeners(element, callback);
       service.attachEventListeners(element, callback);
 
       const event = new CustomEvent('playerEvent', {
-        detail: { eid: 'START' }
+        detail: { eid: 'START' },
       });
       element.dispatchEvent(event);
 
-      // Should only be called once, not three times
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('removeEventListeners', () => {
-    it('should remove event listeners', () => {
-      const config = EpubPlayerService.createDefaultConfig('test', 'Test', '/test.epub');
+    it('should remove event listeners', async () => {
+      const config = await service.createConfig(mockMetadata);
       const element = service.createElement(config);
       const callback = vi.fn();
 
@@ -233,113 +361,18 @@ describe('EpubPlayerService', () => {
       service.removeEventListeners(element);
 
       const event = new CustomEvent('playerEvent', {
-        detail: { eid: 'START' }
+        detail: { eid: 'START' },
       });
       element.dispatchEvent(event);
 
       expect(callback).not.toHaveBeenCalled();
     });
-  });
 
-  describe('isValidEpubUrl', () => {
-    it('should return true for valid EPUB URLs', () => {
-      expect(EpubPlayerService.isValidEpubUrl('https://example.com/book.epub')).toBe(true);
-      expect(EpubPlayerService.isValidEpubUrl('http://example.com/path/to/book.EPUB')).toBe(true);
-      expect(EpubPlayerService.isValidEpubUrl('https://example.com/book.ePub')).toBe(true);
-    });
+    it('should not throw error when removing listeners from element without listeners', async () => {
+      const config = await service.createConfig(mockMetadata);
+      const element = service.createElement(config);
 
-    it('should return true for relative paths', () => {
-      expect(EpubPlayerService.isValidEpubUrl('/sample-epub.epub')).toBe(true);
-      expect(EpubPlayerService.isValidEpubUrl('./books/sample.epub')).toBe(true);
-      expect(EpubPlayerService.isValidEpubUrl('/path/to/book.EPUB')).toBe(true);
-    });
-
-    it('should return false for empty string', () => {
-      expect(EpubPlayerService.isValidEpubUrl('')).toBe(false);
-    });
-
-    it('should return false for non-epub files', () => {
-      expect(EpubPlayerService.isValidEpubUrl('https://example.com/book.pdf')).toBe(false);
-      expect(EpubPlayerService.isValidEpubUrl('/sample.pdf')).toBe(false);
-      expect(EpubPlayerService.isValidEpubUrl('./books/sample.txt')).toBe(false);
-    });
-
-    it('should return false for invalid URLs without path prefix', () => {
-      expect(EpubPlayerService.isValidEpubUrl('not-a-url.epub')).toBe(false);
-      expect(EpubPlayerService.isValidEpubUrl('book.epub')).toBe(false);
-    });
-
-    it('should handle URLs with query parameters', () => {
-      expect(EpubPlayerService.isValidEpubUrl('https://example.com/book.epub?version=1')).toBe(true);
-    });
-
-    it('should handle URLs with fragments', () => {
-      expect(EpubPlayerService.isValidEpubUrl('https://example.com/book.epub#chapter1')).toBe(true);
-    });
-  });
-
-  describe('handlePlayerEvent', () => {
-    it('should structure player events correctly', () => {
-      const mockEvent = {
-        eid: 'START',
-        data: { timestamp: 123456 },
-      };
-
-      const result = EpubPlayerService.handlePlayerEvent(mockEvent);
-
-      expect(result.type).toBe('START');
-      expect(result.data).toEqual(mockEvent);
-    });
-
-    it('should handle events without eid', () => {
-      const mockEvent = {
-        data: { timestamp: 123456 },
-      };
-
-      const result = EpubPlayerService.handlePlayerEvent(mockEvent);
-
-      expect(result.type).toBe('unknown');
-      expect(result.data).toEqual(mockEvent);
-    });
-
-    it('should handle null event', () => {
-      const result = EpubPlayerService.handlePlayerEvent(null);
-
-      expect(result.type).toBe('unknown');
-      expect(result.data).toBeNull();
-    });
-
-    it('should handle undefined event', () => {
-      const result = EpubPlayerService.handlePlayerEvent(undefined);
-
-      expect(result.type).toBe('unknown');
-      expect(result.data).toBeUndefined();
-    });
-
-    it('should handle different event types', () => {
-      const eventTypes = ['START', 'LOADED', 'ERROR', 'END', 'INTERACT'];
-
-      eventTypes.forEach(type => {
-        const mockEvent = { eid: type, data: {} };
-        const result = EpubPlayerService.handlePlayerEvent(mockEvent);
-        expect(result.type).toBe(type);
-      });
-    });
-
-    it('should preserve all event data', () => {
-      const mockEvent = {
-        eid: 'INTERACT',
-        ver: '1.0',
-        edata: { type: 'CLICK', id: 'button-1' },
-        metaData: { duration: 100 },
-      };
-
-      const result = EpubPlayerService.handlePlayerEvent(mockEvent);
-
-      expect(result.data).toEqual(mockEvent);
-      expect(result.data.ver).toBe('1.0');
-      expect(result.data.edata).toEqual({ type: 'CLICK', id: 'button-1' });
-      expect(result.data.metaData).toEqual({ duration: 100 });
+      expect(() => service.removeEventListeners(element)).not.toThrow();
     });
   });
 });
