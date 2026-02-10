@@ -12,11 +12,11 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/sheet";
 import PageLoader from "@/components/PageLoader";
 import Footer from "@/components/Footer";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import HomeSidebar from "@/components/HomeSidebar";
-import HomeStatsCards from "@/components/HomeStatsCards";
-import HomeContinueLearning from "@/components/HomeContinueLearning";
-import HomeInProgressGrid from "@/components/HomeInProgressGrid";
-import HomeRecommendedSection from "@/components/HomeRecommendedSection";
+import HomeSidebar from "@/components/home/HomeSidebar";
+import HomeStatsCards from "@/components/home/HomeStatsCards";
+import HomeContinueLearning from "@/components/home/HomeContinueLearning";
+import HomeInProgressGrid from "@/components/home/HomeInProgressGrid";
+import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
