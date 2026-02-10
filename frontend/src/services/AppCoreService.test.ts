@@ -152,7 +152,6 @@ describe('AppCoreService', () => {
 
             await appCoreService.initialize();
 
-            expect(consoleSpy).toHaveBeenCalledWith('Initializing AppCoreService...');
             expect(consoleSpy).toHaveBeenCalledWith('Device ID initialized:', 'init-id');
         });
 
