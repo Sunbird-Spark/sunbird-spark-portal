@@ -6,7 +6,7 @@ const {
     mockGenerateAuthUrl,
     mockGetToken,
     mockVerifyIdToken,
-    mockObtainDirectly,
+    mockObtainFromClientCredentials,
     mockStoreGrant,
     mockAuthenticated,
     mockOAuth2Constructor,
@@ -15,7 +15,7 @@ const {
     const mockGenerateAuthUrl = vi.fn();
     const mockGetToken = vi.fn();
     const mockVerifyIdToken = vi.fn();
-    const mockObtainDirectly = vi.fn();
+    const mockObtainFromClientCredentials = vi.fn();
     const mockStoreGrant = vi.fn();
     const mockAuthenticated = vi.fn();
     const mockOAuth2Constructor = vi.fn(function () {
@@ -34,7 +34,7 @@ const {
         mockGenerateAuthUrl,
         mockGetToken,
         mockVerifyIdToken,
-        mockObtainDirectly,
+        mockObtainFromClientCredentials,
         mockStoreGrant,
         mockAuthenticated,
         mockOAuth2Constructor,
@@ -58,7 +58,7 @@ vi.mock('google-auth-library', () => ({
 vi.mock('../auth/keycloakManager.js', () => ({
     getKeycloakClient: vi.fn(() => ({
         grantManager: {
-            obtainDirectly: mockObtainDirectly
+            obtainFromClientCredentials: mockObtainFromClientCredentials
         },
         storeGrant: mockStoreGrant,
         authenticated: mockAuthenticated
@@ -101,7 +101,7 @@ describe('GoogleAuthService - Core OAuth', () => {
         mockGenerateAuthUrl.mockReset();
         mockGetToken.mockReset();
         mockVerifyIdToken.mockReset();
-        mockObtainDirectly.mockReset();
+        mockObtainFromClientCredentials.mockReset();
         mockStoreGrant.mockReset();
         mockAuthenticated.mockReset();
 
@@ -226,7 +226,7 @@ describe('GoogleAuthService - Core OAuth', () => {
         };
 
         beforeEach(() => {
-            mockObtainDirectly.mockResolvedValue(mockGrant);
+            mockObtainFromClientCredentials.mockResolvedValue(mockGrant);
             mockAuthenticated.mockResolvedValue(undefined);
         });
 
@@ -234,20 +234,20 @@ describe('GoogleAuthService - Core OAuth', () => {
             const result = await createSession('test@example.com', mockRequest as Request, mockResponse as Response);
 
             expect(result).toEqual({ access_token: 'test-access-token', expires_at: 1234567890 });
-            expect(mockObtainDirectly).toHaveBeenCalledWith('test@example.com', '');
+            expect(mockObtainFromClientCredentials).toHaveBeenCalled();
             expect(mockStoreGrant).toHaveBeenCalledWith(mockGrant, mockRequest, mockResponse);
             expect(mockRequest.kauth).toEqual({ grant: mockGrant });
         });
 
         it('should throw error when session creation fails', async () => {
-            mockObtainDirectly.mockRejectedValue(new Error('Grant failed'));
+            mockObtainFromClientCredentials.mockRejectedValue(new Error('Grant failed'));
             await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
                 .rejects.toThrow('Grant failed');
             expect(logger.error).toHaveBeenCalled();
         });
 
         it('should throw error when grant token is invalid', async () => {
-            mockObtainDirectly.mockResolvedValue({ access_token: null });
+            mockObtainFromClientCredentials.mockResolvedValue({ access_token: null });
             await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
                 .rejects.toThrow('INVALID_GRANT_TOKEN');
         });

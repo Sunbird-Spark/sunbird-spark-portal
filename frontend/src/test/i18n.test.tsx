@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import i18n from '../configs/i18n';
 import { useAppI18n } from '../hooks/useAppI18n';
-import SimpleLanguageSwitcher from '../components/SimpleLanguageSwitcher';
+import SimpleLanguageSwitcher from '../components/common/SimpleLanguageSwitcher';
 
 // Mock component to test the hook
 function TestComponent() {

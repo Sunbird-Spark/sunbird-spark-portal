@@ -21,6 +21,7 @@ import { checkHealth } from './controllers/healthController.js';
 import { userProxy } from './proxies/userProxy.js';
 import helmet from 'helmet';
 import authRoutes from './routes/userAuthInfoRoutes.js';
+import { getAppInfo } from './controllers/appInfoController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,6 +35,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.get('/health', checkHealth);
+app.get('/app/v1/info', getAppInfo);
 
 // Anonymous session middleware for API routes only
 const anonymousSessionMiddleware = [

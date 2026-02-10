@@ -75,14 +75,15 @@ describe('Kong Proxy Integration', () => {
         mockKongServer = express();
         mockKongServer.use(express.json());
 
-        mockKongServer.get('/api/unauthorized', (req: Request, res: Response) => {
+        mockKongServer.get('/unauthorized', (req: Request, res: Response) => {
             res.status(401).json({ success: false });
         });
-        mockKongServer.get('/api/forbidden', (req: Request, res: Response) => {
+        mockKongServer.get('/forbidden', (req: Request, res: Response) => {
             res.status(403).json({ success: false });
         });
 
-        mockKongServer.all('/api/*rest', (req: Request, res: Response) => {
+        // Catch-all route for other requests
+        mockKongServer.use((req: Request, res: Response) => {
             res.status(200).json({
                 success: true,
                 method: req.method,
@@ -140,13 +141,13 @@ describe('Kong Proxy Integration', () => {
         vi.resetModules();
     });
 
-    it('should proxy request and rewrite /portal to /api', async () => {
+    it('should proxy request and rewrite /portal to /', async () => {
         const response = await request(app)
             .get('/portal/user/v1/read/user123')
             .expect(200);
 
         expect(response.body.success).toBe(true);
-        expect(response.body.path).toMatch(/^\/api/);
+        expect(response.body.path).toBe('/user/v1/read/user123');
     });
 
     it('should forward session token in headers when authenticated', async () => {
