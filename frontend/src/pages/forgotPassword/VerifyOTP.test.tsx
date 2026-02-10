@@ -6,7 +6,7 @@ import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 
 // Mock all external dependencies
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));
-vi.mock('@/components/AuthLayout', () => ({ AuthLayout: ({ children }: any) => <div data-testid="auth-layout">{children}</div> }));
+vi.mock('@/components/AuthLayout', () => ({ AuthLayout: ({ children }: { children: React.ReactNode }) => <div data-testid="auth-layout">{children}</div> }));
 vi.mock('react-google-recaptcha', () => ({
     default: React.forwardRef((props: any, ref: any) => {
         React.useImperativeHandle(ref, () => ({
@@ -18,18 +18,18 @@ vi.mock('react-google-recaptcha', () => ({
 }));
 vi.mock('@/utils/validation-utils', () => ({ OTP_REGEX: /^\d{6}$/ }));
 vi.mock('./ForgotPasswordComponents', () => ({
-    Header: ({ title, subtitle }: any) => (
+    Header: ({ title, subtitle }: { title: string, subtitle: string }) => (
         <div>
             <h1>{title}</h1>
             <p>{subtitle}</p>
         </div>
     ),
-    PrimaryButton: ({ children, onClick, disabled, loading }: any) => (
+    PrimaryButton: ({ children, onClick, disabled, loading }: { children: React.ReactNode, onClick?: () => void, disabled?: boolean, loading?: boolean }) => (
         <button data-testid="submit-btn" onClick={onClick} disabled={disabled || loading}>
             {loading ? 'Loading' : children}
         </button>
     ),
-    OTPInput: ({ otp, setOtp }: any) => (
+    OTPInput: ({ _otp, setOtp }: { _otp: string[], setOtp: (otp: string[]) => void }) => (
         <button data-testid="fill-otp" onClick={() => setOtp(['1', '2', '3', '4', '5', '6'])}>Fill OTP</button>
     )
 }));

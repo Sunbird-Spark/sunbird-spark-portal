@@ -1,4 +1,7 @@
 {
+  "header": {
+    "search": "Buscar conteúdo"
+  },
   "loading": "Carregando...",
   "error": "Ocorreu um erro",
   "success": "Sucesso",
@@ -99,5 +102,13 @@
   "joinThousands": "Junte-se a milhares de profissionais que avançaram em suas carreiras com nossos programas de treinamento abrangentes.",
   "certifiedProfessionals": "Formação Profissional Certificada",
   "watchDemo": "Assistir demonstração",
-  "certifications": "Certificações"
+  "certifications": "Certificações",
+  "footer": {
+    "products": "Produtos",
+    "resources": "Recursos",
+    "videos": "Vídeos",
+    "company": "Empresa",
+    "terms": "Termos e Condições",
+    "privacy": "Política de Privacidade"
+  }
 }

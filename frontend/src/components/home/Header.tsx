@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { FiMenu, FiX, FiSearch, FiGlobe, FiChevronDown } from "react-icons/fi";
+import { useState } from "react";
+import { FiMenu, FiX, FiSearch, FiChevronDown, FiBell } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
-import { Input } from "@/components/common/Input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,214 +8,153 @@ import {
   DropdownMenuTrigger,
 } from "@/components/common/DropdownMenu";
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
-import { useAppI18n, type LanguageCode } from "@/hooks/useAppI18n";
-import { NotificationPopover } from "../common/NotificationPopover";
-
-interface Notification {
-  id: string;
-  message: string;
-  date: string;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    message: "COURSE_TEST_1 has been assigned to Group 1312 group by Content Creator",
-    date: "Tue, 13 January 3:12",
-  },
-  {
-    id: "2",
-    message: "You have been added to Group 1312 group by Content Creator",
-    date: "Tue, 13 January 2:48",
-  },
-];
+import translationIcon from "@/assets/translation_icon.svg";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
-  const { t, languages, currentLanguage, changeLanguage, dir } = useAppI18n();
-
-  const handleDeleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { t, languages, currentCode, changeLanguage } = useAppI18n();
 
   const navLinks = [
-    { label: t("courses"), href: "/courses" },
-    { label: t("categories"), href: "#categories" },
+    { label: t("home"), href: "/" },
+    { label: t("explore"), href: "/explore" },
     { label: t("about"), href: "#about" },
     { label: t("contact"), href: "#contact" },
   ];
 
-  useEffect(() => {
-    document.documentElement.dir = dir;
-    document.documentElement.lang = currentLanguage.code;
-  }, [currentLanguage, dir]);
-
-  const handleLanguageChange = (code: string) => {
-    changeLanguage(code as LanguageCode);
+  const isActive = (href: string) => {
+    if (href === "/") return location.pathname === "/";
+    if (href === "/explore") return location.pathname === "/explore";
+    return location.pathname.startsWith(href) && href !== "/";
   };
 
+
+
   return (
-    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border shadow-sm">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 pr-[3.5rem] pl-[0.8125rem]">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-16 md:h-[4.5rem] pl-[3.75rem]" style={{
+          paddingLeft: '0',
+          marginLeft: '0',
+          paddingRight: '2.1875rem',
+        }}>
           {/* Logo */}
-          <a href="/" className="flex items-center">
+          <Link to="/" className="flex items-center md:pl-[1.875rem]">
             <img
               src={sunbirdLogo}
-              alt="Sunbird Spark"
-              className="h-10 w-auto"
+              alt="Sunbird"
+              className="h-8 w-auto"
+              style={{ paddingRight: 0, width: '12.1875rem' }}
             />
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-8" style={{
+            paddingRight: '5rem',
+          }}>
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
-                href={link.href}
-                className="text-foreground/80 hover:text-primary font-medium transition-colors"
+                to={link.href}
+                className={`text-[0.9375rem] transition-colors ${isActive(link.href)
+                  ? 'text-sunbird-brick font-medium'
+                  : 'text-gray-900 font-normal hover:text-sunbird-brick'
+                  }`}
               >
-                {link.label}
-              </a>
+                <span className="flex items-center gap-1">
+                  {link.label}
+                  {link.href === "/explore" && <FiChevronDown className={`w-4 h-4 pl-[0.3125rem] mt-[0.1875rem] ${isActive(link.href) ? 'text-sunbird-brick' : 'text-gray-400'}`} />}
+                </span>
+              </Link>
             ))}
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Search */}
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder={t("searchPlaceholder")}
-                className="pl-10 w-56 bg-muted/50 border-border focus:bg-card focus:ring-2 focus:ring-primary/30"
-              />
+            <div className="flex items-center gap-1">
+              {/* Search */}
+              <button className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors" onClick={() => { navigate("/search") }}>
+                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" />
+              </button>
+
+              {/* Notifications - Filled Bell */}
+              <button className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors">
+                <FiBell className="w-[1.3125rem] h-[1.3125rem] fill-sunbird-brick" />
+              </button>
+
+              {/* Language Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1 p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors">
+                    <img src={translationIcon} alt="Language" width={21} height={21} />
+                    <FiChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[9.375rem] bg-white z-50">
+                  {languages.map((lang) => (
+                    <DropdownMenuItem
+                      key={lang.code}
+                      className={`cursor-pointer hover:bg-gray-50 ${currentCode === lang.code ? 'font-medium text-sunbird-brick' : ''
+                        }`}
+                      onClick={() => changeLanguage(lang.code)}
+                    >
+                      {lang.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
-            {/* Notifications */}
-            <NotificationPopover
-              notifications={notifications}
-              onDelete={handleDeleteNotification}
-              isOpen={isNotificationOpen}
-              onOpenChange={setIsNotificationOpen}
-            />
-
-            {/* Language Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <FiGlobe className="w-4 h-4" />
-                  <span className="hidden lg:inline">{currentLanguage.label}</span>
-                  <FiChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-card border-border">
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className={currentLanguage.code === lang.code ? "bg-muted" : ""}
-                  >
-                    <span className="mr-2">{lang.label}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <a href="/profile">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                {t("login")}
-              </Button>
-            </a>
+            {/* Login Button */}
+            <Button
+              onClick={() => navigate("/profile")}
+              className="flex items-center justify-center w-[4.5rem] h-[1.875rem] bg-sunbird-brick text-white rounded-[0.375rem] text-sm font-medium p-0"
+            >
+              {t("login")}
+            </Button>
           </div>
 
-          {/* Mobile Actions */}
-          <div className="flex items-center gap-2 md:hidden">
-            {/* Mobile Notifications */}
-            <NotificationPopover
-              notifications={notifications}
-              onDelete={handleDeleteNotification}
-              isMobile
-            />
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2 text-sunbird-brick"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        </div>
+      </div>
 
-            {/* Mobile Language Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <FiGlobe className="w-5 h-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-card border-border">
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className={currentLanguage.code === lang.code ? "bg-muted" : ""}
-                  >
-                    <span className="mr-2">{lang.label}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-gray-100">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={`block text-sm font-medium ${isActive(link.href) ? 'text-sunbird-brick' : 'text-gray-600'
+                  }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <hr />
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              onClick={() => {
+                setIsMenuOpen(false);
+                navigate("/profile");
+              }}
+              className="block w-full text-center bg-sunbird-brick text-white px-4 py-2 rounded-lg text-sm font-medium"
             >
-              <FiSearch className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
+              {t("login")}
             </Button>
           </div>
         </div>
-
-        {/* Mobile Search */}
-        {isSearchOpen && (
-          <div className="md:hidden pb-4 animate-fade-in">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder={t("searchPlaceholder")}
-                className="pl-10 w-full bg-muted/50"
-                autoFocus
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <nav className="md:hidden pb-4 animate-fade-in">
-            <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="px-4 py-3 text-foreground/80 hover:text-primary hover:bg-muted/50 rounded-lg font-medium transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.label}
-                </a>
-              ))}
-              <div className="mt-4 px-4">
-                <a href="/profile" className="block">
-                  <Button className="w-full bg-primary hover:bg-primary/90">
-                    {t("login")}
-                  </Button>
-                </a>
-              </div>
-            </div>
-          </nav>
-        )}
-      </div>
+      )}
     </header>
   );
 };

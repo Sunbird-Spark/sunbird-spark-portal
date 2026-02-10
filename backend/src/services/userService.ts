@@ -134,7 +134,7 @@ export const createUserWithEmail = async (googleUser: any, client_id: string, re
     const response = await axios.post(url, {
         request: {
             firstName: googleUser.name,
-            emailId: googleUser.emailId,
+            email: googleUser.emailId,
             emailVerified: true
         },
         params: {

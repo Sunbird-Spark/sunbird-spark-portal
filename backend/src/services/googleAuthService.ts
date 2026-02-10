@@ -12,7 +12,6 @@ const keycloakGoogleConfig = {
     'auth-server-url': envConfig?.DOMAIN_URL + '/auth',
     resource: envConfig?.KEYCLOAK_GOOGLE_CLIENT_ID,
     'confidential-port': 0,
-    'public-client': true,
     'ssl-required': 'external' as const,
     credentials: {
         secret: envConfig?.KEYCLOAK_GOOGLE_CLIENT_SECRET
@@ -25,10 +24,7 @@ export const createSession = async (emailId: string, req: Request, res: Response
     let grant;
 
     try {
-        grant = await keycloakGoogle.grantManager.obtainDirectly(
-            emailId,
-            ''
-        );
+        grant = await keycloakGoogle.grantManager.obtainFromClientCredentials();
     } catch (error) {
         logger.error({
             msg: 'googleOauthHelper:createSession failed',
@@ -57,7 +53,7 @@ export const createSession = async (emailId: string, req: Request, res: Response
         };
     } catch (error) {
         logger.error({
-            msg: 'googleOauthHelper:createSession failed',
+            msg: 'googleOauthHelper:createSession failed during authentication',
             error
         });
         throw error;
