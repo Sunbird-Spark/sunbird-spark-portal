@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
-import Avatar from "react-avatar";
 import { useNavigate } from "react-router-dom";
 import { FiSearch, FiBell, FiMenu, FiChevronDown, FiChevronLeft, FiUser, FiLogOut } from "react-icons/fi";
-import { Input } from "@/components/input";
+import { Input } from "@/components/common/Input";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/dropdown-menu";
-import { Sheet, SheetContent, SheetTitle } from "@/components/sheet";
-import PageLoader from "@/components/PageLoader";
-import Footer from "@/components/Footer";
+} from "@/components/common/DropdownMenu";
+import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
+import PageLoader from "@/components/common/PageLoader";
+import Footer from "@/components/home/Footer";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { LanguageConfig } from "@/configs/languages";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import ProfileCard from "@/components/profile/ProfileCard"
 import PersonalInformation from "@/components/profile/PersonalInformation"
@@ -39,8 +37,6 @@ const Profile = () => {
         }, 600);
         return () => clearTimeout(timer);
     }, []);
-
-    const handleLanguageChange = (lang: LanguageConfig) => changeLanguage(lang.code);
 
     if (isLoading) {
         return <PageLoader message="Loading your profile..." />;
