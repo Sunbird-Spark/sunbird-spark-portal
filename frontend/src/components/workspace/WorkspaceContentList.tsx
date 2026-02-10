@@ -1,0 +1,164 @@
+import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiSend, FiBook, FiFileText, FiHelpCircle, FiFolder, FiClock } from "react-icons/fi";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/common/DropdownMenu";
+import { Button } from "@/components/common/Button";
+import { cn, formatTimeAgo } from "@/lib/utils";
+import { type WorkspaceItem, type ContentType, type ContentStatus } from "@/types";
+
+interface WorkspaceContentListProps {
+  items: WorkspaceItem[];
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  onView: (id: string) => void;
+  onSubmitReview: (id: string) => void;
+}
+
+const typeIcons: Record<ContentType, typeof FiBook> = {
+  course: FiBook,
+  content: FiFileText,
+  quiz: FiHelpCircle,
+  collection: FiFolder,
+};
+
+const typeColors: Record<ContentType, string> = {
+  course: 'text-sunbird-ink bg-sunbird-wave/10',
+  content: 'text-sunbird-brick bg-sunbird-ginger/10',
+  quiz: 'text-sunbird-lavender bg-sunbird-lavender/10',
+  collection: 'text-sunbird-forest bg-sunbird-moss/10',
+};
+
+const statusConfig: Record<ContentStatus, { label: string; bg: string; text: string }> = {
+  draft: { label: 'Draft', bg: 'bg-muted', text: 'text-muted-foreground' },
+  review: { label: 'In Review', bg: 'bg-sunbird-sunflower/20', text: 'text-sunbird-brick' },
+  published: { label: 'Published', bg: 'bg-sunbird-moss/15', text: 'text-sunbird-forest' },
+};
+
+const WorkspaceContentList = ({
+  items,
+  onEdit,
+  onDelete,
+  onView,
+  onSubmitReview,
+}: WorkspaceContentListProps) => {
+  return (
+    <div className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border">
+      {/* Table Header */}
+      <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-muted/50 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide font-['Rubik']">
+        <div className="col-span-5 sm:col-span-4">Title</div>
+        <div className="col-span-2 hidden sm:block">Type</div>
+        <div className="col-span-2">Status</div>
+        <div className="col-span-2 hidden md:block">Modified</div>
+        <div className="col-span-3 sm:col-span-2 text-right">Actions</div>
+      </div>
+
+      {/* Table Body */}
+      <div className="divide-y divide-border">
+        {items.map((item) => {
+          const TypeIcon = typeIcons[item.type];
+          const status = statusConfig[item.status];
+          const timeAgo = formatTimeAgo(new Date(item.updatedAt));
+
+          return (
+            <div
+              key={item.id}
+              className="grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
+            >
+              {/* Title with thumbnail */}
+              <div className="col-span-5 sm:col-span-4 flex items-center gap-3 min-w-0">
+                <div className="w-12 h-9 rounded-lg bg-muted overflow-hidden shrink-0">
+                  {item.thumbnail ? (
+                    <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className={cn("w-full h-full flex items-center justify-center", typeColors[item.type])}>
+                      <TypeIcon className="w-4 h-4" />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h4 className="font-medium text-foreground text-sm font-['Rubik'] truncate">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground font-['Rubik'] truncate sm:hidden">
+                    {item.type}
+                  </p>
+                </div>
+              </div>
+
+              {/* Type */}
+              <div className="col-span-2 hidden sm:flex items-center gap-2">
+                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", typeColors[item.type])}>
+                  <TypeIcon className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-sm text-foreground font-['Rubik'] capitalize">{item.type}</span>
+              </div>
+
+              {/* Status */}
+              <div className="col-span-2">
+                <span className={cn("inline-flex px-2.5 py-1 rounded-full text-xs font-medium font-['Rubik']", status.bg, status.text)}>
+                  {status.label}
+                </span>
+              </div>
+
+              {/* Modified */}
+              <div className="col-span-2 hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-['Rubik']">
+                <FiClock className="w-3.5 h-3.5" />
+                <span>{timeAgo}</span>
+              </div>
+
+              {/* Actions */}
+              <div className="col-span-3 sm:col-span-2 flex items-center justify-end gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-sunbird-wave opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => onView(item.id)}
+                >
+                  <FiEye className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-sunbird-ginger opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => onEdit(item.id)}
+                >
+                  <FiEdit className="w-4 h-4" />
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                      <FiMoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
+                    <DropdownMenuItem onClick={() => onView(item.id)} className="font-['Rubik'] cursor-pointer gap-2">
+                      <FiEye className="w-4 h-4" /> View
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-['Rubik'] cursor-pointer gap-2">
+                      <FiEdit className="w-4 h-4" /> Edit
+                    </DropdownMenuItem>
+                    {item.status === 'draft' && (
+                      <DropdownMenuItem onClick={() => onSubmitReview(item.id)} className="font-['Rubik'] cursor-pointer gap-2 text-sunbird-wave">
+                        <FiSend className="w-4 h-4" /> Submit for Review
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-['Rubik'] cursor-pointer gap-2 text-destructive focus:text-destructive">
+                      <FiTrash2 className="w-4 h-4" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default WorkspaceContentList;

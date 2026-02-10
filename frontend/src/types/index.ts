@@ -49,3 +49,19 @@ export interface Notification {
   duration?: number;
   timestamp: Date;
 }
+
+/** Workspace content types – used until API returns same shape */
+export type ContentStatus = 'draft' | 'review' | 'published';
+export type ContentType = 'course' | 'content' | 'quiz' | 'collection';
+
+export interface WorkspaceItem {
+  id: string;
+  title: string;
+  description: string;
+  type: ContentType;
+  status: ContentStatus;
+  thumbnail?: string;
+  createdAt: string;
+  updatedAt: string;
+  author: string;
+}
