@@ -192,14 +192,14 @@ const ProfileLearningList = () => {
                                 {course.status === "completed" ? (
                                     <>
                                         <FiDownload className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
-                                        <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center">
+                                        <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center whitespace-nowrap">
                                             Download Certificate
                                         </span>
                                     </>
                                 ) : (
                                     <>
                                         <FiEye className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
-                                        <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center">
+                                        <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center whitespace-nowrap">
                                             Preview Certificate
                                         </span>
                                     </>

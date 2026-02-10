@@ -1,6 +1,6 @@
 /* Profile Container */
 .profile-container {
-    @apply min-h-screen bg-white flex flex-col;
+    @apply min-h-screen bg-sunbird-gray-f3 flex flex-col;
 }
 
 .profile-main-content {
@@ -277,11 +277,11 @@
 
 /* Custom list items for ProfileLearningList */
 .profile-learning-item {
-    @apply flex flex-col xl:flex-row items-stretch xl:items-center p-4 md:p-5 bg-white border border-gray-100 rounded-[1.25rem] shadow-sm gap-4 xl:gap-6;
+    @apply flex flex-col xl:flex-row items-stretch xl:items-center p-4 md:p-5 bg-white border border-gray-100 rounded-[1.25rem] shadow-sm gap-4 xl:gap-0 xl:justify-start;
 }
 
 .profile-learning-info {
-    @apply flex items-center gap-4 xl:flex-[2.5] min-w-0;
+    @apply flex items-center gap-4 xl:w-[48%] xl:flex-none min-w-0;
 }
 
 .profile-learning-details {
@@ -289,7 +289,7 @@
 }
 
 .profile-learning-title {
-    @apply text-[0.9375rem] md:text-[1.0625rem] font-medium text-foreground leading-snug mb-1 line-clamp-2;
+    @apply text-[0.9375rem] md:text-[1.0625rem] font-medium text-foreground leading-snug mb-1 whitespace-pre-line;
 }
 
 .profile-learning-meta {
@@ -301,13 +301,13 @@
 }
 
 .profile-learning-stats {
-    @apply flex items-center gap-2 xl:flex-[0.8];
+    @apply flex items-center gap-2 xl:w-24 justify-start shrink-0;
 }
 
 .profile-learning-actions {
-    @apply flex items-center justify-start xl:justify-end gap-2 xl:flex-[0.8];
+    @apply flex items-center justify-start xl:justify-end gap-2 xl:w-48 xl:flex-none;
 }
 
 .profile-learning-status {
-    @apply flex justify-end xl:flex-1 xl:justify-center;
+    @apply flex justify-start xl:flex-1 xl:justify-center;
 }
