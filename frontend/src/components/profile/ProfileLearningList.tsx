@@ -188,6 +188,15 @@ const ProfileLearningList = () => {
                         <div className="profile-learning-actions">
                             <button
                                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                                onClick={() => {
+                                    if (course.status === "completed") {
+                                        console.log("Downloading certificate for:", course.title);
+                                        // TODO: Implement actual download logic
+                                    } else {
+                                        console.log("Previewing certificate for:", course.title);
+                                        // TODO: Implement actual preview logic
+                                    }
+                                }}
                             >
                                 {course.status === "completed" ? (
                                     <>

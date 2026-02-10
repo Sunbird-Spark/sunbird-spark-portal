@@ -119,11 +119,10 @@ describe('Profile Page', () => {
         renderProfile();
         await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        const searchBtns = screen.getAllByRole('button');
-        const mobileSearchBtn = searchBtns.find(b => b.className.includes('profile-search-btn-mobile'));
+        const mobileSearchBtn = screen.getByRole('button', { name: /search/i });
 
         expect(mobileSearchBtn).toBeInTheDocument();
-        fireEvent.click(mobileSearchBtn!);
+        fireEvent.click(mobileSearchBtn);
         expect(mockNavigate).toHaveBeenCalledWith('/search');
     });
 });

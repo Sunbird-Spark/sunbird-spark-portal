@@ -41,8 +41,8 @@ const AppRoutes: React.FC = () => {
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes >
-    </AuthProvider >
+      </Routes>
+    </AuthProvider>
   );
 };
 

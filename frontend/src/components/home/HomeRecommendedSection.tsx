@@ -149,11 +149,11 @@ const HomeRecommendedSection = () => {
                                     )}
                                 </div>
                             </div>
-                        </Link >
+                        </Link>
                     )
                 ))}
-            </div >
-        </section >
+            </div>
+        </section>
     );
 };
 
