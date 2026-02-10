@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import Header from "@/components/Header";
-import HeroBanner from "@/components/HeroBanner";
-import FeaturedCourses from "@/components/FeaturedCourses";
-import CategorySection from "@/components/CategorySection";
-import PopularCourses from "@/components/PopularCourses";
-import StatsSection from "@/components/StatsSection";
-import Footer from "@/components/Footer";
-import PageLoader from "@/components/PageLoader";
+import Header from "@/components/home/Header";
+import HeroBanner from "@/components/home/HeroBanner";
+import FeaturedCourses from "@/components/home/FeaturedCourses";
+import CategorySection from "@/components/home/CategorySection";
+import PopularCourses from "@/components/home/PopularCourses";
+import StatsSection from "@/components/home/StatsSection";
+import Footer from "@/components/home/Footer";
+import PageLoader from "@/components/common/PageLoader";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);

@@ -8,8 +8,8 @@ import {
   FiUsers,
   FiTrendingUp
 } from "react-icons/fi";
-import type { Course } from "@/components/CourseCard";
-import type { Category } from "@/components/CategoryCard";
+import type { Course } from "@/components/home/CourseCard";
+import type { Category } from "@/components/home/CategoryCard";
 
 export const categories: Category[] = [
   {

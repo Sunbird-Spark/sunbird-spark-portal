@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppI18n } from './hooks/useAppI18n';
-import SimpleLanguageSwitcher from './components/SimpleLanguageSwitcher';
+import SimpleLanguageSwitcher from './components/common/SimpleLanguageSwitcher';
 
 export default function SimpleApp(): React.JSX.Element {
   const { t, currentLanguage } = useAppI18n();
