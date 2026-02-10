@@ -103,7 +103,7 @@ const Profile = () => {
                                     readOnly
                                     className="pl-4 pr-10 bg-white border-border focus:border-sunbird-ginger focus:ring-sunbird-ginger/20 rounded-[0.5625rem] h-[2.875rem] text-base cursor-pointer placeholder:text-sunbird-obsidian pointer-events-none"
                                 />
-                                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-ginger hover:text-sunbird-brick">
+                                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-brick hover:text-sunbird-brick/80">
                                     <FiSearch className="w-4 h-4" />
                                 </button>
                             </div>
@@ -165,9 +165,11 @@ const Profile = () => {
                                 <div className="absolute -right-3 top-2 z-20">
                                     <button
                                         onClick={() => setIsSidebarOpen(false)}
-                                        className="w-6 h-6 bg-sunbird-gray-100 rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
+                                        className="w-6 h-6 bg-[#EFEFEF] rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
                                     >
-                                        <FiChevronLeft className="w-4 h-4" />
+                                        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
                                     </button>
                                 </div>
                             </>

@@ -165,7 +165,7 @@ const ProfileLearningList = () => {
                             {/* Progress Ring + Percentage */}
                             <div className="profile-learning-stats">
                                 <ProgressRing progress={course.progress} />
-                                <span className="text-[1rem] font-medium text-sunbird-obsidian w-10">
+                                <span className="text-[1rem] font-normal text-sunbird-obsidian w-10 leading-none tracking-normal">
                                     {course.progress}%
                                 </span>
                             </div>
@@ -178,27 +178,30 @@ const ProfileLearningList = () => {
                                         : "bg-sunbird-status-ongoing-bg border-sunbird-status-ongoing-border text-sunbird-status-ongoing-text"
                                         }`}
                                 >
-                                    <span className="text-sm font-medium">
+                                    <span className="text-[0.875rem] font-medium leading-[1.125rem]">
                                         {course.status === "completed" ? "Completed" : "Ongoing"}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* 4. Certificate Action */}
                         <div className="profile-learning-actions">
                             <button
-                                className="flex items-center gap-2 text-[0.8125rem] font-normal text-sunbird-brick hover:opacity-80 transition-opacity"
+                                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                             >
                                 {course.status === "completed" ? (
                                     <>
-                                        <FiDownload className="w-4 h-4" />
-                                        <span className="text-sunbird-brick text-[0.75rem]">Download Certificate</span>
+                                        <FiDownload className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
+                                        <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center">
+                                            Download Certificate
+                                        </span>
                                     </>
                                 ) : (
                                     <>
-                                        <FiEye className="w-4 h-4" />
-                                        <span className="text-sunbird-brick text-[0.75rem]">Preview Certificate</span>
+                                        <FiEye className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
+                                        <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center">
+                                            Preview Certificate
+                                        </span>
                                     </>
                                 )}
                             </button>

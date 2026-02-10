@@ -4,7 +4,7 @@ const personalInfoData = {
     fullName: "Prachi Desai",
     emailId: "prachi@gmail.com",
     mobileNumber: "1234567890",
-    designation: "Software Engineer",
+    alternateEmailId: "pra1234@gmail.com",
     district: "Bengaluru",
     state: "Karnataka",
 };
@@ -40,18 +40,6 @@ const PersonalInformation = () => {
                     </div>
                 </div>
 
-                {/* Email ID */}
-                <div className="personal-info-field">
-                    <label className="personal-info-label">
-                        Email ID
-                    </label>
-                    <div className="personal-info-value-container">
-                        <span className="personal-info-value">
-                            {personalInfoData.emailId}
-                        </span>
-                    </div>
-                </div>
-
                 {/* Mobile Number */}
                 <div className="personal-info-field">
                     <label className="personal-info-label">
@@ -64,14 +52,26 @@ const PersonalInformation = () => {
                     </div>
                 </div>
 
-                {/* Designation */}
+                {/* Email ID */}
                 <div className="personal-info-field">
                     <label className="personal-info-label">
-                        Designation
+                        Email ID
                     </label>
                     <div className="personal-info-value-container">
                         <span className="personal-info-value">
-                            {personalInfoData.designation}
+                            {personalInfoData.emailId}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Alternate Email ID */}
+                <div className="personal-info-field">
+                    <label className="personal-info-label">
+                        Alternate Email ID
+                    </label>
+                    <div className="personal-info-value-container">
+                        <span className="personal-info-value">
+                            {personalInfoData.alternateEmailId}
                         </span>
                     </div>
                 </div>

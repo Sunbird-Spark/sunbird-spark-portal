@@ -142,6 +142,8 @@
     /* #F3F4F6 */
     --sunbird-footer-bg: 0 0% 11%;
     /* #1C1C1C */
+    --sunbird-gray-ef: 0 0% 93.7%;
+    /* #EFEFEF */
 
     /* Box Shadows */
     --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
@@ -153,19 +155,19 @@
     --sunbird-progress-bg: 39 77% 76%;
     /* #F0CE94 */
 
-    --sunbird-status-completed-bg: 140 31% 93%;
-    /* #E6F3EA */
-    --sunbird-status-completed-border: 140 31% 78%;
-    /* #B2DDBF */
-    --sunbird-status-completed-text: 153 43% 24%;
-    /* #2D6A4F */
+    --sunbird-status-completed-bg: 95 33% 81%;
+    /* #CAE5B6 */
+    --sunbird-status-completed-border: 95 26% 53%;
+    /* #82A668 */
+    --sunbird-status-completed-text: 0 0% 0%;
+    /* #000000 */
 
-    --sunbird-status-ongoing-bg: 38 100% 96%;
-    /* #FFF8EB */
-    --sunbird-status-ongoing-border: 40 88% 87%;
-    /* #FCE6BD */
-    --sunbird-status-ongoing-text: 46 94% 26%;
-    /* #826404 */
+    --sunbird-status-ongoing-bg: 45 100% 89%;
+    /* #FFF1C7 */
+    --sunbird-status-ongoing-border: 28 57% 54%;
+    /* #CC8545 */
+    --sunbird-status-ongoing-text: 0 0% 0%;
+    /* #000000 */
   }
 
   .dark {
