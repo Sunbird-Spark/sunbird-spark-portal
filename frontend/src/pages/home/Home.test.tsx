@@ -5,17 +5,17 @@ import { BrowserRouter } from 'react-router-dom';
 import Home from './Home';
 
 // Mock child components to keep tests focused
-vi.mock('@/components/HomeSidebar', () => ({
+vi.mock('@/components/home/HomeSidebar', () => ({
     default: ({ onNavChange }: { onNavChange: (n: string) => void }) => (
         <div data-testid="sidebar">
             <button onClick={() => onNavChange('profile')}>Change Nav</button>
         </div>
     )
 }));
-vi.mock('@/components/HomeStatsCards', () => ({ default: () => <div data-testid="stats-cards" /> }));
-vi.mock('@/components/HomeContinueLearning', () => ({ default: () => <div data-testid="continue-learning" /> }));
-vi.mock('@/components/HomeInProgressGrid', () => ({ default: () => <div data-testid="inprogress-grid" /> }));
-vi.mock('@/components/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
+vi.mock('@/components/home/HomeStatsCards', () => ({ default: () => <div data-testid="stats-cards" /> }));
+vi.mock('@/components/home/HomeContinueLearning', () => ({ default: () => <div data-testid="continue-learning" /> }));
+vi.mock('@/components/home/HomeInProgressGrid', () => ({ default: () => <div data-testid="inprogress-grid" /> }));
+vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
 vi.mock('@/components/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
 // Mock DropdownMenu to render content inline
