@@ -55,23 +55,44 @@ class userAuthInfoService {
                 headers
             );
 
-            const data = response.data;
+            const data = response?.data;
 
-            if (data.params.status === 'successful') {
+            if (!data) {
+                throw new Error('No data received from auth API');
+            }
+
+            // Check if response has the expected structure
+            if (!data.params || typeof data.params.status !== 'string') {
+                // Log only non-sensitive fields to avoid leaking sid/uid
+                console.warn('Auth API returned unexpected structure. Status:', data.params?.status, 'ResponseCode:', data.responseCode);
+                throw new Error('Invalid response structure from auth API');
+            }
+
+            if (data.params.status === 'successful' && data.result) {
                 this.sessionId = data.result.sid;
                 this.userId = data.result.uid;
                 this.isAuthenticated = data.result.isAuthenticated;
 
                 return data.result;
             } else {
-                throw new Error(data.params.errmsg || 'Failed to fetch auth status');
+                const errmsg =
+                    typeof data.params.errmsg === 'string' && data.params.errmsg.trim().length > 0
+                        ? data.params.errmsg
+                        : 'Failed to fetch auth status';
+                throw new Error(errmsg);
             }
         } catch (error) {
             console.error('Error fetching auth status:', error);
             if (error && typeof error === 'object' && 'response' in error) {
                 const httpError = error as { response?: { status?: number; data?: any } };
                 console.error('Status:', httpError.response?.status);
-                console.error('Data:', httpError.response?.data);
+                // Avoid logging full response data which may contain sensitive fields
+                const safeData = httpError.response?.data ? {
+                    responseCode: httpError.response.data.responseCode,
+                    status: httpError.response.data.params?.status,
+                    errmsg: httpError.response.data.params?.errmsg
+                } : undefined;
+                console.error('Response:', safeData);
             }
             throw error;
         }
