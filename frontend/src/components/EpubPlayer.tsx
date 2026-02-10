@@ -94,12 +94,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
   return (
     <div 
       ref={containerRef} 
-      style={{ 
-        width: '100%', 
-        height: '100%', 
-        minHeight: '600px',
-        position: 'relative' 
-      }} 
+      className="w-full h-full min-h-[600px] relative"
     />
   );
 };
