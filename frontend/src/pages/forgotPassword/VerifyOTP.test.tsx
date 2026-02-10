@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { VerifyOTP } from './VerifyOTP';
-import { OtpIdentifier } from './forgotPasswordTypes';
+import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 
 // Mock all external dependencies
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));

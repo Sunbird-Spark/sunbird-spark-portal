@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
-import { OtpIdentifier } from './forgotPasswordTypes';
+import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { maskIdentifier } from '@/utils/ValidationUtils';
-import { redirectWithError } from './forgotPasswordUtils';
+import { redirectWithError } from '../../utils/forgotPasswordUtils';
 
 interface SelectOTPDeliveryProps {
     validIdentifiers: OtpIdentifier[];

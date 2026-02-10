@@ -3,16 +3,16 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { withRoles } from './rbac/withRoles';
 
-import HomePage from './pages/HomePage';
-import UnauthorizedPage from './pages/UnauthorizedPage';
-import AdminPage from './pages/AdminPage';
-import WorkspacePage from './pages/WorkspacePage';
-import ReportsPage from './pages/ReportsPage';
-import CreateContentPage from './pages/CreateContentPage';
+import HomePage from './pages/home/HomePage';
+import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
+import AdminPage from './pages/admin/AdminPage';
+import WorkspacePage from './pages/workspace/WorkspacePage';
+import ReportsPage from './pages/reports/ReportsPage';
+import CreateContentPage from './pages/content/CreateContentPage';
 import Index from './pages/Index';
-import ForgotPassword from './pages/ForgotPassword';
-import PasswordResetSuccess from './pages/PasswordResetSuccess';
-import SignUp from './pages/SignUp';
+import ForgotPassword from './pages/forgotPassword/ForgotPassword';
+import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
+import SignUp from './pages/signup/SignUp';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);

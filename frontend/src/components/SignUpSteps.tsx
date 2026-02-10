@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Checkbox } from "@/components/CheckBox";
-import { Header, InputLabel, PrimaryButton, OTPInput } from "../pages/ForgotPasswordComponents";
+import { Header, InputLabel, PrimaryButton, OTPInput } from "../pages/forgotPassword/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";

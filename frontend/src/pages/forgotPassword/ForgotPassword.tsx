@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AuthLayout } from '@/components/AuthLayout';
 import { useLearnerFuzzySearch, useResetPassword } from '@/hooks/useUser';
 import { useGenerateOtp, useVerifyOtp } from '@/hooks/useOtp';
-import { Step, OtpIdentifier } from './forgotPasswordTypes';
+import { Step, OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';

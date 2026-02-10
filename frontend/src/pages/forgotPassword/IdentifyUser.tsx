@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Input } from '@/components/input';
 import { Header, InputLabel, PrimaryButton } from './ForgotPasswordComponents';
-import { IdentifierStatus, OtpIdentifier } from './forgotPasswordTypes';
+import { IdentifierStatus, OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { IDENTIFIER_REGEX } from '@/utils/ValidationUtils';
-import { buildValidIdentifiers, redirectWithError } from './forgotPasswordUtils';
+import { buildValidIdentifiers, redirectWithError } from '../../utils/forgotPasswordUtils';
 
 interface IdentifyUserProps {
     googleCaptchaSiteKey: string;

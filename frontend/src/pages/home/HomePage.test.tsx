@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from './HomePage';
-import { AuthProvider } from '../auth/AuthContext';
+import { AuthProvider } from '../../auth/AuthContext';
 
 describe('HomePage', () => {
   it('should render welcome message and courses', () => {

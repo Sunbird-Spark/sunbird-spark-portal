@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Header, PrimaryButton, OTPInput } from './ForgotPasswordComponents';
 import { OTP_REGEX } from '@/utils/ValidationUtils';
-import { OtpIdentifier } from './forgotPasswordTypes';
-import { redirectWithError } from './forgotPasswordUtils';
+import { OtpIdentifier } from '../../types/forgotPasswordTypes';
+import { redirectWithError } from '../../utils/forgotPasswordUtils';
 
 interface VerifyOTPProps {
     selectedIdentifier: OtpIdentifier;

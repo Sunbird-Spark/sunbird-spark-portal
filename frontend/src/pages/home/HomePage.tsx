@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth, Role, User } from '../auth/AuthContext';
-import { getDefaultRouteForRole } from '../rbac/roleConfig';
+import { useAuth, Role, User } from '../../auth/AuthContext';
+import { getDefaultRouteForRole } from '../../rbac/roleConfig';
 import { v4 as uuidv4 } from 'uuid';
 
 const HomePage: React.FC = () => {

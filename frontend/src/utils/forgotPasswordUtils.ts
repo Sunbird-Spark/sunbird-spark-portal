@@ -1,4 +1,4 @@
-import { OtpIdentifier, IdentifierType } from './forgotPasswordTypes';
+import { OtpIdentifier, IdentifierType } from '../types/forgotPasswordTypes';
 
 export const buildValidIdentifiers = (results: any[]): OtpIdentifier[] => {
     const keys: IdentifierType[] = [

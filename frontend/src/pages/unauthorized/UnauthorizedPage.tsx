@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
-import { getDefaultRouteForRole } from '../rbac/roleConfig';
+import { useAuth } from '../../auth/AuthContext';
+import { getDefaultRouteForRole } from '../../rbac/roleConfig';
 
 const UnauthorizedPage: React.FC = () => {
   const navigate = useNavigate();
