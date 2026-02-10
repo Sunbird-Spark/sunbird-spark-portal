@@ -16,10 +16,10 @@ vi.mock('@/components/home/HomeStatsCards', () => ({ default: () => <div data-te
 vi.mock('@/components/home/HomeContinueLearning', () => ({ default: () => <div data-testid="continue-learning" /> }));
 vi.mock('@/components/home/HomeInProgressGrid', () => ({ default: () => <div data-testid="inprogress-grid" /> }));
 vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
-vi.mock('@/components/Footer', () => ({ default: () => <div data-testid="footer" /> }));
+vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
 // Mock DropdownMenu to render content inline
-vi.mock('@/components/dropdown-menu', () => ({
+vi.mock('@/components/common/DropdownMenu', () => ({
     DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
