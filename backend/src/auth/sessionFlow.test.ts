@@ -1,7 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getCookieValue, getUnsignedSessionId, destroySessionId } from '../utils/sessionUtils.js';
 import { sessionStore } from '../utils/sessionStore.js';
-import { CookieNames } from '../utils/cookieConstants.js';
 
 // Mock sessionStore
 vi.mock('../utils/sessionStore.js', () => ({
