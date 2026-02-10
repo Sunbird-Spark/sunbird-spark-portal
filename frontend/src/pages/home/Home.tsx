@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiSearch, FiBell, FiMenu, FiChevronDown } from "react-icons/fi";
-import { Input } from "@/components/input";
+import { Input } from "@/components/common/Input";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/dropdown-menu";
-import { Sheet, SheetContent, SheetTitle } from "@/components/sheet";
-import PageLoader from "@/components/PageLoader";
-import Footer from "@/components/Footer";
+} from "@/components/common/DropdownMenu";
+import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
+import PageLoader from "@/components/common/PageLoader";
+import Footer from "@/components/home/Footer";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import HomeStatsCards from "@/components/home/HomeStatsCards";
