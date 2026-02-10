@@ -105,7 +105,7 @@ export default {
           "gray-e5": "hsl(var(--sunbird-gray-e5))",
           "gray-f3": "hsl(var(--sunbird-gray-f3))",
           "footer-bg": "hsl(var(--sunbird-footer-bg))",
-          "gray-66": "hsl(var(--sunbird-gray-66))",
+          // "gray-66": "hsl(var(--sunbird-gray-66))",
           "progress-bg": "hsl(var(--sunbird-progress-bg))",
           "status-completed-bg": "hsl(var(--sunbird-status-completed-bg))",
           "status-completed-border": "hsl(var(--sunbird-status-completed-border))",

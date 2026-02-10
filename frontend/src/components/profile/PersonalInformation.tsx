@@ -27,79 +27,79 @@ const PersonalInformation = () => {
             </div>
 
             {/* Form Fields Grid */}
-            <div className="personal-info-grid">
+            <dl className="personal-info-grid">
                 {/* Full Name */}
                 <div className="personal-info-field">
-                    <label className="personal-info-label">
+                    <dt className="personal-info-label">
                         Full Name
-                    </label>
-                    <div className="personal-info-value-container">
+                    </dt>
+                    <dd className="personal-info-value-container">
                         <span className="personal-info-value">
                             {personalInfoData.fullName}
                         </span>
-                    </div>
+                    </dd>
                 </div>
 
                 {/* Mobile Number */}
                 <div className="personal-info-field">
-                    <label className="personal-info-label">
+                    <dt className="personal-info-label">
                         Mobile Number
-                    </label>
-                    <div className="personal-info-value-container">
+                    </dt>
+                    <dd className="personal-info-value-container">
                         <span className="personal-info-value">
                             {personalInfoData.mobileNumber}
                         </span>
-                    </div>
+                    </dd>
                 </div>
 
                 {/* Email ID */}
                 <div className="personal-info-field">
-                    <label className="personal-info-label">
+                    <dt className="personal-info-label">
                         Email ID
-                    </label>
-                    <div className="personal-info-value-container">
+                    </dt>
+                    <dd className="personal-info-value-container">
                         <span className="personal-info-value">
                             {personalInfoData.emailId}
                         </span>
-                    </div>
+                    </dd>
                 </div>
 
                 {/* Alternate Email ID */}
                 <div className="personal-info-field">
-                    <label className="personal-info-label">
+                    <dt className="personal-info-label">
                         Alternate Email ID
-                    </label>
-                    <div className="personal-info-value-container">
+                    </dt>
+                    <dd className="personal-info-value-container">
                         <span className="personal-info-value">
                             {personalInfoData.alternateEmailId}
                         </span>
-                    </div>
+                    </dd>
                 </div>
 
                 {/* District */}
                 <div className="personal-info-field">
-                    <label className="personal-info-label">
+                    <dt className="personal-info-label">
                         District
-                    </label>
-                    <div className="personal-info-value-container">
+                    </dt>
+                    <dd className="personal-info-value-container">
                         <span className="personal-info-value">
                             {personalInfoData.district}
                         </span>
-                    </div>
+                    </dd>
                 </div>
 
                 {/* State */}
                 <div className="personal-info-field">
-                    <label className="personal-info-label">
+                    <dt className="personal-info-label">
                         State
-                    </label>
-                    <div className="personal-info-value-container">
+                    </dt>
+                    <dd className="personal-info-value-container">
                         <span className="personal-info-value">
                             {personalInfoData.state}
                         </span>
-                    </div>
+                    </dd>
                 </div>
-            </div>
+            </dl>
         </div>
     );
 };

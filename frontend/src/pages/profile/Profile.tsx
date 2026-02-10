@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiBell, FiMenu, FiChevronDown, FiChevronLeft, FiUser, FiLogOut } from "react-icons/fi";
+import { FiSearch, FiBell, FiMenu, FiChevronDown } from "react-icons/fi";
 import { Input } from "@/components/common/Input";
 import {
     DropdownMenu,
@@ -11,11 +11,11 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
-import { useAppI18n } from "@/hooks/useAppI18n";
+import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
-import ProfileCard from "@/components/profile/ProfileCard"
-import PersonalInformation from "@/components/profile/PersonalInformation"
-import ProfileLearningList from "@/components/profile/ProfileLearningList"
+import ProfileCard from "@/components/profile/ProfileCard";
+import PersonalInformation from "@/components/profile/PersonalInformation";
+import ProfileLearningList from "@/components/profile/ProfileLearningList";
 import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -30,6 +30,10 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [activeNav, setActiveNav] = useState("profile");
     const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+
+    useEffect(() => {
+        setIsSidebarOpen(!isMobile);
+    }, [isMobile]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -86,6 +90,7 @@ const Profile = () => {
                             <button
                                 onClick={() => navigate('/search')}
                                 className="profile-search-btn-mobile"
+                                aria-label="Search"
                             >
                                 <FiSearch className="h-5 w-5" />
                             </button>
@@ -105,8 +110,8 @@ const Profile = () => {
                             </div>
                         )}
                         {/* Notifications */}
-                        <button className="profile-action-btn">
-                            <FiBell className="profile-action-icon" />
+                        <button className="profile-action-btn" aria-label="Notifications">
+                            <FiBell className="profile-action-icon" aria-hidden="true" />
                         </button>
 
                         {/* Language Dropdown */}
@@ -122,7 +127,7 @@ const Profile = () => {
                                     <DropdownMenuItem
                                         key={lng.code}
                                         className={`profile-dropdown-item ${currentCode === lng.code ? 'active' : ''}`}
-                                        onClick={() => changeLanguage(lng.code as any)}
+                                        onSelect={() => changeLanguage(lng.code as LanguageCode)}
                                     >
                                         <span>{lng.label}</span>
                                         {currentCode === lng.code && (
