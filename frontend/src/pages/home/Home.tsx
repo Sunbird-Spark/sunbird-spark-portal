@@ -158,7 +158,7 @@ const Home = () => {
                     </Sheet>
                 ) : (
                     /* Sidebar - Desktop */
-                    <div className="relative shrink-0">
+                    <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
                         {isSidebarOpen && (
                             <>
                                 <HomeSidebar activeNav={activeNav} onNavChange={setActiveNav} />
