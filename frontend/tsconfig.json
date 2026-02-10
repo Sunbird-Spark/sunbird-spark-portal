@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    /* Runtime */
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext", // Changed from CommonJS
+    "moduleResolution": "bundler", // Added for modern build tools
+    "jsx": "react-jsx",
+
+    /* Paths */
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": false,
+
+    /* Build */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true, // Added for Vite
+    "resolveJsonModule": true, // Added for importing JSON
+    "isolatedModules": true, // Added for Vite
+    "noEmit": true, // Added since Vite handles the build
+
+    /* Source maps */
+    "sourceMap": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* Testing */
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

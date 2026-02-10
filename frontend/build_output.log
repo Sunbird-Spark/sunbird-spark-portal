@@ -1,0 +1,6 @@
+
+> sunbirded-portal@1.0.0 build
+> tsc && vite build
+
+src/components/players/QUMLPlayer.tsx(35,7): error TS2339: Property 'sunbird-quml-player' does not exist on type 'JSX.IntrinsicElements'.
+src/components/players/QUMLPlayer.tsx(39,7): error TS2339: Property 'sunbird-quml-player' does not exist on type 'JSX.IntrinsicElements'.

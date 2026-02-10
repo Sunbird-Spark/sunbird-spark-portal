@@ -1,0 +1,63 @@
+name: Pull Request Quality Checks
+
+on:
+  pull_request:
+
+jobs:
+  frontend-checks:
+    name: Frontend Quality & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Frontend lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Frontend build
+        working-directory: frontend
+        run: npm run build
+
+      - name: Frontend tests
+        working-directory: frontend
+        run: npm run test:coverage
+
+  backend-checks:
+    name: Backend Quality & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Backend lint
+        working-directory: backend
+        run: npm run lint
+
+      - name: Backend build
+        working-directory: backend
+        run: npm run build
+
+      - name: Backend tests
+        working-directory: backend
+        run: npm run test:coverage

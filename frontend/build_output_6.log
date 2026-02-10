@@ -1,0 +1,20 @@
+
+> sunbirded-portal@1.0.0 build
+> tsc && vite build
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 342 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                            0.72 kB │ gzip:     0.38 kB
+dist/assets/sunbird-logo-CstYRPAC.svg      5.84 kB │ gzip:     2.43 kB
+dist/assets/auth-wave-bg-DgRGYDsw.svg  7,557.26 kB │ gzip: 5,640.56 kB
+dist/assets/index-Bv5nf8ic.css            69.63 kB │ gzip:    12.15 kB
+dist/assets/index-vjl5bueX.js            656.40 kB │ gzip:   216.08 kB │ map: 4,763.25 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 9.16s

@@ -1,0 +1,3 @@
+frontend/public/assets/quml-player:
+styles.css
+sunbird-quml-player.js

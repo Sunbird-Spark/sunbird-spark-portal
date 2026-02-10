@@ -1,0 +1,431 @@
+/* Sunbird Joyful Design System - Professional Training LMS */
+
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Sunbird Joyful Theme Colors */
+    --background: 48 23% 91%;
+    /* #E9E8D9 - Body background */
+    --foreground: 0 0% 13%;
+    /* #222222 - Text */
+    --surface: 0 0% 100%;
+    /* White surface */
+
+    --card: 60 24% 93%;
+    /* #F3F3E5 - Card background */
+    --card-foreground: 0 0% 20%;
+    /* #333333 */
+
+    --popover: 60 24% 93%;
+    --popover-foreground: 0 0% 20%;
+
+    --primary: 12 50% 45%;
+    /* #AC5139 - Sunbird Terracotta */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 100% 66%;
+    /* #FFD954 - Primary Yellow */
+    --secondary-foreground: 0 0% 20%;
+
+    --muted: 205 47% 95%;
+    /* #EDF4F9 - Light Blue */
+    --muted-foreground: 210 11% 45%;
+
+    --accent: 45 100% 66%;
+    /* #FFD954 - Yellow accent */
+    --accent-foreground: 0 0% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 25% 80%;
+    --input: 210 25% 85%;
+    --ring: 12 50% 45%;
+
+    --radius: 1rem;
+
+    /* Custom Sunbird colors */
+    --sunbird-primary: 12 50% 45%;
+    /* #AC5139 */
+    --sunbird-dark-blue: 207 100% 16%;
+    /* #002E50 */
+    --sunbird-yellow: 45 100% 66%;
+    /* #FFD954 */
+    --sunbird-light-blue: 205 47% 95%;
+    /* #EDF4F9 */
+    --sunbird-medium-blue: 210 40% 65%;
+    /* #80A7CE */
+
+    --sunbird-ginger: 28 57% 54%;
+    /* #cc8545 */
+    --sunbird-brick: 15 51% 44%;
+    /* #a85236 */
+    --sunbird-sunflower: 45 100% 73%;
+    /* #ffdb73 */
+    --sunbird-ivory: 55 100% 98%;
+    /* #fffef4 */
+    --sunbird-ink: 193 35% 33%;
+    /* #376673 */
+    --sunbird-wave: 158 78% 68%;
+    /* #70edbf */
+    --sunbird-leaf: 62 96% 33%;
+    /* #a1a603 */
+    --sunbird-forest: 95 26% 53%;
+    /* #82a668 */
+    --sunbird-moss: 146 26% 53%;
+    /* #66a682 */
+    --sunbird-jamun: 322 70% 19%;
+    /* #540f3b */
+    --sunbird-lavender: 322 17% 52%;
+    /* #99708a */
+    --sunbird-theme-teal: 180 31% 42%;
+    /* #4A8C8C */
+    --sunbird-charcoal: 0 0% 20%;
+    /* #333333 */
+    --sunbird-obsidian: 0 0% 13%;
+    /* #222222 */
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 12 50% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 100% 66%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 12 50% 45%;
+
+    /* Additional Sunbird Grays & System Colors */
+    --sunbird-gray-75: 0 0% 46%;
+    /* #757575 */
+    --sunbird-gray-82: 0 0% 51%;
+    /* #828282 */
+    --sunbird-gray-b2: 0 0% 70%;
+    /* #B2B2B2 */
+    --sunbird-gray-4a: 218 17% 35%;
+    /* #4A5568 */
+    --sunbird-gray-d0: 214 15% 84%;
+    /* #D0D5DD */
+    --sunbird-gray-34: 221 23% 27%;
+    /* #344054 */
+    --sunbird-success-green: 145 63% 49%;
+    /* #2ECC71 */
+    --sunbird-orange-light: 13 100% 97%;
+    /* #FFF5F2 */
+    --sunbird-white: 0 0% 100%;
+    /* #FFFFFF */
+    --sunbird-gray-77: 0 0% 47%;
+    /* #777777 */
+    --sunbird-gray-d9: 0 0% 85%;
+    /* #D9D9D9 */
+    --sunbird-beige-light: 45 100% 89%;
+    /* #FFF1C7 */
+    --sunbird-gray-f1: 0 0% 95%;
+    /* #F1F1F1 */
+    --sunbird-blue-light: 194 36% 59%;
+    /* #70ADBF */
+    --sunbird-blue-medium: 194 47% 45%;
+    /* #3D8FA7 */
+    --sunbird-brown-dark: 28 66% 42%;
+    /* #B06624 */
+    --sunbird-green-dark: 146 47% 36%;
+    /* #318656 */
+    --sunbird-purple-dark: 322 21% 38%;
+    /* #744C65 */
+    --sunbird-gray-e5: 210 5% 90%;
+    /* #E5E7EB */
+    --sunbird-gray-f3: 210 5% 96%;
+    /* #F3F4F6 */
+    --sunbird-footer-bg: 0 0% 11%;
+    /* #1C1C1C */
+
+    /* Box Shadows */
+    --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
+  }
+
+  .dark {
+    --background: 207 100% 16%;
+    /* Dark blue background */
+    --foreground: 210 40% 98%;
+    --surface: 210 40% 12%;
+
+    --card: 210 40% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 210 40% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 45 100% 66%;
+    /* Yellow as primary in dark mode */
+    --primary-foreground: 0 0% 20%;
+
+    --secondary: 213 95% 31%;
+    /* Blue as secondary */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 45 100% 66%;
+    --accent-foreground: 0 0% 20%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 45 100% 66%;
+
+    --sidebar-background: 207 100% 16%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 45 100% 66%;
+    --sidebar-primary-foreground: 0 0% 20%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 45 100% 66%;
+  }
+
+}
+
+@layer components {
+  .login-wrapper {
+    @apply font-rubik min-h-screen w-full flex items-center justify-center relative bg-sunbird-theme-teal auth-bg-wave overflow-x-hidden;
+  }
+
+  .login-split-container {
+    @apply flex flex-col md:flex-row m-[0.625rem] md:m-auto bg-white rounded-[4rem] p-[0.375rem] relative z-10 shadow-2xl overflow-hidden w-[67.375rem] h-[41.625rem] min-h-[41.625rem];
+  }
+
+  /* Tablet view responsiveness */
+  @media (min-width: 640px) and (max-width: 1024px) {
+    .login-split-container {
+      margin: 1.5rem !important;
+    }
+  }
+
+  .login-left-panel {
+    @apply hidden md:flex flex-1 relative items-center justify-center overflow-hidden rounded-[3.5rem] auth-bg-wave;
+  }
+
+  .login-left-panel-container {
+    @apply absolute inset-0 z-[3] border-0 rounded-[3.5rem];
+    box-shadow: 0 0 0 2rem hsl(var(--sunbird-white) / 0.05);
+  }
+
+  .left-panel-content {
+    @apply absolute z-[2] left-10 bottom-10 max-w-[calc(100%-5rem)];
+  }
+
+  .left-panel-title {
+    @apply !font-rubik text-[1.875rem] font-semibold text-white leading-[2.625rem];
+  }
+
+  .login-card {
+    @apply flex-[0.85] p-6 md:p-10 relative flex flex-col justify-center md:pt-8 pt-8;
+  }
+
+  .close-button {
+    @apply absolute top-5 right-5 p-2 text-sunbird-charcoal hover:opacity-70 transition-opacity z-20;
+  }
+
+  .login-inner-container {
+    @apply mx-auto w-full max-w-sm flex flex-col justify-start;
+  }
+
+  .logo-container {
+    @apply text-center;
+  }
+
+  .sunbird-logo-wrapper {
+    @apply mb-2;
+  }
+
+  .logo-image {
+    @apply h-10 w-auto mx-auto;
+  }
+
+  /* Header & Labels */
+  .login-header-title {
+    @apply !font-rubik text-[1.875rem] font-semibold text-sunbird-obsidian leading-[1.875rem] mb-2;
+  }
+
+  .login-header-subtitle {
+    @apply text-[0.875rem] font-normal text-sunbird-gray-75 leading-relaxed mx-auto;
+  }
+
+  .login-input-label {
+    @apply block text-[0.875rem] font-normal text-sunbird-gray-75 mb-2;
+  }
+
+  /* Buttons */
+  .login-primary-button {
+    @apply w-full h-13 bg-sunbird-brick !bg-sunbird-brick text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all;
+  }
+
+  /* Global Signup/Auth Styles */
+  .secondary-outline-button {
+    @apply w-full !h-10 !bg-white border font-medium flex items-center justify-center gap-2 hover:bg-gray-50 mb-0 text-[0.875rem];
+    border-color: hsl(var(--sunbird-gray-d0)) !important;
+    color: hsl(var(--sunbird-gray-34)) !important;
+    border-radius: 0.5rem !important;
+  }
+
+  .form-divider-container {
+    @apply flex items-center gap-4 my-1;
+  }
+
+  .form-divider-line {
+    @apply h-[1px] flex-1 bg-gray-200;
+  }
+
+  .form-divider-text {
+    @apply text-gray-500 text-[0.75rem] font-medium;
+  }
+
+  .form-error-absolute {
+    @apply text-[0.75rem] text-red-500 absolute left-0 leading-tight;
+  }
+
+  .form-error-offset-8 {
+    @apply bottom-[-8px];
+  }
+
+  .form-error-offset-4 {
+    @apply bottom-[-4px];
+  }
+
+  .form-error-offset-2 {
+    @apply bottom-[-2px];
+  }
+
+  .themed-checkbox {
+    @apply w-4 h-4;
+    border-color: hsl(var(--sunbird-gray-82)) !important;
+    border-radius: 0.25rem !important;
+  }
+
+  .themed-checkbox[data-state="checked"] {
+    background-color: hsl(var(--sunbird-brick)) !important;
+    border-color: hsl(var(--sunbird-brick)) !important;
+  }
+
+  .themed-link {
+    @apply font-bold text-sunbird-brick underline hover:underline-offset-2;
+  }
+
+  .required-asterisk {
+    @apply text-sunbird-gray-75 ml-1;
+  }
+
+  /* OTP Input */
+  .otp-input-container {
+    @apply flex justify-between gap-1 md:gap-2 max-w-full md:max-w-100 mx-auto;
+  }
+
+  .otp-digit-input {
+    @apply w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-semibold border border-sunbird-brick rounded-[0.25rem] focus:border-sunbird-brick focus:ring-1 focus:ring-sunbird-brick outline-none transition-all;
+  }
+
+  .otp-digit-input:focus {
+    @apply w-11 h-11 md:w-13 md:h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1rem] md:text-[1.25rem] focus:outline-none;
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
+  /* Form Elements */
+  .login-input-field {
+    @apply h-[2.5rem] !bg-white !rounded-xs border-sunbird-gray-82 focus:border-sunbird-brick focus:ring-0 px-4 text-[0.875rem] placeholder:text-sunbird-gray-b2;
+  }
+
+  .login-input-field:focus {
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
+  .login-form-instruction {
+    @apply text-[0.75rem] text-sunbird-gray-75 mt-1;
+  }
+
+  .login-error-message {
+    @apply text-red-600 text-sm mt-2;
+  }
+
+  /* Success Icon */
+  .success-icon-container {
+    @apply w-18 h-18 rounded-full bg-sunbird-success-green flex items-center justify-center shadow-md;
+  }
+
+  .success-icon-check {
+    @apply text-white text-4xl;
+  }
+
+  /* Delivery Selection */
+  .delivery-prompt {
+    @apply text-[0.875rem] font-medium text-center text-sunbird-obsidian;
+  }
+
+  .delivery-option {
+    @apply flex items-center gap-3 p-4 border rounded-xs cursor-pointer border-sunbird-gray-82 bg-sunbird-base-white;
+  }
+
+  .delivery-option-selected {
+    @apply border-sunbird-brick bg-sunbird-orange-light;
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
+  .delivery-radio {
+    @apply w-4 h-4 accent-sunbird-brick;
+  }
+
+  .delivery-text {
+    @apply text-[0.875rem] font-medium text-sunbird-gray-4a;
+  }
+
+  /* OTP Verification Extra */
+  .otp-validity-info {
+    @apply text-center text-[0.85rem] text-sunbird-gray-4a;
+  }
+
+  .resend-otp-btn {
+    @apply text-sunbird-brick font-semibold ml-1 hover:underline;
+  }
+
+  .resend-otp-btn:disabled {
+    @apply opacity-50 cursor-not-allowed no-underline;
+  }
+
+
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Rubik', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+  }
+
+  .auth-bg-wave {
+    background-image: url('./assets/auth-wave-bg.svg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+}

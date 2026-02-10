@@ -1,0 +1,532 @@
+
+> sunbirded-portal@1.0.0 test:run
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/app/frontend[39m
+
+[90mstdout[2m | src/services/AppCoreService.test.ts[2m > [22m[2mAppCoreService[2m > [22m[2minitialize[2m > [22m[2mshould initialize successfully
+[22m[39mInitializing AppCoreService...
+
+[90mstdout[2m | src/services/AppCoreService.test.ts[2m > [22m[2mAppCoreService[2m > [22m[2minitialize[2m > [22m[2mshould initialize successfully
+[22m[39mDevice ID initialized: init-id
+
+[90mstdout[2m | src/services/AppCoreService.test.ts[2m > [22m[2mAppCoreService[2m > [22m[2minitialize[2m > [22m[2mshould throw and log error initialization fails
+[22m[39mInitializing AppCoreService...
+
+[90mstderr[2m | src/services/AppCoreService.test.ts[2m > [22m[2mAppCoreService[2m > [22m[2minitialize[2m > [22m[2mshould throw and log error initialization fails
+[22m[39mAppCoreService initialization failed: Error: SunbirdTelemetry SDK not available (EkTelemetry not found on window)
+    at [90m/app/frontend/[39msrc/services/AppCoreService.ts:41:24
+    at new Promise (<anonymous>)
+    at AppCoreService.getDeviceId [90m(/app/frontend/[39msrc/services/AppCoreService.ts:39:16[90m)[39m
+    at AppCoreService.initialize [90m(/app/frontend/[39msrc/services/AppCoreService.ts:100:41[90m)[39m
+    at [90m/app/frontend/[39msrc/services/AppCoreService.test.ts:166:41
+    at [90mfile:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+
+ [32m✓[39m src/services/AppCoreService.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+[90mstderr[2m | src/services/userAuthInfoService/userAuthInfoService.test.ts[2m > [22m[2muserAuthInfoService[2m > [22m[2mgetAuthInfo[2m > [22m[2mshould throw error when api returns unsuccessful status
+[22m[39mError fetching auth status: Error: Something went wrong
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:67:23[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+
+[90mstderr[2m | src/services/userAuthInfoService/userAuthInfoService.test.ts[2m > [22m[2muserAuthInfoService[2m > [22m[2mgetAuthInfo[2m > [22m[2mshould use default error message when api returns failed status without errmsg
+[22m[39mError fetching auth status: Error: Failed to fetch auth status
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:67:23[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+
+[90mstderr[2m | src/services/userAuthInfoService/userAuthInfoService.test.ts[2m > [22m[2muserAuthInfoService[2m > [22m[2mgetAuthInfo[2m > [22m[2mshould throw error when HTTP client fails
+[22m[39mError fetching auth status: Error: Network Error
+    at [90m/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.test.ts:140:34
+    at [90mfile:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///app/frontend/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///app/frontend/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///app/frontend/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstderr[2m | src/services/userAuthInfoService/userAuthInfoService.test.ts[2m > [22m[2muserAuthInfoService[2m > [22m[2mgetAuthInfo[2m > [22m[2mshould log detailed error info if error has response
+[22m[39mError fetching auth status: { response: { status: [33m400[39m, data: { message: [32m'Bad Request'[39m } } }
+Status: [33m400[39m
+Data: { message: [32m'Bad Request'[39m }
+
+ [32m✓[39m src/services/userAuthInfoService/userAuthInfoService.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m src/pages/forgotPassword/IdentifyUser.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 213[2mms[22m[39m
+ [32m✓[39m src/components/auth/SignUpSteps.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 243[2mms[22m[39m
+ [32m✓[39m src/pages/signup/SignUp.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 160[2mms[22m[39m
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx
+[22m[39m🌐 i18next is maintained with support from locize.com — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+i18next: languageChanged en
+i18next: initialized {
+  debug: [33mtrue[39m,
+  initAsync: [33mtrue[39m,
+  ns: [ [32m'translation'[39m ],
+  defaultNS: [ [32m'translation'[39m ],
+  fallbackLng: [ [32m'en'[39m ],
+  fallbackNS: [33mfalse[39m,
+  supportedLngs: [33mfalse[39m,
+  nonExplicitSupportedLngs: [33mfalse[39m,
+  load: [32m'all'[39m,
+  preload: [33mfalse[39m,
+  simplifyPluralSuffix: [33mtrue[39m,
+  keySeparator: [32m'.'[39m,
+  nsSeparator: [32m':'[39m,
+  pluralSeparator: [32m'_'[39m,
+  contextSeparator: [32m'_'[39m,
+  partialBundledLanguages: [33mfalse[39m,
+  saveMissing: [33mfalse[39m,
+  updateMissing: [33mfalse[39m,
+  saveMissingTo: [32m'fallback'[39m,
+  saveMissingPlurals: [33mtrue[39m,
+  missingKeyHandler: [33mfalse[39m,
+  missingInterpolationHandler: [33mfalse[39m,
+  postProcess: [33mfalse[39m,
+  postProcessPassResolved: [33mfalse[39m,
+  returnNull: [33mfalse[39m,
+  returnEmptyString: [33mtrue[39m,
+  returnObjects: [33mfalse[39m,
+  joinArrays: [33mfalse[39m,
+  returnedObjectHandler: [33mfalse[39m,
+  parseMissingKeyHandler: [33mfalse[39m,
+  appendNamespaceToMissingKey: [33mfalse[39m,
+  appendNamespaceToCIMode: [33mfalse[39m,
+  overloadTranslationOptionHandler: [36m[Function: overloadTranslationOptionHandler][39m,
+  interpolation: {
+    escapeValue: [33mfalse[39m,
+    format: [36m[Function: bound format][39m,
+    prefix: [32m'{{'[39m,
+    suffix: [32m'}}'[39m,
+    formatSeparator: [32m','[39m,
+    unescapePrefix: [32m'-'[39m,
+    nestingPrefix: [32m'$t('[39m,
+    nestingSuffix: [32m')'[39m,
+    nestingOptionsSeparator: [32m','[39m,
+    maxReplaces: [33m1000[39m,
+    skipOnVariables: [33mtrue[39m
+  },
+  cacheInBuiltFormats: [33mtrue[39m,
+  resources: {
+    en: { translation: [36m[Object][39m },
+    fr: { translation: [36m[Object][39m },
+    pt: { translation: [36m[Object][39m },
+    ar: { translation: [36m[Object][39m }
+  },
+  lng: [32m'en'[39m,
+  react: { useSuspense: [33mfalse[39m },
+  ignoreJSONStructure: [33mtrue[39m
+}
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould expose a translation function
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould return English as default language
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould return RTL direction for Arabic
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould return RTL direction for Arabic
+[22m[39mi18next: languageChanged ar
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould return LTR direction for Portuguese
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould return LTR direction for Portuguese
+[22m[39mi18next: languageChanged pt
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould return all available languages (sorted config list)
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould change language successfully
+[22m[39mi18next: languageChanged en
+
+[90mstderr[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould change language successfully
+[22m[39mAn update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould change language successfully
+[22m[39mi18next: languageChanged fr
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould not change language for invalid language code
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould always return a valid currentLanguage config (fallback behavior)
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould fallback when i18n.language is empty string
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mi18next: languageChanged en
+
+[90mstderr[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mAn update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mi18next: languageChanged fr
+
+[90mstderr[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mAn update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mi18next: languageChanged pt
+
+[90mstdout[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mi18next: languageChanged ar
+
+[90mstderr[2m | src/hooks/useAppI18n.test.tsx[2m > [22m[2museAppI18n Hook[2m > [22m[2mshould handle all supported languages
+[22m[39mAn update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ [32m✓[39m src/hooks/useAppI18n.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m src/components/common/DropdownMenu.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 390[2mms[22m[39m
+ [32m✓[39m src/pages/unauthorized/UnauthorizedPage.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 93[2mms[22m[39m
+ [32m✓[39m src/AppRoutes.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+ [32m✓[39m src/lib/http-client/adapters/AxiosAdapter.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/pages/forgotPassword/SelectOTPDelivery.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 169[2mms[22m[39m
+ [32m✓[39m src/utils/forgotPasswordUtils.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/pages/forgotPassword/VerifyOTP.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 131[2mms[22m[39m
+ [32m✓[39m src/pages/home/Home.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 3867[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the loading state initially and then the dashboard [33m 684[2mms[22m[39m
+     [33m[2m✓[22m[39m handles sidebar toggle on desktop [33m 654[2mms[22m[39m
+     [33m[2m✓[22m[39m renders mobile layout correctly [33m 640[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates to search when search bar is clicked [33m 627[2mms[22m[39m
+     [33m[2m✓[22m[39m changes language through the dropdown [33m 633[2mms[22m[39m
+     [33m[2m✓[22m[39m updates activeNav when sidebar notifies [33m 626[2mms[22m[39m
+ [32m✓[39m src/components/home/HomeSidebar.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 184[2mms[22m[39m
+ [32m✓[39m src/rbac/roleConfig.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/pages/forgotPassword/ForgotPasswordComponents.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 113[2mms[22m[39m
+ [32m✓[39m src/utils/ValidationUtils.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/utils.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+[90mstdout[2m | src/test/i18n.test.tsx
+[22m[39m🌐 i18next is maintained with support from locize.com — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+i18next: languageChanged en
+i18next: initialized {
+  debug: [33mtrue[39m,
+  initAsync: [33mtrue[39m,
+  ns: [ [32m'translation'[39m ],
+  defaultNS: [ [32m'translation'[39m ],
+  fallbackLng: [ [32m'en'[39m ],
+  fallbackNS: [33mfalse[39m,
+  supportedLngs: [33mfalse[39m,
+  nonExplicitSupportedLngs: [33mfalse[39m,
+  load: [32m'all'[39m,
+  preload: [33mfalse[39m,
+  simplifyPluralSuffix: [33mtrue[39m,
+  keySeparator: [32m'.'[39m,
+  nsSeparator: [32m':'[39m,
+  pluralSeparator: [32m'_'[39m,
+  contextSeparator: [32m'_'[39m,
+  partialBundledLanguages: [33mfalse[39m,
+  saveMissing: [33mfalse[39m,
+  updateMissing: [33mfalse[39m,
+  saveMissingTo: [32m'fallback'[39m,
+  saveMissingPlurals: [33mtrue[39m,
+  missingKeyHandler: [33mfalse[39m,
+  missingInterpolationHandler: [33mfalse[39m,
+  postProcess: [33mfalse[39m,
+  postProcessPassResolved: [33mfalse[39m,
+  returnNull: [33mfalse[39m,
+  returnEmptyString: [33mtrue[39m,
+  returnObjects: [33mfalse[39m,
+  joinArrays: [33mfalse[39m,
+  returnedObjectHandler: [33mfalse[39m,
+  parseMissingKeyHandler: [33mfalse[39m,
+  appendNamespaceToMissingKey: [33mfalse[39m,
+  appendNamespaceToCIMode: [33mfalse[39m,
+  overloadTranslationOptionHandler: [36m[Function: overloadTranslationOptionHandler][39m,
+  interpolation: {
+    escapeValue: [33mfalse[39m,
+    format: [36m[Function: bound format][39m,
+    prefix: [32m'{{'[39m,
+    suffix: [32m'}}'[39m,
+    formatSeparator: [32m','[39m,
+    unescapePrefix: [32m'-'[39m,
+    nestingPrefix: [32m'$t('[39m,
+    nestingSuffix: [32m')'[39m,
+    nestingOptionsSeparator: [32m','[39m,
+    maxReplaces: [33m1000[39m,
+    skipOnVariables: [33mtrue[39m
+  },
+  cacheInBuiltFormats: [33mtrue[39m,
+  resources: {
+    en: { translation: [36m[Object][39m },
+    fr: { translation: [36m[Object][39m },
+    pt: { translation: [36m[Object][39m },
+    ar: { translation: [36m[Object][39m }
+  },
+  lng: [32m'en'[39m,
+  react: { useSuspense: [33mfalse[39m },
+  ignoreJSONStructure: [33mtrue[39m
+}
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould initialize with English as default language
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould change language when requested
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould change language when requested
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould render SimpleLanguageSwitcher component
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould toggle language when SimpleLanguageSwitcher is changed
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould toggle language when SimpleLanguageSwitcher is changed
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould support direct translation keys
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould fallback to key for missing translations
+[22m[39mi18next: languageChanged en
+
+[90mstdout[2m | src/test/i18n.test.tsx[2m > [22m[2mSimple Internationalization (i18n)[2m > [22m[2mshould fallback to key for missing translations
+[22m[39mi18next::translator: missingKey en translation nonexistent.key nonexistent.key
+
+ [32m✓[39m src/test/i18n.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 197[2mms[22m[39m
+ [32m✓[39m src/hooks/useToast.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m src/components/home/HomeRecommendedSection.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 311[2mms[22m[39m
+ [32m✓[39m src/services/UserService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/lib/http-client/BaseClient.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/auth/AuthContext.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 110[2mms[22m[39m
+ [32m✓[39m src/components/common/NotificationPopover.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 385[2mms[22m[39m
+ [32m✓[39m src/components/common/Card.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 145[2mms[22m[39m
+ [32m✓[39m src/components/home/HomeInProgressGrid.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 345[2mms[22m[39m
+[90mstderr[2m | src/pages/forgotPassword/ForgotPassword.test.tsx[2m > [22m[2mForgotPassword[2m > [22m[2mtransitions through steps
+[22m[39mError fetching captcha site key: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at SystemSettingService.read [90m(/app/frontend/[39msrc/services/SystemSettingService.ts:9:12[90m)[39m
+    at [90m/app/frontend/[39msrc/pages/forgotPassword/ForgotPassword.tsx:24:26
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15519:11[90m)[39m
+
+ [32m✓[39m src/pages/forgotPassword/ForgotPassword.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 131[2mms[22m[39m
+ [32m✓[39m src/components/auth/AuthLayout.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 192[2mms[22m[39m
+ [32m✓[39m src/components/home/HomeStatsCards.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+ [32m✓[39m src/components/home/HomeContinueLearning.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 101[2mms[22m[39m
+ [32m✓[39m src/components/home/FeaturedCourses.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 229[2mms[22m[39m
+ [32m✓[39m src/pages/home/HomePage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 88[2mms[22m[39m
+ [32m✓[39m src/components/home/Header.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 192[2mms[22m[39m
+ [32m✓[39m src/hooks/useUser.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/services/OrganizationService.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/pages/ProtectedPages.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/hooks/useOtp.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/components/home/HomePerformanceChart.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 82[2mms[22m[39m
+ [32m✓[39m src/services/OtpService.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/api/health.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mrenders without crashing
+[22m[39mError fetching auth status: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mrenders without crashing
+[22m[39mPortal initialization failed: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mrenders without crashing
+[22m[39mPortal initialization failed: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mrenders the landing page after loading
+[22m[39mError fetching auth status: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mrenders the landing page after loading
+[22m[39mPortal initialization failed: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mrenders the landing page after loading
+[22m[39mPortal initialization failed: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+ [32m✓[39m src/services/SystemSettingService.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/services/FrameworkService.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/services/ChannelService.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/services/ContentService.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mrenders the landing page after loading
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mdisplays the LMS landing page content
+[22m[39mError fetching auth status: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mdisplays the LMS landing page content
+[22m[39mPortal initialization failed: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mApp Component - RBAC Integration[2m > [22m[2mdisplays the LMS landing page content
+[22m[39mPortal initialization failed: Error: HttpClient not initialized. Call init() with an adapter instance first.
+    at getClient [90m(/app/frontend/[39msrc/lib/http-client/index.ts:11:11[90m)[39m
+    at userAuthInfoService.getAuthInfo [90m(/app/frontend/[39msrc/services/userAuthInfoService/userAuthInfoService.ts:53:69[90m)[39m
+    at portalInitializer [90m(/app/frontend/[39msrc/utils/portalInitializer.ts:9:31[90m)[39m
+    at [90m/app/frontend/[39msrc/App.tsx:12:5
+    at Object.react_stack_bottom_frame [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25989:20[90m)[39m
+    at runWithFiberInDEV [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at commitHookEffectListMount [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13249:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13336:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15484:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/app/frontend/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:15439:11[90m)[39m
+
+ [32m✓[39m src/api/client.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/main.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/App.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 2186[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the landing page after loading [33m 1087[2mms[22m[39m
+     [33m[2m✓[22m[39m displays the LMS landing page content [33m 1044[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m49 passed[39m[22m[90m (49)[39m
+[2m      Tests [22m [1m[32m273 passed[39m[22m[90m (273)[39m
+[2m   Start at [22m 08:33:17
+[2m   Duration [22m 22.41s[2m (transform 3.17s, setup 7.40s, import 11.35s, tests 10.96s, environment 24.83s)[22m

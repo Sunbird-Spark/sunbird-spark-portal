@@ -1,0 +1,40 @@
+# Server Configuration
+# NOTE: For local development, change ENVIRONMENT to 'local' after copying this file to .env
+# Do NOT set NODE_ENV for local development (remove or comment out the line)
+NODE_ENV=test
+ENVIRONMENT=test
+PORT=3000
+
+DOMAIN_URL=http://localhost:3000
+KONG_URL=http://localhost:8000
+
+# Logging Configuration
+SUNBIRD_PORTAL_LOG_LEVEL=error
+
+# Session Configuration
+SUNBIRD_ANONYMOUS_SESSION_TTL=60000
+SUNBIRD_ANONYMOUS_SESSION_SECRET=test_anonymous_session_secret
+SUNBIRD_LOGGEDIN_SESSION_SECRET=test_loggedin_session_secret
+SUNBIRD_PORTAL_SESSION_STORE=in-memory
+
+# Kong Configuration (test tokens)
+KONG_ANONYMOUS_FALLBACK_TOKEN=test_anonymous_fallback_token
+KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN=test_anonymous_register_token
+KONG_LOGGEDIN_FALLBACK_TOKEN=test_loggedin_fallback_token
+KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN=test_loggedin_register_token
+
+# Keycloak Configuration
+PORTAL_REALM=sunbird
+PORTAL_AUTH_SERVER_CLIENT=portal
+
+# Learn Service Configuration
+LEARN_BASE_URL=http://localhost:9000
+
+# Google reCAPTCHA (test values)
+GOOGLE_RECAPTCHA_SECRET=test_recaptcha_secret
+
+# Google OAuth Configuration
+GOOGLE_OAUTH_CLIENT_ID=test_client_id
+GOOGLE_OAUTH_CLIENT_SECRET=test_client_secret
+KEYCLOAK_GOOGLE_CLIENT_ID=test_keycloak_client_id
+KEYCLOAK_GOOGLE_CLIENT_SECRET=test_keycloak_client_secret
