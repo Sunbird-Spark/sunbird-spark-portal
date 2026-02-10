@@ -11,8 +11,8 @@
     /* Sunbird Joyful Theme Colors */
     --background: 48 23% 91%;
     /* #E9E8D9 - Body background */
-    --foreground: 0 0% 20%;
-    /* #333333 - Text */
+    --foreground: 0 0% 13%;
+    /* #222222 - Text */
     --surface: 0 0% 100%;
     /* White surface */
 
@@ -118,6 +118,30 @@
     /* #FFF5F2 */
     --sunbird-white: 0 0% 100%;
     /* #FFFFFF */
+    --sunbird-gray-77: 0 0% 47%;
+    /* #777777 */
+    --sunbird-gray-d9: 0 0% 85%;
+    /* #D9D9D9 */
+    --sunbird-beige-light: 45 100% 89%;
+    /* #FFF1C7 */
+    --sunbird-gray-f1: 0 0% 95%;
+    /* #F1F1F1 */
+    --sunbird-blue-light: 194 36% 59%;
+    /* #70ADBF */
+    --sunbird-blue-medium: 194 47% 45%;
+    /* #3D8FA7 */
+    --sunbird-brown-dark: 28 66% 42%;
+    /* #B06624 */
+    --sunbird-green-dark: 146 47% 36%;
+    /* #318656 */
+    --sunbird-purple-dark: 322 21% 38%;
+    /* #744C65 */
+    --sunbird-gray-e5: 210 5% 90%;
+    /* #E5E7EB */
+    --sunbird-gray-f3: 210 5% 96%;
+    /* #F3F4F6 */
+    --sunbird-footer-bg: 0 0% 11%;
+    /* #1C1C1C */
 
     /* Box Shadows */
     --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
@@ -372,6 +396,7 @@
   .resend-otp-btn:disabled {
     @apply opacity-50 cursor-not-allowed no-underline;
   }
+
 
 
 }
