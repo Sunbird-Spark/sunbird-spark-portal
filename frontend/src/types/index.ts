@@ -49,3 +49,9 @@ export interface Notification {
   duration?: number;
   timestamp: Date;
 }
+
+declare global {
+  interface Window {
+    questionListUrl: string;
+  }
+}

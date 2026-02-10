@@ -4,7 +4,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'sunbird-quml-player': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        'player-config'?: any;
+        'player-config'?: string;
       };
     }
   }

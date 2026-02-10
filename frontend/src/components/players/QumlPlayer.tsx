@@ -4,17 +4,29 @@ interface QumlPlayerProps {
   playerConfig: any;
   telemetryEvents?: (event: any) => void;
   playerEvent?: (event: any) => void;
+  questionListUrl?: string;
 }
 
-const QumlPlayer: React.FC<QumlPlayerProps> = ({ playerConfig, telemetryEvents, playerEvent }) => {
-  const playerRef = useRef<any>(null);
+const QumlPlayer: React.FC<QumlPlayerProps> = ({
+  playerConfig,
+  telemetryEvents,
+  playerEvent,
+  questionListUrl = 'https://staging.sunbirded.org/api/question/v2/list'
+}) => {
+  const playerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // Set global question list URL as required by the player
+    if (window) {
+      window.questionListUrl = questionListUrl;
+    }
+
     const playerElement = playerRef.current;
 
     if (playerElement) {
-      // Set the property directly on the DOM element
-      playerElement.playerConfig = playerConfig;
+      // Use setAttribute for player-config as seen in vanilla JS example
+      // This ensures compatibility if the web component expects attribute parsing
+      playerElement.setAttribute('player-config', JSON.stringify(playerConfig));
 
       const handlePlayerEvent = (event: any) => {
         if (playerEvent) {
@@ -36,7 +48,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ playerConfig, telemetryEvents, 
         playerElement.removeEventListener('telemetryEvent', handleTelemetryEvent);
       };
     }
-  }, [playerConfig, playerEvent, telemetryEvents]);
+  }, [playerConfig, playerEvent, telemetryEvents, questionListUrl]);
 
   return (
     <div className="w-full h-full">
