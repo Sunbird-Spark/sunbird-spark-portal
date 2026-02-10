@@ -48,6 +48,7 @@ const players = [
 ];
 
 // Helper function to recursively copy directories
+// Throws on any error to ensure failures are caught by caller
 function copyDirectory(source, destination) {
   if (!existsSync(destination)) {
     mkdirSync(destination, { recursive: true });
@@ -101,6 +102,8 @@ if (existsSync(assetsDir)) {
 
 console.log('\n📦 Copying player files to public directory...\n');
 
+let hasErrors = false;
+
 players.forEach((player) => {
   console.log(`🎯 ${player.name}:`);
   const sourceBase = join(__dirname, '..', player.source);
@@ -122,6 +125,7 @@ players.forEach((player) => {
         console.log(`  ✓ Copied ${file.from} → public/${file.to}`);
       } catch (error) {
         console.error(`  ✗ Failed to copy ${file.from}:`, error.message);
+        hasErrors = true;
       }
     });
   }
@@ -137,11 +141,17 @@ players.forEach((player) => {
         console.log(`  ✓ Copied ${dir.from}/ → public/${dir.to}/`);
       } catch (error) {
         console.error(`  ✗ Failed to copy ${dir.from}/:`, error.message);
+        hasErrors = true;
       }
     });
   }
 
   console.log('');
 });
+
+if (hasErrors) {
+  console.error('❌ Player files copy failed! Some assets are missing.\n');
+  process.exit(1);
+}
 
 console.log('✅ Player files copied successfully!\n');
