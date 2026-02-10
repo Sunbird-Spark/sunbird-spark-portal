@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FiArrowRight } from "react-icons/fi";
-import { Button } from "@/components/button";
+import { Button } from "@/components/common/Button";
 
 const continueCourse = {
     id: "1",

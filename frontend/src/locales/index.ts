@@ -13,4 +13,4 @@ export {
 export { useAppI18n } from '../hooks/useAppI18n';
 
 // Re-export components (simple version only)
-export { default as SimpleLanguageSwitcher } from '../components/SimpleLanguageSwitcher';
+export { default as SimpleLanguageSwitcher } from '../components/common/SimpleLanguageSwitcher';
