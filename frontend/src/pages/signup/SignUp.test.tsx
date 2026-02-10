@@ -21,7 +21,7 @@ vi.mock("@/hooks/useToast", () => ({
 
 // We can use the actual SignUpStep components as they are exported from SignUpSteps.tsx
 // But it's easier to mock them to control the flow in the Page test
-vi.mock('@/components/SignUpSteps', () => ({
+vi.mock('@/components/auth/SignUpSteps', () => ({
     SignUpStep1: ({ handleContinue, setEmailOrMobile, setPassword, setConfirmPassword, setIsTermsAccepted }: any) => (
         <div>
             <button data-testid="continue-btn" onClick={handleContinue}>Continue</button>

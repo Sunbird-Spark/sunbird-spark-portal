@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@/components/button';
+import { Button } from '@/components/common/Button';
 
 export const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => (
     <div className="login-header text-center mb-8">

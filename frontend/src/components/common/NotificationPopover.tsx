@@ -1,10 +1,10 @@
 import { FiBell, FiX, FiTrash2 } from "react-icons/fi";
-import { Button } from "@/components/button";
+import { Button } from "@/components/common/Button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/popover";
+} from "@/components/common/Popover";
 
 interface Notification {
   id: string;

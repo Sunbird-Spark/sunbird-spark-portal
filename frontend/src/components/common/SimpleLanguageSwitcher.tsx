@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppI18n, type LanguageCode } from '../hooks/useAppI18n';
+import { useAppI18n, type LanguageCode } from '../../hooks/useAppI18n';
 
 export default function SimpleLanguageSwitcher() {
   const { languages, currentCode, changeLanguage } = useAppI18n();

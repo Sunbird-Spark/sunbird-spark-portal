@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/button";
-import { Input } from "@/components/input";
-import { Checkbox } from "@/components/CheckBox";
-import { Header, InputLabel, PrimaryButton, OTPInput } from "../pages/forgotPassword/ForgotPasswordComponents";
+import { Button } from "@/components/common/Button";
+import { Input } from "@/components/common/Input";
+import { Checkbox } from "@/components/common/CheckBox";
+import { Header, InputLabel, PrimaryButton, OTPInput } from "../../pages/forgotPassword/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";

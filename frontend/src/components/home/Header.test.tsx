@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import Header from './Header';
+import Header from '../home/Header';
 
 // Mock the hooks
 vi.mock('@/hooks/useAppI18n', () => ({

@@ -1,6 +1,6 @@
 import { FiStar, FiClock, FiUsers, FiBookOpen } from "react-icons/fi";
-import { Card, CardContent } from "@/components/card";
-import { Badge } from "@/components/badge";
+import { Card, CardContent } from "@/components/common/Card";
+import { Badge } from "@/components/common/Badge";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface Course {

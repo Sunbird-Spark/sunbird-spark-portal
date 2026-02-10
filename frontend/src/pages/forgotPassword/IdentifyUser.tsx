@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
-import { Input } from '@/components/input';
+import { Input } from '@/components/common/Input';
 import { Header, InputLabel, PrimaryButton } from './ForgotPasswordComponents';
 import { IdentifierStatus, OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { IDENTIFIER_REGEX } from '@/utils/ValidationUtils';

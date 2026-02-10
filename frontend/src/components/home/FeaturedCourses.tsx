@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { FiChevronLeft, FiChevronRight, FiArrowRight } from "react-icons/fi";
-import { Button } from "@/components/button";
-import CourseCard from "./CourseCard";
+import { Button } from "@/components/common/Button";
+import CourseCard from "../home/CourseCard";
 import { featuredCourses } from "@/configs/mockData";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { Link } from "react-router-dom";

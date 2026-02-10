@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { AuthLayout } from '@/components/AuthLayout';
+import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/useToast";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX, OTP_REGEX } from '@/utils/ValidationUtils';
-import { SignUpStep1, SignUpStep2 } from '@/components/SignUpSteps';
+import { SignUpStep1, SignUpStep2 } from '@/components/auth/SignUpSteps';
 
 const SignUp: React.FC = () => {
     const navigate = useNavigate();

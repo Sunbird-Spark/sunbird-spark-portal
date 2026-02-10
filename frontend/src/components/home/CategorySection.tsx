@@ -1,5 +1,5 @@
 import { FiArrowRight } from "react-icons/fi";
-import { Button } from "@/components/button";
+import { Button } from "@/components/common/Button";
 import CategoryCard from "./CategoryCard";
 import { categories } from "@/configs/mockData";
 import { useAppI18n } from "@/hooks/useAppI18n";

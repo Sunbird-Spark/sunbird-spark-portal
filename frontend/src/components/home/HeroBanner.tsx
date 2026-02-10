@@ -1,5 +1,5 @@
 import { FiArrowRight, FiPlay, FiUsers, FiAward, FiBookOpen } from "react-icons/fi";
-import { Button } from "@/components/button";
+import { Button } from "@/components/common/Button";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { Link } from "react-router-dom";
 

@@ -1,5 +1,5 @@
 import { IconType } from "react-icons";
-import { Card } from "@/components/card";
+import { Card } from "@/components/common/Card";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface Category {

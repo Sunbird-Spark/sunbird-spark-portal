@@ -15,7 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuRadioGroup,
-} from './dropdown-menu';
+} from './DropdownMenu';
 
 describe('DropdownMenu Components', () => {
   it('renders DropdownMenu with trigger and content', () => {
