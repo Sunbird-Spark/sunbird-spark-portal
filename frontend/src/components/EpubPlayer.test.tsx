@@ -1,25 +1,69 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { EpubPlayer } from './EpubPlayer';
-import appCoreService from '../services/AppCoreService';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 
-// Mock services
-vi.mock('../services/AppCoreService', () => ({
-  default: {
-    getDeviceId: vi.fn(() => Promise.resolve('test-device-id')),
+// Mock player config helper
+const createMockPlayerConfig = (epubUrl: string, contentName = 'EPUB Document') => ({
+  context: {
+    mode: 'play',
+    authToken: '',
+    sid: '7283cf2e-d215-9944-b0c5-269489c6fa56',
+    did: '3c0a3724311fe944dec5df559cc4e006',
+    uid: 'anonymous',
+    channel: '505c7c48ac6dc1edc9b08f21db5a571e',
+    pdata: {
+      id: 'sunbird.portal',
+      ver: '3.2.12',
+      pid: 'sunbird-portal.contentplayer',
+    },
+    tags: [''],
+    timeDiff: 0,
+    host: '',
+    endpoint: '',
+    userData: {
+      firstName: 'Test',
+      lastName: 'User',
+    },
   },
-}));
-
-vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
-  default: {
-    getAuthInfo: vi.fn(() => Promise.resolve({
-      sid: 'test-session-id',
-      uid: 'test-user-id',
-      isAuthenticated: true,
-    })),
+  contextRollup: {
+    l1: '505c7c48ac6dc1edc9b08f21db5a571d',
   },
-}));
+  cdata: [],
+  objectRollup: {},
+  config: {},
+  metadata: {
+    compatibilityLevel: 4,
+    artifactUrl: epubUrl,
+    contentType: 'FocusSpot',
+    identifier: 'test-epub-id',
+    audience: ['Teacher'],
+    visibility: 'Default',
+    mediaType: 'content',
+    osId: 'org.ekstep.quiz.app',
+    languageCode: ['en'],
+    license: 'CC BY 4.0',
+    name: contentName,
+    status: 'Live',
+    code: '43e68089-997e-49a4-902a-6262e5654515',
+    description: 'Test EPUB',
+    streamingUrl: epubUrl,
+    createdOn: '2019-12-16T07:59:53.154+0000',
+    copyrightYear: 2019,
+    additionalCategories: ['Focus Spot'],
+    lastUpdatedOn: '2019-12-16T11:52:56.405+0000',
+    creator: 'Test Creator',
+    pkgVersion: 1,
+    versionKey: '1576497176405',
+    framework: 'tn_k-12_5',
+    createdBy: 'test-user-id',
+    resourceType: 'Read',
+    licenseDetails: {
+      name: 'CC BY 4.0',
+      url: 'https://creativecommons.org/licenses/by/4.0/legalcode',
+      description: 'For details see below:',
+    },
+  },
+});
 
 describe('EpubPlayer', () => {
   beforeEach(() => {
@@ -35,8 +79,13 @@ describe('EpubPlayer', () => {
   });
 
   it('should render without crashing', async () => {
+    const config = createMockPlayerConfig('/test.epub');
     const { container } = render(
-      <EpubPlayer epubUrl="/test.epub" />
+      <EpubPlayer 
+        context={config.context}
+        config={config.config}
+        metadata={config.metadata}
+      />
     );
     
     await waitFor(() => {
@@ -45,27 +94,26 @@ describe('EpubPlayer', () => {
   });
 
   it('should show loading state initially', () => {
-    const { getByText } = render(
-      <EpubPlayer epubUrl="/test.epub" />
+    const config = createMockPlayerConfig('/test.epub');
+    const { container } = render(
+      <EpubPlayer 
+        context={config.context}
+        config={config.config}
+        metadata={config.metadata}
+      />
     );
     
-    expect(getByText('Loading EPUB Player...')).toBeTruthy();
-  });
-
-  it('should fetch device ID and auth info on mount', async () => {
-    render(<EpubPlayer epubUrl="/test.epub" />);
-
-    await waitFor(() => {
-      expect(appCoreService.getDeviceId).toHaveBeenCalled();
-      expect(userAuthInfoService.getAuthInfo).toHaveBeenCalledWith('test-device-id');
-    });
+    // Check that the player container exists
+    expect(container.querySelector('.epub-player-container')).toBeTruthy();
   });
 
   it('should create player element with correct config', async () => {
+    const config = createMockPlayerConfig('/test.epub', 'Test EPUB');
     const { container } = render(
       <EpubPlayer 
-        epubUrl="/test.epub" 
-        contentName="Test EPUB"
+        context={config.context}
+        config={config.config}
+        metadata={config.metadata}
       />
     );
 
@@ -74,17 +122,20 @@ describe('EpubPlayer', () => {
       expect(playerElement).toBeTruthy();
       expect(playerElement?.getAttribute('player-config')).toBeTruthy();
       
-      const config = JSON.parse(playerElement?.getAttribute('player-config') || '{}');
-      expect(config.metadata.artifactUrl).toBe('/test.epub');
-      expect(config.metadata.name).toBe('Test EPUB');
+      const playerConfig = JSON.parse(playerElement?.getAttribute('player-config') || '{}');
+      expect(playerConfig.context.mode).toBe('play');
+      expect(playerConfig.context.uid).toBe('anonymous');
     });
   });
 
   it('should call onPlayerEvent when player event is triggered', async () => {
+    const config = createMockPlayerConfig('/test.epub');
     const onPlayerEvent = vi.fn();
     const { container } = render(
       <EpubPlayer 
-        epubUrl="/test.epub" 
+        context={config.context}
+        config={config.config}
+        metadata={config.metadata}
         onPlayerEvent={onPlayerEvent}
       />
     );
@@ -110,8 +161,13 @@ describe('EpubPlayer', () => {
   });
 
   it('should cleanup on unmount', async () => {
+    const config = createMockPlayerConfig('/test.epub');
     const { container, unmount } = render(
-      <EpubPlayer epubUrl="/test.epub" />
+      <EpubPlayer 
+        context={config.context}
+        config={config.config}
+        metadata={config.metadata}
+      />
     );
 
     await waitFor(() => {
@@ -121,25 +177,5 @@ describe('EpubPlayer', () => {
     unmount();
 
     expect(container.querySelector('sunbird-epub-player')).toBeFalsy();
-  });
-
-  it('should use fallback values when auth service fails', async () => {
-    vi.mocked(appCoreService.getDeviceId).mockRejectedValueOnce(new Error('Device ID error'));
-
-    const { container } = render(
-      <EpubPlayer epubUrl="/test.epub" />
-    );
-
-    await waitFor(() => {
-      // Player should still be created with fallback values
-      const playerElement = container.querySelector('sunbird-epub-player');
-      expect(playerElement).toBeTruthy();
-      
-      const config = JSON.parse(playerElement?.getAttribute('player-config') || '{}');
-      // Should use fallback values
-      expect(config.context.uid).toBe('anonymous');
-      expect(config.context.sid).toBe('anonymous-session');
-      expect(config.context.did).toMatch(/^device-\d+$/);
-    });
   });
 });

@@ -13,6 +13,7 @@ import Index from './pages/Index';
 import ForgotPassword from './pages/ForgotPassword';
 import PasswordResetSuccess from './pages/PasswordResetSuccess';
 import SignUp from './pages/SignUp';
+import { EpubPlayerDemo } from './pages/EpubPlayerDemo';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -30,6 +31,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/epub-player" element={<EpubPlayerDemo />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />

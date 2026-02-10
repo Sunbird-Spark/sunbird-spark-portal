@@ -1,79 +1,11 @@
 import { EpubPlayerConfig, EpubPlayerEvent } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 
 /**
  * Service for initializing and managing the EPUB Player.
  * Handles player creation, configuration, and event management.
  */
 export class EpubPlayerService {
-  private eventHandlers = new WeakMap<HTMLElement, (event: Event) => void>();
-
-  private static readonly DEFAULT_CONTEXT = {
-    mode: 'play' as const,
-    partner: [] as string[],
-    pdata: {
-      id: 'sunbird.portal',
-      ver: '1.0',
-      pid: 'sunbird-portal',
-    },
-    timeDiff: 0,
-    channel: 'sunbird-portal',
-    tags: [] as string[],
-    contextRollup: {},
-    objectRollup: {},
-    endpoint: '',
-  };
-
-  private static readonly DEFAULT_CONFIG = {
-    sideMenu: {
-      showShare: false,
-      showDownload: false,
-      showReplay: false,
-      showExit: false,
-    },
-  };
-
-  private static readonly DEFAULT_METADATA = {
-    streamingUrl: '',
-    compatibilityLevel: 1,
-    pkgVersion: 1,
-  };
-
-  /**
-   * Creates a default player configuration
-   * Automatically fetches sid and uid from the auth service if not provided
-   */
-  public static createDefaultConfig(
-    contentId: string,
-    contentName: string,
-    epubUrl: string,
-    userId?: string,
-    sessionId?: string
-  ): EpubPlayerConfig {
-    // Get sid and uid from auth service if not provided
-    const sid = sessionId || userAuthInfoService.getSessionId() || `session-${Date.now()}`;
-    const uid = userId || userAuthInfoService.getUserId() || `anonymous`;
-
-    return {
-      context: {
-        ...EpubPlayerService.DEFAULT_CONTEXT,
-        contentId,
-        sid,
-        uid,
-        did: `device-${Date.now()}`,
-        host: window.location.origin,
-      },
-      config: {
-        ...EpubPlayerService.DEFAULT_CONFIG,
-      },
-      metadata: {
-        ...EpubPlayerService.DEFAULT_METADATA,
-        identifier: contentId,
-        name: contentName,
-        artifactUrl: epubUrl,
-      },
-    };
-  }
+  private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
 
   /**
    * Create EPUB player element with configuration
@@ -90,7 +22,8 @@ export class EpubPlayerService {
    */
   attachEventListeners(
     element: HTMLElement,
-    onPlayerEvent?: (event: EpubPlayerEvent) => void
+    onPlayerEvent?: (event: EpubPlayerEvent) => void,
+    onTelemetryEvent?: (event: any) => void
   ): void {
     // Remove any existing handler first to prevent memory leaks
     this.removeEventListeners(element);
@@ -108,19 +41,28 @@ export class EpubPlayerService {
       }
     };
 
+    const telemetryHandler = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (onTelemetryEvent) {
+        onTelemetryEvent(customEvent.detail);
+      }
+    };
+
     element.addEventListener('playerEvent', playerHandler);
+    element.addEventListener('telemetryEvent', telemetryHandler);
     
-    // Store handler for cleanup
-    this.eventHandlers.set(element, playerHandler);
+    // Store handlers for cleanup
+    this.eventHandlers.set(element, { player: playerHandler, telemetry: telemetryHandler });
   }
 
   /**
    * Remove event listeners from the player element
    */
   removeEventListeners(element: HTMLElement): void {
-    const handler = this.eventHandlers.get(element);
-    if (handler) {
-      element.removeEventListener('playerEvent', handler);
+    const handlers = this.eventHandlers.get(element);
+    if (handlers) {
+      element.removeEventListener('playerEvent', handlers.player);
+      element.removeEventListener('telemetryEvent', handlers.telemetry);
       this.eventHandlers.delete(element);
     }
   }
@@ -154,15 +96,5 @@ export class EpubPlayerService {
     } catch {
       return false;
     }
-  }
-
-  /**
-   * Handles player events and provides structured event data
-   */
-  public static handlePlayerEvent(event: any): EpubPlayerEvent {
-    return {
-      type: event?.eid || 'unknown',
-      data: event,
-    };
   }
 }

@@ -1,19 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
-import appCoreService from '../services/AppCoreService';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { EpubPlayerService } from '../services/players/epub';
 import type { EpubPlayerConfig, EpubPlayerEvent } from '../services/players/epub';
 
 interface EpubPlayerProps {
-  epubUrl: string;
-  contentName?: string;
+  context: any;
+  contextRollup?: any;
+  cdata?: any;
+  objectRollup?: any;
+  mode?: any;
+  config?: any;
+  metadata?: any;
   onPlayerEvent?: (event: EpubPlayerEvent) => void;
+  onTelemetryEvent?: (event: any) => void;
 }
 
 export const EpubPlayer: React.FC<EpubPlayerProps> = ({
-  epubUrl,
-  contentName = 'EPUB Document',
+  context,
+  contextRollup,
+  cdata,
+  objectRollup,
+  mode,
+  config,
+  metadata,
   onPlayerEvent,
+  onTelemetryEvent,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerElementRef = useRef<HTMLElement | null>(null);
@@ -29,42 +39,36 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
       }
 
       try {
-        // Get device ID and session ID from services
-        let deviceId = 'device-' + Date.now();
-        let sessionId = 'anonymous-session';
-        let userId = 'anonymous';
-
-        try {
-          deviceId = await appCoreService.getDeviceId();
-          const authInfo = await userAuthInfoService.getAuthInfo(deviceId);
-          sessionId = authInfo?.sid || sessionId;
-          userId = authInfo?.uid || userId;
-        } catch (authError) {
-          // Auth service failed, continue with fallback values
-          console.warn('Auth service unavailable, using fallback values');
-        }
-
         if (!mounted) return;
 
-        // Create default config
-        const config = EpubPlayerService.createDefaultConfig(
-          'epub-content-' + Date.now(),
-          contentName,
-          epubUrl,
-          userId,
-          sessionId
-        );
-        
-        // Update device ID
-        config.context.did = deviceId;
+        // Build config - use context as-is, with optional overrides
+        const playerConfig: EpubPlayerConfig = {
+          context: {
+            ...context,
+            mode: mode !== undefined ? mode : context.mode,
+            contextRollup: contextRollup !== undefined ? contextRollup : context.contextRollup,
+            cdata: cdata !== undefined ? cdata : context.cdata,
+            objectRollup: objectRollup !== undefined ? objectRollup : context.objectRollup,
+          },
+          config: config || {},
+          metadata: metadata || {},
+        };
+
+        console.log('EPUB Player Config:', JSON.stringify(playerConfig, null, 2));
 
         // Create player element via service
-        const epubElement = playerService.createElement(config);
+        const epubElement = playerService.createElement(playerConfig);
 
         // Attach event listeners via service
-        playerService.attachEventListeners(epubElement, (event) => {
-          if (onPlayerEvent) onPlayerEvent(event);
-        });
+        playerService.attachEventListeners(
+          epubElement,
+          (event) => {
+            if (onPlayerEvent) onPlayerEvent(event);
+          },
+          (event) => {
+            if (onTelemetryEvent) onTelemetryEvent(event);
+          }
+        );
 
         // Store reference to player element
         playerElementRef.current = epubElement;
@@ -98,7 +102,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
         playerElementRef.current = null;
       }
     };
-  }, [epubUrl, contentName, onPlayerEvent]);
+  }, [context, contextRollup, cdata, objectRollup, mode, config, metadata, onPlayerEvent, onTelemetryEvent]);
 
   return (
     <div ref={containerRef} className="epub-player-container">
