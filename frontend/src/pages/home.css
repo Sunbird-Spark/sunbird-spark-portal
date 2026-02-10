@@ -100,7 +100,7 @@
 }
 
 .home-continue-section {
-    @apply mb-8 md:mb-12;
+    @apply pt-2 mb-8 md:mb-12;
 }
 
 .home-continue-grid {
