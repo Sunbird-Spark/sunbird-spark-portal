@@ -1,12 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import session from 'express-session';
-import { envConfig } from './config/env.js';
-import { sessionStore } from './utils/sessionStore.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
-import { destroySession } from './utils/sessionUtils.js';
+import { destroySession, destroySessionId, getCookieValue, getUnsignedSessionId } from './utils/sessionUtils.js';
+import { anonymousSessionConfig, authSessionConfig } from './config/sessionConfig.js';
 import formRoutes from './routes/formsRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
@@ -39,37 +38,25 @@ app.get('/app/v1/info', getAppInfo);
 
 // Anonymous session middleware for API routes only
 const anonymousSessionMiddleware = [
-    session({
-        name: CookieNames.ANONYMOUS,
-        store: sessionStore,
-        secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-            sameSite: 'lax'
-        }
-    }),
+    session(anonymousSessionConfig),
     registerDeviceWithKong(),
     setAnonymousOrg()
 ];
 
 app.get('/profile',
-    session({
-        name: CookieNames.AUTH,
-        store: sessionStore,
-        secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-            sameSite: 'lax'
+    session(authSessionConfig), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), async (req: Request, res: Response) => {
+        try {
+            const anonymousCookie = getCookieValue(req.headers.cookie || '', CookieNames.ANONYMOUS);
+            const anonymousSessionId = getUnsignedSessionId(anonymousCookie || '');
+
+            if (anonymousSessionId) {
+                await destroySessionId(anonymousSessionId);
+                logger.info(`Destroyed anonymous session ${anonymousSessionId} during login`);
+            }
+        } catch (err) {
+            logger.error('Error cleaning up anonymous session', err);
         }
-    }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: Request, res: Response) => {
+
         res.clearCookie(CookieNames.ANONYMOUS);
         if (req.session) {
             req.session.save((err) => {
@@ -83,12 +70,13 @@ app.get('/profile',
         }
     });
 
-app.all('/portal/logout', async (req, res) => {
-    res.status(200).clearCookie(CookieNames.SESSION_ID, { path: '/' });
+app.all('/portal/logout', session(authSessionConfig), async (req, res) => {
     try {
         await destroySession(req);
+        res.clearCookie(CookieNames.AUTH);
+        logger.info('User logged out and session destroyed');
     } catch (err) {
-        logger.error('Error destroying session', err);
+        logger.error('Error destroying session during logout', err);
     }
     res.redirect('/');
 })
