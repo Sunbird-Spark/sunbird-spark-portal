@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Profile from './Profile';
 
 // Mock child components
-vi.mock('@/components/HomeSidebar', () => ({
+vi.mock('@/components/home/HomeSidebar', () => ({
     default: ({ onNavChange }: { onNavChange: (n: string) => void }) => (
         <div data-testid="sidebar">
             <button onClick={() => onNavChange('profile')}>Change Nav</button>

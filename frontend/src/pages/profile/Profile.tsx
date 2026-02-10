@@ -14,7 +14,7 @@ import PageLoader from "@/components/PageLoader";
 import Footer from "@/components/Footer";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { LanguageConfig } from "@/configs/languages";
-import HomeSidebar from "@/components/HomeSidebar";
+import HomeSidebar from "@/components/home/HomeSidebar";
 import ProfileCard from "@/components/profile/ProfileCard"
 import PersonalInformation from "@/components/profile/PersonalInformation"
 import ProfileLearningList from "@/components/profile/ProfileLearningList"
