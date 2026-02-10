@@ -42,7 +42,7 @@ class AppCoreService {
                 return;
             }
 
-            window.EkTelemetry.getFingerPrint((deviceId: string, components: FingerprintComponent[], version: string) => {
+            window.EkTelemetry.getFingerPrint((deviceId: string, _components: FingerprintComponent[], _version: string) => {
                 this.deviceId = deviceId;
 
                 // Store in localStorage
@@ -94,12 +94,9 @@ class AppCoreService {
 
     async initialize(): Promise<void> {
         try {
-            console.log('Initializing AppCoreService...');
-
             // Preload device ID
             const deviceId = await this.getDeviceId();
             console.log('Device ID initialized:', deviceId);
-
         } catch (error) {
             console.error('AppCoreService initialization failed:', error);
             throw error;

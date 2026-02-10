@@ -20,7 +20,6 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
   react: { useSuspense: false },
   debug: import.meta.env.DEV,
- 
 });
 
 export default i18n;

@@ -8,9 +8,11 @@ import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
 import { destroySession } from './utils/sessionUtils.js';
 import formRoutes from './routes/formsRoutes.js';
+import googleRoutes from './routes/googleRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 import { redirectTenant } from './controllers/tenantController.js';
+import { setAnonymousOrg } from './middlewares/anonymousOrg.js';
 import { loadTenants } from './services/tenantService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +20,8 @@ import { CookieNames } from './utils/cookieConstants.js';
 import { checkHealth } from './controllers/healthController.js';
 import { userProxy } from './proxies/userProxy.js';
 import helmet from 'helmet';
+import authRoutes from './routes/userAuthInfoRoutes.js';
+import { getAppInfo } from './controllers/appInfoController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,19 +35,26 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.get('/health', checkHealth);
-app.use(session({
-    name: CookieNames.ANONYMOUS,
-    store: sessionStore,
-    secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        secure: envConfig.ENVIRONMENT !== 'local',
-        maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-        sameSite: 'lax'
-    }
-}), registerDeviceWithKong());
+app.get('/app/v1/info', getAppInfo);
+
+// Anonymous session middleware for API routes only
+const anonymousSessionMiddleware = [
+    session({
+        name: CookieNames.ANONYMOUS,
+        store: sessionStore,
+        secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: envConfig.ENVIRONMENT !== 'local',
+            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
+            sameSite: 'lax'
+        }
+    }),
+    registerDeviceWithKong(),
+    setAnonymousOrg()
+];
 
 app.get('/profile',
     session({
@@ -81,9 +92,17 @@ app.all('/portal/logout', async (req, res) => {
     }
     res.redirect('/');
 })
+
+// Apply anonymous session middleware to API routes (once per route tree)
+app.use('/api', anonymousSessionMiddleware);
 app.use('/api/data/v1/form', formRoutes);
+app.use('/portal/user/v1/auth', anonymousSessionMiddleware, authRoutes);
+app.use('/google', googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Apply anonymous session middleware to portal routes (once per route tree)
+app.use('/portal', anonymousSessionMiddleware);
 
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
 app.post('/portal/user/v1/password/reset', userProxy);

@@ -36,6 +36,13 @@ declare module 'express-session' {
             hashTagId?: string;
             rootOrgId?: string;
         }
+        anonymousOrg?: {
+            id?: string;
+            slug?: string;
+            channel?: string;
+            hashTagId?: string;
+            orgName?: string;
+        };
         managedToken?: string;
         logSession?: boolean;
         deviceId?: string;
@@ -51,5 +58,14 @@ declare module 'express-session' {
             [key: string]: any;
         };
         auth_redirect_uri?: string;
+        googleOAuth?: {
+            nonce: string;
+            state: string;
+            client_id: string;
+            redirect_uri: string;
+            error_callback: string;
+            timestamp: number;
+            sessionUsed?: boolean;
+        };
     }
 }

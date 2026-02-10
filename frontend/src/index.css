@@ -11,8 +11,8 @@
     /* Sunbird Joyful Theme Colors */
     --background: 48 23% 91%;
     /* #E9E8D9 - Body background */
-    --foreground: 0 0% 20%;
-    /* #333333 - Text */
+    --foreground: 0 0% 13%;
+    /* #222222 - Text */
     --surface: 0 0% 100%;
     /* White surface */
 
@@ -118,9 +118,56 @@
     /* #FFF5F2 */
     --sunbird-white: 0 0% 100%;
     /* #FFFFFF */
+    --sunbird-gray-77: 0 0% 47%;
+    /* #777777 */
+    --sunbird-gray-d9: 0 0% 85%;
+    /* #D9D9D9 */
+    --sunbird-beige-light: 45 100% 89%;
+    /* #FFF1C7 */
+    --sunbird-gray-f1: 0 0% 95%;
+    /* #F1F1F1 */
+    --sunbird-blue-light: 194 36% 59%;
+    /* #70ADBF */
+    --sunbird-blue-medium: 194 47% 45%;
+    /* #3D8FA7 */
+    --sunbird-brown-dark: 28 66% 42%;
+    /* #B06624 */
+    --sunbird-green-dark: 146 47% 36%;
+    /* #318656 */
+    --sunbird-purple-dark: 322 21% 38%;
+    /* #744C65 */
+    --sunbird-gray-e5: 210 5% 90%;
+    /* #E5E7EB */
+    --sunbird-gray-f3: 210 5% 96%;
+    /* #F3F4F6 */
+    --sunbird-footer-bg: 0 0% 11%;
+    /* #1C1C1C */
+    --sunbird-gray-ef: 0 0% 93.7%;
+    /* #EFEFEF */
 
     /* Box Shadows */
     --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
+    --sunbird-shadow-sm: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-md: 0 0.875rem 0.875rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-lg: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
+
+    /* Component Specific Colors */
+    --sunbird-progress-bg: 39 77% 76%;
+    /* #F0CE94 */
+
+    --sunbird-status-completed-bg: 95 33% 81%;
+    /* #CAE5B6 */
+    --sunbird-status-completed-border: 95 26% 53%;
+    /* #82A668 */
+    --sunbird-status-completed-text: 0 0% 0%;
+    /* #000000 */
+
+    --sunbird-status-ongoing-bg: 45 100% 89%;
+    /* #FFF1C7 */
+    --sunbird-status-ongoing-border: 28 57% 54%;
+    /* #CC8545 */
+    --sunbird-status-ongoing-text: 0 0% 0%;
+    /* #000000 */
   }
 
   .dark {
@@ -374,6 +421,7 @@
   .resend-otp-btn:disabled {
     @apply opacity-50 cursor-not-allowed no-underline;
   }
+
 
 
 }

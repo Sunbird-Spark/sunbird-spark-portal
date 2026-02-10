@@ -41,6 +41,19 @@ export default [
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      'max-lines': [
+        'error',
+        {
+          max: 500,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+    },
+  },
 
   prettier,
 ];

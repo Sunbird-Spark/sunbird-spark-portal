@@ -3,13 +3,15 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { withRoles } from './rbac/withRoles';
 
-import HomePage from './pages/HomePage';
-import UnauthorizedPage from './pages/UnauthorizedPage';
-import AdminPage from './pages/AdminPage';
-import WorkspacePage from './pages/WorkspacePage';
-import ReportsPage from './pages/ReportsPage';
-import CreateContentPage from './pages/CreateContentPage';
+import Home from './pages/home/Home';
+import Profile from './pages/profile/Profile';
+import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
+import AdminPage from './pages/admin/AdminPage';
+import WorkspacePage from './pages/workspace/WorkspacePage';
+import ReportsPage from './pages/reports/ReportsPage';
+import CreateContentPage from './pages/content/CreateContentPage';
 import Index from './pages/Index';
+
 import ForgotPassword from './pages/ForgotPassword';
 import PasswordResetSuccess from './pages/PasswordResetSuccess';
 import SignUp from './pages/SignUp';
@@ -26,11 +28,13 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Index />} />
-        <Route path="/home" element={<HomePage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/collection/:collectionId" element={<CollectionDetail />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile" element={<Profile />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />

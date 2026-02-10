@@ -19,7 +19,8 @@ describe('kongProxy', () => {
 
     const importKongProxy = async (overrideEnv?: { KONG_URL?: string }) => {
         vi.doMock('http-proxy-middleware', () => ({
-            createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next())
+            createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
+            responseInterceptor: vi.fn()
         }));
         vi.doMock('../utils/proxyUtils.js', () => ({
             decorateRequestHeaders: vi.fn()
@@ -73,15 +74,16 @@ describe('Kong Proxy Integration', () => {
 
         mockKongServer = express();
         mockKongServer.use(express.json());
-        
-        mockKongServer.get('/api/unauthorized', (req: Request, res: Response) => {
+
+        mockKongServer.get('/unauthorized', (req: Request, res: Response) => {
             res.status(401).json({ success: false });
         });
-        mockKongServer.get('/api/forbidden', (req: Request, res: Response) => {
+        mockKongServer.get('/forbidden', (req: Request, res: Response) => {
             res.status(403).json({ success: false });
         });
-        
-        mockKongServer.all('/api/*rest', (req: Request, res: Response) => {
+
+        // Catch-all route for other requests
+        mockKongServer.use((req: Request, res: Response) => {
             res.status(200).json({
                 success: true,
                 method: req.method,
@@ -110,7 +112,7 @@ describe('Kong Proxy Integration', () => {
         }));
 
         const { kongProxy } = await import('./kongProxy.js');
-        
+
         app = express();
         app.use(express.json());
         app.use(session({
@@ -139,13 +141,13 @@ describe('Kong Proxy Integration', () => {
         vi.resetModules();
     });
 
-    it('should proxy request and rewrite /portal to /api', async () => {
+    it('should proxy request and rewrite /portal to /', async () => {
         const response = await request(app)
             .get('/portal/user/v1/read/user123')
             .expect(200);
 
         expect(response.body.success).toBe(true);
-        expect(response.body.path).toMatch(/^\/api/);
+        expect(response.body.path).toBe('/user/v1/read/user123');
     });
 
     it('should forward session token in headers when authenticated', async () => {
@@ -217,40 +219,40 @@ describe('Kong Proxy Integration', () => {
 
         expect(response.body.success).toBe(true);
     });
-    
+
     it('should log error on status code greater than 400', async () => {
         const logger = (await import('../utils/logger.js')).default;
         const errorSpy = vi.spyOn(logger, 'error');
-        
+
         await request(app)
             .get('/portal/unauthorized')
             .expect(401);
-        
+
         expect(errorSpy).toHaveBeenCalled();
         const call = errorSpy.mock.calls[0];
         expect(call).toBeDefined();
         const messageArg = call ? call[0] : '';
         expect(String(messageArg)).toContain('Error proxying request');
         expect(String(messageArg)).toContain('Status: 401');
-        
+
         errorSpy.mockRestore();
     });
-    
+
     it('should log error on 403 Forbidden from upstream', async () => {
         const logger = (await import('../utils/logger.js')).default;
         const errorSpy = vi.spyOn(logger, 'error');
-        
+
         await request(app)
             .get('/portal/forbidden')
             .expect(403);
-        
+
         expect(errorSpy).toHaveBeenCalled();
         const call = errorSpy.mock.calls[0];
         expect(call).toBeDefined();
         const messageArg = call ? call[0] : '';
         expect(String(messageArg)).toContain('Error proxying request');
         expect(String(messageArg)).toContain('Status: 403');
-        
+
         errorSpy.mockRestore();
     });
 });
