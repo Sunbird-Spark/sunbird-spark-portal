@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SignUp from './SignUp';
 import { BrowserRouter } from 'react-router-dom';
-import React from 'react';
 
 // Mock hooks
 const mockNavigate = vi.fn();
@@ -47,7 +46,8 @@ vi.mock('@/hooks/useOtp', () => ({
 }));
 
 // Mock ReCAPTCHA
-vi.mock('react-google-recaptcha', () => {
+vi.mock('react-google-recaptcha', async () => {
+    const React = await import('react');
     return {
         default: React.forwardRef((props: any, ref: any) => {
             React.useImperativeHandle(ref, () => ({

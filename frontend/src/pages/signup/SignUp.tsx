@@ -151,7 +151,7 @@ const SignUp: React.FC = () => {
                 onError: (error: any) => {
                     console.error('OTP generation error:', error);
                     captchaRef.current?.reset();
-                    
+
                     if (error?.response?.status === 418) {
                         toast({
                             title: "Captcha Validation Failed",
@@ -173,7 +173,7 @@ const SignUp: React.FC = () => {
     const handleVerifyOtp = async () => {
         const otpString = otp.join('');
         const isEmail = emailOrMobile.includes('@');
-        
+
         const request = {
             request: {
                 key: emailOrMobile,
@@ -181,7 +181,7 @@ const SignUp: React.FC = () => {
                 otp: otpString
             }
         };
-        
+
         // First verify OTP
         verifyOtpMutation.mutate(
             { request },
@@ -190,10 +190,10 @@ const SignUp: React.FC = () => {
                     if (response.status === 200) {
                         // OTP verified successfully, now call signup API
                         const deviceId = localStorage.getItem('deviceId') || undefined;
-                        
+
                         // Hash the password with bcrypt before sending to backend
                         const hashedPassword = await hashPassword(password);
-                        
+
                         signupMutation.mutate(
                             { firstName: firstName.trim(), identifier: emailOrMobile, password: hashedPassword, deviceId },
                             {
@@ -256,14 +256,14 @@ const SignUp: React.FC = () => {
 
     const resendOtp = async (captchaResponse?: string) => {
         const isEmail = emailOrMobile.includes('@');
-        
+
         const request = {
             request: {
                 key: emailOrMobile,
                 type: isEmail ? 'email' : 'phone'
             }
         };
-        
+
         generateOtpMutation.mutate(
             { request, captchaResponse },
             {
@@ -280,7 +280,7 @@ const SignUp: React.FC = () => {
                 onError: (error: any) => {
                     console.error('Resend OTP error:', error);
                     captchaRef.current?.reset();
-                    
+
                     if (error?.response?.status === 418) {
                         toast({
                             title: "Captcha Validation Failed",
@@ -341,6 +341,7 @@ const SignUp: React.FC = () => {
                         sitekey={googleCaptchaSiteKey}
                         size="invisible"
                         onChange={token => {
+                            console.log('ReCAPTCHA token received');
                             if (token) {
                                 if (step === 1) {
                                     initiateOtpGeneration(token);
@@ -349,6 +350,8 @@ const SignUp: React.FC = () => {
                                 }
                             }
                         }}
+                        onLoad={() => console.log('ReCAPTCHA API loaded successfully')}
+                        onErrored={() => console.error('ReCAPTCHA error occurred')}
                     />
                 )}
             </div>
