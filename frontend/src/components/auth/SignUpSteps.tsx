@@ -9,6 +9,8 @@ import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 
 
 interface Step1Props {
+    firstName: string;
+    setFirstName: (val: string) => void;
     emailOrMobile: string;
     setEmailOrMobile: (val: string) => void;
     password: string;
@@ -23,9 +25,11 @@ interface Step1Props {
     setShowConfirmPassword: (val: React.SetStateAction<boolean>) => void;
     handleContinue: () => void;
     isStep1Valid: boolean;
+    isLoading?: boolean;
 }
 
 export const SignUpStep1 = ({
+    firstName, setFirstName,
     emailOrMobile, setEmailOrMobile,
     password, setPassword,
     confirmPassword, setConfirmPassword,
@@ -33,7 +37,8 @@ export const SignUpStep1 = ({
     showPassword, setShowPassword,
     showConfirmPassword, setShowConfirmPassword,
     handleContinue,
-    isStep1Valid
+    isStep1Valid,
+    isLoading = false
 }: Step1Props) => (
     <>
         <Header
@@ -46,7 +51,7 @@ export const SignUpStep1 = ({
             <Button
                 variant="outline"
                 className="secondary-outline-button"
-                onClick={() => console.log('Google Sign In')}
+                onClick={() => { window.location.href = "/google/auth" }}
             >
                 <FcGoogle className="w-5 h-5" />
                 Sign in with Google
@@ -61,6 +66,23 @@ export const SignUpStep1 = ({
 
             {/* Form Fields */}
             <div className="space-y-3">
+                {/* First Name */}
+                <div className="form-group relative pb-4">
+                    <InputLabel htmlFor="firstName" required>First Name</InputLabel>
+                    <Input
+                        id="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Enter First Name"
+                        className="login-input-field h-10 px-3"
+                    />
+                    {firstName && firstName.trim().length === 0 && (
+                        <p className="form-error-absolute form-error-offset-8">
+                            First name is required
+                        </p>
+                    )}
+                </div>
+
                 {/* Email / Mobile */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="emailOrMobile" required>Email ID / Mobile Number</InputLabel>
@@ -161,11 +183,11 @@ export const SignUpStep1 = ({
                 </div>
 
                 <PrimaryButton
-                    disabled={!isStep1Valid}
+                    disabled={!isStep1Valid || isLoading}
                     onClick={handleContinue}
                     className="mt-4 h-[3rem]"
                 >
-                    Continue
+                    {isLoading ? 'Creating Account...' : 'Continue'}
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
@@ -181,9 +203,11 @@ interface Step2Props {
     setOtp: (val: string[]) => void;
     isOtpValid: boolean;
     handleVerifyOtp: () => void;
+    handleResendOtp: () => void;
+    isLoading?: boolean;
 }
 
-export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2Props) => {
+export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp, handleResendOtp, isLoading = false }: Step2Props) => {
     const [disableResendOtp, setDisableResendOtp] = useState(false);
     const [counter, setCounter] = useState(20);
     const [resendOtpCounter, setResendOtpCounter] = useState(1);
@@ -206,9 +230,9 @@ export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2P
         return () => clearInterval(interval);
     }, [resendOtpCounter]);
 
-    const handleResendOtp = () => {
+    const onResendClick = () => {
         setResendOtpCounter(prev => prev + 1);
-        console.log("Resending OTP...");
+        handleResendOtp();
     };
 
     return (
@@ -229,7 +253,7 @@ export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2P
                     <div className="text-center text-[0.75rem] font-medium mt-8">
                         <button
                             disabled={disableResendOtp}
-                            onClick={handleResendOtp}
+                            onClick={onResendClick}
                             className="resend-otp-btn"
                         >
                             Resend OTP {counter > 0 && `(${counter})`}
@@ -239,11 +263,11 @@ export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2P
 
                 <div className="pb-2 mt-20">
                     <PrimaryButton
-                        disabled={!isOtpValid}
+                        disabled={!isOtpValid || isLoading}
                         onClick={handleVerifyOtp}
                         className="h-[3rem]"
                     >
-                        Submit
+                        {isLoading ? 'Verifying...' : 'Submit'}
                     </PrimaryButton>
                 </div>
             </div>

@@ -49,6 +49,8 @@ vi.mock('react-icons/fi', () => ({
 
 describe('SignUpStep1', () => {
     const defaultProps = {
+        firstName: '',
+        setFirstName: vi.fn(),
         emailOrMobile: '',
         setEmailOrMobile: vi.fn(),
         password: '',
@@ -69,11 +71,15 @@ describe('SignUpStep1', () => {
         render(<SignUpStep1 {...defaultProps} />);
         expect(screen.getByText('Welcome to Sunbird!')).toBeInTheDocument();
         expect(screen.getByText('Sign in with Google')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Enter First Name')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter Email ID / Mobile Number')).toBeInTheDocument();
     });
 
     it('handles input changes', () => {
         render(<SignUpStep1 {...defaultProps} />);
+
+        fireEvent.change(screen.getByPlaceholderText('Enter First Name'), { target: { value: 'John' } });
+        expect(defaultProps.setFirstName).toHaveBeenCalledWith('John');
 
         fireEvent.change(screen.getByPlaceholderText('Enter Email ID / Mobile Number'), { target: { value: 'test@example.com' } });
         expect(defaultProps.setEmailOrMobile).toHaveBeenCalledWith('test@example.com');
@@ -138,6 +144,7 @@ describe('SignUpStep2', () => {
         setOtp: vi.fn(),
         isOtpValid: false,
         handleVerifyOtp: vi.fn(),
+        handleResendOtp: vi.fn(),
     };
 
     it('renders Step 2 correctly', () => {
@@ -158,5 +165,12 @@ describe('SignUpStep2', () => {
         render(<SignUpStep2 {...props} />);
         fireEvent.click(screen.getByTestId('primary-button'));
         expect(props.handleVerifyOtp).toHaveBeenCalled();
+    });
+
+    it('calls handleResendOtp when resend button is clicked', () => {
+        render(<SignUpStep2 {...defaultProps} />);
+        const resendButton = screen.getByText(/Resend OTP/);
+        fireEvent.click(resendButton);
+        expect(defaultProps.handleResendOtp).toHaveBeenCalled();
     });
 });
