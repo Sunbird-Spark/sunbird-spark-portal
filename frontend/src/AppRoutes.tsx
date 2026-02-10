@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { withRoles } from './rbac/withRoles';
 
-import HomePage from './pages/home/HomePage';
+import Home from './pages/home/Home';
 import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
 import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
@@ -25,8 +25,8 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Index />} />
-        <Route path="/home" element={<HomePage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />

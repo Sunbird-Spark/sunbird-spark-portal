@@ -34,9 +34,8 @@ export const NotificationPopover = ({
           <FiBell className="w-5 h-5" />
           {notifications.length > 0 && (
             <span
-              className={`absolute -top-1 -right-1 ${
-                isMobile ? "w-4 h-4 text-[10px]" : "w-5 h-5 text-xs"
-              } bg-destructive text-destructive-foreground rounded-full flex items-center justify-center`}
+              className={`absolute -top-1 -right-1 ${isMobile ? "w-4 h-4 text-[0.625rem]" : "w-5 h-5 text-xs"
+                } bg-destructive text-destructive-foreground rounded-full flex items-center justify-center`}
             >
               {notifications.length}
             </span>
@@ -45,9 +44,8 @@ export const NotificationPopover = ({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className={`${
-          isMobile ? "w-80 p-0" : "w-96 p-0"
-        } bg-muted/95 border-border shadow-lg`}
+        className={`${isMobile ? "w-80 p-0" : "w-96 p-0"
+          } bg-muted/95 border-border shadow-lg`}
       >
         <div className={isMobile ? "p-3" : "p-4"}>
           {!isMobile && (
@@ -71,15 +69,13 @@ export const NotificationPopover = ({
             </h3>
           )}
           <div
-            className={`space-y-${isMobile ? "2" : "3"} max-h-${
-              isMobile ? "64" : "80"
-            } overflow-y-auto`}
+            className={`space-y-${isMobile ? "2" : "3"} max-h-${isMobile ? "64" : "80"
+              } overflow-y-auto`}
           >
             {notifications.length === 0 ? (
               <p
-                className={`text-muted-foreground ${
-                  isMobile ? "text-xs py-3" : "text-sm py-4"
-                } text-center`}
+                className={`text-muted-foreground ${isMobile ? "text-xs py-3" : "text-sm py-4"
+                  } text-center`}
               >
                 No new notifications
               </p>
@@ -87,21 +83,18 @@ export const NotificationPopover = ({
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`bg-card ${
-                    isMobile ? "p-3" : "p-4"
-                  } rounded-lg border border-border`}
+                  className={`bg-card ${isMobile ? "p-3" : "p-4"
+                    } rounded-lg border border-border`}
                 >
                   <p
-                    className={`${
-                      isMobile ? "text-xs" : "text-xs"
-                    } text-muted-foreground mb-1`}
+                    className={`${isMobile ? "text-xs" : "text-xs"
+                      } text-muted-foreground mb-1`}
                   >
                     {notification.date}
                   </p>
                   <p
-                    className={`${
-                      isMobile ? "text-xs" : "text-sm"
-                    } text-foreground`}
+                    className={`${isMobile ? "text-xs" : "text-sm"
+                      } text-foreground`}
                   >
                     {notification.message}
                   </p>
@@ -109,9 +102,8 @@ export const NotificationPopover = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`${
-                        isMobile ? "h-6 w-6" : "h-8 w-8"
-                      } text-destructive hover:text-destructive hover:bg-destructive/10`}
+                      className={`${isMobile ? "h-6 w-6" : "h-8 w-8"
+                        } text-destructive hover:text-destructive hover:bg-destructive/10`}
                       onClick={() => onDelete(notification.id)}
                     >
                       <FiTrash2 className={isMobile ? "w-3 h-3" : "w-4 h-4"} />
