@@ -71,7 +71,7 @@ const HomeInProgressGrid = () => {
                                     </h4>
                                     <div className="flex items-center gap-3 mt-auto">
                                         <div className="flex-1">
-                                            <div className="w-24 h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden">
+                                            <div className="w-21 h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-sunbird-brick rounded-full"
                                                     style={{ width: `${item.progress}%` }}
