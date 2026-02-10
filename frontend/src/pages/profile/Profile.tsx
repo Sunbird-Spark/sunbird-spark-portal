@@ -13,22 +13,22 @@ import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
-import HomeStatsCards from "@/components/home/HomeStatsCards";
-import HomeContinueLearning from "@/components/home/HomeContinueLearning";
-import HomeInProgressGrid from "@/components/home/HomeInProgressGrid";
-import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
+import ProfileCard from "@/components/profile/ProfileCard";
+import PersonalInformation from "@/components/profile/PersonalInformation";
+import ProfileLearningList from "@/components/profile/ProfileLearningList";
+import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
-import "./home.css";
+import "./profile.css";
 
-const Home = () => {
+const Profile = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
     const [isLoading, setIsLoading] = useState(true);
-    const [activeNav, setActiveNav] = useState("home");
+    const [activeNav, setActiveNav] = useState("profile");
     const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
     useEffect(() => {
@@ -43,100 +43,101 @@ const Home = () => {
     }, []);
 
     if (isLoading) {
-        return <PageLoader message="Loading your dashboard..." />;
+        return <PageLoader message="Loading your profile..." />;
     }
 
     return (
-        <div className="home-container">
+        <div className="profile-container">
             {/* Top Header */}
-            <header
-                className={isMobile ? "home-header-mobile" : "home-header"}
-            >
-                <div className="flex items-center justify-between">
+            <header className={`profile-header ${isMobile ? 'mobile' : ''}`}>
+                <div className="profile-header-container">
                     {/* Left: Sunbird Logo + Align with Sidebar */}
-                    <div
-                        className={`flex items-center transition-all ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'}`}
-                    >
-                        {isMobile ? (
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setIsSidebarOpen(true)}
-                                    className="text-sunbird-ginger hover:text-sunbird-brick transition-colors p-2 -ml-2"
-                                    aria-label="Open Menu"
-                                >
-                                    <FiMenu className="w-6 h-6" />
-                                </button>
-                                <h1 className="text-lg font-semibold text-sunbird-obsidian">Home</h1>
+                    <div className={`profile-logo-container ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'}`}>
+                        {!isMobile && isSidebarOpen && (
+                            <div className="w-full">
+                                <img
+                                    src={sunbirdLogo}
+                                    alt="Sunbird"
+                                    className="h-[2.4375rem] w-auto"
+                                    style={{ height: '2.4375rem' }}
+                                />
                             </div>
+                        )}
+                        {/* Sidebar Toggle */}
+                        {isMobile ? (
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="sidebar-toggle-btn"
+                                aria-label="Open Menu"
+                            >
+                                <FiMenu className="w-5 h-3.5" />
+                            </button>
                         ) : (
-                            isSidebarOpen ? (
-                                <img src={sunbirdLogo} alt="Sunbird" className="w-auto" style={{ height: '2.4375rem' }} />
-                            ) : (
+                            !isSidebarOpen && (
                                 <button
                                     onClick={() => setIsSidebarOpen(true)}
-                                    className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
+                                    className="sidebar-toggle-btn"
                                 >
-                                    <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M1 1H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                        <path d="M1 7H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                        <path d="M1 13H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                    </svg>
+                                    <FiMenu className="w-5 h-3.5" />
                                 </button>
                             )
                         )}
                     </div>
 
                     {/* Right: Search + Language */}
-                    <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-4'}`}>
-                        {/* Search Bar */}
+                    <div className="profile-header-actions">
                         {isMobile ? (
                             <button
                                 onClick={() => navigate('/search')}
-                                className="text-sunbird-brick hover:text-sunbird-brick p-2"
+                                className="profile-search-btn-mobile"
+                                aria-label="Search"
                             >
-                                <FiSearch className="w-5 h-5" />
+                                <FiSearch className="h-5 w-5" />
                             </button>
                         ) : (
-                            <button
-                                type="button"
-                                className="home-search-container w-full md:w-[25rem] h-[2.875rem] text-left relative"
+                            <div
+                                className="profile-search-container"
                                 onClick={() => navigate('/search')}
                             >
-                                <FiSearch className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sunbird-brick w-4 h-4 cursor-pointer" />
                                 <Input
-                                    type="text"
                                     placeholder={t("header.search")}
-                                    className="home-search-input pointer-events-none bg-transparent pl-4 pr-10 h-[2.875rem]"
                                     readOnly
+                                    className="pl-4 pr-10 bg-white border-border focus:border-sunbird-ginger focus:ring-sunbird-ginger/20 rounded-[0.5625rem] h-[2.875rem] text-base cursor-pointer placeholder:text-sunbird-obsidian pointer-events-none"
                                 />
-                            </button>
+                                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-brick hover:text-sunbird-brick/80">
+                                    <FiSearch className="w-4 h-4" />
+                                </button>
+                            </div>
                         )}
-
                         {/* Notifications */}
-                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                            <FiBell className="w-5 h-5 text-sunbird-brick" />
+                        <button className="profile-action-btn" aria-label="Notifications">
+                            <FiBell className="profile-action-icon" aria-hidden="true" />
                         </button>
 
                         {/* Language Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <img src={translationIcon} alt="Translate" className="w-5 h-5" />
+                                <button className="profile-lang-btn">
+                                    <img src={translationIcon} alt="Language" className="profile-action-icon" />
                                     <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="min-w-[9.375rem] p-2 bg-white border-gray-100 z-50">
-                                {languages.map((lang) => (
+                            <DropdownMenuContent align="end" className="profile-dropdown-content w-40">
+                                {languages.map((lng) => (
                                     <DropdownMenuItem
-                                        key={lang.code}
-                                        onSelect={() => changeLanguage(lang.code as LanguageCode)}
-                                        className={`cursor-pointer p-2 rounded-md ${currentCode === lang.code ? "bg-sunbird-brick/10 text-sunbird-brick font-semibold" : ""}`}
+                                        key={lng.code}
+                                        className={`profile-dropdown-item ${currentCode === lng.code ? 'active' : ''}`}
+                                        onSelect={() => changeLanguage(lng.code as LanguageCode)}
                                     >
-                                        {lang.label}
+                                        <span>{lng.label}</span>
+                                        {currentCode === lng.code && (
+                                            <div className="profile-dropdown-indicator" />
+                                        )}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
+
                     </div>
                 </div>
             </header>
@@ -178,32 +179,22 @@ const Home = () => {
                 )}
 
                 {/* Main Content Area */}
-                <main className="home-main-content">
-                    <div className="home-content-wrapper">
-                        {/* Welcome Section */}
-                        <div className="mb-6 md:mb-8">
-                            <h2 className="home-welcome-title">Hi John Deo</h2>
-                            <p className="home-welcome-subtitle">Welcome to a learning experience made just for you.</p>
+                <main className="profile-main-content">
+                    <div className="profile-content-wrapper">
+                        {/* Top Section: Profile Card + Personal Information */}
+                        <div className="grid grid-cols-1 lg:grid-cols-[23.3125rem_1fr] gap-6 mb-8">
+                            {/* Left: Profile Card */}
+                            <ProfileCard />
+
+                            {/* Right: Personal Information */}
+                            <PersonalInformation />
                         </div>
 
-                        {/* Stats Cards */}
-                        <HomeStatsCards />
+                        {/* Stats Cards Section */}
+                        <ProfileStatsCards />
 
-                        {/* Continue Learning + Performance */}
-                        <div className="home-continue-section">
-                            <h3 className="home-continue-section-title">Continue from where you left</h3>
-                            <div className="home-continue-grid">
-                                <div className="w-full lg:w-[65%]">
-                                    <HomeContinueLearning />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* In Progress Contents */}
-                        <HomeInProgressGrid />
-
-                        {/* Recommended Contents */}
-                        <HomeRecommendedSection />
+                        {/* My Learning Section */}
+                        <ProfileLearningList />
                     </div>
                 </main>
             </div>
@@ -214,5 +205,4 @@ const Home = () => {
     );
 };
 
-
-export default Home;
+export default Profile;
