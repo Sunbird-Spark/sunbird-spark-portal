@@ -16,11 +16,11 @@ vi.mock('@/components/profile/ProfileCard', () => ({ default: () => <div data-te
 vi.mock('@/components/profile/PersonalInformation', () => ({ default: () => <div data-testid="personal-info" /> }));
 vi.mock('@/components/profile/ProfileStatsCards', () => ({ default: () => <div data-testid="stats-cards" /> }));
 vi.mock('@/components/profile/ProfileLearningList', () => ({ default: () => <div data-testid="learning-list" /> }));
-vi.mock('@/components/Footer', () => ({ default: () => <div data-testid="footer" /> }));
-vi.mock('@/components/PageLoader', () => ({ default: () => <div>Loading...</div> }));
+vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
+vi.mock('@/components/common/PageLoader', () => ({ default: () => <div>Loading...</div> }));
 
 // Mock DropdownMenu to render content inline
-vi.mock('@/components/dropdown-menu', () => ({
+vi.mock('@/components/common/DropdownMenu', () => ({
     DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -30,7 +30,7 @@ vi.mock('@/components/dropdown-menu', () => ({
 }));
 
 // Mock Sheet component
-vi.mock('@/components/sheet', () => ({
+vi.mock('@/components/home/Sheet', () => ({
     Sheet: ({ children, open }: { children: React.ReactNode, open: boolean }) => open ? <div data-testid="sheet">{children}</div> : null,
     SheetContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     SheetTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
