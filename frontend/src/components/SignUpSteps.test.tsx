@@ -4,7 +4,7 @@ import { SignUpStep1, SignUpStep2 } from './SignUpSteps';
 import React from 'react';
 
 // Mock child components from ForgotPasswordComponents
-vi.mock('../pages/ForgotPasswordComponents', () => ({
+vi.mock('../pages/forgotPassword/ForgotPasswordComponents', () => ({
     Header: ({ title, subtitle }: any) => (
         <div data-testid="header">
             <h1>{title}</h1>
