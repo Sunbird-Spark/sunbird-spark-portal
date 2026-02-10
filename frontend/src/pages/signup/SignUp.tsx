@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/useToast";
@@ -6,6 +7,8 @@ import { IDENTIFIER_REGEX, PASSWORD_REGEX, OTP_REGEX } from '@/utils/ValidationU
 import { SignUpStep1, SignUpStep2 } from '@/components/auth/SignUpSteps';
 import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
+import { SystemSettingService } from '@/services/SystemSettingService';
+import { hashPassword } from '@/utils/passwordUtils';
 
 const SignUp: React.FC = () => {
     const navigate = useNavigate();
@@ -16,6 +19,21 @@ const SignUp: React.FC = () => {
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
     const generateOtpMutation = useGenerateOtp();
+
+    // Captcha
+    const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
+    const captchaRef = React.useRef<ReCAPTCHA>(null);
+
+    React.useEffect(() => {
+        const systemSettingService = new SystemSettingService();
+        systemSettingService.read('portal_google_recaptcha_site_key')
+            .then(res => {
+                if (res.data?.result?.value) {
+                    setGoogleCaptchaSiteKey(res.data?.result?.value);
+                }
+            })
+            .catch(err => console.error('Error fetching captcha site key:', err));
+    }, []);
 
     // Form State
     const [firstName, setFirstName] = useState('');
@@ -92,6 +110,15 @@ const SignUp: React.FC = () => {
             return;
         }
 
+        // Trigger captcha if configured, otherwise proceed directly
+        if (googleCaptchaSiteKey) {
+            captchaRef.current?.execute();
+        } else {
+            initiateOtpGeneration();
+        }
+    };
+
+    const initiateOtpGeneration = async (captchaResponse?: string) => {
         // Generate OTP first
         const isEmail = emailOrMobile.includes('@');
         const otpRequest = {
@@ -102,7 +129,7 @@ const SignUp: React.FC = () => {
         };
 
         generateOtpMutation.mutate(
-            { request: otpRequest },
+            { request: otpRequest, captchaResponse },
             {
                 onSuccess: (otpResponse) => {
                     if (otpResponse.status === 200) {
@@ -119,14 +146,25 @@ const SignUp: React.FC = () => {
                             variant: "destructive",
                         });
                     }
+                    captchaRef.current?.reset();
                 },
                 onError: (error: any) => {
                     console.error('OTP generation error:', error);
-                    toast({
-                        title: "OTP Generation Failed",
-                        description: error.message || "Failed to send OTP. Please try again.",
-                        variant: "destructive",
-                    });
+                    captchaRef.current?.reset();
+                    
+                    if (error?.response?.status === 418) {
+                        toast({
+                            title: "Captcha Validation Failed",
+                            description: "Please try again.",
+                            variant: "destructive",
+                        });
+                    } else {
+                        toast({
+                            title: "OTP Generation Failed",
+                            description: error.message || "Failed to send OTP. Please try again.",
+                            variant: "destructive",
+                        });
+                    }
                 }
             }
         );
@@ -148,13 +186,16 @@ const SignUp: React.FC = () => {
         verifyOtpMutation.mutate(
             { request },
             {
-                onSuccess: (response) => {
+                onSuccess: async (response) => {
                     if (response.status === 200) {
                         // OTP verified successfully, now call signup API
                         const deviceId = localStorage.getItem('deviceId') || undefined;
                         
+                        // Hash the password with bcrypt before sending to backend
+                        const hashedPassword = await hashPassword(password);
+                        
                         signupMutation.mutate(
-                            { firstName: firstName.trim(), identifier: emailOrMobile, password, deviceId },
+                            { firstName: firstName.trim(), identifier: emailOrMobile, password: hashedPassword, deviceId },
                             {
                                 onSuccess: (signupResponse) => {
                                     if (signupResponse.status === 200) {
@@ -206,6 +247,14 @@ const SignUp: React.FC = () => {
     };
 
     const handleResendOtpClick = async () => {
+        if (googleCaptchaSiteKey) {
+            captchaRef.current?.execute();
+        } else {
+            resendOtp();
+        }
+    };
+
+    const resendOtp = async (captchaResponse?: string) => {
         const isEmail = emailOrMobile.includes('@');
         
         const request = {
@@ -216,7 +265,7 @@ const SignUp: React.FC = () => {
         };
         
         generateOtpMutation.mutate(
-            { request },
+            { request, captchaResponse },
             {
                 onSuccess: (response) => {
                     if (response.status === 200) {
@@ -226,14 +275,25 @@ const SignUp: React.FC = () => {
                             variant: "default",
                         });
                     }
+                    captchaRef.current?.reset();
                 },
                 onError: (error: any) => {
                     console.error('Resend OTP error:', error);
-                    toast({
-                        title: "Resend Failed",
-                        description: error.message || "Failed to resend OTP. Please try again.",
-                        variant: "destructive",
-                    });
+                    captchaRef.current?.reset();
+                    
+                    if (error?.response?.status === 418) {
+                        toast({
+                            title: "Captcha Validation Failed",
+                            description: "Please try again.",
+                            variant: "destructive",
+                        });
+                    } else {
+                        toast({
+                            title: "Resend Failed",
+                            description: error.message || "Failed to resend OTP. Please try again.",
+                            variant: "destructive",
+                        });
+                    }
                 }
             }
         );
@@ -272,6 +332,23 @@ const SignUp: React.FC = () => {
                         handleVerifyOtp={handleVerifyOtp}
                         handleResendOtp={handleResendOtpClick}
                         isLoading={isLoading}
+                    />
+                )}
+
+                {googleCaptchaSiteKey && (
+                    <ReCAPTCHA
+                        ref={captchaRef}
+                        sitekey={googleCaptchaSiteKey}
+                        size="invisible"
+                        onChange={token => {
+                            if (token) {
+                                if (step === 1) {
+                                    initiateOtpGeneration(token);
+                                } else if (step === 2) {
+                                    resendOtp(token);
+                                }
+                            }
+                        }}
                     />
                 )}
             </div>
