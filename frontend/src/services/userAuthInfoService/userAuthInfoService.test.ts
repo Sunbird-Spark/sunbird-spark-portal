@@ -164,7 +164,12 @@ describe('userAuthInfoService', () => {
 
             expect(consoleSpy).toHaveBeenCalledWith('Error fetching auth status:', httpError);
             expect(consoleSpy).toHaveBeenCalledWith('Status:', 400);
-            expect(consoleSpy).toHaveBeenCalledWith('Data:', httpError.response.data);
+            // Verify that sensitive data is redacted - only safe fields are logged
+            expect(consoleSpy).toHaveBeenCalledWith('Response:', {
+                responseCode: undefined,
+                status: undefined,
+                errmsg: undefined
+            });
         });
     });
 
