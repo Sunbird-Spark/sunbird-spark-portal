@@ -95,6 +95,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
     <div 
       ref={containerRef} 
       className="w-full h-full min-h-[600px] relative"
+      
     />
   );
 };
