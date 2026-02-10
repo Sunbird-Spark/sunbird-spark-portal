@@ -1,10 +1,10 @@
 export interface ApiResponse<T> {
   data: T;
   status: number;
-  headers: Record<string, any>;
+  headers: Record<string, unknown>;
 }
 
-export type StatusHandlerConfig = Record<number, (res: ApiResponse<any>) => void>;
+export type StatusHandlerConfig = Record<number, (res: ApiResponse<unknown>) => void>;
 
 export interface HttpClientConfig {
   baseURL?: string;
@@ -23,8 +23,8 @@ export interface HeaderOperation {
 
 export interface IHttpClient {
   get<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
-  post<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
-  put<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
+  post<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
+  put<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   updateHeaders(headers: HeaderOperation[]): void;
 }

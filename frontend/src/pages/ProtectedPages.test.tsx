@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import AdminPage from './AdminPage';
-import WorkspacePage from './WorkspacePage';
-import ReportsPage from './ReportsPage';
-import CreateContentPage from './CreateContentPage';
+import AdminPage from './admin/AdminPage';
+import WorkspacePage from './workspace/WorkspacePage';
+import ReportsPage from './reports/ReportsPage';
+import CreateContentPage from './content/CreateContentPage';
 
 describe('Protected Pages', () => {
   describe('AdminPage', () => {
