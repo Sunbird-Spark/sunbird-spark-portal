@@ -420,6 +420,14 @@
     @apply opacity-50 cursor-not-allowed no-underline;
   }
 
+  /* EPUB Player Styles */
+  .epub-player-container {
+    @apply w-full h-full block relative;
+  }
+
+  .epub-player-loading {
+    @apply absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center text-sunbird-gray-75 text-base bg-sunbird-light-blue;
+  }
 
 
 }

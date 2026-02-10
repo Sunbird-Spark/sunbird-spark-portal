@@ -72,3 +72,20 @@ pnpm-debug.log*
 # Misc
 # =========================
 *.local
+
+*.bcmap
+
+public/assets/**/*.svg
+
+# =========================
+# Player files (copied from node_modules)
+# =========================
+frontend/public/sunbird-epub-player.js
+frontend/public/epub-player-styles.css
+frontend/public/assets/epub-player/
+
+# =========================
+# Sample/Test files (local only)
+# =========================
+frontend/public/sample-epub.epub
+frontend/public/*.epub
