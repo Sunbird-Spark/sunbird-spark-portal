@@ -11,7 +11,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
-import { useAppI18n } from "@/hooks/useAppI18n";
+import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import HomeStatsCards from "@/components/home/HomeStatsCards";
 import HomeContinueLearning from "@/components/home/HomeContinueLearning";
@@ -29,7 +29,11 @@ const Home = () => {
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
     const [isLoading, setIsLoading] = useState(true);
     const [activeNav, setActiveNav] = useState("home");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile); // Open by default on desktop, closed on mobile
+    const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+
+    useEffect(() => {
+        setIsSidebarOpen(!isMobile);
+    }, [isMobile]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -125,7 +129,7 @@ const Home = () => {
                                 {languages.map((lang) => (
                                     <DropdownMenuItem
                                         key={lang.code}
-                                        onSelect={() => changeLanguage(lang.code)}
+                                        onSelect={() => changeLanguage(lang.code as LanguageCode)}
                                         className={`cursor-pointer p-2 rounded-md ${currentCode === lang.code ? "bg-sunbird-brick/10 text-sunbird-brick font-semibold" : ""}`}
                                     >
                                         {lang.label}
