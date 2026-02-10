@@ -1,4 +1,5 @@
 import { EpubPlayerConfig, EpubPlayerEvent } from './types';
+import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 
 /**
  * Service for initializing and managing the EPUB Player.
@@ -96,5 +97,67 @@ export class EpubPlayerService {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Create a default EPUB player configuration
+   */
+  public static createDefaultConfig(
+    contentId: string,
+    name: string,
+    artifactUrl: string,
+    uid?: string,
+    sid?: string
+  ): EpubPlayerConfig {
+    const userId = uid || userAuthInfoService.getUserId() || 'anonymous';
+    const sessionId = sid || userAuthInfoService.getSessionId() || `session-${Date.now()}`;
+    const deviceId = `device-${Date.now()}`;
+
+    return {
+      context: {
+        mode: 'play',
+        partner: [],
+        pdata: {
+          id: 'sunbird.portal',
+          ver: '1.0',
+          pid: 'sunbird-portal',
+        },
+        contentId,
+        sid: sessionId,
+        uid: userId,
+        did: deviceId,
+        channel: 'sunbird-portal',
+        tags: [],
+        timeDiff: 0,
+        host: window.location.origin,
+        endpoint: '',
+      },
+      config: {
+        sideMenu: {
+          showShare: false,
+          showDownload: false,
+          showReplay: false,
+          showExit: false,
+        },
+      },
+      metadata: {
+        identifier: contentId,
+        name,
+        artifactUrl,
+        streamingUrl: '',
+        compatibilityLevel: 1,
+        pkgVersion: 1,
+      },
+    };
+  }
+
+  /**
+   * Handle and structure player events
+   */
+  public static handlePlayerEvent(event: any): { type: string; data: any } {
+    return {
+      type: event?.eid || 'unknown',
+      data: event,
+    };
   }
 }
