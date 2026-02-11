@@ -84,7 +84,7 @@ app.all('/portal/logout', session(authSessionConfig), async (req, res) => {
         logger.error('Error destroying session during logout', err);
     }
     res.redirect('/');
-})
+});
 
 // Apply anonymous session middleware to API routes (once per route tree)
 app.use('/api', anonymousSessionMiddleware);
