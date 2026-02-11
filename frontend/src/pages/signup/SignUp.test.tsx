@@ -66,9 +66,8 @@ vi.mock('@/services/SystemSettingService', () => ({
     }
 }));
 
-// We can use the actual SignUpStep components as they are exported from SignUpSteps.tsx
-// But it's easier to mock them to control the flow in the Page test
-vi.mock('@/components/auth/SignUpSteps', () => ({
+// Mock individual step components to control the flow in the Page test
+vi.mock('@/components/auth/SignUpStep1', () => ({
     SignUpStep1: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword, setIsTermsAccepted }: any) => (
         <div>
             <button data-testid="continue-btn" onClick={handleContinue}>Continue</button>
@@ -78,13 +77,19 @@ vi.mock('@/components/auth/SignUpSteps', () => ({
             <input data-testid="conf-input" onChange={(e) => setConfirmPassword(e.target.value)} />
             <input type="checkbox" data-testid="terms-check" onChange={(e) => setIsTermsAccepted(e.target.checked)} />
         </div>
-    ),
+    )
+}));
+
+vi.mock('@/components/auth/SignUpStep2', () => ({
     SignUpStep2: ({ handleVerifyOtp, setOtp }: any) => (
         <div>
             <button data-testid="verify-btn" onClick={handleVerifyOtp}>Verify</button>
             <button data-testid="fill-otp-btn" onClick={() => setOtp(['1', '2', '3', '4', '5', '6'])}>Fill OTP</button>
         </div>
-    ),
+    )
+}));
+
+vi.mock('@/components/auth/SignUpStep3', () => ({
     SignUpStep3: ({ handleProceed }: any) => (
         <div>
             <div data-testid="success-message">Congratulations!</div>
