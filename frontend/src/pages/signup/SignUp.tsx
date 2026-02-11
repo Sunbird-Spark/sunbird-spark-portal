@@ -4,7 +4,7 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/useToast";
 import { OTP_REGEX } from '@/utils/ValidationUtils';
-import { SignUpStep1, SignUpStep2 } from '@/components/auth/SignUpSteps';
+import { SignUpStep1, SignUpStep2, SignUpStep3 } from '@/components/auth/SignUpSteps';
 import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { SystemSettingService } from '@/services/SystemSettingService';
@@ -16,7 +16,7 @@ const SignUp: React.FC = () => {
     const captchaRef = useRef<ReCAPTCHA>(null);
     const signupService = useMemo(() => new SignupService(), []);
 
-    const [step, setStep] = useState<1 | 2>(1);
+    const [step, setStep] = useState<1 | 2 | 3>(1);
     const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
     const [firstName, setFirstName] = useState('');
     const [emailOrMobile, setEmailOrMobile] = useState('');
@@ -115,12 +115,7 @@ const SignUp: React.FC = () => {
                         }, {
                             onSuccess: (signupResponse) => {
                                 if (signupResponse.status === 200) {
-                                    toast({
-                                        title: "Account Created",
-                                        description: "You have successfully signed up. Redirecting...",
-                                        variant: "default",
-                                    });
-                                    setTimeout(() => navigate('/onboarding'), 1000);
+                                    setStep(3);
                                 } else {
                                     toast({
                                         title: "Signup Failed",
@@ -162,6 +157,10 @@ const SignUp: React.FC = () => {
         googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation(undefined, true);
     };
 
+    const handleProceedToLogin = () => {
+        navigate('/profile');
+    };
+
     return (
         <AuthLayout isOtpPage={step === 2}>
             <div className="w-full font-rubik">
@@ -195,6 +194,12 @@ const SignUp: React.FC = () => {
                         handleVerifyOtp={handleVerifyOtp}
                         handleResendOtp={handleResendOtp}
                         isLoading={isLoading}
+                    />
+                )}
+
+                {step === 3 && (
+                    <SignUpStep3
+                        handleProceed={handleProceedToLogin}
                     />
                 )}
 

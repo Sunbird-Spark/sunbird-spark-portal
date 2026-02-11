@@ -4,9 +4,8 @@ import { Input } from "@/components/common/Input";
 import { Checkbox } from "@/components/common/CheckBox";
 import { Header, InputLabel, PrimaryButton, OTPInput } from "../../pages/forgotPassword/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiCheck } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
-
 
 interface Step1Props {
     firstName: string;
@@ -261,6 +260,31 @@ export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp, handleRe
                     </PrimaryButton>
                 </div>
             </div>
+        </div>
+    );
+};
+
+interface Step3Props {
+    handleProceed: () => void;
+}
+
+export const SignUpStep3 = ({ handleProceed }: Step3Props) => {
+    return (
+        <div className="flex flex-col items-center">
+            <Header
+                title="Congratulations!"
+                subtitle="Your account has been successfully created."
+            />
+
+            <div className="flex justify-center mb-10">
+                <div className="success-icon-container">
+                    <FiCheck className="success-icon-check" />
+                </div>
+            </div>
+
+            <PrimaryButton onClick={handleProceed}>
+                Proceed to Login
+            </PrimaryButton>
         </div>
     );
 };

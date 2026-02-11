@@ -84,6 +84,12 @@ vi.mock('@/components/auth/SignUpSteps', () => ({
             <button data-testid="verify-btn" onClick={handleVerifyOtp}>Verify</button>
             <button data-testid="fill-otp-btn" onClick={() => setOtp(['1', '2', '3', '4', '5', '6'])}>Fill OTP</button>
         </div>
+    ),
+    SignUpStep3: ({ handleProceed }: any) => (
+        <div>
+            <div data-testid="success-message">Congratulations!</div>
+            <button data-testid="proceed-btn" onClick={handleProceed}>Proceed to Login</button>
+        </div>
     )
 }));
 
@@ -197,8 +203,12 @@ describe('SignUp Page', () => {
         fireEvent.click(screen.getByTestId('fill-otp-btn'));
         fireEvent.click(verifyBtn);
 
+        // Wait for step 3 (success screen)
         await waitFor(() => {
-            expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Account Created' }));
+            expect(screen.getByTestId('success-message')).toBeInTheDocument();
         });
+
+        fireEvent.click(screen.getByTestId('proceed-btn'));
+        expect(mockNavigate).toHaveBeenCalledWith('/profile');
     });
 });
