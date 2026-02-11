@@ -57,12 +57,7 @@ app.get('/profile',
             logger.error('Error cleaning up anonymous session', err);
         }
 
-        res.clearCookie(CookieNames.ANONYMOUS, {
-            path: anonymousSessionConfig.cookie?.path,
-            httpOnly: anonymousSessionConfig.cookie?.httpOnly,
-            secure: anonymousSessionConfig.cookie?.secure,
-            sameSite: anonymousSessionConfig.cookie?.sameSite,
-        });
+        res.clearCookie(CookieNames.ANONYMOUS);
         if (req.session) {
             req.session.save((err) => {
                 if (err) {
@@ -78,13 +73,13 @@ app.get('/profile',
 app.all('/portal/logout', session(authSessionConfig), async (req, res) => {
     try {
         await destroySession(req);
-        res.clearCookie(CookieNames.AUTH, { path: '/' });
+        res.clearCookie(CookieNames.AUTH);
         logger.info('User logged out and session destroyed');
     } catch (err) {
         logger.error('Error destroying session during logout', err);
     }
     res.redirect('/');
-});
+})
 
 // Apply anonymous session middleware to API routes (once per route tree)
 app.use('/api', anonymousSessionMiddleware);

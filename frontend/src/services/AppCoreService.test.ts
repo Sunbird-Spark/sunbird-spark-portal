@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import appCoreService, { AppCoreService } from './AppCoreService';
 import * as storageUtils from '../utils/storage';
-import { DeviceService } from '@project-sunbird/telemetry-sdk';
 
 // Mock the storage utils
 vi.mock('../utils/storage', () => ({
@@ -10,25 +9,19 @@ vi.mock('../utils/storage', () => ({
     removeStorageItem: vi.fn(),
 }));
 
-// Mock the telemetry SDK
-vi.mock('@project-sunbird/telemetry-sdk', () => ({
-    DeviceService: {
-        getFingerPrint: vi.fn(),
-    },
-    $t: {
-        initialize: vi.fn(),
-    }
-}));
-
 describe('AppCoreService', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        // Reset singleton private state if possible, or just use `appCoreService`
+        // Since we can't easily reset private state of the singleton exported instance,
+        // we might need to rely on `clearDeviceId` to reset state between tests.
         appCoreService.clearDeviceId();
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
+        // Clean up global window object
         delete (window as any).EkTelemetry;
     });
 
@@ -41,16 +34,16 @@ describe('AppCoreService', () => {
 
     describe('getDeviceId', () => {
         it('should return deviceId from memory if available', async () => {
-            // Seed memory via internal state manipulation or by calling getDeviceId once
+            // First, seed the memory
             (storageUtils.getStorageItem as any).mockReturnValue('stored-device-id');
             await appCoreService.getDeviceId();
 
-            // Clear storage mock
+            // Clear storage mock to ensure we aren't reading from it again
             (storageUtils.getStorageItem as any).mockReturnValue(null);
 
             const result = await appCoreService.getDeviceId();
             expect(result).toBe('stored-device-id');
-            // Should not call storage again
+            // Should not check storage second time
             expect(storageUtils.getStorageItem).toHaveBeenCalledTimes(1);
         });
 
@@ -67,20 +60,42 @@ describe('AppCoreService', () => {
             (storageUtils.getStorageItem as any).mockReturnValue(null);
 
             const mockFingerprint = 'new-generated-fp';
-            (DeviceService.getFingerPrint as any).mockResolvedValue(mockFingerprint);
+            // Mock window.EkTelemetry
+            (window as any).EkTelemetry = {
+                getFingerPrint: vi.fn((cb) => cb(mockFingerprint, [], '1.0'))
+            };
 
             const result = await appCoreService.getDeviceId();
 
             expect(result).toBe(mockFingerprint);
             expect(storageUtils.setStorageItem).toHaveBeenCalledWith('deviceId', mockFingerprint);
-            expect(DeviceService.getFingerPrint).toHaveBeenCalled();
         });
 
-        it('should throw error if DeviceService fails', async () => {
+        it('should throw error if EkTelemetry is not available', async () => {
             (storageUtils.getStorageItem as any).mockReturnValue(null);
-            (DeviceService.getFingerPrint as any).mockRejectedValue(new Error('SDK Error'));
+            (window as any).EkTelemetry = undefined;
 
-            await expect(appCoreService.getDeviceId()).rejects.toThrow('SDK Error');
+            await expect(appCoreService.getDeviceId()).rejects.toThrow('SunbirdTelemetry SDK not available');
+        });
+    });
+
+    describe('getFingerprintData', () => {
+        it('should return parsed data from storage', () => {
+            const mockData = { id: 'fp-data' };
+            (storageUtils.getStorageItem as any).mockReturnValue(JSON.stringify(mockData));
+
+            const result = appCoreService.getFingerprintData();
+            expect(result).toEqual(mockData);
+        });
+
+        it('should return null if storage is empty', () => {
+            (storageUtils.getStorageItem as any).mockReturnValue(null);
+            expect(appCoreService.getFingerprintData()).toBeNull();
+        });
+
+        it('should return null if JSON parse fails', () => {
+            (storageUtils.getStorageItem as any).mockReturnValue('invalid-json');
+            expect(appCoreService.getFingerprintData()).toBeNull();
         });
     });
 
@@ -89,7 +104,7 @@ describe('AppCoreService', () => {
             appCoreService.clearDeviceId();
 
             expect(storageUtils.removeStorageItem).toHaveBeenCalledWith('deviceId');
-            // 'deviceFingerprint' was removed from implementation
+            expect(storageUtils.removeStorageItem).toHaveBeenCalledWith('deviceFingerprint');
         });
     });
 
@@ -98,13 +113,11 @@ describe('AppCoreService', () => {
             // Setup device ID
             (storageUtils.getStorageItem as any).mockReturnValue('device-123');
 
-            // Mock navigator (using Object.defineProperty as before)
+            // Mock navigator
             const originalUserAgent = navigator.userAgent;
             const originalPlatform = navigator.platform;
 
-            // We need to be careful with navigator mocks in JSDOM/Vitest environment
-            // but the original test did it this way.
-             Object.defineProperty(navigator, 'userAgent', { value: 'TestAgent', configurable: true });
+            Object.defineProperty(navigator, 'userAgent', { value: 'TestAgent', configurable: true });
             Object.defineProperty(navigator, 'platform', { value: 'TestPlatform', configurable: true });
 
             const info = await appCoreService.getDeviceInfo();
@@ -114,7 +127,8 @@ describe('AppCoreService', () => {
             expect(info.platform).toBe('TestPlatform');
             expect(typeof info.timestamp).toBe('number');
 
-             Object.defineProperty(navigator, 'userAgent', { value: originalUserAgent, configurable: true });
+            // Cleanup
+            Object.defineProperty(navigator, 'userAgent', { value: originalUserAgent, configurable: true });
             Object.defineProperty(navigator, 'platform', { value: originalPlatform, configurable: true });
         });
     });
@@ -132,23 +146,23 @@ describe('AppCoreService', () => {
     });
 
     describe('initialize', () => {
-        it('should initialize successfully and set global telemetry', async () => {
+        it('should initialize successfully', async () => {
             const consoleSpy = vi.spyOn(console, 'log');
             (storageUtils.getStorageItem as any).mockReturnValue('init-id');
 
             await appCoreService.initialize();
 
-            expect((window as any).EkTelemetry).toBeDefined();
             expect(consoleSpy).toHaveBeenCalledWith('Device ID initialized:', 'init-id');
         });
 
         it('should throw and log error initialization fails', async () => {
             const consoleSpy = vi.spyOn(console, 'error');
+            const error = new Error('Init failed');
             // Force getDeviceId to fail
             (storageUtils.getStorageItem as any).mockReturnValue(null);
-            (DeviceService.getFingerPrint as any).mockRejectedValue(new Error('Init failed'));
+            (window as any).EkTelemetry = undefined;
 
-            await expect(appCoreService.initialize()).rejects.toThrow('Init failed');
+            await expect(appCoreService.initialize()).rejects.toThrow('SunbirdTelemetry SDK not available');
             expect(consoleSpy).toHaveBeenCalledWith('AppCoreService initialization failed:', expect.any(Error));
         });
     });

@@ -3,11 +3,14 @@ import { getCookieValue, getUnsignedSessionId, destroySessionId } from '../utils
 import { sessionStore } from '../utils/sessionStore.js';
 import * as cookieSignature from 'cookie-signature';
 import { envConfig } from '../config/env.js';
+import logger from '../utils/logger.js';
 
 // Mock sessionStore
 vi.mock('../utils/sessionStore.js', () => ({
   sessionStore: {
-    destroy: vi.fn((sid, cb) => cb(null))
+    destroy: vi.fn((sid, cb) => {
+        if (cb) cb(null);
+    })
   }
 }));
 
@@ -77,6 +80,19 @@ describe('Session Utils', () => {
       const sid = 'session123';
       await destroySessionId(sid);
       expect(sessionStore.destroy).toHaveBeenCalledWith(sid, expect.any(Function));
+    });
+
+    it('should reject and log error if destroy fails', async () => {
+      const sid = 'errorSession';
+      const error = new Error('Destroy failed');
+
+      // Override mock implementation for this test case
+      vi.mocked(sessionStore.destroy).mockImplementationOnce((id, cb) => {
+          if (cb) cb(error);
+      });
+
+      await expect(destroySessionId(sid)).rejects.toThrow(error);
+      expect(logger.error).toHaveBeenCalledWith(`Error destroying session ID ${sid}:`, error);
     });
   });
 });

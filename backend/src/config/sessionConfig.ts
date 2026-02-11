@@ -3,7 +3,7 @@ import { envConfig } from './env.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { CookieNames } from '../utils/cookieConstants.js';
 
-export const anonymousSessionConfig: session.SessionOptions = {
+export const anonymousSessionConfig = {
     name: CookieNames.ANONYMOUS,
     store: sessionStore,
     secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
@@ -15,9 +15,9 @@ export const anonymousSessionConfig: session.SessionOptions = {
         maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
         sameSite: 'lax'
     }
-};
+} as session.SessionOptions & { cookie: { secure: boolean } };
 
-export const authSessionConfig: session.SessionOptions = {
+export const authSessionConfig = {
     name: CookieNames.AUTH,
     store: sessionStore,
     secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
@@ -29,4 +29,4 @@ export const authSessionConfig: session.SessionOptions = {
         maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL, // Using same TTL? Usually logged in sessions might have diff TTL but let's stick to existing
         sameSite: 'lax'
     }
-};
+} as session.SessionOptions & { cookie: { secure: boolean } };

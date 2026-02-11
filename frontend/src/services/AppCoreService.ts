@@ -1,5 +1,11 @@
-import { DeviceService, $t } from '@project-sunbird/telemetry-sdk';
+import { FingerprintData, SunbirdTelemetry, FingerprintComponent } from '../types/telemetry';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storage';
+
+declare global {
+    interface Window {
+        EkTelemetry: SunbirdTelemetry;
+    }
+}
 
 class AppCoreService {
     private static instance: AppCoreService;
@@ -30,20 +36,39 @@ class AppCoreService {
         }
 
         // Generate device ID using telemetry SDK
-        try {
-            const deviceId = await DeviceService.getFingerPrint();
-            this.deviceId = deviceId;
-            setStorageItem('deviceId', deviceId);
-            return deviceId;
-        } catch (error) {
-            console.error('Failed to generate device ID', error);
-            throw error;
+        return new Promise<string>((resolve, reject) => {
+            if (!window.EkTelemetry) {
+                reject(new Error('SunbirdTelemetry SDK not available (EkTelemetry not found on window)'));
+                return;
+            }
+
+            window.EkTelemetry.getFingerPrint((deviceId: string, _components: FingerprintComponent[], _version: string) => {
+                this.deviceId = deviceId;
+
+                // Store in localStorage
+                setStorageItem('deviceId', deviceId);
+
+                resolve(deviceId);
+            });
+        });
+    }
+
+    getFingerprintData(): FingerprintData | null {
+        const stored = getStorageItem('deviceFingerprint');
+        if (stored) {
+            try {
+                return JSON.parse(stored) as FingerprintData;
+            } catch {
+                return null;
+            }
         }
+        return null;
     }
 
     clearDeviceId(): void {
         this.deviceId = null;
         removeStorageItem('deviceId');
+        removeStorageItem('deviceFingerprint');
     }
 
     async getDeviceInfo(): Promise<{
@@ -69,14 +94,8 @@ class AppCoreService {
 
     async initialize(): Promise<void> {
         try {
-            // Expose global telemetry instance for backward compatibility
-            if (typeof window !== 'undefined') {
-                (window as any).EkTelemetry = $t;
-            }
-
             // Preload device ID
             const deviceId = await this.getDeviceId();
-            // eslint-disable-next-line no-console
             console.log('Device ID initialized:', deviceId);
         } catch (error) {
             console.error('AppCoreService initialization failed:', error);
@@ -88,3 +107,4 @@ class AppCoreService {
 // Export singleton instance
 export default AppCoreService.getInstance();
 export { AppCoreService };
+export type { FingerprintData };
