@@ -17,6 +17,7 @@ export class AxiosAdapter extends BaseClient {
     this.client = axios.create({
       baseURL,
       headers: config.defaultHeaders,
+      withCredentials: true,
     });
   }
 
