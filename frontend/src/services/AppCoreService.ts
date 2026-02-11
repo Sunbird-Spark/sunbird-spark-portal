@@ -69,7 +69,7 @@ class AppCoreService {
 
     async initialize(): Promise<void> {
         try {
-            // Initialize global telemetry instance for backward compatibility with players
+            // Expose global telemetry instance for backward compatibility
             if (typeof window !== 'undefined') {
                 (window as any).EkTelemetry = $t;
             }
