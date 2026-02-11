@@ -22,7 +22,7 @@ import { userProxy } from './proxies/userProxy.js';
 import helmet from 'helmet';
 import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
-import { handlePasswordForSignup, handlePasswordForReset } from './middlewares/passwordHandler.js';
+import { handlePassword } from './middlewares/passwordHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -141,9 +141,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/portal', anonymousSessionMiddleware);
 
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
-app.post('/portal/user/v1/password/reset', handlePasswordForReset, userProxy);
+app.post('/portal/user/v1/password/reset', handlePassword, userProxy);
 app.post('/portal/otp/v1/verify', kongProxy);
-app.post('/portal/user/v2/signup', handlePasswordForSignup, kongProxy);
+app.post('/portal/user/v2/signup', handlePassword, kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',

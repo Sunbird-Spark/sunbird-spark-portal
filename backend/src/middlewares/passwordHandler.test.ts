@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
-import { handlePasswordForSignup, handlePasswordForReset } from './passwordHandler.js';
+import { handlePassword } from './passwordHandler.js';
 
 describe('Password Handler Middleware', () => {
     let mockRequest: Partial<Request>;
@@ -18,33 +18,35 @@ describe('Password Handler Middleware', () => {
         mockNext = vi.fn();
     });
 
-    describe('handlePasswordForSignup', () => {
-        it('should accept valid bcrypt hash', () => {
-            // Valid bcrypt hash (example)
-            const bcryptHash = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+    describe('handlePassword', () => {
+        it('should decode base64 encoded password', () => {
+            // "TestPass123!" encoded in base64
+            const base64Password = btoa('TestPass123!');
             mockRequest.body = {
                 request: {
-                    password: bcryptHash
+                    password: base64Password
                 }
             };
 
-            handlePasswordForSignup(mockRequest as Request, mockResponse as Response, mockNext);
+            handlePassword(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(mockNext).toHaveBeenCalled();
-            expect(mockRequest.body.request.password).toBe(bcryptHash);
+            expect(mockRequest.body.request.password).toBe('TestPass123!');
         });
 
-        it('should accept bcrypt hash with $2b$ prefix', () => {
-            const bcryptHash = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+        it('should decode password with special characters', () => {
+            const originalPassword = 'P@ssw0rd!#$%^&*()';
+            const base64Password = btoa(originalPassword);
             mockRequest.body = {
                 request: {
-                    password: bcryptHash
+                    password: base64Password
                 }
             };
 
-            handlePasswordForSignup(mockRequest as Request, mockResponse as Response, mockNext);
+            handlePassword(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(mockNext).toHaveBeenCalled();
+            expect(mockRequest.body.request.password).toBe(originalPassword);
         });
 
         it('should handle requests without password', () => {
@@ -52,47 +54,29 @@ describe('Password Handler Middleware', () => {
                 request: {}
             };
 
-            handlePasswordForSignup(mockRequest as Request, mockResponse as Response, mockNext);
+            handlePassword(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(mockNext).toHaveBeenCalled();
         });
 
-        it('should still proceed with invalid hash format (Kong will validate)', () => {
+        it('should handle empty request body', () => {
+            mockRequest.body = {};
+
+            handlePassword(mockRequest as Request, mockResponse as Response, mockNext);
+
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should handle invalid base64 gracefully', () => {
             mockRequest.body = {
                 request: {
-                    password: 'not-a-bcrypt-hash'
+                    password: 'not-valid-base64!!!'
                 }
             };
 
-            handlePasswordForSignup(mockRequest as Request, mockResponse as Response, mockNext);
+            handlePassword(mockRequest as Request, mockResponse as Response, mockNext);
 
-            // Should still call next() - Kong will handle validation
-            expect(mockNext).toHaveBeenCalled();
-        });
-    });
-
-    describe('handlePasswordForReset', () => {
-        it('should accept valid bcrypt hash for reset', () => {
-            const bcryptHash = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
-            mockRequest.body = {
-                request: {
-                    password: bcryptHash
-                }
-            };
-
-            handlePasswordForReset(mockRequest as Request, mockResponse as Response, mockNext);
-
-            expect(mockNext).toHaveBeenCalled();
-            expect(mockRequest.body.request.password).toBe(bcryptHash);
-        });
-
-        it('should handle requests without password', () => {
-            mockRequest.body = {
-                request: {}
-            };
-
-            handlePasswordForReset(mockRequest as Request, mockResponse as Response, mockNext);
-
+            // Should call next with error or handle gracefully
             expect(mockNext).toHaveBeenCalled();
         });
     });

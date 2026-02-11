@@ -38,13 +38,13 @@ const SignUp: React.FC = () => {
     useEffect(() => {
         const systemSettingService = new SystemSettingService();
         systemSettingService.read('portal_google_recaptcha_site_key')
-            .then(res => {
-                if (res.data?.result?.value) {
-                    setGoogleCaptchaSiteKey(res.data.result.value);
-                }
-            })
-            .catch(err => console.error('Error fetching captcha site key:', err));
-    }, []);
+        .then(res => {
+        if (res.data?.result?.value) {
+        setGoogleCaptchaSiteKey(res.data.result.value);
+        }
+})
+        .catch(err => console.error('Error fetching captcha site key:', err));
+            }, []);
 
     const handleOtpMutation = (captchaResponse?: string, isResend = false) => {
         const request = signupService.createOtpGenerationRequest(emailOrMobile);
@@ -97,16 +97,16 @@ const SignUp: React.FC = () => {
         googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation();
     };
 
-    const handleVerifyOtp = async () => {
+    const handleVerifyOtp = () => {
         const request = signupService.createOtpVerificationRequest(emailOrMobile, otp.join(''));
 
         verifyOtpMutation.mutate(
             { request },
             {
-                onSuccess: async (response) => {
+                onSuccess: (response) => {
                     if (response.status === 200) {
                         const deviceId = localStorage.getItem('deviceId') || undefined;
-                        const signupRequest = await signupService.prepareSignupRequest(firstName, emailOrMobile, password, deviceId);
+                        const signupRequest = signupService.prepareSignupRequest(firstName, emailOrMobile, password, deviceId);
 
                         signupMutation.mutate(signupRequest, {
                             onSuccess: (signupResponse) => {

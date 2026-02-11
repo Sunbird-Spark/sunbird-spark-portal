@@ -1,4 +1,3 @@
-import { hashPassword } from '@/utils/passwordUtils';
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from '@/utils/ValidationUtils';
 import { SignupValidationResult, OtpRequest, SignupRequest } from '@/types/signupTypes';
 
@@ -116,17 +115,17 @@ export class SignupService {
         };
     }
 
-    async prepareSignupRequest(
+    prepareSignupRequest(
         firstName: string,
         identifier: string,
         password: string,
         deviceId?: string
-    ): Promise<SignupRequest> {
-        const hashedPassword = await hashPassword(password);
+    ): SignupRequest {
+        const encodedPassword = btoa(password);
         return {
             firstName: firstName.trim(),
             identifier,
-            password: hashedPassword,
+            password: encodedPassword,
             deviceId,
         };
     }
