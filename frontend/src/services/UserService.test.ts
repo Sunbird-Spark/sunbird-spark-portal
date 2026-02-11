@@ -87,7 +87,7 @@ describe('UserService', () => {
                         firstName: 'John',
                         email: 'test@example.com',
                         password: 'Password123!',
-                        emailVerified: false
+                        emailVerified: true
                     }),
                     params: {
                         source: 'web',
@@ -116,7 +116,7 @@ describe('UserService', () => {
                         firstName: 'Jane',
                         phone: '9876543210',
                         password: 'Password123!',
-                        phoneVerified: false
+                        phoneVerified: true
                     }),
                     params: {
                         source: 'web',

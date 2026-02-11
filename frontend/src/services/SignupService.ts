@@ -114,19 +114,4 @@ export class SignupService {
             }
         };
     }
-
-    prepareSignupRequest(
-        firstName: string,
-        identifier: string,
-        password: string,
-        deviceId?: string
-    ): SignupRequest {
-        const encodedPassword = btoa(password);
-        return {
-            firstName: firstName.trim(),
-            identifier,
-            password: encodedPassword,
-            deviceId,
-        };
-    }
 }

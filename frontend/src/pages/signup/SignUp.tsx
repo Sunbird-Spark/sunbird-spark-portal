@@ -106,9 +106,13 @@ const SignUp: React.FC = () => {
                 onSuccess: (response) => {
                     if (response.status === 200) {
                         const deviceId = localStorage.getItem('deviceId') || undefined;
-                        const signupRequest = signupService.prepareSignupRequest(firstName, emailOrMobile, password, deviceId);
 
-                        signupMutation.mutate(signupRequest, {
+                        signupMutation.mutate({ 
+                            firstName, 
+                            identifier: emailOrMobile, 
+                            password, 
+                            deviceId 
+                        }, {
                             onSuccess: (signupResponse) => {
                                 if (signupResponse.status === 200) {
                                     toast({

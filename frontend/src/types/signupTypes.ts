@@ -15,8 +15,22 @@ export interface OtpRequest {
 }
 
 export interface SignupRequest {
-    firstName: string;
-    identifier: string;
-    password: string;
-    deviceId?: string;
+    request: {
+        firstName?: string;
+        email?: string;
+        phone?: string;
+        password: string;
+        emailVerified?: boolean;
+        phoneVerified?: boolean;
+    };
+    params?: {
+        source?: string;
+        signupType?: string;
+    };
+}
+
+export interface SignupResponse {
+    userId: string;
+    accessToken?: string;
+    refreshToken?: string;
 }
