@@ -67,7 +67,7 @@ vi.mock('@/services/SystemSettingService', () => ({
 }));
 
 // Mock individual step components to control the flow in the Page test
-vi.mock('@/components/auth/SignUpStep1', () => ({
+vi.mock('@/components/signup/SignUpStep1', () => ({
     SignUpStep1: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword, setIsTermsAccepted }: any) => (
         <div>
             <button data-testid="continue-btn" onClick={handleContinue}>Continue</button>
@@ -80,7 +80,7 @@ vi.mock('@/components/auth/SignUpStep1', () => ({
     )
 }));
 
-vi.mock('@/components/auth/SignUpStep2', () => ({
+vi.mock('@/components/signup/SignUpStep2', () => ({
     SignUpStep2: ({ handleVerifyOtp, setOtp }: any) => (
         <div>
             <button data-testid="verify-btn" onClick={handleVerifyOtp}>Verify</button>
@@ -89,7 +89,7 @@ vi.mock('@/components/auth/SignUpStep2', () => ({
     )
 }));
 
-vi.mock('@/components/auth/SignUpStep3', () => ({
+vi.mock('@/components/signup/SignUpStep3', () => ({
     SignUpStep3: ({ handleProceed }: any) => (
         <div>
             <div data-testid="success-message">Congratulations!</div>
