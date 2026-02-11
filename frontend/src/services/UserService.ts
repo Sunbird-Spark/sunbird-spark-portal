@@ -1,6 +1,6 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 import _ from 'lodash';
-import { SignupRequest , SignupResponse } from '../types/signupTypes'
+import { SignupRequest, SignupResponse } from '../types/signupTypes'
 
 export class UserService {
     public async searchUser(
@@ -70,14 +70,14 @@ export class UserService {
         }
 
         const isEmail = this.isEmail(identifier);
-        
+
         const requestBody: SignupRequest = {
             request: _.assign(
                 {
                     firstName,
                     password,
                 },
-                isEmail 
+                isEmail
                     ? { email: identifier, emailVerified: true }
                     : { phone: identifier, phoneVerified: true }
             ),

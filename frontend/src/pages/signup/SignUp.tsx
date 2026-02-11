@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/useToast";
 import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { SignUpForm } from '@/components/signup/SignUpForm';
@@ -13,7 +12,6 @@ import { SystemSettingService } from '@/services/SystemSettingService';
 import { SignupService } from '@/services/SignupService';
 
 const SignUp: React.FC = () => {
-    const navigate = useNavigate();
     const { toast } = useToast();
     const captchaRef = useRef<ReCAPTCHA>(null);
     const signupService = useMemo(() => new SignupService(), []);
@@ -40,17 +38,17 @@ const SignUp: React.FC = () => {
     useEffect(() => {
         const systemSettingService = new SystemSettingService();
         systemSettingService.read('portal_google_recaptcha_site_key')
-        .then(res => {
-        if (res.data?.result?.value) {
-        setGoogleCaptchaSiteKey(res.data.result.value);
-        }
-})
-        .catch(err => console.error('Error fetching captcha site key:', err));
+            .then(res => {
+                if (res.data?.result?.value) {
+                    setGoogleCaptchaSiteKey(res.data.result.value);
+                }
+            })
+            .catch(err => console.error('Error fetching captcha site key:', err));
     }, []);
 
     const handleOtpSuccess = (response: any, isResend = false) => {
         captchaRef.current?.reset();
-        
+
         if (response.status !== 200) {
             toast({
                 title: "OTP Generation Failed",
@@ -61,12 +59,12 @@ const SignUp: React.FC = () => {
         }
 
         const title = isResend ? "OTP Resent" : "OTP Sent";
-        const description = isResend 
-            ? "A new verification code has been sent." 
+        const description = isResend
+            ? "A new verification code has been sent."
             : "Please check your email/phone for the verification code.";
-        
+
         toast({ title, description, variant: "default" });
-        
+
         if (!isResend) {
             setStep(2);
         }
@@ -75,15 +73,15 @@ const SignUp: React.FC = () => {
     const handleOtpError = (error: any, isResend = false) => {
         console.error('OTP generation error:', error);
         captchaRef.current?.reset();
-        
+
         const isCaptchaError = error?.response?.status === 418;
-        const title = isCaptchaError 
-            ? "Captcha Validation Failed" 
+        const title = isCaptchaError
+            ? "Captcha Validation Failed"
             : isResend ? "Resend Failed" : "OTP Generation Failed";
-        const description = isCaptchaError 
-            ? "Please try again." 
+        const description = isCaptchaError
+            ? "Please try again."
             : error.message || "Failed to send OTP. Please try again.";
-        
+
         toast({ title, description, variant: "destructive" });
     };
 

@@ -99,6 +99,8 @@ export class SignupService {
     }
 
     encodePassword(password: string): string {
-        return btoa(password);
+        const utf8Bytes = new TextEncoder().encode(password);
+        const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
+        return btoa(binaryString);
     }
 }
