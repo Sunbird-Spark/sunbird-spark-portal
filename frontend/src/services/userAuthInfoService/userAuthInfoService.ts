@@ -2,22 +2,9 @@ import { getClient } from '../../lib/http-client';
 import type { ApiResponse } from '../../lib/http-client';
 
 interface AuthStatusResponse {
-    id: string;
-    ver: string;
-    ts: Date;
-    params: {
-        resmsgid: string;
-        msgid: string;
-        status: string;
-        err: string | null;
-        errmsg: string | null;
-    };
-    responseCode: string;
-    result: {
-        sid: string;
-        uid: string | null;
-        isAuthenticated: boolean;
-    };
+    sid: string;
+    uid: string | null;
+    isAuthenticated: boolean;
 }
 
 class userAuthInfoService {
@@ -45,42 +32,12 @@ class userAuthInfoService {
      */
     async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse['result']> {
         try {
-            const headers: Record<string, string> = {};
-            if (deviceId) {
-                headers['x-device-id'] = deviceId;
-            }
-
-            const response: ApiResponse<AuthStatusResponse> = await getClient().get<AuthStatusResponse>(
-                '/user/v1/auth/info',
-                headers
-            );
-
-            const data = response?.data;
-
-            if (!data) {
-                throw new Error('No data received from auth API');
-            }
-
-            // Check if response has the expected structure
-            if (!data.params || typeof data.params.status !== 'string') {
-                // Log only non-sensitive fields to avoid leaking sid/uid
-                console.warn('Auth API returned unexpected structure. Status:', data.params?.status, 'ResponseCode:', data.responseCode);
-                throw new Error('Invalid response structure from auth API');
-            }
-
-            if (data.params.status === 'successful' && data.result) {
-                this.sessionId = data.result.sid;
-                this.userId = data.result.uid;
-                this.isAuthenticated = data.result.isAuthenticated;
-
-                return data.result;
-            } else {
-                const errmsg =
-                    typeof data.params.errmsg === 'string' && data.params.errmsg.trim().length > 0
-                        ? data.params.errmsg
-                        : 'Failed to fetch auth status';
-                throw new Error(errmsg);
-            }
+            const response = await getClient().get<AuthStatusResponse>(
+                '/user/v1/auth/info')
+            this.sessionId = response.data.sid;
+            this.userId = response.data.uid;
+            this.isAuthenticated = response.data.isAuthenticated;
+            return response.data;
         } catch (error) {
             console.error('Error fetching auth status:', error);
             if (error && typeof error === 'object' && 'response' in error) {
