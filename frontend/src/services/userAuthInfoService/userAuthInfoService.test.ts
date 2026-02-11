@@ -94,7 +94,8 @@ describe('userAuthInfoService', () => {
         it('should call without device ID header when not provided', async () => {
             mockGet.mockResolvedValue(mockSuccessResponse);
 
-            await userAuthInfoService.getAuthInfo();
+            // Explicitly pass undefined to satisfy stricter TS check if implicit undefined is not allowed
+            await userAuthInfoService.getAuthInfo(undefined);
 
             expect(mockGet).toHaveBeenCalledWith('/user/v1/auth/info', {});
         });
