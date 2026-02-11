@@ -47,7 +47,6 @@ export const SignUpStep1 = ({
         />
 
         <div className="space-y-3">
-            {/* Google Sign In */}
             <Button
                 variant="outline"
                 className="secondary-outline-button"
@@ -57,16 +56,13 @@ export const SignUpStep1 = ({
                 Sign in with Google
             </Button>
 
-            {/* Divider */}
             <div className="form-divider-container">
                 <div className="form-divider-line"></div>
                 <span className="form-divider-text">OR</span>
                 <div className="form-divider-line"></div>
             </div>
 
-            {/* Form Fields */}
             <div className="space-y-3">
-                {/* First Name */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="firstName" required>First Name</InputLabel>
                     <Input
@@ -83,7 +79,6 @@ export const SignUpStep1 = ({
                     )}
                 </div>
 
-                {/* Email / Mobile */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="emailOrMobile" required>Email ID / Mobile Number</InputLabel>
                     <Input
@@ -93,7 +88,6 @@ export const SignUpStep1 = ({
                         placeholder="Enter Email ID / Mobile Number"
                         className="login-input-field h-10 px-3"
                     />
-                    {/* Inline Error (Optional/Complementary) */}
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
                         <p className="form-error-absolute form-error-offset-8">
                             Enter valid Email or 10-digit Mobile (6-9)
@@ -101,7 +95,6 @@ export const SignUpStep1 = ({
                     )}
                 </div>
 
-                {/* Password */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="password" required>Password</InputLabel>
                     <div className="relative">
@@ -126,7 +119,6 @@ export const SignUpStep1 = ({
                             )}
                         </button>
                     </div>
-                    {/* Password Requirements */}
                     {password && !PASSWORD_REGEX.test(password) && (
                         <p className="form-error-absolute form-error-offset-4">
                             Password must be 8+ chars (upper, lower, num, special)
@@ -134,7 +126,6 @@ export const SignUpStep1 = ({
                     )}
                 </div>
 
-                {/* Confirm Password */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="confirmPassword" required>Confirm Password</InputLabel>
                     <div className="relative">
@@ -166,7 +157,6 @@ export const SignUpStep1 = ({
                     )}
                 </div>
 
-                {/* Terms Checkbox */}
                 <div className="flex items-center space-x-2 mt-1">
                     <Checkbox
                         id="terms"
