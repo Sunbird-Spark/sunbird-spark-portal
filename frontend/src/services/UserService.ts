@@ -1,5 +1,24 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 
+export interface UserReadResponse {
+    id: string;
+    ver: string;
+    ts: string;
+    params: {
+        resmsgid: string;
+        msgid: string;
+        err: string | null;
+        status: string;
+        errmsg: string | null;
+    };
+    responseCode: string;
+    result: {
+        response: {
+            [key: string]: any;
+        };
+    };
+}
+
 export class UserService {
     public async searchUser(
         identifier: string,
@@ -49,6 +68,14 @@ export class UserService {
         return getClient().post(
             `/user/v1/password/reset`,
             request
+        );
+    }
+
+    public async userRead(
+        userId: string
+    ): Promise<ApiResponse<UserReadResponse>> {
+        return getClient().get<UserReadResponse>(
+            `/user/v5/read/${userId}`
         );
     }
 }

@@ -1,13 +1,20 @@
 import Avatar from "react-avatar";
 
-const ProfileCard = () => {
+interface ProfileCardProps {
+    user: any;
+}
+
+const ProfileCard = ({ user }: ProfileCardProps) => {
+    const fullName = `${user.firstName} ${user.lastName}`;
+    const displayEmail = user.maskedEmail || user.email;
+
     return (
         <div className="profile-card">
             {/* Profile Photo with Ring using react-avatar */}
             <div className="profile-avatar-wrapper">
                 <div className="profile-avatar-ring">
                     <Avatar
-                        name="Prachi desai"
+                        name={fullName}
                         size="100%"
                         round={true}
                         maxInitials={2}
@@ -23,12 +30,12 @@ const ProfileCard = () => {
 
             {/* Name */}
             <h2 className="profile-name">
-                Prachi desai
+                {fullName}
             </h2>
 
             {/* Sunbird ID */}
             <p className="profile-id-text">
-                Sunbird ID : prachi@gmail.com
+                Sunbird ID : {displayEmail}
             </p>
         </div>
     );

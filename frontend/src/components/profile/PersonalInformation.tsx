@@ -1,15 +1,21 @@
 import { FiEdit2 } from "react-icons/fi";
 
-const personalInfoData = {
-    fullName: "Prachi Desai",
-    emailId: "prachi@gmail.com",
-    mobileNumber: "1234567890",
-    alternateEmailId: "pra1234@gmail.com",
-    district: "Bengaluru",
-    state: "Karnataka",
-};
+interface PersonalInformationProps {
+    user: any;
+}
 
-const PersonalInformation = () => {
+const PersonalInformation = ({ user }: PersonalInformationProps) => {
+    const fullName = `${user.firstName} ${user.lastName}`;
+    const displayEmail = user.maskedEmail || user.email;
+    const displayPhone = user.maskedPhone || user.phone || "N/A";
+
+    // Extract district and state from profileLocation
+    const district = user.profileLocation?.find((loc: any) => loc.type === "district")?.id || "N/A";
+    const state = user.profileLocation?.find((loc: any) => loc.type === "state")?.id || "N/A";
+
+    // Recovery email (if available)
+    const alternateEmail = user.recoveryEmail || "N/A";
+
     return (
         <div className="personal-info-card">
             {/* Header with Edit */}
@@ -35,7 +41,7 @@ const PersonalInformation = () => {
                     </dt>
                     <dd className="personal-info-value-container">
                         <span className="personal-info-value">
-                            {personalInfoData.fullName}
+                            {fullName}
                         </span>
                     </dd>
                 </div>
@@ -47,7 +53,7 @@ const PersonalInformation = () => {
                     </dt>
                     <dd className="personal-info-value-container">
                         <span className="personal-info-value">
-                            {personalInfoData.mobileNumber}
+                            {displayPhone}
                         </span>
                     </dd>
                 </div>
@@ -59,7 +65,7 @@ const PersonalInformation = () => {
                     </dt>
                     <dd className="personal-info-value-container">
                         <span className="personal-info-value">
-                            {personalInfoData.emailId}
+                            {displayEmail}
                         </span>
                     </dd>
                 </div>
@@ -71,7 +77,7 @@ const PersonalInformation = () => {
                     </dt>
                     <dd className="personal-info-value-container">
                         <span className="personal-info-value">
-                            {personalInfoData.alternateEmailId}
+                            {alternateEmail}
                         </span>
                     </dd>
                 </div>
@@ -83,7 +89,7 @@ const PersonalInformation = () => {
                     </dt>
                     <dd className="personal-info-value-container">
                         <span className="personal-info-value">
-                            {personalInfoData.district}
+                            {district}
                         </span>
                     </dd>
                 </div>
@@ -95,7 +101,7 @@ const PersonalInformation = () => {
                     </dt>
                     <dd className="personal-info-value-container">
                         <span className="personal-info-value">
-                            {personalInfoData.state}
+                            {state}
                         </span>
                     </dd>
                 </div>
