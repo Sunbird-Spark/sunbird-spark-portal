@@ -1,9 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import session from 'express-session';
 import { envConfig } from './config/env.js';
-import { sessionStore } from './utils/sessionStore.js';
-import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
 import { destroySession } from './utils/sessionUtils.js';
@@ -12,7 +9,6 @@ import googleRoutes from './routes/googleRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
 import { kongProxy } from './proxies/kongProxy.js';
 import { redirectTenant } from './controllers/tenantController.js';
-import { setAnonymousOrg } from './middlewares/anonymousOrg.js';
 import { loadTenants } from './services/tenantService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -23,6 +19,7 @@ import helmet from 'helmet';
 import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
 import { handlePassword } from './middlewares/passwordHandler.js';
+import { conditionalSessionMiddleware, authSessionMiddleware } from './middlewares/conditionalSession.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,45 +68,17 @@ app.use(helmet({
 }));
 
 loadTenants();
-app.use(cors());
+app.use(cors({
+    origin: envConfig.ENVIRONMENT === 'local' ? ['http://localhost:5173', 'http://localhost:3000'] : false,
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded());
 app.get('/health', checkHealth);
 app.get('/app/v1/info', getAppInfo);
 
-// Anonymous session middleware for API routes only
-const anonymousSessionMiddleware = [
-    session({
-        name: CookieNames.ANONYMOUS,
-        store: sessionStore,
-        secret: envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-            sameSite: 'lax'
-        }
-    }),
-    registerDeviceWithKong(),
-    setAnonymousOrg()
-];
-
 app.get('/profile',
-    session({
-        name: CookieNames.AUTH,
-        store: sessionStore,
-        secret: envConfig.SUNBIRD_LOGGEDIN_SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: envConfig.ENVIRONMENT !== 'local',
-            maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-            sameSite: 'lax'
-        }
-    }), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: Request, res: Response) => {
+    authSessionMiddleware, keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), (req: Request, res: Response) => {
         res.clearCookie(CookieNames.ANONYMOUS);
         if (req.session) {
             req.session.save((err) => {
@@ -123,7 +92,8 @@ app.get('/profile',
         }
     });
 
-app.all('/portal/logout', async (req, res) => {
+app.all('/portal/logout', authSessionMiddleware, async (req, res) => {
+    res.clearCookie(CookieNames.AUTH);
     res.status(200).clearCookie(CookieNames.SESSION_ID, { path: '/' });
     try {
         await destroySession(req);
@@ -134,15 +104,15 @@ app.all('/portal/logout', async (req, res) => {
 })
 
 // Apply anonymous session middleware to API routes (once per route tree)
-app.use('/api', anonymousSessionMiddleware);
+app.use('/api', conditionalSessionMiddleware);
 app.use('/api/data/v1/form', formRoutes);
-app.use('/portal/user/v1/auth', anonymousSessionMiddleware, authRoutes);
+app.use('/portal/user/v1/auth', conditionalSessionMiddleware, authRoutes);
 app.use('/google', googleRoutes);
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Apply anonymous session middleware to portal routes (once per route tree)
-app.use('/portal', anonymousSessionMiddleware);
+app.use('/portal', conditionalSessionMiddleware);
 
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
 app.post('/portal/user/v1/password/reset', handlePassword, userProxy);
@@ -162,6 +132,6 @@ app.all('/portal/*rest', kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 
-app.get(/.*/, (req, res) => {
+app.get(/.*/, conditionalSessionMiddleware, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
