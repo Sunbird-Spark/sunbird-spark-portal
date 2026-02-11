@@ -1,71 +1,60 @@
+import _ from 'lodash';
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from '@/utils/ValidationUtils';
-import { SignupValidationResult, OtpRequest, SignupRequest } from '@/types/signupTypes';
+import { SignupValidationResult, OtpRequest } from '@/types/signupTypes';
 
 export class SignupService {
+    private static readonly VALIDATION_SUCCESS: SignupValidationResult = { isValid: true };
+
+    private createError(title: string, description: string): SignupValidationResult {
+        return {
+            isValid: false,
+            error: { title, description }
+        };
+    }
 
     validateFirstName(firstName: string): SignupValidationResult {
-        if (!firstName.trim()) {
-            return {
-                isValid: false,
-                error: {
-                    title: "First Name Required",
-                    description: "Please enter your first name.",
-                }
-            };
-        }
-        return { isValid: true };
+        return _.isEmpty(_.trim(firstName))
+            ? this.createError(
+                "First Name Required",
+                "Please enter your first name."
+            )
+            : SignupService.VALIDATION_SUCCESS;
     }
 
     validateIdentifier(emailOrMobile: string): SignupValidationResult {
-        if (!IDENTIFIER_REGEX.test(emailOrMobile)) {
-            return {
-                isValid: false,
-                error: {
-                    title: "Invalid Email or Mobile",
-                    description: "Please enter a valid email or a 10-digit mobile number starting with 6-9.",
-                }
-            };
-        }
-        return { isValid: true };
+        return !IDENTIFIER_REGEX.test(emailOrMobile)
+            ? this.createError(
+                "Invalid Email or Mobile",
+                "Please enter a valid email or a 10-digit mobile number starting with 6-9."
+            )
+            : SignupService.VALIDATION_SUCCESS;
     }
 
     validatePassword(password: string): SignupValidationResult {
-        if (!PASSWORD_REGEX.test(password)) {
-            return {
-                isValid: false,
-                error: {
-                    title: "Weak Password",
-                    description: "Password must be at least 8 characters, include an uppercase, a lowercase, a number, and a special character.",
-                }
-            };
-        }
-        return { isValid: true };
+        return !PASSWORD_REGEX.test(password)
+            ? this.createError(
+                "Weak Password",
+                "Password must be at least 8 characters, include an uppercase, a lowercase, a number, and a special character."
+            )
+            : SignupService.VALIDATION_SUCCESS;
     }
 
     validatePasswordMatch(password: string, confirmPassword: string): SignupValidationResult {
-        if (password !== confirmPassword) {
-            return {
-                isValid: false,
-                error: {
-                    title: "Passwords Mismatch",
-                    description: "The confirmed password does not match the entered password.",
-                }
-            };
-        }
-        return { isValid: true };
+        return password !== confirmPassword
+            ? this.createError(
+                "Passwords Mismatch",
+                "The confirmed password does not match the entered password."
+            )
+            : SignupService.VALIDATION_SUCCESS;
     }
 
     validateTermsAccepted(isTermsAccepted: boolean): SignupValidationResult {
-        if (!isTermsAccepted) {
-            return {
-                isValid: false,
-                error: {
-                    title: "Terms Not Accepted",
-                    description: "Please accept the Terms of Use to continue.",
-                }
-            };
-        }
-        return { isValid: true };
+        return !isTermsAccepted
+            ? this.createError(
+                "Terms Not Accepted",
+                "Please accept the Terms of Use to continue."
+            )
+            : SignupService.VALIDATION_SUCCESS;
     }
 
     validateStep1(
@@ -83,17 +72,11 @@ export class SignupService {
             this.validateTermsAccepted(isTermsAccepted),
         ];
 
-        for (const validation of validations) {
-            if (!validation.isValid) {
-                return validation;
-            }
-        }
-
-        return { isValid: true };
+        return _.find(validations, { isValid: false }) || SignupService.VALIDATION_SUCCESS;
     }
 
     getIdentifierType(identifier: string): 'email' | 'phone' {
-        return identifier.includes('@') ? 'email' : 'phone';
+        return _.includes(identifier, '@') ? 'email' : 'phone';
     }
 
     createOtpGenerationRequest(identifier: string): OtpRequest {
