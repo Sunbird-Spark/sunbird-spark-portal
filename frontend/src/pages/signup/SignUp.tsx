@@ -44,7 +44,7 @@ const SignUp: React.FC = () => {
         }
 })
         .catch(err => console.error('Error fetching captcha site key:', err));
-            }, []);
+    }, []);
 
     const handleOtpMutation = (captchaResponse?: string, isResend = false) => {
         const request = signupService.createOtpGenerationRequest(emailOrMobile);
@@ -107,11 +107,11 @@ const SignUp: React.FC = () => {
                     if (response.status === 200) {
                         const deviceId = localStorage.getItem('deviceId') || undefined;
 
-                        signupMutation.mutate({ 
-                            firstName, 
-                            identifier: emailOrMobile, 
-                            password, 
-                            deviceId 
+                        signupMutation.mutate({
+                            firstName,
+                            identifier: emailOrMobile,
+                            password: btoa(password),
+                            deviceId
                         }, {
                             onSuccess: (signupResponse) => {
                                 if (signupResponse.status === 200) {
