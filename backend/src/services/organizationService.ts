@@ -25,7 +25,7 @@ export const getDefaultOrg = async (
 ): Promise<Organization> => {
     try {
         const { data } = await axios.post(
-            `${envConfig.KONG_URL}/api/org/v2/search`,
+            `${envConfig.KONG_URL}/org/v2/search`,
             { request: { filters: { slug: slug.trim(), isTenant: true } } },
             {
                 headers: {
