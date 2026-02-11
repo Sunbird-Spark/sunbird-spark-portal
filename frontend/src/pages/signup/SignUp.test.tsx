@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SignUp from './SignUp';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock hooks
 const mockNavigate = vi.fn();
@@ -100,25 +101,35 @@ vi.mock('@/components/signup/SignUpSuccess', () => ({
 
 
 describe('SignUp Page', () => {
+    let queryClient: QueryClient;
+
     beforeEach(() => {
         vi.clearAllMocks();
+        queryClient = new QueryClient({
+            defaultOptions: {
+                queries: { retry: false },
+                mutations: { retry: false },
+            },
+        });
     });
 
-    it('renders Step 1 initially', () => {
-        render(
-            <BrowserRouter>
-                <SignUp />
-            </BrowserRouter>
+    const renderWithProviders = (component: React.ReactElement) => {
+        return render(
+            <QueryClientProvider client={queryClient}>
+                <BrowserRouter>
+                    {component}
+                </BrowserRouter>
+            </QueryClientProvider>
         );
+    };
+
+    it('renders Step 1 initially', () => {
+        renderWithProviders(<SignUp />);
         expect(screen.getByTestId('continue-btn')).toBeInTheDocument();
     });
 
     it('shows error if identifier is invalid', () => {
-        render(
-            <BrowserRouter>
-                <SignUp />
-            </BrowserRouter>
-        );
+        renderWithProviders(<SignUp />);
         fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });
         fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'invalid' } });
         fireEvent.click(screen.getByTestId('continue-btn'));
@@ -126,11 +137,7 @@ describe('SignUp Page', () => {
     });
 
     it('shows error if password is weak', () => {
-        render(
-            <BrowserRouter>
-                <SignUp />
-            </BrowserRouter>
-        );
+        renderWithProviders(<SignUp />);
         fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });
         fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByTestId('pass-input'), { target: { value: 'weak' } });
@@ -139,11 +146,7 @@ describe('SignUp Page', () => {
     });
 
     it('shows error if passwords mismatch', () => {
-        render(
-            <BrowserRouter>
-                <SignUp />
-            </BrowserRouter>
-        );
+        renderWithProviders(<SignUp />);
         fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });
         fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByTestId('pass-input'), { target: { value: 'Pass123!' } });
@@ -153,11 +156,7 @@ describe('SignUp Page', () => {
     });
 
     it('shows error if terms not accepted', () => {
-        render(
-            <BrowserRouter>
-                <SignUp />
-            </BrowserRouter>
-        );
+        renderWithProviders(<SignUp />);
         fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });
         fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByTestId('pass-input'), { target: { value: 'Pass123!' } });
@@ -168,11 +167,7 @@ describe('SignUp Page', () => {
     });
 
     it('transitions to Step 2 when validation passes', async () => {
-        render(
-            <BrowserRouter>
-                <SignUp />
-            </BrowserRouter>
-        );
+        renderWithProviders(<SignUp />);
         fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });
         fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByTestId('pass-input'), { target: { value: 'Pass123!' } });
@@ -190,11 +185,7 @@ describe('SignUp Page', () => {
         delete (window as any).location;
         window.location = { href: '' } as any;
 
-        render(
-            <BrowserRouter>
-                <SignUp />
-            </BrowserRouter>
-        );
+        renderWithProviders(<SignUp />);
 
         // Transition to step 2
         fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });

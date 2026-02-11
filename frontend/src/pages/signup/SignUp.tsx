@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useToast } from "@/hooks/useToast";
@@ -8,7 +8,7 @@ import { SignUpOtpVerification } from '@/components/signup/SignUpOtpVerification
 import { SignUpSuccess } from '@/components/signup/SignUpSuccess';
 import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
-import { SystemSettingService } from '@/services/SystemSettingService';
+import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
 
 const SignUp: React.FC = () => {
@@ -17,7 +17,6 @@ const SignUp: React.FC = () => {
     const signupService = useMemo(() => new SignupService(), []);
 
     const [step, setStep] = useState<1 | 2 | 3>(1);
-    const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
     const [firstName, setFirstName] = useState('');
     const [emailOrMobile, setEmailOrMobile] = useState('');
     const [password, setPassword] = useState('');
@@ -27,6 +26,9 @@ const SignUp: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
+    const googleCaptchaSiteKey = captchaSiteKeyData?.data?.result?.value || '';
+
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
     const generateOtpMutation = useGenerateOtp();
@@ -34,17 +36,6 @@ const SignUp: React.FC = () => {
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
     const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword && isTermsAccepted);
     const isOtpValid = OTP_REGEX.test(otp.join(''));
-
-    useEffect(() => {
-        const systemSettingService = new SystemSettingService();
-        systemSettingService.read('portal_google_recaptcha_site_key')
-            .then(res => {
-                if (res.data?.result?.value) {
-                    setGoogleCaptchaSiteKey(res.data.result.value);
-                }
-            })
-            .catch(err => console.error('Error fetching captcha site key:', err));
-    }, []);
 
     const handleOtpSuccess = (response: any, isResend = false) => {
         captchaRef.current?.reset();
