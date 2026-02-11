@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import session from 'express-session';
+import { envConfig } from './config/env.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
