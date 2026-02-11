@@ -153,7 +153,7 @@ const HomeRecommendedSection = () => {
                     )
                 ))}
             </div>
-        </section >
+        </section>
     );
 };
 
