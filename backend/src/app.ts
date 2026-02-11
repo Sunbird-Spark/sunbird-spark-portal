@@ -22,13 +22,49 @@ import { userProxy } from './proxies/userProxy.js';
 import helmet from 'helmet';
 import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
+import { handlePassword } from './middlewares/passwordHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const app = express();
 app.set('trust proxy', true);
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://www.google.com",
+                "https://www.gstatic.com"
+            ],
+            frameSrc: [
+                "'self'",
+                "https://www.google.com"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://fonts.googleapis.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "data:"
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+                "https:"
+            ],
+            connectSrc: [
+                "'self'",
+                "https://www.google.com"
+            ]
+        }
+    }
+}));
 
 loadTenants();
 app.use(cors({
@@ -97,8 +133,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/portal', anonymousSessionMiddleware);
 
 app.post('/portal/user/v1/fuzzy/search', validateRecaptcha, userProxy);
-app.post('/portal/user/v1/password/reset', userProxy);
+app.post('/portal/user/v1/password/reset', handlePassword, userProxy);
 app.post('/portal/otp/v1/verify', kongProxy);
+app.post('/portal/user/v2/signup', handlePassword, kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [
     '/portal/user/v1/exists/email/:emailId',

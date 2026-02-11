@@ -25,3 +25,14 @@ export const useResetPassword = (): UseMutationResult<
       userService.resetPassword(variables.request),
   });
 };
+
+export const useSignup = (): UseMutationResult<
+  ApiResponse<{ userId: string; }>,
+  Error,
+  { firstName: string; identifier: string; password: string; deviceId?: string }
+> => {
+  return useMutation({
+    mutationFn: (variables: { firstName: string; identifier: string; password: string; deviceId?: string }) =>
+      userService.signup(variables.firstName, variables.identifier, variables.password, variables.deviceId),
+  });
+};
