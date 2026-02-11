@@ -84,8 +84,8 @@ const WorkspaceSidebar = ({ activeView, onViewChange, counts, userRole, onRoleCh
                 "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium font-['Rubik'] transition-all duration-200",
                 isActive && !isHighlight && "bg-sunbird-ginger/10 text-sunbird-brick",
                 !isActive && !isHighlight && "text-foreground/80 hover:bg-gray-100 hover:text-foreground",
-                isHighlight && isActive && "bg-sunbird-ginger text-white shadow-md",
-                isHighlight && !isActive && "bg-sunbird-ginger/90 text-white hover:bg-sunbird-ginger shadow-sm"
+                isHighlight && isActive && "bg-sunbird-brick text-white shadow-md hover:bg-sunbird-brick/90",
+                isHighlight && !isActive && "bg-sunbird-brick text-white hover:bg-sunbird-brick/90 shadow-sm"
               )}
             >
               <div className="flex items-center gap-3">
