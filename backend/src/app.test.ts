@@ -20,6 +20,7 @@ describe('Express App', () => {
     const { app } = await import('./app.js');
     const response = await request(app)
       .get('/non-existent-route')
+      .set('Origin', 'http://localhost:5173')
       .expect(404);
 
     // The response should have CORS headers

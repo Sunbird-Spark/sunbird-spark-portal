@@ -32,7 +32,7 @@ app.use(helmet());
 
 loadTenants();
 app.use(cors({
-    origin: envConfig.ENVIRONMENT === 'local' ? ['http://localhost:5173', 'http://127.0.0.1:5173'] : false, // Add other local ports if needed
+    origin: (envConfig.ENVIRONMENT === 'local' || envConfig.ENVIRONMENT === 'test') ? ['http://localhost:5173', 'http://127.0.0.1:5173'] : false, // Add other local ports if needed
     credentials: true
 }));
 app.use(express.json());
