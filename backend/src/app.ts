@@ -4,6 +4,7 @@ import session from 'express-session';
 import { envConfig } from './config/env.js';
 import { registerDeviceWithKong } from './middlewares/kongAuth.js';
 import { keycloak } from './auth/keycloakProvider.js';
+import { authenticated } from './auth/keycloakManager.js';
 import logger from './utils/logger.js';
 import { destroySession, destroySessionId, getCookieValue, getUnsignedSessionId } from './utils/sessionUtils.js';
 import { anonymousSessionConfig, authSessionConfig } from './config/sessionConfig.js';
@@ -50,6 +51,9 @@ const anonymousSessionMiddleware = [
 app.get('/profile',
     session(authSessionConfig), keycloak.middleware({ admin: '/callback', logout: '/logout' }), keycloak.protect(), async (req: Request, res: Response) => {
         try {
+            // Manually call the authenticated hook to ensure session regeneration happens before response
+            await authenticated(req);
+
             const anonymousCookie = getCookieValue(req.headers.cookie || '', CookieNames.ANONYMOUS);
             const anonymousSessionId = getUnsignedSessionId(anonymousCookie || '');
 
@@ -58,20 +62,15 @@ app.get('/profile',
                 logger.info(`Destroyed anonymous session ${anonymousSessionId} during login`);
             }
         } catch (err) {
-            logger.error('Error cleaning up anonymous session', err);
+            logger.error('Error during profile handler execution', err);
         }
 
         res.clearCookie(CookieNames.ANONYMOUS);
-        if (req.session) {
-            req.session.save((err) => {
-                if (err) {
-                    logger.error('Error saving session', err);
-                }
-                res.redirect('/home');
-            });
-        } else {
-            res.redirect('/');
-        }
+
+        // authenticated() calls regenerateSession which saves the session.
+        // We can redirect immediately, or save again to be safe (no harm in saving twice if needed, but regenerate saves)
+        // Let's redirect directly to ensure no double-response issues
+        res.redirect('/home');
     });
 
 app.all('/portal/logout', session(authSessionConfig), async (req, res) => {

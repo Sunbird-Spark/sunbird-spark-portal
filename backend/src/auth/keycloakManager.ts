@@ -9,7 +9,7 @@ import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 export const getKeycloakClient = (config: Keycloak.KeycloakConfig, store: any) => {
     const keycloak = new Keycloak({ store: store || sessionStore }, config);
-    keycloak.authenticated = authenticated;
+    // keycloak.authenticated = authenticated; // We will call this manually to avoid race conditions
     keycloak.deauthenticated = deauthenticated;
     return keycloak;
 }
@@ -22,7 +22,7 @@ const deauthenticated = async function (request: Request) {
     }
 }
 
-const authenticated = async (request: Request) => {
+export const authenticated = async (request: Request) => {
     try {
         await regenerateSession(request);
         setSessionTTLFromToken(request);
