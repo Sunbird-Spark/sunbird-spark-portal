@@ -1,7 +1,7 @@
 import { getClient } from '../../lib/http-client';
 import type { ApiResponse } from '../../lib/http-client';
 
-interface AuthStatusResponse {
+interface AuthStatusResult {
     sid: string;
     uid: string | null;
     isAuthenticated: boolean;
@@ -30,27 +30,39 @@ class userAuthInfoService {
      * @param deviceId - Optional device ID to send in the x-device-id header
      * @returns Promise with the auth status response
      */
-    async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse> {
+    async getAuthInfo(deviceId?: string): Promise<AuthStatusResult> {
         try {
-            const response = await getClient().get<AuthStatusResponse>(
-                '/user/v1/auth/info')
-            this.sessionId = response.data.sid;
-            this.userId = response.data.uid;
-            this.isAuthenticated = response.data.isAuthenticated;
-            return response.data;
+            const headers: Record<string, string> = {};
+            if (deviceId) {
+                headers['x-device-id'] = deviceId;
+            }
+
+            // The AxiosAdapter unwraps the response, so 'data' corresponds to the 'result' property of the API response
+            const response: ApiResponse<AuthStatusResult> = await getClient().get<AuthStatusResult>(
+                '/user/v1/auth/info',
+                headers
+            );
+
+            const data = response?.data;
+
+            if (!data) {
+                throw new Error('No data received from auth API');
+            }
+
+            // Since the adapter unwraps the 'result', we expect data to be AuthStatusResult
+            if (data.sid) {
+                this.sessionId = data.sid;
+                this.userId = data.uid;
+                this.isAuthenticated = data.isAuthenticated;
+
+                return data;
+            } else {
+               // If unwrap failed or structure is different (e.g. error response), handle it
+               // Ideally we should typecheck or assume success if no error thrown by adapter
+               throw new Error('Invalid response structure from auth API');
+            }
         } catch (error) {
             console.error('Error fetching auth status:', error);
-            if (error && typeof error === 'object' && 'response' in error) {
-                const httpError = error as { response?: { status?: number; data?: any } };
-                console.error('Status:', httpError.response?.status);
-                // Avoid logging full response data which may contain sensitive fields
-                const safeData = httpError.response?.data ? {
-                    responseCode: httpError.response.data.responseCode,
-                    status: httpError.response.data.params?.status,
-                    errmsg: httpError.response.data.params?.errmsg
-                } : undefined;
-                console.error('Response:', safeData);
-            }
             throw error;
         }
     }

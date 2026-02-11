@@ -1,187 +1,100 @@
-import React, { useState, useRef, useMemo } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import React, { useState } from 'react';
 import { AuthLayout } from '@/components/auth/AuthLayout';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/useToast";
-import { OTP_REGEX } from '@/utils/ValidationUtils';
-import { SignUpForm } from '@/components/signup/SignUpForm';
-import { SignUpOtpVerification } from '@/components/signup/SignUpOtpVerification';
-import { SignUpSuccess } from '@/components/signup/SignUpSuccess';
-import { useSignup } from '@/hooks/useUser';
-import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
-import { useSystemSetting } from '@/hooks/useSystemSetting';
-import { SignupService } from '@/services/SignupService';
+import { IDENTIFIER_REGEX, PASSWORD_REGEX, OTP_REGEX } from '@/utils/ValidationUtils';
+import { SignUpStep1, SignUpStep2 } from '@/components/auth/SignUpSteps';
 
 const SignUp: React.FC = () => {
+    const navigate = useNavigate();
+    const [step, setStep] = useState<1 | 2>(1);
     const { toast } = useToast();
-    const captchaRef = useRef<ReCAPTCHA>(null);
-    const signupService = useMemo(() => new SignupService(), []);
 
-    const [step, setStep] = useState<1 | 2 | 3>(1);
-    const [firstName, setFirstName] = useState('');
+    // Form State
     const [emailOrMobile, setEmailOrMobile] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
+
+    // UI State
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
-    const googleCaptchaSiteKey = captchaSiteKeyData?.data?.result?.value || '';
+    const isStep1Valid =
+        emailOrMobile.trim().length > 0 &&
+        password.length > 0 &&
+        confirmPassword.length > 0 &&
+        password === confirmPassword &&
+        isTermsAccepted;
 
-    const signupMutation = useSignup();
-    const verifyOtpMutation = useVerifyOtp();
-    const generateOtpMutation = useGenerateOtp();
-
-    const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
-    const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword && isTermsAccepted);
     const isOtpValid = OTP_REGEX.test(otp.join(''));
 
-    const handleOtpSuccess = (response: any, isResend = false) => {
-        captchaRef.current?.reset();
-
-        if (response.status !== 200) {
-            toast({
-                title: "OTP Generation Failed",
-                description: "Failed to send OTP. Please try again.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        const title = isResend ? "OTP Resent" : "OTP Sent";
-        const description = isResend
-            ? "A new verification code has been sent."
-            : "Please check your email/phone for the verification code.";
-
-        toast({ title, description, variant: "default" });
-
-        if (!isResend) {
-            setStep(2);
-        }
-    };
-
-    const handleOtpError = (error: any, isResend = false) => {
-        console.error('OTP generation error:', error);
-        captchaRef.current?.reset();
-
-        const isCaptchaError = error?.response?.status === 418;
-        const title = isCaptchaError
-            ? "Captcha Validation Failed"
-            : isResend ? "Resend Failed" : "OTP Generation Failed";
-        const description = isCaptchaError
-            ? "Please try again."
-            : error.message || "Failed to send OTP. Please try again.";
-
-        toast({ title, description, variant: "destructive" });
-    };
-
-    const handleOtpMutation = (captchaResponse?: string, isResend = false) => {
-        const request = signupService.createOtpGenerationRequest(emailOrMobile);
-
-        generateOtpMutation.mutate(
-            { request, captchaResponse },
-            {
-                onSuccess: (response) => handleOtpSuccess(response, isResend),
-                onError: (error) => handleOtpError(error, isResend)
-            }
-        );
-    };
-
     const handleContinue = () => {
-        const validation = signupService.validateSignupForm(firstName, emailOrMobile, password, confirmPassword, isTermsAccepted);
-
-        if (!validation.isValid && validation.error) {
+        // 1. Validate Identifier (Email or Mobile)
+        if (!IDENTIFIER_REGEX.test(emailOrMobile)) {
             toast({
-                title: validation.error.title,
-                description: validation.error.description,
+                title: "Invalid Email or Mobile",
+                description: "Please enter a valid email or a 10-digit mobile number starting with 6-9.",
                 variant: "destructive",
             });
             return;
         }
 
-        googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation();
-    };
-
-    const handleSignupSuccess = (signupResponse: any) => {
-        if (signupResponse.status !== 200) {
+        // 2. Validate Password Strength
+        if (!PASSWORD_REGEX.test(password)) {
             toast({
-                title: "Signup Failed",
-                description: "OTP verified but account creation failed. Please try again.",
+                title: "Weak Password",
+                description: "Password must be at least 8 characters, include an uppercase, a lowercase, a number, and a special character.",
                 variant: "destructive",
             });
             return;
         }
 
-        setStep(3);
-    };
-
-    const handleSignupError = (error: any) => {
-        toast({
-            title: "Signup Failed",
-            description: error.message || "OTP verified but account creation failed. Please try again.",
-            variant: "destructive",
-        });
-    };
-
-    const handleOtpVerificationSuccess = (response: any) => {
-        if (response.status !== 200) {
+        // 3. Validate Password Match
+        if (password !== confirmPassword) {
             toast({
-                title: "Verification Failed",
-                description: "Invalid OTP. Please try again.",
+                title: "Passwords Mismatch",
+                description: "The confirmed password does not match the entered password.",
                 variant: "destructive",
             });
             return;
         }
 
-        const deviceId = localStorage.getItem('deviceId') || undefined;
+        // 4. Validate Terms
+        if (!isTermsAccepted) {
+            toast({
+                title: "Terms Not Accepted",
+                description: "Please accept the Terms of Use to continue.",
+                variant: "destructive",
+            });
+            return;
+        }
 
-        signupMutation.mutate({
-            firstName,
-            identifier: emailOrMobile,
-            password: signupService.encodePassword(password),
-            deviceId
-        }, {
-            onSuccess: handleSignupSuccess,
-            onError: handleSignupError
-        });
-    };
-
-    const handleOtpVerificationError = (error: any) => {
-        toast({
-            title: "Verification Failed",
-            description: error.message || "An error occurred during verification. Please try again.",
-            variant: "destructive",
-        });
+        // If all validations pass
+        setStep(2);
     };
 
     const handleVerifyOtp = () => {
-        const request = signupService.createOtpVerificationRequest(emailOrMobile, otp.join(''));
+        // Verify OTP logic
 
-        verifyOtpMutation.mutate(
-            { request },
-            {
-                onSuccess: handleOtpVerificationSuccess,
-                onError: handleOtpVerificationError
-            }
-        );
-    };
+        toast({
+            title: "Account Created",
+            description: "You have successfully signed up. Redirecting...",
+            variant: "default",
+        });
 
-    const handleResendOtp = () => {
-        googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation(undefined, true);
-    };
-
-    const handleProceedToLogin = () => {
-        window.location.href = '/profile';
+        // Redirect or show success
+        setTimeout(() => {
+            navigate('/onboarding');
+        }, 1000);
     };
 
     return (
         <AuthLayout isOtpPage={step === 2}>
             <div className="w-full font-rubik">
                 {step === 1 && (
-                    <SignUpForm
-                        firstName={firstName}
-                        setFirstName={setFirstName}
+                    <SignUpStep1
                         emailOrMobile={emailOrMobile}
                         setEmailOrMobile={setEmailOrMobile}
                         password={password}
@@ -196,35 +109,15 @@ const SignUp: React.FC = () => {
                         setShowConfirmPassword={setShowConfirmPassword}
                         handleContinue={handleContinue}
                         isStep1Valid={isStep1Valid}
-                        isLoading={isLoading}
                     />
                 )}
 
                 {step === 2 && (
-                    <SignUpOtpVerification
+                    <SignUpStep2
                         otp={otp}
                         setOtp={setOtp}
                         isOtpValid={isOtpValid}
                         handleVerifyOtp={handleVerifyOtp}
-                        handleResendOtp={handleResendOtp}
-                        isLoading={isLoading}
-                    />
-                )}
-
-                {step === 3 && (
-                    <SignUpSuccess
-                        handleProceed={handleProceedToLogin}
-                    />
-                )}
-
-                {googleCaptchaSiteKey && (
-                    <ReCAPTCHA
-                        ref={captchaRef}
-                        sitekey={googleCaptchaSiteKey}
-                        size="invisible"
-                        onChange={token => token && handleOtpMutation(token, step === 2)}
-                        onLoad={() => console.log('ReCAPTCHA API loaded successfully')}
-                        onErrored={() => console.error('ReCAPTCHA error occurred')}
                     />
                 )}
             </div>

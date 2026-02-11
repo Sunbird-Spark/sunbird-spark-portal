@@ -1,6 +1,4 @@
 import { getClient, ApiResponse } from '../lib/http-client';
-import _ from 'lodash';
-import { SignupRequest, SignupResponse } from '../types/signupTypes'
 
 export class UserService {
     public async searchUser(
@@ -51,46 +49,6 @@ export class UserService {
         return getClient().post(
             `/user/v1/password/reset`,
             request
-        );
-    }
-
-    private isEmail(identifier: string): boolean {
-        return _.includes(identifier, '@');
-    }
-
-    public async signup(
-        firstName: string,
-        identifier: string,
-        password: string,
-        deviceId?: string
-    ): Promise<ApiResponse<SignupResponse>> {
-        const headers: Record<string, string> = {};
-        if (!_.isEmpty(deviceId) && !_.isUndefined(deviceId)) {
-            headers['x-device-id'] = deviceId;
-        }
-
-        const isEmail = this.isEmail(identifier);
-
-        const requestBody: SignupRequest = {
-            request: _.assign(
-                {
-                    firstName,
-                    password,
-                },
-                isEmail
-                    ? { email: identifier, emailVerified: true }
-                    : { phone: identifier, phoneVerified: true }
-            ),
-            params: {
-                source: 'web',
-                signupType: 'self'
-            }
-        };
-
-        return getClient().post<SignupResponse>(
-            `/user/v2/signup`,
-            requestBody,
-            headers
         );
     }
 }

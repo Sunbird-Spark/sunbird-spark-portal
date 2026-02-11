@@ -1,15 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { Checkbox } from "@/components/common/CheckBox";
-import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/ForgotPasswordComponents";
+import { Header, InputLabel, PrimaryButton, OTPInput } from "../../pages/forgotPassword/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 
+
 interface Step1Props {
-    firstName: string;
-    setFirstName: (val: string) => void;
     emailOrMobile: string;
     setEmailOrMobile: (val: string) => void;
     password: string;
@@ -24,11 +23,9 @@ interface Step1Props {
     setShowConfirmPassword: (val: React.SetStateAction<boolean>) => void;
     handleContinue: () => void;
     isStep1Valid: boolean;
-    isLoading?: boolean;
 }
 
-export const SignUpForm = ({
-    firstName, setFirstName,
+export const SignUpStep1 = ({
     emailOrMobile, setEmailOrMobile,
     password, setPassword,
     confirmPassword, setConfirmPassword,
@@ -36,8 +33,7 @@ export const SignUpForm = ({
     showPassword, setShowPassword,
     showConfirmPassword, setShowConfirmPassword,
     handleContinue,
-    isStep1Valid,
-    isLoading = false
+    isStep1Valid
 }: Step1Props) => (
     <>
         <Header
@@ -46,38 +42,26 @@ export const SignUpForm = ({
         />
 
         <div className="space-y-3">
+            {/* Google Sign In */}
             <Button
                 variant="outline"
                 className="secondary-outline-button"
-                onClick={() => { window.location.href = "/google/auth" }}
+                onClick={() => console.log('Google Sign In')}
             >
                 <FcGoogle className="w-5 h-5" />
                 Sign in with Google
             </Button>
 
+            {/* Divider */}
             <div className="form-divider-container">
                 <div className="form-divider-line"></div>
                 <span className="form-divider-text">OR</span>
                 <div className="form-divider-line"></div>
             </div>
 
+            {/* Form Fields */}
             <div className="space-y-3">
-                <div className="form-group relative pb-4">
-                    <InputLabel htmlFor="firstName" required>First Name</InputLabel>
-                    <Input
-                        id="firstName"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Enter First Name"
-                        className="login-input-field h-10 px-3"
-                    />
-                    {firstName && firstName.trim().length === 0 && (
-                        <p className="form-error-absolute form-error-offset-8">
-                            First name is required
-                        </p>
-                    )}
-                </div>
-
+                {/* Email / Mobile */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="emailOrMobile" required>Email ID / Mobile Number</InputLabel>
                     <Input
@@ -87,6 +71,7 @@ export const SignUpForm = ({
                         placeholder="Enter Email ID / Mobile Number"
                         className="login-input-field h-10 px-3"
                     />
+                    {/* Inline Error (Optional/Complementary) */}
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
                         <p className="form-error-absolute form-error-offset-8">
                             Enter valid Email or 10-digit Mobile (6-9)
@@ -94,6 +79,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
+                {/* Password */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="password" required>Password</InputLabel>
                     <div className="relative">
@@ -118,6 +104,7 @@ export const SignUpForm = ({
                             )}
                         </button>
                     </div>
+                    {/* Password Requirements */}
                     {password && !PASSWORD_REGEX.test(password) && (
                         <p className="form-error-absolute form-error-offset-4">
                             Password must be 8+ chars (upper, lower, num, special)
@@ -125,6 +112,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
+                {/* Confirm Password */}
                 <div className="form-group relative pb-4">
                     <InputLabel htmlFor="confirmPassword" required>Confirm Password</InputLabel>
                     <div className="relative">
@@ -156,6 +144,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
+                {/* Terms Checkbox */}
                 <div className="flex items-center space-x-2 mt-1">
                     <Checkbox
                         id="terms"
@@ -172,11 +161,11 @@ export const SignUpForm = ({
                 </div>
 
                 <PrimaryButton
-                    disabled={!isStep1Valid || isLoading}
+                    disabled={!isStep1Valid}
                     onClick={handleContinue}
                     className="mt-4 h-[3rem]"
                 >
-                    {isLoading ? 'Creating Account...' : 'Continue'}
+                    Continue
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
@@ -186,3 +175,78 @@ export const SignUpForm = ({
         </div>
     </>
 );
+
+interface Step2Props {
+    otp: string[];
+    setOtp: (val: string[]) => void;
+    isOtpValid: boolean;
+    handleVerifyOtp: () => void;
+}
+
+export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp }: Step2Props) => {
+    const [disableResendOtp, setDisableResendOtp] = useState(false);
+    const [counter, setCounter] = useState(20);
+    const [resendOtpCounter, setResendOtpCounter] = useState(1);
+
+    useEffect(() => {
+        setDisableResendOtp(true);
+        setCounter(20);
+
+        const interval = setInterval(() => {
+            setCounter(prev => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    setDisableResendOtp(false);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [resendOtpCounter]);
+
+    const handleResendOtp = () => {
+        setResendOtpCounter(prev => prev + 1);
+        console.log("Resending OTP...");
+    };
+
+    return (
+        <div className="flex flex-col h-full">
+            <Header
+                title="Enter the code"
+                subtitle="Enter the 6 digit code sent to your Email ID and complete the verification"
+            />
+
+            <div className="flex flex-col flex-1 justify-between h-full">
+                <div className="text-center pt-2">
+                    <p className="text-[0.75rem] font-medium text-sunbird-gray-75 mb-6">
+                        OTP is valid for 30 minutes
+                    </p>
+
+                    <OTPInput otp={otp} setOtp={setOtp} />
+
+                    <div className="text-center text-[0.75rem] font-medium mt-8">
+                        <button
+                            disabled={disableResendOtp}
+                            onClick={handleResendOtp}
+                            className="resend-otp-btn"
+                        >
+                            Resend OTP {counter > 0 && `(${counter})`}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="pb-2 mt-20">
+                    <PrimaryButton
+                        disabled={!isOtpValid}
+                        onClick={handleVerifyOtp}
+                        className="h-[3rem]"
+                    >
+                        Submit
+                    </PrimaryButton>
+                </div>
+            </div>
+        </div>
+    );
+};

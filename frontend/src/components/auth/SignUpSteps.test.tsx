@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SignUpForm } from './SignUpForm';
-import { SignUpOtpVerification } from './SignUpOtpVerification';
+import { SignUpStep1, SignUpStep2 } from './SignUpSteps';
 
 // Mock child components from ForgotPasswordComponents
 vi.mock('../../pages/forgotPassword/ForgotPasswordComponents', () => ({
@@ -48,10 +47,8 @@ vi.mock('react-icons/fi', () => ({
     FiCheck: () => <div data-testid="check-icon" />
 }));
 
-describe('SignUpForm', () => {
+describe('SignUpStep1', () => {
     const defaultProps = {
-        firstName: '',
-        setFirstName: vi.fn(),
         emailOrMobile: '',
         setEmailOrMobile: vi.fn(),
         password: '',
@@ -69,18 +66,14 @@ describe('SignUpForm', () => {
     };
 
     it('renders Step 1 correctly', () => {
-        render(<SignUpForm {...defaultProps} />);
+        render(<SignUpStep1 {...defaultProps} />);
         expect(screen.getByText('Welcome to Sunbird!')).toBeInTheDocument();
         expect(screen.getByText('Sign in with Google')).toBeInTheDocument();
-        expect(screen.getByPlaceholderText('Enter First Name')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter Email ID / Mobile Number')).toBeInTheDocument();
     });
 
     it('handles input changes', () => {
-        render(<SignUpForm {...defaultProps} />);
-
-        fireEvent.change(screen.getByPlaceholderText('Enter First Name'), { target: { value: 'John' } });
-        expect(defaultProps.setFirstName).toHaveBeenCalledWith('John');
+        render(<SignUpStep1 {...defaultProps} />);
 
         fireEvent.change(screen.getByPlaceholderText('Enter Email ID / Mobile Number'), { target: { value: 'test@example.com' } });
         expect(defaultProps.setEmailOrMobile).toHaveBeenCalledWith('test@example.com');
@@ -94,26 +87,26 @@ describe('SignUpForm', () => {
 
     it('shows validation errors for invalid email/mobile', () => {
         const props = { ...defaultProps, emailOrMobile: 'invalid' };
-        render(<SignUpForm {...props} />);
+        render(<SignUpStep1 {...props} />);
         expect(screen.getByText('Enter valid Email or 10-digit Mobile (6-9)')).toBeInTheDocument();
     });
 
     it('shows validation errors for weak password', () => {
         const props = { ...defaultProps, password: 'weak' };
-        render(<SignUpForm {...props} />);
+        render(<SignUpStep1 {...props} />);
         expect(screen.getByText(/Password must be 8\+ chars/)).toBeInTheDocument();
     });
 
     it('shows error when passwords do not match', () => {
         const props = { ...defaultProps, password: 'Password123!', confirmPassword: 'Different!' };
-        render(<SignUpForm {...props} />);
+        render(<SignUpStep1 {...props} />);
         expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
     });
 
     it('toggles password visibility', () => {
         const setShowPassword = vi.fn();
         const setShowConfirmPassword = vi.fn();
-        render(<SignUpForm {...defaultProps} setShowPassword={setShowPassword} setShowConfirmPassword={setShowConfirmPassword} />);
+        render(<SignUpStep1 {...defaultProps} setShowPassword={setShowPassword} setShowConfirmPassword={setShowConfirmPassword} />);
 
         const eyeButtons = screen.getAllByRole('button');
         // Index 0 is Google Sign In, indices 1 and 2 are eye buttons
@@ -125,7 +118,7 @@ describe('SignUpForm', () => {
     });
 
     it('handles terms checkbox', () => {
-        render(<SignUpForm {...defaultProps} />);
+        render(<SignUpStep1 {...defaultProps} />);
         const checkbox = screen.getByRole('checkbox');
         fireEvent.click(checkbox);
         expect(defaultProps.setIsTermsAccepted).toHaveBeenCalled();
@@ -133,29 +126,28 @@ describe('SignUpForm', () => {
 
     it('calls handleContinue when primary button is clicked', () => {
         const props = { ...defaultProps, isStep1Valid: true };
-        render(<SignUpForm {...props} />);
+        render(<SignUpStep1 {...props} />);
         fireEvent.click(screen.getByTestId('primary-button'));
         expect(props.handleContinue).toHaveBeenCalled();
     });
 });
 
-describe('SignUpOtpVerification', () => {
+describe('SignUpStep2', () => {
     const defaultProps = {
         otp: ['', '', '', '', '', ''],
         setOtp: vi.fn(),
         isOtpValid: false,
         handleVerifyOtp: vi.fn(),
-        handleResendOtp: vi.fn(),
     };
 
     it('renders Step 2 correctly', () => {
-        render(<SignUpOtpVerification {...defaultProps} />);
+        render(<SignUpStep2 {...defaultProps} />);
         expect(screen.getByText('Enter the code')).toBeInTheDocument();
         expect(screen.getByTestId('otp-input')).toBeInTheDocument();
     });
 
     it('handles OTP input change', () => {
-        render(<SignUpOtpVerification {...defaultProps} />);
+        render(<SignUpStep2 {...defaultProps} />);
         const firstDigit = screen.getByTestId('otp-0');
         fireEvent.change(firstDigit, { target: { value: '1' } });
         expect(defaultProps.setOtp).toHaveBeenCalled();
@@ -163,27 +155,8 @@ describe('SignUpOtpVerification', () => {
 
     it('calls handleVerifyOtp when OTP is valid and button is clicked', () => {
         const props = { ...defaultProps, isOtpValid: true };
-        render(<SignUpOtpVerification {...props} />);
+        render(<SignUpStep2 {...props} />);
         fireEvent.click(screen.getByTestId('primary-button'));
         expect(props.handleVerifyOtp).toHaveBeenCalled();
-    });
-
-    it('calls handleResendOtp when resend button is clicked', async () => {
-        vi.useFakeTimers();
-        const { rerender } = render(<SignUpOtpVerification {...defaultProps} />);
-        
-        // Wait for the initial timer to complete (20 seconds)
-        await vi.advanceTimersByTimeAsync(20000);
-        
-        // Force a re-render to update the button state
-        rerender(<SignUpOtpVerification {...defaultProps} />);
-        
-        const resendButton = screen.getByText(/Resend OTP/);
-        expect(resendButton).not.toBeDisabled();
-        
-        fireEvent.click(resendButton);
-        expect(defaultProps.handleResendOtp).toHaveBeenCalled();
-        
-        vi.useRealTimers();
     });
 });
