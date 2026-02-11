@@ -7,6 +7,21 @@ interface AuthStatusResponse {
     isAuthenticated: boolean;
 }
 
+interface SunbirdApiResponse<T> {
+    id: string;
+    ver: string;
+    ts: string;
+    params: {
+        resmsgid: string;
+        msgid: string;
+        err: string | null;
+        status: string;
+        errmsg: string | null;
+    };
+    responseCode: string;
+    result: T;
+}
+
 class userAuthInfoService {
     private static instance: userAuthInfoService;
     private sessionId: string | null = null;
@@ -32,12 +47,25 @@ class userAuthInfoService {
      */
     async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse> {
         try {
-            const response = await getClient().get<AuthStatusResponse>(
-                '/user/v1/auth/info')
-            this.sessionId = response.data.sid;
-            this.userId = response.data.uid;
-            this.isAuthenticated = response.data.isAuthenticated;
-            return response.data;
+            const config = deviceId ? { 'x-device-id': deviceId } : {};
+            const response = await getClient().get<SunbirdApiResponse<AuthStatusResponse>>(
+                '/user/v1/auth/info',
+                config
+            );
+
+            if (response.data.params?.status === 'failed') {
+                throw new Error(response.data.params.errmsg || 'Failed to fetch auth status');
+            }
+
+            const result = response.data.result;
+            if (result) {
+                this.sessionId = result.sid;
+                this.userId = result.uid;
+                this.isAuthenticated = result.isAuthenticated;
+                return result;
+            }
+
+            throw new Error('Invalid response format');
         } catch (error) {
             console.error('Error fetching auth status:', error);
             if (error && typeof error === 'object' && 'response' in error) {
