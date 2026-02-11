@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useNavigate } from 'react-router-dom';
@@ -12,59 +12,78 @@ import { SignupService } from '@/services/SignupService';
 
 const SignUp: React.FC = () => {
     const navigate = useNavigate();
-    const [step, setStep] = useState<1 | 2>(1);
     const { toast } = useToast();
+    const captchaRef = useRef<ReCAPTCHA>(null);
+    const signupService = useMemo(() => new SignupService(), []);
 
-    const signupService = new SignupService();
-
-    const signupMutation = useSignup();
-    const verifyOtpMutation = useVerifyOtp();
-    const generateOtpMutation = useGenerateOtp();
-
+    const [step, setStep] = useState<1 | 2>(1);
     const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
-    const captchaRef = React.useRef<ReCAPTCHA>(null);
-
-    useEffect(() => {
-        const systemSettingService = new SystemSettingService();
-        systemSettingService.read('portal_google_recaptcha_site_key')
-            .then(res => {
-                if (res.data?.result?.value) {
-                    setGoogleCaptchaSiteKey(res.data?.result?.value);
-                }
-            })
-            .catch(err => console.error('Error fetching captcha site key:', err));
-    }, []);
-
     const [firstName, setFirstName] = useState('');
     const [emailOrMobile, setEmailOrMobile] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
-
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const signupMutation = useSignup();
+    const verifyOtpMutation = useVerifyOtp();
+    const generateOtpMutation = useGenerateOtp();
+
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
-
-    const isStep1Valid =
-        firstName.trim().length > 0 &&
-        emailOrMobile.trim().length > 0 &&
-        password.length > 0 &&
-        confirmPassword.length > 0 &&
-        password === confirmPassword &&
-        isTermsAccepted;
-
+    const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword && isTermsAccepted);
     const isOtpValid = OTP_REGEX.test(otp.join(''));
 
-    const handleContinue = async () => {
-        const validation = signupService.validateStep1(
-            firstName,
-            emailOrMobile,
-            password,
-            confirmPassword,
-            isTermsAccepted
+    useEffect(() => {
+        const systemSettingService = new SystemSettingService();
+        systemSettingService.read('portal_google_recaptcha_site_key')
+            .then(res => {
+                if (res.data?.result?.value) {
+                    setGoogleCaptchaSiteKey(res.data.result.value);
+                }
+            })
+            .catch(err => console.error('Error fetching captcha site key:', err));
+    }, []);
+
+    const handleOtpMutation = (captchaResponse?: string, isResend = false) => {
+        const request = signupService.createOtpGenerationRequest(emailOrMobile);
+
+        generateOtpMutation.mutate(
+            { request, captchaResponse },
+            {
+                onSuccess: (response) => {
+                    captchaRef.current?.reset();
+                    if (response.status === 200) {
+                        toast({
+                            title: isResend ? "OTP Resent" : "OTP Sent",
+                            description: isResend ? "A new verification code has been sent." : "Please check your email/phone for the verification code.",
+                            variant: "default",
+                        });
+                        if (!isResend) setStep(2);
+                    } else {
+                        toast({
+                            title: "OTP Generation Failed",
+                            description: "Failed to send OTP. Please try again.",
+                            variant: "destructive",
+                        });
+                    }
+                },
+                onError: (error: any) => {
+                    console.error('OTP generation error:', error);
+                    captchaRef.current?.reset();
+                    toast({
+                        title: error?.response?.status === 418 ? "Captcha Validation Failed" : isResend ? "Resend Failed" : "OTP Generation Failed",
+                        description: error?.response?.status === 418 ? "Please try again." : error.message || "Failed to send OTP. Please try again.",
+                        variant: "destructive",
+                    });
+                }
+            }
         );
+    };
+
+    const handleContinue = () => {
+        const validation = signupService.validateStep1(firstName, emailOrMobile, password, confirmPassword, isTermsAccepted);
 
         if (!validation.isValid && validation.error) {
             toast({
@@ -75,76 +94,19 @@ const SignUp: React.FC = () => {
             return;
         }
 
-        if (googleCaptchaSiteKey) {
-            captchaRef.current?.execute();
-        } else {
-            initiateOtpGeneration();
-        }
-    };
-
-    const initiateOtpGeneration = async (captchaResponse?: string) => {
-        const otpRequest = signupService.createOtpGenerationRequest(emailOrMobile);
-
-        generateOtpMutation.mutate(
-            { request: otpRequest, captchaResponse },
-            {
-                onSuccess: (otpResponse) => {
-                    if (otpResponse.status === 200) {
-                        toast({
-                            title: "OTP Sent",
-                            description: "Please check your email/phone for the verification code.",
-                            variant: "default",
-                        });
-                        setStep(2);
-                    } else {
-                        toast({
-                            title: "OTP Generation Failed",
-                            description: "Failed to send OTP. Please try again.",
-                            variant: "destructive",
-                        });
-                    }
-                    captchaRef.current?.reset();
-                },
-                onError: (error: any) => {
-                    console.error('OTP generation error:', error);
-                    captchaRef.current?.reset();
-
-                    if (error?.response?.status === 418) {
-                        toast({
-                            title: "Captcha Validation Failed",
-                            description: "Please try again.",
-                            variant: "destructive",
-                        });
-                    } else {
-                        toast({
-                            title: "OTP Generation Failed",
-                            description: error.message || "Failed to send OTP. Please try again.",
-                            variant: "destructive",
-                        });
-                    }
-                }
-            }
-        );
+        googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation();
     };
 
     const handleVerifyOtp = async () => {
-        const otpString = otp.join('');
-        const request = signupService.createOtpVerificationRequest(emailOrMobile, otpString);
+        const request = signupService.createOtpVerificationRequest(emailOrMobile, otp.join(''));
 
-        // First verify OTP
         verifyOtpMutation.mutate(
             { request },
             {
                 onSuccess: async (response) => {
                     if (response.status === 200) {
-                        // OTP verified successfully, now call signup API
                         const deviceId = localStorage.getItem('deviceId') || undefined;
-                        const signupRequest = await signupService.prepareSignupRequest(
-                            firstName,
-                            emailOrMobile,
-                            password,
-                            deviceId
-                        );
+                        const signupRequest = await signupService.prepareSignupRequest(firstName, emailOrMobile, password, deviceId);
 
                         signupMutation.mutate(signupRequest, {
                             onSuccess: (signupResponse) => {
@@ -154,10 +116,7 @@ const SignUp: React.FC = () => {
                                         description: "You have successfully signed up. Redirecting...",
                                         variant: "default",
                                     });
-
-                                    setTimeout(() => {
-                                        navigate('/onboarding');
-                                    }, 1000);
+                                    setTimeout(() => navigate('/onboarding'), 1000);
                                 } else {
                                     toast({
                                         title: "Signup Failed",
@@ -195,50 +154,8 @@ const SignUp: React.FC = () => {
         );
     };
 
-    const handleResendOtpClick = async () => {
-        if (googleCaptchaSiteKey) {
-            captchaRef.current?.execute();
-        } else {
-            resendOtp();
-        }
-    };
-
-    const resendOtp = async (captchaResponse?: string) => {
-        const request = signupService.createOtpGenerationRequest(emailOrMobile);
-
-        generateOtpMutation.mutate(
-            { request, captchaResponse },
-            {
-                onSuccess: (response) => {
-                    if (response.status === 200) {
-                        toast({
-                            title: "OTP Resent",
-                            description: "A new verification code has been sent.",
-                            variant: "default",
-                        });
-                    }
-                    captchaRef.current?.reset();
-                },
-                onError: (error: any) => {
-                    console.error('Resend OTP error:', error);
-                    captchaRef.current?.reset();
-
-                    if (error?.response?.status === 418) {
-                        toast({
-                            title: "Captcha Validation Failed",
-                            description: "Please try again.",
-                            variant: "destructive",
-                        });
-                    } else {
-                        toast({
-                            title: "Resend Failed",
-                            description: error.message || "Failed to resend OTP. Please try again.",
-                            variant: "destructive",
-                        });
-                    }
-                }
-            }
-        );
+    const handleResendOtp = () => {
+        googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation(undefined, true);
     };
 
     return (
@@ -272,7 +189,7 @@ const SignUp: React.FC = () => {
                         setOtp={setOtp}
                         isOtpValid={isOtpValid}
                         handleVerifyOtp={handleVerifyOtp}
-                        handleResendOtp={handleResendOtpClick}
+                        handleResendOtp={handleResendOtp}
                         isLoading={isLoading}
                     />
                 )}
@@ -282,16 +199,7 @@ const SignUp: React.FC = () => {
                         ref={captchaRef}
                         sitekey={googleCaptchaSiteKey}
                         size="invisible"
-                        onChange={token => {
-                            console.log('ReCAPTCHA token received');
-                            if (token) {
-                                if (step === 1) {
-                                    initiateOtpGeneration(token);
-                                } else if (step === 2) {
-                                    resendOtp(token);
-                                }
-                            }
-                        }}
+                        onChange={token => token && handleOtpMutation(token, step === 2)}
                         onLoad={() => console.log('ReCAPTCHA API loaded successfully')}
                         onErrored={() => console.error('ReCAPTCHA error occurred')}
                     />
