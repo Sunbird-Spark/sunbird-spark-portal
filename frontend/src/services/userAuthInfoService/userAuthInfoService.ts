@@ -30,7 +30,7 @@ class userAuthInfoService {
      * @param deviceId - Optional device ID to send in the x-device-id header
      * @returns Promise with the auth status response
      */
-    async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse['result']> {
+    async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse> {
         try {
             const response = await getClient().get<AuthStatusResponse>(
                 '/user/v1/auth/info')
