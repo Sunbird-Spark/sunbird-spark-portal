@@ -32,9 +32,9 @@ class userAuthInfoService {
      */
     async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse> {
         try {
-            const config = deviceId ? { headers: { 'x-device-id': deviceId } } : {};
+            const headers: Record<string, string> = deviceId ? { 'x-device-id': deviceId } : {};
             const response = await getClient().get<any>(
-                '/user/v1/auth/info', config);
+                '/user/v1/auth/info', headers);
 
             // Check for API level error
             if (response.data.params?.status === 'failed') {
