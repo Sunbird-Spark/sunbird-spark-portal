@@ -1,6 +1,6 @@
-import { FiMenu } from "react-icons/fi";
-
-import { Button } from "@/components/common/Button";
+import { useNavigate } from "react-router-dom";
+import { FiSearch, FiBell, FiMenu, FiChevronDown } from "react-icons/fi";
+import { Input } from "@/components/common/Input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,137 +8,140 @@ import {
   DropdownMenuTrigger,
 } from "@/components/common/DropdownMenu";
 import { useAppI18n, type LanguageCode } from "@/hooks/useAppI18n";
-
-const LanguageIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <text
-      x="2"
-      y="16"
-      fontSize="11"
-      fontWeight="600"
-      fill="currentColor"
-    >
-      A
-    </text>
-    <text
-      x="12"
-      y="16"
-      fontSize="9"
-      fontWeight="500"
-      fill="currentColor"
-    >
-      あ
-    </text>
-  </svg>
-);
+import sunbirdLogo from "@/assets/sunbird-logo.svg";
+import translationIcon from "@/assets/translation_icon.svg";
 
 interface WorkspacePageHeaderProps {
   isMobile: boolean;
+  isSidebarOpen: boolean;
   onMenuOpen: () => void;
-  onBack: () => void;
 }
 
 const WorkspacePageHeader = ({
   isMobile,
+  isSidebarOpen,
   onMenuOpen,
-  onBack,
 }: WorkspacePageHeaderProps) => {
+  const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
 
-  const handleLanguageChange = (code: LanguageCode) => {
-    void changeLanguage(code);
-  };
-
   return (
-    <header className="bg-white border-b border-gray-100 px-4 md:px-6 py-3 md:py-4 shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
+    <header
+      className={isMobile ? "home-header-mobile" : "home-header"}
+    >
       <div className="flex items-center justify-between">
-        {/* Left: Menu Toggle + Title */}
-        <div className="flex items-center gap-2 md:gap-3">
-          {isMobile && (
-            <button
-              type="button"
-              onClick={onMenuOpen}
-              className="text-sunbird-ginger hover:text-sunbird-brick transition-colors p-1"
-            >
-              <FiMenu className="w-5 h-5" />
-            </button>
-          )}
-          {/* Back Arrow */}
-          <button
-            type="button"
-            onClick={onBack}
-            className="text-sunbird-brick hover:text-sunbird-ginger transition-colors p-1"
-          >
-            <svg
-              width="8"
-              height="14"
-              viewBox="0 0 8 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M7 1L1 7L7 13"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className="text-lg md:text-xl font-semibold text-sunbird-obsidian font-['Rubik']">
-            {t("workspace")}
-          </h1>
-        </div>
-
-        {/* Right: Language */}
-        <div className="flex items-center gap-2 md:gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1 text-gray-600 hover:text-sunbird-ginger"
+        {/* Left: Sunbird Logo + Align with Sidebar */}
+        <div
+          className={`flex items-center transition-all ${!isMobile && isSidebarOpen ? "w-[13.25rem]" : "w-auto"} ${isMobile ? "pl-0" : "pl-[1.875rem]"}`}
+        >
+          {isMobile ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onMenuOpen}
+                className="text-sunbird-ginger hover:text-sunbird-brick transition-colors p-2 -ml-2"
+                aria-label="Open Menu"
               >
-                <LanguageIcon />
+                <FiMenu className="w-6 h-6" />
+              </button>
+              <h1 className="text-lg font-semibold text-sunbird-obsidian">
+                {t("workspace")}
+              </h1>
+            </div>
+          ) : (
+            isSidebarOpen ? (
+              <img
+                src={sunbirdLogo}
+                alt="Sunbird"
+                className="w-auto"
+                style={{ height: "2.4375rem" }}
+              />
+            ) : (
+              <button
+                onClick={onMenuOpen}
+                className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
+              >
                 <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
+                  width="20"
+                  height="14"
+                  viewBox="0 0 20 14"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M3 4.5L6 7.5L9 4.5"
+                    d="M1 1H19"
                     stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth="2"
                     strokeLinecap="round"
-                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M1 7H19"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M1 13H19"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
                   />
                 </svg>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="bg-white border-gray-200 rounded-xl"
+              </button>
+            )
+          )}
+        </div>
+
+        {/* Right: Search + Language */}
+        <div className={`flex items-center ${isMobile ? "gap-2" : "gap-4"}`}>
+          {/* Search Bar */}
+          {isMobile ? (
+            <button
+              onClick={() => navigate("/search")}
+              className="text-sunbird-brick hover:text-sunbird-brick p-2"
             >
+              <FiSearch className="w-5 h-5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="home-search-container w-full md:w-[25rem] h-[2.875rem] text-left relative"
+              onClick={() => navigate("/search")}
+            >
+              <FiSearch className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sunbird-brick w-4 h-4 cursor-pointer" />
+              <Input
+                type="text"
+                placeholder={t("header.search")}
+                className="home-search-input pointer-events-none bg-transparent pl-4 pr-10 h-[2.875rem]"
+                readOnly
+              />
+            </button>
+          )}
+
+          {/* Notifications */}
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <FiBell className="w-5 h-5 text-sunbird-brick" />
+          </button>
+
+          {/* Language Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <img
+                  src={translationIcon}
+                  alt="Translate"
+                  className="w-5 h-5"
+                />
+                <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="min-w-[9.375rem] p-2 bg-white border-gray-100 z-50">
               {languages.map((lang) => (
                 <DropdownMenuItem
                   key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code as LanguageCode)}
-                  className={`font-['Rubik'] ${
-                    currentCode === lang.code ? "bg-sunbird-ivory" : ""
-                  }`}
+                  onSelect={() => changeLanguage(lang.code as LanguageCode)}
+                  className={`cursor-pointer p-2 rounded-md ${currentCode === lang.code ? "bg-sunbird-brick/10 text-sunbird-brick font-semibold" : ""}`}
                 >
-                  <span className="mr-2">{lang.label}</span>
-                  <span className="text-gray-400 text-xs">
-                    ({lang.code})
-                  </span>
+                  {lang.label}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -150,4 +153,3 @@ const WorkspacePageHeader = ({
 };
 
 export default WorkspacePageHeader;
-

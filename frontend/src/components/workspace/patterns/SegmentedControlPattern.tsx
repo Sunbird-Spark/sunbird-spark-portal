@@ -1,7 +1,6 @@
-import { FiPlus, FiEdit, FiCheckCircle, FiGrid, FiList, FiSearch, FiChevronDown } from "react-icons/fi";
+import { FiPlus, FiGrid, FiList, FiChevronDown } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
-import { Input } from "@/components/common/Input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +18,6 @@ interface SegmentedControlPatternProps {
   userRole: UserRole;
   onRoleChange: (role: UserRole) => void;
   counts: { drafts: number; review: number; published: number; all: number; pendingReview?: number };
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   sortBy: SortOption;
@@ -37,12 +34,10 @@ const SegmentedControlPattern = ({
   userRole,
   onRoleChange,
   counts,
-  searchQuery,
-  onSearchChange,
   viewMode,
   onViewModeChange,
-  sortBy,
-  onSortChange,
+  sortBy: _sortBy,
+  onSortChange: _onSortChange,
   typeFilter,
   onTypeFilterChange,
   contentCount,
@@ -103,8 +98,7 @@ const SegmentedControlPattern = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Create Button - Prominent */}
+        <div className="flex items-center gap-3 sm:ml-auto">
           {userRole === 'creator' && (
             <Button
               onClick={onCreateClick}
@@ -115,17 +109,6 @@ const SegmentedControlPattern = ({
               {t('createNew')}
             </Button>
           )}
-
-          {/* Search - Expandable Style */}
-          <div className="relative flex-1 sm:w-64">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={t('searchContent')}
-              className="pl-10 border-gray-200 rounded-2xl bg-white font-['Rubik'] h-11"
-            />
-          </div>
         </div>
       </div>
 

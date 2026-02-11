@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { FiUpload, FiUsers } from "react-icons/fi";
 
 import {
@@ -27,16 +26,15 @@ import "../home/home.css";
 import CreateContentModal from "@/pages/workspace/CreateContentModal";
 
 const WorkspacePage = () => {
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { t } = useAppI18n();
   const [isLoading, setIsLoading] = useState(true);
   const [activeNav, setActiveNav] = useState("workspace");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [userRole, setUserRole] = useState<UserRole>('creator');
   const [activeView, setActiveView] = useState<WorkspaceView>('all');
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
@@ -213,8 +211,6 @@ const WorkspacePage = () => {
     userRole,
     onRoleChange: setUserRole,
     counts,
-    searchQuery,
-    onSearchChange: setSearchQuery,
     viewMode,
     onViewModeChange: setViewMode,
     sortBy,
@@ -228,53 +224,63 @@ const WorkspacePage = () => {
   if (isLoading) return <PageLoader message={t('loading')} />;
 
   return (
-    <div className="min-h-screen bg-[#F4F4F4] flex">
-      {/* Left Sidebar - Desktop */}
-      {!isMobile && (
-        <HomeSidebar activeNav={activeNav} onNavChange={setActiveNav} />
-      )}
+    <div className="min-h-screen bg-[#F4F4F4] flex flex-col">
+      <WorkspacePageHeader
+        isMobile={isMobile}
+        isSidebarOpen={isSidebarOpen}
+        onMenuOpen={() => setIsSidebarOpen(true)}
+      />
 
-      {/* Left Sidebar - Mobile Sheet */}
-      {isMobile && (
-        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-          <SheetContent side="left" className="p-0 w-[220px]">
-            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-            <HomeSidebar activeNav={activeNav} onNavChange={(nav) => {
-              setActiveNav(nav);
-              setIsSidebarOpen(false);
-            }} />
-          </SheetContent>
-        </Sheet>
-      )}
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <WorkspacePageHeader
-          isMobile={isMobile}
-          onMenuOpen={() => setIsSidebarOpen(true)}
-          onBack={() => navigate(-1)}
-        />
-
-        {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto bg-[#F4F4F4]">
-          <div className="home-content-wrapper">
-            {/* Navigation */}
-            <SegmentedControlPattern {...navigationProps} />
-
-            {/* Content Area */}
-            {renderContent()}
+      <div className="flex flex-1 relative transition-all">
+        {/* Sidebar - Mobile (same as Home/Profile) */}
+        {isMobile ? (
+          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+            <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <HomeSidebar
+                activeNav={activeNav}
+                onNavChange={(nav) => {
+                  setActiveNav(nav);
+                  setIsSidebarOpen(false);
+                }}
+              />
+            </SheetContent>
+          </Sheet>
+        ) : (
+          /* Sidebar - Desktop (same as Home/Profile) */
+          <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
+            {isSidebarOpen && (
+              <>
+                <HomeSidebar activeNav={activeNav} onNavChange={setActiveNav} />
+                <div className="absolute -right-3 top-2 z-20">
+                  <button
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="w-6 h-6 bg-[#EFEFEF] rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
+                  >
+                    <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
+        )}
 
-          {/* Footer */}
-          <Footer />
-        </main>
-
-        <CreateContentModal
-          open={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onOptionSelect={handleCreateOption}
-        />
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <main className="flex-1 overflow-y-auto bg-[#F4F4F4]">
+            <div className="home-content-wrapper">
+              <SegmentedControlPattern {...navigationProps} />
+              {renderContent()}
+            </div>
+          </main>
+          <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
+        </div>
       </div>
+
+      {/* Footer - full width below sidebar + content (same as Home/Profile) */}
+      <Footer />
     </div>
   );
 };
