@@ -16,14 +16,12 @@ export const getAuthInfo = async (req: Request, res: Response) => {
     try {
         const deviceId = req.headers['x-device-id'] as string;
 
-        // Store device ID in session if provided and not already set
         if (deviceId && !req.session.deviceId) {
             req.session.deviceId = deviceId;
             await saveSession(req);
             logger.info(`AUTH_STATUS :: Device ID stored in session: ${deviceId}`);
         }
 
-        // Log the device ID for debugging purposes
         if (deviceId) {
             logger.info(`AUTH_STATUS :: Request from device ID: ${deviceId}`);
         }
@@ -34,7 +32,6 @@ export const getAuthInfo = async (req: Request, res: Response) => {
 
         logger.info(`AUTH_STATUS :: Session ID: ${sessionId}, User ID: ${userId}, Authenticated: ${isAuthenticated}, Device ID: ${req.session.deviceId || 'not set'}`);
 
-        // Prepare the response data
         const authStatusData = {
             sid: sessionId,
             uid: userId,
