@@ -32,12 +32,23 @@ class userAuthInfoService {
      */
     async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse> {
         try {
-            const response = await getClient().get<AuthStatusResponse>(
-                '/user/v1/auth/info')
-            this.sessionId = response.data.sid;
-            this.userId = response.data.uid;
-            this.isAuthenticated = response.data.isAuthenticated;
-            return response.data;
+            const config = deviceId ? { headers: { 'x-device-id': deviceId } } : {};
+            const response = await getClient().get<any>(
+                '/user/v1/auth/info', config);
+
+            // Check for API level error
+            if (response.data.params?.status === 'failed') {
+                const errorMessage = response.data.params.errmsg || 'Failed to fetch auth status';
+                throw new Error(errorMessage);
+            }
+
+            // Handle unwrapped response or direct response
+            const result = response.data.result || response.data;
+
+            this.sessionId = result.sid;
+            this.userId = result.uid;
+            this.isAuthenticated = result.isAuthenticated;
+            return result;
         } catch (error) {
             console.error('Error fetching auth status:', error);
             if (error && typeof error === 'object' && 'response' in error) {

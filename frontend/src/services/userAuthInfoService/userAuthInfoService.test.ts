@@ -69,7 +69,9 @@ describe('userAuthInfoService', () => {
 
             // Check HTTP client call
             expect(mockGet).toHaveBeenCalledWith('/user/v1/auth/info', {
-                'x-device-id': mockDeviceId
+                headers: {
+                    'x-device-id': mockDeviceId
+                }
             });
 
             // Check result
