@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/home/Header";
-import HeroBanner from "@/components/home/HeroBanner";
-import FeaturedCourses from "@/components/home/FeaturedCourses";
+import HeroWithStats from "@/components/index/HeroWithStats";
+import MostPopularContent from "@/components/index/MostPopularContent";
 import CategorySection from "@/components/home/CategorySection";
-import PopularCourses from "@/components/home/PopularCourses";
-import StatsSection from "@/components/home/StatsSection";
+import ResourceCenter from "@/components/index/ResourceCenter";
+import PopularContent from "@/components/index/PopularContent";
+import FAQSection from "@/components/index/FAQSection";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 
@@ -19,18 +20,19 @@ const Index = () => {
   }, []);
 
   if (isLoading) {
-    return <PageLoader message="Loading Sunbird Spark..." />;
+    return <PageLoader message="Loading Sunbird..." />;
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <HeroBanner />
-        <FeaturedCourses />
+        <HeroWithStats />
+        <MostPopularContent />
         <CategorySection />
-        <PopularCourses />
-        <StatsSection />
+        <ResourceCenter />
+        <PopularContent />
+        <FAQSection />
       </main>
       <Footer />
     </div>

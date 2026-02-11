@@ -34,15 +34,11 @@ const Header = () => {
 
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 pr-[3.5rem] pl-[0.8125rem]">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-[4.5rem] pl-[3.75rem]" style={{
-          paddingLeft: '0',
-          marginLeft: '0',
-          paddingRight: '2.1875rem',
-        }}>
+        <div className="flex items-center justify-between h-16 md:h-[4.5rem] pl-[60px] pr-[127px]">
           {/* Logo */}
-          <Link to="/" className="flex items-center md:pl-[1.875rem]">
+          <Link to="/" className="flex items-center">
             <img
               src={sunbirdLogo}
               alt="Sunbird"

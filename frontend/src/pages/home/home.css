@@ -9,7 +9,7 @@
 }
 
 .home-content-wrapper {
-    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[5.125rem] lg:pl-[5.75rem];
 }
 
 .home-welcome-title {
@@ -178,4 +178,18 @@
 /* Footer */
 .sunbird-footer {
     @apply bg-sunbird-footer-bg font-rubik !pr-[3.75rem];
+}
+
+/* Custom Card Shape */
+.card-mask-custom {
+    border-radius: 1.25rem;
+    mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.05));
+    background-color: white;
+}
+
+[dir="rtl"] .card-mask-custom {
+    mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
 }

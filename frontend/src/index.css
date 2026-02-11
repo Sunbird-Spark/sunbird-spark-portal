@@ -430,6 +430,16 @@
   }
 
 
+  .card-mask-custom {
+    -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+  }
+
+  [dir="rtl"] .card-mask-custom {
+    -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+  }
+
 }
 
 @layer base {
