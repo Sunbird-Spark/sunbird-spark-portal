@@ -41,7 +41,7 @@ describe('organizationService', () => {
 
             expect(result).toEqual(mockOrg);
             expect(axios.post).toHaveBeenCalledWith(
-                expect.stringContaining('/api/org/v2/search'),
+                expect.stringContaining('/org/v2/search'),
                 { request: { filters: { slug: 'sunbird', isTenant: true } } },
                 expect.objectContaining({
                     headers: expect.objectContaining({
