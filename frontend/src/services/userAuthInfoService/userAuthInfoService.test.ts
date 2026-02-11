@@ -25,7 +25,6 @@ describe('userAuthInfoService', () => {
     });
 
     describe('getAuthInfo', () => {
-        const mockDeviceId = 'test-device-id';
         const mockSuccessResponse = {
             data: {
                 sid: 'session-123',
@@ -46,12 +45,22 @@ describe('userAuthInfoService', () => {
             headers: {}
         };
 
+        const mockApiErrorResponse = {
+            data: {
+                sid: null,
+                uid: null,
+                isAuthenticated: false
+            },
+            status: 401,
+            headers: {}
+        };
+
         it('should successfully fetch auth status and update state', async () => {
             mockGet.mockResolvedValue(mockSuccessResponse);
 
-            const result = await userAuthInfoService.getAuthInfo(mockDeviceId);
+            const result = await userAuthInfoService.getAuthInfo();
 
-            // Check HTTP client call - service doesn't use headers
+            // Check HTTP client call
             expect(mockGet).toHaveBeenCalledWith('/user/v1/auth/info');
 
             // Check result
@@ -66,47 +75,32 @@ describe('userAuthInfoService', () => {
         it('should handle anonymous user properly', async () => {
             mockGet.mockResolvedValue(mockAnonymousResponse);
 
-            await userAuthInfoService.getAuthInfo(mockDeviceId);
+            await userAuthInfoService.getAuthInfo();
 
             expect(userAuthInfoService.getSessionId()).toBe('session-789');
             expect(userAuthInfoService.getUserId()).toBeNull();
             expect(userAuthInfoService.isUserAuthenticated()).toBe(false);
         });
 
-        it('should call without device ID header when not provided', async () => {
-            mockGet.mockResolvedValue(mockSuccessResponse);
+it('should handle API error response (non-2xx status)', async () => {
+            // AxiosAdapter converts non-2xx responses to resolved ApiResponse
+            mockGet.mockResolvedValue(mockApiErrorResponse);
 
-            // Explicitly pass undefined to satisfy stricter TS check if implicit undefined is not allowed
-            await userAuthInfoService.getAuthInfo(undefined);
+            // Service doesn't validate status codes, so it will process the response
+            const result = await userAuthInfoService.getAuthInfo();
 
-            // Service doesn't use headers parameter
-            expect(mockGet).toHaveBeenCalledWith('/user/v1/auth/info');
-        });
-
-        it('should throw error when api returns unsuccessful status', async () => {
-            const mockErrorResponse = new Error('Something went wrong');
-            mockGet.mockRejectedValue(mockErrorResponse);
-
-            await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
-                .rejects.toThrow('Something went wrong');
-
-            // State should not change
+            expect(result).toEqual(mockApiErrorResponse.data);
+            // State gets updated even with error status
             expect(userAuthInfoService.getSessionId()).toBeNull();
+            expect(userAuthInfoService.getUserId()).toBeNull();
+            expect(userAuthInfoService.isUserAuthenticated()).toBe(false);
         });
 
-        it('should use default error message when api returns failed status without errmsg', async () => {
-            const mockErrorResponse = new Error('Failed to fetch auth status');
-            mockGet.mockRejectedValue(mockErrorResponse);
-
-            await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
-                .rejects.toThrow('Failed to fetch auth status');
-        });
-
-        it('should throw error when HTTP client fails', async () => {
+        it('should throw error when HTTP client fails (network error)', async () => {
             const networkError = new Error('Network Error');
             mockGet.mockRejectedValue(networkError);
 
-            await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
+            await expect(userAuthInfoService.getAuthInfo())
                 .rejects.toThrow('Network Error');
         });
 
@@ -123,7 +117,7 @@ describe('userAuthInfoService', () => {
             const consoleSpy = vi.spyOn(console, 'error');
 
             try {
-                await userAuthInfoService.getAuthInfo(mockDeviceId);
+                await userAuthInfoService.getAuthInfo();
             } catch (e) {
                 // Expected error
             }
@@ -154,7 +148,7 @@ describe('userAuthInfoService', () => {
                 headers: {}
             };
             mockGet.mockResolvedValue(mockResponse);
-            await userAuthInfoService.getAuthInfo('d1');
+            await userAuthInfoService.getAuthInfo();
 
             expect(userAuthInfoService.isUserAuthenticated()).toBe(true);
 
