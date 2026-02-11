@@ -10,7 +10,7 @@ interface Step2Props {
     isLoading?: boolean;
 }
 
-export const SignUpStep2 = ({ otp, setOtp, isOtpValid, handleVerifyOtp, handleResendOtp, isLoading = false }: Step2Props) => {
+export const SignUpOtpVerification = ({ otp, setOtp, isOtpValid, handleVerifyOtp, handleResendOtp, isLoading = false }: Step2Props) => {
     const [disableResendOtp, setDisableResendOtp] = useState(false);
     const [counter, setCounter] = useState(20);
     const [resendOtpCounter, setResendOtpCounter] = useState(1);

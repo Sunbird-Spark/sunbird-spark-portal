@@ -4,9 +4,9 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/useToast";
 import { OTP_REGEX } from '@/utils/ValidationUtils';
-import { SignUpStep1 } from '@/components/signup/SignUpStep1';
-import { SignUpStep2 } from '@/components/signup/SignUpStep2';
-import { SignUpStep3 } from '@/components/signup/SignUpStep3';
+import { SignUpForm } from '@/components/signup/SignUpForm';
+import { SignUpOtpVerification } from '@/components/signup/SignUpOtpVerification';
+import { SignUpSuccess } from '@/components/signup/SignUpSuccess';
 import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { SystemSettingService } from '@/services/SystemSettingService';
@@ -160,14 +160,14 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        navigate('/profile');
+        window.location.href = '/profile';
     };
 
     return (
         <AuthLayout isOtpPage={step === 2}>
             <div className="w-full font-rubik">
                 {step === 1 && (
-                    <SignUpStep1
+                    <SignUpForm
                         firstName={firstName}
                         setFirstName={setFirstName}
                         emailOrMobile={emailOrMobile}
@@ -189,7 +189,7 @@ const SignUp: React.FC = () => {
                 )}
 
                 {step === 2 && (
-                    <SignUpStep2
+                    <SignUpOtpVerification
                         otp={otp}
                         setOtp={setOtp}
                         isOtpValid={isOtpValid}
@@ -200,7 +200,7 @@ const SignUp: React.FC = () => {
                 )}
 
                 {step === 3 && (
-                    <SignUpStep3
+                    <SignUpSuccess
                         handleProceed={handleProceedToLogin}
                     />
                 )}

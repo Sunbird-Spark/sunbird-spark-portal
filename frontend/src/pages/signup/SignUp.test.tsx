@@ -67,8 +67,8 @@ vi.mock('@/services/SystemSettingService', () => ({
 }));
 
 // Mock individual step components to control the flow in the Page test
-vi.mock('@/components/signup/SignUpStep1', () => ({
-    SignUpStep1: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword, setIsTermsAccepted }: any) => (
+vi.mock('@/components/signup/SignUpForm', () => ({
+    SignUpForm: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword, setIsTermsAccepted }: any) => (
         <div>
             <button data-testid="continue-btn" onClick={handleContinue}>Continue</button>
             <input data-testid="firstname-input" onChange={(e) => setFirstName(e.target.value)} />
@@ -80,8 +80,8 @@ vi.mock('@/components/signup/SignUpStep1', () => ({
     )
 }));
 
-vi.mock('@/components/signup/SignUpStep2', () => ({
-    SignUpStep2: ({ handleVerifyOtp, setOtp }: any) => (
+vi.mock('@/components/signup/SignUpOtpVerification', () => ({
+    SignUpOtpVerification: ({ handleVerifyOtp, setOtp }: any) => (
         <div>
             <button data-testid="verify-btn" onClick={handleVerifyOtp}>Verify</button>
             <button data-testid="fill-otp-btn" onClick={() => setOtp(['1', '2', '3', '4', '5', '6'])}>Fill OTP</button>
@@ -89,14 +89,15 @@ vi.mock('@/components/signup/SignUpStep2', () => ({
     )
 }));
 
-vi.mock('@/components/signup/SignUpStep3', () => ({
-    SignUpStep3: ({ handleProceed }: any) => (
+vi.mock('@/components/signup/SignUpSuccess', () => ({
+    SignUpSuccess: ({ handleProceed }: any) => (
         <div>
             <div data-testid="success-message">Congratulations!</div>
             <button data-testid="proceed-btn" onClick={handleProceed}>Proceed to Login</button>
         </div>
     )
 }));
+
 
 describe('SignUp Page', () => {
     beforeEach(() => {
@@ -186,6 +187,9 @@ describe('SignUp Page', () => {
     });
 
     it('handles OTP verification and navigation', async () => {
+        delete (window as any).location;
+        window.location = { href: '' } as any;
+
         render(
             <BrowserRouter>
                 <SignUp />
@@ -214,6 +218,6 @@ describe('SignUp Page', () => {
         });
 
         fireEvent.click(screen.getByTestId('proceed-btn'));
-        expect(mockNavigate).toHaveBeenCalledWith('/profile');
+        expect(window.location.href).toBe('/profile');
     });
 });
