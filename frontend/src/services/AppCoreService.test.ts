@@ -104,7 +104,7 @@ describe('AppCoreService', () => {
 
             // We need to be careful with navigator mocks in JSDOM/Vitest environment
             // but the original test did it this way.
-             Object.defineProperty(navigator, 'userAgent', { value: 'TestAgent', configurable: true });
+            Object.defineProperty(navigator, 'userAgent', { value: 'TestAgent', configurable: true });
             Object.defineProperty(navigator, 'platform', { value: 'TestPlatform', configurable: true });
 
             const info = await appCoreService.getDeviceInfo();
@@ -114,7 +114,7 @@ describe('AppCoreService', () => {
             expect(info.platform).toBe('TestPlatform');
             expect(typeof info.timestamp).toBe('number');
 
-             Object.defineProperty(navigator, 'userAgent', { value: originalUserAgent, configurable: true });
+            Object.defineProperty(navigator, 'userAgent', { value: originalUserAgent, configurable: true });
             Object.defineProperty(navigator, 'platform', { value: originalPlatform, configurable: true });
         });
     });
