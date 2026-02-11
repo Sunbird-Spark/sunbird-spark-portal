@@ -27,7 +27,7 @@ interface Step1Props {
     isLoading?: boolean;
 }
 
-export const SignUpStep1 = ({
+export const SignUpForm = ({
     firstName, setFirstName,
     emailOrMobile, setEmailOrMobile,
     password, setPassword,

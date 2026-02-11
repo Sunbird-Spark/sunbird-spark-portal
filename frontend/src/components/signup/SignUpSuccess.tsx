@@ -6,7 +6,7 @@ interface Step3Props {
     handleProceed: () => void;
 }
 
-export const SignUpStep3 = ({ handleProceed }: Step3Props) => {
+export const SignUpSuccess = ({ handleProceed }: Step3Props) => {
     return (
         <div className="flex flex-col items-center">
             <Header
