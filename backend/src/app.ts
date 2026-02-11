@@ -27,44 +27,7 @@ const __dirname = path.dirname(__filename);
 export const app = express();
 app.set('trust proxy', true);
 app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "'unsafe-eval'",
-                "https://www.google.com",
-                "https://www.gstatic.com",
-                "https://www.recaptcha.net"
-            ],
-            frameSrc: [
-                "'self'",
-                "https://www.google.com",
-                "https://www.recaptcha.net"
-            ],
-            styleSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "https://fonts.googleapis.com"
-            ],
-            fontSrc: [
-                "'self'",
-                "https://fonts.gstatic.com",
-                "data:"
-            ],
-            imgSrc: [
-                "'self'",
-                "data:",
-                "https:"
-            ],
-            connectSrc: [
-                "'self'",
-                "https://www.google.com",
-                "https://www.recaptcha.net"
-            ]
-        }
-    }
+    contentSecurityPolicy: false
 }));
 
 loadTenants();
