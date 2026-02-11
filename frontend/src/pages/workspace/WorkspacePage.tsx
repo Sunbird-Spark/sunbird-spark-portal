@@ -16,8 +16,9 @@ import WorkspaceContentList from "@/components/workspace/WorkspaceContentList";
 import { type ViewMode, type SortOption, type ContentTypeFilter } from "@/components/workspace/WorkspaceHeader";
 import EmptyState from "@/components/workspace/EmptyState";
 import SegmentedControlPattern from "@/components/workspace/patterns/SegmentedControlPattern";
-import { type WorkspaceItem } from "@/types";
-import { getItemCounts, workspaceItems } from "@/data/workspaceData";
+import { type WorkspaceItem } from "@/types/contentTypes";
+import { useContentSearch } from "@/hooks/useContent";
+import { mapContentToWorkspaceItem } from "@/utils/workspaceUtils";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppI18n } from "@/hooks/useAppI18n";
@@ -29,7 +30,6 @@ const WorkspacePage = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { t } = useAppI18n();
-  const [isLoading, setIsLoading] = useState(true);
   const [activeNav, setActiveNav] = useState("workspace");
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [userRole, setUserRole] = useState<UserRole>('creator');
@@ -38,16 +38,33 @@ const WorkspacePage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
-  const [items, setItems] = useState<WorkspaceItem[]>(workspaceItems);
-
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const counts = getItemCounts();
+  const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
+  const { data: searchData, isLoading, refetch } = useContentSearch({
+    request: showContent
+      ? { sort_by: sortBy === 'updated' ? { lastUpdatedOn: 'desc' } : sortBy === 'created' ? { createdOn: 'desc' } : { name: 'asc' } }
+      : undefined,
+    enabled: showContent,
+  });
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
+  const items: WorkspaceItem[] = useMemo(() => {
+    if (!searchData?.data) return [];
+    const content = searchData.data.content ?? [];
+    const questionSets = searchData.data.QuestionSet ?? [];
+    return [...content, ...questionSets].map(mapContentToWorkspaceItem);
+  }, [searchData]);
+
+  const counts = useMemo(
+    () => ({
+      all: items.length,
+      drafts: items.filter((i) => i.status === 'draft').length,
+      review: items.filter((i) => i.status === 'review').length,
+      published: items.filter((i) => i.status === 'published').length,
+      pendingReview: items.filter((i) => i.status === 'review').length,
+    }),
+    [items]
+  );
 
   // Reset view when role changes
   useEffect(() => {
@@ -104,27 +121,25 @@ const WorkspacePage = () => {
     toast({ title: "Edit Content", description: "Opening content editor..." });
   };
 
-  const handleDelete = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
+  const handleDelete = (_id: string) => {
     toast({ 
       title: "Content Deleted", 
       description: "The content has been removed.", 
       variant: "destructive" 
     });
+    void refetch();
   };
 
   const handleView = (_id: string) => {
     toast({ title: "Preview", description: "Opening content preview..." });
   };
 
-  const handleSubmitReview = (id: string) => {
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, status: 'review' as const } : item
-    ));
+  const handleSubmitReview = (_id: string) => {
     toast({ 
       title: "Submitted for Review", 
       description: "Your content has been submitted for review." 
     });
+    void refetch();
   };
 
   const handleCreateClick = () => {
@@ -221,7 +236,7 @@ const WorkspacePage = () => {
     onCreateClick: handleCreateClick,
   };
 
-  if (isLoading) return <PageLoader message={t('loading')} />;
+  if (showContent && isLoading) return <PageLoader message={t('loading')} />;
 
   return (
     <div className="min-h-screen bg-[#F4F4F4] flex flex-col">

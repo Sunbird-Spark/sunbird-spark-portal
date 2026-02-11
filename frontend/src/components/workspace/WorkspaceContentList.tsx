@@ -8,7 +8,7 @@ import {
 } from "@/components/common/DropdownMenu";
 import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
-import { type WorkspaceItem, type ContentType, type ContentStatus } from "@/types";
+import { type WorkspaceItem } from "@/types/contentTypes";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
@@ -18,21 +18,21 @@ interface WorkspaceContentListProps {
   onSubmitReview: (id: string) => void;
 }
 
-const typeIcons: Record<ContentType, typeof FiBook> = {
+const typeIcons: Record<WorkspaceItem['type'], typeof FiBook> = {
   course: FiBook,
   content: FiFileText,
   quiz: FiHelpCircle,
   collection: FiFolder,
 };
 
-const typeColors: Record<ContentType, string> = {
+const typeColors: Record<WorkspaceItem['type'], string> = {
   course: 'text-sunbird-ink bg-sunbird-wave/10',
   content: 'text-sunbird-brick bg-sunbird-ginger/10',
   quiz: 'text-sunbird-lavender bg-sunbird-lavender/10',
   collection: 'text-sunbird-forest bg-sunbird-moss/10',
 };
 
-const statusConfig: Record<ContentStatus, { label: string; bg: string; text: string }> = {
+const statusConfig: Record<WorkspaceItem['status'], { label: string; bg: string; text: string }> = {
   draft: { label: 'Draft', bg: 'bg-muted', text: 'text-muted-foreground' },
   review: { label: 'In Review', bg: 'bg-sunbird-sunflower/20', text: 'text-sunbird-brick' },
   published: { label: 'Published', bg: 'bg-sunbird-moss/15', text: 'text-sunbird-forest' },
