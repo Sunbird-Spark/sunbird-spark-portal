@@ -73,7 +73,7 @@ app.get('/profile',
 app.all('/portal/logout', session(authSessionConfig), async (req, res) => {
     try {
         await destroySession(req);
-        res.clearCookie(CookieNames.AUTH);
+        res.clearCookie(CookieNames.AUTH, { path: '/' });
         logger.info('User logged out and session destroyed');
     } catch (err) {
         logger.error('Error destroying session during logout', err);
