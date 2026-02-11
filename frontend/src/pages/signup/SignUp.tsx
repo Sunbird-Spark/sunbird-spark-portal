@@ -26,8 +26,18 @@ const SignUp: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
-    const googleCaptchaSiteKey = captchaSiteKeyData?.data?.result?.value || '';
+    const { data: captchaSiteKeyData, isLoading: isSiteKeyLoading, error: siteKeyError } = useSystemSetting('portal_google_recaptcha_site_key');
+
+    const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.value || '';
+
+    React.useEffect(() => {
+        console.log('ReCAPTCHA Site Key Debug:', {
+            rawData: captchaSiteKeyData,
+            extractedKey: googleCaptchaSiteKey,
+            isLoading: isSiteKeyLoading,
+            error: siteKeyError
+        });
+    }, [captchaSiteKeyData, googleCaptchaSiteKey, isSiteKeyLoading, siteKeyError]);
 
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
