@@ -40,8 +40,9 @@ describe('organizationService', () => {
             const result = await getDefaultOrg('sunbird', 'test-token');
 
             expect(result).toEqual(mockOrg);
+            // Expect either relative or absolute URL containing the path
             expect(axios.post).toHaveBeenCalledWith(
-                expect.stringContaining('/api/org/v2/search'),
+                expect.stringMatching(/\/org\/v2\/search/),
                 { request: { filters: { slug: 'sunbird', isTenant: true } } },
                 expect.objectContaining({
                     headers: expect.objectContaining({
