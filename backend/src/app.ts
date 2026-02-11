@@ -57,7 +57,12 @@ app.get('/profile',
             logger.error('Error cleaning up anonymous session', err);
         }
 
-        res.clearCookie(CookieNames.ANONYMOUS);
+        res.clearCookie(CookieNames.ANONYMOUS, {
+            path: anonymousSessionConfig.cookie?.path,
+            httpOnly: anonymousSessionConfig.cookie?.httpOnly,
+            secure: anonymousSessionConfig.cookie?.secure,
+            sameSite: anonymousSessionConfig.cookie?.sameSite,
+        });
         if (req.session) {
             req.session.save((err) => {
                 if (err) {
