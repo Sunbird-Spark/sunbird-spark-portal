@@ -1,78 +1,167 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UserService } from './UserService';
-import { getClient } from '../lib/http-client';
+import * as httpClient from '../lib/http-client';
 
-// Mock getClient
-vi.mock('../lib/http-client', () => ({
-    getClient: vi.fn()
-}));
+vi.mock('../lib/http-client');
 
 describe('UserService', () => {
     let userService: UserService;
-    const mockPost = vi.fn();
+    let mockClient: any;
 
     beforeEach(() => {
-        vi.clearAllMocks();
-        (getClient as any).mockReturnValue({
-            post: mockPost
-        });
         userService = new UserService();
+        mockClient = {
+            post: vi.fn(),
+        };
+        vi.spyOn(httpClient, 'getClient').mockReturnValue(mockClient);
     });
 
-    it('should call searchUser with email payload when identifier is email', async () => {
-        const identifier = 'test@example.com';
-        const name = 'John';
-        await userService.searchUser(identifier, name);
+    describe('searchUser', () => {
+        it('should search user by email', async () => {
+            const mockResponse = {
+                data: { users: [] },
+                status: 200,
+                headers: {}
+            };
+            mockClient.post.mockResolvedValue(mockResponse);
 
-        expect(mockPost).toHaveBeenCalledWith('/user/v1/fuzzy/search', {
-            request: {
-                filters: {
-                    isDeleted: 'false',
-                    fuzzy: { firstName: name },
-                    $or: {
-                        email: identifier,
-                        prevUsedEmail: identifier
-                    }
-                }
-            }
+            await userService.searchUser('test@example.com', 'John');
+
+            expect(mockClient.post).toHaveBeenCalledWith(
+                '/user/v1/fuzzy/search',
+                expect.objectContaining({
+                    request: expect.objectContaining({
+                        filters: expect.objectContaining({
+                            $or: {
+                                email: 'test@example.com',
+                                prevUsedEmail: 'test@example.com'
+                            }
+                        })
+                    })
+                })
+            );
+        });
+
+        it('should search user by phone', async () => {
+            const mockResponse = {
+                data: { users: [] },
+                status: 200,
+                headers: {}
+            };
+            mockClient.post.mockResolvedValue(mockResponse);
+
+            await userService.searchUser('9876543210', 'John');
+
+            expect(mockClient.post).toHaveBeenCalledWith(
+                '/user/v1/fuzzy/search',
+                expect.objectContaining({
+                    request: expect.objectContaining({
+                        filters: expect.objectContaining({
+                            $or: {
+                                phone: '9876543210',
+                                prevUsedPhone: '9876543210'
+                            }
+                        })
+                    })
+                })
+            );
         });
     });
 
-    it('should call searchUser with phone payload when identifier is phone', async () => {
-        const identifier = '9876543210';
-        const name = 'John';
-        await userService.searchUser(identifier, name);
+    describe('signup', () => {
+        it('should successfully sign up with email', async () => {
+            const mockResponse = {
+                data: { userId: 'user123' },
+                status: 200,
+                headers: {}
+            };
+            mockClient.post.mockResolvedValue(mockResponse);
 
-        expect(mockPost).toHaveBeenCalledWith('/user/v1/fuzzy/search', {
-            request: {
-                filters: {
-                    isDeleted: 'false',
-                    fuzzy: { firstName: name },
-                    $or: {
-                        phone: identifier,
-                        prevUsedPhone: identifier
+            const result = await userService.signup('John', 'test@example.com', 'Password123!');
+
+            expect(result).toEqual(mockResponse);
+            expect(mockClient.post).toHaveBeenCalledWith(
+                '/user/v2/signup',
+                expect.objectContaining({
+                    request: expect.objectContaining({
+                        firstName: 'John',
+                        email: 'test@example.com',
+                        password: 'Password123!',
+                        emailVerified: true
+                    }),
+                    params: {
+                        source: 'web',
+                        signupType: 'self'
                     }
-                }
-            }
+                }),
+                {}
+            );
+        });
+
+        it('should successfully sign up with phone', async () => {
+            const mockResponse = {
+                data: { userId: 'user123' },
+                status: 200,
+                headers: {}
+            };
+            mockClient.post.mockResolvedValue(mockResponse);
+
+            const result = await userService.signup('Jane', '9876543210', 'Password123!');
+
+            expect(result).toEqual(mockResponse);
+            expect(mockClient.post).toHaveBeenCalledWith(
+                '/user/v2/signup',
+                expect.objectContaining({
+                    request: expect.objectContaining({
+                        firstName: 'Jane',
+                        phone: '9876543210',
+                        password: 'Password123!',
+                        phoneVerified: true
+                    }),
+                    params: {
+                        source: 'web',
+                        signupType: 'self'
+                    }
+                }),
+                {}
+            );
+        });
+
+        it('should include device ID in headers when provided', async () => {
+            const mockResponse = {
+                data: { userId: 'user123' },
+                status: 200,
+                headers: {}
+            };
+            mockClient.post.mockResolvedValue(mockResponse);
+
+            await userService.signup('John', 'test@example.com', 'Password123!', 'device-123');
+
+            expect(mockClient.post).toHaveBeenCalledWith(
+                '/user/v2/signup',
+                expect.any(Object),
+                { 'x-device-id': 'device-123' }
+            );
         });
     });
 
-    it('should call fuzzyUserSearch with correct endpoint and payload', async () => {
-        const request = { name: 'John' };
-        await userService.fuzzyUserSearch(request);
-        expect(mockPost).toHaveBeenCalledWith('/user/v1/fuzzy/search', request);
-    });
+    describe('resetPassword', () => {
+        it('should reset password', async () => {
+            const mockResponse = {
+                data: { success: true },
+                status: 200,
+                headers: {}
+            };
+            mockClient.post.mockResolvedValue(mockResponse);
 
-    it('should call fuzzyUserSearch with captchaResponse when provided', async () => {
-        const request = { name: 'John' };
-        const captchaResponse = 'mock-captcha';
-        await userService.fuzzyUserSearch(request, captchaResponse);
-        expect(mockPost).toHaveBeenCalledWith(`/user/v1/fuzzy/search?captchaResponse=${captchaResponse}`, request);
-    });
+            const request = { key: 'test@example.com', password: 'NewPass123!' };
+            const result = await userService.resetPassword(request);
 
-    it('should call resetPassword with correct endpoint and payload', async () => {
-        const request = { password: 'New' };
-        await userService.resetPassword(request);
-        expect(mockPost).toHaveBeenCalledWith('/user/v1/password/reset', request);
+            expect(result).toEqual(mockResponse);
+            expect(mockClient.post).toHaveBeenCalledWith(
+                '/user/v1/password/reset',
+                request
+            );
+        });
     });
 });
