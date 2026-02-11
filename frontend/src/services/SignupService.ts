@@ -57,7 +57,7 @@ export class SignupService {
             : SignupService.VALIDATION_SUCCESS;
     }
 
-    validateStep1(
+    validateSignupForm(
         firstName: string,
         emailOrMobile: string,
         password: string,
@@ -96,5 +96,9 @@ export class SignupService {
                 otp,
             }
         };
+    }
+
+    encodePassword(password: string): string {
+        return btoa(password);
     }
 }

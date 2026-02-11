@@ -75,7 +75,7 @@ describe('useUser hooks', () => {
   describe('useSignup', () => {
     it('should call signup with correct parameters', async () => {
       mockUserService.signup.mockResolvedValue({ 
-        data: { userId: '123', accessToken: 'token', refreshToken: 'refresh' } 
+        data: { userId: '123' } 
       });
       
       const { result } = renderHook(() => useSignup(), { wrapper: createWrapper() });

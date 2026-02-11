@@ -48,44 +48,59 @@ const SignUp: React.FC = () => {
         .catch(err => console.error('Error fetching captcha site key:', err));
     }, []);
 
+    const handleOtpSuccess = (response: any, isResend = false) => {
+        captchaRef.current?.reset();
+        
+        if (response.status !== 200) {
+            toast({
+                title: "OTP Generation Failed",
+                description: "Failed to send OTP. Please try again.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const title = isResend ? "OTP Resent" : "OTP Sent";
+        const description = isResend 
+            ? "A new verification code has been sent." 
+            : "Please check your email/phone for the verification code.";
+        
+        toast({ title, description, variant: "default" });
+        
+        if (!isResend) {
+            setStep(2);
+        }
+    };
+
+    const handleOtpError = (error: any, isResend = false) => {
+        console.error('OTP generation error:', error);
+        captchaRef.current?.reset();
+        
+        const isCaptchaError = error?.response?.status === 418;
+        const title = isCaptchaError 
+            ? "Captcha Validation Failed" 
+            : isResend ? "Resend Failed" : "OTP Generation Failed";
+        const description = isCaptchaError 
+            ? "Please try again." 
+            : error.message || "Failed to send OTP. Please try again.";
+        
+        toast({ title, description, variant: "destructive" });
+    };
+
     const handleOtpMutation = (captchaResponse?: string, isResend = false) => {
         const request = signupService.createOtpGenerationRequest(emailOrMobile);
 
         generateOtpMutation.mutate(
             { request, captchaResponse },
             {
-                onSuccess: (response) => {
-                    captchaRef.current?.reset();
-                    if (response.status === 200) {
-                        toast({
-                            title: isResend ? "OTP Resent" : "OTP Sent",
-                            description: isResend ? "A new verification code has been sent." : "Please check your email/phone for the verification code.",
-                            variant: "default",
-                        });
-                        if (!isResend) setStep(2);
-                    } else {
-                        toast({
-                            title: "OTP Generation Failed",
-                            description: "Failed to send OTP. Please try again.",
-                            variant: "destructive",
-                        });
-                    }
-                },
-                onError: (error: any) => {
-                    console.error('OTP generation error:', error);
-                    captchaRef.current?.reset();
-                    toast({
-                        title: error?.response?.status === 418 ? "Captcha Validation Failed" : isResend ? "Resend Failed" : "OTP Generation Failed",
-                        description: error?.response?.status === 418 ? "Please try again." : error.message || "Failed to send OTP. Please try again.",
-                        variant: "destructive",
-                    });
-                }
+                onSuccess: (response) => handleOtpSuccess(response, isResend),
+                onError: (error) => handleOtpError(error, isResend)
             }
         );
     };
 
     const handleContinue = () => {
-        const validation = signupService.validateStep1(firstName, emailOrMobile, password, confirmPassword, isTermsAccepted);
+        const validation = signupService.validateSignupForm(firstName, emailOrMobile, password, confirmPassword, isTermsAccepted);
 
         if (!validation.isValid && validation.error) {
             toast({
@@ -99,58 +114,66 @@ const SignUp: React.FC = () => {
         googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation();
     };
 
+    const handleSignupSuccess = (signupResponse: any) => {
+        if (signupResponse.status !== 200) {
+            toast({
+                title: "Signup Failed",
+                description: "OTP verified but account creation failed. Please try again.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setStep(3);
+    };
+
+    const handleSignupError = (error: any) => {
+        toast({
+            title: "Signup Failed",
+            description: error.message || "OTP verified but account creation failed. Please try again.",
+            variant: "destructive",
+        });
+    };
+
+    const handleOtpVerificationSuccess = (response: any) => {
+        if (response.status !== 200) {
+            toast({
+                title: "Verification Failed",
+                description: "Invalid OTP. Please try again.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const deviceId = localStorage.getItem('deviceId') || undefined;
+
+        signupMutation.mutate({
+            firstName,
+            identifier: emailOrMobile,
+            password: signupService.encodePassword(password),
+            deviceId
+        }, {
+            onSuccess: handleSignupSuccess,
+            onError: handleSignupError
+        });
+    };
+
+    const handleOtpVerificationError = (error: any) => {
+        toast({
+            title: "Verification Failed",
+            description: error.message || "An error occurred during verification. Please try again.",
+            variant: "destructive",
+        });
+    };
+
     const handleVerifyOtp = () => {
         const request = signupService.createOtpVerificationRequest(emailOrMobile, otp.join(''));
 
         verifyOtpMutation.mutate(
             { request },
             {
-                onSuccess: (response) => {
-                    if (response.status === 200) {
-                        const deviceId = localStorage.getItem('deviceId') || undefined;
-
-                        signupMutation.mutate({
-                            firstName,
-                            identifier: emailOrMobile,
-                            password: btoa(password),
-                            deviceId
-                        }, {
-                            onSuccess: (signupResponse) => {
-                                if (signupResponse.status === 200) {
-                                    setStep(3);
-                                } else {
-                                    toast({
-                                        title: "Signup Failed",
-                                        description: "OTP verified but account creation failed. Please try again.",
-                                        variant: "destructive",
-                                    });
-                                }
-                            },
-                            onError: (error: any) => {
-                                console.error('Signup error:', error);
-                                toast({
-                                    title: "Signup Failed",
-                                    description: error.message || "OTP verified but account creation failed. Please try again.",
-                                    variant: "destructive",
-                                });
-                            }
-                        });
-                    } else {
-                        toast({
-                            title: "Verification Failed",
-                            description: "Invalid OTP. Please try again.",
-                            variant: "destructive",
-                        });
-                    }
-                },
-                onError: (error: any) => {
-                    console.error('OTP verification error:', error);
-                    toast({
-                        title: "Verification Failed",
-                        description: error.message || "An error occurred during verification. Please try again.",
-                        variant: "destructive",
-                    });
-                }
+                onSuccess: handleOtpVerificationSuccess,
+                onError: handleOtpVerificationError
             }
         );
     };

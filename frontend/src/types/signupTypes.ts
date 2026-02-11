@@ -31,6 +31,4 @@ export interface SignupRequest {
 
 export interface SignupResponse {
     userId: string;
-    accessToken?: string;
-    refreshToken?: string;
 }

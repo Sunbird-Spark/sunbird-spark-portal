@@ -27,7 +27,7 @@ export const useResetPassword = (): UseMutationResult<
 };
 
 export const useSignup = (): UseMutationResult<
-  ApiResponse<{ userId: string; accessToken?: string; refreshToken?: string }>,
+  ApiResponse<{ userId: string; }>,
   Error,
   { firstName: string; identifier: string; password: string; deviceId?: string }
 > => {
