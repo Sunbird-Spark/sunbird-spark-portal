@@ -167,10 +167,22 @@ describe('SignUpStep2', () => {
         expect(props.handleVerifyOtp).toHaveBeenCalled();
     });
 
-    it('calls handleResendOtp when resend button is clicked', () => {
-        render(<SignUpStep2 {...defaultProps} />);
+    it('calls handleResendOtp when resend button is clicked', async () => {
+        vi.useFakeTimers();
+        const { rerender } = render(<SignUpStep2 {...defaultProps} />);
+        
+        // Wait for the initial timer to complete (20 seconds)
+        await vi.advanceTimersByTimeAsync(20000);
+        
+        // Force a re-render to update the button state
+        rerender(<SignUpStep2 {...defaultProps} />);
+        
         const resendButton = screen.getByText(/Resend OTP/);
+        expect(resendButton).not.toBeDisabled();
+        
         fireEvent.click(resendButton);
         expect(defaultProps.handleResendOtp).toHaveBeenCalled();
+        
+        vi.useRealTimers();
     });
 });

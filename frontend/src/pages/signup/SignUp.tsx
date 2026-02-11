@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/useToast";
-import { IDENTIFIER_REGEX, PASSWORD_REGEX, OTP_REGEX } from '@/utils/ValidationUtils';
+import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { SignUpStep1, SignUpStep2 } from '@/components/auth/SignUpSteps';
 import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { SystemSettingService } from '@/services/SystemSettingService';
-import { hashPassword } from '@/utils/passwordUtils';
+import { SignupService } from '@/services/SignupService';
 
 const SignUp: React.FC = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState<1 | 2>(1);
     const { toast } = useToast();
 
-    // Mutations
+    const signupService = new SignupService();
+
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
     const generateOtpMutation = useGenerateOtp();
 
-    // Captcha
     const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
     const captchaRef = React.useRef<ReCAPTCHA>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const systemSettingService = new SystemSettingService();
         systemSettingService.read('portal_google_recaptcha_site_key')
             .then(res => {
@@ -35,7 +35,6 @@ const SignUp: React.FC = () => {
             .catch(err => console.error('Error fetching captcha site key:', err));
     }, []);
 
-    // Form State
     const [firstName, setFirstName] = useState('');
     const [emailOrMobile, setEmailOrMobile] = useState('');
     const [password, setPassword] = useState('');
@@ -43,7 +42,6 @@ const SignUp: React.FC = () => {
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
 
-    // UI State
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -60,57 +58,23 @@ const SignUp: React.FC = () => {
     const isOtpValid = OTP_REGEX.test(otp.join(''));
 
     const handleContinue = async () => {
-        // 1. Validate First Name
-        if (!firstName.trim()) {
+        const validation = signupService.validateStep1(
+            firstName,
+            emailOrMobile,
+            password,
+            confirmPassword,
+            isTermsAccepted
+        );
+
+        if (!validation.isValid && validation.error) {
             toast({
-                title: "First Name Required",
-                description: "Please enter your first name.",
+                title: validation.error.title,
+                description: validation.error.description,
                 variant: "destructive",
             });
             return;
         }
 
-        // 2. Validate Identifier (Email or Mobile)
-        if (!IDENTIFIER_REGEX.test(emailOrMobile)) {
-            toast({
-                title: "Invalid Email or Mobile",
-                description: "Please enter a valid email or a 10-digit mobile number starting with 6-9.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        // 3. Validate Password Strength
-        if (!PASSWORD_REGEX.test(password)) {
-            toast({
-                title: "Weak Password",
-                description: "Password must be at least 8 characters, include an uppercase, a lowercase, a number, and a special character.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        // 4. Validate Password Match
-        if (password !== confirmPassword) {
-            toast({
-                title: "Passwords Mismatch",
-                description: "The confirmed password does not match the entered password.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        // 5. Validate Terms
-        if (!isTermsAccepted) {
-            toast({
-                title: "Terms Not Accepted",
-                description: "Please accept the Terms of Use to continue.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        // Trigger captcha if configured, otherwise proceed directly
         if (googleCaptchaSiteKey) {
             captchaRef.current?.execute();
         } else {
@@ -119,14 +83,7 @@ const SignUp: React.FC = () => {
     };
 
     const initiateOtpGeneration = async (captchaResponse?: string) => {
-        // Generate OTP first
-        const isEmail = emailOrMobile.includes('@');
-        const otpRequest = {
-            request: {
-                key: emailOrMobile,
-                type: isEmail ? 'email' : 'phone'
-            }
-        };
+        const otpRequest = signupService.createOtpGenerationRequest(emailOrMobile);
 
         generateOtpMutation.mutate(
             { request: otpRequest, captchaResponse },
@@ -172,15 +129,7 @@ const SignUp: React.FC = () => {
 
     const handleVerifyOtp = async () => {
         const otpString = otp.join('');
-        const isEmail = emailOrMobile.includes('@');
-
-        const request = {
-            request: {
-                key: emailOrMobile,
-                type: isEmail ? 'email' : 'phone',
-                otp: otpString
-            }
-        };
+        const request = signupService.createOtpVerificationRequest(emailOrMobile, otpString);
 
         // First verify OTP
         verifyOtpMutation.mutate(
@@ -190,42 +139,42 @@ const SignUp: React.FC = () => {
                     if (response.status === 200) {
                         // OTP verified successfully, now call signup API
                         const deviceId = localStorage.getItem('deviceId') || undefined;
+                        const signupRequest = await signupService.prepareSignupRequest(
+                            firstName,
+                            emailOrMobile,
+                            password,
+                            deviceId
+                        );
 
-                        // Hash the password with bcrypt before sending to backend
-                        const hashedPassword = await hashPassword(password);
+                        signupMutation.mutate(signupRequest, {
+                            onSuccess: (signupResponse) => {
+                                if (signupResponse.status === 200) {
+                                    toast({
+                                        title: "Account Created",
+                                        description: "You have successfully signed up. Redirecting...",
+                                        variant: "default",
+                                    });
 
-                        signupMutation.mutate(
-                            { firstName: firstName.trim(), identifier: emailOrMobile, password: hashedPassword, deviceId },
-                            {
-                                onSuccess: (signupResponse) => {
-                                    if (signupResponse.status === 200) {
-                                        toast({
-                                            title: "Account Created",
-                                            description: "You have successfully signed up. Redirecting...",
-                                            variant: "default",
-                                        });
-
-                                        setTimeout(() => {
-                                            navigate('/onboarding');
-                                        }, 1000);
-                                    } else {
-                                        toast({
-                                            title: "Signup Failed",
-                                            description: "OTP verified but account creation failed. Please try again.",
-                                            variant: "destructive",
-                                        });
-                                    }
-                                },
-                                onError: (error: any) => {
-                                    console.error('Signup error:', error);
+                                    setTimeout(() => {
+                                        navigate('/onboarding');
+                                    }, 1000);
+                                } else {
                                     toast({
                                         title: "Signup Failed",
-                                        description: error.message || "OTP verified but account creation failed. Please try again.",
+                                        description: "OTP verified but account creation failed. Please try again.",
                                         variant: "destructive",
                                     });
                                 }
+                            },
+                            onError: (error: any) => {
+                                console.error('Signup error:', error);
+                                toast({
+                                    title: "Signup Failed",
+                                    description: error.message || "OTP verified but account creation failed. Please try again.",
+                                    variant: "destructive",
+                                });
                             }
-                        );
+                        });
                     } else {
                         toast({
                             title: "Verification Failed",
@@ -255,14 +204,7 @@ const SignUp: React.FC = () => {
     };
 
     const resendOtp = async (captchaResponse?: string) => {
-        const isEmail = emailOrMobile.includes('@');
-
-        const request = {
-            request: {
-                key: emailOrMobile,
-                type: isEmail ? 'email' : 'phone'
-            }
-        };
+        const request = signupService.createOtpGenerationRequest(emailOrMobile);
 
         generateOtpMutation.mutate(
             { request, captchaResponse },
