@@ -1,4 +1,8 @@
 {
+  "header": {
+    "search": "Search for content",
+    "login": "Log In"
+  },
   "loading": "Loading...",
   "error": "An error occurred",
   "success": "Success",
@@ -22,9 +26,11 @@
   "forgotPassword": "Forgot Password?",
   "invalidCredentials": "Invalid email or password",
   "loginSuccess": "Login successful",
-  "users": "Total Users",
-  "sessions": "Active Sessions",
-  "revenue": "Revenue",
+  "stats": {
+    "users": "Total Users",
+    "sessions": "Active Sessions",
+    "revenue": "Revenue"
+  },
   "network": "Network error. Please check your connection.",
   "server": "Server error. Please try again later.",
   "validation": "Please check your input and try again.",
@@ -112,5 +118,13 @@
   "joinThousands": "Join thousands of professionals who have advanced their careers with our comprehensive training programs.",
   "certifiedProfessionals": "Certified Professional Training",
   "watchDemo": "Watch Demo",
-  "certifications": "Certifications"
+  "certifications": "Certifications",
+  "footer": {
+    "products": "Products",
+    "resources": "Resources",
+    "videos": "Videos",
+    "company": "Company",
+    "terms": "Terms and Conditions",
+    "privacy": "Privacy Policy"
+  }
 }

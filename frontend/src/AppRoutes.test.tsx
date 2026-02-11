@@ -7,12 +7,12 @@ import AppRoutes from "./AppRoutes";
 // --------------------
 // Mock Pages
 // --------------------
-vi.mock("./pages/HomePage", () => ({ default: () => <div>Home Page</div> }));
-vi.mock("./pages/UnauthorizedPage", () => ({ default: () => <div>Unauthorized Page</div> }));
-vi.mock("./pages/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
-vi.mock("./pages/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
-vi.mock("./pages/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
-vi.mock("./pages/CreateContentPage", () => ({ default: () => <div>Create Content Page</div> }));
+vi.mock("./pages/home/Home", () => ({ default: () => <div>Home Page</div> }));
+vi.mock("./pages/unauthorized/UnauthorizedPage", () => ({ default: () => <div>Unauthorized Page</div> }));
+vi.mock("./pages/admin/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
+vi.mock("./pages/workspace/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
+vi.mock("./pages/reports/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
+vi.mock("./pages/content/CreateContentPage", () => ({ default: () => <div>Create Content Page</div> }));
 vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
 
 // --------------------

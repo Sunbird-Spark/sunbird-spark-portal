@@ -73,11 +73,19 @@ pnpm-debug.log*
 # =========================
 *.local
 
-# PDF font maps
 *.bcmap
 
-# Ignore SVGs in assets folder
 public/assets/**/*.svg
 
-# Ignore full PDF.js web viewer bundle
-frontend/public/assets/pdfjs/web/
+# =========================
+# Player files (copied from node_modules)
+# =========================
+frontend/public/sunbird-epub-player.js
+frontend/public/epub-player-styles.css
+frontend/public/assets/epub-player/
+
+# =========================
+# Sample/Test files (local only)
+# =========================
+frontend/public/sample-epub.epub
+frontend/public/*.epub
