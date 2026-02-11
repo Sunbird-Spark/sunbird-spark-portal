@@ -26,12 +26,24 @@ describe('userAuthInfoService', () => {
 
     describe('getAuthInfo', () => {
         const mockDeviceId = 'test-device-id';
-        // Note: The AxiosAdapter unwraps the response, so we mock the unwrapped data structure (just the result)
         const mockSuccessResponse = {
             data: {
-                sid: 'session-123',
-                uid: 'user-456',
-                isAuthenticated: true
+                id: 'api.user.auth.info',
+                ver: '1.0',
+                ts: new Date(),
+                params: {
+                    status: 'successful',
+                    resmsgid: 'msg-id',
+                    msgid: 'msg-id',
+                    err: null,
+                    errmsg: null
+                },
+                responseCode: 'OK',
+                result: {
+                    sid: 'session-123',
+                    uid: 'user-456',
+                    isAuthenticated: true
+                }
             },
             status: 200,
             headers: {}
@@ -39,9 +51,12 @@ describe('userAuthInfoService', () => {
 
         const mockAnonymousResponse = {
             data: {
-                sid: 'session-789',
-                uid: null,
-                isAuthenticated: false
+                params: { status: 'successful' },
+                result: {
+                    sid: 'session-789',
+                    uid: null,
+                    isAuthenticated: false
+                }
             },
             status: 200,
             headers: {}
@@ -58,7 +73,7 @@ describe('userAuthInfoService', () => {
             });
 
             // Check result
-            expect(result).toEqual(mockSuccessResponse.data);
+            expect(result).toEqual(mockSuccessResponse.data.result);
 
             // Check internal state update
             expect(userAuthInfoService.getSessionId()).toBe('session-123');
@@ -84,19 +99,41 @@ describe('userAuthInfoService', () => {
             expect(mockGet).toHaveBeenCalledWith('/user/v1/auth/info', {});
         });
 
-        it('should throw error when api returns invalid structure', async () => {
+        it('should throw error when api returns unsuccessful status', async () => {
             const mockErrorResponse = {
-                data: {}, // Missing sid
+                data: {
+                    params: {
+                        status: 'failed',
+                        errmsg: 'Something went wrong'
+                    }
+                },
                 status: 200,
                 headers: {}
             };
             mockGet.mockResolvedValue(mockErrorResponse);
 
             await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
-                .rejects.toThrow('Invalid response structure from auth API');
+                .rejects.toThrow('Something went wrong');
 
             // State should not change
             expect(userAuthInfoService.getSessionId()).toBeNull();
+        });
+
+        it('should use default error message when api returns failed status without errmsg', async () => {
+            const mockErrorResponse = {
+                data: {
+                    params: {
+                        status: 'failed',
+                        errmsg: null
+                    }
+                },
+                status: 200,
+                headers: {}
+            };
+            mockGet.mockResolvedValue(mockErrorResponse);
+
+            await expect(userAuthInfoService.getAuthInfo(mockDeviceId))
+                .rejects.toThrow('Failed to fetch auth status');
         });
 
         it('should throw error when HTTP client fails', async () => {
@@ -147,7 +184,8 @@ describe('userAuthInfoService', () => {
             // Setup state
             const mockResponse = {
                 data: {
-                    sid: 's1', uid: 'u1', isAuthenticated: true
+                    params: { status: 'successful' },
+                    result: { sid: 's1', uid: 'u1', isAuthenticated: true }
                 },
                 status: 200,
                 headers: {}

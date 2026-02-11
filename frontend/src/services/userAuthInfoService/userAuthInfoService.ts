@@ -1,10 +1,23 @@
 import { getClient } from '../../lib/http-client';
 import type { ApiResponse } from '../../lib/http-client';
 
-interface AuthStatusResult {
-    sid: string;
-    uid: string | null;
-    isAuthenticated: boolean;
+interface AuthStatusResponse {
+    id: string;
+    ver: string;
+    ts: Date;
+    params: {
+        resmsgid: string;
+        msgid: string;
+        status: string;
+        err: string | null;
+        errmsg: string | null;
+    };
+    responseCode: string;
+    result: {
+        sid: string;
+        uid: string | null;
+        isAuthenticated: boolean;
+    };
 }
 
 class userAuthInfoService {
@@ -30,15 +43,14 @@ class userAuthInfoService {
      * @param deviceId - Optional device ID to send in the x-device-id header
      * @returns Promise with the auth status response
      */
-    async getAuthInfo(deviceId?: string): Promise<AuthStatusResult> {
+    async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse['result']> {
         try {
             const headers: Record<string, string> = {};
             if (deviceId) {
                 headers['x-device-id'] = deviceId;
             }
 
-            // The AxiosAdapter unwraps the response, so 'data' corresponds to the 'result' property of the API response
-            const response: ApiResponse<AuthStatusResult> = await getClient().get<AuthStatusResult>(
+            const response: ApiResponse<AuthStatusResponse> = await getClient().get<AuthStatusResponse>(
                 '/user/v1/auth/info',
                 headers
             );
@@ -49,17 +61,25 @@ class userAuthInfoService {
                 throw new Error('No data received from auth API');
             }
 
-            // Since the adapter unwraps the 'result', we expect data to be AuthStatusResult
-            if (data.sid) {
-                this.sessionId = data.sid;
-                this.userId = data.uid;
-                this.isAuthenticated = data.isAuthenticated;
+            // Check if response has the expected structure
+            if (!data.params || typeof data.params.status !== 'string') {
+                // Log only non-sensitive fields to avoid leaking sid/uid
+                console.warn('Auth API returned unexpected structure. Status:', data.params?.status, 'ResponseCode:', data.responseCode);
+                throw new Error('Invalid response structure from auth API');
+            }
 
-                return data;
+            if (data.params.status === 'successful' && data.result) {
+                this.sessionId = data.result.sid;
+                this.userId = data.result.uid;
+                this.isAuthenticated = data.result.isAuthenticated;
+
+                return data.result;
             } else {
-               // If unwrap failed or structure is different (e.g. error response), handle it
-               // Ideally we should typecheck or assume success if no error thrown by adapter
-               throw new Error('Invalid response structure from auth API');
+                const errmsg =
+                    typeof data.params.errmsg === 'string' && data.params.errmsg.trim().length > 0
+                        ? data.params.errmsg
+                        : 'Failed to fetch auth status';
+                throw new Error(errmsg);
             }
         } catch (error) {
             console.error('Error fetching auth status:', error);
