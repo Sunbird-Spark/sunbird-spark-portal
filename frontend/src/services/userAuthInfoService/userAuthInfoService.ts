@@ -27,9 +27,10 @@ class userAuthInfoService {
     /**
      * Fetches the authentication status from the backend
      * This includes the session ID (sid) and user ID (uid)
+     * @param deviceId - Optional device ID to send in the x-device-id header
      * @returns Promise with the auth status response
      */
-    async getAuthInfo(): Promise<AuthStatusResponse> {
+    async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse> {
         try {
             const response = await getClient().get<AuthStatusResponse>(
                 '/user/v1/auth/info')
