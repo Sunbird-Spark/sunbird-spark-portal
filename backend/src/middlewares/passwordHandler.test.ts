@@ -76,8 +76,12 @@ describe('Password Handler Middleware', () => {
 
             handlePassword(mockRequest as Request, mockResponse as Response, mockNext);
 
-            // Should call next with error or handle gracefully
-            expect(mockNext).toHaveBeenCalled();
+            expect(mockResponse.status).toHaveBeenCalledWith(400);
+            expect(mockResponse.json).toHaveBeenCalledWith({
+                error: 'Invalid password format',
+                message: 'Password must be base64 encoded'
+            });
+            expect(mockNext).not.toHaveBeenCalled();
         });
     });
 });
