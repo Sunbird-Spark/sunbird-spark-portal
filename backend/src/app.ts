@@ -38,11 +38,13 @@ app.use(helmet({
                 "'unsafe-inline'",
                 "'unsafe-eval'",
                 "https://www.google.com",
-                "https://www.gstatic.com"
+                "https://www.gstatic.com",
+                "https://www.recaptcha.net"
             ],
             frameSrc: [
                 "'self'",
-                "https://www.google.com"
+                "https://www.google.com",
+                "https://www.recaptcha.net"
             ],
             styleSrc: [
                 "'self'",
@@ -61,7 +63,8 @@ app.use(helmet({
             ],
             connectSrc: [
                 "'self'",
-                "https://www.google.com"
+                "https://www.google.com",
+                "https://www.recaptcha.net"
             ]
         }
     }
