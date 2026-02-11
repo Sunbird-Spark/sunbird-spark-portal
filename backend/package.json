@@ -46,6 +46,8 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/connect-pg-simple": "^7.0.3",
+    "@types/cookie": "^0.6.0",
+    "@types/cookie-signature": "^1.1.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",

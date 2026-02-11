@@ -2,22 +2,23 @@ import type { Request } from 'express';
 import logger from './logger.js';
 import { generateLoggedInKongToken } from '../services/kongAuthService.js';
 import { sessionStore } from './sessionStore.js';
+import * as cookie from 'cookie';
+import * as cookieSignature from 'cookie-signature';
+import { envConfig } from '../config/env.js';
 
 export const getCookieValue = (header: string, name: string): string | null => {
     if (!header) return null;
-    const match = header.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    if (match && match[2]) {
-        return decodeURIComponent(match[2]);
-    }
-    return null;
+    const cookies = cookie.parse(header);
+    return cookies[name] || null;
 };
 
 export const getUnsignedSessionId = (cookieValue: string): string | null => {
     if (!cookieValue) return null;
-    if (cookieValue.slice(0, 2) === 's:') {
-        return cookieValue.slice(2).split('.')[0] ?? null;
+    // cookie-signature expects the value to start with 's:'
+    if (cookieValue.startsWith('s:')) {
+        const unsigned = cookieSignature.unsign(cookieValue.slice(2), envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET);
+        return unsigned !== false ? unsigned : null;
     }
-    // If not signed, return as is (unlikely with secret set)
     return cookieValue;
 };
 

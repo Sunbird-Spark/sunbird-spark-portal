@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { getCookieValue, getUnsignedSessionId, destroySessionId } from '../utils/sessionUtils.js';
 import { sessionStore } from '../utils/sessionStore.js';
+import * as cookieSignature from 'cookie-signature';
+import { envConfig } from '../config/env.js';
 
 // Mock sessionStore
 vi.mock('../utils/sessionStore.js', () => ({
@@ -35,15 +37,23 @@ describe('Session Utils', () => {
     });
 
     it('should handle URI encoded values', () => {
+      // cookie package handles decoding automatically
       const header = 'anonymous_cookie=s%3A123.sig';
       expect(getCookieValue(header, 'anonymous_cookie')).toBe('s:123.sig');
     });
   });
 
   describe('getUnsignedSessionId', () => {
-    it('should extract session ID from signed cookie value', () => {
-      const value = 's:session123.signature';
-      expect(getUnsignedSessionId(value)).toBe('session123');
+    it('should extract session ID from signed cookie value using secret', () => {
+      const sessionId = 'session123';
+      // Use real signing to ensure test validity
+      const signed = 's:' + cookieSignature.sign(sessionId, envConfig.SUNBIRD_ANONYMOUS_SESSION_SECRET);
+      expect(getUnsignedSessionId(signed)).toBe(sessionId);
+    });
+
+    it('should return null if signature is invalid', () => {
+      const signed = 's:session123.invalidsignature';
+      expect(getUnsignedSessionId(signed)).toBeNull();
     });
 
     it('should return null if empty', () => {
@@ -51,6 +61,7 @@ describe('Session Utils', () => {
     });
 
     it('should return original value if not signed (fallback)', () => {
+        // If it doesn't start with s:, it returns the value as is
       const value = 'plainvalue';
       expect(getUnsignedSessionId(value)).toBe('plainvalue');
     });
