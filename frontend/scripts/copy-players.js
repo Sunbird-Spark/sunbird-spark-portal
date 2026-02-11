@@ -22,6 +22,13 @@ const players = [
       { from: 'assets', to: 'assets/epub-player/assets' },
     ],
   },
+  {
+    name: 'QuML Player',
+    source: 'node_modules/@project-sunbird/sunbird-quml-player-web-component/assets/quml-player',
+    directories: [
+      { from: '.', to: 'assets/quml-player' },
+    ],
+  },
   // PDF and Video players will be added when packages are installed
   // {
   //   name: 'PDF Player',
