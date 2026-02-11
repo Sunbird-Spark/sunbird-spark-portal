@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import appCoreService, { AppCoreService } from './AppCoreService';
 import * as storageUtils from '../utils/storage';
 import { DeviceService } from '@project-sunbird/telemetry-sdk';
+import * as httpClient from '../lib/http-client';
 
 // Mock the storage utils
 vi.mock('../utils/storage', () => ({
@@ -20,11 +21,19 @@ vi.mock('@project-sunbird/telemetry-sdk', () => ({
     }
 }));
 
+// Mock the HTTP client
+vi.mock('../lib/http-client', () => ({
+    getClient: vi.fn(),
+}));
+
 describe('AppCoreService', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
         appCoreService.clearDeviceId();
+        (httpClient.getClient as any).mockReturnValue({
+            updateHeaders: vi.fn()
+        });
     });
 
     afterEach(() => {
@@ -104,7 +113,7 @@ describe('AppCoreService', () => {
 
             // We need to be careful with navigator mocks in JSDOM/Vitest environment
             // but the original test did it this way.
-             Object.defineProperty(navigator, 'userAgent', { value: 'TestAgent', configurable: true });
+            Object.defineProperty(navigator, 'userAgent', { value: 'TestAgent', configurable: true });
             Object.defineProperty(navigator, 'platform', { value: 'TestPlatform', configurable: true });
 
             const info = await appCoreService.getDeviceInfo();
@@ -114,7 +123,7 @@ describe('AppCoreService', () => {
             expect(info.platform).toBe('TestPlatform');
             expect(typeof info.timestamp).toBe('number');
 
-             Object.defineProperty(navigator, 'userAgent', { value: originalUserAgent, configurable: true });
+            Object.defineProperty(navigator, 'userAgent', { value: originalUserAgent, configurable: true });
             Object.defineProperty(navigator, 'platform', { value: originalPlatform, configurable: true });
         });
     });
