@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SignUpStep1, SignUpStep2 } from './SignUpSteps';
+import { SignUpStep1 } from './SignUpStep1';
+import { SignUpStep2 } from './SignUpStep2';
 
 // Mock child components from ForgotPasswordComponents
 vi.mock('../../pages/forgotPassword/ForgotPasswordComponents', () => ({
