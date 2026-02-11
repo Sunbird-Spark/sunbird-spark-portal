@@ -5,7 +5,7 @@ import type Keycloak from 'keycloak-connect';
 
 import KeycloakConnect from 'keycloak-connect';
 
-import { getKeycloakClient } from './keycloakManager.js';
+import { getKeycloakClient, authenticated } from './keycloakManager.js';
 
 import logger from '../utils/logger.js';
 import { generateLoggedInKongToken, saveKongTokenToSession } from '../services/kongAuthService.js';
@@ -72,7 +72,8 @@ describe('getKeycloakClient', () => {
             config
         );
 
-        expect((kc as unknown as { authenticated: unknown }).authenticated).toBeTypeOf('function');
+        // authenticated handler is manually attached in app code now, not by getKeycloakClient
+        // expect((kc as unknown as { authenticated: unknown }).authenticated).toBeTypeOf('function');
         expect((kc as unknown as { deauthenticated: unknown }).deauthenticated).toBeTypeOf('function');
     });
 
@@ -121,12 +122,7 @@ describe('authenticated handler', () => {
     });
 
     it('should regenerate session, extract userId and fetch user', async () => {
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-
-        // wait for the async IIFE inside authenticated()
-        await new Promise(process.nextTick);
+        await authenticated(req as Request);
 
         expect(regenerateSession).toHaveBeenCalledWith(req);
         expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
@@ -141,12 +137,7 @@ describe('authenticated handler', () => {
         // Set existing kong token in session
         (req.session as any).kongToken = 'existing-kong-token';
 
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-
-        // wait for the async IIFE inside authenticated()
-        await new Promise(process.nextTick);
+        await authenticated(req as Request);
 
         expect(regenerateSession).toHaveBeenCalledWith(req);
         expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
@@ -160,10 +151,7 @@ describe('authenticated handler', () => {
     it('should handle missing sub gracefully', async () => {
         (req as any).kauth = {};
 
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
+        await authenticated(req as Request);
 
         expect((req.session as any)?.userId).toBeUndefined();
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
@@ -175,10 +163,7 @@ describe('authenticated handler', () => {
     it('should log error if regenerateSession fails', async () => {
         vi.mocked(regenerateSession).mockRejectedValue(new Error('regen failed'));
 
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
+        await authenticated(req as Request);
 
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
             'error logging in user',
@@ -194,10 +179,7 @@ describe('authenticated handler', () => {
             new Error('user service failure')
         );
 
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
+        await authenticated(req as Request);
 
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
             'error logging in user',
@@ -216,10 +198,7 @@ describe('authenticated handler', () => {
             }
         };
 
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
+        await authenticated(req as Request);
 
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
             'error logging in user',
