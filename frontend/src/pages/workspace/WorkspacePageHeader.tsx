@@ -59,6 +59,7 @@ const WorkspacePageHeader = ({
               <button
                 onClick={onMenuOpen}
                 className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
+                aria-label="Open sidebar"
               >
                 <svg
                   width="20"
@@ -98,6 +99,7 @@ const WorkspacePageHeader = ({
             <button
               onClick={() => navigate("/search")}
               className="text-sunbird-brick hover:text-sunbird-brick p-2"
+              aria-label="Search"
             >
               <FiSearch className="w-5 h-5" />
             </button>
