@@ -503,14 +503,6 @@
     @apply relative;
   }
 
-  .content-player-week-label-container {
-    @apply absolute top-4 left-4 z-10;
-  }
-
-  .content-player-week-label {
-    @apply bg-sunbird-brick text-white text-sm font-medium px-4 py-2 rounded-md font-rubik;
-  }
-
   .content-player-video-thumbnail {
     @apply aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative;
   }
@@ -541,42 +533,6 @@
 
   .content-player-related-grid {
     @apply grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr;
-  }
-
-  .content-player-carousel-nav {
-    @apply flex items-center justify-center gap-3 mt-8;
-  }
-
-  .content-player-carousel-btn-prev {
-    @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors;
-  }
-
-  .content-player-carousel-btn-next {
-    @apply w-8 h-8 rounded-full bg-sunbird-brick flex items-center justify-center hover:bg-sunbird-brick/90 transition-colors;
-  }
-
-  .content-player-carousel-indicators {
-    @apply flex items-center gap-2;
-  }
-
-  .content-player-carousel-dot-active {
-    @apply w-6 h-1 bg-gray-800 rounded-full;
-  }
-
-  .content-player-carousel-dot-inactive {
-    @apply w-6 h-1 bg-gray-300 rounded-full;
-  }
-
-  .content-player-carousel-arrow {
-    @apply w-4 h-4;
-  }
-
-  .content-player-carousel-arrow-gray {
-    @apply w-4 h-4 text-gray-500;
-  }
-
-  .content-player-carousel-arrow-white {
-    @apply w-4 h-4 text-white;
   }
 
   .content-player-resource-title {
