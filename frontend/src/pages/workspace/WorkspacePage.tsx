@@ -32,7 +32,7 @@ const WorkspacePage = () => {
   const [activeView, setActiveView] = useState<WorkspaceView>('all');
   const [searchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [sortBy, setSortBy] = useState<SortOption>('updated');
+  const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -64,11 +64,8 @@ const WorkspacePage = () => {
 
   // Reset view when role changes
   useEffect(() => {
-    if (userRole === 'creator') {
-      setActiveView('all');
-    } else {
-      setActiveView('pending-review');
-    }
+    const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';
+    setActiveView((prev) => (prev === nextView ? prev : nextView));
   }, [userRole]);
 
   const filteredItems = useMemo(() => {
@@ -92,17 +89,16 @@ const WorkspacePage = () => {
       );
     }
     
-    // Apply sorting
-    filtered.sort((a, b) => {
+    // Apply sorting (sort a copy so we don't mutate filtered)
+    const toTime = (s: string | null) => (s ? new Date(s).getTime() : 0);
+    return [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case 'updated': return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        case 'created': return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'updated': return toTime(b.updatedAt) - toTime(a.updatedAt);
+        case 'created': return toTime(b.createdAt) - toTime(a.createdAt);
         case 'title': return a.title.localeCompare(b.title);
         default: return 0;
       }
     });
-    
-    return filtered;
   }, [items, activeView, typeFilter, searchQuery, sortBy]);
 
   const handleCreateOption = (optionId: string) => {
@@ -148,8 +144,6 @@ const WorkspacePage = () => {
     counts,
     viewMode,
     onViewModeChange: setViewMode,
-    sortBy,
-    onSortChange: setSortBy,
     typeFilter,
     onTypeFilterChange: setTypeFilter,
     contentCount: !['create', 'uploads', 'collaborations'].includes(activeView) ? filteredItems.length : undefined,

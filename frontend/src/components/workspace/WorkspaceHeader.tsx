@@ -1,14 +1,14 @@
-import { FiSearch, FiGrid, FiList, FiFilter, FiChevronDown } from "react-icons/fi";
-import { Input } from "@/components/common/Input";
-import { Button } from "@/components/common/Button";
+import { FiSearch, FiGrid, FiList, FiFilter, FiChevronDown } from 'react-icons/fi';
+import { Input } from '@/components/common/Input';
+import { Button } from '@/components/common/Button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/common/DropdownMenu";
-import { cn } from "@/lib/utils";
-import { useAppI18n } from "@/hooks/useAppI18n";
+} from '@/components/common/DropdownMenu';
+import { cn } from '@/lib/utils';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 export type ViewMode = 'grid' | 'list';
 export type SortOption = 'updated' | 'created' | 'title';
@@ -85,8 +85,8 @@ const WorkspaceHeader = ({
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-8 w-8 rounded-md transition-all",
-                  viewMode === 'grid' && "bg-white shadow-sm text-sunbird-brick"
+                  'h-8 w-8 rounded-md transition-all',
+                  viewMode === 'grid' && 'bg-white shadow-sm text-sunbird-brick',
                 )}
                 onClick={() => onViewModeChange('grid')}
               >
@@ -96,8 +96,8 @@ const WorkspaceHeader = ({
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-8 w-8 rounded-md transition-all",
-                  viewMode === 'list' && "bg-white shadow-sm text-sunbird-brick"
+                  'h-8 w-8 rounded-md transition-all',
+                  viewMode === 'list' && 'bg-white shadow-sm text-sunbird-brick',
                 )}
                 onClick={() => onViewModeChange('list')}
               >
@@ -138,14 +138,17 @@ const WorkspaceHeader = ({
                   <FiChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-44 bg-white rounded-xl shadow-lg border border-gray-100">
+              <DropdownMenuContent
+                align="start"
+                className="w-44 bg-white rounded-xl shadow-lg border border-gray-100"
+              >
                 {Object.entries(typeLabels).map(([key, label]) => (
                   <DropdownMenuItem
                     key={key}
                     onClick={() => onTypeFilterChange(key as ContentTypeFilter)}
                     className={cn(
-                      "font-rubik cursor-pointer",
-                      typeFilter === key && "bg-sunbird-ginger/10 text-sunbird-brick"
+                      'font-rubik cursor-pointer',
+                      typeFilter === key && 'bg-sunbird-ginger/10 text-sunbird-brick',
                     )}
                   >
                     {label}
@@ -165,14 +168,17 @@ const WorkspaceHeader = ({
                   <FiChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 bg-white rounded-xl shadow-lg border border-gray-100">
+              <DropdownMenuContent
+                align="end"
+                className="w-40 bg-white rounded-xl shadow-lg border border-gray-100"
+              >
                 {Object.entries(sortLabels).map(([key, label]) => (
                   <DropdownMenuItem
                     key={key}
                     onClick={() => onSortChange(key as SortOption)}
                     className={cn(
-                      "font-rubik cursor-pointer",
-                      sortBy === key && "bg-sunbird-ginger/10 text-sunbird-brick"
+                      'font-rubik cursor-pointer',
+                      sortBy === key && 'bg-sunbird-ginger/10 text-sunbird-brick',
                     )}
                   >
                     {label}

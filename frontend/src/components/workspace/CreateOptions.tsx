@@ -25,7 +25,7 @@ interface CreateOptionsProps {
 }
 
 const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
-  const { t } = useAppI18n();
+  useAppI18n();
 
   const editorCategories: EditorCategory[] = [
     {

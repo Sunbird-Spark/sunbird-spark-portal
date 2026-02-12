@@ -49,7 +49,7 @@ const WorkspaceContentCard = ({
   const colors = typeColors[item.type];
   const status = statusConfig[item.status];
 
-  const timeAgo = formatTimeAgo(new Date(item.updatedAt));
+  const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300 border border-border">

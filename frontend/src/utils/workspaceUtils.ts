@@ -25,8 +25,8 @@ export function mapContentToWorkspaceItem(item: ContentSearchItem): WorkspaceIte
     type: TYPE_MAP[item.objectType ?? ''] ?? 'content',
     status: STATUS_MAP[item.status ?? ''] ?? 'draft',
     thumbnail: item.posterImage ?? item.thumbnail,
-    createdAt: item.createdOn ?? '',
-    updatedAt: item.lastUpdatedOn ?? item.createdOn ?? '',
+    createdAt: item.createdOn ?? null,
+    updatedAt: item.lastUpdatedOn ?? item.createdOn ?? null,
     author: item.creator ?? item.createdBy ?? 'Unknown',
   };
 }

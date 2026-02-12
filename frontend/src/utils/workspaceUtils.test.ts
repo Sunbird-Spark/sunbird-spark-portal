@@ -107,11 +107,11 @@ describe('workspaceUtils', () => {
       expect(
         mapContentToWorkspaceItem({ identifier: 'a', createdOn: '2024-01-01' }).updatedAt
       ).toBe('2024-01-01');
-      expect(mapContentToWorkspaceItem({ identifier: 'a' }).updatedAt).toBe('');
+      expect(mapContentToWorkspaceItem({ identifier: 'a' }).updatedAt).toBeNull();
     });
 
-    it('uses empty string for createdAt when createdOn is missing', () => {
-      expect(mapContentToWorkspaceItem({ identifier: 'a' }).createdAt).toBe('');
+    it('uses null for createdAt when createdOn is missing', () => {
+      expect(mapContentToWorkspaceItem({ identifier: 'a' }).createdAt).toBeNull();
     });
   });
 });

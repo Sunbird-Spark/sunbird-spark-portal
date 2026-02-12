@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { type WorkspaceView, type UserRole } from "../WorkspaceSidebar";
-import { type ViewMode, type SortOption, type ContentTypeFilter } from "../WorkspaceHeader";
+import { type ViewMode, type ContentTypeFilter } from "../WorkspaceHeader";
 
 interface SegmentedControlPatternProps {
   activeView: WorkspaceView;
@@ -20,8 +20,6 @@ interface SegmentedControlPatternProps {
   counts: { drafts: number; review: number; published: number; all: number; pendingReview?: number };
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
-  sortBy: SortOption;
-  onSortChange: (sort: SortOption) => void;
   typeFilter: ContentTypeFilter;
   onTypeFilterChange: (filter: ContentTypeFilter) => void;
   contentCount?: number;
@@ -36,8 +34,6 @@ const SegmentedControlPattern = ({
   counts,
   viewMode,
   onViewModeChange,
-  sortBy: _sortBy,
-  onSortChange: _onSortChange,
   typeFilter,
   onTypeFilterChange,
   contentCount,

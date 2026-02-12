@@ -5,8 +5,8 @@ export interface WorkspaceItem {
   type: 'course' | 'content' | 'quiz' | 'collection';
   status: 'draft' | 'review' | 'published';
   thumbnail?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | null;
+  updatedAt: string | null;
   author: string;
 }
 

@@ -61,7 +61,7 @@ const WorkspaceContentList = ({
         {items.map((item) => {
           const TypeIcon = typeIcons[item.type];
           const status = statusConfig[item.status];
-          const timeAgo = formatTimeAgo(new Date(item.updatedAt));
+          const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
           return (
             <div
