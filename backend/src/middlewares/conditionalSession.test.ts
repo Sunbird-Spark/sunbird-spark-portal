@@ -21,7 +21,8 @@ vi.mock('express-session', () => ({
 
 vi.mock('../config/sessionConfig', () => ({
     authSessionConfig: { name: 'auth_cookie' },
-    anonymousSessionConfig: { name: 'anonymous_cookie' }
+    anonymousSessionConfig: { name: 'anonymous_cookie' },
+    sessionConfig: { name: 'mock_session_config' }
 }));
 
 vi.mock('../utils/cookieConstants', () => ({
