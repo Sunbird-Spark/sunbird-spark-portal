@@ -42,14 +42,14 @@ const HeroStats = () => {
         <div className="flex w-full flex-wrap items-center gap-4 lg:gap-10 lg:flex-nowrap">
             {/* Stats Card */}
             <div
-                className={`grid grid-cols-3 items-center px-12 rounded-2xl bg-surface ${floatingShadow} lg:w-[35.5rem] h-[11.625rem]`}
+                className={`flex items-center px-6 rounded-2xl bg-surface ${floatingShadow} lg:w-[35.5rem] h-[11.625rem]`}
             >
                 {/* 500+ Courses */}
-                <div className="text-center">
-                    <div className="flex justify-center mb-[10px] pl-[10px]">
+                <div className="flex-1 text-center relative">
+                    <div className="flex justify-center mb-[10px]">
                         <BookIcon />
                     </div>
-                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground pl-[10px]">
+                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground">
                         500+
                     </div>
                     <div className="font-rubik font-normal text-[18px] leading-[20px] tracking-normal text-center text-[#757575]">
@@ -58,7 +58,7 @@ const HeroStats = () => {
                 </div>
 
                 {/* 50K+ Active Learners */}
-                <div className="text-center">
+                <div className="flex-1 text-center relative">
                     <div className="flex justify-center mb-1.5">
                         <UsersIcon />
                     </div>
@@ -71,7 +71,7 @@ const HeroStats = () => {
                 </div>
 
                 {/* 200+ Certifications */}
-                <div className="text-center">
+                <div className="flex-1 text-center">
                     <div className="flex justify-center mb-1.5">
                         <CertificateIcon />
                     </div>

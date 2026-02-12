@@ -15,7 +15,7 @@ const HeroWithStats = () => {
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-white pb-24 lg:pb-32">
                 {/* Cream Wave Background - positioned at bottom */}
-                <div className="absolute bottom-[-50px] left-0 right-0 w-full">
+                <div className="absolute bottom-[80px] top-[150px] left-0 right-0 w-full">
                     <img
                         src={creamWave}
                         alt=""
@@ -28,14 +28,14 @@ const HeroWithStats = () => {
                     className={`absolute w-8 h-8 rounded-full hidden lg:block bg-sunbird-brick top-[-3%] ${isRTL ? 'left-[38%]' : 'right-[27%]'}`}
                 />
                 <div
-                    className={`absolute w-10 h-10 rounded-full hidden lg:block bg-sunbird-yellow top-[30.71%] ${isRTL ? 'left-[48%]' : 'right-[32%]'}`}
+                    className={`absolute w-10 h-10 rounded-full hidden lg:block bg-sunbird-yellow top-[25.71%] ${isRTL ? 'left-[48%]' : 'right-[32%]'}`}
                 />
                 <div
-                    className={`absolute w-4 h-4 rounded-full hidden lg:block bg-sunbird-brick top-[25.73%] ${isRTL ? 'left-[98%]' : 'right-[14%]'}`}
+                    className={`absolute w-4 h-4 rounded-full hidden lg:block bg-sunbird-brick top-[21.73%] ${isRTL ? 'left-[98%]' : 'right-[14%]'}`}
                 />
 
-                <div className="w-full relative z-10 pl-[7.9375rem] pr-[7.9375rem]" style={{ marginTop: '1.875rem' }}>
-                    <div className="grid lg:grid-cols-[60%_40%] gap-8 items-start min-h-[30.25rem] pt-8 lg:pt-12" style={{ paddingTop: '3.125rem' }}>
+                <div className="w-full relative z-10 pl-[7.9375rem] pr-[7.9375rem]">
+                    <div className="grid lg:grid-cols-[60%_40%] gap-8 items-start min-h-[30.25rem] pt-8 lg:pt-12" style={{ paddingTop: '0.625rem' }}>
                         {/* Content - Left Side (becomes Right in RTL grid) */}
                         <div className="max-w-[700px] pt-8">
                             <h1
@@ -74,7 +74,7 @@ const HeroWithStats = () => {
                                     src={tealShape}
                                     alt=""
                                     className="w-full h-auto rotate-[-0.5deg] origin-center pb-[1rem]  pl-[6.25rem]"
-                                    style={{ paddingBottom: '6.875rem' }}
+                                    style={{ paddingBottom: '5.275rem' }}
                                 />
                             </div>
                             <div className="relative z-10  flex items-end justify-center h-full">
@@ -82,7 +82,7 @@ const HeroWithStats = () => {
                                     src={heroWoman}
                                     alt="Professional learning"
                                     className="w-[22.5rem] h-auto object-contain"
-                                    style={{ width: '52.5rem', height: '46.875rem', paddingBottom: '0.0625rem', paddingTop: '10.375rem' }}
+                                    style={{ width: '55.5rem', height: '42.875rem', paddingBottom: '0.0625rem', paddingTop: '9.675rem' }}
                                 />
                             </div>
                         </div>
@@ -91,7 +91,7 @@ const HeroWithStats = () => {
             </div>
 
             <div className="relative z-20 -mt-24 lg:-mt-36">
-                <div className="w-full pl-[7.9375rem] pr-[7.9375rem]" style={{ marginTop: '4.375rem' }}>
+                <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
                     <HeroStats />
                 </div>
             </div>

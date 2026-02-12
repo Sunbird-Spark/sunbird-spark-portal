@@ -20,7 +20,7 @@ const ResourceCenter = () => {
     const { t } = useAppI18n();
 
     return (
-        <section className="pt-[30px] pb-16 bg-[#FFF1C7]">
+        <section className="pt-[30px] pb-[1.875rem] bg-[#FFF1C7]">
             <div className="w-full pl-[127px] pr-[127px]">
 
                 <div className="flex items-center justify-center gap-4 mb-[20px]">
@@ -30,7 +30,7 @@ const ResourceCenter = () => {
                     </span>
                     <div className="h-[1px] w-[100px] bg-[#333333]"></div>
                 </div>
-                <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-[#333333] text-center mb-10 md:mb-14">
+                <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-[#333333] text-center mb-[20px]">
                     {t("resource.title")}
                 </h2>
 
@@ -121,7 +121,7 @@ const ResourceCardComponent = ({
                     <img
                         src={image}
                         alt={title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 rounded-[20px]"
                     />
                 </div>
 
