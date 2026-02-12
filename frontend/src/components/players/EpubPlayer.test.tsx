@@ -11,7 +11,7 @@ const mockRemoveEventListeners = vi.fn();
 
 // Mock the EpubPlayerService
 vi.mock('../../services/players/epub', () => {
-  const MockEpubPlayerService = vi.fn(function() {
+  const MockEpubPlayerService = vi.fn(function(this: any) {
     this.createConfig = mockCreateConfig;
     this.createElement = mockCreateElement;
     this.attachEventListeners = mockAttachEventListeners;
