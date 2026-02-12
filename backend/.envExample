@@ -7,7 +7,7 @@ PORT=3000
 
 DOMAIN_URL=http://localhost:3000
 KONG_URL=http://localhost:8000
-
+SERVER_URL='http://localhost:3000'
 # Logging Configuration
 SUNBIRD_PORTAL_LOG_LEVEL=error
 

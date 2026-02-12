@@ -4,6 +4,8 @@ import { envConfig } from './config/env.js';
 import { keycloak } from './auth/keycloakProvider.js';
 import logger from './utils/logger.js';
 import { regenerateSession, regenerateAnonymousSession } from './utils/sessionUtils.js';
+import { setSessionTTLFromToken } from './utils/sessionTTLUtil.js';
+import { fetchUserById, setUserSession } from './services/userService.js';
 import formRoutes from './routes/formsRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import { validateRecaptcha } from './middlewares/googleAuth.js';
@@ -19,6 +21,7 @@ import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
 import { handlePassword } from './middlewares/passwordHandler.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
+import _ from 'lodash';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,33 +41,56 @@ app.get('/health', checkHealth);
 app.get('/app/v1/info', getAppInfo);
 
 
-app.get('/portal/login',
-    sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/callback', logout: '/portal/logout' }), keycloak.protect(), async (req: Request, res: Response) => {
-        if (req.session) {
-            try {
-                await regenerateSession(req);
-                res.redirect('/profile');
-            } catch (err) {
-                logger.error('Error generating session on login', err);
-                res.redirect('/');
-            }
-        } else {
-            logger.error('No session found after Keycloak protect');
-            res.redirect('/');
-        }
-    });
 
-app.get('/profile',
-    sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/callback', logout: '/portal/logout' }), keycloak.protect(), async (req: Request, res: Response) => {
+
+app.get('/portal/login',
+    sessionMiddleware,
+    keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
+    keycloak.protect(),
+    (req, res) => {
+        // This handler will only be reached if the user is already authenticated
+        // OR if they just logged in and Keycloak redirected them back here.
+        // However, keycloak-connect often redirects to the "clean" URL after login.
+        // To be safe, we just redirect to home if we get here.
+        res.redirect('/home');
+    }
+);
+
+// New route to handle the actual post-login logic if needed,
+// but for now, let's try to rely on the fact that once logged in,
+// the user hits /portal/login again and falls through to the handler above.
+//
+// WAIT. The issue is that the handler above WAS NOT HIT.
+//
+// Let's try a different approach:
+// 1. /portal/login -> simple redirect to a protected route /portal/auth/callback
+// 2. /portal/auth/callback -> protected -> runs our logic -> redirects to /home
+
+app.get('/portal/auth/callback',
+    sessionMiddleware,
+    keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
+    keycloak.protect(),
+    async (req: Request, res: Response) => {
+        logger.info('Entered /portal/auth/callback handler');
         if (req.session) {
             try {
-                // Regenerate session to prevent fixation and set new Kong token
+                // Regenerate session
                 await regenerateSession(req);
-                if (envConfig.ENVIRONMENT === 'local') {
-                    res.redirect('http://localhost:5173/profile');
-                } else {
-                    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+                setSessionTTLFromToken(req);
+
+                // Initialize user session
+                const tokenSubject = _.get(req, 'kauth.grant.access_token.content.sub');
+                if (tokenSubject) {
+                    const userIdFromToken = _.last(_.split(tokenSubject, ':'));
+                    req.session.userId = userIdFromToken;
+
+                    if (userIdFromToken) {
+                        const userProfileResponse = await fetchUserById(userIdFromToken, req);
+                        await setUserSession(req, userProfileResponse);
+                    }
                 }
+
+                res.redirect('/home');
             } catch (err) {
                 logger.error('Error generating session on login', err);
                 res.redirect('/');
@@ -73,21 +99,19 @@ app.get('/profile',
             logger.error('No session found after Keycloak protect');
             res.redirect('/');
         }
-    });
+    }
+);
+
+// app.get('/profile', ... (commented out code remains commented out)
 
 app.all('/portal/logout', sessionMiddleware, async (req, res, next) => {
     // 1. Clear Keycloak session/tokens (handled by keycloak middleware usually, but here we just process local logout)
-
     // 2. Regenerate to anonymous session (clears user data, gets new SID, sets new anonymous tokens)
     try {
         await regenerateAnonymousSession(req);
-        // Apply anonymous middlewares to ensure org/device setup on new session if needed
-        // But regenerateAnonymousSession already sets kongToken and roles.
-        // We might want to run anonymousMiddlewares[1] (setAnonymousOrg) to ensure org is set?
-        // setAnonymousOrg checks rootOrghashTagId. New session won't have it.
-        // So we should run it.
-        // However, we can just redirect to / which will run the middlewares again.
-        res.redirect('/');
+        // Redirect to Keycloak logout
+        const logoutUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(envConfig.SERVER_URL + '/')}`;
+        res.redirect(logoutUrl);
     } catch (err) {
         logger.error('Error regenerating session on logout', err);
         res.redirect('/');
@@ -97,7 +121,7 @@ app.all('/portal/logout', sessionMiddleware, async (req, res, next) => {
 // Apply anonymous session middleware to API routes (once per route tree)
 app.use('/api', sessionMiddleware, ...anonymousMiddlewares);
 app.use('/api/data/v1/form', formRoutes);
-app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, authRoutes);
+app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), authRoutes);
 app.use('/google', googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));

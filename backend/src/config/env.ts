@@ -6,6 +6,7 @@ const env = process.env;
 
 export const envConfig = {
     ENVIRONMENT: env.ENVIRONMENT || '',
+    SERVER_URL: env.SERVER_URL || '',
     DOMAIN_URL: env.DOMAIN_URL || '',
     KONG_URL: env.KONG_URL || '',
     SUNBIRD_YUGABYTE_HOST: env.SUNBIRD_YUGABYTE_HOST || '',
