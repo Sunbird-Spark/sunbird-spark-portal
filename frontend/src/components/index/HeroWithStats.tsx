@@ -34,12 +34,12 @@ const HeroWithStats = () => {
                     className={`absolute w-4 h-4 rounded-full hidden lg:block bg-sunbird-brick top-[21.73%] ${isRTL ? 'left-[98%]' : 'right-[14%]'}`}
                 />
 
-                <div className="w-full relative z-10 pl-[7.9375rem] pr-[7.9375rem]">
-                    <div className="grid lg:grid-cols-[60%_40%] gap-8 items-start min-h-[30.25rem] pt-8 lg:pt-12" style={{ paddingTop: '0.625rem' }}>
+                <div className="w-full relative z-10 px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
+                    <div className="grid lg:grid-cols-[60%_40%] gap-8 items-start min-h-[30.25rem]" style={{ paddingTop: '0.625rem' }}>
                         {/* Content - Left Side (becomes Right in RTL grid) */}
                         <div className="max-w-[700px] pt-8">
                             <h1
-                                className="font-rubik font-semibold text-[3.75rem] leading-[4.375rem] tracking-normal mb-6 text-sunbird-obsidian"
+                                className="font-rubik font-semibold text-4xl lg:text-[3.75rem] leading-tight lg:leading-[4.375rem] tracking-normal mb-6 text-sunbird-obsidian"
                             >
                                 {t("hero.title", "Knowledge that moves you forward.").split(/(\n)/).map((line, i) =>
                                     line === "\n" ? <br key={i} /> : line
@@ -47,7 +47,7 @@ const HeroWithStats = () => {
                             </h1>
 
                             <p
-                                className="font-rubik font-normal text-[1.125rem] leading-[1.625rem] tracking-normal mb-[2.8125rem] max-w-[34.375rem] text-sunbird-gray-75"
+                                className="font-rubik font-normal text-lg lg:text-[1.125rem] leading-[1.625rem] tracking-normal mb-8 lg:mb-[2.8125rem] max-w-[34.375rem] text-sunbird-gray-75"
                             >
                                 {t("hero.subtitle")}
                             </p>
@@ -55,7 +55,7 @@ const HeroWithStats = () => {
                             <Link to="/explore">
                                 <Button
                                     size="lg"
-                                    className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-white w-[20rem] h-[3.75rem] px-0 rounded-[0.75rem] shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-brick"
+                                    className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-white w-full lg:w-[20rem] h-[3.75rem] px-0 rounded-[0.75rem] shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-brick"
                                 >
                                     {t("hero.cta")}
                                     {isRTL ? (
@@ -90,7 +90,7 @@ const HeroWithStats = () => {
             </div>
 
             <div className="relative z-20 -mt-24 lg:-mt-36">
-                <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
+                <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
                     <HeroStats />
                 </div>
             </div>

@@ -41,10 +41,10 @@ const HeroStats = () => {
         <div className="flex w-full flex-wrap items-center gap-4 lg:gap-10 lg:flex-nowrap">
             {/* Stats Card */}
             <div
-                className={`flex items-center px-6 rounded-2xl bg-surface ${floatingShadow} lg:w-[35.5rem] h-[11.625rem]`}
+                className={`flex flex-col lg:flex-row items-center px-6 py-6 lg:py-0 rounded-2xl bg-surface ${floatingShadow} w-full lg:w-[35.5rem] h-auto lg:h-[11.625rem] gap-6 lg:gap-0`}
             >
                 {/* 500+ Courses */}
-                <div className="flex-1 text-center relative">
+                <div className="flex-1 text-center relative w-full lg:w-auto">
                     <div className="flex justify-center mb-[0.625rem]">
                         <BookIcon />
                     </div>
@@ -57,7 +57,7 @@ const HeroStats = () => {
                 </div>
 
                 {/* 50K+ Active Learners */}
-                <div className="flex-1 text-center relative">
+                <div className="flex-1 text-center relative w-full lg:w-auto">
                     <div className="flex justify-center mb-1.5">
                         <UsersIcon />
                     </div>
@@ -70,7 +70,7 @@ const HeroStats = () => {
                 </div>
 
                 {/* 200+ Certifications */}
-                <div className="flex-1 text-center">
+                <div className="flex-1 text-center w-full lg:w-auto">
                     <div className="flex justify-center mb-1.5">
                         <CertificateIcon />
                     </div>
@@ -85,7 +85,7 @@ const HeroStats = () => {
 
             {/* Learning Process Card */}
             <div
-                className={`flex flex-col justify-between px-7 py-[1.25rem] rounded-2xl bg-surface ${floatingShadow} lg:w-[16.25rem] h-[11.625rem]`}
+                className={`flex flex-col justify-between px-7 py-[1.25rem] rounded-2xl bg-surface ${floatingShadow} w-full lg:w-[16.25rem] h-[11.625rem]`}
             >
                 <div>
                     <p className="font-rubik font-medium text-[1.25rem] leading-[1.5rem] tracking-normal mb-4 text-foreground line-clamp-2 pt-[0.625rem] pl-[0.0625rem]">
@@ -100,7 +100,7 @@ const HeroStats = () => {
             </div>
 
             {/* Study at your own pace Card */}
-            <div className="relative lg:w-[16.6875rem] h-[11.625rem]">
+            <div className="relative w-full lg:w-[16.6875rem] h-[11.625rem]">
                 <div className="h-full w-full drop-shadow-[0_15px_30px_rgba(0,0,0,0.15)]">
                     <div
                         className="relative flex h-full flex-col justify-between bg-white px-6 py-6 rounded-2xl card-mask-custom"

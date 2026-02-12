@@ -12,25 +12,21 @@ const CategorySection = () => {
   const categories = [
     {
       id: "ui-ux-design",
-      name: "UI/UX Design",
       icon: uiuxIcon,
       background: "linear-gradient(to right, #45C0ED, #8E46C5)",
     },
     {
       id: "it-development",
-      name: "IT Development",
       icon: devIcon,
       background: "linear-gradient(to right, #D55E1D, #F6C35C)",
     },
     {
       id: "digital-marketing",
-      name: "Digital Marketing",
       icon: marketingIcon,
       background: "linear-gradient(to right, #1D79D5, #6ED97B)",
     },
     {
       id: "entrepreneurship",
-      name: "Entrepreneurship",
       icon: entrepreneurIcon,
       background: "linear-gradient(to right, #F59C84, #D655E7)",
     },
@@ -38,7 +34,7 @@ const CategorySection = () => {
 
   return (
     <section id="categories" className="pt-[2.5rem] pb-8 bg-white">
-      <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
+      <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
         {/* Header */}
         <div className="mb-8">
           <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground">
@@ -47,8 +43,8 @@ const CategorySection = () => {
         </div>
 
         {/* Category Cards and Browse All */}
-        <div className="flex items-center gap-6 pb-[1.875rem] flex-wrap justify-between">
-          <div className="flex items-center gap-4 flex-wrap lg:flex-nowrap">
+        <div className="flex items-center gap-6 pb-[1.875rem] flex-wrap justify-center lg:justify-between">
+          <div className="flex items-center gap-4 flex-wrap justify-center lg:flex-nowrap">
             {categories.map((category) => (
               <Link key={category.id} to="/explore" className="group">
                 <div
@@ -60,9 +56,9 @@ const CategorySection = () => {
 
                   {/* Bottom content: Icon + Label */}
                   <div className="flex flex-col gap-3">
-                    <img src={category.icon} alt={category.name} className="w-8 h-8" />
+                    <img src={category.icon} alt={t(`categoriesList.${category.id}`)} className="w-8 h-8" />
                     <p className="text-[1.0625rem] font-bold text-white leading-tight">
-                      {category.name}
+                      {t(`categoriesList.${category.id}`)}
                     </p>
                   </div>
                 </div>

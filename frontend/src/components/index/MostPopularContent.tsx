@@ -63,8 +63,8 @@ const MostPopularContent = () => {
     ];
 
     return (
-        <section className="pt-[3.75rem] pb-8 bg-white">
-            <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
+        <section className="pt-8 lg:pt-[3.75rem] pb-8 bg-white">
+            <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
                 <CourseGrid
                     title={t("popular.title")}
                     courses={courses}
