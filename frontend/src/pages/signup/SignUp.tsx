@@ -26,7 +26,7 @@ const SignUp: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const { data: captchaSiteKeyData, isLoading: isSiteKeyLoading, error: siteKeyError } = useSystemSetting('portal_google_recaptcha_site_key');
+    const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
     const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
 
     const signupMutation = useSignup();
