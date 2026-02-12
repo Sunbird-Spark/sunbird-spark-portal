@@ -110,7 +110,7 @@ const Header = () => {
 
             {/* Login Button */}
             <Button
-              onClick={() => window.location.href = "/profile"}
+              onClick={() => navigate("/profile")}
               className="flex items-center justify-center w-[4.5rem] h-[1.875rem] bg-sunbird-brick text-white rounded-[0.375rem] text-sm font-medium p-0"
             >
               {t("login")}
@@ -146,7 +146,7 @@ const Header = () => {
             <Button
               onClick={() => {
                 setIsMenuOpen(false);
-                window.location.href = "/profile";
+                navigate("/profile");
               }}
               className="block w-full text-center bg-sunbird-brick text-white px-4 py-2 rounded-lg text-sm font-medium"
             >
