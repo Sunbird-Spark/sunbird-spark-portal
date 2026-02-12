@@ -1,5 +1,6 @@
 import type { SortOption, ContentTypeFilter } from '../../types/workspaceTypes';
-import type { TranslateFn } from './workspaceMenuConfig';
+
+export type TranslateFn = (key: string) => string;
 
 export function getSortLabels(t: TranslateFn): Record<SortOption, string> {
   return {

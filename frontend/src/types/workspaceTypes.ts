@@ -45,14 +45,6 @@ export interface WorkspaceSidebarCounts {
   pendingReview?: number;
 }
 
-export interface WorkspaceMenuItem {
-  id: WorkspaceView;
-  label: string;
-  icon: IconType;
-  count?: number;
-  highlight?: boolean;
-}
-
 export interface WorkspaceSegment {
   id: WorkspaceView;
   label: string;

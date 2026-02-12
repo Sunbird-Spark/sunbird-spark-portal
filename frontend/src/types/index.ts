@@ -59,7 +59,6 @@ export type {
   EditorOption,
   EditorCategory,
   WorkspaceSidebarCounts,
-  WorkspaceMenuItem,
   WorkspaceSegment,
   WorkspaceSecondaryAction,
   EmptyStateVariant,
