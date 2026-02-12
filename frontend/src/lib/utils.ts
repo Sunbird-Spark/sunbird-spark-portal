@@ -10,9 +10,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatTimeAgo(value: Date | string | number): string {
-  const local = dayjs(value).format("YYYY-MM-DD HH:mm:ss");
-  if (dayjs(local).isValid()) {
-    return dayjs(local).fromNow();
+  const date = dayjs(value);
+  if (date.isValid()) {
+    return date.fromNow();
   }
   return "Invalid date";
 }

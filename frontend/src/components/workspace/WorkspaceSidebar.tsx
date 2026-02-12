@@ -28,7 +28,7 @@ const WorkspaceSidebar = ({ activeView, onViewChange, counts, userRole, onRoleCh
   ];
 
   const reviewerMenuItems = [
-    { id: 'pending-review' as const, label: 'Pending Review', icon: FiClipboard, count: counts.pendingReview || 3 },
+    { id: 'pending-review' as const, label: 'Pending Review', icon: FiClipboard, count: counts.pendingReview ?? 0 },
     { id: 'my-published' as const, label: 'Published by Me', icon: FiCheckCircle, count: counts.published },
   ];
 
@@ -56,7 +56,7 @@ const WorkspaceSidebar = ({ activeView, onViewChange, counts, userRole, onRoleCh
             className={cn(
               "flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium font-['Rubik'] transition-all duration-200",
               userRole === 'reviewer'
-                ? "bg-white text-sunbird-wave shadow-sm"
+                ? "bg-white text-sunbird-brick shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >

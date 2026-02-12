@@ -4,8 +4,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import CreateContentModal from './CreateContentModal';
 
 vi.mock('@/components/common/Button', () => ({
-  Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
-    <button type="button" onClick={onClick}>
+  Button: ({ children, onClick, ...props }: React.ComponentProps<'button'>) => (
+    <button type="button" onClick={onClick} {...props}>
       {children}
     </button>
   ),
@@ -36,7 +36,7 @@ describe('CreateContentModal', () => {
     expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Create Content' })).toBeInTheDocument();
     expect(screen.getByTestId('create-options')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '✕' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close dialog' })).toBeInTheDocument();
   });
 
   it('calls onClose when close button is clicked', () => {
@@ -44,7 +44,7 @@ describe('CreateContentModal', () => {
     render(
       <CreateContentModal open onClose={onClose} onOptionSelect={vi.fn()} />
     );
-    fireEvent.click(screen.getByRole('button', { name: '✕' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

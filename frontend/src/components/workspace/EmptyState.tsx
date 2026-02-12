@@ -1,4 +1,4 @@
-import { FiPlus, FiUpload, FiUsers, FiInbox } from "react-icons/fi";
+import { FiPlus, FiInbox } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import { IconType } from "react-icons";
 

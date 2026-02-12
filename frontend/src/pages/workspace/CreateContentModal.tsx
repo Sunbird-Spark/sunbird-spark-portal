@@ -32,6 +32,7 @@ export default function CreateContentModal({
             size="sm"
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground"
+            aria-label="Close dialog"
           >
             ✕
           </Button>

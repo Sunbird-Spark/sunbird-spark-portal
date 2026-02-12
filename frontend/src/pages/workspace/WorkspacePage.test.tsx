@@ -157,7 +157,7 @@ describe('WorkspacePage', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
     });
-    const closeBtn = screen.getByRole('button', { name: '✕' });
+    const closeBtn = screen.getByRole('button', { name: 'Close dialog' });
     fireEvent.click(closeBtn);
     await waitFor(() => {
       expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();

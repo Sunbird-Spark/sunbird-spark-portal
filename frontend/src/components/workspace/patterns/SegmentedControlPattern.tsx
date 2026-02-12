@@ -53,7 +53,7 @@ const SegmentedControlPattern = ({
   ];
 
   const reviewerSegments = [
-    { id: 'pending-review' as const, label: 'Pending', count: counts.pendingReview || 3 },
+    { id: 'pending-review' as const, label: 'Pending', count: counts.pendingReview ?? 0 },
     { id: 'my-published' as const, label: 'Published', count: counts.published },
   ];
 
@@ -89,7 +89,7 @@ const SegmentedControlPattern = ({
               className={cn(
                 "px-3 py-1.5 rounded-lg transition-all",
                 userRole === 'reviewer'
-                  ? "text-sunbird-wave font-semibold"
+                  ? "text-sunbird-brick font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
