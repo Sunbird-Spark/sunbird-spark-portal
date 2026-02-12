@@ -1,9 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import SegmentedControlPattern from './SegmentedControlPattern';
-import type { WorkspaceView, UserRole } from '../WorkspaceSidebar';
-import type { ViewMode, ContentTypeFilter } from '../WorkspaceHeader';
+import SegmentedControlPattern from '@/components/workspace/SegmentedControlPattern';
+import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from '@/types/workspaceTypes';
 
 const mockT = (key: string) => key;
 

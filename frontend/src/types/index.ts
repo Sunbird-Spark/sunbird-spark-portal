@@ -49,3 +49,23 @@ export interface Notification {
   duration?: number;
   timestamp: Date;
 }
+
+export type {
+  WorkspaceView,
+  UserRole,
+  ViewMode,
+  SortOption,
+  ContentTypeFilter,
+  EditorOption,
+  EditorCategory,
+  WorkspaceSidebarCounts,
+  WorkspaceMenuItem,
+  WorkspaceSegment,
+  WorkspaceSecondaryAction,
+  EmptyStateVariant,
+  WorkspaceItem,
+  ContentSearchRequest,
+  ContentSearchItem,
+  ContentSearchResponse,
+  UseContentSearchOptions,
+} from './workspaceTypes';

@@ -7,12 +7,11 @@ import {
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
-import { type WorkspaceView, type UserRole } from "@/components/workspace/WorkspaceSidebar";
-import { type ViewMode, type SortOption, type ContentTypeFilter } from "@/components/workspace/WorkspaceHeader";
-import SegmentedControlPattern from "@/components/workspace/patterns/SegmentedControlPattern";
-import { type WorkspaceItem } from "@/types/contentTypes";
+import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
+import SegmentedControlPattern from "@/components/workspace/SegmentedControlPattern";
+import { type WorkspaceItem } from "@/types/workspaceTypes";
 import { useContentSearch } from "@/hooks/useContent";
-import { mapContentToWorkspaceItem } from "@/utils/workspaceUtils";
+import { mapContentToWorkspaceItem } from "@/services/workspace";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppI18n } from "@/hooks/useAppI18n";

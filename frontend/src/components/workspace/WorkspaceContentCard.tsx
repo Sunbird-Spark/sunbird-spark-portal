@@ -1,4 +1,4 @@
-import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiSend, FiBook, FiFileText, FiHelpCircle, FiFolder, FiClock, FiUser } from "react-icons/fi";
+import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiSend, FiClock, FiUser } from "react-icons/fi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,8 @@ import {
 } from "@/components/common/DropdownMenu";
 import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
-import { type WorkspaceItem } from "@/types/contentTypes";
+import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { CONTENT_TYPE_ICONS, CONTENT_TYPE_CARD_COLORS, STATUS_CONFIG } from "@/services/workspace";
 
 interface WorkspaceContentCardProps {
   item: WorkspaceItem;
@@ -18,26 +19,6 @@ interface WorkspaceContentCardProps {
   onSubmitReview: (id: string) => void;
 }
 
-const typeIcons: Record<WorkspaceItem['type'], typeof FiBook> = {
-  course: FiBook,
-  content: FiFileText,
-  quiz: FiHelpCircle,
-  collection: FiFolder,
-};
-
-const typeColors: Record<WorkspaceItem['type'], { bg: string; text: string }> = {
-  course: { bg: 'bg-sunbird-wave/10', text: 'text-sunbird-ink' },
-  content: { bg: 'bg-sunbird-ginger/10', text: 'text-sunbird-brick' },
-  quiz: { bg: 'bg-sunbird-lavender/10', text: 'text-sunbird-lavender' },
-  collection: { bg: 'bg-sunbird-moss/10', text: 'text-sunbird-forest' },
-};
-
-const statusConfig: Record<WorkspaceItem['status'], { label: string; bg: string; text: string; dot: string }> = {
-  draft: { label: 'Draft', bg: 'bg-muted', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
-  review: { label: 'In Review', bg: 'bg-sunbird-sunflower/20', text: 'text-sunbird-brick', dot: 'bg-sunbird-ginger' },
-  published: { label: 'Published', bg: 'bg-sunbird-moss/15', text: 'text-sunbird-forest', dot: 'bg-sunbird-moss' },
-};
-
 const WorkspaceContentCard = ({
   item,
   onEdit,
@@ -45,10 +26,9 @@ const WorkspaceContentCard = ({
   onView,
   onSubmitReview,
 }: WorkspaceContentCardProps) => {
-  const TypeIcon = typeIcons[item.type];
-  const colors = typeColors[item.type];
-  const status = statusConfig[item.status];
-
+  const TypeIcon = CONTENT_TYPE_ICONS[item.type];
+  const colors = CONTENT_TYPE_CARD_COLORS[item.type];
+  const status = STATUS_CONFIG[item.status];
   const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
   return (
@@ -70,7 +50,7 @@ const WorkspaceContentCard = ({
         {/* Status Badge */}
         <div className="absolute top-3 left-3">
           <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik", status.bg, status.text)}>
-            <span className={cn("w-1.5 h-1.5 rounded-full", status.dot)} />
+            {status.dot ? <span className={cn("w-1.5 h-1.5 rounded-full", status.dot)} /> : null}
             {status.label}
           </div>
         </div>

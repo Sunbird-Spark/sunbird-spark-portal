@@ -9,10 +9,8 @@ import {
 } from '@/components/common/DropdownMenu';
 import { cn } from '@/lib/utils';
 import { useAppI18n } from '@/hooks/useAppI18n';
-
-export type ViewMode = 'grid' | 'list';
-export type SortOption = 'updated' | 'created' | 'title';
-export type ContentTypeFilter = 'all' | 'course' | 'content' | 'quiz' | 'collection';
+import { getSortLabels, getTypeLabels } from '@/services/workspace';
+import type { ViewMode, SortOption, ContentTypeFilter } from '@/types/workspaceTypes';
 
 interface WorkspaceHeaderProps {
   title: string;
@@ -45,19 +43,8 @@ const WorkspaceHeader = ({
 }: WorkspaceHeaderProps) => {
   const { t } = useAppI18n();
 
-  const sortLabels: Record<SortOption, string> = {
-    updated: t('lastUpdated'),
-    created: t('dateCreated'),
-    title: t('titleAZ'),
-  };
-
-  const typeLabels: Record<ContentTypeFilter, string> = {
-    all: t('allTypes'),
-    course: t('course'),
-    content: t('content'),
-    quiz: t('quiz'),
-    collection: t('collection'),
-  };
+  const sortLabels = getSortLabels(t);
+  const typeLabels = getTypeLabels(t);
 
   return (
     <div className="space-y-4 mb-6">

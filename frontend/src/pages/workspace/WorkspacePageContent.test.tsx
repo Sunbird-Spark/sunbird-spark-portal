@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspacePageContent from './WorkspacePageContent';
-import type { WorkspaceItem } from '@/types/contentTypes';
+import type { WorkspaceItem } from '@/types/workspaceTypes';
 
 const mockT = (key: string) => key;
 const defaultProps = {

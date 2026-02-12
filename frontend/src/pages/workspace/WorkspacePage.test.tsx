@@ -46,7 +46,7 @@ vi.mock('@/components/home/Footer', () => ({ default: () => <footer data-testid=
 
 vi.mock('@/components/common/PageLoader', () => ({ default: ({ message }: { message: string }) => <div>{message}</div> }));
 
-vi.mock('@/components/workspace/patterns/SegmentedControlPattern', () => ({
+vi.mock('@/components/workspace/SegmentedControlPattern', () => ({
   default: ({
     onCreateClick,
     onViewChange,

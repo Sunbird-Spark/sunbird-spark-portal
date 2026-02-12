@@ -1,40 +1,14 @@
-import {
-  FiPlus,
-  FiFolder,
-  FiEdit,
-  FiSend,
-  FiCheckCircle,
-  FiUpload,
-  FiUsers,
-  FiEye,
-  FiClipboard,
-} from 'react-icons/fi';
+import { FiEdit, FiEye } from 'react-icons/fi';
 import { Badge } from '@/components/common/Badge';
 import { cn } from '@/lib/utils';
 import { useAppI18n } from '@/hooks/useAppI18n';
-
-export type WorkspaceView =
-  | 'create'
-  | 'all'
-  | 'drafts'
-  | 'review'
-  | 'published'
-  | 'uploads'
-  | 'collaborations'
-  | 'pending-review'
-  | 'my-published';
-export type UserRole = 'creator' | 'reviewer';
+import { getCreatorMenuItems, getReviewerMenuItems } from '@/services/workspace';
+import type { WorkspaceView, UserRole, WorkspaceSidebarCounts } from '@/types/workspaceTypes';
 
 interface WorkspaceSidebarProps {
   activeView: WorkspaceView;
   onViewChange: (view: WorkspaceView) => void;
-  counts: {
-    drafts: number;
-    review: number;
-    published: number;
-    all: number;
-    pendingReview?: number;
-  };
+  counts: WorkspaceSidebarCounts;
   userRole: UserRole;
   onRoleChange: (role: UserRole) => void;
 }
@@ -48,37 +22,10 @@ const WorkspaceSidebar = ({
 }: WorkspaceSidebarProps) => {
   const { t } = useAppI18n();
 
-  const creatorMenuItems = [
-    { id: 'create' as const, label: t('createNew'), icon: FiPlus, highlight: true },
-    { id: 'all' as const, label: t('allMyContent'), icon: FiFolder, count: counts.all },
-    { id: 'drafts' as const, label: t('drafts'), icon: FiEdit, count: counts.drafts },
-    { id: 'review' as const, label: t('submittedForReview'), icon: FiSend, count: counts.review },
-    {
-      id: 'published' as const,
-      label: t('published'),
-      icon: FiCheckCircle,
-      count: counts.published,
-    },
-    { id: 'uploads' as const, label: t('allUploads'), icon: FiUpload },
-    { id: 'collaborations' as const, label: t('collaborations'), icon: FiUsers },
-  ];
-
-  const reviewerMenuItems = [
-    {
-      id: 'pending-review' as const,
-      label: 'Pending Review',
-      icon: FiClipboard,
-      count: counts.pendingReview ?? 0,
-    },
-    {
-      id: 'my-published' as const,
-      label: 'Published by Me',
-      icon: FiCheckCircle,
-      count: counts.published,
-    },
-  ];
-
-  const menuItems = userRole === 'creator' ? creatorMenuItems : reviewerMenuItems;
+  const menuItems =
+    userRole === 'creator'
+      ? getCreatorMenuItems(counts, t)
+      : getReviewerMenuItems(counts);
 
   return (
     <div className="space-y-5">

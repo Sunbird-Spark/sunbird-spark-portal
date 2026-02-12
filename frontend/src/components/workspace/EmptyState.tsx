@@ -1,6 +1,8 @@
 import { FiPlus, FiInbox } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import { IconType } from "react-icons";
+import { EMPTY_STATE_VARIANT_STYLES } from "@/services/workspace";
+import type { EmptyStateVariant } from "@/types/workspaceTypes";
 
 interface EmptyStateProps {
   title: string;
@@ -8,7 +10,7 @@ interface EmptyStateProps {
   actionLabel?: string;
   onAction?: () => void;
   icon?: IconType;
-  variant?: 'default' | 'uploads' | 'collaborations' | 'search';
+  variant?: EmptyStateVariant;
 }
 
 const EmptyState = ({
@@ -19,30 +21,7 @@ const EmptyState = ({
   icon: Icon = FiInbox,
   variant = 'default',
 }: EmptyStateProps) => {
-  const variantStyles = {
-    default: {
-      iconBg: 'bg-muted',
-      iconColor: 'text-muted-foreground',
-      buttonBg: 'bg-sunbird-ginger hover:bg-sunbird-brick',
-    },
-    uploads: {
-      iconBg: 'bg-sunbird-ginger/10',
-      iconColor: 'text-sunbird-ginger',
-      buttonBg: 'bg-sunbird-ginger hover:bg-sunbird-brick',
-    },
-    collaborations: {
-      iconBg: 'bg-sunbird-wave/10',
-      iconColor: 'text-sunbird-wave',
-      buttonBg: 'bg-sunbird-wave hover:bg-sunbird-ink',
-    },
-    search: {
-      iconBg: 'bg-sunbird-lavender/10',
-      iconColor: 'text-sunbird-lavender',
-      buttonBg: 'bg-sunbird-ginger hover:bg-sunbird-brick',
-    },
-  };
-
-  const styles = variantStyles[variant];
+  const styles = EMPTY_STATE_VARIANT_STYLES[variant];
 
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-white rounded-[1.25rem] shadow-sm border border-border">

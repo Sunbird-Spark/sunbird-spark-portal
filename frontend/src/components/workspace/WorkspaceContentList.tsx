@@ -1,4 +1,4 @@
-import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiSend, FiBook, FiFileText, FiHelpCircle, FiFolder, FiClock } from "react-icons/fi";
+import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiSend, FiClock } from "react-icons/fi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,8 @@ import {
 } from "@/components/common/DropdownMenu";
 import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
-import { type WorkspaceItem } from "@/types/contentTypes";
+import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { CONTENT_TYPE_ICONS, CONTENT_TYPE_COLORS, STATUS_CONFIG } from "@/services/workspace";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
@@ -17,26 +18,6 @@ interface WorkspaceContentListProps {
   onView: (id: string) => void;
   onSubmitReview: (id: string) => void;
 }
-
-const typeIcons: Record<WorkspaceItem['type'], typeof FiBook> = {
-  course: FiBook,
-  content: FiFileText,
-  quiz: FiHelpCircle,
-  collection: FiFolder,
-};
-
-const typeColors: Record<WorkspaceItem['type'], string> = {
-  course: 'text-sunbird-ink bg-sunbird-wave/10',
-  content: 'text-sunbird-brick bg-sunbird-ginger/10',
-  quiz: 'text-sunbird-lavender bg-sunbird-lavender/10',
-  collection: 'text-sunbird-forest bg-sunbird-moss/10',
-};
-
-const statusConfig: Record<WorkspaceItem['status'], { label: string; bg: string; text: string }> = {
-  draft: { label: 'Draft', bg: 'bg-muted', text: 'text-muted-foreground' },
-  review: { label: 'In Review', bg: 'bg-sunbird-sunflower/20', text: 'text-sunbird-brick' },
-  published: { label: 'Published', bg: 'bg-sunbird-moss/15', text: 'text-sunbird-forest' },
-};
 
 const WorkspaceContentList = ({
   items,
@@ -59,8 +40,8 @@ const WorkspaceContentList = ({
       {/* Table Body */}
       <div className="divide-y divide-border">
         {items.map((item) => {
-          const TypeIcon = typeIcons[item.type];
-          const status = statusConfig[item.status];
+          const TypeIcon = CONTENT_TYPE_ICONS[item.type];
+          const status = STATUS_CONFIG[item.status];
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
           return (
@@ -74,7 +55,7 @@ const WorkspaceContentList = ({
                   {item.thumbnail ? (
                     <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <div className={cn("w-full h-full flex items-center justify-center", typeColors[item.type])}>
+                    <div className={cn("w-full h-full flex items-center justify-center", CONTENT_TYPE_COLORS[item.type])}>
                       <TypeIcon className="w-4 h-4" />
                     </div>
                   )}
@@ -91,7 +72,7 @@ const WorkspaceContentList = ({
 
               {/* Type */}
               <div className="col-span-2 hidden sm:flex items-center gap-2">
-                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", typeColors[item.type])}>
+                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", CONTENT_TYPE_COLORS[item.type])}>
                   <TypeIcon className="w-3.5 h-3.5" />
                 </div>
                 <span className="text-sm text-foreground font-rubik capitalize">{item.type}</span>

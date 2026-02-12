@@ -9,8 +9,13 @@ import {
 } from "@/components/common/DropdownMenu";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { type WorkspaceView, type UserRole } from "../WorkspaceSidebar";
-import { type ViewMode, type ContentTypeFilter } from "../WorkspaceHeader";
+import {
+  getCreatorSegments,
+  getReviewerSegments,
+  getSecondaryActions,
+  shouldShowContentFilters,
+} from "@/services/workspace";
+import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
 
 interface SegmentedControlPatternProps {
   activeView: WorkspaceView;
@@ -41,25 +46,10 @@ const SegmentedControlPattern = ({
 }: SegmentedControlPatternProps) => {
   const { t } = useAppI18n();
 
-  const creatorSegments = [
-    { id: 'all' as const, label: 'All', count: counts.all },
-    { id: 'drafts' as const, label: 'Drafts', count: counts.drafts },
-    { id: 'review' as const, label: 'Review', count: counts.review },
-    { id: 'published' as const, label: 'Published', count: counts.published },
-  ];
-
-  const reviewerSegments = [
-    { id: 'pending-review' as const, label: 'Pending', count: counts.pendingReview ?? 0 },
-    { id: 'my-published' as const, label: 'Published', count: counts.published },
-  ];
-
-  const segments = userRole === 'creator' ? creatorSegments : reviewerSegments;
-  const showContentFilters = !['create', 'uploads', 'collaborations'].includes(activeView);
-
-  const secondaryActions = userRole === 'creator' ? [
-    { id: 'uploads' as const, label: 'Uploads' },
-    { id: 'collaborations' as const, label: 'Collaborations' },
-  ] : [];
+  const segments =
+    userRole === 'creator' ? getCreatorSegments(counts) : getReviewerSegments(counts);
+  const showContentFilters = shouldShowContentFilters(activeView);
+  const secondaryActions = getSecondaryActions(userRole);
 
   return (
     <div className="space-y-4 mb-6">

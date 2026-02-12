@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mapContentToWorkspaceItem } from './workspaceUtils';
+import { mapContentToWorkspaceItem } from './contentMapper';
 
-describe('workspaceUtils', () => {
+describe('contentMapper', () => {
   describe('mapContentToWorkspaceItem', () => {
     it('maps full ContentSearchItem to WorkspaceItem with all fields', () => {
       const item = {

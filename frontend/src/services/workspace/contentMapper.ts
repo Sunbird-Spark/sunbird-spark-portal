@@ -1,4 +1,4 @@
-import type { ContentSearchItem, WorkspaceItem } from '@/types/contentTypes';
+import type { ContentSearchItem, WorkspaceItem } from '../../types/workspaceTypes';
 
 const STATUS_MAP: Record<string, WorkspaceItem['status']> = {
   Draft: 'draft',

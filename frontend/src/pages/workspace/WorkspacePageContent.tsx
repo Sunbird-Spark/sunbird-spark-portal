@@ -3,7 +3,7 @@ import CreateOptions from "@/components/workspace/CreateOptions";
 import WorkspaceContentCard from "@/components/workspace/WorkspaceContentCard";
 import WorkspaceContentList from "@/components/workspace/WorkspaceContentList";
 import EmptyState from "@/components/workspace/EmptyState";
-import { type WorkspaceItem } from "@/types/contentTypes";
+import { type WorkspaceItem } from "@/types/workspaceTypes";
 
 interface WorkspacePageContentProps {
   showCreateModal: boolean;

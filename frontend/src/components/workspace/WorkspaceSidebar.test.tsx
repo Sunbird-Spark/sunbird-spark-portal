@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceSidebar from './WorkspaceSidebar';
-import type { WorkspaceView, UserRole } from './WorkspaceSidebar';
+import type { WorkspaceView, UserRole } from '@/types/workspaceTypes';
 
 const mockT = (key: string) => key;
 
