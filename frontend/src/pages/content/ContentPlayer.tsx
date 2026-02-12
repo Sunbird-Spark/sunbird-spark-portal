@@ -1,69 +1,44 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { FiArrowLeft, FiPlay, FiArrowRight, FiStar, FiShare2 } from "react-icons/fi";
+import { useParams, useNavigate } from "react-router-dom";
+import { FiArrowLeft, FiPlay, FiStar, FiShare2 } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
-
-// Import resource images
-import resourceRobotHand from "@/assets/resource-robot-hand1.svg";
-import resourceHacker from "@/assets/resource-hacker.svg";
-import resourceRobot from "@/assets/resource-robot.svg";
-import resourceTextBook from "@/assets/resource-text-book.svg"
-
-// Mock content data
-const contentData = {
-  id: "1",
-  title: "The AI Engineer Introduction",
-  rating: 4.5,
-  learners: "9k",
-  lessons: 25,
-  image: resourceRobotHand,
-  currentWeek: "Week 1: Foundation & Basics",
-  relatedContent: [
-    {
-      id: "r-1",
-      title: "The AI Engineer Course 2026: Complete AI Engineer Bootcamp",
-      type: "Course",
-      image: resourceRobot,
-      rating: 4.5,
-      learners: "9k",
-      lessons: 25,
-    },
-    {
-      id: "r-2",
-      title: "Generative AI for Cybersecurity Professionals",
-      type: "PDF",
-      image: resourceHacker,
-      isResource: true,
-    },
-    {
-      id: "r-3",
-      title: "Data Engineering Foundations",
-      type: "Textbook",
-      image: resourceTextBook,
-      rating: 4.5,
-      learners: "9k",
-      lessons: 25,
-    },
-  ],
-};
+import RelatedCourseCard from "@/components/content/RelatedCourseCard";
+import RelatedResourceCard from "@/components/content/RelatedResourceCard";
+import { fetchContentById } from "@/services/contentPlayerService";
+import { ContentData } from "@/types/contentTypes";
 
 const ContentPlayer = () => {
   const { contentId } = useParams();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [contentData, setContentData] = useState<ContentData | null>(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
+    const loadContent = async () => {
+      if (!contentId) return;
+      
+      setIsLoading(true);
+      try {
+        const data = await fetchContentById(contentId);
+        setContentData(data);
+      } catch (error) {
+        console.error('Failed to load content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadContent();
   }, [contentId]);
 
   if (isLoading) {
     return <PageLoader message="Loading content..." />;
+  }
+
+  if (!contentData) {
+    return <div>Content not found</div>;
   }
 
   return (
@@ -105,7 +80,6 @@ const ContentPlayer = () => {
         <div className="content-player-video-container">
           <div className="content-player-video-wrapper">
             <div className="content-player-video-relative">
-
               {/* Video Thumbnail */}
               <div className="content-player-video-thumbnail">
                 <img src={contentData.image} alt={contentData.title} className="content-player-video-image" />
@@ -123,7 +97,6 @@ const ContentPlayer = () => {
         <section>
           <div className="content-player-related-header">
             <h2 className="content-player-related-title">Related Content</h2>
-            <FiArrowRight className="content-player-related-arrow" />
           </div>
 
           <div className="content-player-related-grid">
@@ -135,20 +108,6 @@ const ContentPlayer = () => {
               ),
             )}
           </div>
-
-          {/* Carousel Navigation */}
-          <div className="content-player-carousel-nav">
-            <button className="content-player-carousel-btn-prev">
-              <FiArrowLeft className="content-player-carousel-arrow-gray" />
-            </button>
-            <div className="content-player-carousel-indicators">
-              <div className="content-player-carousel-dot-active" />
-              <div className="content-player-carousel-dot-inactive" />
-            </div>
-            <button className="content-player-carousel-btn-next">
-              <FiArrowRight className="content-player-carousel-arrow-white" />
-            </button>
-          </div>
         </section>
       </main>
 
@@ -156,79 +115,5 @@ const ContentPlayer = () => {
     </div>
   );
 };
-
-// Related Content Cards
-interface RelatedItem {
-  id: string;
-  title: string;
-  type: string;
-  image: string;
-  isResource?: boolean;
-  rating?: number;
-  learners?: string;
-  lessons?: number;
-}
-
-const RelatedCourseCard = ({ item }: { item: RelatedItem }) => (
-  <Link to={`/content/${item.id}`} className="related-course-card-link">
-    <div className="related-course-card-container">
-      <div className="related-course-card-image-container">
-        <img
-          src={item.image}
-          alt={item.title}
-          className="related-course-card-image"
-        />
-      </div>
-      <div className="related-course-card-content">
-        <span className="related-course-card-type-badge">
-          {item.type}
-        </span>
-        <h3 className="related-course-card-title">
-          {item.title}
-        </h3>
-        <div className="related-course-card-stats">
-          <span className="related-course-card-rating">
-            {item.rating}
-            <FiStar className="related-course-card-star" />
-          </span>
-          <span className="related-course-card-separator">•</span>
-          <span>{item.learners} Learners</span>
-          <span className="related-course-card-separator">•</span>
-          <span>{item.lessons} Lessons</span>
-        </div>
-      </div>
-    </div>
-  </Link>
-);
-
-const RelatedResourceCard = ({ item }: { item: RelatedItem }) => (
-  <Link to={`/content/${item.id}`} className="related-resource-card-link">
-    <div className="related-resource-card-container">
-      <img
-        src={item.image}
-        alt={item.title}
-        className="related-resource-card-image"
-      />
-
-      {/* Type Badge */}
-      <div className="related-resource-card-badge-container">
-        <span className="related-resource-card-type-badge">
-          {item.type}
-        </span>
-      </div>
-
-      {/* Content */}
-      <div className="related-resource-card-content">
-        <h3 className="content-player-resource-title">
-          {item.title}
-        </h3>
-        <p className="related-resource-card-subtitle">
-          See the Case Study
-          <FiArrowRight className="related-resource-card-arrow" />
-        </p>
-      </div>
-    </div>
-  </Link>
-);
 
 export default ContentPlayer;

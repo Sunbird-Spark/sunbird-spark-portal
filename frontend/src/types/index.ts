@@ -49,3 +49,6 @@ export interface Notification {
   duration?: number;
   timestamp: Date;
 }
+
+// Re-export content types
+export * from './contentTypes';

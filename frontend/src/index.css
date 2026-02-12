@@ -491,7 +491,6 @@
   }
 
   .content-player-video-container {
-    /* @apply max-w-4xl mx-auto mb-16; */
     width: 71.625rem;
     height: 41.313rem;
   }
@@ -529,7 +528,7 @@
   }
 
   .content-player-related-header {
-    @apply flex items-center gap-3 mb-6;
+    @apply flex items-center gap-3 mb-6 mt-12;
   }
 
   .content-player-related-title {
