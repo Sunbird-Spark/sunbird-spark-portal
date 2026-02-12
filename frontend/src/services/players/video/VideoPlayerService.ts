@@ -23,20 +23,14 @@ export class VideoPlayerService {
     metadata: VideoPlayerMetadata,
     contextProps?: VideoPlayerContextProps
   ): Promise<VideoPlayerConfig> {
-    console.log('[VideoPlayerService] Creating config for:', metadata.identifier);
-    
-    // Get session and user info from auth service
+ // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
     const uid = userAuthInfoService.getUserId() || 'anonymous';
-    
-    console.log('[VideoPlayerService] Session ID:', sid, sid.startsWith('session-') ? '(fallback)' : '(from service)');
-    console.log('[VideoPlayerService] User ID:', uid, uid === 'anonymous' ? '(fallback)' : '(from service)');
 
     // Get device ID from AppCoreService (backend) with fallback
     let did = `device-${Date.now()}`;
     try {
       did = await appCoreService.getDeviceId();
-      console.log('[VideoPlayerService] Device ID:', did, '(from AppCoreService)');
     } catch (error) {
       console.warn('[VideoPlayerService] Failed to fetch device ID, using fallback:', did, error);
     }
@@ -52,8 +46,7 @@ export class VideoPlayerService {
       const org = orgResponse?.data?.result?.response?.content?.[0];
       if (org?.channel) {
         channel = org.channel;
-        console.log('[VideoPlayerService] Channel:', channel, '(from OrganizationService)');
-      } else {
+     } else {
         console.warn('[VideoPlayerService] Channel not found from org service, using random fallback:', channel);
       }
     } catch (error) {
@@ -87,20 +80,6 @@ export class VideoPlayerService {
       config: {},
       metadata,
     };
-
-    console.log('[VideoPlayerService] Final config created:', {
-      context: {
-        mode: context.mode,
-        sid: context.sid,
-        did: context.did,
-        uid: context.uid,
-        channel: context.channel,
-      },
-      metadata: {
-        identifier: metadata.identifier,
-        name: metadata.name,
-      }
-    });
 
     return finalConfig;
   }

@@ -3,7 +3,6 @@ import { VideoPlayerService } from './VideoPlayerService';
 import type { VideoPlayerMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
 
 // Mock the services
 vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
