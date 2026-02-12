@@ -41,6 +41,15 @@ const qumlWebComponentRoot = path.join(
 );
 const qumlAssetsSource = path.join(qumlWebComponentRoot, 'assets/quml-player');
 const qumlFinalDest = path.join(publicRoot, 'assets/quml-player');
+const qumlLegacyPlayerFile = path.join(publicRoot, 'assets', 'sunbird-quml-player.js');
+
+// QUML Editor paths
+const qumlEditorWebComponentRoot = path.join(
+    __dirname,
+    'node_modules/@project-sunbird/sunbird-questionset-editor-web-component'
+);
+const qumlEditorAssetsSource = path.join(qumlEditorWebComponentRoot, 'assets/quml-editor');
+const qumlEditorFinalDest = path.join(publicRoot, 'assets/quml-editor');
 
 /**
  * Recursively copy directory
@@ -105,8 +114,24 @@ try {
     fs.mkdirSync(qumlFinalDest, { recursive: true });
     console.log('📦 Copying QUML player files to public/assets/quml-player/...');
     copyDirectory(qumlAssetsSource, qumlFinalDest);
+    // Also place legacy player file at /assets/sunbird-quml-player.js to satisfy older loader paths
+    const playerBundle = path.join(qumlFinalDest, 'sunbird-quml-player.js');
+    if (fs.existsSync(playerBundle)) {
+        fs.copyFileSync(playerBundle, qumlLegacyPlayerFile);
+        console.log('✅ Copied legacy sunbird-quml-player.js to public/assets/');
+    }
 
-    // 6. Copy COMMON assets (icons) to root assets folder
+    // 6. Copy QUML Editor assets (if package is installed)
+    if (fs.existsSync(qumlEditorWebComponentRoot)) {
+        console.log(`\n📂 QUML Editor Source: ${qumlEditorAssetsSource}`);
+        fs.mkdirSync(qumlEditorFinalDest, { recursive: true });
+        console.log('📦 Copying QUML editor files to public/assets/quml-editor/...');
+        copyDirectory(qumlEditorAssetsSource, qumlEditorFinalDest);
+    } else {
+        console.log('\n⚠️  QUML Editor package not found - skipping (install @project-sunbird/lib-questionset-editor when available)');
+    }
+
+    // 7. Copy COMMON assets (icons) to root assets folder
     // Many Sunbird components expect icons at /assets/*.svg
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
@@ -135,6 +160,7 @@ try {
     console.log(`📍 Video Player: public/assets/video-player/`);
     console.log(`📍 ePub Player: public/assets/epub-player/`);
     console.log(`📍 QUML Player: public/assets/quml-player/`);
+    console.log(`📍 QUML Editor: public/assets/quml-editor/`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {
