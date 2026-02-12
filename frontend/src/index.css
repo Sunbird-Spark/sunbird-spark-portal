@@ -429,6 +429,270 @@
     @apply absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center text-sunbird-gray-75 text-base bg-sunbird-light-blue;
   }
 
+  .content-player-container {
+    @apply py-6;
+    margin-left: 8rem;
+    margin-right: 8rem;
+  }
+
+  .content-player-resource-title {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  }
+
+  .content-player-resource-subtitle {
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  }
+
+
+  /* Content Player Component Styles */
+  .content-player-background {
+    @apply min-h-screen bg-gray-100;
+  }
+
+  .content-player-go-back {
+    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity font-rubik;
+  }
+
+  .content-player-back-arrow {
+    width: 1.125rem;
+    height: 0.686rem;
+  }
+
+  .content-player-title-row {
+    @apply flex items-start justify-between mb-2;
+  }
+
+  .content-player-title {
+    @apply font-rubik font-semibold text-[26px] leading-[38px] tracking-normal text-[#222222];
+  }
+
+  .content-player-share-btn {
+    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity font-rubik mx-2;
+  }
+
+  .content-player-share-icon {
+    @apply w-4 h-4;
+  }
+
+  .content-player-stats-row {
+    @apply flex items-center gap-2 text-sm text-muted-foreground mb-8 font-rubik;
+  }
+
+  .content-player-rating-container {
+    @apply flex items-center gap-1;
+  }
+
+  .content-player-star-icon {
+    @apply w-3.5 h-3.5 text-sunbird-brick fill-sunbird-brick;
+  }
+
+  .content-player-stats-separator {
+    @apply text-gray-300;
+  }
+
+  .content-player-video-container {
+    /* @apply max-w-4xl mx-auto mb-16; */
+    width: 71.625rem;
+    height: 41.313rem;
+  }
+
+  .content-player-video-wrapper {
+    @apply bg-white rounded-xl overflow-hidden border border-gray-100;
+  }
+
+  .content-player-video-relative {
+    @apply relative;
+  }
+
+  .content-player-week-label-container {
+    @apply absolute top-4 left-4 z-10;
+  }
+
+  .content-player-week-label {
+    @apply bg-sunbird-brick text-white text-sm font-medium px-4 py-2 rounded-md font-rubik;
+  }
+
+  .content-player-video-thumbnail {
+    @apply aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative;
+  }
+
+  .content-player-video-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .content-player-play-button {
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg;
+  }
+
+  .content-player-play-icon {
+    @apply w-6 h-6 text-sunbird-brick ml-1 fill-sunbird-brick;
+  }
+
+  .content-player-related-header {
+    @apply flex items-center gap-3 mb-6;
+  }
+
+  .content-player-related-title {
+    @apply text-xl font-semibold text-foreground font-rubik;
+  }
+
+  .content-player-related-arrow {
+    @apply w-5 h-5 text-sunbird-brick;
+  }
+
+  .content-player-related-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr;
+  }
+
+  .content-player-carousel-nav {
+    @apply flex items-center justify-center gap-3 mt-8;
+  }
+
+  .content-player-carousel-btn-prev {
+    @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors;
+  }
+
+  .content-player-carousel-btn-next {
+    @apply w-8 h-8 rounded-full bg-sunbird-brick flex items-center justify-center hover:bg-sunbird-brick/90 transition-colors;
+  }
+
+  .content-player-carousel-indicators {
+    @apply flex items-center gap-2;
+  }
+
+  .content-player-carousel-dot-active {
+    @apply w-6 h-1 bg-gray-800 rounded-full;
+  }
+
+  .content-player-carousel-dot-inactive {
+    @apply w-6 h-1 bg-gray-300 rounded-full;
+  }
+
+  .content-player-carousel-arrow {
+    @apply w-4 h-4;
+  }
+
+  .content-player-carousel-arrow-gray {
+    @apply w-4 h-4 text-gray-500;
+  }
+
+  .content-player-carousel-arrow-white {
+    @apply w-4 h-4 text-white;
+  }
+
+  /* Related Course Card Styles */
+  .related-course-card-link {
+    @apply h-full;
+  }
+
+  .related-course-card-link:hover .related-course-card-image {
+    @apply scale-105;
+  }
+
+  .content-player-resource-title {
+    @apply font-rubik font-medium text-[26px] leading-[38px] tracking-normal text-white font-semibold mb-2;
+  }
+
+  .related-resource-card-subtitle {
+    @apply font-rubik font-medium text-[16px] leading-[24px] tracking-normal text-[#FFFFFF] text-center;
+  }
+
+  .related-course-card-container {
+    @apply bg-white overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow flex flex-col;
+    width: 23.125rem;
+    height: 24.5rem;
+    border-radius: 1.25rem;
+  }
+
+  .related-course-card-image-container {
+    @apply aspect-[4/2] overflow-hidden flex items-center justify-center;
+  }
+
+  .related-course-card-image {
+    width: 20.625rem;
+    height: 10.125rem;
+    @apply object-cover object-center;
+  }
+
+  .related-course-card-content {
+    @apply p-4 flex-1 flex flex-col;
+  }
+
+  .related-course-card-type-badge {
+    @apply inline-block text-xs font-medium text-foreground bg-sunbird-beige-light border border-sunbird-ginger rounded-full px-3 py-1 mb-2 w-fit font-rubik;
+  }
+
+  .related-course-card-title {
+    @apply font-rubik font-medium text-[20px] leading-[28px] tracking-normal text-foreground mb-3 line-clamp-2 flex-1;
+  }
+
+  .related-course-card-stats {
+    @apply flex items-center gap-2 text-xs text-muted-foreground font-rubik;
+  }
+
+  .related-course-card-rating {
+    @apply flex items-center gap-1;
+  }
+
+  .related-course-card-star {
+    @apply w-3 h-3 text-amber-400 fill-amber-400;
+  }
+
+  .related-course-card-separator {
+    @apply text-gray-300;
+  }
+
+  /* Related Resource Card Styles */
+  .related-resource-card-link {
+    @apply h-full;
+  }
+
+  .related-resource-card-link:hover .related-resource-card-image {
+    @apply scale-105;
+  }
+
+  .related-resource-card-container {
+    /* @apply rounded-xl overflow-hidden relative min-h-[240px]; */
+    position: relative;
+    width: 23.125rem;
+    height: 24.5rem;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    background-color: black;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .related-resource-card-image {
+    /* @apply absolute inset-0 w-full h-full object-cover block transition-transform duration-300; */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .related-resource-card-badge-container {
+    @apply absolute top-4 left-4;
+  }
+
+  .related-resource-card-type-badge {
+    @apply inline-block bg-white text-foreground text-xs font-medium px-3 py-1.5 rounded-md font-rubik;
+  }
+
+  .related-resource-card-content {
+    @apply absolute inset-x-0 bottom-0 p-4;
+  }
+
+  .related-resource-card-subtitle {
+    @apply text-white/90 text-sm font-medium flex items-center gap-2 font-rubik content-player-resource-subtitle;
+  }
+
+  .related-resource-card-arrow {
+    @apply w-3.5 h-3.5;
+  }
 
 }
 
