@@ -91,9 +91,13 @@ export class EpubPlayerService {
 
   /**
    * Load EPUB player styles dynamically (only once)
+   * Checks for existing style element to prevent race conditions
    */
   private loadStyles(): void {
-    if (EpubPlayerService.stylesLoaded) {
+    // Check if styles already exist in the DOM (prevents race conditions)
+    const existingStyles = document.querySelector('[data-epub-player-styles="true"]');
+    if (existingStyles || EpubPlayerService.stylesLoaded) {
+      EpubPlayerService.stylesLoaded = true;
       return;
     }
 

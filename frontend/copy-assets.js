@@ -46,7 +46,11 @@ const qumlFinalDest = path.join(publicRoot, 'assets/quml-player');
  * Recursively copy directory
  */
 function copyDirectory(src, dest) {
-    if (!fs.existsSync(src)) return;
+    if (!fs.existsSync(src)) {
+        throw new Error(
+            `Source directory "${src}" does not exist. This may indicate a missing npm package or an incorrect path.`
+        );
+    }
     if (!fs.existsSync(dest)) {
         fs.mkdirSync(dest, { recursive: true });
     }
@@ -107,13 +111,13 @@ try {
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
     // Copy PDF icons first
-    const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
-    for (const icon of pdfIcons) {
-        fs.copyFileSync(
-            path.join(pdfAssetsSource, icon),
-            path.join(publicRoot, 'assets', icon)
-        );
-    }
+    // const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
+    // for (const icon of pdfIcons) {
+    //     fs.copyFileSync(
+    //         path.join(pdfAssetsSource, icon),
+    //         path.join(publicRoot, 'assets', icon)
+    //     );
+    // }
 
     // Copy QUML icons second (this will override PDF icons if there are duplicates)
     const qumlIconsDir = path.join(qumlAssetsSource, 'assets');
@@ -128,7 +132,6 @@ try {
     }
 
     console.log('\n✅ Assets consolidated successfully!');
-    console.log(`📍 PDF Player: public/assets/pdf-player/`);
     console.log(`📍 Video Player: public/assets/video-player/`);
     console.log(`📍 ePub Player: public/assets/epub-player/`);
     console.log(`📍 QUML Player: public/assets/quml-player/`);
