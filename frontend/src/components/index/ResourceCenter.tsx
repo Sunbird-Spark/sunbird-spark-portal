@@ -23,7 +23,13 @@ const ResourceCenter = () => {
         <section className="pt-[60px] pb-16 bg-[#FFF1C7]">
             <div className="w-full pl-[127px] pr-[127px]">
 
-
+                <div className="flex items-center justify-center gap-4 mb-2">
+                    <div className="h-[1px] w-[100px] bg-[#333333]"></div>
+                    <span className="font-rubik font-normal text-[16px] leading-[24px] tracking-normal text-[#333333]">
+                        Resource Center
+                    </span>
+                    <div className="h-[1px] w-[100px] bg-[#333333]"></div>
+                </div>
                 <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-[#333333] text-center mb-10 md:mb-14">
                     {t("resource.title")}
                 </h2>
@@ -48,7 +54,7 @@ const ResourceCenter = () => {
                     </div>
 
                     {/* Column 2 - Middle: Short top (PDF), Tall bottom (Video) */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4">
                         <ResourceCardComponent
                             id="2"
                             title="Data Engineering Foundations"
@@ -66,7 +72,7 @@ const ResourceCenter = () => {
                     </div>
 
                     {/* Column 3 - Right: Tall top (HTML), Short bottom (Video) */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4">
                         <ResourceCardComponent
                             id="3"
                             title="Generative AI for Cybersecurity Professionals"
