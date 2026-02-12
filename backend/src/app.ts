@@ -71,15 +71,6 @@ app.get('/portal/auth/callback',
     sessionMiddleware,
     // Add debug logging
     (req: Request, res: Response, next: express.NextFunction) => {
-        logger.info('DEBUG: /portal/auth/callback hit ' + JSON.stringify({
-            url: req.url,
-            query: req.query,
-            sessionID: req.sessionID,
-            cookie: req.headers.cookie,
-            hasSession: !!req.session,
-            hasKauth: !!_.get(req, 'kauth')
-        }));
-
         // Edge case: keycloak-connect might fail if auth_callback is present but no code/state
         // and no session. Redirect to login to restart flow.
         if (req.query.auth_callback && !req.query.code && !_.get(req, 'kauth.grant')) {
