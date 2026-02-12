@@ -45,29 +45,49 @@ app.get('/app/v1/info', getAppInfo);
 
 app.get('/portal/login',
     sessionMiddleware,
-    keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
-    keycloak.protect(),
     (req: Request, res: Response) => {
-        // This handler will only be reached if the user is already authenticated
-        // OR if they just logged in and Keycloak redirected them back here.
-        // However, keycloak-connect often redirects to the "clean" URL after login.
-        // To be safe, we just redirect to home if we get here.
-        res.redirect('/home');
+        logger.info('DEBUG: /portal/login hit ' + JSON.stringify({
+            url: req.url,
+            query: req.query,
+            sessionID: req.sessionID,
+            cookie: req.headers.cookie,
+            hasSession: !!req.session,
+            hasKauth: !!_.get(req, 'kauth')
+        }));
+
+        // If already authenticated, go home
+        if (req.session && _.get(req, 'kauth.grant')) {
+            logger.info('User already authenticated, redirecting to home');
+            return res.redirect('/home');
+        }
+
+        // Otherwise start login flow -> redirect to protected callback
+        logger.info('Redirecting to /portal/auth/callback for login');
+        res.redirect('/portal/auth/callback');
     }
 );
 
-// New route to handle the actual post-login logic if needed,
-// but for now, let's try to rely on the fact that once logged in,
-// the user hits /portal/login again and falls through to the handler above.
-//
-// WAIT. The issue is that the handler above WAS NOT HIT.
-//
-// Let's try a different approach:
-// 1. /portal/login -> simple redirect to a protected route /portal/auth/callback
-// 2. /portal/auth/callback -> protected -> runs our logic -> redirects to /home
-
 app.get('/portal/auth/callback',
     sessionMiddleware,
+    // Add debug logging
+    (req: Request, res: Response, next: express.NextFunction) => {
+        logger.info('DEBUG: /portal/auth/callback hit ' + JSON.stringify({
+            url: req.url,
+            query: req.query,
+            sessionID: req.sessionID,
+            cookie: req.headers.cookie,
+            hasSession: !!req.session,
+            hasKauth: !!_.get(req, 'kauth')
+        }));
+
+        // Edge case: keycloak-connect might fail if auth_callback is present but no code/state
+        // and no session. Redirect to login to restart flow.
+        if (req.query.auth_callback && !req.query.code && !_.get(req, 'kauth.grant')) {
+            logger.warn('Detected auth_callback without code and no session. Restarting login flow.');
+            return res.redirect('/portal/login');
+        }
+        next();
+    },
     keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
     keycloak.protect(),
     async (req: Request, res: Response) => {
@@ -90,6 +110,7 @@ app.get('/portal/auth/callback',
                     }
                 }
 
+                logger.info('Session setup complete, redirecting to /home');
                 res.redirect('/home');
             } catch (err) {
                 logger.error('Error generating session on login', err);
