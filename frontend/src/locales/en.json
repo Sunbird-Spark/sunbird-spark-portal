@@ -1,4 +1,8 @@
 {
+  "header": {
+    "search": "Search for content",
+    "login": "Log In"
+  },
   "loading": "Loading...",
   "error": "An error occurred",
   "success": "Success",

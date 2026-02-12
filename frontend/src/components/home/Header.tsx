@@ -35,22 +35,20 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)]">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-[4.5rem] pl-[3.75rem] pr-[7.9375rem]">
+      <div className="container mx-auto px-0">
+        <div className="flex items-center justify-between h-16 md:h-[4.5rem] px-4 lg:pl-[3.75rem] lg:pr-[7.9375rem]">
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
               src={sunbirdLogo}
               alt="Sunbird"
-              className="h-8 w-auto"
-              style={{ paddingRight: 0, width: '13.1875rem' }}
+              className="h-8 w-auto md:w-[13.1875rem]"
+              style={{ paddingRight: 0 }}
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8" style={{
-            paddingRight: '5rem',
-          }}>
+          <nav className="hidden md:flex items-center gap-8 lg:pr-20">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -135,6 +133,37 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+
+            <div className="pt-2 flex flex-col gap-4">
+              {/* Search */}
+              <button
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-sunbird-brick"
+                onClick={() => {
+                  navigate("/search");
+                  setIsMenuOpen(false);
+                }}
+              >
+                <FiSearch className="w-5 h-5" />
+                <span>{t("header.search")}</span>
+              </button>
+
+              {/* Language */}
+              <div className="flex items-center gap-2">
+                <img src={translationIcon} alt="Language" className="w-5 h-5" />
+                <select
+                  className="bg-transparent text-sm font-medium text-gray-600 focus:outline-none"
+                  value={currentCode}
+                  onChange={(e) => changeLanguage(e.target.value as any)}
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <hr />
             <Button
               onClick={() => {

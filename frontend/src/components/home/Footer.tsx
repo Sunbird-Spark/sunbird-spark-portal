@@ -18,7 +18,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-sunbird-footer-bg font-rubik">
-      <div className="w-full py-[2.5rem] px-6 md:px-12 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
+      <div className="w-full py-[2.5rem] px-4 md:px-12 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-6 pb-[1.875rem] ">
           {/* Logo */}
           <div className="shrink-0">
@@ -26,7 +26,7 @@ const Footer = () => {
               <img
                 src={sunbirdLogo}
                 alt="Sunbird"
-                className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-[5rem]"
+                className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-0 lg:pr-[5rem]"
               />
             </Link>
           </div>

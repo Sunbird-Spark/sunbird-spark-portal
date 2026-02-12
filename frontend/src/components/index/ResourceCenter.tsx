@@ -21,14 +21,14 @@ const ResourceCenter = () => {
 
     return (
         <section className="pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7]">
-            <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
+            <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
 
                 <div className="flex items-center justify-center gap-4 mb-[1.25rem]">
-                    <div className="h-[0.0625rem] w-[6.25rem] bg-[#333333]"></div>
+                    <div className="h-[0.0625rem] w-12 lg:w-[6.25rem] bg-[#333333]"></div>
                     <span className="font-rubik font-normal text-[1rem] leading-[1.5rem] tracking-normal text-[#333333]">
                         {t("resource.header")}
                     </span>
-                    <div className="h-[0.0625rem] w-[6.25rem] bg-[#333333]"></div>
+                    <div className="h-[0.0625rem] w-12 lg:w-[6.25rem] bg-[#333333]"></div>
                 </div>
                 <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-[#333333] text-center mb-[1.25rem]">
                     {t("resource.title")}
@@ -114,7 +114,7 @@ const ResourceCardComponent = ({
     };
 
     return (
-        <Link to={`/collection/${id}`} className="block group w-[22.5rem]">
+        <Link to={`/collection/${id}`} className="block group w-full max-w-[22.5rem] mx-auto md:mx-0">
             <div className={`relative w-full ${heightClass} rounded-[1.25rem] overflow-hidden`}>
                 {/* Background Image Container */}
                 <div className="absolute inset-0">
