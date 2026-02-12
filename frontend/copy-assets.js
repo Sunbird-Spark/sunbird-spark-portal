@@ -139,5 +139,5 @@ try {
 
 } catch (error) {
     console.error('❌ Error consolidating assets:', error.message);
-    process.exit(0);
+    process.exit(1);
 }
