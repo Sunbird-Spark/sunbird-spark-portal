@@ -1,6 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { FiUpload, FiUsers } from "react-icons/fi";
-
 import {
   Sheet,
   SheetContent,
@@ -10,11 +8,7 @@ import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import { type WorkspaceView, type UserRole } from "@/components/workspace/WorkspaceSidebar";
-import CreateOptions from "@/components/workspace/CreateOptions";
-import WorkspaceContentCard from "@/components/workspace/WorkspaceContentCard";
-import WorkspaceContentList from "@/components/workspace/WorkspaceContentList";
 import { type ViewMode, type SortOption, type ContentTypeFilter } from "@/components/workspace/WorkspaceHeader";
-import EmptyState from "@/components/workspace/EmptyState";
 import SegmentedControlPattern from "@/components/workspace/patterns/SegmentedControlPattern";
 import { type WorkspaceItem } from "@/types/contentTypes";
 import { useContentSearch } from "@/hooks/useContent";
@@ -23,8 +17,9 @@ import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import WorkspacePageHeader from "./WorkspacePageHeader";
+import WorkspacePageContent from "./WorkspacePageContent";
+import CreateContentModal from "./CreateContentModal";
 import "../home/home.css";
-import CreateContentModal from "@/pages/workspace/CreateContentModal";
 
 const WorkspacePage = () => {
   const isMobile = useIsMobile();
@@ -142,83 +137,7 @@ const WorkspacePage = () => {
     void refetch();
   };
 
-  const handleCreateClick = () => {
-    setShowCreateModal(true);
-  };
-
-  const renderContent = () => {
-    // Create modal/view
-    if (showCreateModal || activeView === 'create') {
-      return (
-        <div className="bg-white rounded-[20px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100/80">
-          <CreateOptions onOptionSelect={handleCreateOption} />
-        </div>
-      );
-    }
-
-    // Uploads empty state
-    if (activeView === 'uploads') {
-      return (
-        <EmptyState
-          title={t('noUploadsYet')}
-          description={t('uploadHere')}
-          actionLabel={t('uploadContent')}
-          onAction={() => handleCreateOption('upload-content')}
-          icon={FiUpload}
-          variant="uploads"
-        />
-      );
-    }
-
-    // Collaborations empty state
-    if (activeView === 'collaborations') {
-      return (
-        <EmptyState
-          title={t('noCollaborations')}
-          description={t('sharedWithYou')}
-          icon={FiUsers}
-          variant="collaborations"
-        />
-      );
-    }
-
-    // Empty results
-    if (filteredItems.length === 0) {
-      return (
-        <EmptyState
-          title={searchQuery ? t('noContentFound') : t('createFirst')}
-          description={searchQuery ? t('tryAdjusting') : t('createFirst')}
-          actionLabel={!searchQuery ? t('createContent') : undefined}
-          onAction={!searchQuery ? handleCreateClick : undefined}
-          variant={searchQuery ? 'search' : 'default'}
-        />
-      );
-    }
-
-    // Content grid or list
-    return viewMode === 'grid' ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-        {filteredItems.map(item => (
-          <WorkspaceContentCard
-            key={item.id}
-            item={item}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onView={handleView}
-            onSubmitReview={handleSubmitReview}
-          />
-        ))}
-      </div>
-    ) : (
-      <WorkspaceContentList
-        items={filteredItems}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onView={handleView}
-        onSubmitReview={handleSubmitReview}
-      />
-    );
-  };
+  const handleCreateClick = () => setShowCreateModal(true);
 
   const navigationProps = {
     activeView,
@@ -287,7 +206,20 @@ const WorkspacePage = () => {
           <main className="flex-1 overflow-y-auto bg-[#F4F4F4]">
             <div className="home-content-wrapper">
               <SegmentedControlPattern {...navigationProps} />
-              {renderContent()}
+              <WorkspacePageContent
+                showCreateModal={showCreateModal}
+                activeView={activeView}
+                filteredItems={filteredItems}
+                viewMode={viewMode}
+                searchQuery={searchQuery}
+                t={t}
+                onCreateOption={handleCreateOption}
+                onCreateClick={handleCreateClick}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onView={handleView}
+                onSubmitReview={handleSubmitReview}
+              />
             </div>
           </main>
           <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
