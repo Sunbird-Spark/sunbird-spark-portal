@@ -14,8 +14,7 @@ export const sessionConfig: session.SessionOptions = {
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        // secure: !isLocal,
-        secure: false, // Force false for debugging
+        secure: !isLocal,
         maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
         sameSite: isLocal ? 'lax' : 'none'
     } as session.SessionOptions['cookie']
