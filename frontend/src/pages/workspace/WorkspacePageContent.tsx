@@ -10,7 +10,6 @@ interface WorkspacePageContentProps {
   activeView: string;
   filteredItems: WorkspaceItem[];
   viewMode: 'grid' | 'list';
-  searchQuery: string;
   t: (key: string) => string;
   onCreateOption: (optionId: string) => void;
   onCreateClick: () => void;
@@ -25,7 +24,6 @@ export default function WorkspacePageContent({
   activeView,
   filteredItems,
   viewMode,
-  searchQuery,
   t,
   onCreateOption,
   onCreateClick,
@@ -66,11 +64,11 @@ export default function WorkspacePageContent({
   if (filteredItems.length === 0) {
     return (
       <EmptyState
-        title={searchQuery ? t('noContentFound') : t('createFirst')}
-        description={searchQuery ? t('tryAdjusting') : t('createFirst')}
-        actionLabel={!searchQuery ? t('createContent') : undefined}
-        onAction={!searchQuery ? onCreateClick : undefined}
-        variant={searchQuery ? 'search' : 'default'}
+        title={t('createFirst')}
+        description={t('createFirst')}
+        actionLabel={t('createContent')}
+        onAction={onCreateClick}
+        variant="default"
       />
     );
   }
