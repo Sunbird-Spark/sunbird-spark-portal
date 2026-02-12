@@ -6,6 +6,11 @@ import { OrganizationService } from '../../OrganizationService';
 /**
  * Service for initializing and managing the Video Player.
  * Handles player creation, configuration, and event management.
+ * 
+ * Style Loading Strategy:
+ * - Video player styles are loaded dynamically when the first player is created
+ * - This prevents unnecessary CSS loading if no video player is used on the page
+ * - Styles are loaded globally as the web component requires them in the document scope
  */
 export class VideoPlayerService {
   private eventHandlers = new WeakMap<
@@ -13,6 +18,7 @@ export class VideoPlayerService {
     { player: (event: Event) => void; telemetry: (event: Event) => void }
   >();
   private orgService = new OrganizationService();
+  private static stylesLoaded = false;
 
   /**
    * Create video player configuration with context props and metadata
@@ -23,7 +29,7 @@ export class VideoPlayerService {
     metadata: VideoPlayerMetadata,
     contextProps?: VideoPlayerContextProps
   ): Promise<VideoPlayerConfig> {
- // Get session and user info from auth service
+    // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
     const uid = userAuthInfoService.getUserId() || 'anonymous';
 
@@ -32,7 +38,7 @@ export class VideoPlayerService {
     try {
       did = await appCoreService.getDeviceId();
     } catch (error) {
-      console.warn('[VideoPlayerService] Failed to fetch device ID, using fallback:', did, error);
+      console.warn('Failed to fetch device ID, using fallback:', error);
     }
 
     // Get channel from org service with random fallback for testing
@@ -46,11 +52,12 @@ export class VideoPlayerService {
       const org = orgResponse?.data?.result?.response?.content?.[0];
       if (org?.channel) {
         channel = org.channel;
-     } else {
-        console.warn('[VideoPlayerService] Channel not found from org service, using random fallback:', channel);
+        console.log('Using channel from org service:', channel);
+      } else {
+        console.warn('Channel not found from org service, using random fallback:', channel);
       }
     } catch (error) {
-      console.warn('[VideoPlayerService] Failed to fetch channel from org service, using random fallback:', channel, error);
+      console.warn('Failed to fetch channel from org service, using random fallback:', channel);
     }
 
     // Build context with defaults and overrides
@@ -85,9 +92,33 @@ export class VideoPlayerService {
   }
 
   /**
+   * Load video player styles dynamically (only once)
+   * Checks for existing style element to prevent race conditions
+   */
+  private loadStyles(): void {
+    // Check if styles already exist in the DOM (prevents race conditions)
+    const existingStyles = document.querySelector('[data-video-player-styles="true"]');
+    if (existingStyles || VideoPlayerService.stylesLoaded) {
+      VideoPlayerService.stylesLoaded = true;
+      return;
+    }
+
+    const styleLink = document.createElement('link');
+    styleLink.rel = 'stylesheet';
+    styleLink.href = '/assets/video-player/styles.css';
+    styleLink.setAttribute('data-video-player-styles', 'true');
+    document.head.appendChild(styleLink);
+    VideoPlayerService.stylesLoaded = true;
+  }
+
+  /**
    * Create video player element with configuration
+   * Styles are loaded dynamically on first use
    */
   createElement(config: VideoPlayerConfig): HTMLElement {
+    // Load styles if not already loaded
+    this.loadStyles();
+
     const element = document.createElement('sunbird-video-player');
     const configString = JSON.stringify(config);
 
