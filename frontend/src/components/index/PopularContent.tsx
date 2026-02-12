@@ -107,7 +107,7 @@ const PopularContent = () => {
 
                     {/* Title */}
                     <h3
-                        className="font-medium text-[20px] leading-[28px] line-clamp-2 bg-transparent border-0 text-foreground tracking-normal mb-[50px]"
+                        className="font-rubik font-medium text-[20px] leading-[28px] tracking-normal line-clamp-2 bg-transparent border-0 text-foreground mb-[50px]"
                     >
                         {course.title}
                     </h3>
@@ -146,7 +146,7 @@ const PopularContent = () => {
         <div className={className}>
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-                <h2 className="font-rubik font-medium text-[26px] leading-[100%] text-foreground">
+                <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-foreground">
                     {title}
                 </h2>
                 <Link
@@ -168,10 +168,10 @@ const PopularContent = () => {
     );
 
     return (
-        <section className="pt-[60px] pb-6 bg-white">
+        <section className="pt-[60px] bg-white">
             <div className="w-full pl-[127px] pr-[127px]">
                 <CourseGrid courses={mostViewedCourses} title={t("trending.mostViewed")} className="mb-[60px]" CardComponent={MostViewedCard} />
-                <CourseGrid courses={trendingCourses} title={t("trending.trending")} className="mb-2" CardComponent={MostViewedCard} />
+                <CourseGrid courses={trendingCourses} title={t("trending.trending")} className="mb-0" CardComponent={MostViewedCard} />
             </div>
         </section>
     );

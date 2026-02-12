@@ -84,7 +84,7 @@ const MostPopularContent = () => {
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-6">
                     <h2
-                        className="font-rubik font-medium text-[26px] leading-[100%] text-foreground"
+                        className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-foreground"
                     >
                         {t("popular.title")}
                     </h2>
@@ -126,7 +126,7 @@ const MostPopularContent = () => {
 
                                     {/* Title */}
                                     <h3
-                                        className="font-medium text-[20px] leading-[28px] line-clamp-2 bg-transparent border-0 text-foreground tracking-normal mb-[50px]"
+                                        className="font-rubik font-medium text-[20px] leading-[28px] tracking-normal line-clamp-2 bg-transparent border-0 text-foreground mb-[50px]"
                                     >
                                         {course.title}
                                     </h3>

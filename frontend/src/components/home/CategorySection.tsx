@@ -41,13 +41,13 @@ const CategorySection = () => {
       <div className="w-full pl-[127px] pr-[127px]">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="font-rubik font-medium text-[26px] leading-[100%] text-foreground">
+          <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-foreground">
             {t("browseCategories")}
           </h2>
         </div>
 
         {/* Category Cards and Browse All */}
-        <div className="flex items-center gap-8 flex-wrap pt-[30px] pb-[60px]">
+        <div className="flex items-center gap-4 flex-wrap pt-[30px] pb-[60px]">
           {categories.map((category) => (
             <Link key={category.id} to="/explore" className="group">
               <div
@@ -72,7 +72,7 @@ const CategorySection = () => {
           <Link
             to="/explore"
             className="group flex flex-col items-center justify-center gap-3 ml-4"
-            style={{ paddingLeft: '60px', paddingTop: '17px', paddingBottom: '0px' }}
+            style={{ paddingTop: '17px', paddingBottom: '0px' }}
           >
             <div
               className="rounded-full text-white flex items-center justify-center transition-transform hover:scale-105 w-[59px] h-[59px] bg-sunbird-brick"

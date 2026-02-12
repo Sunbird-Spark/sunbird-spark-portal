@@ -20,7 +20,7 @@ const Header = () => {
 
   const navLinks = [
     { label: t("home"), href: "/" },
-    { label: t("explore"), href: "/explore" },
+    { label: t("Explore"), href: "/explore" },
     { label: t("about"), href: "#about" },
     { label: t("contact"), href: "#contact" },
   ];
@@ -55,9 +55,10 @@ const Header = () => {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`text-[0.9375rem] transition-colors ${isActive(link.href)
-                  ? 'text-sunbird-brick font-medium'
-                  : 'text-gray-900 font-normal hover:text-sunbird-brick'
+                className={`font-rubik text-[18px] leading-[26px] tracking-normal transition-colors
+                  ${isActive(link.href)
+                    ? "font-medium text-sunbird-brick"
+                    : "font-normal text-gray-600 hover:text-gray-900"
                   }`}
               >
                 <span className="flex items-center gap-1">
@@ -76,10 +77,7 @@ const Header = () => {
                 <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" />
               </button>
 
-              {/* Notifications - Filled Bell */}
-              <button className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors">
-                <FiBell className="w-[1.3125rem] h-[1.3125rem] fill-sunbird-brick" />
-              </button>
+
 
               {/* Language Selector */}
               <DropdownMenu>
@@ -107,7 +105,7 @@ const Header = () => {
             {/* Login Button */}
             <Button
               onClick={() => navigate("/profile")}
-              className="flex items-center justify-center w-[4.5rem] h-[1.875rem] bg-sunbird-brick text-white rounded-[0.375rem] text-sm font-medium p-0"
+              className="font-rubik font-medium text-[16px] leading-[16px] tracking-normal w-[72px] h-[30px] rounded-[6px] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center p-0"
             >
               {t("login")}
             </Button>

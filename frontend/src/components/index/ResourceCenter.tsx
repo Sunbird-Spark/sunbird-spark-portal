@@ -22,16 +22,9 @@ const ResourceCenter = () => {
     return (
         <section className="pt-[60px] pb-16 bg-[#FFF1C7]">
             <div className="w-full pl-[127px] pr-[127px]">
-                {/* Header with lines */}
-                <div className="flex items-center justify-center gap-4 mb-4">
-                    <div className="h-px w-14 bg-[#333333]/15" />
-                    <div className="text-[14px] font-medium text-[#333333] tracking-widest uppercase">
-                        {t("resource.header")}
-                    </div>
-                    <div className="h-px w-14 bg-[#333333]/15" />
-                </div>
 
-                <h2 className="font-rubik font-medium text-[26px] leading-[100%] text-[#333333] text-center mb-10 md:mb-14">
+
+                <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-[#333333] text-center mb-10 md:mb-14">
                     {t("resource.title")}
                 </h2>
 
@@ -135,7 +128,7 @@ const ResourceCardComponent = ({
 
                 {/* Bottom Content - Aligned exactly at bottom-left corner */}
                 <div className="absolute bottom-[62px] left-[34px] right-[24px] z-10 flex flex-col items-start gap-1.5">
-                    <h3 className="text-white font-bold text-[18px] md:text-[20px] leading-[1.25] [text-wrap:balance]">
+                    <h3 className="font-rubik font-medium text-[20px] leading-[28px] tracking-normal text-white [text-wrap:balance]">
                         {title}
                     </h3>
                     <div className="flex items-center gap-2 text-white/95 font-semibold text-[14px] group-hover:underline transition-all">

@@ -49,10 +49,10 @@ const HeroStats = () => {
                     <div className="flex justify-center mb-[10px] pl-[10px]">
                         <BookIcon />
                     </div>
-                    <div className="text-2xl md:text-3xl font-bold text-foreground pl-[10px]">
+                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground pl-[10px]">
                         500+
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="font-rubik font-normal text-[18px] leading-[20px] tracking-normal text-center text-[#757575]">
                         {t("stats.courses")}
                     </div>
                 </div>
@@ -62,10 +62,10 @@ const HeroStats = () => {
                     <div className="flex justify-center mb-1.5">
                         <UsersIcon />
                     </div>
-                    <div className="text-2xl md:text-3xl font-bold text-foreground">
+                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground">
                         50K+
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="font-rubik font-normal text-[18px] leading-[20px] tracking-normal text-center text-[#757575]">
                         {t("stats.activeLearners")}
                     </div>
                 </div>
@@ -75,10 +75,10 @@ const HeroStats = () => {
                     <div className="flex justify-center mb-1.5">
                         <CertificateIcon />
                     </div>
-                    <div className="text-2xl md:text-3xl font-bold text-foreground">
+                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground">
                         200+
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="font-rubik font-normal text-[18px] leading-[20px] tracking-normal text-center text-[#757575]">
                         {t("stats.certifications")}
                     </div>
                 </div>
@@ -89,7 +89,7 @@ const HeroStats = () => {
                 className={`flex flex-col justify-between px-7 py-[20px] rounded-2xl bg-surface ${floatingShadow} lg:w-[16.25rem] h-[11.625rem]`}
             >
                 <div>
-                    <p className="text-sm font-semibold mb-4 leading-snug text-foreground">
+                    <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal mb-4 text-foreground">
                         {t("hero.processSimple").split(/(\n)/).map((line, i) =>
                             line === "\n" ? <br key={i} /> : line
                         )}
@@ -108,7 +108,7 @@ const HeroStats = () => {
                     <div
                         className="relative flex h-full flex-col justify-between bg-white px-6 py-6 rounded-2xl card-mask-custom"
                     >
-                        <p className="text-[1rem] font-bold leading-tight text-foreground max-w-[80%]">
+                        <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal text-foreground max-w-[80%]">
                             {t("hero.studyPace").split(/(\n)/).map((line, i) =>
                                 line === "\n" ? <br key={i} /> : line
                             )}
