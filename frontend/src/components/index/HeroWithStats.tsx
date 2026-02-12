@@ -81,8 +81,7 @@ const HeroWithStats = () => {
                                 <img
                                     src={heroWoman}
                                     alt="Professional learning"
-                                    className="w-[22.5rem] h-auto object-contain"
-                                    style={{ width: '55.5rem', height: '44.875rem', paddingBottom: '0.0625rem', paddingTop: '9.975rem' }}
+                                    className="w-[55.5rem] h-[44.875rem] object-contain pb-[0.0625rem] pt-[9.975rem]"
                                 />
                             </div>
                         </div>

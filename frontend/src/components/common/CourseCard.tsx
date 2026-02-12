@@ -46,7 +46,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
                     <Badge
                         className={`inline-flex items-center justify-center p-0 rounded-[2.25rem] mb-[1.25rem] ${course.type === 'Textbook' ? 'w-[5.875rem]' : 'w-[4.875rem]'} h-[1.875rem] ${getBadgeStyle()}`}
                     >
-                        {t(`contentTypes.${course.type.toLowerCase()}`) || course.type}
+                        {t(`contentTypes.${course.type.toLowerCase()}`, { defaultValue: course.type })}
                     </Badge>
 
                     {/* Title */}

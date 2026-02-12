@@ -1,4 +1,7 @@
 {
+  "header": {
+    "search": "Buscar conteúdo"
+  },
   "loading": "Carregando...",
   "error": "Ocorreu um erro",
   "success": "Sucesso",

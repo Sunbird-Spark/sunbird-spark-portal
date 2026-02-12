@@ -26,7 +26,7 @@ const ResourceCenter = () => {
                 <div className="flex items-center justify-center gap-4 mb-[1.25rem]">
                     <div className="h-[0.0625rem] w-[6.25rem] bg-[#333333]"></div>
                     <span className="font-rubik font-normal text-[1rem] leading-[1.5rem] tracking-normal text-[#333333]">
-                        Resource Center
+                        {t("resource.header")}
                     </span>
                     <div className="h-[0.0625rem] w-[6.25rem] bg-[#333333]"></div>
                 </div>
@@ -126,8 +126,8 @@ const ResourceCardComponent = ({
                 </div>
 
                 {/* Top-left Badge - Exact 44x38 dimensions */}
-                <div className="absolute top-[2.75rem] left-[2.125rem] z-5">
-                    <span className="flex items-center justify-center bg-white text-black font-weight-[500] font-bold font-style-[medium] text-[1rem] px-3 w-[4.875rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide">
+                <div className="absolute top-[2.75rem] left-[2.125rem] z-[5]">
+                    <span className="flex items-center justify-center bg-white text-black font-medium text-[1rem] px-3 w-[4.875rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide">
                         {type}
                     </span>
                 </div>

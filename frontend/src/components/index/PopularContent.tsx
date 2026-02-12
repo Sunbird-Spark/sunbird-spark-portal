@@ -1,4 +1,3 @@
-import React from "react";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { CourseGrid } from "@/components/common/CourseGrid";
 import { ContentCourse } from "@/components/common/CourseCard";

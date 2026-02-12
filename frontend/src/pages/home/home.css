@@ -181,7 +181,7 @@
 }
 
 /* Custom Card Shape */
-.card-mask-custom {
+/* .card-mask-custom {
     border-radius: 1.25rem;
     mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
     -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
@@ -192,4 +192,4 @@
 [dir="rtl"] .card-mask-custom {
     mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
     -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
-}
+} */

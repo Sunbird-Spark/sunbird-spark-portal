@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { FiArrowRight } from "react-icons/fi";
 import Avatar from "react-avatar";

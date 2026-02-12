@@ -21,6 +21,7 @@ export const CourseGrid = ({ title, courses, className = "mb-12" }: CourseGridPr
                     <Button
                         variant="ghost"
                         className="p-0 h-auto hover:bg-transparent text-sunbird-brick"
+                        aria-label="View all courses"
                     >
                         <FiArrowRight className="w-5 h-3" />
                     </Button>
