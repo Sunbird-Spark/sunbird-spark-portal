@@ -75,7 +75,7 @@ const MostPopularContent = () => {
     ];
 
     const getBadgeStyle = () => {
-        return "bg-sunbird-ivory text-foreground border-[1.5px] border-sunbird-ginger";
+        return "bg-[#FFF1C7] text-foreground font-rubik font-medium text-[14px] leading-[18px] border-[#CC8545] border-[1px]";
     };
 
     return (
@@ -106,34 +106,35 @@ const MostPopularContent = () => {
                                 className="group bg-white rounded-[20px] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-[2px_2px_20px_0px_rgba(0,0,0,0.09)] w-[370px] h-[392px] flex flex-col"
                             >
                                 {/* Image with padding */}
-                                <div className="px-[20px] pt-[20px] pb-10px">
-                                    <div className="relative overflow-hidden rounded-xl h-[162px] w-[330px]">
-                                        <div
-                                            className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-                                            style={{ backgroundImage: `url(${course.image})` }}
+                                <div className="px-[20px] pt-[20px] w-full">
+                                    <div className="relative overflow-hidden rounded-[20px] h-[162px] w-full">
+                                        <img
+                                            src={course.image}
+                                            alt={course.title}
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-[20px]"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Content */}
-                                <div className="px-[20px] pt-[20px] pb-5 flex flex-col h-full">
+                                <div className="px-[20px] pt-[20px] pb-5 flex flex-col flex-grow">
                                     {/* Badge below image */}
                                     <Badge
-                                        className={`inline-block text-[0.6875rem] font-medium px-[15px] py-[5px] rounded-full mb-[20px] w-[78px] h-[30px] ${getBadgeStyle()}`}
+                                        className={`inline-flex items-center justify-center p-0 rounded-[36px] mb-[20px] ${course.type === 'Textbook' ? 'w-[94px]' : 'w-[78px]'} h-[30px] ${getBadgeStyle()}`}
                                     >
                                         {t(`contentTypes.${course.type.toLowerCase()}`) || course.type}
                                     </Badge>
 
                                     {/* Title */}
                                     <h3
-                                        className="font-rubik font-medium text-[20px] leading-[28px] tracking-normal line-clamp-2 bg-transparent border-0 text-foreground mb-[50px]"
+                                        className="font-rubik font-medium text-[20px] leading-[28px] tracking-normal bg-transparent border-0 text-foreground mb-[20px] min-h-[56px]"
                                     >
                                         {course.title}
                                     </h3>
 
-                                    {/* Stats */}
+                                    {/* Stats - Pushed to bottom */}
                                     <div
-                                        className="flex items-center gap-1.5 text-xs text-muted-foreground pt-[2px]"
+                                        className="flex items-center gap-1.5 text-xs text-muted-foreground pt-[2px] mt-auto"
                                     >
                                         <span
                                             className="font-medium text-foreground"

@@ -47,31 +47,33 @@ const CategorySection = () => {
         </div>
 
         {/* Category Cards and Browse All */}
-        <div className="flex items-center gap-4 flex-wrap pt-[30px] pb-[60px]">
-          {categories.map((category) => (
-            <Link key={category.id} to="/explore" className="group">
-              <div
-                className="flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[224px] h-[194px] rounded-[20px]"
-                style={{ background: category.background }}
-              >
-                {/* Top-left white horizontal line */}
-                <div className="w-9 h-[3px] bg-white/90 rounded-full" />
+        <div className="flex items-center gap-6 pb-[30px] flex-wrap justify-between">
+          <div className="flex items-center gap-4 flex-wrap lg:flex-nowrap">
+            {categories.map((category) => (
+              <Link key={category.id} to="/explore" className="group">
+                <div
+                  className="flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[224px] h-[194px] rounded-[20px]"
+                  style={{ background: category.background }}
+                >
+                  {/* Top-left white horizontal line */}
+                  <div className="w-9 h-[3px] bg-white/90 rounded-full" />
 
-                {/* Bottom content: Icon + Label */}
-                <div className="flex flex-col gap-3">
-                  <img src={category.icon} alt={category.name} className="w-8 h-8" />
-                  <p className="text-[17px] font-bold text-white leading-tight">
-                    {category.name}
-                  </p>
+                  {/* Bottom content: Icon + Label */}
+                  <div className="flex flex-col gap-3">
+                    <img src={category.icon} alt={category.name} className="w-8 h-8" />
+                    <p className="text-[17px] font-bold text-white leading-tight">
+                      {category.name}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
 
           {/* Browse All Button */}
           <Link
             to="/explore"
-            className="group flex flex-col items-center justify-center gap-3 ml-4"
+            className="group flex flex-col items-center justify-center gap-3"
             style={{ paddingTop: '17px', paddingBottom: '0px' }}
           >
             <div
