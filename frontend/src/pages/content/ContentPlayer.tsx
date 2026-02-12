@@ -6,7 +6,7 @@ import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import RelatedContentCard from "@/components/content/RelatedContentCard";
 import RelatedPdfCard from "@/components/content/RelatedPdfCard";
-import { fetchContentById } from "@/services/contentPlayerService";
+import { fetchContentById } from "@/services/ContentService";
 import { ContentData } from "@/types/contentTypes";
 
 const ContentPlayer = () => {
