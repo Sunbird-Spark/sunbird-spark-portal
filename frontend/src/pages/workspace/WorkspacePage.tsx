@@ -51,16 +51,16 @@ const WorkspacePage = () => {
     return [...content, ...questionSets].map(mapContentToWorkspaceItem);
   }, [searchData]);
 
-  const counts = useMemo(
-    () => ({
+  const counts = useMemo(() => {
+    const review = items.filter((i) => i.status === 'review').length;
+    return {
       all: items.length,
       drafts: items.filter((i) => i.status === 'draft').length,
-      review: items.filter((i) => i.status === 'review').length,
+      review,
       published: items.filter((i) => i.status === 'published').length,
-      pendingReview: items.filter((i) => i.status === 'review').length,
-    }),
-    [items]
-  );
+      pendingReview: review,
+    };
+  }, [items]);
 
   // Reset view when role changes
   useEffect(() => {
