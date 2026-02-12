@@ -10,7 +10,6 @@ const defaultProps = {
   activeView: 'all',
   filteredItems: [] as WorkspaceItem[],
   viewMode: 'grid' as const,
-  searchQuery: '',
   t: mockT,
   onCreateOption: vi.fn(),
   onCreateClick: vi.fn(),
@@ -105,18 +104,12 @@ describe('WorkspacePageContent', () => {
     expect(screen.getByTestId('empty-desc')).toHaveTextContent('sharedWithYou');
     expect(screen.queryByRole('button', { name: 'uploadContent' })).not.toBeInTheDocument();
   });
-  it('renders empty state createFirst when no items and no search, and calls onCreateClick on action', () => {
+  it('renders empty state createFirst when no items and calls onCreateClick on action', () => {
     const onCreateClick = vi.fn();
-    render(<WorkspacePageContent {...defaultProps} activeView="all" filteredItems={[]} searchQuery="" onCreateClick={onCreateClick} />);
+    render(<WorkspacePageContent {...defaultProps} activeView="all" filteredItems={[]} onCreateClick={onCreateClick} />);
     expect(screen.getByTestId('empty-title')).toHaveTextContent('createFirst');
     fireEvent.click(screen.getByRole('button', { name: 'createContent' }));
     expect(onCreateClick).toHaveBeenCalled();
-  });
-  it('renders empty state noContentFound when no items and search query set', () => {
-    render(<WorkspacePageContent {...defaultProps} activeView="all" filteredItems={[]} searchQuery="q" />);
-    expect(screen.getByTestId('empty-title')).toHaveTextContent('noContentFound');
-    expect(screen.getByTestId('empty-desc')).toHaveTextContent('tryAdjusting');
-    expect(screen.queryByRole('button', { name: 'createContent' })).not.toBeInTheDocument();
   });
   it('renders grid of cards when items and viewMode grid, list when viewMode list', () => {
     const propsWithItems = { ...defaultProps, activeView: 'all' as const, filteredItems: [mockItem] };

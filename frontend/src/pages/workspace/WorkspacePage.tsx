@@ -30,7 +30,6 @@ const WorkspacePage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [userRole, setUserRole] = useState<UserRole>('creator');
   const [activeView, setActiveView] = useState<WorkspaceView>('all');
-  const [searchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
@@ -80,15 +79,6 @@ const WorkspacePage = () => {
     // Apply type filter
     if (typeFilter !== 'all') filtered = filtered.filter(i => i.type === typeFilter);
     
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(i => 
-        i.title.toLowerCase().includes(query) || 
-        i.description.toLowerCase().includes(query)
-      );
-    }
-    
     // Apply sorting (sort a copy so we don't mutate filtered)
     const toTime = (s: string | null) => (s ? new Date(s).getTime() : 0);
     return [...filtered].sort((a, b) => {
@@ -99,7 +89,7 @@ const WorkspacePage = () => {
         default: return 0;
       }
     });
-  }, [items, activeView, typeFilter, searchQuery, sortBy]);
+  }, [items, activeView, typeFilter, sortBy]);
 
   const handleCreateOption = (optionId: string) => {
     setShowCreateModal(false);
@@ -206,7 +196,6 @@ const WorkspacePage = () => {
                 activeView={activeView}
                 filteredItems={filteredItems}
                 viewMode={viewMode}
-                searchQuery={searchQuery}
                 t={t}
                 onCreateOption={handleCreateOption}
                 onCreateClick={handleCreateClick}
