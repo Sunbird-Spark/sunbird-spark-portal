@@ -18,15 +18,15 @@ const Footer = () => {
 
   return (
     <footer className="bg-sunbird-footer-bg font-rubik">
-      <div className="w-full py-[60px] px-6 md:px-12 lg:pl-[127px] lg:pr-[127px]">
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-10">
+      <div className="w-full py-[40px] px-6 md:px-12 lg:pl-[127px] lg:pr-[127px]">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 pb-[30px] ">
           {/* Logo */}
           <div className="shrink-0">
             <Link to="/" className="inline-block">
               <img
                 src={sunbirdLogo}
                 alt="Sunbird"
-                className="h-8 w-auto md:w-[13.25rem] h-[2.4375rem]"
+                className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-[80px]"
               />
             </Link>
           </div>
@@ -35,7 +35,7 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row gap-10 md:gap-20 lg:gap-28 lg:pr-[6.25rem] w-full lg:w-auto">
             {/* Products */}
             <div>
-              <h4 className="font-semibold text-sm mb-4 text-white">
+              <h4 className="font-semibold text-sm mb-6 text-white">
                 {t("footer.products")}
               </h4>
               <ul className="space-y-3">
@@ -54,7 +54,7 @@ const Footer = () => {
 
             {/* Company */}
             <div id="about">
-              <h4 className="font-semibold text-sm mb-4 text-white">
+              <h4 className="font-semibold text-sm mb-6 text-white">
                 {t("footer.company")}
               </h4>
               <ul className="space-y-3">

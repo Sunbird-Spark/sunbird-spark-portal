@@ -42,10 +42,10 @@ const HeroStats = () => {
         <div className="flex w-full flex-wrap items-center gap-4 lg:gap-10 lg:flex-nowrap">
             {/* Stats Card */}
             <div
-                className={`flex items-center justify-between px-12 rounded-2xl bg-surface ${floatingShadow} lg:w-[35.5rem] h-[11.625rem]`}
+                className={`grid grid-cols-3 items-center px-12 rounded-2xl bg-surface ${floatingShadow} lg:w-[35.5rem] h-[11.625rem]`}
             >
                 {/* 500+ Courses */}
-                <div className="text-center pl-[30px]">
+                <div className="text-center">
                     <div className="flex justify-center mb-[10px] pl-[10px]">
                         <BookIcon />
                     </div>
@@ -58,7 +58,7 @@ const HeroStats = () => {
                 </div>
 
                 {/* 50K+ Active Learners */}
-                <div className="text-center pr-[30px]">
+                <div className="text-center">
                     <div className="flex justify-center mb-1.5">
                         <UsersIcon />
                     </div>
@@ -71,7 +71,7 @@ const HeroStats = () => {
                 </div>
 
                 {/* 200+ Certifications */}
-                <div className="text-center pr-[30px]">
+                <div className="text-center">
                     <div className="flex justify-center mb-1.5">
                         <CertificateIcon />
                     </div>
@@ -89,14 +89,12 @@ const HeroStats = () => {
                 className={`flex flex-col justify-between px-7 py-[20px] rounded-2xl bg-surface ${floatingShadow} lg:w-[16.25rem] h-[11.625rem]`}
             >
                 <div>
-                    <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal mb-4 text-foreground">
-                        {t("hero.processSimple").split(/(\n)/).map((line, i) =>
-                            line === "\n" ? <br key={i} /> : line
-                        )}
+                    <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal mb-4 text-foreground line-clamp-2 pt-[10px] pl-[1px]">
+                        {t("hero.processSimple")}
                     </p>
                 </div>
                 <div>
-                    <span className="inline-block px-4 py-1.5 text-[0.8125rem] font-medium rounded-full border border-border text-foreground">
+                    <span className="flex items-center justify-center w-[80px] h-[34px] rounded-[22px] border border-[#D2D6DE] font-rubik font-normal text-[14px] leading-[20px] tracking-[0px] text-center opacity-[0.99] text-foreground">
                         {t("hero.online")}
                     </span>
                 </div>
@@ -108,10 +106,8 @@ const HeroStats = () => {
                     <div
                         className="relative flex h-full flex-col justify-between bg-white px-6 py-6 rounded-2xl card-mask-custom"
                     >
-                        <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal text-foreground max-w-[80%]">
-                            {t("hero.studyPace").split(/(\n)/).map((line, i) =>
-                                line === "\n" ? <br key={i} /> : line
-                            )}
+                        <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal text-foreground max-w-[80%] line-clamp-2 pt-[10px] pl-[1px]">
+                            {t("hero.studyPace")}
                         </p>
 
                         <div className="flex -space-x-3 mb-1">

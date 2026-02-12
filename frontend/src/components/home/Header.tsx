@@ -43,7 +43,7 @@ const Header = () => {
               src={sunbirdLogo}
               alt="Sunbird"
               className="h-8 w-auto"
-              style={{ paddingRight: 0, width: '12.1875rem' }}
+              style={{ paddingRight: 0, width: '13.1875rem' }}
             />
           </Link>
 

@@ -20,10 +20,10 @@ const ResourceCenter = () => {
     const { t } = useAppI18n();
 
     return (
-        <section className="pt-[60px] pb-16 bg-[#FFF1C7]">
+        <section className="pt-[30px] pb-16 bg-[#FFF1C7]">
             <div className="w-full pl-[127px] pr-[127px]">
 
-                <div className="flex items-center justify-center gap-4 mb-2">
+                <div className="flex items-center justify-center gap-4 mb-[20px]">
                     <div className="h-[1px] w-[100px] bg-[#333333]"></div>
                     <span className="font-rubik font-normal text-[16px] leading-[24px] tracking-normal text-[#333333]">
                         Resource Center
