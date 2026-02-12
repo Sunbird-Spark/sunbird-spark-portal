@@ -57,11 +57,6 @@ export const getSessionStore = () => {
     }
     logger.info('Using MemoryStore for session management');
     const memoryStore = new session.MemoryStore();
-    const originalSet = memoryStore.set;
-    memoryStore.set = function (sid, sess, cb) {
-        // console.log('MemoryStore SET:', sid);
-        return originalSet.call(this, sid, sess, cb);
-    };
     return memoryStore;
 };
 
