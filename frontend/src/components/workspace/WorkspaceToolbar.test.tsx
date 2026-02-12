@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import SegmentedControlPattern from '@/components/workspace/SegmentedControlPattern';
+import WorkspaceToolbar from '@/components/workspace/WorkspaceToolbar';
 import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from '@/types/workspaceTypes';
 
 const mockT = (key: string) => key;
@@ -45,7 +45,7 @@ vi.mock('@/components/common/DropdownMenu', () => ({
 
 const baseCounts = { all: 5, drafts: 2, review: 1, published: 2, pendingReview: 3 };
 
-const renderControl = (overrides?: Partial<{
+const renderToolbar = (overrides?: Partial<{
   activeView: WorkspaceView;
   userRole: UserRole;
   viewMode: ViewMode;
@@ -74,13 +74,13 @@ const renderControl = (overrides?: Partial<{
     ...overrides,
   };
 
-  render(<SegmentedControlPattern {...props} />);
+  render(<WorkspaceToolbar {...props} />);
   return { ...props, onViewChange, onRoleChange, onViewModeChange, onTypeFilterChange, onCreateClick };
 };
 
-describe('SegmentedControlPattern', () => {
+describe('WorkspaceToolbar', () => {
   it('switches role between creator and reviewer and toggles create button visibility', () => {
-    const { onRoleChange } = renderControl();
+    const { onRoleChange } = renderToolbar();
 
     // Creator should see create button
     expect(screen.getByRole('button', { name: 'createNew' })).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe('SegmentedControlPattern', () => {
   });
 
   it('calls onViewChange when main segment buttons are clicked', () => {
-    const { onViewChange } = renderControl({ userRole: 'creator', activeView: 'all' });
+    const { onViewChange } = renderToolbar({ userRole: 'creator', activeView: 'all' });
 
     fireEvent.click(screen.getByRole('button', { name: /Drafts/ }));
     expect(onViewChange).toHaveBeenCalledWith('drafts');
@@ -101,7 +101,7 @@ describe('SegmentedControlPattern', () => {
   });
 
   it('shows reviewer segments when userRole is reviewer', () => {
-    const { onViewChange } = renderControl({ userRole: 'reviewer', activeView: 'pending-review' });
+    const { onViewChange } = renderToolbar({ userRole: 'reviewer', activeView: 'pending-review' });
 
     expect(screen.getByRole('button', { name: /Pending/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Published/ })).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('SegmentedControlPattern', () => {
   });
 
   it('renders secondary actions for creator and calls onViewChange from More menu', () => {
-    const { onViewChange } = renderControl({ userRole: 'creator' });
+    const { onViewChange } = renderToolbar({ userRole: 'creator' });
 
     // Our DropdownMenu mock always renders content
     expect(screen.getByText('More')).toBeInTheDocument();
@@ -122,7 +122,7 @@ describe('SegmentedControlPattern', () => {
   });
 
   it('shows type filter and view mode controls when content filters are enabled', () => {
-    const { onTypeFilterChange, onViewModeChange } = renderControl({
+    const { onTypeFilterChange, onViewModeChange } = renderToolbar({
       activeView: 'all',
       viewMode: 'grid',
       typeFilter: 'all',
@@ -142,18 +142,18 @@ describe('SegmentedControlPattern', () => {
   });
 
   it('hides filters when activeView is create/uploads/collaborations', () => {
-    renderControl({ activeView: 'create' });
+    renderToolbar({ activeView: 'create' });
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
 
-    renderControl({ activeView: 'uploads' });
+    renderToolbar({ activeView: 'uploads' });
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
 
-    renderControl({ activeView: 'collaborations' });
+    renderToolbar({ activeView: 'collaborations' });
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
   });
 
   it('shows stats row only for creator with content filters and displays counts', () => {
-    renderControl({
+    renderToolbar({
       userRole: 'creator',
       activeView: 'all',
       counts: { all: 10, drafts: 3, review: 4, published: 6, pendingReview: 2 },
@@ -164,8 +164,7 @@ describe('SegmentedControlPattern', () => {
   });
 
   it('does not show stats row for reviewer', () => {
-    renderControl({ userRole: 'reviewer', activeView: 'all' });
+    renderToolbar({ userRole: 'reviewer', activeView: 'all' });
     expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
   });
 });
-

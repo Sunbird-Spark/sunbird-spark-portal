@@ -17,7 +17,7 @@ import {
 } from "@/services/workspace";
 import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
 
-interface SegmentedControlPatternProps {
+interface WorkspaceToolbarProps {
   activeView: WorkspaceView;
   onViewChange: (view: WorkspaceView) => void;
   userRole: UserRole;
@@ -31,7 +31,7 @@ interface SegmentedControlPatternProps {
   onCreateClick: () => void;
 }
 
-const SegmentedControlPattern = ({
+const WorkspaceToolbar = ({
   activeView,
   onViewChange,
   userRole,
@@ -43,7 +43,7 @@ const SegmentedControlPattern = ({
   onTypeFilterChange,
   contentCount,
   onCreateClick,
-}: SegmentedControlPatternProps) => {
+}: WorkspaceToolbarProps) => {
   const { t } = useAppI18n();
 
   const segments =
@@ -240,4 +240,4 @@ const SegmentedControlPattern = ({
   );
 };
 
-export default SegmentedControlPattern;
+export default WorkspaceToolbar;
