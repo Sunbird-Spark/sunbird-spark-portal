@@ -3,11 +3,11 @@ import { Badge } from "@/components/common/Badge";
 import { Link } from "react-router-dom";
 import { RelatedItem } from "@/types/contentTypes";
 
-interface RelatedContentCardProps {
+interface ContentCardProps {
   item: RelatedItem;
 }
 
-const RelatedContentCard = ({ item }: RelatedContentCardProps) => {
+const ContentCard = ({ item }: ContentCardProps) => {
   return (
     <Link to={`/content/${item.id}`} className="related-resource-card-link">
       <div className="group related-resource-card-container">
@@ -55,4 +55,4 @@ const RelatedContentCard = ({ item }: RelatedContentCardProps) => {
   );
 };
 
-export default RelatedContentCard;
+export default ContentCard;

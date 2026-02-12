@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { RelatedItem } from "@/types/contentTypes";
 
-interface RelatedPdfCardProps {
+interface ResourceCardProps {
   item: RelatedItem;
 }
 
-const RelatedPdfCard = ({ item }: RelatedPdfCardProps) => {
+const ResourceCard = ({ item }: ResourceCardProps) => {
   const { t } = useAppI18n();
 
   const getViewLabel = (type: string) => {
@@ -54,4 +54,4 @@ const RelatedPdfCard = ({ item }: RelatedPdfCardProps) => {
   );
 };
 
-export default RelatedPdfCard;
+export default ResourceCard;
