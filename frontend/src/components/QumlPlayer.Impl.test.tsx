@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -14,7 +15,8 @@ vi.mock('../services/QuestionSetService', () => ({
 }));
 
 vi.mock('../utils/buildPlayerConfig', () => ({
-  buildPlayerConfig: vi.fn((params) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  buildPlayerConfig: vi.fn((params: any) => ({
     context: { mode: 'play', uid: params.uid, channel: params.orgChannel },
     config: {},
     metadata: params.metadata,
