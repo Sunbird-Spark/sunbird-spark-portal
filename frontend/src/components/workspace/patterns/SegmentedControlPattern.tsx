@@ -71,7 +71,7 @@ const SegmentedControlPattern = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {/* Role Switcher - Minimal */}
-          <div className="flex items-center gap-1 text-sm font-['Rubik']">
+          <div className="flex items-center gap-1 text-sm font-rubik">
             <button
               onClick={() => onRoleChange('creator')}
               className={cn(
@@ -83,7 +83,7 @@ const SegmentedControlPattern = ({
             >
               Creator
             </button>
-            <span className="text-gray-300">|</span>
+            <span className="text-muted-foreground">|</span>
             <button
               onClick={() => onRoleChange('reviewer')}
               className={cn(
@@ -103,7 +103,7 @@ const SegmentedControlPattern = ({
             <Button
               onClick={onCreateClick}
               size="lg"
-              className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-['Rubik'] rounded-2xl shadow-lg px-6"
+              className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik rounded-2xl shadow-lg px-6"
             >
               <FiPlus className="w-5 h-5 mr-2" />
               {t('createNew')}
@@ -122,7 +122,7 @@ const SegmentedControlPattern = ({
                 key={segment.id}
                 onClick={() => onViewChange(segment.id)}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium font-['Rubik'] transition-all",
+                  "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium font-rubik transition-all",
                   activeView === segment.id
                     ? "bg-white text-sunbird-brick shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -152,7 +152,7 @@ const SegmentedControlPattern = ({
             {secondaryActions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="font-['Rubik'] rounded-xl">
+                  <Button variant="outline" size="sm" className="font-rubik rounded-xl">
                     More
                     <FiChevronDown className="w-4 h-4 ml-1" />
                   </Button>
@@ -162,7 +162,7 @@ const SegmentedControlPattern = ({
                     <DropdownMenuItem
                       key={action.id}
                       onClick={() => onViewChange(action.id)}
-                      className="font-['Rubik']"
+                      className="font-rubik"
                     >
                       {action.label}
                     </DropdownMenuItem>
@@ -177,7 +177,7 @@ const SegmentedControlPattern = ({
                 {/* Type Filter */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="font-['Rubik'] rounded-xl">
+                    <Button variant="outline" size="sm" className="font-rubik rounded-xl">
                       {typeFilter === 'all' ? 'All Types' : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
                       <FiChevronDown className="w-4 h-4 ml-1" />
                     </Button>
@@ -187,7 +187,7 @@ const SegmentedControlPattern = ({
                       <DropdownMenuItem
                         key={type}
                         onClick={() => onTypeFilterChange(type)}
-                        className="font-['Rubik']"
+                        className="font-rubik"
                       >
                         {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
                       </DropdownMenuItem>
@@ -227,24 +227,24 @@ const SegmentedControlPattern = ({
         <div className="flex items-center gap-6 px-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
-            <span className="text-sm font-['Rubik'] text-muted-foreground">
+            <span className="text-sm font-rubik text-muted-foreground">
               <span className="font-semibold text-foreground">{counts.published}</span> Published
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
-            <span className="text-sm font-['Rubik'] text-muted-foreground">
+            <span className="text-sm font-rubik text-muted-foreground">
               <span className="font-semibold text-foreground">{counts.review}</span> In Review
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-gray-400" />
-            <span className="text-sm font-['Rubik'] text-muted-foreground">
+            <span className="text-sm font-rubik text-muted-foreground">
               <span className="font-semibold text-foreground">{counts.drafts}</span> Drafts
             </span>
           </div>
           {contentCount !== undefined && (
-            <span className="text-sm text-muted-foreground font-['Rubik'] ml-auto">
+            <span className="text-sm text-muted-foreground font-rubik ml-auto">
               Showing {contentCount} items
             </span>
           )}

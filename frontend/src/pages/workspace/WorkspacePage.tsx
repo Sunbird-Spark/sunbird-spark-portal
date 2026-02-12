@@ -20,6 +20,7 @@ import WorkspacePageHeader from "./WorkspacePageHeader";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import "../home/home.css";
+import "./workspace.css";
 
 const WorkspacePage = () => {
   const isMobile = useIsMobile();
@@ -158,7 +159,7 @@ const WorkspacePage = () => {
   if (showContent && isLoading) return <PageLoader message={t('loading')} />;
 
   return (
-    <div className="min-h-screen bg-sunbird-gray-f3 flex flex-col">
+    <div className="workspace-container">
       <WorkspacePageHeader
         isMobile={isMobile}
         isSidebarOpen={isSidebarOpen}
@@ -203,8 +204,8 @@ const WorkspacePage = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
-          <main className="flex-1 overflow-y-auto bg-sunbird-gray-f3">
-            <div className="home-content-wrapper">
+          <main className="workspace-main-content">
+            <div className="workspace-content-wrapper">
               <SegmentedControlPattern {...navigationProps} />
               <WorkspacePageContent
                 showCreateModal={showCreateModal}

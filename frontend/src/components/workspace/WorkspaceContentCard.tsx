@@ -69,7 +69,7 @@ const WorkspaceContentCard = ({
 
         {/* Status Badge */}
         <div className="absolute top-3 left-3">
-          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-['Rubik']", status.bg, status.text)}>
+          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik", status.bg, status.text)}>
             <span className={cn("w-1.5 h-1.5 rounded-full", status.dot)} />
             {status.label}
           </div>
@@ -77,7 +77,7 @@ const WorkspaceContentCard = ({
 
         {/* Type Badge */}
         <div className="absolute top-3 right-3">
-          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-['Rubik'] bg-surface/90 backdrop-blur-sm shadow-sm", colors.text)}>
+          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-surface/90 backdrop-blur-sm shadow-sm", colors.text)}>
             <TypeIcon className="w-3 h-3" />
             <span className="capitalize">{item.type}</span>
           </div>
@@ -109,7 +109,7 @@ const WorkspaceContentCard = ({
       {/* Content */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-foreground text-sm font-['Rubik'] line-clamp-2 leading-snug flex-1">
+          <h3 className="font-semibold text-foreground text-sm font-rubik line-clamp-2 leading-snug flex-1">
             {item.title}
           </h3>
           <DropdownMenu>
@@ -119,31 +119,31 @@ const WorkspaceContentCard = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
-              <DropdownMenuItem onClick={() => onView(item.id)} className="font-['Rubik'] cursor-pointer gap-2">
+              <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
                 <FiEye className="w-4 h-4" /> View
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-['Rubik'] cursor-pointer gap-2">
+              <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
                 <FiEdit className="w-4 h-4" /> Edit
               </DropdownMenuItem>
               {item.status === 'draft' && (
-                <DropdownMenuItem onClick={() => onSubmitReview(item.id)} className="font-['Rubik'] cursor-pointer gap-2 text-sunbird-wave">
+                <DropdownMenuItem onClick={() => onSubmitReview(item.id)} className="font-rubik cursor-pointer gap-2 text-sunbird-wave">
                   <FiSend className="w-4 h-4" /> Submit for Review
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-['Rubik'] cursor-pointer gap-2 text-destructive focus:text-destructive">
+              <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
                 <FiTrash2 className="w-4 h-4" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        <p className="text-xs text-muted-foreground font-['Rubik'] line-clamp-2 mb-3 leading-relaxed">
+        <p className="text-xs text-muted-foreground font-rubik line-clamp-2 mb-3 leading-relaxed">
           {item.description}
         </p>
 
         {/* Meta Info */}
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-['Rubik']">
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-rubik">
           <div className="flex items-center gap-1">
             <FiClock className="w-3 h-3" />
             <span>{timeAgo}</span>

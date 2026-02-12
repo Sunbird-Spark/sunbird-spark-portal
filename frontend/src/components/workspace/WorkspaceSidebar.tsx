@@ -42,7 +42,7 @@ const WorkspaceSidebar = ({ activeView, onViewChange, counts, userRole, onRoleCh
           <button
             onClick={() => onRoleChange('creator')}
             className={cn(
-              "flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium font-['Rubik'] transition-all duration-200",
+              "flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium font-rubik transition-all duration-200",
               userRole === 'creator'
                 ? "bg-white text-sunbird-brick shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -54,7 +54,7 @@ const WorkspaceSidebar = ({ activeView, onViewChange, counts, userRole, onRoleCh
           <button
             onClick={() => onRoleChange('reviewer')}
             className={cn(
-              "flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium font-['Rubik'] transition-all duration-200",
+              "flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium font-rubik transition-all duration-200",
               userRole === 'reviewer'
                 ? "bg-white text-sunbird-brick shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -81,7 +81,7 @@ const WorkspaceSidebar = ({ activeView, onViewChange, counts, userRole, onRoleCh
               key={item.id}
               onClick={() => onViewChange(item.id)}
               className={cn(
-                "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium font-['Rubik'] transition-all duration-200",
+                "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium font-rubik transition-all duration-200",
                 isActive && !isHighlight && "bg-sunbird-ginger/10 text-sunbird-brick",
                 !isActive && !isHighlight && "text-foreground/80 hover:bg-gray-100 hover:text-foreground",
                 isHighlight && isActive && "bg-sunbird-brick text-white shadow-md hover:bg-sunbird-brick/90",
@@ -115,17 +115,17 @@ const WorkspaceSidebar = ({ activeView, onViewChange, counts, userRole, onRoleCh
         <>
           <div className="h-px bg-gray-200" />
           <div className="px-3">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-['Rubik']">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-rubik">
               Quick Stats
             </h4>
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-sunbird-wave/10 rounded-xl p-3 text-center">
-                <div className="text-xl font-bold text-sunbird-ink font-['Rubik']">{counts.published}</div>
-                <div className="text-[10px] text-muted-foreground font-['Rubik']">Published</div>
+                <div className="text-xl font-bold text-sunbird-ink font-rubik">{counts.published}</div>
+                <div className="text-[10px] text-muted-foreground font-rubik">Published</div>
               </div>
               <div className="bg-sunbird-ginger/10 rounded-xl p-3 text-center">
-                <div className="text-xl font-bold text-sunbird-brick font-['Rubik']">{counts.review}</div>
-                <div className="text-[10px] text-muted-foreground font-['Rubik']">In Review</div>
+                <div className="text-xl font-bold text-sunbird-brick font-rubik">{counts.review}</div>
+                <div className="text-[10px] text-muted-foreground font-rubik">In Review</div>
               </div>
             </div>
           </div>

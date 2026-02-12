@@ -64,7 +64,7 @@ const WorkspaceHeader = ({
       {/* Title Row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground font-['Rubik']">
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground font-rubik">
             {title}
             {contentCount !== undefined && contentCount > 0 && (
               <span className="ml-2 text-base font-normal text-muted-foreground">
@@ -73,7 +73,7 @@ const WorkspaceHeader = ({
             )}
           </h1>
           {subtitle && (
-            <p className="text-sm text-muted-foreground font-['Rubik'] mt-0.5">{subtitle}</p>
+            <p className="text-sm text-muted-foreground font-rubik mt-0.5">{subtitle}</p>
           )}
         </div>
 
@@ -118,7 +118,7 @@ const WorkspaceHeader = ({
               placeholder="Search your content..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="ps-10 bg-white border-gray-200 focus:border-sunbird-ginger focus:ring-sunbird-ginger/20 rounded-xl h-10 font-['Rubik'] text-sm"
+              className="ps-10 bg-white border-sunbird-gray-d0 focus:border-sunbird-ginger focus:ring-sunbird-ginger/20 rounded-xl h-10 font-rubik text-sm"
             />
           </div>
 
@@ -129,7 +129,7 @@ const WorkspaceHeader = ({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-10 px-4 bg-white border-gray-200 rounded-xl font-['Rubik'] text-sm gap-2 hover:border-sunbird-ginger hover:bg-sunbird-ginger/5"
+                  className="h-10 px-4 bg-white border-sunbird-gray-d0 rounded-xl font-rubik text-sm gap-2 hover:border-sunbird-ginger hover:bg-sunbird-ginger/5"
                 >
                   <FiFilter className="w-4 h-4 text-muted-foreground" />
                   <span className={typeFilter !== 'all' ? 'text-sunbird-brick font-medium' : ''}>
@@ -144,7 +144,7 @@ const WorkspaceHeader = ({
                     key={key}
                     onClick={() => onTypeFilterChange(key as ContentTypeFilter)}
                     className={cn(
-                      "font-['Rubik'] cursor-pointer",
+                      "font-rubik cursor-pointer",
                       typeFilter === key && "bg-sunbird-ginger/10 text-sunbird-brick"
                     )}
                   >
@@ -159,7 +159,7 @@ const WorkspaceHeader = ({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-10 px-4 bg-white border-gray-200 rounded-xl font-['Rubik'] text-sm gap-2 hover:border-sunbird-ginger hover:bg-sunbird-ginger/5"
+                  className="h-10 px-4 bg-white border-sunbird-gray-d0 rounded-xl font-rubik text-sm gap-2 hover:border-sunbird-ginger hover:bg-sunbird-ginger/5"
                 >
                   <span>{sortLabels[sortBy]}</span>
                   <FiChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
@@ -171,7 +171,7 @@ const WorkspaceHeader = ({
                     key={key}
                     onClick={() => onSortChange(key as SortOption)}
                     className={cn(
-                      "font-['Rubik'] cursor-pointer",
+                      "font-rubik cursor-pointer",
                       sortBy === key && "bg-sunbird-ginger/10 text-sunbird-brick"
                     )}
                   >

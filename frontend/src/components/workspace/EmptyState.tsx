@@ -21,8 +21,8 @@ const EmptyState = ({
 }: EmptyStateProps) => {
   const variantStyles = {
     default: {
-      iconBg: 'bg-gray-100',
-      iconColor: 'text-gray-400',
+      iconBg: 'bg-muted',
+      iconColor: 'text-muted-foreground',
       buttonBg: 'bg-sunbird-ginger hover:bg-sunbird-brick',
     },
     uploads: {
@@ -45,17 +45,17 @@ const EmptyState = ({
   const styles = variantStyles[variant];
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-white rounded-[20px] shadow-sm border border-border">
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-white rounded-[1.25rem] shadow-sm border border-border">
       {/* Icon */}
       <div className={`w-20 h-20 rounded-2xl ${styles.iconBg} flex items-center justify-center mb-6`}>
         <Icon className={`w-10 h-10 ${styles.iconColor}`} />
       </div>
 
       {/* Text */}
-      <h3 className="text-xl font-semibold text-foreground font-['Rubik'] mb-2">
+      <h3 className="text-xl font-semibold text-foreground font-rubik mb-2">
         {title}
       </h3>
-      <p className="text-muted-foreground font-['Rubik'] max-w-sm mb-6 text-sm leading-relaxed">
+      <p className="text-muted-foreground font-rubik max-w-sm mb-6 text-sm leading-relaxed">
         {description}
       </p>
 
@@ -63,7 +63,7 @@ const EmptyState = ({
       {actionLabel && onAction && (
         <Button
           onClick={onAction}
-          className={`gap-2 ${styles.buttonBg} text-white font-['Rubik'] rounded-xl px-6 shadow-md hover:shadow-lg transition-all`}
+          className={`gap-2 ${styles.buttonBg} text-white font-rubik rounded-xl px-6 shadow-md hover:shadow-lg transition-all`}
         >
           <FiPlus className="w-4 h-4" />
           {actionLabel}

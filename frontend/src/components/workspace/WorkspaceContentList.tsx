@@ -48,7 +48,7 @@ const WorkspaceContentList = ({
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border">
       {/* Table Header */}
-      <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-muted/50 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide font-['Rubik']">
+      <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-muted/50 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide font-rubik">
         <div className="col-span-5 sm:col-span-4">Title</div>
         <div className="col-span-2 hidden sm:block">Type</div>
         <div className="col-span-2">Status</div>
@@ -80,10 +80,10 @@ const WorkspaceContentList = ({
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-medium text-foreground text-sm font-['Rubik'] truncate">
+                  <h4 className="font-medium text-foreground text-sm font-rubik truncate">
                     {item.title}
                   </h4>
-                  <p className="text-xs text-muted-foreground font-['Rubik'] truncate sm:hidden">
+                  <p className="text-xs text-muted-foreground font-rubik truncate sm:hidden">
                     {item.type}
                   </p>
                 </div>
@@ -94,18 +94,18 @@ const WorkspaceContentList = ({
                 <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", typeColors[item.type])}>
                   <TypeIcon className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-sm text-foreground font-['Rubik'] capitalize">{item.type}</span>
+                <span className="text-sm text-foreground font-rubik capitalize">{item.type}</span>
               </div>
 
               {/* Status */}
               <div className="col-span-2">
-                <span className={cn("inline-flex px-2.5 py-1 rounded-full text-xs font-medium font-['Rubik']", status.bg, status.text)}>
+                <span className={cn("inline-flex px-2.5 py-1 rounded-full text-xs font-medium font-rubik", status.bg, status.text)}>
                   {status.label}
                 </span>
               </div>
 
               {/* Modified */}
-              <div className="col-span-2 hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-['Rubik']">
+              <div className="col-span-2 hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-rubik">
                 <FiClock className="w-3.5 h-3.5" />
                 <span>{timeAgo}</span>
               </div>
@@ -135,19 +135,19 @@ const WorkspaceContentList = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
-                    <DropdownMenuItem onClick={() => onView(item.id)} className="font-['Rubik'] cursor-pointer gap-2">
+                    <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
                       <FiEye className="w-4 h-4" /> View
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-['Rubik'] cursor-pointer gap-2">
+                    <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
                       <FiEdit className="w-4 h-4" /> Edit
                     </DropdownMenuItem>
                     {item.status === 'draft' && (
-                      <DropdownMenuItem onClick={() => onSubmitReview(item.id)} className="font-['Rubik'] cursor-pointer gap-2 text-sunbird-wave">
+                      <DropdownMenuItem onClick={() => onSubmitReview(item.id)} className="font-rubik cursor-pointer gap-2 text-sunbird-wave">
                         <FiSend className="w-4 h-4" /> Submit for Review
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-['Rubik'] cursor-pointer gap-2 text-destructive focus:text-destructive">
+                    <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
                       <FiTrash2 className="w-4 h-4" /> Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

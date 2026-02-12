@@ -26,7 +26,7 @@ export default function CreateContentModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold font-['Rubik'] text-foreground">Create Content</h2>
+          <h2 className="text-2xl font-bold font-rubik text-foreground">Create Content</h2>
           <Button
             variant="ghost"
             size="sm"

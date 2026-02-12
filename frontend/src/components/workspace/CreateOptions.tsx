@@ -132,11 +132,11 @@ const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-br from-sunbird-ginger/10 via-sunbird-wave/10 to-sunbird-moss/10 rounded-[20px] p-6 md:p-8 border border-sunbird-ginger/20">
-        <h2 className="text-xl md:text-2xl font-semibold text-foreground font-['Rubik'] mb-2">
+      <div className="bg-gradient-to-br from-sunbird-ginger/10 via-sunbird-wave/10 to-sunbird-moss/10 rounded-[1.25rem] p-6 md:p-8 border border-sunbird-ginger/20">
+        <h2 className="text-xl md:text-2xl font-semibold text-foreground font-rubik mb-2">
           What would you like to create?
         </h2>
-        <p className="text-muted-foreground text-sm md:text-base font-['Rubik']">
+        <p className="text-muted-foreground text-sm md:text-base font-rubik">
           Choose an editor type below to start creating content for your learners.
         </p>
       </div>
@@ -146,14 +146,14 @@ const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
         {editorCategories.map((category) => (
           <div
             key={category.id}
-            className={`bg-white rounded-[20px] border-2 ${category.borderColor} shadow-md overflow-hidden`}
+            className={`bg-white rounded-[1.25rem] border-2 ${category.borderColor} shadow-md overflow-hidden`}
           >
             {/* Category Header */}
             <div className={`${category.accentColor} px-5 py-4`}>
-              <h3 className="text-lg font-semibold text-white font-['Rubik']">
+              <h3 className="text-lg font-semibold text-white font-rubik">
                 {category.title}
               </h3>
-              <p className="text-white/80 text-sm font-['Rubik']">
+              <p className="text-white/80 text-sm font-rubik">
                 {category.subtitle}
               </p>
             </div>
@@ -173,10 +173,10 @@ const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
                         <Icon className={`w-5 h-5 ${option.iconColor}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-foreground text-sm font-['Rubik'] mb-0.5 group-hover:text-sunbird-brick transition-colors">
+                        <h4 className="font-medium text-foreground text-sm font-rubik mb-0.5 group-hover:text-sunbird-brick transition-colors">
                           {option.title}
                         </h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed font-['Rubik'] line-clamp-2">
+                        <p className="text-xs text-muted-foreground leading-relaxed font-rubik line-clamp-2">
                           {option.description}
                         </p>
                       </div>
