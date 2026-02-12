@@ -17,14 +17,15 @@
     "lint:fix": "eslint src --ext ts,tsx --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "copy-players": "node scripts/copy-players.js",
-    "postinstall": "npm run copy-players"
+    "postinstall": "node copy-assets.js"
   },
   "keywords": [],
   "author": "sunbird",
   "license": "MIT",
   "dependencies": {
-    "@project-sunbird/sunbird-epub-player-web-component": "^1.5.0",
+    "@project-sunbird/sunbird-epub-player-web-component": "^2.0.0",
+    "@project-sunbird/sunbird-quml-player-web-component": "^6.0.0",
+    "@project-sunbird/sunbird-video-player-web-component": "^2.0.0",
     "@project-sunbird/telemetry-sdk": "^2.0.1",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-checkbox": "^1.3.2",
