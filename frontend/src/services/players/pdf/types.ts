@@ -1,24 +1,25 @@
-import React from 'react';
-
-// Declare the custom element for React/TypeScript
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'sunbird-pdf-player': React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & {
-          'player-config'?: string;
-        },
-        HTMLElement
-      >;
-    }
-  }
+export interface PdfPlayerContextProps {
+  mode?: string;
+  cdata?: any[];
+  contextRollup?: {
+    l1: string;
+  };
+  objectRollup?: Record<string, any>;
 }
 
-// Sunbird PDF Player specific configuration structure
-export interface SunbirdPdfPlayerConfig {
+export interface PdfPlayerMetadata {
+  identifier: string;
+  name: string;
+  artifactUrl: string;
+  streamingUrl?: string;
+  compatibilityLevel?: number;
+  pkgVersion?: number;
+  [key: string]: any;
+}
+
+export interface PdfPlayerConfig {
   context: {
     mode: string;
-    authToken: string;
     sid: string;
     did: string;
     uid: string;
@@ -28,37 +29,22 @@ export interface SunbirdPdfPlayerConfig {
       ver: string;
       pid: string;
     };
-    contextRollup: Record<string, string>;
-    tags: string[];
+    contextRollup: {
+      l1: string;
+    };
     cdata: any[];
     timeDiff: number;
     objectRollup: Record<string, any>;
     host: string;
     endpoint: string;
-    userData: {
-      firstName: string;
-      lastName: string;
-    };
   };
-  config: {
-    sideMenu: {
-      showShare: boolean;
-      showDownload: boolean;
-      showReplay: boolean;
-      showExit: boolean;
-      showPrint: boolean;
-    };
-  };
-  metadata: {
-    identifier: string;
-    name: string;
-    artifactUrl: string;
-    streamingUrl?: string;
-    compatibilityLevel?: number;
-    pkgVersion?: number;
-    isAvailableLocally?: boolean;
-    basePath?: string;
-    baseDir?: string;
-    [key: string]: any;
-  };
+  config: Record<string, any>;
+  metadata: PdfPlayerMetadata;
+}
+
+export interface PdfPlayerEvent {
+  type: string;
+  data: any;
+  playerId?: string;
+  timestamp?: number;
 }
