@@ -6,8 +6,7 @@ describe('Express App', () => {
     vi.doMock('./config/env.js', () => ({
       envConfig: {
         ENVIRONMENT: 'local',
-        SUNBIRD_ANONYMOUS_SESSION_SECRET: 'test',
-        SUNBIRD_LOGGEDIN_SESSION_SECRET: 'test',
+        SUNBIRD_SESSION_SECRET: 'test',
         SUNBIRD_ANONYMOUS_SESSION_TTL: 1000,
         KONG_URL: 'http://localhost:8000',
         PORTAL_REALM: 'sunbird',
