@@ -1,4 +1,3 @@
-export { WorkspaceService } from './WorkspaceService';
 export { mapContentToWorkspaceItem } from './contentMapper';
 export { getEditorCategories } from './createOptionsConfig';
 export {

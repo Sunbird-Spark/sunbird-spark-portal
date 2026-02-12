@@ -1,9 +1,9 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { WorkspaceService } from '../services/workspace';
+import { ContentService } from '../services/ContentService';
 import { ApiResponse } from '../lib/http-client';
 import type { ContentSearchResponse, UseContentSearchOptions } from '../types/workspaceTypes';
 
-const workspaceService = new WorkspaceService();
+const contentService = new ContentService();
 
 export const useContentSearch = (
   options?: UseContentSearchOptions
@@ -12,7 +12,7 @@ export const useContentSearch = (
   const enabled = options?.enabled ?? true;
   return useQuery({
     queryKey: ['content-search', request],
-    queryFn: () => workspaceService.compositeSearch(request),
+    queryFn: () => contentService.contentSearch(request),
     enabled,
   });
 };
