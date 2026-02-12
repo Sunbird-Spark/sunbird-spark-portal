@@ -1,5 +1,4 @@
 import Keycloak from 'keycloak-connect';
-import _ from 'lodash';
 import type { Request } from 'express';
 import logger from '../utils/logger.js';
 import { sessionStore } from '../utils/sessionStore.js';

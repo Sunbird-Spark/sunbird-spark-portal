@@ -47,7 +47,7 @@ app.get('/portal/login',
     sessionMiddleware,
     keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
     keycloak.protect(),
-    (req, res) => {
+    (req: Request, res: Response) => {
         // This handler will only be reached if the user is already authenticated
         // OR if they just logged in and Keycloak redirected them back here.
         // However, keycloak-connect often redirects to the "clean" URL after login.
@@ -104,7 +104,7 @@ app.get('/portal/auth/callback',
 
 // app.get('/profile', ... (commented out code remains commented out)
 
-app.all('/portal/logout', sessionMiddleware, async (req, res, next) => {
+app.all('/portal/logout', sessionMiddleware, async (req, res) => {
     // 1. Clear Keycloak session/tokens (handled by keycloak middleware usually, but here we just process local logout)
     // 2. Regenerate to anonymous session (clears user data, gets new SID, sets new anonymous tokens)
     try {

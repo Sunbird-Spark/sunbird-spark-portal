@@ -11,7 +11,6 @@ import logger from '../utils/logger.js';
 import { generateLoggedInKongToken, saveKongTokenToSession } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
-import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 import { regenerateSession, destroySession, saveSession } from '../utils/sessionUtils.js';
 
 vi.mock('keycloak-connect', () => {
