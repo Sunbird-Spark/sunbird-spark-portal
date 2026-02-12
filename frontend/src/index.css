@@ -315,15 +315,15 @@
   }
 
   .form-error-offset-8 {
-    @apply bottom-[-8px];
+    @apply bottom-[-0.5rem];
   }
 
   .form-error-offset-4 {
-    @apply bottom-[-4px];
+    @apply bottom-[-0.25rem];
   }
 
   .form-error-offset-2 {
-    @apply bottom-[-2px];
+    @apply bottom-[-0.125rem];
   }
 
   .themed-checkbox {

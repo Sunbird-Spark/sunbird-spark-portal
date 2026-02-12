@@ -1,22 +1,11 @@
 import React from "react";
-import { FiArrowRight, FiStar } from "react-icons/fi";
-import { Button } from "@/components/common/Button";
-import { Badge } from "@/components/common/Badge";
-import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
-
-interface ContentCourse {
-    id: string;
-    title: string;
-    image: string;
-    type: "Course" | "Textbook";
-    rating: number;
-    learners: string;
-    lessons: number;
-}
+import { CourseGrid } from "@/components/common/CourseGrid";
+import { ContentCourse } from "@/components/common/CourseCard";
 
 const PopularContent = () => {
     const { t } = useAppI18n();
+
     const mostViewedCourses: ContentCourse[] = [
         {
             id: "1",
@@ -77,103 +66,19 @@ const PopularContent = () => {
         },
     ];
 
-    const getBadgeStyles = () => {
-        return "bg-[#FFF1C7] text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-[#CC8545] border-[1px]";
-    };
-
-    const MostViewedCard = ({ course }: { course: ContentCourse }) => (
-        <Link to={`/collection/${course.id}`} className="flex justify-center">
-            <div
-                className="group bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-[2px_2px_20px_0px_rgba(0,0,0,0.09)] w-[23.125rem] h-[24.5rem] flex flex-col"
-            >
-                {/* Image with padding */}
-                <div className="px-[1.25rem] pt-[1.25rem] w-full">
-                    <div className="relative overflow-hidden rounded-[1.25rem] h-[10.125rem] w-full">
-                        <img
-                            src={course.image}
-                            alt={course.title}
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-[1.25rem]"
-                        />
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="px-[1.25rem] pt-[1.25rem] pb-5 flex flex-col flex-grow">
-                    {/* Badge below image */}
-                    <Badge
-                        className={`inline-flex items-center justify-center p-0 rounded-[2.25rem] mb-[1.25rem] ${course.type === 'Textbook' ? 'w-[5.875rem]' : 'w-[4.875rem]'} h-[1.875rem] ${getBadgeStyles()}`}
-                    >
-                        {t(`contentTypes.${course.type.toLowerCase()}`) || course.type}
-                    </Badge>
-
-                    {/* Title */}
-                    <h3
-                        className="font-rubik font-medium text-[1.25rem] leading-[1.75rem] tracking-normal bg-transparent border-0 text-foreground mb-[1.25rem] min-h-[3.5rem]"
-                    >
-                        {course.title}
-                    </h3>
-
-                    {/* Stats - Pushed to bottom */}
-                    <div
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground pt-[0.125rem] mt-auto"
-                    >
-                        <span
-                            className="font-medium text-foreground"
-                        >
-                            {course.rating.toFixed(1)}
-                        </span>
-                        <FiStar className="w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick" />
-                        <span className="mx-0.5">•</span>
-                        <span>{course.learners} {t("contentStats.learners")}</span>
-                        <span className="mx-0.5">•</span>
-                        <span>{course.lessons} {t("contentStats.lessons")}</span>
-                    </div>
-                </div>
-            </div>
-        </Link>
-    );
-
-    const CourseGrid = ({
-        courses,
-        title,
-        className = "mb-12",
-        CardComponent
-    }: {
-        courses: ContentCourse[];
-        title: string;
-        className?: string;
-        CardComponent: React.ComponentType<{ course: ContentCourse }>
-    }) => (
-        <div className={className}>
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-                <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground">
-                    {title}
-                </h2>
-                <Link to="/explore">
-                    <Button
-                        variant="ghost"
-                        className="p-0 h-auto hover:bg-transparent text-sunbird-brick"
-                    >
-                        <FiArrowRight className="w-5 h-3" />
-                    </Button>
-                </Link>
-            </div>
-
-            {/* Course Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {courses.map((course) => (
-                    <CardComponent key={course.id} course={course} />
-                ))}
-            </div>
-        </div>
-    );
-
     return (
         <section className="pt-[3.75rem] bg-white">
             <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
-                <CourseGrid courses={mostViewedCourses} title={t("trending.mostViewed")} className="mb-[3.75rem]" CardComponent={MostViewedCard} />
-                <CourseGrid courses={trendingCourses} title={t("trending.trending")} className="mb-0" CardComponent={MostViewedCard} />
+                <CourseGrid
+                    courses={mostViewedCourses}
+                    title={t("trending.mostViewed")}
+                    className="mb-[3.75rem]"
+                />
+                <CourseGrid
+                    courses={trendingCourses}
+                    title={t("trending.trending")}
+                    className="mb-0"
+                />
             </div>
         </section>
     );
