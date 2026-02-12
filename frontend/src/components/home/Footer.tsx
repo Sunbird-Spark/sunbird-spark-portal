@@ -18,15 +18,15 @@ const Footer = () => {
 
   return (
     <footer className="bg-sunbird-footer-bg font-rubik">
-      <div className="w-full py-[40px] px-6 md:px-12 lg:pl-[127px] lg:pr-[127px]">
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 pb-[30px] ">
+      <div className="w-full py-[2.5rem] px-6 md:px-12 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 pb-[1.875rem] ">
           {/* Logo */}
           <div className="shrink-0">
             <Link to="/" className="inline-block">
               <img
                 src={sunbirdLogo}
                 alt="Sunbird"
-                className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-[80px]"
+                className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-[5rem]"
               />
             </Link>
           </div>
@@ -76,7 +76,7 @@ const Footer = () => {
 
       {/* Bottom Bar - Darker strip */}
       <div className="bg-black">
-        <div className="w-full py-4 px-6 md:px-12 lg:pl-[127px] lg:pr-[127px]">
+        <div className="w-full py-4 px-6 md:px-12 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
           <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-4 md:gap-6 text-[0.8125rem] lg:pr-[6.5rem]">
             <a
               href="#"

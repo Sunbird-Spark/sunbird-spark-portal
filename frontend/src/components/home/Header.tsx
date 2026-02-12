@@ -36,7 +36,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)]">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-[4.5rem] pl-[60px] pr-[127px]">
+        <div className="flex items-center justify-between h-16 md:h-[4.5rem] pl-[3.75rem] pr-[7.9375rem]">
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
@@ -55,7 +55,7 @@ const Header = () => {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`font-rubik text-[18px] leading-[26px] tracking-normal transition-colors
+                className={`font-rubik text-[1.125rem] leading-[1.625rem] tracking-normal transition-colors
                   ${isActive(link.href)
                     ? "font-medium text-sunbird-brick"
                     : "font-normal text-gray-600 hover:text-gray-900"
@@ -63,7 +63,6 @@ const Header = () => {
               >
                 <span className="flex items-center gap-1">
                   {link.label}
-                  {link.href === "/explore" && <FiChevronDown className={`w-4 h-4 pl-[0.3125rem] mt-[0.1875rem] ${isActive(link.href) ? 'text-sunbird-brick' : 'text-gray-400'}`} />}
                 </span>
               </Link>
             ))}
@@ -105,7 +104,7 @@ const Header = () => {
             {/* Login Button */}
             <Button
               onClick={() => window.location.href = "/portal/login"}
-              className="font-rubik font-medium text-[16px] leading-[16px] tracking-normal w-[72px] h-[30px] rounded-[6px] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center p-0"
+              className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal w-[4.5rem] h-[1.875rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center p-0"
             >
               {t("login")}
             </Button>

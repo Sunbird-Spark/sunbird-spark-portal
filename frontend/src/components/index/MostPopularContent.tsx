@@ -75,16 +75,16 @@ const MostPopularContent = () => {
     ];
 
     const getBadgeStyle = () => {
-        return "bg-[#FFF1C7] text-foreground font-rubik font-medium text-[14px] leading-[18px] border-[#CC8545] border-[1px]";
+        return "bg-[#FFF1C7] text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-[#CC8545] border-[1px]";
     };
 
     return (
-        <section className="pt-[60px] pb-8 bg-white">
-            <div className="w-full pl-[127px] pr-[127px]">
+        <section className="pt-[3.75rem] pb-8 bg-white">
+            <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-6">
                     <h2
-                        className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-foreground"
+                        className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground"
                     >
                         {t("popular.title")}
                     </h2>
@@ -103,38 +103,38 @@ const MostPopularContent = () => {
                     {courses.map((course) => (
                         <Link key={course.id} to={`/collection/${course.id}`} className="flex justify-center">
                             <div
-                                className="group bg-white rounded-[20px] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-[2px_2px_20px_0px_rgba(0,0,0,0.09)] w-[370px] h-[392px] flex flex-col"
+                                className="group bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-[2px_2px_20px_0px_rgba(0,0,0,0.09)] w-[23.125rem] h-[24.5rem] flex flex-col"
                             >
                                 {/* Image with padding */}
-                                <div className="px-[20px] pt-[20px] w-full">
-                                    <div className="relative overflow-hidden rounded-[20px] h-[162px] w-full">
+                                <div className="px-[1.25rem] pt-[1.25rem] w-full">
+                                    <div className="relative overflow-hidden rounded-[1.25rem] h-[10.125rem] w-full">
                                         <img
                                             src={course.image}
                                             alt={course.title}
-                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-[20px]"
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-[1.25rem]"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Content */}
-                                <div className="px-[20px] pt-[20px] pb-5 flex flex-col flex-grow">
+                                <div className="px-[1.25rem] pt-[1.25rem] pb-5 flex flex-col flex-grow">
                                     {/* Badge below image */}
                                     <Badge
-                                        className={`inline-flex items-center justify-center p-0 rounded-[36px] mb-[20px] ${course.type === 'Textbook' ? 'w-[94px]' : 'w-[78px]'} h-[30px] ${getBadgeStyle()}`}
+                                        className={`inline-flex items-center justify-center p-0 rounded-[2.25rem] mb-[1.25rem] ${course.type === 'Textbook' ? 'w-[5.875rem]' : 'w-[4.875rem]'} h-[1.875rem] ${getBadgeStyle()}`}
                                     >
                                         {t(`contentTypes.${course.type.toLowerCase()}`) || course.type}
                                     </Badge>
 
                                     {/* Title */}
                                     <h3
-                                        className="font-rubik font-medium text-[20px] leading-[28px] tracking-normal bg-transparent border-0 text-foreground mb-[20px] min-h-[56px]"
+                                        className="font-rubik font-medium text-[1.25rem] leading-[1.75rem] tracking-normal bg-transparent border-0 text-foreground mb-[1.25rem] min-h-[3.5rem]"
                                     >
                                         {course.title}
                                     </h3>
 
                                     {/* Stats - Pushed to bottom */}
                                     <div
-                                        className="flex items-center gap-1.5 text-xs text-muted-foreground pt-[2px] mt-auto"
+                                        className="flex items-center gap-1.5 text-xs text-muted-foreground pt-[0.125rem] mt-auto"
                                     >
                                         <span
                                             className="font-medium text-foreground"

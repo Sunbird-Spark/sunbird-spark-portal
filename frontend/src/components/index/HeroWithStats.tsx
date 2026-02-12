@@ -15,7 +15,7 @@ const HeroWithStats = () => {
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-white pb-24 lg:pb-32">
                 {/* Cream Wave Background - positioned at bottom */}
-                <div className="absolute bottom-[80px] top-[150px] left-0 right-0 w-full">
+                <div className="absolute bottom-[5rem] top-[9.375rem] left-0 right-0 w-full">
                     <img
                         src={creamWave}
                         alt=""
@@ -69,12 +69,12 @@ const HeroWithStats = () => {
 
                         {/* Hero Image with teal shape - Right Side (becomes Left in RTL grid) */}
                         <div className="hidden lg:flex justify-end items-end relative h-[28rem] -mb-16 ">
-                            <div className="absolute bottom-[15px] right-[15px] w-[26.25rem]">
+                            <div className="absolute bottom-[0.9375rem] right-[0.9375rem] w-[26.25rem]">
                                 <img
                                     src={tealShape}
                                     alt=""
                                     className="w-full h-auto rotate-[-0.5deg] origin-center pb-[1rem]  pl-[6.25rem]"
-                                    style={{ paddingBottom: '5.275rem' }}
+                                    style={{ paddingBottom: '6.075rem' }}
                                 />
                             </div>
                             <div className="relative z-10  flex items-end justify-center h-full">
@@ -82,7 +82,7 @@ const HeroWithStats = () => {
                                     src={heroWoman}
                                     alt="Professional learning"
                                     className="w-[22.5rem] h-auto object-contain"
-                                    style={{ width: '55.5rem', height: '42.875rem', paddingBottom: '0.0625rem', paddingTop: '9.675rem' }}
+                                    style={{ width: '55.5rem', height: '44.875rem', paddingBottom: '0.0625rem', paddingTop: '9.975rem' }}
                                 />
                             </div>
                         </div>

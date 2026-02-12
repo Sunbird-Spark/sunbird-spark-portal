@@ -34,7 +34,7 @@ const CertificateIcon = () => (
 
 const HeroStats = () => {
     const { t, isRTL } = useAppI18n();
-    const floatingShadow = "shadow-[0_18px_40px_-28px_hsl(var(--foreground)/0.22),0_6px_18px_-12px_hsl(var(--foreground)/0.10)]";
+    const floatingShadow = "shadow-[0_1.125rem_2.5rem_-1.75rem_hsl(var(--foreground)/0.22),0_0.375rem_1.125rem_-0.75rem_hsl(var(--foreground)/0.10)]";
 
     const avatarNames = ["John Doe", "Jane Smith"];
 
@@ -46,13 +46,13 @@ const HeroStats = () => {
             >
                 {/* 500+ Courses */}
                 <div className="flex-1 text-center relative">
-                    <div className="flex justify-center mb-[10px]">
+                    <div className="flex justify-center mb-[0.625rem]">
                         <BookIcon />
                     </div>
-                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground">
+                    <div className="font-rubik font-semibold text-[2.125rem] leading-[2.875rem] tracking-normal text-center text-foreground">
                         500+
                     </div>
-                    <div className="font-rubik font-normal text-[18px] leading-[20px] tracking-normal text-center text-[#757575]">
+                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-[#757575]">
                         {t("stats.courses")}
                     </div>
                 </div>
@@ -62,10 +62,10 @@ const HeroStats = () => {
                     <div className="flex justify-center mb-1.5">
                         <UsersIcon />
                     </div>
-                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground">
+                    <div className="font-rubik font-semibold text-[2.125rem] leading-[2.875rem] tracking-normal text-center text-foreground">
                         50K+
                     </div>
-                    <div className="font-rubik font-normal text-[18px] leading-[20px] tracking-normal text-center text-[#757575]">
+                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-[#757575]">
                         {t("stats.activeLearners")}
                     </div>
                 </div>
@@ -75,10 +75,10 @@ const HeroStats = () => {
                     <div className="flex justify-center mb-1.5">
                         <CertificateIcon />
                     </div>
-                    <div className="font-rubik font-semibold text-[34px] leading-[46px] tracking-normal text-center text-foreground">
+                    <div className="font-rubik font-semibold text-[2.125rem] leading-[2.875rem] tracking-normal text-center text-foreground">
                         200+
                     </div>
-                    <div className="font-rubik font-normal text-[18px] leading-[20px] tracking-normal text-center text-[#757575]">
+                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-[#757575]">
                         {t("stats.certifications")}
                     </div>
                 </div>
@@ -86,15 +86,15 @@ const HeroStats = () => {
 
             {/* Learning Process Card */}
             <div
-                className={`flex flex-col justify-between px-7 py-[20px] rounded-2xl bg-surface ${floatingShadow} lg:w-[16.25rem] h-[11.625rem]`}
+                className={`flex flex-col justify-between px-7 py-[1.25rem] rounded-2xl bg-surface ${floatingShadow} lg:w-[16.25rem] h-[11.625rem]`}
             >
                 <div>
-                    <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal mb-4 text-foreground line-clamp-2 pt-[10px] pl-[1px]">
+                    <p className="font-rubik font-medium text-[1.25rem] leading-[1.5rem] tracking-normal mb-4 text-foreground line-clamp-2 pt-[0.625rem] pl-[0.0625rem]">
                         {t("hero.processSimple")}
                     </p>
                 </div>
                 <div>
-                    <span className="flex items-center justify-center w-[80px] h-[34px] rounded-[22px] border border-[#D2D6DE] font-rubik font-normal text-[14px] leading-[20px] tracking-[0px] text-center opacity-[0.99] text-foreground">
+                    <span className="flex items-center justify-center w-[5rem] h-[2.125rem] rounded-[1.375rem] border border-[#D2D6DE] font-rubik font-normal text-[0.875rem] leading-[1.25rem] tracking-[0rem] text-center opacity-[0.99] text-foreground">
                         {t("hero.online")}
                     </span>
                 </div>
@@ -106,7 +106,7 @@ const HeroStats = () => {
                     <div
                         className="relative flex h-full flex-col justify-between bg-white px-6 py-6 rounded-2xl card-mask-custom"
                     >
-                        <p className="font-rubik font-medium text-[20px] leading-[24px] tracking-normal text-foreground max-w-[80%] line-clamp-2 pt-[10px] pl-[1px]">
+                        <p className="font-rubik font-medium text-[1.25rem] leading-[1.5rem] tracking-normal text-foreground max-w-[80%] line-clamp-2 pt-[0.625rem] pl-[0.0625rem]">
                             {t("hero.studyPace")}
                         </p>
 
@@ -114,7 +114,7 @@ const HeroStats = () => {
                             {avatarNames.map((name, index) => (
                                 <div
                                     key={index}
-                                    className="relative z-10 rounded-full border-[3px] border-white"
+                                    className="relative z-10 rounded-full border-[0.1875rem] border-white"
                                 >
                                     <Avatar
                                         name={name}

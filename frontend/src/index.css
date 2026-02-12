@@ -303,7 +303,7 @@
   }
 
   .form-divider-line {
-    @apply h-[1px] flex-1 bg-gray-200;
+    @apply h-[0.0625rem] flex-1 bg-gray-200;
   }
 
   .form-divider-text {

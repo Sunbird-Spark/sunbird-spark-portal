@@ -39,9 +39,9 @@ const FAQSection = () => {
     ];
 
     return (
-        <section className="bg-white pt-[60px] pb-[60px]">
-            <div className="w-full pl-[127px] pr-[127px]">
-                <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal mb-6 text-foreground">
+        <section className="bg-white pt-[3.75rem] pb-[3.75rem]">
+            <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
+                <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal mb-6 text-foreground">
                     {t("faq.title")}
                 </h2>
 
@@ -53,18 +53,18 @@ const FAQSection = () => {
                         type="single"
                         collapsible
                         defaultValue="item-0"
-                        className="flex flex-col gap-[20px] pt-[15px]"
+                        className="flex flex-col gap-[1.25rem] pt-[0.9375rem]"
                     >
                         {faqs.map((faq, index) => (
                             <AccordionItem
                                 key={index}
                                 value={`item-${index}`}
-                                className="rounded-[16px] py-[19px] px-[20px] border border-border/50 bg-white shadow-sm w-full"
+                                className="rounded-[1rem] py-[1.1875rem] px-[1.25rem] border border-border/50 bg-white shadow-sm w-full"
                             >
-                                <AccordionTrigger className="py-0 text-left font-rubik font-medium text-[18px] leading-[100%] tracking-normal text-foreground hover:no-underline">
+                                <AccordionTrigger className="py-0 text-left font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-foreground hover:no-underline">
                                     {faq.question}
                                 </AccordionTrigger>
-                                <AccordionContent className="!pb-0 pt-5 font-rubik font-normal text-[16px] leading-[26px] tracking-normal text-[#757575]">
+                                <AccordionContent className="!pb-0 pt-5 font-rubik font-normal text-[1rem] leading-[1.625rem] tracking-normal text-[#757575]">
                                     {faq.answer}
                                 </AccordionContent>
                             </AccordionItem>
@@ -72,7 +72,7 @@ const FAQSection = () => {
                     </Accordion>
 
                     <div className="hidden lg:block">
-                        <div className="w-[370px] h-[448px] overflow-hidden rounded-[18px]">
+                        <div className="w-[23.125rem] h-[28rem] overflow-hidden rounded-[1.125rem]">
                             <img
                                 src={faqImage}
                                 alt="Student learning online"

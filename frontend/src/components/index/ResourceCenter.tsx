@@ -20,17 +20,17 @@ const ResourceCenter = () => {
     const { t } = useAppI18n();
 
     return (
-        <section className="pt-[30px] pb-[1.875rem] bg-[#FFF1C7]">
-            <div className="w-full pl-[127px] pr-[127px]">
+        <section className="pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7]">
+            <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
 
-                <div className="flex items-center justify-center gap-4 mb-[20px]">
-                    <div className="h-[1px] w-[100px] bg-[#333333]"></div>
-                    <span className="font-rubik font-normal text-[16px] leading-[24px] tracking-normal text-[#333333]">
+                <div className="flex items-center justify-center gap-4 mb-[1.25rem]">
+                    <div className="h-[0.0625rem] w-[6.25rem] bg-[#333333]"></div>
+                    <span className="font-rubik font-normal text-[1rem] leading-[1.5rem] tracking-normal text-[#333333]">
                         Resource Center
                     </span>
-                    <div className="h-[1px] w-[100px] bg-[#333333]"></div>
+                    <div className="h-[0.0625rem] w-[6.25rem] bg-[#333333]"></div>
                 </div>
-                <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-[#333333] text-center mb-[20px]">
+                <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-[#333333] text-center mb-[1.25rem]">
                     {t("resource.title")}
                 </h2>
 
@@ -42,50 +42,50 @@ const ResourceCenter = () => {
                             title="Elm Partners with Udacity to Build a Graduate Development Program"
                             type="Video"
                             image={resourceRobotHand}
-                            heightClass="h-[459px]"
+                            heightClass="h-[28.6875rem]"
                         />
                         <ResourceCardComponent
                             id="4"
                             title="Bitcoin Engineering Foundations"
                             type="Epub"
                             image={resourceBitcoin}
-                            heightClass="h-[296px]"
+                            heightClass="h-[18.5rem]"
                         />
                     </div>
 
                     {/* Column 2 - Middle: Short top (PDF), Tall bottom (Video) */}
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
                         <ResourceCardComponent
                             id="2"
                             title="Data Engineering Foundations"
                             type="PDF"
                             image={resourceVR}
-                            heightClass="h-[296px]"
+                            heightClass="h-[18.5rem]"
                         />
                         <ResourceCardComponent
                             id="5"
                             title="Generative AI for Cybersecurity Professionals"
                             type="Video"
                             image={resourceHacker}
-                            heightClass="h-[459px]"
+                            heightClass="h-[28.6875rem]"
                         />
                     </div>
 
                     {/* Column 3 - Right: Tall top (HTML), Short bottom (Video) */}
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
                         <ResourceCardComponent
                             id="3"
                             title="Generative AI for Cybersecurity Professionals"
                             type="HTML"
                             image={resourceHardware}
-                            heightClass="h-[430px]"
+                            heightClass="h-[26.875rem]"
                         />
                         <ResourceCardComponent
                             id="6"
                             title="Data Engineering Foundations"
                             type="Video"
                             image={resourceEthereum}
-                            heightClass="h-[296px]"
+                            heightClass="h-[18.5rem]"
                         />
                     </div>
                 </div>
@@ -114,30 +114,30 @@ const ResourceCardComponent = ({
     };
 
     return (
-        <Link to={`/collection/${id}`} className="block group w-[360px]">
-            <div className={`relative w-full ${heightClass} rounded-[20px] overflow-hidden`}>
+        <Link to={`/collection/${id}`} className="block group w-[22.5rem]">
+            <div className={`relative w-full ${heightClass} rounded-[1.25rem] overflow-hidden`}>
                 {/* Background Image Container */}
                 <div className="absolute inset-0">
                     <img
                         src={image}
                         alt={title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 rounded-[20px]"
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 rounded-[1.25rem]"
                     />
                 </div>
 
                 {/* Top-left Badge - Exact 44x38 dimensions */}
-                <div className="absolute top-[44px] left-[34px] z-5">
-                    <span className="flex items-center justify-center bg-white text-black font-weight-[500] font-bold font-style-[medium] text-[16px] px-3 w-[78px] h-[36px] rounded-[4px] shadow-sm tracking-wide">
+                <div className="absolute top-[2.75rem] left-[2.125rem] z-5">
+                    <span className="flex items-center justify-center bg-white text-black font-weight-[500] font-bold font-style-[medium] text-[1rem] px-3 w-[4.875rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide">
                         {type}
                     </span>
                 </div>
 
                 {/* Bottom Content - Aligned exactly at bottom-left corner */}
-                <div className="absolute bottom-[62px] left-[34px] right-[24px] z-10 flex flex-col items-start gap-1.5">
-                    <h3 className="font-rubik font-medium text-[20px] leading-[28px] tracking-normal text-white [text-wrap:balance]">
+                <div className="absolute bottom-[3.875rem] left-[2.125rem] right-[1.5rem] z-10 flex flex-col items-start gap-1.5">
+                    <h3 className="font-rubik font-medium text-[1.25rem] leading-[1.75rem] tracking-normal text-white [text-wrap:balance]">
                         {title}
                     </h3>
-                    <div className="flex items-center gap-2 text-white/95 font-semibold text-[14px] group-hover:underline transition-all">
+                    <div className="flex items-center gap-2 text-white/95 font-semibold text-[0.875rem] group-hover:underline transition-all">
                         {getViewLabel(type)}
                         <FiArrowRight className="w-4 h-4" />
                     </div>

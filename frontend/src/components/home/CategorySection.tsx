@@ -37,31 +37,31 @@ const CategorySection = () => {
   ];
 
   return (
-    <section id="categories" className="pt-[40px] pb-8 bg-white">
-      <div className="w-full pl-[127px] pr-[127px]">
+    <section id="categories" className="pt-[2.5rem] pb-8 bg-white">
+      <div className="w-full pl-[7.9375rem] pr-[7.9375rem]">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="font-rubik font-medium text-[26px] leading-[26px] tracking-normal text-foreground">
+          <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground">
             {t("browseCategories")}
           </h2>
         </div>
 
         {/* Category Cards and Browse All */}
-        <div className="flex items-center gap-6 pb-[30px] flex-wrap justify-between">
+        <div className="flex items-center gap-6 pb-[1.875rem] flex-wrap justify-between">
           <div className="flex items-center gap-4 flex-wrap lg:flex-nowrap">
             {categories.map((category) => (
               <Link key={category.id} to="/explore" className="group">
                 <div
-                  className="flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[224px] h-[194px] rounded-[20px]"
+                  className="flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[14rem] h-[12.125rem] rounded-[1.25rem]"
                   style={{ background: category.background }}
                 >
                   {/* Top-left white horizontal line */}
-                  <div className="w-9 h-[3px] bg-white/90 rounded-full" />
+                  <div className="w-9 h-[0.1875rem] bg-white/90 rounded-full" />
 
                   {/* Bottom content: Icon + Label */}
                   <div className="flex flex-col gap-3">
                     <img src={category.icon} alt={category.name} className="w-8 h-8" />
-                    <p className="text-[17px] font-bold text-white leading-tight">
+                    <p className="text-[1.0625rem] font-bold text-white leading-tight">
                       {category.name}
                     </p>
                   </div>
@@ -74,14 +74,14 @@ const CategorySection = () => {
           <Link
             to="/explore"
             className="group flex flex-col items-center justify-center gap-3"
-            style={{ paddingTop: '17px', paddingBottom: '0px' }}
+            style={{ paddingTop: '1.0625rem', paddingBottom: '0rem' }}
           >
             <div
-              className="rounded-full text-white flex items-center justify-center transition-transform hover:scale-105 w-[59px] h-[59px] bg-sunbird-brick"
+              className="rounded-full text-white flex items-center justify-center transition-transform hover:scale-105 w-[3.6875rem] h-[3.6875rem] bg-sunbird-brick"
             >
               <FiArrowRight className="w-6 h-6" />
             </div>
-            <span className="text-[14px] font-bold text-foreground">
+            <span className="text-[0.875rem] font-bold text-foreground">
               {t("viewAll")}
             </span>
           </Link>
