@@ -6,6 +6,7 @@ import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import RelatedCourseCard from "@/components/content/RelatedCourseCard";
 import RelatedResourceCard from "@/components/content/RelatedResourceCard";
+import RelatedPdfCard from "@/components/content/RelatedPdfCard";
 import { fetchContentById } from "@/services/contentPlayerService";
 import { ContentData } from "@/types/contentTypes";
 
@@ -100,13 +101,15 @@ const ContentPlayer = () => {
           </div>
 
           <div className="content-player-related-grid">
-            {contentData.relatedContent.map((item) =>
-              item.isResource ? (
-                <RelatedResourceCard key={item.id} item={item} />
-              ) : (
-                <RelatedCourseCard key={item.id} item={item} />
-              ),
-            )}
+            {contentData.relatedContent.map((item) => {
+              if (item.type === "PDF" && item.isResource) {
+                return <RelatedPdfCard key={item.id} item={item} />;
+              } else if (item.isResource) {
+                return <RelatedResourceCard key={item.id} item={item} />;
+              } else {
+                return <RelatedCourseCard key={item.id} item={item} />;
+              }
+            })}
           </div>
         </section>
       </main>

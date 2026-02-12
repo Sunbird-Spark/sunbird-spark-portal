@@ -1,41 +1,59 @@
+import { FiArrowRight, FiStar } from "react-icons/fi";
+import { Button } from "@/components/common/Button";
+import { Badge } from "@/components/common/Badge";
 import { Link } from "react-router-dom";
-import { FiArrowRight } from "react-icons/fi";
 import { RelatedItem } from "@/types/contentTypes";
 
 interface RelatedResourceCardProps {
   item: RelatedItem;
 }
 
-const RelatedResourceCard = ({ item }: RelatedResourceCardProps) => (
-  <Link to={`/content/${item.id}`} className="related-resource-card-link">
-    <div className="related-resource-card-container">
-      <div
-        className="related-resource-card-image"
-        style={{
-          backgroundImage: `url(${item.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
+const RelatedResourceCard = ({ item }: RelatedResourceCardProps) => {
+  return (
+    <Link to={`/content/${item.id}`} className="related-resource-card-link">
+      <div className="group related-resource-card-container">
+        {/* Image with padding */}
+        <div className="related-resource-card-image-wrapper">
+          <div className="related-resource-card-image-inner">
+            <img
+              src={item.image}
+              alt={item.title}
+              className="related-resource-card-image"
+            />
+          </div>
+        </div>
 
-      <div className="related-resource-card-badge-container">
-        <span className="related-resource-card-type-badge">
-          {item.type}
-        </span>
-      </div>
+        {/* Content */}
+        <div className="related-resource-card-content-wrapper">
+          {/* Badge below image */}
+          <Badge
+            className={`related-resource-card-badge ${item.type === 'Textbook' ? 'related-resource-card-badge-textbook' : 'related-resource-card-badge-course'}`}
+          >
+            {item.type}
+          </Badge>
 
-      <div className="related-resource-card-content">
-        <h3 className="content-player-resource-title">
-          {item.title}
-        </h3>
-        <p className="related-resource-card-subtitle">
-          See the Case Study
-          <FiArrowRight className="related-resource-card-arrow" />
-        </p>
+          {/* Title */}
+          <h3 className="related-resource-card-title">
+            {item.title}
+          </h3>
+
+          {/* Stats - Pushed to bottom */}
+          {item.rating && item.learners && item.lessons && (
+            <div className="related-resource-card-stats">
+              <span className="related-resource-card-rating">
+                {item.rating.toFixed(1)}
+              </span>
+              <FiStar className="related-resource-card-star" />
+              <span className="related-resource-card-separator">•</span>
+              <span>{item.learners} Learners</span>
+              <span className="related-resource-card-separator">•</span>
+              <span>{item.lessons} Lessons</span>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  </Link>
-);
+    </Link>
+  );
+};
 
 export default RelatedResourceCard;
