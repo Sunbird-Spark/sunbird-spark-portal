@@ -58,6 +58,12 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
 
     const initPlayer = async () => {
       try {
+        console.log('Initializing EPUB player with metadata:', {
+          identifier: metadata.identifier,
+          name: metadata.name,
+          artifactUrl: metadata.artifactUrl,
+        });
+
         const config = await service.createConfig(metadata, contextProps);
         
         if (cancelled) return;
@@ -67,6 +73,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
         
         if (containerRef.current) {
           containerRef.current.appendChild(playerElement);
+          console.log('EPUB player element added to DOM');
         }
       } catch (error) {
         console.error('Failed to initialize EPUB player:', error);

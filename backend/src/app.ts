@@ -30,7 +30,41 @@ const __dirname = path.dirname(__filename);
 export const app = express();
 app.set('trust proxy', true);
 app.use(helmet({
-    contentSecurityPolicy: false
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "'unsafe-eval'",
+                "https://www.google.com",
+                "https://www.gstatic.com"
+            ],
+            frameSrc: [
+                "'self'",
+                "https://www.google.com"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://fonts.googleapis.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "data:"
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+                "https:"
+            ],
+            connectSrc: [
+                "'self'",
+                "https://www.google.com"
+            ]
+        }
+    }
 }));
 
 loadTenants();
