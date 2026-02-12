@@ -158,7 +158,7 @@ const WorkspacePage = () => {
   if (showContent && isLoading) return <PageLoader message={t('loading')} />;
 
   return (
-    <div className="min-h-screen bg-[#F4F4F4] flex flex-col">
+    <div className="min-h-screen bg-sunbird-gray-f3 flex flex-col">
       <WorkspacePageHeader
         isMobile={isMobile}
         isSidebarOpen={isSidebarOpen}
@@ -189,7 +189,7 @@ const WorkspacePage = () => {
                 <div className="absolute -right-3 top-2 z-20">
                   <button
                     onClick={() => setIsSidebarOpen(false)}
-                    className="w-6 h-6 bg-[#EFEFEF] rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
+                    className="w-6 h-6 bg-sunbird-gray-ef rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
                   >
                     <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -203,7 +203,7 @@ const WorkspacePage = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
-          <main className="flex-1 overflow-y-auto bg-[#F4F4F4]">
+          <main className="flex-1 overflow-y-auto bg-sunbird-gray-f3">
             <div className="home-content-wrapper">
               <SegmentedControlPattern {...navigationProps} />
               <WorkspacePageContent

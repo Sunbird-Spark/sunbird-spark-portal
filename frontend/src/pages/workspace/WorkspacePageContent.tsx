@@ -36,7 +36,7 @@ export default function WorkspacePageContent({
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
-      <div className="bg-white rounded-[20px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100/80">
+      <div className="bg-white rounded-[20px] p-6 shadow-sm border border-border">
         <CreateOptions onOptionSelect={onCreateOption} />
       </div>
     );

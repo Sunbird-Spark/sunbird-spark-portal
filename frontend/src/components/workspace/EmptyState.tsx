@@ -45,7 +45,7 @@ const EmptyState = ({
   const styles = variantStyles[variant];
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-white rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100/80">
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-white rounded-[20px] shadow-sm border border-border">
       {/* Icon */}
       <div className={`w-20 h-20 rounded-2xl ${styles.iconBg} flex items-center justify-center mb-6`}>
         <Icon className={`w-10 h-10 ${styles.iconColor}`} />

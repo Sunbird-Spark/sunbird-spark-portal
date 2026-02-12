@@ -146,7 +146,7 @@ const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
         {editorCategories.map((category) => (
           <div
             key={category.id}
-            className={`bg-white rounded-[20px] border-2 ${category.borderColor} shadow-[2px_2px_20px_rgba(0,0,0,0.06)] overflow-hidden`}
+            className={`bg-white rounded-[20px] border-2 ${category.borderColor} shadow-md overflow-hidden`}
           >
             {/* Category Header */}
             <div className={`${category.accentColor} px-5 py-4`}>

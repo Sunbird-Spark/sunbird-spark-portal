@@ -113,7 +113,7 @@ const SegmentedControlPattern = ({
       </div>
 
       {/* Segmented Control Bar */}
-      <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100/80 p-2">
+      <div className="bg-white rounded-2xl shadow-sm border border-border p-2">
         <div className="flex items-center justify-between">
           {/* Main Segments */}
           <div className="flex bg-gray-100 rounded-xl p-1 flex-1 max-w-xl">
