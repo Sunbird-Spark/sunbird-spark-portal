@@ -89,4 +89,3 @@ frontend/public/assets/epub-player/
 # =========================
 frontend/public/sample-epub.epub
 frontend/public/*.epub
-.vscode/settings.json

@@ -1,6 +1,5 @@
 import { DeviceService, $t } from '@project-sunbird/telemetry-sdk';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storage';
-import { getClient } from '../lib/http-client';
 
 class AppCoreService {
     private static instance: AppCoreService;
@@ -75,14 +74,10 @@ class AppCoreService {
                 (window as any).EkTelemetry = $t;
             }
 
-            this.deviceId = await this.getDeviceId();
-            getClient().updateHeaders([{
-                'key': 'X-Device-ID',
-                'value': this.deviceId,
-                'action': 'add',
-            }]);
+            // Preload device ID
+            const deviceId = await this.getDeviceId();
             // eslint-disable-next-line no-console
-            console.log('Device ID initialized:', this.deviceId);
+            console.log('Device ID initialized:', deviceId);
         } catch (error) {
             console.error('AppCoreService initialization failed:', error);
             throw error;
