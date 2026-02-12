@@ -1,14 +1,13 @@
-import { FiArrowRight, FiStar } from "react-icons/fi";
-import { Button } from "@/components/common/Button";
+import { FiStar } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Link } from "react-router-dom";
 import { RelatedItem } from "@/types/contentTypes";
 
-interface RelatedResourceCardProps {
+interface RelatedContentCardProps {
   item: RelatedItem;
 }
 
-const RelatedResourceCard = ({ item }: RelatedResourceCardProps) => {
+const RelatedContentCard = ({ item }: RelatedContentCardProps) => {
   return (
     <Link to={`/content/${item.id}`} className="related-resource-card-link">
       <div className="group related-resource-card-container">
@@ -37,7 +36,7 @@ const RelatedResourceCard = ({ item }: RelatedResourceCardProps) => {
             {item.title}
           </h3>
 
-          {/* Stats - Pushed to bottom */}
+          {/* Stats - Always show if available */}
           {item.rating && item.learners && item.lessons && (
             <div className="related-resource-card-stats">
               <span className="related-resource-card-rating">
@@ -56,4 +55,4 @@ const RelatedResourceCard = ({ item }: RelatedResourceCardProps) => {
   );
 };
 
-export default RelatedResourceCard;
+export default RelatedContentCard;

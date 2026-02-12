@@ -4,8 +4,7 @@ import { FiArrowLeft, FiPlay, FiStar, FiShare2 } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
-import RelatedCourseCard from "@/components/content/RelatedCourseCard";
-import RelatedResourceCard from "@/components/content/RelatedResourceCard";
+import RelatedContentCard from "@/components/content/RelatedContentCard";
 import RelatedPdfCard from "@/components/content/RelatedPdfCard";
 import { fetchContentById } from "@/services/contentPlayerService";
 import { ContentData } from "@/types/contentTypes";
@@ -104,10 +103,8 @@ const ContentPlayer = () => {
             {contentData.relatedContent.map((item) => {
               if (item.type === "PDF" && item.isResource) {
                 return <RelatedPdfCard key={item.id} item={item} />;
-              } else if (item.isResource) {
-                return <RelatedResourceCard key={item.id} item={item} />;
               } else {
-                return <RelatedCourseCard key={item.id} item={item} />;
+                return <RelatedContentCard key={item.id} item={item} />;
               }
             })}
           </div>

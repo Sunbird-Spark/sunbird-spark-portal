@@ -1,4 +1,4 @@
-import resourceRobotHand from "@/assets/resource-robot-hand.svg";
+import resourceRobotHand from "@/assets/resource-robot-hand-fill.svg";
 import resourceHacker from "@/assets/resource-hacker.svg";
 import resourceRobot from "@/assets/resource-robot.svg";
 import resourceTextBook from "@/assets/resource-text-book.svg";
