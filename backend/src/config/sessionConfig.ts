@@ -1,13 +1,13 @@
 import session from 'express-session';
 import { envConfig } from './env.js';
-import { CookieNames } from '../utils/cookieConstants.js';
+
 import { sessionStore } from '../utils/sessionStore.js';
 
 const isLocal = envConfig.ENVIRONMENT === 'local';
 console.log('SESSION CONFIG :: isLocal:', isLocal, 'ENVIRONMENT:', envConfig.ENVIRONMENT);
 
 export const sessionConfig: session.SessionOptions = {
-    name: CookieNames.SESSION_ID,
+    name: 'connect.sid',
     store: sessionStore,
     secret: envConfig.SUNBIRD_SESSION_SECRET,
     resave: false,
