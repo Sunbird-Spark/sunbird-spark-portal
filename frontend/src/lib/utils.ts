@@ -9,7 +9,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Relative time for workspace (e.g. "2 days ago"), aligned with SunbirdEd-portal fromNow pipe */
 export function formatTimeAgo(value: Date | string | number): string {
   const local = dayjs(value).format("YYYY-MM-DD HH:mm:ss");
   if (dayjs(local).isValid()) {
