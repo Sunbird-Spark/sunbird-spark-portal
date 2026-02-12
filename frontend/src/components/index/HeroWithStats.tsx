@@ -34,12 +34,12 @@ const HeroWithStats = () => {
                     className={`absolute w-4 h-4 rounded-full hidden lg:block bg-sunbird-brick top-[25.73%] ${isRTL ? 'left-[98%]' : 'right-[14%]'}`}
                 />
 
-                <div className="w-full relative z-10 pl-[127px] pr-[127px]" style={{ marginTop: '30px' }}>
-                    <div className="grid lg:grid-cols-[60%_40%] gap-8 items-start min-h-[30.25rem] pt-8 lg:pt-12" style={{ paddingTop: '50px' }}>
+                <div className="w-full relative z-10 pl-[7.9375rem] pr-[7.9375rem]" style={{ marginTop: '1.875rem' }}>
+                    <div className="grid lg:grid-cols-[60%_40%] gap-8 items-start min-h-[30.25rem] pt-8 lg:pt-12" style={{ paddingTop: '3.125rem' }}>
                         {/* Content - Left Side (becomes Right in RTL grid) */}
                         <div className="max-w-[700px] pt-8">
                             <h1
-                                className="font-rubik font-semibold text-[60px] leading-[70px] tracking-normal mb-6 text-gray-900"
+                                className="font-rubik font-semibold text-[3.75rem] leading-[4.375rem] tracking-normal mb-6 text-sunbird-obsidian"
                             >
                                 {t("hero.title", "Knowledge that moves you forward.").split(/(\n)/).map((line, i) =>
                                     line === "\n" ? <br key={i} /> : line
@@ -47,7 +47,7 @@ const HeroWithStats = () => {
                             </h1>
 
                             <p
-                                className="font-rubik font-normal text-[18px] leading-[26px] tracking-normal mb-[45px] max-w-[550px] text-gray-500"
+                                className="font-rubik font-normal text-[1.125rem] leading-[1.625rem] tracking-normal mb-[2.8125rem] max-w-[34.375rem] text-sunbird-gray-75"
                             >
                                 {t("hero.subtitle")}
                             </p>
@@ -55,7 +55,7 @@ const HeroWithStats = () => {
                             <Link to="/explore">
                                 <Button
                                     size="lg"
-                                    className="font-rubik font-medium text-[18px] leading-[100%] tracking-normal text-white w-[20rem] h-[3.75rem] px-0 rounded-[12px] shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-brick"
+                                    className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-white w-[20rem] h-[3.75rem] px-0 rounded-[0.75rem] shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-brick"
                                 >
                                     {t("hero.cta")}
                                     {isRTL ? (
@@ -73,8 +73,8 @@ const HeroWithStats = () => {
                                 <img
                                     src={tealShape}
                                     alt=""
-                                    className="w-full h-auto rotate-[-0.5deg] origin-center pb-[1rem]  pl-[100px]"
-                                    style={{ paddingBottom: '110px' }}
+                                    className="w-full h-auto rotate-[-0.5deg] origin-center pb-[1rem]  pl-[6.25rem]"
+                                    style={{ paddingBottom: '6.875rem' }}
                                 />
                             </div>
                             <div className="relative z-10  flex items-end justify-center h-full">
@@ -82,7 +82,7 @@ const HeroWithStats = () => {
                                     src={heroWoman}
                                     alt="Professional learning"
                                     className="w-[22.5rem] h-auto object-contain"
-                                    style={{ width: '840px', height: '750px', paddingBottom: '1px', paddingTop: '166px' }}
+                                    style={{ width: '52.5rem', height: '46.875rem', paddingBottom: '0.0625rem', paddingTop: '10.375rem' }}
                                 />
                             </div>
                         </div>
@@ -91,7 +91,7 @@ const HeroWithStats = () => {
             </div>
 
             <div className="relative z-20 -mt-24 lg:-mt-36">
-                <div className="w-full pl-[127px] pr-[127px]" style={{ marginTop: '70px' }}>
+                <div className="w-full pl-[7.9375rem] pr-[7.9375rem]" style={{ marginTop: '4.375rem' }}>
                     <HeroStats />
                 </div>
             </div>
