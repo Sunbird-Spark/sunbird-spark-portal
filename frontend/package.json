@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@project-sunbird/sunbird-epub-player-web-component": "^2.0.0",
+    "@project-sunbird/sunbird-pdf-player-web-component": "^2.0.0",
     "@project-sunbird/sunbird-quml-player-web-component": "^6.0.0",
     "@project-sunbird/sunbird-video-player-web-component": "^2.0.0",
     "@project-sunbird/telemetry-sdk": "^2.0.1",
@@ -49,6 +50,7 @@
     "react-i18next": "^16.5.2",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.12.0",
+    "reflect-metadata": "^0.2.2",
     "snyk": "^1.1301.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^3.4.17",

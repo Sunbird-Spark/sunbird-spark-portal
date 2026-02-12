@@ -1,166 +1,198 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import PdfPlayer from './PdfPlayer';
-import appCoreService from '../../../services/AppCoreService';
-import userAuthInfoService from '../../../services/userAuthInfoService/userAuthInfoService';
-import { PdfPlayerService } from '../../../services/players/pdf/PdfPlayerService';
+import { render, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { PdfPlayer } from './PdfPlayer';
+import type { PdfPlayerMetadata, PdfPlayerConfig } from '../../../services/players/pdf/types';
 
-// Mock dependencies
-vi.mock('../../../services/AppCoreService');
-vi.mock('../../../services/userAuthInfoService/userAuthInfoService');
+// Create mock functions
+const mockCreateConfig = vi.fn();
+const mockCreateElement = vi.fn();
+const mockAttachEventListeners = vi.fn();
+const mockRemoveEventListeners = vi.fn();
+
+// Mock the PdfPlayerService module
 vi.mock('../../../services/players/pdf/PdfPlayerService', () => {
-    return {
-        PdfPlayerService: vi.fn()
-    };
+  return {
+    PdfPlayerService: class {
+      createConfig = mockCreateConfig;
+      createElement = mockCreateElement;
+      attachEventListeners = mockAttachEventListeners;
+      removeEventListeners = mockRemoveEventListeners;
+    },
+  };
 });
 
 describe('PdfPlayer Component', () => {
-    const mockPdfUrl = 'https://example.com/sample.pdf';
-    const mockContentName = 'Sample PDF';
+  const mockMetadata: PdfPlayerMetadata = {
+    identifier: 'test-pdf-123',
+    name: 'Test PDF Document',
+    artifactUrl: 'https://example.com/test.pdf',
+    streamingUrl: 'https://example.com/test.pdf',
+    compatibilityLevel: 4,
+    pkgVersion: 1,
+  };
 
-    // Mock implementations for ContentPlayerService methods
-    const mockCreateElement = vi.fn();
-    const mockAttachEventListeners = vi.fn();
-    const mockRemoveEventListeners = vi.fn();
+  const mockConfig: PdfPlayerConfig = {
+    context: {
+      mode: 'play',
+      sid: 'session-123',
+      did: 'device-123',
+      uid: 'user-123',
+      channel: 'test-channel',
+      pdata: {
+        id: 'sunbird.portal',
+        ver: '3.2.12',
+        pid: 'sunbird-portal.contentplayer',
+      },
+      contextRollup: {
+        l1: 'test-channel',
+      },
+      cdata: [],
+      timeDiff: 0,
+      objectRollup: {},
+      host: '',
+      endpoint: '',
+    },
+    config: {},
+    metadata: mockMetadata,
+  };
 
-    beforeEach(() => {
-        vi.clearAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-        // Setup Player Service mock
-        (PdfPlayerService as any).mockImplementation(function (this: any) {
-            return {
-                createElement: mockCreateElement,
-                attachEventListeners: mockAttachEventListeners,
-                removeEventListeners: mockRemoveEventListeners
-            };
-        });
+    // Setup default mock returns
+    mockCreateConfig.mockResolvedValue(mockConfig);
+    mockCreateElement.mockReturnValue(document.createElement('sunbird-pdf-player'));
+  });
 
-        // Setup default service responses
-        (appCoreService.getDeviceId as any).mockResolvedValue('device-123');
-        (userAuthInfoService.getAuthInfo as any).mockResolvedValue({
-            sid: 'session-123',
-            uid: 'user-123',
-            isAuthenticated: true
-        });
+  it('should render container div', () => {
+    const { container } = render(<PdfPlayer metadata={mockMetadata} />);
+    const div = container.querySelector('div');
+    expect(div).toBeInTheDocument();
+    expect(div).toHaveClass('w-full', 'h-full', 'min-h-[600px]', 'relative');
+  });
 
-        // Setup createElement to return a real DOM element
-        mockCreateElement.mockReturnValue(document.createElement('div'));
+  it('should initialize player with metadata', async () => {
+    render(<PdfPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledWith(mockMetadata, undefined);
+      expect(mockCreateElement).toHaveBeenCalled();
+      expect(mockAttachEventListeners).toHaveBeenCalled();
+    });
+  });
+
+  it('should pass context props to createConfig', async () => {
+    const contextProps = {
+      mode: 'edit',
+      cdata: [{ id: 'test', type: 'test' }],
+      contextRollup: { l1: 'custom-channel' },
+    };
+
+    render(<PdfPlayer metadata={mockMetadata} {...contextProps} />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledWith(
+        mockMetadata,
+        expect.objectContaining({
+          mode: 'edit',
+          cdata: contextProps.cdata,
+          contextRollup: contextProps.contextRollup,
+        })
+      );
+    });
+  });
+
+  it('should create config without options', async () => {
+    render(<PdfPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledWith(mockMetadata, undefined);
+    });
+  });
+
+  it('should attach event listeners with handlers', async () => {
+    const onPlayerEvent = vi.fn();
+    const onTelemetryEvent = vi.fn();
+
+    render(
+      <PdfPlayer
+        metadata={mockMetadata}
+        onPlayerEvent={onPlayerEvent}
+        onTelemetryEvent={onTelemetryEvent}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockAttachEventListeners).toHaveBeenCalled();
     });
 
-    it('should render loading state initially', () => {
-        render(<PdfPlayer pdfUrl={mockPdfUrl} />);
-        expect(screen.getByText('Loading PDF Player...')).toBeInTheDocument();
+    const calls = mockAttachEventListeners.mock.calls[0];
+    expect(calls).toBeDefined();
+    const [element, playerHandler, telemetryHandler] = calls!;
+    expect(element).toBeInstanceOf(HTMLElement);
+    expect(typeof playerHandler).toBe('function');
+    expect(typeof telemetryHandler).toBe('function');
+  });
+
+  it('should cleanup on unmount', async () => {
+    const { unmount } = render(<PdfPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockCreateElement).toHaveBeenCalled();
     });
 
-    it('should initialize player and remove loading state', async () => {
-        render(<PdfPlayer pdfUrl={mockPdfUrl} contentName={mockContentName} />);
+    const playerElement = mockCreateElement.mock.results[0]?.value;
+    unmount();
 
-        await waitFor(() => {
-            expect(appCoreService.getDeviceId).toHaveBeenCalled();
-            expect(userAuthInfoService.getAuthInfo).toHaveBeenCalledWith('device-123');
-            expect(mockCreateElement).toHaveBeenCalled();
-            expect(screen.queryByText('Loading PDF Player...')).not.toBeInTheDocument();
-        });
+    expect(mockRemoveEventListeners).toHaveBeenCalledWith(playerElement);
+  });
 
-        // Verify config passed to createElement
-        const configArg = mockCreateElement.mock.calls[0]?.[0];
-        expect(configArg).toMatchObject({
-            contentName: mockContentName,
-            contentUrl: mockPdfUrl,
-            did: 'device-123',
-            sid: 'session-123',
-            userId: 'user-123'
-        });
+  it('should handle initialization errors gracefully', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockCreateConfig.mockRejectedValue(new Error('Config creation failed'));
+
+    render(<PdfPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(consoleError).toHaveBeenCalledWith(
+        'Failed to initialize PDF player:',
+        expect.any(Error)
+      );
     });
 
-    it('should handle anonymous user configuration', async () => {
-        // Mock anonymous response (null uid/sid)
-        (userAuthInfoService.getAuthInfo as any).mockResolvedValue(null);
+    expect(mockCreateElement).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
 
-        render(<PdfPlayer pdfUrl={mockPdfUrl} />);
+  it('should not initialize if unmounted during async operations', async () => {
+    mockCreateConfig.mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 100))
+    );
 
-        await waitFor(() => {
-            expect(mockCreateElement).toHaveBeenCalled();
-        });
+    const { unmount } = render(<PdfPlayer metadata={mockMetadata} />);
+    unmount();
 
-        const configArg = mockCreateElement.mock.calls[0]?.[0];
-        expect(configArg).toMatchObject({
-            sid: 'anonymous-session',
-            userId: 'anonymous'
-        });
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    expect(mockCreateElement).not.toHaveBeenCalled();
+  });
+
+  it('should only create contextProps when optional params are provided', async () => {
+    // Without optional params
+    const { rerender } = render(<PdfPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledWith(mockMetadata, undefined);
     });
 
-    it('should attach event listeners properly', async () => {
-        const onPlayerEvent = vi.fn();
-        const onTelemetryEvent = vi.fn();
+    // With optional params
+    rerender(<PdfPlayer metadata={mockMetadata} mode="edit" />);
 
-        render(
-            <PdfPlayer
-                pdfUrl={mockPdfUrl}
-                onPlayerEvent={onPlayerEvent}
-                onTelemetryEvent={onTelemetryEvent}
-            />
-        );
-
-        await waitFor(() => {
-            expect(mockAttachEventListeners).toHaveBeenCalled();
-        });
-
-        // Verify handlers are passed
-        const calls = mockAttachEventListeners.mock.calls[0]!;
-        expect(calls).toBeDefined();
-        const [element, playerHandler, telemetryHandler] = calls;
-        expect(element).toBeInstanceOf(HTMLElement);
-        expect(typeof playerHandler).toBe('function');
-        expect(typeof telemetryHandler).toBe('function');
-
-        // Test the handlers wrapping
-        playerHandler('event-1');
-        expect(onPlayerEvent).toHaveBeenCalledWith('event-1');
-
-        telemetryHandler('event-2');
-        expect(onTelemetryEvent).toHaveBeenCalledWith('event-2');
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalledWith(
+        mockMetadata,
+        expect.objectContaining({ mode: 'edit' })
+      );
     });
-
-    it('should cleanup on unmount', async () => {
-        const { unmount } = render(<PdfPlayer pdfUrl={mockPdfUrl} />);
-
-        await waitFor(() => {
-            expect(mockCreateElement).toHaveBeenCalled();
-        });
-
-        unmount();
-
-        expect(mockRemoveEventListeners).toHaveBeenCalled();
-    });
-
-    it('should handle initialization errors gracefully', async () => {
-        // Simulate error
-        (appCoreService.getDeviceId as any).mockRejectedValue(new Error('Init failed'));
-
-        render(<PdfPlayer pdfUrl={mockPdfUrl} />);
-
-        // Should stop loading eventually (or stay loading? The catch block sets isLoading(false))
-        await waitFor(() => {
-            expect(screen.queryByText('Loading PDF Player...')).not.toBeInTheDocument();
-        });
-
-        // Should NOT have created the player
-        expect(mockCreateElement).not.toHaveBeenCalled();
-    });
-
-    it('should not initialize if component is unmounted during async operations', async () => {
-        // Delay the async operation to allow unmount
-        (appCoreService.getDeviceId as any).mockReturnValue(new Promise(resolve => setTimeout(() => resolve('d1'), 100)));
-
-        const { unmount } = render(<PdfPlayer pdfUrl={mockPdfUrl} />);
-
-        unmount();
-
-        // Wait for potential async completion
-        await new Promise(resolve => setTimeout(resolve, 150));
-
-        expect(mockCreateElement).not.toHaveBeenCalled();
-    });
+  });
 });
