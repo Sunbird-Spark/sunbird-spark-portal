@@ -33,7 +33,7 @@ app.get('/app/v1/info', getAppInfo);
 
 
 // Portal Anonymous Routes
-app.use('/portal', portalAnonymousProxyRoutes)
+app.use('/portal', portalAnonymousProxyRoutes);
 // Portal Authentication Routes (Login, Callback, Logout)
 app.use('/portal', portalAuthRoutes);
 
