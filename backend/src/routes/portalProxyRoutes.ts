@@ -31,11 +31,3 @@ router.all('/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logo
     kongProxy);
 
 export default router;
-
-// The catch-all proxy route
-// When this router is mounted at '/portal', this handler will match '/portal/*rest'.
-router.all('/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
-    keycloak.protect(),
-    kongProxy);
-
-export default router;
