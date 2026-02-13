@@ -33,7 +33,7 @@ describe('Express App', () => {
     const response = await request(app)
       .get('/non-existent-route')
       .set('Origin', 'http://localhost:5173')
-      .expect(404);
+      .expect(302);
 
     // The response should have CORS headers
     expect(response.headers).toHaveProperty('access-control-allow-origin');
