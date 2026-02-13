@@ -3,7 +3,7 @@ import resourceRobotHand from "@/assets/resource-robot-hand-fill.svg";
 import resourceHacker from "@/assets/resource-hacker.svg";
 import resourceRobot from "@/assets/resource-robot.svg";
 import resourceTextBook from "@/assets/resource-text-book.svg";
-import { RelatedItem, ContentData } from "@/types/contentTypes";
+import { ContentData } from "@/types/contentTypes";
 
 export class ContentService {
   public async getContent<T = any>(): Promise<ApiResponse<T>> {

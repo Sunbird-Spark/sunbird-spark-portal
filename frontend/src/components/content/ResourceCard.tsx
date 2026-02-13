@@ -12,11 +12,11 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
 
   const getViewLabel = (type: string) => {
     switch (type) {
-      case "Video": return t("resource.viewVideo") || "View Video";
-      case "PDF": return t("resource.viewPdf") || "View PDF";
-      case "HTML": return t("resource.viewHtml") || "View HTML";
-      case "Epub": return t("resource.viewEpub") || "View Epub";
-      default: return t("view") || "View";
+      case "Video": return t("resource.viewVideo", { defaultValue: "View Video" });
+      case "PDF": return t("resource.viewPdf", { defaultValue: "View PDF" });
+      case "HTML": return t("resource.viewHtml", { defaultValue: "View HTML" });
+      case "Epub": return t("resource.viewEpub", { defaultValue: "View Epub" });
+      default: return t("view", { defaultValue: "View" });
     }
   };
 
