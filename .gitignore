@@ -93,3 +93,5 @@ frontend/public/video-player-styles.css
 frontend/public/assets/video-player/
 
 .vscode/settings.json
+
+frontend/public/assets/*

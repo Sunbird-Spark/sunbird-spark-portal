@@ -21,6 +21,11 @@ describe('Express App', () => {
         sessionStore: new session.MemoryStore()
       };
     });
+    vi.doMock('./proxies/kongProxy.js', () => ({
+      kongProxy: (req: any, res: any) => {
+        res.status(200).send('mock-kong-response');
+      }
+    }));
   });
 
   it('should create an Express application', async () => {
@@ -47,5 +52,14 @@ describe('Express App', () => {
       .set('Content-Type', 'application/json');
 
     expect(response.status).toBe(404);
+  });
+
+  it('should handle anonymous portal route', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .get('/portal/content/v1/read/do_123')
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
   });
 });

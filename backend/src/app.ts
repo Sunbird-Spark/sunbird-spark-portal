@@ -15,6 +15,7 @@ import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
 import { envConfig } from './config/env.js';
+import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,9 @@ app.use(express.urlencoded());
 app.get('/health', checkHealth);
 app.get('/app/v1/info', getAppInfo);
 
+
+// Portal Anonymous Routes
+app.use('/portal', portalAnonymousProxyRoutes);
 // Portal Authentication Routes (Login, Callback, Logout)
 app.use('/portal', portalAuthRoutes);
 
