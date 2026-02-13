@@ -1,6 +1,10 @@
 import { LocaleData } from '../types';
 
 export const en: LocaleData = {
+  header: {
+    search: 'Search for content',
+    login: 'Login',
+  },
   common: {
     loading: 'Loading...',
     error: 'An error occurred',

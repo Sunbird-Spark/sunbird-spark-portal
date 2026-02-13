@@ -43,6 +43,48 @@
   "cloud": "Cloud/Mobile natif",
   "courses": "Cours",
   "categories": "Catégories",
+  "filters": "Filtres",
+  "collections": "Collections",
+  "contentType": "Type de contenu",
+  "filterOptions": {
+    "courses": "Cours",
+    "resources": "Ressources",
+    "textbooks": "Manuels",
+    "skills": "Compétences"
+  },
+  "contentTypes": {
+    "video": "Vidéo",
+    "audio": "Audio",
+    "pdf": "PDF",
+    "epub": "ePub",
+    "youtube": "YouTube",
+    "html": "HTML",
+    "interactive": "Interactif",
+    "course": "Cours",
+    "textbook": "Manuel",
+    "skills": "Compétences"
+  },
+  "categoriesList": {
+    "ai-ml": "IA/ML",
+    "cyber-security": "Cybersécurité",
+    "ux-design": "Design UX",
+    "devops": "DevOps",
+    "data-science": "Science des données",
+    "blockchain": "Blockchain",
+    "ui-ux-design": "Design UI/UX",
+    "it-development": "Développement IT",
+    "digital-marketing": "Marketing Numérique",
+    "entrepreneurship": "Entrepreneuriat"
+  },
+  "viewMore": "Voir Plus",
+  "viewLess": "Voir Moins",
+  "featured": "En Vedette",
+  "by": "par",
+  "levels": {
+    "Beginner": "Débutant",
+    "Intermediate": "Intermédiaire",
+    "Advanced": "Avancé"
+  },
   "about": "À propos",
   "contact": "Contact",
   "signup": "S'inscrire",
@@ -52,6 +94,7 @@
   "browseCategories": "Parcourir par Catégorie",
   "viewAll": "Voir Tout",
   "startLearning": "Commencer à Apprendre",
+  "startExploring": "Commencer l'Exploration",
   "exploreCourses": "Explorer les Cours",
   "heroTitle": "Libérez Votre Potentiel avec une Formation d'Experts",
   "heroSubtitle": "Accédez à des milliers de cours conçus pour vous aider à grandir professionnellement et personnellement. Apprenez à votre rythme, n'importe où, n'importe quand.",
@@ -76,7 +119,6 @@
   "collaborations": "Collaborations",
   "create": "Créer",
   "course": "Cours",
-  "content": "Contenu",
   "quiz": "Quiz",
   "collection": "Collection",
   "courseDesc": "Concevez des cours en utilisant des collections et des ressources. Les cours ont une durée pour atteindre un objectif.",
@@ -116,12 +158,68 @@
   "certifiedProfessionals": "Formation Professionnelle Certifiée",
   "watchDemo": "Regarder la démo",
   "certifications": "Certifications",
+  "nav": {
+    "home": "Accueil",
+    "explore": "Explorer",
+    "about": "À propos",
+    "contact": "Contact"
+  },
+  "button": {
+    "login": "Connexion",
+    "goBack": "Retour",
+    "share": "Partager"
+  },
+  "hero": {
+    "title": "Des connaissances qui vous font avancer.",
+    "subtitle": "Libérez votre potentiel et explorez un monde de connaissances. Commencez votre voyage avec +100 cours conçus pour votre avenir.",
+    "cta": "Commencez Votre Voyage d'Apprentissage",
+    "processSimple": "Le processus d'apprentissage est simple",
+    "online": "En ligne",
+    "studyPace": "Étudiez à votre propre rythme"
+  },
+  "stats": {
+    "courses": "Cours",
+    "activeLearners": "Apprenants Actifs",
+    "certifications": "Certifications"
+  },
+  "popular": {
+    "title": "Contenu le Plus Populaire",
+    "viewAll": "Voir Tout"
+  },
+  "contentStats": {
+    "learners": "Apprenants",
+    "lessons": "Leçons",
+    "view": "Voir"
+  },
+  "courseDetails": {
+    "overview": "Aperçu du cours",
+    "weeks": "Semaines",
+    "skills": "Compétences que vous apprendrez",
+    "suitedFor": "Idéal pour",
+    "relatedContent": "Contenu associé"
+  },
+  "resource": {
+    "title": "Gardez une longueur d'avance. L'avenir commence ici.",
+    "header": "Centre de Ressources",
+    "viewVideo": "Voir la Vidéo",
+    "viewPdf": "Voir le PDF",
+    "viewHtml": "Voir le HTML",
+    "viewEpub": "Voir l'Epub",
+    "seeCaseStudy": "Voir l'étude de cas"
+  },
+  "trending": {
+    "mostViewed": "Contenu le Plus Vu",
+    "trending": "Contenu Tendance"
+  },
+  "faq": {
+    "title": "Foire aux questions"
+  },
   "footer": {
     "products": "Produits",
+    "company": "Entreprise",
     "resources": "Ressources",
     "videos": "Vidéos",
-    "company": "Entreprise",
-    "terms": "Conditions Générales",
-    "privacy": "Politique de Confidentialité"
+    "terms": "Termes et conditions",
+    "privacy": "Politique de confidentialité"
   }
 }

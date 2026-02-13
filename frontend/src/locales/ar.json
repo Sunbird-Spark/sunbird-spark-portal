@@ -1,6 +1,6 @@
 {
   "header": {
-    "search": "البحث في المحتوى",
+    "search": "بحث في المحتوى",
     "login": "تسجيل الدخول"
   },
   "loading": "جارٍ التحميل...",
@@ -26,26 +26,66 @@
   "forgotPassword": "هل نسيت كلمة المرور؟",
   "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
   "loginSuccess": "تم تسجيل الدخول بنجاح",
-  "stats": {
-    "users": "إجمالي المستخدمين",
-    "sessions": "الجلسات النشطة",
-    "revenue": "الإيرادات"
-  },
+  "stats.users": "إجمالي المستخدمين",
+  "stats.sessions": "الجلسات النشطة",
+  "stats.revenue": "الإيرادات",
   "network": "خطأ في الشبكة. يرجى التحقق من الاتصال.",
-  "server": "خطأ في الخادم. يرجى المحاولة لاحقاً.",
+  "server": "خطأ في الخادم. يرجى المحاولة لاحقًا.",
   "validation": "يرجى التحقق من البيانات والمحاولة مرة أخرى.",
   "notFound": "المورد المطلوب غير موجود.",
   "unauthorized": "أنت غير مخول للوصول إلى هذا المورد.",
   "title": "بوابة SunbirdEd",
   "subtitle": "منصة تعليمية حديثة وقابلة للتوسع",
   "description": "مبنية للقرن الحادي والعشرين بأحدث التقنيات",
-  "welcome": "مرحباً بك في بوابة SunbirdEd",
+  "welcome": "مرحبًا بك في بوابة SunbirdEd",
   "scalable": "حل تعلم قابل للتوسع",
   "opensource": "حوكمة مفتوحة المصدر",
   "community": "دعم مجتمعي واسع النطاق",
   "cloud": "سحابي/مهيأ للهواتف المحمولة",
   "courses": "الدورات",
   "categories": "الفئات",
+  "filters": "تصفية",
+  "collections": "المجموعات",
+  "contentType": "نوع المحتوى",
+  "filterOptions": {
+    "courses": "دورات",
+    "resources": "الموارد",
+    "textbooks": "الكتب المدرسية",
+    "skills": "المهارات"
+  },
+  "contentTypes": {
+    "video": "فيديو",
+    "audio": "صوت",
+    "pdf": "PDF",
+    "epub": "Epub",
+    "youtube": "يوتيوب",
+    "html": "HTML",
+    "interactive": "تفاعلي",
+    "course": "دورة",
+    "textbook": "كتاب مدرسي",
+    "skills": "مهارات"
+  },
+  "categoriesList": {
+    "ai-ml": "الذكاء الاصطناعي / تعلم الآلة",
+    "cyber-security": "الأمن السيبراني",
+    "ux-design": "تصميم تجربة المستخدم",
+    "devops": "DevOps",
+    "data-science": "علم البيانات",
+    "blockchain": "بلوك تشين",
+    "ui-ux-design": "تصميم واجهة المستخدم / تجربة المستخدم",
+    "it-development": "تطوير تكنولوجيا المعلومات",
+    "digital-marketing": "التسويق الرقمي",
+    "entrepreneurship": "ريادة الأعمال"
+  },
+  "viewMore": "عرض المزيد",
+  "viewLess": "عرض أقل",
+  "featured": "متميز",
+  "by": "بواسطة",
+  "levels": {
+    "Beginner": "مبتدئ",
+    "Intermediate": "متوسط",
+    "Advanced": "متقدم"
+  },
   "about": "حول",
   "contact": "اتصل بنا",
   "signup": "إنشاء حساب",
@@ -55,6 +95,7 @@
   "browseCategories": "تصفح حسب الفئة",
   "viewAll": "عرض الكل",
   "startLearning": "ابدأ التعلم",
+  "startExploring": "ابدأ الاستكشاف",
   "exploreCourses": "استكشف الدورات",
   "heroTitle": "أطلق العنان لإمكانياتك مع تدريب الخبراء",
   "heroSubtitle": "احصل على آلاف الدورات المصممة لمساعدتك على النمو مهنياً وشخصياً. تعلم بالسرعة التي تناسبك، في أي مكان وأي وقت.",
@@ -79,7 +120,6 @@
   "collaborations": "التعاون",
   "create": "إنشاء",
   "course": "دورة",
-  "content": "محتوى",
   "quiz": "اختبار",
   "collection": "مجموعة",
   "courseDesc": "صمم دورات باستخدام المجموعات والموارد. الدورات لها مدة لتحقيق هدف.",
@@ -119,11 +159,67 @@
   "certifiedProfessionals": "التدريب المهني المعتمد",
   "watchDemo": "شاهد العرض التوضيحي",
   "certifications": "الشهادات",
+  "nav": {
+    "home": "الرئيسية",
+    "explore": "استكشف",
+    "about": "حول",
+    "contact": "اتصل بنا"
+  },
+  "button": {
+    "login": "تسجيل الدخول",
+    "goBack": "رجوع",
+    "share": "مشاركة"
+  },
+  "hero": {
+    "title": "المعرفة التي تدفعك للأمام.",
+    "subtitle": "أطلق العنان لإمكانياتك واستكشف عالماً من المعرفة. ابدأ رحلتك مع أكثر من 100 دورة مصممة لمستقبلك.",
+    "cta": "ابدأ رحلة التعلم الخاصة بك",
+    "processSimple": "عملية التعلم بسيطة",
+    "online": "عبر الإنترنت",
+    "studyPace": "ادرس بالسرعة التي تناسبك"
+  },
+  "stats": {
+    "courses": "دورات",
+    "activeLearners": "متعلمون نشطون",
+    "certifications": "شهادات"
+  },
+  "popular": {
+    "title": "المحتوى الأكثر شعبية",
+    "viewAll": "عرض الكل"
+  },
+  "contentStats": {
+    "learners": "متعلمون",
+    "lessons": "دروس",
+    "view": "عرض"
+  },
+  "courseDetails": {
+    "overview": "نظرة عامة على الدورة",
+    "weeks": "أسابيع",
+    "skills": "المهارات التي ستتعلمها",
+    "suitedFor": "الأفضل ل",
+    "relatedContent": "محتوى ذو صلة"
+  },
+  "resource": {
+    "title": "ابق في المقدمة. ما هو التالي يبدأ هنا.",
+    "header": "مركز الموارد",
+    "viewVideo": "شاهد الفيديو",
+    "viewPdf": "اعرض PDF",
+    "viewHtml": "اعرض HTML",
+    "viewEpub": "اعرض Epub",
+    "seeCaseStudy": "انظر دراسة الحالة"
+  },
+  "trending": {
+    "mostViewed": "المحتوى الأكثر مشاهدة",
+    "trending": "المحتوى الرائج"
+  },
+  "faq": {
+    "title": "الأسئلة الشائعة"
+  },
   "footer": {
-    "products": "المنتجات",
-    "resources": "الموارد",
-    "videos": "الفيديوهات",
-    "company": "الشركة",
+    "products": "منتجات",
+    "company": "شركة",
+    "resources": "موارد",
+    "videos": "فيديوهات",
     "terms": "الشروط والأحكام",
     "privacy": "سياسة الخصوصية"
   }
