@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiArrowRight, FiStar, FiShare2 } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -6,7 +6,10 @@ import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import FAQSection from "@/components/landing/FAQSection";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { collectionData } from "@/data/collectionData";
+import { useCollection } from "@/hooks/useCollection";
+import { useContentSearch } from "@/hooks/useContent";
+import { mapSearchContentToRelatedItems } from "@/services/collection";
+import { collectionData as fallbackCollectionData } from "@/data/collectionData";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import { CourseCard, type ContentCourse } from "@/components/common/CourseCard";
@@ -16,22 +19,39 @@ const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
   const { t } = useAppI18n();
-  const [expandedModules, setExpandedModules] = useState<string[]>(["week-1"]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: collectionDataFromApi, isLoading } = useCollection(collectionId);
+  const collectionData = useMemo(
+    () => collectionDataFromApi ?? fallbackCollectionData,
+    [collectionDataFromApi]
+  );
+  const { data: searchData } = useContentSearch({
+    request: { limit: 20, offset: 0 },
+    enabled: !!collectionData,
+  });
+  const [expandedModules, setExpandedModules] = useState<string[]>([]);
+
+  const relatedItemsFromSearch = useMemo(
+    () => mapSearchContentToRelatedItems(searchData?.data?.content, collectionData?.id, 3),
+    [searchData?.data?.content, collectionData?.id]
+  );
+  const relatedItems = useMemo(
+    () =>
+      relatedItemsFromSearch.length > 0 ? relatedItemsFromSearch : collectionData.relatedContent,
+    [relatedItemsFromSearch, collectionData.relatedContent]
+  );
+
+  const initialExpanded = useMemo(() => {
+    const first = collectionData.modules?.[0];
+    return first ? [first.id] : [];
+  }, [collectionData.modules]);
+
+  const expandedModulesList = expandedModules.length > 0 ? expandedModules : initialExpanded;
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) =>
       prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
     );
   };
-
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [collectionId]);
 
   if (isLoading) {
     return <PageLoader message={t("loading")} />;
@@ -84,7 +104,7 @@ const CollectionDetailPage = () => {
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
             <CollectionSidebar
               modules={collectionData.modules}
-              expandedModules={expandedModules}
+              expandedModules={expandedModulesList}
               toggleModule={toggleModule}
               collectionId={collectionId}
             />
@@ -100,7 +120,7 @@ const CollectionDetailPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr">
-            {collectionData.relatedContent.map((item) =>
+            {relatedItems.map((item) =>
               item.isResource ? (
                 <ResourceCardComponent
                   key={item.id}
