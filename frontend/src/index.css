@@ -421,9 +421,6 @@
   .resend-otp-btn:disabled {
     @apply opacity-50 cursor-not-allowed no-underline;
   }
-
-
-
 }
 
 @layer base {
@@ -454,25 +451,18 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
     background: #D9D9D9;
+    ;
     border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #A85236;
-    border-top: 15px solid #D9D9D9;
-    border-bottom: 15px solid #D9D9D9;
-    background-clip: padding-box;
+    background: #A85236;
     border-radius: 10px;
   }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: #90412b;
-  }
-
 }

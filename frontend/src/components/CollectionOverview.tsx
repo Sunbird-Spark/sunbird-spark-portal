@@ -14,17 +14,17 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
         <div className="space-y-6">
             {/* Video Player Card */}
             <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
-                <div>
+                <div className="relative">
                     {/* Video Thumbnail Container */}
-                    <div className="relative aspect-video bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl overflow-hidden">
+                    <div className="aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative ">
                         <img
                             src={collectionData.image}
                             alt={collectionData.title}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-145"
+                            className="w-full h-full object-cover"
                         />
 
                         {/* Week Label */}
-                        <div className="absolute top-4 left-4 z-20">
+                        <div className="absolute top-4 left-4 z-10">
                             <span className="text-white text-base font-medium px-4 py-2 rounded-md">
                                 Week 1: Foundation & Basics
                             </span>
@@ -37,9 +37,10 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
                     </div>
                 </div>
 
+
                 {/* Course Overview Section */}
                 <div className="px-6 pb-6 pt-0">
-                    <h2 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.overview")}</h2>
+                    <h2 className="text-xl font-bold text-foreground mb-4">{t("courseDetails.overview")}</h2>
 
                     {/* Duration Stats */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
@@ -60,7 +61,7 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
                         </span>
                     </div>
 
-                    <p className="text-sm  text-[#222222] leading-relaxed mb-6">
+                    <p className="text-base text-[#222222] leading-relaxed mb-6">
                         {collectionData.description}
                     </p>
 
@@ -68,10 +69,10 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
                     <div className="grid md:grid-cols-2 gap-x-8 gap-y-1">
                         {/* Skills Column */}
                         <div>
-                            <h3 className="text-base font-semibold text-foreground mb-3">{t("courseDetails.skills")}</h3>
-                            <ul className="space-y-2">
+                            <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.skills")}</h3>
+                            <ul className="space-y-3">
                                 {collectionData.skills.map((skill, index) => (
-                                    <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                    <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
                                         <CheckIcon />
                                         <span>{skill}</span>
                                     </li>
@@ -81,10 +82,10 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
 
                         {/* Best Suited For Column */}
                         <div>
-                            <h3 className="text-base font-semibold text-foreground mb-3">{t("courseDetails.suitedFor")}</h3>
-                            <ul className="space-y-2">
+                            <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.suitedFor")}</h3>
+                            <ul className="space-y-3">
                                 {collectionData.bestSuitedFor.map((role, index) => (
-                                    <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                    <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
                                         <CheckIcon />
                                         <span>{role}</span>
                                     </li>

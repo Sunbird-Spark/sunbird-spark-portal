@@ -52,7 +52,7 @@ const CollectionDetail = () => {
 
                 {/* Title Row */}
                 <div className="flex items-start justify-between mb-2">
-                    <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground max-w-[75%]">
                         {collectionData.title}
                     </h1>
 
@@ -80,7 +80,7 @@ const CollectionDetail = () => {
                     <CollectionOverview collectionData={collectionData} />
 
                     {/* Right Sidebar - Lessons Accordion */}
-                    <div className="lg:sticky lg:top-6 max-h-[calc(100vh-120px)] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="lg:sticky lg:top-6 max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
                         <CollectionSidebar
                             modules={collectionData.modules}
                             expandedModules={expandedModules}
@@ -91,13 +91,13 @@ const CollectionDetail = () => {
                 </div>
 
                 {/* Related Content Section */}
-                <section className="mt-16">
-                    <div className="flex items-center gap-3 mb-6">
-                        <h2 className="text-xl font-semibold text-foreground">{t("courseDetails.relatedContent")}</h2>
-                        <FiArrowRight className="w-5 h-5 text-sunbird-brick" />
+                <section className="mt-16 mb-20">
+                    <div className="flex items-center gap-3 mb-8">
+                        <h2 className="text-2xl font-bold text-foreground">{t("courseDetails.relatedContent")}</h2>
+                        <FiArrowRight className="w-6 h-6 text-sunbird-brick" />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10 auto-rows-fr">
                         {collectionData.relatedContent.map((item) =>
                             item.isResource ? (
                                 <RelatedResourceCard key={item.id} item={item} />

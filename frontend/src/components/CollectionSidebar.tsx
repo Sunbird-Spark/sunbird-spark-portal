@@ -35,10 +35,10 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
                         <CollapsibleTrigger asChild>
                             <button className="w-full p-4 flex items-start justify-between text-left hover:bg-gray-50 transition-colors">
                                 <div className="flex-1 pr-4">
-                                    <h3 className="font-semibold text-foreground text-m mb-1">
+                                    <h3 className="font-bold text-foreground text-lg mb-1">
                                         {module.title}
                                     </h3>
-                                    <p className="text-s text-muted-foreground">
+                                    <p className="text-sm text-muted-foreground">
                                         {module.subtitle}
                                     </p>
                                 </div>
@@ -69,10 +69,10 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
                                                 }`}
                                         >
                                             {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
-                                            <span className="flex-1 text-sm leading-snug">
+                                            <span className="flex-1 text-base leading-snug">
                                                 {lesson.title}
                                             </span>
-                                            <span className="text-sm text-muted-foreground flex-shrink-0">
+                                            <span className="text-sm text-muted-foreground flex-shrink-0 font-medium">
                                                 {lesson.duration}
                                             </span>
                                         </Link>

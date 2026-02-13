@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { FiMenu, FiX, FiSearch, FiChevronDown, FiBell } from "react-icons/fi";
-import { Button } from "@/components/button";
+import { Button } from "@/components/common/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/dropdown-menu";
+} from "@/components/common/DropdownMenu";
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";

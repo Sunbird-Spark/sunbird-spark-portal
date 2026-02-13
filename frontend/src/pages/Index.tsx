@@ -19,7 +19,7 @@ const Index = () => {
   }, []);
 
   if (isLoading) {
-    return <PageLoader message="Loading Sunbird Spark..." />;
+    return <PageLoader message="Loading Sunbird..." />;
   }
 
   return (
@@ -31,6 +31,7 @@ const Index = () => {
         <CategorySection />
         <PopularCourses />
         <StatsSection />
+
       </main>
       <Footer />
     </div>
