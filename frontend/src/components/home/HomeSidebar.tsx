@@ -42,7 +42,7 @@ const mainNavItems = [
 const bottomNavItems = [
     { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help" },
     { id: "settings", label: "Account Settings", icon: FiSettings, path: "/settings" },
-    { id: "logout", label: "Logout", icon: FiLogOut, path: "/logout" },
+    { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
 const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
@@ -50,6 +50,10 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
 
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
+        if (item.id === "logout") {
+            window.location.href = item.path;
+            return;
+        }
         if (item.path !== "/home") {
             navigate(item.path);
         }

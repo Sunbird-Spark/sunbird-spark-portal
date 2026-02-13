@@ -11,8 +11,7 @@ import logger from '../utils/logger.js';
 import { generateLoggedInKongToken, saveKongTokenToSession } from '../services/kongAuthService.js';
 import { sessionStore } from '../utils/sessionStore.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
-import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
-import { regenerateSession, destroySession } from '../utils/sessionUtils.js';
+import { regenerateSession, destroySession, saveSession } from '../utils/sessionUtils.js';
 
 vi.mock('keycloak-connect', () => {
     const MockKeycloak = vi.fn().mockImplementation(function () {
@@ -54,7 +53,8 @@ vi.mock('../utils/sessionTTLUtil.js', () => ({
 
 vi.mock('../utils/sessionUtils.js', () => ({
     regenerateSession: vi.fn(),
-    destroySession: vi.fn()
+    destroySession: vi.fn(),
+    saveSession: vi.fn()
 }));
 
 describe('getKeycloakClient', () => {
@@ -97,7 +97,8 @@ describe('authenticated handler', () => {
 
         req = {
             session: {
-                userId: undefined
+                userId: undefined,
+                save: vi.fn((cb) => cb && cb(null))
             } as unknown as Session,
             kauth: {
                 grant: {
@@ -113,6 +114,7 @@ describe('authenticated handler', () => {
         vi.mocked(regenerateSession).mockResolvedValue(undefined as any);
         vi.mocked(generateLoggedInKongToken).mockResolvedValue('test-kong-token');
         vi.mocked(saveKongTokenToSession).mockResolvedValue(undefined as any);
+        vi.mocked(saveSession).mockResolvedValue(undefined as any); // Mock saveSession
         vi.mocked(fetchUserById).mockResolvedValue({
             responseCode: 'OK',
             result: { response: { id: '12345', userName: 'testuser' } }
@@ -120,7 +122,7 @@ describe('authenticated handler', () => {
         vi.mocked(setUserSession).mockResolvedValue(undefined as any);
     });
 
-    it('should regenerate session, extract userId and fetch user', async () => {
+    it('should log success and save session', async () => {
         const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
 
         (kc as any).authenticated(req as Request);
@@ -128,71 +130,18 @@ describe('authenticated handler', () => {
         // wait for the async IIFE inside authenticated()
         await new Promise(process.nextTick);
 
-        expect(regenerateSession).toHaveBeenCalledWith(req);
-        expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
-        expect((req.session as any)?.userId).toBe('12345');
-        expect(fetchUserById).toHaveBeenCalledWith('12345', req);
-        expect(setUserSession).toHaveBeenCalledWith(req, expect.any(Object));
-        expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');
-        expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
-    });
+        expect(vi.mocked(logger.info)).toHaveBeenCalledWith('in authenticated', req.kauth);
+        expect(saveSession).toHaveBeenCalledWith(req);
+        expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully - Session saved');
 
-    it('should skip kong token generation if session already has one', async () => {
-        // Set existing kong token in session
-        (req.session as any).kongToken = 'existing-kong-token';
-
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-
-        // wait for the async IIFE inside authenticated()
-        await new Promise(process.nextTick);
-
-        expect(regenerateSession).toHaveBeenCalledWith(req);
-        expect(setSessionTTLFromToken).toHaveBeenCalledWith(req);
-        expect((req.session as any)?.userId).toBe('12345');
-        expect(fetchUserById).toHaveBeenCalledWith('12345', req);
-        expect(setUserSession).toHaveBeenCalledWith(req, expect.any(Object));
-        expect(vi.mocked(logger.info)).toHaveBeenCalledWith('Keycloak authenticated successfully');
-        expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
-    });
-
-    it('should handle missing sub gracefully', async () => {
-        (req as any).kauth = {};
-
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
-
-        expect((req.session as any)?.userId).toBeUndefined();
-        expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-            'error logging in user',
-            expect.any(Error)
-        );
-    });
-
-    it('should log error if regenerateSession fails', async () => {
-        vi.mocked(regenerateSession).mockRejectedValue(new Error('regen failed'));
-
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
-
-        expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-            'error logging in user',
-            expect.any(Error)
-        );
-
-        expect(generateLoggedInKongToken).not.toHaveBeenCalled();
+        // Confirm removed logic is NOT called
+        expect(regenerateSession).not.toHaveBeenCalled();
         expect(fetchUserById).not.toHaveBeenCalled();
+        expect(setUserSession).not.toHaveBeenCalled();
     });
 
-    it('should log error if fetchUserById fails', async () => {
-        vi.mocked(fetchUserById).mockRejectedValue(
-            new Error('user service failure')
-        );
+    it('should log error if saving session fails', async () => {
+        vi.mocked(saveSession).mockRejectedValue(new Error('save failed'));
 
         const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
 
@@ -202,30 +151,6 @@ describe('authenticated handler', () => {
         expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
             'error logging in user',
             expect.any(Error)
-        );
-    });
-
-    it('should handle missing userId after extraction', async () => {
-        (req as any).kauth = {
-            grant: {
-                access_token: {
-                    content: {
-                        sub: ''  // Empty sub will result in empty userId
-                    }
-                }
-            }
-        };
-
-        const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);
-
-        (kc as any).authenticated(req as Request);
-        await new Promise(process.nextTick);
-
-        expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-            'error logging in user',
-            expect.objectContaining({
-                message: 'userId missing from session'
-            })
         );
     });
 });
@@ -250,7 +175,7 @@ describe('deauthenticated handler', () => {
 
     it('should handle destroySession errors gracefully', async () => {
         const req = {} as unknown as Request;
-        
+
         vi.mocked(destroySession).mockRejectedValue(new Error('destroy failed'));
 
         const kc = getKeycloakClient({} as Keycloak.KeycloakConfig, undefined);

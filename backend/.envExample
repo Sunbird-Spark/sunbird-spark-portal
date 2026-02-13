@@ -7,14 +7,13 @@ PORT=3000
 
 DOMAIN_URL=http://localhost:3000
 KONG_URL=http://localhost:8000
-
+SERVER_URL='http://localhost:3000'
 # Logging Configuration
 SUNBIRD_PORTAL_LOG_LEVEL=error
 
 # Session Configuration
 SUNBIRD_ANONYMOUS_SESSION_TTL=60000
-SUNBIRD_ANONYMOUS_SESSION_SECRET=test_anonymous_session_secret
-SUNBIRD_LOGGEDIN_SESSION_SECRET=test_loggedin_session_secret
+SUNBIRD_SESSION_SECRET=test_session_secret
 SUNBIRD_PORTAL_SESSION_STORE=in-memory
 
 # Kong Configuration (test tokens)

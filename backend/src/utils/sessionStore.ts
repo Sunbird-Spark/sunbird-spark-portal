@@ -56,7 +56,8 @@ export const getSessionStore = () => {
         return store;
     }
     logger.info('Using MemoryStore for session management');
-    return new session.MemoryStore();
+    const memoryStore = new session.MemoryStore();
+    return memoryStore;
 };
 
 export const sessionStore = getSessionStore();

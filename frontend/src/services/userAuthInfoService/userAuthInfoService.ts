@@ -2,22 +2,9 @@ import { getClient } from '../../lib/http-client';
 import type { ApiResponse } from '../../lib/http-client';
 
 interface AuthStatusResponse {
-    id: string;
-    ver: string;
-    ts: Date;
-    params: {
-        resmsgid: string;
-        msgid: string;
-        status: string;
-        err: string | null;
-        errmsg: string | null;
-    };
-    responseCode: string;
-    result: {
-        sid: string;
-        uid: string | null;
-        isAuthenticated: boolean;
-    };
+    sid: string;
+    uid: string | null;
+    isAuthenticated: boolean;
 }
 
 class userAuthInfoService {
@@ -40,38 +27,28 @@ class userAuthInfoService {
     /**
      * Fetches the authentication status from the backend
      * This includes the session ID (sid) and user ID (uid)
-     * @param deviceId - Optional device ID to send in the x-device-id header
      * @returns Promise with the auth status response
      */
-    async getAuthInfo(deviceId?: string): Promise<AuthStatusResponse['result']> {
+    async getAuthInfo(): Promise<AuthStatusResponse> {
         try {
-            const headers: Record<string, string> = {};
-            if (deviceId) {
-                headers['x-device-id'] = deviceId;
-            }
-
-            const response: ApiResponse<AuthStatusResponse> = await getClient().get<AuthStatusResponse>(
-                '/user/v1/auth/info',
-                headers
-            );
-
-            const data = response.data;
-
-            if (data.params.status === 'successful') {
-                this.sessionId = data.result.sid;
-                this.userId = data.result.uid;
-                this.isAuthenticated = data.result.isAuthenticated;
-
-                return data.result;
-            } else {
-                throw new Error(data.params.errmsg || 'Failed to fetch auth status');
-            }
+            const response = await getClient().get<AuthStatusResponse>(
+                '/user/v1/auth/info')
+            this.sessionId = response.data.sid;
+            this.userId = response.data.uid;
+            this.isAuthenticated = response.data.isAuthenticated;
+            return response.data;
         } catch (error) {
             console.error('Error fetching auth status:', error);
             if (error && typeof error === 'object' && 'response' in error) {
                 const httpError = error as { response?: { status?: number; data?: any } };
                 console.error('Status:', httpError.response?.status);
-                console.error('Data:', httpError.response?.data);
+                // Avoid logging full response data which may contain sensitive fields
+                const safeData = httpError.response?.data ? {
+                    responseCode: httpError.response.data.responseCode,
+                    status: httpError.response.data.params?.status,
+                    errmsg: httpError.response.data.params?.errmsg
+                } : undefined;
+                console.error('Response:', safeData);
             }
             throw error;
         }

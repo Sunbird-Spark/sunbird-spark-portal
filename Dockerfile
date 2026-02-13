@@ -2,6 +2,7 @@
 FROM node:24.12.0-slim AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
+COPY frontend/copy-assets.js ./
 RUN npm i && npm cache clean --force
 COPY frontend/ .
 RUN npm run build
