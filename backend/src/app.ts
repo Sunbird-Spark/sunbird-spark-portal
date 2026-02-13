@@ -31,17 +31,11 @@ app.set('trust proxy', true);
 app.use(helmet({ contentSecurityPolicy: false }));
 
 loadTenants();
-app.use(cors({
-    origin: envConfig.ENVIRONMENT === 'local' ? ['http://localhost:5173', 'http://localhost:3000'] : false,
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.get('/health', checkHealth);
 app.get('/app/v1/info', getAppInfo);
-
-
-
 
 app.get('/portal/login',
     sessionMiddleware,
@@ -155,7 +149,9 @@ const recaptchaProtectedRoutes: string[] = [
 ];
 app.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
-app.all('/portal/*rest', kongProxy);
+app.all('/portal/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
+    keycloak.protect(),
+    kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 
