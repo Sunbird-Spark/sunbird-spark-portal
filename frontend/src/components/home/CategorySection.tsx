@@ -1,39 +1,86 @@
 import { FiArrowRight } from "react-icons/fi";
-import { Button } from "@/components/common/Button";
-import CategoryCard from "./CategoryCard";
-import { categories } from "@/configs/mockData";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { Link } from "react-router-dom";
+import uiuxIcon from "@/assets/uiux-icon.svg";
+import devIcon from "@/assets/dev-icon.svg"
+import marketingIcon from "@/assets/marketing-icon.svg";
+import entrepreneurIcon from "@/assets/entrepreneur-icon.svg";
 
 const CategorySection = () => {
   const { t } = useAppI18n();
 
+  const categories = [
+    {
+      id: "ui-ux-design",
+      icon: uiuxIcon,
+      background: "linear-gradient(to right, #45C0ED, #8E46C5)",
+    },
+    {
+      id: "it-development",
+      icon: devIcon,
+      background: "linear-gradient(to right, #D55E1D, #F6C35C)",
+    },
+    {
+      id: "digital-marketing",
+      icon: marketingIcon,
+      background: "linear-gradient(to right, #1D79D5, #6ED97B)",
+    },
+    {
+      id: "entrepreneurship",
+      icon: entrepreneurIcon,
+      background: "linear-gradient(to right, #F59C84, #D655E7)",
+    },
+  ];
+
   return (
-    <section id="categories" className="py-16 md:py-24 bg-muted">
-      <div className="container mx-auto px-4">
+    <section id="categories" className="pt-[2.5rem] pb-8 bg-white">
+      <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-              {t("browseCategories")}
-            </h2>
-            <p className="text-muted-foreground max-w-2xl">
-              Explore our diverse range of professional training categories
-            </p>
-          </div>
-          <Link to="/courses">
-            <Button variant="ghost" className="text-primary hover:text-primary/90 self-start md:self-auto">
-              {t("viewAll")}
-              <FiArrowRight className="w-4 h-4 ms-2" />
-            </Button>
-          </Link>
+        <div className="mb-8">
+          <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground">
+            {t("browseCategories")}
+          </h2>
         </div>
 
-        {/* Category Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
-          {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
-          ))}
+        {/* Category Cards and Browse All */}
+        <div className="flex items-center gap-6 pb-[1.875rem] flex-wrap justify-center lg:justify-between">
+          <div className="flex items-center gap-4 flex-wrap justify-center lg:flex-nowrap">
+            {categories.map((category) => (
+              <Link key={category.id} to="/explore" className="group">
+                <div
+                  className="flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[14rem] h-[12.125rem] rounded-[1.25rem]"
+                  style={{ background: category.background }}
+                >
+                  {/* Top-left white horizontal line */}
+                  <div className="w-9 h-[0.1875rem] bg-white/90 rounded-full" />
+
+                  {/* Bottom content: Icon + Label */}
+                  <div className="flex flex-col gap-3">
+                    <img src={category.icon} alt={t(`categoriesList.${category.id}`)} className="w-8 h-8" />
+                    <p className="text-[1.0625rem] font-bold text-white leading-tight">
+                      {t(`categoriesList.${category.id}`)}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Browse All Button */}
+          <Link
+            to="/explore"
+            className="group flex flex-col items-center justify-center gap-3"
+            style={{ paddingTop: '1.0625rem', paddingBottom: '0rem' }}
+          >
+            <div
+              className="rounded-full text-white flex items-center justify-center transition-transform hover:scale-105 w-[3.6875rem] h-[3.6875rem] bg-sunbird-brick"
+            >
+              <FiArrowRight className="w-6 h-6" />
+            </div>
+            <span className="text-[0.875rem] font-bold text-foreground">
+              {t("viewAll")}
+            </span>
+          </Link>
         </div>
       </div>
     </section>

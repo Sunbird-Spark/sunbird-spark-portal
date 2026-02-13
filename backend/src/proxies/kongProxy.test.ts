@@ -105,7 +105,7 @@ describe('Kong Proxy Integration', () => {
                 KONG_URL: 'http://localhost:8888',
                 KONG_ANONYMOUS_FALLBACK_TOKEN: 'test-fallback-token',
                 APPID: 'test-app',
-                SUNBIRD_ANONYMOUS_SESSION_SECRET: 'test-secret',
+                SUNBIRD_SESSION_SECRET: 'test-secret',
                 ENVIRONMENT: 'test',
                 SUNBIRD_ANONYMOUS_SESSION_TTL: 86400000
             }
