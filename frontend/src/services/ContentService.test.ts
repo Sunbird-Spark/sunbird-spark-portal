@@ -17,9 +17,21 @@ describe('ContentService', () => {
     init(mockClient);
   });
 
-  it('should call client.get with correct url', async () => {
+  it('should call client.post for contentSearch with request body', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [], QuestionSet: [] }, status: 200, headers: {} });
     const service = new ContentService();
-    await service.getContent();
-    expect(mockClient.get).toHaveBeenCalledWith('/content');
+    await service.contentSearch({ sort_by: { lastUpdatedOn: 'desc' } });
+    expect(mockClient.post).toHaveBeenCalledWith(
+      '/composite/v1/search',
+      expect.objectContaining({
+        request: expect.objectContaining({
+          filters: {},
+          limit: 20,
+          offset: 0,
+          query: '',
+          sort_by: { lastUpdatedOn: 'desc' },
+        }),
+      })
+    );
   });
 });
