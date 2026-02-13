@@ -16,6 +16,7 @@ vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
 vi.mock('../../AppCoreService', () => ({
   default: {
     getDeviceId: vi.fn(),
+    getPData: vi.fn(),
   },
 }));
 
@@ -44,6 +45,11 @@ describe('QumlPlayerService', () => {
     vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('session-123');
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
     vi.mocked(appCoreService.getDeviceId).mockResolvedValue('device-123');
+    vi.mocked(appCoreService.getPData).mockResolvedValue({
+      id: 'sunbird.portal',
+      ver: '3.2.12',
+      pid: 'sunbird.portal.contentplayer',
+    });
     mockOrgService.search.mockResolvedValue({
       data: {
         result: {

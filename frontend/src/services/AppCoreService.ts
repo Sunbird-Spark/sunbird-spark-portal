@@ -76,9 +76,9 @@ class AppCoreService {
         const data = response.data;
 
         return {
-            id: data?.appId,
-            ver: data?.version,
-            pid: data?.appId,
+            id: data?.appId || "",
+            ver: data?.version || "",
+            pid: data?.appId || "",
         };
     }
 

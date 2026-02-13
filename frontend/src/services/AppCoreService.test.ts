@@ -185,10 +185,14 @@ describe('AppCoreService', () => {
             });
         });
 
-        it('should return fallback values if app info endpoint fails', async () => {
+        it('should return fallback values if app info endpoint returns empty data', async () => {
             const mockClient = {
                 get: vi.fn().mockResolvedValue({
-                    data: {}
+                    data: {
+                        appId: undefined,
+                        version: undefined,
+                        buildHash: undefined
+                    }
                 })
             };
             (httpClient.getClient as any).mockReturnValue(mockClient);
