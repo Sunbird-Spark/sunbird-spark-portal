@@ -7,7 +7,6 @@ import { saveSession } from '../utils/sessionUtils.js';
 export const registerDeviceWithKong = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
         logger.info(`registerDeviceWithKong :: ${req.method} ${req.originalUrl}`);
-
         if (req.session.kongToken) {
             const isAuthenticated = req.session.userId && req.kauth;
             const isAnonymous = !req.session.userId;

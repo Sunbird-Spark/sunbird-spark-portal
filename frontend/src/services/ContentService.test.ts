@@ -26,25 +26,21 @@ describe('ContentService', () => {
     service = new ContentService();
   });
 
-  it('should call client.get with correct url and return data on success', async () => {
-    const mockResponse = {
-      data: { id: '123', name: 'Test Content' },
-      status: 200,
-      headers: {}
-    };
-    (mockClient.get as any).mockResolvedValue(mockResponse);
-
-    const result = await service.getContent();
-
-    expect(mockClient.get).toHaveBeenCalledWith('/content');
-    expect(result).toEqual(mockResponse);
-  });
-
-  it('should propagate error when client throws', async () => {
-    const error = new Error('Network error');
-    (mockClient.get as any).mockRejectedValue(error);
-
-    await expect(service.getContent()).rejects.toThrow('Network error');
-    expect(mockClient.get).toHaveBeenCalledWith('/content');
+  it('should call client.post for contentSearch with request body', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [], QuestionSet: [] }, status: 200, headers: {} });
+    const service = new ContentService();
+    await service.contentSearch({ sort_by: { lastUpdatedOn: 'desc' } });
+    expect(mockClient.post).toHaveBeenCalledWith(
+      '/composite/v1/search',
+      expect.objectContaining({
+        request: expect.objectContaining({
+          filters: {},
+          limit: 20,
+          offset: 0,
+          query: '',
+          sort_by: { lastUpdatedOn: 'desc' },
+        }),
+      })
+    );
   });
 });
