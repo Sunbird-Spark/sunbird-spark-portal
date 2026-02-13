@@ -25,7 +25,7 @@ router.get('/login',
         // If already authenticated, go home
         if (req.session && _.get(req, 'kauth.grant')) {
             logger.info('User already authenticated, redirecting to home');
-            return res.redirect('/home');
+            return res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL + '/home');
         }
 
         // Otherwise start login flow -> redirect to protected callback
