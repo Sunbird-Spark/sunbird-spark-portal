@@ -1,9 +1,37 @@
-import { describe, it, expect } from 'vitest';
+import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import AdminPage from './admin/AdminPage';
 import WorkspacePage from './workspace/WorkspacePage';
 import ReportsPage from './reports/ReportsPage';
 import CreateContentPage from './content/CreateContentPage';
+
+vi.mock('@/hooks/useContent', () => ({
+  useContentSearch: vi.fn(() => ({
+    data: { data: { content: [], QuestionSet: [] } },
+    isLoading: false,
+    refetch: vi.fn(),
+  })),
+}));
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+function renderWithProviders(ui: React.ReactElement) {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
+}
 
 describe('Protected Pages', () => {
   describe('AdminPage', () => {
@@ -16,9 +44,9 @@ describe('Protected Pages', () => {
 
   describe('WorkspacePage', () => {
     it('should render workspace', () => {
-      render(<WorkspacePage />);
-      expect(screen.getByRole('heading', { name: 'Workspace' })).toBeInTheDocument();
-      expect(screen.getByText(/accessible to users with/i)).toBeInTheDocument();
+      renderWithProviders(<WorkspacePage />);
+      expect(screen.getByRole('button', { name: 'Workspace' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
     });
   });
 

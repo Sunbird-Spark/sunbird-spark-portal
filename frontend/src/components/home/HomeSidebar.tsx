@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FiHome, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
+import { FiHome, FiUser, FiSettings, FiLogOut, FiEdit } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 
 interface HomeSidebarProps {
@@ -36,6 +36,7 @@ const mainNavItems = [
     { id: "home", label: "Home", icon: FiHome, path: "/home" },
     { id: "learning", label: "My Learning", icon: MyLearningIcon, path: "/my-learning" },
     { id: "explore", label: "Explore", icon: ExploreIcon, path: "/explore" },
+    { id: "workspace", label: "Workspace", icon: FiEdit, path: "/workspace" },
     { id: "profile", label: "Profile", icon: FiUser, path: "/profile" },
 ];
 
