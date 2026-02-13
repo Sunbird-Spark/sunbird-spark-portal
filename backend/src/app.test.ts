@@ -3,6 +3,18 @@ import request from 'supertest';
 
 describe('Express App', () => {
   beforeEach(() => {
+    vi.doMock('./config/env.js', () => ({
+      envConfig: {
+        ENVIRONMENT: 'local',
+        SUNBIRD_SESSION_SECRET: 'test',
+        SUNBIRD_ANONYMOUS_SESSION_TTL: 1000,
+        KONG_URL: 'http://localhost:8000',
+        PORTAL_REALM: 'sunbird',
+        DOMAIN_URL: 'http://localhost:3000',
+        PORTAL_AUTH_SERVER_CLIENT: 'portal',
+        LEARN_BASE_URL: 'http://localhost:9000'
+      }
+    }));
     vi.doMock('./utils/sessionStore.js', () => {
       const session = require('express-session');
       return {
@@ -20,6 +32,7 @@ describe('Express App', () => {
     const { app } = await import('./app.js');
     const response = await request(app)
       .get('/non-existent-route')
+      .set('Origin', 'http://localhost:5173')
       .expect(404);
 
     // The response should have CORS headers

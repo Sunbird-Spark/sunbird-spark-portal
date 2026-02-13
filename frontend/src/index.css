@@ -303,7 +303,7 @@
   }
 
   .form-divider-line {
-    @apply h-[1px] flex-1 bg-gray-200;
+    @apply h-[0.0625rem] flex-1 bg-gray-200;
   }
 
   .form-divider-text {
@@ -315,15 +315,15 @@
   }
 
   .form-error-offset-8 {
-    @apply bottom-[-8px];
+    @apply bottom-[-0.5rem];
   }
 
   .form-error-offset-4 {
-    @apply bottom-[-4px];
+    @apply bottom-[-0.25rem];
   }
 
   .form-error-offset-2 {
-    @apply bottom-[-2px];
+    @apply bottom-[-0.125rem];
   }
 
   .themed-checkbox {
@@ -429,6 +429,16 @@
     @apply absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center text-sunbird-gray-75 text-base bg-sunbird-light-blue;
   }
 
+
+  .card-mask-custom {
+    -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+  }
+
+  [dir="rtl"] .card-mask-custom {
+    -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+  }
 
 }
 
