@@ -20,44 +20,45 @@ export class QumlPlayerService {
     // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
     const uid = userAuthInfoService.getUserId() || 'anonymous';
-    
-    // Get device ID from AppCoreService (backend) with fallback
-    let did = `device-${Date.now()}`;
+
+    // Get device ID from AppCoreService (backend)
+    let did = '';
     try {
       did = await appCoreService.getDeviceId();
     } catch (error) {
-      console.warn('Failed to fetch device ID, using fallback:', error);
+      console.warn('Failed to fetch device ID:', error);
     }
-    
-    // Get channel from org service with random fallback for testing
-    let channel = metadata.channel || `test-channel-${Math.random().toString(36).substring(2, 15)}`;
+
+    // Get channel from org service
+    let channel = '';
     try {
       const orgResponse = await this.orgService.search({
         filters: {
           isTenant: true
         }
       });
-      
       const org = orgResponse?.data?.result?.response?.content?.[0];
       if (org?.channel) {
         channel = org.channel;
+        console.log('Using channel from org service:', channel);
+      } else {
+        console.warn('Channel not found from org service');
       }
     } catch (error) {
-      console.warn('Failed to fetch channel from org service, using fallback:', channel);
+      console.warn('Failed to fetch channel from org service:', error);
     }
 
-    // Build context with defaults and overrides (matches EPUB pattern)
+    // Get pdata from app core service
+    const pdata = await appCoreService.getPData();
+
+    // Build context with defaults and overrides
     const context = {
       mode: contextProps?.mode || 'play',
       sid,
       did,
       uid,
       channel,
-      pdata: {
-        id: 'sunbird.portal',
-        ver: '3.2.12',
-        pid: 'sunbird-portal.contentplayer',
-      },
+      pdata,
       contextRollup: contextProps?.contextRollup || {
         l1: channel,
       },
