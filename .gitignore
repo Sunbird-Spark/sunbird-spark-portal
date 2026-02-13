@@ -88,3 +88,8 @@ frontend/public/sunbird-pdf-player.js
 frontend/public/pdf-player-styles.css
 frontend/public/assets/pdf-player/
 
+frontend/public/sunbird-video-player.js
+frontend/public/video-player-styles.css
+frontend/public/assets/video-player/
+
+.vscode/settings.json
