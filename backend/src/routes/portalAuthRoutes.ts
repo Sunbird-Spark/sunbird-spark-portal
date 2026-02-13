@@ -69,10 +69,10 @@ router.get('/auth/callback',
                 }
 
                 logger.info('Session setup complete, redirecting to /home');
-                res.redirect('/home');
+                res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL + '/home');
             } catch (err) {
                 logger.error('Error generating session on login', err);
-                res.redirect('/');
+                res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
             }
         } else {
             logger.error('No session found after Keycloak protect');
@@ -87,7 +87,7 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
     try {
         await regenerateAnonymousSession(req);
         // Redirect to Keycloak logout
-        const logoutUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(envConfig.SERVER_URL + '/')}`;
+        const logoutUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/')}`;
         res.redirect(logoutUrl);
     } catch (err) {
         logger.error('Error regenerating session on logout', err);
