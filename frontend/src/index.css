@@ -430,12 +430,11 @@
   }
 
   .content-player-container {
-    @apply py-6;
-    margin-left: 8rem;
-    margin-right: 8rem;
+    @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
   }
 
   .content-player-resource-title {
+    @apply font-rubik font-medium text-[26px] leading-[38px] tracking-normal text-white font-semibold mb-2;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
   }
 
@@ -491,8 +490,11 @@
   }
 
   .content-player-video-container {
-    width: 71.625rem;
-    height: 41.313rem;
+    width: 100%;
+    height: 100%;
+    max-height: 41.313rem;
+    max-width: 71.625rem;
+    margin-inline: auto;
   }
 
   .content-player-video-wrapper {
@@ -535,9 +537,7 @@
     @apply grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr;
   }
 
-  .content-player-resource-title {
-    @apply font-rubik font-medium text-[26px] leading-[38px] tracking-normal text-white font-semibold mb-2;
-  }
+
 
   .related-resource-card-subtitle {
     @apply font-rubik font-medium text-[16px] leading-[24px] tracking-normal text-[#FFFFFF] text-center;

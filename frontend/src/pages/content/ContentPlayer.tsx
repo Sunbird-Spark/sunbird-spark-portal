@@ -101,7 +101,7 @@ const ContentPlayer = () => {
 
           <div className="content-player-related-grid">
             {contentData.relatedContent.map((item) => {
-              if (item.type === "PDF" && item.isResource) {
+              if (item.isResource) {
                 return <ResourceCard key={item.id} item={item} />;
               } else {
                 return <ContentCard key={item.id} item={item} />;
