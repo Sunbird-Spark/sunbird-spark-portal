@@ -7,16 +7,18 @@ interface ProfileCardProps {
 }
 
 const ProfileCard = ({ user }: ProfileCardProps) => {
-    const fullName = `${user.firstName} ${user.lastName}`;
-    const displayId = user.userName;
+    const fullName = `${_.get(user, 'firstName', '')} ${_.get(user, 'lastName', '')}`;
+    const displayId = _.get(user, 'userName', '');
 
     const formatRole = (role: string) => {
+        if (!role) return '';
         return role.split('_')
             .map(part => _.upperFirst(_.toLower(part)))
             .join(' ');
     };
 
-    const roles = user.roles?.map(r => formatRole(r.role)) || [];
+    const rolesList = _.get(user, 'roles', []) || [];
+    const roles = rolesList.map((r: any) => formatRole(_.get(r, 'role', '')));
     const roleChunks = _.chunk(roles, 3);
 
     return (
@@ -47,8 +49,8 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
             {/* Roles */}
             {roles.length > 0 && (
                 <div className="profile-roles-container mt-4 flex flex-col items-center gap-1 w-full">
-                    {roleChunks.map((chunk, i) => (
-                        <div key={i} className="flex items-center justify-center gap-1 text-[0.875rem] text-sunbird-gray-75 w-full">
+                    {roleChunks.map((chunk) => (
+                        <div key={chunk.join("|")} className="flex items-center justify-center gap-1 text-[0.875rem] text-sunbird-gray-75 w-full">
                             {chunk.map((role, j) => (
                                 <div key={role} className="flex items-center">
                                     <span className="font-rubik">{role}</span>

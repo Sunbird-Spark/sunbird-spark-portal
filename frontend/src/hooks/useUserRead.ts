@@ -11,7 +11,7 @@ export const useUserRead = (): UseQueryResult<ApiResponse<UserReadResponse>, Err
         queryKey: ['userRead'],
         queryFn: async () => {
             const id = userAuthInfoService.getUserId() ??
-            (await userAuthInfoService.getAuthInfo()).uid;
+                (await userAuthInfoService.getAuthInfo())?.uid;
 
             if (!id) {
                 throw new Error('User ID not available');
