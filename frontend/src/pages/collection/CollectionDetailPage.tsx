@@ -9,7 +9,8 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 import { collectionData } from "@/data/collectionData";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
-import { RelatedCourseCard, RelatedResourceCard } from "@/components/collection/RelatedContent";
+import { CourseCard, type ContentCourse } from "@/components/common/CourseCard";
+import { ResourceCardComponent, type ResourceCardProps } from "@/components/landing/ResourceCenter";
 
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
@@ -101,9 +102,29 @@ const CollectionDetailPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr">
             {collectionData.relatedContent.map((item) =>
               item.isResource ? (
-                <RelatedResourceCard key={item.id} item={item} />
+                <ResourceCardComponent
+                  key={item.id}
+                  id={item.id}
+                  title={item.title}
+                  type={(item.type === "Video" || item.type === "PDF" || item.type === "HTML" || item.type === "Epub" ? item.type : "PDF") as ResourceCardProps["type"]}
+                  image={item.image}
+                  heightClass="h-[24.5rem]"
+                />
               ) : (
-                <RelatedCourseCard key={item.id} item={item} />
+                <CourseCard
+                  key={item.id}
+                  course={
+                    {
+                      id: item.id,
+                      title: item.title,
+                      image: item.image,
+                      type: item.type,
+                      rating: item.rating ?? 0,
+                      learners: item.learners ?? "0",
+                      lessons: item.lessons ?? 0,
+                    } as ContentCourse
+                  }
+                />
               )
             )}
           </div>
