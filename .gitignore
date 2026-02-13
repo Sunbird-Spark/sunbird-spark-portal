@@ -84,9 +84,7 @@ frontend/public/sunbird-epub-player.js
 frontend/public/epub-player-styles.css
 frontend/public/assets/epub-player/
 
-# =========================
-# Sample/Test files (local only)
-# =========================
-frontend/public/sample-epub.epub
-frontend/public/*.epub
-.vscode/settings.json
+frontend/public/sunbird-pdf-player.js
+frontend/public/pdf-player-styles.css
+frontend/public/assets/pdf-player/
+
