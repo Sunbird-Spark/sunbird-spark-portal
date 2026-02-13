@@ -89,4 +89,9 @@ frontend/public/assets/epub-player/
 # =========================
 frontend/public/sample-epub.epub
 frontend/public/*.epub
+
 .vscode/settings.json
+
+frontend/public/sunbird-video-player.js
+frontend/public/video-player-styles.css
+frontend/public/assets
