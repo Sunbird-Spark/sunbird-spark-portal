@@ -23,12 +23,14 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
               className="w-full h-full object-cover"
             />
 
-            {/* Week Label */}
-            <div className="absolute top-4 left-4 z-10">
-              <span className="text-white text-base font-medium px-4 py-2 rounded-md">
-                Week 1: Foundation & Basics
-              </span>
-            </div>
+            {/* Week Label - first module or none */}
+            {collectionData.modules?.[0] && (
+              <div className="absolute top-4 left-4 z-10">
+                <span className="text-white text-base font-medium px-4 py-2 rounded-md">
+                  {collectionData.modules[0].title}
+                </span>
+              </div>
+            )}
 
             {/* Play Button */}
             <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg z-20">

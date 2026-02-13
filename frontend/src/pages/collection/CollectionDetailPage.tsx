@@ -11,7 +11,7 @@ import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import { RelatedCourseCard, RelatedResourceCard } from "@/components/collection/RelatedContent";
 
-const CollectionDetail = () => {
+const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
   const { t } = useAppI18n();
@@ -133,4 +133,4 @@ const CollectionDetail = () => {
   );
 };
 
-export default CollectionDetail;
+export default CollectionDetailPage;
