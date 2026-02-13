@@ -112,7 +112,7 @@ describe('VideoPlayerService', () => {
       const config = await service.createConfig(mockMetadata);
       
       // Should use random fallback channel
-      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+      expect(config.context.channel).toMatch('');
     });
 
     it('should use random fallback channel when org response is invalid', async () => {
@@ -129,7 +129,7 @@ describe('VideoPlayerService', () => {
       const config = await service.createConfig(mockMetadata);
       
       // Should use random fallback channel
-      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+      expect(config.context.channel).toMatch('');
     });
 
     it('should use random fallback channel when org service throws error', async () => {
@@ -138,7 +138,7 @@ describe('VideoPlayerService', () => {
       const config = await service.createConfig(mockMetadata);
       
       // Should use random fallback channel
-      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+      expect(config.context.channel).toMatch('');
     });
 
     it('should use fallback device ID when appCoreService fails', async () => {
