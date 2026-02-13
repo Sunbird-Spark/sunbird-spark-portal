@@ -1,20 +1,18 @@
 import { FiEdit2 } from "react-icons/fi";
+import { UserProfile } from "@/types/userTypes";
 
 interface PersonalInformationProps {
-    user: any;
+    user: UserProfile;
 }
 
 const PersonalInformation = ({ user }: PersonalInformationProps) => {
     const fullName = `${user.firstName} ${user.lastName}`;
+    const truncatedName = fullName.length > 20 ? `${fullName.substring(0, 20)}...` : fullName;
     const displayEmail = user.maskedEmail || user.email;
-    const displayPhone = user.maskedPhone || user.phone || "N/A";
+    const displayPhone = user.maskedPhone || "";
 
-    // Extract district and state from profileLocation
-    const district = user.profileLocation?.find((loc: any) => loc.type === "district")?.id || "N/A";
-    const state = user.profileLocation?.find((loc: any) => loc.type === "state")?.id || "N/A";
-
-    // Recovery email (if available)
-    const alternateEmail = user.recoveryEmail || "N/A";
+    // Recovery email (if available) - Mapped to Alternate Email ID
+    const alternateEmail = user.recoveryEmail || "";
 
     return (
         <div className="personal-info-card">
@@ -39,9 +37,9 @@ const PersonalInformation = ({ user }: PersonalInformationProps) => {
                     <dt className="personal-info-label">
                         Full Name
                     </dt>
-                    <dd className="personal-info-value-container">
-                        <span className="personal-info-value">
-                            {fullName}
+                    <dd className="personal-info-value-container min-w-0">
+                        <span className="personal-info-value block truncate" title={fullName}>
+                            {truncatedName}
                         </span>
                     </dd>
                 </div>
@@ -51,9 +49,9 @@ const PersonalInformation = ({ user }: PersonalInformationProps) => {
                     <dt className="personal-info-label">
                         Mobile Number
                     </dt>
-                    <dd className="personal-info-value-container">
-                        <span className="personal-info-value">
-                            {displayPhone}
+                    <dd className="personal-info-value-container min-w-0">
+                        <span className={`personal-info-value block truncate ${!displayPhone ? 'text-sunbird-gray-75' : ''}`} title={displayPhone || "Mobile Number"}>
+                            {displayPhone || "Mobile Number"}
                         </span>
                     </dd>
                 </div>
@@ -63,8 +61,8 @@ const PersonalInformation = ({ user }: PersonalInformationProps) => {
                     <dt className="personal-info-label">
                         Email ID
                     </dt>
-                    <dd className="personal-info-value-container">
-                        <span className="personal-info-value">
+                    <dd className="personal-info-value-container min-w-0">
+                        <span className="personal-info-value block truncate" title={displayEmail}>
                             {displayEmail}
                         </span>
                     </dd>
@@ -75,33 +73,9 @@ const PersonalInformation = ({ user }: PersonalInformationProps) => {
                     <dt className="personal-info-label">
                         Alternate Email ID
                     </dt>
-                    <dd className="personal-info-value-container">
-                        <span className="personal-info-value">
-                            {alternateEmail}
-                        </span>
-                    </dd>
-                </div>
-
-                {/* District */}
-                <div className="personal-info-field">
-                    <dt className="personal-info-label">
-                        District
-                    </dt>
-                    <dd className="personal-info-value-container">
-                        <span className="personal-info-value">
-                            {district}
-                        </span>
-                    </dd>
-                </div>
-
-                {/* State */}
-                <div className="personal-info-field">
-                    <dt className="personal-info-label">
-                        State
-                    </dt>
-                    <dd className="personal-info-value-container">
-                        <span className="personal-info-value">
-                            {state}
+                    <dd className="personal-info-value-container min-w-0">
+                        <span className={`personal-info-value block truncate ${!alternateEmail ? 'text-sunbird-gray-75' : ''}`} title={alternateEmail || "Alternate Email ID"}>
+                            {alternateEmail || "Alternate Email ID"}
                         </span>
                     </dd>
                 </div>

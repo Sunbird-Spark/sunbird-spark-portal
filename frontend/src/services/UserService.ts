@@ -1,25 +1,7 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 import _ from 'lodash';
 import { SignupRequest, SignupResponse } from '../types/signupTypes'
-
-export interface UserReadResponse {
-    id: string;
-    ver: string;
-    ts: string;
-    params: {
-        resmsgid: string;
-        msgid: string;
-        err: string | null;
-        status: string;
-        errmsg: string | null;
-    };
-    responseCode: string;
-    result: {
-        response: {
-            [key: string]: any;
-        };
-    };
-}
+import { UserReadResponse } from '../types/userTypes';
 
 export class UserService {
     public async searchUser(

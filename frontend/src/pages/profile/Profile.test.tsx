@@ -94,9 +94,7 @@ vi.mock('@/hooks/useUserRead', () => ({
     useUserRead: () => ({
         data: {
             data: {
-                result: {
-                    response: mockUserData
-                }
+                response: mockUserData
             }
         },
         isLoading: false,

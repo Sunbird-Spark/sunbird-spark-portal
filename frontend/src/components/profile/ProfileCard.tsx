@@ -1,12 +1,23 @@
 import Avatar from "react-avatar";
+import _ from 'lodash';
+import { UserProfile } from "@/types/userTypes";
 
 interface ProfileCardProps {
-    user: any;
+    user: UserProfile;
 }
 
 const ProfileCard = ({ user }: ProfileCardProps) => {
     const fullName = `${user.firstName} ${user.lastName}`;
-    const displayEmail = user.maskedEmail || user.email;
+    const displayId = user.userName;
+
+    const formatRole = (role: string) => {
+        return role.split('_')
+            .map(part => _.upperFirst(_.toLower(part)))
+            .join(' ');
+    };
+
+    const roles = user.roles?.map(r => formatRole(r.role)) || [];
+    const roleChunks = _.chunk(roles, 3);
 
     return (
         <div className="profile-card">
@@ -23,11 +34,6 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
                 </div>
             </div>
 
-            {/* Update Photo Link */}
-            <button className="profile-update-photo-btn">
-                Update Photo
-            </button>
-
             {/* Name */}
             <h2 className="profile-name">
                 {fullName}
@@ -35,8 +41,26 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
 
             {/* Sunbird ID */}
             <p className="profile-id-text">
-                Sunbird ID : {displayEmail}
+                Sunbird ID : {displayId}
             </p>
+
+            {/* Roles */}
+            {roles.length > 0 && (
+                <div className="profile-roles-container mt-4 flex flex-col items-center gap-1 w-full">
+                    {roleChunks.map((chunk, i) => (
+                        <div key={i} className="flex items-center justify-center gap-1 text-[0.875rem] text-sunbird-gray-75 w-full">
+                            {chunk.map((role, j) => (
+                                <div key={role} className="flex items-center">
+                                    <span className="font-rubik">{role}</span>
+                                    {j < chunk.length - 1 && (
+                                        <span className="mx-2 text-[0.5rem] text-sunbird-gray-75">•</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

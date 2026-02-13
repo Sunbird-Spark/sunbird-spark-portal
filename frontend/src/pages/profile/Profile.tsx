@@ -32,7 +32,7 @@ const Profile = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
     const { data: userResponse, isLoading, isError } = useUserRead();
-    const userData = userResponse?.data?.result?.response;
+    const userData = userResponse?.data?.response;
 
     useEffect(() => {
         setIsSidebarOpen(!isMobile);
@@ -182,7 +182,7 @@ const Profile = () => {
                 <main className="profile-main-content">
                     <div className="profile-content-wrapper">
                         {/* Top Section: Profile Card + Personal Information */}
-                        <div className="grid grid-cols-1 lg:grid-cols-[23.3125rem_1fr] gap-6 mb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-[19rem_1fr] gap-6 mb-8">
                             {/* Left: Profile Card */}
                             <ProfileCard user={userData} />
 
