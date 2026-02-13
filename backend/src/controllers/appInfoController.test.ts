@@ -27,7 +27,7 @@ import { app } from '../app.js';
 
 describe('GET /app/v1/info', () => {
     it('should return application metadata with mocked values', async () => {
-        const response = await request(app).get('/app/v1/info');
+        const response = await request(app).get('/portal/app/v1/info');
 
         expect(response.status).toBe(200);
         expect(response.body.responseCode).toBe('OK');
