@@ -34,7 +34,7 @@ export class VideoPlayerService {
     const uid = userAuthInfoService.getUserId() || 'anonymous';
 
     // Get device ID from AppCoreService (backend) with fallback
-    let did = `device-${Date.now()}`;
+    let did = '';
     try {
       did = await appCoreService.getDeviceId();
     } catch (error) {
