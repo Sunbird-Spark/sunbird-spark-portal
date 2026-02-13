@@ -1,197 +1,106 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { questionSetService } from '../../../services/QuestionSetService';
-import { buildQumlPlayerConfig, QumlPlayerConfig } from '../../../services/players/quml';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { qumlPlayerService } from '../../../services/players/quml';
+import type { QumlPlayerEvent, QumlPlayerContextProps, QumlPlayerMetadata } from '../../../services/players/quml/types';
 import styles from './QumlPlayer.module.css';
 
-type QumlPlayerProps = {
-  questionSetId?: string;
-};
+interface QumlPlayerProps {
+  metadata: QumlPlayerMetadata;
+  mode?: string;
+  cdata?: any[];
+  contextRollup?: { l1: string };
+  objectRollup?: Record<string, any>;
+  onPlayerEvent?: (event: QumlPlayerEvent) => void;
+  onTelemetryEvent?: (event: any) => void;
+}
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
-const QUESTION_LIST_URL =
-  import.meta.env.VITE_QUESTION_LIST_URL ||
-  `${API_BASE.replace(/\/$/, '')}/action/question/v2/list`;
+const QumlPlayer: React.FC<QumlPlayerProps> = ({
+  metadata,
+  mode = 'play',
+  cdata,
+  contextRollup,
+  objectRollup,
+  onPlayerEvent,
+  onTelemetryEvent,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerElementRef = useRef<HTMLElement | null>(null);
 
-// Expose question list URL early for the web component
-(window as any).questionListUrl = QUESTION_LIST_URL;
-let stylesLoaded = false;
-
-/**
- * Load QUML player styles dynamically (only once)
- * Prevents unnecessary CSS loading if no QUML player is used on the page
- */
-const loadQumlPlayerStyles = (): void => {
-  // Check if styles already exist in the DOM (prevents race conditions)
-  const existingStyles = document.querySelector('[data-quml-player-styles="true"]');
-  if (existingStyles || stylesLoaded) {
-    stylesLoaded = true;
-    return;
-  }
-
-  const styleLink = document.createElement('link');
-  styleLink.rel = 'stylesheet';
-  styleLink.href = '/assets/quml-player/styles.css';
-  styleLink.setAttribute('data-quml-player-styles', 'true');
-  document.head.appendChild(styleLink);
-  stylesLoaded = true;
-};
-
-const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId }) => {
-  const { questionSetId: routeQuestionSetId } = useParams<{ questionSetId?: string }>();
-  const playerRef = useRef<HTMLElement>(null);
-
-  const qsId = useMemo(
-    () => routeQuestionSetId || questionSetId || '',
-    [questionSetId, routeQuestionSetId],
+  // Memoize context props to prevent unnecessary re-renders
+  const contextProps = useMemo<QumlPlayerContextProps>(
+    () => ({
+      mode,
+      ...(cdata && { cdata }),
+      ...(contextRollup && { contextRollup }),
+      ...(objectRollup && { objectRollup }),
+    }),
+    [mode, cdata, contextRollup, objectRollup]
   );
 
-  const questionSetQuery = useQuery({
-    queryKey: ['quml', 'questionset', qsId],
-    enabled: Boolean(qsId),
-    staleTime: 5 * 60 * 1000,
-    queryFn: async () => {
-      // Fetch hierarchy and read in parallel (like old portal's forkJoin)
-      const [hierarchyResp, readResp] = await Promise.all([
-        questionSetService.getHierarchy<any>(qsId),
-        questionSetService.getRead<any>(qsId),
-      ]);
-
-      let metadata =
-        hierarchyResp?.result?.questionset ||
-        hierarchyResp?.result?.questionSet ||
-        hierarchyResp?.questionset ||
-        hierarchyResp;
-
-      if (!metadata) {
-        throw new Error('Hierarchy payload missing questionset');
-      }
-
-      // Merge additional properties from read API (instructions, maxScore, etc.)
-      const readData = readResp?.result?.questionset || readResp?.result?.questionSet;
-      if (readData) {
-        if (readData.instructions) {
-          metadata.instructions = readData.instructions;
-        }
-        if (readData.maxScore) {
-          metadata.maxScore = readData.maxScore;
-        }
-        if (readData.outcomeDeclaration) {
-          metadata.outcomeDeclaration = readData.outcomeDeclaration;
-        }
-      }
-
-      // Collect all question IDs from hierarchy
-      const collectQuestionIds = (node: any): string[] => {
-        if (!node) return [];
-        const ids: string[] = [];
-        if (node.mimeType === 'application/vnd.sunbird.question' && node.identifier) {
-          ids.push(node.identifier);
-        }
-        if (Array.isArray(node.children)) {
-          node.children.forEach((child: any) => {
-            ids.push(...collectQuestionIds(child));
-          });
-        }
-        return ids;
-      };
-
-      const questionIds = collectQuestionIds(metadata);
-
-      // Fetch full question data (with body, responseDeclaration, interactions, etc.)
-      let questionMap = new Map<string, any>();
-      if (questionIds.length > 0) {
-        const listResp = await questionSetService.getQuestionList<any>(questionIds);
-        const questions = listResp?.result?.questions || listResp?.questions || [];
-
-        questions.forEach((q: any) => {
-          if (q?.identifier) {
-            questionMap.set(q.identifier, q);
-          }
-        });
-      }
-
-      // Replace question stubs in hierarchy with full question data
-      const replaceQuestionsInHierarchy = (node: any): any => {
-        if (!node) return node;
-
-        if (node.mimeType === 'application/vnd.sunbird.question' && node.identifier) {
-          const fullQuestion = questionMap.get(node.identifier);
-          if (fullQuestion) {
-            return {
-              ...fullQuestion,
-              parent: node.parent,
-              index: node.index,
-              depth: node.depth,
-              graphId: node.graphId,
-            };
-          }
-        }
-
-        if (Array.isArray(node.children)) {
-          node.children = node.children.map(replaceQuestionsInHierarchy);
-        }
-
-        return node;
-      };
-
-      metadata = replaceQuestionsInHierarchy(metadata);
-
-      // Ensure outcomeDeclaration.maxScore structure exists
-      if (!metadata.outcomeDeclaration) {
-        metadata.outcomeDeclaration = {};
-      }
-      if (!metadata.outcomeDeclaration.maxScore) {
-        const maxScore = metadata.maxScore || 1;
-        metadata.outcomeDeclaration.maxScore = {
-          cardinality: 'single',
-          type: 'integer',
-          defaultValue: maxScore,
-        };
-      }
-
-      return { metadata };
+  // Memoize event handlers
+  const handlePlayerEvent = useCallback(
+    (event: QumlPlayerEvent) => {
+      console.log('[QumlPlayer] Player event:', event);
+      onPlayerEvent?.(event);
     },
-  });
+    [onPlayerEvent]
+  );
 
-  const playerConfig = useMemo<QumlPlayerConfig | null>(() => {
-    if (!questionSetQuery.data) return null;
-    const channel = questionSetQuery.data.metadata?.channel;
-    const uid = questionSetQuery.data.metadata?.createdBy || 'anonymous';
+  const handleTelemetryEvent = useCallback(
+    (event: any) => {
+      console.log('[QumlPlayer] Telemetry event:', event);
+      onTelemetryEvent?.(event);
+    },
+    [onTelemetryEvent]
+  );
 
-    return buildQumlPlayerConfig({
-      metadata: questionSetQuery.data.metadata,
-      orgChannel: channel,
-      deviceId: '',
-      appId: import.meta.env.VITE_APP_ID,
-      pid: import.meta.env.VITE_PID,
-      buildNumber: import.meta.env.VITE_BUILD_NUMBER,
-      uid,
-      host: window.location.origin,
-      env: 'contentplayer',
-      endpoint: '/data/v3/telemetry',
-      enableTelemetryValidation: false,
-    });
-  }, [questionSetQuery.data]);
-
+  // Initialize player
   useEffect(() => {
-    if (!playerRef.current || !playerConfig) return;
+    let playerElement: HTMLElement | null = null;
 
-    // Load QUML player styles when player is first initialized
-    loadQumlPlayerStyles();
+    const initializePlayer = async () => {
+      if (!containerRef.current || !metadata) {
+        console.warn('[QumlPlayer] Container or metadata not available');
+        return;
+      }
 
-    playerRef.current.setAttribute('player-config', JSON.stringify(playerConfig));
-  }, [playerConfig]);
+      try {
+        // Create player config
+        const config = await qumlPlayerService.createConfig(metadata, contextProps);
+        
+        // Create player element
+        playerElement = qumlPlayerService.createElement(config);
+        
+        // Attach event listeners
+        qumlPlayerService.attachEventListeners(
+          playerElement,
+          handlePlayerEvent,
+          handleTelemetryEvent
+        );
 
-  if (!questionSetQuery.data || !playerConfig) {
-    return <div>No question set data available</div>;
-  }
+        // Add to DOM
+        containerRef.current.appendChild(playerElement);
+        playerElementRef.current = playerElement;
+
+        console.log('[QumlPlayer] Player initialized successfully');
+      } catch (error) {
+        console.error('[QumlPlayer] Failed to initialize player:', error);
+      }
+    };
+
+    initializePlayer();
+
+    // Cleanup
+    return () => {
+      if (playerElement) {
+        qumlPlayerService.removeEventListeners(playerElement);
+        playerElement.remove();
+        playerElementRef.current = null;
+      }
+    };
+  }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 
   return (
-    <div className={styles.qumlPlayerContainer}>
-      <sunbird-quml-player ref={playerRef} />
-    </div>
+    <div className={styles.qumlPlayerContainer} ref={containerRef} />
   );
 };
 

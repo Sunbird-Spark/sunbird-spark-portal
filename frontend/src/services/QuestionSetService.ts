@@ -6,7 +6,7 @@ export class QuestionSetService {
     return res.data;
   }
 
-  async getRead<T = any>(questionSetId: string): Promise<T> {
+  async getQuestionset<T = any>(questionSetId: string): Promise<T> {
     const res = await getClient().get<T>(`/questionset/v2/read/${questionSetId}`);
     return res.data;
   }

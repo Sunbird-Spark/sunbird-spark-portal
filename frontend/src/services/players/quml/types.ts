@@ -5,23 +5,25 @@ export interface QumlPlayerConfig {
   data: any;
 }
 
-export interface BuildQumlPlayerConfigInput {
-  metadata: any;
-  user?: { id?: string; firstName?: string; lastName?: string };
-  orgChannel?: string;
-  deviceId?: string;
-  buildNumber?: string;
-  appId?: string;
-  pid?: string;
-  host?: string;
-  authToken?: string;
-  endpoint?: string;
-  env?: string;
-  dialCode?: string;
-  uid?: string;
-  enableTelemetryValidation?: boolean;
-  overrides?: {
-    context?: Record<string, any>;
-    config?: Record<string, any>;
-  };
+export interface QumlPlayerMetadata {
+  identifier: string;
+  name: string;
+  mimeType: string;
+  channel?: string;
+  createdBy?: string;
+  [key: string]: any;
+}
+
+export interface QumlPlayerEvent {
+  type: string;
+  data: any;
+  playerId: string;
+  timestamp: number;
+}
+
+export interface QumlPlayerContextProps {
+  mode?: string;
+  cdata?: any[];
+  contextRollup?: { l1: string };
+  objectRollup?: Record<string, any>;
 }

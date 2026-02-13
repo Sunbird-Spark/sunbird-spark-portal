@@ -48,7 +48,7 @@ describe('QuestionSetService', () => {
     });
   });
 
-  describe('getRead', () => {
+  describe('getQuestionset', () => {
     it('should call client.get with correct url', async () => {
       const mockResponse = {
         data: {
@@ -68,7 +68,7 @@ describe('QuestionSetService', () => {
       };
       mockClient.get = vi.fn().mockResolvedValue(mockResponse);
 
-      const result = await service.getRead('do_123');
+      const result = await service.getQuestionset('do_123');
 
       expect(mockClient.get).toHaveBeenCalledWith('/questionset/v2/read/do_123');
       expect(result).toEqual(mockResponse.data);
@@ -77,7 +77,7 @@ describe('QuestionSetService', () => {
     it('should handle errors', async () => {
       mockClient.get = vi.fn().mockRejectedValue(new Error('Not found'));
 
-      await expect(service.getRead('do_123')).rejects.toThrow('Not found');
+      await expect(service.getQuestionset('do_123')).rejects.toThrow('Not found');
     });
   });
 

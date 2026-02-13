@@ -1,100 +1,172 @@
-import { v4 as uuidv4 } from 'uuid';
-import type { QumlPlayerConfig, BuildQumlPlayerConfigInput } from './types';
+import type { QumlPlayerConfig, QumlPlayerEvent, QumlPlayerContextProps, QumlPlayerMetadata } from './types';
+import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
+import appCoreService from '../../AppCoreService';
+import { OrganizationService } from '../../OrganizationService';
 
-export function buildQumlPlayerConfig(input: BuildQumlPlayerConfigInput): QumlPlayerConfig {
-  const {
-    metadata,
-    user,
-    orgChannel,
-    deviceId,
-    buildNumber,
-    appId,
-    pid,
-    host,
-    authToken,
-    endpoint,
-    env,
-    dialCode,
-    uid,
-    enableTelemetryValidation,
-    overrides,
-  } = input;
+export class QumlPlayerService {
+  private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
+  private orgService = new OrganizationService();
+  private static stylesLoaded = false;
 
-  const baseTemplate: QumlPlayerConfig = {
-    context: {
-      mode: 'play',
+  /**
+   * Create QUML player configuration with context props and metadata
+   * @param metadata - Content metadata from backend
+   * @param contextProps - Optional context properties (mode, cdata, contextRollup, objectRollup)
+   */
+  async createConfig(
+    metadata: QumlPlayerMetadata,
+    contextProps?: QumlPlayerContextProps
+  ): Promise<QumlPlayerConfig> {
+    // Get session and user info from auth service
+    const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
+    const uid = userAuthInfoService.getUserId() || 'anonymous';
+    
+    // Get device ID from AppCoreService (backend) with fallback
+    let did = `device-${Date.now()}`;
+    try {
+      did = await appCoreService.getDeviceId();
+    } catch (error) {
+      console.warn('Failed to fetch device ID, using fallback:', error);
+    }
+    
+    // Get channel from org service with random fallback for testing
+    let channel = metadata.channel || `test-channel-${Math.random().toString(36).substring(2, 15)}`;
+    try {
+      const orgResponse = await this.orgService.search({
+        filters: {
+          isTenant: true
+        }
+      });
+      
+      const org = orgResponse?.data?.result?.response?.content?.[0];
+      if (org?.channel) {
+        channel = org.channel;
+      }
+    } catch (error) {
+      console.warn('Failed to fetch channel from org service, using fallback:', channel);
+    }
+
+    // Build context with defaults and overrides (matches EPUB pattern)
+    const context = {
+      mode: contextProps?.mode || 'play',
+      sid,
+      did,
+      uid,
+      channel,
       pdata: {
         id: 'sunbird.portal',
         ver: '3.2.12',
         pid: 'sunbird-portal.contentplayer',
       },
-    },
-    config: {},
-    metadata: {},
-    data: {},
-  };
+      contextRollup: contextProps?.contextRollup || {
+        l1: channel,
+      },
+      cdata: contextProps?.cdata || [],
+      timeDiff: 0,
+      objectRollup: contextProps?.objectRollup || {},
+      host: '',
+      endpoint: '',
+    };
 
-  const config: QumlPlayerConfig = JSON.parse(JSON.stringify(baseTemplate));
+    const finalConfig = {
+      context,
+      config: {},
+      metadata,
+      data: {},
+    };
 
-  config.context.contentId = metadata?.identifier;
-  config.context.identifier = metadata?.identifier;
-  config.context.sid = uuidv4();
-  config.context.uid = uid || user?.id || 'anonymous';
-  config.context.timeDiff = 0;
-  config.context.authToken = authToken || '';
-  config.context.host = host || config.context.host || '';
-  config.context.endpoint = endpoint || '';
-  config.context.env = env || 'contentplayer';
-  config.context.pdata.id = appId || config.context.pdata.id;
-  config.context.pdata.pid = pid || config.context.pdata.pid;
-  config.context.pdata.ver = buildNumber
-    ? majorMinor(buildNumber)
-    : majorMinor(config.context.pdata.ver);
-
-  const channel = orgChannel || metadata?.channel;
-  if (channel) {
-    config.context.channel = channel;
-    config.context.tags = [channel];
-    config.context.dims = [channel, channel];
-    config.context.app = [channel];
-    config.context.contextRollup = { l1: channel };
-  }
-  if (deviceId) {
-    config.context.did = deviceId;
-  }
-  if (dialCode) {
-    config.context.cdata = [{ id: dialCode, type: 'DialCode' }];
+    return finalConfig;
   }
 
-  config.metadata = metadata;
-  config.data =
-    metadata?.mimeType === 'application/vnd.ekstep.ecml-archive' ? metadata.body || {} : {};
+  /**
+   * Load QUML player styles dynamically (only once)
+   * Checks for existing style element to prevent race conditions
+   */
+  private loadStyles(): void {
+    // Set question list URL for the web component
+    (window as any).questionListUrl = '/action/question/v2/list';
 
-  config.config = {
-    ...config.config,
-    traceId: uuidv4(),
-    enableTelemetryValidation: enableTelemetryValidation ?? false,
-  };
+    // Check if styles already exist in the DOM (prevents race conditions)
+    const existingStyles = document.querySelector('[data-quml-player-styles="true"]');
+    if (existingStyles || QumlPlayerService.stylesLoaded) {
+      QumlPlayerService.stylesLoaded = true;
+      return;
+    }
 
-  if (overrides?.context) {
-    config.context = { ...config.context, ...overrides.context };
+    const styleLink = document.createElement('link');
+    styleLink.rel = 'stylesheet';
+    styleLink.href = '/assets/quml-player/styles.css';
+    styleLink.setAttribute('data-quml-player-styles', 'true');
+    document.head.appendChild(styleLink);
+
+    QumlPlayerService.stylesLoaded = true;
   }
-  if (overrides?.config) {
-    config.config = { ...config.config, ...overrides.config };
+
+  /**
+   * Create QUML player element with configuration
+   * Styles are loaded dynamically on first use
+   */
+  createElement(config: QumlPlayerConfig): HTMLElement {
+    // Load styles if not already loaded
+    this.loadStyles();
+
+    const element = document.createElement('sunbird-quml-player');
+    const configString = JSON.stringify(config);
+    
+    element.setAttribute('player-config', configString);
+    element.setAttribute('data-player-id', config.metadata.identifier);
+    
+    return element;
   }
 
-  return config;
-}
+  /**
+   * Attach event listeners to the player element
+   */
+  attachEventListeners(
+    element: HTMLElement,
+    onPlayerEvent?: (event: QumlPlayerEvent) => void,
+    onTelemetryEvent?: (event: any) => void
+  ): void {
+    // Remove any existing handler first to prevent memory leaks
+    this.removeEventListeners(element);
 
-function majorMinor(version?: string) {
-  if (!version) return '1.0';
-  const parts = version.split('.');
-  return parts.length >= 2 ? `${parts[0]}.${parts[1]}` : version;
-}
+    const playerHandler = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (onPlayerEvent) {
+        const qumlEvent: QumlPlayerEvent = {
+          type: customEvent.detail?.eid || 'unknown',
+          data: customEvent.detail,
+          playerId: element.getAttribute('data-player-id') || 'quml-player',
+          timestamp: Date.now(),
+        };
+        onPlayerEvent(qumlEvent);
+      }
+    };
 
-export class QumlPlayerService {
-  buildConfig(input: BuildQumlPlayerConfigInput): QumlPlayerConfig {
-    return buildQumlPlayerConfig(input);
+    const telemetryHandler = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (onTelemetryEvent) {
+        onTelemetryEvent(customEvent.detail);
+      }
+    };
+
+    element.addEventListener('playerEvent', playerHandler);
+    element.addEventListener('telemetryEvent', telemetryHandler);
+    
+    // Store handlers for cleanup
+    this.eventHandlers.set(element, { player: playerHandler, telemetry: telemetryHandler });
+  }
+
+  /**
+   * Remove event listeners from the player element
+   */
+  removeEventListeners(element: HTMLElement): void {
+    const handlers = this.eventHandlers.get(element);
+    if (handlers) {
+      element.removeEventListener('playerEvent', handlers.player);
+      element.removeEventListener('telemetryEvent', handlers.telemetry);
+      this.eventHandlers.delete(element);
+    }
   }
 }
 
