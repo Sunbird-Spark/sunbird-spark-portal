@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@project-sunbird/sunbird-epub-player-web-component": "^2.0.0",
+    "@project-sunbird/sunbird-pdf-player-web-component": "^2.0.0",
     "@project-sunbird/sunbird-quml-player-web-component": "^6.0.0",
     "@project-sunbird/sunbird-video-player-web-component": "^2.0.0",
     "@project-sunbird/telemetry-sdk": "^2.0.1",
