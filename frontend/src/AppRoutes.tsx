@@ -10,6 +10,7 @@ import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';
+import CollectionDetail from './pages/CollectionDetail';
 import Index from './pages/Index';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
@@ -36,6 +37,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/explore" element={<Explore />} /> 
+        <Route path="/collection/:collectionId" element={<CollectionDetail />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />

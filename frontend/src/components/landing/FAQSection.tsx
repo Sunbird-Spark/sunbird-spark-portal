@@ -46,7 +46,7 @@ const FAQSection = () => {
     }
 
     return (
-        <section className="bg-white pt-8 pb-8 lg:pt-[3.75rem] lg:pb-[3.75rem]">
+        <section className={cn("pt-8 pb-8 lg:pt-[3.75rem] lg:pb-[3.75rem]", className || "bg-white")}>
             <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
                 <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal mb-6 text-foreground">
                     {t("faq.title")}
