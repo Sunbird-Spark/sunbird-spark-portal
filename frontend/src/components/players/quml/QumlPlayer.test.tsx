@@ -51,7 +51,6 @@ const mockConfig: QumlPlayerConfig = {
   },
   config: {},
   metadata: mockMetadata,
-  data: {},
 };
 
 describe('QumlPlayer', () => {
