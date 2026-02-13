@@ -92,29 +92,29 @@ describe('QumlPlayerService', () => {
       expect(config.context.uid).toBe('anonymous');
     });
 
-    it('should use fallback device ID when fetch fails', async () => {
+    it('should use empty device ID when fetch fails', async () => {
       vi.mocked(appCoreService.getDeviceId).mockRejectedValue(new Error('Failed'));
 
       const config = await service.createConfig(mockMetadata);
 
-      expect(config.context.did).toMatch(/^device-\d+$/);
+      expect(config.context.did).toBe('');
     });
 
-    it('should use metadata channel when org service fails', async () => {
+    it('should use empty channel when org service fails', async () => {
       mockOrgService.search.mockRejectedValue(new Error('Failed'));
 
       const config = await service.createConfig(mockMetadata);
 
-      expect(config.context.channel).toBe('test-channel');
+      expect(config.context.channel).toBe('');
     });
 
-    it('should use random channel when metadata has no channel and org service fails', async () => {
+    it('should use empty channel when metadata has no channel and org service fails', async () => {
       mockOrgService.search.mockRejectedValue(new Error('Failed'));
       const metadataWithoutChannel = { ...mockMetadata, channel: undefined };
 
       const config = await service.createConfig(metadataWithoutChannel);
 
-      expect(config.context.channel).toMatch(/^test-channel-/);
+      expect(config.context.channel).toBe('');
     });
 
     it('should apply context props', async () => {
@@ -145,7 +145,7 @@ describe('QumlPlayerService', () => {
       expect(config.context.pdata).toEqual({
         id: 'sunbird.portal',
         ver: '3.2.12',
-        pid: 'sunbird-portal.contentplayer',
+        pid: 'sunbird.portal.contentplayer',
       });
     });
 

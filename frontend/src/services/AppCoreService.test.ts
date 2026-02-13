@@ -181,7 +181,7 @@ describe('AppCoreService', () => {
             expect(pdata).toEqual({
                 id: 'test.portal',
                 ver: '2.0.0',
-                pid: 'test.portal.contentplayer'
+                pid: 'test.portal'
             });
         });
 
@@ -200,9 +200,9 @@ describe('AppCoreService', () => {
             const pdata = await appCoreService.getPData();
 
             expect(pdata).toEqual({
-                id: 'sunbird.portal',
-                ver: '1.0.0',
-                pid: 'sunbird.portal.contentplayer'
+                id: '',
+                ver: '',
+                pid: ''
             });
         });
     });
