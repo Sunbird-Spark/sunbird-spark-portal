@@ -14,6 +14,7 @@ import helmet from 'helmet';
 import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
+import { envConfig } from './config/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,5 +50,9 @@ app.use('/portal', portalProxyRoutes);
 app.get('/:tenantName', redirectTenant);
 
 app.get(/.*/, sessionMiddleware, ...anonymousMiddlewares, (req, res) => {
+    const isLocal = envConfig.ENVIRONMENT == 'local'
+    if (isLocal) {
+        res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
+    }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
