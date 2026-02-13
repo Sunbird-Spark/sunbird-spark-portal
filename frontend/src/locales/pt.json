@@ -30,6 +30,48 @@
   "stats.revenue": "Receita",
   "courses": "Cursos",
   "categories": "Categorias",
+  "filters": "Filtros",
+  "collections": "Coleções",
+  "contentType": "Tipo de Conteúdo",
+  "filterOptions": {
+    "courses": "Cursos",
+    "resources": "Recursos",
+    "textbooks": "Livros didáticos",
+    "skills": "Habilidades"
+  },
+  "contentTypes": {
+    "video": "Vídeo",
+    "audio": "Áudio",
+    "pdf": "PDF",
+    "epub": "ePub",
+    "youtube": "YouTube",
+    "html": "HTML",
+    "interactive": "Interativo",
+    "course": "Curso",
+    "textbook": "Livro Didático",
+    "skills": "Habilidades"
+  },
+  "categoriesList": {
+    "ai-ml": "IA/ML",
+    "cyber-security": "Segurança Cibernética",
+    "ux-design": "Design UX",
+    "devops": "DevOps",
+    "data-science": "Ciência de Dados",
+    "blockchain": "Blockchain",
+    "ui-ux-design": "Design UI/UX",
+    "it-development": "Desenvolvimento de TI",
+    "digital-marketing": "Marketing Digital",
+    "entrepreneurship": "Empreendedorismo"
+  },
+  "viewMore": "Ver Mais",
+  "viewLess": "Ver Menos",
+  "featured": "Destaque",
+  "by": "por",
+  "levels": {
+    "Beginner": "Iniciante",
+    "Intermediate": "Intermediário",
+    "Advanced": "Avançado"
+  },
   "about": "Sobre",
   "contact": "Contato",
   "signup": "Cadastrar",
@@ -39,6 +81,7 @@
   "browseCategories": "Explorar por Categoria",
   "viewAll": "Ver Todos",
   "startLearning": "Começar a Aprender",
+  "startExploring": "Começar a Explorar",
   "exploreCourses": "Explorar Cursos",
   "heroTitle": "Desbloqueie Seu Potencial com Treinamento de Especialistas",
   "heroSubtitle": "Acesse milhares de cursos projetados para ajudá-lo a crescer profissional e pessoalmente. Aprenda no seu ritmo, em qualquer lugar, a qualquer hora.",
@@ -63,7 +106,6 @@
   "collaborations": "Colaborações",
   "create": "Criar",
   "course": "Curso",
-  "content": "Conteúdo",
   "quiz": "Questionário",
   "collection": "Coleção",
   "courseDesc": "Crie cursos usando coleções e recursos. Cursos têm duração para alcançar um objetivo.",
@@ -103,11 +145,67 @@
   "certifiedProfessionals": "Formação Profissional Certificada",
   "watchDemo": "Assistir demonstração",
   "certifications": "Certificações",
+  "nav": {
+    "home": "Início",
+    "explore": "Explorar",
+    "about": "Sobre",
+    "contact": "Contato"
+  },
+  "button": {
+    "login": "Entrar",
+    "goBack": "Voltar",
+    "share": "Compartilhar"
+  },
+  "hero": {
+    "title": "Conhecimento que te move para frente.",
+    "subtitle": "Desbloqueie seu potencial e explore um mundo de conhecimento. Comece sua jornada com mais de 100 cursos feitos para o seu futuro.",
+    "cta": "Comece Sua Jornada de Aprendizado",
+    "processSimple": "O processo de aprendizado é simples",
+    "online": "Online",
+    "studyPace": "Estude no seu próprio ritmo"
+  },
+  "stats": {
+    "courses": "Cursos",
+    "activeLearners": "Alunos Ativos",
+    "certifications": "Certificações"
+  },
+  "popular": {
+    "title": "Conteúdo Mais Popular",
+    "viewAll": "Ver Todos"
+  },
+  "contentStats": {
+    "learners": "Alunos",
+    "lessons": "Aulas",
+    "view": "Ver"
+  },
+  "courseDetails": {
+    "overview": "Visão geral do curso",
+    "weeks": "Semanas",
+    "skills": "Habilidades que você aprenderá",
+    "suitedFor": "Melhor para",
+    "relatedContent": "Conteúdo relacionado"
+  },
+  "resource": {
+    "title": "Fique à frente. O que vem a seguir começa aqui.",
+    "header": "Centro de Recursos",
+    "viewVideo": "Ver o Vídeo",
+    "viewPdf": "Ver o PDF",
+    "viewHtml": "Ver o HTML",
+    "viewEpub": "Ver o Epub",
+    "seeCaseStudy": "Ver estudo de caso"
+  },
+  "trending": {
+    "mostViewed": "Conteúdo Mais Visto",
+    "trending": "Conteúdo em Alta"
+  },
+  "faq": {
+    "title": "Perguntas frequentes"
+  },
   "footer": {
     "products": "Produtos",
+    "company": "Empresa",
     "resources": "Recursos",
     "videos": "Vídeos",
-    "company": "Empresa",
     "terms": "Termos e Condições",
     "privacy": "Política de Privacidade"
   }
