@@ -11,12 +11,12 @@ console.log('\n📦 Consolidating all assets...\n');
 const publicRoot = path.join(__dirname, 'public');
 
 // PDF Player paths
-// const pdfWebComponentRoot = path.join(
-//     __dirname,
-//     'node_modules/@project-sunbird/sunbird-pdf-player-web-component'
-// );
-// const pdfAssetsSource = path.join(pdfWebComponentRoot, 'assets/pdf-player');
-// const pdfFinalDest = path.join(publicRoot, 'assets/pdf-player');
+const pdfWebComponentRoot = path.join(
+    __dirname,
+    'node_modules/@project-sunbird/sunbird-pdf-player-web-component'
+);
+const pdfAssetsSource = path.join(pdfWebComponentRoot, 'assets/pdf-player');
+const pdfFinalDest = path.join(publicRoot, 'assets/pdf-player');
 
 // Video Player paths
 const videoWebComponentRoot = path.join(
@@ -75,18 +75,18 @@ try {
     }
 
     // 2. Copy PDF Player assets
-    // console.log(`\n📂 PDF Player Source: ${pdfAssetsSource}`);
-    // fs.mkdirSync(pdfFinalDest, { recursive: true });
-    // console.log('📦 Copying PDF player files to public/assets/pdf-player/...');
-    // copyDirectory(pdfAssetsSource, pdfFinalDest);
+    console.log(`\n📂 PDF Player Source: ${pdfAssetsSource}`);
+    fs.mkdirSync(pdfFinalDest, { recursive: true });
+    console.log('📦 Copying PDF player files to public/assets/pdf-player/...');
+    copyDirectory(pdfAssetsSource, pdfFinalDest);
 
     // Move local-guide.pdf if it exists in root public
-    // const pdfInRoot = path.join(publicRoot, 'local-guide.pdf');
-    // const pdfInAssets = path.join(pdfFinalDest, 'local-guide.pdf');
-    // if (fs.existsSync(pdfInRoot)) {
-    //     fs.renameSync(pdfInRoot, pdfInAssets);
-    //     console.log('✅ Moved local-guide.pdf to public/assets/pdf-player/');
-    // }
+    const pdfInRoot = path.join(publicRoot, 'local-guide.pdf');
+    const pdfInAssets = path.join(pdfFinalDest, 'local-guide.pdf');
+    if (fs.existsSync(pdfInRoot)) {
+        fs.renameSync(pdfInRoot, pdfInAssets);
+        console.log('✅ Moved local-guide.pdf to public/assets/pdf-player/');
+    }
 
     // 3. Copy Video Player assets
     console.log(`\n📂 Video Player Source: ${videoAssetsSource}`);
@@ -111,13 +111,13 @@ try {
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
     // Copy PDF icons first
-    // const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
-    // for (const icon of pdfIcons) {
-    //     fs.copyFileSync(
-    //         path.join(pdfAssetsSource, icon),
-    //         path.join(publicRoot, 'assets', icon)
-    //     );
-    // }
+    const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
+    for (const icon of pdfIcons) {
+        fs.copyFileSync(
+            path.join(pdfAssetsSource, icon),
+            path.join(publicRoot, 'assets', icon)
+        );
+    }
 
     // Copy QUML icons second (this will override PDF icons if there are duplicates)
     const qumlIconsDir = path.join(qumlAssetsSource, 'assets');
