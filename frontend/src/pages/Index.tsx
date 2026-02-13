@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/home/Header";
-import HeroWithStats from "@/components/index/HeroWithStats";
-import MostPopularContent from "@/components/index/MostPopularContent";
+import HeroWithStats from "@/components/landing/HeroWithStats";
+import MostPopularContent from "@/components/landing/MostPopularContent";
 import CategorySection from "@/components/home/CategorySection";
-import ResourceCenter from "@/components/index/ResourceCenter";
-import PopularContent from "@/components/index/PopularContent";
-import FAQSection from "@/components/index/FAQSection";
+import ResourceCenter from "@/components/landing/ResourceCenter";
+import PopularContent from "@/components/landing/PopularContent";
+import FAQSection from "@/components/landing/FAQSection";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 
