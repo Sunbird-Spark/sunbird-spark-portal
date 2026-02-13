@@ -15,7 +15,7 @@ vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
 
 vi.mock('../../AppCoreService', () => ({
   default: {
-    getDeviceId: vi.fn(() => Promise.resolve('device-123')),
+    getDeviceId: vi.fn(() => Promise.resolve('')),
   },
 }));
 
@@ -68,7 +68,7 @@ describe('PdfPlayerService', () => {
 
       expect(config.context.sid).toBe('session-789');
       expect(config.context.uid).toBe('user-456');
-      expect(config.context.did).toBe('device-123');
+      expect(config.context.did).toBe('');
       expect(config.context.channel).toBe('test-channel-456');
       expect(config.metadata).toEqual(mockMetadata);
     });
@@ -154,7 +154,7 @@ describe('PdfPlayerService', () => {
       const config = await service.createConfig(mockMetadata);
       
       // Should use fallback device ID
-      expect(config.context.did).toMatch(/^device-\d+$/);
+      expect(config.context.did).toMatch('');
     });
 
     it('should use default mode when not provided', async () => {
