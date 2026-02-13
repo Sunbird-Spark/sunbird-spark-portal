@@ -6,10 +6,16 @@ import { OrganizationService } from '../../OrganizationService';
 /**
  * Service for initializing and managing the EPUB Player.
  * Handles player creation, configuration, and event management.
+ * 
+ * Style Loading Strategy:
+ * - EPUB player styles are loaded dynamically when the first player is created
+ * - This prevents unnecessary CSS loading if no EPUB player is used on the page
+ * - Styles are loaded globally as the web component requires them in the document scope
  */
 export class EpubPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
   private orgService = new OrganizationService();
+  private static stylesLoaded = false;
 
   /**
    * Create EPUB player configuration with context props and metadata
@@ -80,38 +86,40 @@ export class EpubPlayerService {
       metadata,
     };
 
-    console.log('EPUB Player Config Created:', {
-      channel,
-      sid,
-      uid,
-      did,
-      artifactUrl: metadata.artifactUrl,
-      identifier: metadata.identifier,
-    });
-
     return finalConfig;
   }
 
   /**
+   * Load EPUB player styles dynamically (only once)
+   * Checks for existing style element to prevent race conditions
+   */
+  private loadStyles(): void {
+    // Check if styles already exist in the DOM (prevents race conditions)
+    const existingStyles = document.querySelector('[data-epub-player-styles="true"]');
+    if (existingStyles || EpubPlayerService.stylesLoaded) {
+      EpubPlayerService.stylesLoaded = true;
+      return;
+    }
+
+    const styleLink = document.createElement('link');
+    styleLink.rel = 'stylesheet';
+    styleLink.href = '/assets/epub-player/styles.css';
+    styleLink.setAttribute('data-epub-player-styles', 'true');
+    document.head.appendChild(styleLink);
+
+    EpubPlayerService.stylesLoaded = true;
+  }
+
+  /**
    * Create EPUB player element with configuration
+   * Styles are loaded dynamically on first use
    */
   createElement(config: EpubPlayerConfig): HTMLElement {
+    // Load styles if not already loaded
+    this.loadStyles();
+
     const element = document.createElement('sunbird-epub-player');
     const configString = JSON.stringify(config);
-    
-    console.log('Creating EPUB player element');
-    console.log('Config summary:', {
-      identifier: config.metadata.identifier,
-      name: config.metadata.name,
-      artifactUrl: config.metadata.artifactUrl,
-      streamingUrl: config.metadata.streamingUrl,
-      channel: config.context.channel,
-      mode: config.context.mode,
-      sid: config.context.sid,
-      uid: config.context.uid,
-      did: config.context.did,
-    });
-    console.log('Full config object:', config);
     
     element.setAttribute('player-config', configString);
     element.setAttribute('data-player-id', config.metadata.identifier);
