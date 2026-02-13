@@ -9,7 +9,7 @@ export interface UserProfile {
     profileLocation?: Array<{ type: string; id: string; name?: string }>;
     recoveryEmail?: string;
     recoveryPhone?: string;
-    roles?: Array<{ role: string;[key: string]: any }>;
+    roles?: Array<{ role: string; [key: string]: any }>;
     [key: string]: any;
 }
 
