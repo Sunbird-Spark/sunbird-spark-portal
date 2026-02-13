@@ -1,54 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
+import type { QumlPlayerConfig, BuildQumlPlayerConfigInput } from './types';
 
-export interface PlayerConfig {
-  context: Record<string, any>;
-  config: Record<string, any>;
-  metadata: any;
-  data: any;
-}
-
-export interface BuildPlayerConfigInput {
-  metadata: any;
-  user?: { id?: string; firstName?: string; lastName?: string };
-  orgChannel?: string;
-  deviceId?: string;
-  buildNumber?: string;
-  appId?: string;
-  pid?: string;
-  host?: string;
-  authToken?: string;
-  endpoint?: string;
-  env?: string;
-  dialCode?: string;
-  uid?: string;
-  enableTelemetryValidation?: boolean;
-  overrides?: {
-    context?: Record<string, any>;
-    config?: Record<string, any>;
-  };
-}
-
-const baseTemplate: PlayerConfig = {
-  context: {
-    mode: 'play',
-    pdata: {
-      id: 'sunbird.portal',
-      ver: '3.2.12',
-      pid: 'sunbird-portal.contentplayer'
-    }
-  },
-  config: {},
-  metadata: {},
-  data: {}
-};
-
-function majorMinor(version?: string) {
-  if (!version) return '1.0';
-  const parts = version.split('.');
-  return parts.length >= 2 ? `${parts[0]}.${parts[1]}` : version;
-}
-
-export function buildPlayerConfig(input: BuildPlayerConfigInput): PlayerConfig {
+export function buildQumlPlayerConfig(input: BuildQumlPlayerConfigInput): QumlPlayerConfig {
   const {
     metadata,
     user,
@@ -64,10 +17,24 @@ export function buildPlayerConfig(input: BuildPlayerConfigInput): PlayerConfig {
     dialCode,
     uid,
     enableTelemetryValidation,
-    overrides
+    overrides,
   } = input;
 
-  const config: PlayerConfig = JSON.parse(JSON.stringify(baseTemplate));
+  const baseTemplate: QumlPlayerConfig = {
+    context: {
+      mode: 'play',
+      pdata: {
+        id: 'sunbird.portal',
+        ver: '3.2.12',
+        pid: 'sunbird-portal.contentplayer',
+      },
+    },
+    config: {},
+    metadata: {},
+    data: {},
+  };
+
+  const config: QumlPlayerConfig = JSON.parse(JSON.stringify(baseTemplate));
 
   config.context.contentId = metadata?.identifier;
   config.context.identifier = metadata?.identifier;
@@ -80,7 +47,10 @@ export function buildPlayerConfig(input: BuildPlayerConfigInput): PlayerConfig {
   config.context.env = env || 'contentplayer';
   config.context.pdata.id = appId || config.context.pdata.id;
   config.context.pdata.pid = pid || config.context.pdata.pid;
-  config.context.pdata.ver = majorMinor(buildNumber || config.context.pdata.ver);
+  config.context.pdata.ver = buildNumber
+    ? majorMinor(buildNumber)
+    : majorMinor(config.context.pdata.ver);
+
   const channel = orgChannel || metadata?.channel;
   if (channel) {
     config.context.channel = channel;
@@ -97,12 +67,13 @@ export function buildPlayerConfig(input: BuildPlayerConfigInput): PlayerConfig {
   }
 
   config.metadata = metadata;
-  config.data = metadata?.mimeType === 'application/vnd.ekstep.ecml-archive' ? metadata.body || {} : {};
+  config.data =
+    metadata?.mimeType === 'application/vnd.ekstep.ecml-archive' ? metadata.body || {} : {};
 
   config.config = {
     ...config.config,
     traceId: uuidv4(),
-    enableTelemetryValidation: enableTelemetryValidation ?? false
+    enableTelemetryValidation: enableTelemetryValidation ?? false,
   };
 
   if (overrides?.context) {
@@ -114,3 +85,17 @@ export function buildPlayerConfig(input: BuildPlayerConfigInput): PlayerConfig {
 
   return config;
 }
+
+function majorMinor(version?: string) {
+  if (!version) return '1.0';
+  const parts = version.split('.');
+  return parts.length >= 2 ? `${parts[0]}.${parts[1]}` : version;
+}
+
+export class QumlPlayerService {
+  buildConfig(input: BuildQumlPlayerConfigInput): QumlPlayerConfig {
+    return buildQumlPlayerConfig(input);
+  }
+}
+
+export const qumlPlayerService = new QumlPlayerService();

@@ -1,15 +1,3 @@
-import React from 'react';
-
-declare global {
-  interface Window {
-    questionListUrl: string;
-  }
-}
-
-declare module 'react' {
-  namespace JSX {
-    interface IntrinsicElements {
-      'sunbird-quml-player': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-    }
-  }
-}
+// Global vite/TypeScript env declarations for the project.
+// QUML player specific typings live alongside its service
+// in services/players/quml/quml-player.d.ts.

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { questionSetService } from '../services/QuestionSetService';
-import { buildPlayerConfig, PlayerConfig } from '../utils/buildPlayerConfig';
+import { questionSetService } from '../../../services/QuestionSetService';
+import { buildQumlPlayerConfig, QumlPlayerConfig } from '../../../services/players/quml';
 import styles from './QumlPlayer.module.css';
 
 type QumlPlayerProps = {
@@ -155,12 +155,12 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId }) => {
     },
   });
 
-  const playerConfig = useMemo<PlayerConfig | null>(() => {
+  const playerConfig = useMemo<QumlPlayerConfig | null>(() => {
     if (!questionSetQuery.data) return null;
     const channel = questionSetQuery.data.metadata?.channel;
     const uid = questionSetQuery.data.metadata?.createdBy || 'anonymous';
 
-    return buildPlayerConfig({
+    return buildQumlPlayerConfig({
       metadata: questionSetQuery.data.metadata,
       orgChannel: channel,
       deviceId: '',
