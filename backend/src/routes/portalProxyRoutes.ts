@@ -20,17 +20,20 @@ const recaptchaProtectedRoutes: string[] = [
     '/otp/v1/generate',
 ];
 
-// Note: routes are mounted at /portal, so we adjust paths if needed. 
-// app.ts uses: app.all(recaptchaProtectedRoutes, ...) where routes start with /portal
-// If we mount this router at /portal, we should remove /portal prefix from paths here?
-// app.ts has: '/portal/user/v1/exists/email/:emailId'
-// If mounted at /portal, path should be '/user/v1/exists/email/:emailId'
-
-router.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
+// These routes are defined relative to the mount path of this router.
+// When the router is mounted at '/portal', Express will serve them as
+// '/portal/user/v1/exists/email/:emailId', '/portal/user/v1/exists/phone/:phoneNumber', etc.
 
 // The catch-all proxy route
-// app.ts has: app.all('/portal/*rest', ...)
-// If mounted at /portal, path is '/*rest'
+// When this router is mounted at '/portal', this handler will match '/portal/*rest'.
+router.all('/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
+    keycloak.protect(),
+    kongProxy);
+
+export default router;
+
+// The catch-all proxy route
+// When this router is mounted at '/portal', this handler will match '/portal/*rest'.
 router.all('/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
     keycloak.protect(),
     kongProxy);
