@@ -3,7 +3,7 @@ import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/index/Accordion";
+} from "@/components/landing/Accordion";
 import faqImage from "@/assets/faq-image.svg";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
