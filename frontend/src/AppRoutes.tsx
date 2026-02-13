@@ -14,7 +14,6 @@ import Index from './pages/Index';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
-import PdfPlayerDemo from './pages/PdfPlayerDemo';
 
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
