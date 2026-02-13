@@ -147,7 +147,6 @@ describe('QumlPlayerService', () => {
       const config = await service.createConfig(mockMetadata);
 
       expect(config.config).toEqual({});
-      expect(config.data).toEqual({});
     });
   });
 

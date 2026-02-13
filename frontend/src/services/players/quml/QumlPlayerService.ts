@@ -72,7 +72,6 @@ export class QumlPlayerService {
       context,
       config: {},
       metadata,
-      data: {},
     };
 
     return finalConfig;
