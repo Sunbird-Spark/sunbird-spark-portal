@@ -10,7 +10,7 @@ const LEARN_BASE_URL = envConfig.LEARN_BASE_URL;
 export const userProxy = createProxyMiddleware({
     target: LEARN_BASE_URL,
     changeOrigin: true,
-    pathRewrite: (path, req) => {
+    pathRewrite: (path) => {
         // Express strips the mount point (/portal) so path is relative. 
         // We check for the path relative to /portal.
         if (path.includes('/user/v1/fuzzy/search')) {
