@@ -6,16 +6,16 @@ import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoSer
 const userService = new UserService();
 
 export const useUserRead = (): UseQueryResult<ApiResponse<UserReadResponse>, Error> => {
-    const userId = userAuthInfoService.getUserId();
+    const id = userAuthInfoService.getUserId();
 
     return useQuery({
-        queryKey: ['userRead', userId],
+        queryKey: ['userRead', id],
         queryFn: () => {
-            if (!userId) {
+            if (!id) {
                 throw new Error('User ID not available');
             }
-            return userService.userRead(userId);
+            return userService.userRead(id);
         },
-        enabled: !!userId,
+        enabled: !!id,
     });
 };

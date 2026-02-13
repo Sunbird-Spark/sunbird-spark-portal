@@ -114,10 +114,10 @@ export class UserService {
     }
 
     public async userRead(
-        userId: string
+        id: string
     ): Promise<ApiResponse<UserReadResponse>> {
         return getClient().get<UserReadResponse>(
-            `/user/v5/read/${userId}`
+            `/user/v5/read/${id}`
         );
     }
 }
