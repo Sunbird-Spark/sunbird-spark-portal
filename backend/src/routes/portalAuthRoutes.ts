@@ -16,8 +16,8 @@ router.get('/login',
         logger.info('DEBUG: /portal/login hit ' + JSON.stringify({
             url: req.url,
             query: req.query,
-            sessionID: req.sessionID,
-            cookie: req.headers.cookie,
+            sessionID: req.sessionID ? '[REDACTED]' : undefined,
+            cookie: req.headers.cookie ? '[REDACTED]' : undefined,
             hasSession: !!req.session,
             hasKauth: !!_.get(req, 'kauth')
         }));
