@@ -76,7 +76,7 @@ class AppCoreService {
             }
 
             this.deviceId = await this.getDeviceId();
-        getClient().updateHeaders([{
+            getClient().updateHeaders([{
                 'key': 'X-Device-ID',
                 'value': this.deviceId,
                 'action': 'add',
