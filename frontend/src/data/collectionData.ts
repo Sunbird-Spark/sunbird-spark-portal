@@ -1,7 +1,6 @@
 import resourceRobotHand from "@/assets/resource-robot-hand.svg";
 import resourceVR from "@/assets/resource-vr.svg";
 import resourceHacker from "@/assets/resource-hacker.svg";
-import resourceBitcoin from "@/assets/resource-bitcoin.svg";
 
 export interface Lesson {
     id: string;
