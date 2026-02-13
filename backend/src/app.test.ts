@@ -22,7 +22,7 @@ describe('Express App', () => {
       };
     });
     vi.doMock('./proxies/kongProxy.js', () => ({
-      kongProxy: (req: any, res: any, next: any) => {
+      kongProxy: (req: any, res: any) => {
         res.status(200).send('mock-kong-response');
       }
     }));
