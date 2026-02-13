@@ -2,7 +2,6 @@ export interface QumlPlayerConfig {
   context: Record<string, any>;
   config: Record<string, any>;
   metadata: any;
-  data: any;
 }
 
 export interface QumlPlayerMetadata {
