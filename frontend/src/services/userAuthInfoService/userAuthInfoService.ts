@@ -32,7 +32,7 @@ class userAuthInfoService {
     async getAuthInfo(): Promise<AuthStatusResponse> {
         try {
             const response = await getClient().get<AuthStatusResponse>(
-                '/user/v1/auth/info')
+                '/user/v1/auth/info');
             this.sessionId = response.data.sid;
             this.userId = response.data.uid;
             this.isAuthenticated = response.data.isAuthenticated;

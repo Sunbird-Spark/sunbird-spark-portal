@@ -82,7 +82,7 @@ describe('userAuthInfoService', () => {
             expect(userAuthInfoService.isUserAuthenticated()).toBe(false);
         });
 
-it('should handle API error response (non-2xx status)', async () => {
+        it('should handle API error response (non-2xx status)', async () => {
             // AxiosAdapter converts non-2xx responses to resolved ApiResponse
             mockGet.mockResolvedValue(mockApiErrorResponse);
 

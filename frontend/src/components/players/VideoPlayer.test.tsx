@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
-import { EpubPlayer } from './EpubPlayer';
-import type { EpubPlayerMetadata } from '../services/players/epub';
+import { VideoPlayer } from './VideoPlayer';
+import type { VideoPlayerMetadata } from '../../services/players/video';
 
 // Create mock service methods
 const mockCreateConfig = vi.fn();
@@ -9,29 +9,34 @@ const mockCreateElement = vi.fn();
 const mockAttachEventListeners = vi.fn();
 const mockRemoveEventListeners = vi.fn();
 
-// Mock the EpubPlayerService
-vi.mock('../services/players/epub', () => ({
-  EpubPlayerService: class {
-    createConfig = mockCreateConfig;
-    createElement = mockCreateElement;
-    attachEventListeners = mockAttachEventListeners;
-    removeEventListeners = mockRemoveEventListeners;
-  },
-}));
+// Mock the VideoPlayerService
+vi.mock('../../services/players/video', () => {
+  const MockVideoPlayerService = vi.fn(function(this: any) {
+    this.createConfig = mockCreateConfig;
+    this.createElement = mockCreateElement;
+    this.attachEventListeners = mockAttachEventListeners;
+    this.removeEventListeners = mockRemoveEventListeners;
+  });
+  
+  return {
+    VideoPlayerService: MockVideoPlayerService,
+  };
+});
 
-describe('EpubPlayer', () => {
+describe('VideoPlayer', () => {
   let mockPlayerElement: HTMLElement;
 
-  const mockMetadata: EpubPlayerMetadata = {
-    identifier: 'test-content-123',
-    name: 'Test EPUB Book',
-    artifactUrl: 'https://example.com/book.epub',
+  const mockMetadata: VideoPlayerMetadata = {
+    identifier: 'test-video-123',
+    name: 'Test Video Content',
+    artifactUrl: 'https://example.com/video.mp4',
+    streamingUrl: 'https://example.com/stream/video.m3u8',
   };
 
   beforeEach(() => {
     // Create mock player element
     mockPlayerElement = document.createElement('div');
-    mockPlayerElement.setAttribute('data-player-id', 'test-content-123');
+    mockPlayerElement.setAttribute('data-player-id', 'test-video-123');
 
     // Setup default mock behavior
     mockCreateConfig.mockResolvedValue({
@@ -47,12 +52,12 @@ describe('EpubPlayer', () => {
   });
 
   it('should render without crashing', () => {
-    const { container } = render(<EpubPlayer metadata={mockMetadata} />);
+    const { container } = render(<VideoPlayer metadata={mockMetadata} />);
     expect(container.querySelector('div')).toBeInTheDocument();
   });
 
   it('should create config with metadata only when no optional props provided', async () => {
-    render(<EpubPlayer metadata={mockMetadata} />);
+    render(<VideoPlayer metadata={mockMetadata} />);
 
     await waitFor(() => {
       expect(mockCreateConfig).toHaveBeenCalledWith(mockMetadata, undefined);
@@ -66,7 +71,7 @@ describe('EpubPlayer', () => {
     const objectRollup = { l1: 'test-object' };
 
     render(
-      <EpubPlayer
+      <VideoPlayer
         metadata={mockMetadata}
         mode={mode}
         cdata={cdata}
@@ -86,7 +91,7 @@ describe('EpubPlayer', () => {
   });
 
   it('should create player element and append to container', async () => {
-    const { container } = render(<EpubPlayer metadata={mockMetadata} />);
+    const { container } = render(<VideoPlayer metadata={mockMetadata} />);
 
     await waitFor(() => {
       expect(mockCreateElement).toHaveBeenCalled();
@@ -99,7 +104,7 @@ describe('EpubPlayer', () => {
     const onTelemetryEvent = vi.fn();
 
     render(
-      <EpubPlayer
+      <VideoPlayer
         metadata={mockMetadata}
         onPlayerEvent={onPlayerEvent}
         onTelemetryEvent={onTelemetryEvent}
@@ -123,7 +128,7 @@ describe('EpubPlayer', () => {
       capturedHandler = handler;
     });
 
-    render(<EpubPlayer metadata={mockMetadata} onPlayerEvent={onPlayerEvent} />);
+    render(<VideoPlayer metadata={mockMetadata} onPlayerEvent={onPlayerEvent} />);
 
     await waitFor(() => {
       expect(mockAttachEventListeners).toHaveBeenCalled();
@@ -137,7 +142,7 @@ describe('EpubPlayer', () => {
   });
 
   it('should cleanup on unmount', async () => {
-    const { unmount } = render(<EpubPlayer metadata={mockMetadata} />);
+    const { unmount } = render(<VideoPlayer metadata={mockMetadata} />);
 
     await waitFor(() => {
       expect(mockCreateElement).toHaveBeenCalled();
@@ -152,11 +157,11 @@ describe('EpubPlayer', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockCreateConfig.mockRejectedValue(new Error('Failed to create config'));
 
-    render(<EpubPlayer metadata={mockMetadata} />);
+    render(<VideoPlayer metadata={mockMetadata} />);
 
     await waitFor(() => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to initialize EPUB player:',
+        'Failed to initialize video player:',
         expect.any(Error)
       );
     });
@@ -172,7 +177,7 @@ describe('EpubPlayer', () => {
       })
     );
 
-    const { unmount } = render(<EpubPlayer metadata={mockMetadata} />);
+    const { unmount } = render(<VideoPlayer metadata={mockMetadata} />);
 
     // Unmount before config resolves
     unmount();
@@ -191,7 +196,7 @@ describe('EpubPlayer', () => {
 
   it('should only include defined optional props in contextProps', async () => {
     render(
-      <EpubPlayer
+      <VideoPlayer
         metadata={mockMetadata}
         mode="play"
         // cdata, contextRollup, objectRollup not provided
@@ -206,14 +211,14 @@ describe('EpubPlayer', () => {
   });
 
   it('should re-initialize player when metadata changes', async () => {
-    const { rerender } = render(<EpubPlayer metadata={mockMetadata} />);
+    const { rerender } = render(<VideoPlayer metadata={mockMetadata} />);
 
     await waitFor(() => {
       expect(mockCreateConfig).toHaveBeenCalledTimes(1);
     });
 
-    const newMetadata = { ...mockMetadata, identifier: 'new-content-456' };
-    rerender(<EpubPlayer metadata={newMetadata} />);
+    const newMetadata = { ...mockMetadata, identifier: 'new-video-456' };
+    rerender(<VideoPlayer metadata={newMetadata} />);
 
     await waitFor(() => {
       expect(mockCreateConfig).toHaveBeenCalledTimes(2);
@@ -222,13 +227,13 @@ describe('EpubPlayer', () => {
   });
 
   it('should re-initialize player when optional props change', async () => {
-    const { rerender } = render(<EpubPlayer metadata={mockMetadata} mode="play" />);
+    const { rerender } = render(<VideoPlayer metadata={mockMetadata} mode="play" />);
 
     await waitFor(() => {
       expect(mockCreateConfig).toHaveBeenCalledTimes(1);
     });
 
-    rerender(<EpubPlayer metadata={mockMetadata} mode="preview" />);
+    rerender(<VideoPlayer metadata={mockMetadata} mode="preview" />);
 
     await waitFor(() => {
       expect(mockCreateConfig).toHaveBeenCalledTimes(2);
