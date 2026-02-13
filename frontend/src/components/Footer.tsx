@@ -1,4 +1,4 @@
-import sunbirdFooterLogo from "@/assets/sunbird-footer-logo.svg";
+import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
@@ -24,7 +24,7 @@ const Footer = () => {
           <div>
             <Link to="/" className="inline-block">
               <img
-                src={sunbirdFooterLogo}
+                src={sunbirdLogo}
                 alt="Sunbird"
                 className="h-8 w-auto"
                 style={{ width: '212px', paddingRight: '50px', height: '39px' }}
