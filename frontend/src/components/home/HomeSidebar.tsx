@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FiHome, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
+import { FiHome, FiUser, FiSettings, FiLogOut, FiEdit } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 
 interface HomeSidebarProps {
@@ -36,13 +36,14 @@ const mainNavItems = [
     { id: "home", label: "Home", icon: FiHome, path: "/home" },
     { id: "learning", label: "My Learning", icon: MyLearningIcon, path: "/my-learning" },
     { id: "explore", label: "Explore", icon: ExploreIcon, path: "/explore" },
+    { id: "workspace", label: "Workspace", icon: FiEdit, path: "/workspace" },
     { id: "profile", label: "Profile", icon: FiUser, path: "/profile" },
 ];
 
 const bottomNavItems = [
     { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help" },
     { id: "settings", label: "Account Settings", icon: FiSettings, path: "/settings" },
-    { id: "logout", label: "Logout", icon: FiLogOut, path: "/logout" },
+    { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
 const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
@@ -50,6 +51,10 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
 
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
+        if (item.id === "logout") {
+            window.location.href = item.path;
+            return;
+        }
         if (item.path !== "/home") {
             navigate(item.path);
         }
