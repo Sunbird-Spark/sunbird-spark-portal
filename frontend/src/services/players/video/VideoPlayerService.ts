@@ -42,7 +42,7 @@ export class VideoPlayerService {
     }
 
     // Get channel from org service with random fallback for testing
-    let channel = `test-channel-${Math.random().toString(36).substring(2, 15)}`; // Random fallback for testing
+    let channel = '' 
     try {
       const orgResponse = await this.orgService.search({
         filters: {
