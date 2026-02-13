@@ -7,7 +7,7 @@ import PageLoader from "@/components/common/PageLoader";
 import FAQSection from "@/components/landing/FAQSection";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { collectionData } from "@/data/collectionData";
-import CollectionOverview from "@/components/collection/collectionOverview";
+import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import { RelatedCourseCard, RelatedResourceCard } from "@/components/collection/RelatedContent";
 
