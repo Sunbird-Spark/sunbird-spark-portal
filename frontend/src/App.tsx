@@ -5,6 +5,7 @@ import AppRoutes from './AppRoutes';
 import { portalInitializer } from './utils/portalInitializer';
 
 const queryClient = new QueryClient();
+
 export default function App() {
   useEffect(() => {
     // Initialize portal (non-blocking)
