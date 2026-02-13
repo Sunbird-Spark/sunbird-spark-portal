@@ -9,7 +9,7 @@
 }
 
 .home-content-wrapper {
-    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[5.125rem] lg:pl-[5.75rem];
+    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
 }
 
 .home-welcome-title {
