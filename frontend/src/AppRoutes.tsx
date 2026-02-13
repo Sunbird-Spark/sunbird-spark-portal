@@ -15,7 +15,6 @@ import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
 
-
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
