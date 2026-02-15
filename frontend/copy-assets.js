@@ -50,6 +50,10 @@ const qumlEditorWebComponentRoot = path.join(
 );
 const qumlEditorAssetsSource = path.join(qumlEditorWebComponentRoot, 'assets/quml-editor');
 const qumlEditorFinalDest = path.join(publicRoot, 'assets/quml-editor');
+const qumlEditorImagesSource = path.join(qumlEditorAssetsSource, 'assets/images');
+const qumlEditorIconsSource = path.join(qumlEditorAssetsSource, 'assets');
+const sharedImagesDest = path.join(publicRoot, 'assets/images');
+const sharedAssetsDest = path.join(publicRoot, 'assets');
 
 /**
  * Recursively copy directory
@@ -72,6 +76,17 @@ function copyDirectory(src, dest) {
         } else {
             fs.copyFileSync(srcPath, destPath);
         }
+    }
+}
+
+function copyFilesWithExtensions(src, dest, extensions) {
+    if (!fs.existsSync(src)) return;
+    fs.mkdirSync(dest, { recursive: true });
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+    for (const entry of entries) {
+        if (entry.isDirectory()) continue;
+        if (!extensions.some(ext => entry.name.endsWith(ext))) continue;
+        fs.copyFileSync(path.join(src, entry.name), path.join(dest, entry.name));
     }
 }
 
@@ -127,6 +142,18 @@ try {
         fs.mkdirSync(qumlEditorFinalDest, { recursive: true });
         console.log('📦 Copying QUML editor files to public/assets/quml-editor/...');
         copyDirectory(qumlEditorAssetsSource, qumlEditorFinalDest);
+
+        // Copy QUML editor images to /assets/images so absolute paths continue to work
+        if (fs.existsSync(qumlEditorImagesSource)) {
+            console.log('🖼️  Copying QUML editor images to public/assets/images/...');
+            copyDirectory(qumlEditorImagesSource, sharedImagesDest);
+        }
+
+        // Copy QUML editor icons/SVGs to /assets for shared access
+        if (fs.existsSync(qumlEditorIconsSource)) {
+            console.log('📦 Copying QUML editor icons to public/assets/...');
+            copyFilesWithExtensions(qumlEditorIconsSource, sharedAssetsDest, ['.svg', '.png', '.jpg']);
+        }
     } else {
         console.log('\n⚠️  QUML Editor package not found - skipping (install @project-sunbird/lib-questionset-editor when available)');
     }
@@ -137,23 +164,12 @@ try {
     
     // Copy PDF icons first
     const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
-    for (const icon of pdfIcons) {
-        fs.copyFileSync(
-            path.join(pdfAssetsSource, icon),
-            path.join(publicRoot, 'assets', icon)
-        );
-    }
+    copyFilesWithExtensions(pdfAssetsSource, path.join(publicRoot, 'assets'), ['.svg']);
 
     // Copy QUML icons second (this will override PDF icons if there are duplicates)
     const qumlIconsDir = path.join(qumlAssetsSource, 'assets');
     if (fs.existsSync(qumlIconsDir)) {
-        const qumlIcons = fs.readdirSync(qumlIconsDir).filter(file => file.endsWith('.svg'));
-        for (const icon of qumlIcons) {
-            fs.copyFileSync(
-                path.join(qumlIconsDir, icon),
-                path.join(publicRoot, 'assets', icon)
-            );
-        }
+        copyFilesWithExtensions(qumlIconsDir, path.join(publicRoot, 'assets'), ['.svg']);
     }
 
     console.log('\n✅ Assets consolidated successfully!');
@@ -161,6 +177,7 @@ try {
     console.log(`📍 ePub Player: public/assets/epub-player/`);
     console.log(`📍 QUML Player: public/assets/quml-player/`);
     console.log(`📍 QUML Editor: public/assets/quml-editor/`);
+    console.log(`📍 QUML Editor Images: public/assets/images/`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {

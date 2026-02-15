@@ -1,268 +1,192 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './QumlEditor.module.css';
+import {
+  qumlEditorService,
+  type EditorConfig,
+  type QuestionSetMetadata,
+  type QumlEditorEvent,
+} from '../../services/QumlEditorService';
 
 type QumlEditorProps = {
-  questionSetId?: string;
+  metadata?: QuestionSetMetadata;
+  mode?: EditorConfig['config']['mode'];
+  contextOverrides?: Partial<EditorConfig['context']>;
+  onEditorEvent?: (event: QumlEditorEvent) => void;
+  onTelemetryEvent?: (event: any) => void;
+  onPlayerEvent?: (event: any) => void;
 };
 
-type EditorStatus = 'loading' | 'ready' | 'error';
-
-// Track if styles have been loaded to prevent duplicate loading
-let stylesLoaded = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let fancytreeJQuery: any = null;
-
-/**
- * Load QUML editor styles dynamically (only once)
- * Prevents unnecessary CSS loading if no QUML editor is used on the page
- */
-const loadQumlEditorStyles = (): void => {
-  const existingStyles = document.querySelector('[data-quml-editor-styles="true"]');
-  if (existingStyles || stylesLoaded) {
-    stylesLoaded = true;
-    return;
+const ensureFancytree = async (): Promise<any> => {
+  const currentJq = (window as any).$ || (window as any).jQuery;
+  if (currentJq?.fn?.fancytree) {
+    return currentJq;
   }
 
-  const styleLink = document.createElement('link');
-  styleLink.rel = 'stylesheet';
-  styleLink.href = '/assets/quml-editor/styles.css';
-  styleLink.setAttribute('data-quml-editor-styles', 'true');
-  document.head.appendChild(styleLink);
-  stylesLoaded = true;
-};
-
-/**
- * Load jQuery Fancytree for the editor (required dependency)
- */
-const loadFancytreeLocally = async (): Promise<void> => {
-  if (window.$ && (window.$ as any).fn && (window.$ as any).fn.fancytree) {
-    return;
-  }
-
-  // Dynamically import jQuery and Fancytree
   const { default: jq } = await import('jquery');
   window.$ = jq;
   (window as any).jQuery = jq;
 
-  // Load Fancytree and its extensions
-  // @ts-expect-error - No type definitions available for jquery.fancytree
+  // @ts-expect-error No types for fancytree modules
   await import('jquery.fancytree');
-  // @ts-expect-error - No type definitions available for jquery.fancytree/glyph
+  // @ts-expect-error No types for fancytree modules
   await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph.js');
-  // @ts-expect-error - No type definitions available for jquery.fancytree/dnd5
+  // @ts-expect-error No types for fancytree modules
   await import('jquery.fancytree/dist/modules/jquery.fancytree.dnd5.js');
+
+  return jq;
 };
 
-/**
- * Wait for Fancytree to be available on window
- */
-const waitForFancytree = async (retries = 20, delayMs = 150): Promise<boolean> => {
-  for (let i = 0; i < retries; i += 1) {
-    const jq = (window as any).$ || (window as any).jQuery;
-    if (jq && jq.fn && jq.fn.fancytree) {
-      window.$ = jq;
-      (window as any).jQuery = jq;
-      return true;
-    }
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
-  }
-  return false;
-};
-
-/**
- * QUML Editor Component
- * Integrates Sunbird QUML questionset editor web component
- */
-const QumlEditor: React.FC<QumlEditorProps> = ({ questionSetId }) => {
-  const { questionSetId: routeQuestionSetId } = useParams<{ questionSetId?: string }>();
+const QumlEditor: React.FC<QumlEditorProps> = ({
+  metadata,
+  mode,
+  contextOverrides,
+  onEditorEvent,
+  onTelemetryEvent,
+  onPlayerEvent,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<EditorStatus>('loading');
-  const [errorMessage, setErrorMessage] = useState('');
   const editorElementRef = useRef<HTMLElement | null>(null);
-  const fancytreeGuardRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [resolvedMetadata, setResolvedMetadata] = useState<QuestionSetMetadata | null>(metadata || null);
+  const fancytreeGuardRef = useRef<number | null>(null);
+  const fancyJQRef = useRef<any>(null);
 
-  const contentId = routeQuestionSetId || questionSetId || 'do_123';
+  const normalizedContextOverrides = useMemo(() => contextOverrides || {}, [contextOverrides]);
+
+  const handleEditorEvent = useCallback(
+    (event: QumlEditorEvent) => {
+      console.log('[QumlEditor] Editor event:', event);
+      onEditorEvent?.(event);
+    },
+    [onEditorEvent]
+  );
+
+  const handleTelemetryEvent = useCallback(
+    (event: any) => {
+      console.log('[QumlEditor] Telemetry event:', event);
+      onTelemetryEvent?.(event);
+    },
+    [onTelemetryEvent]
+  );
+
+  const handlePlayerEvent = useCallback(
+    (event: any) => {
+      console.log('[QumlEditor] Player event:', event);
+      onPlayerEvent?.(event);
+    },
+    [onPlayerEvent]
+  );
 
   useEffect(() => {
-    let isCleanedUp = false;
-
-    const handleEditorEvent = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      console.log('QUML Editor Event:', customEvent.detail || event);
-      
-      // Handle different editor events
-      if (customEvent.detail?.action === 'backContent') {
-        // Navigate back to content list
-        console.log('Back to content');
-      } else if (customEvent.detail?.action === 'submitContent') {
-        // Handle content submission
-        console.log('Content submitted:', customEvent.detail);
+    const resolveMetadata = () => {
+      if (metadata) {
+        setResolvedMetadata(metadata);
+        return;
       }
+
+      setResolvedMetadata(null);
     };
 
-    const mountEditor = async () => {
-      try {
-        // Note: Editor styles should be loaded via link tag in index.html when package is available
-        // For now, editor package is not installed, so this component won't work until:
-        // 1. @project-sunbird/lib-questionset-editor package is published and installed
-        // 2. Assets are copied via copy-assets.js postinstall script
-        // 3. Script tag is uncommented in index.html
+    resolveMetadata();
+  }, [metadata]);
 
-        // Ensure reflect-metadata is available
-        if (!(window as any).Reflect || !(window as any).Reflect.getMetadata) {
+  // Initialize editor once metadata is available
+  useEffect(() => {
+    let isMounted = true;
+
+    const mountEditor = async () => {
+      if (!containerRef.current || !resolvedMetadata) {
+        return;
+      }
+
+      try {
+        if (!(window as any).Reflect?.getMetadata) {
           await import('reflect-metadata');
         }
 
-        // Prevent duplicate registration
+        const jq = await ensureFancytree();
+        fancyJQRef.current = jq;
+
+        // Prevent legacy script reloads if the player is already registered
         if (!(window as any).sunbirdQumlPlayerReady && customElements.get('sunbird-quml-player')) {
           (window as any).sunbirdQumlPlayerReady = true;
         }
 
-        // Load Fancytree
-        await loadFancytreeLocally();
-        fancytreeJQuery = (window as any).$ || (window as any).jQuery;
-
-        const fancytreeReady = await waitForFancytree();
-        if (!fancytreeReady) {
-          throw new Error('jQuery Fancytree not available');
-        }
-
-        // Restore Fancytree-enabled jQuery when player component registers
-        customElements.whenDefined('sunbird-quml-player').then(() => {
-          if (fancytreeJQuery) {
-            window.$ = fancytreeJQuery;
-            (window as any).jQuery = fancytreeJQuery;
-          }
-        }).catch(() => {});
-
-        // Create editor configuration (hardcoded for now)
-        const editorConfig = {
-          context: {
-            identifier: contentId,
-            channel: '0144880972895272960',
-            authToken: '',
-            sid: 'session-123',
-            did: 'device-123',
-            uid: 'user-123',
-            additionalCategories: [],
-            host: window.location.origin,
-            pdata: {
-              id: 'sunbird.portal',
-              ver: '7.0.0',
-              pid: 'sunbird-portal'
-            },
-            actor: {
-              id: 'user-123',
-              type: 'User'
-            },
-            tags: [],
-            defaultLicense: 'CC BY 4.0',
-            endpoint: '/data/v3/telemetry',
-            env: 'questionset_editor',
-            user: {
-              id: 'user-123',
-              orgIds: ['0144880972895272960'],
-              organisations: {},
-              fullName: 'Test User',
-              firstName: 'Test',
-              lastName: 'User'
+        // If/when the player is defined, restore the FancyTree-enabled jQuery onto globals
+        customElements
+          .whenDefined('sunbird-quml-player')
+          .then(() => {
+            if (fancyJQRef.current) {
+              (window as any).$ = fancyJQRef.current;
+              (window as any).jQuery = fancyJQRef.current;
             }
-          },
-          config: {
-            mode: 'edit',
-            primaryCategory: 'Practice Question Set',
-            objectType: 'QuestionSet',
-            showAddCollaborator: false,
-            questionSet: {
-              maxQuestionsLimit: 500
-            }
-          }
-        };
+          })
+          .catch(() => {});
 
-        if (isCleanedUp) return;
+        const config = await qumlEditorService.createConfig(resolvedMetadata, {
+          mode,
+          contextOverrides: normalizedContextOverrides,
+        });
 
-        // Create editor element
-        const editorElement = document.createElement('lib-questionset-editor');
-        editorElement.setAttribute('editor-config', JSON.stringify(editorConfig));
-        editorElement.addEventListener('editorEmitter', handleEditorEvent);
+        if (!isMounted) return;
+
+        const editorElement = qumlEditorService.createElement(config);
+
+        qumlEditorService.attachEventListeners(
+          editorElement,
+          handleEditorEvent,
+          handleTelemetryEvent,
+          handlePlayerEvent,
+        );
+
+        containerRef.current.innerHTML = '';
+        containerRef.current.appendChild(editorElement);
 
         editorElementRef.current = editorElement;
 
-        if (containerRef.current) {
-          containerRef.current.innerHTML = '';
-          containerRef.current.appendChild(editorElement);
-        }
-
-        setStatus('ready');
-
-        // Guard: Restore Fancytree if it gets overwritten
-        fancytreeGuardRef.current = setInterval(async () => {
-          const jq = (window as any).$ || (window as any).jQuery;
-          if (!jq || !jq.fn || !jq.fn.fancytree) {
-            try {
-              const base = fancytreeJQuery || jq;
-              window.$ = base;
-              (window as any).jQuery = base;
-              // @ts-expect-error - No type definitions available for jquery.fancytree
-              await import('jquery.fancytree');
-              // @ts-expect-error - No type definitions available for jquery.fancytree/glyph
-              await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph.js');
-              // @ts-expect-error - No type definitions available for jquery.fancytree/dnd5
-              await import('jquery.fancytree/dist/modules/jquery.fancytree.dnd5.js');
-            } catch (e) {
-              console.warn('Failed to restore FancyTree', e);
-            }
+        // Guard: restore FancyTree if some script drops the plugin (often when player bootstraps)
+        fancytreeGuardRef.current = window.setInterval(async () => {
+          const jqCurrent = (window as any).$ || (window as any).jQuery;
+          if (!jqCurrent || (jqCurrent.fn && jqCurrent.fn.fancytree)) return;
+          try {
+            const base = fancyJQRef.current || jqCurrent;
+            (window as any).$ = base;
+            (window as any).jQuery = base;
+            // @ts-expect-error dynamic import without types
+            await import('jquery.fancytree');
+            // @ts-expect-error dynamic import without types
+            await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph.js');
+            // @ts-expect-error dynamic import without types
+            await import('jquery.fancytree/dist/modules/jquery.fancytree.dnd5.js');
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.warn('[QumlEditor] Failed to restore FancyTree', e);
           }
         }, 800);
-
       } catch (error: any) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.error('Failed to bootstrap QUML editor', error);
-        setErrorMessage(error.message || 'Unknown error');
-        setStatus('error');
+        console.error('[QumlEditor] Failed to initialize editor', error);
+        if (!isMounted) return;
       }
     };
 
     mountEditor();
 
     return () => {
-      isCleanedUp = true;
-      
+      isMounted = false;
+      if (editorElementRef.current) {
+        qumlEditorService.removeEventListeners(editorElementRef.current);
+        editorElementRef.current.remove();
+        editorElementRef.current = null;
+      }
       if (fancytreeGuardRef.current) {
         clearInterval(fancytreeGuardRef.current);
         fancytreeGuardRef.current = null;
       }
-
-      if (editorElementRef.current) {
-        editorElementRef.current.removeEventListener('editorEmitter', handleEditorEvent);
-        if (editorElementRef.current.parentNode) {
-          editorElementRef.current.parentNode.removeChild(editorElementRef.current);
-        }
-        editorElementRef.current = null;
-      }
     };
-  }, [contentId]);
+  }, [handleEditorEvent, handlePlayerEvent, handleTelemetryEvent, mode, normalizedContextOverrides, resolvedMetadata]);
 
   return (
     <div className={styles.qumlEditorPage}>
-      <section className={styles.qumlEditorHeader}>
-        <h2>QUML Questionset Editor</h2>
-        <p>Create and edit question sets using the Sunbird QUML editor</p>
-      </section>
-
-      {status === 'loading' && (
-        <div className={styles.qumlEditorStatus}>
-          Loading editor assets...
-        </div>
-      )}
-
-      {status === 'error' && (
-        <div className={`${styles.qumlEditorStatus} ${styles.qumlEditorStatusError}`}>
-          Failed to load editor: {errorMessage}
-        </div>
-      )}
-
       <div className={styles.qumlEditorHost} ref={containerRef} />
     </div>
   );

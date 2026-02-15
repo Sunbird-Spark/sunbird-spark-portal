@@ -48,8 +48,12 @@ app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // Apply anonymous session middleware to portal routes (once per route tree)
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
 
+app.use('/action', sessionMiddleware, ...anonymousMiddlewares);
+
 // Portal Proxy Routes
 app.use('/portal', portalProxyRoutes);
+
+app.all('/action', portalProxyRoutes);
 
 app.get('/:tenantName', redirectTenant);
 
