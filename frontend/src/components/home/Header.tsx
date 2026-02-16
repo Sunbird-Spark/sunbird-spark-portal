@@ -19,17 +19,27 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
 }
 
-const Header = ({ isSidebarOpen = false, onToggleSidebar = () => { } }: HeaderProps) => {
+const defaultToggleSidebar = () => { };
+
+const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar }: HeaderProps) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  if (isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
+    if (import.meta.env.MODE !== "production") {
+      // Warn when authenticated header is rendered without a real sidebar toggle handler.
+      console.warn(
+        "Header: onToggleSidebar was not provided. Sidebar toggle buttons will not function as expected."
+      );
+    }
+  }
 
   if (isAuthenticated && location.pathname !== "/") {
     return <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />;
   }
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
     { label: t("nav.home"), href: "/" },

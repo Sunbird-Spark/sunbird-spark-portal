@@ -24,7 +24,7 @@ export const categories: HelpCategory[] = [
     {
         title: "Login",
         description: "",
-        faqCount: 10,
+        faqCount: 5,
         slug: "login",
     },
     {
@@ -36,7 +36,7 @@ export const categories: HelpCategory[] = [
     {
         title: "Course & Certificates",
         description: "",
-        faqCount: 26,
+        faqCount: 5,
         slug: "course-certificates",
     },
 ];
@@ -68,7 +68,7 @@ export const faqs: FaqItem[] = [
 /** Per-category FAQ data for the Help Category Detail page. */
 export const categoryFaqs: Record<string, CategoryFaqData> = {
     login: {
-        title: "Login FAQ's",
+        title: "Login FAQs",
         faqs: [
             { question: "How do I create an account?", answer: "Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups." },
             { question: "I forgot my password. How can I reset it?", answer: "You can reset your password by clicking the 'Forgot Password' link on the login page. A reset link will be sent to your registered email address." },
@@ -78,7 +78,7 @@ export const categoryFaqs: Record<string, CategoryFaqData> = {
         ],
     },
     profile: {
-        title: "Profile FAQ's",
+        title: "Profile FAQs",
         faqs: [
             { question: "How do I update my profile information?", answer: "Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups." },
             { question: "Can I change my profile picture?", answer: "Yes, navigate to your Profile page and click on the avatar/photo section to upload a new profile picture." },
@@ -88,7 +88,7 @@ export const categoryFaqs: Record<string, CategoryFaqData> = {
         ],
     },
     "course-certificates": {
-        title: "Course & Certificate FAQ's",
+        title: "Course & Certificate FAQs",
         faqs: [
             { question: "What kind of courses are available on this platform?", answer: "Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups." },
             { question: "What if I need help during the course?", answer: "Our dedicated support team is available 24/7 to assist you. You can reach out through our help center, community forums, or contact us directly via email." },

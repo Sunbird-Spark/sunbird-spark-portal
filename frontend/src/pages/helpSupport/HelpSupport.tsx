@@ -100,7 +100,7 @@ const HelpSupport = () => {
                                             {cat.description}
                                         </p>
                                         <div className="flex items-center justify-between mt-auto">
-                                            <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{cat.faqCount} FAQ's</span>
+                                            <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{cat.faqCount} FAQs</span>
                                             <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
                                         </div>
                                     </div>
