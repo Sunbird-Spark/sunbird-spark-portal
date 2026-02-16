@@ -5,7 +5,7 @@ import { FilterState } from "../pages/Explore";
 import { ContentService } from "../services/ContentService";
 import { FiSearch } from "react-icons/fi";
 import CollectionCard from "./content/CollectionCard";
-import { ResourceCard, ResourceItem } from "./common/ResourceCard";
+import ResourceCard from "./content/ResourceCard";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 
 // Components
@@ -132,14 +132,7 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
                                      (item.mimeType && (item.mimeType.startsWith('video/') || item.mimeType === 'application/x-mpegURL'));
                     
                     if (isResource) {
-                        const resourceItem: ResourceItem = {
-                            id: item.identifier,
-                            title: item.name || '',
-                            type: item.mimeType === 'application/pdf' ? 'PDF' : 
-                                  item.mimeType === 'application/epub+zip' ? 'Epub' : 'Video',
-                            image: item.appIcon || "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=250&fit=crop",
-                        };
-                        return <ResourceCard key={item.identifier} item={resourceItem} />;
+                        return <ResourceCard key={item.identifier} item={item} />;
                     }
                     
                     return <CollectionCard key={item.identifier} item={item} />;

@@ -67,6 +67,8 @@ export const CourseCard = ({ course }: CourseCardProps) => {
                         </span>
                         <FiStar className="w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick" />
                         <span className="mx-0.5">•</span>
+                        <span>{course.learners} {t("contentStats.learners")}</span>
+                        <span className="mx-0.5">•</span>
                         <span>{course.lessons} {t("contentStats.lessons")}</span>
                     </div>
                 </div>
