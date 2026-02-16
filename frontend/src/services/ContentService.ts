@@ -1,5 +1,5 @@
 import { getClient, ApiResponse } from '../lib/http-client';
-import { ContentData, ContentApiResponse } from "@/types/contentTypes";
+import { ContentApiResponse } from "@/types/contentTypes";
 import type { ContentSearchRequest, ContentSearchResponse } from '../types/workspaceTypes';
 
 export class ContentService {
@@ -21,4 +21,3 @@ export class ContentService {
     return getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}`);
   }
 }
-
