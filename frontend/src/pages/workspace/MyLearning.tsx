@@ -19,6 +19,9 @@ import MyLearningCourses from "@/components/my-learning/MyLearningCourses";
 import MyLearningHoursSpent from "@/components/my-learning/MyLearningHoursSpent";
 import MyLearningUpcomingClasses from "@/components/my-learning/MyLearningUpcomingClasses";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LearnService } from "@/services/LearnService";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { Course } from "@/types/courseTypes";
 
 // Custom language icon matching design
 const LanguageIcon = () => (
@@ -37,11 +40,32 @@ const MyLearning = () => {
   const [activeNav, setActiveNav] = useState("learning");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const [courses, setCourses] = useState<Course[]>([]);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
+    const fetchEnrollments = async () => {
+      try {
+        let userId = userAuthInfoService.getUserId();
+        if (!userId) {
+           const authInfo = await userAuthInfoService.getAuthInfo();
+           userId = authInfo?.uid;
+        }
+        
+        if (userId) {
+          const learnService = new LearnService();
+          const response = await learnService.getUserEnrollments(userId);
+          if (response.data.courses) {
+            setCourses(response.data.courses);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch enrollments:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEnrollments();
   }, []);
 
 
@@ -77,7 +101,7 @@ const MyLearning = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             {/* Left Column - Courses (2 cols) */}
             <div className="lg:col-span-2 h-full">
-              <MyLearningCourses />
+              <MyLearningCourses courses={courses} />
             </div>
             
             {/* Right Column - Hours Spent + Upcoming Classes */}
