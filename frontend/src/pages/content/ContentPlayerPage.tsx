@@ -109,40 +109,29 @@ const ContentPlayerPage = () => {
           </div>
 
           {(() => {
-            // Define mimeTypes that should use ResourceCenter
-            const resourceCenterMimeTypes = [
-              "application/epub",
-              "video/x-youtube", 
-              "video/webm",
-              "video/mp4",
-              "application/pdf",
-              "application/vnd.ekstep.ecml-archive"
-            ];
+            // Check if current content mimeType is a collection
+            const isCollection = contentData?.mimeType === "application/vnd.ekstep.content-collection";
 
-            // Check if current content mimeType should use ResourceCenter
-            const shouldUseResourceCenter = contentData?.mimeType && 
-              resourceCenterMimeTypes.includes(contentData.mimeType);
-
-            if (shouldUseResourceCenter) {
+            if (isCollection) {
               return (
                 <div className="content-player-related-grid">
-                  {relatedContentData?.data?.content?.slice(0, 3).map((item) => {
-                    // Filter out the current content from related results
-                    if (item.identifier === contentId) return null;
-                    
-                    return <ResourceCard key={item.identifier} item={item} />;
-                  }).filter(Boolean)}
+                  {relatedContentData?.data?.content
+                    ?.filter((item) => item.identifier !== contentId) // Filter out current content first
+                    .slice(0, 3) // Then take first 3
+                    .map((item) => (
+                      <CollectionCard key={item.identifier} item={item} />
+                    ))}
                 </div>
               );
             } else {
               return (
                 <div className="content-player-related-grid">
-                  {relatedContentData?.data?.content?.slice(0, 3).map((item) => {
-                    // Filter out the current content from related results
-                    if (item.identifier === contentId) return null;
-                    
-                    return <CollectionCard key={item.identifier} item={item} />;
-                  }).filter(Boolean)}
+                  {relatedContentData?.data?.content
+                    ?.filter((item) => item.identifier !== contentId) // Filter out current content first
+                    .slice(0, 3) // Then take first 3
+                    .map((item) => (
+                      <ResourceCard key={item.identifier} item={item} />
+                    ))}
                 </div>
               );
             }
