@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
 import PageLoader from '../components/common/PageLoader';

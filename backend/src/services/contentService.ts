@@ -2,7 +2,15 @@ import axios from 'axios';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
 
-export const searchContent = async (filters: any, limit: number = 100, offset: number = 0, query?: string, sort_by?: any) => {
+import { ContentSearchFilters, ContentSortBy, SearchResponse } from '../types/content.js';
+
+export const searchContent = async (
+  filters: ContentSearchFilters,
+  limit: number = 100,
+  offset: number = 0,
+  query?: string,
+  sort_by?: ContentSortBy
+): Promise<SearchResponse['result']> => {
   try {
     const searchUrl = `${envConfig.LEARN_BASE_URL}/content/v1/search?orgdetails=orgName,email`;
     
@@ -41,10 +49,10 @@ export const searchContent = async (filters: any, limit: number = 100, offset: n
     };
 
     // Log the request details - can be removed in production
-    logger.info(`Searching content at ${searchUrl} with limit=${limit}, offset=${offset}`);
-    logger.info(`Request body: ${JSON.stringify(requestBody, null, 2)}`);
+    // logger.info(`Searching content at ${searchUrl} with limit=${limit}, offset=${offset}`);
+    // logger.info(`Request body: ${JSON.stringify(requestBody, null, 2)}`);
     
-    const response = await axios.post(searchUrl, requestBody, {
+    const response = await axios.post<SearchResponse>(searchUrl, requestBody, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -52,7 +60,7 @@ export const searchContent = async (filters: any, limit: number = 100, offset: n
       timeout: 10000 // 10 seconds timeout
     });
     logger.info(`Received ${response.data?.result?.count || 0} total results, ${response.data?.result?.content?.length || 0} items in this batch`);
-    return response.data;
+    return response.data.result;
   } catch (error) {
     logger.error('Error searching content:', error);
     throw error;

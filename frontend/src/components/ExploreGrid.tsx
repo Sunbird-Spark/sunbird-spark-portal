@@ -65,8 +65,6 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
             const data = await searchContent(limit, currentOffset, currentQuery, currentSortBy, activeFilters);
             const newContent = data.content || [];
             
-            console.log(`Received ${newContent.length} items`);
-            
             if (newContent.length < limit) {
                 setHasMore(false);
             }
