@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import ExploreGrid from './ExploreGrid';
 import * as ContentService from '../services/ContentService';
@@ -16,13 +16,13 @@ vi.mock('../services/ContentService', () => ({
 }));
 
 // Mock IntersectionObserver
-let observerCallback: IntersectionObserverCallback | null = null;
+let observerCallback: ((entries: IntersectionObserverEntry[], observer: IntersectionObserver) => void) | null = null;
 const observeSpy = vi.fn();
 const unobserveSpy = vi.fn();
 const disconnectSpy = vi.fn();
 
 class MockIntersectionObserver {
-  constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+  constructor(callback: (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => void, _options?: IntersectionObserverInit) {
     observerCallback = callback;
   }
   observe = observeSpy;
@@ -32,7 +32,8 @@ class MockIntersectionObserver {
 }
 window.IntersectionObserver = MockIntersectionObserver as any;
 
-const mockContent = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockContent: any[] = [
   {
     identifier: 'course-1',
     name: 'Test Course 1',
@@ -109,15 +110,10 @@ describe('ExploreGrid', () => {
   });
 
   it('handles loading state', () => {
-    // Return a promise that never resolves explicitly to test loading state, 
-    // but better to resolve it later. For checking spinner presence immediately:
+    // Return a promise that never resolves explicitly to test loading state
     (ContentService.searchContent as Mock).mockReturnValue(new Promise(() => {}));
     renderComponent();
-    // The spinner is rendered when isLoading is true
-    // We can look for the spinner container or class
-    const spinner = document.querySelector('.animate-spin');
-    // Since we are mocking globally, we might need to rely on container presence logic
-    // But better to check if searchContent was called
+    // Verify searchContent was called to trigger loading state
     expect(ContentService.searchContent).toHaveBeenCalled();
   });
 
@@ -239,7 +235,8 @@ describe('ExploreGrid', () => {
     // We need to ensure observerCallback is defined before calling it
     if (observerCallback) {
         // Wrap in act if necessary, but vitest usually handles it
-        (observerCallback as IntersectionObserverCallback)(mockEntries, {} as IntersectionObserver);
+        const callback = observerCallback as (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => void;
+        callback(mockEntries, {} as IntersectionObserver);
     } else {
         throw new Error("Observer callback was not captured");
     }
