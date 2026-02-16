@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/collapsible"
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
-import { Module } from "@/data/collectionData"
+import type { Module } from "@/types/collectionTypes"
 
 interface CollectionSidebarProps {
   modules: Module[];

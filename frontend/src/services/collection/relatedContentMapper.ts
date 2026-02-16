@@ -1,5 +1,5 @@
 import type { RelatedContentSearchItem } from '../../types/collectionTypes';
-import type { RelatedItem } from '../../data/collectionData';
+import type { RelatedItem } from '../../types/collectionTypes';
 
 const RELATED_CONTENT_LIMIT = 3;
 

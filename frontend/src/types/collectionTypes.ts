@@ -1,3 +1,42 @@
+export interface Lesson {
+  id: string;
+  title: string;
+  duration: string;
+  type: 'video' | 'document';
+}
+
+export interface Module {
+  id: string;
+  title: string;
+  subtitle: string;
+  lessons: Lesson[];
+}
+
+export interface RelatedItem {
+  id: string;
+  title: string;
+  type: string;
+  image: string;
+  isResource?: boolean;
+  rating?: number;
+  learners?: string;
+  lessons?: number;
+}
+
+export interface CollectionData {
+  id: string;
+  title: string;
+  rating: number;
+  learners: string;
+  lessons: number;
+  image: string;
+  weeks: number;
+  description: string;
+  skills: string[];
+  bestSuitedFor: string[];
+  modules: Module[];
+  relatedContent: RelatedItem[];
+}
 
 export interface HierarchyContentNode {
   identifier: string;

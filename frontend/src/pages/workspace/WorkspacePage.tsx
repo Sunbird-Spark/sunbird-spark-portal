@@ -35,7 +35,7 @@ const WorkspacePage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
-  const { data: searchData, isLoading, refetch } = useContentSearch({
+  const { data: searchData, isLoading, isError, error, refetch } = useContentSearch({
     request: showContent
       ? { sort_by: sortBy === 'updated' ? { lastUpdatedOn: 'desc' } : sortBy === 'created' ? { createdOn: 'desc' } : { name: 'asc' } }
       : undefined,
@@ -139,8 +139,6 @@ const WorkspacePage = () => {
     onCreateClick: handleCreateClick,
   };
 
-  if (showContent && isLoading) return <PageLoader message={t('loading')} />;
-
   return (
     <div className="workspace-container">
       <WorkspacePageHeader
@@ -190,19 +188,31 @@ const WorkspacePage = () => {
           <main className="workspace-main-content">
             <div className="workspace-content-wrapper">
               <WorkspaceToolbar {...navigationProps} />
-              <WorkspacePageContent
-                showCreateModal={showCreateModal}
-                activeView={activeView}
-                filteredItems={filteredItems}
-                viewMode={viewMode}
-                t={t}
-                onCreateOption={handleCreateOption}
-                onCreateClick={handleCreateClick}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onView={handleView}
-                onSubmitReview={handleSubmitReview}
-              />
+              {showContent && isLoading && (
+                <PageLoader message={t('loading')} fullPage={false} />
+              )}
+              {showContent && isError && error && (
+                <PageLoader
+                  error={error.message}
+                  onRetry={() => refetch()}
+                  fullPage={false}
+                />
+              )}
+              {(!showContent || (!isLoading && !isError)) && (
+                <WorkspacePageContent
+                  showCreateModal={showCreateModal}
+                  activeView={activeView}
+                  filteredItems={filteredItems}
+                  viewMode={viewMode}
+                  t={t}
+                  onCreateOption={handleCreateOption}
+                  onCreateClick={handleCreateClick}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                  onSubmitReview={handleSubmitReview}
+                />
+              )}
             </div>
           </main>
           <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />

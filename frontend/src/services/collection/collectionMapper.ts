@@ -1,5 +1,5 @@
 import type { HierarchyContentNode } from '../../types/collectionTypes';
-import type { CollectionData, Module, Lesson } from '../../data/collectionData';
+import type { CollectionData, Module, Lesson } from '../../types/collectionTypes';
 
 const DEFAULT_LESSON_DURATION = '—';
 const DEFAULT_RATING = 0;

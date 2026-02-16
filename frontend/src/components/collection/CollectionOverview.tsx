@@ -1,7 +1,7 @@
 import { FiPlay } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { CheckIcon } from "./CollectionIcons";
-import { CollectionData } from "@/data/collectionData";
+import type { CollectionData } from "@/types/collectionTypes";
 
 interface CollectionOverviewProps {
   collectionData: CollectionData;

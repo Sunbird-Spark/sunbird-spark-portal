@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { CollectionService, mapToCollectionData } from '../services/collection';
-import type { CollectionData } from '../data/collectionData';
+import type { CollectionData } from '../types/collectionTypes';
 
 const collectionService = new CollectionService();
 

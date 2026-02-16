@@ -9,41 +9,56 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useContentSearch } from "@/hooks/useContent";
 import { mapSearchContentToRelatedItems } from "@/services/collection";
-import { collectionData as fallbackCollectionData } from "@/data/collectionData";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import { CourseCard, type ContentCourse } from "@/components/common/CourseCard";
 import { ResourceCardComponent, type ResourceCardProps } from "@/components/landing/ResourceCenter";
+import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
+import defaultRelatedCardImage from "@/assets/resource-vr.svg";
+import defaultResourceCardImage from "@/assets/circuit-board-glowing.svg";
+import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
   const { t } = useAppI18n();
-  const { data: collectionDataFromApi, isLoading } = useCollection(collectionId);
-  const collectionData = useMemo(
-    () => collectionDataFromApi ?? fallbackCollectionData,
-    [collectionDataFromApi]
+  const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
+  const showLoading = isLoading || (isError && isFetching);
+  const hierarchySuccess = !isError && !!collectionDataFromApi;
+  const collectionData = collectionDataFromApi ?? null;
+  const displayCollectionData = useMemo(
+    () =>
+      collectionData
+        ? { ...collectionData, image: collectionData.image || defaultCollectionImage }
+        : null,
+    [collectionData]
   );
-  const { data: searchData } = useContentSearch({
+  const {
+    data: searchData,
+    isError: searchError,
+    error: searchErrorObj,
+    refetch: searchRefetch,
+    isFetching: searchFetching,
+  } = useContentSearch({
     request: { limit: 20, offset: 0 },
-    enabled: !!collectionData,
+    enabled: hierarchySuccess,
   });
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
 
   const relatedItemsFromSearch = useMemo(
-    () => mapSearchContentToRelatedItems(searchData?.data?.content, collectionData?.id, 3),
+    () => mapSearchContentToRelatedItems(searchData?.data?.content, collectionData?.id ?? undefined, 3),
     [searchData?.data?.content, collectionData?.id]
   );
   const relatedItems = useMemo(
     () =>
-      relatedItemsFromSearch.length > 0 ? relatedItemsFromSearch : collectionData.relatedContent,
-    [relatedItemsFromSearch, collectionData.relatedContent]
+      relatedItemsFromSearch.length > 0 ? relatedItemsFromSearch : (collectionData?.relatedContent ?? []),
+    [relatedItemsFromSearch, collectionData?.relatedContent]
   );
 
   const initialExpanded = useMemo(() => {
-    const first = collectionData.modules?.[0];
+    const first = collectionData?.modules?.[0];
     return first ? [first.id] : [];
-  }, [collectionData.modules]);
+  }, [collectionData?.modules]);
 
   const expandedModulesList = expandedModules.length > 0 ? expandedModules : initialExpanded;
 
@@ -53,16 +68,12 @@ const CollectionDetailPage = () => {
     );
   };
 
-  if (isLoading) {
-    return <PageLoader message={t("loading")} />;
-  }
-
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
 
       <main className="container mx-auto px-4 py-6">
-        {/* Go Back Link */}
+        {/* Go Back Link - always visible */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
@@ -71,6 +82,28 @@ const CollectionDetailPage = () => {
           {t("button.goBack")}
         </button>
 
+        {showLoading && (
+          <PageLoader message={t("loading")} fullPage={false} />
+        )}
+
+        {!showLoading && isError && error && (
+          <PageLoader
+            error={error.message}
+            onRetry={() => refetch()}
+            fullPage={false}
+          />
+        )}
+
+        {!showLoading && !isError && collectionDataFromApi == null && (
+          <PageLoader
+            error="Collection not found."
+            onRetry={() => refetch()}
+            fullPage={false}
+          />
+        )}
+
+        {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
+          <>
         {/* Title Row */}
         <div className="flex items-start justify-between mb-2">
           <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">
@@ -98,7 +131,7 @@ const CollectionDetailPage = () => {
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-[1fr_340px] gap-8">
           {/* Left Column */}
-          <CollectionOverview collectionData={collectionData} />
+          <CollectionOverview collectionData={displayCollectionData} />
 
           {/* Right Sidebar - Lessons Accordion */}
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
@@ -119,34 +152,56 @@ const CollectionDetailPage = () => {
             <FiArrowRight className="w-5 h-5 text-sunbird-brick" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr">
-            {relatedItems.map((item) =>
-              item.isResource ? (
-                <ResourceCardComponent
-                  key={item.id}
-                  id={item.id}
-                  title={item.title}
-                  type={(item.type === "Video" || item.type === "PDF" || item.type === "HTML" || item.type === "Epub" ? item.type : "PDF") as ResourceCardProps["type"]}
-                  image={item.image}
-                  heightClass="h-[24.5rem]"
-                />
-              ) : (
-                <CourseCard
-                  key={item.id}
-                  course={
-                    {
-                      id: item.id,
-                      title: item.title,
-                      image: item.image,
-                      type: item.type,
-                      rating: item.rating ?? 0,
-                      learners: item.learners ?? "0",
-                      lessons: item.lessons ?? 0,
-                    } as ContentCourse
-                  }
-                />
-              )
-            )}
+          {searchError && searchErrorObj && (
+            <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
+              <PageLoader
+                error={searchErrorObj.message}
+                onRetry={() => searchRefetch()}
+                fullPage={false}
+              />
+            </div>
+          )}
+
+          {!searchError && searchFetching && relatedItems.length === 0 && (
+            <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
+              <PageLoader message={t("loading")} fullPage={false} />
+            </div>
+          )}
+
+          {!searchError && (relatedItems.length > 0 || !searchFetching) && (
+          <>
+          <div className="related-content-grid">
+            {relatedItems.map((item) => {
+              const resourceCardImage = item.image || defaultResourceCardImage;
+              const courseCardImage = item.image || defaultRelatedCardImage;
+              return (
+                <div key={item.id} className="related-content-card-cell">
+                  {item.isResource ? (
+                    <ResourceCardComponent
+                      id={item.id}
+                      title={item.title}
+                      type={(item.type === "Video" || item.type === "PDF" || item.type === "HTML" || item.type === "Epub" ? item.type : "PDF") as ResourceCardProps["type"]}
+                      image={resourceCardImage}
+                      heightClass="h-[392px]"
+                    />
+                  ) : (
+                    <CourseCard
+                      course={
+                        {
+                          id: item.id,
+                          title: item.title,
+                          image: courseCardImage,
+                          type: item.type,
+                          rating: item.rating ?? 0,
+                          learners: item.learners ?? "0",
+                          lessons: item.lessons ?? 0,
+                        } as ContentCourse
+                      }
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Carousel Navigation */}
@@ -162,12 +217,13 @@ const CollectionDetailPage = () => {
               <FiArrowRight className="w-4 h-4 text-white" />
             </button>
           </div>
+          </>
+          )}
         </section>
         <FAQSection className="bg-gray-100" />
-
-
+          </>
+        )}
       </main>
-
 
       <Footer />
     </div>
