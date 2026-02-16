@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Sheet,
   SheetContent,
@@ -21,10 +22,14 @@ import CreateContentModal from "./CreateContentModal";
 import "../home/home.css";
 import "./workspace.css";
 
+/** Option IDs that should open the generic (upload) editor */
+const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video', 'upload-youtube'];
+
 const WorkspacePage = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { t } = useAppI18n();
+  const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("workspace");
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [userRole, setUserRole] = useState<UserRole>('creator');
@@ -92,9 +97,16 @@ const WorkspacePage = () => {
 
   const handleCreateOption = (optionId: string) => {
     setShowCreateModal(false);
-    toast({ 
-      title: "Starting Editor", 
-      description: `Launching ${optionId.replace('-', ' ')} editor...` 
+
+    if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
+      // Navigate to the generic editor for upload content types
+      navigate('/workspace/content/edit/generic');
+      return;
+    }
+
+    toast({
+      title: "Starting Editor",
+      description: `Launching ${optionId.replace('-', ' ')} editor...`
     });
   };
 
