@@ -76,7 +76,6 @@ export class QumlEditorService {
   private eventHandlers = new WeakMap<HTMLElement, {
     editor?: (event: Event) => void;
     telemetry?: (event: Event) => void;
-    player?: (event: Event) => void;
   }>();
 
   /**
@@ -90,7 +89,7 @@ export class QumlEditorService {
   /**
    * Create editor configuration object similar to player context generation
    */
-  async createEditorConfig(metadata: QuestionSetMetadata): Promise<EditorConfig> {
+  async createEditorConfig(metadata: QuestionSetMetadata, mode?: EditorConfig['config']['mode']): Promise<EditorConfig> {
     const sid = userAuthInfoService.getSessionId() || '';
     const uid = userAuthInfoService.getUserId() || '';
 
@@ -135,7 +134,7 @@ export class QumlEditorService {
         timeDiff: 0,
       },
       config: {
-        mode: this.getEditorMode(metadata.status),
+        mode: mode || 'edit',
         primaryCategory: metadata.primaryCategory,
         objectType: metadata.objectType,
         showAddCollaborator: false,
@@ -153,8 +152,7 @@ export class QumlEditorService {
     metadata: QuestionSetMetadata,
     options?: QumlEditorInitOptions
   ): Promise<EditorConfig> {
-    const baseConfig = await this.createEditorConfig(metadata);
-
+    const baseConfig = await this.createEditorConfig(metadata, options?.mode);
     const context = {
       ...baseConfig.context,
       ...(options?.contextOverrides || {}),
@@ -164,7 +162,6 @@ export class QumlEditorService {
       ...baseConfig.config,
       ...(options?.mode ? { mode: options.mode } : {}),
     };
-
     return {
       ...baseConfig,
       context,
@@ -224,16 +221,14 @@ export class QumlEditorService {
   }
 
   /**
-   * Attach editor / telemetry / player events
+   * Attach editor / telemetry events
    */
   attachEventListeners(
     element: HTMLElement,
     onEditorEvent?: (event: QumlEditorEvent) => void,
     onTelemetryEvent?: (event: any) => void,
-    onPlayerEvent?: (event: any) => void,
   ): void {
     this.removeEventListeners(element);
-
     const editorHandler = (event: Event) => {
       const customEvent = event as CustomEvent;
       const detail = customEvent.detail || {};
@@ -245,25 +240,15 @@ export class QumlEditorService {
       };
       onEditorEvent?.(editorEvent);
     };
-
     const telemetryHandler = (event: Event) => {
       const customEvent = event as CustomEvent;
       onTelemetryEvent?.(customEvent.detail);
     };
-
-    const playerHandler = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      onPlayerEvent?.(customEvent.detail);
-    };
-
     element.addEventListener('editorEmitter', editorHandler);
     element.addEventListener('telemetryEvent', telemetryHandler);
-    element.addEventListener('playerEvent', playerHandler);
-
     this.eventHandlers.set(element, {
       editor: editorHandler,
       telemetry: telemetryHandler,
-      player: playerHandler,
     });
   }
 
@@ -280,29 +265,8 @@ export class QumlEditorService {
       if (handlers.telemetry) {
         element.removeEventListener('telemetryEvent', handlers.telemetry);
       }
-      if (handlers.player) {
-        element.removeEventListener('playerEvent', handlers.player);
-      }
       this.eventHandlers.delete(element);
     }
   }
-
-  /**
-   * Determine editor mode based on content status
-   */
-  private getEditorMode(status: string): 'edit' | 'review' | 'read' {
-    const lowerStatus = status.toLowerCase();
-
-    if (['flagged', 'flagreview'].includes(lowerStatus)) {
-      return 'read';
-    }
-
-    if (lowerStatus === 'review') {
-      return 'review';
-    }
-
-    return 'edit';
-  }
 }
-
 export const qumlEditorService = new QumlEditorService();
