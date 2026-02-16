@@ -462,7 +462,7 @@
   }
 
   .content-player-title {
-    @apply font-rubik font-semibold text-[26px] leading-[38px] tracking-normal text-[#222222];
+    @apply font-rubik font-semibold text-[26px] leading-[38px] tracking-normal text-foreground;
   }
 
   .content-player-share-btn {
@@ -502,7 +502,7 @@
   }
 
   .content-player-video-relative {
-    @apply relative;
+    @apply relative h-80 sm:h-96 md:h-screen lg:h-screen;
   }
 
   .content-player-video-thumbnail {

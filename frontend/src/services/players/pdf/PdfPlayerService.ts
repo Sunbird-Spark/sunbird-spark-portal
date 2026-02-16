@@ -6,10 +6,16 @@ import { OrganizationService } from '../../OrganizationService';
 /**
  * Service for initializing and managing the PDF Player.
  * Handles player creation, configuration, and event management.
+ * 
+ * Style Loading Strategy:
+ * - PDF player styles are loaded dynamically when the first player is created
+ * - This prevents unnecessary CSS loading if no PDF player is used on the page
+ * - Styles are loaded globally as the web component requires them in the document scope
  */
 export class PdfPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
   private orgService = new OrganizationService();
+  private static stylesLoaded = false;
 
   /**
    * Create PDF player configuration with context props and metadata
@@ -72,6 +78,10 @@ export class PdfPlayerService {
       objectRollup: contextProps?.objectRollup || {},
       host: '',
       endpoint: '',
+      userData: {
+        firstName: 'Guest',
+        lastName: '',
+      }
     };
 
     const finalConfig = {
@@ -91,11 +101,34 @@ export class PdfPlayerService {
 
     return finalConfig;
   }
+  /**
+   * Load PDF player styles dynamically (only once)
+   * Checks for existing style element to prevent race conditions
+   */
+  private loadStyles(): void {
+    // Check if styles already exist in the DOM (prevents race conditions)
+    const existingStyles = document.querySelector('[data-pdf-player-styles="true"]');
+    if (existingStyles || PdfPlayerService.stylesLoaded) {
+      PdfPlayerService.stylesLoaded = true;
+      return;
+    }
+
+    const styleLink = document.createElement('link');
+    styleLink.rel = 'stylesheet';
+    styleLink.href = '/assets/pdf-player/styles.css';
+    styleLink.setAttribute('data-pdf-player-styles', 'true');
+    document.head.appendChild(styleLink);
+
+    PdfPlayerService.stylesLoaded = true;
+  }
 
   /**
    * Create PDF player element with configuration
+   * Styles are loaded dynamically on first use
    */
   createElement(config: PdfPlayerConfig): HTMLElement {
+    // Load styles if not already loaded
+    this.loadStyles();
     const element = document.createElement('sunbird-pdf-player');
     const configString = JSON.stringify(config);
     
