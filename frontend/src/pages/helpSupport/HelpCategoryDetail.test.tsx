@@ -99,7 +99,7 @@ describe('HelpCategoryDetail', () => {
         await waitForLoading();
 
         // FAQ content is rendered by mock
-        const yesBtn = screen.getAllByText('Yes')[0]; // since multiple faqs exist
+        const yesBtn = screen.getAllByText('Yes')[0]!; // since multiple faqs exist
         fireEvent.click(yesBtn);
 
         await waitFor(() => {
@@ -116,7 +116,7 @@ describe('HelpCategoryDetail', () => {
 
         await waitForLoading();
 
-        const noBtn = screen.getAllByText('No')[0];
+        const noBtn = screen.getAllByText('No')[0]!;
         fireEvent.click(noBtn);
 
         expect(screen.getByText('Sorry about that!')).toBeInTheDocument();
@@ -144,7 +144,7 @@ describe('HelpCategoryDetail', () => {
 
         await waitForLoading();
 
-        const noBtn = screen.getAllByText('No')[0];
+        const noBtn = screen.getAllByText('No')[0]!;
         fireEvent.click(noBtn);
 
         const submitBtn = screen.getByText('Submit feedback');
