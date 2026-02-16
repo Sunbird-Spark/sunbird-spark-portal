@@ -19,7 +19,7 @@ import ContentPlayerPage from './pages/content/ContentPlayerPage';
 import Explore from './pages/Explore';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
-// const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
+const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
 
@@ -41,7 +41,7 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
-        <Route path="/workspace" element={<WorkspacePage />} />
+        <Route path="/workspace" element={<WorkspaceProtected />} />
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentProtected />} />
 
