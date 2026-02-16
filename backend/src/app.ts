@@ -16,6 +16,7 @@ import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
+import contentRoutes from './routes/contentRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,6 +40,7 @@ app.use('/portal', portalAuthRoutes);
 
 // Apply anonymous session middleware to API routes (once per route tree)
 app.use('/api', sessionMiddleware, ...anonymousMiddlewares);
+app.use('/api/content/v1', contentRoutes);
 app.use('/api/data/v1/form', formRoutes);
 app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), authRoutes);
 app.use('/google', googleRoutes);
