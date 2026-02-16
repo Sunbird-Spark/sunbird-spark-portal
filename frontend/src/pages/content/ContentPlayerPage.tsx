@@ -1,10 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiStar, FiShare2 } from "react-icons/fi";
+import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
-import CollectionCard from "@/components/content/CollectionCard";
-import ResourceCard from "@/components/content/ResourceCard";
+import RelatedContent from "@/components/common/RelatedContent";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
@@ -103,46 +102,14 @@ const ContentPlayerPage = () => {
         </div>
 
         {/* Related Content Section */}
-        {(() => {
-          // Check if we have any related content
-          const relatedContent = relatedContentData?.data?.content;
-          
-          // Don't show section if no related content
-          if (!relatedContent || relatedContent.length === 0) {
-            return null;
+        <RelatedContent
+          items={relatedContentData?.data?.content}
+          cardType={
+            contentData?.mimeType === "application/vnd.ekstep.content-collection"
+              ? "collection"
+              : "resource"
           }
-
-          return (
-            <section>
-              <div className="content-player-related-header">
-                <h2 className="content-player-related-title">Related Content</h2>
-              </div>
-
-              {(() => {
-                // Check if current content mimeType is a collection
-                const isCollection = contentData?.mimeType === "application/vnd.ekstep.content-collection";
-
-                if (isCollection) {
-                  return (
-                    <div className="content-player-related-grid">
-                      {relatedContent.map((item) => (
-                        <CollectionCard key={item.identifier} item={item} />
-                      ))}
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div className="content-player-related-grid">
-                      {relatedContent.map((item) => (
-                        <ResourceCard key={item.identifier} item={item} />
-                      ))}
-                    </div>
-                  );
-                }
-              })()}
-            </section>
-          );
-        })()}
+        />
       </main>
 
       <Footer />

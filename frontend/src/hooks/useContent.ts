@@ -20,12 +20,13 @@ export const useContentSearch = (
 
 export const useContentRead = (
   contentId: string,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean; fields?: string[] }
 ): UseQueryResult<ApiResponse<ContentApiResponse>, Error> => {
   const enabled = options?.enabled ?? true;
+  const fields = options?.fields;
   return useQuery({
-    queryKey: ['content-read', contentId],
-    queryFn: () => contentService.contentRead(contentId),
+    queryKey: ['content-read', contentId, fields],
+    queryFn: () => contentService.contentRead(contentId, fields),
     enabled: enabled && !!contentId,
   });
 };
