@@ -67,7 +67,6 @@ const FAQSection = () => {
                     }
                 } catch (fallbackError) {
                     console.error("Failed to fetch FAQ data:", fallbackError);
-                    // Keep default FAQs
                 }
             }
         };
