@@ -1,4 +1,5 @@
 import { getClient, ApiResponse } from '../lib/http-client';
+import { ContentData, ContentApiResponse } from "@/types/contentTypes";
 import type { ContentSearchRequest, ContentSearchResponse } from '../types/workspaceTypes';
 import { ContentSearchFilters, ContentSortBy, SearchResponse } from '../types/content';
 
@@ -16,7 +17,12 @@ export class ContentService {
       },
     });
   }
+
+  public async contentRead(contentId: string): Promise<ApiResponse<ContentApiResponse>> {
+    return getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}`);
+  }
 }
+
 
 export const searchContent = async (
     limit: number = 20,
