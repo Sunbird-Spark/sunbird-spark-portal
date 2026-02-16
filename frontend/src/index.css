@@ -429,6 +429,227 @@
     @apply absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center text-sunbird-gray-75 text-base bg-sunbird-light-blue;
   }
 
+  .content-player-container {
+    @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+  }
+
+  .content-player-resource-title {
+    @apply font-rubik font-medium text-[26px] leading-[38px] tracking-normal text-white font-semibold mb-2;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  }
+
+  .content-player-resource-subtitle {
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  }
+
+
+  /* Content Player Component Styles */
+  .content-player-background {
+    @apply min-h-screen bg-gray-100;
+  }
+
+  .content-player-go-back {
+    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity font-rubik;
+  }
+
+  .content-player-back-arrow {
+    width: 1.125rem;
+    height: 0.686rem;
+  }
+
+  .content-player-title-row {
+    @apply flex items-start justify-between mb-2;
+  }
+
+  .content-player-title {
+    @apply font-rubik font-semibold text-[26px] leading-[38px] tracking-normal text-[#222222];
+  }
+
+  .content-player-share-btn {
+    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity font-rubik mx-2;
+  }
+
+  .content-player-share-icon {
+    @apply w-4 h-4;
+  }
+
+  .content-player-stats-row {
+    @apply flex items-center gap-2 text-sm text-muted-foreground mb-8 font-rubik;
+  }
+
+  .content-player-rating-container {
+    @apply flex items-center gap-1;
+  }
+
+  .content-player-star-icon {
+    @apply w-3.5 h-3.5 text-sunbird-brick fill-sunbird-brick;
+  }
+
+  .content-player-stats-separator {
+    @apply text-gray-300;
+  }
+
+  .content-player-video-container {
+    width: 100%;
+    height: 100%;
+    max-height: 41.313rem;
+    max-width: 71.625rem;
+    margin-inline: auto;
+  }
+
+  .content-player-video-wrapper {
+    @apply bg-white rounded-xl overflow-hidden border border-gray-100;
+  }
+
+  .content-player-video-relative {
+    @apply relative;
+  }
+
+  .content-player-video-thumbnail {
+    @apply aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative;
+  }
+
+  .content-player-video-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .content-player-play-button {
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg;
+  }
+
+  .content-player-play-icon {
+    @apply w-6 h-6 text-sunbird-brick ml-1 fill-sunbird-brick;
+  }
+
+  .content-player-related-header {
+    @apply flex items-center gap-3 mb-6 mt-12;
+  }
+
+  .content-player-related-title {
+    @apply text-xl font-semibold text-foreground font-rubik;
+  }
+
+  .content-player-related-arrow {
+    @apply w-5 h-5 text-sunbird-brick;
+  }
+
+  .content-player-related-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr;
+  }
+
+
+
+  .related-resource-card-subtitle {
+    @apply font-rubik font-medium text-[16px] leading-[24px] tracking-normal text-[#FFFFFF] text-center;
+  }
+  .related-resource-card-link {
+    @apply flex justify-center;
+  }
+
+  .related-resource-card-container {
+    @apply bg-white rounded-[20px] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-[2px_2px_20px_0px_rgba(0,0,0,0.09)] w-[370px] h-[392px] flex flex-col;
+  }
+
+  .related-resource-card-image-wrapper {
+    @apply px-[20px] pt-[20px] w-full;
+  }
+
+  .related-resource-card-image-inner {
+    @apply relative overflow-hidden rounded-[20px] h-[162px] w-full;
+  }
+
+  .related-resource-card-image {
+    @apply absolute inset-0 w-full h-full rounded-[20px];
+    object-fit: cover;
+    -o-object-fit: cover;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+    transition-duration: .5s;
+    animation-duration: .5s;
+  }
+
+  .group:hover .related-resource-card-image {
+    @apply scale-105;
+  }
+
+  .related-resource-card-content-wrapper {
+    @apply px-[20px] pt-[20px] pb-5 flex flex-col flex-grow;
+  }
+
+  .related-resource-card-badge {
+    @apply inline-flex items-center justify-center px-3 rounded-[36px] mb-[20px] h-[30px] bg-sunbird-beige-light text-foreground font-rubik font-medium text-[14px] leading-[18px] border-[#CC8545] border-[1px] w-fit;
+  }
+
+  .related-resource-card-title {
+    @apply font-rubik font-medium text-[20px] leading-[28px] tracking-normal bg-transparent border-0 text-foreground mb-[20px] min-h-[56px];
+  }
+
+  .related-resource-card-stats {
+    @apply flex items-center gap-1.5 text-xs text-muted-foreground pt-[2px] mt-auto;
+  }
+
+  .related-resource-card-rating {
+    @apply font-medium text-foreground;
+  }
+
+  .related-resource-card-star {
+    @apply w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick;
+  }
+
+  .related-resource-card-separator {
+    @apply mx-0.5;
+  }
+
+  /* Resource Card Styles - Based on ResourceCenter Template */
+  .resource-card-link {
+    @apply block w-full;
+  }
+
+  .resource-card-container {
+    @apply relative w-full h-[392px] rounded-[20px] overflow-hidden;
+  }
+
+  .resource-card-image-wrapper {
+    @apply absolute inset-0;
+  }
+
+  .resource-card-image {
+    @apply w-full h-full object-cover transition-transform duration-700 ease-out rounded-[20px];
+  }
+
+  .group:hover .resource-card-image {
+    @apply scale-105;
+  }
+
+  .resource-card-badge-wrapper {
+    @apply absolute top-[44px] left-[34px] z-[5];
+  }
+
+  .resource-card-badge {
+    @apply flex items-center justify-center bg-white text-black font-medium text-[16px] px-3 w-[78px] h-[36px] rounded-[4px] shadow-sm tracking-wide;
+    font-weight: 500;
+  }
+
+  .resource-card-content {
+    @apply absolute bottom-[62px] left-[34px] right-[24px] z-10 flex flex-col items-start gap-1.5;
+  }
+
+  .resource-card-title {
+    @apply font-rubik font-medium text-[20px] leading-[28px] tracking-normal text-white;
+    text-wrap: balance;
+  }
+
+  .resource-card-action {
+    @apply flex items-center gap-2 text-white/95 font-semibold text-[14px] transition-all;
+  }
+
+  .group:hover .resource-card-action {
+    @apply underline;
+  }
+
+  .resource-card-arrow {
+    @apply w-4 h-4;
+  }
 
   .card-mask-custom {
     -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
