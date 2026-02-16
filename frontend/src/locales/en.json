@@ -210,7 +210,11 @@
     "viewEpub": "View The Epub",
     "readEpub": "View The Epub",
     "readTextbook": "View The Textbook",
-    "seeCaseStudy": "See the Case Study"
+    "seeCaseStudy": "See the Case Study",
+    "videoBadge": "Video",
+    "epubBadge": "EPUB",
+    "htmlBadge": "HTML",
+    "pdfBadge": "PDF"
   },
   "trending": {
     "mostViewed": "Most Viewed Content",

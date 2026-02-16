@@ -1,4 +1,5 @@
 import { getClient, ApiResponse } from '../lib/http-client';
+import { ContentData, ContentApiResponse } from "@/types/contentTypes";
 import type { ContentSearchRequest, ContentSearchResponse } from '../types/workspaceTypes';
 
 export class ContentService {
@@ -15,4 +16,9 @@ export class ContentService {
       },
     });
   }
+
+  public async contentRead(contentId: string): Promise<ApiResponse<ContentApiResponse>> {
+    return getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}`);
+  }
 }
+

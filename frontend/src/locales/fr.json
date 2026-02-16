@@ -205,7 +205,11 @@
     "viewPdf": "Voir le PDF",
     "viewHtml": "Voir le HTML",
     "viewEpub": "Voir l'Epub",
-    "seeCaseStudy": "Voir l'étude de cas"
+    "seeCaseStudy": "Voir l'étude de cas",
+    "videoBadge": "vidéo",
+    "epubBadge": "EPUB",
+    "htmlBadge": "HTML",
+    "pdfBadge": "PDF"
   },
   "trending": {
     "mostViewed": "Contenu le Plus Vu",

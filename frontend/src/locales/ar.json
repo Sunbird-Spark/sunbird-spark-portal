@@ -206,7 +206,11 @@
     "viewPdf": "اعرض PDF",
     "viewHtml": "اعرض HTML",
     "viewEpub": "اعرض Epub",
-    "seeCaseStudy": "انظر دراسة الحالة"
+    "seeCaseStudy": "انظر دراسة الحالة",
+    "videoBadge": "فيديو",
+    "epubBadge": "EPUB",
+    "htmlBadge": "أتش تي أم أل",
+    "pdfBadge": "قوات الدفاع الشعبي"
   },
   "trending": {
     "mostViewed": "المحتوى الأكثر مشاهدة",
