@@ -22,7 +22,8 @@ const unobserveSpy = vi.fn();
 const disconnectSpy = vi.fn();
 
 class MockIntersectionObserver {
-  constructor(callback: (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => void, _options?: IntersectionObserverInit) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(callback: (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => void, _options?: any) {
     observerCallback = callback;
   }
   observe = observeSpy;
