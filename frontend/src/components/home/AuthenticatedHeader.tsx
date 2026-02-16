@@ -55,6 +55,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                         !isSidebarOpen && (
                             <button
                                 onClick={onToggleSidebar}
+                                aria-label="Toggle Sidebar"
                                 className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
                             >
                                 <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">

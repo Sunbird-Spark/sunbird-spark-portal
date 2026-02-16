@@ -103,6 +103,7 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
 
     return (
         <aside
+            data-testid="home-sidebar"
             className="w-[15.125rem] bg-white flex flex-col shrink-0 z-20 relative h-full md:h-[calc(100vh-4.5rem)]"
             style={{
                 boxShadow: '0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09)'
