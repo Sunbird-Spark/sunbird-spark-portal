@@ -1,14 +1,18 @@
-// Import video and document icons
-import iconVideo from "@/assets/icon-video.svg";
-import iconDocument from "@/assets/icon-document.svg";
+import { FiVideo, FiFileText } from "react-icons/fi";
 
-// Video/Document icons using imported images
+const iconStyle = { color: "hsl(var(--sunbird-brick))", stroke: "hsl(var(--sunbird-brick))" };
+const iconWrapperClass = "inline-flex items-center flex-shrink-0";
+
 export const VideoIcon = () => (
-  <img src={iconVideo} alt="Video" className="flex-shrink-0 w-[1.375rem] h-[0.875rem]" />
+  <span className={`${iconWrapperClass} w-8 h-5`} aria-hidden>
+    <FiVideo className="w-full h-full" style={iconStyle} />
+  </span>
 );
 
 export const DocumentIcon = () => (
-  <img src={iconDocument} alt="Document" className="flex-shrink-0 w-[1.0625rem] h-[1.3125rem]" />
+  <span className={`${iconWrapperClass} w-6 h-7`} aria-hidden>
+    <FiFileText className="w-full h-full" style={iconStyle} />
+  </span>
 );
 
 export const CheckIcon = () => (
