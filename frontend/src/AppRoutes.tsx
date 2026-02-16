@@ -15,6 +15,7 @@ import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
 import QumlEditor from './components/quml-editor/QumlEditor';
+import ContentPlayerPage from './pages/content/ContentPlayerPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -34,6 +35,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/editor/:questionSetId" element={<QumlEditor />} />
+        <Route path="/content/:contentId" element={<ContentPlayerPage />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
