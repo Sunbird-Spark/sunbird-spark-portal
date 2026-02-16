@@ -31,7 +31,7 @@ export class EpubPlayerService {
     const uid = userAuthInfoService.getUserId() || 'anonymous';
     
     // Get device ID from AppCoreService (backend) with fallback
-    let did = `device-${Date.now()}`;
+    let did = '';
     try {
       did = await appCoreService.getDeviceId();
     } catch (error) {
@@ -39,7 +39,7 @@ export class EpubPlayerService {
     }
     
     // Get channel from org service with random fallback for testing
-    let channel = `test-channel-${Math.random().toString(36).substring(2, 15)}`; // Random fallback for testing
+    let channel = '';
     try {
       const orgResponse = await this.orgService.search({
         filters: {
