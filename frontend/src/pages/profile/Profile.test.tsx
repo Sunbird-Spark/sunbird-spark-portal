@@ -65,6 +65,16 @@ vi.mock('@/hooks/use-mobile', () => ({
     useIsMobile: () => mockUseIsMobile(),
 }));
 
+// Mock useAuth
+vi.mock('@/auth/AuthContext', () => ({
+    useAuth: vi.fn(() => ({
+        isAuthenticated: true,
+        user: { id: '75a0d064-b41a-4ff8-ac22-38611acbddfe', name: 'Chetann Test0r8', role: 'student' },
+        login: vi.fn(),
+        logout: vi.fn(),
+    })),
+}));
+
 // Mock useUserRead hook
 const mockUserData = {
     id: '75a0d064-b41a-4ff8-ac22-38611acbddfe',

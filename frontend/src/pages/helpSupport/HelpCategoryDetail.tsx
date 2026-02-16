@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FiArrowLeft } from "react-icons/fi";
+import { FaArrowLeftLong } from "react-icons/fa6";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import PageLoader from "@/components/common/PageLoader";
-import AuthenticatedHeader from "@/components/home/AuthenticatedHeader";
+import Header from "@/components/home/Header";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
     Accordion,
@@ -54,7 +55,7 @@ const HelpCategoryDetail = () => {
     return (
         <div className="profile-container">
             {/* Top Header */}
-            <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
+            <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
 
             <div className="flex flex-1 relative transition-all">
                 {/* Sidebar - Mobile */}
@@ -92,18 +93,18 @@ const HelpCategoryDetail = () => {
                                 onClick={() => navigate("/help-support")}
                                 className="flex items-center gap-[0.5rem] text-sunbird-brick font-medium font-['Rubik'] text-sm hover:opacity-80 transition-opacity"
                             >
-                                <FiArrowLeft className="w-[1rem] h-[1rem]" />
+                                <FaArrowLeftLong className="w-[1rem] h-[1rem]" />
                                 Go Back
                             </button>
                             <button
-                                className="bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity"
+                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
                             >
                                 Report an Issue
                             </button>
                         </div>
 
                         {/* Category Title */}
-                        <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem]">
+                        <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem] pt-[1.25rem]">
                             {category.title}
                         </h1>
 
@@ -113,14 +114,14 @@ const HelpCategoryDetail = () => {
                                 <AccordionItem
                                     key={index}
                                     value={`item-${index}`}
-                                    className="rounded-[0.625rem] px-[1.25rem] bg-sunbird-base-white border-b-0"
+                                    className="rounded-[0.625rem] bg-sunbird-base-white border-b-0"
                                 >
-                                    <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] text-foreground [&>svg]:text-sunbird-brick">
+                                    <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick">
                                         {faq.question}
                                     </AccordionTrigger>
-                                    <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-[0.5rem] text-muted-foreground">
-                                        <p className="mb-[1rem]">{faq.answer}</p>
-                                        <div className="py-[0.625rem] border-t border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)]">
+                                    <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
+                                        <p className="mb-[1rem] px-[1.25rem]">{faq.answer}</p>
+                                        <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
                                             {/* Thank you state */}
                                             {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
                                                 <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">
@@ -142,8 +143,8 @@ const HelpCategoryDetail = () => {
                                                             onClick={() => handleSubmitFeedback(index)}
                                                             disabled={!feedbackText[index]?.trim()}
                                                             className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
-                                                                    ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
-                                                                    : "bg-sunbird-brick hover:opacity-90"
+                                                                ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
+                                                                : "bg-sunbird-brick hover:opacity-90"
                                                                 }`}
                                                         >
                                                             Submit feedback

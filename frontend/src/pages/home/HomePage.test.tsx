@@ -1,10 +1,27 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from './HomePage';
 import { AuthProvider } from '../../auth/AuthContext';
+import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+
+// Mock userAuthInfoService
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: {
+    getAuthInfo: vi.fn(),
+    clearAuth: vi.fn(),
+  },
+}));
 
 describe('HomePage', () => {
+  beforeEach(() => {
+    // Default mock implementation
+    (userAuthInfoService.getAuthInfo as any).mockResolvedValue({
+      isAuthenticated: false,
+      uid: null,
+      sid: 'test-session-id',
+    });
+  });
   it('should render welcome message and courses', () => {
     render(
       <MemoryRouter>

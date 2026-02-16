@@ -56,6 +56,16 @@ vi.mock('@/hooks/use-mobile', () => ({
     useIsMobile: () => mockUseIsMobile(),
 }));
 
+// Mock useAuth for Header
+vi.mock('@/auth/AuthContext', () => ({
+    useAuth: vi.fn(() => ({
+        isAuthenticated: true,
+        user: { id: '123', name: 'John Doe', role: 'content_creator' },
+        login: vi.fn(),
+        logout: vi.fn(),
+    })),
+}));
+
 describe('Home Page', () => {
     beforeEach(() => {
         mockUseIsMobile.mockReturnValue(false); // Default to desktop

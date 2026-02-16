@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { FiMenu, FiX, FiSearch, FiChevronDown, FiBell } from "react-icons/fi";
+import { FiMenu, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
+import AuthenticatedHeader from "./AuthenticatedHeader";
+import { useAuth } from "@/auth/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +14,22 @@ import translationIcon from "@/assets/translation_icon.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+interface HeaderProps {
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+}
+
+const Header = ({ isSidebarOpen = false, onToggleSidebar = () => { } }: HeaderProps) => {
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
+
+  if (isAuthenticated && location.pathname !== "/") {
+    return <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />;
+  }
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
     { label: t("nav.home"), href: "/" },

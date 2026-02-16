@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowRight } from "react-icons/fi";
+import { FaArrowRightLong } from "react-icons/fa6";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import PageLoader from "@/components/common/PageLoader";
-import AuthenticatedHeader from "@/components/home/AuthenticatedHeader";
+import Header from "@/components/home/Header";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
     Accordion,
@@ -40,7 +41,7 @@ const HelpSupport = () => {
     return (
         <div className="profile-container">
             {/* Top Header */}
-            <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
+            <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
 
             <div className="flex flex-1 relative transition-all">
                 {/* Sidebar - Mobile */}
@@ -78,14 +79,14 @@ const HelpSupport = () => {
                                 How can we assist you today?
                             </h1>
                             <button
-                                className="bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity"
+                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
                             >
                                 Report an Issue
                             </button>
                         </div>
 
                         {/* Category Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.25rem] mb-[2.5rem]">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.25rem] mb-[2.5rem] pt-[1.25rem]">
                             {categories.map((cat) => (
                                 <div
                                     key={cat.title}
@@ -100,7 +101,7 @@ const HelpSupport = () => {
                                         </p>
                                         <div className="flex items-center justify-between mt-auto">
                                             <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{cat.faqCount} FAQ's</span>
-                                            <FiArrowRight className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
+                                            <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
                                         </div>
                                     </div>
                                 </div>
