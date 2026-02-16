@@ -73,12 +73,6 @@ vi.mock('@/components/collection/CollectionOverview', () => ({
 vi.mock('@/components/collection/CollectionSidebar', () => ({
   default: () => <aside data-testid="collection-sidebar">Sidebar</aside>,
 }));
-vi.mock('@/components/common/CourseCard', () => ({
-  CourseCard: ({ course }: { course: { title: string } }) => <div data-testid="course-card">{course.title}</div>,
-}));
-vi.mock('@/components/landing/ResourceCenter', () => ({
-  ResourceCardComponent: ({ title }: { title: string }) => <div data-testid="resource-card">{title}</div>,
-}));
 vi.mock('@/components/landing/FAQSection', () => ({ default: () => <section data-testid="faq">FAQ</section> }));
 
 const createTestQueryClient = () =>
@@ -156,7 +150,8 @@ describe('CollectionDetailPage', () => {
     mockUseContentSearch.mockReturnValue({ data: { data: { content: [] } }, isLoading: false });
     renderWithProviders(<CollectionDetailPage />);
     expect(screen.getByText('courseDetails.relatedContent')).toBeInTheDocument();
-    expect(screen.getByTestId('course-card')).toBeInTheDocument();
     expect(screen.getByText('Related 1')).toBeInTheDocument();
+    const relatedLink = screen.getByRole('link', { name: /Related 1/i });
+    expect(relatedLink).toHaveAttribute('href', '/collection/r1');
   });
 });

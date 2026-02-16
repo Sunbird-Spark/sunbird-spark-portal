@@ -1,32 +1,17 @@
-import type { RelatedContentSearchItem } from '../../types/collectionTypes';
-import type { RelatedItem } from '../../types/collectionTypes';
+import type { RelatedContentItem, RelatedContentSearchItem, RelatedItem } from '../../types/collectionTypes';
 
 const RELATED_CONTENT_LIMIT = 3;
 
+const TYPE_TO_MIME: Record<string, string> = {
+  Video: 'video/mp4',
+  PDF: 'application/pdf',
+  Epub: 'application/epub',
+  HTML: 'application/vnd.ekstep.html-archive',
+};
+
 function isRootLevel(item: RelatedContentSearchItem): boolean {
   const visibility = (item.visibility ?? '').toLowerCase();
-  const hasParent = Boolean(item.parent);
-  return visibility === 'default' && !hasParent;
-}
-
-function displayTypeFromItem(item: RelatedContentSearchItem): string {
-  const mime = (item.mimeType ?? '').toLowerCase();
-  const category = (item.primaryCategory ?? '').toLowerCase();
-  const resourceType = (item.resourceType ?? '').toLowerCase();
-
-  if (mime.startsWith('video/')) return 'Video';
-  if (mime === 'application/pdf') return 'PDF';
-  if (mime === 'application/epub') return 'Epub';
-  if (mime.includes('html')) return 'HTML';
-
-  if (resourceType === 'course' || category === 'course') return 'Course';
-  if (resourceType === 'book' || category.includes('textbook')) return 'Textbook';
-  if (resourceType === 'collection' || category === 'content playlist') return 'Collection';
-
-  if (category.includes('resource') || resourceType === 'learn' || resourceType === 'teach') {
-    return 'PDF';
-  }
-  return 'Course';
+  return visibility === 'default' && !item.parent;
 }
 
 function isResourceItem(item: RelatedContentSearchItem): boolean {
@@ -37,29 +22,42 @@ function isResourceItem(item: RelatedContentSearchItem): boolean {
   return true;
 }
 
-export function mapSearchContentToRelatedItems(
+function filterAndSlice(
   items: RelatedContentSearchItem[] | undefined,
   excludeId?: string,
   limit: number = RELATED_CONTENT_LIMIT
-): RelatedItem[] {
-  if (!items || !Array.isArray(items)) return [];
-
-  const filtered = items
+): RelatedContentSearchItem[] {
+  if (!items?.length) return [];
+  return items
     .filter((item) => isRootLevel(item) && item.identifier !== excludeId)
     .slice(0, limit);
+}
 
-  return filtered.map((item) => {
-    const type = displayTypeFromItem(item);
-    const isResource = isResourceItem(item);
-    const image = item.appIcon ?? item.posterImage ?? item.thumbnail ?? '';
+export function mapRelatedItemsToContentSearchItems(items: RelatedItem[]): RelatedContentItem[] {
+  return items.map((item) => ({
+    identifier: item.id,
+    name: item.title,
+    appIcon: item.image,
+    posterImage: item.image,
+    mimeType: TYPE_TO_MIME[item.type] ?? 'application/pdf',
+    primaryCategory: item.type,
+    cardType: item.isResource ? 'resource' : 'collection',
+  }));
+}
 
-    return {
-      id: item.identifier,
-      title: item.name ?? 'Untitled',
-      type,
-      image,
-      isResource,
-      lessons: item.leafNodesCount,
-    };
-  });
+export function mapSearchContentToRelatedContentItems(
+  items: RelatedContentSearchItem[] | undefined,
+  excludeId?: string,
+  limit: number = RELATED_CONTENT_LIMIT
+): RelatedContentItem[] {
+  const filtered = filterAndSlice(items, excludeId, limit);
+  return filtered.map((item) => ({
+    identifier: item.identifier,
+    name: item.name ?? 'Untitled',
+    appIcon: item.appIcon ?? item.posterImage ?? item.thumbnail ?? '',
+    posterImage: item.posterImage ?? item.appIcon ?? item.thumbnail ?? '',
+    mimeType: item.mimeType,
+    primaryCategory: item.primaryCategory,
+    cardType: isResourceItem(item) ? 'resource' : 'collection',
+  }));
 }

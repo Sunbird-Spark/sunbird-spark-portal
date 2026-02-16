@@ -55,6 +55,10 @@ export interface CourseHierarchyResponse {
 }
 
 
+import type { ContentSearchItem } from './workspaceTypes';
+
+export type RelatedContentItem = ContentSearchItem & { cardType?: 'collection' | 'resource' };
+
 export interface RelatedContentSearchItem {
   identifier: string;
   name?: string;

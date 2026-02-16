@@ -5,17 +5,17 @@ import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import FAQSection from "@/components/landing/FAQSection";
+import RelatedContent from "@/components/common/RelatedContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useContentSearch } from "@/hooks/useContent";
-import { mapSearchContentToRelatedItems } from "@/services/collection";
+import {
+  mapSearchContentToRelatedContentItems,
+  mapRelatedItemsToContentSearchItems,
+} from "@/services/collection";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
-import { CourseCard, type ContentCourse } from "@/components/common/CourseCard";
-import { ResourceCardComponent, type ResourceCardProps } from "@/components/landing/ResourceCenter";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
-import defaultRelatedCardImage from "@/assets/resource-vr.svg";
-import defaultResourceCardImage from "@/assets/circuit-board-glowing.svg";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
@@ -45,15 +45,18 @@ const CollectionDetailPage = () => {
   });
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
 
-  const relatedItemsFromSearch = useMemo(
-    () => mapSearchContentToRelatedItems(searchData?.data?.content, collectionData?.id ?? undefined, 3),
-    [searchData?.data?.content, collectionData?.id]
-  );
-  const relatedItems = useMemo(
-    () =>
-      relatedItemsFromSearch.length > 0 ? relatedItemsFromSearch : (collectionData?.relatedContent ?? []),
-    [relatedItemsFromSearch, collectionData?.relatedContent]
-  );
+  const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
+
+  const relatedContentItems = useMemo(() => {
+    if (hasSearchResults) {
+      return mapSearchContentToRelatedContentItems(
+        searchData?.data?.content,
+        collectionData?.id ?? undefined,
+        3
+      );
+    }
+    return mapRelatedItemsToContentSearchItems(collectionData?.relatedContent ?? []);
+  }, [hasSearchResults, searchData?.data?.content, collectionData?.id, collectionData?.relatedContent]);
 
   const initialExpanded = useMemo(() => {
     const first = collectionData?.modules?.[0];
@@ -152,11 +155,6 @@ const CollectionDetailPage = () => {
 
         {/* Related Content Section */}
         <section className="mt-16">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-xl font-semibold text-foreground">{t("courseDetails.relatedContent")}</h2>
-            <FiArrowRight className="w-5 h-5 text-sunbird-brick" />
-          </div>
-
           {searchError && searchErrorObj && (
             <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
               <PageLoader
@@ -167,47 +165,18 @@ const CollectionDetailPage = () => {
             </div>
           )}
 
-          {!searchError && searchFetching && relatedItems.length === 0 && (
+          {!searchError && searchFetching && relatedContentItems.length === 0 && (
             <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
               <PageLoader message={t("loading")} fullPage={false} />
             </div>
           )}
 
-          {!searchError && (relatedItems.length > 0 || !searchFetching) && (
+          {!searchError && (relatedContentItems.length > 0 || !searchFetching) && (
           <>
-          <div className="related-content-grid">
-            {relatedItems.map((item) => {
-              const resourceCardImage = item.image || defaultResourceCardImage;
-              const courseCardImage = item.image || defaultRelatedCardImage;
-              return (
-                <div key={item.id} className="related-content-card-cell">
-                  {item.isResource ? (
-                    <ResourceCardComponent
-                      id={item.id}
-                      title={item.title}
-                      type={(item.type === "Video" || item.type === "PDF" || item.type === "HTML" || item.type === "Epub" ? item.type : "PDF") as ResourceCardProps["type"]}
-                      image={resourceCardImage}
-                      heightClass="h-[392px]"
-                    />
-                  ) : (
-                    <CourseCard
-                      course={
-                        {
-                          id: item.id,
-                          title: item.title,
-                          image: courseCardImage,
-                          type: item.type,
-                          rating: item.rating ?? 0,
-                          learners: item.learners ?? "0",
-                          lessons: item.lessons ?? 0,
-                        } as ContentCourse
-                      }
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <RelatedContent
+            items={relatedContentItems}
+            cardType="collection"
+          />
 
           {/* Carousel Navigation - TODO: implement carousel when related content section is enhanced */}
           <div className="flex items-center justify-center gap-3 mt-8">
