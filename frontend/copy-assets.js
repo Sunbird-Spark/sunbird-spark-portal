@@ -45,7 +45,7 @@ const qumlFinalDest = path.join(publicRoot, 'assets/quml-player');
 // Collection Editor paths
 const collectionEditorWebComponentRoot = path.join(
     __dirname,
-    'node_modules/@yashash_sanketika/sunbird-collection-editor-web-component'
+    'node_modules/@project-sunbird/sunbird-collection-editor-web-component'
 );
 const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
 const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
