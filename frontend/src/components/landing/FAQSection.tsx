@@ -53,38 +53,38 @@ const FAQSection = () => {
             const langCode = currentCode || 'en';
             
             try {
-                // Build URL and fetch from blob storage
-                const faqJsonUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', langCode);
-                const response = await blobStorageService.fetchJson<FaqData>(faqJsonUrl);
+                // Build URLs for primary language and English fallback
+                const primaryUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', langCode);
+                const fallbackUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', 'en');
+                
+                // Fetch with automatic fallback (only if langCode is not 'en')
+                const response = langCode !== 'en'
+                    ? await blobStorageService.fetchJsonWithFallback<FaqData>(primaryUrl, fallbackUrl)
+                    : await blobStorageService.fetchJson<FaqData>(primaryUrl);
                 
                 // Read from the 'general' array which has title and description
                 if (response?.general && Array.isArray(response.general)) {
                     setFaqs(response.general);
+                } else {
+                    setFaqs([]);
                 }
             } catch (error) {
-                // Fallback to English
-                try {
-                    const fallbackUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', 'en');
-                    const response = await blobStorageService.fetchJson<FaqData>(fallbackUrl);
-                    
-                    if (response?.general && Array.isArray(response.general)) {
-                        setFaqs(response.general);
-                    }
-                } catch (fallbackError) {
-                    console.error("Failed to fetch FAQ data:", fallbackError);
-                }
+                console.error("Failed to fetch FAQ data:", error);
+                setFaqs([]);
             }
         };
 
         fetchFaqData();
     }, [faqUrl, currentCode, blobStorageService]);
 
-    // Sanitize FAQs
+    // Sanitize FAQs and filter out invalid entries
     const sanitizedFaqs = useMemo(() => {
-        return faqs.map(faq => ({
-            title: faq.title,
-            description: sanitizeHtml(faq.description),
-        }));
+        return faqs
+            .filter(faq => faq.title && faq.description) // Filter out FAQs with empty title or description
+            .map(faq => ({
+                title: faq.title,
+                description: sanitizeHtml(faq.description),
+            }));
     }, [faqs]);
 
     // Don't render the section if there are no FAQs

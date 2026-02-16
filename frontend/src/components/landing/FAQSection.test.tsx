@@ -7,13 +7,10 @@ import { BlobStorageService } from '@/services/BlobStorageService';
 // Mock dependencies
 vi.mock('@/services/SystemSettingService');
 vi.mock('@/services/BlobStorageService');
+
+const mockUseAppI18n = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
-  useAppI18n: () => ({
-    t: (key: string) => key,
-    currentCode: 'en',
-    changeLanguage: vi.fn(),
-    languages: [],
-  }),
+  useAppI18n: () => mockUseAppI18n(),
 }));
 
 describe('FAQSection', () => {
@@ -33,6 +30,13 @@ describe('FAQSection', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default mock for useAppI18n
+    mockUseAppI18n.mockReturnValue({
+      t: (key: string) => key,
+      currentCode: 'en',
+      changeLanguage: vi.fn(),
+      languages: [],
+    });
   });
 
   it('should render nothing when no FAQs are available', async () => {
@@ -112,6 +116,14 @@ describe('FAQSection', () => {
   });
 
   it('should fallback to English when language-specific FAQ is not available', async () => {
+    // Override the default 'en' language to test fallback behavior
+    mockUseAppI18n.mockReturnValue({
+      t: (key: string) => key,
+      currentCode: 'fr', // Use French to trigger fallback
+      changeLanguage: vi.fn(),
+      languages: [],
+    });
+
     vi.mocked(SystemSettingService.prototype.read).mockResolvedValue({
       data: { response: { value: mockFaqUrl } },
       status: 200,
@@ -119,13 +131,11 @@ describe('FAQSection', () => {
     });
 
     vi.mocked(BlobStorageService.prototype.buildLanguageUrl)
-      .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`)
+      .mockReturnValueOnce(`${mockFaqUrl}/faq-fr.json`)
       .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`);
 
-    // First call fails (language-specific), second succeeds (English fallback)
-    vi.mocked(BlobStorageService.prototype.fetchJson)
-      .mockRejectedValueOnce(new Error('404'))
-      .mockResolvedValueOnce(mockFaqData);
+    // Mock fetchJsonWithFallback to return data (simulating successful fallback)
+    vi.mocked(BlobStorageService.prototype.fetchJsonWithFallback).mockResolvedValue(mockFaqData);
 
     render(<FAQSection />);
 
@@ -133,8 +143,8 @@ describe('FAQSection', () => {
       expect(screen.getByText('Test Question 1')).toBeInTheDocument();
     });
 
-    // Verify fetchJson was called twice (once for language, once for fallback)
-    expect(BlobStorageService.prototype.fetchJson).toHaveBeenCalledTimes(2);
+    // Verify fetchJsonWithFallback was called
+    expect(BlobStorageService.prototype.fetchJsonWithFallback).toHaveBeenCalledTimes(1);
   });
 
   it('should handle API errors gracefully', async () => {
@@ -286,6 +296,14 @@ describe('FAQSection', () => {
   });
 
   it('should handle both language fetch and fallback failures', async () => {
+    // Override the default 'en' language to test fallback behavior
+    mockUseAppI18n.mockReturnValue({
+      t: (key: string) => key,
+      currentCode: 'fr', // Use French to trigger fallback
+      changeLanguage: vi.fn(),
+      languages: [],
+    });
+
     vi.mocked(SystemSettingService.prototype.read).mockResolvedValue({
       data: { response: { value: mockFaqUrl } },
       status: 200,
@@ -293,22 +311,97 @@ describe('FAQSection', () => {
     });
 
     vi.mocked(BlobStorageService.prototype.buildLanguageUrl)
-      .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`)
+      .mockReturnValueOnce(`${mockFaqUrl}/faq-fr.json`)
       .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`);
 
-    // Both language-specific and English fallback fail
-    vi.mocked(BlobStorageService.prototype.fetchJson)
-      .mockRejectedValueOnce(new Error('404'))
-      .mockRejectedValueOnce(new Error('404'));
+    // Mock fetchJsonWithFallback to return null (both primary and fallback failed)
+    vi.mocked(BlobStorageService.prototype.fetchJsonWithFallback).mockResolvedValue(null);
 
     const { container } = render(<FAQSection />);
 
     await waitFor(() => {
-      // Verify fetchJson was called twice (once for language, once for fallback)
-      expect(BlobStorageService.prototype.fetchJson).toHaveBeenCalledTimes(2);
+      // Verify fetchJsonWithFallback was called
+      expect(BlobStorageService.prototype.fetchJsonWithFallback).toHaveBeenCalledTimes(1);
     });
 
     // Component should render nothing when both fail
     expect(container.firstChild).toBeNull();
+  });
+
+  it('should filter out FAQs with empty descriptions', async () => {
+    const dataWithEmptyDescription = {
+      general: [
+        {
+          title: 'Valid Question',
+          description: 'Valid answer',
+        },
+        {
+          title: 'Empty Description Question',
+          description: '',
+        },
+        {
+          title: 'Another Valid Question',
+          description: 'Another valid answer',
+        },
+      ],
+    };
+
+    vi.mocked(SystemSettingService.prototype.read).mockResolvedValue({
+      data: { response: { value: mockFaqUrl } },
+      status: 200,
+      headers: {},
+    });
+
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    // Since currentCode is 'en', it will use fetchJson (not fetchJsonWithFallback)
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(dataWithEmptyDescription);
+
+    render(<FAQSection />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Valid Question')).toBeInTheDocument();
+      expect(screen.getByText('Another Valid Question')).toBeInTheDocument();
+      expect(screen.queryByText('Empty Description Question')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should filter out FAQs with empty titles', async () => {
+    const dataWithEmptyTitle = {
+      general: [
+        {
+          title: 'Valid Question',
+          description: 'Valid answer',
+        },
+        {
+          title: '',
+          description: 'This has no title',
+        },
+      ],
+    };
+
+    vi.mocked(SystemSettingService.prototype.read).mockResolvedValue({
+      data: { response: { value: mockFaqUrl } },
+      status: 200,
+      headers: {},
+    });
+
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    // Since currentCode is 'en', it will use fetchJson (not fetchJsonWithFallback)
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(dataWithEmptyTitle);
+
+    render(<FAQSection />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Valid Question')).toBeInTheDocument();
+      // Should only render 1 FAQ item
+      const accordionItems = screen.getAllByRole('button');
+      expect(accordionItems).toHaveLength(1);
+    });
   });
 });
