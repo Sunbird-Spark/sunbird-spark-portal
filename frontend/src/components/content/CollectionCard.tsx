@@ -7,7 +7,7 @@ interface ContentCardProps {
   item: ContentSearchItem;
 }
 
-const ContentCard = ({ item }: ContentCardProps) => {
+const CollectionCard = ({ item }: ContentCardProps) => {
   return (
     <Link to={`/content/${item.identifier}`} className="related-resource-card-link">
       <div className="group related-resource-card-container">
@@ -52,4 +52,4 @@ const ContentCard = ({ item }: ContentCardProps) => {
   );
 };
 
-export default ContentCard;
+export default CollectionCard;

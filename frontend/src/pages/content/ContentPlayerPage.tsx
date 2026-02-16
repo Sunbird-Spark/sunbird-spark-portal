@@ -3,13 +3,11 @@ import { FiArrowLeft, FiStar, FiShare2 } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
-import ContentCard from "@/components/content/ContentCard";
+import CollectionCard from "@/components/content/CollectionCard";
 import ResourceCard from "@/components/content/ResourceCard";
-import PopularContent from "@/components/landing/PopularContent";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
-import { ContentData } from "@/types/contentTypes";
 
 const ContentPlayerPage = () => {
   const { contentId } = useParams();
@@ -77,7 +75,7 @@ const ContentPlayerPage = () => {
         </div>
 
         {/* Stats Row */}
-        <div className="content-player-stats-row">
+        {/* <div className="content-player-stats-row">
           <span className="content-player-rating-container">
             4.5
             <FiStar className="content-player-star-icon" />
@@ -88,7 +86,7 @@ const ContentPlayerPage = () => {
             <FiShare2 className="content-player-share-icon" />
             Share
           </button>
-        </div>
+        </div> */}
 
         {/* Content Player */}
         <div className="content-player-video-container">
@@ -143,7 +141,7 @@ const ContentPlayerPage = () => {
                     // Filter out the current content from related results
                     if (item.identifier === contentId) return null;
                     
-                    return <ContentCard key={item.identifier} item={item} />;
+                    return <CollectionCard key={item.identifier} item={item} />;
                   }).filter(Boolean)}
                 </div>
               );
