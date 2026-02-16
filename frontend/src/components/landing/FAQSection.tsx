@@ -16,34 +16,10 @@ interface FAQ {
     description: string;
 }
 
-const DEFAULT_FAQS: FAQ[] = [
-    {
-        title: "What kind of courses are available on this platform?",
-        description: "Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.",
-    },
-    {
-        title: "What if I need help during the course?",
-        description: "Our dedicated support team is available 24/7 to assist you. You can reach out through our help center, community forums, or contact us directly via email.",
-    },
-    {
-        title: "Are the courses accredited or do they offer certification?",
-        description: "Yes, many of our courses offer industry-recognized certifications upon completion. Check each course page for specific certification details.",
-    },
-    {
-        title: "Can I learn in offline mode?",
-        description: "Absolutely! Our mobile app allows you to download course content and learn offline at your convenience.",
-    },
-    {
-        title: "Who are the trainers?",
-        description: "Our trainers are industry experts with years of practical experience and are carefully vetted.",
-    },
-];
-
 const FAQSection = () => {
     const { t, currentCode } = useAppI18n();
     const [faqUrl, setFaqUrl] = useState<string>("");
     const [faqs, setFaqs] = useState<FAQ[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
 
     // Fetch FAQ base URL from API
     useEffect(() => {
@@ -69,7 +45,6 @@ const FAQSection = () => {
         if (!faqUrl) return;
 
         const fetchFaqData = async () => {
-            setIsLoading(true);
             const langCode = currentCode || 'en';
             
             try {
@@ -94,8 +69,6 @@ const FAQSection = () => {
                     console.error("Failed to fetch FAQ data:", fallbackError);
                     // Keep default FAQs
                 }
-            } finally {
-                setIsLoading(false);
             }
         };
 
