@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
-import PageLoader from '../components/common/PageLoader';
 import ExploreFilters from '../components/explore/ExploreFilters';
 import ExploreGrid from '../components/explore/ExploreGrid';
 import { FiChevronDown, FiSearch } from 'react-icons/fi';
