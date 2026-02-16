@@ -21,7 +21,6 @@
   background-color: hsl(var(--sunbird-brick) / 0.85);
 }
 
-/* Related content: equal columns and uniform gap between all cards */
 .related-content-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -48,7 +47,6 @@
   align-items: stretch;
 }
 
-/* Fixed card size: 370px × 392px, same for all cards */
 .related-content-grid .related-content-card-cell > a {
   width: 370px;
   max-width: 370px;

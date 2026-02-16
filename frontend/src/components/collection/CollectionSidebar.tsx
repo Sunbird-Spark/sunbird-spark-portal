@@ -5,7 +5,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/collapsible"
+} from "./collapsible"
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
 import type { Module } from "@/types/collectionTypes"
 
