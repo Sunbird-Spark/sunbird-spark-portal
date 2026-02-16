@@ -1,17 +1,17 @@
 import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { ContentData } from "@/types/contentTypes";
+import { ContentSearchItem } from "@/types/workspaceTypes";
 
 interface ResourceCardProps {
-  item: ContentData;
+  item: ContentSearchItem;
 }
 
 const ResourceCard = ({ item }: ResourceCardProps) => {
   const { t } = useAppI18n();
 
-  const getViewLabel = (item: ContentData) => {
-    switch (item.mimeType) {
+  const getViewLabel = (mimeType?: string) => {
+    switch (mimeType) {
       case "video/x-youtube":
       case "video/webm":
       case "video/mp4":
@@ -32,27 +32,23 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
       <div className="resource-card-container">
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">
-          <img
-            src={item.previewUrl || ''}
-            alt={item.name}
-            className="resource-card-image"
-          />
+          <div className="resource-card-image bg-black" />
         </div>
 
         {/* Top-left Badge */}
         <div className="resource-card-badge-wrapper">
           <span className="resource-card-badge">
-            {getViewLabel(item)}
+            {getViewLabel(item.mimeType)}
           </span>
         </div>
 
         {/* Bottom Content */}
         <div className="resource-card-content">
           <h3 className="resource-card-title">
-            {item.name}
+            {item.name || 'Untitled'}
           </h3>
           <div className="resource-card-action">
-            {getViewLabel(item)}
+            {getViewLabel(item.mimeType)}
             <FiArrowRight className="resource-card-arrow" />
           </div>
         </div>

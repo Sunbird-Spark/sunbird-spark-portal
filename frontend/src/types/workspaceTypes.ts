@@ -90,6 +90,7 @@ export interface ContentSearchItem {
   lastUpdatedOn?: string;
   creator?: string;
   createdBy?: string;
+  mimeType?: string;
 }
 
 export interface ContentSearchResponse {

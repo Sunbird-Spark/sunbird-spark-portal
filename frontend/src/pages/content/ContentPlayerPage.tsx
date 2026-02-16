@@ -5,7 +5,6 @@ import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import ContentCard from "@/components/content/ContentCard";
 import ResourceCard from "@/components/content/ResourceCard";
-import ResourceCenter from "@/components/landing/ResourceCenter";
 import PopularContent from "@/components/landing/PopularContent";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
@@ -133,46 +132,21 @@ const ContentPlayerPage = () => {
                     // Filter out the current content from related results
                     if (item.identifier === contentId) return null;
                     
-                    // Convert ContentSearchItem to ContentData format
-                    const contentItem: ContentData = {
-                      identifier: item.identifier,
-                      name: item.name || '',
-                      primaryCategory: item.objectType || 'content',
-                      previewUrl: item.posterImage || item.thumbnail || '',
-                      mediaType: 'content',
-                      language: [],
-                      mimeType: contentData?.mimeType || '',
-                      objectType: item.objectType || 'content',
-                      contentType: 'content',
-                      audience: [],
-                      visibility: 'Default',
-                      languageCode: [],
-                      version: 1,
-                      license: 'CC BY 4.0',
-                      size: 0,
-                      status: item.status || 'Live',
-                      code: '',
-                      createdOn: item.createdOn || '',
-                      lastUpdatedOn: item.lastUpdatedOn || '',
-                      lastStatusChangedOn: item.lastUpdatedOn || '',
-                      createdFor: [],
-                      creator: item.creator || '',
-                      os: [],
-                      pkgVersion: 1,
-                      versionKey: '',
-                      framework: '',
-                      createdBy: item.createdBy || '',
-                      compatibilityLevel: 1,
-                      ownershipType: [],
-                      channel: ''
-                    };
-                    
-                    return <ResourceCard key={item.identifier} item={contentItem} />;
+                    return <ResourceCard key={item.identifier} item={item} />;
                   }).filter(Boolean)}
                 </div>
               );
             } else {
-              return <PopularContent />;
+              return (
+                <div className="content-player-related-grid">
+                  {relatedContentData?.data?.content?.slice(0, 3).map((item) => {
+                    // Filter out the current content from related results
+                    if (item.identifier === contentId) return null;
+                    
+                    return <ContentCard key={item.identifier} item={item} />;
+                  }).filter(Boolean)}
+                </div>
+              );
             }
           })()}
         </section>
