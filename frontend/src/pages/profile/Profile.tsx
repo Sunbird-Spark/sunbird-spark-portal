@@ -18,6 +18,7 @@ import PersonalInformation from "@/components/profile/PersonalInformation";
 import ProfileLearningList from "@/components/profile/ProfileLearningList";
 import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserRead } from "@/hooks/useUserRead";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
@@ -27,23 +28,22 @@ const Profile = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
-    const [isLoading, setIsLoading] = useState(true);
     const [activeNav, setActiveNav] = useState("profile");
     const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+
+    const { data: userResponse, isLoading, isError } = useUserRead();
+    const userData = userResponse?.data?.response;
 
     useEffect(() => {
         setIsSidebarOpen(!isMobile);
     }, [isMobile]);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 600);
-        return () => clearTimeout(timer);
-    }, []);
-
     if (isLoading) {
         return <PageLoader message="Loading your profile..." />;
+    }
+
+    if (isError || !userData) {
+        return <PageLoader message="Error loading profile..." />;
     }
 
     return (
@@ -182,12 +182,12 @@ const Profile = () => {
                 <main className="profile-main-content">
                     <div className="profile-content-wrapper">
                         {/* Top Section: Profile Card + Personal Information */}
-                        <div className="grid grid-cols-1 lg:grid-cols-[23.3125rem_1fr] gap-6 mb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-[19rem_1fr] gap-6 mb-8">
                             {/* Left: Profile Card */}
-                            <ProfileCard />
+                            <ProfileCard user={userData} />
 
                             {/* Right: Personal Information */}
-                            <PersonalInformation />
+                            <PersonalInformation user={userData} />
                         </div>
 
                         {/* Stats Cards Section */}

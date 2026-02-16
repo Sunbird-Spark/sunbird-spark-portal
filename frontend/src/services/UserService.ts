@@ -1,6 +1,7 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 import _ from 'lodash';
 import { SignupRequest, SignupResponse } from '../types/signupTypes'
+import { UserReadResponse } from '../types/userTypes';
 
 export class UserService {
     public async searchUser(
@@ -91,6 +92,14 @@ export class UserService {
             `/user/v2/signup`,
             requestBody,
             headers
+        );
+    }
+
+    public async userRead(
+        id: string
+    ): Promise<ApiResponse<UserReadResponse>> {
+        return getClient().get<UserReadResponse>(
+            `/user/v5/read/${id}`
         );
     }
 }

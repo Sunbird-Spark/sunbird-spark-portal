@@ -67,6 +67,20 @@ class AppCoreService {
         return getStorageItem('deviceId') !== null;
     }
 
+    async getPData(): Promise<{ id: string; ver: string; pid: string }> {
+        const response = await getClient().get<{
+            appId: string;
+            version: string;
+            buildHash: string;
+        }>('/app/v1/info');
+        const data = response.data;
+
+        return {
+            id: data?.appId || "",
+            ver: data?.version || "",
+            pid: data?.appId || "",
+        };
+    }
 
     async initialize(): Promise<void> {
         try {

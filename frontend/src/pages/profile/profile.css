@@ -115,15 +115,15 @@
 
 /* Profile Card */
 .profile-card {
-    @apply bg-white rounded-[1.25rem] p-6 flex flex-col items-center;
+    @apply bg-white rounded-[1.25rem] p-4 flex flex-col items-center;
 }
 
 .profile-avatar-wrapper {
-    @apply relative mb-3;
+    @apply relative mb-8;
 }
 
 .profile-avatar-ring {
-    @apply w-[11.9375rem] h-[11.9375rem] rounded-full border-4 border-sunbird-ginger p-0.5 flex items-center justify-center overflow-hidden;
+    @apply w-[9rem] h-[9rem] rounded-full border-4 border-sunbird-ginger p-0.5 flex items-center justify-center overflow-hidden;
 }
 
 .profile-update-photo-btn {
@@ -143,7 +143,7 @@
 
 /* Personal Information */
 .personal-info-card {
-    @apply bg-white rounded-[1.25rem] p-6;
+    @apply bg-white rounded-[1.25rem] p-4;
 }
 
 .personal-info-header {
@@ -155,7 +155,7 @@
 }
 
 .personal-info-accent {
-    @apply absolute -left-6 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-ginger hidden md:block;
+    @apply absolute -left-4 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-ginger hidden md:block;
 }
 
 .personal-info-title {
@@ -181,7 +181,7 @@
 }
 
 .personal-info-value-container {
-    @apply border border-border rounded-lg px-4 py-2.5 h-10 flex items-center;
+    @apply border border-border rounded-[10px] px-4 py-2.5 h-10 flex items-center;
 }
 
 .personal-info-value {

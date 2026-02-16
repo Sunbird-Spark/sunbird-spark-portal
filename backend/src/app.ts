@@ -30,7 +30,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.get('/health', checkHealth);
-app.get('/app/v1/info', getAppInfo);
+app.get('/portal/app/v1/info', getAppInfo);
 
 
 // Portal Anonymous Routes
