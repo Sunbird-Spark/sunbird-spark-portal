@@ -78,6 +78,10 @@ export class EpubPlayerService {
       objectRollup: contextProps?.objectRollup || {},
       host: '',
       endpoint: '',
+      userData: {
+        firstName: 'Guest',
+        lastName: '',
+      }
     };
 
     const finalConfig = {

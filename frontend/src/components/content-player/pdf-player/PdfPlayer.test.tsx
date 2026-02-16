@@ -68,7 +68,7 @@ describe('PdfPlayer Component', () => {
     const { container } = render(<PdfPlayer metadata={mockMetadata} />);
     const div = container.querySelector('div');
     expect(div).toBeInTheDocument();
-    expect(div).toHaveClass('w-full', 'h-full', 'min-h-[600px]', 'relative');
+    expect(div).toHaveClass('w-full', 'h-full', 'min-h-[37.5rem]', 'relative');
   });
 
   it('should initialize player with metadata', async () => {
