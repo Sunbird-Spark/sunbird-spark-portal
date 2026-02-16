@@ -22,7 +22,7 @@ export interface EcmlPlayerMetadata {
 export interface EcmlPlayerConfig {
   context: {
     mode: string;
-    sid: string;
+    sid: string | null;
     did: string;
     uid: string;
     channel: string;
