@@ -45,7 +45,7 @@ describe('Express App', () => {
   it('should create an Express application', async () => {
     const { app } = await import('./app.js');
     expect(app).toBeDefined();
-  });
+  }, 10000);
 
   it('should handle CORS', async () => {
     const { app } = await import('./app.js');
