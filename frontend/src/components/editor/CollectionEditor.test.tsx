@@ -13,6 +13,7 @@ vi.mock('../../services/editors/collection-editor', () => {
 
   return {
     CollectionEditorService: MockCollectionEditorService,
+    CollectionEditorContextProps: {},
   };
 });
 
@@ -23,7 +24,11 @@ describe('CollectionEditor component', () => {
 
   it('initializes editor with identifier', async () => {
     const { container } = render(
-      <CollectionEditor identifier="do_123" metadata={{ identifier: 'do_123' }} />
+      <CollectionEditor 
+        identifier="do_123" 
+        metadata={{ identifier: 'do_123' }} 
+        contextProps={{ mode: 'edit' }}
+      />
     );
 
     await waitFor(() => {
