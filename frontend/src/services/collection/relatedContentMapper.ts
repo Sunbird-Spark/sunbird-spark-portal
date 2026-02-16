@@ -24,7 +24,7 @@ function displayTypeFromItem(item: RelatedContentSearchItem): string {
   if (resourceType === 'collection' || category === 'content playlist') return 'Collection';
 
   if (category.includes('resource') || resourceType === 'learn' || resourceType === 'teach') {
-    return mime.startsWith('video/') ? 'Video' : mime === 'application/pdf' ? 'PDF' : 'PDF';
+    return 'PDF';
   }
   return 'Course';
 }

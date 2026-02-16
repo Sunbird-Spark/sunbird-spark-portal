@@ -33,7 +33,11 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
             )}
 
             {/* Play Button */}
-            <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg z-20">
+            <button
+              type="button"
+              aria-label={t("button.playVideo")}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg z-20"
+            >
               <FiPlay className="w-6 h-6 text-sunbird-brick ml-1" fill="currentColor" />
             </button>
           </div>

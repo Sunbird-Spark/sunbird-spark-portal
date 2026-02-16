@@ -170,7 +170,10 @@
   "button": {
     "login": "Login",
     "goBack": "Go Back",
-    "share": "Share"
+    "share": "Share",
+    "playVideo": "Play video",
+    "previous": "Previous",
+    "next": "Next"
   },
   "hero": {
     "title": "Knowledge that moves you forward.",

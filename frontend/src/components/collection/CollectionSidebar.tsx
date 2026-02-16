@@ -36,14 +36,14 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
             onOpenChange={() => toggleModule(module.id)}
           >
             <div className={`bg-white rounded-xl border transition-all duration-300 overflow-hidden ${containsActiveLesson && !isExpanded
-              ? 'border-[#A85236] shadow-[0_0_12px_rgba(168,82,54,0.1)]'
+              ? 'border-sunbird-brick shadow-[0_0_12px_hsl(var(--sunbird-brick)/0.1)]'
               : 'border-gray-100'
               }`}>
               <CollapsibleTrigger asChild>
                 <button className={`w-full p-4 flex items-start justify-between text-left hover:bg-gray-50 transition-colors ${containsActiveLesson && !isExpanded ? 'bg-orange-50/30' : ''
                   }`}>
                   <div className="flex-1 pr-4">
-                    <h3 className={`font-bold text-lg mb-1 transition-colors ${containsActiveLesson && !isExpanded ? 'text-[#A85236]' : 'text-foreground'
+                    <h3 className={`font-bold text-lg mb-1 transition-colors ${containsActiveLesson && !isExpanded ? 'text-sunbird-brick' : 'text-foreground'
                       }`}>
                       {module.title}
                     </h3>
@@ -52,9 +52,9 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
                     </p>
                   </div>
                   {isExpanded ? (
-                    <FiChevronUp className="w-5 h-5 text-[#B94A2C] flex-shrink-0 mt-0.5" />
+                    <FiChevronUp className="w-5 h-5 text-sunbird-brick flex-shrink-0 mt-0.5" />
                   ) : (
-                    <FiChevronDown className="w-5 h-5 text-[#B94A2C] flex-shrink-0 mt-0.5" />
+                    <FiChevronDown className="w-5 h-5 text-sunbird-brick flex-shrink-0 mt-0.5" />
                   )}
                 </button>
               </CollapsibleTrigger>
@@ -73,8 +73,8 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
                         }
                         onClick={() => setActiveLessonId(lesson.id)}
                         className={`flex items-center gap-3 rounded-[10px] px-4 py-3 hover:bg-gray-200 transition-colors w-full h-[70px] ${isActive
-                          ? 'border border-[#A85236] bg-[#FFFFFF] shadow-[0_1px_14px_#0000001A] opacity-100'
-                          : 'border border-transparent bg-[#FFFFFF] shadow-[0_1px_14px_#0000001A] opacity-90'
+                          ? 'border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100'
+                          : 'border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-90'
                           }`}
                       >
                         {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}

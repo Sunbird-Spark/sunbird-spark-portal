@@ -122,7 +122,12 @@ const CollectionDetailPage = () => {
           <span>{collectionData.learners} {t("contentStats.learners")}</span>
           <span className="text-gray-300">•</span>
           <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
-          <button className="flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity">
+          <button
+            type="button"
+            aria-label={t("button.share")}
+            className="flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity"
+            onClick={() => { /* TODO: implement share */ }}
+          >
             <FiShare2 className="w-4 h-4" />
             {t("button.share")}
           </button>
@@ -204,16 +209,26 @@ const CollectionDetailPage = () => {
             })}
           </div>
 
-          {/* Carousel Navigation */}
+          {/* Carousel Navigation - TODO: implement carousel when related content section is enhanced */}
           <div className="flex items-center justify-center gap-3 mt-8">
-            <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors">
+            <button
+              type="button"
+              aria-label={t("button.previous")}
+              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors"
+              onClick={() => { /* TODO: implement carousel previous */ }}
+            >
               <FiArrowLeft className="w-4 h-4 text-gray-500" />
             </button>
             <div className="flex items-center gap-2">
               <div className="w-6 h-1 bg-gray-800 rounded-full" />
               <div className="w-6 h-1 bg-gray-300 rounded-full" />
             </div>
-            <button className="w-8 h-8 rounded-full bg-sunbird-brick flex items-center justify-center hover:bg-sunbird-brick/90 transition-colors">
+            <button
+              type="button"
+              aria-label={t("button.next")}
+              className="w-8 h-8 rounded-full bg-sunbird-brick flex items-center justify-center hover:bg-sunbird-brick/90 transition-colors"
+              onClick={() => { /* TODO: implement carousel next */ }}
+            >
               <FiArrowRight className="w-4 h-4 text-white" />
             </button>
           </div>

@@ -48,18 +48,18 @@
 }
 
 .related-content-grid .related-content-card-cell > a {
-  width: 370px;
+  width: 100%;
   max-width: 370px;
-  min-width: 370px;
+  min-width: 0;
   height: 392px;
   margin: 0;
   display: block;
 }
 
 .related-content-grid .related-content-card-cell > a > div {
-  width: 370px;
-  max-width: 370px;
-  min-width: 370px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 392px;
   margin: 0;
   box-sizing: border-box;

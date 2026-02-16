@@ -154,7 +154,10 @@
   "button": {
     "login": "Entrar",
     "goBack": "Voltar",
-    "share": "Compartilhar"
+    "share": "Compartilhar",
+    "playVideo": "Reproduzir vídeo",
+    "previous": "Anterior",
+    "next": "Próximo"
   },
   "hero": {
     "title": "Conhecimento que te move para frente.",
