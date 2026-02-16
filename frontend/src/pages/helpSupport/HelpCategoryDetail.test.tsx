@@ -70,7 +70,7 @@ describe('HelpCategoryDetail', () => {
 
         await waitForLoading();
 
-        expect(screen.getByText("Login FAQ's")).toBeInTheDocument();
+        expect(screen.getByText("Login FAQs")).toBeInTheDocument();
         expect(screen.getByText('Go Back')).toBeInTheDocument();
     });
 

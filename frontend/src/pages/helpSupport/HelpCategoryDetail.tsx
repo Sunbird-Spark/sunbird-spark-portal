@@ -39,15 +39,41 @@ const HelpCategoryDetail = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    const category = (categoryFaqs[categoryId || ""] || categoryFaqs["course-certificates"])!;
+    const resolvedCategory = categoryFaqs[categoryId || ""];
+    if (!resolvedCategory && categoryId) {
+        console.warn(
+            `HelpCategoryDetail: Invalid categoryId "${categoryId}" provided, falling back to "course-certificates".`
+        );
+    }
+    const category = (resolvedCategory || categoryFaqs["course-certificates"])!;
 
     const handleFeedback = (index: number, value: "yes" | "no") => {
         setFeedback((prev) => ({ ...prev, [index]: value }));
     };
 
-    const handleSubmitFeedback = (index: number) => {
-        setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
-        setFeedbackText((prev) => ({ ...prev, [index]: "" }));
+    const handleSubmitFeedback = async (index: number) => {
+        const wasHelpful = feedback[index] === "yes";
+        const text = feedbackText[index] ?? "";
+
+        try {
+            await fetch("/api/help-support/feedback", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    categoryId,
+                    questionIndex: index,
+                    wasHelpful,
+                    feedbackText: text,
+                }),
+            });
+        } catch (error) {
+            console.error("Failed to submit help category feedback", error);
+        } finally {
+            setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
+            setFeedbackText((prev) => ({ ...prev, [index]: "" }));
+        }
     };
 
     if (isLoading) return <PageLoader message="Loading..." />;
@@ -137,6 +163,8 @@ const HelpCategoryDetail = () => {
                                                         value={feedbackText[index] || ""}
                                                         onChange={(e) => setFeedbackText((prev) => ({ ...prev, [index]: e.target.value }))}
                                                         className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-['Rubik'] resize-none h-[5rem] focus:outline-none focus:border-sunbird-brick"
+                                                        aria-label="Additional feedback about this answer"
+                                                        aria-required="true"
                                                     />
                                                     <div className="flex justify-end">
                                                         <button
