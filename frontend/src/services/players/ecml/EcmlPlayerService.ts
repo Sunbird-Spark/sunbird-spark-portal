@@ -12,7 +12,7 @@ export class EcmlPlayerService {
     metadata: EcmlPlayerMetadata,
     contextProps?: EcmlPlayerContextProps
   ) {
-    const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
+    const sid = userAuthInfoService.getSessionId();
     const uid = userAuthInfoService.getUserId() || 'anonymous';
 
     let did = '';
@@ -57,8 +57,8 @@ export class EcmlPlayerService {
       cdata: contextProps?.cdata || [],
       timeDiff: 0,
       objectRollup: contextProps?.objectRollup || {},
-      host: window.location.origin,
-      endpoint: '/data/v1/telemetry',
+      host: '',
+      endpoint: '/portal/data/v1/telemetry',
       dims: tags,
       app: [channel],
       userData: {

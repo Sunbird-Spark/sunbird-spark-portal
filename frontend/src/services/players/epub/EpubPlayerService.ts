@@ -27,7 +27,7 @@ export class EpubPlayerService {
     contextProps?: EpubPlayerContextProps
   ): Promise<EpubPlayerConfig> {
     // Get session and user info from auth service
-    const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
+    const sid = userAuthInfoService.getSessionId()
     const uid = userAuthInfoService.getUserId() || 'anonymous';
     
     // Get device ID from AppCoreService (backend) with fallback
