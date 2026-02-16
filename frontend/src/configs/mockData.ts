@@ -9,7 +9,7 @@ import {
   FiTrendingUp
 } from "react-icons/fi";
 import type { Category } from "@/components/home/CategoryCard";
-import { ContentSearchItem } from "@/types/workspaceTypes";
+import type { ContentSearchItem } from "@/types/workspaceTypes";
 
 export const categories: Category[] = [
   {
