@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiEdit } from "react-icons/fi";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FiHome, FiUser, FiLogOut, FiEdit, FiSettings } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 
 interface HomeSidebarProps {
@@ -42,11 +42,21 @@ const mainNavItems = [
 
 const bottomNavItems = [
     { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help-support" },
+    { id: "settings", label: "Account Settings", icon: FiSettings, path: "/settings" },
     { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
 const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Hide Account Settings on Help & Support pages
+    const filteredBottomNavItems = bottomNavItems.filter(item => {
+        if (location.pathname.startsWith('/help-support') && item.id === 'settings') {
+            return false;
+        }
+        return true;
+    });
 
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
@@ -103,7 +113,7 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
                 {renderNavList(mainNavItems)}
 
                 {/* Bottom Nav (Bottom) */}
-                {renderNavList(bottomNavItems)}
+                {renderNavList(filteredBottomNavItems)}
             </nav>
         </aside>
     );

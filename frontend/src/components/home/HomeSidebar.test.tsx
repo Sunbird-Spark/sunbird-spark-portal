@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import HomeSidebar from './HomeSidebar';
 
 // Mock useNavigate
@@ -95,5 +95,15 @@ describe('HomeSidebar', () => {
 
         const inactiveHomeIcon = screen.getByText('Home').previousSibling;
         expect(inactiveHomeIcon).toHaveClass('text-sunbird-ginger');
+    });
+    it('hides Account Settings when on help-support route', () => {
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HomeSidebar {...defaultProps} />
+            </MemoryRouter>
+        );
+
+        expect(screen.queryByText('Account Settings')).not.toBeInTheDocument();
+        expect(screen.getByText('Help and Support')).toBeInTheDocument();
     });
 });
