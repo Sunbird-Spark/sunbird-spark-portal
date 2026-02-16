@@ -118,21 +118,9 @@ const FAQSection = () => {
     return (
         <section className="bg-white pt-8 pb-8 lg:pt-[3.75rem] lg:pb-[3.75rem]">
             <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground">
-                        {t("faq.title")}
-                    </h2>
-                    {faqUrl && (
-                        <a 
-                            href={faqUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sunbird-brick hover:underline font-rubik text-sm"
-                        >
-                            View more FAQs
-                        </a>
-                    )}
-                </div>
+                <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal mb-6 text-foreground">
+                    {t("faq.title")}
+                </h2>
 
                 <div className="grid lg:grid-cols-[1fr_auto] gap-10">
                     <Accordion
