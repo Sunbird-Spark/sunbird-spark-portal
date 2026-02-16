@@ -10,13 +10,20 @@ interface ResourceCardProps {
 const ResourceCard = ({ item }: ResourceCardProps) => {
   const { t } = useAppI18n();
 
-  const getViewLabel = (type: string) => {
-    switch (type) {
-      case "Video": return t("resource.viewVideo", { defaultValue: "View Video" });
-      case "PDF": return t("resource.viewPdf", { defaultValue: "View PDF" });
-      case "HTML": return t("resource.viewHtml", { defaultValue: "View HTML" });
-      case "Epub": return t("resource.viewEpub", { defaultValue: "View Epub" });
-      default: return t("view", { defaultValue: "View" });
+  const getViewLabel = (item: ContentData) => {
+    switch (item.mimeType) {
+      case "video/x-youtube":
+      case "video/webm":
+      case "video/mp4":
+        return t("resource.videoBadge", { defaultValue: "Video" });
+      case "application/pdf":
+        return t("resource.pdfBadge", { defaultValue: "PDF" });
+      case "application/vnd.ekstep.html-archive":
+        return t("resource.htmlBadge", { defaultValue: "HTML" });
+      case "application/epub":
+        return t("resource.epubBadge", { defaultValue: "EPUB" });
+      default: 
+        return t("view", { defaultValue: "View" });
     }
   };
 
@@ -35,7 +42,7 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
         {/* Top-left Badge */}
         <div className="resource-card-badge-wrapper">
           <span className="resource-card-badge">
-            {item.primaryCategory}
+            {getViewLabel(item)}
           </span>
         </div>
 
@@ -45,7 +52,7 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
             {item.name}
           </h3>
           <div className="resource-card-action">
-            {getViewLabel(item.primaryCategory)}
+            {getViewLabel(item)}
             <FiArrowRight className="resource-card-arrow" />
           </div>
         </div>

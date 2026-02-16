@@ -5,6 +5,8 @@ import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import ContentCard from "@/components/content/ContentCard";
 import ResourceCard from "@/components/content/ResourceCard";
+import ResourceCenter from "@/components/landing/ResourceCenter";
+import PopularContent from "@/components/landing/PopularContent";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
@@ -109,48 +111,70 @@ const ContentPlayerPage = () => {
             <h2 className="content-player-related-title">Related Content</h2>
           </div>
 
-          <div className="content-player-related-grid">
-            {relatedContentData?.data?.content?.slice(0, 3).map((item) => {
-              // Filter out the current content from related results
-              if (item.identifier === contentId) return null;
-              
-              // Convert ContentSearchItem to ContentData format
-              const contentItem: ContentData = {
-                identifier: item.identifier,
-                name: item.name || '',
-                primaryCategory: item.objectType || 'content',
-                previewUrl: item.posterImage || item.thumbnail || '',
-                mediaType: 'content',
-                language: [],
-                mimeType: contentData?.mimeType || '',
-                objectType: item.objectType || 'content',
-                contentType: 'content',
-                audience: [],
-                visibility: 'Default',
-                languageCode: [],
-                version: 1,
-                license: 'CC BY 4.0',
-                size: 0,
-                status: item.status || 'Live',
-                code: '',
-                createdOn: item.createdOn || '',
-                lastUpdatedOn: item.lastUpdatedOn || '',
-                lastStatusChangedOn: item.lastUpdatedOn || '',
-                createdFor: [],
-                creator: item.creator || '',
-                os: [],
-                pkgVersion: 1,
-                versionKey: '',
-                framework: '',
-                createdBy: item.createdBy || '',
-                compatibilityLevel: 1,
-                ownershipType: [],
-                channel: ''
-              };
-              
-              return <ContentCard key={item.identifier} item={contentItem} />;
-            }).filter(Boolean)}
-          </div>
+          {(() => {
+            // Define mimeTypes that should use ResourceCenter
+            const resourceCenterMimeTypes = [
+              "application/epub",
+              "video/x-youtube", 
+              "video/webm",
+              "video/mp4",
+              "application/pdf",
+              "application/vnd.ekstep.ecml-archive"
+            ];
+
+            // Check if current content mimeType should use ResourceCenter
+            const shouldUseResourceCenter = contentData?.mimeType && 
+              resourceCenterMimeTypes.includes(contentData.mimeType);
+
+            if (shouldUseResourceCenter) {
+              return (
+                <div className="content-player-related-grid">
+                  {relatedContentData?.data?.content?.slice(0, 3).map((item) => {
+                    // Filter out the current content from related results
+                    if (item.identifier === contentId) return null;
+                    
+                    // Convert ContentSearchItem to ContentData format
+                    const contentItem: ContentData = {
+                      identifier: item.identifier,
+                      name: item.name || '',
+                      primaryCategory: item.objectType || 'content',
+                      previewUrl: item.posterImage || item.thumbnail || '',
+                      mediaType: 'content',
+                      language: [],
+                      mimeType: contentData?.mimeType || '',
+                      objectType: item.objectType || 'content',
+                      contentType: 'content',
+                      audience: [],
+                      visibility: 'Default',
+                      languageCode: [],
+                      version: 1,
+                      license: 'CC BY 4.0',
+                      size: 0,
+                      status: item.status || 'Live',
+                      code: '',
+                      createdOn: item.createdOn || '',
+                      lastUpdatedOn: item.lastUpdatedOn || '',
+                      lastStatusChangedOn: item.lastUpdatedOn || '',
+                      createdFor: [],
+                      creator: item.creator || '',
+                      os: [],
+                      pkgVersion: 1,
+                      versionKey: '',
+                      framework: '',
+                      createdBy: item.createdBy || '',
+                      compatibilityLevel: 1,
+                      ownershipType: [],
+                      channel: ''
+                    };
+                    
+                    return <ResourceCard key={item.identifier} item={contentItem} />;
+                  }).filter(Boolean)}
+                </div>
+              );
+            } else {
+              return <PopularContent />;
+            }
+          })()}
         </section>
       </main>
 
