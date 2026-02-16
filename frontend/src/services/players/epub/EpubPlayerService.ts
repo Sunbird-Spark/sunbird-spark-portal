@@ -27,11 +27,11 @@ export class EpubPlayerService {
     contextProps?: EpubPlayerContextProps
   ): Promise<EpubPlayerConfig> {
     // Get session and user info from auth service
-    const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
+    const sid = userAuthInfoService.getSessionId();
     const uid = userAuthInfoService.getUserId() || 'anonymous';
     
     // Get device ID from AppCoreService (backend) with fallback
-    let did = `device-${Date.now()}`;
+    let did = '';
     try {
       did = await appCoreService.getDeviceId();
     } catch (error) {
@@ -39,7 +39,7 @@ export class EpubPlayerService {
     }
     
     // Get channel from org service with random fallback for testing
-    let channel = `test-channel-${Math.random().toString(36).substring(2, 15)}`; // Random fallback for testing
+    let channel = '';
     try {
       const orgResponse = await this.orgService.search({
         filters: {

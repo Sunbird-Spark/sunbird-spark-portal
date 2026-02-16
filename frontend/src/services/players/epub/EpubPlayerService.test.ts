@@ -81,12 +81,12 @@ describe('EpubPlayerService', () => {
       expect(config.context.uid).toBe('anonymous');
     });
 
-    it('should generate session ID when not available', async () => {
+    it('should use null sid when session ID is not available', async () => {
       vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
 
       const config = await service.createConfig(mockMetadata);
 
-      expect(config.context.sid).toMatch(/^session-\d+$/);
+      expect(config.context.sid).toBeNull();
     });
 
     it('should fetch channel from organization service', async () => {
@@ -112,11 +112,11 @@ describe('EpubPlayerService', () => {
 
       const config = await service.createConfig(mockMetadata);
       
-      // Should use random fallback channel
-      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+      // Should use empty fallback channel
+      expect(config.context.channel).toBe('');
     });
 
-    it('should use random fallback channel when org response is invalid', async () => {
+    it('should use empty fallback channel when org response is invalid', async () => {
       mockOrgSearch.mockResolvedValue({
         data: {
           result: {
@@ -128,27 +128,27 @@ describe('EpubPlayerService', () => {
       });
 
       const config = await service.createConfig(mockMetadata);
-      
-      // Should use random fallback channel
-      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+
+      // Should use empty fallback channel
+      expect(config.context.channel).toBe('');
     });
 
-    it('should use random fallback channel when org service throws error', async () => {
+    it('should use empty fallback channel when org service throws error', async () => {
       mockOrgSearch.mockRejectedValue(new Error('Network error'));
 
       const config = await service.createConfig(mockMetadata);
-      
-      // Should use random fallback channel
-      expect(config.context.channel).toMatch(/^test-channel-[a-z0-9]+$/);
+
+      // Should use empty fallback channel
+      expect(config.context.channel).toBe('');
     });
 
-    it('should use fallback device ID when appCoreService fails', async () => {
+    it('should use empty fallback device ID when appCoreService fails', async () => {
       vi.mocked(appCoreService.getDeviceId).mockRejectedValue(new Error('Device ID error'));
 
       const config = await service.createConfig(mockMetadata);
-      
-      // Should use fallback device ID
-      expect(config.context.did).toMatch(/^device-\d+$/);
+
+      // Should use empty fallback device ID
+      expect(config.context.did).toBe('');
     });
 
     it('should use default mode when not provided', async () => {
