@@ -2,11 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import FAQSection from './FAQSection';
 import { SystemSettingService } from '@/services/SystemSettingService';
-import axios from 'axios';
+import { BlobStorageService } from '@/services/BlobStorageService';
 
 // Mock dependencies
 vi.mock('@/services/SystemSettingService');
-vi.mock('axios');
+vi.mock('@/services/BlobStorageService');
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => key,
@@ -43,8 +43,12 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: { general: [] },
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue({
+      general: [],
     });
 
     const { container } = render(<FAQSection />);
@@ -62,9 +66,11 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: mockFaqData,
-    });
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(mockFaqData);
 
     render(<FAQSection />);
 
@@ -90,9 +96,11 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: maliciousData,
-    });
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(maliciousData);
 
     render(<FAQSection />);
 
@@ -110,12 +118,14 @@ describe('FAQSection', () => {
       headers: {},
     });
 
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl)
+      .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`)
+      .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`);
+
     // First call fails (language-specific), second succeeds (English fallback)
-    vi.mocked(axios.get)
+    vi.mocked(BlobStorageService.prototype.fetchJson)
       .mockRejectedValueOnce(new Error('404'))
-      .mockResolvedValueOnce({
-        data: mockFaqData,
-      });
+      .mockResolvedValueOnce(mockFaqData);
 
     render(<FAQSection />);
 
@@ -123,8 +133,8 @@ describe('FAQSection', () => {
       expect(screen.getByText('Test Question 1')).toBeInTheDocument();
     });
 
-    // Verify axios was called twice (once for language, once for fallback)
-    expect(axios.get).toHaveBeenCalledTimes(2);
+    // Verify fetchJson was called twice (once for language, once for fallback)
+    expect(BlobStorageService.prototype.fetchJson).toHaveBeenCalledTimes(2);
   });
 
   it('should handle API errors gracefully', async () => {
@@ -146,9 +156,11 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: mockFaqData,
-    });
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(mockFaqData);
 
     render(<FAQSection />);
 
@@ -164,8 +176,12 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: { categories: [] }, // No general array
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue({
+      categories: [], // No general array
     });
 
     const { container } = render(<FAQSection />);
@@ -188,8 +204,8 @@ describe('FAQSection', () => {
       expect(container.firstChild).toBeNull();
     });
 
-    // Axios should not be called if FAQ URL is not set
-    expect(axios.get).not.toHaveBeenCalled();
+    // BlobStorageService should not be called if FAQ URL is not set
+    expect(BlobStorageService.prototype.fetchJson).not.toHaveBeenCalled();
   });
 
   it('should handle different API response structures for FAQ URL', async () => {
@@ -200,9 +216,11 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: mockFaqData,
-    });
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(mockFaqData);
 
     render(<FAQSection />);
 
@@ -218,14 +236,20 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: mockFaqData,
-    });
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(mockFaqData);
 
     render(<FAQSection />);
 
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(`${mockFaqUrl}/faq-en.json`);
+      expect(BlobStorageService.prototype.buildLanguageUrl).toHaveBeenCalledWith(
+        mockFaqUrl,
+        'faq',
+        'en'
+      );
     });
   });
 
@@ -245,9 +269,11 @@ describe('FAQSection', () => {
       headers: {},
     });
 
-    vi.mocked(axios.get).mockResolvedValue({
-      data: htmlData,
-    });
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl).mockReturnValue(
+      `${mockFaqUrl}/faq-en.json`
+    );
+
+    vi.mocked(BlobStorageService.prototype.fetchJson).mockResolvedValue(htmlData);
 
     render(<FAQSection />);
 
@@ -266,16 +292,20 @@ describe('FAQSection', () => {
       headers: {},
     });
 
+    vi.mocked(BlobStorageService.prototype.buildLanguageUrl)
+      .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`)
+      .mockReturnValueOnce(`${mockFaqUrl}/faq-en.json`);
+
     // Both language-specific and English fallback fail
-    vi.mocked(axios.get)
+    vi.mocked(BlobStorageService.prototype.fetchJson)
       .mockRejectedValueOnce(new Error('404'))
       .mockRejectedValueOnce(new Error('404'));
 
     const { container } = render(<FAQSection />);
 
     await waitFor(() => {
-      // Verify axios was called twice (once for language, once for fallback)
-      expect(axios.get).toHaveBeenCalledTimes(2);
+      // Verify fetchJson was called twice (once for language, once for fallback)
+      expect(BlobStorageService.prototype.fetchJson).toHaveBeenCalledTimes(2);
     });
 
     // Component should render nothing when both fail

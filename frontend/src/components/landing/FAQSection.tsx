@@ -8,7 +8,7 @@ import faqImage from "@/assets/faq-image.svg";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useState, useEffect, useMemo } from "react";
 import { SystemSettingService } from "@/services/SystemSettingService";
-import axios from "axios";
+import { BlobStorageService } from "@/services/BlobStorageService";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 interface FAQ {
@@ -16,10 +16,15 @@ interface FAQ {
     description: string;
 }
 
+interface FaqData {
+    general: FAQ[];
+}
+
 const FAQSection = () => {
     const { t, currentCode } = useAppI18n();
     const [faqUrl, setFaqUrl] = useState<string>("");
     const [faqs, setFaqs] = useState<FAQ[]>([]);
+    const blobStorageService = useMemo(() => new BlobStorageService(), []);
 
     // Fetch FAQ base URL from API
     useEffect(() => {
@@ -48,22 +53,22 @@ const FAQSection = () => {
             const langCode = currentCode || 'en';
             
             try {
-                // Fetch directly from blob storage
-                const faqJsonUrl = `${faqUrl}/faq-${langCode}.json`;
-                const response = await axios.get<any>(faqJsonUrl);
+                // Build URL and fetch from blob storage
+                const faqJsonUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', langCode);
+                const response = await blobStorageService.fetchJson<FaqData>(faqJsonUrl);
                 
                 // Read from the 'general' array which has title and description
-                if (response.data?.general && Array.isArray(response.data.general)) {
-                    setFaqs(response.data.general);
+                if (response?.general && Array.isArray(response.general)) {
+                    setFaqs(response.general);
                 }
             } catch (error) {
                 // Fallback to English
                 try {
-                    const fallbackUrl = `${faqUrl}/faq-en.json`;
-                    const response = await axios.get<any>(fallbackUrl);
+                    const fallbackUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', 'en');
+                    const response = await blobStorageService.fetchJson<FaqData>(fallbackUrl);
                     
-                    if (response.data?.general && Array.isArray(response.data.general)) {
-                        setFaqs(response.data.general);
+                    if (response?.general && Array.isArray(response.general)) {
+                        setFaqs(response.general);
                     }
                 } catch (fallbackError) {
                     console.error("Failed to fetch FAQ data:", fallbackError);
@@ -72,7 +77,7 @@ const FAQSection = () => {
         };
 
         fetchFaqData();
-    }, [faqUrl, currentCode]);
+    }, [faqUrl, currentCode, blobStorageService]);
 
     // Sanitize FAQs
     const sanitizedFaqs = useMemo(() => {
