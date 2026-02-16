@@ -3,14 +3,16 @@ import { render, waitFor } from '@testing-library/react';
 import CollectionEditor from './CollectionEditor';
 
 vi.mock('../../services/editors/collection-editor', () => {
+  class MockCollectionEditorService {
+    initializeDependencies = vi.fn().mockResolvedValue(undefined);
+    createConfig = vi.fn().mockResolvedValue({ context: { identifier: 'do_123' }, config: {}, metadata: {} });
+    createElement = vi.fn().mockReturnValue(document.createElement('lib-editor'));
+    attachEventListeners = vi.fn();
+    removeEventListeners = vi.fn();
+  }
+
   return {
-    CollectionEditorService: vi.fn().mockImplementation(() => ({
-      initializeDependencies: vi.fn().mockResolvedValue(undefined),
-      createConfig: vi.fn().mockResolvedValue({ context: { identifier: 'do_123' }, config: {} }),
-      createElement: vi.fn().mockReturnValue(document.createElement('lib-editor')),
-      attachEventListeners: vi.fn(),
-      removeEventListeners: vi.fn(),
-    })),
+    CollectionEditorService: MockCollectionEditorService,
   };
 });
 

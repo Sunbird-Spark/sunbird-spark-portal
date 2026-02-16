@@ -36,87 +36,67 @@ export class CollectionEditorService {
 
     async initializeDependencies(): Promise<void> {
         if (CollectionEditorService.dependenciesLoaded) {
-            console.log('[CollectionEditor] Dependencies already loaded, skipping initialization');
             return;
         }
 
-        console.log('[CollectionEditor] Starting dependency initialization...');
-
-        // 1. Ensure reflect-metadata is available
-        if (!(globalThis as any).Reflect?.getMetadata) {
-            console.log('[CollectionEditor] Loading reflect-metadata...');
-            await import('reflect-metadata');
-        }
-
-        // 2. Ensure jQuery is present
+        // 1. Load jQuery from npm package
         if (!(globalThis as any).$ || !(globalThis as any).jQuery) {
-            console.log('[CollectionEditor] Loading jQuery...');
             const { default: jq } = await import('jquery');
             (globalThis as any).$ = jq;
             (globalThis as any).jQuery = jq;
         }
 
         const $global = (globalThis as any).$;
-        (globalThis as any).jQuery = $global;
 
-        // 3. Load jQuery UI from CDN and wait for it to be available
+        // 2. Load jQuery UI from CDN - MUST be loaded via script tag and confirmed ready
+        //    before any FancyTree module import because bundled modules check $.ui at initialization time
         if (!$global.ui) {
-            console.log('[CollectionEditor] Loading jQuery UI from CDN...');
             await this.loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js');
             
-            // Poll for jQuery UI to be available (max 5 seconds)
+            // Wait for jQuery UI to be available (max 5 seconds)
             const startTime = Date.now();
             while (!$global.ui && Date.now() - startTime < 5000) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
             
             if (!$global.ui) {
-                throw new Error('jQuery UI failed to load after 5 seconds; required for FancyTree');
+                throw new Error('jQuery UI failed to load; required for FancyTree');
             }
-            console.log('[CollectionEditor] jQuery UI loaded successfully');
         }
 
-        // 4. Load FancyTree from CDN (instead of module imports to avoid timing issues)
+        // 3. Load FancyTree from CDN - Cannot use npm package because:
+        //    - Module imports execute immediately when bundle loads
+        //    - FancyTree checks for $.ui during module initialization
+        //    - Timing race: bundle may load before jQuery UI script registers $.ui
+        //    - CDN script loading ensures sequential execution and proper $.ui availability
         if (!$global.fn?.fancytree) {
-            console.log('[CollectionEditor] Loading FancyTree from CDN...');
             await this.loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.min.js');
             
-            // Poll for FancyTree to be available (max 5 seconds)
+            // Wait for FancyTree to be available (max 5 seconds)
             const startTime = Date.now();
             while (!$global.fn?.fancytree && Date.now() - startTime < 5000) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
             
             if (!$global.fn?.fancytree) {
-                throw new Error('FancyTree failed to load after 5 seconds');
+                throw new Error('FancyTree failed to load');
             }
-            console.log('[CollectionEditor] FancyTree loaded successfully');
         }
 
-        // 5. Load the Collection Editor Web Component Script
+        // 4. Load the Collection Editor Web Component
         if (!customElements.get('lib-editor')) {
-            console.log('[CollectionEditor] Loading collection editor web component...');
             await new Promise<void>((resolve, reject) => {
                 const script = document.createElement('script');
                 script.src = '/assets/collection-editor/sunbird-collection-editor.js';
                 script.async = true;
-                script.onload = () => {
-                    console.log('[CollectionEditor] Web component script loaded');
-                    resolve();
-                };
-                script.onerror = (err) => {
-                    console.error('[CollectionEditor] Failed to load web component script', err);
-                    reject(err);
-                };
+                script.onload = () => resolve();
+                script.onerror = (err) => reject(new Error('Failed to load collection editor web component'));
                 document.body.appendChild(script);
-            }).catch((error) => {
-                console.warn('Collection editor web component script not found at /assets/collection-editor/sunbird-collection-editor.js', error);
             });
         }
 
         this.loadAssets();
         CollectionEditorService.dependenciesLoaded = true;
-        console.log('[CollectionEditor] All dependencies loaded successfully');
     }
 
     async createConfig(
@@ -171,7 +151,6 @@ export class CollectionEditorService {
             config: {
                 showAddCollaborator: true,
                 mode: contextProps?.mode,
-                maxDepth: 4,
                 objectType: 'Collection',
                 primaryCategory: 'Content Playlist',
             },
@@ -182,27 +161,18 @@ export class CollectionEditorService {
     private loadAssets(): void {
         if (CollectionEditorService.stylesLoaded) return;
 
-        // Load styles
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
         styleLink.href = '/assets/collection-editor/styles.css';
         styleLink.setAttribute('data-collection-editor-styles', 'true');
         document.head.appendChild(styleLink);
 
-        // Load script if not using standard import or if web component requires it
-        // The web component usually registers itself when imported.
-        // Use dynamic import or script tag if needed. 
-        // Assuming the package import in the component handles registration.
-
         CollectionEditorService.stylesLoaded = true;
     }
 
     createElement(config: CollectionEditorConfig): HTMLElement {
-        this.loadAssets();
-
         const element = document.createElement('lib-editor');
         element.setAttribute('editor-config', JSON.stringify(config));
-
         return element;
     }
 
