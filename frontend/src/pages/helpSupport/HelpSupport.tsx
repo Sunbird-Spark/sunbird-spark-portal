@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiBell, FiChevronDown } from "react-icons/fi";
+import { FiArrowRight, FiSearch, FiBell, FiChevronDown } from "react-icons/fi";
 import { Input } from "@/components/common/Input";
 import {
     DropdownMenu,
@@ -9,46 +9,88 @@ import {
     DropdownMenuTrigger,
 } from "@/components/common/DropdownMenu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
-import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
-import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
-import ProfileCard from "@/components/profile/ProfileCard";
-import PersonalInformation from "@/components/profile/PersonalInformation";
-import ProfileLearningList from "@/components/profile/ProfileLearningList";
-import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
+import PageLoader from "@/components/common/PageLoader";
+import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useUserRead } from "@/hooks/useUserRead";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/landing/Accordion";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
-import "./profile.css";
+import "../profile/profile.css";
 
-const Profile = () => {
+const categories = [
+    {
+        title: "Login",
+        description: "",
+        faqCount: 10,
+        slug: "login",
+    },
+    {
+        title: "Profile",
+        description: "",
+        faqCount: 5,
+        slug: "profile",
+    },
+    {
+        title: "Course & Certificates",
+        description: "",
+        faqCount: 26,
+        slug: "course-certificates",
+    },
+];
+
+const faqs = [
+    {
+        question: "What kind of courses are available on this platform?",
+        answer: "Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.",
+    },
+    {
+        question: "What if I need help during the course?",
+        answer: "Our dedicated support team is available 24/7 to assist you. You can reach out through our help center, community forums, or contact us directly via email.",
+    },
+    {
+        question: "Are the courses accredited or do they offer certification?",
+        answer: "Yes, many of our courses offer industry-recognized certifications upon completion. Check each course page for specific certification details.",
+    },
+    {
+        question: "Can I learn in offline mode?",
+        answer: "Absolutely! Our mobile app allows you to download course content and learn offline at your convenience. Perfect for learning on the go.",
+    },
+    {
+        question: "Who are the trainers?",
+        answer: "Our trainers are industry experts with years of practical experience. Each trainer is carefully vetted to ensure high-quality instruction.",
+    },
+];
+
+const HelpSupport = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
-    const [activeNav, setActiveNav] = useState("profile");
+    const [activeNav, setActiveNav] = useState("help");
     const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
-
-    const { data: userResponse, isLoading, isError } = useUserRead();
-    const userData = userResponse?.data?.response;
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         setIsSidebarOpen(!isMobile);
     }, [isMobile]);
 
-    if (isLoading) {
-        return <PageLoader message="Loading your profile..." />;
-    }
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 600);
+        return () => clearTimeout(timer);
+    }, []);
 
-    if (isError || !userData) {
-        return <PageLoader message="Error loading profile..." />;
-    }
+    if (isLoading) return <PageLoader message="Loading..." />;
 
     return (
         <div className="profile-container">
-            {/* Top Header */}
+            {/* Top Header — same as Profile */}
             <header className={`profile-header ${isMobile ? 'mobile' : ''}`}>
                 <div className="profile-header-container">
                     {/* Left: Sunbird Logo + Align with Sidebar */}
@@ -189,20 +231,62 @@ const Profile = () => {
                 {/* Main Content Area */}
                 <main className="profile-main-content">
                     <div className="profile-content-wrapper">
-                        {/* Top Section: Profile Card + Personal Information */}
-                        <div className="grid grid-cols-1 lg:grid-cols-[19rem_1fr] gap-6 mb-8">
-                            {/* Left: Profile Card */}
-                            <ProfileCard user={userData} />
-
-                            {/* Right: Personal Information */}
-                            <PersonalInformation user={userData} />
+                        {/* Header row */}
+                        <div className="flex items-center justify-between mb-8">
+                            <h1 className="font-['Rubik'] font-medium text-[24px] leading-[100%] tracking-[0%] text-foreground">
+                                How can we assist you today?
+                            </h1>
+                            <button
+                                className="bg-sunbird-brick text-white text-sm font-medium font-['Rubik'] px-5 py-2.5 rounded-[10px] hover:opacity-90 transition-opacity"
+                            >
+                                Report an Issue
+                            </button>
                         </div>
 
-                        {/* Stats Cards Section */}
-                        <ProfileStatsCards />
+                        {/* Category Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+                            {categories.map((cat) => (
+                                <div
+                                    key={cat.title}
+                                    onClick={() => navigate(`/help-support/${cat.slug}`)}
+                                    className="bg-white rounded-[10px] overflow-hidden flex flex-col shadow-[2px_2px_20px_rgba(0,0,0,0.09)] hover:shadow-md transition-shadow cursor-pointer"
+                                >
+                                    <div className="w-[32px] h-[12px] bg-[#CC8545] ml-[30px]" />
+                                    <div className="px-5 pb-5 pt-6 flex flex-col flex-1">
+                                        <h3 className="font-['Rubik'] font-medium text-[18px] leading-[100%] tracking-[0%] text-foreground mb-2">{cat.title}</h3>
+                                        <p className="text-base text-foreground font-['Rubik'] leading-relaxed mb-4">
+                                            {cat.description}
+                                        </p>
+                                        <div className="flex items-center justify-between mt-auto">
+                                            <span className="font-['Rubik'] font-normal text-[14px] leading-[26px] tracking-[0%] text-[#757575]">{cat.faqCount} FAQ's</span>
+                                            <FiArrowRight className="w-5 h-5 text-[#A85236]" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
 
-                        {/* My Learning Section */}
-                        <ProfileLearningList />
+                        {/* Most Viewed FAQs */}
+                        <h2 className="font-['Rubik'] font-medium text-[24px] leading-[100%] tracking-[0%] text-foreground mb-5">
+                            Most Viewed FAQ's
+                        </h2>
+
+                        <Accordion type="single" collapsible defaultValue="item-0" className="space-y-3">
+                            {faqs.map((faq, index) => (
+                                <AccordionItem
+                                    key={index}
+                                    value={`item-${index}`}
+                                    className="rounded-[10px] px-5 bg-white border-b-0"
+                                >
+                                    <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[18px] leading-[100%] tracking-[0%] hover:no-underline py-4 text-foreground [&>svg]:text-[#A85236]">
+                                        {faq.question}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="font-['Rubik'] font-normal text-[16px] leading-[26px] tracking-[0%] pb-4 text-muted-foreground">
+                                        {faq.answer}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
                     </div>
                 </main>
             </div>
@@ -213,4 +297,4 @@ const Profile = () => {
     );
 };
 
-export default Profile;
+export default HelpSupport;

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FiHome, FiUser, FiSettings, FiLogOut, FiEdit } from "react-icons/fi";
+import { FiHome, FiUser, FiLogOut, FiEdit } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 
 interface HomeSidebarProps {
@@ -41,8 +41,7 @@ const mainNavItems = [
 ];
 
 const bottomNavItems = [
-    { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help" },
-    { id: "settings", label: "Account Settings", icon: FiSettings, path: "/settings" },
+    { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help-support" },
     { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
