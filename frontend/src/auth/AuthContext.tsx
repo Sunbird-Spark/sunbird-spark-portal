@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export type Role = 'admin' | 'content_creator' | 'content_reviewer' | 'guest';
 
@@ -21,32 +21,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const authInfo = await userAuthInfoService.getAuthInfo();
-        if (authInfo.isAuthenticated) {
-          setUser({
-            id: authInfo.uid || 'unknown',
-            name: 'User', // Placeholder as we don't have name in auth info
-            role: 'content_creator', // Default role for now
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch auth info:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-  }, []);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -54,8 +30,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    userAuthInfoService.clearAuth();
-    // Optionally call backend logout API here if needed
   };
 
   const value: AuthContextType = {
@@ -64,10 +38,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
   };
-
-  if (loading) {
-    return null; // Or a loading spinner
-  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
