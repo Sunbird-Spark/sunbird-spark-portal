@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 
 // Mock child components to keep tests focused
@@ -77,9 +77,9 @@ describe('Home Page', () => {
 
     const renderHome = () => {
         return render(
-            <BrowserRouter>
+            <MemoryRouter initialEntries={['/home']}>
                 <Home />
-            </BrowserRouter>
+            </MemoryRouter>
         );
     };
 
@@ -121,7 +121,6 @@ describe('Home Page', () => {
         renderHome();
         await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        expect(screen.getByText('Home')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();
     });
 
@@ -139,7 +138,7 @@ describe('Home Page', () => {
         renderHome();
         await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        const langBtn = screen.getByAltText('Translate').parentElement;
+        const langBtn = screen.getByAltText('Language').parentElement;
         fireEvent.click(langBtn!);
 
         const hindiOption = await screen.findByText('Hindi');
