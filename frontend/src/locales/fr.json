@@ -193,6 +193,7 @@
   },
   "courseDetails": {
     "overview": "Aperçu du cours",
+    "units": "Unités",
     "weeks": "Semaines",
     "skills": "Compétences que vous apprendrez",
     "suitedFor": "Idéal pour",

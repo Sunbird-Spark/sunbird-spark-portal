@@ -23,7 +23,7 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
               className="w-full h-full object-cover"
             />
 
-            {/* Week Label - first module or none */}
+            {/* Unit label - first module or none */}
             {collectionData.modules?.[0] && (
               <div className="absolute top-4 left-4 z-10">
                 <span className="text-white text-base font-medium px-4 py-2 rounded-md">
@@ -44,7 +44,7 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
         <div className="px-6 pb-6 pt-0">
           <h2 className="text-xl font-bold text-foreground mb-4">{t("courseDetails.overview")}</h2>
 
-          {/* Duration Stats */}
+          {/* Stats: Units & Lessons */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
             <span className="flex items-center gap-2">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-sunbird-brick">
@@ -52,7 +52,9 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
                 <path d="M2 6H14" stroke="currentColor" strokeWidth="1.5" />
               </svg>
               <span className="text-black font-bold">
-                {collectionData.weeks} </span>{t("courseDetails.weeks")}
+                {collectionData.modules?.length ?? 0}
+              </span>
+              {t("courseDetails.units")}
             </span>
             <span className="flex items-center gap-2">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-sunbird-brick">

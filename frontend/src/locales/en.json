@@ -196,6 +196,7 @@
   },
   "courseDetails": {
     "overview": "Course Overview",
+    "units": "Units",
     "weeks": "Weeks",
     "skills": "Skills you will learn",
     "suitedFor": "Best Suited For",
