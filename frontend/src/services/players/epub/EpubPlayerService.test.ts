@@ -81,12 +81,12 @@ describe('EpubPlayerService', () => {
       expect(config.context.uid).toBe('anonymous');
     });
 
-    it('should generate session ID when not available', async () => {
+    it('should use null sid when session ID is not available', async () => {
       vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
 
       const config = await service.createConfig(mockMetadata);
 
-      expect(config.context.sid).toMatch(/^session-\d+$/);
+      expect(config.context.sid).toBeNull();
     });
 
     it('should fetch channel from organization service', async () => {

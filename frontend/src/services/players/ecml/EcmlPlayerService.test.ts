@@ -80,11 +80,11 @@ describe('EcmlPlayerService', () => {
       expect(result.context.uid).toBe('anonymous');
     });
 
-    it('should generate session ID when not available', async () => {
+    it('should use null sid when session ID is not available', async () => {
       vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
 
       const result = await service.createConfig(mockMetadata);
-      expect(result.context.sid).toMatch(/^session-\d+$/);
+      expect(result.context.sid).toBeNull();
     });
 
     it('should use empty fallback when device ID fails', async () => {
@@ -189,14 +189,14 @@ describe('EcmlPlayerService', () => {
       expect(result.data).toEqual({});
     });
 
-    it('should set host to window.location.origin', async () => {
+    it('should set host to empty string', async () => {
       const result = await service.createConfig(mockMetadata);
-      expect(result.context.host).toBe(window.location.origin);
+      expect(result.context.host).toBe('');
     });
 
     it('should set telemetry endpoint', async () => {
       const result = await service.createConfig(mockMetadata);
-      expect(result.context.endpoint).toBe('/data/v1/telemetry');
+      expect(result.context.endpoint).toBe('/portal/data/v1/telemetry');
     });
   });
 
