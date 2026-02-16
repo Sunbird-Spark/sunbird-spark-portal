@@ -281,4 +281,34 @@ describe('ExploreGrid', () => {
          }));
     });
   });
+
+  it('does not load more content if results are empty', async () => {
+    // Mock empty initial results
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: [] } },
+        isLoading: false,
+        error: null,
+    } as any);
+    
+    observerCallback = null;
+    renderComponent();
+
+    await waitFor(() => {
+        expect(useContentSearch).toHaveBeenCalledWith(expect.objectContaining({ 
+            request: expect.objectContaining({ offset: 0 }) 
+        }));
+    });
+
+    // Try to trigger observer
+    const mockEntries = [{ isIntersecting: true }] as IntersectionObserverEntry[];
+    if (observerCallback) {
+        const callback = observerCallback as (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => void;
+        callback(mockEntries, {} as IntersectionObserver);
+    }
+
+    // Offset should NOT have incremented
+    expect(useContentSearch).not.toHaveBeenLastCalledWith(expect.objectContaining({ 
+        request: expect.objectContaining({ offset: 9 }) 
+    }));
+  });
 });

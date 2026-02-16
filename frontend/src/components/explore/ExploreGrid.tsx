@@ -98,7 +98,7 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
 
         const observer = new IntersectionObserver(
             entries => {
-                if (entries?.[0]?.isIntersecting && hasMore && !isQueryLoading) {
+                if (entries?.[0]?.isIntersecting && hasMore && !isQueryLoading && displayItems.length > 0) {
                     setOffset(prev => prev + limit);
                 }
             },
@@ -114,7 +114,7 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
                 observer.unobserve(observerTarget.current);
             }
         };
-    }, [hasMore, isQueryLoading]);
+    }, [hasMore, isQueryLoading, displayItems.length]);
 
     const isLoading = isQueryLoading && offset === 0;
     const isFetchingMore = isQueryLoading && offset > 0;

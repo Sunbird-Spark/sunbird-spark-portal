@@ -35,17 +35,17 @@ const Explore = () => {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <main className="w-full px-[30px] py-6 md:py-8">
+      <main className="w-full px-[1.875rem] py-6 md:py-8">
         <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           {/* Filters Sidebar */}
-          <aside className="w-full md:w-[350px] shrink-0">
+          <aside className="w-full md:w-[21.875rem] shrink-0">
             <ExploreFilters filters={filters} setFilters={setFilters} />
           </aside>
 
           {/* Content Grid */}
           <div className="flex-1">
             <div>
-              <div className="bg-white rounded-[12px] px-4 mb-6 flex flex-row justify-between items-center shadow-sm border border-border h-[60px]">
+              <div className="bg-white rounded-[0.75rem] px-4 mb-6 flex flex-row justify-between items-center shadow-sm border border-border h-[3.75rem]">
                 <div className="flex-1 max-w-2xl relative">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
@@ -58,7 +58,7 @@ const Explore = () => {
                         setActiveSearchQuery(searchQuery);
                       }
                     }}
-                    className="pl-10 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[16px] placeholder:text-[#999999] w-full"
+                    className="pl-10 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[1rem] placeholder:text-[#999999] w-full"
                   />
                 </div>
 
@@ -88,7 +88,7 @@ const Explore = () => {
                         <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[140px] bg-white z-50">
+                    <DropdownMenuContent align="end" className="w-[8.75rem] bg-white z-50">
                       <DropdownMenuItem
                         className="cursor-pointer hover:bg-gray-50"
                         onClick={() => {
