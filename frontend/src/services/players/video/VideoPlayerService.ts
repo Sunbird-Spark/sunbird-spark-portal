@@ -80,6 +80,10 @@ export class VideoPlayerService {
       objectRollup: contextProps?.objectRollup || {},
       host: '',
       endpoint: '',
+      userData: {
+        firstName: 'Guest',
+        lastName: '',
+      }
     };
 
     const finalConfig = {
