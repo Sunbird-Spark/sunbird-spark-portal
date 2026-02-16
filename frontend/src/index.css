@@ -462,7 +462,7 @@
   }
 
   .content-player-title {
-    @apply font-rubik font-semibold text-[26px] leading-[38px] tracking-normal text-[#222222];
+    @apply font-rubik font-semibold text-[26px] leading-[38px] tracking-normal text-foreground;
   }
 
   .content-player-share-btn {
@@ -526,7 +526,7 @@
   }
 
   .content-player-related-title {
-    @apply text-xl font-semibold text-foreground text-[#222222] font-rubik;
+    @apply text-xl font-semibold text-foreground font-rubik;
   }
 
   .content-player-related-arrow {
@@ -577,11 +577,11 @@
   }
 
   .related-resource-card-badge {
-    @apply inline-flex items-center justify-center px-3 rounded-[36px] mb-[20px] h-[30px] bg-sunbird-beige-light text-foreground text-[#222222] font-rubik font-medium text-[14px] leading-[18px] border-[#CC8545] border-[1px] w-fit;
+    @apply inline-flex items-center justify-center px-3 rounded-[36px] mb-[20px] h-[30px] bg-sunbird-beige-light text-foreground font-rubik font-medium text-[14px] leading-[18px] border-[#CC8545] border-[1px] w-fit;
   }
 
   .related-resource-card-title {
-    @apply font-rubik font-medium text-[20px] leading-[28px] tracking-[0%] bg-transparent border-0 text-[#222222] mb-[20px] min-h-[56px];
+    @apply font-rubik font-medium text-[20px] leading-[28px] tracking-normal bg-transparent border-0 text-foreground mb-[20px] min-h-[56px];
   }
 
   .related-resource-card-stats {
