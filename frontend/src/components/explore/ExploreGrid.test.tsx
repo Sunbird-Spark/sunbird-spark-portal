@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import ExploreGrid from './ExploreGrid';
-import { ContentService } from '../services/ContentService';
+import { useContentSearch } from '../../hooks/useContent';
 
 // Mock dependencies
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -11,11 +11,8 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
-const mockContentSearch = vi.fn();
-vi.mock('../services/ContentService', () => ({
-  ContentService: vi.fn().mockImplementation(() => ({
-    contentSearch: mockContentSearch
-  }))
+vi.mock('../../hooks/useContent', () => ({
+  useContentSearch: vi.fn(),
 }));
 
 // Mock IntersectionObserver
@@ -82,7 +79,6 @@ describe('ExploreGrid', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockContentSearch.mockReset();
   });
 
   const renderComponent = (props = {}) => {
@@ -94,7 +90,11 @@ describe('ExploreGrid', () => {
   };
 
   it('renders without crashing', async () => {
-    mockContentSearch.mockResolvedValue({ data: { content: [] } });
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: [] } },
+        isLoading: false,
+        error: null,
+    } as any);
     renderComponent();
     await waitFor(() => {
        expect(screen.queryByText('No content found')).toBeInTheDocument();
@@ -102,7 +102,11 @@ describe('ExploreGrid', () => {
   });
 
   it('fetches and displays content', async () => {
-    mockContentSearch.mockResolvedValue({ data: { content: mockContent } });
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: mockContent } },
+        isLoading: false,
+        error: null,
+    } as any);
     renderComponent();
 
     await waitFor(() => {
@@ -114,22 +118,34 @@ describe('ExploreGrid', () => {
   });
 
   it('handles loading state', () => {
-    mockContentSearch.mockReturnValue(new Promise(() => {}));
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        error: null,
+    } as any);
     renderComponent();
-    expect(mockContentSearch).toHaveBeenCalled();
+    expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   it('handles error state', async () => {
-    mockContentSearch.mockRejectedValue(new Error('Network error'));
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('Network error'),
+    } as any);
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to load content')).toBeInTheDocument();
+      expect(screen.getByText('Network error')).toBeInTheDocument();
     });
   });
 
   it('displays empty state when no content found', async () => {
-    mockContentSearch.mockResolvedValue({ data: { content: [] } });
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: [] } },
+        isLoading: false,
+        error: null,
+    } as any);
     renderComponent();
 
     await waitFor(() => {
@@ -138,14 +154,21 @@ describe('ExploreGrid', () => {
   });
 
   it('refetches when query changes', async () => {
-    mockContentSearch.mockResolvedValue({ data: { content: [] } });
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: [] } },
+        isLoading: false,
+        error: null,
+    } as any);
+
     const { rerender } = render(
       <BrowserRouter>
         <ExploreGrid {...defaultProps} query="initial" />
       </BrowserRouter>
     );
 
-    expect(mockContentSearch).toHaveBeenCalledWith(expect.objectContaining({ query: 'initial' }));
+    expect(useContentSearch).toHaveBeenCalledWith(expect.objectContaining({ 
+        request: expect.objectContaining({ query: 'initial' }) 
+    }));
 
     rerender(
       <BrowserRouter>
@@ -154,12 +177,19 @@ describe('ExploreGrid', () => {
     );
 
     await waitFor(() => {
-        expect(mockContentSearch).toHaveBeenCalledWith(expect.objectContaining({ query: 'updated' }));
+        expect(useContentSearch).toHaveBeenLastCalledWith(expect.objectContaining({ 
+            request: expect.objectContaining({ query: 'updated' }) 
+        }));
     });
   });
 
   it('refetches when filters change', async () => {
-    mockContentSearch.mockResolvedValue({ data: { content: [] } });
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: [] } },
+        isLoading: false,
+        error: null,
+    } as any);
+
     const { rerender } = render(
         <BrowserRouter>
             <ExploreGrid {...defaultProps} />
@@ -179,14 +209,15 @@ describe('ExploreGrid', () => {
     );
 
     await waitFor(() => {
-        expect(mockContentSearch).toHaveBeenCalledTimes(2);
-        expect(mockContentSearch).toHaveBeenLastCalledWith(
+        expect(useContentSearch).toHaveBeenLastCalledWith(
             expect.objectContaining({
-                filters: expect.objectContaining({ 
-                    primaryCategory: ['Collection1'],
-                    contentType: ['Course'],
-                    se_subjects: ['Math'],
-                    objectType: 'Content'
+                request: expect.objectContaining({
+                    filters: expect.objectContaining({ 
+                        primaryCategory: ['Collection1'],
+                        contentType: ['Course'],
+                        se_subjects: ['Math'],
+                        objectType: 'Content'
+                    })
                 })
             })
         );
@@ -194,35 +225,47 @@ describe('ExploreGrid', () => {
   });
 
   it('loads more content on infinite scroll', async () => {
-    mockContentSearch.mockResolvedValue({ 
+    // Page 1
+    vi.mocked(useContentSearch).mockReturnValue({
         data: {
-            content: Array(9).fill(null).map((_, i) => ({
-                identifier: `course-${i}-page-1`,
-                name: `Course ${i}`,
-                contentType: 'Course',
-                leafNodesCount: 10
-            }))
-        }
-    });
+            data: {
+                content: Array(9).fill(null).map((_, i) => ({
+                    identifier: `course-${i}-page-1`,
+                    name: `Course ${i}`,
+                    contentType: 'Course',
+                    leafNodesCount: 10
+                }))
+            }
+        },
+        isLoading: false,
+        error: null,
+    } as any);
     
     observerCallback = null;
 
     renderComponent();
 
     await waitFor(() => {
-        expect(mockContentSearch).toHaveBeenCalledWith(expect.objectContaining({ offset: 0 }));
+        expect(useContentSearch).toHaveBeenCalledWith(expect.objectContaining({ 
+            request: expect.objectContaining({ offset: 0 }) 
+        }));
     });
 
-    mockContentSearch.mockResolvedValue({ 
+    // Mock page 2 return
+    vi.mocked(useContentSearch).mockReturnValue({
         data: {
-            content: Array(9).fill(null).map((_, i) => ({
-                identifier: `course-${i}-page-2`,
-                name: `Course ${i} Page 2`,
-                contentType: 'Course',
-                leafNodesCount: 10
-            }))
-        }
-    });
+            data: {
+                content: Array(9).fill(null).map((_, i) => ({
+                    identifier: `course-${i}-page-2`,
+                    name: `Course ${i} Page 2`,
+                    contentType: 'Course',
+                    leafNodesCount: 10
+                }))
+            }
+        },
+        isLoading: false,
+        error: null,
+    } as any);
 
     const mockEntries = [{ isIntersecting: true }] as IntersectionObserverEntry[];
     if (observerCallback) {
@@ -233,8 +276,9 @@ describe('ExploreGrid', () => {
     }
 
     await waitFor(() => {
-         expect(mockContentSearch).toHaveBeenCalledTimes(2);
-         expect(mockContentSearch).toHaveBeenLastCalledWith(expect.objectContaining({ offset: 9 }));
+         expect(useContentSearch).toHaveBeenLastCalledWith(expect.objectContaining({ 
+             request: expect.objectContaining({ offset: 9 }) 
+         }));
     });
   });
 });

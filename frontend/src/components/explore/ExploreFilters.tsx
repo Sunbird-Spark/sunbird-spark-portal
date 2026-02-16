@@ -1,14 +1,14 @@
 
 import React, { BaseSyntheticEvent } from "react";
-import { Checkbox } from "./common/CheckBox";
-import { useAppI18n } from "../hooks/useAppI18n";
-import type { FilterState } from "../pages/Explore";
+import { Checkbox } from "../common/CheckBox";
+import { useAppI18n } from "../../hooks/useAppI18n";
+import type { FilterState } from "../../pages/Explore";
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "./landing/Accordion";
+} from "../landing/Accordion";
 
 interface ExploreFiltersProps {
     filters: FilterState;
@@ -64,7 +64,7 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
     }
 
     return (
-        <div className="bg-sunbird-ivory rounded-[1.375rem] p-5">
+        <div className="bg-[#F8F9FA] rounded-[1.375rem] p-5">
             {/* Filters Title */}
             <h2 className="text-lg font-bold text-foreground mb-4 px-1">{t("filters")}</h2>
 

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
 import PageLoader from '../components/common/PageLoader';
-import ExploreFilters from '../components/ExploreFilters';
-import ExploreGrid from '../components/ExploreGrid';
+import ExploreFilters from '../components/explore/ExploreFilters';
+import ExploreGrid from '../components/explore/ExploreGrid';
 import { FiChevronDown, FiSearch } from 'react-icons/fi';
 import { Input } from "../components/common/Input";
 import {
@@ -22,7 +22,6 @@ export interface FilterState {
 
 const Explore = () => {
   const { t } = useAppI18n();
-  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
     collections: [],
     contentTypes: [],
@@ -33,19 +32,9 @@ const Explore = () => {
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
   const [sortLabel, setSortLabel] = useState('Newest');
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <PageLoader message={t('loading') || 'Loading...'} />;
-  }
 
   return (
-    <div className="min-h-screen bg-sunbird-ivory shadow-[inset_0px_10px_30px_rgba(0,0,0,0.04)]">
+    <div className="min-h-screen bg-white">
       <Header />
       <main className="w-full px-[30px] py-6 md:py-8">
         <div className="flex flex-col md:flex-row gap-6 md:gap-8">
