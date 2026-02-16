@@ -1,22 +1,22 @@
 import { FiStar } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Link } from "react-router-dom";
-import { RelatedItem } from "@/types/contentTypes";
+import { ContentData } from "@/types/contentTypes";
 
 interface ContentCardProps {
-  item: RelatedItem;
+  item: ContentData;
 }
 
 const ContentCard = ({ item }: ContentCardProps) => {
   return (
-    <Link to={`/content/${item.id}`} className="related-resource-card-link">
+    <Link to={`/content/${item.identifier}`} className="related-resource-card-link">
       <div className="group related-resource-card-container">
         {/* Image with padding */}
         <div className="related-resource-card-image-wrapper">
           <div className="related-resource-card-image-inner">
             <img
-              src={item.image}
-              alt={item.title}
+              src={item.previewUrl || ''}
+              alt={item.name}
               className="related-resource-card-image"
             />
           </div>
@@ -26,29 +26,26 @@ const ContentCard = ({ item }: ContentCardProps) => {
         <div className="related-resource-card-content-wrapper">
           {/* Badge below image */}
           <Badge
-            className={`related-resource-card-badge ${item.type === 'Textbook' ? 'related-resource-card-badge-textbook' : 'related-resource-card-badge-course'}`}
+            className={`related-resource-card-badge ${item.primaryCategory === 'Textbook' ? 'related-resource-card-badge-textbook' : 'related-resource-card-badge-course'}`}
           >
-            {item.type}
+            {item.primaryCategory}
           </Badge>
 
           {/* Title */}
           <h3 className="related-resource-card-title">
-            {item.title}
+            {item.name}
           </h3>
 
-          {/* Stats - Always show if available */}
-          {item.rating && item.learners && item.lessons && (
-            <div className="related-resource-card-stats">
-              <span className="related-resource-card-rating">
-                {item.rating.toFixed(1)}
-              </span>
-              <FiStar className="related-resource-card-star" />
-              <span className="related-resource-card-separator">•</span>
-              <span>{item.learners} Learners</span>
-              <span className="related-resource-card-separator">•</span>
-              <span>{item.lessons} Lessons</span>
-            </div>
-          )}
+          {/* Stats - Show basic info if available */}
+          <div className="related-resource-card-stats">
+            <span>{item.mediaType}</span>
+            {item.language && item.language.length > 0 && (
+              <>
+                <span className="related-resource-card-separator">•</span>
+                <span>{item.language[0]}</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </Link>

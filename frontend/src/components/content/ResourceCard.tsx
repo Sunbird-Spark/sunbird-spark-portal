@@ -1,10 +1,10 @@
 import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { RelatedItem } from "@/types/contentTypes";
+import { ContentData } from "@/types/contentTypes";
 
 interface ResourceCardProps {
-  item: RelatedItem;
+  item: ContentData;
 }
 
 const ResourceCard = ({ item }: ResourceCardProps) => {
@@ -21,13 +21,13 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
   };
 
   return (
-    <Link to={`/content/${item.id}`} className="group resource-card-link">
+    <Link to={`/content/${item.identifier}`} className="group resource-card-link">
       <div className="resource-card-container">
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">
           <img
-            src={item.image}
-            alt={item.title}
+            src={item.previewUrl || ''}
+            alt={item.name}
             className="resource-card-image"
           />
         </div>
@@ -35,17 +35,17 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
         {/* Top-left Badge */}
         <div className="resource-card-badge-wrapper">
           <span className="resource-card-badge">
-            {item.type}
+            {item.primaryCategory}
           </span>
         </div>
 
         {/* Bottom Content */}
         <div className="resource-card-content">
           <h3 className="resource-card-title">
-            {item.title}
+            {item.name}
           </h3>
           <div className="resource-card-action">
-            {getViewLabel(item.type)}
+            {getViewLabel(item.primaryCategory)}
             <FiArrowRight className="resource-card-arrow" />
           </div>
         </div>
