@@ -1,3 +1,5 @@
+import '../jquery-setup'; // Must be first - sets up jQuery globally
+import 'jquery-ui-dist/jquery-ui';
 import { CollectionEditorConfig, CollectionEditorContextProps, CollectionEditorEvent } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
@@ -8,95 +10,74 @@ export class CollectionEditorService {
     private orgService = new OrganizationService();
     private static stylesLoaded = false;
     private static dependenciesLoaded = false;
-
-    private async loadScriptOnce(url: string): Promise<void> {
-        await new Promise<void>((resolve, reject) => {
-            const existing = document.querySelector(`script[data-src="${url}"]`);
-            if (existing) {
-                if ((existing as HTMLScriptElement).dataset.loaded === 'true') {
-                    resolve();
-                    return;
-                }
-                existing.addEventListener('load', () => resolve(), { once: true });
-                existing.addEventListener('error', (e) => reject(e), { once: true });
-                return;
-            }
-            const script = document.createElement('script');
-            script.src = url;
-            script.async = true;
-            script.dataset.src = url;
-            script.onload = () => {
-                script.dataset.loaded = 'true';
-                resolve();
-            };
-            script.onerror = (e) => reject(e);
-            document.body.appendChild(script);
-        });
-    }
+    private static dependenciesLoading?: Promise<void>;
 
     async initializeDependencies(): Promise<void> {
+        // Return early if already loaded
         if (CollectionEditorService.dependenciesLoaded) {
             return;
         }
 
-        // 1. Load jQuery from npm package
-        if (!(globalThis as any).$ || !(globalThis as any).jQuery) {
-            const { default: jq } = await import('jquery');
-            (globalThis as any).$ = jq;
-            (globalThis as any).jQuery = jq;
+        // If loading is in progress, wait for it to complete
+        if (CollectionEditorService.dependenciesLoading) {
+            return CollectionEditorService.dependenciesLoading;
         }
 
-        const $global = (globalThis as any).$;
+        // Create loading promise to prevent concurrent initialization
+        CollectionEditorService.dependenciesLoading = (async () => {
+            try {
+                const $global = (globalThis as any).$;
 
-        // 2. Load jQuery UI from CDN - MUST be loaded via script tag and confirmed ready
-        //    before any FancyTree module import because bundled modules check $.ui at initialization time
-        if (!$global.ui) {
-            await this.loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js');
-            
-            // Wait for jQuery UI to be available (max 5 seconds)
-            const startTime = Date.now();
-            while (!$global.ui && Date.now() - startTime < 5000) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            
-            if (!$global.ui) {
-                throw new Error('jQuery UI failed to load; required for FancyTree');
-            }
-        }
+                // jQuery and jQuery UI are now loaded via static imports
+                // Load FancyTree from self-hosted script (not dynamic import to avoid CommonJS issues)
+                if (!$global.fn?.fancytree) {
+                    await new Promise<void>((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = '/assets/fancytree/jquery.fancytree-all-deps.min.js';
+                        script.async = true;
+                        script.onload = () => {
+                            // Wait for FancyTree to register itself
+                            const checkFancytree = setInterval(() => {
+                                if ($global.fn?.fancytree) {
+                                    clearInterval(checkFancytree);
+                                    resolve();
+                                }
+                            }, 50);
+                            // Timeout after 2 seconds
+                            setTimeout(() => {
+                                clearInterval(checkFancytree);
+                                if (!$global.fn?.fancytree) {
+                                    reject(new Error('FancyTree failed to attach to jQuery'));
+                                }
+                            }, 2000);
+                        };
+                        script.onerror = () => reject(new Error('Failed to load FancyTree'));
+                        document.body.appendChild(script);
+                    });
+                }
 
-        // 3. Load FancyTree from CDN - Cannot use npm package because:
-        //    - Module imports execute immediately when bundle loads
-        //    - FancyTree checks for $.ui during module initialization
-        //    - Timing race: bundle may load before jQuery UI script registers $.ui
-        //    - CDN script loading ensures sequential execution and proper $.ui availability
-        if (!$global.fn?.fancytree) {
-            await this.loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.min.js');
-            
-            // Wait for FancyTree to be available (max 5 seconds)
-            const startTime = Date.now();
-            while (!$global.fn?.fancytree && Date.now() - startTime < 5000) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            
-            if (!$global.fn?.fancytree) {
-                throw new Error('FancyTree failed to load');
-            }
-        }
+                // Load the Collection Editor Web Component
+                if (!customElements.get('lib-editor')) {
+                    await new Promise<void>((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = '/assets/collection-editor/sunbird-collection-editor.js';
+                        script.async = true;
+                        script.onload = () => resolve();
+                        script.onerror = () => reject(new Error('Failed to load collection editor web component'));
+                        document.body.appendChild(script);
+                    });
+                }
 
-        // 4. Load the Collection Editor Web Component
-        if (!customElements.get('lib-editor')) {
-            await new Promise<void>((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = '/assets/collection-editor/sunbird-collection-editor.js';
-                script.async = true;
-                script.onload = () => resolve();
-                script.onerror = (err) => reject(new Error('Failed to load collection editor web component'));
-                document.body.appendChild(script);
-            });
-        }
+                this.loadAssets();
+                CollectionEditorService.dependenciesLoaded = true;
+            } catch (error) {
+                // Reset loading promise on failure so retry is possible
+                CollectionEditorService.dependenciesLoading = undefined;
+                throw error;
+            }
+        })();
 
-        this.loadAssets();
-        CollectionEditorService.dependenciesLoaded = true;
+        return CollectionEditorService.dependenciesLoading;
     }
 
     async createConfig(
@@ -150,7 +131,7 @@ export class CollectionEditorService {
             context,
             config: {
                 showAddCollaborator: true,
-                mode: contextProps?.mode,
+                mode: contextProps?.mode || 'edit',
                 objectType: 'Collection',
                 primaryCategory: 'Content Playlist',
             },
@@ -186,7 +167,6 @@ export class CollectionEditorService {
 
         const editorHandler = (event: Event) => {
             const customEvent = event as CustomEvent;
-            console.log("On editorEmitter", customEvent);
             if (onEditorEvent) {
                 onEditorEvent({
                     type: 'editorEmitter',

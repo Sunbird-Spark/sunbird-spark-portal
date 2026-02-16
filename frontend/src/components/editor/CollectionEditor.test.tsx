@@ -148,7 +148,7 @@ describe('CollectionEditor - Basic Rendering', () => {
     );
 
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('[QumlPlayer] Container or metadata not available');
+      expect(consoleSpy).toHaveBeenCalledWith('[CollectionEditor] Container or metadata not available');
     });
 
     expect(mockInitializeDependencies).not.toHaveBeenCalled();

@@ -46,7 +46,7 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
     const initEditor = async () => {
       try {
         if (!containerRef.current || !metadata) {
-          console.warn('[QumlPlayer] Container or metadata not available');
+          console.warn('[CollectionEditor] Container or metadata not available');
           return;
         }
         await serviceRef.current.initializeDependencies();
