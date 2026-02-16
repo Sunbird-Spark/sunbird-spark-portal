@@ -13,6 +13,7 @@ vi.mock("./pages/admin/AdminPage", () => ({ default: () => <div>Admin Page</div>
 vi.mock("./pages/workspace/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
 vi.mock("./pages/reports/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
 vi.mock("./pages/content/CreateContentPage", () => ({ default: () => <div>Create Content Page</div> }));
+vi.mock("./pages/Explore", () => ({ default: () => <div>Explore Page</div> }));
 vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
 
 // --------------------
@@ -50,6 +51,20 @@ describe("AppRoutes (RBAC routing tests)", () => {
 
     renderWithRoute("/home");
     expect(screen.getByText("Home Page")).toBeInTheDocument();
+  });
+
+  it("public route: /explore renders ExplorePage", () => {
+    mockUseAuth.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refetchUser: vi.fn(),
+    });
+
+    renderWithRoute("/explore");
+    expect(screen.getByText("Explore Page")).toBeInTheDocument();
   });
 
   it("public route: /unauthorized renders UnauthorizedPage", () => {

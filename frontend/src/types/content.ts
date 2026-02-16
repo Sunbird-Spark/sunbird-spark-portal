@@ -31,3 +31,15 @@ export interface SearchResponse {
         facets?: any[];
     };
 }
+
+export interface ContentSearchFilters {
+    primaryCategory?: string[];
+    visibility?: string[];
+    contentType?: string[];
+    se_subjects?: string[];
+    [key: string]: any;
+}
+
+export interface ContentSortBy {
+    [key: string]: "asc" | "desc";
+}

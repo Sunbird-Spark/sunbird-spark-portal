@@ -29,20 +29,25 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
     const [hasMore, setHasMore] = useState(true);
     
     // Use refs for pagination to avoid closure staleness in scroll handler
+
     const offsetRef = useRef(0);
     const isFetchingRef = useRef(false);
     const observerTarget = useRef<HTMLDivElement>(null);
+    const requestIdRef = useRef(0);
     const limit = 9;
 
-    const fetchContent = async () => {
-        if (isFetchingRef.current) return;
+    const fetchContent = async (isNewQuery = false) => {
+        // Prevent duplicate scroll loading, but allow new queries to override
+        if (!isNewQuery && isFetchingRef.current) return;
         
         isFetchingRef.current = true;
+        const requestId = ++requestIdRef.current;
+        
         setIsLoading(true);
         setError(null);
 
         try {
-            const currentOffset = offsetRef.current;
+            const currentOffset = isNewQuery ? 0 : offsetRef.current;
             const currentSortBy = sortBy; 
             const currentQuery = query;
             const currentFilters = filters;
@@ -63,6 +68,10 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
             }
             
             const data = await searchContent(limit, currentOffset, currentQuery, currentSortBy, activeFilters);
+            
+            // Should be the latest request to update state
+            if (requestId !== requestIdRef.current) return;
+
             const newContent = data.content || [];
             
             if (newContent.length < limit) {
@@ -116,21 +125,25 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
             offsetRef.current = currentOffset + newContent.length;
             setError(null);
         } catch (err) {
+            if (requestId !== requestIdRef.current) return;
             console.error('Failed to fetch content:', err);
             setError('Failed to load courses');
             setHasMore(false);
         } finally {
-            setIsLoading(false);
-            isFetchingRef.current = false;
+            if (requestId === requestIdRef.current) {
+                setIsLoading(false);
+                isFetchingRef.current = false;
+            }
         }
     };
 
+    // Initial load and query change reset
     // Initial load and query change reset
     useEffect(() => {
         offsetRef.current = 0;
         setDisplayItems([]);
         setHasMore(true);
-        fetchContent();
+        fetchContent(true);
     }, [query, filters, sortBy]);
 
     // Infinite scroll observer
