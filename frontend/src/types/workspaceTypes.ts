@@ -91,6 +91,7 @@ export interface ContentSearchItem {
   creator?: string;
   createdBy?: string;
   mimeType?: string;
+  appIcon?: string;
 }
 
 export interface ContentSearchResponse {
