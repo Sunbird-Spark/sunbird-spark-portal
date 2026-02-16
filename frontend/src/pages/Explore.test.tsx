@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Explore from './Explore';
 
 // Mock child components
-vi.mock('../components/ExploreGrid', () => ({
+vi.mock('../components/explore/ExploreGrid', () => ({
   default: ({ query, sortBy, filters }: any) => (
     <div data-testid="explore-grid">
       Grid Query: {query}, Sort: {JSON.stringify(sortBy)}, Filters: {JSON.stringify(filters)}
@@ -12,7 +12,7 @@ vi.mock('../components/ExploreGrid', () => ({
   ),
 }));
 
-vi.mock('../components/ExploreFilters', () => ({
+vi.mock('../components/explore/ExploreFilters', () => ({
   default: ({ filters, setFilters }: any) => (
     <div data-testid="explore-filters">
       <button onClick={() => setFilters({ ...filters, collections: ['TestCollection'] })}>
@@ -49,20 +49,9 @@ describe('Explore Page', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state initially', () => {
-    renderComponent();
-    expect(screen.getByText('loading')).toBeInTheDocument();
-  });
-
-  it('renders page content after loading timeout', async () => {
+  it('renders page content', () => {
     renderComponent();
     
-    // Initially showing loading
-    expect(screen.getByText('loading')).toBeInTheDocument();
-
-    // Wait for loading to finish (component uses 500ms timeout)
-    await waitFor(() => expect(screen.queryByText('loading')).not.toBeInTheDocument(), { timeout: 2000 });
-
     expect(screen.getByTestId('header')).toBeInTheDocument();
     expect(screen.getByTestId('footer')).toBeInTheDocument();
     expect(screen.getByTestId('explore-filters')).toBeInTheDocument();
@@ -71,8 +60,6 @@ describe('Explore Page', () => {
 
   it('updates search query on input', async () => {
     renderComponent();
-    // Wait for loading to finish
-    await waitFor(() => expect(screen.queryByText('loading')).not.toBeInTheDocument(), { timeout: 2000 });
 
     const input = screen.getByPlaceholderText('searchPlaceholder');
     fireEvent.change(input, { target: { value: 'test query' } });
@@ -85,8 +72,6 @@ describe('Explore Page', () => {
 
   it('updates sort options', async () => {
     renderComponent();
-    // Wait for loading to finish
-    await waitFor(() => expect(screen.queryByText('loading')).not.toBeInTheDocument(), { timeout: 2000 });
 
     // Debugging: check if button exists
     const sortButton = screen.getByText('Newest');
@@ -110,8 +95,6 @@ describe('Explore Page', () => {
 
   it('updates filters from child component', async () => {
     renderComponent();
-    // Wait for loading to finish
-    await waitFor(() => expect(screen.queryByText('loading')).not.toBeInTheDocument(), { timeout: 2000 });
 
     const updateFilterButton = screen.getByText('Update Filters');
     fireEvent.click(updateFilterButton);
