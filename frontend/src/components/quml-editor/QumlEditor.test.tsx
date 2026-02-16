@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import QumlEditor from './QumlEditor';
-import { qumlEditorService } from '../../services/QumlEditorService';
+import { qumlEditorService } from '../../services/editors/quml-editor/QumlEditorService';
 
 vi.mock('jquery', () => ({
   default: () => ({
@@ -18,7 +18,7 @@ vi.mock('jquery.fancytree/dist/modules/jquery.fancytree.dnd5.js', () => ({}));
 vi.mock('reflect-metadata', () => ({}));
 
 vi.mock('../../services/QumlEditorService', async () => {
-  const actual = await vi.importActual<typeof import('../../services/QumlEditorService')>('../../services/QumlEditorService');
+  const actual = await vi.importActual<typeof import('../../services/editors/quml-editor/QumlEditorService')>('../../services/QumlEditorService');
 
   return {
     __esModule: true,

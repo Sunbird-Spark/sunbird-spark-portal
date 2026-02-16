@@ -1,18 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { QumlEditorService, qumlEditorService, type QuestionSetMetadata } from './QumlEditorService';
-import appCoreService from './AppCoreService';
+import { QumlEditorService, type QuestionSetMetadata } from './';
+import appCoreService from '../../AppCoreService';
+import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
+
+vi.mock('../../userAuthInfoService/userAuthInfoService');
 
 describe('QumlEditorService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should expose a singleton instance', () => {
-    const service = qumlEditorService;
+  it('should expose a service class', () => {
+    const service = new QumlEditorService();
     expect(service).toBeInstanceOf(QumlEditorService);
   });
 
-  it('createEditorConfig should build editor config with metadata defaults', async () => {
+  it('createConfig should build editor config with metadata defaults', async () => {
     const metadata: QuestionSetMetadata = {
       identifier: 'do_123',
       name: 'Sample Question Set',
@@ -25,21 +28,30 @@ describe('QumlEditorService', () => {
     } as QuestionSetMetadata;
 
     const service = new QumlEditorService();
+    vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('');
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
     vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-123');
     vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' });
-    vi.spyOn<any, any>(service, 'fetchUserInfo').mockResolvedValue({ firstName: 'Jane', lastName: 'Doe', fullName: 'Jane Doe', userName: 'janedoe' });
-    vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({ data: { result: { response: { content: [] } } } });
-    const config = await service.createEditorConfig(metadata);
+    vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({ 
+      data: { 
+        result: { 
+          response: { 
+            content: [{ channel: 'channel-from-metadata' }] 
+          } 
+        } 
+      } 
+    });
+    const config = await service.createConfig(metadata);
 
     expect(config.context.identifier).toBe(metadata.identifier);
     expect(config.context.channel).toBe('channel-from-metadata');
     expect(config.context.sid).toBe('');
     expect(config.context.did).toBe('device-123');
-    expect(config.context.uid).toBe(metadata.createdBy);
-    expect(config.context.user).toEqual({ firstName: 'Jane', lastName: 'Doe', fullName: 'Jane Doe', userName: 'janedoe' });
+    expect(config.context.uid).toBe('user-123');
+    expect(config.context.user.id).toBe('user-123');
     expect(config.context.pdata.id).toBe('sunbird.portal');
     expect(config.config.primaryCategory).toBe(metadata.primaryCategory);
     expect(config.config.objectType).toBe(metadata.objectType);
-    expect(config.config.mode).toBe('edit'); // derived from status 'draft'
+    expect(config.config.mode).toBe('edit');
   });
 });
