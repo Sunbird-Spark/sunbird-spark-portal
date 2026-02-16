@@ -26,6 +26,20 @@ describe('Express App', () => {
         res.status(200).send('mock-kong-response');
       }
     }));
+    vi.doMock('./middlewares/formsValidator.js', () => ({
+      validateCreateAPI: (req: any, res: any, next: any) => next(),
+      validateReadAPI: (req: any, res: any, next: any) => next(),
+      validateUpdateAPI: (req: any, res: any, next: any) => next(),
+      validateListAPI: (req: any, res: any, next: any) => next()
+    }));
+    vi.doMock('./controllers/formsController.js', () => ({
+      create: (req: any, res: any) => res.status(200).send({}),
+      read: (req: any, res: any) => {
+        res.status(200).send({ result: 'mock-read-response' });
+      },
+      update: (req: any, res: any) => res.status(200).send({}),
+      listAll: (req: any, res: any) => res.status(200).send({})
+    }));
   });
 
   it('should create an Express application', async () => {
@@ -61,5 +75,41 @@ describe('Express App', () => {
       .expect(200);
 
     expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /portal/org/v2/search via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/portal/org/v2/search')
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /portal/data/v1/system/settings/get/* via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .get('/portal/data/v1/system/settings/get/do_123')
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /portal/composite/v1/search via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/portal/composite/v1/search')
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /portal/data/v1/form/read via formsController', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/portal/data/v1/form/read')
+      .expect(200);
+
+    expect(response.body).toEqual({ result: 'mock-read-response' });
   });
 });

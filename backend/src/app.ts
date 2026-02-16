@@ -38,8 +38,8 @@ app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousPr
 app.use('/portal', portalAuthRoutes);
 
 // Apply anonymous session middleware to API routes (once per route tree)
-app.use('/api', sessionMiddleware, ...anonymousMiddlewares);
-app.use('/api/data/v1/form', formRoutes);
+
+app.use('/data/v1/form', formRoutes);
 app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), authRoutes);
 app.use('/google', googleRoutes);
 
