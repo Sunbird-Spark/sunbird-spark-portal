@@ -41,6 +41,8 @@ export class EcmlPlayerService {
 
     const tags = hashTagId ? [hashTagId] : channel ? [channel] : [];
 
+    const pdata = await appCoreService.getPData();
+
     const context = {
       mode: contextProps?.mode || 'play',
       partner: [],
@@ -48,11 +50,7 @@ export class EcmlPlayerService {
       did,
       uid,
       channel,
-      pdata: {
-        id: 'sunbird.portal',
-        ver: '1.8.0',
-        pid: 'sunbird-portal',
-      },
+      pdata,
       contentId: metadata.identifier,
       contextRollup: contextProps?.contextRollup || { l1: channel },
       tags,

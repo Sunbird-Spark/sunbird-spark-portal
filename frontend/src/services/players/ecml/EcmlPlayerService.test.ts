@@ -14,6 +14,7 @@ vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
 vi.mock('../../AppCoreService', () => ({
   default: {
     getDeviceId: vi.fn(() => Promise.resolve('device-123')),
+    getPData: vi.fn(() => Promise.resolve({ id: 'test.portal', ver: '1.0.0', pid: 'test.portal' })),
   },
 }));
 

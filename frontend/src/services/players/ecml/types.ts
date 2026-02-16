@@ -26,6 +26,7 @@ export interface EcmlPlayerConfig {
     did: string;
     uid: string;
     channel: string;
+    contentId: string;
     pdata: {
       id: string;
       ver: string;
@@ -34,12 +35,19 @@ export interface EcmlPlayerConfig {
     contextRollup: {
       l1: string;
     };
+    tags: string[];
     cdata: any[];
     timeDiff: number;
     objectRollup: Record<string, any>;
     host: string;
     endpoint: string;
+    dims: string[];
+    app: string[];
     partner?: any[];
+    userData: {
+      firstName: string;
+      lastName: string;
+    };
   };
   config: {
     showEndPage: boolean;
@@ -65,8 +73,10 @@ export interface EcmlPlayerConfig {
       showPrint?: boolean;
       showReplay?: boolean;
     };
+    enableTelemetryValidation: boolean;
   };
   metadata: EcmlPlayerMetadata;
+  data: Record<string, any>;
 }
 
 export interface EcmlPlayerEvent {
