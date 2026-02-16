@@ -22,6 +22,10 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
         return t("resource.htmlBadge", { defaultValue: "HTML" });
       case "application/epub":
         return t("resource.epubBadge", { defaultValue: "EPUB" });
+      case "application/vnd.ekstep.ecml-archive":
+        return t("resource.ecmlBadge", { defaultValue: "ECML" });
+      case "application/vnd.ekstep.h5p-archive":
+        return t("resource.h5pBadge", { defaultValue: "H5P" });
       default: 
         return t("view", { defaultValue: "View" });
     }
