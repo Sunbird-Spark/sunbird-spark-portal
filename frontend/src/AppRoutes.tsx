@@ -17,6 +17,7 @@ import SignUp from './pages/signup/SignUp';
 import HelpSupport from './pages/helpSupport/HelpSupport';
 import HelpCategoryDetail from './pages/helpSupport/HelpCategoryDetail';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
+import Explore from './pages/Explore';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -38,6 +39,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/help-support" element={<HelpSupport />} />
         <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
+        <Route path="/explore" element={<Explore />} /> 
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />

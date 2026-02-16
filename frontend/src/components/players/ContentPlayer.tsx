@@ -2,6 +2,7 @@ import React from 'react';
 import { EpubPlayer } from './EpubPlayer';
 import { VideoPlayer } from './VideoPlayer';
 import { PdfPlayer } from '../content-player/pdf-player/PdfPlayer';
+import { EcmlPlayer } from './EcmlPlayer';
 
 // MIME type to player component mapping
 const MIME_TYPE_PLAYERS = {
@@ -10,6 +11,7 @@ const MIME_TYPE_PLAYERS = {
   'video/webm': VideoPlayer,
   'video/mp4': VideoPlayer,
   'application/pdf': PdfPlayer,
+  'application/vnd.ekstep.ecml-archive': EcmlPlayer,
 } as const;
 
 type SupportedMimeType = keyof typeof MIME_TYPE_PLAYERS;
