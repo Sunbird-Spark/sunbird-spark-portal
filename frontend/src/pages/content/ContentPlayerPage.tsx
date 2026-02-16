@@ -103,40 +103,46 @@ const ContentPlayerPage = () => {
         </div>
 
         {/* Related Content Section */}
-        <section>
-          <div className="content-player-related-header">
-            <h2 className="content-player-related-title">Related Content</h2>
-          </div>
+        {(() => {
+          // Check if we have any related content
+          const relatedContent = relatedContentData?.data?.content;
+          
+          // Don't show section if no related content
+          if (!relatedContent || relatedContent.length === 0) {
+            return null;
+          }
 
-          {(() => {
-            // Check if current content mimeType is a collection
-            const isCollection = contentData?.mimeType === "application/vnd.ekstep.content-collection";
+          return (
+            <section>
+              <div className="content-player-related-header">
+                <h2 className="content-player-related-title">Related Content</h2>
+              </div>
 
-            if (isCollection) {
-              return (
-                <div className="content-player-related-grid">
-                  {relatedContentData?.data?.content
-                    ?.filter((item) => item.identifier !== contentId) // Filter out current content first
-                    .slice(0, 3) // Then take first 3
-                    .map((item) => (
-                      <CollectionCard key={item.identifier} item={item} />
-                    ))}
-                </div>
-              );
-            } else {
-              return (
-                <div className="content-player-related-grid">
-                  {relatedContentData?.data?.content
-                    ?.filter((item) => item.identifier !== contentId) // Filter out current content first
-                    .slice(0, 3) // Then take first 3
-                    .map((item) => (
-                      <ResourceCard key={item.identifier} item={item} />
-                    ))}
-                </div>
-              );
-            }
-          })()}
-        </section>
+              {(() => {
+                // Check if current content mimeType is a collection
+                const isCollection = contentData?.mimeType === "application/vnd.ekstep.content-collection";
+
+                if (isCollection) {
+                  return (
+                    <div className="content-player-related-grid">
+                      {relatedContent.map((item) => (
+                        <CollectionCard key={item.identifier} item={item} />
+                      ))}
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="content-player-related-grid">
+                      {relatedContent.map((item) => (
+                        <ResourceCard key={item.identifier} item={item} />
+                      ))}
+                    </div>
+                  );
+                }
+              })()}
+            </section>
+          );
+        })()}
       </main>
 
       <Footer />
