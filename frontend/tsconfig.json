@@ -36,6 +36,6 @@
     /* Testing */
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
   },
-  "include": ["src", "src/types/**/*.d.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

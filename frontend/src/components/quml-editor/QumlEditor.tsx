@@ -13,27 +13,25 @@ type QumlEditorProps = {
   contextOverrides?: Partial<EditorConfig['context']>;
   onEditorEvent?: (event: QumlEditorEvent) => void;
   onTelemetryEvent?: (event: any) => void;
-  onPlayerEvent?: (event: any) => void;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ensureFancytree = async (): Promise<any> => {
-  const currentJq = (window as any).$ || (window as any).jQuery;
-  if (currentJq?.fn?.fancytree) {
-    return currentJq;
-  }
-
-  const { default: jq } = await import('jquery');
-  window.$ = jq;
-  (window as any).jQuery = jq;
-
+const loadFancytreeModules = async (): Promise<void> => {
   // @ts-expect-error No types for fancytree modules
   await import('jquery.fancytree');
   // @ts-expect-error No types for fancytree modules
   await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph.js');
   // @ts-expect-error No types for fancytree modules
   await import('jquery.fancytree/dist/modules/jquery.fancytree.dnd5.js');
-
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ensureFancytree = async (): Promise<any> => {
+  const currentJq = (window as any).$ || (window as any).jQuery;
+  if (currentJq?.fn?.fancytree) {
+    return currentJq;
+  }
+  const { default: jq } = await import('jquery');
+  window.$ = jq;
+  (window as any).jQuery = jq;
+  await loadFancytreeModules();
   return jq;
 };
 
@@ -43,16 +41,13 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
   contextOverrides,
   onEditorEvent,
   onTelemetryEvent,
-  onPlayerEvent,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorElementRef = useRef<HTMLElement | null>(null);
   const [resolvedMetadata, setResolvedMetadata] = useState<QuestionSetMetadata | null>(metadata || null);
   const fancytreeGuardRef = useRef<number | null>(null);
   const fancyJQRef = useRef<any>(null);
-
   const normalizedContextOverrides = useMemo(() => contextOverrides || {}, [contextOverrides]);
-
   const handleEditorEvent = useCallback(
     (event: QumlEditorEvent) => {
       console.log('[QumlEditor] Editor event:', event);
@@ -60,21 +55,12 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
     },
     [onEditorEvent]
   );
-
   const handleTelemetryEvent = useCallback(
     (event: any) => {
       console.log('[QumlEditor] Telemetry event:', event);
       onTelemetryEvent?.(event);
     },
     [onTelemetryEvent]
-  );
-
-  const handlePlayerEvent = useCallback(
-    (event: any) => {
-      console.log('[QumlEditor] Player event:', event);
-      onPlayerEvent?.(event);
-    },
-    [onPlayerEvent]
   );
 
   useEffect(() => {
@@ -131,14 +117,11 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
         if (!isMounted) return;
 
         const editorElement = qumlEditorService.createElement(config);
-
         qumlEditorService.attachEventListeners(
           editorElement,
           handleEditorEvent,
           handleTelemetryEvent,
-          handlePlayerEvent,
         );
-
         containerRef.current.innerHTML = '';
         containerRef.current.appendChild(editorElement);
 
@@ -152,14 +135,8 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
             const base = fancyJQRef.current || jqCurrent;
             (window as any).$ = base;
             (window as any).jQuery = base;
-            // @ts-expect-error dynamic import without types
-            await import('jquery.fancytree');
-            // @ts-expect-error dynamic import without types
-            await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph.js');
-            // @ts-expect-error dynamic import without types
-            await import('jquery.fancytree/dist/modules/jquery.fancytree.dnd5.js');
+            await loadFancytreeModules();
           } catch (e) {
-            // eslint-disable-next-line no-console
             console.warn('[QumlEditor] Failed to restore FancyTree', e);
           }
         }, 800);
@@ -183,8 +160,7 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
         fancytreeGuardRef.current = null;
       }
     };
-  }, [handleEditorEvent, handlePlayerEvent, handleTelemetryEvent, mode, normalizedContextOverrides, resolvedMetadata]);
-
+  }, [handleEditorEvent, handleTelemetryEvent, mode, normalizedContextOverrides, resolvedMetadata]);
   return (
     <div className={styles.qumlEditorPage}>
       <div className={styles.qumlEditorHost} ref={containerRef} />
