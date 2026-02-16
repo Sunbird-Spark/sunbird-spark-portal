@@ -161,4 +161,49 @@ describe('AppCoreService', () => {
             expect(consoleSpy).toHaveBeenCalledWith('AppCoreService initialization failed:', expect.any(Error));
         });
     });
+
+    describe('getPData', () => {
+        it('should fetch and return pdata from app info endpoint', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: {
+                        appId: 'test.portal',
+                        version: '2.0.0',
+                        buildHash: 'abc123'
+                    }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            const pdata = await appCoreService.getPData();
+
+            expect(mockClient.get).toHaveBeenCalledWith('/app/v1/info');
+            expect(pdata).toEqual({
+                id: 'test.portal',
+                ver: '2.0.0',
+                pid: 'test.portal'
+            });
+        });
+
+        it('should return fallback values if app info endpoint returns empty data', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: {
+                        appId: undefined,
+                        version: undefined,
+                        buildHash: undefined
+                    }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            const pdata = await appCoreService.getPData();
+
+            expect(pdata).toEqual({
+                id: '',
+                ver: '',
+                pid: ''
+            });
+        });
+    });
 });
