@@ -1,36 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import QumlEditor from './QumlEditor';
-import { qumlEditorService } from '../../services/editors/quml-editor/QumlEditorService';
+import { QumlEditorService } from '../../services/editors/quml-editor';
 
-vi.mock('jquery', () => ({
-  default: () => ({
-    fn: {
-      fancytree: vi.fn(),
-    },
-  }),
+vi.mock('../../services/editors/quml-editor', () => ({
+  QumlEditorService: vi.fn(),
+  QumlEditorConfig: {},
+  QuestionSetMetadata: {},
+  QumlEditorEvent: {},
+  QumlEditorContextOverrides: {},
 }));
-
-vi.mock('jquery.fancytree', () => ({}));
-vi.mock('jquery.fancytree/dist/modules/jquery.fancytree.glyph.js', () => ({}));
-vi.mock('jquery.fancytree/dist/modules/jquery.fancytree.dnd5.js', () => ({}));
-vi.mock('reflect-metadata', () => ({}));
-
-vi.mock('../../services/QumlEditorService', async () => {
-  const actual = await vi.importActual<typeof import('../../services/editors/quml-editor/QumlEditorService')>('../../services/QumlEditorService');
-
-  return {
-    __esModule: true,
-    ...actual,
-    qumlEditorService: {
-      createConfig: vi.fn(),
-      createElement: vi.fn(),
-      attachEventListeners: vi.fn(),
-      removeEventListeners: vi.fn(),
-    },
-  };
-});
 
 const createWrapper = () => ({ children }: { children: React.ReactNode }) => (
   <BrowserRouter>{children}</BrowserRouter>
@@ -50,74 +31,174 @@ describe('QumlEditor', () => {
 
   const mockConfig = {
     context: { identifier: 'do_123' },
-    config: {},
+    config: { mode: 'edit' },
+    metadata: mockMetadata,
   } as any;
 
   let mockElement: HTMLElement;
+  let mockServiceInstance: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (window as any).Reflect = { getMetadata: vi.fn() };
+    (globalThis as any).$ = { fn: { fancytree: vi.fn() } };
     mockElement = document.createElement('lib-questionset-editor');
 
-    vi.mocked(qumlEditorService.createConfig).mockResolvedValue(mockConfig);
-    vi.mocked(qumlEditorService.createElement).mockReturnValue(mockElement);
-    vi.mocked(qumlEditorService.attachEventListeners).mockImplementation(() => {});
-    vi.mocked(qumlEditorService.removeEventListeners).mockImplementation(() => {});
+    mockServiceInstance = {
+      initializeDependencies: vi.fn().mockResolvedValue(undefined),
+      createConfig: vi.fn().mockResolvedValue(mockConfig),
+      createElement: vi.fn().mockReturnValue(mockElement),
+      attachEventListeners: vi.fn(),
+      removeEventListeners: vi.fn(),
+    };
+
+    (QumlEditorService as any).mockImplementation(function() {
+      return mockServiceInstance;
+    });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  it('initializes dependencies on mount', async () => {
+    render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(mockServiceInstance.initializeDependencies).toHaveBeenCalled();
+    });
   });
 
-  it('uses provided metadata to build config', async () => {
+  it('creates config with provided metadata and options', async () => {
     render(
       <QumlEditor
         metadata={mockMetadata}
         mode="review"
-        contextOverrides={{ uid: 'override-uid' } as any}
-      />, { wrapper: createWrapper() }
+        contextOverrides={{ mode: 'review' }}
+      />,
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => {
-      expect(qumlEditorService.createConfig).toHaveBeenCalledWith(
+      expect(mockServiceInstance.createConfig).toHaveBeenCalledWith(
         mockMetadata,
-        expect.objectContaining({
-          mode: 'review',
-          contextOverrides: expect.objectContaining({ uid: 'override-uid' }),
-        })
+        expect.objectContaining({ mode: 'review' })
       );
-      expect(qumlEditorService.createElement).toHaveBeenCalledWith(mockConfig);
+    });
+  });
+
+  it('creates and appends editor element', async () => {
+    const { container } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(mockServiceInstance.createElement).toHaveBeenCalledWith(mockConfig);
+      expect(container.querySelector('lib-questionset-editor')).toBeTruthy();
+    });
+  });
+
+  it('attaches event listeners with handlers', async () => {
+    const onEditorEvent = vi.fn();
+    const onTelemetryEvent = vi.fn();
+
+    render(
+      <QumlEditor
+        metadata={mockMetadata}
+        onEditorEvent={onEditorEvent}
+        onTelemetryEvent={onTelemetryEvent}
+      />,
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(mockServiceInstance.attachEventListeners).toHaveBeenCalledWith(
+        mockElement,
+        expect.any(Function),
+        expect.any(Function)
+      );
     });
   });
 
   it('forwards editor events to consumer', async () => {
     const onEditorEvent = vi.fn();
-    let capturedEditorHandler: ((event: any) => void) | undefined;
+    let capturedHandler: any;
 
-    vi.mocked(qumlEditorService.attachEventListeners).mockImplementation((_, editorHandler) => {
-      capturedEditorHandler = editorHandler;
+    mockServiceInstance.attachEventListeners.mockImplementation((_el: any, handler: any) => {
+      capturedHandler = handler;
     });
 
     render(<QumlEditor metadata={mockMetadata} onEditorEvent={onEditorEvent} />, { wrapper: createWrapper() });
 
-    await waitFor(() => {
-      expect(qumlEditorService.attachEventListeners).toHaveBeenCalled();
-      expect(capturedEditorHandler).toBeDefined();
-    });
+    await waitFor(() => expect(capturedHandler).toBeDefined());
 
-    capturedEditorHandler?.({ type: 'submitContent', data: { id: 'x' }, editorId: 'do_123', timestamp: Date.now() });
+    const mockEvent = { type: 'submitContent', data: { id: 'x' } };
+    capturedHandler(mockEvent);
 
-    expect(onEditorEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'submitContent' }));
+    expect(onEditorEvent).toHaveBeenCalledWith(mockEvent);
   });
 
-  it('cleans up listeners on unmount', async () => {
+  it('forwards telemetry events to consumer', async () => {
+    const onTelemetryEvent = vi.fn();
+    let capturedTelemetryHandler: any;
+
+    mockServiceInstance.attachEventListeners.mockImplementation((_el: any, _editor: any, telemetry: any) => {
+      capturedTelemetryHandler = telemetry;
+    });
+
+    render(<QumlEditor metadata={mockMetadata} onTelemetryEvent={onTelemetryEvent} />, { wrapper: createWrapper() });
+
+    await waitFor(() => expect(capturedTelemetryHandler).toBeDefined());
+
+    const mockTelemetry = { eid: 'INTERACT', edata: {} };
+    capturedTelemetryHandler(mockTelemetry);
+
+    expect(onTelemetryEvent).toHaveBeenCalledWith(mockTelemetry);
+  });
+
+  it('shows loading state initially', () => {
+    const { container } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+    expect(container.textContent).toContain('Loading Editor');
+  });
+
+  it('does not initialize without metadata', async () => {
+    render(<QumlEditor />, { wrapper: createWrapper() });
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    expect(mockServiceInstance.initializeDependencies).not.toHaveBeenCalled();
+  });
+
+  it('handles initialization errors gracefully', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockServiceInstance.initializeDependencies.mockRejectedValue(new Error('Init failed'));
+
+    render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(consoleError).toHaveBeenCalledWith(
+        '[QumlEditor] Failed to initialize editor:',
+        expect.any(Error)
+      );
+    });
+
+    consoleError.mockRestore();
+  });
+
+  it('cleans up listeners and element on unmount', async () => {
     const { unmount } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
 
-    await waitFor(() => expect(qumlEditorService.createElement).toHaveBeenCalled());
+    await waitFor(() => expect(mockServiceInstance.createElement).toHaveBeenCalled());
 
     unmount();
 
-    expect(qumlEditorService.removeEventListeners).toHaveBeenCalledWith(mockElement);
+    expect(mockServiceInstance.removeEventListeners).toHaveBeenCalledWith(mockElement);
+  });
+
+  it('clears FancyTree guard interval on unmount', async () => {
+    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
+
+    const { unmount } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+
+    await waitFor(() => expect(mockServiceInstance.createElement).toHaveBeenCalled());
+
+    unmount();
+
+    expect(clearIntervalSpy).toHaveBeenCalled();
+
+    clearIntervalSpy.mockRestore();
   });
 });

@@ -1,12 +1,14 @@
+import '../jquery-setup'; // Must be first - sets up jQuery globally
+import 'jquery-ui-dist/jquery-ui';
 import { QumlEditorConfig, QumlEditorContextOverrides, QumlEditorEvent, QuestionSetMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
-import { getClient } from '@/lib/http-client';
 
 export class QumlEditorService {
   private static stylesLoaded = false;
   private static dependenciesLoaded = false;
+  private static dependenciesLoading?: Promise<void>;
 
   private orgService = new OrganizationService();
   private eventHandlers = new WeakMap<HTMLElement, {
@@ -14,85 +16,49 @@ export class QumlEditorService {
     telemetry?: (event: Event) => void;
   }>();
 
-  async getQuestionSet<T = any>(questionSetId: string): Promise<T> {
-    const res = await getClient().get<unknown>(`/questionset/v2/read/${questionSetId}?mode=edit`);
-    return res.data as T;
-  }
-  private async loadScriptOnce(url: string): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      const existing = document.querySelector(`script[data-src="${url}"]`);
-      if (existing) {
-        if ((existing as HTMLScriptElement).dataset.loaded === 'true') {
-          resolve();
-          return;
-        }
-        existing.addEventListener('load', () => resolve(), { once: true });
-        existing.addEventListener('error', (e) => reject(e), { once: true });
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = url;
-      script.async = true;
-      script.dataset.src = url;
-      script.onload = () => {
-        script.dataset.loaded = 'true';
-        resolve();
-      };
-      script.onerror = (e) => reject(e);
-      document.body.appendChild(script);
-    });
-  }
-
   async initializeDependencies(): Promise<void> {
+    // Return early if already loaded
     if (QumlEditorService.dependenciesLoaded) {
       return;
     }
 
-    // 1. Load jQuery from npm package
-    if (!(globalThis as any).$ || !(globalThis as any).jQuery) {
-      const { default: jq } = await import('jquery');
-      (globalThis as any).$ = jq;
-      (globalThis as any).jQuery = jq;
+    // If loading is in progress, wait for it to complete
+    if (QumlEditorService.dependenciesLoading) {
+      return QumlEditorService.dependenciesLoading;
     }
 
-    const $global = (globalThis as any).$;
+    // Create loading promise to prevent concurrent initialization
+    QumlEditorService.dependenciesLoading = (async () => {
+      try {
+        const $global = (globalThis as any).$;
 
-    // 2. Load jQuery UI from CDN - MUST be loaded via script tag and confirmed ready
-    //    before any FancyTree module import because bundled modules check $.ui at initialization time
-    if (!$global.ui) {
-      await this.loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js');
-      
-      // Wait for jQuery UI to be available (max 5 seconds)
-      const startTime = Date.now();
-      while (!$global.ui && Date.now() - startTime < 5000) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      if (!$global.ui) {
-        throw new Error('jQuery UI failed to load; required for FancyTree');
-      }
-    }
+        // jQuery and jQuery UI are now loaded via static imports
+        // Load FancyTree modules from npm
+        if (!$global.fn?.fancytree) {
+          // Load all FancyTree modules in sequence
+          await import('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
+          await import('jquery.fancytree/dist/modules/jquery.fancytree');
+          await import('jquery.fancytree/dist/modules/jquery.fancytree.dnd5');
+          await import('jquery.fancytree/dist/modules/jquery.fancytree.edit');
+          await import('jquery.fancytree/dist/modules/jquery.fancytree.filter');
+          await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph');
+          await import('jquery.fancytree/dist/modules/jquery.fancytree.table');
 
-    // 3. Load FancyTree from CDN - Cannot use npm package because:
-    //    - Module imports execute immediately when bundle loads
-    //    - FancyTree checks for $.ui during module initialization
-    //    - Timing race: bundle may load before jQuery UI script registers $.ui
-    //    - CDN script loading ensures sequential execution and proper $.ui availability
-    if (!$global.fn?.fancytree) {
-      await this.loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.min.js');
-      
-      // Wait for FancyTree to be available (max 5 seconds)
-      const startTime = Date.now();
-      while (!$global.fn?.fancytree && Date.now() - startTime < 5000) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      if (!$global.fn?.fancytree) {
-        throw new Error('FancyTree failed to load');
-      }
-    }
+          // Verify FancyTree attached to jQuery
+          if (!$global.fn?.fancytree) {
+            throw new Error('FancyTree failed to attach to jQuery');
+          }
+        }
 
-    QumlEditorService.dependenciesLoaded = true;
+        QumlEditorService.dependenciesLoaded = true;
+      } catch (error) {
+        // Reset loading promise on failure so retry is possible
+        QumlEditorService.dependenciesLoading = undefined;
+        throw error;
+      }
+    })();
+
+    return QumlEditorService.dependenciesLoading;
   }
 
   async createConfig(
