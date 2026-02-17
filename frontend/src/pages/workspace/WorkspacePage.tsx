@@ -19,6 +19,7 @@ import WorkspacePageHeader from "./WorkspacePageHeader";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
+import { WORKSPACE_STATUS_FILTER, WORKSPACE_PRIMARY_CATEGORY_FILTER } from "./workspaceConstants";
 import "../home/home.css";
 import "./workspace.css";
 
@@ -52,11 +53,20 @@ const WorkspacePage = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
+  const userId = userAuthInfoService.getUserId();
   const { data: searchData, isLoading, isError, error, refetch } = useContentSearch({
     request: showContent
-      ? { sort_by: sortBy === 'updated' ? { lastUpdatedOn: 'desc' } : sortBy === 'created' ? { createdOn: 'desc' } : { name: 'asc' } }
+      ? {
+          filters: {
+            createdBy: userId ?? '',
+            status: [...WORKSPACE_STATUS_FILTER],
+            primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
+          },
+          facets: ['status'],
+          sort_by: sortBy === 'updated' ? { lastUpdatedOn: 'desc' } : sortBy === 'created' ? { createdOn: 'desc' } : { name: 'asc' },
+        }
       : undefined,
-    enabled: showContent,
+    enabled: showContent && !!userId,
   });
 
   const items: WorkspaceItem[] = useMemo(() => {
@@ -67,15 +77,17 @@ const WorkspacePage = () => {
   }, [searchData]);
 
   const counts = useMemo(() => {
-    const review = items.filter((i) => i.status === 'review').length;
-    return {
-      all: items.length,
-      drafts: items.filter((i) => i.status === 'draft').length,
-      review,
-      published: items.filter((i) => i.status === 'published').length,
-      pendingReview: review,
-    };
-  }, [items]);
+    const statusFacet = searchData?.data?.facets?.find(f => f.name === 'status');
+    const getFacetCount = (name: string) =>
+      statusFacet?.values.find(v => v.name === name)?.count ?? 0;
+
+    const drafts = getFacetCount('draft');
+    const review = getFacetCount('review');
+    const published = getFacetCount('live');
+    const all = searchData?.data?.count ?? 0;
+
+    return { all, drafts, review, published, pendingReview: review };
+  }, [searchData]);
 
   useEffect(() => {
     const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';

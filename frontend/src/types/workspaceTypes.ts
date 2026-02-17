@@ -70,8 +70,19 @@ export interface WorkspaceItem {
   author: string;
 }
 
+export interface FacetValue {
+  name: string;
+  count: number;
+}
+
+export interface Facet {
+  name: string;
+  values: FacetValue[];
+}
+
 export interface ContentSearchRequest {
   filters?: Record<string, unknown>;
+  facets?: string[];
   limit?: number;
   offset?: number;
   query?: string;
@@ -96,8 +107,10 @@ export interface ContentSearchItem {
 }
 
 export interface ContentSearchResponse {
+  count?: number;
   content?: ContentSearchItem[];
   QuestionSet?: ContentSearchItem[];
+  facets?: Facet[];
 }
 
 export interface UseContentSearchOptions {
