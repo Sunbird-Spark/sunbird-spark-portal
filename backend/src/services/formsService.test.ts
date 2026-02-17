@@ -3,8 +3,24 @@ import request from 'supertest';
 import { app } from '../app.js';
 import { FormService } from './formsService.js';
 
+// Mock sessionStore still needed for app.ts/middlewares
 vi.mock('../utils/sessionStore.js', () => {
-    const mockYsqlPool = {
+    return {
+        ysqlPool: {},
+        getYsqlPool: () => ({}),
+        sessionStore: {
+            get: vi.fn((sid, callback) => callback(null, null)),
+            set: vi.fn((sid, session, callback) => callback(null)),
+            destroy: vi.fn((sid, callback) => callback(null)),
+            on: vi.fn(),
+            touch: vi.fn((sid, session, callback) => callback(null))
+        }
+    };
+});
+
+// Mock the new formsDatabase
+vi.mock('../databases/formsDatabase.js', () => {
+    const mockFormsPool = {
         query: (...args: any[]) => {
             const [query, params] = args;
             if (query.includes('INSERT INTO')) {
@@ -29,15 +45,7 @@ vi.mock('../utils/sessionStore.js', () => {
         }
     };
     return {
-        ysqlPool: mockYsqlPool,
-        getYsqlPool: () => mockYsqlPool,
-        sessionStore: {
-            get: vi.fn((sid, callback) => callback(null, null)),
-            set: vi.fn((sid, session, callback) => callback(null)),
-            destroy: vi.fn((sid, callback) => callback(null)),
-            on: vi.fn(),
-            touch: vi.fn((sid, session, callback) => callback(null))
-        }
+        getFormsPool: () => mockFormsPool
     };
 });
 
@@ -49,7 +57,7 @@ describe('FormService API Integration', () => {
     });
 
     describe('Create', () => {
-        const endpoint = '/api/data/v1/form/create';
+        const endpoint = '/data/v1/form/create';
         it.each([
             [{ type: 'content', subType: 'textbook', action: 'save', framework: 'NCF', rootOrgId: 'sunbird', data: { template: 'template1' } }],
             [{ type: 'content', action: 'save', rootOrgId: 'sunbird', data: { template: 'template1' } }],
@@ -76,9 +84,9 @@ describe('FormService API Integration', () => {
     });
 
     describe('Read', () => {
-        const endpoint = '/api/data/v1/form/read';
+        const endpoint = '/data/v1/form/read';
         it('should read existing form', async () => {
-            await api.post('/api/data/v1/form/create').send({ request: { type: 'content', action: 'view', framework: 'readTest', rootOrgId: 'readOrg', data: { template: 'readTemplate' } } });
+            await api.post('/data/v1/form/create').send({ request: { type: 'content', action: 'view', framework: 'readTest', rootOrgId: 'readOrg', data: { template: 'readTemplate' } } });
             const response = await api.post(endpoint).send({ request: { type: 'content', action: 'view', framework: 'readTest', rootOrgId: 'readOrg' } });
             expect(response.status).toBe(200);
             expect(response.body.id).toBe('api.form.read');
@@ -104,9 +112,9 @@ describe('FormService API Integration', () => {
     });
 
     describe('Update', () => {
-        const endpoint = '/api/data/v1/form/update';
+        const endpoint = '/data/v1/form/update';
         it('should update existing form', async () => {
-            await api.post('/api/data/v1/form/create').send({ request: { type: 'content', action: 'search', framework: 'testFramework', rootOrgId: 'testOrg', data: { template: 'original' } } });
+            await api.post('/data/v1/form/create').send({ request: { type: 'content', action: 'search', framework: 'testFramework', rootOrgId: 'testOrg', data: { template: 'original' } } });
             const response = await api.post(endpoint).send({ request: { type: 'content', action: 'search', framework: 'testFramework', rootOrgId: 'testOrg', data: { template: 'updated' } } });
             expect(response.status).toBe(200);
             expect(response.body.id).toBe('api.form.update');
@@ -128,9 +136,9 @@ describe('FormService API Integration', () => {
     });
 
     describe('List', () => {
-        const endpoint = '/api/data/v1/form/list';
+        const endpoint = '/data/v1/form/list';
         it('should list forms for a valid rootOrgId', async () => {
-            await api.post('/api/data/v1/form/create').send({ request: { type: 'list-test', action: 'list-action', rootOrgId: 'listOrg', data: { foo: 'bar' } } });
+            await api.post('/data/v1/form/create').send({ request: { type: 'list-test', action: 'list-action', rootOrgId: 'listOrg', data: { foo: 'bar' } } });
             const response = await api.post(endpoint).send({ request: { rootOrgId: 'listOrg' } });
             expect(response.status).toBe(200);
             expect(response.body.id).toBe('api.form.list');
