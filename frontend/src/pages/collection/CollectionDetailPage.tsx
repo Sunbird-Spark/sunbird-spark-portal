@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiArrowRight, FiStar, FiShare2 } from "react-icons/fi";
+import { FiArrowLeft, FiStar, FiShare2 } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
@@ -182,39 +182,15 @@ const CollectionDetailPage = () => {
           )}
 
           {!searchError && (relatedContentItems.length > 0 || !searchFetching) && (
-          <>
-          <RelatedContent
-            items={relatedContentItems}
-            cardType="collection"
-          />
-
-          {/* Carousel Navigation - TODO: implement carousel when related content section is enhanced */}
-          <div className="flex items-center justify-center gap-3 mt-8">
-            <button
-              type="button"
-              aria-label={t("button.previous")}
-              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors"
-              onClick={() => { /* TODO: implement carousel previous */ }}
-            >
-              <FiArrowLeft className="w-4 h-4 text-gray-500" />
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1 bg-gray-800 rounded-full" />
-              <div className="w-6 h-1 bg-gray-300 rounded-full" />
-            </div>
-            <button
-              type="button"
-              aria-label={t("button.next")}
-              className="w-8 h-8 rounded-full bg-sunbird-brick flex items-center justify-center hover:bg-sunbird-brick/90 transition-colors"
-              onClick={() => { /* TODO: implement carousel next */ }}
-            >
-              <FiArrowRight className="w-4 h-4 text-white" />
-            </button>
-          </div>
-          </>
+            <RelatedContent
+              items={relatedContentItems}
+              cardType="collection"
+            />
           )}
         </section>
-        <FAQSection className="bg-gray-100" />
+        <div className="mt-16">
+          <FAQSection />
+        </div>
           </>
         )}
       </main>
