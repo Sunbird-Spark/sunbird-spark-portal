@@ -20,7 +20,7 @@ export interface EpubPlayerMetadata {
 export interface EpubPlayerConfig {
   context: {
     mode: string;
-    sid: string;
+    sid: string | null;
     did: string;
     uid: string;
     channel: string;
@@ -29,14 +29,16 @@ export interface EpubPlayerConfig {
       ver: string;
       pid: string;
     };
-    contextRollup: {
-      l1: string;
-    };
+    contextRollup: any;
     cdata: any[];
     timeDiff: number;
     objectRollup: Record<string, any>;
     host: string;
     endpoint: string;
+    userData: {
+      firstName: string;
+      lastName: string;
+    };
   };
   config: Record<string, any>;
   metadata: EpubPlayerMetadata;

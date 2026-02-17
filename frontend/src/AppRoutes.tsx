@@ -14,6 +14,8 @@ import Index from './pages/Index';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
+import ContentPlayerPage from './pages/content/ContentPlayerPage';
+import Explore from './pages/Explore';
 import MyLearning from './pages/workspace/MyLearning';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
@@ -33,6 +35,8 @@ const AppRoutes: React.FC = () => {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/content/:contentId" element={<ContentPlayerPage />} />
+        <Route path="/explore" element={<Explore />} /> 
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />

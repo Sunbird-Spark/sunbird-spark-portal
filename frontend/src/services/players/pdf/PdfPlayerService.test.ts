@@ -3,7 +3,6 @@ import { PdfPlayerService } from './PdfPlayerService';
 import type { PdfPlayerMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
 
 // Mock the services
 vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
@@ -272,6 +271,70 @@ describe('PdfPlayerService', () => {
       const element = service.createElement(config);
 
       expect(element.getAttribute('data-player-id')).toBe('content-123');
+    });
+
+    it('should load styles on first createElement call', async () => {
+      // Clear any existing styles and reset static flag
+      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
+      (PdfPlayerService as any).stylesLoaded = false;
+
+      const config = await service.createConfig(mockMetadata);
+      service.createElement(config);
+
+      const styleLink = document.querySelector('[data-pdf-player-styles="true"]');
+      expect(styleLink).toBeTruthy();
+      expect(styleLink?.getAttribute('href')).toBe('/assets/pdf-player/styles.css');
+      expect(styleLink?.getAttribute('rel')).toBe('stylesheet');
+    });
+
+    it('should not load styles multiple times', async () => {
+      // Clear any existing styles and reset static flag
+      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
+      (PdfPlayerService as any).stylesLoaded = false;
+
+      const config = await service.createConfig(mockMetadata);
+      
+      // Create multiple elements
+      service.createElement(config);
+      service.createElement(config);
+      service.createElement(config);
+
+      const styleLinks = document.querySelectorAll('[data-pdf-player-styles="true"]');
+      expect(styleLinks.length).toBe(1);
+    });
+
+    it('should not load styles if already present in DOM', async () => {
+      // Clear any existing styles and reset static flag
+      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
+      (PdfPlayerService as any).stylesLoaded = false;
+
+      // Manually add a style element to simulate existing styles
+      const existingStyle = document.createElement('link');
+      existingStyle.setAttribute('data-pdf-player-styles', 'true');
+      existingStyle.rel = 'stylesheet';
+      existingStyle.href = '/assets/pdf-player/styles.css';
+      document.head.appendChild(existingStyle);
+
+      const config = await service.createConfig(mockMetadata);
+      service.createElement(config);
+
+      // Should still only have one style element
+      const styleLinks = document.querySelectorAll('[data-pdf-player-styles="true"]');
+      expect(styleLinks.length).toBe(1);
+      expect((PdfPlayerService as any).stylesLoaded).toBe(true);
+    });
+
+    it('should not load styles if stylesLoaded flag is already true', async () => {
+      // Clear any existing styles but keep static flag as true
+      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
+      (PdfPlayerService as any).stylesLoaded = true;
+
+      const config = await service.createConfig(mockMetadata);
+      service.createElement(config);
+
+      // Should not create any new style elements
+      const styleLinks = document.querySelectorAll('[data-pdf-player-styles="true"]');
+      expect(styleLinks.length).toBe(0);
     });
   });
 
