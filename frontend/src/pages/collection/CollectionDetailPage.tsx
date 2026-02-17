@@ -155,6 +155,11 @@ const CollectionDetailPage = () => {
 
         {/* Related Content Section */}
         <section className="mt-16">
+          {(searchError || (searchFetching && relatedContentItems.length === 0)) && (
+            <div className="content-player-related-header mb-6">
+              <h2 className="content-player-related-title">{t("courseDetails.relatedContent")}</h2>
+            </div>
+          )}
           {searchError && searchErrorObj && (
             <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
               <PageLoader
