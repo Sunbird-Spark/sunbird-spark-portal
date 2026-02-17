@@ -19,6 +19,7 @@ interface WorkspacePageContentProps {
   isError: boolean;
   error: Error | null;
   onLoadMore: () => void;
+  onRetry: () => void;
   onCreateOption: (optionId: string) => void;
   onCreateClick: () => void;
   onEdit: (id: string) => void;
@@ -39,6 +40,7 @@ export default function WorkspacePageContent({
   isError,
   error,
   onLoadMore,
+  onRetry,
   onCreateOption,
   onCreateClick,
   onEdit,
@@ -81,16 +83,16 @@ export default function WorkspacePageContent({
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <FiAlertCircle className="w-12 h-12 text-destructive mb-4" />
-        <h3 className="text-lg font-semibold font-rubik mb-2">Something went wrong</h3>
+        <h3 className="text-lg font-semibold font-rubik mb-2">{t('somethingWentWrong')}</h3>
         <p className="text-sm text-muted-foreground font-rubik mb-4 max-w-md">
-          {error?.message ?? 'Failed to load content. Please try again.'}
+          {error?.message ?? t('failedToLoadContent')}
         </p>
         <Button
           variant="outline"
-          onClick={() => window.location.reload()}
+          onClick={onRetry}
           className="font-rubik rounded-xl"
         >
-          Retry
+          {t('retry')}
         </Button>
       </div>
     );
@@ -101,7 +103,7 @@ export default function WorkspacePageContent({
     return (
       <div className="flex items-center justify-center py-16">
         <FiLoader className="w-6 h-6 animate-spin text-sunbird-brick mr-3" />
-        <span className="text-sm text-muted-foreground font-rubik">Loading content…</span>
+        <span className="text-sm text-muted-foreground font-rubik">{t('loadingContent')}</span>
       </div>
     );
   }
@@ -150,6 +152,7 @@ export default function WorkspacePageContent({
         hasMore={hasMore}
         isLoadingMore={isLoadingMore}
         onLoadMore={onLoadMore}
+        t={t}
       />
     </div>
   );
@@ -164,10 +167,12 @@ function InfiniteScrollSentinel({
   hasMore,
   isLoadingMore,
   onLoadMore,
+  t,
 }: {
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  t: (key: string) => string;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -196,7 +201,7 @@ function InfiniteScrollSentinel({
       {isLoadingMore && (
         <div className="flex items-center gap-2">
           <FiLoader className="w-5 h-5 animate-spin text-sunbird-brick" />
-          <span className="text-sm text-muted-foreground font-rubik">Loading more…</span>
+          <span className="text-sm text-muted-foreground font-rubik">{t('loadingMore')}</span>
         </div>
       )}
     </div>

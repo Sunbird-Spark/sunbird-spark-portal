@@ -17,6 +17,7 @@ const defaultProps = {
   isError: false,
   error: null,
   onLoadMore: vi.fn(),
+  onRetry: vi.fn(),
   onCreateOption: vi.fn(),
   onCreateClick: vi.fn(),
   onEdit: vi.fn(),

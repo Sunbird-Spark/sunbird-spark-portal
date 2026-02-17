@@ -69,6 +69,7 @@ const WorkspacePage = () => {
     activeTab: activeView,
     sortBy,
     typeFilter,
+    userRole,
     enabled: showContent,
   });
 
@@ -220,6 +221,7 @@ const WorkspacePage = () => {
                 isError={!!error}
                 error={error}
                 onLoadMore={loadMore}
+                onRetry={refetchAll}
                 onCreateOption={handleCreateOption}
                 onCreateClick={handleCreateClick}
                 onEdit={handleEdit}

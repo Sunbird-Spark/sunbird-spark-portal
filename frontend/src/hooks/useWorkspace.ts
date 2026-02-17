@@ -41,6 +41,7 @@ interface UseWorkspaceOptions {
   activeTab: WorkspaceView;
   sortBy: SortOption;
   typeFilter: ContentTypeFilter;
+  userRole?: 'creator' | 'reviewer';
   enabled?: boolean;
 }
 
@@ -58,11 +59,15 @@ export function useWorkspace({
   activeTab,
   sortBy,
   typeFilter,
+  userRole = 'creator',
   enabled = true,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create', 'uploads', 'collaborations'].includes(activeTab);
   const queryEnabled = enabled && !!userId && isContentTab;
+
+  // Whether this tab shows the current user's own content
+  const isOwnContentTab = !['pending-review'].includes(activeTab) || userRole === 'creator';
 
   // ── Counts query (runs once, shared across tabs) ──────────────────────
   const countsQuery = useQuery({
@@ -70,7 +75,7 @@ export function useWorkspace({
     queryFn: () =>
       contentService.contentSearch({
         filters: {
-          createdBy: userId ?? '',
+          ...(isOwnContentTab ? { createdBy: userId ?? '' } : {}),
           status: [...WORKSPACE_STATUS_FILTER],
           primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
         },
@@ -88,9 +93,9 @@ export function useWorkspace({
     const getFacetCount = (name: string) =>
       statusFacet?.values.find((v) => v.name === name)?.count ?? 0;
 
-    const drafts = getFacetCount('draft');
-    const review = getFacetCount('review');
-    const published = getFacetCount('live');
+    const drafts = getFacetCount('draft') + getFacetCount('flagdraft');
+    const review = getFacetCount('review') + getFacetCount('processing') + getFacetCount('flagreview');
+    const published = getFacetCount('live') + getFacetCount('unlisted');
     const all = countsQuery.data?.data?.count ?? 0;
 
     return { all, drafts, review, published, pendingReview: review };
@@ -102,11 +107,11 @@ export function useWorkspace({
     getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: {
-          createdBy: userId ?? '',
+          ...(isOwnContentTab ? { createdBy: userId ?? '' } : {}),
           status: statusFilter,
           primaryCategory: primaryCategoryFilter,
         },
@@ -135,11 +140,13 @@ export function useWorkspace({
 
   const totalCount = contentQuery.data?.pages[0]?.data?.count ?? 0;
 
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = contentQuery;
+
   const loadMore = useCallback(() => {
-    if (contentQuery.hasNextPage && !contentQuery.isFetchingNextPage) {
-      void contentQuery.fetchNextPage();
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
     }
-  }, [contentQuery]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const refetchCounts = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
@@ -155,10 +162,10 @@ export function useWorkspace({
     counts,
     totalCount,
     isLoading: contentQuery.isLoading,
-    isLoadingMore: contentQuery.isFetchingNextPage,
+    isLoadingMore: isFetchingNextPage,
     isCountsLoading: countsQuery.isLoading,
     error: contentQuery.error,
-    hasMore: !!contentQuery.hasNextPage,
+    hasMore: !!hasNextPage,
     loadMore,
     refetchCounts,
     refetchAll,
