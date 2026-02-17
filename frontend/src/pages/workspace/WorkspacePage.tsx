@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Sheet,
   SheetContent,
@@ -12,17 +13,34 @@ import WorkspaceToolbar from "@/components/workspace/WorkspaceToolbar";
 import { type WorkspaceItem } from "@/types/workspaceTypes";
 import { useContentSearch } from "@/hooks/useContent";
 import { mapContentToWorkspaceItem } from "@/services/workspace";
+import { ContentService } from "@/services/ContentService";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import WorkspacePageHeader from "./WorkspacePageHeader";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
+import ContentNameDialog from "./ContentNameDialog";
 import "../home/home.css";
 import "./workspace.css";
 
+// Resource editor option IDs that should trigger the content editor
+const RESOURCE_EDITOR_OPTIONS = ['interactive', 'quiz', 'story'];
+
+const RESOURCE_EDITOR_OPTION_LABELS: Record<string, string> = {
+  interactive: 'Interactive Activity',
+  quiz: 'Quiz & Assessment',
+  story: 'Story & Game',
+};
+
+const contentService = new ContentService();
+
 const WorkspacePage = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { data: userData } = useUserRead();
   const { toast } = useToast();
   const { t } = useAppI18n();
   const [activeNav, setActiveNav] = useState("workspace");
@@ -33,6 +51,9 @@ const WorkspacePage = () => {
   const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
   const { data: searchData, isLoading, refetch } = useContentSearch({
@@ -91,11 +112,45 @@ const WorkspacePage = () => {
   }, [items, activeView, typeFilter, sortBy]);
 
   const handleCreateOption = (optionId: string) => {
-    setShowCreateModal(false);
-    toast({ 
-      title: "Starting Editor", 
-      description: `Launching ${optionId.replace('-', ' ')} editor...` 
-    });
+    if (RESOURCE_EDITOR_OPTIONS.includes(optionId)) {
+      // Resource editor options: show name dialog first
+      setShowCreateModal(false);
+      setSelectedOption(optionId);
+      setShowNameDialog(true);
+    } else {
+      setShowCreateModal(false);
+      toast({
+        title: "Starting Editor",
+        description: `Launching ${optionId.replace('-', ' ')} editor...`
+      });
+    }
+  };
+
+  const handleContentNameSubmit = async (name: string) => {
+    setIsCreating(true);
+    try {
+      const first = userData?.data?.response?.firstName?.trim();
+      const last = userData?.data?.response?.lastName?.trim();
+      const creator = first || last ? [first, last].filter(Boolean).join(" ") : "anonymous";
+      const response = await contentService.contentCreate(name, {
+        createdBy: userAuthInfoService.getUserId() || '', creator,
+        mimeType: 'application/vnd.ekstep.ecml-archive', contentType: 'Resource', primaryCategory: 'Learning Resource',
+      });
+      const contentId = response.data?.identifier || response.data?.content_id;
+      if (contentId) {
+        setShowNameDialog(false);
+        setSelectedOption(null);
+        navigate(`/edit/content-editor/${contentId}`);
+      } else {
+        console.error("Content creation response missing identifier:", response);
+        toast({ title: "Error", description: "Unexpected server response. Please try again.", variant: "destructive" });
+      }
+    } catch (error) {
+      console.error('Failed to create content:', error);
+      toast({ title: "Error", description: "Failed to create content. Please try again.", variant: "destructive" });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleEdit = (_id: string) => {
@@ -206,6 +261,13 @@ const WorkspacePage = () => {
             </div>
           </main>
           <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
+          <ContentNameDialog
+            open={showNameDialog}
+            onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
+            onSubmit={handleContentNameSubmit}
+            isLoading={isCreating}
+            optionTitle={selectedOption ? RESOURCE_EDITOR_OPTION_LABELS[selectedOption] : undefined}
+          />
         </div>
       </div>
 
