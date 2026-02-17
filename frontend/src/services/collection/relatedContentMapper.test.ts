@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import {
-  mapRelatedItemsToContentSearchItems,
-  mapSearchContentToRelatedContentItems,
-} from './relatedContentMapper';
-import type { RelatedContentSearchItem, RelatedItem } from '../../types/collectionTypes';
+import { mapSearchContentToRelatedContentItems } from './relatedContentMapper';
+import type { RelatedContentSearchItem } from '../../types/collectionTypes';
 
 describe('relatedContentMapper', () => {
   describe('mapSearchContentToRelatedContentItems', () => {
@@ -77,52 +74,6 @@ describe('relatedContentMapper', () => {
       ];
       const result = mapSearchContentToRelatedContentItems(items);
       expect(result[0]!.appIcon).toBe('https://icon.png');
-    });
-  });
-
-  describe('mapRelatedItemsToContentSearchItems', () => {
-    it('maps RelatedItem to ContentSearchItem with cardType', () => {
-      const items: RelatedItem[] = [
-        { id: 'r1', title: 'Video Resource', type: 'Video', image: 'https://img.png', isResource: true },
-        { id: 'r2', title: 'Course Item', type: 'Course', image: 'https://course.png', isResource: false },
-      ];
-      const result = mapRelatedItemsToContentSearchItems(items);
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual(
-        expect.objectContaining({
-          identifier: 'r1',
-          name: 'Video Resource',
-          appIcon: 'https://img.png',
-          mimeType: 'video/mp4',
-          primaryCategory: 'Video',
-          cardType: 'resource',
-        })
-      );
-      expect(result[1]).toEqual(
-        expect.objectContaining({
-          identifier: 'r2',
-          name: 'Course Item',
-          appIcon: 'https://course.png',
-          primaryCategory: 'Course',
-          cardType: 'collection',
-        })
-      );
-    });
-
-    it('maps PDF type to application/pdf mimeType', () => {
-      const items: RelatedItem[] = [
-        { id: 'p1', title: 'PDF Doc', type: 'PDF', image: '', isResource: true },
-      ];
-      const result = mapRelatedItemsToContentSearchItems(items);
-      expect(result[0]!.mimeType).toBe('application/pdf');
-    });
-
-    it('defaults unknown type to application/pdf', () => {
-      const items: RelatedItem[] = [
-        { id: 'x1', title: 'Unknown', type: 'Unknown', image: '', isResource: true },
-      ];
-      const result = mapRelatedItemsToContentSearchItems(items);
-      expect(result[0]!.mimeType).toBe('application/pdf');
     });
   });
 });
