@@ -15,12 +15,14 @@ import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
+import ContentEditorPage from './pages/content/ContentEditorPage';
 import Explore from './pages/Explore';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
+const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
 
 const AppRoutes: React.FC = () => {
   return (
@@ -42,6 +44,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/workspace" element={<WorkspaceProtected />} />
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentProtected />} />
+        <Route path="/edit/content-editor/:contentId" element={<ContentEditorProtected />} />
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

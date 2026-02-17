@@ -65,4 +65,144 @@ describe('ContentService', () => {
     await service.contentRead('do_789', []);
     expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_789');
   });
+
+  describe('contentCreate', () => {
+    const mockCreateResponse = {
+      data: {
+        content_id: 'do_new_123',
+        identifier: 'do_new_123',
+        node_id: 'do_new_123',
+        versionKey: '123456',
+      },
+      status: 200,
+      headers: {},
+    };
+
+    beforeEach(() => {
+      mockClient.post = vi.fn().mockResolvedValue(mockCreateResponse);
+      // Mock crypto.randomUUID
+      vi.stubGlobal('crypto', { randomUUID: () => 'mock-uuid-1234' });
+    });
+
+    it('should call client.post with correct endpoint and default fields', async () => {
+      await service.contentCreate('My Content', {
+        createdBy: 'user-1',
+        creator: 'Test User',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/create',
+        {
+          request: {
+            content: {
+              name: 'My Content',
+              code: 'mock-uuid-1234',
+              createdBy: 'user-1',
+              creator: 'Test User',
+              mimeType: 'application/vnd.ekstep.ecml-archive',
+              contentType: 'Resource',
+              primaryCategory: 'Learning Resource',
+            },
+          },
+        }
+      );
+    });
+
+    it('should use custom mimeType when provided', async () => {
+      await service.contentCreate('My Content', {
+        createdBy: 'user-1',
+        creator: 'Test User',
+        mimeType: 'application/pdf',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/create',
+        expect.objectContaining({
+          request: expect.objectContaining({
+            content: expect.objectContaining({
+              mimeType: 'application/pdf',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should use custom contentType when provided', async () => {
+      await service.contentCreate('My Content', {
+        createdBy: 'user-1',
+        creator: 'Test User',
+        contentType: 'Course',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/create',
+        expect.objectContaining({
+          request: expect.objectContaining({
+            content: expect.objectContaining({
+              contentType: 'Course',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should use custom primaryCategory when provided', async () => {
+      await service.contentCreate('My Content', {
+        createdBy: 'user-1',
+        creator: 'Test User',
+        primaryCategory: 'Course Assessment',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/create',
+        expect.objectContaining({
+          request: expect.objectContaining({
+            content: expect.objectContaining({
+              primaryCategory: 'Course Assessment',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should include framework when provided', async () => {
+      await service.contentCreate('My Content', {
+        createdBy: 'user-1',
+        creator: 'Test User',
+        framework: 'TPD',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/create',
+        expect.objectContaining({
+          request: expect.objectContaining({
+            content: expect.objectContaining({
+              framework: 'TPD',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should not include framework when not provided', async () => {
+      await service.contentCreate('My Content', {
+        createdBy: 'user-1',
+        creator: 'Test User',
+      });
+
+      const callArgs = (mockClient.post as any).mock.calls[0][1];
+      expect(callArgs.request.content).not.toHaveProperty('framework');
+    });
+
+    it('should return the create response', async () => {
+      const result = await service.contentCreate('My Content', {
+        createdBy: 'user-1',
+        creator: 'Test User',
+      });
+
+      expect(result.data.identifier).toBe('do_new_123');
+      expect(result.data.content_id).toBe('do_new_123');
+      expect(result.status).toBe(200);
+    });
+  });
 });
