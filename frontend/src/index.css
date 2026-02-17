@@ -293,7 +293,7 @@
   /* Global Signup/Auth Styles */
   .secondary-outline-button {
     @apply w-full !h-10 !bg-white border font-medium flex items-center justify-center gap-2 hover:bg-gray-50 mb-0 text-[0.875rem];
-    border-color: hsl(var(--sunbird-gray-d0)) !important;
+    border-color: hsl(var(--sunbird-gray-77)) !important;
     color: hsl(var(--sunbird-gray-34)) !important;
     border-radius: 0.5rem !important;
   }
@@ -691,3 +691,48 @@
   }
 
 }
+
+  /* Terms and Conditions Popover Close Button */
+  .tnc-close-icon {
+    color: hsl(var(--sunbird-brick));
+  }
+
+  /* Terms and Conditions Popover Styles */
+  .tnc-dialog-overlay {
+    @apply fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+  }
+
+  .tnc-dialog-content {
+    @apply fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2;
+    @apply rounded-[1.875rem] border bg-white shadow-lg outline-none;
+    @apply w-[90vw] h-[80vh] max-w-[72.875rem] max-h-[41.25rem];
+    @apply md:w-[85vw] md:h-[75vh];
+    @apply lg:w-[72.875rem] lg:h-[41.25rem];
+    @apply data-[state=open]:animate-in data-[state=closed]:animate-out;
+    @apply data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+    @apply data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95;
+  }
+
+  .tnc-dialog-header {
+    @apply flex items-center justify-between p-4;
+  }
+
+  .tnc-dialog-title {
+    @apply text-lg font-semibold text-popover-foreground;
+  }
+
+  .tnc-close-button {
+    @apply h-8 w-8 rounded-full;
+  }
+
+  .tnc-close-button:hover {
+    background-color: hsl(var(--sunbird-gray-d0)) !important;
+  }
+
+  .tnc-iframe-container {
+    @apply flex-1 overflow-hidden p-4;
+  }
+
+  .tnc-iframe {
+    @apply w-full h-full border-0 rounded;
+  }

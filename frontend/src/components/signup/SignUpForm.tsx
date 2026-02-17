@@ -6,6 +6,8 @@ import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/Fo
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
+import { TermsAndConditionsPopover } from "@/components/common/TermsAndConditionsPopover";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 interface Step1Props {
     firstName: string;
@@ -38,7 +40,41 @@ export const SignUpForm = ({
     handleContinue,
     isStep1Valid,
     isLoading = false
-}: Step1Props) => (
+}: Step1Props) => {
+    const { data: tncConfig } = useSystemSetting('tncConfig');
+    console.log('tncConfig', tncConfig);
+    
+    const getTncUrl = () => {
+        const value = tncConfig?.data?.response?.value;
+        console.log('value', value, typeof value);
+        
+        if (!value) return '';
+        
+        // Parse if value is a string
+        let parsedValue = value;
+        if (typeof value === 'string') {
+            try {
+                parsedValue = JSON.parse(value);
+            } catch (e) {
+                console.error('Failed to parse TNC config:', e);
+                return '';
+            }
+        }
+        
+        const latestVersion = parsedValue.latestVersion;
+        console.log('latestVersion', latestVersion);
+        
+        if (latestVersion && parsedValue[latestVersion]?.url) {
+            return parsedValue[latestVersion].url;
+        }
+        
+        return '';
+    };
+    
+    const termsUrl = getTncUrl();
+    console.log('termsUrl', termsUrl);
+
+    return (
     <>
         <Header
             title="Welcome to Sunbird!"
@@ -167,7 +203,17 @@ export const SignUpForm = ({
                         htmlFor="terms"
                         className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sunbird-charcoal"
                     >
-                        I understand & <a href="#" className="themed-link" onClick={(e) => e.preventDefault()}>accept the SUNBIRD Terms of Use</a>.
+                        I understand & <TermsAndConditionsPopover 
+                            termsUrl={termsUrl}
+                            title="Terms of Use"
+                        >
+                            <button 
+                                type="button"
+                                className="themed-link inline"
+                            >
+                                accept the SUNBIRD Terms of Use
+                            </button>
+                        </TermsAndConditionsPopover>.
                     </label>
                 </div>
 
@@ -185,4 +231,5 @@ export const SignUpForm = ({
             </div>
         </div>
     </>
-);
+    );
+};
