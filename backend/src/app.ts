@@ -52,11 +52,10 @@ app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
 // Portal Proxy Routes
 app.use('/portal', portalProxyRoutes);
 
-// Apply anonymous session middleware to portal routes (once per route tree)
-app.use('/action', sessionMiddleware, ...anonymousMiddlewares);
+app.use('/action', sessionMiddleware);
 
-// Portal Proxy Routes
-app.all('/action/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), kongProxy);
+// Portal Proxy Routes (authenticated only)
+app.all('/action/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 
