@@ -12,17 +12,6 @@ export interface Module {
   lessons: Lesson[];
 }
 
-export interface RelatedItem {
-  id: string;
-  title: string;
-  type: string;
-  image: string;
-  isResource?: boolean;
-  rating?: number;
-  learners?: string;
-  lessons?: number;
-}
-
 export interface CollectionData {
   id: string;
   title: string;

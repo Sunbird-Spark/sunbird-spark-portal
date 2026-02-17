@@ -1,13 +1,6 @@
-import type { RelatedContentItem, RelatedContentSearchItem, RelatedItem } from '../../types/collectionTypes';
+import type { RelatedContentItem, RelatedContentSearchItem } from '../../types/collectionTypes';
 
 const RELATED_CONTENT_LIMIT = 3;
-
-const TYPE_TO_MIME: Record<string, string> = {
-  Video: 'video/mp4',
-  PDF: 'application/pdf',
-  Epub: 'application/epub',
-  HTML: 'application/vnd.ekstep.html-archive',
-};
 
 function isRootLevel(item: RelatedContentSearchItem): boolean {
   const visibility = (item.visibility ?? '').toLowerCase();
@@ -31,18 +24,6 @@ function filterAndSlice(
   return items
     .filter((item) => isRootLevel(item) && item.identifier !== excludeId)
     .slice(0, limit);
-}
-
-export function mapRelatedItemsToContentSearchItems(items: RelatedItem[]): RelatedContentItem[] {
-  return items.map((item) => ({
-    identifier: item.id,
-    name: item.title,
-    appIcon: item.image,
-    posterImage: item.image,
-    mimeType: TYPE_TO_MIME[item.type] ?? 'application/pdf',
-    primaryCategory: item.type,
-    cardType: item.isResource ? 'resource' : 'collection',
-  }));
 }
 
 export function mapSearchContentToRelatedContentItems(
