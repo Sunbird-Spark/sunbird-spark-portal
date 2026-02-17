@@ -74,7 +74,7 @@ export const categories: Category[] = [
 export const collectionCards: ContentSearchItem[] = [
   {
     identifier: "collection-1",
-    name: "The AI Engineer Course 2026: Complete AI Engineer\n Bootcamp",
+    name: "The AI Engineer Course 2026: Complete AI Engineer Bootcamp",
     appIcon: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=250&fit=crop",
     primaryCategory: "Leadership",
     description: "Comprehensive leadership training for modern managers",
@@ -120,8 +120,7 @@ export const collectionCards: ContentSearchItem[] = [
   {
     identifier: "collection-6",
     name: "Generative AI for Cybersecurity Professionals",
-            appIcon: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=250&fit=crop",
-            
+    appIcon: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=250&fit=crop",
     primaryCategory: "Course",
     description: "Master AWS cloud architecture and earn certification",
     objectType: "Collection",
