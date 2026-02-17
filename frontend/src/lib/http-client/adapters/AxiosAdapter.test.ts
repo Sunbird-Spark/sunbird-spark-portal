@@ -72,9 +72,8 @@ describe('AxiosAdapter', () => {
     expect(result.data).toEqual(mockData);
   });
 
-  it('should return full data on error response (without result)', async () => {
-    const mockData = { id: "api.error", errmsg: "Something went wrong" };
-    const mockResponse = { data: mockData, status: 500, headers: {} };
+  it('should throw with error message on 4xx/5xx response', async () => {
+    const mockResponse = { data: { params: { errmsg: 'Something went wrong' } }, status: 500, headers: {} };
 
     const error: any = new Error('Server Error');
     error.isAxiosError = true;
@@ -82,12 +81,22 @@ describe('AxiosAdapter', () => {
 
     mockAxiosInstance.get.mockRejectedValue(error);
 
-    const result = await adapter.get('/test');
-    expect(result.data).toEqual(mockData);
-    expect(result.status).toBe(500);
+    await expect(adapter.get('/test')).rejects.toThrow('Something went wrong');
   });
 
-  it('should trigger status handler on specific status', async () => {
+  it('should throw with request failed message when params.errmsg is missing', async () => {
+    const mockResponse = { data: {}, status: 500, headers: {} };
+
+    const error: any = new Error('Server Error');
+    error.isAxiosError = true;
+    error.response = mockResponse;
+
+    mockAxiosInstance.get.mockRejectedValue(error);
+
+    await expect(adapter.get('/test')).rejects.toThrow('Server Error');
+  });
+
+  it('should throw on 4xx so status handlers are not invoked', async () => {
     const handler = vi.fn();
     adapter = new AxiosAdapter({
       baseURL: 'http://test.com',
@@ -101,9 +110,8 @@ describe('AxiosAdapter', () => {
 
     mockAxiosInstance.get.mockRejectedValue(error);
 
-    const result = await adapter.get('/test');
-    expect(handler).toHaveBeenCalledWith(result);
-    expect(result.status).toBe(403);
+    await expect(adapter.get('/test')).rejects.toThrow('Forbidden');
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it('should add headers using updateHeaders', () => {

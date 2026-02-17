@@ -167,7 +167,10 @@
   "button": {
     "login": "Connexion",
     "goBack": "Retour",
-    "share": "Partager"
+    "share": "Partager",
+    "playVideo": "Lire la vidéo",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "hero": {
     "title": "Des connaissances qui vous font avancer.",
@@ -193,6 +196,7 @@
   },
   "courseDetails": {
     "overview": "Aperçu du cours",
+    "units": "Unités",
     "weeks": "Semaines",
     "skills": "Compétences que vous apprendrez",
     "suitedFor": "Idéal pour",
