@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { HttpService } from '../services/HttpService';
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useAppI18n } from "@/hooks/useAppI18n";
+import type { ApiFaqCategory } from "@/types/helpSupport";
 
 const httpService = new HttpService();
 
@@ -76,4 +79,22 @@ export const useFaqData = (baseUrl: string | undefined, languageCode: string) =>
   }, [baseUrl, languageCode]);
 
   return { data, loading, error };
+};
+
+/**
+ * Shared hook that fetches FAQ data from the portalFaqURL setting
+ * and returns the categories array along with loading/error states.
+ */
+export const useHelpFaqData = () => {
+  const { currentCode } = useAppI18n();
+  const { data: settingResponse } = useSystemSetting("portalFaqURL");
+  const faqUrl = settingResponse?.data?.response?.value || settingResponse?.data?.value;
+  const { data: faqData, loading, error } = useFaqData(faqUrl, currentCode || "en");
+
+  const categories: ApiFaqCategory[] = useMemo(
+    () => (faqData as any)?.categories ?? [],
+    [faqData]
+  );
+
+  return { categories, loading, error };
 };

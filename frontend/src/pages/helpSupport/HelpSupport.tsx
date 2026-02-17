@@ -7,7 +7,7 @@ import HomeSidebar from "@/components/home/HomeSidebar";
 import PageLoader from "@/components/common/PageLoader";
 import Header from "@/components/home/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useHelpFaqData } from "@/hooks/useHelpFaqData";
+import { useHelpFaqData } from "@/hooks/useFaqData";
 
 import SidebarCloseButton from "../../components/common/SidebarCloseButton";
 import {

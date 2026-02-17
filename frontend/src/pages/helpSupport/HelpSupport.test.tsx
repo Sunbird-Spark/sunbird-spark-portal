@@ -43,7 +43,7 @@ vi.mock("@/utils/sanitizeHtml", () => ({
 
 // Mock the shared hook
 const mockUseHelpFaqData = vi.fn();
-vi.mock("@/hooks/useHelpFaqData", () => ({
+vi.mock("@/hooks/useFaqData", () => ({
     useHelpFaqData: (...args: any[]) => mockUseHelpFaqData(...args),
 }));
 
