@@ -1,4 +1,4 @@
-import { getYsqlPool } from '../utils/sessionStore.js';
+import { getFormsPool } from '../databases/formsDatabase.js';
 import { logger } from '../utils/logger.js';
 
 export class FormService {
@@ -26,7 +26,7 @@ export class FormService {
             new Date()
         ];
         logger.info('FormService.create - Query params:', params);
-        await getYsqlPool().query(query, params);
+        await getFormsPool().query(query, params);
         logger.info('FormService.create - Success!');
         return { created: 'OK' };
     }
@@ -50,7 +50,7 @@ export class FormService {
             queryCtx.component
         ];
 
-        const result = await getYsqlPool().query(query, params);
+        const result = await getFormsPool().query(query, params);
 
         if (result.rowCount === 0) {
             const error = new Error(`invalid request, no records found for the match to update!`) as Error & { statusCode: number; msg: string };
@@ -97,7 +97,7 @@ export class FormService {
             queryCtx.component
         ];
 
-        const result = await getYsqlPool().query(query, params);
+        const result = await getFormsPool().query(query, params);
         return result.rows[0] || null;
     }
 
@@ -116,7 +116,7 @@ export class FormService {
         `;
         const params = [rootOrgId];
 
-        const result = await getYsqlPool().query(query, params);
+        const result = await getFormsPool().query(query, params);
         return result.rows;
     }
 }
