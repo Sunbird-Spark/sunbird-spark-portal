@@ -32,12 +32,11 @@ describe('QumlEditorService', () => {
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
     vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-123');
     vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' });
+    // Match the structure expected by QumlEditorService: data.response.content
     vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({ 
       data: { 
-        result: { 
-          response: { 
-            content: [{ channel: 'channel-from-metadata' }] 
-          } 
+        response: { 
+          content: [{ channel: 'channel-from-metadata' }] 
         } 
       } 
     });
