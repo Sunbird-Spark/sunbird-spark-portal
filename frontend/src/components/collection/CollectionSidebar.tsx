@@ -27,7 +27,6 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
     <div className="space-y-3">
       {modules.map((module) => {
         const isExpanded = expandedModules.includes(module.id);
-        const containsActiveLesson = module.lessons.some(l => l.id === activeLessonId);
 
         return (
           <Collapsible
@@ -35,16 +34,11 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
             open={isExpanded}
             onOpenChange={() => toggleModule(module.id)}
           >
-            <div className={`bg-white rounded-xl border transition-all duration-300 overflow-hidden ${containsActiveLesson && !isExpanded
-              ? 'border-sunbird-brick shadow-[0_0_12px_hsl(var(--sunbird-brick)/0.1)]'
-              : 'border-gray-100'
-              }`}>
+            <div className="bg-white rounded-xl border border-gray-100 transition-all duration-300 overflow-hidden">
               <CollapsibleTrigger asChild>
-                <button className={`w-full p-4 flex items-start justify-between text-left hover:bg-gray-50 transition-colors ${containsActiveLesson && !isExpanded ? 'bg-orange-50/30' : ''
-                  }`}>
+                <button className="w-full p-4 flex items-start justify-between text-left hover:bg-gray-50 transition-colors">
                   <div className="flex-1 pr-4">
-                    <h3 className={`font-bold text-lg mb-1 transition-colors ${containsActiveLesson && !isExpanded ? 'text-sunbird-brick' : 'text-foreground'
-                      }`}>
+                    <h3 className="font-bold text-lg mb-1 text-foreground">
                       {module.title}
                     </h3>
                     <p className="text-sm text-muted-foreground">

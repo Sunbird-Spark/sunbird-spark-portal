@@ -20,10 +20,10 @@ const mockCollectionData: CollectionData = {
   learners: '9k',
   lessons: 15,
   image: 'https://example.com/image.png',
-  weeks: 2,
+  units: 2,
   description: 'A comprehensive course description for testing.',
   skills: ['Skill A', 'Skill B', 'Skill C'],
-  bestSuitedFor: ['Student', 'Developer'],
+  audience: ['Student', 'Developer'],
   modules: [
     {
       id: 'mod-1',
@@ -35,7 +35,6 @@ const mockCollectionData: CollectionData = {
       ],
     },
   ],
-  relatedContent: [],
 };
 
 describe('CollectionOverview', () => {
@@ -86,7 +85,7 @@ describe('CollectionOverview', () => {
   it('renders best suited for section with all roles', () => {
     render(<CollectionOverview collectionData={mockCollectionData} />);
     expect(screen.getByText('courseDetails.suitedFor')).toBeInTheDocument();
-    mockCollectionData.bestSuitedFor.forEach((role) => {
+    mockCollectionData.audience.forEach((role) => {
       expect(screen.getByText(role)).toBeInTheDocument();
     });
   });

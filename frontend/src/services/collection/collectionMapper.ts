@@ -4,7 +4,7 @@ import type { CollectionData, Module, Lesson } from '../../types/collectionTypes
 const DEFAULT_LESSON_DURATION = '—';
 const DEFAULT_RATING = 0;
 const DEFAULT_LEARNERS = '0';
-const DEFAULT_WEEKS = 0;
+const DEFAULT_UNITS = 0;
 
 function lessonTypeFromMimeType(mimeType?: string): 'video' | 'document' {
   if (!mimeType) return 'document';
@@ -35,7 +35,7 @@ function mapChildrenToModules(children: HierarchyContentNode[] | undefined): Mod
 
 export function mapToCollectionData(content: HierarchyContentNode): CollectionData {
   const modules = mapChildrenToModules(content.children);
-  const weeks = modules.length > 0 ? modules.length : DEFAULT_WEEKS;
+  const units = modules.length > 0 ? modules.length : DEFAULT_UNITS;
 
   return {
     id: content.identifier,
@@ -44,11 +44,10 @@ export function mapToCollectionData(content: HierarchyContentNode): CollectionDa
     learners: DEFAULT_LEARNERS,
     lessons: content.leafNodesCount ?? 0,
     image: content.appIcon ?? '',
-    weeks,
+    units,
     description: content.description ?? '',
     skills: [],
-    bestSuitedFor: Array.isArray(content.audience) ? content.audience : [],
+    audience: Array.isArray(content.audience) ? content.audience : [],
     modules,
-    relatedContent: [],
   };
 }

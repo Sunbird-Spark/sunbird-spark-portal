@@ -12,10 +12,10 @@ const mockCollectionData = {
   learners: '9k',
   lessons: 12,
   image: 'https://img.png',
-  weeks: 2,
+  units: 2,
   description: 'Test description',
   skills: ['Skill 1'],
-  bestSuitedFor: ['Student'],
+  audience: ['Student'],
   modules: [
     {
       id: 'mod-1',
@@ -26,9 +26,6 @@ const mockCollectionData = {
         { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document' as const },
       ],
     },
-  ],
-  relatedContent: [
-    { id: 'r1', title: 'Related 1', type: 'Course', image: '', lessons: 5 },
   ],
 };
 
@@ -146,12 +143,39 @@ describe('CollectionDetailPage', () => {
     expect(screen.getByText(/12/)).toBeInTheDocument();
   });
 
-  it('shows related content section with fallback data when search returns empty', () => {
-    mockUseContentSearch.mockReturnValue({ data: { data: { content: [] } }, isLoading: false });
+  it('does not show related content cards when search returns empty', () => {
+    mockUseContentSearch.mockReturnValue({
+      data: { data: { content: [] } },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    });
     renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByText('courseDetails.relatedContent')).toBeInTheDocument();
-    expect(screen.getByText('Related 1')).toBeInTheDocument();
-    const relatedLink = screen.getByRole('link', { name: /Related 1/i });
-    expect(relatedLink).toHaveAttribute('href', '/collection/r1');
+    expect(screen.queryByText('Related 1')).not.toBeInTheDocument();
+  });
+
+  it('shows related content when search returns results', () => {
+    mockUseContentSearch.mockReturnValue({
+      data: {
+        data: {
+          content: [
+            {
+              identifier: 'search-1',
+              name: 'Search Result 1',
+              appIcon: '',
+              posterImage: '',
+              visibility: 'Default',
+              mimeType: 'video/mp4',
+              primaryCategory: 'Course',
+            },
+          ],
+        },
+      },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.getByText('Search Result 1')).toBeInTheDocument();
   });
 });
