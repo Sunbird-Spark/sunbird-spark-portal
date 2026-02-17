@@ -46,7 +46,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentPage />} />
         <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
-        <Route path="/create" element={<CreateContentProtected />} />
         <Route path="/my-learning" element={<MyLearning />} />
 
         {/* Catch-all redirect */}

@@ -1,13 +1,6 @@
 import { Course } from "@/types/courseTypes";
+import { FiBookOpen } from "react-icons/fi";
 
-const LessonIcon = () => (
-  <svg width="0.875rem" height="0.875rem" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 3C2 1.89543 2.89543 1 4 1H11C12.1046 1 13 1.89543 13 3V11C13 12.1046 12.1046 13 11 13H4C2.89543 13 2 12.1046 2 11V3Z" stroke="#A85236" strokeWidth="1.5"/>
-    <path d="M5 4H10" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 7H10" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 10H8" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
 
 interface MyLearningUpcomingBatchesProps {
   upcomingBatches?: Course[];
@@ -85,7 +78,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
                     </h4>
                     <div className="flex items-center gap-6 text-[0.875rem] text-[#6B7280] font-['Rubik']">
                       <div className="flex items-center gap-1.5">
-                        <LessonIcon />
+                        <FiBookOpen className="text-[#A85236] w-[0.875rem] h-[0.875rem]" />
                         <span className="font-light">{batchItem.lessons} Lessons</span>
                       </div>
                     </div>

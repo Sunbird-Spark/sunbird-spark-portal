@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiBell, FiMenu, FiChevronDown } from "react-icons/fi";
+import { FiSearch, FiBell, FiMenu, FiChevronDown, FiChevronLeft } from "react-icons/fi";
 import { Input } from "@/components/common/Input";
 import {
   DropdownMenu,
@@ -180,9 +180,7 @@ const MyLearning = () => {
                     onClick={() => setIsSidebarOpen(false)}
                     className="w-6 h-6 bg-[#EFEFEF] rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
                   >
-                    <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <FiChevronLeft className="w-4 h-4" />
                   </button>
                 </div>
               </>
