@@ -1,5 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { questionSetService } from '../services/QuestionSetService';
+import _ from 'lodash';
 
 interface UseQumlContentOptions {
   enabled?: boolean;
@@ -28,7 +29,7 @@ export const useQumlContent = (
       // Fetch hierarchy
       const hierarchyResp = await questionSetService.getHierarchy<any>(questionSetId);
 
-      let metadata = hierarchyResp?.questionset;
+      let metadata = _.get(hierarchyResp, 'questionset');
 
       if (!metadata) {
         throw new Error('Hierarchy payload missing questionset');
@@ -37,32 +38,29 @@ export const useQumlContent = (
       // Collect all question IDs from hierarchy
       const collectQuestionIds = (node: any): string[] => {
         if (!node) return [];
-        const ids: string[] = [];
         
-        if (node.mimeType === 'application/vnd.sunbird.question' && node.identifier) {
-          ids.push(node.identifier);
-        }
+        const currentId = 
+          node.mimeType === 'application/vnd.sunbird.question' && node.identifier
+            ? [node.identifier]
+            : [];
         
-        if (Array.isArray(node.children)) {
-          node.children.forEach((child: any) => {
-            ids.push(...collectQuestionIds(child));
-          });
-        }
+        const childIds = _.flatMap(_.get(node, 'children', []), collectQuestionIds);
         
-        return ids;
+        return [...currentId, ...childIds];
       };
 
       const questionIds = collectQuestionIds(metadata);
 
       // Fetch full question data (with body, responseDeclaration, interactions, etc.)
       let questionMap = new Map<string, any>();
-      if (questionIds.length > 0) {
+      if (!_.isEmpty(questionIds)) {
         const listResp = await questionSetService.getQuestionList<any>(questionIds);
-        const questions = listResp?.result?.questions || listResp?.questions || [];
+        const questions = _.get(listResp, 'result.questions') || _.get(listResp, 'questions', []);
         
         questions.forEach((q: any) => {
-          if (q?.identifier) {
-            questionMap.set(q.identifier, q);
+          const identifier = _.get(q, 'identifier');
+          if (identifier) {
+            questionMap.set(identifier, q);
           }
         });
       }
@@ -75,8 +73,9 @@ export const useQumlContent = (
           return questionMap.get(node.identifier) || node;
         }
 
-        if (Array.isArray(node.children)) {
-          node.children = node.children.map(replaceQuestionsInHierarchy);
+        const children = _.get(node, 'children');
+        if (Array.isArray(children)) {
+          node.children = _.map(children, replaceQuestionsInHierarchy);
         }
 
         return node;
@@ -85,11 +84,11 @@ export const useQumlContent = (
       metadata = replaceQuestionsInHierarchy(metadata);
 
       // Ensure outcomeDeclaration.maxScore structure exists
-      if (!metadata.outcomeDeclaration) {
+      if (!_.get(metadata, 'outcomeDeclaration')) {
         metadata.outcomeDeclaration = {};
       }
-      if (!metadata.outcomeDeclaration.maxScore) {
-        const maxScore = metadata.maxScore || 1;
+      if (!_.get(metadata, 'outcomeDeclaration.maxScore')) {
+        const maxScore = _.get(metadata, 'maxScore', 1);
         metadata.outcomeDeclaration.maxScore = {
           cardinality: 'single',
           type: 'integer',
