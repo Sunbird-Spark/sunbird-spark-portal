@@ -16,12 +16,14 @@ export const useFaqData = (baseUrl: string | undefined, languageCode: string) =>
       return;
     }
 
+    const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
+
     const fetchData = async () => {
       setLoading(true);
       setError(null);
 
-      const primaryUrl = `${baseUrl}/faq-${languageCode}.json`;
-      const fallbackUrl = `${baseUrl}/faq-en.json`;
+      const primaryUrl = `${normalizedBaseUrl}/faq-${languageCode}.json`;
+      const fallbackUrl = `${normalizedBaseUrl}/faq-en.json`;
 
       try {
         const result = await httpService.get(primaryUrl);
