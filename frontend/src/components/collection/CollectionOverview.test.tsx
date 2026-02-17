@@ -16,13 +16,10 @@ vi.mock('@/hooks/useAppI18n', () => ({
 const mockCollectionData: CollectionData = {
   id: 'col-1',
   title: 'Test Course Title',
-  rating: 4.5,
-  learners: '9k',
   lessons: 15,
   image: 'https://example.com/image.png',
   units: 2,
   description: 'A comprehensive course description for testing.',
-  skills: ['Skill A', 'Skill B', 'Skill C'],
   audience: ['Student', 'Developer'],
   modules: [
     {
@@ -72,14 +69,6 @@ describe('CollectionOverview', () => {
   it('renders description', () => {
     render(<CollectionOverview collectionData={mockCollectionData} />);
     expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
-  });
-
-  it('renders skills section with all skills', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    expect(screen.getByText('courseDetails.skills')).toBeInTheDocument();
-    mockCollectionData.skills.forEach((skill) => {
-      expect(screen.getByText(skill)).toBeInTheDocument();
-    });
   });
 
   it('renders best suited for section with all roles', () => {

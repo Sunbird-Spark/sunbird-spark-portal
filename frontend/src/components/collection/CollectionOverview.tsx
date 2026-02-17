@@ -73,33 +73,17 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
             {collectionData.description}
           </p>
 
-          {/* Skills Grid */}
-          <div className="grid md:grid-cols-2 gap-x-8 gap-y-1">
-            {/* Skills Column */}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.skills")}</h3>
-              <ul className="space-y-3">
-                {collectionData.skills.map((skill, index) => (
-                  <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
-                    <CheckIcon />
-                    <span>{skill}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Best Suited For Column */}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.suitedFor")}</h3>
-              <ul className="space-y-3">
-                {collectionData.audience.map((role, index) => (
-                  <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
-                    <CheckIcon />
-                    <span>{role}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Best Suited For */}
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.suitedFor")}</h3>
+            <ul className="space-y-3">
+              {collectionData.audience.map((role, index) => (
+                <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
+                  <CheckIcon />
+                  <span>{role}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

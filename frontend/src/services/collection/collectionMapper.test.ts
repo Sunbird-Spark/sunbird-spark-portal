@@ -22,9 +22,6 @@ describe('collectionMapper', () => {
       expect(result.image).toBe('https://icon.png');
       expect(result.lessons).toBe(5);
       expect(result.audience).toEqual(['Student', 'Teacher']);
-      expect(result.rating).toBe(0);
-      expect(result.learners).toBe('0');
-      expect(result.skills).toEqual([]);
       expect(result.modules).toEqual([]);
     });
 
