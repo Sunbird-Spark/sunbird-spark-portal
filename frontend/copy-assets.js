@@ -50,10 +50,6 @@ const qumlEditorWebComponentRoot = path.join(
 );
 const qumlEditorAssetsSource = path.join(qumlEditorWebComponentRoot, 'assets/quml-editor');
 const qumlEditorFinalDest = path.join(publicRoot, 'assets/quml-editor');
-const qumlEditorImagesSource = path.join(qumlEditorAssetsSource, 'assets/images');
-const qumlEditorIconsSource = path.join(qumlEditorAssetsSource, 'assets');
-const sharedImagesDest = path.join(publicRoot, 'assets/images');
-const sharedAssetsDest = path.join(publicRoot, 'assets');
 
 /**
  * Recursively copy directory
@@ -143,17 +139,6 @@ try {
         console.log('📦 Copying QUML editor files to public/assets/quml-editor/...');
         copyDirectory(qumlEditorAssetsSource, qumlEditorFinalDest);
 
-        // Copy QUML editor images to /assets/images so absolute paths continue to work
-        if (fs.existsSync(qumlEditorImagesSource)) {
-            console.log('🖼️  Copying QUML editor images to public/assets/images/...');
-            copyDirectory(qumlEditorImagesSource, sharedImagesDest);
-        }
-
-        // Copy QUML editor icons/SVGs to /assets for shared access
-        if (fs.existsSync(qumlEditorIconsSource)) {
-            console.log('📦 Copying QUML editor icons to public/assets/...');
-            copyFilesWithExtensions(qumlEditorIconsSource, sharedAssetsDest, ['.svg', '.png', '.jpg']);
-        }
     } else {
         console.log('\n⚠️  QUML Editor package not found - skipping (install @project-sunbird/lib-questionset-editor when available)');
     }
@@ -163,13 +148,24 @@ try {
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
     // Copy PDF icons first
-    const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
-    copyFilesWithExtensions(pdfAssetsSource, path.join(publicRoot, 'assets'), ['.svg']);
+   const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
+    for (const icon of pdfIcons) {
+        fs.copyFileSync(
+            path.join(pdfAssetsSource, icon),
+            path.join(publicRoot, 'assets', icon)
+        );
+    }
 
     // Copy QUML icons second (this will override PDF icons if there are duplicates)
     const qumlIconsDir = path.join(qumlAssetsSource, 'assets');
     if (fs.existsSync(qumlIconsDir)) {
-        copyFilesWithExtensions(qumlIconsDir, path.join(publicRoot, 'assets'), ['.svg']);
+        const qumlIcons = fs.readdirSync(qumlIconsDir).filter(file => file.endsWith('.svg'));
+        for (const icon of qumlIcons) {
+            fs.copyFileSync(
+                path.join(qumlIconsDir, icon),
+                path.join(publicRoot, 'assets', icon)
+            );
+        }
     }
 
     console.log('\n✅ Assets consolidated successfully!');
