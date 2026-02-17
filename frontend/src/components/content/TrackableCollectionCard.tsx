@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Course } from "@/types/courseTypes";
 
-const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=100&h=100&fit=crop";
 
 interface TrackableCollectionCardProps {
   course: Course;
@@ -19,11 +18,15 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
         className="flex gap-6 p-6 bg-white rounded-2xl border border-[#F3F4F6] hover:shadow-md transition-shadow"
       >
         {/* Thumbnail */}
-        <img
-          src={course.content?.appIcon || DEFAULT_THUMBNAIL}
-          alt={course.courseName}
-          className="w-[7.5rem] h-[7.5rem] rounded-2xl object-cover flex-shrink-0 shadow-sm"
-        />
+        {course.content?.appIcon ? (
+          <img
+            src={course.content.appIcon}
+            alt={course.courseName}
+            className="w-[7.5rem] h-[7.5rem] rounded-2xl object-cover flex-shrink-0 shadow-sm"
+          />
+        ) : (
+          <div className="w-[7.5rem] h-[7.5rem] rounded-2xl bg-black flex-shrink-0 shadow-sm" />
+        )}
 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
