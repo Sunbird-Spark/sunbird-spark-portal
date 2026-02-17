@@ -20,17 +20,9 @@ export const getFormsClient = (): cassandra.Client => {
             },
         });
 
-        (async () => {
-            try {
-                await _formsClient!.connect();
-                logger.debug('Forms database (Cassandra/YCQL) connection test succeeded.');
-            } catch (error) {
-                logger.error('Forms database (Cassandra/YCQL) connection test failed:', error);
-                if (process.env.NODE_ENV !== 'test') {
-                    process.exit(1);
-                }
-            }
-        })();
+        // Lazy connection: The driver will connect automatically on the first query execution.
+        // No explicit connect() call is needed here, preventing race conditions.
+        logger.info('Forms database (Cassandra/YCQL) client initialized (lazy connection).');
     }
     return _formsClient;
 };

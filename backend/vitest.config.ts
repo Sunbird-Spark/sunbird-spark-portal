@@ -21,6 +21,8 @@ export default defineConfig({
         '**/*.spec.ts',
         '**/*.test.ts',
         '**/types/**',
+        'package-lock.json',
+        'package.json',
       ],
       thresholds: {
         branches: 70,
