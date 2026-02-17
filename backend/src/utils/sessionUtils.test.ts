@@ -36,6 +36,8 @@ describe('sessionUtils', () => {
             save: vi.fn((cb) => cb && cb(null)),
             regenerate: vi.fn((cb) => {
                 mockSession.id = 'new-session-id'; // Simulate ID change
+                // Also update the sessionID property on the request object, which is what is logged
+                (mockReq as any).sessionID = 'new-session-id';
                 cb && cb(null);
             }),
             destroy: vi.fn((cb) => cb && cb(null)),
