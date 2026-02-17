@@ -1,9 +1,11 @@
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import RelatedContent from "@/components/common/RelatedContent";
+import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
@@ -28,6 +30,16 @@ const ContentPlayerPage = () => {
     },
     enabled: !!contentData?.mimeType
   });
+
+  const relatedContentItems = useMemo(
+    () =>
+      mapSearchContentToRelatedContentItems(
+        relatedContentData?.data?.content,
+        contentId ?? undefined,
+        3
+      ),
+    [relatedContentData?.data?.content, contentId]
+  );
   
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
     onPlayerEvent: (event) => {
@@ -103,7 +115,7 @@ const ContentPlayerPage = () => {
 
         {/* Related Content Section */}
         <RelatedContent
-          items={relatedContentData?.data?.content}
+          items={relatedContentItems}
           cardType={
             contentData?.mimeType === "application/vnd.ekstep.content-collection"
               ? "collection"

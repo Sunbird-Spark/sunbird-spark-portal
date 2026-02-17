@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import 'keycloak-connect';
 
 declare module 'keycloak-connect' {

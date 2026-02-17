@@ -38,6 +38,13 @@ export class AxiosAdapter extends BaseClient {
       return this.mapResponse(response);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
+        const status = error.response.status;
+        if (status >= 400) {
+          const body = error.response.data as Record<string, unknown> | undefined;
+          const params = body?.params as Record<string, unknown> | undefined;
+          const errmsg = typeof params?.errmsg === 'string' ? params.errmsg : error.message || `Request failed (${status})`;
+          throw new Error(errmsg);
+        }
         return this.mapResponse(error.response as AxiosResponse<T>);
       }
       throw error;
