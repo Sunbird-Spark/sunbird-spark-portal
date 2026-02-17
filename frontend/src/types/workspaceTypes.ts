@@ -70,8 +70,19 @@ export interface WorkspaceItem {
   author: string;
 }
 
+export interface FacetValue {
+  name: string;
+  count: number;
+}
+
+export interface Facet {
+  name: string;
+  values: FacetValue[];
+}
+
 export interface ContentSearchRequest {
   filters?: Record<string, unknown>;
+  facets?: string[];
   limit?: number;
   offset?: number;
   query?: string;
@@ -96,11 +107,48 @@ export interface ContentSearchItem {
 }
 
 export interface ContentSearchResponse {
+  count?: number;
   content?: ContentSearchItem[];
   QuestionSet?: ContentSearchItem[];
+  facets?: Facet[];
 }
 
 export interface UseContentSearchOptions {
   request?: ContentSearchRequest;
   enabled?: boolean;
+}
+
+/** Aggregated counts for workspace tabs, derived from API facets. */
+export interface WorkspaceCounts {
+  all: number;
+  drafts: number;
+  review: number;
+  published: number;
+  pendingReview: number;
+}
+
+/** Return type of the useWorkspace hook. */
+export interface UseWorkspaceReturn {
+  /** Content items for the current tab/page (flattened across all loaded pages). */
+  contents: WorkspaceItem[];
+  /** Tab badge counts derived from facets. */
+  counts: WorkspaceCounts;
+  /** Total matching items for the current tab filter. */
+  totalCount: number;
+  /** True during the initial load of the content query. */
+  isLoading: boolean;
+  /** True while fetching the next page (Load More). */
+  isLoadingMore: boolean;
+  /** True during the initial load of the counts query. */
+  isCountsLoading: boolean;
+  /** Error from the content query, if any. */
+  error: Error | null;
+  /** Whether more pages are available to load. */
+  hasMore: boolean;
+  /** Trigger to load the next page of results. */
+  loadMore: () => void;
+  /** Refetch the counts query (e.g. after content creation). */
+  refetchCounts: () => void;
+  /** Refetch both counts and content (e.g. after delete/review). */
+  refetchAll: () => void;
 }
