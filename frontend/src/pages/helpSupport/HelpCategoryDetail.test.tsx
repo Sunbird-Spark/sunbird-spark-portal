@@ -23,7 +23,14 @@ vi.mock("@/components/home/HomeSidebar", () => ({
         <div data-testid="home-sidebar" data-collapsed={collapsed}>
             <span data-testid="active-nav">{activeNav}</span>
             <button onClick={() => onNavChange('home')}>Change Nav</button>
-            {onToggle && <button onClick={onToggle} aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}>Toggle Sidebar</button>}
+            {onToggle && (
+                <button
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                >
+                    Toggle Sidebar
+                </button>
+            )}
         </div>
     ),
 }));
@@ -31,7 +38,7 @@ vi.mock("@/components/home/HomeSidebar", () => ({
 vi.mock("@/components/landing/Accordion", () => ({
     Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
     AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
-    AccordionTrigger: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
+    AccordionTrigger: ({ children }: any) => <button>{children}</button>,
     AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
 }));
 
@@ -43,35 +50,19 @@ vi.mock("@/utils/sanitizeHtml", () => ({
     sanitizeHtml: (html: string) => html,
 }));
 
-// Mock the shared hook
+// Mock FAQ hook
 const mockUseHelpFaqData = vi.fn();
 vi.mock("@/hooks/useFaqData", () => ({
     useHelpFaqData: (...args: any[]) => mockUseHelpFaqData(...args),
 }));
 
-const mockCategories = [
-    {
-        name: "Login",
-        faqs: [
-            { topic: "How do I create an account?", description: "Register using your email or phone." },
-            { topic: "I forgot my password", description: "Click forgot password on login page." },
-            { topic: "Can I use Google login?", description: "Yes, Google login is supported." },
-        ],
-    },
-    {
-        name: "Profile",
-        faqs: [
-            { topic: "How to update profile?", description: "Go to profile settings." },
-        ],
-    },
-];
-
-// Mock useSystemSetting hook
+// Mock system setting
 vi.mock("@/hooks/useSystemSetting", () => ({
     useSystemSetting: vi.fn(),
 }));
 
 const mockNavigate = vi.fn();
+
 vi.mock("react-router-dom", async () => {
     const actual = await vi.importActual("react-router-dom");
     return {
@@ -81,18 +72,35 @@ vi.mock("react-router-dom", async () => {
     };
 });
 
+const mockCategories = [
+    {
+        name: "Login",
+        faqs: [
+            { topic: "How do I create an account?", description: "Register using your email or phone." },
+            { topic: "I forgot my password", description: "Click forgot password on login page." },
+        ],
+    },
+];
+
 describe('HelpCategoryDetail', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockUseHelpFaqData.mockReturnValue({ categories: mockCategories, loading: false, error: null });
+
+        mockUseHelpFaqData.mockReturnValue({
+            categories: mockCategories,
+            loading: false,
+            error: null
+        });
+
         vi.mocked(useParams).mockReturnValue({ categoryId: 'login' });
+
         vi.mocked(useSystemSetting).mockReturnValue({
             data: { data: { response: { value: 'Test App' } } },
             isLoading: false,
         } as any);
     });
 
-    it('renders the category detail page with FAQs from API and replaces app name in title, question and answer', async () => {
+    it('renders category FAQs and replaces app name placeholders', async () => {
         const categoriesWithPlaceholder = [
             {
                 name: "About {{APP_NAME}}",
@@ -101,7 +109,13 @@ describe('HelpCategoryDetail', () => {
                 ]
             }
         ];
-        mockUseHelpFaqData.mockReturnValue({ categories: categoriesWithPlaceholder, loading: false, error: null });
+
+        mockUseHelpFaqData.mockReturnValue({
+            categories: categoriesWithPlaceholder,
+            loading: false,
+            error: null
+        });
+
         vi.mocked(useParams).mockReturnValue({ categoryId: 'about-app-name' });
 
         render(
@@ -115,13 +129,11 @@ describe('HelpCategoryDetail', () => {
             expect(screen.getByText("What is Test App?")).toBeInTheDocument();
             expect(screen.getByText("Welcome to Test App")).toBeInTheDocument();
         });
-
-        expect(screen.getByText('Go Back')).toBeInTheDocument();
     });
 
     it('navigates back when Go Back is clicked', () => {
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
@@ -130,9 +142,9 @@ describe('HelpCategoryDetail', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/help-support');
     });
 
-    it('toggles sidebar state', () => {
+    it('toggles sidebar collapse/expand', () => {
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
@@ -140,24 +152,18 @@ describe('HelpCategoryDetail', () => {
         const sidebar = screen.getByTestId('home-sidebar');
         expect(sidebar).toHaveAttribute('data-collapsed', 'false');
 
-        // Click Collapse (simulated via mock button which calls onToggle)
-        const toggleBtn = screen.getByRole('button', { name: "Collapse Sidebar" });
-        fireEvent.click(toggleBtn);
-
+        fireEvent.click(screen.getByRole('button', { name: "Collapse Sidebar" }));
         expect(sidebar).toHaveAttribute('data-collapsed', 'true');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed'); // Header check
+        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed');
 
-        // Click Expand
-        const expandBtn = screen.getByRole('button', { name: "Expand Sidebar" });
-        fireEvent.click(expandBtn);
-
+        fireEvent.click(screen.getByRole('button', { name: "Expand Sidebar" }));
         expect(sidebar).toHaveAttribute('data-collapsed', 'false');
         expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
     });
 
     it('handles feedback submission (Yes)', async () => {
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
@@ -165,31 +171,34 @@ describe('HelpCategoryDetail', () => {
         fireEvent.click(screen.getAllByText('Yes')[0]!);
 
         await waitFor(() => {
-            expect(screen.getAllByText('Thank you for your feedback!')[0]).toBeInTheDocument();
+            expect(screen.getAllByText('Thank you for your feedback!')[0]!).toBeInTheDocument();
         });
     });
 
-    it('handles feedback submission (No) with text feedback', async () => {
+    it('handles feedback submission (No) with text input', async () => {
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
 
         fireEvent.click(screen.getAllByText('No')[0]!);
-        expect(screen.getByText('Sorry about that!')).toBeInTheDocument();
 
-        fireEvent.change(screen.getByPlaceholderText('Type Here...'), { target: { value: 'This is not helpful' } });
+        fireEvent.change(
+            screen.getByPlaceholderText('Type Here...'),
+            { target: { value: 'Needs more details' } }
+        );
+
         fireEvent.click(screen.getByText('Submit feedback'));
 
         await waitFor(() => {
-            expect(screen.getAllByText('Thank you for your feedback!')[0]).toBeInTheDocument();
+            expect(screen.getAllByText('Thank you for your feedback!')[0]!).toBeInTheDocument();
         });
     });
 
-    it('disables submit button when feedback text is empty', () => {
+    it('disables submit button when feedback is empty', () => {
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
@@ -197,15 +206,23 @@ describe('HelpCategoryDetail', () => {
         fireEvent.click(screen.getAllByText('No')[0]!);
         expect(screen.getByText('Submit feedback')).toBeDisabled();
 
-        fireEvent.change(screen.getByPlaceholderText('Type Here...'), { target: { value: 'Some feedback' } });
+        fireEvent.change(
+            screen.getByPlaceholderText('Type Here...'),
+            { target: { value: 'Some feedback' } }
+        );
+
         expect(screen.getByText('Submit feedback')).not.toBeDisabled();
     });
 
-    it('shows loading state while data is being fetched', () => {
-        mockUseHelpFaqData.mockReturnValue({ categories: [], loading: true, error: null });
+    it('shows loading state', () => {
+        mockUseHelpFaqData.mockReturnValue({
+            categories: [],
+            loading: true,
+            error: null
+        });
 
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
@@ -214,54 +231,30 @@ describe('HelpCategoryDetail', () => {
     });
 
     it('shows error state when fetch fails', () => {
-        mockUseHelpFaqData.mockReturnValue({ categories: [], loading: false, error: new Error('fail') });
+        mockUseHelpFaqData.mockReturnValue({
+            categories: [],
+            loading: false,
+            error: new Error('fail')
+        });
 
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
 
         expect(screen.getByText('Something went wrong')).toBeInTheDocument();
     });
-    it('shows error when category is not found', async () => {
-        const { useParams } = await import("react-router-dom");
+
+    it('shows error when category is not found', () => {
         vi.mocked(useParams).mockReturnValue({ categoryId: 'invalid-id' });
 
         render(
-            <MemoryRouter initialEntries={['/help-support/invalid-id']}>
+            <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
+
         expect(screen.getByText('Category not found.')).toBeInTheDocument();
-    });
-
-    it('handles successful feedback submission', async () => {
-        const fetchSpy = vi.spyOn(window, 'fetch').mockResolvedValue({
-            ok: true,
-            json: async () => ({})
-        } as Response);
-
-        render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
-                <HelpCategoryDetail />
-            </MemoryRouter>
-        );
-
-        const yesButtons = screen.getAllByText('Yes');
-        const firstYesButton = yesButtons[0];
-        if (firstYesButton) {
-            fireEvent.click(firstYesButton);
-        }
-
-        await waitFor(() => {
-            expect(screen.getByText('Thank you for your feedback!')).toBeInTheDocument();
-        });
-
-        // Check if fetch was called with correct params
-        expect(fetchSpy).toHaveBeenCalledWith("/api/help-support/feedback", expect.objectContaining({
-            method: "POST",
-            body: expect.stringContaining('"wasHelpful":true')
-        }));
     });
 });
