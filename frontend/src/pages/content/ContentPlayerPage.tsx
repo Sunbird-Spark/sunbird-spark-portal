@@ -7,14 +7,30 @@ import RelatedContent from "@/components/common/RelatedContent";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
+import { useQumlContent } from "@/hooks/useQumlContent";
 
 const ContentPlayerPage = () => {
   const { contentId } = useParams();
   const navigate = useNavigate();
   
   const { data, isLoading, error } = useContentRead(contentId || '');
-  console.log('data', data)
   const contentData = data?.data?.content;
+  
+  // Check if this is QUML content that needs special handling
+  const isQumlContent = contentData?.mimeType === 'application/vnd.sunbird.questionset' || 
+                       contentData?.mimeType === 'application/vnd.sunbird.question';
+  
+  // Use QUML hook for question sets, regular content hook for others
+  const { 
+    data: qumlData, 
+    isLoading: isQumlLoading, 
+    error: qumlError 
+  } = useQumlContent(contentId || '', { enabled: isQumlContent });
+  
+  // Determine which data to use based on content type
+  const playerMetadata = isQumlContent ? qumlData : contentData;
+  const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
+  const playerError = isQumlContent ? qumlError : error;
   
   // Search for related content based on mime type
   const { data: relatedContentData } = useContentSearch({
@@ -40,15 +56,15 @@ const ContentPlayerPage = () => {
     },
   });
 
-  if (isLoading) {
+  if (playerIsLoading) {
     return <PageLoader message="Loading content..." />;
   }
 
-  if (error) {
-    return <div>Error loading content: {error.message}</div>;
+  if (playerError) {
+    return <div>Error loading content: {playerError.message}</div>;
   }
 
-  if (!contentData) {
+  if (!playerMetadata) {
     return <div>Content not found</div>;
   }
 
@@ -69,7 +85,7 @@ const ContentPlayerPage = () => {
         {/* Title Row */}
         <div className="content-player-title-row">
           <h1 className="content-player-title">
-            {contentData.name}
+            {playerMetadata.name}
           </h1>
         </div>
 
@@ -92,8 +108,8 @@ const ContentPlayerPage = () => {
           <div className="content-player-video-wrapper">
             <div className="content-player-video-relative">
               <PlayerComponent
-                mimeType={contentData.mimeType}
-                metadata={contentData}
+                mimeType={playerMetadata.mimeType}
+                metadata={playerMetadata}
                 onPlayerEvent={handlePlayerEvent}
                 onTelemetryEvent={handleTelemetryEvent}
               />
