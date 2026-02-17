@@ -78,7 +78,7 @@ export class QumlEditorService {
     let channel = '';
     try {
       const orgResponse = await this.orgService.search({ filters: { isTenant: true } });
-      const org = orgResponse?.data?.result?.response?.content?.[0] || orgResponse?.data?.response?.content?.[0];
+      const org = orgResponse?.data?.response?.content?.[0]
       if (org?.channel) {
         channel = org.channel;
       }
