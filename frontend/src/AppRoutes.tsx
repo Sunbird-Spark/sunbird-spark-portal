@@ -16,7 +16,7 @@ import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
 import Explore from './pages/Explore';
-import MyLearning from './pages/workspace/MyLearning';
+import MyLearning from './pages/my-learning/MyLearning';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
