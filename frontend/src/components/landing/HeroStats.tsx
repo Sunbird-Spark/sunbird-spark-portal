@@ -77,7 +77,7 @@ const HeroStats = () => {
 
             {/* Study at your own pace Card */}
             <div className="relative w-full lg:w-[16.6875rem] h-[11.625rem]">
-                <div className="h-full w-full drop-shadow-[0_15px_30px_rgba(0,0,0,0.15)]">
+                <div className="h-full w-full drop-shadow-[0_0.9375rem_1.875rem_rgba(0,0,0,0.15)]">
                     <div
                         className="relative flex h-full flex-col justify-between bg-white px-6 py-6 rounded-2xl card-mask-custom"
                     >
@@ -93,7 +93,7 @@ const HeroStats = () => {
                                 >
                                     <Avatar
                                         name={name}
-                                        size="40"
+                                        size="2.5rem"
                                         round={true}
                                         textSizeRatio={2}
                                     />
@@ -117,9 +117,9 @@ const HeroStats = () => {
                     aria-label="Go"
                 >
                     {isRTL ? (
-                        <FiArrowRight className="w-6 h-6 rotate-180" />
+                        <FiArrowRight className="w-[1.5rem] h-[1.5rem] rotate-180" />
                     ) : (
-                        <FiArrowRight className="w-6 h-6" />
+                        <FiArrowRight className="w-[1.5rem] h-[1.5rem]" />
                     )}
                 </button>
             </div>
