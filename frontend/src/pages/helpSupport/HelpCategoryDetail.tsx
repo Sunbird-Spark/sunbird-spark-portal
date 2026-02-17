@@ -64,28 +64,12 @@ const HelpCategoryDetail = () => {
         setIsSidebarOpen(!isMobile);
     }, [isMobile]);
 
-    const submitFeedback = async (index: number, wasHelpful: boolean, text: string) => {
-        try {
-            await fetch("/api/help-support/feedback", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ categoryId, questionIndex: index, wasHelpful, feedbackText: text }),
-            });
-        } catch (err) {
-            console.error("Failed to submit help category feedback", err);
-        }
-    };
-
     const handleFeedback = (index: number, value: "yes" | "no") => {
         setFeedback((prev) => ({ ...prev, [index]: value }));
-        if (value === "yes") {
-            submitFeedback(index, true, "");
-        }
     };
 
     const handleSubmitFeedback = async (index: number) => {
         const text = feedbackText[index] ?? "";
-        await submitFeedback(index, false, text);
 
         setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
         setFeedbackText((prev) => ({ ...prev, [index]: "" }));
