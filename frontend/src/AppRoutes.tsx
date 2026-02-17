@@ -15,6 +15,8 @@ import Index from './pages/Index';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
+import HelpSupport from './pages/helpSupport/HelpSupport';
+import HelpCategoryDetail from './pages/helpSupport/HelpCategoryDetail';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
 import ContentEditorPage from './pages/content/ContentEditorPage';
 import Explore from './pages/Explore';
@@ -37,6 +39,8 @@ const AppRoutes: React.FC = () => {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/help-support" element={<HelpSupport />} />
+        <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/explore" element={<Explore />} /> 
         <Route path="/collection/:collectionId" element={<CollectionDetailPage />} />
