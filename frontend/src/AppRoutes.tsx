@@ -17,12 +17,14 @@ import SignUp from './pages/signup/SignUp';
 import HelpSupport from './pages/helpSupport/HelpSupport';
 import HelpCategoryDetail from './pages/helpSupport/HelpCategoryDetail';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
+import ContentEditorPage from './pages/content/ContentEditorPage';
 import Explore from './pages/Explore';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
+const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
 
 const AppRoutes: React.FC = () => {
   return (
@@ -43,9 +45,10 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
-        <Route path="/workspace" element={<WorkspaceProtected />} />
+        <Route path="/workspace" element={<WorkspacePage />} />
         <Route path="/reports" element={<ReportsProtected />} />
-        <Route path="/create" element={<CreateContentProtected />} />
+        <Route path="/create" element={<CreateContentPage />} />
+        <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
