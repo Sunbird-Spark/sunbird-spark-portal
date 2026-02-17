@@ -68,28 +68,6 @@ const HelpCategoryDetail = () => {
         }
     };
 
-    if (loading) return <PageLoader message="Loading..." />;
-
-    if (error) {
-        return (
-            <PageLoader
-                message="Loading..."
-                error="Failed to load FAQ data. Please try again."
-                onRetry={() => window.location.reload()}
-            />
-        );
-    }
-
-    if (!category) {
-        return (
-            <PageLoader
-                message="Loading..."
-                error="Category not found."
-                onRetry={() => navigate("/help-support")}
-            />
-        );
-    }
-
     return (
         <div className="profile-container">
             <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
@@ -135,79 +113,99 @@ const HelpCategoryDetail = () => {
                             </button>
                         </div>
 
-                        {/* Category Title */}
-                        <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem] pt-[1.25rem]">
-                            {category.title}
-                        </h1>
+                        {loading ? (
+                            <PageLoader message="Loading..." fullPage={false} />
+                        ) : error ? (
+                            <PageLoader
+                                message="Loading..."
+                                error="Failed to load FAQ data. Please try again."
+                                onRetry={() => window.location.reload()}
+                                fullPage={false}
+                            />
+                        ) : !category ? (
+                            <PageLoader
+                                message="Loading..."
+                                error="Category not found."
+                                onRetry={() => navigate("/help-support")}
+                                fullPage={false}
+                            />
+                        ) : (
+                            <>
+                                {/* Category Title */}
+                                <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem] pt-[1.25rem]">
+                                    {category.title}
+                                </h1>
 
-                        {/* FAQ Accordion */}
-                        <Accordion type="single" collapsible defaultValue="item-0" className="space-y-[0.75rem]">
-                            {sanitizedFaqs.map((faq, index) => (
-                                <AccordionItem
-                                    key={index}
-                                    value={`item-${index}`}
-                                    className="rounded-[0.625rem] bg-sunbird-base-white border-b-0"
-                                >
-                                    <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick">
-                                        {faq.question}
-                                    </AccordionTrigger>
-                                    <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
-                                        <div
-                                            className="mb-[1rem] px-[1.25rem]"
-                                            dangerouslySetInnerHTML={{ __html: faq.answer }}
-                                        />
-                                        <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
-                                            {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
-                                                <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">
-                                                    Thank you for your feedback!
-                                                </p>
-                                            ) : feedback[index] === "no" ? (
-                                                <div className="py-[0.5rem] space-y-[0.75rem]">
-                                                    <p className="text-sm font-semibold text-foreground font-['Rubik']">Sorry about that!</p>
-                                                    <p className="text-sm font-semibold text-foreground font-['Rubik']">What more would you like to know?</p>
-                                                    <textarea
-                                                        placeholder="Type Here..."
-                                                        value={feedbackText[index] || ""}
-                                                        onChange={(e) => setFeedbackText((prev) => ({ ...prev, [index]: e.target.value }))}
-                                                        className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-['Rubik'] resize-none h-[5rem] focus:outline-none focus:border-sunbird-brick"
-                                                        aria-label="Additional feedback about this answer"
-                                                        aria-required="true"
-                                                    />
-                                                    <div className="flex justify-end">
-                                                        <button
-                                                            onClick={() => handleSubmitFeedback(index)}
-                                                            disabled={!feedbackText[index]?.trim()}
-                                                            className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
-                                                                ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
-                                                                : "bg-sunbird-brick hover:opacity-90"
-                                                                }`}
-                                                        >
-                                                            Submit feedback
-                                                        </button>
-                                                    </div>
+                                {/* FAQ Accordion */}
+                                <Accordion type="single" collapsible defaultValue="item-0" className="space-y-[0.75rem]">
+                                    {sanitizedFaqs.map((faq, index) => (
+                                        <AccordionItem
+                                            key={index}
+                                            value={`item-${index}`}
+                                            className="rounded-[0.625rem] bg-sunbird-base-white border-b-0"
+                                        >
+                                            <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick">
+                                                {faq.question}
+                                            </AccordionTrigger>
+                                            <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
+                                                <div
+                                                    className="mb-[1rem] px-[1.25rem]"
+                                                    dangerouslySetInnerHTML={{ __html: faq.answer }}
+                                                />
+                                                <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
+                                                    {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
+                                                        <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">
+                                                            Thank you for your feedback!
+                                                        </p>
+                                                    ) : feedback[index] === "no" ? (
+                                                        <div className="py-[0.5rem] space-y-[0.75rem]">
+                                                            <p className="text-sm font-semibold text-foreground font-['Rubik']">Sorry about that!</p>
+                                                            <p className="text-sm font-semibold text-foreground font-['Rubik']">What more would you like to know?</p>
+                                                            <textarea
+                                                                placeholder="Type Here..."
+                                                                value={feedbackText[index] || ""}
+                                                                onChange={(e) => setFeedbackText((prev) => ({ ...prev, [index]: e.target.value }))}
+                                                                className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-['Rubik'] resize-none h-[5rem] focus:outline-none focus:border-sunbird-brick"
+                                                                aria-label="Additional feedback about this answer"
+                                                                aria-required="true"
+                                                            />
+                                                            <div className="flex justify-end">
+                                                                <button
+                                                                    onClick={() => handleSubmitFeedback(index)}
+                                                                    disabled={!feedbackText[index]?.trim()}
+                                                                    className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
+                                                                        ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
+                                                                        : "bg-sunbird-brick hover:opacity-90"
+                                                                        }`}
+                                                                >
+                                                                    Submit feedback
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-[0.75rem]">
+                                                            <span className="text-sm text-muted-foreground font-['Rubik']">Did this answer help you?</span>
+                                                            <button
+                                                                onClick={() => handleFeedback(index, "no")}
+                                                                className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                            >
+                                                                No
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleFeedback(index, "yes")}
+                                                                className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                            >
+                                                                Yes
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            ) : (
-                                                <div className="flex items-center gap-[0.75rem]">
-                                                    <span className="text-sm text-muted-foreground font-['Rubik']">Did this answer help you?</span>
-                                                    <button
-                                                        onClick={() => handleFeedback(index, "no")}
-                                                        className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
-                                                    >
-                                                        No
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleFeedback(index, "yes")}
-                                                        className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
-                                                    >
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
+                            </>
+                        )}
                     </div>
                 </main>
             </div>
