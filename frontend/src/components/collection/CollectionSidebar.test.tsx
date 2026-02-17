@@ -10,8 +10,15 @@ const mockModules: Module[] = [
     title: 'Module One',
     subtitle: 'First module subtitle',
     lessons: [
-      { id: 'lesson-1', title: 'Video Lesson', duration: '5:00', type: 'video' },
-      { id: 'lesson-2', title: 'Document Lesson', duration: '—', type: 'document' },
+      { id: 'lesson-1', title: 'Video Lesson', duration: '5:00', type: 'video', mimeType: 'video/mp4' },
+      { id: 'lesson-2', title: 'Document Lesson', duration: '—', type: 'document', mimeType: 'application/pdf' },
+      {
+        id: 'lesson-col',
+        title: 'Nested Course',
+        duration: '—',
+        type: 'document',
+        mimeType: 'application/vnd.ekstep.content-collection',
+      },
     ],
   },
   {
@@ -29,7 +36,6 @@ describe('CollectionSidebar', () => {
     modules: mockModules,
     expandedModules: ['mod-1'],
     toggleModule: vi.fn(),
-    collectionId: 'col-123',
   };
 
   const renderSidebar = (props = defaultProps) => {
@@ -84,11 +90,18 @@ describe('CollectionSidebar', () => {
     expect(videoLink).toHaveAttribute('href', '/content/lesson-1');
   });
 
-  it('renders document lesson link with correct href for course lesson route', () => {
+  it('renders document lesson link with correct href for content route', () => {
     renderSidebar();
 
     const documentLink = screen.getByRole('link', { name: /Document Lesson/ });
-    expect(documentLink).toHaveAttribute('href', '/course/col-123/lesson/lesson-2');
+    expect(documentLink).toHaveAttribute('href', '/content/lesson-2');
+  });
+
+  it('renders collection lesson link with correct href for collection route', () => {
+    renderSidebar();
+
+    const collectionLink = screen.getByRole('link', { name: /Nested Course/ });
+    expect(collectionLink).toHaveAttribute('href', '/collection/lesson-col');
   });
 
   it('updates active lesson when a lesson link is clicked', () => {
@@ -121,6 +134,7 @@ describe('CollectionSidebar', () => {
     renderSidebar();
 
     expect(screen.getByText('5:00')).toBeInTheDocument();
-    expect(screen.getByText('—')).toBeInTheDocument();
+    const durationDashes = screen.getAllByText('—');
+    expect(durationDashes.length).toBeGreaterThanOrEqual(1);
   });
 });

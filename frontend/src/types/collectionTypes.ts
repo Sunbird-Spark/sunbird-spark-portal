@@ -3,6 +3,7 @@ export interface Lesson {
   title: string;
   duration: string;
   type: 'video' | 'document';
+  mimeType?: string;
 }
 
 export interface Module {

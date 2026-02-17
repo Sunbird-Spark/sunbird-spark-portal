@@ -18,6 +18,7 @@ function mapChildrenToLessons(children: HierarchyContentNode[] | undefined): Les
     title: node.name ?? 'Untitled',
     duration: DEFAULT_LESSON_DURATION,
     type: lessonTypeFromMimeType(node.mimeType),
+    mimeType: node.mimeType,
   }));
 }
 

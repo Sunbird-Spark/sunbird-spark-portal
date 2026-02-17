@@ -136,7 +136,6 @@ const CollectionDetailPage = () => {
               modules={collectionData.modules}
               expandedModules={expandedModules}
               toggleModule={toggleModule}
-              collectionId={collectionId}
             />
           </div>
 

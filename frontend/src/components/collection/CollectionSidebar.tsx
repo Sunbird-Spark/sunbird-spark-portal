@@ -7,16 +7,21 @@ import {
   CollapsibleTrigger,
 } from "./collapsible"
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
-import type { Module } from "@/types/collectionTypes"
+import type { Lesson, Module } from "@/types/collectionTypes"
+
+function getLessonHref(lesson: Lesson): string {
+  const mime = (lesson.mimeType ?? '').toLowerCase();
+  const isCollection = mime === 'application/vnd.ekstep.content-collection';
+  return isCollection ? `/collection/${lesson.id}` : `/content/${lesson.id}`;
+}
 
 interface CollectionSidebarProps {
   modules: Module[];
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
-  collectionId: string | undefined;
 }
 
-const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionId }: CollectionSidebarProps) => {
+const CollectionSidebar = ({ modules, expandedModules, toggleModule }: CollectionSidebarProps) => {
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
     modules?.[0]?.lessons?.[0]?.id ?? null
   );
@@ -58,11 +63,7 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionI
                     return (
                       <Link
                         key={lesson.id}
-                        to={
-                          lesson.type === "video"
-                            ? `/content/${lesson.id}`
-                            : `/course/${collectionId}/lesson/${lesson.id}`
-                        }
+                        to={getLessonHref(lesson)}
                         onClick={() => setActiveLessonId(lesson.id)}
                         className={`flex items-center gap-3 rounded-[10px] px-4 py-3 hover:bg-gray-200 transition-colors w-full h-[70px] ${isActive
                           ? 'border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100'
