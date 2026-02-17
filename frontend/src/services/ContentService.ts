@@ -35,4 +35,38 @@ export class ContentService {
     const queryString = resolvedFields.length ? `?fields=${resolvedFields.join(',')}` : '';
     return getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}${queryString}`);
   }
+
+  public async contentCreate(
+    name: string,
+    options: {
+      createdBy: string;
+      creator: string;
+      mimeType?: string;
+      contentType?: string;
+      primaryCategory?: string;
+      framework?: string;
+    }
+  ): Promise<ApiResponse<ContentCreateResponse>> {
+    return getClient().post<ContentCreateResponse>('/content/v1/create', {
+      request: {
+        content: {
+          name,
+          code: crypto.randomUUID(),
+          createdBy: options.createdBy,
+          creator: options.creator,
+          mimeType: options.mimeType ?? 'application/vnd.ekstep.ecml-archive',
+          contentType: options.contentType ?? 'Resource',
+          primaryCategory: options.primaryCategory ?? 'Learning Resource',
+          ...(options.framework && { framework: options.framework }),
+        },
+      },
+    });
+  }
+}
+
+export interface ContentCreateResponse {
+  content_id: string;
+  identifier: string;
+  node_id: string;
+  versionKey: string;
 }
