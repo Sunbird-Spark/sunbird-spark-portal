@@ -67,7 +67,7 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
   });
 
   it('sets up FancyTree guard interval', async () => {
-    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
 
     render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
 
@@ -75,9 +75,9 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
       expect(mockServiceInstance.createElement).toHaveBeenCalled();
     });
 
-    expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 800);
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 800);
 
-    setIntervalSpy.mockRestore();
+    setTimeoutSpy.mockRestore();
   });
 
   it('restores jQuery when FancyTree is lost', async () => {
