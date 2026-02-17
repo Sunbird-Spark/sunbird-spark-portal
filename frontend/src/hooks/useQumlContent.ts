@@ -24,36 +24,14 @@ export const useQumlContent = (
   return useQuery({
     queryKey: ['quml', 'questionset', questionSetId],
     enabled: enabled && Boolean(questionSetId),
-    staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
-      // Fetch hierarchy and read in parallel (like old portal's forkJoin)
-      const [hierarchyResp, readResp] = await Promise.all([
-        questionSetService.getHierarchy<any>(questionSetId),
-        questionSetService.getQuestionset<any>(questionSetId),
-      ]);
+      // Fetch hierarchy
+      const hierarchyResp = await questionSetService.getHierarchy<any>(questionSetId);
 
-      let metadata =
-        hierarchyResp?.result?.questionset ||
-        hierarchyResp?.result?.questionSet ||
-        hierarchyResp?.questionset ||
-        hierarchyResp;
+      let metadata = hierarchyResp?.questionset;
 
       if (!metadata) {
         throw new Error('Hierarchy payload missing questionset');
-      }
-
-      // Merge additional properties from read API (instructions, maxScore, etc.)
-      const readData = readResp?.result?.questionset || readResp?.result?.questionSet;
-      if (readData) {
-        if (readData.instructions) {
-          metadata.instructions = readData.instructions;
-        }
-        if (readData.maxScore) {
-          metadata.maxScore = readData.maxScore;
-        }
-        if (readData.outcomeDeclaration) {
-          metadata.outcomeDeclaration = readData.outcomeDeclaration;
-        }
       }
 
       // Collect all question IDs from hierarchy
@@ -94,16 +72,7 @@ export const useQumlContent = (
         if (!node) return node;
 
         if (node.mimeType === 'application/vnd.sunbird.question' && node.identifier) {
-          const fullQuestion = questionMap.get(node.identifier);
-          if (fullQuestion) {
-            return {
-              ...fullQuestion,
-              parent: node.parent,
-              index: node.index,
-              depth: node.depth,
-              graphId: node.graphId,
-            };
-          }
+          return questionMap.get(node.identifier) || node;
         }
 
         if (Array.isArray(node.children)) {
