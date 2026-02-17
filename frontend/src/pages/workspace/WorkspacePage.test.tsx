@@ -4,13 +4,12 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import WorkspacePage from './WorkspacePage';
+import type { UseWorkspaceReturn } from '@/types/workspaceTypes';
 
-vi.mock('@/hooks/useContent', () => ({
-  useContentSearch: vi.fn(() => ({
-    data: { data: { content: [], QuestionSet: [] } },
-    isLoading: false,
-    refetch: vi.fn(),
-  })),
+const mockUseWorkspace = vi.fn<() => UseWorkspaceReturn>();
+
+vi.mock('@/hooks/useWorkspace', () => ({
+  useWorkspace: (...args: unknown[]) => mockUseWorkspace(),
 }));
 
 const mockToast = vi.fn();
@@ -98,14 +97,21 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('WorkspacePage', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     mockUseIsMobile.mockReturnValue(false);
-    const { useContentSearch } = await import('@/hooks/useContent');
-    vi.mocked(useContentSearch).mockReturnValue({
-      data: { data: { content: [], QuestionSet: [] } },
+    mockUseWorkspace.mockReturnValue({
+      contents: [],
+      counts: { all: 0, drafts: 0, review: 0, published: 0, pendingReview: 0 },
+      totalCount: 0,
       isLoading: false,
-      refetch: vi.fn(),
-    } as unknown as ReturnType<typeof useContentSearch>);
+      isLoadingMore: false,
+      isCountsLoading: false,
+      error: null,
+      hasMore: false,
+      loadMore: vi.fn(),
+      refetchCounts: vi.fn(),
+      refetchAll: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -119,13 +125,20 @@ describe('WorkspacePage', () => {
     expect(screen.getByTestId('footer')).toBeInTheDocument();
   });
 
-  it('shows loading state when useContentSearch isLoading is true', async () => {
-    const { useContentSearch } = await import('@/hooks/useContent');
-    vi.mocked(useContentSearch).mockReturnValue({
-      data: undefined,
+  it('shows loading state when isLoading and isCountsLoading are true', () => {
+    mockUseWorkspace.mockReturnValue({
+      contents: [],
+      counts: { all: 0, drafts: 0, review: 0, published: 0, pendingReview: 0 },
+      totalCount: 0,
       isLoading: true,
-      refetch: vi.fn(),
-    } as unknown as ReturnType<typeof useContentSearch>);
+      isLoadingMore: false,
+      isCountsLoading: true,
+      error: null,
+      hasMore: false,
+      loadMore: vi.fn(),
+      refetchCounts: vi.fn(),
+      refetchAll: vi.fn(),
+    });
     renderWithProviders(<WorkspacePage />);
     expect(screen.getByText('loading')).toBeInTheDocument();
   });
