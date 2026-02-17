@@ -50,13 +50,15 @@ const MyLearning = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const upcomingBatches = courses.filter(course => {
-    if (course.batch && course.batch.startDate) {
-      const startDate = new Date(course.batch.startDate);
-      return !isNaN(startDate.getTime()) && startDate > today;
+  const upcomingBatches = courses.filter(
+    (course: { batch?: { startDate?: string | Date } }) => {
+      if (course.batch && course.batch.startDate) {
+        const startDate = new Date(course.batch.startDate);
+        return !isNaN(startDate.getTime()) && startDate > today;
+      }
+      return false;
     }
-    return false;
-  });
+  );
 
   if (isLoading) {
     return <PageLoader message="Loading your learning..." />;
@@ -234,7 +236,7 @@ const MyLearning = () => {
 
             {/* Recommended Contents */}
             <HomeRecommendedSection 
-              creatorIds={Array.from(new Set(courses.map(c => c.batch?.createdBy).filter(Boolean))) as string[]}
+              creatorIds={Array.from(new Set(courses.map(c => c.batch?.createdBy).filter((id): id is string => !!id)))}
             />
           </div>
         </main>

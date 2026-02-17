@@ -114,11 +114,27 @@ describe('HomeRecommendedSection', () => {
         renderComponent();
 
         // Item 1: CollectionCard links to /collection/:id
-        const firstCard = screen.getByText(/Complete AI Engineer Bootcamp/).closest('a');
+        const firstCard = screen.getByText('Complete AI Engineer Bootcamp').closest('a');
         expect(firstCard).toHaveAttribute('href', '/collection/1');
 
         // Item 2: ResourceCard links to /content/:id
         const videoCard = screen.getByText('Generative AI for Cybersecurity Professionals').closest('a');
         expect(videoCard).toHaveAttribute('href', '/content/2');
+    });
+
+    it('filters by creatorIds when provided', () => {
+        render(
+            <BrowserRouter>
+                <HomeRecommendedSection creatorIds={['user1', 'user2']} />
+            </BrowserRouter>
+        );
+
+        expect(useContentSearch).toHaveBeenCalledWith(expect.objectContaining({
+            request: expect.objectContaining({
+                filters: expect.objectContaining({
+                    createdBy: ['user1', 'user2']
+                })
+            })
+        }));
     });
 });

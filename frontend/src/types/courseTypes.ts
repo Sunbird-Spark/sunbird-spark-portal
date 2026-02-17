@@ -21,9 +21,9 @@ export interface Course {
   batch?: Batch;
   content?: {
     appIcon: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CourseEnrollmentResponse {

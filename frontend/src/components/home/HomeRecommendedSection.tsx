@@ -17,6 +17,7 @@ const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps
             filters: {
                 status: ["Live"],
                 objectType: ["Content", "QuestionSet"], // Broaden search to include various content types
+                ...(creatorIds.length > 0 && { createdBy: creatorIds })
             },
             sort_by: {
                 lastUpdatedOn: "desc"
