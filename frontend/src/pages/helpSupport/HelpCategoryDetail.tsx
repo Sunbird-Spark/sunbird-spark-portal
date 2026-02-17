@@ -15,12 +15,14 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/landing/Accordion";
-import SidebarCloseButton from "../../components/common/SidebarCloseButton";
-import { buildCategoryFaqsMap } from "../../components/helpSupport/HelpSupportData";
+
+import { buildCategoryFaqsMap } from "../../services/HelpSupportService";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 import "../profile/profile.css";
 
 const HelpCategoryDetail = () => {
+
     const { categoryId } = useParams<{ categoryId: string }>();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
@@ -29,17 +31,33 @@ const HelpCategoryDetail = () => {
     const [feedback, setFeedback] = useState<Record<number, "yes" | "no" | "submitted" | null>>({});
     const [feedbackText, setFeedbackText] = useState<Record<number, string>>({});
 
+    const { data: appNameSetting } = useSystemSetting("sunbird");
+    const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
+
     const { categories: allCategories, loading, error } = useHelpFaqData();
 
-    // Look up current category by slug, sanitize answers
-    const category = useMemo(
-        () => buildCategoryFaqsMap(allCategories)[categoryId || ""],
-        [allCategories, categoryId]
-    );
+    // Look up current category by slug
+    const category = useMemo(() => {
+        const rawCategory = buildCategoryFaqsMap(allCategories)[categoryId || ""];
+        if (!rawCategory) return null;
+
+        return {
+            ...rawCategory,
+            title: rawCategory.title.replace(/{{APP_NAME}}/g, appName),
+            faqs: rawCategory.faqs.map(faq => ({
+                ...faq,
+                question: faq.question.replace(/{{APP_NAME}}/g, appName)
+            }))
+        };
+    }, [allCategories, categoryId, appName]);
+
 
     const sanitizedFaqs = useMemo(
-        () => (category?.faqs ?? []).map((faq) => ({ ...faq, answer: sanitizeHtml(faq.answer) })),
-        [category]
+        () => (category?.faqs ?? []).map((faq) => ({
+            ...faq,
+            answer: sanitizeHtml(faq.answer).replace(/{{APP_NAME}}/g, appName)
+        })),
+        [category, appName]
     );
 
     useEffect(() => {
@@ -92,13 +110,14 @@ const HelpCategoryDetail = () => {
                         </SheetContent>
                     </Sheet>
                 ) : (
+
                     <div className="relative shrink-0 sticky top-[4.5rem] self-start z-[20]">
-                        {isSidebarOpen && (
-                            <>
-                                <HomeSidebar activeNav={activeNav} onNavChange={setActiveNav} />
-                                <SidebarCloseButton onClick={() => setIsSidebarOpen(false)} />
-                            </>
-                        )}
+                        <HomeSidebar
+                            activeNav={activeNav}
+                            onNavChange={setActiveNav}
+                            collapsed={!isSidebarOpen}
+                            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+                        />
                     </div>
                 )}
 
@@ -216,7 +235,7 @@ const HelpCategoryDetail = () => {
             </div>
 
             <Footer />
-        </div>
+        </div >
     );
 };
 

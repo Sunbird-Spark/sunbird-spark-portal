@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, useParams } from 'react-router-dom';
 import HelpCategoryDetail from './HelpCategoryDetail';
+import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 // Mock sub-components
 vi.mock("@/components/home/Header", () => ({
@@ -18,10 +19,11 @@ vi.mock("@/components/home/Footer", () => ({
 }));
 
 vi.mock("@/components/home/HomeSidebar", () => ({
-    default: ({ activeNav, onNavChange }: any) => (
-        <div data-testid="home-sidebar">
+    default: ({ activeNav, onNavChange, collapsed, onToggle }: any) => (
+        <div data-testid="home-sidebar" data-collapsed={collapsed}>
             <span data-testid="active-nav">{activeNav}</span>
             <button onClick={() => onNavChange('home')}>Change Nav</button>
+            {onToggle && <button onClick={onToggle} aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}>Toggle Sidebar</button>}
         </div>
     ),
 }));
@@ -64,6 +66,11 @@ const mockCategories = [
     },
 ];
 
+// Mock useSystemSetting hook
+vi.mock("@/hooks/useSystemSetting", () => ({
+    useSystemSetting: vi.fn(),
+}));
+
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
     const actual = await vi.importActual("react-router-dom");
@@ -79,20 +86,37 @@ describe('HelpCategoryDetail', () => {
         vi.clearAllMocks();
         mockUseHelpFaqData.mockReturnValue({ categories: mockCategories, loading: false, error: null });
         vi.mocked(useParams).mockReturnValue({ categoryId: 'login' });
+        vi.mocked(useSystemSetting).mockReturnValue({
+            data: { data: { response: { value: 'Test App' } } },
+            isLoading: false,
+        } as any);
     });
 
-    it('renders the category detail page with FAQs from API', () => {
+    it('renders the category detail page with FAQs from API and replaces app name in title, question and answer', async () => {
+        const categoriesWithPlaceholder = [
+            {
+                name: "About {{APP_NAME}}",
+                faqs: [
+                    { topic: "What is {{APP_NAME}}?", description: "Welcome to {{APP_NAME}}" }
+                ]
+            }
+        ];
+        mockUseHelpFaqData.mockReturnValue({ categories: categoriesWithPlaceholder, loading: false, error: null });
+        vi.mocked(useParams).mockReturnValue({ categoryId: 'about-app-name' });
+
         render(
-            <MemoryRouter initialEntries={['/help-support/login']}>
+            <MemoryRouter initialEntries={['/help-support/about-app-name']}>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("Login FAQs")).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText("About Test App FAQs")).toBeInTheDocument();
+            expect(screen.getByText("What is Test App?")).toBeInTheDocument();
+            expect(screen.getByText("Welcome to Test App")).toBeInTheDocument();
+        });
+
         expect(screen.getByText('Go Back')).toBeInTheDocument();
-        expect(screen.getByText('How do I create an account?')).toBeInTheDocument();
-        expect(screen.getByText('I forgot my password')).toBeInTheDocument();
-        expect(screen.getByText('Can I use Google login?')).toBeInTheDocument();
     });
 
     it('navigates back when Go Back is clicked', () => {
@@ -104,6 +128,31 @@ describe('HelpCategoryDetail', () => {
 
         fireEvent.click(screen.getByText('Go Back'));
         expect(mockNavigate).toHaveBeenCalledWith('/help-support');
+    });
+
+    it('toggles sidebar state', () => {
+        render(
+            <MemoryRouter initialEntries={['/help-support/login']}>
+                <HelpCategoryDetail />
+            </MemoryRouter>
+        );
+
+        const sidebar = screen.getByTestId('home-sidebar');
+        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
+
+        // Click Collapse (simulated via mock button which calls onToggle)
+        const toggleBtn = screen.getByRole('button', { name: "Collapse Sidebar" });
+        fireEvent.click(toggleBtn);
+
+        expect(sidebar).toHaveAttribute('data-collapsed', 'true');
+        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed'); // Header check
+
+        // Click Expand
+        const expandBtn = screen.getByRole('button', { name: "Expand Sidebar" });
+        fireEvent.click(expandBtn);
+
+        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
+        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
     });
 
     it('handles feedback submission (Yes)', async () => {

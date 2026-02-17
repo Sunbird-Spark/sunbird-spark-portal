@@ -1,15 +1,9 @@
-/**
- * Types and helpers for the Help & Support pages.
- * Data is fetched dynamically from the portalFaqURL endpoint.
- */
 
 import {
     ApiFaqCategory,
     CategoryFaqData,
     HelpCategory,
-} from "../../types/helpSupport";
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
+} from "../types/helpSupport";
 
 /** Convert a category name to a URL-friendly slug. */
 export const slugify = (name: string): string =>
@@ -17,10 +11,6 @@ export const slugify = (name: string): string =>
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
-
-
-
-
 
 /** Build the category card data from the API categories array. */
 export const buildHelpCategories = (categories: ApiFaqCategory[]): HelpCategory[] =>

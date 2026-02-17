@@ -51,32 +51,17 @@ describe('AuthenticatedHeader', () => {
             );
 
             expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
-            expect(screen.queryByLabelText('Toggle Sidebar')).not.toBeInTheDocument();
+
         });
 
-        it('renders toggle button when sidebar is closed', () => {
+        // Desktop no longer has a toggle button in the header.
+        it('renders logo on desktop', () => {
             render(
                 <MemoryRouter>
                     <AuthenticatedHeader isSidebarOpen={false} onToggleSidebar={mockOnToggleSidebar} />
                 </MemoryRouter>
             );
-
-            const toggleBtn = screen.getByLabelText('Toggle Sidebar');
-            expect(toggleBtn).toBeInTheDocument();
-            expect(screen.queryByAltText('Sunbird')).not.toBeInTheDocument();
-        });
-
-        it('calls onToggleSidebar when toggle button is clicked', () => {
-            render(
-                <MemoryRouter>
-                    <AuthenticatedHeader isSidebarOpen={false} onToggleSidebar={mockOnToggleSidebar} />
-                </MemoryRouter>
-            );
-
-            const toggleBtn = screen.getByLabelText('Toggle Sidebar');
-            fireEvent.click(toggleBtn);
-
-            expect(mockOnToggleSidebar).toHaveBeenCalledTimes(1);
+            expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
         });
 
         it('renders search input on desktop', () => {

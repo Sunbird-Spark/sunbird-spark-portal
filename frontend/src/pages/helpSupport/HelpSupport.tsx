@@ -8,11 +8,12 @@ import PageLoader from "@/components/common/PageLoader";
 import Header from "@/components/home/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useHelpFaqData } from "@/hooks/useFaqData";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 import SidebarCloseButton from "../../components/common/SidebarCloseButton";
 import {
     buildHelpCategories,
-} from "../../components/helpSupport/HelpSupportData";
+} from "../../services/HelpSupportService";
 
 import "../profile/profile.css";
 
@@ -22,11 +23,18 @@ const HelpSupport = () => {
     const [activeNav, setActiveNav] = useState("help");
     const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
+    const { data: appNameSetting } = useSystemSetting("sunbird");
+    const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
+
     const { categories: allCategories, loading, error } = useHelpFaqData();
 
     const categories = useMemo(
-        () => buildHelpCategories(allCategories),
-        [allCategories]
+        () => buildHelpCategories(allCategories).map(cat => ({
+            ...cat,
+            title: cat.title.replace(/{{APP_NAME}}/g, appName),
+            description: cat.description.replace(/{{APP_NAME}}/g, appName)
+        })),
+        [allCategories, appName]
     );
 
     useEffect(() => {
@@ -53,12 +61,12 @@ const HelpSupport = () => {
                     </Sheet>
                 ) : (
                     <div className="relative shrink-0 sticky top-[4.5rem] self-start z-[20]">
-                        {isSidebarOpen && (
-                            <>
-                                <HomeSidebar activeNav={activeNav} onNavChange={setActiveNav} />
-                                <SidebarCloseButton onClick={() => setIsSidebarOpen(false)} />
-                            </>
-                        )}
+                        <HomeSidebar
+                            activeNav={activeNav}
+                            onNavChange={setActiveNav}
+                            collapsed={!isSidebarOpen}
+                            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+                        />
                     </div>
                 )}
 

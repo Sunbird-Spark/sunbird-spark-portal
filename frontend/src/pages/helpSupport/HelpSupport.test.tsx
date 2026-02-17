@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HelpSupport from './HelpSupport';
+import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 // Mock sub-components
 vi.mock("@/components/home/Header", () => ({
@@ -18,10 +19,11 @@ vi.mock("@/components/home/Footer", () => ({
 }));
 
 vi.mock("@/components/home/HomeSidebar", () => ({
-    default: ({ activeNav, onNavChange }: any) => (
-        <div data-testid="home-sidebar">
+    default: ({ activeNav, onNavChange, collapsed, onToggle }: any) => (
+        <div data-testid="home-sidebar" data-collapsed={collapsed}>
             <span data-testid="active-nav">{activeNav}</span>
             <button onClick={() => onNavChange('home')}>Change Nav</button>
+            {onToggle && <button onClick={onToggle} aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}>Toggle Sidebar</button>}
         </div>
     ),
 }));
@@ -39,6 +41,11 @@ vi.mock("@/hooks/use-mobile", () => ({
 
 vi.mock("@/utils/sanitizeHtml", () => ({
     sanitizeHtml: (html: string) => html,
+}));
+
+// Mock useSystemSetting hook
+vi.mock("@/hooks/useSystemSetting", () => ({
+    useSystemSetting: vi.fn(),
 }));
 
 // Mock the shared hook
@@ -82,21 +89,28 @@ describe('HelpSupport', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockUseHelpFaqData.mockReturnValue({ categories: mockCategories, loading: false, error: null });
+        vi.mocked(useSystemSetting).mockReturnValue({
+            data: { data: { response: { value: 'Test App' } } },
+            isLoading: false,
+        } as any);
     });
 
-    it('renders the help & support page with dynamic categories', () => {
+    it('renders the help & support page with dynamic categories and replaces app name', () => {
+        const categoriesWithPlaceholder = [
+            {
+                name: "About {{APP_NAME}}",
+                faqs: [{ topic: "T1", description: "D1" }]
+            }
+        ];
+        mockUseHelpFaqData.mockReturnValue({ categories: categoriesWithPlaceholder, loading: false, error: null });
+
         render(
             <MemoryRouter initialEntries={['/help-support']}>
                 <HelpSupport />
             </MemoryRouter>
         );
 
-        expect(screen.getByText('How can we assist you today?')).toBeInTheDocument();
-        expect(screen.getByText('Login')).toBeInTheDocument();
-        expect(screen.getByText('Profile')).toBeInTheDocument();
-        expect(screen.getByText('Course & Certificates')).toBeInTheDocument();
-        expect(screen.getByTestId('mock-header')).toBeInTheDocument();
-        expect(screen.getByTestId('mock-footer')).toBeInTheDocument();
+        expect(screen.getByText('About Test App')).toBeInTheDocument();
     });
 
     it('displays correct FAQ count for each category', () => {
@@ -152,16 +166,23 @@ describe('HelpSupport', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
-        expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
+        const sidebar = screen.getByTestId('home-sidebar');
+        expect(sidebar).toBeInTheDocument();
+        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
 
-        fireEvent.click(screen.getByRole('button', { name: /close sidebar/i }));
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed');
-        expect(screen.queryByTestId('home-sidebar')).not.toBeInTheDocument();
+        // Click Collapse
+        const collapseBtn = screen.getByRole('button', { name: /Collapse Sidebar/i });
+        fireEvent.click(collapseBtn);
 
-        fireEvent.click(screen.getByLabelText('Toggle Sidebar'));
+        expect(sidebar).toHaveAttribute('data-collapsed', 'true');
+        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed'); // Header mock update
+
+        // Click Expand (same button spot, new label)
+        const expandBtn = screen.getByRole('button', { name: /Expand Sidebar/i });
+        fireEvent.click(expandBtn);
+
+        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
         expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
-        expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
     });
 
     it('handles api error gracefully', () => {

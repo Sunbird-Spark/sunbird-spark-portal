@@ -27,9 +27,9 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
         <header className={`profile-header ${isMobile ? 'mobile' : ''}`}>
             <div className="profile-header-container">
                 {/* Left: Sunbird Logo + Sidebar Toggle */}
-                <div className={`profile-logo-container ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'}`}>
-                    {!isMobile && isSidebarOpen && (
-                        <div className="w-full">
+                <div className={`profile-logo-container ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'} transition-all duration-300`}>
+                    {!isMobile && (
+                        <div className="w-full h-full flex items-center">
                             <img
                                 src={sunbirdLogo}
                                 alt="Sunbird"
@@ -38,8 +38,8 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                             />
                         </div>
                     )}
-                    {/* Sidebar Toggle */}
-                    {isMobile ? (
+                    {/* Sidebar Toggle - Mobile */}
+                    {isMobile && (
                         <button
                             onClick={onToggleSidebar}
                             className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
@@ -51,20 +51,6 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                                 <path d="M1 13H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                             </svg>
                         </button>
-                    ) : (
-                        !isSidebarOpen && (
-                            <button
-                                onClick={onToggleSidebar}
-                                aria-label="Toggle Sidebar"
-                                className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
-                            >
-                                <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M1 1H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                    <path d="M1 7H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                    <path d="M1 13H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                </svg>
-                            </button>
-                        )
                     )}
                 </div>
 
