@@ -29,7 +29,7 @@ import "./workspace.css";
 // Resource editor option IDs that should trigger the content editor
 const RESOURCE_EDITOR_OPTIONS = ['interactive', 'quiz', 'story'];
 
-const OPTION_LABELS: Record<string, string> = {
+const RESOURCE_EDITOR_OPTION_LABELS: Record<string, string> = {
   interactive: 'Interactive Activity',
   quiz: 'Quiz & Assessment',
   story: 'Story & Game',
@@ -129,12 +129,12 @@ const WorkspacePage = () => {
   const handleContentNameSubmit = async (name: string) => {
     setIsCreating(true);
     try {
+      const first = userData?.data?.response?.firstName?.trim();
+      const last = userData?.data?.response?.lastName?.trim();
+      const creator = first || last ? [first, last].filter(Boolean).join(" ") : "anonymous";
       const response = await contentService.contentCreate(name, {
-        createdBy: userAuthInfoService.getUserId() || '',
-        creator: userData?.data?.response?.firstName || '',
-        mimeType: 'application/vnd.ekstep.ecml-archive',
-        contentType: 'Resource',
-        primaryCategory: 'Learning Resource',
+        createdBy: userAuthInfoService.getUserId() || '', creator,
+        mimeType: 'application/vnd.ekstep.ecml-archive', contentType: 'Resource', primaryCategory: 'Learning Resource',
       });
       const contentId = response.data?.identifier || response.data?.content_id;
       if (contentId) {
@@ -142,7 +142,8 @@ const WorkspacePage = () => {
         setSelectedOption(null);
         navigate(`/edit/content-editor/${contentId}`);
       } else {
-        toast({ title: "Error", description: "Failed to create content. No identifier returned.", variant: "destructive" });
+        console.error("Content creation response missing identifier:", response);
+        toast({ title: "Error", description: "Unexpected server response. Please try again.", variant: "destructive" });
       }
     } catch (error) {
       console.error('Failed to create content:', error);
@@ -265,7 +266,7 @@ const WorkspacePage = () => {
             onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
             onSubmit={handleContentNameSubmit}
             isLoading={isCreating}
-            optionTitle={selectedOption ? OPTION_LABELS[selectedOption] : undefined}
+            optionTitle={selectedOption ? RESOURCE_EDITOR_OPTION_LABELS[selectedOption] : undefined}
           />
         </div>
       </div>

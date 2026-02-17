@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/common/Button";
 
 interface ContentNameDialogProps {
@@ -18,6 +18,30 @@ export default function ContentNameDialog({
 }: ContentNameDialogProps) {
   const [name, setName] = useState("");
 
+  // Reset name when dialog is closed (including from parent via open prop)
+  useEffect(() => {
+    if (!open) {
+      setName("");
+    }
+  }, [open]);
+
+  const handleClose = useCallback(() => {
+    setName("");
+    onClose();
+  }, [onClose]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isLoading) {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, isLoading, handleClose]);
+
   if (!open) return null;
 
   const handleSubmit = (e: FormEvent) => {
@@ -26,11 +50,6 @@ export default function ContentNameDialog({
     if (trimmed) {
       onSubmit(trimmed);
     }
-  };
-
-  const handleClose = () => {
-    setName("");
-    onClose();
   };
 
   return (

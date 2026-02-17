@@ -104,7 +104,7 @@ describe('ContentEditor', () => {
     expect($result).toHaveProperty('attr');
   });
 
-  it('should call onClose when jQuery shim iziModal("close") is called', async () => {
+  it('should call onClose when jQuery shim iziModal("close") is called for #contentEditor', async () => {
     const onClose = vi.fn();
     render(<ContentEditor metadata={mockMetadata} onClose={onClose} />);
 
@@ -114,6 +114,33 @@ describe('ContentEditor', () => {
 
     (window as any).$('#contentEditor').iziModal('close');
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('should not trigger onClose for non-editor selectors in jQuery shim', async () => {
+    const onClose = vi.fn();
+    render(<ContentEditor metadata={mockMetadata} onClose={onClose} />);
+
+    await waitFor(() => {
+      expect((window as any).$).toBeDefined();
+    });
+
+    (window as any).$('#someOtherElement').iziModal('close');
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('should delegate to previous jQuery for non-editor selectors', async () => {
+    const prevJQuery = vi.fn().mockReturnValue({ test: true });
+    (window as any).$ = prevJQuery;
+
+    render(<ContentEditor metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockBuildConfig).toHaveBeenCalled();
+    });
+
+    const result = (window as any).$('#someOther');
+    expect(prevJQuery).toHaveBeenCalledWith('#someOther');
+    expect(result).toEqual({ test: true });
   });
 
   it('should handle initialization errors gracefully', async () => {
@@ -152,7 +179,7 @@ describe('ContentEditor', () => {
     });
   });
 
-  it('should handle postMessage events from iframe', async () => {
+  it('should handle postMessage events from same origin', async () => {
     const onEditorEvent = vi.fn();
 
     render(<ContentEditor metadata={mockMetadata} onEditorEvent={onEditorEvent} />);
@@ -164,6 +191,7 @@ describe('ContentEditor', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: { eid: 'START', edata: { type: 'content' } },
+        origin: window.location.origin,
       })
     );
 
@@ -173,6 +201,25 @@ describe('ContentEditor', () => {
         contentId: 'test-content-123',
       })
     );
+  });
+
+  it('should ignore postMessage from different origin', async () => {
+    const onEditorEvent = vi.fn();
+
+    render(<ContentEditor metadata={mockMetadata} onEditorEvent={onEditorEvent} />);
+
+    await waitFor(() => {
+      expect(mockBuildConfig).toHaveBeenCalled();
+    });
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: { eid: 'START', edata: { type: 'content' } },
+        origin: 'https://malicious-site.com',
+      })
+    );
+
+    expect(onEditorEvent).not.toHaveBeenCalled();
   });
 
   it('should handle postMessage with string data', async () => {
@@ -187,6 +234,7 @@ describe('ContentEditor', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: JSON.stringify({ eid: 'END', edata: {} }),
+        origin: window.location.origin,
       })
     );
 
@@ -218,7 +266,12 @@ describe('ContentEditor', () => {
       expect(mockBuildConfig).toHaveBeenCalled();
     });
 
-    window.dispatchEvent(new MessageEvent('message', { data: 'not-json' }));
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: 'not-json',
+        origin: window.location.origin,
+      })
+    );
 
     expect(onEditorEvent).not.toHaveBeenCalled();
   });
@@ -235,6 +288,7 @@ describe('ContentEditor', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: { event: 'editor:window:close' },
+        origin: window.location.origin,
       })
     );
 
@@ -253,6 +307,7 @@ describe('ContentEditor', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: { event: 'editor:content:review' },
+        origin: window.location.origin,
       })
     );
 

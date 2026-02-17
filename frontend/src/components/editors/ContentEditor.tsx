@@ -34,24 +34,34 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
     // Install a jQuery shim on the parent window.
     // The content editor calls window.parent.$('#contentEditor').iziModal('close')
     // to close itself. This shim intercepts that call and triggers our React handler.
+    const previousJQuery = (window as any).$;
     const jQueryShim = (selector: string) => {
+      const isContentEditorSelector =
+        selector === '#contentEditor' || selector === 'iframe#contentEditor';
+
+      // If this is not the content editor selector, delegate to any existing jQuery
+      if (!isContentEditorSelector && typeof previousJQuery === 'function') {
+        return previousJQuery(selector);
+      }
+
       return {
         iziModal: (action: string) => {
-          if (action === 'close') {
+          if (isContentEditorSelector && action === 'close') {
             onCloseRef.current?.();
           }
         },
-        // The editor may also call other jQuery methods on the parent
         css: () => jQueryShim(selector),
         find: () => jQueryShim(selector),
         attr: () => jQueryShim(selector),
       };
     };
-    const previousJQuery = (window as any).$;
     (window as any).$ = jQueryShim;
 
     const messageHandler = (event: MessageEvent) => {
       if (!event.data) return;
+
+      // Only accept messages from same origin (the editor iframe)
+      if (event.origin !== window.location.origin) return;
 
       const eventData = typeof event.data === 'string'
         ? (() => { try { return JSON.parse(event.data); } catch { return null; } })()
@@ -101,6 +111,12 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
     return () => {
       cancelled = true;
       window.removeEventListener('message', messageHandler);
+      // Set iframe src first so the editor can gracefully unload
+      // while global properties still exist
+      if (iframe) {
+        iframe.onload = null;
+        iframe.src = 'about:blank';
+      }
       // Clean up global window properties
       delete (window as any).context;
       delete (window as any).config;
@@ -109,10 +125,6 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
         (window as any).$ = previousJQuery;
       } else {
         delete (window as any).$;
-      }
-      if (iframe) {
-        iframe.onload = null;
-        iframe.src = 'about:blank';
       }
     };
   }, [metadata, handleEditorEvent]);

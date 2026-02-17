@@ -106,4 +106,34 @@ describe('ContentNameDialog', () => {
     const input = screen.getByPlaceholderText('Untitled Content');
     expect(input).toHaveFocus();
   });
+
+  it('should close when Escape key is pressed', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(defaultProps.onClose).toHaveBeenCalled();
+  });
+
+  it('should not close on Escape when isLoading is true', () => {
+    render(<ContentNameDialog {...defaultProps} isLoading={true} />);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(defaultProps.onClose).not.toHaveBeenCalled();
+  });
+
+  it('should reset name when dialog is closed via open prop', () => {
+    const { rerender } = render(<ContentNameDialog {...defaultProps} />);
+
+    const input = screen.getByPlaceholderText('Untitled Content');
+    fireEvent.change(input, { target: { value: 'My Content' } });
+
+    // Close the dialog by changing open to false
+    rerender(<ContentNameDialog {...defaultProps} open={false} />);
+
+    // Reopen the dialog
+    rerender(<ContentNameDialog {...defaultProps} open={true} />);
+
+    const reopenedInput = screen.getByPlaceholderText('Untitled Content');
+    expect(reopenedInput).toHaveValue('');
+  });
 });
