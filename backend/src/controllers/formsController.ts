@@ -28,7 +28,7 @@ export const create = async (req: Request, res: Response) => {
         res.status(200).send(response);
     } catch (error) {
         logger.error('Error creating form:', error);
-        const statusCode = (error as any).statusCode || 500;
+        const statusCode = (error as { statusCode?: number }).statusCode || 500;
         response.setError({
             err: "ERR_CREATE_FORM_DATA",
             errmsg: (error as Error)?.message || String(error) || 'Unknown error',
@@ -92,21 +92,22 @@ export const read = async (req: Request, res: Response) => {
         let result = await formService.read(query);
 
         if (!result) {
-            const error: any = new Error("Form data not found");
+            const error = new Error("Form data not found") as Error & { statusCode: number };
             error.statusCode = 404;
             throw error;
         }
 
-        let responseData: any = {};
+        let responseData: Record<string, unknown> = {};
         // Use manual iteration if available (safer for TS)
         if (result && typeof result['keys'] === 'function') {
-            const row = result as any;
-            row.keys().forEach((key: any) => {
+            // eslint-disable-next-line no-unused-vars
+            const row = result as { keys: () => string[]; get: (k: string) => unknown };
+            row.keys().forEach((key: string) => {
                 responseData[key] = row.get(key);
             });
         } else if (result && typeof result['forEach'] === 'function') {
             // Fallback
-            (result as any).forEach((value: any, key: any) => {
+            (result as unknown as Map<string, unknown>).forEach((value: unknown, key: string) => {
                 responseData[key] = value;
             });
         } else {
@@ -130,7 +131,7 @@ export const read = async (req: Request, res: Response) => {
 
     } catch (error) {
         logger.error('Error reading form:', error);
-        const statusCode = (error as any).statusCode || 500;
+        const statusCode = (error as { statusCode?: number }).statusCode || 500;
         response.setError({
             err: "ERR_READ_FORM_DATA",
             errmsg: (error as Error)?.message || 'Form data not found',
@@ -156,7 +157,7 @@ export const listAll = async (req: Request, res: Response) => {
         res.status(200).send(response);
     } catch (error) {
         logger.error('Error listing forms:', error);
-        const statusCode = (error as any).statusCode || 500;
+        const statusCode = (error as { statusCode?: number }).statusCode || 500;
         response.setError({
             err: "ERR_LIST_ALL_FORM",
             errmsg: (error as Error)?.message || String(error) || 'Unknown error',

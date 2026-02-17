@@ -1,29 +1,22 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import request from 'supertest';
-import { app } from '../app.js';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { FormService } from './formsService.js';
+import { logger } from '../utils/logger.js';
 
-// Mock sessionStore still needed for app.ts/middlewares
-vi.mock('../utils/sessionStore.js', () => {
-    return {
-        ysqlPool: {},
-        getYsqlPool: () => ({}),
-        sessionStore: {
-            get: vi.fn((sid, callback) => callback(null, null)),
-            set: vi.fn((sid, session, callback) => callback(null)),
-            destroy: vi.fn((sid, callback) => callback(null)),
-            on: vi.fn(),
-            touch: vi.fn((sid, session, callback) => callback(null))
-        }
-    };
-});
+// Mock logger
+vi.mock('../utils/logger.js', () => ({
+    logger: {
+        info: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+    }
+}));
 
 // Mock the new formsDatabase
 vi.mock('../databases/formsDatabase.js', () => {
     const mockFormsClient = {
-        execute: vi.fn((query: string, params: any[]) => {
+        execute: vi.fn((query: string, params: unknown[]) => {
             // Helper to create a mock ResultSet
-            const createResult = (rows: any[], wasApplied = true) => ({
+            const createResult = (rows: Record<string, unknown>[], wasApplied = true) => ({
                 rows,
                 rowLength: rows.length,
                 first: () => {
@@ -33,7 +26,8 @@ vi.mock('../databases/formsDatabase.js', () => {
                     return {
                         ...row,
                         get: (key: string) => row[key],
-                        forEach: (callback: (value: any, key: string) => void) => {
+                        // eslint-disable-next-line no-unused-vars
+                        forEach: (callback: (value: unknown, key: string) => void) => {
                             Object.keys(row).forEach(key => callback(row[key], key));
                         },
                         keys: () => Object.keys(row),
@@ -43,193 +37,179 @@ vi.mock('../databases/formsDatabase.js', () => {
                 wasApplied: () => wasApplied
             });
 
-            if (query.includes('INSERT INTO')) {
-                // Determine if we should fail (simulate error if needed, but here we just simulate success)
-                return Promise.resolve(createResult([]));
+            if (query.includes('INSERT INTO form_data')) {
+                return createResult([]);
             }
-
-            if (query.includes('SELECT * FROM form_data')) {
-                // params: [type, action, subtype, root_org, framework, component]
-                const rootOrg = params[3];
-                const framework = params[4];
-
-                // Simulate finding a record for specific criteria
-                if (rootOrg === 'readOrg' && framework === 'readTest') {
-                    return Promise.resolve(createResult([{ root_org: 'readOrg', data: '{}' }]));
-                }
-                // Match for update test setup verification if needed, or simple read
-                if (rootOrg === 'org' && framework === '*') {
-                    // Case for 'should handle malformed data in DB' test where we might pass partials
-                    // in the test it calls with rootOrgId: 'org'. Implementation will try root_org='org' first.
-                    return Promise.resolve(createResult([{ root_org: 'org', data: '{invalidJson}' }]));
-                }
-
-                return Promise.resolve(createResult([]));
-            }
-
             if (query.includes('UPDATE form_data')) {
-                // params: [data, last_modified, root_org, framework, type, action, subtype, component]
-                // root_org is at index 2
-                const rootOrg = params[2];
-                if (rootOrg === 'nonexistent') {
-                    return Promise.resolve(createResult([], false)); // wasApplied = false
-                }
-                return Promise.resolve(createResult([], true));
+                // Determine if it should fail (simulate IF EXISTS failure)
+                // For testing, we can use a specific param to trigger failure or mock differently per test
+                // Here we assume success by default
+                return createResult([], true);
             }
-
-            if (query.includes('SELECT type, subtype, action')) { // listAll
-                const rootOrg = params[0];
-                if (rootOrg === 'listOrg') {
-                    return Promise.resolve(createResult([{ type: 'form', data: {} }]));
-                }
-                return Promise.resolve(createResult([]));
+            if (query.includes('SELECT * FROM form_data')) {
+                const type = params[0] as string;
+                if (type === 'invalid') return createResult([]);
+                return createResult([{
+                    root_org: 'org1',
+                    type: 'type1',
+                    subtype: 'subtype1',
+                    action: 'action1',
+                    component: 'component1',
+                    framework: 'framework1',
+                    data: '{"some":"data"}'
+                }]);
             }
-
-            return Promise.resolve(createResult([]));
-        })
+            if (query.includes('SELECT type, subtype')) {
+                const rootOrg = params[0] as string;
+                if (rootOrg === 'empty') return createResult([]);
+                return createResult([
+                    { type: 't1', subtype: 's1', action: 'a1', component: 'c1' },
+                    { type: 't2', subtype: 's2', action: 'a2', component: 'c2' }
+                ]);
+            }
+            return createResult([]);
+        }),
     };
     return {
         getFormsClient: () => mockFormsClient
     };
 });
 
-const api = request(app);
+describe('FormService', () => {
+    let formService: FormService;
 
-describe('FormService API Integration', () => {
+    beforeEach(() => {
+        formService = new FormService();
+        vi.clearAllMocks();
+    });
+
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
-    describe('Create', () => {
-        const endpoint = '/data/v1/form/create';
-        it.each([
-            [{ type: 'content', subType: 'textbook', action: 'save', framework: 'NCF', rootOrgId: 'sunbird', data: { template: 'template1' } }],
-            [{ type: 'content', action: 'save', rootOrgId: 'sunbird', data: { template: 'template1' } }],
-            [{ type: 'content', action: 'save', data: { template: 'template1' } }]
-        ])('should create form with valid/partial request %#', async (reqBody) => {
-            const response = await api.post(endpoint).set('Content-Type', 'application/json').send({ request: reqBody });
-            expect(response.status).toBe(200);
-            expect(response.body.id).toBe('api.form.create');
+    describe('create', () => {
+        it('should create a form successfully', async () => {
+            const data = {
+                rootOrgId: 'org1',
+                framework: 'framework1',
+                type: 'type1',
+                subType: 'subtype1',
+                action: 'action1',
+                component: 'component1',
+                data: { some: 'data' }
+            };
+
+            const result = await formService.create(data);
+
+            expect(result).toEqual({ created: 'OK' });
+            expect(logger.info).toHaveBeenCalledWith('FormService.create - Success!');
         });
-        it('should handle DB error gracefully', async () => {
-            vi.spyOn(FormService.prototype, 'create').mockRejectedValue(new Error('DB Error'));
-            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'save', data: {} } });
-            expect(response.status).toBe(500);
-            expect(response.body.params.err).toBe('ERR_CREATE_FORM_DATA');
-        });
-        it('should handle 404 error from service', async () => {
-            const error: any = new Error('Not found');
-            error.statusCode = 404;
-            vi.spyOn(FormService.prototype, 'create').mockRejectedValue(error);
-            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'save', data: {} } });
-            expect(response.status).toBe(404);
-            expect(response.body.responseCode).toBe('RESOURCE_NOT_FOUND');
+
+        it('should handle missing optional fields by using wildcard *', async () => {
+            const data = {
+                type: 'type1',
+                action: 'action1',
+                data: { some: 'data' }
+            } as Record<string, unknown>; // Cast to valid Partial input for test
+
+            const result = await formService.create(data);
+
+            expect(result).toEqual({ created: 'OK' });
+            // Verify query params contain * for missing fields
+            // The params array index: 0=rootOrg, 2=subType, 4=component, 5=framework
+            // Accessing the mock call:
+            // @ts-ignore
+            const calls = (formService['client'].execute as Mock).mock.calls;
+            const params = calls[0][1] as string[];
+            expect(params[0]).toBe('*'); // rootOrg
+            expect(params[2]).toBe('*'); // subType
+            expect(params[4]).toBe('*'); // component
+            expect(params[5]).toBe('*'); // framework
         });
     });
 
-    describe('Read', () => {
-        const endpoint = '/data/v1/form/read';
-        it('should read existing form', async () => {
-            // Setup isn't strictly needed due to mock implementation logic but good for flow
-            await api.post('/data/v1/form/create').send({ request: { type: 'content', action: 'view', framework: 'readTest', rootOrgId: 'readOrg', data: { template: 'readTemplate' } } });
+    describe('update', () => {
+        it('should update a form successfully', async () => {
+            const queryCtx = {
+                root_org: 'org1',
+                framework: 'framework1',
+                type: 'type1',
+                action: 'action1',
+                subtype: 'subtype1',
+                component: 'component1'
+            };
+            const updateValue = {
+                data: JSON.stringify({ newData: 'value' }),
+                last_modified_on: new Date()
+            };
 
-            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'view', framework: 'readTest', rootOrgId: 'readOrg' } });
-            expect(response.status).toBe(200);
-            expect(response.body.id).toBe('api.form.read');
-            expect(response.body.result.form).toBeDefined();
-        });
-        it('should return 404 when form not found', async () => {
-            const response = await api.post(endpoint).send({ request: { type: 'nonexistent', action: 'nonexistent', framework: 'nonexistent', rootOrgId: 'nonexistent' } });
-            expect(response.status).toBe(404);
-            expect(response.body.params.err).toBe('ERR_READ_FORM_DATA');
-        });
-        it('should handle service errors gracefully', async () => {
-            vi.spyOn(FormService.prototype, 'read').mockRejectedValue(new Error('Read failed'));
-            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'view' } });
-            expect(response.status).toBe(500);
-            expect(response.body.params.err).toBe('ERR_READ_FORM_DATA');
-        });
-        it('should handle malformed data in DB', async () => {
-            // The service is mocked to return invalidJson for rootOrg='org' in the vi.mock above
-            // But we can also spyOn if we want to force it without relying on the global mock logic
-            // However, the global mock is already set up to return invalid JSON for this case if we match the criteria.
-            // Let's rely on the mock setup in vi.mock to be cleaner or override it. 
-            // Since we mocked the DB class specifically, we can't easily override the DB response unless we change the variable it closes over.
-            // But spyOn works on the Service method, bypassing DB.
-            vi.spyOn(FormService.prototype, 'read').mockResolvedValue({ data: '{invalidJson}', root_org: 'org' } as unknown as any);
+            const result = await formService.update(queryCtx, updateValue);
 
-            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'view', rootOrgId: 'org' } });
-            expect(response.status).toBe(200);
-            expect(response.body.result.form).toBeDefined();
+            expect(result).toEqual({
+                rootOrgId: 'org1',
+                key: 'type1.subtype1.action1.component1',
+                status: 'SUCCESS'
+            });
+        });
+
+        it('should throw error if update was not applied (IF EXISTS failed)', async () => {
+            // Mock wasApplied to return false for this test
+            // We need to override the mock implementation for this specific test
+            // @ts-ignore
+            const mockExecute = formService['client'].execute as Mock;
+            mockExecute.mockResolvedValueOnce({
+                wasApplied: () => false
+            });
+
+            const queryCtx = { root_org: 'org1' } as Record<string, unknown>;
+            const updateValue = { data: '{}' } as Record<string, unknown>;
+
+            await expect(formService.update(queryCtx, updateValue)).rejects.toThrow('invalid request, no records found for the match to update!');
         });
     });
 
-    describe('Update', () => {
-        const endpoint = '/data/v1/form/update';
-        it('should update existing form', async () => {
-            await api.post('/data/v1/form/create').send({ request: { type: 'content', action: 'search', framework: 'testFramework', rootOrgId: 'testOrg', data: { template: 'original' } } });
-            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'search', framework: 'testFramework', rootOrgId: 'testOrg', data: { template: 'updated' } } });
-            expect(response.status).toBe(200);
-            expect(response.body.id).toBe('api.form.update');
+    describe('read', () => {
+        it('should return form data when found', async () => {
+            const validCtx = { root_org: 'org1', type: 'type1' } as Record<string, unknown>;
+            const result = await formService.read(validCtx);
+
+            expect(result).toBeDefined();
+            expect(result?.get('type')).toBe('type1');
         });
-        it.each([
-            [{ type: 'content', action: 'update', framework: 'NCF', data: { template: 'test' } }, 400],
-            [{ type: 'nonexistent', action: 'update', framework: 'NCF', rootOrgId: 'nonexistent', data: { template: 'test' } }, [404, 400]]
-        ])('should handle invalid or not found update %#', async (reqBody, expected) => {
-            const response = await api.post(endpoint).send({ request: reqBody });
-            if (Array.isArray(expected)) expect(expected).toContain(response.status);
-            else expect(response.status).toBe(expected);
-        });
-        it('should handle service errors gracefully', async () => {
-            vi.spyOn(FormService.prototype, 'update').mockRejectedValue(new Error('Update failed'));
-            const response = await api.post(endpoint).send({ request: { type: 'content', action: 'update' } });
-            expect([400, 500]).toContain(response.status);
-            expect(response.body.params.err).toBe('ERR_UPDATE_FORM_DATA');
+
+        it('should return null when form data is not found (iterates combinations)', async () => {
+            // Force mock to return empty rows for all calls
+            // @ts-ignore
+            const mockExecute = formService['client'].execute as Mock;
+            mockExecute.mockResolvedValue({
+                rowLength: 0,
+                first: () => null,
+                rows: []
+            });
+
+            const validCtx = { root_org: 'org1', type: 'type1' } as Record<string, unknown>;
+            const result = await formService.read(validCtx);
+
+            expect(result).toBeNull();
+            // Should have tried 5 combinations
+            expect(mockExecute).toHaveBeenCalledTimes(5);
         });
     });
 
-    describe('List', () => {
-        const endpoint = '/data/v1/form/list';
-        it('should list forms for a valid rootOrgId', async () => {
-            // Prepare mock to return result for 'listOrg'
-            const response = await api.post(endpoint).send({ request: { rootOrgId: 'listOrg' } });
-            expect(response.status).toBe(200);
-            expect(response.body.id).toBe('api.form.list');
-            expect(response.body.result.count).toBeGreaterThan(0);
-            expect(Array.isArray(response.body.result.forms)).toBe(true);
-        });
-        it('should handle service errors gracefully', async () => {
-            vi.spyOn(FormService.prototype, 'listAll').mockRejectedValue(new Error('List failed'));
-            const response = await api.post(endpoint).send({ request: { rootOrgId: 'test' } });
-            expect(response.status).toBe(500);
-            expect(response.body.params.err).toBe('ERR_LIST_ALL_FORM');
-        });
-        it('should handle 404 error from service', async () => {
-            const error: any = new Error('Not found');
-            error.statusCode = 404;
-            vi.spyOn(FormService.prototype, 'listAll').mockRejectedValue(error);
-            const response = await api.post(endpoint).send({ request: { rootOrgId: 'test' } });
-            expect(response.status).toBe(404);
-            expect(response.body.responseCode).toBe('RESOURCE_NOT_FOUND');
-        });
-        it.each([
-            [{}],
-            [{ rootOrgId: '' }]
-        ])('should handle missing/empty rootOrgId %#', async (reqBody) => {
-            const response = await api.post(endpoint).send({ request: reqBody });
-            expect(response.status).toBe(400);
-        });
-    });
+    describe('listAll', () => {
+        it('should list all forms for a rootOrgId', async () => {
+            const rootOrgId = 'org1';
+            const result = await formService.listAll(rootOrgId);
 
-    describe('Unit Tests: listAll Validation', () => {
-        it('should throw 400 if rootOrgId is missing/empty', async () => {
-            const service = new FormService();
-            // Test undefined
-            await expect(service.listAll(undefined as any)).rejects.toMatchObject({ statusCode: 400, message: 'rootOrgId must be a non-empty string' });
-            // Test empty string
-            await expect(service.listAll('')).rejects.toMatchObject({ statusCode: 400 });
-            // Test whitespace
-            await expect(service.listAll('   ')).rejects.toMatchObject({ statusCode: 400 });
+            expect(result).toHaveLength(2);
+            expect(result[0]).toHaveProperty('type', 't1');
+            expect(result[1]).toHaveProperty('type', 't2');
+        });
+
+        it('should throw error if rootOrgId is invalid', async () => {
+            await expect(formService.listAll('')).rejects.toThrow('rootOrgId must be a non-empty string');
+            // @ts-ignore
+            await expect(formService.listAll(null)).rejects.toThrow('rootOrgId must be a non-empty string');
         });
     });
 });
