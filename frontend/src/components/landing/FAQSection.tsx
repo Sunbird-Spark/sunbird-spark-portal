@@ -27,7 +27,8 @@ const FAQSection = () => {
     const { data: faqData } = useFaqData(faqUrl, currentCode || 'en');
 
     // Extract FAQs from response
-    const faqs: FAQ[] = (faqData as any)?.general || [];
+    const generalData = (faqData as any)?.general;
+    const faqs: FAQ[] = Array.isArray(generalData) ? generalData : [];
 
     // Sanitize FAQs and filter out invalid entries
     const sanitizedFaqs = useMemo(() => {
