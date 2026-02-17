@@ -48,11 +48,6 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/api': {
-        target: 'http://localhost:3000/api',
-        changeOrigin: true,
-        secure: false,
-      },
       '/plugins': {
         target: 'http://localhost:3000',
         changeOrigin: true,
