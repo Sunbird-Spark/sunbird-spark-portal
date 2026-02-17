@@ -27,6 +27,7 @@ export interface QumlEditorConfig {
   };
   config: {
     mode: 'edit' | 'review' | 'read';
+    apiSlug?: string;
     primaryCategory: string;
     objectType: string;
     showAddCollaborator: boolean;

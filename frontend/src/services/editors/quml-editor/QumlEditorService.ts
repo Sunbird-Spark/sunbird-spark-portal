@@ -112,6 +112,7 @@ export class QumlEditorService {
     return {
       context,
       config: {
+        apiSlug: '/portal',
         mode,
         primaryCategory: metadata.primaryCategory,
         objectType: metadata.objectType,
