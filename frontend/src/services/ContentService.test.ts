@@ -43,4 +43,26 @@ describe('ContentService', () => {
       })
     );
   });
+
+  it('should call contentRead with default fields when no fields provided', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_123');
+    const callUrl = (mockClient.get as any).mock.calls[0][0] as string;
+    expect(callUrl).toContain('/content/v1/read/do_123?fields=');
+    expect(callUrl).toContain('body');
+    expect(callUrl).toContain('mimeType');
+    expect(callUrl).toContain('artifactUrl');
+  });
+
+  it('should call contentRead with custom fields when provided', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_456', ['name', 'description']);
+    expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_456?fields=name,description');
+  });
+
+  it('should call contentRead with no query string when empty array provided', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_789', []);
+    expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_789');
+  });
 });

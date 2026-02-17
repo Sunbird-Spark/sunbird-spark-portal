@@ -23,12 +23,17 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/action': {
+      '/content/preview': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
-      '/api': {
+      '/assets/public': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/content-plugins': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
