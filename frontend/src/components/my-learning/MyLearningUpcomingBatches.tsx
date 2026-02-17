@@ -1,18 +1,11 @@
 import { Course } from "@/types/courseTypes";
 
-const ClockIcon = () => (
+const LessonIcon = () => (
   <svg width="0.875rem" height="0.875rem" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="7" cy="7" r="6" stroke="#A85236" strokeWidth="1.5"/>
-    <path d="M7 4V7L9 8.5" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const StudentsIcon = () => (
-  <svg width="0.875rem" height="0.875rem" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="5" cy="4" r="2" stroke="#A85236" strokeWidth="1.5"/>
-    <path d="M1 11C1 9.34315 2.34315 8 4 8H6C7.65685 8 9 9.34315 9 11" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="10" cy="4.5" r="1.5" stroke="#A85236" strokeWidth="1.5"/>
-    <path d="M10 8C11.6569 8 13 9.34315 13 11" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M2 3C2 1.89543 2.89543 1 4 1H11C12.1046 1 13 1.89543 13 3V11C13 12.1046 12.1046 13 11 13H4C2.89543 13 2 12.1046 2 11V3Z" stroke="#A85236" strokeWidth="1.5"/>
+    <path d="M5 4H10" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M5 7H10" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M5 10H8" stroke="#A85236" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -43,10 +36,8 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
 
     acc[dateStr].push({
       id: course.courseId,
-      time: "09:00", // Time is not available in API response, defaulting
       title: course.courseName,
-      duration: "1hr", // Duration not available, defaulting
-      students: 0, // Enrollment count not available in this API, defaulting
+      lessons: course.leafNodesCount || 0,
       color: color
     });
     return acc;
@@ -87,28 +78,15 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
                   key={batchItem.id}
                   className={`flex ${batchItem.color} rounded-lg overflow-hidden min-h-[5.625rem]`}
                 >
-                  {/* Time Box */}
-                  <div className="w-[6.25rem] flex items-center justify-center relative">
-                    <span className="text-[1rem] text-[#6B7280] font-normal font-['Rubik']">
-                      {batchItem.time}
-                    </span>
-                    {/* Vertical Divider Line */}
-                    <div className="absolute right-0 top-5 bottom-5 w-[1px] bg-gray-200/60"></div>
-                  </div>
-
                   {/* Content Box */}
-                  <div className="flex-1 py-4 pl-6 pr-4 flex flex-col justify-center">
+                  <div className="flex-1 py-4 px-6 flex flex-col justify-center">
                     <h4 className="text-[1rem] font-normal text-[#222222] mb-1.5 font-['Rubik'] leading-snug">
                       {batchItem.title}
                     </h4>
                     <div className="flex items-center gap-6 text-[0.875rem] text-[#6B7280] font-['Rubik']">
                       <div className="flex items-center gap-1.5">
-                        <ClockIcon />
-                        <span className="font-light">{batchItem.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <StudentsIcon />
-                        <span className="font-light">{batchItem.students} Students</span>
+                        <LessonIcon />
+                        <span className="font-light">{batchItem.lessons} Lessons</span>
                       </div>
                     </div>
                   </div>

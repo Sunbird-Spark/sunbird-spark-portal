@@ -1,0 +1,81 @@
+/* Shared Page Layout Styles */
+
+.page-container {
+    @apply min-h-screen bg-sunbird-gray-f3 flex flex-col;
+}
+
+.page-main-content {
+    @apply flex-1 bg-sunbird-gray-f3 relative;
+}
+
+.page-content-wrapper {
+    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+}
+
+/* Page Header */
+.page-header {
+    @apply bg-white border-b border-gray-100 px-4 py-3 md:px-6 md:py-4 z-30 sticky top-0 lg:pr-[6.25rem];
+    box-shadow: var(--sunbird-shadow-md);
+}
+
+.page-header.mobile {
+    @apply z-20;
+    box-shadow: var(--sunbird-shadow-sm);
+}
+
+.page-header-container {
+    @apply flex items-center justify-between;
+}
+
+.page-logo-container {
+    @apply flex items-center gap-4;
+}
+
+.page-logo-img {
+    @apply h-[2.4375rem] w-auto;
+}
+
+.sidebar-toggle-btn {
+    @apply text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1;
+}
+
+.page-header-actions {
+    @apply flex items-center gap-4;
+}
+
+.page-search-container {
+    @apply relative w-[25rem] cursor-pointer;
+}
+
+.page-search-btn-mobile {
+    @apply p-2 text-sunbird-brick;
+}
+
+.page-action-btn {
+    @apply p-2 hover:bg-gray-100 rounded-lg transition-colors;
+}
+
+.page-action-icon {
+    @apply w-5 h-5 text-sunbird-brick;
+}
+
+.page-lang-btn {
+    @apply flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors;
+}
+
+/* Dropdown Styles */
+.page-dropdown-content {
+    @apply bg-white p-2 border border-sunbird-gray-d0 rounded-xl shadow-xl;
+}
+
+.page-dropdown-item {
+    @apply flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-sunbird-gray-f3 transition-colors;
+}
+
+.page-dropdown-item.active {
+    @apply text-sunbird-brick font-medium bg-sunbird-gray-f3;
+}
+
+.page-dropdown-indicator {
+    @apply w-1.5 h-1.5 rounded-full bg-sunbird-brick;
+}
