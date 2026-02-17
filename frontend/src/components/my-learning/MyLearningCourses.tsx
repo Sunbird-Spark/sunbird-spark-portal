@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
+import { FiChevronDown } from "react-icons/fi";
 import { Course } from "@/types/courseTypes";
 import TrackableCollectionCard from "../content/TrackableCollectionCard";
 
-const ChevronDownIcon = () => (
-  <svg width="0.625rem" height="0.375rem" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M1 1L5 5L9 1" stroke="#CC8545" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 const COURSES_PER_PAGE = 9;
 
@@ -51,7 +47,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <h3 className="text-[1.375rem] font-bold text-[#222222] font-['Rubik']">Courses</h3>
-        <ChevronDownIcon />
+        <FiChevronDown className="text-[#CC8545] w-[1rem] h-[1rem]" />
       </div>
 
       {/* Filter Tabs */}
