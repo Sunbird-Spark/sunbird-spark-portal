@@ -17,8 +17,6 @@ interface CollectionSidebarProps {
 }
 
 const CollectionSidebar = ({ modules, expandedModules, toggleModule, collectionId }: CollectionSidebarProps) => {
-  // track which lesson is active so we can show the border/shadow starting
-  // on the first lesson and move it when the user clicks another one
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
     modules?.[0]?.lessons?.[0]?.id ?? null
   );
