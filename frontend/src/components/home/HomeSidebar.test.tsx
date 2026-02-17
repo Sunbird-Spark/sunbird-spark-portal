@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import HomeSidebar from './HomeSidebar';
 
 // Mock useNavigate
@@ -19,13 +19,18 @@ describe('HomeSidebar', () => {
         onNavChange: vi.fn(),
     };
 
-    const renderSidebar = (props = defaultProps) => {
+    const renderSidebar = (props: any = defaultProps) => {
         return render(
             <BrowserRouter>
                 <HomeSidebar {...props} />
             </BrowserRouter>
         );
     };
+
+    // Mock useIsMobile to safely test desktop behavior
+    vi.mock("@/hooks/use-mobile", () => ({
+        useIsMobile: () => false,
+    }));
 
     it('renders all navigation items', () => {
         renderSidebar();
@@ -95,5 +100,46 @@ describe('HomeSidebar', () => {
 
         const inactiveHomeIcon = screen.getByText('Home').previousSibling;
         expect(inactiveHomeIcon).toHaveClass('text-sunbird-ginger');
+    });
+    it('hides Account Settings when on help-support route', () => {
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HomeSidebar {...defaultProps} />
+            </MemoryRouter>
+        );
+
+        expect(screen.queryByText('Account Settings')).not.toBeInTheDocument();
+        expect(screen.getByText('Help and Support')).toBeInTheDocument();
+    });
+
+    it('renders in collapsed state', () => {
+        renderSidebar({ ...defaultProps, collapsed: true });
+
+        // Sidebar should have reduced width
+        const sidebar = screen.getByTestId('home-sidebar');
+        expect(sidebar).toHaveClass('w-[5rem]');
+
+        // Text labels should not be visible (queryByText should return null for the label text wrapper)
+        // Since we are conditionally rendering the span, we expect queryByText to potentially find the title attribute but not the visible text span
+        // But since title attribute is on the button, getByText won't find it.
+        // Let's verify that the span with text is NOT in the document.
+        expect(screen.queryByText('Home')).not.toBeInTheDocument();
+        expect(screen.queryByText('My Learning')).not.toBeInTheDocument();
+
+        // Icons should still be there (we can find them by class or by checking if button exists)
+        // Buttons should retain title attribute
+        const homeButton = screen.getAllByRole('button')[0];
+        expect(homeButton).toHaveAttribute('title', 'Home');
+    });
+
+    it('calls onToggle when toggle button is clicked', () => {
+        const onToggle = vi.fn();
+        renderSidebar({ ...defaultProps, onToggle });
+
+        // Find the toggle button (it has aria-label "Collapse Sidebar" initially)
+        const toggleBtn = screen.getByRole('button', { name: /Collapse Sidebar/i });
+        fireEvent.click(toggleBtn);
+
+        expect(onToggle).toHaveBeenCalledTimes(1);
     });
 });

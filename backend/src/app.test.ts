@@ -3,6 +3,12 @@ import request from 'supertest';
 
 describe('Express App', () => {
   beforeEach(() => {
+    vi.doMock('./auth/keycloakProvider.js', () => ({
+      keycloak: {
+        middleware: () => (req: any, res: any, next: any) => next(),
+        protect: () => (req: any, res: any, next: any) => next()
+      }
+    }));
     vi.doMock('./config/env.js', () => ({
       envConfig: {
         ENVIRONMENT: 'local',
@@ -111,5 +117,43 @@ describe('Express App', () => {
       .expect(200);
 
     expect(response.body).toEqual({ result: 'mock-read-response' });
+  });
+
+  it('should handle /action/* routes via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .get('/action/data/v1/page/assemble')
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle POST requests to /action/* routes', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/action/content/v1/search')
+      .send({ request: { query: 'test' } })
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /action/course/v1/hierarchy/* via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .get('/action/course/v1/hierarchy/do_123')
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /action/data/v1/telemetry via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/action/data/v1/telemetry')
+      .send({ events: [] })
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
   });
 });

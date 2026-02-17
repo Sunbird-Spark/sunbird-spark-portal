@@ -13,9 +13,8 @@ export const kongProxy = createProxyMiddleware({
     secure: false,
     selfHandleResponse: true,
     pathRewrite: {
-        '^/portal': '/',
-        '^/action': '/',
-        '^/api': '/',
+        '^/portal': '',
+        '^/action': '',
     },
     on: {
         proxyReq: (proxyReq: http.ClientRequest, req: Request): void => {

@@ -1,10 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/home/Sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
@@ -56,7 +52,7 @@ const WorkspacePage = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
-  const { data: searchData, isLoading, refetch } = useContentSearch({
+  const { data: searchData, isLoading, isError, error, refetch } = useContentSearch({
     request: showContent
       ? { sort_by: sortBy === 'updated' ? { lastUpdatedOn: 'desc' } : sortBy === 'created' ? { createdOn: 'desc' } : { name: 'asc' } }
       : undefined,
@@ -81,7 +77,6 @@ const WorkspacePage = () => {
     };
   }, [items]);
 
-  // Reset view when role changes
   useEffect(() => {
     const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';
     setActiveView((prev) => (prev === nextView ? prev : nextView));
@@ -89,8 +84,6 @@ const WorkspacePage = () => {
 
   const filteredItems = useMemo(() => {
     let filtered = [...items];
-    
-    // Apply view-specific filters
     if (activeView === 'drafts') filtered = filtered.filter(i => i.status === 'draft');
     else if (activeView === 'review' || activeView === 'pending-review') filtered = filtered.filter(i => i.status === 'review');
     else if (activeView === 'published' || activeView === 'my-published') filtered = filtered.filter(i => i.status === 'published');
@@ -98,8 +91,6 @@ const WorkspacePage = () => {
     
     // Apply type filter
     if (typeFilter !== 'all') filtered = filtered.filter(i => i.type === typeFilter);
-    
-    // Apply sorting (sort a copy so we don't mutate filtered)
     const toTime = (s: string | null) => (s ? new Date(s).getTime() : 0);
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
@@ -113,7 +104,6 @@ const WorkspacePage = () => {
 
   const handleCreateOption = (optionId: string) => {
     if (RESOURCE_EDITOR_OPTIONS.includes(optionId)) {
-      // Resource editor options: show name dialog first
       setShowCreateModal(false);
       setSelectedOption(optionId);
       setShowNameDialog(true);
@@ -194,8 +184,6 @@ const WorkspacePage = () => {
     onCreateClick: handleCreateClick,
   };
 
-  if (showContent && isLoading) return <PageLoader message={t('loading')} />;
-
   return (
     <div className="workspace-container">
       <WorkspacePageHeader
@@ -205,7 +193,6 @@ const WorkspacePage = () => {
       />
 
       <div className="flex flex-1 relative transition-all">
-        {/* Sidebar - Mobile (same as Home/Profile) */}
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
@@ -220,7 +207,6 @@ const WorkspacePage = () => {
             </SheetContent>
           </Sheet>
         ) : (
-          /* Sidebar - Desktop (same as Home/Profile) */
           <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
             {isSidebarOpen && (
               <>
@@ -239,25 +225,34 @@ const WorkspacePage = () => {
             )}
           </div>
         )}
-
-        {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
           <main className="workspace-main-content">
             <div className="workspace-content-wrapper">
               <WorkspaceToolbar {...navigationProps} />
-              <WorkspacePageContent
-                showCreateModal={showCreateModal}
-                activeView={activeView}
-                filteredItems={filteredItems}
-                viewMode={viewMode}
-                t={t}
-                onCreateOption={handleCreateOption}
-                onCreateClick={handleCreateClick}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onView={handleView}
-                onSubmitReview={handleSubmitReview}
-              />
+              {showContent && isLoading && (
+                <PageLoader message={t('loading')} fullPage={false} />
+              )}
+              {showContent && isError && error && (
+                <PageLoader
+                  error={error.message}
+                  onRetry={() => refetch()}
+                  fullPage={false}
+                />
+              )}
+              {(!showContent || (!isLoading && !isError)) && (
+                <WorkspacePageContent showCreateModal={showCreateModal}
+                  activeView={activeView}
+                  filteredItems={filteredItems}
+                  viewMode={viewMode}
+                  t={t}
+                  onCreateOption={handleCreateOption}
+                  onCreateClick={handleCreateClick}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                  onSubmitReview={handleSubmitReview}
+                />
+              )}
             </div>
           </main>
           <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
@@ -270,8 +265,6 @@ const WorkspacePage = () => {
           />
         </div>
       </div>
-
-      {/* Footer - full width below sidebar + content (same as Home/Profile) */}
       <Footer />
     </div>
   );

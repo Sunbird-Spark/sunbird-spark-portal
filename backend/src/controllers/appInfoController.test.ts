@@ -22,6 +22,14 @@ vi.mock('../config/env.js', async (importOriginal) => {
     };
 });
 
+// Mock formsDatabase to prevent DB connection during tests
+vi.mock('../databases/formsDatabase.js', () => ({
+    getFormsClient: () => ({
+        execute: vi.fn(),
+        connect: vi.fn()
+    })
+}));
+
 // Import app AFTER mocking modules
 import { app } from '../app.js';
 

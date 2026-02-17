@@ -154,7 +154,10 @@
   "button": {
     "login": "Entrar",
     "goBack": "Voltar",
-    "share": "Compartilhar"
+    "share": "Compartilhar",
+    "playVideo": "Reproduzir vídeo",
+    "previous": "Anterior",
+    "next": "Próximo"
   },
   "hero": {
     "title": "Conhecimento que te move para frente.",
@@ -180,6 +183,7 @@
   },
   "courseDetails": {
     "overview": "Visão geral do curso",
+    "units": "Unidades",
     "weeks": "Semanas",
     "skills": "Habilidades que você aprenderá",
     "suitedFor": "Melhor para",

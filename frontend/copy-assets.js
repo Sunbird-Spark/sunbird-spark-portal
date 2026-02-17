@@ -51,6 +51,14 @@ const qumlEditorWebComponentRoot = path.join(
 const qumlEditorAssetsSource = path.join(qumlEditorWebComponentRoot, 'assets/quml-editor');
 const qumlEditorFinalDest = path.join(publicRoot, 'assets/quml-editor');
 
+// Collection Editor paths
+const collectionEditorWebComponentRoot = path.join(
+    __dirname,
+    'node_modules/@project-sunbird/sunbird-collection-editor-web-component'
+);
+const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
+const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
+
 /**
  * Recursively copy directory
  */
@@ -132,7 +140,13 @@ try {
         console.log('✅ Copied legacy sunbird-quml-player.js to public/assets/');
     }
 
-    // 6. Copy QUML Editor assets (if package is installed)
+    // 6. Copy Collection Editor assets
+    console.log(`\n📂 Collection Editor Source: ${collectionEditorAssetsSource}`);
+    fs.mkdirSync(collectionEditorFinalDest, { recursive: true });
+    console.log('📦 Copying Collection Editor files to public/assets/collection-editor/...');
+    copyDirectory(collectionEditorAssetsSource, collectionEditorFinalDest);
+    
+     // 7. Copy QUML Editor assets (if package is installed)
     if (fs.existsSync(qumlEditorWebComponentRoot)) {
         console.log(`\n📂 QUML Editor Source: ${qumlEditorAssetsSource}`);
         fs.mkdirSync(qumlEditorFinalDest, { recursive: true });
@@ -167,7 +181,7 @@ try {
         console.log('\n⚠️  QUML Editor package not found - skipping (install @project-sunbird/lib-questionset-editor when available)');
     }
 
-    // 7. Copy COMMON assets (icons) to root assets folder
+    // 8. Copy COMMON assets (icons) to root assets folder
     // Many Sunbird components expect icons at /assets/*.svg
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
@@ -198,6 +212,7 @@ try {
     console.log(`📍 QUML Player: public/assets/quml-player/`);
     console.log(`📍 QUML Editor: public/assets/quml-editor/`);
     console.log(`📍 QUML Editor Images: public/assets/images/`);
+    console.log(`📍 Collection Editor: public/assets/collection-editor/`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {
