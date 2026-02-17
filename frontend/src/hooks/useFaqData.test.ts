@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFaqData } from './useFaqData';
-import { vi, Mock, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Hoist the mock function so it can be used in vi.mock
 const { mockGet } = vi.hoisted(() => ({
