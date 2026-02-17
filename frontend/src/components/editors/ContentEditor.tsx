@@ -134,8 +134,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
       ref={iframeRef}
       id="contentEditor"
       name="contentEditor"
-      className="w-full h-full border-0"
-      style={{ minHeight: '100vh' }}
+      className="w-full h-full border-0 min-h-screen"
       title="Content Editor"
       aria-label="Content Editor"
     />
