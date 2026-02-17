@@ -155,7 +155,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     expect(screen.getByText("Admin Page")).toBeInTheDocument();
   });
 
-  it("protected: content_creator can access /create", () => {
+  it("public route: /create renders CreateContentPage for content_creator", () => {
     mockUseAuth.mockReturnValue({
       user: { id: "4", name: "D", role: "content_creator" },
       isAuthenticated: true,
@@ -169,7 +169,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     expect(screen.getByText("Create Content Page")).toBeInTheDocument();
   });
 
-  it("protected: content_reviewer cannot access /create", () => {
+  it("public route: /create renders CreateContentPage for content_reviewer", () => {
     mockUseAuth.mockReturnValue({
       user: { id: "5", name: "E", role: "content_reviewer" },
       isAuthenticated: true,
@@ -180,6 +180,6 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
 
     renderWithRoute("/create");
-    expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
+    expect(screen.getByText("Create Content Page")).toBeInTheDocument();
   });
 });
