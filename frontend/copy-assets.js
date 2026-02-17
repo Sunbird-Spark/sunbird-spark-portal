@@ -139,6 +139,30 @@ try {
         console.log('📦 Copying QUML editor files to public/assets/quml-editor/...');
         copyDirectory(qumlEditorAssetsSource, qumlEditorFinalDest);
 
+        // Copy QUML editor icons to public/assets
+        const qumlEditorIconsSource = path.join(qumlEditorAssetsSource, 'assets');
+        const commonAssetsDest = path.join(publicRoot, 'assets');
+        copyFilesWithExtensions(qumlEditorIconsSource, commonAssetsDest, ['.svg', '.png', '.ico']);
+
+        // Copy QUML editor images to public/assets/images
+        const qumlEditorImagesDest = path.join(commonAssetsDest, 'images');
+        const qumlEditorImageCandidates = [
+            path.join(qumlEditorAssetsSource, 'assets/images'), // preferred location
+            path.join(qumlEditorAssetsSource, 'images'),        // fallback location
+        ];
+        let qumlEditorImagesCopied = false;
+        for (const srcDir of qumlEditorImageCandidates) {
+            if (fs.existsSync(srcDir)) {
+                console.log(`📦 Copying QUML editor images from ${srcDir} to public/assets/images/...`);
+                copyDirectory(srcDir, qumlEditorImagesDest);
+                qumlEditorImagesCopied = true;
+                break;
+            }
+        }
+        if (!qumlEditorImagesCopied) {
+            console.log('ℹ️  No QUML editor images directory found at assets/images or images.');
+        }
+
     } else {
         console.log('\n⚠️  QUML Editor package not found - skipping (install @project-sunbird/lib-questionset-editor when available)');
     }
