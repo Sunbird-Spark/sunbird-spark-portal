@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { envConfig } from '../config/env.js';
+import { logger } from '../utils/logger.js';
 
 let _formsPool: pg.Pool | null = null;
 
@@ -16,9 +17,9 @@ export const getFormsPool = (): pg.Pool => {
         (async () => {
             try {
                 await _formsPool!.query('SELECT 1');
-                console.log('Forms database pool connection test succeeded.');
+                logger.info('Forms database pool connection test succeeded.');
             } catch (error) {
-                console.error('Forms database pool connection test failed:', error);
+                logger.error('Forms database pool connection test failed:', error);
                 if (process.env.NODE_ENV !== 'test') {
                     process.exit(1);
                 }
