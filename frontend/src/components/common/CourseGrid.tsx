@@ -1,11 +1,12 @@
 import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/common/Button";
-import { CourseCard, ContentCourse } from "./CourseCard";
+import CollectionCard from "@/components/content/CollectionCard";
+import type { ContentSearchItem } from "@/types/workspaceTypes";
 
 interface CourseGridProps {
     title: string;
-    courses: ContentCourse[];
+    courses: ContentSearchItem[];
     className?: string;
 }
 
@@ -31,7 +32,7 @@ export const CourseGrid = ({ title, courses, className = "mb-12" }: CourseGridPr
             {/* Course Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {courses.map((course) => (
-                    <CourseCard key={course.id} course={course} />
+                    <CollectionCard key={course.identifier} item={course} />
                 ))}
             </div>
         </div>

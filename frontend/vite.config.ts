@@ -38,6 +38,21 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/content-editor': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/action': {
+        target: 'http://localhost:3000/api',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/plugins': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 
