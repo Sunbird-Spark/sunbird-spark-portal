@@ -140,6 +140,7 @@ export class FormService {
             SELECT type, subtype, action, root_org, framework, data, component 
             FROM form_data 
             WHERE root_org = ?
+            ALLOW FILTERING
         `;
         const params = [rootOrgId];
 

@@ -15,6 +15,7 @@ vi.mock('../utils/logger.js', () => ({
 vi.mock('../databases/formsDatabase.js', () => {
     const mockFormsClient = {
         execute: vi.fn((query: string, params: unknown[]) => {
+            console.error('DEBUG MOCK EXECUTE:', JSON.stringify({ query, params }));
             // Helper to create a mock ResultSet
             const createResult = (rows: Record<string, unknown>[], wasApplied = true) => ({
                 rows,
@@ -36,8 +37,6 @@ vi.mock('../databases/formsDatabase.js', () => {
                 },
                 wasApplied: () => wasApplied
             });
-
-            console.log('Mock EXECUTE QUERY:', query); // Debug log
 
             if (query.includes('INSERT INTO form_data')) {
                 return createResult([]);

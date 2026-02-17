@@ -97,22 +97,11 @@ export const read = async (req: Request, res: Response) => {
             throw error;
         }
 
-        let responseData: Record<string, unknown> = {};
-        // Use manual iteration if available (safer for TS)
-        if (result && typeof result['keys'] === 'function') {
-            // eslint-disable-next-line no-unused-vars
-            const row = result as { keys: () => string[]; get: (k: string) => unknown };
-            row.keys().forEach((key: string) => {
-                responseData[key] = row.get(key);
-            });
-        } else if (result && typeof result['forEach'] === 'function') {
-            // Fallback
-            (result as unknown as Map<string, unknown>).forEach((value: unknown, key: string) => {
-                responseData[key] = value;
-            });
-        } else {
-            responseData = { ...result };
-        }
+        const resultObj =
+            result && typeof (result as any)[Symbol.iterator] === 'function'
+                ? Object.fromEntries(result as any)
+                : { ...(result as any) };
+        let responseData: any = resultObj;
 
         if (_.isString(responseData.data)) {
             try {
