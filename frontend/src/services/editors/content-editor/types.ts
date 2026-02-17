@@ -49,7 +49,7 @@ export interface ContentEditorWindowConfig {
   showHelp: boolean;
   previewConfig: {
     repos: string[];
-    plugins: Array<{ id: string; ver: number; type: string }>;
+    plugins: Array<{ id: string; ver: string; type: string }>;
     splash: {
       text: string;
       icon: string;
