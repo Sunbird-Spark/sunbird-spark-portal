@@ -2,7 +2,7 @@ import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/common/Button";
 import CollectionCard from "@/components/content/CollectionCard";
-import { ContentSearchItem } from "@/types/workspaceTypes";
+import type { ContentSearchItem } from "@/types/workspaceTypes";
 
 interface CourseGridProps {
     title: string;
