@@ -11,6 +11,8 @@ export const useFaqData = (baseUrl: string | undefined, languageCode: string) =>
   useEffect(() => {
     if (!baseUrl) {
       setData(null);
+      setLoading(false);
+      setError(null);
       return;
     }
 
