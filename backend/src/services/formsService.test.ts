@@ -3,8 +3,24 @@ import request from 'supertest';
 import { app } from '../app.js';
 import { FormService } from './formsService.js';
 
+// Mock sessionStore still needed for app.ts/middlewares
 vi.mock('../utils/sessionStore.js', () => {
-    const mockYsqlPool = {
+    return {
+        ysqlPool: {},
+        getYsqlPool: () => ({}),
+        sessionStore: {
+            get: vi.fn((sid, callback) => callback(null, null)),
+            set: vi.fn((sid, session, callback) => callback(null)),
+            destroy: vi.fn((sid, callback) => callback(null)),
+            on: vi.fn(),
+            touch: vi.fn((sid, session, callback) => callback(null))
+        }
+    };
+});
+
+// Mock the new formsDatabase
+vi.mock('../databases/formsDatabase.js', () => {
+    const mockFormsPool = {
         query: (...args: any[]) => {
             const [query, params] = args;
             if (query.includes('INSERT INTO')) {
@@ -29,15 +45,7 @@ vi.mock('../utils/sessionStore.js', () => {
         }
     };
     return {
-        ysqlPool: mockYsqlPool,
-        getYsqlPool: () => mockYsqlPool,
-        sessionStore: {
-            get: vi.fn((sid, callback) => callback(null, null)),
-            set: vi.fn((sid, session, callback) => callback(null)),
-            destroy: vi.fn((sid, callback) => callback(null)),
-            on: vi.fn(),
-            touch: vi.fn((sid, session, callback) => callback(null))
-        }
+        getFormsPool: () => mockFormsPool
     };
 });
 
