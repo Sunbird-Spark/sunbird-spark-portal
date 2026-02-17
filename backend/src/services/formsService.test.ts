@@ -20,32 +20,76 @@ vi.mock('../utils/sessionStore.js', () => {
 
 // Mock the new formsDatabase
 vi.mock('../databases/formsDatabase.js', () => {
-    const mockFormsPool = {
-        query: (...args: any[]) => {
-            const [query, params] = args;
+    const mockFormsClient = {
+        execute: vi.fn((query: string, params: any[]) => {
+            // Helper to create a mock ResultSet
+            const createResult = (rows: any[], wasApplied = true) => ({
+                rows,
+                rowLength: rows.length,
+                first: () => {
+                    const row = rows[0];
+                    if (!row) return null;
+                    // Add Row-like methods to the object
+                    return {
+                        ...row,
+                        get: (key: string) => row[key],
+                        forEach: (callback: (value: any, key: string) => void) => {
+                            Object.keys(row).forEach(key => callback(row[key], key));
+                        },
+                        keys: () => Object.keys(row),
+                        values: () => Object.values(row)
+                    };
+                },
+                wasApplied: () => wasApplied
+            });
+
             if (query.includes('INSERT INTO')) {
-                return Promise.resolve({ rowCount: 1, rows: [] });
+                // Determine if we should fail (simulate error if needed, but here we just simulate success)
+                return Promise.resolve(createResult([]));
             }
+
             if (query.includes('SELECT * FROM form_data')) {
-                if (params && params[0] === 'readOrg') {
-                    return Promise.resolve({ rows: [{ root_org: 'readOrg', data: '{}' }] });
+                // params: [type, action, subtype, root_org, framework, component]
+                const rootOrg = params[3];
+                const framework = params[4];
+
+                // Simulate finding a record for specific criteria
+                if (rootOrg === 'readOrg' && framework === 'readTest') {
+                    return Promise.resolve(createResult([{ root_org: 'readOrg', data: '{}' }]));
                 }
-                return Promise.resolve({ rows: [] });
+                // Match for update test setup verification if needed, or simple read
+                if (rootOrg === 'org' && framework === '*') {
+                    // Case for 'should handle malformed data in DB' test where we might pass partials
+                    // in the test it calls with rootOrgId: 'org'. Implementation will try root_org='org' first.
+                    return Promise.resolve(createResult([{ root_org: 'org', data: '{invalidJson}' }]));
+                }
+
+                return Promise.resolve(createResult([]));
             }
+
             if (query.includes('UPDATE form_data')) {
-                if (params && params[4] === 'nonexistent') {
-                    return Promise.resolve({ rowCount: 0, rows: [] });
+                // params: [data, last_modified, root_org, framework, type, action, subtype, component]
+                // root_org is at index 2
+                const rootOrg = params[2];
+                if (rootOrg === 'nonexistent') {
+                    return Promise.resolve(createResult([], false)); // wasApplied = false
                 }
-                return Promise.resolve({ rowCount: 1, rows: [] });
+                return Promise.resolve(createResult([], true));
             }
-            if (query.includes('SELECT type, subtype, action')) {
-                return Promise.resolve({ rows: [{ type: 'form', data: {} }] });
+
+            if (query.includes('SELECT type, subtype, action')) { // listAll
+                const rootOrg = params[0];
+                if (rootOrg === 'listOrg') {
+                    return Promise.resolve(createResult([{ type: 'form', data: {} }]));
+                }
+                return Promise.resolve(createResult([]));
             }
-            return Promise.resolve({ rows: [] });
-        }
+
+            return Promise.resolve(createResult([]));
+        })
     };
     return {
-        getFormsPool: () => mockFormsPool
+        getFormsClient: () => mockFormsClient
     };
 });
 
@@ -86,7 +130,9 @@ describe('FormService API Integration', () => {
     describe('Read', () => {
         const endpoint = '/data/v1/form/read';
         it('should read existing form', async () => {
+            // Setup isn't strictly needed due to mock implementation logic but good for flow
             await api.post('/data/v1/form/create').send({ request: { type: 'content', action: 'view', framework: 'readTest', rootOrgId: 'readOrg', data: { template: 'readTemplate' } } });
+
             const response = await api.post(endpoint).send({ request: { type: 'content', action: 'view', framework: 'readTest', rootOrgId: 'readOrg' } });
             expect(response.status).toBe(200);
             expect(response.body.id).toBe('api.form.read');
@@ -104,7 +150,14 @@ describe('FormService API Integration', () => {
             expect(response.body.params.err).toBe('ERR_READ_FORM_DATA');
         });
         it('should handle malformed data in DB', async () => {
-            vi.spyOn(FormService.prototype, 'read').mockResolvedValue({ data: '{invalidJson}', root_org: 'org' });
+            // The service is mocked to return invalidJson for rootOrg='org' in the vi.mock above
+            // But we can also spyOn if we want to force it without relying on the global mock logic
+            // However, the global mock is already set up to return invalid JSON for this case if we match the criteria.
+            // Let's rely on the mock setup in vi.mock to be cleaner or override it. 
+            // Since we mocked the DB class specifically, we can't easily override the DB response unless we change the variable it closes over.
+            // But spyOn works on the Service method, bypassing DB.
+            vi.spyOn(FormService.prototype, 'read').mockResolvedValue({ data: '{invalidJson}', root_org: 'org' } as unknown as any);
+
             const response = await api.post(endpoint).send({ request: { type: 'content', action: 'view', rootOrgId: 'org' } });
             expect(response.status).toBe(200);
             expect(response.body.result.form).toBeDefined();
@@ -138,7 +191,7 @@ describe('FormService API Integration', () => {
     describe('List', () => {
         const endpoint = '/data/v1/form/list';
         it('should list forms for a valid rootOrgId', async () => {
-            await api.post('/data/v1/form/create').send({ request: { type: 'list-test', action: 'list-action', rootOrgId: 'listOrg', data: { foo: 'bar' } } });
+            // Prepare mock to return result for 'listOrg'
             const response = await api.post(endpoint).send({ request: { rootOrgId: 'listOrg' } });
             expect(response.status).toBe(200);
             expect(response.body.id).toBe('api.form.list');

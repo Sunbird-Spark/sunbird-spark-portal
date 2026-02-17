@@ -23,6 +23,7 @@ KONG_ANONYMOUS_FALLBACK_TOKEN=test_anonymous_fallback_token
 KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN=test_anonymous_register_token
 KONG_LOGGEDIN_FALLBACK_TOKEN=test_loggedin_fallback_token
 KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN=test_loggedin_register_token
+SUNBIRD_YUGABYTE_YCQL_PORT=9042
 
 # Keycloak Configuration
 PORTAL_REALM=sunbird

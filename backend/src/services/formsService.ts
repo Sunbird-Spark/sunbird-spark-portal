@@ -1,7 +1,13 @@
-import { getFormsPool } from '../databases/formsDatabase.js';
+import { getFormsClient } from '../databases/formsDatabase.js';
 import { logger } from '../utils/logger.js';
+import cassandra from 'cassandra-driver';
 
 export class FormService {
+    private client: cassandra.Client;
+
+    constructor() {
+        this.client = getFormsClient();
+    }
 
     public async create(data: Record<string, unknown>) {
         logger.info('FormService.create - Input data:', JSON.stringify(data, null, 2));
@@ -12,8 +18,8 @@ export class FormService {
 
         const query = `
             INSERT INTO form_data (root_org, type, subtype, action, component, framework, data, created_on)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            ON CONFLICT (root_org, framework, type, subtype, action, component) DO NOTHING
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            IF NOT EXISTS
         `;
         const params = [
             rootOrgId,
@@ -26,7 +32,7 @@ export class FormService {
             new Date()
         ];
         logger.info('FormService.create - Query params:', params);
-        await getFormsPool().query(query, params);
+        await this.client.execute(query, params, { prepare: true });
         logger.info('FormService.create - Success!');
         return { created: 'OK' };
     }
@@ -34,9 +40,9 @@ export class FormService {
     public async update(queryCtx: Record<string, unknown>, updateValue: Record<string, unknown>) {
         const query = `
             UPDATE form_data 
-            SET data = $1, last_modified_on = $2
-            WHERE root_org = $3 AND framework = $4 AND type = $5 AND action = $6 AND subtype = $7 AND component = $8
-            RETURNING *
+            SET data = ?, last_modified_on = ?
+            WHERE root_org = ? AND framework = ? AND type = ? AND action = ? AND subtype = ? AND component = ?
+            IF EXISTS
         `;
 
         const params = [
@@ -50,9 +56,10 @@ export class FormService {
             queryCtx.component
         ];
 
-        const result = await getFormsPool().query(query, params);
+        const result = await this.client.execute(query, params, { prepare: true });
 
-        if (result.rowCount === 0) {
+        // In Cassandra, if IF EXISTS condition fails, applied is false
+        if (!result.wasApplied()) {
             const error = new Error(`invalid request, no records found for the match to update!`) as Error & { statusCode: number; msg: string };
             error.statusCode = 404;
             error.msg = error.message;
@@ -66,39 +73,40 @@ export class FormService {
     }
 
     public async read(queryCtx: Record<string, unknown>) {
-        const query = `
-            SELECT * FROM form_data 
-            WHERE type = $3 AND action = $4 AND subtype = $5
-            AND (
-                (root_org = $1 AND framework = $2 AND component = $6) OR
-                (root_org = $1 AND framework = '*' AND component = $6) OR
-                (root_org = '*' AND framework = $2 AND component = $6) OR
-                (root_org = '*' AND framework = '*' AND component = $6) OR
-                (root_org = '*' AND framework = '*' AND component = '*')
-            )
-            ORDER BY
-                CASE
-                    WHEN root_org = $1 AND framework = $2 AND component = $6 THEN 1
-                    WHEN root_org = $1 AND framework = '*' AND component = $6 THEN 2
-                    WHEN root_org = '*' AND framework = $2 AND component = $6 THEN 3
-                    WHEN root_org = '*' AND framework = '*' AND component = $6 THEN 4
-                    WHEN root_org = '*' AND framework = '*' AND component = '*' THEN 5
-                    ELSE 6
-                END ASC
-            LIMIT 1
-        `;
+        const baseQuery = `SELECT * FROM form_data WHERE type = ? AND action = ? AND subtype = ? AND root_org = ? AND framework = ? AND component = ?`;
 
-        const params = [
-            queryCtx.root_org,
-            queryCtx.framework,
-            queryCtx.type,
-            queryCtx.action,
-            queryCtx.subtype,
-            queryCtx.component
+        // Define priority order for fallback
+        // 1. Specific: root_org, framework, component
+        // 2. root_org, *, component
+        // 3. *, framework, component
+        // 4. *, *, component
+        // 5. *, *, *
+
+        const combinations = [
+            { root_org: queryCtx.root_org, framework: queryCtx.framework, component: queryCtx.component },
+            { root_org: queryCtx.root_org, framework: '*', component: queryCtx.component },
+            { root_org: '*', framework: queryCtx.framework, component: queryCtx.component },
+            { root_org: '*', framework: '*', component: queryCtx.component },
+            { root_org: '*', framework: '*', component: '*' }
         ];
 
-        const result = await getFormsPool().query(query, params);
-        return result.rows[0] || null;
+        for (const combo of combinations) {
+            const params = [
+                queryCtx.type,
+                queryCtx.action,
+                queryCtx.subtype,
+                combo.root_org,
+                combo.framework,
+                combo.component
+            ];
+
+            const result = await this.client.execute(baseQuery, params, { prepare: true });
+            if (result.rowLength > 0) {
+                return result.first();
+            }
+        }
+
+        return null;
     }
 
     public async listAll(rootOrgId: string) {
@@ -112,11 +120,11 @@ export class FormService {
         const query = `
             SELECT type, subtype, action, root_org, framework, data, component 
             FROM form_data 
-            WHERE root_org = $1
+            WHERE root_org = ?
         `;
         const params = [rootOrgId];
 
-        const result = await getFormsPool().query(query, params);
+        const result = await this.client.execute(query, params, { prepare: true });
         return result.rows;
     }
 }

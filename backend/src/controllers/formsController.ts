@@ -97,7 +97,22 @@ export const read = async (req: Request, res: Response) => {
             throw error;
         }
 
-        let responseData = { ...result };
+        let responseData: any = {};
+        // Use manual iteration if available (safer for TS)
+        if (result && typeof result['keys'] === 'function') {
+            const row = result as any;
+            row.keys().forEach((key: any) => {
+                responseData[key] = row.get(key);
+            });
+        } else if (result && typeof result['forEach'] === 'function') {
+            // Fallback
+            (result as any).forEach((value: any, key: any) => {
+                responseData[key] = value;
+            });
+        } else {
+            responseData = { ...result };
+        }
+
         if (_.isString(responseData.data)) {
             try {
                 responseData.data = JSON.parse(responseData.data);
