@@ -2,8 +2,6 @@ import type { HierarchyContentNode } from '../../types/collectionTypes';
 import type { CollectionData, Module, Lesson } from '../../types/collectionTypes';
 
 const DEFAULT_LESSON_DURATION = '—';
-const DEFAULT_RATING = 0;
-const DEFAULT_LEARNERS = '0';
 const DEFAULT_UNITS = 0;
 
 function lessonTypeFromMimeType(mimeType?: string): 'video' | 'document' {
@@ -40,13 +38,10 @@ export function mapToCollectionData(content: HierarchyContentNode): CollectionDa
   return {
     id: content.identifier,
     title: content.name ?? 'Untitled',
-    rating: DEFAULT_RATING,
-    learners: DEFAULT_LEARNERS,
     lessons: content.leafNodesCount ?? 0,
     image: content.appIcon ?? '',
     units,
     description: content.description ?? '',
-    skills: [],
     audience: Array.isArray(content.audience) ? content.audience : [],
     modules,
   };

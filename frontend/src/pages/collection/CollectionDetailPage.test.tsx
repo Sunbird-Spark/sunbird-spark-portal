@@ -8,13 +8,10 @@ import CollectionDetailPage from './CollectionDetailPage';
 const mockCollectionData = {
   id: 'col-1',
   title: 'Test Collection',
-  rating: 4.5,
-  learners: '9k',
   lessons: 12,
   image: 'https://img.png',
   units: 2,
   description: 'Test description',
-  skills: ['Skill 1'],
   audience: ['Student'],
   modules: [
     {
@@ -136,10 +133,8 @@ describe('CollectionDetailPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 
-  it('shows stats row with rating, learners, lessons', () => {
+  it('shows stats row with lessons count', () => {
     renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByText(/4\.5/)).toBeInTheDocument();
-    expect(screen.getByText(/9k/)).toBeInTheDocument();
     expect(screen.getByText(/12/)).toBeInTheDocument();
   });
 

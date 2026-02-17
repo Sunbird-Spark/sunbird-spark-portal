@@ -26,13 +26,10 @@ export interface RelatedItem {
 export interface CollectionData {
   id: string;
   title: string;
-  rating: number;
-  learners: string;
   lessons: number;
   image: string;
   units: number;
   description: string;
-  skills: string[];
   audience: string[];
   modules: Module[];
 }

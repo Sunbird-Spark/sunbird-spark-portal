@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiStar, FiShare2 } from "react-icons/fi";
+import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
@@ -122,23 +122,7 @@ const CollectionDetailPage = () => {
 
         {/* Stats Row */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <span className="flex items-center gap-1">
-            {collectionData.rating}
-            <FiStar className="w-3.5 h-3.5 text-sunbird-brick fill-sunbird-brick" />
-          </span>
-          <span className="text-gray-300">•</span>
-          <span>{collectionData.learners} {t("contentStats.learners")}</span>
-          <span className="text-gray-300">•</span>
           <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
-          <button
-            type="button"
-            aria-label={t("button.share")}
-            className="flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity"
-            onClick={() => { /* TODO: implement share */ }}
-          >
-            <FiShare2 className="w-4 h-4" />
-            {t("button.share")}
-          </button>
         </div>
 
         {/* Main Content Grid */}
