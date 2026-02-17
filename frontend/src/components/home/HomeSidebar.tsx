@@ -1,10 +1,14 @@
-import { useNavigate } from "react-router-dom";
-import { FiHome, FiUser, FiSettings, FiLogOut, FiEdit } from "react-icons/fi";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FiHome, FiUser, FiLogOut, FiEdit, FiSettings } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
+import SidebarCloseButton from "@/components/common/SidebarCloseButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HomeSidebarProps {
     activeNav: string;
     onNavChange: (nav: string) => void;
+    collapsed?: boolean;
+    onToggle?: () => void;
 }
 
 // Custom Explore icon matching the design
@@ -41,13 +45,23 @@ const mainNavItems = [
 ];
 
 const bottomNavItems = [
-    { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help" },
+    { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help-support" },
     { id: "settings", label: "Account Settings", icon: FiSettings, path: "/settings" },
     { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
-const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
+const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: HomeSidebarProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const isMobile = useIsMobile();
+
+    // Hide Account Settings on Help & Support pages
+    const filteredBottomNavItems = bottomNavItems.filter(item => {
+        if (location.pathname.startsWith('/help-support') && item.id === 'settings') {
+            return false;
+        }
+        return true;
+    });
 
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
@@ -76,15 +90,17 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
                         <button
                             onClick={() => handleNavClick(item)}
                             className={`
-                                w-full flex items-center gap-3 px-6 py-4 text-[1.125rem] transition-colors
+                                w-full flex items-center transition-colors
+                                ${collapsed ? 'justify-center px-2 py-4' : 'gap-3 px-6 py-4'}
                                 ${isActive
                                     ? "text-sunbird-brick font-normal"
                                     : "text-sunbird-obsidian font-normal hover:bg-gray-50"
                                 }
                             `}
+                            title={collapsed ? item.label : undefined}
                         >
                             <Icon className={`w-5 h-5 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
-                            <span>{item.label}</span>
+                            {!collapsed && <span className="text-[1.125rem]">{item.label}</span>}
                         </button>
                     </li>
                 );
@@ -94,7 +110,11 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
 
     return (
         <aside
-            className="w-[15.125rem] bg-white flex flex-col shrink-0 z-20 relative h-full md:h-[calc(100vh-4.5rem)]"
+            data-testid="home-sidebar"
+            className={`
+                bg-white flex flex-col shrink-0 z-20 relative h-full md:h-[calc(100vh-4.5rem)] transition-all duration-300
+                ${collapsed ? 'w-[5rem]' : 'w-[15.125rem]'}
+            `}
             style={{
                 boxShadow: '0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09)'
             }}
@@ -104,8 +124,15 @@ const HomeSidebar = ({ activeNav, onNavChange }: HomeSidebarProps) => {
                 {renderNavList(mainNavItems)}
 
                 {/* Bottom Nav (Bottom) */}
-                {renderNavList(bottomNavItems)}
+                {renderNavList(filteredBottomNavItems)}
             </nav>
+
+            {!isMobile && onToggle && (
+                <SidebarCloseButton
+                    onClick={onToggle}
+                    collapsed={collapsed}
+                />
+            )}
         </aside>
     );
 };
