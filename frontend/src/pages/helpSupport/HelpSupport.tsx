@@ -26,7 +26,7 @@ const HelpSupport = () => {
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
 
-    const { categories: allCategories, loading, error } = useHelpFaqData();
+    const { categories: allCategories, loading, error, refetch } = useHelpFaqData();
 
     const categories = useMemo(
         () => buildHelpCategories(allCategories).map(cat => ({
@@ -88,7 +88,7 @@ const HelpSupport = () => {
                             <PageLoader
                                 message="Loading..."
                                 error={error?.message || "Failed to load FAQ data. Please try again."}
-                                onRetry={() => window.location.reload()}
+                                onRetry={refetch}
                                 fullPage={false}
                             />
                         ) : (

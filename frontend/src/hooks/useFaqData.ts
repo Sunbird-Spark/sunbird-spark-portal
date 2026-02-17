@@ -10,6 +10,9 @@ export const useFaqData = (baseUrl: string | undefined, languageCode: string) =>
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<any>(null);
+  const [refetchIndex, setRefetchIndex] = useState(0);
+
+  const refetch = () => setRefetchIndex(prev => prev + 1);
 
   useEffect(() => {
     if (!baseUrl) {
@@ -76,9 +79,9 @@ export const useFaqData = (baseUrl: string | undefined, languageCode: string) =>
     return () => {
       controller.abort();
     };
-  }, [baseUrl, languageCode]);
+  }, [baseUrl, languageCode, refetchIndex]);
 
-  return { data, loading, error };
+  return { data, loading, error, refetch };
 };
 
 /**
@@ -87,14 +90,19 @@ export const useFaqData = (baseUrl: string | undefined, languageCode: string) =>
  */
 export const useHelpFaqData = () => {
   const { currentCode } = useAppI18n();
-  const { data: settingResponse } = useSystemSetting("portalFaqURL");
+  const { data: settingResponse, refetch: refetchSetting } = useSystemSetting("portalFaqURL");
   const faqUrl = settingResponse?.data?.response?.value || settingResponse?.data?.value;
-  const { data: faqData, loading, error } = useFaqData(faqUrl, currentCode || "en");
+  const { data: faqData, loading, error, refetch: refetchFaq } = useFaqData(faqUrl, currentCode || "en");
 
   const categories: ApiFaqCategory[] = useMemo(
     () => (faqData as any)?.categories ?? [],
     [faqData]
   );
 
-  return { categories, loading, error };
+  const refetch = async () => {
+    await refetchSetting();
+    refetchFaq();
+  };
+
+  return { categories, loading, error, refetch };
 };
