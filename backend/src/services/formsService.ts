@@ -72,6 +72,25 @@ export class FormService {
         };
     }
 
+    /**
+     * Read a form configuration from the `form_data` table.
+     *
+     * Expected Cassandra schema:
+     * - The WHERE clause always binds all of the following columns with equality operators:
+     *   type, action, subtype, root_org, framework, component.
+     * - The table is expected to be modeled so that these columns form the primary key,
+     *   for example:
+     *     PRIMARY KEY ((type, action, subtype), root_org, framework, component)
+     *   or an equivalent primary key that uses the same columns and allows lookups by
+     *   exact matches on all six.
+     *
+     * Fallback logic:
+     * - The `combinations` array varies only the *values* for root_org, framework,
+     *   and component (using the literal '*' as a sentinel value stored in the table),
+     *   but the set of columns in the WHERE clause is always the same.
+     * - No query relies on partial primary-key specification or ALLOW FILTERING; this
+     *   method always queries by exact equality on the full primary key as defined above.
+     */
     public async read(queryCtx: Record<string, unknown>) {
         const baseQuery = `SELECT * FROM form_data WHERE type = ? AND action = ? AND subtype = ? AND root_org = ? AND framework = ? AND component = ?`;
 
