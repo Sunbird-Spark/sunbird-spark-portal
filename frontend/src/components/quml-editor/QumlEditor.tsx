@@ -75,17 +75,24 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
         containerRef.current.appendChild(editorElement);
         setStatus('ready');
 
-        // Guard: restore FancyTree if web component overwrites jQuery
-        fancytreeGuardRef.current = window.setInterval(() => {
-          const jqCurrent = (globalThis as any).$ || (globalThis as any).jQuery;
-          if (jqCurrent?.fn?.fancytree) return; // FancyTree is still available
-          
-          // FancyTree was lost, restore our saved jQuery reference
-          if (fancyJQRef.current) {
-            (globalThis as any).$ = fancyJQRef.current;
-            (globalThis as any).jQuery = fancyJQRef.current;
-          }
-        }, 800);
+        // Guard: restore FancyTree if web component overwrites jQuery.
+        let guardInterval = 800;
+        const scheduleGuard = () => {
+          fancytreeGuardRef.current = window.setTimeout(() => {
+            const jqCurrent = (globalThis as any).$ || (globalThis as any).jQuery;
+            if (jqCurrent?.fn?.fancytree) {
+              guardInterval = Math.min(guardInterval * 2, 30_000);
+            } else {
+              if (fancyJQRef.current) {
+                (globalThis as any).$ = fancyJQRef.current;
+                (globalThis as any).jQuery = fancyJQRef.current;
+              }
+              guardInterval = 800;
+            }
+            scheduleGuard();
+          }, guardInterval);
+        };
+        scheduleGuard();
       } catch (error: any) {
         console.error('[QumlEditor] Failed to initialize editor:', error);
         setStatus('error');
@@ -101,7 +108,7 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
         editorElement.remove();
       }
       if (fancytreeGuardRef.current) {
-        clearInterval(fancytreeGuardRef.current);
+        clearTimeout(fancytreeGuardRef.current);
         fancytreeGuardRef.current = null;
       }
     };
