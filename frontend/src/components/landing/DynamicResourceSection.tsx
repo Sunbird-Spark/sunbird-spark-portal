@@ -85,14 +85,20 @@ const DynamicResourceSection = ({ title, criteria }: DynamicResourceSectionProps
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {columns.map((col, colIdx) => (
                         <div key={colIdx} className="flex flex-col gap-2">
-                            {col.items.map((item, itemIdx) => (
-                                <ResourceCardComponent
-                                    key={item.identifier}
-                                    item={item}
-                                    image={resourceImages[(colIdx * 2 + itemIdx) % resourceImages.length]}
-                                    heightClass={col.heights[itemIdx]}
-                                />
-                            ))}
+                            {col.items.map((item, itemIdx) => {
+                                const imageIndex = (colIdx * 2 + itemIdx) % resourceImages.length;
+                                const height = col.heights[itemIdx];
+                                if (!height) return null;
+                                
+                                return (
+                                    <ResourceCardComponent
+                                        key={item.identifier}
+                                        item={item}
+                                        image={resourceImages[imageIndex]!}
+                                        heightClass={height!}
+                                    />
+                                );
+                            })}
                         </div>
                     ))}
                 </div>
