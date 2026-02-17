@@ -37,6 +37,8 @@ vi.mock('../databases/formsDatabase.js', () => {
                 wasApplied: () => wasApplied
             });
 
+            console.log('Mock EXECUTE QUERY:', query); // Debug log
+
             if (query.includes('INSERT INTO form_data')) {
                 return createResult([]);
             }
@@ -59,7 +61,8 @@ vi.mock('../databases/formsDatabase.js', () => {
                     data: '{"some":"data"}'
                 }]);
             }
-            if (query.includes('SELECT type, subtype')) {
+            // Check for listAll query more broadly
+            if (query.includes('FROM form_data') && query.includes('SELECT type, subtype')) {
                 const rootOrg = params[0] as string;
                 if (rootOrg === 'empty') return createResult([]);
                 return createResult([
@@ -120,6 +123,7 @@ describe('FormService', () => {
             // Accessing the mock call:
             // @ts-ignore
             const calls = (formService['client'].execute as Mock).mock.calls;
+            if (!calls[0]) throw new Error('Mock execute was not called'); // Guards against undefined
             const params = calls[0][1] as string[];
             expect(params[0]).toBe('*'); // rootOrg
             expect(params[2]).toBe('*'); // subType
