@@ -12,6 +12,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
   const limitedBatches = upcomingBatches.slice(0, 10);
 
   // Group batches by date
+  // Group batches by date
   const groupedBatches = limitedBatches.reduce((acc, course) => {
     const startDate = course.batch?.startDate;
     if (!startDate) return acc;
@@ -21,25 +22,26 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
     const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
 
     if (!acc[dateStr]) {
-      acc[dateStr] = [];
+      acc[dateStr] = {
+        date: dateStr,
+        sortKey: dateObj.getTime(), // Use timestamp for reliable sorting
+        batches: []
+      };
     }
     
     // Determine background color based on index
-    const color = acc[dateStr].length % 2 === 0 ? "bg-[#FDF7FA]" : "bg-[#F3FAF7]";
+    const color = acc[dateStr].batches.length % 2 === 0 ? "bg-[#FDF7FA]" : "bg-[#F3FAF7]";
 
-    acc[dateStr].push({
-      id: course.courseId,
+    acc[dateStr].batches.push({
+      courseId: course.courseId,
       title: course.courseName,
       lessons: course.leafNodesCount || 0,
       color: color
     });
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, { date: string, sortKey: number, batches: any[] }>);
 
-  const upcomingBatchesData = Object.entries(groupedBatches).map(([date, batches]) => ({
-    date,
-    batches
-  })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const upcomingBatchesData = Object.values(groupedBatches).sort((a, b) => a.sortKey - b.sortKey);
 
   if (upcomingBatchesData.length === 0) {
      return (
@@ -68,7 +70,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
             <div className="space-y-4">
               {dateGroup.batches.map((batchItem) => (
                 <div
-                  key={batchItem.id}
+                  key={batchItem.courseId}
                   className={`flex ${batchItem.color} rounded-lg overflow-hidden min-h-[5.625rem]`}
                 >
                   {/* Content Box */}

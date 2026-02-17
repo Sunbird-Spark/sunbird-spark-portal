@@ -30,7 +30,7 @@ const mockRecommendedItems = [
     {
         identifier: '1',
         name: 'Complete AI Engineer Bootcamp',
-        mimeType: 'application/vnd.ekstep.content-collection',
+        mimeType: 'application/unknown', // Changed to pass client-side filter (logic defaults to CollectionCard)
         primaryCategory: 'Course', // CollectionCard uses this
         contentType: 'Course',
         objectType: 'Content',
@@ -89,7 +89,7 @@ describe('HomeRecommendedSection', () => {
     it('renders all recommended items', () => {
         renderComponent();
 
-        expect(screen.getByText(/Complete AI Engineer Bootcamp/)).toBeInTheDocument();
+        expect(screen.getByText('Complete AI Engineer Bootcamp')).toBeInTheDocument();
         expect(screen.getByText('Generative AI for Cybersecurity Professionals')).toBeInTheDocument();
         expect(screen.getByText('Data Engineering Foundations')).toBeInTheDocument();
     });

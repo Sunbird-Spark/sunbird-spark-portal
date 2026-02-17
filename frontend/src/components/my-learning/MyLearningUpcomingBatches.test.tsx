@@ -16,12 +16,11 @@ const mockBatches: Course[] = [
     progress: 0,
     content: { appIcon: '' },
     batch: {
-        batchId: 'b1',
-        startDate: '2023-10-15',
-        endDate: '',
-        status: 1,
+        startDate: new Date(Date.now() + 86400000).toISOString(),
+        batchId: 'batch-1',
         enrollmentType: 'open',
-        createdBy: 'user1'
+        createdBy: 'user-1',
+        status: 1
     }
   },
   {
@@ -95,7 +94,7 @@ describe('MyLearningUpcomingBatches', () => {
         ...mockBatches[0]!,
         courseId: `id-${i}`,
         courseName: `Batch Test ${i}`,
-        batch: { ...mockBatches[0]!.batch, startDate: '2023-12-01' },
+        batch: { ...mockBatches[0]!.batch!, startDate: '2023-12-01' },
         content: { appIcon: '' },
         completionPercentage: 0
      }));

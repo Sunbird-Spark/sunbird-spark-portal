@@ -28,6 +28,13 @@ const mockCourses: Course[] = [
     appIcon: '',
     content: { appIcon: '' },
     progress: 1,
+    batch: {
+        batchId: 'b1',
+        startDate: '2023-01-01',
+        status: 1,
+        enrollmentType: 'open',
+        createdBy: 'user1'
+    }
   },
   {
     courseId: '2',
@@ -39,6 +46,13 @@ const mockCourses: Course[] = [
     appIcon: '',
     content: { appIcon: '' },
     progress: 5,
+    batch: {
+        batchId: 'b2',
+        startDate: '2023-01-01',
+        status: 1,
+        enrollmentType: 'open',
+        createdBy: 'user1'
+    }
   },
   {
     courseId: '3',
@@ -50,6 +64,13 @@ const mockCourses: Course[] = [
     appIcon: '',
     content: { appIcon: '' },
     progress: 5,
+    batch: {
+        batchId: 'b3',
+        startDate: '2023-01-01',
+        status: 1,
+        enrollmentType: 'open',
+        createdBy: 'user1'
+    }
   },
 ];
 
@@ -99,6 +120,13 @@ describe('MyLearningCourses', () => {
       courseName: `Course ${i}`,
       completionPercentage: 10,
       content: { appIcon: '' },
+      batch: {
+        batchId: `batch-${i}`,
+        startDate: '2023-01-01',
+        status: 1,
+        enrollmentType: 'open',
+        createdBy: 'user1'
+      }
     }));
     
     render(<MyLearningCourses courses={manyCourses} />);

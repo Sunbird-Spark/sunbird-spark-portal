@@ -31,7 +31,7 @@ const MyLearning = () => {
   const [activeNav, setActiveNav] = useState("learning");
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
-  const { data, isLoading } = useMyLearning();
+  const { data, isLoading, error } = useMyLearning();
   const courses = data?.data?.courses || [];
 
   useEffect(() => {
@@ -45,6 +45,8 @@ const MyLearning = () => {
   const contentsCompleted = courses.filter(course => course.completionPercentage === 100).length;
   
   // Filter upcoming batches: startDate > today
+  // Note: This intentionally filters out courses that have already started, even if they are in progress.
+  // "Upcoming" strictly means batches with a start date in the future.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -58,6 +60,24 @@ const MyLearning = () => {
 
   if (isLoading) {
     return <PageLoader message="Loading your learning..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="page-container flex items-center justify-center">
+         <div className="text-center">
+            <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
+            <p className="text-gray-600">Failed to load your learning progress. Please try again later.</p>
+            <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-sunbird-brick text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+                Retry
+            </button>
+         </div>
+         <Footer />
+      </div>
+    );
   }
 
   return (

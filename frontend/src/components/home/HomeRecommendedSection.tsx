@@ -17,17 +17,18 @@ const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps
             filters: {
                 status: ["Live"],
                 objectType: ["Content", "QuestionSet"], // Broaden search to include various content types
-                mimeType: { "!=": "application/vnd.ekstep.content-collection" } // Exclude collections if needed, or adjust based on preference
             },
             sort_by: {
                 lastUpdatedOn: "desc"
             },
-            limit: 3
+            limit: 10 // Increase limit to allow client-side filtering
         },
         enabled: isEnabled
     });
 
-    const recommendedItems = data?.data?.content || [];
+    const recommendedItems = (data?.data?.content || [])
+        .filter((item: any) => item.mimeType !== "application/vnd.ekstep.content-collection")
+        .slice(0, 3);
 
     if (!isEnabled) {
         return null;

@@ -10,7 +10,6 @@ interface TrackableCollectionCardProps {
 const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps) => {
   return (
     <Link
-      key={course.courseId || index}
       to={`/content/${course.courseId}`}
       className="block"
     >
@@ -37,7 +36,14 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
             Completed : <span className="font-medium">{course.completionPercentage}%</span>
           </p>
           {/* Progress Bar */}
-          <div className="h-2 bg-[#F4F4F4] rounded-[0.625rem] max-w-[22.5rem]">
+          <div 
+            className="h-2 bg-[#F4F4F4] rounded-[0.625rem] max-w-[22.5rem]"
+            role="progressbar" 
+            aria-valuenow={course.completionPercentage} 
+            aria-valuemin={0} 
+            aria-valuemax={100}
+            aria-label="Course completion"
+          >
             <div
               className="h-full bg-[#A85236] rounded-[0.625rem] transition-all"
               style={{ width: `${course.completionPercentage}%` }}

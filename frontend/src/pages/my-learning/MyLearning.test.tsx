@@ -52,8 +52,36 @@ vi.mock('react-icons/fi', () => ({
 
 describe('MyLearning Page', () => {
   const mockCourses = [
-    { courseId: '1', courseName: 'C1', completionPercentage: 10, leafNodesCount: 5, progress: 1 },
-    { courseId: '2', courseName: 'C2', completionPercentage: 100, leafNodesCount: 5, progress: 5 },
+    { 
+        courseId: '1', 
+        courseName: 'C1', 
+        completionPercentage: 10, 
+        leafNodesCount: 5, 
+        progress: 1,
+        content: { appIcon: '' },
+        batch: {
+            batchId: 'b1',
+            startDate: '2023-01-01',
+            status: 1,
+            enrollmentType: 'open',
+            createdBy: 'user1'
+        }
+    },
+    { 
+        courseId: '2', 
+        courseName: 'C2', 
+        completionPercentage: 100, 
+        leafNodesCount: 5, 
+        progress: 5,
+        content: { appIcon: '' },
+        batch: {
+            batchId: 'b2',
+            startDate: '2023-01-01',
+            status: 1,
+            enrollmentType: 'open',
+            createdBy: 'user1'
+        }
+    },
   ];
 
   beforeEach(() => {
