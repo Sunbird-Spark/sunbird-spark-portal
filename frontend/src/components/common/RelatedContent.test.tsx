@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import RelatedContent from './RelatedContent';
+import type { RelatedContentItem } from '@/types/collectionTypes';
 import type { ContentSearchItem } from '@/types/workspaceTypes';
 
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -38,7 +39,7 @@ const mockItems: ContentSearchItem[] = [
 ];
 
 type RenderProps = {
-  items?: ContentSearchItem[];
+  items?: RelatedContentItem[];
   cardType: 'collection' | 'resource';
   title?: string;
   limit?: number;
@@ -163,5 +164,18 @@ describe('RelatedContent', () => {
     expect(section).toBeInTheDocument();
     expect(document.querySelector('.content-player-related-header')).toBeInTheDocument();
     expect(document.querySelector('.content-player-related-grid')).toBeInTheDocument();
+  });
+
+  it('uses per-item cardType when provided', () => {
+    const mixedItems: RelatedContentItem[] = [
+      { identifier: 'item-1', name: 'First Item', appIcon: 'https://example.com/icon1.png', mimeType: 'video/mp4', primaryCategory: 'Resource', cardType: 'resource' },
+      { identifier: 'item-2', name: 'Second Item', appIcon: 'https://example.com/icon2.png', mimeType: 'application/pdf', primaryCategory: 'Resource', cardType: 'collection' },
+    ];
+    renderRelatedContent({
+      items: mixedItems,
+      cardType: 'resource',
+    });
+    expect(screen.getByRole('link', { name: /First Item/ })).toHaveAttribute('href', '/content/item-1');
+    expect(screen.getByRole('link', { name: /Second Item/ })).toHaveAttribute('href', '/collection/item-2');
   });
 });
