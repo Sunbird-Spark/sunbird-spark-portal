@@ -12,6 +12,18 @@ export const getFormsPool = (): pg.Pool => {
             user: envConfig.SUNBIRD_YUGABYTE_USER,
             password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
         });
+
+        (async () => {
+            try {
+                await _formsPool!.query('SELECT 1');
+                console.log('Forms database pool connection test succeeded.');
+            } catch (error) {
+                console.error('Forms database pool connection test failed:', error);
+                if (process.env.NODE_ENV !== 'test') {
+                    process.exit(1);
+                }
+            }
+        })();
     }
     return _formsPool;
 };
