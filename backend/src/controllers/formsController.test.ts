@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { Request, Response } from 'express';
 import { create, update, read, listAll } from './formsController.js';
 import { FormService } from '../services/formsService.js';
 import { logger } from '../utils/logger.js';
-import { Response as ApiResponse } from '../models/Response.js';
 
 // Mock FormService
 vi.mock('../services/formsService.js', () => {
@@ -30,7 +29,6 @@ describe('FormsController', () => {
     let jsonMock: Mock;
     let statusMock: Mock;
     let sendMock: Mock;
-    let mockFormService: any;
 
     beforeEach(() => {
         // Reset mocks
@@ -50,8 +48,6 @@ describe('FormsController', () => {
             headers: {}
         };
 
-        // Get the mock instance
-        mockFormService = new FormService();
         // Since we mocked the class, obtaining the instance via 'new' in the controller 
         // will return the same prototype methods we spy on here IF the controller creates it once.
         // HOWEVER, `formsController.ts` does: `const formService = new FormService();` at module level.
@@ -69,7 +65,7 @@ describe('FormsController', () => {
     // Helper to get the mocked service instance specific method
     const getMockMethod = (method: keyof FormService) => {
         // @ts-ignore
-        return FormService.prototype[method];
+        return FormService.prototype[method] as Mock;
     };
 
     describe('create', () => {

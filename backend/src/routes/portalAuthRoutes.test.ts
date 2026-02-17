@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
-import session from 'express-session';
+
 
 // Mocks
 const mockKeycloakMiddleware = vi.fn(() => (req: Request, res: Response, next: NextFunction) => next());
@@ -58,15 +58,13 @@ vi.mock('../config/env.js', () => ({
 
 describe('PortalAuthRoutes', () => {
     let app: express.Application;
-    let sessionUtilsMock: any;
-    let userServiceMock: any;
 
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
 
-        sessionUtilsMock = await import('../utils/sessionUtils.js');
-        userServiceMock = await import('../services/userService.js');
+        await import('../utils/sessionUtils.js');
+        await import('../services/userService.js');
         const portalAuthRoutes = (await import('./portalAuthRoutes.js')).default;
 
         app = express();
@@ -119,7 +117,7 @@ describe('PortalAuthRoutes', () => {
 describe('PortalAuthRoutes Integration', () => {
     let app: express.Application;
 
-    const setupApp = async (customMiddleware?: (req: Request, res: Response, next: NextFunction) => void) => {
+    const setupApp = async (customMiddleware?: express.RequestHandler) => {
         vi.resetModules();
         const portalAuthRoutes = (await import('./portalAuthRoutes.js')).default;
 
@@ -156,7 +154,10 @@ describe('PortalAuthRoutes Integration', () => {
         });
 
         it('should redirect to /portal/auth/callback if not authenticated', async () => {
-            const app = await setupApp(); // Default no kauth
+            const app = await setupApp((req, res, next) => {
+                // Do nothing middleware but call next
+                next();
+            });
             const res = await request(app).get('/portal/login');
             expect(res.status).toBe(302);
             expect(res.header.location).toBe('/portal/auth/callback');
@@ -197,8 +198,8 @@ describe('PortalAuthRoutes Integration', () => {
                     grant: {
                         access_token: {
                             content: { sub: 'f:keycloak:user123' }
-                        }
-                    }
+                        } as any
+                    } as any
                 };
                 next();
             });
@@ -207,7 +208,7 @@ describe('PortalAuthRoutes Integration', () => {
             const userService = await import('../services/userService.js');
 
             vi.mocked(sessionUtils.regenerateSession).mockResolvedValue(undefined);
-            vi.mocked(userService.fetchUserById).mockResolvedValue({});
+            vi.mocked(userService.fetchUserById).mockResolvedValue({} as any);
             vi.mocked(userService.setUserSession).mockResolvedValue(undefined);
 
             await request(app).get('/portal/auth/callback');

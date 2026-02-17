@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import type { Server } from 'http';
-import * as http from 'http';
 
 vi.mock('../utils/logger.js', () => ({
     default: {
