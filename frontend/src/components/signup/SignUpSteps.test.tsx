@@ -3,6 +3,24 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { SignUpForm } from './SignUpForm';
 import { SignUpOtpVerification } from './SignUpOtpVerification';
 
+// Mock useSystemSetting hook
+vi.mock('@/hooks/useSystemSetting', () => ({
+    useSystemSetting: vi.fn(() => ({
+        data: {
+            data: {
+                response: {
+                    value: JSON.stringify({
+                        latestVersion: 'v1',
+                        v1: {
+                            url: 'https://example.com/terms'
+                        }
+                    })
+                }
+            }
+        }
+    }))
+}));
+
 // Mock child components from ForgotPasswordComponents
 vi.mock('../../pages/forgotPassword/ForgotPasswordComponents', () => ({
     Header: ({ title, subtitle }: any) => (
@@ -45,7 +63,8 @@ vi.mock('react-icons/fc', () => ({ FcGoogle: () => <div data-testid="google-icon
 vi.mock('react-icons/fi', () => ({
     FiEye: () => <div data-testid="eye-icon" />,
     FiEyeOff: () => <div data-testid="eye-off-icon" />,
-    FiCheck: () => <div data-testid="check-icon" />
+    FiCheck: () => <div data-testid="check-icon" />,
+    FiX: () => <div data-testid="x-icon" />
 }));
 
 describe('SignUpForm', () => {

@@ -8,6 +8,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 import { TermsAndConditionsPopover } from "@/components/common/TermsAndConditionsPopover";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { SignupService } from "@/services/SignupService";
 
 interface Step1Props {
     firstName: string;
@@ -42,37 +43,8 @@ export const SignUpForm = ({
     isLoading = false
 }: Step1Props) => {
     const { data: tncConfig } = useSystemSetting('tncConfig');
-    console.log('tncConfig', tncConfig);
-    
-    const getTncUrl = () => {
-        const value = tncConfig?.data?.response?.value;
-        console.log('value', value, typeof value);
-        
-        if (!value) return '';
-        
-        // Parse if value is a string
-        let parsedValue = value;
-        if (typeof value === 'string') {
-            try {
-                parsedValue = JSON.parse(value);
-            } catch (e) {
-                console.error('Failed to parse TNC config:', e);
-                return '';
-            }
-        }
-        
-        const latestVersion = parsedValue.latestVersion;
-        console.log('latestVersion', latestVersion);
-        
-        if (latestVersion && parsedValue[latestVersion]?.url) {
-            return parsedValue[latestVersion].url;
-        }
-        
-        return '';
-    };
-    
-    const termsUrl = getTncUrl();
-    console.log('termsUrl', termsUrl);
+    const signupService = new SignupService();
+    const termsUrl = signupService.getTncUrl(tncConfig);
 
     return (
     <>

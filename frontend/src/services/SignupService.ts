@@ -103,4 +103,29 @@ export class SignupService {
         const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
         return btoa(binaryString);
     }
+
+    getTncUrl(tncConfig: any): string {
+        const value = tncConfig?.data?.response?.value;
+
+        if (!value) return '';
+
+        let parsedValue = value;
+        if (typeof value === 'string') {
+            try {
+                parsedValue = JSON.parse(value);
+            } catch (e) {
+                console.error('Failed to parse TNC config:', e);
+                return '';
+            }
+        }
+
+        const latestVersion = parsedValue.latestVersion;
+
+        if (latestVersion && parsedValue[latestVersion]?.url) {
+            return parsedValue[latestVersion].url;
+        }
+
+        return '';
+    }
 }
+
