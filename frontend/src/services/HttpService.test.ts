@@ -18,15 +18,15 @@ describe('HttpService', () => {
 
     const result = await httpService.get('http://example.com/data');
     expect(result).toEqual(mockData);
-    expect(axios.get).toHaveBeenCalledWith('http://example.com/data', { headers: undefined });
+    expect(axios.get).toHaveBeenCalledWith('http://example.com/data', undefined);
   });
 
-  it('should pass headers correctly', async () => {
+  it('should pass config correctly', async () => {
     const mockData = { key: 'value' };
     const headers = { Authorization: 'Bearer token' };
     (axios.get as Mock).mockResolvedValue({ data: mockData });
 
-    await httpService.get('http://example.com/data', headers);
+    await httpService.get('http://example.com/data', { headers });
     expect(axios.get).toHaveBeenCalledWith('http://example.com/data', { headers });
   });
 
@@ -35,5 +35,13 @@ describe('HttpService', () => {
     (axios.get as Mock).mockRejectedValue(error);
 
     await expect(httpService.get('http://example.com/data')).rejects.toThrow('Network Error');
+  });
+
+  it('should correctly identify cancellation error', () => {
+    const cancelError = new Error('canceled');
+    (axios.isCancel as Mock).mockReturnValue(true);
+
+    expect(HttpService.isCancel(cancelError)).toBe(true);
+    expect(axios.isCancel).toHaveBeenCalledWith(cancelError);
   });
 });
