@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/common/DropdownMenu";
-import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
@@ -160,6 +160,7 @@ const MyLearning = () => {
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 pl-0 pr-0 pb-0">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetDescription className="sr-only">Main Navigation</SheetDescription>
               <HomeSidebar
                 activeNav={activeNav}
                 onNavChange={(nav) => {
