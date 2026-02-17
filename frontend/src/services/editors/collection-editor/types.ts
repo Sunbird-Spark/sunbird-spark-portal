@@ -1,6 +1,8 @@
 export interface CollectionEditorContextProps {
     mode: string;
     cdata?: any[];
+    objectType?: string;
+    primaryCategory?: string;
     contextRollup?: { l1: string };
     objectRollup?: Record<string, any>;
 }

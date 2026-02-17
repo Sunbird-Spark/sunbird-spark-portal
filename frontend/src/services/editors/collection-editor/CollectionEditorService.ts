@@ -28,32 +28,22 @@ export class CollectionEditorService {
             try {
                 const $global = (globalThis as any).$;
 
-                // jQuery and jQuery UI are now loaded via static imports
-                // Load FancyTree from self-hosted script (not dynamic import to avoid CommonJS issues)
+                // jQuery and jQuery UI are loaded via static imports at the top
+                // Now load FancyTree with ALL extensions from npm module
                 if (!$global.fn?.fancytree) {
-                    await new Promise<void>((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = '/assets/fancytree/jquery.fancytree-all-deps.min.js';
-                        script.async = true;
-                        script.onload = () => {
-                            // Wait for FancyTree to register itself
-                            const checkFancytree = setInterval(() => {
-                                if ($global.fn?.fancytree) {
-                                    clearInterval(checkFancytree);
-                                    resolve();
-                                }
-                            }, 50);
-                            // Timeout after 2 seconds
-                            setTimeout(() => {
-                                clearInterval(checkFancytree);
-                                if (!$global.fn?.fancytree) {
-                                    reject(new Error('FancyTree failed to attach to jQuery'));
-                                }
-                            }, 2000);
-                        };
-                        script.onerror = () => reject(new Error('Failed to load FancyTree'));
-                        document.body.appendChild(script);
-                    });
+                    // Import the full FancyTree bundle with all extensions (glyph, table, etc.)
+                    await import('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
+                    await import('jquery.fancytree/dist/modules/jquery.fancytree');
+                    await import('jquery.fancytree/dist/modules/jquery.fancytree.dnd5');
+                    await import('jquery.fancytree/dist/modules/jquery.fancytree.edit');
+                    await import('jquery.fancytree/dist/modules/jquery.fancytree.filter');
+                    await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph');
+                    await import('jquery.fancytree/dist/modules/jquery.fancytree.table');
+                    
+                    // Verify FancyTree attached to jQuery
+                    if (!$global.fn?.fancytree) {
+                        throw new Error('FancyTree failed to attach to jQuery');
+                    }
                 }
 
                 // Load the Collection Editor Web Component
@@ -132,8 +122,8 @@ export class CollectionEditorService {
             config: {
                 showAddCollaborator: true,
                 mode: contextProps?.mode || 'edit',
-                objectType: 'Collection',
-                primaryCategory: 'Content Playlist',
+                objectType: contextProps?.objectType || 'Collection',
+                primaryCategory: contextProps?.primaryCategory || 'Content Playlist',
             },
             metadata,
         };

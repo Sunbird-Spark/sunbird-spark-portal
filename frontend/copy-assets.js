@@ -50,9 +50,6 @@ const collectionEditorWebComponentRoot = path.join(
 const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
 const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
 
-// FancyTree paths (self-hosted dependency)
-const fancytreeSource = path.join(__dirname, 'node_modules/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js');
-const fancytreeDest = path.join(publicRoot, 'assets/fancytree');
 /**
  * Recursively copy directory
  */
@@ -123,13 +120,7 @@ try {
     console.log('📦 Copying Collection Editor files to public/assets/collection-editor/...');
     copyDirectory(collectionEditorAssetsSource, collectionEditorFinalDest);
     
-    // 7. Copy FancyTree (self-hosted dependency for security)
-    console.log(`\n📂 FancyTree Source: ${fancytreeSource}`);
-    fs.mkdirSync(fancytreeDest, { recursive: true });
-    console.log('📦 Copying FancyTree to public/assets/fancytree/...');
-    fs.copyFileSync(fancytreeSource, path.join(fancytreeDest, 'jquery.fancytree-all-deps.min.js'));
-    
-    // 8. Copy COMMON assets (icons) to root assets folder
+    // 7. Copy COMMON assets (icons) to root assets folder
     // Many Sunbird components expect icons at /assets/*.svg
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
