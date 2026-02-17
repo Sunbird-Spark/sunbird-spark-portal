@@ -9,7 +9,7 @@ import Header from "@/components/home/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useHelpFaqData } from "@/hooks/useHelpFaqData";
 
-import SidebarCloseButton from "./SidebarCloseButton";
+import SidebarCloseButton from "../../components/common/SidebarCloseButton";
 import {
     buildHelpCategories,
 } from "./helpSupportData";

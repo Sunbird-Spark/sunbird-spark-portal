@@ -70,7 +70,7 @@ vi.mock("react-router-dom", async () => {
     return {
         ...actual,
         useNavigate: () => mockNavigate,
-        useParams: () => ({ categoryId: 'login' }),
+        useParams: vi.fn(() => ({ categoryId: 'login' })),
     };
 });
 
@@ -173,5 +173,45 @@ describe('HelpCategoryDetail', () => {
         );
 
         expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    });
+    it('shows error when category is not found', async () => {
+        const { useParams } = await import("react-router-dom");
+        vi.mocked(useParams).mockReturnValue({ categoryId: 'invalid-id' });
+
+        render(
+            <MemoryRouter initialEntries={['/help-support/invalid-id']}>
+                <HelpCategoryDetail />
+            </MemoryRouter>
+        );
+        expect(screen.getByText('Category not found.')).toBeInTheDocument();
+    });
+
+    it('handles successful feedback submission', async () => {
+        const fetchSpy = vi.spyOn(window, 'fetch').mockResolvedValue({
+            ok: true,
+            json: async () => ({})
+        } as Response);
+
+        render(
+            <MemoryRouter initialEntries={['/help-support/login']}>
+                <HelpCategoryDetail />
+            </MemoryRouter>
+        );
+
+        const yesButtons = screen.getAllByText('Yes');
+        const firstYesButton = yesButtons[0];
+        if (firstYesButton) {
+            fireEvent.click(firstYesButton);
+        }
+
+        await waitFor(() => {
+            expect(screen.getByText('Thank you for your feedback!')).toBeInTheDocument();
+        });
+
+        // Check if fetch was called with correct params
+        expect(fetchSpy).toHaveBeenCalledWith("/api/help-support/feedback", expect.objectContaining({
+            method: "POST",
+            body: expect.stringContaining('"wasHelpful":true')
+        }));
     });
 });

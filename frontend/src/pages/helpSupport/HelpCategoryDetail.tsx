@@ -15,7 +15,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/landing/Accordion";
-import SidebarCloseButton from "./SidebarCloseButton";
+import SidebarCloseButton from "../../components/common/SidebarCloseButton";
 import { buildCategoryFaqsMap } from "./helpSupportData";
 
 import "../profile/profile.css";

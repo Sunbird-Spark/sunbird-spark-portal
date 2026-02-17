@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useFaqData } from "@/hooks/useFaqData";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import type { ApiFaqCategory } from "@/pages/helpSupport/helpSupportData";
+import type { ApiFaqCategory } from "@/types/helpSupport";
 
 /**
  * Shared hook that fetches FAQ data from the portalFaqURL setting

@@ -182,4 +182,24 @@ describe('HelpSupport', () => {
         expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
         expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
     });
+    it('handles api error gracefully', () => {
+        mockUseHelpFaqData.mockReturnValue({ categories: [], loading: false, error: { message: "Failed to fetch" } });
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HelpSupport />
+            </MemoryRouter>
+        );
+        expect(screen.getByText(/Failed to load FAQ data/i)).toBeInTheDocument();
+    });
+
+    it('navigates to correct category on click', () => {
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HelpSupport />
+            </MemoryRouter>
+        );
+        const categoryCard = screen.getByText('Login');
+        fireEvent.click(categoryCard);
+        expect(mockNavigate).toHaveBeenCalledWith('/help-support/login');
+    });
 });
