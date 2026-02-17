@@ -26,12 +26,33 @@ export interface FormReadResponse {
       action: string;
       component: string;
       framework: string;
-      data: any;
+      data: {
+        sections: FormSection[];
+      };
       created_on: string;
       last_modified_on: string | null;
       rootOrgId: string;
     };
   };
+}
+
+export interface FormSection {
+  id: string;
+  index: number;
+  title: string;
+  type: 'content' | 'categories' | 'resource';
+  criteria?: {
+    request: import('./workspaceTypes').ContentSearchRequest;
+  };
+  list?: CategoryItem[];
+}
+
+export interface CategoryItem {
+  id: string;
+  index: number;
+  title: string;
+  code: string;
+  value: string;
 }
 
 export interface UseFormReadOptions {

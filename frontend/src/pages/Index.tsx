@@ -1,37 +1,69 @@
-import { useState, useEffect } from "react";
 import Header from "@/components/home/Header";
 import HeroWithStats from "@/components/landing/HeroWithStats";
-import MostPopularContent from "@/components/landing/MostPopularContent";
-import CategorySection from "@/components/home/CategorySection";
-import ResourceCenter from "@/components/landing/ResourceCenter";
-import PopularContent from "@/components/landing/PopularContent";
 import FAQSection from "@/components/landing/FAQSection";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
+import { useFormRead } from "@/hooks/useForm";
+import DynamicContentSection from "@/components/landing/DynamicContentSection";
+import DynamicCategorySection from "@/components/landing/DynamicCategorySection";
+import DynamicResourceSection from "@/components/landing/DynamicResourceSection";
+import { FormSection } from "@/types/formTypes";
 
 const Index = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: formData, isLoading } = useFormRead({
+    request: {
+      type: "page",
+      subType: "landing",
+      action: "sections",
+      component: "portal",
+      framework: "*",
+    }
+  });
 
   if (isLoading) {
     return <PageLoader message="Loading Sunbird..." />;
   }
+
+  const sections = formData?.data?.result?.form?.data?.sections || [];
+  const sortedSections = [...sections].sort((a, b) => a.index - b.index);
+
+  const renderSection = (section: FormSection) => {
+    switch (section.type) {
+      case 'content':
+        return (
+          <DynamicContentSection
+            key={section.id}
+            title={section.title}
+            criteria={section.criteria}
+          />
+        );
+      case 'categories':
+        return (
+          <DynamicCategorySection
+            key={section.id}
+            title={section.title}
+            list={section.list}
+          />
+        );
+      case 'resource':
+        return (
+          <DynamicResourceSection
+            key={section.id}
+            title={section.title}
+            criteria={section.criteria}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main>
         <HeroWithStats />
-        <MostPopularContent />
-        <CategorySection />
-        <ResourceCenter />
-        <PopularContent />
+        {sortedSections.map(renderSection)}
         <FAQSection />
       </main>
       <Footer />
