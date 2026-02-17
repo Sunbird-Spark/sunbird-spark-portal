@@ -39,7 +39,7 @@ describe('HttpService', () => {
 
   it('should correctly identify cancellation error', () => {
     const cancelError = new Error('canceled');
-    (axios.isCancel as Mock).mockReturnValue(true);
+    vi.mocked(axios.isCancel).mockReturnValue(true);
 
     expect(HttpService.isCancel(cancelError)).toBe(true);
     expect(axios.isCancel).toHaveBeenCalledWith(cancelError);
