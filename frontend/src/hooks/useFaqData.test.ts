@@ -12,6 +12,7 @@ vi.mock('../services/HttpService', () => {
   return {
     HttpService: class {
       get = mockGet;
+      static isCancel = (err: any) => err?.message === 'canceled';
     },
   };
 });
@@ -32,7 +33,7 @@ describe('useFaqData', () => {
 
     expect(result.current.data).toEqual({ general: [] });
     expect(result.current.error).toBeNull();
-    expect(mockGet).toHaveBeenCalledWith('http://base/faq-es.json');
+    expect(mockGet).toHaveBeenCalledWith('http://base/faq-es.json', expect.objectContaining({ signal: expect.any(AbortSignal) }));
     expect(mockGet).toHaveBeenCalledTimes(1);
   });
 
@@ -45,8 +46,8 @@ describe('useFaqData', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.data).toEqual({ general: ['fallback'] });
-    expect(mockGet).toHaveBeenCalledWith('http://base/faq-es.json');
-    expect(mockGet).toHaveBeenCalledWith('http://base/faq-en.json');
+    expect(mockGet).toHaveBeenCalledWith('http://base/faq-es.json', expect.anything());
+    expect(mockGet).toHaveBeenCalledWith('http://base/faq-en.json', expect.anything());
   });
 
   it('fails if both primary and fallback fail', async () => {
@@ -59,8 +60,8 @@ describe('useFaqData', () => {
 
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith('http://base/faq-es.json');
-    expect(mockGet).toHaveBeenCalledWith('http://base/faq-en.json');
+    expect(mockGet).toHaveBeenCalledWith('http://base/faq-es.json', expect.anything());
+    expect(mockGet).toHaveBeenCalledWith('http://base/faq-en.json', expect.anything());
   });
 
   it('does not fallback if primary is already English', async () => {
@@ -72,7 +73,25 @@ describe('useFaqData', () => {
 
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith('http://base/faq-en.json');
+    expect(mockGet).toHaveBeenCalledWith('http://base/faq-en.json', expect.anything());
     expect(mockGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('aborts request on unmount', async () => {
+    let abortSignal: AbortSignal | undefined;
+    mockGet.mockImplementation((url, config) => {
+      abortSignal = config?.signal;
+      return new Promise(() => {}); // Never resolve
+    });
+
+    const { unmount } = renderHook(() => useFaqData('http://base', 'es'));
+
+    expect(mockGet).toHaveBeenCalled();
+    expect(abortSignal).toBeDefined();
+    expect(abortSignal?.aborted).toBe(false);
+
+    unmount();
+
+    expect(abortSignal?.aborted).toBe(true);
   });
 });
