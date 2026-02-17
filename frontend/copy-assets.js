@@ -149,6 +149,7 @@ try {
     console.log(`📍 Video Player: public/assets/video-player/`);
     console.log(`📍 ePub Player: public/assets/epub-player/`);
     console.log(`📍 QUML Player: public/assets/quml-player/`);
+    console.log(`📍 Collection Editor: public/assets/collection-editor/`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {
