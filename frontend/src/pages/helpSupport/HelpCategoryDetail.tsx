@@ -16,7 +16,7 @@ import {
     AccordionTrigger,
 } from "@/components/landing/Accordion";
 import SidebarCloseButton from "../../components/common/SidebarCloseButton";
-import { buildCategoryFaqsMap } from "./helpSupportData";
+import { buildCategoryFaqsMap } from "../../components/helpSupport/HelpSupportData";
 
 import "../profile/profile.css";
 
@@ -46,14 +46,7 @@ const HelpCategoryDetail = () => {
         setIsSidebarOpen(!isMobile);
     }, [isMobile]);
 
-    const handleFeedback = (index: number, value: "yes" | "no") => {
-        setFeedback((prev) => ({ ...prev, [index]: value }));
-    };
-
-    const handleSubmitFeedback = async (index: number) => {
-        const wasHelpful = feedback[index] === "yes";
-        const text = feedbackText[index] ?? "";
-
+    const submitFeedback = async (index: number, wasHelpful: boolean, text: string) => {
         try {
             await fetch("/api/help-support/feedback", {
                 method: "POST",
@@ -62,10 +55,22 @@ const HelpCategoryDetail = () => {
             });
         } catch (err) {
             console.error("Failed to submit help category feedback", err);
-        } finally {
-            setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
-            setFeedbackText((prev) => ({ ...prev, [index]: "" }));
         }
+    };
+
+    const handleFeedback = (index: number, value: "yes" | "no") => {
+        setFeedback((prev) => ({ ...prev, [index]: value }));
+        if (value === "yes") {
+            submitFeedback(index, true, "");
+        }
+    };
+
+    const handleSubmitFeedback = async (index: number) => {
+        const text = feedbackText[index] ?? "";
+        await submitFeedback(index, false, text);
+
+        setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
+        setFeedbackText((prev) => ({ ...prev, [index]: "" }));
     };
 
     return (

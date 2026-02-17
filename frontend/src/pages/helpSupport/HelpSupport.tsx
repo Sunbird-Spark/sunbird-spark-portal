@@ -12,7 +12,7 @@ import { useHelpFaqData } from "@/hooks/useHelpFaqData";
 import SidebarCloseButton from "../../components/common/SidebarCloseButton";
 import {
     buildHelpCategories,
-} from "./helpSupportData";
+} from "../../components/helpSupport/HelpSupportData";
 
 import "../profile/profile.css";
 
