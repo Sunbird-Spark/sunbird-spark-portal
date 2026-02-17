@@ -32,7 +32,7 @@ export const useQumlContent = (
       let metadata = _.get(hierarchyResp, 'questionset');
 
       if (!metadata) {
-        throw new Error('Hierarchy payload missing questionset');
+        throw new Error(`Hierarchy payload missing questionset for ID: ${questionSetId}`);
       }
 
       // Collect all question IDs from hierarchy
@@ -75,6 +75,8 @@ export const useQumlContent = (
 
         const children = _.get(node, 'children');
         if (Array.isArray(children)) {
+          // Children are replaced to include full question attributes
+          // (outcomeDeclaration, body, responseDeclaration etc.) from the list API response
           node.children = _.map(children, replaceQuestionsInHierarchy);
         }
 

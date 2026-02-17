@@ -502,8 +502,7 @@
   }
 
   .content-player-video-relative {
-    @apply relative h-80 sm:h-96 md:h-screen lg:h-screen;
-    height: 37.5rem;
+    @apply relative h-80 sm:h-96 md:h-[37.5rem] lg:h-[37.5rem];
   }
 
   .content-player-video-thumbnail {
