@@ -43,15 +43,15 @@ describe('relatedContentMapper', () => {
       expect(result).toHaveLength(2);
     });
 
-    it('maps search results preserving mimeType and sets cardType from isResourceItem', () => {
+    it('maps search results preserving mimeType and sets cardType from mimeType', () => {
       const items: RelatedContentSearchItem[] = [
         { identifier: 'v1', name: 'Video', visibility: 'Default', mimeType: 'video/mp4', appIcon: 'https://icon.png' },
         {
           identifier: 'c1',
           name: 'Course',
           visibility: 'Default',
+          mimeType: 'application/vnd.ekstep.content-collection',
           primaryCategory: 'Course',
-          resourceType: 'Course',
         },
       ];
       const result = mapSearchContentToRelatedContentItems(items);

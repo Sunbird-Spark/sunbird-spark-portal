@@ -7,14 +7,6 @@ function isRootLevel(item: RelatedContentSearchItem): boolean {
   return visibility === 'default' && !item.parent;
 }
 
-function isResourceItem(item: RelatedContentSearchItem): boolean {
-  const mime = (item.mimeType ?? '').toLowerCase();
-  const category = (item.primaryCategory ?? '').toLowerCase();
-  if (mime.startsWith('video/') || mime === 'application/pdf' || mime === 'application/epub') return true;
-  if (category.includes('course') || category.includes('textbook') || category.includes('collection')) return false;
-  return true;
-}
-
 function filterAndSlice(
   items: RelatedContentSearchItem[] | undefined,
   excludeId?: string,
@@ -39,6 +31,6 @@ export function mapSearchContentToRelatedContentItems(
     posterImage: item.posterImage ?? item.appIcon ?? item.thumbnail ?? '',
     mimeType: item.mimeType,
     primaryCategory: item.primaryCategory,
-    cardType: isResourceItem(item) ? 'resource' : 'collection',
+    cardType: (item.mimeType ?? '').toLowerCase() === 'application/vnd.ekstep.content-collection' ? 'collection' : 'resource',
   }));
 }
