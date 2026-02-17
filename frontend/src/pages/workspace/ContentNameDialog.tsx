@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { Button } from "@/components/common/Button";
 
 interface ContentNameDialogProps {
@@ -20,7 +20,7 @@ export default function ContentNameDialog({
 
   if (!open) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
     if (trimmed) {
