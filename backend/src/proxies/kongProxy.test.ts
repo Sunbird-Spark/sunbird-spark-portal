@@ -132,6 +132,7 @@ describe('Kong Proxy Integration', () => {
         });
 
         app.all('/portal/*rest', kongProxy);
+        app.all('/action/*rest', kongProxy);
     });
 
     afterEach(() => {
@@ -254,5 +255,65 @@ describe('Kong Proxy Integration', () => {
         expect(String(messageArg)).toContain('Status: 403');
 
         errorSpy.mockRestore();
+    });
+
+    it('should proxy /action request and rewrite to /', async () => {
+        const response = await request(app)
+            .get('/action/data/v1/page/assemble')
+            .expect(200);
+
+        expect(response.body.success).toBe(true);
+        expect(response.body.path).toBe('/data/v1/page/assemble');
+    });
+
+    it('should handle POST to /action with authenticated user', async () => {
+        const response = await request(app)
+            .post('/action/content/v1/search')
+            .set('X-Test-Auth', 'true')
+            .send({ request: { query: 'test' } })
+            .expect(200);
+
+        expect(response.body.success).toBe(true);
+        expect(response.body.method).toBe('POST');
+        expect(response.body.headers.authorization).toBe('Bearer user-session-token');
+    });
+
+    it('should forward session headers for /action routes', async () => {
+        const response = await request(app)
+            .get('/action/course/v1/hierarchy/do_123')
+            .set('X-Test-Auth', 'true')
+            .expect(200);
+
+        expect(response.body.headers['x-session-id']).toBeDefined();
+        expect(response.body.headers['x-channel-id']).toBe('test-channel');
+        expect(response.body.headers['x-authenticated-userid']).toBe('12345');
+        expect(response.body.headers['x-app-id']).toBe('test-app');
+    });
+
+    it('should use fallback token for unauthenticated /action requests', async () => {
+        const response = await request(app)
+            .get('/action/data/v1/page/assemble')
+            .expect(200);
+
+        expect(response.body.headers.authorization).toBe('Bearer test-fallback-token');
+    });
+
+    it('should handle /action routes with query parameters', async () => {
+        const response = await request(app)
+            .get('/action/content/v1/read/do_123?mode=edit&fields=name,status')
+            .expect(200);
+
+        expect(response.body.success).toBe(true);
+        expect(response.body.path).toBe('/content/v1/read/do_123');
+    });
+
+    it('should handle telemetry POST to /action', async () => {
+        const response = await request(app)
+            .post('/action/data/v1/telemetry')
+            .send({ events: [{ eid: 'INTERACT' }] })
+            .expect(200);
+
+        expect(response.body.success).toBe(true);
+        expect(response.body.method).toBe('POST');
     });
 });

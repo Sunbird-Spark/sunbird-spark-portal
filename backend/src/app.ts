@@ -16,6 +16,7 @@ import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
+import { kongProxy } from './proxies/kongProxy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,6 +51,11 @@ app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
 
 // Portal Proxy Routes
 app.use('/portal', portalProxyRoutes);
+
+app.use('/action', sessionMiddleware);
+
+// Portal Proxy Routes (authenticated only)
+app.all('/action/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 

@@ -42,6 +42,14 @@ const qumlWebComponentRoot = path.join(
 const qumlAssetsSource = path.join(qumlWebComponentRoot, 'assets/quml-player');
 const qumlFinalDest = path.join(publicRoot, 'assets/quml-player');
 
+// Collection Editor paths
+const collectionEditorWebComponentRoot = path.join(
+    __dirname,
+    'node_modules/@project-sunbird/sunbird-collection-editor-web-component'
+);
+const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
+const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
+
 /**
  * Recursively copy directory
  */
@@ -106,7 +114,13 @@ try {
     console.log('📦 Copying QUML player files to public/assets/quml-player/...');
     copyDirectory(qumlAssetsSource, qumlFinalDest);
 
-    // 6. Copy COMMON assets (icons) to root assets folder
+    // 6. Copy Collection Editor assets
+    console.log(`\n📂 Collection Editor Source: ${collectionEditorAssetsSource}`);
+    fs.mkdirSync(collectionEditorFinalDest, { recursive: true });
+    console.log('📦 Copying Collection Editor files to public/assets/collection-editor/...');
+    copyDirectory(collectionEditorAssetsSource, collectionEditorFinalDest);
+    
+    // 7. Copy COMMON assets (icons) to root assets folder
     // Many Sunbird components expect icons at /assets/*.svg
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
@@ -135,6 +149,7 @@ try {
     console.log(`📍 Video Player: public/assets/video-player/`);
     console.log(`📍 ePub Player: public/assets/epub-player/`);
     console.log(`📍 QUML Player: public/assets/quml-player/`);
+    console.log(`📍 Collection Editor: public/assets/collection-editor/`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {
