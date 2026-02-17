@@ -6,37 +6,44 @@ import {
 } from "@/components/landing/Accordion";
 import faqImage from "@/assets/faq-image.svg";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { useMemo } from "react";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useFaqData } from "@/hooks/useFaqData";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
+
+interface FAQ {
+    title: string;
+    description: string;
+}
 
 const FAQSection = () => {
-    const { t } = useAppI18n();
+    const { t, currentCode } = useAppI18n();
 
-    const faqs = [
-        {
-            question: "What kind of courses are available on this platform?",
-            answer:
-                "Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.",
-        },
-        {
-            question: "What if I need help during the course?",
-            answer:
-                "Our dedicated support team is available 24/7 to assist you. You can reach out through our help center, community forums, or contact us directly via email.",
-        },
-        {
-            question: "Are the courses accredited or do they offer certification?",
-            answer:
-                "Yes, many of our courses offer industry-recognized certifications upon completion. Check each course page for specific certification details.",
-        },
-        {
-            question: "Can I learn in offline mode?",
-            answer:
-                "Absolutely! Our mobile app allows you to download course content and learn offline at your convenience.",
-        },
-        {
-            question: "Who are the trainers?",
-            answer:
-                "Our trainers are industry experts with years of practical experience and are carefully vetted.",
-        },
-    ];
+    // Fetch FAQ base URL
+    const { data: settingResponse } = useSystemSetting("portalFaqURL");
+    const faqUrl = settingResponse?.data?.response?.value || settingResponse?.data?.value;
+
+    // Fetch FAQ data based on language
+    const { data: faqData } = useFaqData(faqUrl, currentCode || 'en');
+
+    // Extract FAQs from response
+    const generalData = (faqData as any)?.general;
+    const faqs: FAQ[] = Array.isArray(generalData) ? generalData : [];
+
+    // Sanitize FAQs and filter out invalid entries
+    const sanitizedFaqs = useMemo(() => {
+        return faqs
+            .filter(faq => faq.title && faq.description) // Filter out FAQs with empty title or description
+            .map(faq => ({
+                title: faq.title,
+                description: sanitizeHtml(faq.description),
+            }));
+    }, [faqs]);
+
+    // Don't render the section if there are no FAQs
+    if (sanitizedFaqs.length === 0) {
+        return null;
+    }
 
     return (
         <section className="bg-white pt-8 pb-8 lg:pt-[3.75rem] lg:pb-[3.75rem]">
@@ -45,27 +52,24 @@ const FAQSection = () => {
                     {t("faq.title")}
                 </h2>
 
-                {/* ✅ FAQ + IMAGE INSIDE SAME CONTAINER */}
                 <div className="grid lg:grid-cols-[1fr_auto] gap-10">
-
-                    {/* FAQ */}
                     <Accordion
                         type="single"
                         collapsible
                         defaultValue="item-0"
                         className="flex flex-col gap-[1.25rem] pt-[0.9375rem]"
                     >
-                        {faqs.map((faq, index) => (
+                        {sanitizedFaqs.map((faq, index) => (
                             <AccordionItem
                                 key={index}
                                 value={`item-${index}`}
                                 className="rounded-[1rem] py-[1.1875rem] px-[1.25rem] border border-border/50 bg-white shadow-sm w-full"
                             >
                                 <AccordionTrigger className="py-0 text-left font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-foreground hover:no-underline">
-                                    {faq.question}
+                                    {faq.title}
                                 </AccordionTrigger>
                                 <AccordionContent className="!pb-0 pt-5 font-rubik font-normal text-[1rem] leading-[1.625rem] tracking-normal text-[#757575]">
-                                    {faq.answer}
+                                    <div dangerouslySetInnerHTML={{ __html: faq.description }} />
                                 </AccordionContent>
                             </AccordionItem>
                         ))}

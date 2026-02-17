@@ -1,0 +1,139 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, fireEvent, screen } from '@testing-library/react';
+import ContentNameDialog from './ContentNameDialog';
+
+describe('ContentNameDialog', () => {
+  const defaultProps = {
+    open: true,
+    onClose: vi.fn(),
+    onSubmit: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should render nothing when open is false', () => {
+    const { container } = render(
+      <ContentNameDialog {...defaultProps} open={false} />
+    );
+    expect(container.innerHTML).toBe('');
+  });
+
+  it('should render dialog when open is true', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Create Content')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Untitled Content')).toBeInTheDocument();
+  });
+
+  it('should display custom optionTitle when provided', () => {
+    render(<ContentNameDialog {...defaultProps} optionTitle="Quiz" />);
+    expect(screen.getByText('Create Quiz')).toBeInTheDocument();
+  });
+
+  it('should call onSubmit with trimmed name on form submit', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    const input = screen.getByPlaceholderText('Untitled Content');
+    fireEvent.change(input, { target: { value: '  My Content  ' } });
+    fireEvent.submit(input.closest('form')!);
+
+    expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Content');
+  });
+
+  it('should not call onSubmit when name is empty or whitespace', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    const input = screen.getByPlaceholderText('Untitled Content');
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.submit(input.closest('form')!);
+
+    expect(defaultProps.onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('should disable Create button when name is empty', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    const createButton = screen.getByRole('button', { name: 'Create' });
+    expect(createButton).toBeDisabled();
+  });
+
+  it('should enable Create button when name has content', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    const input = screen.getByPlaceholderText('Untitled Content');
+    fireEvent.change(input, { target: { value: 'My Content' } });
+
+    const createButton = screen.getByRole('button', { name: 'Create' });
+    expect(createButton).not.toBeDisabled();
+  });
+
+  it('should call onClose when Cancel button is clicked', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(defaultProps.onClose).toHaveBeenCalled();
+  });
+
+  it('should call onClose when clicking backdrop', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    fireEvent.click(screen.getByRole('dialog'));
+    expect(defaultProps.onClose).toHaveBeenCalled();
+  });
+
+  it('should not close when clicking dialog content area', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    const input = screen.getByPlaceholderText('Untitled Content');
+    fireEvent.click(input.closest('.bg-white')!);
+    expect(defaultProps.onClose).not.toHaveBeenCalled();
+  });
+
+  it('should show loading state when isLoading is true', () => {
+    render(<ContentNameDialog {...defaultProps} isLoading={true} />);
+
+    expect(screen.getByText('Creating...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Untitled Content')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+  });
+
+  it('should auto-focus the input field', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    const input = screen.getByPlaceholderText('Untitled Content');
+    expect(input).toHaveFocus();
+  });
+
+  it('should close when Escape key is pressed', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(defaultProps.onClose).toHaveBeenCalled();
+  });
+
+  it('should not close on Escape when isLoading is true', () => {
+    render(<ContentNameDialog {...defaultProps} isLoading={true} />);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(defaultProps.onClose).not.toHaveBeenCalled();
+  });
+
+  it('should reset name when dialog is closed via open prop', () => {
+    const { rerender } = render(<ContentNameDialog {...defaultProps} />);
+
+    const input = screen.getByPlaceholderText('Untitled Content');
+    fireEvent.change(input, { target: { value: 'My Content' } });
+
+    // Close the dialog by changing open to false
+    rerender(<ContentNameDialog {...defaultProps} open={false} />);
+
+    // Reopen the dialog
+    rerender(<ContentNameDialog {...defaultProps} open={true} />);
+
+    const reopenedInput = screen.getByPlaceholderText('Untitled Content');
+    expect(reopenedInput).toHaveValue('');
+  });
+});
