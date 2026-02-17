@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import TrackableCollectionCard from './TrackableCollectionCard';
-import { Course } from '@/types/courseTypes';
+import { TrackableCollection } from '@/types/TrackableCollections';
 
-const mockCourse: Course = {
+const mockCourse: TrackableCollection = {
   courseId: 'do_12345',
   courseName: 'Test Course 101',
   description: 'A test course description',
@@ -18,7 +18,7 @@ const mockCourse: Course = {
   }
 };
 
-const mockCourseNoIcon: Course = {
+const mockCourseNoIcon: TrackableCollection = {
     ...mockCourse,
     appIcon: '',
     content: {
@@ -27,10 +27,10 @@ const mockCourseNoIcon: Course = {
 };
 
 describe('TrackableCollectionCard', () => {
-  const renderComponent = (course: Course) => {
+  const renderComponent = (course: TrackableCollection = mockCourse, index: number = 0) => {
     return render(
       <BrowserRouter>
-        <TrackableCollectionCard course={course} />
+        <TrackableCollectionCard course={course} index={index} />
       </BrowserRouter>
     );
   };

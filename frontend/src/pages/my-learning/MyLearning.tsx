@@ -1,5 +1,7 @@
+import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "@/components/home/Header";
 import { FiSearch, FiBell, FiMenu, FiChevronDown, FiChevronLeft } from "react-icons/fi";
 import { Input } from "@/components/common/Input";
 import {
@@ -14,11 +16,11 @@ import Footer from "@/components/home/Footer";
 import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
-import MyLearningCourses from "@/components/my-learning/MyLearningCourses";
-import MyLearningHoursSpent from "@/components/my-learning/MyLearningHoursSpent";
-import MyLearningUpcomingBatches from "@/components/my-learning/MyLearningUpcomingBatches";
+import MyLearningCourses from "@/components/myLearning/MyLearningCourses";
+import MyLearningHoursSpent from "@/components/myLearning/MyLearningHoursSpent";
+import MyLearningUpcomingBatches from "@/components/myLearning/MyLearningUpcomingBatches";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useMyLearning } from "@/hooks/useMyLearning";
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
@@ -31,7 +33,7 @@ const MyLearning = () => {
   const [activeNav, setActiveNav] = useState("learning");
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
-  const { data, isLoading, error } = useMyLearning();
+  const { data, isLoading, error } = useUserEnrolledCollections();
   const courses = data?.data?.courses || [];
 
   useEffect(() => {
@@ -47,14 +49,12 @@ const MyLearning = () => {
   // Filter upcoming batches: startDate > today
   // Note: This intentionally filters out courses that have already started, even if they are in progress.
   // "Upcoming" strictly means batches with a start date in the future.
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = dayjs().startOf('day');
 
   const upcomingBatches = courses.filter(
     (course: { batch?: { startDate?: string | Date } }) => {
       if (course.batch && course.batch.startDate) {
-        const startDate = new Date(course.batch.startDate);
-        return !isNaN(startDate.getTime()) && startDate > today;
+        return dayjs(course.batch.startDate).isAfter(today);
       }
       return false;
     }
@@ -66,18 +66,23 @@ const MyLearning = () => {
 
   if (error) {
     return (
-      <div className="page-container flex items-center justify-center">
-         <div className="text-center">
-            <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
-            <p className="text-gray-600">Failed to load your learning progress. Please try again later.</p>
-            <button 
-                onClick={() => window.location.reload()}
-                className="mt-4 px-4 py-2 bg-sunbird-brick text-white rounded-md hover:opacity-90 transition-opacity"
-            >
-                Retry
-            </button>
-         </div>
-         <Footer />
+      <div className="page-container">
+          <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
+          <div className="flex flex-1 relative transition-all">
+             <div className="flex-1 flex items-center justify-center h-[calc(100vh-80px)]">
+                <div className="text-center">
+                    <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
+                    <p className="text-gray-600 mb-4">Failed to load your learning progress. Please try again later.</p>
+                     <button 
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-sunbird-brick text-white rounded-md hover:opacity-90 transition-opacity"
+                    >
+                        Retry
+                    </button>
+                </div>
+             </div>
+          </div>
+          <Footer />
       </div>
     );
   }

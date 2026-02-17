@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
-import { Course } from "@/types/courseTypes";
+import { TrackableCollection } from "@/types/TrackableCollections";
+import { FiBookOpen } from "react-icons/fi";
 
 
 interface TrackableCollectionCardProps {
-  course: Course;
-  index?: number;
+  course: TrackableCollection;
+  index: number;
 }
 
 const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps) => {

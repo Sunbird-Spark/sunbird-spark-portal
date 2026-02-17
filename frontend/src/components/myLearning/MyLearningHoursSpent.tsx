@@ -34,9 +34,9 @@ const MyLearningHoursSpent = ({
   const contentsStrokeDasharray = `${contentsPercentage * innerCircumference} ${innerCircumference}`;
 
   return (
-    <div className="bg-[#FFF8DE] rounded-2xl p-6">
+    <div className="bg-sunbird-beige rounded-2xl p-6">
       {/* Header */}
-      <h3 className="text-[1.25rem] font-semibold text-[#222222] mb-6 font-['Rubik']">Learning Progress</h3>
+      <h3 className="text-[1.25rem] font-semibold text-sunbird-obsidian mb-6 font-['Rubik']">Learning Progress</h3>
 
       <div className="flex items-center gap-8">
         {/* Double Donut Chart */}
@@ -89,7 +89,7 @@ const MyLearningHoursSpent = ({
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[1.125rem] font-bold text-[#222222] font-['Rubik']">{totalHours}</span>
+            <span className="text-[1.125rem] font-bold text-sunbird-obsidian font-['Rubik']">{totalHours}</span>
           </div>
         </div>
 
@@ -99,10 +99,10 @@ const MyLearningHoursSpent = ({
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-2 bg-[#D48952] rounded-full"></div>
             </div>
-            <div className="text-[1.125rem] font-bold text-[#222222] mb-0.5 font-['Rubik']">
+            <div className="text-[1.125rem] font-bold text-sunbird-obsidian mb-0.5 font-['Rubik']">
               {lessonsVisited}/{totalLessons}
             </div>
-            <div className="text-[0.875rem] text-[#6B7280] font-['Rubik']">
+            <div className="text-[0.875rem] text-gray-500 font-['Rubik']">
               Lesson visited
             </div>
           </div>
@@ -111,10 +111,10 @@ const MyLearningHoursSpent = ({
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-2 bg-[#A05E29] rounded-full"></div>
             </div>
-            <div className="text-[1.125rem] font-bold text-[#222222] mb-0.5 font-['Rubik']">
+            <div className="text-[1.125rem] font-bold text-sunbird-obsidian mb-0.5 font-['Rubik']">
               {contentsCompleted}/{totalContents}
             </div>
-            <div className="text-[0.875rem] text-[#6B7280] font-['Rubik']">
+            <div className="text-[0.875rem] text-gray-500 font-['Rubik']">
               Contents completed
             </div>
           </div>

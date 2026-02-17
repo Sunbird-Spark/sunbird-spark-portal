@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import MyLearningUpcomingBatches from './MyLearningUpcomingBatches';
-import { Course } from '@/types/courseTypes';
+import { TrackableCollection, Batch } from '@/types/TrackableCollections';
 
 // Mock Course Data
-const mockBatches: Course[] = [
+const mockBatches: TrackableCollection[] = [
   {
-    courseId: '1',
+    courseId: 'batch1',
     courseName: 'Batch 1',
     description: 'Desc 1',
     leafNodesCount: 5,

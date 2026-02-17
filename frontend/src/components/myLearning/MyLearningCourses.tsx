@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FiChevronDown } from "react-icons/fi";
-import { Course } from "@/types/courseTypes";
+import { TrackableCollection } from "@/types/TrackableCollections";
 import TrackableCollectionCard from "../content/TrackableCollectionCard";
 
 
@@ -15,7 +15,7 @@ const tabs: { id: TabType; label: string }[] = [
 ];
 
 interface MyLearningCoursesProps {
-  courses?: Course[];
+  courses?: TrackableCollection[];
 }
 
 const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
@@ -46,8 +46,8 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
     <div className="bg-white rounded-2xl p-6 h-full shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-[1.375rem] font-bold text-[#222222] font-['Rubik']">Courses</h3>
-        <FiChevronDown className="text-[#CC8545] w-[1rem] h-[1rem]" />
+        <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-['Rubik']">Courses</h3>
+        <FiChevronDown className="text-sunbird-copper w-[1rem] h-[1rem]" />
       </div>
 
       {/* Filter Tabs */}
@@ -58,8 +58,8 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
             onClick={() => setActiveTab(tab.id)}
             className={`pl-6 pr-6 py-2.5 rounded-full text-[0.875rem] font-medium font-['Rubik'] transition-all ${
               activeTab === tab.id
-                ? "bg-[#A85236] text-white shadow-md shadow-[#A85236]/20"
-                : "bg-transparent border border-[#E5E7EB] text-[#6B7280] hover:border-[#A85236] hover:text-[#A85236]"
+                ? "bg-sunbird-brick text-white shadow-md shadow-sunbird-brick/20"
+                : "bg-transparent border border-gray-200 text-gray-500 hover:border-sunbird-brick hover:text-sunbird-brick"
             }`}
           >
             {tab.label}
@@ -84,7 +84,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
               <div className="flex justify-center py-6 mt-4">
                 <button
                   onClick={() => setVisibleCount(prev => prev + COURSES_PER_PAGE)}
-                  className="bg-white border border-[#A85236] text-[#A85236] pl-8 pr-8 py-2.5 rounded-full text-[0.875rem] font-medium hover:bg-[#A85236] hover:text-white transition-all shadow-sm font-['Rubik']"
+                  className="bg-white border border-sunbird-brick text-sunbird-brick pl-8 pr-8 py-2.5 rounded-full text-[0.875rem] font-medium hover:bg-sunbird-brick hover:text-white transition-all shadow-sm font-['Rubik']"
                 >
                   View more courses
                 </button>
@@ -93,13 +93,13 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
             
             {/* End of List Message */}
             {!hasMore && allFilteredCourses.length > COURSES_PER_PAGE && (
-              <div className="text-center py-4 text-[#6B7280] text-[0.875rem] font-['Rubik']">
+              <div className="text-center py-4 text-gray-500 text-[0.875rem] font-['Rubik']">
                 No more courses to show
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-10 text-[#6B7280] font-['Rubik']">
+          <div className="text-center py-10 text-gray-500 font-['Rubik']">
             No courses found in this category.
           </div>
         )}

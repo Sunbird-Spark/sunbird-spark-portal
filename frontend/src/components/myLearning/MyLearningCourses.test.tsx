@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import MyLearningCourses from './MyLearningCourses';
-import { Course } from '@/types/courseTypes';
+import { TrackableCollection } from '@/types/TrackableCollections';
 
 // Mock TrackableCollectionCard to avoid deep rendering
 vi.mock('../content/TrackableCollectionCard', () => ({
-  default: ({ course }: { course: Course }) => (
+  default: ({ course }: { course: TrackableCollection }) => (
     <div data-testid="course-card">
       {course.courseName} - {course.completionPercentage}%
     </div>
@@ -17,7 +17,7 @@ vi.mock('react-icons/fi', () => ({
   FiChevronDown: () => <span data-testid="chevron-down" />,
 }));
 
-const mockCourses: Course[] = [
+const mockCourses: TrackableCollection[] = [
   {
     courseId: '1',
     courseName: 'Active Course 1',

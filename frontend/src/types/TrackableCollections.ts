@@ -9,7 +9,7 @@ export interface Batch {
   [key: string]: any;
 }
 
-export interface Course {
+export interface TrackableCollection {
   courseId: string;
   courseName: string;
   completionPercentage: number;
@@ -27,5 +27,5 @@ export interface Course {
 }
 
 export interface CourseEnrollmentResponse {
-  courses: Course[];
+  courses: TrackableCollection[];
 }

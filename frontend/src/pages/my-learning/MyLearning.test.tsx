@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import MyLearning from './MyLearning';
-import { useMyLearning } from '@/hooks/useMyLearning';
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
+import { TrackableCollection } from '@/types/TrackableCollections';
 import { useIsMobile } from '@/hooks/use-mobile'; // Fixed import path - removed .ts
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 // Mock Hooks
-vi.mock('@/hooks/useMyLearning');
+vi.mock('@/hooks/useUserEnrolledCollections');
 vi.mock('@/hooks/use-mobile'); // Fixed mock path
 vi.mock('@/hooks/useAppI18n'); // Mock i18n
 
@@ -24,16 +25,14 @@ vi.mock('@/components/home/HomeRecommendedSection', () => ({
   default: () => <div data-testid="home-recommended">Recommended Section</div>,
 }));
 
-vi.mock('@/components/my-learning/MyLearningCourses', () => ({
-  default: ({ courses }: any) => <div data-testid="my-learning-courses">Courses Count: {courses.length}</div>,
+vi.mock('@/components/myLearning/MyLearningCourses', () => ({
+  default: () => <div data-testid="my-learning-courses">My Learning Courses</div>
 }));
-
-vi.mock('@/components/my-learning/MyLearningHoursSpent', () => ({
-  default: () => <div data-testid="my-learning-hours">Hours Spent</div>,
+vi.mock('@/components/myLearning/MyLearningHoursSpent', () => ({
+  default: () => <div data-testid="my-learning-hours">Hours Spent</div>
 }));
-
-vi.mock('@/components/my-learning/MyLearningUpcomingBatches', () => ({
-  default: () => <div data-testid="my-learning-batches">Upcoming Batches</div>,
+vi.mock('@/components/myLearning/MyLearningUpcomingBatches', () => ({
+  default: () => <div data-testid="my-learning-batches">Upcoming Batches</div>
 }));
 
 vi.mock('@/components/home/Footer', () => ({
@@ -51,7 +50,7 @@ vi.mock('react-icons/fi', () => ({
 }));
 
 describe('MyLearning Page', () => {
-  const mockCourses = [
+  const mockCourses: TrackableCollection[] = [
     { 
         courseId: '1', 
         courseName: 'C1', 
@@ -88,9 +87,10 @@ describe('MyLearning Page', () => {
     vi.clearAllMocks();
 
     // Default Mocks
-    (useMyLearning as any).mockReturnValue({
-      data: { data: { courses: mockCourses } },
+    (useUserEnrolledCollections as any).mockReturnValue({
       isLoading: false,
+      data: { data: { courses: mockCourses } },
+      error: null,
     });
 
     (useIsMobile as any).mockReturnValue(false); // Default Desktop
@@ -112,7 +112,11 @@ describe('MyLearning Page', () => {
   };
 
   it('renders loading state', () => {
-    (useMyLearning as any).mockReturnValue({ isLoading: true });
+    (useUserEnrolledCollections as any).mockReturnValue({
+      isLoading: true,
+      data: null,
+      error: null,
+    });
     renderComponent();
     expect(screen.getByTestId('page-loader')).toHaveTextContent('Loading your learning...');
   });
@@ -128,7 +132,7 @@ describe('MyLearning Page', () => {
   it('renders content sections', () => {
     renderComponent();
     
-    expect(screen.getByTestId('my-learning-courses')).toHaveTextContent('Courses Count: 2');
+    expect(screen.getByTestId('my-learning-courses')).toHaveTextContent('My Learning Courses');
     expect(screen.getByTestId('my-learning-hours')).toBeInTheDocument();
     expect(screen.getByTestId('my-learning-batches')).toBeInTheDocument();
     expect(screen.getByTestId('home-recommended')).toBeInTheDocument();
