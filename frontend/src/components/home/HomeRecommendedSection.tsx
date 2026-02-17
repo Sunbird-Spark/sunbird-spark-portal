@@ -65,8 +65,9 @@ const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps
                      ))
                 ) : (
                     recommendedItems.map((item: any) => {
-                        const isResource = ['application/pdf', 'application/epub+zip'].includes(item.mimeType || '') || 
-                                         (item.mimeType && (item.mimeType.startsWith('video/') || item.mimeType === 'application/x-mpegURL'));
+                        const mimeType = item.mimeType || '';
+                        const isResource = ['application/pdf', 'application/epub', 'application/epub+zip'].includes(mimeType) ||
+                                         (mimeType.startsWith('video/') || mimeType === 'application/x-mpegURL');
                         
                         if (isResource) {
                             return <ResourceCard key={item.identifier} item={item} />;
