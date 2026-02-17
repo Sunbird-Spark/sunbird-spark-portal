@@ -41,7 +41,6 @@ const qumlWebComponentRoot = path.join(
 );
 const qumlAssetsSource = path.join(qumlWebComponentRoot, 'assets/quml-player');
 const qumlFinalDest = path.join(publicRoot, 'assets/quml-player');
-const qumlLegacyPlayerFile = path.join(publicRoot, 'assets', 'sunbird-quml-player.js');
 
 // QUML Editor paths
 const qumlEditorWebComponentRoot = path.join(
@@ -80,17 +79,6 @@ function copyDirectory(src, dest) {
         } else {
             fs.copyFileSync(srcPath, destPath);
         }
-    }
-}
-
-function copyFilesWithExtensions(src, dest, extensions) {
-    if (!fs.existsSync(src)) return;
-    fs.mkdirSync(dest, { recursive: true });
-    const entries = fs.readdirSync(src, { withFileTypes: true });
-    for (const entry of entries) {
-        if (entry.isDirectory()) continue;
-        if (!extensions.some(ext => entry.name.endsWith(ext))) continue;
-        fs.copyFileSync(path.join(src, entry.name), path.join(dest, entry.name));
     }
 }
 
@@ -133,14 +121,7 @@ try {
     fs.mkdirSync(qumlFinalDest, { recursive: true });
     console.log('📦 Copying QUML player files to public/assets/quml-player/...');
     copyDirectory(qumlAssetsSource, qumlFinalDest);
-    // Also place legacy player file at /assets/sunbird-quml-player.js to satisfy older loader paths
-    const playerBundle = path.join(qumlFinalDest, 'sunbird-quml-player.js');
-    if (fs.existsSync(playerBundle)) {
-        fs.copyFileSync(playerBundle, qumlLegacyPlayerFile);
-        console.log('✅ Copied legacy sunbird-quml-player.js to public/assets/');
-    }
-
-    // 6. Copy Collection Editor assets
+   
     console.log(`\n📂 Collection Editor Source: ${collectionEditorAssetsSource}`);
     fs.mkdirSync(collectionEditorFinalDest, { recursive: true });
     console.log('📦 Copying Collection Editor files to public/assets/collection-editor/...');
@@ -153,12 +134,8 @@ try {
         console.log('📦 Copying QUML editor files to public/assets/quml-editor/...');
         copyDirectory(qumlEditorAssetsSource, qumlEditorFinalDest);
 
-        // Copy QUML editor icons to public/assets
-        const qumlEditorIconsSource = path.join(qumlEditorAssetsSource, 'assets');
-        const commonAssetsDest = path.join(publicRoot, 'assets');
-        copyFilesWithExtensions(qumlEditorIconsSource, commonAssetsDest, ['.svg', '.png', '.ico']);
-
         // Copy QUML editor images to public/assets/images
+        const commonAssetsDest = path.join(publicRoot, 'assets');
         const qumlEditorImagesDest = path.join(commonAssetsDest, 'images');
         const qumlEditorImageCandidates = [
             path.join(qumlEditorAssetsSource, 'assets/images'), // preferred location
@@ -186,7 +163,7 @@ try {
     console.log('\n📦 Copying common icons to public/assets/ for shared access...');
     
     // Copy PDF icons first
-   const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
+    const pdfIcons = fs.readdirSync(pdfAssetsSource).filter(file => file.endsWith('.svg'));
     for (const icon of pdfIcons) {
         fs.copyFileSync(
             path.join(pdfAssetsSource, icon),
