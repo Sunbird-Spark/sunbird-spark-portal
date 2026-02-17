@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useParams } from 'react-router-dom';
 import HelpCategoryDetail from './HelpCategoryDetail';
 
 // Mock sub-components
@@ -78,6 +78,7 @@ describe('HelpCategoryDetail', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockUseHelpFaqData.mockReturnValue({ categories: mockCategories, loading: false, error: null });
+        vi.mocked(useParams).mockReturnValue({ categoryId: 'login' });
     });
 
     it('renders the category detail page with FAQs from API', () => {

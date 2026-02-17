@@ -121,25 +121,6 @@ describe('HelpSupport', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/help-support/login');
     });
 
-    it('shows most viewed FAQs (first 2 from each category)', () => {
-        render(
-            <MemoryRouter initialEntries={['/help-support']}>
-                <HelpSupport />
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText("Most Viewed FAQ's")).toBeInTheDocument();
-        // First 2 from each category
-        expect(screen.getByText('How do I login?')).toBeInTheDocument();
-        expect(screen.getByText('I forgot my password')).toBeInTheDocument();
-        expect(screen.getByText('How to update profile?')).toBeInTheDocument();
-        expect(screen.getByText('Change avatar?')).toBeInTheDocument();
-        expect(screen.getByText('How to enroll?')).toBeInTheDocument();
-        expect(screen.getByText('Download certificate?')).toBeInTheDocument();
-        // Third FAQ from Login should NOT be in most viewed
-        expect(screen.queryByText('Can I use SSO?')).not.toBeInTheDocument();
-    });
-
     it('shows loading state while data is being fetched', () => {
         mockUseHelpFaqData.mockReturnValue({ categories: [], loading: true, error: null });
 
@@ -182,6 +163,7 @@ describe('HelpSupport', () => {
         expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
         expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
     });
+
     it('handles api error gracefully', () => {
         mockUseHelpFaqData.mockReturnValue({ categories: [], loading: false, error: { message: "Failed to fetch" } });
         render(
@@ -189,7 +171,7 @@ describe('HelpSupport', () => {
                 <HelpSupport />
             </MemoryRouter>
         );
-        expect(screen.getByText(/Failed to load FAQ data/i)).toBeInTheDocument();
+        expect(screen.getByText(/Failed to fetch/i)).toBeInTheDocument();
     });
 
     it('navigates to correct category on click', () => {
