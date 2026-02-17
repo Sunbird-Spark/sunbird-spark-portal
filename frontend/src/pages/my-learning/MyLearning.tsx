@@ -158,7 +158,7 @@ const MyLearning = () => {
         {/* Sidebar - Mobile */}
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-            <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
+            <SheetContent side="left" className="w-[17.5rem] pt-10 pl-0 pr-0 pb-0">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <HomeSidebar
                 activeNav={activeNav}
