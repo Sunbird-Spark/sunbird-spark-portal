@@ -18,7 +18,7 @@ const MyLearningHoursSpent = ({
   // SVG Donut chart calculations
   const size = 140; // Increased overall size
   const center = size / 2;
-  const strokeWidth = 8; // Matched to w-8 h-2 bar (8px)
+  const strokeWidth = 8; // Matched to w-8 h-2 bar 
   
   // Outer circle (Lessons)
   const outerRadius = 58;

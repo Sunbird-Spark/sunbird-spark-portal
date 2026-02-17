@@ -50,7 +50,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
 
   if (upcomingBatchesData.length === 0) {
      return (
-        <div className="bg-white rounded-2xl p-6 shadow-[0px_2px_12px_rgba(0,0,0,0.03)]">
+        <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
             <h3 className="text-[1.25rem] font-bold text-[#222222] mb-6 font-['Rubik']">Upcoming Batches</h3>
             <div className="text-gray-500 text-sm">No upcoming batches scheduled.</div>
         </div>
@@ -58,7 +58,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
   }
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-[0px_2px_12px_rgba(0,0,0,0.03)]">
+    <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
       <h3 className="text-[1.25rem] font-bold text-[#222222] mb-6 font-['Rubik']">Upcoming Batches</h3>
 
@@ -79,7 +79,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
                   className={`flex ${batchItem.color} rounded-lg overflow-hidden min-h-[5.625rem]`}
                 >
                   {/* Content Box */}
-                  <div className="flex-1 py-4 px-6 flex flex-col justify-center">
+                  <div className="flex-1 py-4 pl-6 pr-6 flex flex-col justify-center">
                     <h4 className="text-[1rem] font-normal text-[#222222] mb-1.5 font-['Rubik'] leading-snug">
                       {batchItem.title}
                     </h4>
