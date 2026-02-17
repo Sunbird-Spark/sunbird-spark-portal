@@ -14,9 +14,10 @@ const mockBatches: Course[] = [
     appIcon: '',
     completionPercentage: 0,
     progress: 0,
+    content: { appIcon: '' },
     batch: {
         batchId: 'b1',
-        startDate: '2023-10-15', // Feb 12 format check depends on locale, let's just use date grouping check
+        startDate: '2023-10-15',
         endDate: '',
         status: 1,
         enrollmentType: 'open',
@@ -32,9 +33,10 @@ const mockBatches: Course[] = [
     appIcon: '',
     completionPercentage: 0,
     progress: 0,
+    content: { appIcon: '' },
     batch: {
         batchId: 'b2',
-        startDate: '2023-10-15', // Same date to test grouping
+        startDate: '2023-10-15',
         endDate: '',
         status: 1,
         enrollmentType: 'open',
@@ -50,6 +52,7 @@ const mockBatches: Course[] = [
     appIcon: '',
     completionPercentage: 0,
     progress: 0,
+    content: { appIcon: '' },
     batch: {
         batchId: 'b3',
         startDate: '2023-11-20',
@@ -89,10 +92,12 @@ describe('MyLearningUpcomingBatches', () => {
   it('limits to 10 batches', () => {
      // Create 12 dummy batches
      const manyBatches = Array.from({ length: 12 }, (_, i) => ({
-        ...mockBatches[0],
+        ...mockBatches[0]!,
         courseId: `id-${i}`,
         courseName: `Batch Test ${i}`,
-        batch: { ...mockBatches[0].batch, startDate: '2023-12-01' }
+        batch: { ...mockBatches[0]!.batch, startDate: '2023-12-01' },
+        content: { appIcon: '' },
+        completionPercentage: 0
      }));
 
      render(<MyLearningUpcomingBatches upcomingBatches={manyBatches} />);

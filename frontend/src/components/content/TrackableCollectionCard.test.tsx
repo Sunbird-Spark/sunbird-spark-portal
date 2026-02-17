@@ -20,9 +20,9 @@ const mockCourse: Course = {
 
 const mockCourseNoIcon: Course = {
     ...mockCourse,
-    appIcon: undefined,
+    appIcon: '',
     content: {
-        appIcon: undefined
+        appIcon: ''
     }
 };
 

@@ -26,6 +26,7 @@ const mockCourses: Course[] = [
     leafNodesCount: 5,
     lastUpdatedOn: '2023-01-01',
     appIcon: '',
+    content: { appIcon: '' },
     progress: 1,
   },
   {
@@ -36,6 +37,7 @@ const mockCourses: Course[] = [
     leafNodesCount: 5,
     lastUpdatedOn: '2023-01-01',
     appIcon: '',
+    content: { appIcon: '' },
     progress: 5,
   },
   {
@@ -46,6 +48,7 @@ const mockCourses: Course[] = [
     leafNodesCount: 5,
     lastUpdatedOn: '2023-01-01',
     appIcon: '',
+    content: { appIcon: '' },
     progress: 5,
   },
 ];
@@ -95,6 +98,7 @@ describe('MyLearningCourses', () => {
       courseId: `id-${i}`,
       courseName: `Course ${i}`,
       completionPercentage: 10,
+      content: { appIcon: '' },
     }));
     
     render(<MyLearningCourses courses={manyCourses} />);
