@@ -92,7 +92,7 @@ const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.suitedFor")}</h3>
               <ul className="space-y-3">
-                {collectionData.bestSuitedFor.map((role, index) => (
+                {collectionData.audience.map((role, index) => (
                   <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
                     <CheckIcon />
                     <span>{role}</span>

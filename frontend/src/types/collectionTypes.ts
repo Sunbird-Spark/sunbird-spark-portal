@@ -30,12 +30,11 @@ export interface CollectionData {
   learners: string;
   lessons: number;
   image: string;
-  weeks: number;
+  units: number;
   description: string;
   skills: string[];
-  bestSuitedFor: string[];
+  audience: string[];
   modules: Module[];
-  relatedContent: RelatedItem[];
 }
 
 export interface HierarchyContentNode {

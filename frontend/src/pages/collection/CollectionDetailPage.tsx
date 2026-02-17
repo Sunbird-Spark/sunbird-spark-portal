@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiArrowRight, FiStar, FiShare2 } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -9,10 +9,7 @@ import RelatedContent from "@/components/common/RelatedContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useContentSearch } from "@/hooks/useContent";
-import {
-  mapSearchContentToRelatedContentItems,
-  mapRelatedItemsToContentSearchItems,
-} from "@/services/collection";
+import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
@@ -44,6 +41,20 @@ const CollectionDetailPage = () => {
     enabled: hierarchySuccess,
   });
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
+  const initialExpandedSet = useRef(false);
+
+  useEffect(() => {
+    const firstId = collectionData?.modules?.[0]?.id;
+    if (firstId && !initialExpandedSet.current) {
+      setExpandedModules([firstId]);
+      initialExpandedSet.current = true;
+    }
+  }, [collectionData?.modules]);
+
+  useEffect(() => {
+    initialExpandedSet.current = false;
+    setExpandedModules([]);
+  }, [collectionId]);
 
   const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
 
@@ -55,15 +66,9 @@ const CollectionDetailPage = () => {
         3
       );
     }
-    return mapRelatedItemsToContentSearchItems(collectionData?.relatedContent ?? []);
-  }, [hasSearchResults, searchData?.data?.content, collectionData?.id, collectionData?.relatedContent]);
+    return [];
+  }, [hasSearchResults, searchData?.data?.content, collectionData?.id]);
 
-  const initialExpanded = useMemo(() => {
-    const first = collectionData?.modules?.[0];
-    return first ? [first.id] : [];
-  }, [collectionData?.modules]);
-
-  const expandedModulesList = expandedModules.length > 0 ? expandedModules : initialExpanded;
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) =>
@@ -145,7 +150,7 @@ const CollectionDetailPage = () => {
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
             <CollectionSidebar
               modules={collectionData.modules}
-              expandedModules={expandedModulesList}
+              expandedModules={expandedModules}
               toggleModule={toggleModule}
               collectionId={collectionId}
             />

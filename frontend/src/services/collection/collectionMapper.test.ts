@@ -21,11 +21,10 @@ describe('collectionMapper', () => {
       expect(result.description).toBe('A test description');
       expect(result.image).toBe('https://icon.png');
       expect(result.lessons).toBe(5);
-      expect(result.bestSuitedFor).toEqual(['Student', 'Teacher']);
+      expect(result.audience).toEqual(['Student', 'Teacher']);
       expect(result.rating).toBe(0);
       expect(result.learners).toBe('0');
       expect(result.skills).toEqual([]);
-      expect(result.relatedContent).toEqual([]);
       expect(result.modules).toEqual([]);
     });
 
@@ -49,17 +48,17 @@ describe('collectionMapper', () => {
       expect(mapToCollectionData({ identifier: 'a' }).lessons).toBe(0);
     });
 
-    it('maps audience to bestSuitedFor when array', () => {
+    it('maps audience from API when array', () => {
       const content: HierarchyContentNode = {
         identifier: 'a',
         audience: ['Learner', 'Educator'],
       };
-      expect(mapToCollectionData(content).bestSuitedFor).toEqual(['Learner', 'Educator']);
+      expect(mapToCollectionData(content).audience).toEqual(['Learner', 'Educator']);
     });
 
-    it('uses empty bestSuitedFor when audience is not array', () => {
+    it('uses empty audience when audience is not array', () => {
       const content = { identifier: 'a', audience: null } as unknown as HierarchyContentNode;
-      expect(mapToCollectionData(content).bestSuitedFor).toEqual([]);
+      expect(mapToCollectionData(content).audience).toEqual([]);
     });
 
     it('maps children to modules with lessons', () => {
@@ -92,7 +91,7 @@ describe('collectionMapper', () => {
           { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document' },
         ],
       });
-      expect(result.weeks).toBe(1);
+      expect(result.units).toBe(1);
     });
 
     it('maps mimeType video/* to lesson type video', () => {
@@ -146,7 +145,7 @@ describe('collectionMapper', () => {
       expect(result.modules[2]!.subtitle).toBe('');
     });
 
-    it('sets weeks from modules length when present', () => {
+    it('sets units from modules length when present', () => {
       const content: HierarchyContentNode = {
         identifier: 'a',
         children: [
@@ -155,13 +154,13 @@ describe('collectionMapper', () => {
         ],
       };
       const result = mapToCollectionData(content);
-      expect(result.weeks).toBe(2);
+      expect(result.units).toBe(2);
     });
 
-    it('uses weeks 0 when no modules', () => {
+    it('uses units 0 when no modules', () => {
       const content: HierarchyContentNode = { identifier: 'a' };
       const result = mapToCollectionData(content);
-      expect(result.weeks).toBe(0);
+      expect(result.units).toBe(0);
     });
   });
 });
