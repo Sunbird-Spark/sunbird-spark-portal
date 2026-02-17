@@ -155,7 +155,7 @@ try {
         }
 
     } else {
-        console.log('\n⚠️  QUML Editor package not found - skipping (install @project-sunbird/lib-questionset-editor when available)');
+        console.log('\n⚠️ QUML Editor package not found - skipping (install @project-sunbird/sunbird-questionset-editor-web-component when available)');
     }
 
     // 8. Copy COMMON assets (icons) to root assets folder

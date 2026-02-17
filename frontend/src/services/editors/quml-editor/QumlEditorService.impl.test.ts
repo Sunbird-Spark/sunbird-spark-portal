@@ -179,7 +179,7 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
       vi.spyOn(appCoreService, 'getDeviceId').mockRejectedValue(new Error('Device error'));
       vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'portal' });
       vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({
-        data: { result: { response: { content: [{ channel: 'test' }] } } },
+        data: { response: { content: [{ channel: 'test' }] } },
       });
 
       const metadata = { identifier: 'do_123' } as QuestionSetMetadata;

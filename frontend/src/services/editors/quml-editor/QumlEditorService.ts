@@ -50,6 +50,7 @@ export class QumlEditorService {
           }
         }
 
+        this.loadAssets();
         QumlEditorService.dependenciesLoaded = true;
       } catch (error) {
         // Reset loading promise on failure so retry is possible
@@ -78,7 +79,7 @@ export class QumlEditorService {
     let channel = '';
     try {
       const orgResponse = await this.orgService.search({ filters: { isTenant: true } });
-      const org = orgResponse?.data?.response?.content?.[0]
+      const org = orgResponse?.data?.response?.content?.[0];
       if (org?.channel) {
         channel = org.channel;
       }
@@ -138,8 +139,6 @@ export class QumlEditorService {
   }
 
   createElement(config: QumlEditorConfig): HTMLElement {
-    this.loadAssets();
-
     const element = document.createElement('lib-questionset-editor');
     element.setAttribute('editor-config', JSON.stringify(config));
     return element;
@@ -183,4 +182,3 @@ export class QumlEditorService {
     }
   }
 }
-export const qumlEditorService = new QumlEditorService();
