@@ -33,7 +33,7 @@ describe('CollectionEditorService - Config Creation', () => {
       });
 
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { result: { response: { content: [{ channel: 'channel-1' }] } } } 
+        data: { response: { content: [{ channel: 'channel-1' }] } } 
       } as any);
 
       const config = await service.createConfig(
@@ -64,7 +64,7 @@ describe('CollectionEditorService - Config Creation', () => {
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { result: { response: { content: [{ channel: 'ch1' }] } } } 
+        data: { response: { content: [{ channel: 'ch1' }] } } 
       } as any);
 
       const config = await service.createConfig({ identifier: 'do_123' }, { mode: 'edit' });
@@ -80,7 +80,7 @@ describe('CollectionEditorService - Config Creation', () => {
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { result: { response: { content: [{ channel: 'ch1' }] } } } 
+        data: { response: { content: [{ channel: 'ch1' }] } } 
       } as any);
 
       const config = await service.createConfig({ identifier: 'do_123' }, { mode: 'edit' });
@@ -97,7 +97,7 @@ describe('CollectionEditorService - Config Creation', () => {
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { result: { response: { content: [{ channel: 'ch1' }] } } } 
+        data: { response: { content: [{ channel: 'ch1' }] } } 
       } as any);
 
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -139,7 +139,7 @@ describe('CollectionEditorService - Config Creation', () => {
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { result: { response: { content: [{ channel: 'ch1' }] } } } 
+        data: { response: { content: [{ channel: 'ch1' }] } } 
       } as any);
 
       const config = await service.createConfig(

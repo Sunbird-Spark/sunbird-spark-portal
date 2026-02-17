@@ -46,18 +46,6 @@ export class CollectionEditorService {
                     }
                 }
 
-                // Load the Collection Editor Web Component
-                if (!customElements.get('lib-editor')) {
-                    await new Promise<void>((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = '/assets/collection-editor/sunbird-collection-editor.js';
-                        script.async = true;
-                        script.onload = () => resolve();
-                        script.onerror = () => reject(new Error('Failed to load collection editor web component'));
-                        document.body.appendChild(script);
-                    });
-                }
-
                 this.loadAssets();
                 CollectionEditorService.dependenciesLoaded = true;
             } catch (error) {
@@ -88,7 +76,7 @@ export class CollectionEditorService {
             const orgResponse = await this.orgService.search({
                 filters: { isTenant: true }
             });
-            const org = orgResponse?.data?.result?.response?.content?.[0];
+            const org = orgResponse?.data?.response?.content?.[0];
             if (org) {
                 channel = org.channel;
             }
