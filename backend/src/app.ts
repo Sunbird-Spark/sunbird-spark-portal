@@ -56,9 +56,7 @@ app.use('/portal', portalProxyRoutes);
 app.use('/action', sessionMiddleware, ...anonymousMiddlewares);
 
 // Portal Proxy Routes
-app.all('/action/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
-    keycloak.protect(),
-    kongProxy);
+app.all('/action/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 
