@@ -6,9 +6,9 @@ import {
 } from "@/components/landing/Accordion";
 import faqImage from "@/assets/faq-image.svg";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { useState, useEffect, useMemo } from "react";
-import { SystemSettingService } from "@/services/SystemSettingService";
-import { BlobStorageService } from "@/services/BlobStorageService";
+import { useMemo } from "react";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useFaqData } from "@/hooks/useFaqData";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 interface FAQ {
@@ -16,66 +16,18 @@ interface FAQ {
     description: string;
 }
 
-interface FaqData {
-    general: FAQ[];
-}
-
 const FAQSection = () => {
     const { t, currentCode } = useAppI18n();
-    const [faqUrl, setFaqUrl] = useState<string>("");
-    const [faqs, setFaqs] = useState<FAQ[]>([]);
-    const blobStorageService = useMemo(() => new BlobStorageService(), []);
 
-    // Fetch FAQ base URL from API
-    useEffect(() => {
-        const fetchFaqUrl = async () => {
-            try {
-                const service = new SystemSettingService();
-                const apiResponse = await service.read<any>("portalFaqURL");
-                
-                const faqUrlValue = apiResponse.data?.response?.value || apiResponse.data?.value;
-                
-                if (faqUrlValue) {
-                    setFaqUrl(faqUrlValue);
-                }
-            } catch (error) {
-                console.error("Failed to fetch FAQ URL:", error);
-            }
-        };
-        fetchFaqUrl();
-    }, []);
+    // Fetch FAQ base URL
+    const { data: settingResponse } = useSystemSetting("portalFaqURL");
+    const faqUrl = settingResponse?.data?.response?.value || settingResponse?.data?.value;
 
     // Fetch FAQ data based on language
-    useEffect(() => {
-        if (!faqUrl) return;
+    const { data: faqData } = useFaqData(faqUrl, currentCode || 'en');
 
-        const fetchFaqData = async () => {
-            const langCode = currentCode || 'en';
-            
-            try {
-                // Build URLs for primary language and English fallback
-                const primaryUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', langCode);
-                const fallbackUrl = blobStorageService.buildLanguageUrl(faqUrl, 'faq', 'en');
-                
-                // Fetch with automatic fallback (only if langCode is not 'en')
-                const response = langCode !== 'en'
-                    ? await blobStorageService.fetchJsonWithFallback<FaqData>(primaryUrl, fallbackUrl)
-                    : await blobStorageService.fetchJson<FaqData>(primaryUrl);
-                
-                // Read from the 'general' array which has title and description
-                if (response?.general && Array.isArray(response.general)) {
-                    setFaqs(response.general);
-                } else {
-                    setFaqs([]);
-                }
-            } catch (error) {
-                console.error("Failed to fetch FAQ data:", error);
-                setFaqs([]);
-            }
-        };
-
-        fetchFaqData();
-    }, [faqUrl, currentCode, blobStorageService]);
+    // Extract FAQs from response
+    const faqs: FAQ[] = (faqData as any)?.general || [];
 
     // Sanitize FAQs and filter out invalid entries
     const sanitizedFaqs = useMemo(() => {
