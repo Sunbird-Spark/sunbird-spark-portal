@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HelpSupport from './HelpSupport';
 
@@ -26,7 +26,6 @@ vi.mock("@/components/home/HomeSidebar", () => ({
     ),
 }));
 
-// Mock Accordion to avoid Radix UI issues in tests
 vi.mock("@/components/landing/Accordion", () => ({
     Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
     AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
@@ -34,107 +33,153 @@ vi.mock("@/components/landing/Accordion", () => ({
     AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
 }));
 
-// Mock hooks
 vi.mock("@/hooks/use-mobile", () => ({
     useIsMobile: vi.fn(() => false),
 }));
 
-// Mock navigate
+vi.mock("@/utils/sanitizeHtml", () => ({
+    sanitizeHtml: (html: string) => html,
+}));
+
+// Mock the shared hook
+const mockUseHelpFaqData = vi.fn();
+vi.mock("@/hooks/useHelpFaqData", () => ({
+    useHelpFaqData: (...args: any[]) => mockUseHelpFaqData(...args),
+}));
+
+const mockCategories = [
+    {
+        name: "Login",
+        faqs: [
+            { topic: "How do I login?", description: "Use your credentials to login." },
+            { topic: "I forgot my password", description: "Click forgot password link." },
+            { topic: "Can I use SSO?", description: "Yes, SSO is supported." },
+        ],
+    },
+    {
+        name: "Profile",
+        faqs: [
+            { topic: "How to update profile?", description: "Go to profile settings." },
+            { topic: "Change avatar?", description: "Click on your avatar to change it." },
+        ],
+    },
+    {
+        name: "Course & Certificates",
+        faqs: [
+            { topic: "How to enroll?", description: "Click enroll on the course page." },
+            { topic: "Download certificate?", description: "Go to profile > certificates." },
+        ],
+    },
+];
+
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
     const actual = await vi.importActual("react-router-dom");
-    return {
-        ...actual,
-        useNavigate: () => mockNavigate,
-    };
+    return { ...actual, useNavigate: () => mockNavigate };
 });
 
 describe('HelpSupport', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseHelpFaqData.mockReturnValue({ categories: mockCategories, loading: false, error: null });
     });
 
-    const waitForLoading = async () => {
-        await waitFor(() => {
-            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-        }, { timeout: 5000 });
-    };
-
-    it('renders the help & support page after loading', async () => {
+    it('renders the help & support page with dynamic categories', () => {
         render(
             <MemoryRouter initialEntries={['/help-support']}>
                 <HelpSupport />
             </MemoryRouter>
         );
 
-        await waitForLoading();
-
         expect(screen.getByText('How can we assist you today?')).toBeInTheDocument();
+        expect(screen.getByText('Login')).toBeInTheDocument();
+        expect(screen.getByText('Profile')).toBeInTheDocument();
+        expect(screen.getByText('Course & Certificates')).toBeInTheDocument();
         expect(screen.getByTestId('mock-header')).toBeInTheDocument();
         expect(screen.getByTestId('mock-footer')).toBeInTheDocument();
     });
 
-    it('navigates to category detail when a category card is clicked', async () => {
+    it('displays correct FAQ count for each category', () => {
         render(
             <MemoryRouter initialEntries={['/help-support']}>
                 <HelpSupport />
             </MemoryRouter>
         );
 
-        await waitForLoading();
+        expect(screen.getByText('3 FAQs')).toBeInTheDocument();
+        expect(screen.getAllByText('2 FAQs')).toHaveLength(2);
+    });
 
-        const loginCategory = screen.getByText('Login');
-        fireEvent.click(loginCategory.closest('div')!);
+    it('navigates to category detail when a category card is clicked', () => {
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HelpSupport />
+            </MemoryRouter>
+        );
 
+        fireEvent.click(screen.getByText('Login').closest('div')!);
         expect(mockNavigate).toHaveBeenCalledWith('/help-support/login');
     });
 
-    it('displays FAQ content (mocked accordion)', async () => {
+    it('shows most viewed FAQs (first 2 from each category)', () => {
         render(
             <MemoryRouter initialEntries={['/help-support']}>
                 <HelpSupport />
             </MemoryRouter>
         );
 
-        await waitForLoading();
-
-        // In the mock, content is always rendered in the DOM, just structure
-        // Verify question exists
-        expect(screen.getByText('What kind of courses are available on this platform?')).toBeInTheDocument();
-
-        // Verify answer exists (mock accordion renders children)
-        expect(screen.getByText(/Lorem ipsum is placeholder text/)).toBeInTheDocument();
+        expect(screen.getByText("Most Viewed FAQ's")).toBeInTheDocument();
+        // First 2 from each category
+        expect(screen.getByText('How do I login?')).toBeInTheDocument();
+        expect(screen.getByText('I forgot my password')).toBeInTheDocument();
+        expect(screen.getByText('How to update profile?')).toBeInTheDocument();
+        expect(screen.getByText('Change avatar?')).toBeInTheDocument();
+        expect(screen.getByText('How to enroll?')).toBeInTheDocument();
+        expect(screen.getByText('Download certificate?')).toBeInTheDocument();
+        // Third FAQ from Login should NOT be in most viewed
+        expect(screen.queryByText('Can I use SSO?')).not.toBeInTheDocument();
     });
 
-    it('toggles sidebar state', async () => {
+    it('shows loading state while data is being fetched', () => {
+        mockUseHelpFaqData.mockReturnValue({ categories: [], loading: true, error: null });
+
         render(
             <MemoryRouter initialEntries={['/help-support']}>
                 <HelpSupport />
             </MemoryRouter>
         );
 
-        await waitForLoading();
+        expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
 
-        // Initially sidebar is open
+    it('shows error state when fetch fails', () => {
+        mockUseHelpFaqData.mockReturnValue({ categories: [], loading: false, error: new Error('fail') });
+
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HelpSupport />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    });
+
+    it('toggles sidebar state', () => {
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HelpSupport />
+            </MemoryRouter>
+        );
+
         expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
         expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
 
-        // Close sidebar using Close button
-        const closeBtn = screen.getByRole('button', { name: /close sidebar/i });
-        fireEvent.click(closeBtn);
-
-        await waitFor(() => {
-            expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed');
-        });
+        fireEvent.click(screen.getByRole('button', { name: /close sidebar/i }));
+        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed');
         expect(screen.queryByTestId('home-sidebar')).not.toBeInTheDocument();
 
-        // Open sidebar using Toggle button in header
-        const toggleBtn = screen.getByLabelText('Toggle Sidebar');
-        fireEvent.click(toggleBtn);
-
-        await waitFor(() => {
-            expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
-        });
+        fireEvent.click(screen.getByLabelText('Toggle Sidebar'));
+        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
         expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
     });
 });

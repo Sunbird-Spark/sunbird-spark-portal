@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
@@ -6,17 +6,13 @@ import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import PageLoader from "@/components/common/PageLoader";
 import Header from "@/components/home/Header";
-
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/landing/Accordion";
+import { useHelpFaqData } from "@/hooks/useHelpFaqData";
 
 import SidebarCloseButton from "./SidebarCloseButton";
-import { categories, faqs } from "./helpSupportData";
+import {
+    buildHelpCategories,
+} from "./helpSupportData";
 
 import "../profile/profile.css";
 
@@ -25,26 +21,35 @@ const HelpSupport = () => {
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
     const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
-    const [isLoading, setIsLoading] = useState(true);
+
+    const { categories: allCategories, loading, error } = useHelpFaqData();
+
+    const categories = useMemo(
+        () => buildHelpCategories(allCategories),
+        [allCategories]
+    );
 
     useEffect(() => {
         setIsSidebarOpen(!isMobile);
     }, [isMobile]);
 
-    useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 600);
-        return () => clearTimeout(timer);
-    }, []);
+    if (loading) return <PageLoader message="Loading..." />;
 
-    if (isLoading) return <PageLoader message="Loading..." />;
+    if (error) {
+        return (
+            <PageLoader
+                message="Loading..."
+                error="Failed to load FAQ data. Please try again."
+                onRetry={() => window.location.reload()}
+            />
+        );
+    }
 
     return (
         <div className="profile-container">
-            {/* Top Header */}
             <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
 
             <div className="flex flex-1 relative transition-all">
-                {/* Sidebar - Mobile */}
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetContent side="left" className="w-[17.5rem] pt-[2.5rem] px-0 pb-0">
@@ -59,7 +64,6 @@ const HelpSupport = () => {
                         </SheetContent>
                     </Sheet>
                 ) : (
-                    /* Sidebar - Desktop */
                     <div className="relative shrink-0 sticky top-[4.5rem] self-start z-[20]">
                         {isSidebarOpen && (
                             <>
@@ -70,7 +74,6 @@ const HelpSupport = () => {
                     </div>
                 )}
 
-                {/* Main Content Area */}
                 <main className="profile-main-content">
                     <div className="profile-content-wrapper">
                         {/* Header row */}
@@ -78,62 +81,41 @@ const HelpSupport = () => {
                             <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground">
                                 How can we assist you today?
                             </h1>
-                            <button
-                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
-                            >
+                            <button className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
                                 Report an Issue
                             </button>
                         </div>
 
                         {/* Category Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.25rem] mb-[2.5rem] pt-[1.25rem]">
-                            {categories.map((cat) => (
-                                <div
-                                    key={cat.title}
-                                    onClick={() => navigate(`/help-support/${cat.slug}`)}
-                                    className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-[0.125rem_0.125rem_1.25rem_rgba(0,0,0,0.09)] hover:shadow-md transition-shadow cursor-pointer"
-                                >
-                                    <div className="w-[2rem] h-[0.75rem] bg-sunbird-ginger ml-[1.875rem]" />
-                                    <div className="px-[1.25rem] pb-[1.25rem] pt-[1.5rem] flex flex-col flex-1">
-                                        <h3 className="font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] text-foreground mb-[0.5rem]">{cat.title}</h3>
-                                        <p className="text-base text-foreground font-['Rubik'] leading-relaxed mb-[1rem]">
-                                            {cat.description}
-                                        </p>
-                                        <div className="flex items-center justify-between mt-auto">
-                                            <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{cat.faqCount} FAQs</span>
-                                            <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
+                        {categories.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.25rem] mb-[2.5rem] pt-[1.25rem]">
+                                {categories.map((cat) => (
+                                    <div
+                                        key={cat.slug}
+                                        onClick={() => navigate(`/help-support/${cat.slug}`)}
+                                        className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-[0.125rem_0.125rem_1.25rem_rgba(0,0,0,0.09)] hover:shadow-md transition-shadow cursor-pointer"
+                                    >
+                                        <div className="w-[2rem] h-[0.75rem] bg-sunbird-ginger ml-[1.875rem]" />
+                                        <div className="px-[1.25rem] pb-[1.25rem] pt-[1.5rem] flex flex-col flex-1">
+                                            <h3 className="font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] text-foreground mb-[0.5rem]">{cat.title}</h3>
+                                            <p className="text-base text-foreground font-['Rubik'] leading-relaxed mb-[1rem]">
+                                                {cat.description}
+                                            </p>
+                                            <div className="flex items-center justify-between mt-auto">
+                                                <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{cat.faqCount} FAQs</span>
+                                                <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
 
-                        {/* Most Viewed FAQs */}
-                        <h2 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.25rem]">
-                            Most Viewed FAQ's
-                        </h2>
 
-                        <Accordion type="single" collapsible defaultValue="item-0" className="space-y-[0.75rem]">
-                            {faqs.map((faq, index) => (
-                                <AccordionItem
-                                    key={index}
-                                    value={`item-${index}`}
-                                    className="rounded-[0.625rem] px-[1.25rem] bg-sunbird-base-white border-b-0"
-                                >
-                                    <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] text-foreground [&>svg]:text-sunbird-brick">
-                                        {faq.question}
-                                    </AccordionTrigger>
-                                    <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-[1rem] text-muted-foreground">
-                                        {faq.answer}
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
                     </div>
                 </main>
             </div>
 
-            {/* Footer */}
             <Footer />
         </div>
     );

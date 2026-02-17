@@ -3,6 +3,7 @@ import { FiMenu, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import AuthenticatedHeader from "./AuthenticatedHeader";
 import { useAuth } from "@/auth/AuthContext";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +23,8 @@ interface HeaderProps {
 const defaultToggleSidebar = () => { };
 
 const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar }: HeaderProps) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated: contextAuth } = useAuth();
+  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const location = useLocation();
   const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();

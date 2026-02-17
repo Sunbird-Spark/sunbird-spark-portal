@@ -26,7 +26,6 @@ vi.mock("@/components/home/HomeSidebar", () => ({
     ),
 }));
 
-// Mock Accordion
 vi.mock("@/components/landing/Accordion", () => ({
     Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
     AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
@@ -34,12 +33,37 @@ vi.mock("@/components/landing/Accordion", () => ({
     AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
 }));
 
-// Mock hooks
 vi.mock("@/hooks/use-mobile", () => ({
     useIsMobile: vi.fn(() => false),
 }));
 
-// Mock navigate
+vi.mock("@/utils/sanitizeHtml", () => ({
+    sanitizeHtml: (html: string) => html,
+}));
+
+// Mock the shared hook
+const mockUseHelpFaqData = vi.fn();
+vi.mock("@/hooks/useHelpFaqData", () => ({
+    useHelpFaqData: (...args: any[]) => mockUseHelpFaqData(...args),
+}));
+
+const mockCategories = [
+    {
+        name: "Login",
+        faqs: [
+            { topic: "How do I create an account?", description: "Register using your email or phone." },
+            { topic: "I forgot my password", description: "Click forgot password on login page." },
+            { topic: "Can I use Google login?", description: "Yes, Google login is supported." },
+        ],
+    },
+    {
+        name: "Profile",
+        faqs: [
+            { topic: "How to update profile?", description: "Go to profile settings." },
+        ],
+    },
+];
+
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
     const actual = await vi.importActual("react-router-dom");
@@ -53,39 +77,31 @@ vi.mock("react-router-dom", async () => {
 describe('HelpCategoryDetail', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseHelpFaqData.mockReturnValue({ categories: mockCategories, loading: false, error: null });
     });
 
-    const waitForLoading = async () => {
-        await waitFor(() => {
-            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-        }, { timeout: 5000 });
-    };
-
-    it('renders the category detail page after loading', async () => {
+    it('renders the category detail page with FAQs from API', () => {
         render(
             <MemoryRouter initialEntries={['/help-support/login']}>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
-
-        await waitForLoading();
 
         expect(screen.getByText("Login FAQs")).toBeInTheDocument();
         expect(screen.getByText('Go Back')).toBeInTheDocument();
+        expect(screen.getByText('How do I create an account?')).toBeInTheDocument();
+        expect(screen.getByText('I forgot my password')).toBeInTheDocument();
+        expect(screen.getByText('Can I use Google login?')).toBeInTheDocument();
     });
 
-    it('navigates back when Go Back is clicked', async () => {
+    it('navigates back when Go Back is clicked', () => {
         render(
             <MemoryRouter initialEntries={['/help-support/login']}>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
 
-        await waitForLoading();
-
-        const goBackBtn = screen.getByText('Go Back');
-        fireEvent.click(goBackBtn);
-
+        fireEvent.click(screen.getByText('Go Back'));
         expect(mockNavigate).toHaveBeenCalledWith('/help-support');
     });
 
@@ -96,11 +112,7 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        await waitForLoading();
-
-        // FAQ content is rendered by mock
-        const yesBtn = screen.getAllByText('Yes')[0]!; // since multiple faqs exist
-        fireEvent.click(yesBtn);
+        fireEvent.click(screen.getAllByText('Yes')[0]!);
 
         await waitFor(() => {
             expect(screen.getAllByText('Thank you for your feedback!')[0]).toBeInTheDocument();
@@ -114,45 +126,52 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        await waitForLoading();
-
-        const noBtn = screen.getAllByText('No')[0]!;
-        fireEvent.click(noBtn);
-
+        fireEvent.click(screen.getAllByText('No')[0]!);
         expect(screen.getByText('Sorry about that!')).toBeInTheDocument();
-        const textarea = screen.getByPlaceholderText('Type Here...');
-        expect(textarea).toBeInTheDocument();
 
-        // Type feedback
-        fireEvent.change(textarea, { target: { value: 'This is not helpful' } });
-
-        // Submit feedback
-        const submitBtn = screen.getByText('Submit feedback');
-        fireEvent.click(submitBtn);
+        fireEvent.change(screen.getByPlaceholderText('Type Here...'), { target: { value: 'This is not helpful' } });
+        fireEvent.click(screen.getByText('Submit feedback'));
 
         await waitFor(() => {
             expect(screen.getAllByText('Thank you for your feedback!')[0]).toBeInTheDocument();
         });
     });
 
-    it('disables submit button when feedback text is empty', async () => {
+    it('disables submit button when feedback text is empty', () => {
         render(
             <MemoryRouter initialEntries={['/help-support/login']}>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
 
-        await waitForLoading();
+        fireEvent.click(screen.getAllByText('No')[0]!);
+        expect(screen.getByText('Submit feedback')).toBeDisabled();
 
-        const noBtn = screen.getAllByText('No')[0]!;
-        fireEvent.click(noBtn);
+        fireEvent.change(screen.getByPlaceholderText('Type Here...'), { target: { value: 'Some feedback' } });
+        expect(screen.getByText('Submit feedback')).not.toBeDisabled();
+    });
 
-        const submitBtn = screen.getByText('Submit feedback');
-        expect(submitBtn).toBeDisabled();
+    it('shows loading state while data is being fetched', () => {
+        mockUseHelpFaqData.mockReturnValue({ categories: [], loading: true, error: null });
 
-        // Type something
-        const textarea = screen.getByPlaceholderText('Type Here...');
-        fireEvent.change(textarea, { target: { value: 'Some feedback' } });
-        expect(submitBtn).not.toBeDisabled();
+        render(
+            <MemoryRouter initialEntries={['/help-support/login']}>
+                <HelpCategoryDetail />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+
+    it('shows error state when fetch fails', () => {
+        mockUseHelpFaqData.mockReturnValue({ categories: [], loading: false, error: new Error('fail') });
+
+        render(
+            <MemoryRouter initialEntries={['/help-support/login']}>
+                <HelpCategoryDetail />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Something went wrong')).toBeInTheDocument();
     });
 });
