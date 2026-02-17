@@ -526,7 +526,7 @@
   }
 
   .content-player-related-title {
-    @apply text-xl font-semibold text-foreground font-rubik;
+    @apply text-xl font-semibold text-foreground font-rubik my-2;
   }
 
   .content-player-related-arrow {
