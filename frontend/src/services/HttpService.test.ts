@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, Mock } from 'vitest';
+import { describe, it, expect, vi, Mock, beforeEach } from 'vitest';
 import axios from 'axios';
 import { HttpService } from './HttpService';
 

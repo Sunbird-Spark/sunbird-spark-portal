@@ -1,9 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import FAQSection from './FAQSection';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { useFaqData } from '@/hooks/useFaqData';
-import { vi, Mock } from 'vitest';
+import { vi, Mock, describe, beforeEach, it, expect } from 'vitest';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { PropsWithChildren } from 'react';
 
 // Mock dependencies
 vi.mock('@/hooks/useSystemSetting');
@@ -12,10 +13,10 @@ vi.mock('@/hooks/useAppI18n');
 
 // Mock child components
 vi.mock('@/components/landing/Accordion', () => ({
-  Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
-  AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
-  AccordionTrigger: ({ children }: any) => <div data-testid="accordion-trigger">{children}</div>,
-  AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
+  Accordion: ({ children }: PropsWithChildren) => <div data-testid="accordion">{children}</div>,
+  AccordionItem: ({ children }: PropsWithChildren) => <div data-testid="accordion-item">{children}</div>,
+  AccordionTrigger: ({ children }: PropsWithChildren) => <div data-testid="accordion-trigger">{children}</div>,
+  AccordionContent: ({ children }: PropsWithChildren) => <div data-testid="accordion-content">{children}</div>,
 }));
 
 describe('FAQSection', () => {
