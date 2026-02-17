@@ -8,7 +8,7 @@ import resourceBitcoin from "@/assets/resource-bitcoin.svg"
 import resourceHacker from "@/assets/resource-hacker.svg"
 import resourceEthereum from "@/assets/resource-ethereum.svg"
 
-export interface ResourceCardProps {
+interface ResourceCardProps {
     id: string;
     title: string;
     type: "Video" | "PDF" | "HTML" | "Epub";
@@ -94,7 +94,7 @@ const ResourceCenter = () => {
     );
 };
 
-export const ResourceCardComponent = ({
+const ResourceCardComponent = ({
     id,
     title,
     type,
