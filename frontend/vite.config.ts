@@ -43,12 +43,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/plugins': {
+      '/action': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
-      '/action': {
+      '/plugins': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
