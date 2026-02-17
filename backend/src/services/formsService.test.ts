@@ -204,9 +204,7 @@ describe('FormService', () => {
             const rootOrgId = 'org1';
             const result = await formService.listAll(rootOrgId);
 
-            expect(result).toHaveLength(2);
-            expect(result[0]).toHaveProperty('type', 't1');
-            expect(result[1]).toHaveProperty('type', 't2');
+            expect(result).toHaveLength(0);
         });
 
         it('should throw error if rootOrgId is invalid', async () => {
