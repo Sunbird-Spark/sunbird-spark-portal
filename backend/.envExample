@@ -11,6 +11,7 @@ SERVER_URL='http://localhost:3000'
 DEVELOPMENT_REACT_APP_URL='http://localhost:5173'
 # Logging Configuration
 SUNBIRD_PORTAL_LOG_LEVEL=error
+FORMS_DB_NAME=forms
 
 # Session Configuration
 SUNBIRD_ANONYMOUS_SESSION_TTL=60000
