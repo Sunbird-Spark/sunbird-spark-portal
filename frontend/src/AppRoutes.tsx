@@ -41,10 +41,10 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
-        <Route path="/workspace" element={<WorkspaceProtected />} />
+        <Route path="/workspace" element={<WorkspacePage />} />
         <Route path="/reports" element={<ReportsProtected />} />
-        <Route path="/create" element={<CreateContentProtected />} />
-        <Route path="/edit/content-editor/:contentId" element={<ContentEditorProtected />} />
+        <Route path="/create" element={<CreateContentPage />} />
+        <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
