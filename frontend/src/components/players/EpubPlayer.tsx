@@ -81,6 +81,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
         service.removeEventListeners(playerElement);
         playerElement.remove();
       }
+      EpubPlayerService.unloadStyles();
     };
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 

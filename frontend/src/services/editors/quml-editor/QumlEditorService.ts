@@ -7,6 +7,8 @@ import { OrganizationService } from '../../OrganizationService';
 
 export class QumlEditorService {
   private static stylesLoaded = false;
+  private static scriptLoaded = false;
+  private static scriptLoading?: Promise<void>;
   private static dependenciesLoaded = false;
   private static dependenciesLoading?: Promise<void>;
 
@@ -15,6 +17,25 @@ export class QumlEditorService {
     editor: (event: Event) => void;
     telemetry?: (event: Event) => void;
   }>();
+
+  private loadScript(): Promise<void> {
+    if (QumlEditorService.scriptLoaded || customElements.get('lib-questionset-editor')) {
+      QumlEditorService.scriptLoaded = true;
+      return Promise.resolve();
+    }
+    if (QumlEditorService.scriptLoading) {
+      return QumlEditorService.scriptLoading;
+    }
+    QumlEditorService.scriptLoading = new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/assets/quml-editor/sunbird-questionset-editor.js';
+      script.setAttribute('data-quml-editor-script', 'true');
+      script.onload = () => { QumlEditorService.scriptLoaded = true; QumlEditorService.scriptLoading = undefined; resolve(); };
+      script.onerror = () => { QumlEditorService.scriptLoading = undefined; reject(new Error('Failed to load sunbird-questionset-editor script')); };
+      document.body.appendChild(script);
+    });
+    return QumlEditorService.scriptLoading;
+  }
 
   async initializeDependencies(): Promise<void> {
     // Return early if already loaded
@@ -30,6 +51,7 @@ export class QumlEditorService {
     // Create loading promise to prevent concurrent initialization
     QumlEditorService.dependenciesLoading = (async () => {
       try {
+        await this.loadScript();
         const $global = (globalThis as any).$;
 
         // jQuery and jQuery UI are now loaded via static imports

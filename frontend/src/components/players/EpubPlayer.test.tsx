@@ -18,6 +18,8 @@ vi.mock('../../services/players/epub', () => {
     this.removeEventListeners = mockRemoveEventListeners;
   });
   
+  MockEpubPlayerService.unloadStyles = vi.fn();
+  
   return {
     EpubPlayerService: MockEpubPlayerService,
   };

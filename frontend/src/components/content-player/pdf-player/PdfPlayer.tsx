@@ -88,6 +88,7 @@ export const PdfPlayer: React.FC<PdfPlayerProps> = ({
         service.removeEventListeners(playerElement);
         playerElement.remove();
       }
+      PdfPlayerService.unloadStyles();
     };
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 

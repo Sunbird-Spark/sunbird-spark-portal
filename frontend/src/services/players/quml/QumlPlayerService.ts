@@ -7,6 +7,27 @@ export class QumlPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
   private orgService = new OrganizationService();
   private static stylesLoaded = false;
+  private static scriptLoaded = false;
+  private static scriptLoading?: Promise<void>;
+
+  private loadScript(): Promise<void> {
+    if (QumlPlayerService.scriptLoaded || customElements.get('sunbird-quml-player')) {
+      QumlPlayerService.scriptLoaded = true;
+      return Promise.resolve();
+    }
+    if (QumlPlayerService.scriptLoading) {
+      return QumlPlayerService.scriptLoading;
+    }
+    QumlPlayerService.scriptLoading = new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/assets/quml-player/sunbird-quml-player.js';
+      script.setAttribute('data-quml-player-script', 'true');
+      script.onload = () => { QumlPlayerService.scriptLoaded = true; QumlPlayerService.scriptLoading = undefined; resolve(); };
+      script.onerror = () => { QumlPlayerService.scriptLoading = undefined; reject(new Error('Failed to load sunbird-quml-player script')); };
+      document.body.appendChild(script);
+    });
+    return QumlPlayerService.scriptLoading;
+  }
 
   /**
    * Create QUML player configuration with context props and metadata
@@ -17,6 +38,7 @@ export class QumlPlayerService {
     metadata: QumlPlayerMetadata,
     contextProps?: QumlPlayerContextProps
   ): Promise<QumlPlayerConfig> {
+    await this.loadScript();
     // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
     const uid = userAuthInfoService.getUserId() || 'anonymous';
@@ -104,6 +126,19 @@ export class QumlPlayerService {
     document.head.appendChild(styleLink);
 
     QumlPlayerService.stylesLoaded = true;
+  }
+
+  /**
+   * Remove QUML player styles from the document head.
+   * Called when the player component unmounts to prevent style bleed
+   * into other pages during SPA navigation.
+   */
+  static unloadStyles(): void {
+    const styleLink = document.querySelector('[data-quml-player-styles="true"]');
+    if (styleLink) {
+      styleLink.remove();
+    }
+    QumlPlayerService.stylesLoaded = false;
   }
 
   /**

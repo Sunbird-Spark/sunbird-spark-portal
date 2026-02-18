@@ -18,9 +18,16 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
   let service: QumlEditorService;
 
   beforeEach(() => {
+    // Mock the custom element to prevent script loading
+    if (!customElements.get('lib-questionset-editor')) {
+      customElements.define('lib-questionset-editor', class extends HTMLElement {});
+    }
+
     service = new QumlEditorService();
     (QumlEditorService as any).dependenciesLoaded = false;
     (QumlEditorService as any).dependenciesLoading = undefined;
+    (QumlEditorService as any).scriptLoaded = false;
+    (QumlEditorService as any).scriptLoading = undefined;
     
     // Setup jQuery mock with .each method to prevent FancyTree initialization errors
     const mockJQuery: any = { fn: {}, ui: {}, each: vi.fn() };
