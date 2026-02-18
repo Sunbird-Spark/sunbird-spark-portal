@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import {
   Collapsible,
@@ -9,28 +8,29 @@ import {
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
 import type { Lesson, Module } from "@/types/collectionTypes"
 
-function getLessonHref(lesson: Lesson): string {
+function getLessonHref(lesson: Lesson, collectionId: string): string {
   const mime = (lesson.mimeType ?? '').toLowerCase();
   const isCollection = mime === 'application/vnd.ekstep.content-collection';
-  return isCollection ? `/collection/${lesson.id}` : `/content/${lesson.id}`;
+  return isCollection ? `/collection/${lesson.id}` : `/collection/${collectionId}/content/${lesson.id}`;
 }
 
 interface CollectionSidebarProps {
+  collectionId: string;
   modules: Module[];
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
+  activeLessonId?: string | null;
   contentBlocked?: boolean;
 }
 
 const CollectionSidebar = ({
+  collectionId,
   modules,
   expandedModules,
   toggleModule,
+  activeLessonId = null,
   contentBlocked = false,
 }: CollectionSidebarProps) => {
-  const [activeLessonId, setActiveLessonId] = useState<string | null>(
-    modules?.[0]?.lessons?.[0]?.id ?? null
-  );
 
   return (
     <div className="space-y-3">
@@ -98,8 +98,7 @@ const CollectionSidebar = ({
                     return (
                       <Link
                         key={lesson.id}
-                        to={getLessonHref(lesson)}
-                        onClick={() => setActiveLessonId(lesson.id)}
+                        to={getLessonHref(lesson, collectionId)}
                         className={`${baseClass} ${interactiveClass}`}
                       >
                         {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}

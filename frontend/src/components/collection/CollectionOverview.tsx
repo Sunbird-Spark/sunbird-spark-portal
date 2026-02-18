@@ -2,45 +2,85 @@ import { FiPlay } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { CheckIcon } from "./CollectionIcons";
 import type { CollectionData } from "@/types/collectionTypes";
+import { ContentPlayer } from "@/components/players";
+import PageLoader from "@/components/common/PageLoader";
 
 interface CollectionOverviewProps {
   collectionData: CollectionData;
+  contentId?: string;
+  playerMetadata?: any;
+  playerIsLoading?: boolean;
+  playerError?: Error | null;
+  onPlayerEvent?: (event: any) => void;
+  onTelemetryEvent?: (event: any) => void;
 }
 
-const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
+const CollectionOverview = ({
+  collectionData,
+  contentId,
+  playerMetadata,
+  playerIsLoading,
+  playerError,
+  onPlayerEvent,
+  onTelemetryEvent,
+}: CollectionOverviewProps) => {
   const { t } = useAppI18n();
 
   return (
     <div className="space-y-6">
-      {/* Video Player Card */}
+      {/* Player Card */}
       <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
         <div className="relative">
-          {/* Video Thumbnail Container */}
-          <div className="aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative ">
-            <img
-              src={collectionData.image}
-              alt={collectionData.title}
-              className="w-full h-full object-cover"
-            />
+          {contentId ? (
+            /* Content Player */
+            <div className="w-full">
+              {playerIsLoading && (
+                <div className="aspect-video flex items-center justify-center bg-gray-100">
+                  <PageLoader message={t("loading")} fullPage={false} />
+                </div>
+              )}
+              {!playerIsLoading && playerError && (
+                <div className="aspect-video flex items-center justify-center bg-gray-100">
+                  <p className="text-sm text-red-500">{playerError.message}</p>
+                </div>
+              )}
+              {!playerIsLoading && !playerError && playerMetadata && (
+                <ContentPlayer
+                  mimeType={playerMetadata.mimeType}
+                  metadata={playerMetadata}
+                  onPlayerEvent={onPlayerEvent}
+                  onTelemetryEvent={onTelemetryEvent}
+                />
+              )}
+            </div>
+          ) : (
+            /* Thumbnail Placeholder */
+            <div className="aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative">
+              <img
+                src={collectionData.image}
+                alt={collectionData.title}
+                className="w-full h-full object-cover"
+              />
 
-            {/* Unit label - first module or none */}
-            {collectionData.modules?.[0] && (
-              <div className="absolute top-4 left-4 z-10">
-                <span className="text-white text-base font-medium px-4 py-2 rounded-md">
-                  {collectionData.modules[0].title}
-                </span>
-              </div>
-            )}
+              {/* Unit label - first module or none */}
+              {collectionData.modules?.[0] && (
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="text-white text-base font-medium px-4 py-2 rounded-md">
+                    {collectionData.modules[0].title}
+                  </span>
+                </div>
+              )}
 
-            {/* Play Button */}
-            <button
-              type="button"
-              aria-label={t("button.playVideo")}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg z-20"
-            >
-              <FiPlay className="w-6 h-6 text-sunbird-brick ml-1" fill="currentColor" />
-            </button>
-          </div>
+              {/* Play Button */}
+              <button
+                type="button"
+                aria-label={t("button.playVideo")}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg z-20"
+              >
+                <FiPlay className="w-6 h-6 text-sunbird-brick ml-1" fill="currentColor" />
+              </button>
+            </div>
+          )}
         </div>
 
 
