@@ -4,63 +4,56 @@ import MyLearningUpcomingBatches from './MyLearningUpcomingBatches';
 import { TrackableCollection, Batch } from '@/types/TrackableCollections';
 
 // Mock Course Data
-const mockBatches: TrackableCollection[] = [
-  {
-    courseId: 'batch1',
-    courseName: 'Batch 1',
-    description: 'Desc 1',
-    leafNodesCount: 5,
-    lastUpdatedOn: '2023-01-01',
-    appIcon: '',
-    completionPercentage: 0,
-    progress: 0,
-    content: { appIcon: '' },
-    batch: {
-        startDate: new Date(Date.now() + 86400000).toISOString(),
-        batchId: 'batch-1',
-        enrollmentType: 'open',
-        createdBy: 'user-1',
-        status: 1
-    }
+const createMockUpcomingBatch = (id: string, name: string, startDate: string, leafNodesCount: number = 5): TrackableCollection => ({
+  courseId: id,
+  courseName: name,
+  collectionId: id,
+  contentId: id,
+  batchId: `batch-${id}`,
+  userId: 'user_123',
+  addedBy: 'admin_123',
+  active: true,
+  status: 1,
+  completionPercentage: 0,
+  progress: 0,
+  leafNodesCount: leafNodesCount,
+  description: `Desc for ${name}`,
+  courseLogoUrl: '',
+  dateTime: 1770290316793,
+  enrolledDate: 1770290214120,
+  batch: {
+    identifier: `batch-${id}`,
+    batchId: `batch-${id}`,
+    name: `Batch for ${name}`,
+    startDate: startDate,
+    status: 1,
+    enrollmentType: 'open',
+    createdBy: 'user1'
   },
-  {
-    courseId: '2',
-    courseName: 'Batch 2',
-    description: 'Desc 2',
-    leafNodesCount: 3,
-    lastUpdatedOn: '2023-01-01',
+  content: {
+    identifier: id,
+    name: name,
+    description: `Desc for ${name}`,
     appIcon: '',
-    completionPercentage: 0,
-    progress: 0,
-    content: { appIcon: '' },
-    batch: {
-        batchId: 'b2',
-        startDate: '2023-10-15',
-        endDate: '',
-        status: 1,
-        enrollmentType: 'open',
-        createdBy: 'user1'
-    }
-  },
-  {
-    courseId: '3',
-    courseName: 'Batch 3',
-    description: 'Desc 3',
-    leafNodesCount: 8,
-    lastUpdatedOn: '2023-01-01',
-    appIcon: '',
-    completionPercentage: 0,
-    progress: 0,
-    content: { appIcon: '' },
-    batch: {
-        batchId: 'b3',
-        startDate: '2023-11-20',
-        endDate: '',
-        status: 1,
-        enrollmentType: 'open',
-        createdBy: 'user1'
+    mimeType: 'application/vnd.ekstep.content-collection',
+    primaryCategory: 'Course',
+    contentType: 'Course',
+    resourceType: 'Course',
+    objectType: 'Content',
+    pkgVersion: 1,
+    channel: 'channel_123',
+    organisation: ['Sunbird Org'],
+    trackable: {
+      enabled: 'Yes',
+      autoBatch: 'No'
     }
   }
+});
+
+const mockBatches: TrackableCollection[] = [
+  createMockUpcomingBatch('batch1', 'Batch 1', new Date(Date.now() + 86400000).toISOString(), 5),
+  createMockUpcomingBatch('batch2', 'Batch 2', '2023-10-15', 3),
+  createMockUpcomingBatch('batch3', 'Batch 3', '2023-11-20', 8),
 ];
 
 describe('MyLearningUpcomingBatches', () => {
@@ -95,7 +88,6 @@ describe('MyLearningUpcomingBatches', () => {
         courseId: `id-${i}`,
         courseName: `Batch Test ${i}`,
         batch: { ...mockBatches[0]!.batch!, startDate: '2023-12-01' },
-        content: { appIcon: '' },
         completionPercentage: 0
      }));
 

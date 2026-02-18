@@ -17,61 +17,56 @@ vi.mock('react-icons/fi', () => ({
   FiChevronDown: () => <span data-testid="chevron-down" />,
 }));
 
+const createMockCourse = (id: string, name: string, percentage: number): TrackableCollection => ({
+  courseId: id,
+  courseName: name,
+  collectionId: id,
+  contentId: id,
+  batchId: `batch-${id}`,
+  userId: 'user_123',
+  addedBy: 'admin_123',
+  active: true,
+  status: 2,
+  completionPercentage: percentage,
+  progress: percentage === 100 ? 5 : 1,
+  leafNodesCount: 5,
+  description: `Description for ${name}`,
+  courseLogoUrl: '',
+  dateTime: 1770290316793,
+  enrolledDate: 1770290214120,
+  batch: {
+    identifier: `batch-${id}`,
+    batchId: `batch-${id}`,
+    name: `Batch for ${name}`,
+    startDate: '2023-01-01',
+    status: 1,
+    enrollmentType: 'open',
+    createdBy: 'user1'
+  },
+  content: {
+    identifier: id,
+    name: name,
+    description: `Description for ${name}`,
+    appIcon: '',
+    mimeType: 'application/vnd.ekstep.content-collection',
+    primaryCategory: 'Course',
+    contentType: 'Course',
+    resourceType: 'Course',
+    objectType: 'Content',
+    pkgVersion: 1,
+    channel: 'channel_123',
+    organisation: ['Sunbird Org'],
+    trackable: {
+      enabled: 'Yes',
+      autoBatch: 'No'
+    }
+  }
+});
+
 const mockCourses: TrackableCollection[] = [
-  {
-    courseId: '1',
-    courseName: 'Active Course 1',
-    description: 'Desc 1',
-    completionPercentage: 10,
-    leafNodesCount: 5,
-    lastUpdatedOn: '2023-01-01',
-    appIcon: '',
-    content: { appIcon: '' },
-    progress: 1,
-    batch: {
-        batchId: 'b1',
-        startDate: '2023-01-01',
-        status: 1,
-        enrollmentType: 'open',
-        createdBy: 'user1'
-    }
-  },
-  {
-    courseId: '2',
-    courseName: 'Active Course 2',
-    description: 'Desc 2',
-    completionPercentage: 50,
-    leafNodesCount: 5,
-    lastUpdatedOn: '2023-01-01',
-    appIcon: '',
-    content: { appIcon: '' },
-    progress: 5,
-    batch: {
-        batchId: 'b2',
-        startDate: '2023-01-01',
-        status: 1,
-        enrollmentType: 'open',
-        createdBy: 'user1'
-    }
-  },
-  {
-    courseId: '3',
-    courseName: 'Completed Course 1',
-    description: 'Desc 3',
-    completionPercentage: 100,
-    leafNodesCount: 5,
-    lastUpdatedOn: '2023-01-01',
-    appIcon: '',
-    content: { appIcon: '' },
-    progress: 5,
-    batch: {
-        batchId: 'b3',
-        startDate: '2023-01-01',
-        status: 1,
-        enrollmentType: 'open',
-        createdBy: 'user1'
-    }
-  },
+  createMockCourse('1', 'Active Course 1', 10),
+  createMockCourse('2', 'Active Course 2', 50),
+  createMockCourse('3', 'Completed Course 1', 100),
 ];
 
 describe('MyLearningCourses', () => {
@@ -114,18 +109,22 @@ describe('MyLearningCourses', () => {
   
   it('shows "View more courses" button when there are many courses', () => {
     // Create 12 active courses
-    const manyCourses = Array.from({ length: 12 }, (_, i) => ({
-      ...mockCourses[0],
+    const manyCourses = Array.from({ length: 12 }, (_, i): TrackableCollection => ({
+      ...mockCourses[0]!,
       courseId: `id-${i}`,
+      collectionId: `id-${i}`,
+      contentId: `id-${i}`,
       courseName: `Course ${i}`,
       completionPercentage: 10,
-      content: { appIcon: '' },
       batch: {
+        ...mockCourses[0]!.batch!,
         batchId: `batch-${i}`,
+        identifier: `batch-${i}`,
         startDate: '2023-01-01',
         status: 1,
         enrollmentType: 'open',
-        createdBy: 'user1'
+        createdBy: 'user1',
+        name: `Batch for Course ${i}`
       }
     }));
     

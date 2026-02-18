@@ -30,8 +30,8 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
     }
     
     // Determine background color based on index
-    // Using standard Tailwind colors for alternating rows
-    const color = acc[dateStr].batches.length % 2 === 0 ? "bg-red-50" : "bg-green-50";
+    // Using subtle warm tints to match design
+    const color = acc[dateStr].batches.length % 2 === 0 ? "mylearning-batch-bg-light" : "mylearning-batch-bg-alt";
 
     acc[dateStr].batches.push({
       courseId: course.courseId,

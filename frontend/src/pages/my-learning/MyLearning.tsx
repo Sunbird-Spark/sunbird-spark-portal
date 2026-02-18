@@ -17,7 +17,7 @@ import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
 import MyLearningCourses from "@/components/myLearning/MyLearningCourses";
-import MyLearningHoursSpent from "@/components/myLearning/MyLearningHoursSpent";
+import MyLearningProgress from "@/components/myLearning/MyLearningProgress";
 import MyLearningUpcomingBatches from "@/components/myLearning/MyLearningUpcomingBatches";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
@@ -228,7 +228,7 @@ const MyLearning = () => {
               
               {/* Right Column - Hours Spent + Upcoming Batches */}
               <div className="space-y-6">
-                <MyLearningHoursSpent 
+                <MyLearningProgress 
                   lessonsVisited={lessonsVisited}
                   totalLessons={totalLessons}
                   contentsCompleted={contentsCompleted}

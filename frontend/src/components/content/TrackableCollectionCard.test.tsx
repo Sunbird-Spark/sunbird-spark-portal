@@ -7,21 +7,45 @@ import { TrackableCollection } from '@/types/TrackableCollections';
 const mockCourse: TrackableCollection = {
   courseId: 'do_12345',
   courseName: 'Test Course 101',
-  description: 'A test course description',
-  leafNodesCount: 10,
-  lastUpdatedOn: '2023-01-01',
-  appIcon: 'https://example.com/icon.png',
+  collectionId: 'do_12345',
+  contentId: 'do_12345',
+  batchId: '012345',
+  userId: 'user_123',
+  addedBy: 'admin_123',
+  active: true,
+  status: 2,
   completionPercentage: 45,
   progress: 4,
+  leafNodesCount: 10,
+  description: 'A test course description',
+  courseLogoUrl: 'https://example.com/icon.png',
+  dateTime: 1770290316793,
+  enrolledDate: 1770290214120,
   content: {
-      appIcon: 'https://example.com/icon.png'
+    identifier: 'do_12345',
+    name: 'Test Course 101',
+    description: 'A test course description',
+    appIcon: 'https://example.com/icon.png',
+    mimeType: 'application/vnd.ekstep.content-collection',
+    primaryCategory: 'Course',
+    contentType: 'Course',
+    resourceType: 'Course',
+    objectType: 'Content',
+    pkgVersion: 1,
+    channel: 'channel_123',
+    organisation: ['Org 1'],
+    trackable: {
+      enabled: 'Yes',
+      autoBatch: 'No'
+    }
   }
 };
 
 const mockCourseNoIcon: TrackableCollection = {
     ...mockCourse,
-    appIcon: '',
+    courseLogoUrl: '',
     content: {
+        ...mockCourse.content!,
         appIcon: ''
     }
 };

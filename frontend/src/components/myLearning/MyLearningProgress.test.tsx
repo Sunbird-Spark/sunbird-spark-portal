@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import MyLearningHoursSpent from './MyLearningHoursSpent';
+import MyLearningProgress from './MyLearningProgress';
 
-describe('MyLearningHoursSpent', () => {
+describe('MyLearningProgress', () => {
   const defaultProps = {
     lessonsVisited: 5,
     totalLessons: 10,
@@ -11,24 +11,24 @@ describe('MyLearningHoursSpent', () => {
   };
 
   it('renders the title correctly', () => {
-    render(<MyLearningHoursSpent {...defaultProps} />);
+    render(<MyLearningProgress {...defaultProps} />);
     expect(screen.getByText('Learning Progress')).toBeInTheDocument();
   });
 
   it('displays the lessons visited and total lessons correctly', () => {
-    render(<MyLearningHoursSpent {...defaultProps} />);
+    render(<MyLearningProgress {...defaultProps} />);
     expect(screen.getByText('5/10')).toBeInTheDocument();
     expect(screen.getByText('Lesson visited')).toBeInTheDocument();
   });
 
   it('displays the contents completed and total contents correctly', () => {
-    render(<MyLearningHoursSpent {...defaultProps} />);
+    render(<MyLearningProgress {...defaultProps} />);
     expect(screen.getByText('2/4')).toBeInTheDocument();
     expect(screen.getByText('Contents completed')).toBeInTheDocument();
   });
 
   it('renders progress rings with center text', () => {
-    render(<MyLearningHoursSpent {...defaultProps} />);
+    render(<MyLearningProgress {...defaultProps} />);
     // The center text is the lessonsVisited (as per code)
     expect(screen.getByText('5')).toBeInTheDocument();
     
@@ -42,7 +42,7 @@ describe('MyLearningHoursSpent', () => {
 
   it('handles zero values gracefully', () => {
     render(
-      <MyLearningHoursSpent 
+      <MyLearningProgress 
         lessonsVisited={0} 
         totalLessons={0} 
         contentsCompleted={0} 

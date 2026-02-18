@@ -122,19 +122,5 @@ describe('HomeRecommendedSection', () => {
         expect(videoCard).toHaveAttribute('href', '/content/2');
     });
 
-    it('filters by creatorIds when provided', () => {
-        render(
-            <BrowserRouter>
-                <HomeRecommendedSection creatorIds={['user1', 'user2']} />
-            </BrowserRouter>
-        );
 
-        expect(useContentSearch).toHaveBeenCalledWith(expect.objectContaining({
-            request: expect.objectContaining({
-                filters: expect.objectContaining({
-                    createdBy: ['user1', 'user2']
-                })
-            })
-        }));
-    });
 });

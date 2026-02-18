@@ -1,40 +1,40 @@
-interface MyLearningHoursSpentProps {
+interface MyLearningProgressProps {
   lessonsVisited: number;
   totalLessons: number;
   contentsCompleted: number;
   totalContents: number;
 }
 
-const MyLearningHoursSpent = ({ 
+const MyLearningProgress = ({ 
   lessonsVisited = 0, 
   totalLessons = 0, 
   contentsCompleted = 0, 
   totalContents = 0 
-}: MyLearningHoursSpentProps) => {
+}: MyLearningProgressProps) => {
   // Using lessonsVisited as the main "stats" number for now since we don't have duration.
   // Or we could pass strict "hours" if available.
   const totalHours = lessonsVisited; 
 
   // SVG Donut chart calculations
-  const size = 140; // Increased overall size
+  const size = 140; 
   const center = size / 2;
-  const strokeWidth = 8; // Matched to w-8 h-2 bar 
+  const strokeWidth = 12; // Increased to be more prominent
   
   // Outer circle (Lessons)
   const outerRadius = 58;
   const outerCircumference = 2 * Math.PI * outerRadius;
-  // Protect against divide by zero
   const lessonsPercentage = totalLessons > 0 ? (lessonsVisited / totalLessons) : 0;
+  // Ensure a small segment is visible if progress is 0 but lessons exist? No, follows data.
   const lessonsStrokeDasharray = `${lessonsPercentage * outerCircumference} ${outerCircumference}`;
   
   // Inner circle (Contents)
-  const innerRadius = 36; // Significantly smaller for more gap
+  const innerRadius = 34; // Slightly more gap
   const innerCircumference = 2 * Math.PI * innerRadius;
   const contentsPercentage = totalContents > 0 ? (contentsCompleted / totalContents) : 0;
   const contentsStrokeDasharray = `${contentsPercentage * innerCircumference} ${innerCircumference}`;
 
   return (
-    <div className="bg-sunbird-beige rounded-2xl p-6">
+    <div className="mylearning-donut-container">
       {/* Header */}
       <h3 className="text-[1.25rem] font-semibold text-sunbird-obsidian mb-6 font-['Rubik']">Learning Progress</h3>
 
@@ -48,7 +48,7 @@ const MyLearningHoursSpent = ({
               cy={center} 
               r={outerRadius} 
               fill="none" 
-              stroke="#FFFFFF" 
+              className="mylearning-donut-ring-bg"
               strokeWidth={strokeWidth}
             />
             {/* Inner Background Ring */}
@@ -57,7 +57,7 @@ const MyLearningHoursSpent = ({
               cy={center} 
               r={innerRadius} 
               fill="none" 
-              stroke="#FFFFFF" 
+              className="mylearning-donut-ring-bg"
               strokeWidth={strokeWidth}
             />
             
@@ -67,7 +67,7 @@ const MyLearningHoursSpent = ({
               cy={center} 
               r={outerRadius} 
               fill="none" 
-              stroke="#D48952" 
+              className="mylearning-donut-ring-outer"
               strokeWidth={strokeWidth}
               strokeDasharray={lessonsStrokeDasharray}
               strokeLinecap="round"
@@ -80,7 +80,7 @@ const MyLearningHoursSpent = ({
               cy={center} 
               r={innerRadius} 
               fill="none" 
-              stroke="#A05E29" 
+              className="mylearning-donut-ring-inner"
               strokeWidth={strokeWidth}
               strokeDasharray={contentsStrokeDasharray}
               strokeLinecap="round"
@@ -89,7 +89,7 @@ const MyLearningHoursSpent = ({
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[1.125rem] font-bold text-sunbird-obsidian font-['Rubik']">{totalHours}</span>
+            <span className="text-[2rem] font-bold text-sunbird-obsidian font-['Rubik']">{totalHours}</span>
           </div>
         </div>
 
@@ -124,4 +124,4 @@ const MyLearningHoursSpent = ({
   );
 };
 
-export default MyLearningHoursSpent;
+export default MyLearningProgress;

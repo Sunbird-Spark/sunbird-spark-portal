@@ -9,31 +9,25 @@ interface HomeRecommendedSectionProps {
 }
 
 const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps) => {
-    // Only search if we have creator IDs to filter by
-    const isEnabled = creatorIds.length > 0;
-
     const { data, isLoading } = useContentSearch({
         request: {
             filters: {
                 status: ["Live"],
-                objectType: ["Content", "QuestionSet"], // Broaden search to include various content types
-                ...(creatorIds.length > 0 && { createdBy: creatorIds })
+                objectType: ["Content"]
             },
             sort_by: {
                 lastUpdatedOn: "desc"
             },
-            limit: 10 // Increase limit to allow client-side filtering
+            limit: 10
         },
-        enabled: isEnabled
+        enabled: true
     });
 
+    // Filter out collections unless they are specific types we want to show
+    // For now, we want to show Resources (PDF, Video, etc.) and avoid nested collections
     const recommendedItems = (data?.data?.content || [])
         .filter((item: any) => item.mimeType !== "application/vnd.ekstep.content-collection")
         .slice(0, 3);
-
-    if (!isEnabled) {
-        return null;
-    }
 
     if (!isLoading && recommendedItems.length === 0) {
         return (

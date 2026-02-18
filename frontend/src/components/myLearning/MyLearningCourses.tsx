@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import { FiChevronDown } from "react-icons/fi";
 import { TrackableCollection } from "@/types/TrackableCollections";
@@ -23,11 +24,20 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
   const [visibleCount, setVisibleCount] = useState(COURSES_PER_PAGE);
 
   const getFilteredCourses = () => {
+    const today = dayjs().startOf('day');
+    
     switch (activeTab) {
       case "active":
         return courses.filter(c => c.completionPercentage < 100);
       case "completed":
         return courses.filter(c => c.completionPercentage === 100);
+      case "upcoming":
+        return courses.filter(c => {
+          if (c.batch && c.batch.startDate) {
+            return dayjs(c.batch.startDate).isAfter(today);
+          }
+          return false;
+        });
       default:
         return courses;
     }
@@ -45,9 +55,9 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
   return (
     <div className="bg-white rounded-2xl p-6 h-full shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit">
         <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-['Rubik']">Courses</h3>
-        <FiChevronDown className="text-sunbird-copper w-[1rem] h-[1rem]" />
+        <FiChevronDown className="text-sunbird-obsidian w-[1.25rem] h-[1.25rem] mt-1" />
       </div>
 
       {/* Filter Tabs */}
@@ -58,8 +68,8 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
             onClick={() => setActiveTab(tab.id)}
             className={`pl-6 pr-6 py-2.5 rounded-full text-[0.875rem] font-medium font-['Rubik'] transition-all ${
               activeTab === tab.id
-                ? "bg-sunbird-brick text-white shadow-md shadow-sunbird-brick/20"
-                : "bg-transparent border border-gray-200 text-gray-500 hover:border-sunbird-brick hover:text-sunbird-brick"
+                ? "mylearning-tab-active"
+                : "mylearning-tab-inactive"
             }`}
           >
             {tab.label}

@@ -50,38 +50,56 @@ vi.mock('react-icons/fi', () => ({
 }));
 
 describe('MyLearning Page', () => {
-  const mockCourses: TrackableCollection[] = [
-    { 
-        courseId: '1', 
-        courseName: 'C1', 
-        completionPercentage: 10, 
-        leafNodesCount: 5, 
-        progress: 1,
-        content: { appIcon: '' },
-        batch: {
-            batchId: 'b1',
-            startDate: '2023-01-01',
-            status: 1,
-            enrollmentType: 'open',
-            createdBy: 'user1'
-        }
-    },
-    { 
-        courseId: '2', 
-        courseName: 'C2', 
-        completionPercentage: 100, 
-        leafNodesCount: 5, 
-        progress: 5,
-        content: { appIcon: '' },
-        batch: {
-            batchId: 'b2',
-            startDate: '2023-01-01',
-            status: 1,
-            enrollmentType: 'open',
-            createdBy: 'user1'
-        }
-    },
-  ];
+  const createMockCourse = (id: string, name: string, percentage: number): TrackableCollection => ({
+  courseId: id,
+  courseName: name,
+  collectionId: id,
+  contentId: id,
+  batchId: `batch-${id}`,
+  userId: 'user_123',
+  addedBy: 'admin_123',
+  active: true,
+  status: 2,
+  completionPercentage: percentage,
+  progress: percentage === 100 ? 5 : 1,
+  leafNodesCount: 5,
+  description: `Description for ${name}`,
+  courseLogoUrl: '',
+  dateTime: 1770290316793,
+  enrolledDate: 1770290214120,
+  batch: {
+    identifier: `batch-${id}`,
+    batchId: `batch-${id}`,
+    name: `Batch for ${name}`,
+    startDate: '2023-01-01',
+    status: 1,
+    enrollmentType: 'open',
+    createdBy: 'user1'
+  },
+  content: {
+    identifier: id,
+    name: name,
+    description: `Description for ${name}`,
+    appIcon: '',
+    mimeType: 'application/vnd.ekstep.content-collection',
+    primaryCategory: 'Course',
+    contentType: 'Course',
+    resourceType: 'Course',
+    objectType: 'Content',
+    pkgVersion: 1,
+    channel: 'channel_123',
+    organisation: ['Sunbird Org'],
+    trackable: {
+      enabled: 'Yes',
+      autoBatch: 'No'
+    }
+  }
+});
+
+const mockCourses: TrackableCollection[] = [
+  createMockCourse('1', 'C1', 10),
+  createMockCourse('2', 'C2', 100),
+];
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -18,9 +18,9 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
         className="flex gap-6 p-6 bg-white rounded-2xl border border-[#F3F4F6] hover:shadow-md transition-shadow"
       >
         {/* Thumbnail */}
-        {course.content?.appIcon ? (
+        {(course.content?.appIcon || course.courseLogoUrl) ? (
           <img
-            src={course.content.appIcon}
+            src={course.content?.appIcon || course.courseLogoUrl}
             alt={course.courseName}
             className="w-[7.5rem] h-[7.5rem] rounded-2xl object-cover flex-shrink-0 shadow-sm"
           />
@@ -30,7 +30,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <h4 className="font-bold text-[1.125rem] leading-[1.4] text-[#222222] line-clamp-2 mb-6 font-['Rubik']">
+          <h4 className="font-bold text-[1.125rem] leading-[1.4] text-[#222222] line-clamp-2 mb-2 font-['Rubik']">
             {course.courseName}
           </h4>
           <p className="text-[1rem] font-normal text-[#222222] mb-3 font-['Rubik']">
@@ -38,7 +38,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
           </p>
           {/* Progress Bar */}
           <div 
-            className="h-2 bg-[#F4F4F4] rounded-[0.625rem] max-w-[22.5rem]"
+            className="mylearning-progress-bar-container max-w-[22.5rem]"
             role="progressbar" 
             aria-valuenow={course.completionPercentage} 
             aria-valuemin={0} 
@@ -46,7 +46,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
             aria-label="Course completion"
           >
             <div
-              className="h-full bg-[#A85236] rounded-[0.625rem] transition-all"
+              className="mylearning-progress-bar-fill transition-all"
               style={{ width: `${course.completionPercentage}%` }}
             />
           </div>
