@@ -8,7 +8,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 import { TermsAndConditionsPopover } from "@/components/common/TermsAndConditionsPopover";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
-import { SignupService } from "@/services/SignupService";
+import { TncService } from "@/services/TncService";
 
 interface Step1Props {
     firstName: string;
@@ -43,8 +43,8 @@ export const SignUpForm = ({
     isLoading = false
 }: Step1Props) => {
     const { data: tncConfig } = useSystemSetting('tncConfig');
-    const signupService = new SignupService();
-    const termsUrl = signupService.getTncUrl(tncConfig);
+    const tncService = new TncService();
+    const termsUrl = tncService.getTncUrl(tncConfig);
 
     return (
     <>
