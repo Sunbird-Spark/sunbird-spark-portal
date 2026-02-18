@@ -7,6 +7,7 @@ import HomeSidebar from "@/components/home/HomeSidebar";
 import PageLoader from "@/components/common/PageLoader";
 import Header from "@/components/home/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSidebarState } from "@/hooks/useSidebarState";
 import { useHelpFaqData } from "@/hooks/useFaqData";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
@@ -21,7 +22,7 @@ const HelpSupport = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
@@ -37,9 +38,6 @@ const HelpSupport = () => {
         [allCategories, appName]
     );
 
-    useEffect(() => {
-        setIsSidebarOpen(!isMobile);
-    }, [isMobile]);
 
     return (
         <div className="profile-container">

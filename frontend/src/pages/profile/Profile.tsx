@@ -11,6 +11,7 @@ import PersonalInformation from "@/components/profile/PersonalInformation";
 import ProfileLearningList from "@/components/profile/ProfileLearningList";
 import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSidebarState } from "@/hooks/useSidebarState";
 import { useUserRead } from "@/hooks/useUserRead";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
@@ -22,22 +23,10 @@ const Profile = () => {
     const isMobile = useIsMobile();
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
     const [activeNav, setActiveNav] = useState("profile");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
 
     const { data: userResponse, isLoading, isError } = useUserRead();
     const userData = userResponse?.data?.response;
-
-    useEffect(() => {
-        setIsSidebarOpen(!isMobile);
-    }, [isMobile]);
-
-    if (isLoading) {
-        return <PageLoader message="Loading your profile..." />;
-    }
-
-    if (isError || !userData) {
-        return <PageLoader message="Error loading profile..." />;
-    }
 
     return (
         <div className="profile-container">
@@ -73,22 +62,28 @@ const Profile = () => {
 
                 {/* Main Content Area */}
                 <main className="profile-main-content">
-                    <div className="profile-content-wrapper">
-                        {/* Top Section: Profile Card + Personal Information */}
-                        <div className="grid grid-cols-1 lg:grid-cols-[19rem_1fr] gap-6 mb-8">
-                            {/* Left: Profile Card */}
-                            <ProfileCard user={userData} />
+                    {isLoading ? (
+                        <PageLoader message="Loading your profile..." fullPage={false} />
+                    ) : isError || !userData ? (
+                        <PageLoader message="Error loading profile..." fullPage={false} />
+                    ) : (
+                        <div className="profile-content-wrapper">
+                            {/* Top Section: Profile Card + Personal Information */}
+                            <div className="grid grid-cols-1 lg:grid-cols-[19rem_1fr] gap-6 mb-8">
+                                {/* Left: Profile Card */}
+                                <ProfileCard user={userData} />
 
-                            {/* Right: Personal Information */}
-                            <PersonalInformation user={userData} />
+                                {/* Right: Personal Information */}
+                                <PersonalInformation user={userData} />
+                            </div>
+
+                            {/* Stats Cards Section */}
+                            <ProfileStatsCards />
+
+                            {/* My Learning Section */}
+                            <ProfileLearningList />
                         </div>
-
-                        {/* Stats Cards Section */}
-                        <ProfileStatsCards />
-
-                        {/* My Learning Section */}
-                        <ProfileLearningList />
-                    </div>
+                    )}
                 </main>
             </div>
 
