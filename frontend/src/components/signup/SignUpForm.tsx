@@ -6,6 +6,9 @@ import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/Fo
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
+import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useGetTncUrl } from "@/hooks/useTnc";
 
 interface Step1Props {
     firstName: string;
@@ -38,7 +41,11 @@ export const SignUpForm = ({
     handleContinue,
     isStep1Valid,
     isLoading = false
-}: Step1Props) => (
+}: Step1Props) => {
+    const { data: tncConfig, isSuccess: isTncConfigSuccess } = useSystemSetting('tncConfig');
+    const { data: termsUrl } = useGetTncUrl(isTncConfigSuccess ? tncConfig : null);
+
+    return (
     <>
         <Header
             title="Welcome to Sunbird!"
@@ -163,12 +170,28 @@ export const SignUpForm = ({
                         onCheckedChange={(checked) => setIsTermsAccepted(checked === true)}
                         className="themed-checkbox"
                     />
-                    <label
-                        htmlFor="terms"
-                        className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sunbird-charcoal"
-                    >
-                        I understand & <a href="#" className="themed-link" onClick={(e) => e.preventDefault()}>accept the SUNBIRD Terms of Use</a>.
-                    </label>
+                    <div className="text-[0.75rem] font-medium leading-none text-sunbird-charcoal">
+                        <label htmlFor="terms" className="cursor-pointer">
+                            I understand &amp; {' '}
+                        </label>
+                        {termsUrl ? (
+                            <TermsAndConditionsDialog 
+                                termsUrl={termsUrl}
+                                title="Terms of Use"
+                            >
+                                <button 
+                                    type="button"
+                                    className="themed-link inline"
+                                >
+                                   accept the SUNBIRD Terms of Use
+                                </button>
+                            </TermsAndConditionsDialog>
+                        ) : (
+                            <span className="themed-link inline">
+                                accept the SUNBIRD Terms of Use
+                            </span>
+                        )}.
+                    </div>
                 </div>
 
                 <PrimaryButton
@@ -185,4 +208,5 @@ export const SignUpForm = ({
             </div>
         </div>
     </>
-);
+    );
+};
