@@ -104,4 +104,3 @@ export class SignupService {
         return btoa(binaryString);
     }
 }
-

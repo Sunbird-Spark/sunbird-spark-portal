@@ -293,7 +293,7 @@
   /* Global Signup/Auth Styles */
   .secondary-outline-button {
     @apply w-full !h-10 !bg-white border font-medium flex items-center justify-center gap-2 hover:bg-gray-50 mb-0 text-[0.875rem];
-    border-color: hsl(var(--sunbird-gray-77)) !important;
+    border-color: hsl(var(--sunbird-gray-d0)) !important;
     color: hsl(var(--sunbird-gray-34)) !important;
     border-radius: 0.5rem !important;
   }
