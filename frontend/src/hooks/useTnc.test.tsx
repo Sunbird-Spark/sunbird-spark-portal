@@ -4,21 +4,34 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAcceptTnc, useGetTncUrl } from './useTnc';
 import React from 'react';
 
-// Create mock functions
-const mockAcceptTnc = vi.fn();
-const mockGetTncUrl = vi.fn();
-const mockGetLatestVersion = vi.fn();
-
-// Mock the TncService
+// Mock the TncService with methods defined in the factory
 vi.mock('@/services/TncService', () => {
+    // Create mock functions inside the factory to avoid hoisting issues
+    const mockAcceptTnc = vi.fn();
+    const mockGetTncUrl = vi.fn();
+    const mockGetLatestVersion = vi.fn();
+    
+    class MockTncService {
+        acceptTnc = mockAcceptTnc;
+        getTncUrl = mockGetTncUrl;
+        getLatestVersion = mockGetLatestVersion;
+    }
+    
+    // Expose the mocks so tests can access them
+    (MockTncService as any).mockAcceptTnc = mockAcceptTnc;
+    (MockTncService as any).mockGetTncUrl = mockGetTncUrl;
+    (MockTncService as any).mockGetLatestVersion = mockGetLatestVersion;
+    
     return {
-        TncService: class {
-            acceptTnc = mockAcceptTnc;
-            getTncUrl = mockGetTncUrl;
-            getLatestVersion = mockGetLatestVersion;
-        },
+        TncService: MockTncService,
     };
 });
+
+// Import the service to get access to the mocks
+import { TncService } from '@/services/TncService';
+const mockAcceptTnc = (TncService as any).mockAcceptTnc;
+const mockGetTncUrl = (TncService as any).mockGetTncUrl;
+const mockGetLatestVersion = (TncService as any).mockGetLatestVersion;
 
 describe('useTnc hooks', () => {
     let queryClient: QueryClient;
