@@ -3,10 +3,14 @@ import { CollectionEditorService } from './CollectionEditorService';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import { ChannelService } from '../../ChannelService';
+import { SystemSettingService } from '../../SystemSettingService';
 
 vi.mock('../../userAuthInfoService/userAuthInfoService');
 vi.mock('../../AppCoreService');
 vi.mock('../../OrganizationService');
+vi.mock('../../ChannelService');
+vi.mock('../../SystemSettingService');
 
 describe('CollectionEditorService - Config Creation', () => {
   let service: CollectionEditorService;
@@ -31,9 +35,15 @@ describe('CollectionEditorService - Config Creation', () => {
       (appCoreService.getPData as any) = vi.fn().mockResolvedValue({ 
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
+      vi.spyOn(SystemSettingService.prototype, 'read').mockResolvedValue({
+        data: { response: { value: 'default-channel' } },
+      } as any);
 
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { response: { content: [{ channel: 'channel-1' }] } } 
+        data: { response: { content: [{ hashTagId: 'channel-1', identifier: 'channel-1' }] } } 
+      } as any);
+      vi.spyOn(ChannelService.prototype, 'read').mockResolvedValue({
+        data: { channel: { frameworks: [{ identifier: 'framework-1' }] } },
       } as any);
 
       const config = await service.createConfig(
@@ -45,6 +55,7 @@ describe('CollectionEditorService - Config Creation', () => {
       expect(config.context.did).toBe('device-1');
       expect(config.context.uid).toBe('uid-1');
       expect(config.context.channel).toBe('channel-1');
+      expect(config.context.framework).toBe('framework-1');
       expect(config.context.pdata.id).toBe('sunbird.portal');
       expect(config.context.mode).toBe('edit');
       expect(config.context.identifier).toBe('do_123');
@@ -63,8 +74,14 @@ describe('CollectionEditorService - Config Creation', () => {
       (appCoreService.getPData as any) = vi.fn().mockResolvedValue({ 
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
+      vi.spyOn(SystemSettingService.prototype, 'read').mockResolvedValue({
+        data: { response: { value: 'default-channel' } },
+      } as any);
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { response: { content: [{ channel: 'ch1' }] } } 
+        data: { response: { content: [{ hashTagId: 'ch1', identifier: 'ch1' }] } } 
+      } as any);
+      vi.spyOn(ChannelService.prototype, 'read').mockResolvedValue({
+        data: { channel: { frameworks: [] } },
       } as any);
 
       const config = await service.createConfig({ identifier: 'do_123' }, { mode: 'edit' });
@@ -79,8 +96,14 @@ describe('CollectionEditorService - Config Creation', () => {
       (appCoreService.getPData as any) = vi.fn().mockResolvedValue({ 
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
+      vi.spyOn(SystemSettingService.prototype, 'read').mockResolvedValue({
+        data: { response: { value: 'default-channel' } },
+      } as any);
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { response: { content: [{ channel: 'ch1' }] } } 
+        data: { response: { content: [{ hashTagId: 'ch1', identifier: 'ch1' }] } } 
+      } as any);
+      vi.spyOn(ChannelService.prototype, 'read').mockResolvedValue({
+        data: { channel: { frameworks: [] } },
       } as any);
 
       const config = await service.createConfig({ identifier: 'do_123' }, { mode: 'edit' });
@@ -96,8 +119,14 @@ describe('CollectionEditorService - Config Creation', () => {
       (appCoreService.getPData as any) = vi.fn().mockResolvedValue({ 
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
+      vi.spyOn(SystemSettingService.prototype, 'read').mockResolvedValue({
+        data: { response: { value: 'default-channel' } },
+      } as any);
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { response: { content: [{ channel: 'ch1' }] } } 
+        data: { response: { content: [{ hashTagId: 'ch1', identifier: 'ch1' }] } } 
+      } as any);
+      vi.spyOn(ChannelService.prototype, 'read').mockResolvedValue({
+        data: { channel: { frameworks: [] } },
       } as any);
 
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -117,6 +146,9 @@ describe('CollectionEditorService - Config Creation', () => {
       (appCoreService.getPData as any) = vi.fn().mockResolvedValue({ 
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
+      vi.spyOn(SystemSettingService.prototype, 'read').mockResolvedValue({
+        data: { response: { value: 'default-channel' } },
+      } as any);
       vi.spyOn(OrganizationService.prototype, 'search').mockRejectedValue(
         new Error('Org fetch error')
       );
@@ -138,8 +170,14 @@ describe('CollectionEditorService - Config Creation', () => {
       (appCoreService.getPData as any) = vi.fn().mockResolvedValue({ 
         id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' 
       });
+      vi.spyOn(SystemSettingService.prototype, 'read').mockResolvedValue({
+        data: { response: { value: 'default-channel' } },
+      } as any);
       vi.spyOn(OrganizationService.prototype, 'search').mockResolvedValue({ 
-        data: { response: { content: [{ channel: 'ch1' }] } } 
+        data: { response: { content: [{ hashTagId: 'ch1', identifier: 'ch1' }] } } 
+      } as any);
+      vi.spyOn(ChannelService.prototype, 'read').mockResolvedValue({
+        data: { channel: { frameworks: [] } },
       } as any);
 
       const config = await service.createConfig(

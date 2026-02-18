@@ -1,4 +1,4 @@
-import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiSend, FiClock } from "react-icons/fi";
+import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiClock } from "react-icons/fi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,6 @@ interface WorkspaceContentListProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
-  onSubmitReview: (id: string) => void;
 }
 
 const WorkspaceContentList = ({
@@ -24,7 +23,6 @@ const WorkspaceContentList = ({
   onEdit,
   onDelete,
   onView,
-  onSubmitReview,
 }: WorkspaceContentListProps) => {
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border">
@@ -43,6 +41,13 @@ const WorkspaceContentList = ({
           const TypeIcon = CONTENT_TYPE_ICONS[item.type];
           const status = STATUS_CONFIG[item.status];
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
+
+          const isDraft = item.status === 'draft';
+          const isPublished = item.status === 'published';
+          const isReview = item.status === 'review';
+          const showView = isPublished || isReview;
+          const showEdit = !isPublished && !isReview;
+          const showDelete = isDraft;
 
           return (
             <div
@@ -65,7 +70,7 @@ const WorkspaceContentList = ({
                     {item.title}
                   </h4>
                   <p className="text-xs text-muted-foreground font-rubik truncate sm:hidden">
-                    {item.type}
+                    {item.primaryCategory || item.type}
                   </p>
                 </div>
               </div>
@@ -75,7 +80,7 @@ const WorkspaceContentList = ({
                 <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", CONTENT_TYPE_COLORS[item.type])}>
                   <TypeIcon className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-sm text-foreground font-rubik capitalize">{item.type}</span>
+                <span className="text-sm text-foreground font-rubik">{item.primaryCategory || item.type}</span>
               </div>
 
               {/* Status */}
@@ -93,22 +98,26 @@ const WorkspaceContentList = ({
 
               {/* Actions */}
               <div className="col-span-3 sm:col-span-2 flex items-center justify-end gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-sunbird-wave opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => onView(item.id)}
-                >
-                  <FiEye className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-sunbird-ginger opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => onEdit(item.id)}
-                >
-                  <FiEdit className="w-4 h-4" />
-                </Button>
+                {showView && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-sunbird-wave opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => onView(item.id)}
+                  >
+                    <FiEye className="w-4 h-4" />
+                  </Button>
+                )}
+                {showEdit && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-sunbird-ginger opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => onEdit(item.id)}
+                  >
+                    <FiEdit className="w-4 h-4" />
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
@@ -116,21 +125,24 @@ const WorkspaceContentList = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
-                    <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
-                      <FiEye className="w-4 h-4" /> View
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
-                      <FiEdit className="w-4 h-4" /> Edit
-                    </DropdownMenuItem>
-                    {item.status === 'draft' && (
-                      <DropdownMenuItem onClick={() => onSubmitReview(item.id)} className="font-rubik cursor-pointer gap-2 text-sunbird-wave">
-                        <FiSend className="w-4 h-4" /> Submit for Review
+                    {showView && (
+                      <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
+                        <FiEye className="w-4 h-4" /> View
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
-                      <FiTrash2 className="w-4 h-4" /> Delete
-                    </DropdownMenuItem>
+                    {showEdit && (
+                      <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
+                        <FiEdit className="w-4 h-4" /> Edit
+                      </DropdownMenuItem>
+                    )}
+                    {showDelete && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
+                          <FiTrash2 className="w-4 h-4" /> Delete
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

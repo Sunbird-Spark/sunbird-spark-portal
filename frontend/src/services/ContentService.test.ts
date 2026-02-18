@@ -57,7 +57,7 @@ describe('ContentService', () => {
   it('should call contentRead with custom fields when provided', async () => {
     mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
     await service.contentRead('do_456', ['name', 'description']);
-    expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_456?fields=name,description');
+    expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_456?fields=name%2Cdescription');
   });
 
   it('should call contentRead with no query string when empty array provided', async () => {

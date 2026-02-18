@@ -6,6 +6,8 @@ const mockCreateConfig = vi.fn().mockResolvedValue({ context: { identifier: 'do_
 const mockCreateElement = vi.fn().mockReturnValue(document.createElement('lib-editor'));
 const mockAttachEventListeners = vi.fn();
 const mockRemoveEventListeners = vi.fn();
+const mockLoadAssets = vi.fn();
+const mockRemoveAssets = vi.fn();
 vi.mock('../../services/editors/collection-editor', () => {
   class MockCollectionEditorService {
     initializeDependencies = mockInitializeDependencies;
@@ -13,6 +15,8 @@ vi.mock('../../services/editors/collection-editor', () => {
     createElement = mockCreateElement;
     attachEventListeners = mockAttachEventListeners;
     removeEventListeners = mockRemoveEventListeners;
+    loadAssets = mockLoadAssets;
+    removeAssets = mockRemoveAssets;
   }
   return { CollectionEditorService: MockCollectionEditorService, CollectionEditorContextProps: {} };
 });
@@ -28,6 +32,8 @@ describe('CollectionEditor - Event Handling', () => {
       metadata: { identifier: 'do_123' } 
     });
     mockCreateElement.mockReturnValue(document.createElement('lib-editor'));
+    mockLoadAssets.mockImplementation(() => undefined);
+    mockRemoveAssets.mockImplementation(() => undefined);
   });
 
   it('calls onEditorEvent when editor event is triggered', async () => {
@@ -131,6 +137,8 @@ describe('CollectionEditor - Lifecycle', () => {
       metadata: { identifier: 'do_123' } 
     });
     mockCreateElement.mockReturnValue(document.createElement('lib-editor'));
+    mockLoadAssets.mockImplementation(() => undefined);
+    mockRemoveAssets.mockImplementation(() => undefined);
   });
 
   it('re-initializes when identifier changes', async () => {

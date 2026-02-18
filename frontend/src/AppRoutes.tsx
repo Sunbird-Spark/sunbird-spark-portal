@@ -19,6 +19,7 @@ import HelpSupport from './pages/helpSupport/HelpSupport';
 import HelpCategoryDetail from './pages/helpSupport/HelpCategoryDetail';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
 import ContentEditorPage from './pages/content/ContentEditorPage';
+import CollectionEditorPage from './pages/content/CollectionEditorPage';
 import Explore from './pages/Explore';
 import MyLearning from './pages/myLearning/MyLearning';
 import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
@@ -29,6 +30,7 @@ const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
 const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
 const GenericEditorProtected = withRoles(['content_creator'])(GenericEditorPage);
+const CollectionEditorProtected = withRoles(['content_creator'])(CollectionEditorPage);
 
 const AppRoutes: React.FC = () => {
   return (
@@ -55,6 +57,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/create" element={<CreateContentPage />} />
         <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
         <Route path="/my-learning" element={<MyLearning />} />
+        <Route path="/edit/collection-editor/:contentId" element={<CollectionEditorProtected />} />
 
         {/* Generic Editor routes */}
         <Route path="/workspace/content/edit/generic" element={<GenericEditorPage />} />

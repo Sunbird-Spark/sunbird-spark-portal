@@ -23,7 +23,6 @@ const defaultProps = {
   onEdit: vi.fn(),
   onDelete: vi.fn(),
   onView: vi.fn(),
-  onSubmitReview: vi.fn(),
 };
 const mockItem: WorkspaceItem = {
   id: 'item-1',
@@ -33,7 +32,9 @@ const mockItem: WorkspaceItem = {
   status: 'draft',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-02T00:00:00Z',
-  author: 'Author',
+  author: 'user-1',
+  primaryCategory: 'Course',
+  contentType: 'Course',
 };
 
 vi.mock('@/components/workspace/CreateOptions', () => ({
@@ -55,19 +56,17 @@ vi.mock('@/components/workspace/EmptyState', () => ({
   ),
 }));
 vi.mock('@/components/workspace/WorkspaceContentCard', () => ({
-  default: ({ item, onEdit, onDelete, onView, onSubmitReview }: {
+  default: ({ item, onEdit, onDelete, onView }: {
     item: WorkspaceItem;
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onView: (id: string) => void;
-    onSubmitReview: (id: string) => void;
   }) => (
     <div data-testid="content-card">
       <span>{item.title}</span>
       <button type="button" onClick={() => onEdit(item.id)}>Edit</button>
       <button type="button" onClick={() => onDelete(item.id)}>Delete</button>
       <button type="button" onClick={() => onView(item.id)}>View</button>
-      <button type="button" onClick={() => onSubmitReview(item.id)}>Submit Review</button>
     </div>
   ),
 }));
@@ -128,8 +127,8 @@ describe('WorkspacePageContent', () => {
     expect(screen.getByTestId('content-list')).toBeInTheDocument();
     expect(screen.queryByTestId('content-card')).not.toBeInTheDocument();
   });
-  it('invokes onEdit, onDelete, onView, onSubmitReview when grid card actions clicked', () => {
-    const onEdit = vi.fn(), onDelete = vi.fn(), onView = vi.fn(), onSubmitReview = vi.fn();
+  it('invokes onEdit, onDelete, onView when grid card actions clicked', () => {
+    const onEdit = vi.fn(), onDelete = vi.fn(), onView = vi.fn();
     render(
       <WorkspacePageContent
         {...defaultProps}
@@ -139,7 +138,6 @@ describe('WorkspacePageContent', () => {
         onEdit={onEdit}
         onDelete={onDelete}
         onView={onView}
-        onSubmitReview={onSubmitReview}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
@@ -148,8 +146,6 @@ describe('WorkspacePageContent', () => {
     expect(onDelete).toHaveBeenCalledWith('item-1');
     fireEvent.click(screen.getByRole('button', { name: 'View' }));
     expect(onView).toHaveBeenCalledWith('item-1');
-    fireEvent.click(screen.getByRole('button', { name: 'Submit Review' }));
-    expect(onSubmitReview).toHaveBeenCalledWith('item-1');
   });
   it('invokes onEdit when list row Edit clicked', () => {
     const onEdit = vi.fn();

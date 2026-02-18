@@ -14,6 +14,7 @@ export interface CollectionEditorConfig {
         did: string;
         uid: string;
         channel: string;
+        framework: string;
         pdata: { id: string; ver: string; pid: string };
         contextRollup: { l1: string };
         cdata: any[];

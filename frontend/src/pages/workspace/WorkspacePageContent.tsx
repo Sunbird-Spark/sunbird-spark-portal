@@ -25,7 +25,6 @@ interface WorkspacePageContentProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
-  onSubmitReview: (id: string) => void;
 }
 
 export default function WorkspacePageContent({
@@ -46,7 +45,6 @@ export default function WorkspacePageContent({
   onEdit,
   onDelete,
   onView,
-  onSubmitReview,
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
@@ -133,7 +131,6 @@ export default function WorkspacePageContent({
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
-              onSubmitReview={onSubmitReview}
             />
           ))}
         </div>
@@ -143,7 +140,6 @@ export default function WorkspacePageContent({
           onEdit={onEdit}
           onDelete={onDelete}
           onView={onView}
-          onSubmitReview={onSubmitReview}
         />
       )}
 
