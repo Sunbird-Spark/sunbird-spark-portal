@@ -27,8 +27,7 @@ const CollectionDetailPage = () => {
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const isTrackable =
     (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
-  const showUnlockPrompt = isTrackable && !isAuthenticated;
-  const contentBlocked = showUnlockPrompt;
+  const contentBlocked = isTrackable && !isAuthenticated;
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const collectionData = collectionDataFromApi ?? null;
@@ -141,7 +140,7 @@ const CollectionDetailPage = () => {
 
           {/* Right Sidebar - Lessons Accordion */}
           <div className="lg:sticky lg:top-6 flex flex-col max-h-[calc(100vh_-_120px)] pr-3">
-            {showUnlockPrompt && (
+            {contentBlocked && (
               <div className="flex-shrink-0 mb-4">
                 <LoginToUnlockCard />
               </div>

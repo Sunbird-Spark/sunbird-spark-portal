@@ -16,7 +16,7 @@ const LoginToUnlockCard = () => {
         <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] text-sunbird-status-ongoing-text">
           {t("courseDetails.unlockLearningTitle")}
         </h3>
-        <p className="font-rubik font-normal text-[0.875rem] leading-[100%] text-muted-foreground whitespace-nowrap">
+        <p className="font-rubik font-normal text-[0.8125rem] leading-[100%] text-muted-foreground">
           {t("courseDetails.unlockLearningDescription")}
         </p>
       </div>

@@ -234,4 +234,44 @@ describe('CollectionDetailPage', () => {
     expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
     expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
   });
+
+  it('does not show LoginToUnlockCard when trackable.enabled is "No"', () => {
+    mockUseCollection.mockReturnValue({
+      data: { ...mockCollectionData, trackable: { enabled: 'No' } },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
+  });
+
+  it('does not show LoginToUnlockCard when trackable exists but enabled is undefined', () => {
+    mockUseCollection.mockReturnValue({
+      data: { ...mockCollectionData, trackable: {} },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
+  });
+
+  it('shows LoginToUnlockCard when trackable.enabled is "YES" (uppercase) and user not authenticated', () => {
+    mockUseCollection.mockReturnValue({
+      data: { ...mockCollectionData, trackable: { enabled: 'YES' as const } },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
+  });
+
+  it('shows LoginToUnlockCard when trackable.enabled is "yes" (lowercase) and user not authenticated', () => {
+    mockUseCollection.mockReturnValue({
+      data: { ...mockCollectionData, trackable: { enabled: 'yes' as const } },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
+  });
 });
