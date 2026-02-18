@@ -3,6 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import HomeSidebar from './HomeSidebar';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '@/auth/AuthContext';
+import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -16,9 +18,6 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock authentication
-import { useAuth } from '@/auth/AuthContext';
-import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
-
 vi.mock('@/auth/AuthContext', () => ({
     useAuth: vi.fn(),
 }));

@@ -178,7 +178,7 @@ describe('WorkspacePage', () => {
   it('renders mobile layout with sheet when isMobile is true', () => {
     mockUseIsMobile.mockReturnValue(true);
     renderWithProviders(<WorkspacePage />);
-    expect(screen.getByRole('button', { name: 'Open Menu' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
   });
 
   it('closes create modal when close button is clicked', async () => {
