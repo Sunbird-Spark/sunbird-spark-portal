@@ -91,7 +91,7 @@ describe('TrackableCollectionCard', () => {
     renderComponent(mockCourse);
     
     const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/content/do_12345');
+    expect(link).toHaveAttribute('href', '/collection/do_12345');
   });
 
   it('renders progress bar with correct width', () => {
