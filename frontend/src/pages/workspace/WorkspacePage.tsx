@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
@@ -6,15 +6,13 @@ import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
 import WorkspaceToolbar from "@/components/workspace/WorkspaceToolbar";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
-import { useContentSearch } from "@/hooks/useContent";
-import { mapContentToWorkspaceItem } from "@/services/workspace";
 import { ContentService } from "@/services/ContentService";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import WorkspacePageHeader from "./WorkspacePageHeader";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -52,55 +50,34 @@ const WorkspacePage = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
-  const { data: searchData, isLoading, isError, error, refetch } = useContentSearch({
-    request: showContent
-      ? { sort_by: sortBy === 'updated' ? { lastUpdatedOn: 'desc' } : sortBy === 'created' ? { createdOn: 'desc' } : { name: 'asc' } }
-      : undefined,
+  const userId = userAuthInfoService.getUserId();
+
+  const {
+    contents,
+    counts,
+    totalCount,
+    isLoading,
+    isLoadingMore,
+    isCountsLoading,
+    error,
+    hasMore,
+    loadMore,
+    refetchCounts,
+    refetchAll,
+  } = useWorkspace({
+    userId,
+    activeTab: activeView,
+    sortBy,
+    typeFilter,
+    userRole,
     enabled: showContent,
   });
 
-  const items: WorkspaceItem[] = useMemo(() => {
-    if (!searchData?.data) return [];
-    const content = searchData.data.content ?? [];
-    const questionSets = searchData.data.QuestionSet ?? [];
-    return [...content, ...questionSets].map(mapContentToWorkspaceItem);
-  }, [searchData]);
-
-  const counts = useMemo(() => {
-    const review = items.filter((i) => i.status === 'review').length;
-    return {
-      all: items.length,
-      drafts: items.filter((i) => i.status === 'draft').length,
-      review,
-      published: items.filter((i) => i.status === 'published').length,
-      pendingReview: review,
-    };
-  }, [items]);
-
+  // Reset view when role changes
   useEffect(() => {
     const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';
     setActiveView((prev) => (prev === nextView ? prev : nextView));
   }, [userRole]);
-
-  const filteredItems = useMemo(() => {
-    let filtered = [...items];
-    if (activeView === 'drafts') filtered = filtered.filter(i => i.status === 'draft');
-    else if (activeView === 'review' || activeView === 'pending-review') filtered = filtered.filter(i => i.status === 'review');
-    else if (activeView === 'published' || activeView === 'my-published') filtered = filtered.filter(i => i.status === 'published');
-    else if (activeView === 'all') { /* show all */ }
-    
-    // Apply type filter
-    if (typeFilter !== 'all') filtered = filtered.filter(i => i.type === typeFilter);
-    const toTime = (s: string | null) => (s ? new Date(s).getTime() : 0);
-    return [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'updated': return toTime(b.updatedAt) - toTime(a.updatedAt);
-        case 'created': return toTime(b.createdAt) - toTime(a.createdAt);
-        case 'title': return a.title.localeCompare(b.title);
-        default: return 0;
-      }
-    });
-  }, [items, activeView, typeFilter, sortBy]);
 
   const handleCreateOption = (optionId: string) => {
     if (RESOURCE_EDITOR_OPTIONS.includes(optionId)) {
@@ -153,7 +130,7 @@ const WorkspacePage = () => {
       description: "The content has been removed.", 
       variant: "destructive" 
     });
-    void refetch();
+    refetchAll();
   };
 
   const handleView = (_id: string) => {
@@ -165,7 +142,7 @@ const WorkspacePage = () => {
       title: "Submitted for Review", 
       description: "Your content has been submitted for review." 
     });
-    void refetch();
+    refetchAll();
   };
 
   const handleCreateClick = () => setShowCreateModal(true);
@@ -180,9 +157,12 @@ const WorkspacePage = () => {
     onViewModeChange: setViewMode,
     typeFilter,
     onTypeFilterChange: setTypeFilter,
-    contentCount: !['create', 'uploads', 'collaborations'].includes(activeView) ? filteredItems.length : undefined,
+    contentCount: showContent ? contents.length : undefined,
+    totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,
   };
+
+  if (showContent && isCountsLoading && isLoading) return <PageLoader message={t('loading')} />;
 
   return (
     <div className="workspace-container">
@@ -229,30 +209,26 @@ const WorkspacePage = () => {
           <main className="workspace-main-content">
             <div className="workspace-content-wrapper">
               <WorkspaceToolbar {...navigationProps} />
-              {showContent && isLoading && (
-                <PageLoader message={t('loading')} fullPage={false} />
-              )}
-              {showContent && isError && error && (
-                <PageLoader
-                  error={error.message}
-                  onRetry={() => refetch()}
-                  fullPage={false}
-                />
-              )}
-              {(!showContent || (!isLoading && !isError)) && (
-                <WorkspacePageContent showCreateModal={showCreateModal}
-                  activeView={activeView}
-                  filteredItems={filteredItems}
-                  viewMode={viewMode}
-                  t={t}
-                  onCreateOption={handleCreateOption}
-                  onCreateClick={handleCreateClick}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onView={handleView}
-                  onSubmitReview={handleSubmitReview}
-                />
-              )}
+              <WorkspacePageContent
+                showCreateModal={showCreateModal}
+                activeView={activeView}
+                filteredItems={contents}
+                viewMode={viewMode}
+                t={t}
+                isLoading={isLoading}
+                isLoadingMore={isLoadingMore}
+                hasMore={hasMore}
+                isError={!!error}
+                error={error}
+                onLoadMore={loadMore}
+                onRetry={refetchAll}
+                onCreateOption={handleCreateOption}
+                onCreateClick={handleCreateClick}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onView={handleView}
+                onSubmitReview={handleSubmitReview}
+              />
             </div>
           </main>
           <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
