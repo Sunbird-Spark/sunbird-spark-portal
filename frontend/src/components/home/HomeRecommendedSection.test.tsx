@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import HomeRecommendedSection from './HomeRecommendedSection';
+import { useContentSearch } from '@/hooks/useContent';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -13,11 +14,65 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
+// Mock useContentSearch
+vi.mock('@/hooks/useContent', () => ({
+    useContentSearch: vi.fn(),
+}));
+
+// Mock useAppI18n
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string, options?: any) => options?.defaultValue || key,
+    }),
+}));
+
+const mockRecommendedItems = [
+    {
+        identifier: '1',
+        name: 'Complete AI Engineer Bootcamp',
+        mimeType: 'application/vnd.ekstep.content-collection',
+        primaryCategory: 'Course', // CollectionCard uses this
+        contentType: 'Course',
+        objectType: 'Content',
+        appIcon: 'icon1.jpg',
+    },
+    {
+        identifier: '2',
+        name: 'Generative AI for Cybersecurity Professionals',
+        mimeType: 'video/mp4', // ResourceCard uses this -> Video
+        contentType: 'Resource',
+        objectType: 'Content',
+        appIcon: 'icon2.jpg',
+    },
+    {
+        identifier: '3',
+        name: 'Data Engineering Foundations',
+        mimeType: 'application/pdf', // ResourceCard uses this -> PDF
+        contentType: 'Resource',
+        objectType: 'Content',
+        appIcon: 'icon3.jpg',
+    }
+];
+
 describe('HomeRecommendedSection', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        
+        // Default Mock Implementation
+        (useContentSearch as any).mockReturnValue({
+            data: {
+                data: {
+                    content: mockRecommendedItems
+                }
+            },
+            isLoading: false,
+        });
+    });
+
     const renderComponent = () => {
         return render(
             <BrowserRouter>
-                <HomeRecommendedSection />
+                <HomeRecommendedSection creatorIds={['user1']} />
             </BrowserRouter>
         );
     };
@@ -34,43 +89,52 @@ describe('HomeRecommendedSection', () => {
     it('renders all recommended items', () => {
         renderComponent();
 
-        // Check for specific items
-        expect(screen.getByText(/Complete AI Engineer Bootcamp/)).toBeInTheDocument();
+        expect(screen.getByText('Complete AI Engineer Bootcamp')).toBeInTheDocument();
         expect(screen.getByText('Generative AI for Cybersecurity Professionals')).toBeInTheDocument();
-        expect(screen.getAllByText('Data Engineering Foundations').length).toBeGreaterThan(0);
+        expect(screen.getByText('Data Engineering Foundations')).toBeInTheDocument();
     });
 
     it('renders correct badges for different types', () => {
         renderComponent();
 
-        expect(screen.getAllByText('Course').length).toBeGreaterThan(0);
-        expect(screen.getByText('Video')).toBeInTheDocument();
-        expect(screen.getAllByText('Textbook').length).toBeGreaterThan(0);
-    });
-
-    it('renders stats for course/textbook items', () => {
-        renderComponent();
-
-        // Item 1 has 4.5 rating, 9k learners, 25 lessons
-        expect(screen.getAllByText('4.5').length).toBeGreaterThan(0);
-        expect(screen.getAllByText(/9k Learners/).length).toBeGreaterThan(0);
-        expect(screen.getAllByText(/25 Lessons/).length).toBeGreaterThan(0);
+        // Item 1: CollectionCard renders primaryCategory
+        expect(screen.getByText('Course')).toBeInTheDocument();
+        
+        // Item 2: ResourceCard renders "Video" for video/mp4
+        // The mock t function returns defaultValue. 
+        // ResourceCard: t("resource.videoBadge", { defaultValue: "Video" })
+        expect(screen.getAllByText('Video').length).toBeGreaterThan(0);
+        
+        // Item 3: ResourceCard renders "PDF" for application/pdf
+        // ResourceCard: t("resource.pdfBadge", { defaultValue: "PDF" })
+        expect(screen.getAllByText('PDF').length).toBeGreaterThan(0);
     });
 
     it('navigates when a card is clicked', () => {
         renderComponent();
 
-        // Check first item - it should be a link with correct href
-        const firstCard = screen.getByText(/Complete AI Engineer Bootcamp/).closest('a');
-        expect(firstCard).toHaveAttribute('href', '/course/1');
+        // Item 1: CollectionCard links to /collection/:id
+        const firstCard = screen.getByText('Complete AI Engineer Bootcamp').closest('a');
+        expect(firstCard).toHaveAttribute('href', '/collection/1');
 
-        // Check video card - it should be a link with correct href
+        // Item 2: ResourceCard links to /content/:id
         const videoCard = screen.getByText('Generative AI for Cybersecurity Professionals').closest('a');
-        expect(videoCard).toHaveAttribute('href', '/course/2');
+        expect(videoCard).toHaveAttribute('href', '/content/2');
     });
 
-    it('renders video CTA button on video card', () => {
-        renderComponent();
-        expect(screen.getByText('View The Video')).toBeInTheDocument();
+
+    it('filters out enrolled courses', () => {
+        render(
+            <BrowserRouter>
+                <HomeRecommendedSection enrolledCourseIds={['1']} />
+            </BrowserRouter>
+        );
+
+        // Course '1' should NOT be present
+        expect(screen.queryByText('Complete AI Engineer Bootcamp')).not.toBeInTheDocument();
+
+        // Other courses should still be present
+        expect(screen.getByText('Generative AI for Cybersecurity Professionals')).toBeInTheDocument();
+        expect(screen.getByText('Data Engineering Foundations')).toBeInTheDocument();
     });
 });

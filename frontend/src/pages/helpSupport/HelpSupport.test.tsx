@@ -56,6 +56,7 @@ vi.mock("@/hooks/useFaqData", () => ({
 
 const mockCategories = [
     {
+        id: "login",
         name: "Login",
         faqs: [
             { topic: "How do I login?", description: "Use your credentials to login." },
@@ -64,6 +65,7 @@ const mockCategories = [
         ],
     },
     {
+        id: "profile",
         name: "Profile",
         faqs: [
             { topic: "How to update profile?", description: "Go to profile settings." },
@@ -71,6 +73,7 @@ const mockCategories = [
         ],
     },
     {
+        id: "course_certificates",
         name: "Course & Certificates",
         faqs: [
             { topic: "How to enroll?", description: "Click enroll on the course page." },
