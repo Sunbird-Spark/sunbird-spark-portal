@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SignUpForm } from './SignUpForm';
 import { SignUpOtpVerification } from './SignUpOtpVerification';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 
 // Mock useSystemSetting hook
 vi.mock('@/hooks/useSystemSetting', () => ({
@@ -68,6 +70,17 @@ vi.mock('react-icons/fi', () => ({
 }));
 
 describe('SignUpForm', () => {
+    let queryClient: QueryClient;
+
+    beforeEach(() => {
+        queryClient = new QueryClient({
+            defaultOptions: {
+                queries: { retry: false },
+                mutations: { retry: false },
+            },
+        });
+    });
+
     const defaultProps = {
         firstName: '',
         setFirstName: vi.fn(),
@@ -87,8 +100,16 @@ describe('SignUpForm', () => {
         isStep1Valid: false,
     };
 
+    const renderWithProviders = (component: React.ReactElement) => {
+        return render(
+            <QueryClientProvider client={queryClient}>
+                {component}
+            </QueryClientProvider>
+        );
+    };
+
     it('renders Step 1 correctly', () => {
-        render(<SignUpForm {...defaultProps} />);
+        renderWithProviders(<SignUpForm {...defaultProps} />);
         expect(screen.getByText('Welcome to Sunbird!')).toBeInTheDocument();
         expect(screen.getByText('Sign in with Google')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter First Name')).toBeInTheDocument();
@@ -96,7 +117,7 @@ describe('SignUpForm', () => {
     });
 
     it('handles input changes', () => {
-        render(<SignUpForm {...defaultProps} />);
+        renderWithProviders(<SignUpForm {...defaultProps} />);
 
         fireEvent.change(screen.getByPlaceholderText('Enter First Name'), { target: { value: 'John' } });
         expect(defaultProps.setFirstName).toHaveBeenCalledWith('John');
@@ -113,26 +134,26 @@ describe('SignUpForm', () => {
 
     it('shows validation errors for invalid email/mobile', () => {
         const props = { ...defaultProps, emailOrMobile: 'invalid' };
-        render(<SignUpForm {...props} />);
+        renderWithProviders(<SignUpForm {...props} />);
         expect(screen.getByText('Enter valid Email or 10-digit Mobile (6-9)')).toBeInTheDocument();
     });
 
     it('shows validation errors for weak password', () => {
         const props = { ...defaultProps, password: 'weak' };
-        render(<SignUpForm {...props} />);
+        renderWithProviders(<SignUpForm {...props} />);
         expect(screen.getByText(/Password must be 8\+ chars/)).toBeInTheDocument();
     });
 
     it('shows error when passwords do not match', () => {
         const props = { ...defaultProps, password: 'Password123!', confirmPassword: 'Different!' };
-        render(<SignUpForm {...props} />);
+        renderWithProviders(<SignUpForm {...props} />);
         expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
     });
 
     it('toggles password visibility', () => {
         const setShowPassword = vi.fn();
         const setShowConfirmPassword = vi.fn();
-        render(<SignUpForm {...defaultProps} setShowPassword={setShowPassword} setShowConfirmPassword={setShowConfirmPassword} />);
+        renderWithProviders(<SignUpForm {...defaultProps} setShowPassword={setShowPassword} setShowConfirmPassword={setShowConfirmPassword} />);
 
         const eyeButtons = screen.getAllByRole('button');
         // Index 0 is Google Sign In, indices 1 and 2 are eye buttons
@@ -144,7 +165,7 @@ describe('SignUpForm', () => {
     });
 
     it('handles terms checkbox', () => {
-        render(<SignUpForm {...defaultProps} />);
+        renderWithProviders(<SignUpForm {...defaultProps} />);
         const checkbox = screen.getByRole('checkbox');
         fireEvent.click(checkbox);
         expect(defaultProps.setIsTermsAccepted).toHaveBeenCalled();
@@ -152,7 +173,7 @@ describe('SignUpForm', () => {
 
     it('calls handleContinue when primary button is clicked', () => {
         const props = { ...defaultProps, isStep1Valid: true };
-        render(<SignUpForm {...props} />);
+        renderWithProviders(<SignUpForm {...props} />);
         fireEvent.click(screen.getByTestId('primary-button'));
         expect(props.handleContinue).toHaveBeenCalled();
     });
