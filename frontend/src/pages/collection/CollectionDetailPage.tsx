@@ -12,14 +12,22 @@ import { useContentSearch } from "@/hooks/useContent";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
+import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
+import { useAuth } from "@/auth/AuthContext";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
   const { t } = useAppI18n();
+  const { isAuthenticated: contextAuth } = useAuth();
+  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
+  const isTrackable =
+    (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
+  const contentBlocked = isTrackable && !isAuthenticated;
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const collectionData = collectionDataFromApi ?? null;
@@ -131,12 +139,20 @@ const CollectionDetailPage = () => {
           <CollectionOverview collectionData={displayCollectionData} />
 
           {/* Right Sidebar - Lessons Accordion */}
-          <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
-            <CollectionSidebar
-              modules={collectionData.modules}
-              expandedModules={expandedModules}
-              toggleModule={toggleModule}
-            />
+          <div className="lg:sticky lg:top-6 flex flex-col max-h-[calc(100vh_-_120px)] pr-3">
+            {contentBlocked && (
+              <div className="flex-shrink-0 mb-4">
+                <LoginToUnlockCard />
+              </div>
+            )}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+              <CollectionSidebar
+                modules={collectionData.modules}
+                expandedModules={expandedModules}
+                toggleModule={toggleModule}
+                contentBlocked={contentBlocked}
+              />
+            </div>
           </div>
 
         </div>

@@ -13,6 +13,7 @@ export interface Module {
   lessons: Lesson[];
 }
 
+export type TrackableEnabled = "Yes" | "No";
 export interface CollectionData {
   id: string;
   title: string;
@@ -22,6 +23,7 @@ export interface CollectionData {
   description: string;
   audience: string[];
   modules: Module[];
+  trackable?: { enabled?: TrackableEnabled };
 }
 
 export interface HierarchyContentNode {
@@ -34,6 +36,7 @@ export interface HierarchyContentNode {
   leafNodesCount?: number;
   audience?: string[];
   children?: HierarchyContentNode[];
+  trackable?: { enabled?: TrackableEnabled };
 }
 
 export interface CourseHierarchyResponse {
