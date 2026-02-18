@@ -38,17 +38,26 @@ const HelpCategoryDetail = () => {
 
     // Look up current category by slug
     const category = useMemo(() => {
-        const rawCategory = buildCategoryFaqsMap(allCategories)[categoryId || ""];
-        if (!rawCategory) return null;
+        try {
+            if (!allCategories || !Array.isArray(allCategories)) return null;
 
-        return {
-            ...rawCategory,
-            title: rawCategory.title.replace(/{{APP_NAME}}/g, appName),
-            faqs: rawCategory.faqs.map(faq => ({
-                ...faq,
-                question: faq.question.replace(/{{APP_NAME}}/g, appName)
-            }))
-        };
+            const categoryMap = buildCategoryFaqsMap(allCategories);
+            const rawCategory = categoryMap?.[categoryId || ""];
+
+            if (!rawCategory) return null;
+
+            return {
+                ...rawCategory,
+                title: rawCategory.title?.replace(/{{APP_NAME}}/g, appName) || "",
+                faqs: (rawCategory.faqs || []).map(faq => ({
+                    ...faq,
+                    question: faq.question?.replace(/{{APP_NAME}}/g, appName) || ""
+                }))
+            };
+        } catch (err) {
+            console.error("Error processing category detail:", err);
+            return null;
+        }
     }, [allCategories, categoryId, appName]);
 
 
@@ -134,6 +143,13 @@ const HelpCategoryDetail = () => {
                             <PageLoader
                                 message="Loading..."
                                 error="Category not found."
+                                onRetry={() => navigate("/help-support")}
+                                fullPage={false}
+                            />
+                        ) : sanitizedFaqs.length === 0 ? (
+                            <PageLoader
+                                message="Loading..."
+                                error="No FAQs available for this category."
                                 onRetry={() => navigate("/help-support")}
                                 fullPage={false}
                             />
