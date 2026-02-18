@@ -17,6 +17,7 @@ import { sessionMiddleware, anonymousMiddlewares } from './middlewares/condition
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import { kongProxy } from './proxies/kongProxy.js';
+import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,6 +46,11 @@ app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, keyc
 app.use('/google', googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+// Content Editor Proxy Routes (serves /action/*, /content-plugins/*, /plugins/*, etc.)
+// keycloak.middleware() deserializes the session grant into req.kauth so that
+// decorateRequestHeaders can read the user's access token for upstream auth.
+app.use('/', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware(), knowlgMwProxyRoutes);
 
 // Apply anonymous session middleware to portal routes (once per route tree)
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
