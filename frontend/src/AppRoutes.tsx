@@ -20,6 +20,7 @@ import HelpCategoryDetail from './pages/helpSupport/HelpCategoryDetail';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
 import ContentEditorPage from './pages/content/ContentEditorPage';
 import Explore from './pages/Explore';
+import MyLearning from './pages/myLearning/MyLearning';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -51,6 +52,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentPage />} />
         <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
+        <Route path="/my-learning" element={<MyLearning />} />
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
