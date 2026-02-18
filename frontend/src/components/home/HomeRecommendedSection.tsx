@@ -6,9 +6,10 @@ import { useContentSearch } from "@/hooks/useContent";
 
 interface HomeRecommendedSectionProps {
     creatorIds?: string[];
+    enrolledCourseIds?: string[];
 }
 
-const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps) => {
+const HomeRecommendedSection = ({ creatorIds = [], enrolledCourseIds = [] }: HomeRecommendedSectionProps) => {
     const { data, isLoading } = useContentSearch({
         request: {
             filters: {
@@ -26,6 +27,7 @@ const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps
     // Filter out collections unless they are specific types we want to show
     // For now, we want to show Resources (PDF, Video, etc.) and avoid nested collections
     const recommendedItems = (data?.data?.content || [])
+        .filter((item: any) => !enrolledCourseIds.includes(item.identifier))
         .slice(0, 3);
 
     if (!isLoading && recommendedItems.length === 0) {

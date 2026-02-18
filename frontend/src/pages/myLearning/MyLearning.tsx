@@ -242,6 +242,7 @@ const MyLearning = () => {
             {/* Recommended Contents */}
             <HomeRecommendedSection 
               creatorIds={Array.from(new Set(courses.map(c => c.batch?.createdBy).filter((id): id is string => !!id)))}
+              enrolledCourseIds={courses.map(c => c.courseId)}
             />
           </div>
         </main>

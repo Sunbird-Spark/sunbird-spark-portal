@@ -123,4 +123,18 @@ describe('HomeRecommendedSection', () => {
     });
 
 
+    it('filters out enrolled courses', () => {
+        render(
+            <BrowserRouter>
+                <HomeRecommendedSection enrolledCourseIds={['1']} />
+            </BrowserRouter>
+        );
+
+        // Course '1' should NOT be present
+        expect(screen.queryByText('Complete AI Engineer Bootcamp')).not.toBeInTheDocument();
+
+        // Other courses should still be present
+        expect(screen.getByText('Generative AI for Cybersecurity Professionals')).toBeInTheDocument();
+        expect(screen.getByText('Data Engineering Foundations')).toBeInTheDocument();
+    });
 });
