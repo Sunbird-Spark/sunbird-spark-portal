@@ -1,17 +1,16 @@
 import { FiVideo, FiFileText } from "react-icons/fi";
 
-const iconStyle = { color: "hsl(var(--sunbird-brick))", stroke: "hsl(var(--sunbird-brick))" };
 const iconWrapperClass = "inline-flex items-center flex-shrink-0";
 
 export const VideoIcon = () => (
-  <span className={`${iconWrapperClass} w-8 h-5`} aria-hidden>
-    <FiVideo className="w-full h-full" style={iconStyle} />
+  <span className={`${iconWrapperClass} w-8 h-5 text-sunbird-brick`} aria-hidden>
+    <FiVideo className="w-full h-full" />
   </span>
 );
 
 export const DocumentIcon = () => (
-  <span className={`${iconWrapperClass} w-6 h-7`} aria-hidden>
-    <FiFileText className="w-full h-full" style={iconStyle} />
+  <span className={`${iconWrapperClass} w-6 h-7 text-sunbird-brick`} aria-hidden>
+    <FiFileText className="w-full h-full" />
   </span>
 );
 
