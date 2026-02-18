@@ -141,7 +141,7 @@ export class UserService {
             fields: ENROLLMENT_CONTENT_FIELDS.join(','),
             batchDetails: BATCH_DETAILS_FIELDS.join(','),
         });
-        const url = `/learner/course/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
+        const url = `/course/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
         return getClient().get<CourseEnrollmentResponse>(url);
     }
 }
