@@ -20,7 +20,7 @@ import HelpCategoryDetail from './pages/helpSupport/HelpCategoryDetail';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
 import ContentEditorPage from './pages/content/ContentEditorPage';
 import Explore from './pages/Explore';
-import MyLearning from './pages/my-learning/MyLearning';
+import MyLearning from './pages/myLearning/MyLearning';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
