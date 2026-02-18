@@ -43,6 +43,15 @@ export const buildCategoryFaqsMap = (
     for (const cat of categories) {
         if (!cat) continue;
         const slug = cat.id || slugify(cat.name || "");
+        if (!slug) {
+            console.warn("Skipping category: Unable to generate slug (missing id and name)", cat);
+            continue;
+        }
+        if (map[slug]) {
+            console.warn(`Skipping duplicate category slug: "${slug}"`, cat);
+            continue;
+        }
+
         map[slug] = {
             title: `${cat.name || "Unknown"} FAQs`,
             faqs: (Array.isArray(cat.faqs) ? cat.faqs : []).map((faq) => {

@@ -40,7 +40,7 @@ const HelpSupport = () => {
                 }));
             } catch (err) {
                 console.error("Error processing help categories:", err);
-                return [];
+                throw err;
             }
         },
         [allCategories, appName]

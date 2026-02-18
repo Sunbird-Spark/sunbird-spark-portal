@@ -49,10 +49,10 @@ const HelpCategoryDetail = () => {
 
             return {
                 ...rawCategory,
-                title: rawCategory.title?.replace(/{{APP_NAME}}/g, appName) || "",
+                title: rawCategory.title.replace(/{{APP_NAME}}/g, appName) || "",
                 faqs: (rawCategory.faqs || []).map(faq => ({
                     ...faq,
-                    question: faq.question?.replace(/{{APP_NAME}}/g, appName) || ""
+                    question: faq.question.replace(/{{APP_NAME}}/g, appName) || ""
                 }))
             };
         } catch (err) {
