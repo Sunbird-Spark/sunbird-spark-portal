@@ -28,6 +28,11 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
     },
 }));
 
+// Mock useIsMobile to safely test desktop behavior
+vi.mock("@/hooks/use-mobile", () => ({
+    useIsMobile: () => false,
+}));
+
 describe('HomeSidebar', () => {
     const defaultProps = {
         activeNav: 'home',
@@ -49,10 +54,7 @@ describe('HomeSidebar', () => {
         vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' });
     });
 
-    // Mock useIsMobile to safely test desktop behavior
-    vi.mock("@/hooks/use-mobile", () => ({
-        useIsMobile: () => false,
-    }));
+
 
     it('returns null when not authenticated', () => {
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, login: vi.fn(), logout: vi.fn() } as any);
