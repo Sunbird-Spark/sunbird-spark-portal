@@ -17,7 +17,7 @@ export interface FormReadResponse {
     action: string;
     component: string;
     data: {
-      sections: FormSection[];
+      sections: any;
     };
     created_on: string;
     last_modified_on: string;
