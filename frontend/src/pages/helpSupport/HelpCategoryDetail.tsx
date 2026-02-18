@@ -39,26 +39,21 @@ const HelpCategoryDetail = () => {
 
     // Look up current category by slug
     const category = useMemo(() => {
-        try {
-            if (!allCategories || !Array.isArray(allCategories)) return null;
+        if (!allCategories || !Array.isArray(allCategories)) return null;
 
-            const categoryMap = buildCategoryFaqsMap(allCategories);
-            const rawCategory = categoryMap?.[categoryId || ""];
+        const categoryMap = buildCategoryFaqsMap(allCategories);
+        const rawCategory = categoryMap?.[categoryId || ""];
 
-            if (!rawCategory) return null;
+        if (!rawCategory) return null;
 
-            return {
-                ...rawCategory,
-                title: rawCategory.title?.replace(/{{APP_NAME}}/g, appName) || "",
-                faqs: (rawCategory.faqs || []).map(faq => ({
-                    ...faq,
-                    question: faq.question?.replace(/{{APP_NAME}}/g, appName) || ""
-                }))
-            };
-        } catch (err) {
-            console.error("Error processing category detail:", err);
-            return null;
-        }
+        return {
+            ...rawCategory,
+            title: rawCategory.title.replace(/{{APP_NAME}}/g, appName) || "",
+            faqs: (rawCategory.faqs || []).map(faq => ({
+                ...faq,
+                question: faq.question.replace(/{{APP_NAME}}/g, appName) || ""
+            }))
+        };
     }, [allCategories, categoryId, appName]);
 
 

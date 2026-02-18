@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+} from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
@@ -31,6 +35,8 @@ const RESOURCE_EDITOR_OPTION_LABELS: Record<string, string> = {
 };
 
 const contentService = new ContentService();
+/** Option IDs that should open the generic (upload) editor */
+const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video', 'upload-youtube'];
 
 const WorkspacePage = () => {
   const isMobile = useIsMobile();
@@ -85,6 +91,9 @@ const WorkspacePage = () => {
       setShowCreateModal(false);
       setSelectedOption(optionId);
       setShowNameDialog(true);
+    } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
+      navigate('/workspace/content/edit/generic');
+      return;
     } else {
       setShowCreateModal(false);
       toast({

@@ -35,12 +35,12 @@ const HelpSupport = () => {
 
                 return buildHelpCategories(allCategories).map(cat => ({
                     ...cat,
-                    title: cat.title?.replace(/{{APP_NAME}}/g, appName) || "",
-                    description: cat.description?.replace(/{{APP_NAME}}/g, appName) || ""
+                    title: cat.title.replace(/{{APP_NAME}}/g, appName) || "",
+                    description: cat.description.replace(/{{APP_NAME}}/g, appName) || ""
                 }));
             } catch (err) {
                 console.error("Error processing help categories:", err);
-                return [];
+                throw err;
             }
         },
         [allCategories, appName]

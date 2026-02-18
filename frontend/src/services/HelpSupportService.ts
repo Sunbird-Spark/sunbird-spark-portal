@@ -23,12 +23,21 @@ export const buildHelpCategories = (categories: ApiFaqCategory[]): HelpCategory[
     if (!Array.isArray(categories)) return [];
 
     return categories.map((cat) => {
-        if (!cat) return null;
+        if (!cat) {
+            console.warn("buildHelpCategories: encountered null or undefined category, skipping.");
+            return null;
+        }
+        const slug = cat.id || slugify(cat.name || "");
+        if (!slug) {
+            console.warn("buildHelpCategories: Skipping category with empty slug", cat);
+            return null;
+        }
+
         return {
             title: cat.name || "",
             description: cat.description || "",
             faqCount: Array.isArray(cat.faqs) ? cat.faqs.length : 0,
-            slug: cat.id || slugify(cat.name || ""),
+            slug,
         };
     }).filter((cat): cat is HelpCategory => cat !== null);
 };
@@ -43,15 +52,23 @@ export const buildCategoryFaqsMap = (
     for (const cat of categories) {
         if (!cat) continue;
         const slug = cat.id || slugify(cat.name || "");
+        if (!slug) {
+            console.warn("Skipping category: Unable to generate slug (missing id and name)", cat);
+            continue;
+        }
+        if (map[slug]) {
+            console.warn(`Skipping duplicate category slug: "${slug}"`, cat);
+            continue;
+        }
+
         map[slug] = {
             title: `${cat.name || "Unknown"} FAQs`,
-            faqs: (Array.isArray(cat.faqs) ? cat.faqs : []).map((faq) => {
-                if (!faq) return { question: "", answer: "" };
-                return {
+            faqs: (Array.isArray(cat.faqs) ? cat.faqs : [])
+                .filter((faq) => !!faq)
+                .map((faq) => ({
                     question: faq.topic || "",
                     answer: faq.description || "",
-                };
-            }),
+                })),
         };
     }
     return map;
