@@ -11,9 +11,10 @@ import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoServ
 import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import WorkspacePageHeader from "./WorkspacePageHeader";
+import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
@@ -38,7 +39,7 @@ const WorkspacePage = () => {
   const { toast } = useToast();
   const { t } = useAppI18n();
   const [activeNav, setActiveNav] = useState("workspace");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
   const [userRole, setUserRole] = useState<UserRole>('creator');
   const [activeView, setActiveView] = useState<WorkspaceView>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -125,10 +126,10 @@ const WorkspacePage = () => {
   };
 
   const handleDelete = (_id: string) => {
-    toast({ 
-      title: "Content Deleted", 
-      description: "The content has been removed.", 
-      variant: "destructive" 
+    toast({
+      title: "Content Deleted",
+      description: "The content has been removed.",
+      variant: "destructive"
     });
     refetchAll();
   };
@@ -138,9 +139,9 @@ const WorkspacePage = () => {
   };
 
   const handleSubmitReview = (_id: string) => {
-    toast({ 
-      title: "Submitted for Review", 
-      description: "Your content has been submitted for review." 
+    toast({
+      title: "Submitted for Review",
+      description: "Your content has been submitted for review."
     });
     refetchAll();
   };
@@ -162,14 +163,11 @@ const WorkspacePage = () => {
     onCreateClick: handleCreateClick,
   };
 
-  if (showContent && isCountsLoading && isLoading) return <PageLoader message={t('loading')} />;
-
   return (
     <div className="workspace-container">
-      <WorkspacePageHeader
-        isMobile={isMobile}
+      <Header
         isSidebarOpen={isSidebarOpen}
-        onMenuOpen={() => setIsSidebarOpen(true)}
+        onToggleSidebar={() => setIsSidebarOpen(true)}
       />
 
       <div className="flex flex-1 relative transition-all">
@@ -188,48 +186,43 @@ const WorkspacePage = () => {
           </Sheet>
         ) : (
           <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
-            {isSidebarOpen && (
-              <>
-                <HomeSidebar activeNav={activeNav} onNavChange={setActiveNav} />
-                <div className="absolute -right-3 top-2 z-20">
-                  <button
-                    onClick={() => setIsSidebarOpen(false)}
-                    className="w-6 h-6 bg-sunbird-gray-ef rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
-                  >
-                    <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                </div>
-              </>
-            )}
+            <HomeSidebar
+              activeNav={activeNav}
+              onNavChange={setActiveNav}
+              collapsed={!isSidebarOpen}
+              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
           </div>
         )}
         <div className="flex-1 flex flex-col min-w-0">
           <main className="workspace-main-content">
-            <div className="workspace-content-wrapper">
-              <WorkspaceToolbar {...navigationProps} />
-              <WorkspacePageContent
-                showCreateModal={showCreateModal}
-                activeView={activeView}
-                filteredItems={contents}
-                viewMode={viewMode}
-                t={t}
-                isLoading={isLoading}
-                isLoadingMore={isLoadingMore}
-                hasMore={hasMore}
-                isError={!!error}
-                error={error}
-                onLoadMore={loadMore}
-                onRetry={refetchAll}
-                onCreateOption={handleCreateOption}
-                onCreateClick={handleCreateClick}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onView={handleView}
-                onSubmitReview={handleSubmitReview}
-              />
-            </div>
+            {showContent && isCountsLoading && isLoading ? (
+              <PageLoader message={t('loading')} fullPage={false} />
+            ) : (
+              <div className="workspace-content-wrapper">
+                <WorkspaceToolbar {...navigationProps} />
+                <WorkspacePageContent
+                  showCreateModal={showCreateModal}
+                  activeView={activeView}
+                  filteredItems={contents}
+                  viewMode={viewMode}
+                  t={t}
+                  isLoading={isLoading}
+                  isLoadingMore={isLoadingMore}
+                  hasMore={hasMore}
+                  isError={!!error}
+                  error={error}
+                  onLoadMore={loadMore}
+                  onRetry={refetchAll}
+                  onCreateOption={handleCreateOption}
+                  onCreateClick={handleCreateClick}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                  onSubmitReview={handleSubmitReview}
+                />
+              </div>
+            )}
           </main>
           <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
           <ContentNameDialog

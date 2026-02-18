@@ -90,9 +90,9 @@ export const useFaqData = (baseUrl: string | undefined, languageCode: string) =>
  */
 export const useHelpFaqData = () => {
   const { currentCode } = useAppI18n();
-  const { data: settingResponse, refetch: refetchSetting } = useSystemSetting("portalFaqURL");
+  const { data: settingResponse, isLoading: settingLoading, error: settingError, refetch: refetchSetting } = useSystemSetting("portalFaqURL");
   const faqUrl = settingResponse?.data?.response?.value || settingResponse?.data?.value;
-  const { data: faqData, loading, error, refetch: refetchFaq } = useFaqData(faqUrl, currentCode || "en");
+  const { data: faqData, loading: faqLoading, error: faqError, refetch: refetchFaq } = useFaqData(faqUrl, currentCode || "en");
 
   const categories: ApiFaqCategory[] = useMemo(
     () => (faqData as any)?.categories ?? [],
@@ -104,5 +104,10 @@ export const useHelpFaqData = () => {
     refetchFaq();
   };
 
-  return { categories, loading, error, refetch };
+  return {
+    categories,
+    loading: settingLoading || faqLoading,
+    error: settingError || faqError,
+    refetch
+  };
 };
