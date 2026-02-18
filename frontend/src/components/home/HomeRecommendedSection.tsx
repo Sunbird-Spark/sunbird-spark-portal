@@ -26,7 +26,6 @@ const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps
     // Filter out collections unless they are specific types we want to show
     // For now, we want to show Resources (PDF, Video, etc.) and avoid nested collections
     const recommendedItems = (data?.data?.content || [])
-        .filter((item: any) => item.mimeType !== "application/vnd.ekstep.content-collection")
         .slice(0, 3);
 
     if (!isLoading && recommendedItems.length === 0) {
@@ -59,9 +58,7 @@ const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps
                      ))
                 ) : (
                     recommendedItems.map((item: any) => {
-                        const mimeType = item.mimeType || '';
-                        const isResource = ['application/pdf', 'application/epub', 'application/epub+zip'].includes(mimeType) ||
-                                         (mimeType.startsWith('video/') || mimeType === 'application/x-mpegURL');
+                        const isResource = item.mimeType !== "application/vnd.ekstep.content-collection";
                         
                         if (isResource) {
                             return <ResourceCard key={item.identifier} item={item} />;
