@@ -55,10 +55,22 @@ describe('Index Page', () => {
       </BrowserRouter>
     );
 
-    const sections = screen.getAllByTestId(/-section$/);
-    expect(sections).toHaveLength(3);
-    expect(sections[0]).toHaveTextContent('Popular');
-    expect(sections[1]).toHaveTextContent('Categories');
-    expect(sections[2]).toHaveTextContent('Resources');
+    const contentSection = screen.getByTestId('content-section');
+    const categorySection = screen.getByTestId('category-section');
+    const resourceSection = screen.getByTestId('resource-section');
+    
+    expect(contentSection).toHaveTextContent('Popular');
+    expect(categorySection).toHaveTextContent('Categories');
+    expect(resourceSection).toHaveTextContent('Resources');
+    
+    // Verify order: content should come before category
+    expect(
+      contentSection.compareDocumentPosition(categorySection) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    
+    // Verify order: category should come before resource
+    expect(
+      categorySection.compareDocumentPosition(resourceSection) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 });
