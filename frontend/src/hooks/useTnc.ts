@@ -1,4 +1,4 @@
-import { useMutation, UseMutationResult } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery } from '@tanstack/react-query';
 import { TncService, AcceptTncResponse } from '@/services/TncService';
 import { ApiResponse } from '@/lib/http-client';
 
@@ -14,3 +14,11 @@ export const useAcceptTnc = (): UseMutationResult<
       tncService.acceptTnc(tncConfig, identifier),
   });
 };
+
+export const useGetTncUrl = (tncConfig: any) => {
+  return useQuery({
+      queryKey: ['tncUrl', tncConfig],
+      queryFn: () => tncService.getTncUrl(tncConfig),
+      enabled: !!tncConfig,
+    });
+}

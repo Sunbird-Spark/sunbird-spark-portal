@@ -8,7 +8,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 import { TermsAndConditionsPopover } from "@/components/common/TermsAndConditionsPopover";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
-import { TncService } from "@/services/TncService";
+import { useGetTncUrl } from "@/hooks/useTnc";
 
 interface Step1Props {
     firstName: string;
@@ -42,9 +42,8 @@ export const SignUpForm = ({
     isStep1Valid,
     isLoading = false
 }: Step1Props) => {
-    const { data: tncConfig } = useSystemSetting('tncConfig');
-    const tncService = new TncService();
-    const termsUrl = tncService.getTncUrl(tncConfig);
+    const { data: tncConfig, isSuccess: isTncConfigSuccess } = useSystemSetting('tncConfig');
+    const { data: termsUrl } = useGetTncUrl(isTncConfigSuccess ? tncConfig : null);
 
     return (
     <>
@@ -175,17 +174,19 @@ export const SignUpForm = ({
                         htmlFor="terms"
                         className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sunbird-charcoal"
                     >
-                        I understand & <TermsAndConditionsPopover 
-                            termsUrl={termsUrl}
-                            title="Terms of Use"
-                        >
-                            <button 
-                                type="button"
-                                className="themed-link inline"
+                        I understand & {termsUrl && (
+                            <TermsAndConditionsPopover 
+                                termsUrl={termsUrl}
+                                title="Terms of Use"
                             >
-                                accept the SUNBIRD Terms of Use
-                            </button>
-                        </TermsAndConditionsPopover>.
+                                <button 
+                                    type="button"
+                                    className="themed-link inline"
+                                >
+                                    accept the SUNBIRD Terms of Use
+                                </button>
+                            </TermsAndConditionsPopover>
+                        )}.
                     </label>
                 </div>
 
