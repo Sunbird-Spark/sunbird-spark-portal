@@ -19,27 +19,39 @@ export const slugify = (name: string): string => {
 };
 
 /** Build the category card data from the API categories array. */
-export const buildHelpCategories = (categories: ApiFaqCategory[]): HelpCategory[] =>
-    categories.map((cat) => ({
-        title: cat.name,
-        description: cat.description || "",
-        faqCount: cat.faqs?.length ?? 0,
-        slug: cat.id || slugify(cat.name),
-    }));
+export const buildHelpCategories = (categories: ApiFaqCategory[]): HelpCategory[] => {
+    if (!Array.isArray(categories)) return [];
+
+    return categories.map((cat) => {
+        if (!cat) return null;
+        return {
+            title: cat.name || "",
+            description: cat.description || "",
+            faqCount: Array.isArray(cat.faqs) ? cat.faqs.length : 0,
+            slug: cat.id || slugify(cat.name || ""),
+        };
+    }).filter((cat): cat is HelpCategory => cat !== null);
+};
 
 /** Build a slug → CategoryFaqData map for the detail page. */
 export const buildCategoryFaqsMap = (
     categories: ApiFaqCategory[]
 ): Record<string, CategoryFaqData> => {
     const map: Record<string, CategoryFaqData> = {};
+    if (!Array.isArray(categories)) return map;
+
     for (const cat of categories) {
-        const slug = cat.id || slugify(cat.name);
+        if (!cat) continue;
+        const slug = cat.id || slugify(cat.name || "");
         map[slug] = {
-            title: `${cat.name} FAQs`,
-            faqs: (cat.faqs ?? []).map((faq) => ({
-                question: faq.topic,
-                answer: faq.description,
-            })),
+            title: `${cat.name || "Unknown"} FAQs`,
+            faqs: (Array.isArray(cat.faqs) ? cat.faqs : []).map((faq) => {
+                if (!faq) return { question: "", answer: "" };
+                return {
+                    question: faq.topic || "",
+                    answer: faq.description || "",
+                };
+            }),
         };
     }
     return map;
