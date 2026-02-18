@@ -79,7 +79,6 @@ const DynamicCategorySection = ({ title, list }: DynamicCategorySectionProps) =>
                 >
                   <div className="w-9 h-[0.1875rem] bg-white/90 rounded-full" />
                   <div className="flex flex-col gap-3">
-                    <img src={getIconForCategory(category)} alt={category.title} className="w-8 h-8" />
                     <p className="text-[1.0625rem] font-bold text-white leading-tight">
                       {category.title}
                     </p>

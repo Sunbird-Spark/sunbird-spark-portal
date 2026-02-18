@@ -106,59 +106,6 @@ describe('DynamicCategorySection', () => {
     expect(firstCardStyle).toContain('var(--category-gradient-');
   });
 
-  it('renders fallback icon for unknown category', () => {
-    const mockCategories = [
-      { id: 'cat1', index: 1, title: 'Unknown Category', code: 'unknown', value: 'Unknown Category' },
-    ];
-
-    const { container } = render(
-      <BrowserRouter>
-        <DynamicCategorySection title="Categories" list={mockCategories} />
-      </BrowserRouter>
-    );
-
-    const images = container.querySelectorAll('img');
-    expect(images.length).toBeGreaterThan(0);
-    expect(images[0]).toHaveAttribute('alt', 'Unknown Category');
-  });
-
-  it('uses code field for icon mapping', () => {
-    const mockCategories = [
-      { id: 'cat1', index: 1, title: 'Tech Category', code: 'technology', value: 'Tech' },
-      { id: 'cat2', index: 2, title: 'Design Category', code: 'design', value: 'Design' },
-    ];
-
-    const { container } = render(
-      <BrowserRouter>
-        <DynamicCategorySection title="Categories" list={mockCategories} />
-      </BrowserRouter>
-    );
-
-    const images = container.querySelectorAll('img');
-    expect(images.length).toBe(2);
-    expect(images[0]).toHaveAttribute('alt', 'Tech Category');
-    expect(images[1]).toHaveAttribute('alt', 'Design Category');
-  });
-
-  it('handles case-insensitive code matching', () => {
-    const mockCategories = [
-      { id: 'cat1', index: 1, title: 'Tech', code: 'TECHNOLOGY', value: 'Tech' },
-      { id: 'cat2', index: 2, title: 'Marketing', code: 'Marketing', value: 'Marketing' },
-    ];
-
-    const { container } = render(
-      <BrowserRouter>
-        <DynamicCategorySection title="Categories" list={mockCategories} />
-      </BrowserRouter>
-    );
-
-    const images = container.querySelectorAll('img');
-    expect(images.length).toBe(2);
-    // Should successfully map icons despite different casing
-    expect(images[0]).toHaveAttribute('src');
-    expect(images[1]).toHaveAttribute('src');
-  });
-
   it('renders all links with correct href to /explore', () => {
     const mockCategories = [
       { id: 'cat1', index: 1, title: 'UI/UX Design', code: 'technology', value: 'UI/UX Design' },
