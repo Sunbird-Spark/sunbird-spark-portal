@@ -12,6 +12,23 @@ vi.mock('@/hooks/useWorkspace', () => ({
   useWorkspace: (...args: unknown[]) => mockUseWorkspace(),
 }));
 
+vi.mock('@/auth/AuthContext', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    user: { name: 'Test User', role: 'content_creator' },
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: {
+    getUserId: () => 'test-user-id',
+    isUserAuthenticated: () => true,
+  },
+}));
+
 const mockToast = vi.fn();
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: mockToast }),
