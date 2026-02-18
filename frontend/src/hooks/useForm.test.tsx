@@ -12,20 +12,18 @@ vi.mock('../services/FormService', () => {
       return {
         formRead: () => Promise.resolve({ 
           data: { 
-            result: { 
-              form: { 
-                type: 'page',
-                subtype: 'landing',
-                action: 'sections',
-                component: 'portal',
-                framework: '*',
-                data: {
-                  sections: []
-                },
-                created_on: '2024-01-01',
-                last_modified_on: null,
-                rootOrgId: 'test-org'
-              } 
+            form: { 
+              type: 'page',
+              subtype: 'landing',
+              action: 'sections',
+              component: 'portal',
+              framework: '*',
+              data: {
+                sections: []
+              },
+              created_on: '2024-01-01',
+              last_modified_on: '2024-01-01',
+              rootOrgId: 'test-org'
             } 
           } 
         }),
@@ -61,6 +59,6 @@ describe('useFormRead', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data?.data.result.form.type).toBe('page');
+    expect(result.current.data?.data.form.type).toBe('page');
   });
 });
