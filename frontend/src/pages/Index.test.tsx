@@ -36,15 +36,13 @@ describe('Index Page', () => {
   it('renders dynamic sections in correct order', () => {
     const mockFormData = {
       data: {
-        result: {
-          form: {
-            data: {
-              sections: [
-                { id: 'sec2', index: 2, title: 'Categories', type: 'categories', list: [] },
-                { id: 'sec1', index: 1, title: 'Popular', type: 'content', criteria: {} },
-                { id: 'sec3', index: 3, title: 'Resources', type: 'resource', criteria: {} },
-              ]
-            }
+        form: {
+          data: {
+            sections: [
+              { id: 'sec2', index: 2, title: 'Categories', type: 'categories', list: [] },
+              { id: 'sec1', index: 1, title: 'Popular', type: 'content', criteria: {} },
+              { id: 'sec3', index: 3, title: 'Resources', type: 'resources', criteria: {} },
+            ]
           }
         }
       }

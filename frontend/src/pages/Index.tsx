@@ -29,7 +29,7 @@ const Index = () => {
   console.log('Form API Response:', formData);
   console.log('Form API Error:', error);
 
-  const sections = formData?.data?.result?.form?.data?.sections || [];
+  const sections = formData?.data?.form?.data?.sections || [];
   console.log('Sections found:', sections);
   
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
@@ -52,7 +52,7 @@ const Index = () => {
             list={section.list}
           />
         );
-      case 'resource':
+      case 'resources':
         return (
           <DynamicResourceSection
             key={section.id}
