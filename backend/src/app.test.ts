@@ -124,13 +124,13 @@ describe('Express App', () => {
     expect(response.body).toEqual({ result: 'mock-read-response' });
   });
 
-  it('should handle /action/* routes via kongProxy', async () => {
+  it('should handle /action/* routes via knowlgMwProxy', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
       .get('/action/data/v1/page/assemble')
       .expect(200);
 
-    expect(response.text).toBe('mock-kong-response');
+    expect(response.text).toBe('mock-knowlg-response');
   });
 
   it('should handle POST requests to /action/* routes', async () => {
@@ -140,25 +140,25 @@ describe('Express App', () => {
       .send({ request: { query: 'test' } })
       .expect(200);
 
-    expect(response.text).toBe('mock-kong-response');
+    expect(response.text).toBe('mock-knowlg-response');
   });
 
-  it('should handle /action/course/v1/hierarchy/* via kongProxy', async () => {
+  it('should handle /action/course/v1/hierarchy/* via knowlgMwProxy', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
       .get('/action/course/v1/hierarchy/do_123')
       .expect(200);
 
-    expect(response.text).toBe('mock-kong-response');
+    expect(response.text).toBe('mock-knowlg-response');
   });
 
-  it('should handle /action/data/v1/telemetry via kongProxy', async () => {
+  it('should handle /action/data/v1/telemetry via knowlgMwProxy', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
       .post('/action/data/v1/telemetry')
       .send({ events: [] })
       .expect(200);
 
-    expect(response.text).toBe('mock-kong-response');
+    expect(response.text).toBe('mock-knowlg-response');
   });
 });
