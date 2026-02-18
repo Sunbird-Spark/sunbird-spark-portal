@@ -22,6 +22,7 @@ export interface CollectionData {
   description: string;
   audience: string[];
   modules: Module[];
+  trackable?: { enabled?: string };
 }
 
 export interface HierarchyContentNode {
@@ -34,6 +35,7 @@ export interface HierarchyContentNode {
   leafNodesCount?: number;
   audience?: string[];
   children?: HierarchyContentNode[];
+  trackable?: { enabled?: string };
 }
 
 export interface CourseHierarchyResponse {

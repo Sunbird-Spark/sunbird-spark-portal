@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuth } from '@/auth/AuthContext';
+import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import CollectionDetailPage from './CollectionDetailPage';
 
 const mockCollectionData = {
@@ -64,8 +66,24 @@ vi.mock('@/components/collection/CollectionOverview', () => ({
     <div data-testid="collection-overview">{collectionData.title}</div>
   ),
 }));
+vi.mock('@/auth/AuthContext', () => ({
+  useAuth: vi.fn(() => ({
+    isAuthenticated: false,
+    user: null,
+    login: vi.fn(),
+    logout: vi.fn(),
+  })),
+}));
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: { isUserAuthenticated: vi.fn(() => false) },
+}));
+
 vi.mock('@/components/collection/CollectionSidebar', () => ({
-  default: () => <aside data-testid="collection-sidebar">Sidebar</aside>,
+  default: ({ contentBlocked }: { contentBlocked?: boolean }) => (
+    <aside data-testid="collection-sidebar" data-content-blocked={String(!!contentBlocked)}>
+      Sidebar
+    </aside>
+  ),
 }));
 vi.mock('@/components/landing/FAQSection', () => ({ default: () => <section data-testid="faq">FAQ</section> }));
 
@@ -85,6 +103,13 @@ function renderWithProviders(ui: React.ReactElement) {
 describe('CollectionDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+    vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(false);
     mockUseCollection.mockReturnValue({
       data: mockCollectionData,
       isLoading: false,
@@ -172,5 +197,41 @@ describe('CollectionDetailPage', () => {
     });
     renderWithProviders(<CollectionDetailPage />);
     expect(screen.getByText('Search Result 1')).toBeInTheDocument();
+  });
+
+  it('shows LoginToUnlockCard when collection is trackable and user is not authenticated', () => {
+    mockUseCollection.mockReturnValue({
+      data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
+  });
+
+  it('does not show LoginToUnlockCard when user is authenticated (trackable collection)', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: true,
+      user: { id: '1', name: 'User', role: 'guest' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+    mockUseCollection.mockReturnValue({
+      data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
+  });
+
+  it('does not show LoginToUnlockCard when collection is not trackable', () => {
+    mockUseCollection.mockReturnValue({
+      data: mockCollectionData,
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
   });
 });
