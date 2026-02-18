@@ -11,7 +11,7 @@ const BatchCard = ({ collectionId }: BatchCardProps) => {
 
   return (
     <>
-      <div className="flex-shrink-0 bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border px-5 py-4 flex flex-col gap-2 min-w-[11rem]">
+      <div className="w-full bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border px-5 py-4 flex flex-col gap-2">
         <p className="text-xs text-muted-foreground font-['Rubik'] leading-tight">
           Manage batches for this course
         </p>

@@ -5,6 +5,69 @@ import { FiX, FiCheck, FiSearch, FiLoader } from "react-icons/fi";
 import { useLearnerFuzzySearch } from "@/hooks/useUser";
 import { cn } from "@/lib/utils";
 
+/* ─── Switch primitives ─── */
+
+const SwitchToggle = ({
+  id,
+  checked,
+  onChange,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (val: boolean) => void;
+}) => (
+  <button
+    id={id}
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange(!checked)}
+    className={cn(
+      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-sunbird-brick/30 focus:ring-offset-2",
+      checked ? "bg-sunbird-brick" : "bg-gray-300"
+    )}
+  >
+    <span
+      className={cn(
+        "inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200",
+        checked ? "translate-x-6" : "translate-x-1"
+      )}
+    />
+  </button>
+);
+
+interface SwitchRowProps {
+  id: string;
+  checked: boolean;
+  onChange: (val: boolean) => void;
+  label: string;
+  /** Optional text that appears next to the toggle, e.g. "Open" */
+  valueLabel?: string;
+}
+
+const SwitchRow = ({ id, checked, onChange, label, valueLabel }: SwitchRowProps) => (
+  <div className="flex items-center justify-between gap-4">
+    <label htmlFor={id} className="text-sm font-medium text-foreground font-['Rubik'] cursor-pointer">
+      {label}
+    </label>
+    <div className="flex items-center gap-2">
+      {valueLabel && (
+        <span
+          className={cn(
+            "text-xs font-medium font-['Rubik'] transition-colors",
+            checked ? "text-sunbird-brick" : "text-muted-foreground"
+          )}
+        >
+          {valueLabel}
+        </span>
+      )}
+      <SwitchToggle id={id} checked={checked} onChange={onChange} />
+    </div>
+  </div>
+);
+
+/* ─── Types ─── */
+
 interface MentorUser {
   identifier: string;
   firstName?: string;
@@ -48,6 +111,8 @@ const INITIAL_FORM: BatchFormState = {
 const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']";
 const inputClass =
   "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']";
+
+/* ─── Modal ─── */
 
 const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: CreateBatchModalProps) => {
   const [form, setForm] = useState<BatchFormState>(INITIAL_FORM);
@@ -121,6 +186,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] max-h-[90vh] overflow-y-auto focus:outline-none">
+
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-border sticky top-0 bg-white rounded-t-2xl z-10">
             <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-['Rubik']">
@@ -214,36 +280,33 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
               </div>
             </div>
 
-            {/* 8. Batch Type */}
-            <div>
-              <label htmlFor="batchType" className={labelClass}>
-                Batch Type
-              </label>
-              <select
-                id="batchType"
-                className={inputClass}
-                value={form.batchType}
-                onChange={(e) => handleField("batchType", e.target.value)}
-              >
-                <option value="Open">Open</option>
-                <option value="Invite Only">Invite Only</option>
-              </select>
-            </div>
-
-            {/* 6-7. Booleans */}
-            <div className="space-y-3">
-              <CheckboxRow
-                id="issueCertificate"
-                checked={form.issueCertificate}
-                onCheckedChange={(v) => handleField("issueCertificate", !!v)}
-                label="Issue Certificate"
-              />
-              <CheckboxRow
-                id="enableDiscussion"
-                checked={form.enableDiscussion}
-                onCheckedChange={(v) => handleField("enableDiscussion", !!v)}
-                label="Enable Discussion"
-              />
+            {/* 6, 7, 8 — Switches: Issue Certificate, Enable Discussion, Batch Type */}
+            <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
+              <div className="px-4 py-3">
+                <SwitchRow
+                  id="issueCertificate"
+                  label="Issue Certificate"
+                  checked={form.issueCertificate}
+                  onChange={(v) => handleField("issueCertificate", v)}
+                />
+              </div>
+              <div className="px-4 py-3">
+                <SwitchRow
+                  id="enableDiscussion"
+                  label="Enable Discussion"
+                  checked={form.enableDiscussion}
+                  onChange={(v) => handleField("enableDiscussion", v)}
+                />
+              </div>
+              <div className="px-4 py-3">
+                <SwitchRow
+                  id="batchType"
+                  label="Batch Type"
+                  valueLabel="Open"
+                  checked={form.batchType === "Open"}
+                  onChange={(v) => handleField("batchType", v ? "Open" : "")}
+                />
+              </div>
             </div>
 
             {/* 9. Mentors */}
@@ -364,6 +427,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
     </Dialog.Root>
   );
 };
+
+/* ─── Checkbox (used only for T&C and mentor list) ─── */
 
 interface CheckboxRowProps {
   id: string;
