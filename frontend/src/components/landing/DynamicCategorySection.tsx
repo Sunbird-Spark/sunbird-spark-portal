@@ -11,17 +11,38 @@ interface DynamicCategorySectionProps {
   list?: CategoryItem[];
 }
 
+// Icon mapping based on category code for stability
 const iconMap: Record<string, string> = {
-  "UI/UX Design": uiuxIcon,
-  "IT Development": devIcon,
-  "Digital Marketing": marketingIcon,
-  "Entrepreneurship": entrepreneurIcon,
-  "Data Science": devIcon,
+  "technology": devIcon,
+  "design": uiuxIcon,
+  "marketing": marketingIcon,
+  "business": entrepreneurIcon,
+  "data": devIcon,
+  // Fallback mappings for legacy title-based codes
+  "uiux": uiuxIcon,
+  "development": devIcon,
 };
 
 const getIconForCategory = (category: CategoryItem): string => {
-  // Try to match by value first, then title, then use default
-  return iconMap[category.value] || iconMap[category.title] || devIcon;
+  // Normalize code to lowercase for case-insensitive matching
+  const normalizedCode = category.code?.toLowerCase() || '';
+  
+  // Try code-based lookup first (most stable)
+  const iconByCode = iconMap[normalizedCode];
+  if (iconByCode) {
+    return iconByCode;
+  }
+  
+  // Fallback to value-based lookup for backward compatibility
+  if (category.value) {
+    const iconByValue = iconMap[category.value];
+    if (iconByValue) {
+      return iconByValue;
+    }
+  }
+  
+  // Final fallback to default icon
+  return devIcon;
 };
 
 const backgroundMap = [
