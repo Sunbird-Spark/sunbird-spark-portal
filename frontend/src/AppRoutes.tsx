@@ -10,13 +10,17 @@ import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';
+import CollectionDetailPage from './pages/collection/CollectionDetailPage';
 import Index from './pages/Index';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
 import SignUp from './pages/signup/SignUp';
+import HelpSupport from './pages/helpSupport/HelpSupport';
+import HelpCategoryDetail from './pages/helpSupport/HelpCategoryDetail';
 import ContentPlayerPage from './pages/content/ContentPlayerPage';
 import ContentEditorPage from './pages/content/ContentEditorPage';
 import Explore from './pages/Explore';
+import MyLearning from './pages/myLearning/MyLearning';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -36,8 +40,11 @@ const AppRoutes: React.FC = () => {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/help-support" element={<HelpSupport />} />
+        <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/explore" element={<Explore />} /> 
+        <Route path="/collection/:collectionId" element={<CollectionDetailPage />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
@@ -45,6 +52,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentPage />} />
         <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
+        <Route path="/my-learning" element={<MyLearning />} />
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

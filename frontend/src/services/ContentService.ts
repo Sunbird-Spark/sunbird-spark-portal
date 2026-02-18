@@ -22,6 +22,7 @@ export class ContentService {
     return getClient().post<ContentSearchResponse>('/composite/v1/search', {
       request: {
         filters: request.filters ?? {},
+        facets: request.facets,
         limit: request.limit ?? 20,
         offset: request.offset ?? 0,
         query: request.query ?? '',
