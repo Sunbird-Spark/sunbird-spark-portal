@@ -79,36 +79,30 @@ describe('GenericEditorService', () => {
 
     mockSystemSettingRead.mockResolvedValue({
       data: {
-        result: {
-          response: {
-            value: 'test-slug',
-          },
+        response: {
+          value: 'test-slug',
         },
       },
     });
 
     mockOrgSearch.mockResolvedValue({
       data: {
-        result: {
-          response: {
-            content: [
-              {
-                channel: 'test-channel',
-                hashTagId: 'hash-123',
-                identifier: 'org-1',
-              },
-            ],
-          },
+        response: {
+          content: [
+            {
+              channel: 'test-channel',
+              hashTagId: 'test-channel',
+              identifier: 'org-1',
+            },
+          ],
         },
       },
     });
 
     mockChannelRead.mockResolvedValue({
       data: {
-        result: {
-          channel: {
-            defaultFramework: 'TPD',
-          },
+        channel: {
+          defaultFramework: 'TPD',
         },
       },
     });
@@ -359,14 +353,14 @@ describe('GenericEditorService', () => {
       expect(context.framework).toBe('TPD');
     });
 
-    it('should default to NCF when no framework available', async () => {
+    it('should default to empty string when no framework available', async () => {
       mockOrgSearch.mockResolvedValue({
-        data: { result: { response: { content: [] } } },
+        data: { response: { content: [] } },
       });
 
       const context = await service.buildEditorContext({ contentId: 'do_1' });
 
-      expect(context.framework).toBe('NCF');
+      expect(context.framework).toBe('');
     });
 
     it('should not fetch channel framework when provided in params', async () => {
