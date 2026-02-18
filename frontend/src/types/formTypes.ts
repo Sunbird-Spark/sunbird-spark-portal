@@ -16,9 +16,7 @@ export interface FormReadResponse {
     subtype: string;
     action: string;
     component: string;
-    data: {
-      sections: any;
-    };
+    data: any;
     created_on: string;
     last_modified_on: string;
     rootOrgId: string;
