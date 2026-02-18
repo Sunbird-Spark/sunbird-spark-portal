@@ -11,7 +11,7 @@ interface TrackableCollectionCardProps {
 const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps) => {
   return (
     <Link
-      to={`/content/${course.courseId}`}
+      to={`/collection/${course.collectionId}`}
       className="block"
     >
       <div
