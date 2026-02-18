@@ -10,8 +10,8 @@ export class FormService {
         type: request.type,
         subType: request.subType ?? '',
         action: request.action,
-        component: request.component ?? '',
-        rootOrgId: request.rootOrgId ?? '',
+        component: request.component ?? '*',
+        rootOrgId: request.rootOrgId ?? '*',
         framework: request.framework ?? '*'
       },
     });
