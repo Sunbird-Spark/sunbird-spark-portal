@@ -118,13 +118,10 @@ const CollectionDetailPage = () => {
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
           <>
         {/* Title Row */}
-        <div className="flex items-start justify-between mb-2">
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">
+        <div className="mb-2">
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground">
             {collectionData.title}
           </h1>
-          {isAuthenticated && collectionId && (
-            <BatchCard collectionId={collectionId} />
-          )}
         </div>
 
         {/* Stats Row */}
@@ -137,13 +134,18 @@ const CollectionDetailPage = () => {
           {/* Left Column */}
           <CollectionOverview collectionData={displayCollectionData} />
 
-          {/* Right Sidebar - Lessons Accordion */}
+          {/* Right Sidebar - Lessons Accordion + Batch Card */}
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
             <CollectionSidebar
               modules={collectionData.modules}
               expandedModules={expandedModules}
               toggleModule={toggleModule}
             />
+            {isAuthenticated && collectionId && (
+              <div className="mt-4">
+                <BatchCard collectionId={collectionId} />
+              </div>
+            )}
           </div>
 
         </div>
