@@ -19,6 +19,7 @@ import {
   VALID_CONTENT_STATUSES,
   VALID_CONTENT_STATES,
   EDITABLE_STATES,
+  DEFAULT_PRIMARY_CATEGORIES,
 } from './editorConfig';
 import { GENERIC_EDITOR_MIME_TYPES } from './types';
 import type {
@@ -217,14 +218,7 @@ export class GenericEditorService {
       ownershipType: ['createdBy'],
       timeDiff: 0,
       instance: 'SUNBIRD',
-      primaryCategories: [
-          "eTextbook",
-          "Explanation Content",
-          "Learning Resource",
-          "Practice Question Set",
-          "Teacher Resource",
-          "Exam Question"
-      ],
+      primaryCategories: [...DEFAULT_PRIMARY_CATEGORIES],
     };
 
     if (
