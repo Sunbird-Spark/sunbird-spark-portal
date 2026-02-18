@@ -18,6 +18,8 @@ vi.mock('../../services/players/video', () => {
     this.removeEventListeners = mockRemoveEventListeners;
   });
   
+  MockVideoPlayerService.unloadStyles = vi.fn();
+  
   return {
     VideoPlayerService: MockVideoPlayerService,
   };

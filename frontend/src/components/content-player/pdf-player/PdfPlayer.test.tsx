@@ -17,6 +17,7 @@ vi.mock('../../../services/players/pdf/PdfPlayerService', () => {
       createElement = mockCreateElement;
       attachEventListeners = mockAttachEventListeners;
       removeEventListeners = mockRemoveEventListeners;
+      static unloadStyles = vi.fn();
     },
   };
 });

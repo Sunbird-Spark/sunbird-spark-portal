@@ -14,10 +14,17 @@ describe('CollectionEditorService - Dependencies', () => {
   let service: CollectionEditorService;
 
   beforeEach(() => {
+    // Mock the custom element to prevent script loading
+    if (!customElements.get('lib-editor')) {
+      customElements.define('lib-editor', class extends HTMLElement {});
+    }
+
     service = new CollectionEditorService();
     (CollectionEditorService as any).dependenciesLoaded = false;
     (CollectionEditorService as any).dependenciesLoading = undefined;
     (CollectionEditorService as any).stylesLoaded = false;
+    (CollectionEditorService as any).scriptLoaded = false;
+    (CollectionEditorService as any).scriptLoading = undefined;
     
     // Setup mock jQuery
     const mockJQuery: any = vi.fn();

@@ -9,8 +9,29 @@ export class CollectionEditorService {
     private eventHandlers = new WeakMap<HTMLElement, { editor: (event: Event) => void; telemetry?: (event: Event) => void }>();
     private orgService = new OrganizationService();
     private static stylesLoaded = false;
+    private static scriptLoaded = false;
+    private static scriptLoading?: Promise<void>;
     private static dependenciesLoaded = false;
     private static dependenciesLoading?: Promise<void>;
+
+    private loadScript(): Promise<void> {
+        if (CollectionEditorService.scriptLoaded || customElements.get('lib-editor')) {
+            CollectionEditorService.scriptLoaded = true;
+            return Promise.resolve();
+        }
+        if (CollectionEditorService.scriptLoading) {
+            return CollectionEditorService.scriptLoading;
+        }
+        CollectionEditorService.scriptLoading = new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = '/assets/collection-editor/sunbird-collection-editor.js';
+            script.setAttribute('data-collection-editor-script', 'true');
+            script.onload = () => { CollectionEditorService.scriptLoaded = true; CollectionEditorService.scriptLoading = undefined; resolve(); };
+            script.onerror = () => { CollectionEditorService.scriptLoading = undefined; reject(new Error('Failed to load sunbird-collection-editor script')); };
+            document.body.appendChild(script);
+        });
+        return CollectionEditorService.scriptLoading;
+    }
 
     async initializeDependencies(): Promise<void> {
         // Return early if already loaded
@@ -26,6 +47,7 @@ export class CollectionEditorService {
         // Create loading promise to prevent concurrent initialization
         CollectionEditorService.dependenciesLoading = (async () => {
             try {
+                await this.loadScript();
                 const $global = (globalThis as any).$;
 
                 // jQuery and jQuery UI are loaded via static imports at the top
