@@ -45,6 +45,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/explore" element={<Explore />} /> 
         <Route path="/collection/:collectionId" element={<CollectionDetailPage />} />
+        <Route path="/collection/:collectionId/content/:contentId" element={<CollectionDetailPage />} />
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
