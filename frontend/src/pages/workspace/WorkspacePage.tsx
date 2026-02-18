@@ -1,24 +1,18 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/home/Sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
 import WorkspaceToolbar from "@/components/workspace/WorkspaceToolbar";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
-import { useContentSearch } from "@/hooks/useContent";
-import { mapContentToWorkspaceItem } from "@/services/workspace";
 import { ContentService } from "@/services/ContentService";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import WorkspacePageHeader from "./WorkspacePageHeader";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -56,30 +50,28 @@ const WorkspacePage = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
-  const { data: searchData, isLoading, refetch } = useContentSearch({
-    request: showContent
-      ? { sort_by: sortBy === 'updated' ? { lastUpdatedOn: 'desc' } : sortBy === 'created' ? { createdOn: 'desc' } : { name: 'asc' } }
-      : undefined,
+  const userId = userAuthInfoService.getUserId();
+
+  const {
+    contents,
+    counts,
+    totalCount,
+    isLoading,
+    isLoadingMore,
+    isCountsLoading,
+    error,
+    hasMore,
+    loadMore,
+    refetchCounts,
+    refetchAll,
+  } = useWorkspace({
+    userId,
+    activeTab: activeView,
+    sortBy,
+    typeFilter,
+    userRole,
     enabled: showContent,
   });
-
-  const items: WorkspaceItem[] = useMemo(() => {
-    if (!searchData?.data) return [];
-    const content = searchData.data.content ?? [];
-    const questionSets = searchData.data.QuestionSet ?? [];
-    return [...content, ...questionSets].map(mapContentToWorkspaceItem);
-  }, [searchData]);
-
-  const counts = useMemo(() => {
-    const review = items.filter((i) => i.status === 'review').length;
-    return {
-      all: items.length,
-      drafts: items.filter((i) => i.status === 'draft').length,
-      review,
-      published: items.filter((i) => i.status === 'published').length,
-      pendingReview: review,
-    };
-  }, [items]);
 
   // Reset view when role changes
   useEffect(() => {
@@ -87,33 +79,8 @@ const WorkspacePage = () => {
     setActiveView((prev) => (prev === nextView ? prev : nextView));
   }, [userRole]);
 
-  const filteredItems = useMemo(() => {
-    let filtered = [...items];
-    
-    // Apply view-specific filters
-    if (activeView === 'drafts') filtered = filtered.filter(i => i.status === 'draft');
-    else if (activeView === 'review' || activeView === 'pending-review') filtered = filtered.filter(i => i.status === 'review');
-    else if (activeView === 'published' || activeView === 'my-published') filtered = filtered.filter(i => i.status === 'published');
-    else if (activeView === 'all') { /* show all */ }
-    
-    // Apply type filter
-    if (typeFilter !== 'all') filtered = filtered.filter(i => i.type === typeFilter);
-    
-    // Apply sorting (sort a copy so we don't mutate filtered)
-    const toTime = (s: string | null) => (s ? new Date(s).getTime() : 0);
-    return [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'updated': return toTime(b.updatedAt) - toTime(a.updatedAt);
-        case 'created': return toTime(b.createdAt) - toTime(a.createdAt);
-        case 'title': return a.title.localeCompare(b.title);
-        default: return 0;
-      }
-    });
-  }, [items, activeView, typeFilter, sortBy]);
-
   const handleCreateOption = (optionId: string) => {
     if (RESOURCE_EDITOR_OPTIONS.includes(optionId)) {
-      // Resource editor options: show name dialog first
       setShowCreateModal(false);
       setSelectedOption(optionId);
       setShowNameDialog(true);
@@ -163,7 +130,7 @@ const WorkspacePage = () => {
       description: "The content has been removed.", 
       variant: "destructive" 
     });
-    void refetch();
+    refetchAll();
   };
 
   const handleView = (_id: string) => {
@@ -175,7 +142,7 @@ const WorkspacePage = () => {
       title: "Submitted for Review", 
       description: "Your content has been submitted for review." 
     });
-    void refetch();
+    refetchAll();
   };
 
   const handleCreateClick = () => setShowCreateModal(true);
@@ -190,11 +157,12 @@ const WorkspacePage = () => {
     onViewModeChange: setViewMode,
     typeFilter,
     onTypeFilterChange: setTypeFilter,
-    contentCount: !['create', 'uploads', 'collaborations'].includes(activeView) ? filteredItems.length : undefined,
+    contentCount: showContent ? contents.length : undefined,
+    totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,
   };
 
-  if (showContent && isLoading) return <PageLoader message={t('loading')} />;
+  if (showContent && isCountsLoading && isLoading) return <PageLoader message={t('loading')} />;
 
   return (
     <div className="workspace-container">
@@ -205,7 +173,6 @@ const WorkspacePage = () => {
       />
 
       <div className="flex flex-1 relative transition-all">
-        {/* Sidebar - Mobile (same as Home/Profile) */}
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
@@ -220,7 +187,6 @@ const WorkspacePage = () => {
             </SheetContent>
           </Sheet>
         ) : (
-          /* Sidebar - Desktop (same as Home/Profile) */
           <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
             {isSidebarOpen && (
               <>
@@ -239,8 +205,6 @@ const WorkspacePage = () => {
             )}
           </div>
         )}
-
-        {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
           <main className="workspace-main-content">
             <div className="workspace-content-wrapper">
@@ -248,9 +212,16 @@ const WorkspacePage = () => {
               <WorkspacePageContent
                 showCreateModal={showCreateModal}
                 activeView={activeView}
-                filteredItems={filteredItems}
+                filteredItems={contents}
                 viewMode={viewMode}
                 t={t}
+                isLoading={isLoading}
+                isLoadingMore={isLoadingMore}
+                hasMore={hasMore}
+                isError={!!error}
+                error={error}
+                onLoadMore={loadMore}
+                onRetry={refetchAll}
                 onCreateOption={handleCreateOption}
                 onCreateClick={handleCreateClick}
                 onEdit={handleEdit}
@@ -270,8 +241,6 @@ const WorkspacePage = () => {
           />
         </div>
       </div>
-
-      {/* Footer - full width below sidebar + content (same as Home/Profile) */}
       <Footer />
     </div>
   );

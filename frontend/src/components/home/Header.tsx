@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { FiMenu, FiX, FiSearch, FiChevronDown, FiBell } from "react-icons/fi";
+import { FiMenu, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
+import AuthenticatedHeader from "./AuthenticatedHeader";
+import { useAuth } from "@/auth/AuthContext";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +15,33 @@ import translationIcon from "@/assets/translation_icon.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+interface HeaderProps {
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+}
+
+const defaultToggleSidebar = () => { };
+
+const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar }: HeaderProps) => {
+  const { isAuthenticated: contextAuth } = useAuth();
+  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const location = useLocation();
   const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  if (isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
+    if (import.meta.env.MODE !== "production") {
+      // Warn when authenticated header is rendered without a real sidebar toggle handler.
+      console.warn(
+        "Header: onToggleSidebar was not provided. Sidebar toggle buttons will not function as expected."
+      );
+    }
+  }
+
+  if (isAuthenticated && location.pathname !== "/") {
+    return <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />;
+  }
 
   const navLinks = [
     { label: t("nav.home"), href: "/" },

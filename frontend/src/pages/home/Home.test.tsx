@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 
 // Mock child components to keep tests focused
@@ -56,6 +56,16 @@ vi.mock('@/hooks/use-mobile', () => ({
     useIsMobile: () => mockUseIsMobile(),
 }));
 
+// Mock useAuth for Header
+vi.mock('@/auth/AuthContext', () => ({
+    useAuth: vi.fn(() => ({
+        isAuthenticated: true,
+        user: { id: '123', name: 'John Doe', role: 'content_creator' },
+        login: vi.fn(),
+        logout: vi.fn(),
+    })),
+}));
+
 describe('Home Page', () => {
     beforeEach(() => {
         mockUseIsMobile.mockReturnValue(false); // Default to desktop
@@ -67,9 +77,9 @@ describe('Home Page', () => {
 
     const renderHome = () => {
         return render(
-            <BrowserRouter>
+            <MemoryRouter initialEntries={['/home']}>
                 <Home />
-            </BrowserRouter>
+            </MemoryRouter>
         );
     };
 
@@ -111,7 +121,6 @@ describe('Home Page', () => {
         renderHome();
         await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        expect(screen.getByText('Home')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();
     });
 
@@ -129,7 +138,7 @@ describe('Home Page', () => {
         renderHome();
         await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        const langBtn = screen.getByAltText('Translate').parentElement;
+        const langBtn = screen.getByAltText('Language').parentElement;
         fireEvent.click(langBtn!);
 
         const hindiOption = await screen.findByText('Hindi');

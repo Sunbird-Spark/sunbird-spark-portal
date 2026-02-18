@@ -55,17 +55,22 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({
 
   // Initialize player
   useEffect(() => {
+    if (!containerRef.current) return;
+
     let playerElement: HTMLElement | null = null;
+    let cancelled = false;
 
     const initializePlayer = async () => {
-      if (!containerRef.current || !metadata) {
-        console.warn('[QumlPlayer] Container or metadata not available');
+      if (!metadata) {
+        console.warn('[QumlPlayer] Metadata not available');
         return;
       }
 
       try {
         // Create player config
         const config = await qumlPlayerService.createConfig(metadata, contextProps);
+        
+        if (cancelled) return;
         
         // Create player element
         playerElement = qumlPlayerService.createElement(config);
@@ -78,10 +83,11 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({
         );
 
         // Add to DOM
-        containerRef.current.appendChild(playerElement);
-        playerElementRef.current = playerElement;
-
-        console.log('[QumlPlayer] Player initialized successfully');
+        if (containerRef.current) {
+          containerRef.current.appendChild(playerElement);
+          playerElementRef.current = playerElement;
+          console.log('[QumlPlayer] Player initialized successfully');
+        }
       } catch (error) {
         console.error('[QumlPlayer] Failed to initialize player:', error);
       }
@@ -91,6 +97,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({
 
     // Cleanup
     return () => {
+      cancelled = true;
       if (playerElement) {
         qumlPlayerService.removeEventListeners(playerElement);
         playerElement.remove();
