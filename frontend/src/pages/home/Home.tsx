@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useHomeData } from "@/hooks/useHomeData";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
@@ -11,6 +12,7 @@ import HomeContinueLearning from "@/components/home/HomeContinueLearning";
 import HomeInProgressGrid from "@/components/home/HomeInProgressGrid";
 import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSidebarState } from "@/hooks/useSidebarState";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
@@ -20,24 +22,9 @@ const Home = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
-    const [isLoading, setIsLoading] = useState(true);
+    const { loading: isLoading, error, refetch } = useHomeData();
     const [activeNav, setActiveNav] = useState("home");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
-
-    useEffect(() => {
-        setIsSidebarOpen(!isMobile);
-    }, [isMobile]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 600);
-        return () => clearTimeout(timer);
-    }, []);
-
-    if (isLoading) {
-        return <PageLoader message="Loading your dashboard..." />;
-    }
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
 
     return (
         <div className="home-container">
@@ -80,24 +67,35 @@ const Home = () => {
                             <p className="home-welcome-subtitle">Welcome to a learning experience made just for you.</p>
                         </div>
 
-                        {/* Stats Cards */}
-                        <HomeStatsCards />
+                        {isLoading || error ? (
+                            <PageLoader
+                                message="Loading your dashboard..."
+                                fullPage={false}
+                                error={error ? (error.message || "Failed to load dashboard") : undefined}
+                                onRetry={refetch}
+                            />
+                        ) : (
+                            <>
+                                {/* Stats Cards */}
+                                <HomeStatsCards />
 
-                        {/* Continue Learning + Performance */}
-                        <div className="home-continue-section">
-                            <h3 className="home-continue-section-title">Continue from where you left</h3>
-                            <div className="home-continue-grid">
-                                <div className="w-full lg:w-[65%]">
-                                    <HomeContinueLearning />
+                                {/* Continue Learning + Performance */}
+                                <div className="home-continue-section">
+                                    <h3 className="home-continue-section-title">Continue from where you left</h3>
+                                    <div className="home-continue-grid">
+                                        <div className="w-full lg:w-[65%]">
+                                            <HomeContinueLearning />
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* In Progress Contents */}
-                        <HomeInProgressGrid />
+                                {/* In Progress Contents */}
+                                <HomeInProgressGrid />
 
-                        {/* Recommended Contents */}
-                        <HomeRecommendedSection />
+                                {/* Recommended Contents */}
+                                <HomeRecommendedSection />
+                            </>
+                        )}
                     </div>
                 </main>
             </div>

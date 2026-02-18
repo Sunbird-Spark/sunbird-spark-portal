@@ -7,6 +7,7 @@ import HomeSidebar from "@/components/home/HomeSidebar";
 import PageLoader from "@/components/common/PageLoader";
 import Header from "@/components/home/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSidebarState } from "@/hooks/useSidebarState";
 import { useHelpFaqData } from "@/hooks/useFaqData";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import {
@@ -27,7 +28,7 @@ const HelpCategoryDetail = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
     const [feedback, setFeedback] = useState<Record<number, "yes" | "no" | "submitted" | null>>({});
     const [feedbackText, setFeedbackText] = useState<Record<number, string>>({});
 
@@ -60,9 +61,6 @@ const HelpCategoryDetail = () => {
         [category, appName]
     );
 
-    useEffect(() => {
-        setIsSidebarOpen(!isMobile);
-    }, [isMobile]);
 
     const handleFeedback = (index: number, value: "yes" | "no") => {
         setFeedback((prev) => ({ ...prev, [index]: value }));

@@ -3,6 +3,8 @@ import { FiHome, FiUser, FiLogOut, FiEdit, FiSettings } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/auth/AuthContext";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 
 interface HomeSidebarProps {
     activeNav: string;
@@ -46,7 +48,6 @@ const mainNavItems = [
 
 const bottomNavItems = [
     { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help-support" },
-    { id: "settings", label: "Account Settings", icon: FiSettings, path: "/settings" },
     { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
@@ -54,14 +55,12 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
+    const { isAuthenticated: contextAuth } = useAuth();
+    const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
 
-    // Hide Account Settings on Help & Support pages
-    const filteredBottomNavItems = bottomNavItems.filter(item => {
-        if (location.pathname.startsWith('/help-support') && item.id === 'settings') {
-            return false;
-        }
-        return true;
-    });
+    if (!isAuthenticated || location.pathname === "/") {
+        return null;
+    }
 
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
@@ -69,7 +68,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
             window.location.href = item.path;
             return;
         }
-        if (item.path !== "/home") {
+        if (location.pathname !== item.path) {
             navigate(item.path);
         }
     };
@@ -124,7 +123,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                 {renderNavList(mainNavItems)}
 
                 {/* Bottom Nav (Bottom) */}
-                {renderNavList(filteredBottomNavItems)}
+                {renderNavList(bottomNavItems)}
             </nav>
 
             {!isMobile && onToggle && (
