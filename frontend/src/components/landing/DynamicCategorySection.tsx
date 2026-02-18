@@ -46,10 +46,10 @@ const getIconForCategory = (category: CategoryItem): string => {
 };
 
 const backgroundMap = [
-  "linear-gradient(to right, #45C0ED, #8E46C5)",
-  "linear-gradient(to right, #D55E1D, #F6C35C)",
-  "linear-gradient(to right, #1D79D5, #6ED97B)",
-  "linear-gradient(to right, #F59C84, #D655E7)",
+  "var(--category-gradient-1)",
+  "var(--category-gradient-2)",
+  "var(--category-gradient-3)",
+  "var(--category-gradient-4)",
 ];
 
 const DynamicCategorySection = ({ title, list }: DynamicCategorySectionProps) => {

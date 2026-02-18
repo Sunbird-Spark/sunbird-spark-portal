@@ -103,7 +103,7 @@ describe('DynamicCategorySection', () => {
     expect(categoryCards.length).toBeGreaterThan(0);
     
     const firstCardStyle = (categoryCards[0] as HTMLElement).style.background;
-    expect(firstCardStyle).toContain('linear-gradient');
+    expect(firstCardStyle).toContain('var(--category-gradient-');
   });
 
   it('renders fallback icon for unknown category', () => {
