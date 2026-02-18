@@ -37,7 +37,8 @@ export const contentActionProxy = createProxyMiddleware({
                 fixRequestBody(proxyReq, req);
             }
         },
-        proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+        // eslint-disable-next-line no-unused-vars
+        proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, _res) => {
             const statusCode = proxyRes.statusCode || 500;
             if (statusCode >= 400) {
                 const body = responseBuffer.toString('utf8');

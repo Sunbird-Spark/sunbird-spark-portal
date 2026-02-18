@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { GenericEditorService } from '@/services/editors/generic-editor';
 import type {
@@ -23,7 +24,7 @@ interface UseGenericEditorReturn {
   contentDetails: ContentDetails | null;
   openEditor: () => Promise<void>;
   closeEditor: () => void;
-  iframeRef: React.RefObject<HTMLIFrameElement | null>;
+  iframeRef: RefObject<HTMLIFrameElement | null>;
 }
 
 export const useGenericEditor = (
