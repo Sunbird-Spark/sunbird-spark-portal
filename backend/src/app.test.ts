@@ -32,6 +32,11 @@ describe('Express App', () => {
         res.status(200).send('mock-kong-response');
       }
     }));
+    vi.doMock('./proxies/knowlgMwProxy.js', () => ({
+      contentActionProxy: (req: any, res: any) => {
+        res.status(200).send('mock-knowlg-response');
+      }
+    }));
     vi.doMock('./middlewares/formsValidator.js', () => ({
       validateCreateAPI: (req: any, res: any, next: any) => next(),
       validateReadAPI: (req: any, res: any, next: any) => next(),

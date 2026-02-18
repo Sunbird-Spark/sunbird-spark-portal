@@ -8,11 +8,11 @@ export const GENERIC_EDITOR_WINDOW_CONFIG = {
   corePluginsPackaged: true,
   modalId: 'genericEditor',
   dispatcher: 'local',
-  apislug: '/portal',
+  apislug: '/action',
   alertOnUnload: true,
   loadingImage: '',
   cloudStorage: {
-    provider: '',
+    provider: 'azure',
   },
   plugins: [
     { id: 'org.ekstep.sunbirdcommonheader', ver: '1.9', type: 'plugin' },

@@ -162,6 +162,27 @@ export const useGenericEditor = (
     onClose?.();
   }, [params.contentId, params.contentStatus, onClose]);
 
+  // Expose a jQuery/iziModal shim on window so the editor iframe can call
+  // window.parent.$('#genericEditor').iziModal('close') without errors.
+  // The editor's closeEditor handler expects this jQuery API to exist.
+  useEffect(() => {
+    const closeEditorRef = () => closeEditor();
+    const jQueryShim = (_selector: string) => ({
+      iziModal: (action: string) => {
+        if (action === 'close') {
+          closeEditorRef();
+        }
+      },
+    });
+    (window as any).$ = jQueryShim;
+    (window as any).jQuery = jQueryShim;
+
+    return () => {
+      delete (window as any).$;
+      delete (window as any).jQuery;
+    };
+  }, [closeEditor]);
+
   // Set inEditor session flag on mount, clean up on unmount
   useEffect(() => {
     sessionStorage.setItem('inEditor', 'true');

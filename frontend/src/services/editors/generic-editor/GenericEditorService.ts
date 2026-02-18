@@ -10,6 +10,7 @@ import { getClient } from '../../../lib/http-client';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import { ChannelService } from '../../ChannelService';
 import {
   GENERIC_EDITOR_WINDOW_CONFIG,
   DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
@@ -38,6 +39,7 @@ declare global {
 
 export class GenericEditorService {
   private orgService = new OrganizationService();
+  private channelService = new ChannelService();
 
   /**
    * Get the generic editor URL.
@@ -45,10 +47,6 @@ export class GenericEditorService {
    * falls back to env var or default path.
    */
   getEditorUrl(): string {
-    const hiddenInput = document.getElementById('genericEditorURL') as HTMLInputElement | null;
-    if (hiddenInput?.value) {
-      return hiddenInput.value;
-    }
     return import.meta.env.VITE_GENERIC_EDITOR_URL || '/generic-editor/index.html';
   }
 
@@ -175,6 +173,21 @@ export class GenericEditorService {
       console.warn('Failed to get channel from org service');
     }
 
+    // Fetch default framework from channel if not provided via route params
+    let framework = params.framework || '';
+    if (!framework && channel) {
+      try {
+        const channelResponse = await this.channelService.read(channel);
+        const defaultFramework = channelResponse?.data?.result?.channel?.defaultFramework;
+        console.log('Fetched default framework from channel:', defaultFramework);
+        if (defaultFramework) {
+          framework = defaultFramework;
+        }
+      } catch {
+        console.warn('Failed to fetch default framework from channel');
+      }
+    }
+
     // Build pdata (producer data for telemetry)
     let pdata = { id: 'sunbird.portal', ver: '1.0', pid: 'sunbird-portal' };
     try {
@@ -200,11 +213,18 @@ export class GenericEditorService {
       channel,
       defaultLicense: 'CC BY 4.0',
       env: 'generic-editor',
-      framework: params.framework || '',
+      framework: framework || 'NCF',
       ownershipType: ['createdBy'],
       timeDiff: 0,
       instance: 'SUNBIRD',
-      primaryCategories: [],
+      primaryCategories: [
+          "eTextbook",
+          "Explanation Content",
+          "Learning Resource",
+          "Practice Question Set",
+          "Teacher Resource",
+          "Exam Question"
+      ],
     };
 
     if (
