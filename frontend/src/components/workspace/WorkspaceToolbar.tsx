@@ -22,6 +22,8 @@ interface WorkspaceToolbarProps {
   onViewChange: (view: WorkspaceView) => void;
   userRole: UserRole;
   onRoleChange: (role: UserRole) => void;
+  hasCreatorRole?: boolean;
+  hasReviewerRole?: boolean;
   counts: { drafts: number; review: number; published: number; all: number; pendingReview?: number };
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
@@ -37,6 +39,8 @@ const WorkspaceToolbar = ({
   onViewChange,
   userRole,
   onRoleChange,
+  hasCreatorRole = true,
+  hasReviewerRole = true,
   counts,
   viewMode,
   onViewModeChange,
@@ -52,6 +56,7 @@ const WorkspaceToolbar = ({
     userRole === 'creator' ? getCreatorSegments(counts) : getReviewerSegments(counts);
   const showContentFilters = shouldShowContentFilters(activeView);
   const secondaryActions = getSecondaryActions(userRole);
+  const showRoleSwitcher = hasCreatorRole || hasReviewerRole;
 
   return (
     <div className="space-y-4 mb-6">
@@ -59,31 +64,39 @@ const WorkspaceToolbar = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {/* Role Switcher - Minimal */}
-          <div className="flex items-center gap-1 text-sm font-rubik">
-            <button
-              onClick={() => onRoleChange('creator')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg transition-all",
-                userRole === 'creator'
-                  ? "text-sunbird-brick font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
+          {showRoleSwitcher && (
+            <div className="flex items-center gap-1 text-sm font-rubik">
+              {hasCreatorRole && (
+                <button
+                  onClick={() => onRoleChange('creator')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg transition-all",
+                    userRole === 'creator'
+                      ? "text-sunbird-brick font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Creator
+                </button>
               )}
-            >
-              Creator
-            </button>
-            <span className="text-muted-foreground">|</span>
-            <button
-              onClick={() => onRoleChange('reviewer')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg transition-all",
-                userRole === 'reviewer'
-                  ? "text-sunbird-brick font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
+              {hasCreatorRole && hasReviewerRole && (
+                <span className="text-muted-foreground">|</span>
               )}
-            >
-              Reviewer
-            </button>
-          </div>
+              {hasReviewerRole && (
+                <button
+                  onClick={() => onRoleChange('reviewer')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg transition-all",
+                    userRole === 'reviewer'
+                      ? "text-sunbird-brick font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Reviewer
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3 sm:ml-auto">

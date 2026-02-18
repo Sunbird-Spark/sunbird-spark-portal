@@ -11,6 +11,8 @@ const mockCreateConfig = vi.fn().mockResolvedValue({
 const mockCreateElement = vi.fn().mockReturnValue(document.createElement('lib-editor'));
 const mockAttachEventListeners = vi.fn();
 const mockRemoveEventListeners = vi.fn();
+const mockLoadAssets = vi.fn();
+const mockRemoveAssets = vi.fn();
 
 vi.mock('../../services/editors/collection-editor', () => {
   class MockCollectionEditorService {
@@ -19,6 +21,8 @@ vi.mock('../../services/editors/collection-editor', () => {
     createElement = mockCreateElement;
     attachEventListeners = mockAttachEventListeners;
     removeEventListeners = mockRemoveEventListeners;
+    loadAssets = mockLoadAssets;
+    removeAssets = mockRemoveAssets;
   }
 
   return {
@@ -37,6 +41,8 @@ describe('CollectionEditor - Basic Rendering', () => {
       metadata: { identifier: 'do_123' } 
     });
     mockCreateElement.mockReturnValue(document.createElement('lib-editor'));
+    mockLoadAssets.mockImplementation(() => undefined);
+    mockRemoveAssets.mockImplementation(() => undefined);
   });
 
   it('initializes editor with metadata and contextProps', async () => {
@@ -51,15 +57,16 @@ describe('CollectionEditor - Basic Rendering', () => {
     await waitFor(() => {
       const editorContainer = container.querySelector('#collection-editor-container');
       expect(editorContainer).toBeTruthy();
+      expect(mockAttachEventListeners).toHaveBeenCalled();
     });
 
+    expect(mockLoadAssets).toHaveBeenCalledTimes(1);
     expect(mockInitializeDependencies).toHaveBeenCalledTimes(1);
     expect(mockCreateConfig).toHaveBeenCalledWith(
       { identifier: 'do_123', name: 'Test Collection' },
       { mode: 'edit' }
     );
     expect(mockCreateElement).toHaveBeenCalled();
-    expect(mockAttachEventListeners).toHaveBeenCalled();
   });
 
   it('displays loading state initially', () => {
@@ -71,7 +78,7 @@ describe('CollectionEditor - Basic Rendering', () => {
       />
     );
 
-    expect(screen.getByText('Loading Editor...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('handles initialization error gracefully', async () => {
@@ -134,6 +141,7 @@ describe('CollectionEditor - Basic Rendering', () => {
     unmount();
 
     expect(mockRemoveEventListeners).toHaveBeenCalled();
+    expect(mockRemoveAssets).toHaveBeenCalled();
   });
 
   it('skips initialization if container is not available', async () => {

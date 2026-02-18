@@ -1,4 +1,4 @@
-import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiSend, FiClock, FiUser } from "react-icons/fi";
+import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiClock, FiUser } from "react-icons/fi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,6 @@ interface WorkspaceContentCardProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
-  onSubmitReview: (id: string) => void;
 }
 
 const WorkspaceContentCard = ({
@@ -24,12 +23,18 @@ const WorkspaceContentCard = ({
   onEdit,
   onDelete,
   onView,
-  onSubmitReview,
 }: WorkspaceContentCardProps) => {
   const TypeIcon = CONTENT_TYPE_ICONS[item.type];
   const colors = CONTENT_TYPE_CARD_COLORS[item.type];
   const status = STATUS_CONFIG[item.status];
   const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
+
+  const isDraft = item.status === 'draft';
+  const isPublished = item.status === 'published';
+  const isReview = item.status === 'review';
+  const showView = isPublished || isReview;
+  const showEdit = !isPublished && !isReview;
+  const showDelete = isDraft;
 
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300 border border-border">
@@ -59,30 +64,34 @@ const WorkspaceContentCard = ({
         <div className="absolute top-3 right-3">
           <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-surface/90 backdrop-blur-sm shadow-sm", colors.text)}>
             <TypeIcon className="w-3 h-3" />
-            <span className="capitalize">{item.type}</span>
+            <span>{item.primaryCategory || item.type}</span>
           </div>
         </div>
 
         {/* Hover Actions Overlay */}
         <div className="absolute inset-0 bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => onView(item.id)}
-            className="bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
-          >
-            <FiEye className="w-4 h-4 mr-1.5" />
-            Preview
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => onEdit(item.id)}
-            className="bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
-          >
-            <FiEdit className="w-4 h-4 mr-1.5" />
-            Edit
-          </Button>
+          {showView && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onView(item.id)}
+              className="bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
+            >
+              <FiEye className="w-4 h-4 mr-1.5" />
+              View
+            </Button>
+          )}
+          {showEdit && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onEdit(item.id)}
+              className="bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
+            >
+              <FiEdit className="w-4 h-4 mr-1.5" />
+              Edit
+            </Button>
+          )}
         </div>
       </div>
 
@@ -99,21 +108,24 @@ const WorkspaceContentCard = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
-              <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
-                <FiEye className="w-4 h-4" /> View
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
-                <FiEdit className="w-4 h-4" /> Edit
-              </DropdownMenuItem>
-              {item.status === 'draft' && (
-                <DropdownMenuItem onClick={() => onSubmitReview(item.id)} className="font-rubik cursor-pointer gap-2 text-sunbird-wave">
-                  <FiSend className="w-4 h-4" /> Submit for Review
+              {showView && (
+                <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
+                  <FiEye className="w-4 h-4" /> View
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
-                <FiTrash2 className="w-4 h-4" /> Delete
-              </DropdownMenuItem>
+              {showEdit && (
+                <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
+                  <FiEdit className="w-4 h-4" /> Edit
+                </DropdownMenuItem>
+              )}
+              {showDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
+                    <FiTrash2 className="w-4 h-4" /> Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

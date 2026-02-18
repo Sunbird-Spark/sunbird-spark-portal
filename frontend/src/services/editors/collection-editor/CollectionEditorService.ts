@@ -4,10 +4,14 @@ import { CollectionEditorConfig, CollectionEditorContextProps, CollectionEditorE
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import { ChannelService } from '../../ChannelService';
+import { SystemSettingService } from '../../SystemSettingService';
 
 export class CollectionEditorService {
     private eventHandlers = new WeakMap<HTMLElement, { editor: (event: Event) => void; telemetry?: (event: Event) => void }>();
     private orgService = new OrganizationService();
+    private channelService = new ChannelService();
+    private systemSettingService = new SystemSettingService();
     private static stylesLoaded = false;
     private static dependenciesLoaded = false;
     private static dependenciesLoading?: Promise<void>;
@@ -73,15 +77,36 @@ export class CollectionEditorService {
 
         let channel = '';
         try {
-            const orgResponse = await this.orgService.search({
-                filters: { isTenant: true }
-            });
+            const filters: Record<string, any> = { isTenant: true };
+            try {
+                const settingResponse = await this.systemSettingService.read('default_channel');
+                const slugValue = settingResponse?.data?.response?.value;
+                if (slugValue) {
+                    filters.slug = slugValue;
+                }
+            } catch (err) {
+                console.warn('Failed to fetch default channel system setting:', err);
+            }
+            const orgResponse = await this.orgService.search({ filters });
             const org = orgResponse?.data?.response?.content?.[0];
             if (org) {
-                channel = org.channel;
+                channel = org.hashTagId || org.identifier;
             }
         } catch (error) {
             console.warn('Failed to fetch channel info:', error);
+        }
+
+        let framework = '';
+        if (channel) {
+            try {
+                const channelResponse = await this.channelService.read(channel);
+                const frameworks = channelResponse?.data?.channel?.frameworks;
+                if (Array.isArray(frameworks) && frameworks.length > 0) {
+                    framework = frameworks[0]?.identifier || '';
+                }
+            } catch (error) {
+                console.warn('Failed to fetch channel framework:', error);
+            }
         }
 
         const pdata = await appCoreService.getPData();
@@ -92,6 +117,7 @@ export class CollectionEditorService {
             did,
             uid,
             channel,
+            framework,
             pdata,
             contextRollup: contextProps?.contextRollup || { l1: channel },
             cdata: contextProps?.cdata || [],
@@ -117,7 +143,7 @@ export class CollectionEditorService {
         };
     }
 
-    private loadAssets(): void {
+    loadAssets(): void {
         if (CollectionEditorService.stylesLoaded) return;
 
         const styleLink = document.createElement('link');
@@ -129,7 +155,14 @@ export class CollectionEditorService {
         CollectionEditorService.stylesLoaded = true;
     }
 
+    removeAssets(): void {
+        const link = document.querySelector('link[data-collection-editor-styles]');
+        if (link) link.remove();
+        CollectionEditorService.stylesLoaded = false;
+    }
+
     createElement(config: CollectionEditorConfig): HTMLElement {
+        (window as any).CKEDITOR_VERSION = undefined;
         const element = document.createElement('lib-editor');
         element.setAttribute('editor-config', JSON.stringify(config));
         return element;

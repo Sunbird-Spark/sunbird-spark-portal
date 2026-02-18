@@ -68,6 +68,8 @@ export interface WorkspaceItem {
   createdAt: string | null;
   updatedAt: string | null;
   author: string;
+  primaryCategory: string;
+  contentType?: string;
 }
 
 export interface FacetValue {
@@ -141,6 +143,8 @@ export interface UseWorkspaceReturn {
   isLoadingMore: boolean;
   /** True during the initial load of the counts query. */
   isCountsLoading: boolean;
+  /** True when content is being background-refetched (e.g. after delete/review). */
+  isRefreshing: boolean;
   /** Error from the content query, if any. */
   error: Error | null;
   /** Whether more pages are available to load. */
@@ -148,7 +152,7 @@ export interface UseWorkspaceReturn {
   /** Trigger to load the next page of results. */
   loadMore: () => void;
   /** Refetch the counts query (e.g. after content creation). */
-  refetchCounts: () => void;
+  refetchCounts: () => Promise<void>;
   /** Refetch both counts and content (e.g. after delete/review). */
-  refetchAll: () => void;
+  refetchAll: () => Promise<void>;
 }

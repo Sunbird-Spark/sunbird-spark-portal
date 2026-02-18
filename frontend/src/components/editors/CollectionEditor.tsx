@@ -4,6 +4,7 @@ import {
   CollectionEditorService,
   type CollectionEditorContextProps,
 } from '../../services/editors/collection-editor';
+import PageLoader from '../common/PageLoader';
 
 interface CollectionEditorProps {
   identifier: string;
@@ -38,6 +39,15 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
     },
     [onTelemetryEvent],
   );
+
+  // CSS lifecycle: add the collection-editor stylesheet on mount,
+  // remove it on unmount so it doesn't bleed into the rest of the portal.
+  useEffect(() => {
+    serviceRef.current.loadAssets();
+    return () => {
+      serviceRef.current.removeAssets();
+    };
+  }, []);
 
   useEffect(() => {
     let editorElement: HTMLElement | null = null;
@@ -82,7 +92,7 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
 
   return (
     <div className="w-full h-full min-h-[600px] relative" id="collection-editor-wrapper">
-      {status === 'loading' && <div className="p-4">Loading Editor...</div>}
+      {status === 'loading' && <PageLoader message="Loading..." fullPage={false} />}
       <div ref={containerRef} className="w-full h-full" id="collection-editor-container" />
     </div>
   );

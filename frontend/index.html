@@ -18,6 +18,15 @@
   <script src="/assets/epub-player/sunbird-epub-player.js"></script>
   <script src="/assets/pdf-player/sunbird-pdf-player.js"></script>
   <script src="/assets/video-player/sunbird-video-player.js"></script>
+  <script>
+    Object.defineProperty(window, 'CKEDITOR_VERSION', {
+      configurable: true,
+      enumerable: true,
+      get: function() { return undefined; },
+      set: function() { }
+    });
+  </script>
+
   <script src="/assets/quml-editor/sunbird-questionset-editor.js"></script>
   <script src="/assets/quml-player/sunbird-quml-player.js"></script>
   <script src="/assets/collection-editor/sunbird-collection-editor.js"></script>
