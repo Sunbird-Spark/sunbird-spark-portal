@@ -11,6 +11,7 @@ import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
+import { SystemSettingService } from '../../SystemSettingService';
 import {
   GENERIC_EDITOR_WINDOW_CONFIG,
   DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
@@ -41,6 +42,7 @@ declare global {
 export class GenericEditorService {
   private orgService = new OrganizationService();
   private channelService = new ChannelService();
+  private systemSettingService = new SystemSettingService();
 
   /**
    * Get the generic editor URL.
@@ -160,15 +162,23 @@ export class GenericEditorService {
       console.warn('Failed to get device ID for editor context');
     }
 
-    // Get channel from org service
+    // Fetch default channel slug from system settings, then get org details
     let channel = '';
     try {
+      let slug = '';
+      try {
+        const settingResponse = await this.systemSettingService.read('default_channel');
+        slug = settingResponse?.data?.response?.value || '';
+      } catch {
+        console.warn('Failed to fetch default_channel system setting');
+      }
+
       const orgResponse = await this.orgService.search({
-        filters: { isTenant: true },
+        filters: { slug, isTenant: true },
       });
-      const org = orgResponse?.data?.result?.response?.content?.[0];
+      const org = orgResponse?.data?.response?.content?.[0];
       if (org?.channel) {
-        channel = org.channel;
+        channel = org.hashTagId;
       }
     } catch {
       console.warn('Failed to get channel from org service');
@@ -179,8 +189,8 @@ export class GenericEditorService {
     if (!framework && channel) {
       try {
         const channelResponse = await this.channelService.read(channel);
-        const defaultFramework = channelResponse?.data?.result?.channel?.defaultFramework;
-        console.log('Fetched default framework from channel:', defaultFramework);
+        const defaultFramework = channelResponse?.data?.channel?.defaultFramework;
+        console.warn('Fetched default framework from channel:', defaultFramework);
         if (defaultFramework) {
           framework = defaultFramework;
         }
@@ -214,7 +224,7 @@ export class GenericEditorService {
       channel,
       defaultLicense: 'CC BY 4.0',
       env: 'generic-editor',
-      framework: framework || 'NCF',
+      framework: framework,
       ownershipType: ['createdBy'],
       timeDiff: 0,
       instance: 'SUNBIRD',
