@@ -72,7 +72,7 @@ const DynamicCategorySection = ({ title, list }: DynamicCategorySectionProps) =>
         <div className="flex items-center gap-6 pb-[1.875rem] flex-wrap justify-center lg:justify-between">
           <div className="flex items-center gap-4 flex-wrap justify-center lg:flex-nowrap">
             {sortedCategories.map((category, idx) => (
-              <Link key={category.id + idx} to="/explore" className="group">
+              <Link key={`${category.id}-${idx}`} to="/explore" className="group">
                 <div
                   className="flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[14rem] h-[12.125rem] rounded-[1.25rem]"
                   style={{ background: backgroundMap[idx % backgroundMap.length] }}
