@@ -6,7 +6,7 @@ import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/Fo
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
-import { TermsAndConditionsPopover } from "@/components/common/TermsAndConditionsPopover";
+import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
 
@@ -175,7 +175,7 @@ export const SignUpForm = ({
                         className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sunbird-charcoal"
                     >
                         I understand & {termsUrl && (
-                            <TermsAndConditionsPopover 
+                            <TermsAndConditionsDialog 
                                 termsUrl={termsUrl}
                                 title="Terms of Use"
                             >
@@ -185,7 +185,7 @@ export const SignUpForm = ({
                                 >
                                     accept the SUNBIRD Terms of Use
                                 </button>
-                            </TermsAndConditionsPopover>
+                            </TermsAndConditionsDialog>
                         )}.
                     </label>
                 </div>

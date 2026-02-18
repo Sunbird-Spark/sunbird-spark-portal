@@ -3,7 +3,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { FiX } from "react-icons/fi";
 import { Button } from "./Button";
 
-interface TermsAndConditionsPopoverProps {
+interface TermsAndConditionsDialogProps {
   children: React.ReactNode;
   termsUrl: string;
   title?: string;
@@ -11,7 +11,7 @@ interface TermsAndConditionsPopoverProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export const TermsAndConditionsPopover: React.FC<TermsAndConditionsPopoverProps> = ({
+export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> = ({
   children,
   termsUrl,
   title = "Terms and Conditions",

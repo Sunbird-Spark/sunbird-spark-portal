@@ -1,25 +1,25 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { TermsAndConditionsPopover } from './TermsAndConditionsPopover';
+import { TermsAndConditionsDialog } from './TermsAndConditionsDialog';
 
 // Mock react-icons
 vi.mock('react-icons/fi', () => ({
     FiX: () => <div data-testid="x-icon" />
 }));
 
-describe('TermsAndConditionsPopover', () => {
+describe('TermsAndConditionsDialog', () => {
     const defaultProps = {
         children: <button>Open Terms</button>,
         termsUrl: 'https://example.com/terms',
     };
 
     it('renders trigger element', () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         expect(screen.getByText('Open Terms')).toBeInTheDocument();
     });
 
     it('opens dialog when trigger is clicked', async () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         
         const trigger = screen.getByText('Open Terms');
         fireEvent.click(trigger);
@@ -30,7 +30,7 @@ describe('TermsAndConditionsPopover', () => {
     });
 
     it('displays default title', async () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         
         fireEvent.click(screen.getByText('Open Terms'));
 
@@ -41,7 +41,7 @@ describe('TermsAndConditionsPopover', () => {
 
     it('displays custom title when provided', async () => {
         render(
-            <TermsAndConditionsPopover 
+            <TermsAndConditionsDialog 
                 {...defaultProps} 
                 title="Custom Terms Title"
             />
@@ -55,7 +55,7 @@ describe('TermsAndConditionsPopover', () => {
     });
 
     it('renders iframe with correct src', async () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         
         fireEvent.click(screen.getByText('Open Terms'));
 
@@ -67,7 +67,7 @@ describe('TermsAndConditionsPopover', () => {
     });
 
     it('iframe has correct sandbox attributes', async () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         
         fireEvent.click(screen.getByText('Open Terms'));
 
@@ -78,7 +78,7 @@ describe('TermsAndConditionsPopover', () => {
     });
 
     it('closes dialog when close button is clicked', async () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         
         fireEvent.click(screen.getByText('Open Terms'));
 
@@ -97,7 +97,7 @@ describe('TermsAndConditionsPopover', () => {
     it('calls onOpenChange when dialog state changes', async () => {
         const onOpenChange = vi.fn();
         render(
-            <TermsAndConditionsPopover 
+            <TermsAndConditionsDialog 
                 {...defaultProps} 
                 onOpenChange={onOpenChange}
             />
@@ -112,7 +112,7 @@ describe('TermsAndConditionsPopover', () => {
 
     it('can be controlled with open prop', async () => {
         const { rerender } = render(
-            <TermsAndConditionsPopover 
+            <TermsAndConditionsDialog 
                 {...defaultProps} 
                 open={false}
             />
@@ -121,7 +121,7 @@ describe('TermsAndConditionsPopover', () => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
         rerender(
-            <TermsAndConditionsPopover 
+            <TermsAndConditionsDialog 
                 {...defaultProps} 
                 open={true}
             />
@@ -133,7 +133,7 @@ describe('TermsAndConditionsPopover', () => {
     });
 
     it('renders close icon', async () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         
         fireEvent.click(screen.getByText('Open Terms'));
 
@@ -143,7 +143,7 @@ describe('TermsAndConditionsPopover', () => {
     });
 
     it('has accessible description', async () => {
-        render(<TermsAndConditionsPopover {...defaultProps} />);
+        render(<TermsAndConditionsDialog {...defaultProps} />);
         
         fireEvent.click(screen.getByText('Open Terms'));
 
