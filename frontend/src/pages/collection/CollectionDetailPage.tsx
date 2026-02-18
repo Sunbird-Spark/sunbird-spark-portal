@@ -12,12 +12,17 @@ import { useContentSearch } from "@/hooks/useContent";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
+import BatchCard from "@/components/collection/BatchCard";
+import { useAuth } from "@/auth/AuthContext";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated: contextAuth } = useAuth();
+  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const { t } = useAppI18n();
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const showLoading = isLoading || (isError && isFetching);
@@ -117,7 +122,9 @@ const CollectionDetailPage = () => {
           <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">
             {collectionData.title}
           </h1>
-
+          {isAuthenticated && collectionId && (
+            <BatchCard collectionId={collectionId} />
+          )}
         </div>
 
         {/* Stats Row */}
