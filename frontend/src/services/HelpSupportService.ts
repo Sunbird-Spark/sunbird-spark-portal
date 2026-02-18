@@ -23,7 +23,7 @@ export const slugify = (name: string): string => {
 export const buildHelpCategories = (categories: ApiFaqCategory[]): HelpCategory[] =>
     categories.map((cat) => ({
         title: cat.name,
-        description: "",
+        description: cat.description || "",
         faqCount: cat.faqs?.length ?? 0,
         slug: cat.id || slugify(cat.name),
     }));
