@@ -280,7 +280,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
               </div>
             </div>
 
-            {/* 6, 7, 8 — Switches: Issue Certificate, Enable Discussion, Batch Type */}
+            {/* 6, 7, 8 — Issue Certificate switch, Batch Type (text only) */}
+            {/* Enable Discussion is temporarily disabled */}
             <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
               <div className="px-4 py-3">
                 <SwitchRow
@@ -290,22 +291,17 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
                   onChange={(v) => handleField("issueCertificate", v)}
                 />
               </div>
-              <div className="px-4 py-3">
+              {/* <div className="px-4 py-3">
                 <SwitchRow
                   id="enableDiscussion"
                   label="Enable Discussion"
                   checked={form.enableDiscussion}
                   onChange={(v) => handleField("enableDiscussion", v)}
                 />
-              </div>
-              <div className="px-4 py-3">
-                <SwitchRow
-                  id="batchType"
-                  label="Batch Type"
-                  valueLabel="Open"
-                  checked={form.batchType === "Open"}
-                  onChange={(v) => handleField("batchType", v ? "Open" : "")}
-                />
+              </div> */}
+              <div className="px-4 py-3 flex items-center justify-between gap-4">
+                <span className="text-sm font-medium text-foreground font-['Rubik']">Batch Type</span>
+                <span className="text-sm font-medium text-sunbird-brick font-['Rubik']">Open</span>
               </div>
             </div>
 

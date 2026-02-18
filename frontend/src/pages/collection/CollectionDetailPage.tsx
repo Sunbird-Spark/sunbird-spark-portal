@@ -134,18 +134,18 @@ const CollectionDetailPage = () => {
           {/* Left Column */}
           <CollectionOverview collectionData={displayCollectionData} />
 
-          {/* Right Sidebar - Lessons Accordion + Batch Card */}
+          {/* Right Sidebar - Batch Card + Lessons Accordion */}
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
+            {isAuthenticated && collectionId && (
+              <div className="mb-4">
+                <BatchCard collectionId={collectionId} />
+              </div>
+            )}
             <CollectionSidebar
               modules={collectionData.modules}
               expandedModules={expandedModules}
               toggleModule={toggleModule}
             />
-            {isAuthenticated && collectionId && (
-              <div className="mt-4">
-                <BatchCard collectionId={collectionId} />
-              </div>
-            )}
           </div>
 
         </div>
