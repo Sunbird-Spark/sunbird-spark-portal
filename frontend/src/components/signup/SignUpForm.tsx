@@ -170,11 +170,11 @@ export const SignUpForm = ({
                         onCheckedChange={(checked) => setIsTermsAccepted(checked === true)}
                         className="themed-checkbox"
                     />
-                    <label
-                        htmlFor="terms"
-                        className="text-[0.75rem] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sunbird-charcoal"
-                    >
-                        I understand & {termsUrl && (
+                    <div className="text-[0.75rem] font-medium leading-none text-sunbird-charcoal">
+                        <label htmlFor="terms" className="cursor-pointer">
+                            I understand &amp; {' '}
+                        </label>
+                        {termsUrl ? (
                             <TermsAndConditionsDialog 
                                 termsUrl={termsUrl}
                                 title="Terms of Use"
@@ -183,11 +183,15 @@ export const SignUpForm = ({
                                     type="button"
                                     className="themed-link inline"
                                 >
-                                    accept the SUNBIRD Terms of Use
+                                   accept the SUNBIRD Terms of Use
                                 </button>
                             </TermsAndConditionsDialog>
+                        ) : (
+                            <span className="themed-link inline">
+                                accept the SUNBIRD Terms of Use
+                            </span>
                         )}.
-                    </label>
+                    </div>
                 </div>
 
                 <PrimaryButton
