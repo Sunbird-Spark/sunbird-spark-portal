@@ -66,3 +66,13 @@ export const DEFAULT_VIDEO_MAX_SIZE = '100';
 
 /** Default content file size in MB */
 export const DEFAULT_CONTENT_FILE_SIZE = 150;
+
+/** Primary categories supported by the generic editor */
+export const DEFAULT_PRIMARY_CATEGORIES = [
+  'eTextbook',
+  'Explanation Content',
+  'Learning Resource',
+  'Practice Question Set',
+  'Teacher Resource',
+  'Exam Question',
+] as const;
