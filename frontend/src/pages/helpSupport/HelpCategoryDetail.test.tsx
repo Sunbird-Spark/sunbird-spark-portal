@@ -74,6 +74,7 @@ vi.mock("react-router-dom", async () => {
 
 const mockCategories = [
     {
+        id: "login",
         name: "Login",
         faqs: [
             { topic: "How do I create an account?", description: "Register using your email or phone." },

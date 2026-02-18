@@ -23,6 +23,7 @@ export interface ApiFaqItem {
 }
 
 export interface ApiFaqCategory {
+    id?: string;
     name: string;
     faqs: ApiFaqItem[];
     videos?: any[];
