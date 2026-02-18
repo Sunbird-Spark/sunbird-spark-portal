@@ -55,7 +55,7 @@ const HomeRecommendedSection = ({ creatorIds = [] }: HomeRecommendedSectionProps
                 {isLoading ? (
                      // Skeleton loading state
                      Array(3).fill(0).map((_, i) => (
-                        <div key={i} className="animate-pulse bg-gray-200 rounded-2xl h-[280px]"></div>
+                        <div key={i} className="animate-pulse bg-gray-200 rounded-2xl h-[17.5rem]"></div>
                      ))
                 ) : (
                     recommendedItems.map((item: any) => {

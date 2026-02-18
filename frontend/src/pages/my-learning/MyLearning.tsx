@@ -69,7 +69,7 @@ const MyLearning = () => {
       <div className="page-container">
           <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
           <div className="flex flex-1 relative transition-all">
-             <div className="flex-1 flex items-center justify-center h-[calc(100vh-80px)]">
+             <div className="flex-1 flex items-center justify-center h-[calc(100vh-5rem)]">
                 <div className="text-center">
                     <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
                     <p className="text-gray-600 mb-4">Failed to load your learning progress. Please try again later.</p>
@@ -206,7 +206,7 @@ const MyLearning = () => {
                 <div className="absolute -right-3 top-2 z-20">
                   <button
                     onClick={() => setIsSidebarOpen(false)}
-                    className="w-6 h-6 bg-[#EFEFEF] rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
+                    className="w-6 h-6 bg-sunbird-gray-ef rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
                   >
                     <FiChevronLeft className="w-4 h-4" />
                   </button>

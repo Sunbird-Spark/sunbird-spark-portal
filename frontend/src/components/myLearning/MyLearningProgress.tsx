@@ -97,7 +97,7 @@ const MyLearningProgress = ({
         <div className="flex-1 space-y-6 min-w-0">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-2 bg-[#D48952] rounded-full"></div>
+              <div className="w-8 h-2 bg-[hsl(var(--sunbird-learning-outer))] rounded-full"></div>
             </div>
             <div className="text-[1.125rem] font-bold text-sunbird-obsidian mb-0.5 font-['Rubik']">
               {lessonsVisited}/{totalLessons}
@@ -109,9 +109,9 @@ const MyLearningProgress = ({
 
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-2 bg-[#A05E29] rounded-full"></div>
+              <div className="w-8 h-2 bg-[hsl(var(--sunbird-learning-inner))] rounded-full"></div>
             </div>
-            <div className="text-[1.125rem] font-bold text-sunbird-obsidian mb-0.5 font-['Rubik']">
+            <div className="text-[1.125rem] font-bold text-[hsl(var(--sunbird-learning-inner))] mb-0.5 font-['Rubik']">
               {contentsCompleted}/{totalContents}
             </div>
             <div className="text-[0.875rem] text-gray-500 font-['Rubik']">

@@ -15,7 +15,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
       className="block"
     >
       <div
-        className="flex gap-6 p-6 bg-white rounded-2xl border border-[#F3F4F6] hover:shadow-md transition-shadow"
+        className="flex gap-6 p-6 bg-white rounded-2xl border border-sunbird-gray-f3 hover:shadow-md transition-shadow"
       >
         {/* Thumbnail */}
         {(course.content?.appIcon || course.courseLogoUrl) ? (
@@ -30,10 +30,10 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <h4 className="font-bold text-[1.125rem] leading-[1.4] text-[#222222] line-clamp-2 mb-2 font-['Rubik']">
+          <h4 className="font-bold text-[1.125rem] leading-[1.4] text-sunbird-obsidian line-clamp-2 mb-2 font-['Rubik']">
             {course.courseName}
           </h4>
-          <p className="text-[1rem] font-normal text-[#222222] mb-3 font-['Rubik']">
+          <p className="text-[1rem] font-normal text-sunbird-obsidian mb-3 font-['Rubik']">
             Completed : <span className="font-medium">{course.completionPercentage}%</span>
           </p>
           {/* Progress Bar */}
