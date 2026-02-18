@@ -1,3 +1,5 @@
+import { ContentSearchRequest } from './workspaceTypes';
+
 export interface FormReadRequest {
   type: string;
   subType?: string;
@@ -29,7 +31,7 @@ export interface FormSection {
   title: string;
   type: 'content' | 'categories' | 'resources';
   criteria?: {
-    request: import('./workspaceTypes').ContentSearchRequest;
+    request: ContentSearchRequest;
   };
   list?: CategoryItem[];
 }
