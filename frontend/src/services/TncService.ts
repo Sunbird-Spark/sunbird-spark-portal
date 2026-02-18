@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { getClient, ApiResponse } from '../lib/http-client';
 
 export interface AcceptTncRequest {
@@ -10,46 +11,26 @@ export interface AcceptTncResponse {
 }
 
 export class TncService {
+    private parseTncConfig(tncConfig: any): any {
+        const value = _.get(tncConfig, 'data.response.value');
+        if (!value) return null;
+        if (!_.isString(value)) return value;
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            console.error('Failed to parse TNC config:', e);
+            return null;
+        }
+    }
+
     getTncUrl(tncConfig: any): string {
-        const value = tncConfig?.data?.response?.value;
-
-        if (!value) return '';
-
-        let parsedValue = value;
-        if (typeof value === 'string') {
-            try {
-                parsedValue = JSON.parse(value);
-            } catch (e) {
-                console.error('Failed to parse TNC config:', e);
-                return '';
-            }
-        }
-
-        const latestVersion = parsedValue.latestVersion;
-
-        if (latestVersion && parsedValue[latestVersion]?.url) {
-            return parsedValue[latestVersion].url;
-        }
-
-        return '';
+        const parsed = this.parseTncConfig(tncConfig);
+        const latestVersion = _.get(parsed, 'latestVersion');
+        return _.get(parsed, [latestVersion, 'url'], '');
     }
 
     getLatestVersion(tncConfig: any): string {
-        const value = tncConfig?.data?.response?.value;
-
-        if (!value) return '';
-
-        let parsedValue = value;
-        if (typeof value === 'string') {
-            try {
-                parsedValue = JSON.parse(value);
-            } catch (e) {
-                console.error('Failed to parse TNC config:', e);
-                return '';
-            }
-        }
-
-        return parsedValue?.latestVersion || '';
+        return _.get(this.parseTncConfig(tncConfig), 'latestVersion', '');
     }
 
     async acceptTnc(tncConfig: any, identifier: string): Promise<ApiResponse<AcceptTncResponse>> {
