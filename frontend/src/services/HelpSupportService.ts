@@ -6,7 +6,6 @@ import {
 } from "../types/helpSupport";
 
 /** Convert a category name to a URL-friendly slug. */
-/** Convert a category name to a URL-friendly slug. */
 export const slugify = (name: string): string => {
     const slug = name
         .toLowerCase()
@@ -14,7 +13,7 @@ export const slugify = (name: string): string => {
         .replace(/^-+|-+$/g, "");
 
     if (!slug || slug.length === 0) {
-        return name.trim().replace(/\s+/g, '-');
+        return name.trim().replace(/\s+/g, "-");
     }
     return slug;
 };
