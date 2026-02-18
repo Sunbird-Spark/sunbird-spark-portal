@@ -67,6 +67,10 @@ export class QumlPlayerService {
       objectRollup: contextProps?.objectRollup || {},
       host: '',
       endpoint: '',
+      userData: {
+        firstName: 'Guest',
+        lastName: '',
+      }
     };
 
     const finalConfig = {

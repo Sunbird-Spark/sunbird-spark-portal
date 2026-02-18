@@ -28,6 +28,7 @@ interface WorkspaceToolbarProps {
   typeFilter: ContentTypeFilter;
   onTypeFilterChange: (filter: ContentTypeFilter) => void;
   contentCount?: number;
+  totalCount?: number;
   onCreateClick: () => void;
 }
 
@@ -42,6 +43,7 @@ const WorkspaceToolbar = ({
   typeFilter,
   onTypeFilterChange,
   contentCount,
+  totalCount,
   onCreateClick,
 }: WorkspaceToolbarProps) => {
   const { t } = useAppI18n();
@@ -231,7 +233,7 @@ const WorkspaceToolbar = ({
           </div>
           {contentCount !== undefined && (
             <span className="text-sm text-muted-foreground font-rubik ml-auto">
-              Showing {contentCount} items
+              Showing {contentCount}{totalCount !== undefined && totalCount > contentCount ? ` of ${totalCount}` : ''} items
             </span>
           )}
         </div>

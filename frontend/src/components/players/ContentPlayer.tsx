@@ -3,6 +3,7 @@ import { EpubPlayer } from './EpubPlayer';
 import { VideoPlayer } from './VideoPlayer';
 import { PdfPlayer } from '../content-player/pdf-player/PdfPlayer';
 import { EcmlPlayer } from './EcmlPlayer';
+import QumlPlayer from './quml/QumlPlayer';
 
 // MIME type to player component mapping
 const MIME_TYPE_PLAYERS = {
@@ -12,6 +13,8 @@ const MIME_TYPE_PLAYERS = {
   'video/mp4': VideoPlayer,
   'application/pdf': PdfPlayer,
   'application/vnd.ekstep.ecml-archive': EcmlPlayer,
+  'application/vnd.sunbird.questionset': QumlPlayer,
+  'application/vnd.sunbird.question': QumlPlayer,
 } as const;
 
 type SupportedMimeType = keyof typeof MIME_TYPE_PLAYERS;
@@ -37,7 +40,7 @@ export const ContentPlayer: React.FC<ContentPlayerProps> = ({
   onPlayerEvent,
   onTelemetryEvent,
 }) => {
-  // Get the appropriate player component for the MIME type
+    // Get the appropriate player component for the MIME type
   const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType];
 
   // If no player is found for the MIME type, show unsupported content message
