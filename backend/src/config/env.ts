@@ -38,4 +38,5 @@ export const envConfig = {
     GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || '',
     APPID: (env.ENVIRONMENT || 'local') + '.' + (env.SUNBIRD_PORTAL_INSTANCE || 'sunbird') + '.portal',
     LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
+    KNOWLG_MW_BASE_URL: env.KNOWLG_MW_BASE_URL || 'http://knowledge-mw-service:5000',
 };
