@@ -2,6 +2,37 @@ import { getClient, ApiResponse } from '../lib/http-client';
 import _ from 'lodash';
 import { SignupRequest, SignupResponse } from '../types/signupTypes'
 import { UserReadResponse } from '../types/userTypes';
+import { CourseEnrollmentResponse } from '../types/TrackableCollections';
+
+const ORG_DETAILS_FIELDS = ['orgName', 'email'] as const;
+const LICENSE_DETAILS_FIELDS = ['name', 'description', 'url'] as const;
+const ENROLLMENT_CONTENT_FIELDS = [
+  'contentType',
+  'topic',
+  'name',
+  'channel',
+  'mimeType',
+  'appIcon',
+  'resourceType',
+  'identifier',
+  'pkgVersion',
+  'trackable',
+  'primaryCategory',
+  'organisation',
+  'board',
+  'medium',
+  'gradeLevel',
+  'subject',
+] as const;
+const BATCH_DETAILS_FIELDS = [
+  'name',
+  'endDate',
+  'startDate',
+  'status',
+  'enrollmentType',
+  'createdBy',
+  'certificates',
+] as const;
 
 export class UserService {
     public async searchUser(
@@ -102,4 +133,17 @@ export class UserService {
             `/user/v5/read/${id}`
         );
     }
+
+    public async getUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
+        const searchParams = new URLSearchParams({
+            orgdetails: ORG_DETAILS_FIELDS.join(','),
+            licenseDetails: LICENSE_DETAILS_FIELDS.join(','),
+            fields: ENROLLMENT_CONTENT_FIELDS.join(','),
+            batchDetails: BATCH_DETAILS_FIELDS.join(','),
+        });
+        const url = `/course/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
+        return getClient().get<CourseEnrollmentResponse>(url);
+    }
 }
+
+export const userService = new UserService();
