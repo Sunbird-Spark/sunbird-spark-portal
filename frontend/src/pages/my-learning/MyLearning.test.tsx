@@ -28,7 +28,7 @@ vi.mock('@/components/home/HomeRecommendedSection', () => ({
 vi.mock('@/components/myLearning/MyLearningCourses', () => ({
   default: () => <div data-testid="my-learning-courses">My Learning Courses</div>
 }));
-vi.mock('@/components/myLearning/MyLearningHoursSpent', () => ({
+vi.mock('@/components/myLearning/MyLearningProgress', () => ({
   default: () => <div data-testid="my-learning-hours">Hours Spent</div>
 }));
 vi.mock('@/components/myLearning/MyLearningUpcomingBatches', () => ({
