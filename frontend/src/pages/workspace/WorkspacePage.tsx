@@ -39,7 +39,7 @@ const WorkspacePage = () => {
   const { toast } = useToast();
   const { t } = useAppI18n();
   const [activeNav, setActiveNav] = useState("workspace");
-  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
+  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
   const [userRole, setUserRole] = useState<UserRole>('creator');
   const [activeView, setActiveView] = useState<WorkspaceView>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');

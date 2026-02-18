@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
@@ -28,7 +28,7 @@ const HelpCategoryDetail = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
-    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
     const [feedback, setFeedback] = useState<Record<number, "yes" | "no" | "submitted" | null>>({});
     const [feedbackText, setFeedbackText] = useState<Record<number, string>>({});
 

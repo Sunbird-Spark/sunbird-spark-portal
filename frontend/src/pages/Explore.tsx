@@ -38,14 +38,11 @@ const Explore = () => {
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
   const [sortLabel, setSortLabel] = useState('Newest');
   const [activeNav, setActiveNav] = useState("explore");
-  const { isOpen: isSidebarOpen, toggleSidebar: onToggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
-
+  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
   useEffect(() => {
     // For Explore page, we always want it closed by default when mounting
     setIsSidebarOpen(false);
-  }, []);
-
-
+  }, [setIsSidebarOpen]);
   return (
     <div className="home-container">
       <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />

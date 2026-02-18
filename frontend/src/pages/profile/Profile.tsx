@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
-import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import ProfileCard from "@/components/profile/ProfileCard";
 import PersonalInformation from "@/components/profile/PersonalInformation";
@@ -13,17 +11,12 @@ import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useUserRead } from "@/hooks/useUserRead";
-
-import sunbirdLogo from "@/assets/sunbird-logo.svg";
-import translationIcon from "@/assets/translation_icon.svg";
 import "./profile.css";
 
 const Profile = () => {
-    const navigate = useNavigate();
     const isMobile = useIsMobile();
-    const { t, languages, currentCode, changeLanguage } = useAppI18n();
     const [activeNav, setActiveNav] = useState("profile");
-    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
 
     const { data: userResponse, isLoading, isError } = useUserRead();
     const userData = userResponse?.data?.response;

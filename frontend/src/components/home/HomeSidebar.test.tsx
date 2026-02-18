@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import HomeSidebar from './HomeSidebar';
+import { useLocation } from 'react-router-dom';
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
-import { useLocation } from 'react-router-dom';
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
     return {

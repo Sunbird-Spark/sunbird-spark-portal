@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useHomeData } from "@/hooks/useHomeData";
-import { useNavigate } from "react-router-dom";
+import { useHomeData } from "@/hooks/useHomeData"
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
-import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import HomeStatsCards from "@/components/home/HomeStatsCards";
 import HomeContinueLearning from "@/components/home/HomeContinueLearning";
@@ -14,14 +12,10 @@ import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 
-import sunbirdLogo from "@/assets/sunbird-logo.svg";
-import translationIcon from "@/assets/translation_icon.svg";
 import "./home.css";
 
 const Home = () => {
-    const navigate = useNavigate();
     const isMobile = useIsMobile();
-    const { t, languages, currentCode, changeLanguage } = useAppI18n();
     const { loading: isLoading, error, refetch } = useHomeData();
     const [activeNav, setActiveNav] = useState("home");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);

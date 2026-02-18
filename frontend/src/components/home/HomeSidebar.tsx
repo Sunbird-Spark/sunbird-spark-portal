@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiEdit, FiSettings } from "react-icons/fi";
+import { FiHome, FiUser, FiLogOut, FiEdit } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";

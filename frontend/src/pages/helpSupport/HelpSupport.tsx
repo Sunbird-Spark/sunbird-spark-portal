@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
@@ -11,7 +11,6 @@ import { useSidebarState } from "@/hooks/useSidebarState";
 import { useHelpFaqData } from "@/hooks/useFaqData";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
-import SidebarCloseButton from "../../components/common/SidebarCloseButton";
 import {
     buildHelpCategories,
 } from "../../services/HelpSupportService";
@@ -22,7 +21,7 @@ const HelpSupport = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
-    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
