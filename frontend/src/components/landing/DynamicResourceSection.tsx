@@ -35,21 +35,22 @@ const DynamicResourceSection = ({ title, criteria }: DynamicResourceSectionProps
 
     const contents = data.data.content || [];
 
-    // Layout configuration matching ResourceCenter.tsx
-    const columns = [
-        {
-            items: contents.slice(0, 2),
-            heights: ["h-[28.6875rem]", "h-[18.5rem]"]
-        },
-        {
-            items: contents.slice(2, 4),
-            heights: ["h-[18.5rem]", "h-[28.6875rem]"]
-        },
-        {
-            items: contents.slice(4, 6),
-            heights: ["h-[26.875rem]", "h-[18.5rem]"]
-        }
+    // Layout configuration matching ResourceCenter.tsx, but adaptive to content length
+    const baseHeights = [
+        ["h-[28.6875rem]", "h-[18.5rem]"],
+        ["h-[18.5rem]", "h-[28.6875rem]"],
+        ["h-[26.875rem]", "h-[18.5rem]"],
     ];
+    
+    const columns = baseHeights
+        .map((heights, colIdx) => {
+            const start = colIdx * 2;
+            const end = start + 2;
+            const items = contents.slice(start, end);
+            return { items, heights };
+        })
+        // Avoid rendering completely empty columns when there are fewer than 6 items
+        .filter(col => col.items.length > 0);
 
     return (
         <section className="pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7]">

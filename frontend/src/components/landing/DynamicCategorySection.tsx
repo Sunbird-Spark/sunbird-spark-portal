@@ -16,7 +16,12 @@ const iconMap: Record<string, string> = {
   "IT Development": devIcon,
   "Digital Marketing": marketingIcon,
   "Entrepreneurship": entrepreneurIcon,
-  "Data Science": devIcon, // Fallback
+  "Data Science": devIcon,
+};
+
+const getIconForCategory = (category: CategoryItem): string => {
+  // Try to match by value first, then title, then use default
+  return iconMap[category.value] || iconMap[category.title] || devIcon;
 };
 
 const backgroundMap = [
@@ -53,7 +58,7 @@ const DynamicCategorySection = ({ title, list }: DynamicCategorySectionProps) =>
                 >
                   <div className="w-9 h-[0.1875rem] bg-white/90 rounded-full" />
                   <div className="flex flex-col gap-3">
-                    <img src={iconMap[category.title] || devIcon} alt={category.title} className="w-8 h-8" />
+                    <img src={getIconForCategory(category)} alt={category.title} className="w-8 h-8" />
                     <p className="text-[1.0625rem] font-bold text-white leading-tight">
                       {category.title}
                     </p>
