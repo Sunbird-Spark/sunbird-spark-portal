@@ -30,7 +30,7 @@ const mockRecommendedItems = [
     {
         identifier: '1',
         name: 'Complete AI Engineer Bootcamp',
-        mimeType: 'application/unknown', // Changed to pass client-side filter (logic defaults to CollectionCard)
+        mimeType: 'application/vnd.ekstep.content-collection',
         primaryCategory: 'Course', // CollectionCard uses this
         contentType: 'Course',
         objectType: 'Content',
