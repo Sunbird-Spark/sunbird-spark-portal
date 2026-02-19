@@ -9,7 +9,12 @@ import {
 import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import { type WorkspaceItem } from "@/types/workspaceTypes";
-import { CONTENT_TYPE_ICONS, CONTENT_TYPE_CARD_COLORS, STATUS_CONFIG } from "@/services/workspace";
+import {
+  CONTENT_TYPE_ICONS,
+  CONTENT_TYPE_CARD_COLORS,
+  STATUS_CONFIG,
+  getWorkspaceItemActionVisibility,
+} from "@/services/workspace";
 
 interface WorkspaceContentCardProps {
   item: WorkspaceItem;
@@ -29,12 +34,7 @@ const WorkspaceContentCard = ({
   const status = STATUS_CONFIG[item.status];
   const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
-  const isDraft = item.status === 'draft';
-  const isPublished = item.status === 'published';
-  const isReview = item.status === 'review';
-  const showView = isPublished || isReview;
-  const showEdit = !isPublished && !isReview;
-  const showDelete = isDraft;
+  const { showView, showEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
 
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300 border border-border">

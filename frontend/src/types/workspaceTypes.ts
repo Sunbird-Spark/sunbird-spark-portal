@@ -69,7 +69,6 @@ export interface WorkspaceItem {
   updatedAt: string | null;
   author: string;
   primaryCategory: string;
-  contentType?: string;
 }
 
 export interface FacetValue {

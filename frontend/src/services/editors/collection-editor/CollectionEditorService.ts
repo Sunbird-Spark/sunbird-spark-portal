@@ -185,7 +185,6 @@ export class CollectionEditorService {
     }
 
     createElement(config: CollectionEditorConfig): HTMLElement {
-        (window as any).CKEDITOR_VERSION = undefined;
         const element = document.createElement('lib-editor');
         element.setAttribute('editor-config', JSON.stringify(config));
         return element;
