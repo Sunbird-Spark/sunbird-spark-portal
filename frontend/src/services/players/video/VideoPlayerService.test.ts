@@ -55,6 +55,11 @@ describe('VideoPlayerService', () => {
       },
     });
 
+    // Mock the custom element to prevent script loading
+    if (!customElements.get('sunbird-video-player')) {
+      customElements.define('sunbird-video-player', class extends HTMLElement {});
+    }
+
     service = new VideoPlayerService();
   });
 

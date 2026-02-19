@@ -38,6 +38,11 @@ describe('QumlPlayerService', () => {
   };
 
   beforeEach(() => {
+    // Mock the custom element to prevent script loading
+    if (!customElements.get('sunbird-quml-player')) {
+      customElements.define('sunbird-quml-player', class extends HTMLElement {});
+    }
+
     service = new QumlPlayerService();
     mockOrgService = (service as any).orgService;
 

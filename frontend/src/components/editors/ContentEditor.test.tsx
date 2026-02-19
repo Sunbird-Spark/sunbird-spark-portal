@@ -41,7 +41,7 @@ describe('ContentEditor', () => {
     },
     config: {
       baseURL: '',
-      apislug: '/portal',
+      apislug: '/action',
       build_number: '1.0',
       pluginRepo: '/content-plugins',
       plugins: [],
