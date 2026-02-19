@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 
 // Use vi.hoisted to create mocks that can be used in vi.mock factories
 const {
@@ -77,7 +77,7 @@ import {
 
 describe('GoogleAuthService - Validation & Helpers', () => {
     let mockRequest: Partial<Request>;
-    let mockResponse: Partial<Response>;
+
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -95,10 +95,7 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             oidc: undefined
         };
 
-        mockResponse = {
-            cookie: vi.fn(),
-            clearCookie: vi.fn()
-        };
+
     });
 
     describe('validateOAuthSession', () => {
@@ -188,35 +185,35 @@ describe('GoogleAuthService - Validation & Helpers', () => {
         it('should handle existing and new user authentication', async () => {
             // Existing user
             mockGetUserByEmail.mockResolvedValue({ email: 'test@example.com' });
-            let result = await handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request, mockResponse as Response);
+            let result = await handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request);
             expect(result).toBe(true);
             expect(mockCreateUserWithEmail).not.toHaveBeenCalled();
 
             // New user
             mockGetUserByEmail.mockResolvedValue(null);
             mockCreateUserWithEmail.mockResolvedValue({ email: 'test@example.com' });
-            result = await handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request, mockResponse as Response);
+            result = await handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request);
             expect(result).toBe(false);
             expect(mockCreateUserWithEmail).toHaveBeenCalled();
         });
 
         it('should handle authentication errors', async () => {
             // Missing email
-            await expect(handleUserAuthentication({ name: 'Test User' }, 'test-client-id', mockRequest as Request, mockResponse as Response)).rejects.toThrow('GOOGLE_EMAIL_NOT_FOUND');
+            await expect(handleUserAuthentication({ name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('GOOGLE_EMAIL_NOT_FOUND');
 
             // Fetch user error
             mockGetUserByEmail.mockRejectedValue(new Error('Database error'));
-            await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request, mockResponse as Response)).rejects.toThrow('FETCH_USER_FAILED');
+            await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('FETCH_USER_FAILED');
 
             // Create user error
             mockGetUserByEmail.mockResolvedValue(null);
             mockCreateUserWithEmail.mockRejectedValue(new Error('Create user error'));
-            await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request, mockResponse as Response)).rejects.toThrow('CREATE_USER_FAILED');
+            await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('CREATE_USER_FAILED');
 
             // Session creation error
             mockGetUserByEmail.mockResolvedValue({ email: 'test@example.com' });
             mockClientCredentialsGrant.mockRejectedValue(new Error('Session error'));
-            await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request, mockResponse as Response)).rejects.toThrow('SESSION_CREATION_FAILED');
+            await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('SESSION_CREATION_FAILED');
         });
     });
 });
