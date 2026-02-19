@@ -9,7 +9,23 @@ export interface FormReadRequest {
   framework?: string;
 }
 
+// Keep original interface for compatibility
 export interface FormReadResponse {
+  form: {
+    framework: string;
+    type: string;
+    subtype: string;
+    action: string;
+    component: string;
+    data: any;
+    created_on: string;
+    last_modified_on: string;
+    rootOrgId: string;
+  };
+}
+
+// Renamed interface for the full API response structure
+export interface FormConfigResponse {
   id: string;
   params: {
     resmsgid: string;

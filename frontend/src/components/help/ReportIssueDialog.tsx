@@ -50,7 +50,8 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
         });
 
         console.log("[ReportIssueDialog] raw response:", JSON.stringify(response));
-        const fields = (response.data as any).form?.data?.fields;
+        const formData = (response.data as any).result?.form || (response.data as any).form;
+        const fields = formData?.data?.fields;
         console.log("[ReportIssueDialog] fields:", fields);
         const categoryField = fields?.find((field: any) => field.code === "category");
         const subcategoryField = fields?.find((field: any) => field.code === "subcategory");

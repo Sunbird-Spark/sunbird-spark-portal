@@ -59,6 +59,6 @@ describe('useFormRead', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data?.data.result.form.type).toBe('page');
+    expect((result.current.data?.data as any).form.type).toBe('page');
   });
 });
