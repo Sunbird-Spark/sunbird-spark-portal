@@ -12,6 +12,7 @@ const MIME_TYPE_PLAYERS = {
   'video/webm': VideoPlayer,
   'video/mp4': VideoPlayer,
   'application/pdf': PdfPlayer,
+  'application/vnd.ekstep.h5p-archive': EcmlPlayer,
   'application/vnd.ekstep.ecml-archive': EcmlPlayer,
   'application/vnd.sunbird.questionset': QumlPlayer,
   'application/vnd.sunbird.question': QumlPlayer,
