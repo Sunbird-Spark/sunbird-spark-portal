@@ -140,7 +140,7 @@ const CollectionDetailPage = () => {
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
             {isAuthenticated && isContentCreator && collectionId && (
               <div className="mb-4">
-                <BatchCard collectionId={collectionId} />
+                <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
               </div>
             )}
             <CollectionSidebar

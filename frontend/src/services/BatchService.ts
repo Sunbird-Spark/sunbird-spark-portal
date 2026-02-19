@@ -4,15 +4,19 @@ export interface Batch {
   id: string;
   courseId: string;
   name: string;
+  description?: string;
   /** "0" = Upcoming, "1" = Ongoing, "2" = Expired */
   status: string;
   startDate: string;
   endDate: string;
   enrollmentEndDate?: string;
+  enrollmentType?: string;
   /** If present and non-empty, the batch already has a certificate template */
   certTemplates?: Record<string, unknown>;
+  mentors?: string[];
   createdBy?: string;
   createdDate?: string;
+  createdFor?: string[];
 }
 
 export interface BatchListResponse {
@@ -33,6 +37,19 @@ export interface CreateBatchRequest {
   createdFor: string[];
   mentors?: string[];
   tandc: boolean;
+  enrollmentEndDate?: string;
+}
+
+export interface UpdateBatchRequest {
+  id: string;
+  courseId: string;
+  name: string;
+  description?: string;
+  enrollmentType: 'open';
+  startDate: string;
+  endDate: string;
+  createdFor: string[];
+  mentors: string[];
   enrollmentEndDate?: string;
 }
 
@@ -63,6 +80,17 @@ export class BatchService {
   ): Promise<ApiResponse<CreateBatchResponse>> {
     return getClient().post<CreateBatchResponse>(
       '/learner/course/v1/batch/create',
+      { request },
+      headers
+    );
+  }
+
+  async updateBatch(
+    request: UpdateBatchRequest,
+    headers?: Record<string, string>
+  ): Promise<ApiResponse<unknown>> {
+    return getClient().patch<unknown>(
+      '/learner/course/v1/batch/update',
       { request },
       headers
     );

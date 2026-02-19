@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { FiPlus, FiLoader, FiAward, FiCalendar, FiChevronDown } from "react-icons/fi";
+import { FiPlus, FiLoader, FiAward, FiCalendar, FiChevronDown, FiEdit2 } from "react-icons/fi";
 import dayjs from "dayjs";
 import CreateBatchModal from "./CreateBatchModal";
+import AddCertificateModal from "./AddCertificateModal";
 import { useBatchList } from "@/hooks/useBatch";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
 interface BatchCardProps {
   collectionId: string;
+  collectionName?: string;
 }
 
 /* ── Status helpers ── */
@@ -40,28 +42,48 @@ function formatDate(dateStr: string | undefined): string {
 
 interface BatchListItemProps {
   batch: Batch;
+  collectionId: string;
+  collectionName?: string;
+  onEditClick: (batch: Batch) => void;
+  onCertificateClick: (batch: Batch) => void;
 }
 
-const BatchListItem = ({ batch }: BatchListItemProps) => {
+const BatchListItem = ({
+  batch,
+  collectionId,
+  collectionName,
+  onEditClick,
+  onCertificateClick,
+}: BatchListItemProps) => {
   const status = getBatchStatus(batch.status);
   const hasCertTemplate =
     batch.certTemplates != null && Object.keys(batch.certTemplates).length > 0;
 
   return (
     <div className="py-3 px-4 flex flex-col gap-1.5">
-      {/* Name + status badge (shown only in single-batch mode; hidden when a dropdown provides context) */}
+      {/* Name + status badge + edit button */}
       <div className="flex items-start justify-between gap-2">
         <span className="text-sm font-medium text-foreground font-['Rubik'] leading-snug flex-1">
           {batch.name}
         </span>
-        <span
-          className={cn(
-            "inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 shrink-0 font-['Rubik']",
-            STATUS_STYLES[status]
-          )}
-        >
-          {status}
-        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span
+            className={cn(
+              "inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 font-['Rubik']",
+              STATUS_STYLES[status]
+            )}
+          >
+            {status}
+          </span>
+          <button
+            type="button"
+            onClick={() => onEditClick(batch)}
+            title="Edit batch"
+            className="p-1 rounded text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/5 transition-colors"
+          >
+            <FiEdit2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Start – End dates */}
@@ -85,6 +107,7 @@ const BatchListItem = ({ batch }: BatchListItemProps) => {
         {hasCertTemplate ? (
           <button
             type="button"
+            onClick={() => onCertificateClick(batch)}
             className="text-xs text-sunbird-brick font-medium font-['Rubik'] hover:underline"
           >
             Edit Certificate
@@ -92,6 +115,7 @@ const BatchListItem = ({ batch }: BatchListItemProps) => {
         ) : (
           <button
             type="button"
+            onClick={() => onCertificateClick(batch)}
             className="text-xs text-sunbird-brick font-medium font-['Rubik'] hover:underline"
           >
             Add Certificate
@@ -104,8 +128,10 @@ const BatchListItem = ({ batch }: BatchListItemProps) => {
 
 /* ── BatchCard ── */
 
-const BatchCard = ({ collectionId }: BatchCardProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editBatch, setEditBatch] = useState<Batch | null>(null);
+  const [certBatch, setCertBatch] = useState<Batch | null>(null);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
   const { data: batches, isLoading, isError } = useBatchList(collectionId);
@@ -116,6 +142,14 @@ const BatchCard = ({ collectionId }: BatchCardProps) => {
   // Resolve which batch to display in the detail panel
   const displayedBatch =
     batches?.find((b) => b.id === selectedBatchId) ?? batches?.[0] ?? null;
+
+  const handleEditClick = (batch: Batch) => {
+    setEditBatch(batch);
+  };
+
+  const handleCertificateClick = (batch: Batch) => {
+    setCertBatch(batch);
+  };
 
   return (
     <>
@@ -173,7 +207,13 @@ const BatchCard = ({ collectionId }: BatchCardProps) => {
             {/* Selected batch detail */}
             {displayedBatch && (
               <div className="border-t border-border">
-                <BatchListItem batch={displayedBatch} />
+                <BatchListItem
+                  batch={displayedBatch}
+                  collectionId={collectionId}
+                  collectionName={collectionName}
+                  onEditClick={handleEditClick}
+                  onCertificateClick={handleCertificateClick}
+                />
               </div>
             )}
           </>
@@ -181,14 +221,20 @@ const BatchCard = ({ collectionId }: BatchCardProps) => {
 
         {/* ── Single batch → detail panel directly (no dropdown) ── */}
         {!isLoading && !isError && count === 1 && displayedBatch && (
-          <BatchListItem batch={displayedBatch} />
+          <BatchListItem
+            batch={displayedBatch}
+            collectionId={collectionId}
+            collectionName={collectionName}
+            onEditClick={handleEditClick}
+            onCertificateClick={handleCertificateClick}
+          />
         )}
 
         {/* ── Create Batch button — always visible ── */}
         <div className="px-5 py-4 border-t border-border mt-auto">
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsCreateModalOpen(true)}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors rounded-lg px-3 py-1.5"
           >
             <FiPlus className="w-4 h-4" />
@@ -197,11 +243,31 @@ const BatchCard = ({ collectionId }: BatchCardProps) => {
         </div>
       </div>
 
+      {/* Create batch modal */}
       <CreateBatchModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
         collectionId={collectionId}
       />
+
+      {/* Edit batch modal */}
+      <CreateBatchModal
+        open={!!editBatch}
+        onOpenChange={(open) => { if (!open) setEditBatch(null); }}
+        collectionId={collectionId}
+        initialBatch={editBatch ?? undefined}
+      />
+
+      {/* Add / Edit certificate modal */}
+      {certBatch && (
+        <AddCertificateModal
+          open={!!certBatch}
+          onOpenChange={(open) => { if (!open) setCertBatch(null); }}
+          courseId={collectionId}
+          batchId={certBatch.id}
+          courseName={collectionName}
+        />
+      )}
     </>
   );
 };

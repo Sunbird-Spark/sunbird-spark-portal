@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiX, FiCheck, FiSearch, FiLoader } from "react-icons/fi";
-import { useLearnerFuzzySearch } from "@/hooks/useUser";
-import { useCreateBatch } from "@/hooks/useBatch";
+import { useCreateBatch, useUpdateBatch } from "@/hooks/useBatch";
+import { useMentorList, MentorUser } from "@/hooks/useMentor";
+import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
 /* ─── Switch primitives ─── */
@@ -42,7 +43,6 @@ interface SwitchRowProps {
   checked: boolean;
   onChange: (val: boolean) => void;
   label: string;
-  /** Optional text that appears next to the toggle, e.g. "Open" */
   valueLabel?: string;
 }
 
@@ -69,18 +69,12 @@ const SwitchRow = ({ id, checked, onChange, label, valueLabel }: SwitchRowProps)
 
 /* ─── Types ─── */
 
-interface MentorUser {
-  identifier: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-}
-
 interface CreateBatchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   collectionId: string;
+  /** When provided, the modal operates in Edit mode */
+  initialBatch?: Batch;
 }
 
 interface BatchFormState {
@@ -96,18 +90,18 @@ interface BatchFormState {
   acceptTerms: boolean;
 }
 
-const INITIAL_FORM: BatchFormState = {
-  batchName: "",
-  aboutBatch: "",
-  startDate: "",
-  endDate: "",
-  enrolmentEndDate: "",
+const makeInitialForm = (batch?: Batch): BatchFormState => ({
+  batchName: batch?.name ?? "",
+  aboutBatch: batch?.description ?? "",
+  startDate: batch?.startDate ?? "",
+  endDate: batch?.endDate ?? "",
+  enrolmentEndDate: batch?.enrollmentEndDate ?? "",
   issueCertificate: false,
   enableDiscussion: false,
   batchType: "Open",
-  selectedMentorIds: [],
+  selectedMentorIds: batch?.mentors ?? [],
   acceptTerms: false,
-};
+});
 
 const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']";
 const inputClass =
@@ -115,42 +109,31 @@ const inputClass =
 
 /* ─── Modal ─── */
 
-const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModalProps) => {
-  const [form, setForm] = useState<BatchFormState>(INITIAL_FORM);
+const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: CreateBatchModalProps) => {
+  const isEditMode = !!initialBatch;
+
+  const [form, setForm] = useState<BatchFormState>(() => makeInitialForm(initialBatch));
   const [mentorQuery, setMentorQuery] = useState("");
-  const [mentorResults, setMentorResults] = useState<MentorUser[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const fuzzySearch = useLearnerFuzzySearch();
+  const { data: allMentors = [], isLoading: mentorsLoading } = useMentorList();
   const createBatch = useCreateBatch();
+  const updateBatch = useUpdateBatch();
+
+  const isPending = isEditMode ? updateBatch.isPending : createBatch.isPending;
+
+  // Re-populate form when switching to a different batch in edit mode
+  useEffect(() => {
+    if (open) {
+      setForm(makeInitialForm(initialBatch));
+      setMentorQuery("");
+      setSubmitError(null);
+    }
+  }, [open, initialBatch]);
 
   const handleField = <K extends keyof BatchFormState>(key: K, value: BatchFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
-
-  const handleMentorSearch = useCallback(
-    async (query: string) => {
-      setMentorQuery(query);
-      if (query.trim().length < 2) {
-        setMentorResults([]);
-        return;
-      }
-      try {
-        const result = await fuzzySearch.mutateAsync({ identifier: query.trim(), name: query.trim() });
-        const users: MentorUser[] = (result?.data?.response?.content ?? []).map((u: any) => ({
-          identifier: u.identifier,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          email: u.email,
-          phone: u.phone,
-        }));
-        setMentorResults(users);
-      } catch {
-        setMentorResults([]);
-      }
-    },
-    [fuzzySearch]
-  );
 
   const toggleMentor = (id: string) => {
     setForm((prev) => ({
@@ -161,36 +144,59 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
     }));
   };
 
+  // Filter mentors by query text (client-side filter since the list is usually small)
+  const filteredMentors: MentorUser[] =
+    mentorQuery.trim().length >= 1
+      ? allMentors.filter((u) => {
+          const name = [u.firstName, u.lastName].filter(Boolean).join(" ").toLowerCase();
+          const email = (u.maskedEmail ?? u.email ?? "").toLowerCase();
+          const q = mentorQuery.toLowerCase();
+          return name.includes(q) || email.includes(q) || u.identifier.toLowerCase().includes(q);
+        })
+      : allMentors;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
     try {
-      await createBatch.mutateAsync({
-        courseId: collectionId,
-        name: form.batchName,
-        description: form.aboutBatch || undefined,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        mentors: form.selectedMentorIds.length > 0 ? form.selectedMentorIds : undefined,
-        tandc: form.acceptTerms,
-        enrollmentEndDate: form.enrolmentEndDate || undefined,
-      });
+      if (isEditMode && initialBatch) {
+        await updateBatch.mutateAsync({
+          batchId: initialBatch.id,
+          courseId: collectionId,
+          name: form.batchName,
+          description: form.aboutBatch || undefined,
+          startDate: form.startDate,
+          endDate: form.endDate,
+          mentors: form.selectedMentorIds.length > 0 ? form.selectedMentorIds : undefined,
+          enrollmentEndDate: form.enrolmentEndDate || undefined,
+        });
+      } else {
+        await createBatch.mutateAsync({
+          courseId: collectionId,
+          name: form.batchName,
+          description: form.aboutBatch || undefined,
+          startDate: form.startDate,
+          endDate: form.endDate,
+          mentors: form.selectedMentorIds.length > 0 ? form.selectedMentorIds : undefined,
+          tandc: form.acceptTerms,
+          enrollmentEndDate: form.enrolmentEndDate || undefined,
+        });
+      }
       onOpenChange(false);
-      setForm(INITIAL_FORM);
-      setMentorQuery("");
-      setMentorResults([]);
     } catch (err: unknown) {
       setSubmitError(
-        err instanceof Error ? err.message : "Failed to create batch. Please try again."
+        err instanceof Error
+          ? err.message
+          : isEditMode
+          ? "Failed to update batch. Please try again."
+          : "Failed to create batch. Please try again."
       );
     }
   };
 
   const handleClose = () => {
     onOpenChange(false);
-    setForm(INITIAL_FORM);
     setMentorQuery("");
-    setMentorResults([]);
     setSubmitError(null);
   };
 
@@ -198,8 +204,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
     !form.batchName.trim() ||
     !form.startDate ||
     !form.endDate ||
-    !form.acceptTerms ||
-    createBatch.isPending;
+    (!isEditMode && !form.acceptTerms) ||
+    isPending;
 
   return (
     <Dialog.Root open={open} onOpenChange={handleClose}>
@@ -210,7 +216,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-border sticky top-0 bg-white rounded-t-2xl z-10">
             <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-['Rubik']">
-              Create Batch
+              {isEditMode ? "Edit Batch" : "Create Batch"}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
@@ -300,8 +306,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
               </div>
             </div>
 
-            {/* 6, 7, 8 — Issue Certificate switch, Batch Type (text only) */}
-            {/* Enable Discussion is temporarily disabled */}
+            {/* 6. Issue Certificate + Batch Type */}
             <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
               <div className="px-4 py-3">
                 <SwitchRow
@@ -311,43 +316,41 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
                   onChange={(v) => handleField("issueCertificate", v)}
                 />
               </div>
-              {/* <div className="px-4 py-3">
-                <SwitchRow
-                  id="enableDiscussion"
-                  label="Enable Discussion"
-                  checked={form.enableDiscussion}
-                  onChange={(v) => handleField("enableDiscussion", v)}
-                />
-              </div> */}
               <div className="px-4 py-3 flex items-center justify-between gap-4">
                 <span className="text-sm font-medium text-foreground font-['Rubik']">Batch Type</span>
                 <span className="text-sm font-medium text-sunbird-brick font-['Rubik']">Open</span>
               </div>
             </div>
 
-            {/* 9. Mentors */}
+            {/* 7. Mentors */}
             <div>
               <label className={labelClass}>Mentors in the Batch</label>
+
+              {/* Search box */}
               <div className="relative mb-2">
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
                   className={cn(inputClass, "pl-9")}
-                  placeholder="Search mentors by name or identifier…"
+                  placeholder="Search mentors by name or email…"
                   value={mentorQuery}
-                  onChange={(e) => handleMentorSearch(e.target.value)}
+                  onChange={(e) => setMentorQuery(e.target.value)}
                 />
-                {fuzzySearch.isPending && (
+                {mentorsLoading && (
                   <FiLoader className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
                 )}
               </div>
 
-              {mentorResults.length > 0 && (
+              {/* Mentor list */}
+              {filteredMentors.length > 0 && (
                 <div className="rounded-lg border border-border bg-white shadow-sm max-h-40 overflow-y-auto divide-y divide-border">
-                  {mentorResults.map((user) => {
+                  {filteredMentors.map((user) => {
                     const isSelected = form.selectedMentorIds.includes(user.identifier);
                     const displayName =
-                      [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || user.identifier;
+                      [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+                      user.maskedEmail ||
+                      user.email ||
+                      user.identifier;
                     return (
                       <label
                         key={user.identifier}
@@ -372,16 +375,20 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
                 </div>
               )}
 
-              {mentorQuery.trim().length >= 2 && mentorResults.length === 0 && !fuzzySearch.isPending && (
-                <p className="text-xs text-muted-foreground mt-1">No users found for "{mentorQuery}".</p>
+              {!mentorsLoading && allMentors.length === 0 && (
+                <p className="text-xs text-muted-foreground mt-1">No mentors found in your organisation.</p>
               )}
 
+              {/* Selected mentor tags */}
               {form.selectedMentorIds.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {form.selectedMentorIds.map((id) => {
-                    const user = mentorResults.find((u) => u.identifier === id);
+                    const user = allMentors.find((u) => u.identifier === id);
                     const name = user
-                      ? [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || id
+                      ? [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+                        user.maskedEmail ||
+                        user.email ||
+                        id
                       : id;
                     return (
                       <span
@@ -404,16 +411,18 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
               )}
             </div>
 
-            {/* 10. Terms & Conditions */}
-            <div className="rounded-lg bg-gray-50 border border-border p-4">
-              <CheckboxRow
-                id="acceptTerms"
-                checked={form.acceptTerms}
-                onCheckedChange={(v) => handleField("acceptTerms", !!v)}
-                label="I accept the Terms & Conditions for creating this batch."
-                required
-              />
-            </div>
+            {/* 8. Terms & Conditions (create mode only) */}
+            {!isEditMode && (
+              <div className="rounded-lg bg-gray-50 border border-border p-4">
+                <CheckboxRow
+                  id="acceptTerms"
+                  checked={form.acceptTerms}
+                  onCheckedChange={(v) => handleField("acceptTerms", !!v)}
+                  label="I accept the Terms & Conditions for creating this batch."
+                  required
+                />
+              </div>
+            )}
 
             {/* Error message */}
             {submitError && (
@@ -427,7 +436,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
               <button
                 type="button"
                 onClick={handleClose}
-                disabled={createBatch.isPending}
+                disabled={isPending}
                 className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-['Rubik']"
               >
                 Cancel
@@ -442,10 +451,14 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
                     : "bg-sunbird-brick hover:bg-opacity-90"
                 )}
               >
-                {createBatch.isPending && (
-                  <FiLoader className="w-4 h-4 animate-spin" />
-                )}
-                {createBatch.isPending ? "Creating…" : "Create Batch"}
+                {isPending && <FiLoader className="w-4 h-4 animate-spin" />}
+                {isPending
+                  ? isEditMode
+                    ? "Saving…"
+                    : "Creating…"
+                  : isEditMode
+                  ? "Save Changes"
+                  : "Create Batch"}
               </button>
             </div>
           </form>
@@ -455,7 +468,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModal
   );
 };
 
-/* ─── Checkbox (used only for T&C and mentor list) ─── */
+/* ─── Checkbox (used only for T&C) ─── */
 
 interface CheckboxRowProps {
   id: string;
