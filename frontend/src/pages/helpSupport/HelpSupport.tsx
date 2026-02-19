@@ -16,12 +16,14 @@ import {
 } from "../../services/HelpSupportService";
 
 import "../profile/profile.css";
+import ReportIssueDialog from "@/components/help/ReportIssueDialog";
 
 const HelpSupport = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
+    const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
@@ -83,7 +85,9 @@ const HelpSupport = () => {
                             <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground">
                                 How can we assist you today?
                             </h1>
-                            <button className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
+                            <button
+                                onClick={() => setIsReportIssueOpen(true)}
+                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
                                 Report an Issue
                             </button>
                         </div>
@@ -135,6 +139,7 @@ const HelpSupport = () => {
             </div>
 
             <Footer />
+            <ReportIssueDialog open={isReportIssueOpen} onOpenChange={setIsReportIssueOpen} />
         </div>
     );
 };

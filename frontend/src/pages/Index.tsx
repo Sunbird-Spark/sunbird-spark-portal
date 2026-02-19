@@ -25,8 +25,8 @@ const Index = () => {
     return <PageLoader message="Loading Sunbird..." />;
   }
 
-  const sections = formData?.data?.form?.data?.sections || [];
-  
+  const sections = formData?.data?.result?.form?.data?.sections || [];
+
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
 
   const renderSection = (section: FormSection) => {
