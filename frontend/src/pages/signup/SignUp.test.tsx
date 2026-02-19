@@ -24,7 +24,7 @@ vi.mock("@/hooks/useToast", () => ({
 // Mock user hooks
 vi.mock('@/hooks/useUser', () => ({
     useSignup: () => ({
-        mutate: vi.fn((variables, options) => {
+        mutate: vi.fn((_variables, options) => {
             options?.onSuccess?.({ status: 200 });
         }),
         isPending: false
@@ -34,13 +34,13 @@ vi.mock('@/hooks/useUser', () => ({
 // Mock OTP hooks
 vi.mock('@/hooks/useOtp', () => ({
     useGenerateOtp: () => ({
-        mutate: vi.fn((variables, options) => {
+        mutate: vi.fn((_variables, options) => {
             options?.onSuccess?.({ status: 200 });
         }),
         isPending: false
     }),
     useVerifyOtp: () => ({
-        mutate: vi.fn((variables, options) => {
+        mutate: vi.fn((_variables, options) => {
             options?.onSuccess?.({ status: 200 });
         }),
         isPending: false
@@ -51,7 +51,7 @@ vi.mock('@/hooks/useOtp', () => ({
 vi.mock('react-google-recaptcha', async () => {
     const React = await import('react');
     return {
-        default: React.forwardRef((props: any, ref: any) => {
+        default: React.forwardRef((_props: any, ref: any) => {
             React.useImperativeHandle(ref, () => ({
                 execute: vi.fn(),
                 reset: vi.fn(),

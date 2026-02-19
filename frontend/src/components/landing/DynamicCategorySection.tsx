@@ -11,19 +11,12 @@ interface DynamicCategorySectionProps {
   list?: CategoryItem[];
 }
 
-const iconMap: Record<string, string> = {
-  "UI/UX Design": uiuxIcon,
-  "IT Development": devIcon,
-  "Digital Marketing": marketingIcon,
-  "Entrepreneurship": entrepreneurIcon,
-  "Data Science": devIcon, // Fallback
-};
 
 const backgroundMap = [
-  "linear-gradient(to right, #45C0ED, #8E46C5)",
-  "linear-gradient(to right, #D55E1D, #F6C35C)",
-  "linear-gradient(to right, #1D79D5, #6ED97B)",
-  "linear-gradient(to right, #F59C84, #D655E7)",
+  "var(--category-gradient-1)",
+  "var(--category-gradient-2)",
+  "var(--category-gradient-3)",
+  "var(--category-gradient-4)",
 ];
 
 const DynamicCategorySection = ({ title, list }: DynamicCategorySectionProps) => {
@@ -46,14 +39,13 @@ const DynamicCategorySection = ({ title, list }: DynamicCategorySectionProps) =>
         <div className="flex items-center gap-6 pb-[1.875rem] flex-wrap justify-center lg:justify-between">
           <div className="flex items-center gap-4 flex-wrap justify-center lg:flex-nowrap">
             {sortedCategories.map((category, idx) => (
-              <Link key={category.id + idx} to="/explore" className="group">
+              <Link key={`${category.id}-${idx}`} to="/explore" className="group">
                 <div
                   className="flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[14rem] h-[12.125rem] rounded-[1.25rem]"
                   style={{ background: backgroundMap[idx % backgroundMap.length] }}
                 >
                   <div className="w-9 h-[0.1875rem] bg-white/90 rounded-full" />
                   <div className="flex flex-col gap-3">
-                    <img src={iconMap[category.title] || devIcon} alt={category.title} className="w-8 h-8" />
                     <p className="text-[1.0625rem] font-bold text-white leading-tight">
                       {category.title}
                     </p>

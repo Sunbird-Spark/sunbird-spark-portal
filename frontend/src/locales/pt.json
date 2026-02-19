@@ -130,6 +130,11 @@
   "tryAdjusting": "Tente ajustar sua busca ou filtros.",
   "createFirst": "Crie seu primeiro conteúdo para começar.",
   "createContent": "Criar Conteúdo",
+  "somethingWentWrong": "Algo deu errado",
+  "failedToLoadContent": "Falha ao carregar conteúdo. Por favor, tente novamente.",
+  "retry": "Tentar novamente",
+  "loadingContent": "Carregando conteúdo…",
+  "loadingMore": "Carregando mais…",
   "noUploadsYet": "Nenhum upload ainda",
   "uploadHere": "Envie arquivos de conteúdo para gerenciá-los aqui.",
   "noCollaborations": "Nenhuma colaboração ainda",
@@ -154,7 +159,10 @@
   "button": {
     "login": "Entrar",
     "goBack": "Voltar",
-    "share": "Compartilhar"
+    "share": "Compartilhar",
+    "playVideo": "Reproduzir vídeo",
+    "previous": "Anterior",
+    "next": "Próximo"
   },
   "hero": {
     "title": "Conhecimento que te move para frente.",
@@ -180,10 +188,13 @@
   },
   "courseDetails": {
     "overview": "Visão geral do curso",
+    "units": "Unidades",
     "weeks": "Semanas",
     "skills": "Habilidades que você aprenderá",
     "suitedFor": "Melhor para",
-    "relatedContent": "Conteúdo relacionado"
+    "relatedContent": "Conteúdo relacionado",
+    "unlockLearningTitle": "Desbloqueie seu aprendizado.",
+    "unlockLearningDescription": "Faça login para começar sua jornada de aprendizado conosco."
   },
   "resource": {
     "title": "Fique à frente. O que vem a seguir começa aqui.",

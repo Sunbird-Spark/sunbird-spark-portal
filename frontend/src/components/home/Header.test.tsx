@@ -1,7 +1,18 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import Header from '../home/Header';
+
+// Mock useLocation
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useLocation: () => ({
+      pathname: '/',
+    }),
+  };
+});
 
 // Mock the hooks
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -11,10 +22,20 @@ vi.mock('@/hooks/useAppI18n', () => ({
       { code: 'en', label: 'English' },
       { code: 'fr', label: 'Français' },
     ],
-    currentLanguage: { code: 'en', label: 'English' },
+    currentCode: 'en', // Changed from currentLanguage object to currentCode string to match component
     changeLanguage: vi.fn(),
     dir: 'ltr',
   }),
+}));
+
+// Mock useAuth
+vi.mock('@/auth/AuthContext', () => ({
+  useAuth: vi.fn(() => ({
+    isAuthenticated: false,
+    user: null,
+    login: vi.fn(),
+    logout: vi.fn(),
+  })),
 }));
 
 const renderHeader = () => {

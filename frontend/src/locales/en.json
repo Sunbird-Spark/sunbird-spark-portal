@@ -146,6 +146,11 @@
   "tryAdjusting": "Try adjusting your search or filters.",
   "createFirst": "Create your first content to get started.",
   "createContent": "Create Content",
+  "somethingWentWrong": "Something went wrong",
+  "failedToLoadContent": "Failed to load content. Please try again.",
+  "retry": "Retry",
+  "loadingContent": "Loading content…",
+  "loadingMore": "Loading more…",
   "noUploadsYet": "No uploads yet",
   "uploadHere": "Upload content files to manage them here.",
   "noCollaborations": "No collaborations yet",
@@ -170,7 +175,10 @@
   "button": {
     "login": "Login",
     "goBack": "Go Back",
-    "share": "Share"
+    "share": "Share",
+    "playVideo": "Play video",
+    "previous": "Previous",
+    "next": "Next"
   },
   "hero": {
     "title": "Knowledge that moves you forward.",
@@ -196,10 +204,13 @@
   },
   "courseDetails": {
     "overview": "Course Overview",
+    "units": "Units",
     "weeks": "Weeks",
     "skills": "Skills you will learn",
     "suitedFor": "Best Suited For",
-    "relatedContent": "Related Content"
+    "relatedContent": "Related Content",
+    "unlockLearningTitle": "Unlock your learning.",
+    "unlockLearningDescription": "Log in to begin your learning journey with us."
   },
   "resource": {
     "title": "Stay ahead. What's next starts here.",

@@ -145,6 +145,12 @@
     --sunbird-gray-ef: 0 0% 93.7%;
     /* #EFEFEF */
 
+    /* Category Card Gradients */
+    --category-gradient-1: linear-gradient(to right, #45C0ED, #8E46C5);
+    --category-gradient-2: linear-gradient(to right, #D55E1D, #F6C35C);
+    --category-gradient-3: linear-gradient(to right, #1D79D5, #6ED97B);
+    --category-gradient-4: linear-gradient(to right, #F59C84, #D655E7);
+
     /* Box Shadows */
     --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
     --sunbird-shadow-sm: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
@@ -502,7 +508,7 @@
   }
 
   .content-player-video-relative {
-    @apply relative h-80 sm:h-96 md:h-screen lg:h-screen;
+    @apply relative h-80 sm:h-96 md:h-[37.5rem] lg:h-[37.5rem];
   }
 
   .content-player-video-thumbnail {
@@ -526,7 +532,7 @@
   }
 
   .content-player-related-title {
-    @apply text-xl font-semibold text-foreground font-rubik;
+    @apply text-xl font-semibold text-foreground font-rubik my-2;
   }
 
   .content-player-related-arrow {
@@ -659,6 +665,51 @@
   [dir="rtl"] .card-mask-custom {
     -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
     mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+  }
+
+  /* Terms and Conditions Popover Close Button */
+  .tnc-close-icon {
+    color: hsl(var(--sunbird-brick));
+  }
+
+  /* Terms and Conditions Popover Styles */
+  .tnc-dialog-overlay {
+    @apply fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+  }
+
+  .tnc-dialog-content {
+    @apply fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2;
+    @apply rounded-[1.875rem] border bg-white shadow-lg outline-none;
+    @apply w-[90vw] h-[80vh] max-w-[72.875rem] max-h-[41.25rem];
+    @apply md:w-[85vw] md:h-[75vh];
+    @apply lg:w-[72.875rem] lg:h-[41.25rem];
+    @apply data-[state=open]:animate-in data-[state=closed]:animate-out;
+    @apply data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+    @apply data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95;
+  }
+
+  .tnc-dialog-header {
+    @apply flex items-center justify-between p-4;
+  }
+
+  .tnc-dialog-title {
+    @apply text-lg font-semibold text-popover-foreground;
+  }
+
+  .tnc-close-button {
+    @apply h-8 w-8 rounded-full;
+  }
+
+  .tnc-close-button:hover {
+    background-color: hsl(var(--sunbird-gray-d0)) !important;
+  }
+
+  .tnc-iframe-container {
+    @apply flex-1 overflow-hidden p-4;
+  }
+
+  .tnc-iframe {
+    @apply w-full h-full border-0 rounded;
   }
 
 }

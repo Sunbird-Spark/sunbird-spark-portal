@@ -10,7 +10,23 @@ vi.mock('../services/FormService', () => {
   return {
     FormService: function() {
       return {
-        formRead: () => Promise.resolve({ data: { result: { form: { id: '123' } } } }),
+        formRead: () => Promise.resolve({ 
+          data: { 
+            form: { 
+              type: 'page',
+              subtype: 'landing',
+              action: 'sections',
+              component: 'portal',
+              framework: '*',
+              data: {
+                sections: []
+              },
+              created_on: '2024-01-01',
+              last_modified_on: '2024-01-01',
+              rootOrgId: 'test-org'
+            } 
+          } 
+        }),
       };
     },
   };
@@ -43,6 +59,6 @@ describe('useFormRead', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data?.data.result.form.id).toBe('123');
+    expect(result.current.data?.data.form.type).toBe('page');
   });
 });

@@ -1,12 +1,15 @@
+import { Fragment } from "react";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import CollectionCard from "@/components/content/CollectionCard";
 import ResourceCard from "@/components/content/ResourceCard";
-import type { ContentSearchItem } from "@/types/workspaceTypes";
+import type { RelatedContentItem } from "@/types/collectionTypes";
 
 const DEFAULT_LIMIT = 3;
 
+export type { RelatedContentItem };
+
 export interface RelatedContentProps {
-  items: ContentSearchItem[] | undefined;
+  items: RelatedContentItem[] | undefined;
   cardType: "collection" | "resource";
   title?: string;
   limit?: number;
@@ -26,7 +29,13 @@ const RelatedContent = ({
   }
 
   const displayItems = items.slice(0, limit);
-  const CardComponent = cardType === "collection" ? CollectionCard : ResourceCard;
+
+  const renderCard = (item: RelatedContentItem) => {
+    const itemCardType = item.cardType ?? cardType;
+    const CardComponent = itemCardType === "collection" ? CollectionCard : ResourceCard;
+    const card = <CardComponent item={item} />;
+    return <Fragment key={item.identifier}>{card}</Fragment>;
+  };
 
   return (
     <section>
@@ -34,9 +43,7 @@ const RelatedContent = ({
         <h2 className="content-player-related-title">{displayTitle}</h2>
       </div>
       <div className="content-player-related-grid">
-        {displayItems.map((item) => (
-          <CardComponent key={item.identifier} item={item} />
-        ))}
+        {displayItems.map((item) => renderCard(item))}
       </div>
     </section>
   );

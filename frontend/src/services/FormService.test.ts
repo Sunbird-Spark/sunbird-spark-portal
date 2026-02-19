@@ -72,8 +72,8 @@ describe('FormService', () => {
           type: 'content',
           subType: '',
           action: 'create',
-          component: '',
-          rootOrgId: '',
+          component: '*',
+          rootOrgId: '*',
           framework: '*'
         },
       }

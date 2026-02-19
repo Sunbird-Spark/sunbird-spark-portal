@@ -167,7 +167,10 @@
   "button": {
     "login": "Connexion",
     "goBack": "Retour",
-    "share": "Partager"
+    "share": "Partager",
+    "playVideo": "Lire la vidéo",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "hero": {
     "title": "Des connaissances qui vous font avancer.",
@@ -193,10 +196,13 @@
   },
   "courseDetails": {
     "overview": "Aperçu du cours",
+    "units": "Unités",
     "weeks": "Semaines",
     "skills": "Compétences que vous apprendrez",
     "suitedFor": "Idéal pour",
-    "relatedContent": "Contenu associé"
+    "relatedContent": "Contenu associé",
+    "unlockLearningTitle": "Débloquez votre apprentissage.",
+    "unlockLearningDescription": "Connectez-vous pour commencer votre parcours avec nous."
   },
   "resource": {
     "title": "Gardez une longueur d'avance. L'avenir commence ici.",

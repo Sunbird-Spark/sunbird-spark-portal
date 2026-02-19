@@ -10,13 +10,14 @@ import DynamicResourceSection from "@/components/landing/DynamicResourceSection"
 import { FormSection } from "@/types/formTypes";
 
 const Index = () => {
-  const { data: formData, isLoading } = useFormRead({
+  const { data: formData, isLoading, error } = useFormRead({
     request: {
       type: "page",
       subType: "landing",
       action: "sections",
       component: "portal",
       framework: "*",
+      rootOrgId: "*"
     }
   });
 
@@ -24,7 +25,8 @@ const Index = () => {
     return <PageLoader message="Loading Sunbird..." />;
   }
 
-  const sections = formData?.data?.result?.form?.data?.sections || [];
+  const sections = formData?.data?.form?.data?.sections || [];
+  
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
 
   const renderSection = (section: FormSection) => {
@@ -45,7 +47,7 @@ const Index = () => {
             list={section.list}
           />
         );
-      case 'resource':
+      case 'resources':
         return (
           <DynamicResourceSection
             key={section.id}
