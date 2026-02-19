@@ -1,3 +1,4 @@
+import { FiStar } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Link } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
