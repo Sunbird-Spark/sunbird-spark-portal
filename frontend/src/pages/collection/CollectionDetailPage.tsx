@@ -57,7 +57,7 @@ const CollectionDetailPage = () => {
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
   const playerMetadata = isQumlContent ? qumlData : selectedContentData;
-  const playerIsLoading = isQumlContent ? qumlIsLoading : contentIsLoading;
+  const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : (contentIsLoading || !playerMetadata)) : false;
   const playerError = isQumlContent ? qumlError : contentError;
 
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
