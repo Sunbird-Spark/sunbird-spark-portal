@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Explore from './Explore';
+
+// --------------------
+// Mocks
+// --------------------
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -9,6 +13,7 @@ vi.mock('react-router-dom', async () => {
     ...actual,
     useLocation: () => ({ pathname: '/explore' }),
     useNavigate: () => vi.fn(),
+    // useSearchParams uses the actual implementation, driven by MemoryRouter's URL
   };
 });
 
@@ -21,11 +26,14 @@ vi.mock('@/auth/AuthContext', () => ({
   })),
 }));
 
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: { isUserAuthenticated: vi.fn(() => false) },
+}));
+
 vi.mock('../components/home/HomeSidebar', () => ({
   default: () => <div data-testid="sidebar">Sidebar</div>,
 }));
 
-// Mock child components
 vi.mock('../components/explore/ExploreGrid', () => ({
   default: ({ query, sortBy, filters }: any) => (
     <div data-testid="explore-grid">
@@ -70,82 +78,146 @@ vi.mock('@/hooks/useSidebarState', () => ({
   }),
 }));
 
-describe('Explore Page', () => {
-  const renderComponent = () => {
-    return render(
-      <MemoryRouter>
-        <Explore />
-      </MemoryRouter>
-    );
-  };
+// --------------------
+// Helpers
+// --------------------
 
+const setupMatchMedia = () => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+};
+
+/**
+ * Renders Explore inside a MemoryRouter. Pass a full URL string (e.g. '/explore?q=test')
+ * to pre-populate query params.
+ */
+const renderComponent = (initialUrl = '/explore') =>
+  render(
+    <MemoryRouter initialEntries={[initialUrl]}>
+      <Explore />
+    </MemoryRouter>
+  );
+
+// --------------------
+// Tests
+// --------------------
+
+describe('Explore Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation(query => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(), // deprecated
-        removeListener: vi.fn(), // deprecated
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
+    setupMatchMedia();
+  });
+
+  describe('static rendering', () => {
+    it('renders the header, footer, filters, and grid', () => {
+      renderComponent();
+      expect(screen.getByTestId('header')).toBeInTheDocument();
+      expect(screen.getByTestId('footer')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-filters')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-grid')).toBeInTheDocument();
+    });
+
+    it('renders the search input', () => {
+      renderComponent();
+      expect(screen.getByPlaceholderText('searchPlaceholder')).toBeInTheDocument();
+    });
+
+    it('renders the sort dropdown with "Newest" as the default label', () => {
+      renderComponent();
+      expect(screen.getByText('Newest')).toBeInTheDocument();
     });
   });
 
-  it('renders page content', () => {
-    renderComponent();
+  describe('search input', () => {
+    it('updates the grid query when Enter is pressed', async () => {
+      renderComponent();
+      const input = screen.getByPlaceholderText('searchPlaceholder');
 
-    expect(screen.getByTestId('header')).toBeInTheDocument();
-    expect(screen.getByTestId('footer')).toBeInTheDocument();
-    expect(screen.getByTestId('explore-filters')).toBeInTheDocument();
-    expect(screen.getByTestId('explore-grid')).toBeInTheDocument();
-  });
+      fireEvent.change(input, { target: { value: 'test query' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
-  it('updates search query on input', async () => {
-    renderComponent();
-
-    const input = screen.getByPlaceholderText('searchPlaceholder');
-    fireEvent.change(input, { target: { value: 'test query' } });
-
-    // Simulate Enter key to set active search query
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-
-    expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: test query');
-  });
-
-  it('updates sort options', async () => {
-    renderComponent();
-
-    // Debugging: check if button exists
-    const sortButton = screen.getByText('Newest');
-    // Radix UI often responds to pointer events
-    fireEvent.pointerDown(sortButton);
-
-    // Radix UI dropdowns might render in a portal or require specific interaction
-    // The previous error was "Unable to find an element with the text: Oldest"
-    // We can try to await for it to appear
-    await waitFor(() => {
-      expect(screen.getByText('Oldest')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: test query');
     });
 
-    const oldestOption = screen.getByText('Oldest');
-    fireEvent.click(oldestOption);
+    it('does not update the active grid query while typing (before Enter)', () => {
+      renderComponent();
+      const input = screen.getByPlaceholderText('searchPlaceholder');
 
-    await waitFor(() => {
-      expect(screen.getByTestId('explore-grid')).toHaveTextContent('{"lastUpdatedOn":"asc"}');
+      fireEvent.change(input, { target: { value: 'partial' } });
+      // No Enter pressed — activeSearchQuery stays empty
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: ,');
     });
   });
 
-  it('updates filters from child component', async () => {
-    renderComponent();
+  describe('URL query parameter (q)', () => {
+    it('starts with an empty search state when no q param is in the URL', () => {
+      renderComponent('/explore');
+      const input = screen.getByPlaceholderText('searchPlaceholder');
+      expect(input).toHaveValue('');
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: ,');
+    });
 
-    const updateFilterButton = screen.getByText('Update Filters');
-    fireEvent.click(updateFilterButton);
+    it('pre-fills the search input from the q param', () => {
+      renderComponent('/explore?q=tensorflow');
+      const input = screen.getByPlaceholderText('searchPlaceholder');
+      expect(input).toHaveValue('tensorflow');
+    });
 
-    expect(screen.getByTestId('explore-grid')).toHaveTextContent('Filters: {"collections":["TestCollection"],"contentTypes":[],"categories":[]}');
+    it('passes the q param value as the active grid query immediately', () => {
+      renderComponent('/explore?q=tensorflow');
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: tensorflow');
+    });
+
+    it('handles a URL-encoded multi-word q param correctly', () => {
+      renderComponent('/explore?q=machine%20learning');
+      const input = screen.getByPlaceholderText('searchPlaceholder');
+      expect(input).toHaveValue('machine learning');
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: machine learning');
+    });
+
+    it('handles a missing q param as an empty string', () => {
+      renderComponent('/explore?sort=newest');
+      const input = screen.getByPlaceholderText('searchPlaceholder');
+      expect(input).toHaveValue('');
+    });
+  });
+
+  describe('sort options', () => {
+    it('updates the grid sort when "Oldest" is selected', async () => {
+      renderComponent();
+      const sortButton = screen.getByText('Newest');
+      fireEvent.pointerDown(sortButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Oldest')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Oldest'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('explore-grid')).toHaveTextContent('{"lastUpdatedOn":"asc"}');
+      });
+    });
+  });
+
+  describe('filters', () => {
+    it('passes updated filters down to ExploreGrid', () => {
+      renderComponent();
+      fireEvent.click(screen.getByText('Update Filters'));
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent(
+        'Filters: {"collections":["TestCollection"],"contentTypes":[],"categories":[]}'
+      );
+    });
   });
 });

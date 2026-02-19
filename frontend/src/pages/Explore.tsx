@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
 import ExploreFilters from '../components/explore/ExploreFilters';
@@ -15,6 +15,7 @@ import { useAppI18n } from '../hooks/useAppI18n';
 import HomeSidebar from '../components/home/HomeSidebar';
 import { Sheet, SheetContent, SheetTitle } from '../components/home/Sheet';
 import { useIsMobile } from '../hooks/use-mobile';
+import { useSearchParams } from 'react-router-dom';
 import "./home/home.css";
 import { useSidebarState } from '../hooks/useSidebarState';
 
@@ -27,17 +28,29 @@ export interface FilterState {
 const Explore = () => {
   const { t } = useAppI18n();
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<FilterState>({
     collections: [],
     contentTypes: [],
     categories: [],
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeSearchQuery, setActiveSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
+  const [activeSearchQuery, setActiveSearchQuery] = useState(() => searchParams.get('q') ?? '');
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
   const [sortLabel, setSortLabel] = useState('Newest');
   const [activeNav, setActiveNav] = useState("explore");
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
+  useEffect(() => {
+    // For Explore page, we always want it closed by default when mounting
+    setIsSidebarOpen(false);
+  }, [setIsSidebarOpen]);
+
+  // Sync search state when navigating here from the search modal
+  useEffect(() => {
+    const q = searchParams.get('q') ?? '';
+    setSearchQuery(q);
+    setActiveSearchQuery(q);
+  }, [searchParams]);
   return (
     <div className="home-container">
       <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
