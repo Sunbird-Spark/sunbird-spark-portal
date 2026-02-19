@@ -58,6 +58,27 @@ const collectionEditorWebComponentRoot = path.join(
 const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
 const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
 
+const ckeditorCompactShimDest = path.join(publicRoot, 'assets/shims/ckeditor-compact.js');
+const CKEDITOR_COMPACT_SHIM = `/**
+ * CKEditor Compatibility Shim
+ * Prevents multiple editors from conflicting by locking the CKEDITOR_VERSION property.
+ */
+(function () {
+  if (!Object.prototype.hasOwnProperty.call(window, 'CKEDITOR_VERSION')) {
+    Object.defineProperty(window, 'CKEDITOR_VERSION', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return undefined;
+      },
+      set: function (val) {
+        console.warn('CKEditor attempted to set version to:', val, '- Ignored by shim.');
+      }
+    });
+  }
+})();
+`;
+
 /**
  * Recursively copy directory
  */
@@ -85,9 +106,14 @@ function copyDirectory(src, dest) {
 try {
     // 1. Clean up ALL previous asset folders to start fresh
     const legacyAssets = path.join(publicRoot, 'assets');
+    const legacyShims = path.join(publicRoot, 'shims');
     if (fs.existsSync(legacyAssets)) {
         console.log('🧹 Cleaning existing assets folder...');
         fs.rmSync(legacyAssets, { recursive: true, force: true });
+    }
+    if (fs.existsSync(legacyShims)) {
+        console.log('🧹 Removing legacy shims folder at public/shims...');
+        fs.rmSync(legacyShims, { recursive: true, force: true });
     }
 
     // 2. Copy PDF Player assets
@@ -183,6 +209,11 @@ try {
         }
     }
 
+    // 9. Create CKEditor compatibility shim under /assets/shims
+    console.log('\n📦 Creating CKEditor shim at public/assets/shims/ckeditor-compact.js...');
+    fs.mkdirSync(path.dirname(ckeditorCompactShimDest), { recursive: true });
+    fs.writeFileSync(ckeditorCompactShimDest, CKEDITOR_COMPACT_SHIM, 'utf8');
+
     console.log('\n✅ Assets consolidated successfully!');
     console.log(`📍 Video Player: public/assets/video-player/`);
     console.log(`📍 ePub Player: public/assets/epub-player/`);
@@ -190,6 +221,7 @@ try {
     console.log(`📍 QUML Editor: public/assets/quml-editor/`);
     console.log(`📍 QUML Editor Images: public/assets/images/`);
     console.log(`📍 Collection Editor: public/assets/collection-editor/`);
+    console.log(`📍 CKEditor Shim: public/assets/shims/ckeditor-compact.js`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {
