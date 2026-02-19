@@ -54,7 +54,7 @@ describe('HealthController', () => {
         await checkHealth(req as Request, res as ExpressResponse);
 
         // Verify query was called
-        expect(mockQuery).toHaveBeenCalledWith('SELECT 1');
+        expect(mockQuery).toHaveBeenCalledWith({"text": 'SELECT 1', timeout: 5000});
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith(
@@ -80,7 +80,7 @@ describe('HealthController', () => {
 
         await checkHealth(req as Request, res as ExpressResponse);
 
-        expect(mockQuery).toHaveBeenCalledWith('SELECT 1');
+        expect(mockQuery).toHaveBeenCalledWith({"text": 'SELECT 1', timeout: 5000});
 
         expect(res.status).toHaveBeenCalledWith(503);
         expect(res.send).toHaveBeenCalledWith(

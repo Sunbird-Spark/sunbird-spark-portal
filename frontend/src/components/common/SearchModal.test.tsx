@@ -303,4 +303,116 @@ describe('SearchModal', () => {
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('accessibility', () => {
+    it('has proper dialog role and aria attributes', () => {
+      renderModal();
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(dialog).toHaveAttribute('aria-modal', 'true');
+      expect(dialog).toHaveAttribute('aria-label', 'search_for_content_placeholder');
+    });
+
+    it('focuses the search input when modal opens', () => {
+      renderModal();
+      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      expect(input).toHaveFocus();
+    });
+
+    it('restores focus to previously focused element when modal closes', () => {
+      const button = document.createElement('button');
+      document.body.appendChild(button);
+      button.focus();
+      expect(button).toHaveFocus();
+
+      const { rerender } = renderModal(true);
+      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      expect(input).toHaveFocus();
+
+      rerender(
+        <MemoryRouter>
+          <SearchModal isOpen={false} onClose={mockOnClose} />
+        </MemoryRouter>
+      );
+
+      expect(button).toHaveFocus();
+      document.body.removeChild(button);
+    });
+
+    it('traps focus within the modal when tabbing forward', () => {
+      mockUseContentSearch.mockReturnValue(withResults(twoResults));
+      renderModal();
+
+      const dialog = screen.getByRole('dialog');
+      const focusableElements = dialog.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      expect(focusableElements.length).toBeGreaterThan(0);
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) return;
+
+      lastElement.focus();
+      expect(lastElement).toHaveFocus();
+
+      fireEvent.keyDown(document, { key: 'Tab' });
+      expect(firstElement).toHaveFocus();
+    });
+
+    it('traps focus within the modal when tabbing backward', () => {
+      mockUseContentSearch.mockReturnValue(withResults(twoResults));
+      renderModal();
+
+      const dialog = screen.getByRole('dialog');
+      const focusableElements = dialog.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      expect(focusableElements.length).toBeGreaterThan(0);
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) return;
+
+      firstElement.focus();
+      expect(firstElement).toHaveFocus();
+
+      fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+      expect(lastElement).toHaveFocus();
+    });
+
+    it('backdrop has aria-hidden attribute', () => {
+      const { container } = renderModal();
+      const dialog = container.firstChild as HTMLElement;
+      const backdrop = dialog.lastElementChild as HTMLElement;
+      expect(backdrop).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    it('clears query when modal closes', () => {
+      const { rerender } = renderModal(true);
+      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      
+      fireEvent.change(input, { target: { value: 'test query' } });
+      expect(input).toHaveValue('test query');
+
+      rerender(
+        <MemoryRouter>
+          <SearchModal isOpen={false} onClose={mockOnClose} />
+        </MemoryRouter>
+      );
+
+      rerender(
+        <MemoryRouter>
+          <SearchModal isOpen={true} onClose={mockOnClose} />
+        </MemoryRouter>
+      );
+
+      const newInput = screen.getByPlaceholderText('search_for_content_placeholder');
+      expect(newInput).toHaveValue('');
+    });
+  });
 });
