@@ -77,7 +77,16 @@ export const useCreateBatch = () => {
       if (formData.mentors?.length) request.mentors = formData.mentors;
       if (formData.enrollmentEndDate) request.enrollmentEndDate = formData.enrollmentEndDate;
 
-      return batchService.createBatch(request);
+      // Sunbird batch create enforces permissions via these request headers
+      const reqHeaders: Record<string, string> = {
+        'X-User-ID': userId,
+      };
+      if (rootOrgId) {
+        reqHeaders['X-Channel-Id'] = rootOrgId;
+        reqHeaders['X-Org-code'] = rootOrgId;
+      }
+
+      return batchService.createBatch(request, reqHeaders);
     },
 
     onSuccess: (_data, variables) => {

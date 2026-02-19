@@ -58,11 +58,14 @@ export class BatchService {
   }
 
   async createBatch(
-    request: CreateBatchRequest
+    request: CreateBatchRequest,
+    headers?: Record<string, string>
   ): Promise<ApiResponse<CreateBatchResponse>> {
-    return getClient().post<CreateBatchResponse>('/learner/course/v1/batch/create', {
-      request,
-    });
+    return getClient().post<CreateBatchResponse>(
+      '/learner/course/v1/batch/create',
+      { request },
+      headers
+    );
   }
 }
 
