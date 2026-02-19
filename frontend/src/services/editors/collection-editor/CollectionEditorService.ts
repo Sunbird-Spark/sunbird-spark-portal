@@ -13,8 +13,30 @@ export class CollectionEditorService {
     private channelService = new ChannelService();
     private systemSettingService = new SystemSettingService();
     private static stylesLoaded = false;
+    private static scriptLoaded = false;
+    private static scriptLoading?: Promise<void>;
     private static dependenciesLoaded = false;
     private static dependenciesLoading?: Promise<void>;
+
+    private loadScript(): Promise<void> {
+        if (CollectionEditorService.scriptLoaded || customElements.get('lib-editor')) {
+            CollectionEditorService.scriptLoaded = true;
+            return Promise.resolve();
+        }
+        if (CollectionEditorService.scriptLoading) {
+            return CollectionEditorService.scriptLoading;
+        }
+        CollectionEditorService.scriptLoading = new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = '/assets/collection-editor/sunbird-collection-editor.js';
+            script.setAttribute('data-collection-editor-script', 'true');
+            (window as any).CKEDITOR_VERSION = undefined;
+            script.onload = () => { CollectionEditorService.scriptLoaded = true; CollectionEditorService.scriptLoading = undefined; resolve(); };
+            script.onerror = () => { CollectionEditorService.scriptLoading = undefined; reject(new Error('Failed to load sunbird-collection-editor script')); };
+            document.body.appendChild(script);
+        });
+        return CollectionEditorService.scriptLoading;
+    }
 
     async initializeDependencies(): Promise<void> {
         // Return early if already loaded
@@ -50,6 +72,7 @@ export class CollectionEditorService {
                     }
                 }
 
+                await this.loadScript();
                 this.loadAssets();
                 CollectionEditorService.dependenciesLoaded = true;
             } catch (error) {

@@ -58,27 +58,6 @@ const collectionEditorWebComponentRoot = path.join(
 const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
 const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
 
-const ckeditorCompactShimDest = path.join(publicRoot, 'assets/shims/ckeditor-compact.js');
-const CKEDITOR_COMPACT_SHIM = `/**
- * CKEditor Compatibility Shim
- * Prevents multiple editors from conflicting by locking the CKEDITOR_VERSION property.
- */
-(function () {
-  if (!Object.prototype.hasOwnProperty.call(window, 'CKEDITOR_VERSION')) {
-    Object.defineProperty(window, 'CKEDITOR_VERSION', {
-      configurable: true,
-      enumerable: true,
-      get: function () {
-        return undefined;
-      },
-      set: function (val) {
-        console.warn('CKEditor attempted to set version to:', val, '- Ignored by shim.');
-      }
-    });
-  }
-})();
-`;
-
 /**
  * Recursively copy directory
  */
@@ -208,11 +187,6 @@ try {
             );
         }
     }
-
-    // 9. Create CKEditor compatibility shim under /assets/shims
-    console.log('\n📦 Creating CKEditor shim at public/assets/shims/ckeditor-compact.js...');
-    fs.mkdirSync(path.dirname(ckeditorCompactShimDest), { recursive: true });
-    fs.writeFileSync(ckeditorCompactShimDest, CKEDITOR_COMPACT_SHIM, 'utf8');
 
     console.log('\n✅ Assets consolidated successfully!');
     console.log(`📍 Video Player: public/assets/video-player/`);

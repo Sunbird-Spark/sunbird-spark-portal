@@ -43,7 +43,7 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
   // CSS lifecycle: add the collection-editor stylesheet on mount,
   // remove it on unmount so it doesn't bleed into the rest of the portal.
   useEffect(() => {
-    serviceRef.current.loadAssets();
+  serviceRef.current.loadAssets();
     return () => {
       serviceRef.current.removeAssets();
     };
