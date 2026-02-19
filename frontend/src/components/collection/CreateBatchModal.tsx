@@ -3,6 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiX, FiCheck, FiSearch, FiLoader } from "react-icons/fi";
 import { useLearnerFuzzySearch } from "@/hooks/useUser";
+import { useCreateBatch } from "@/hooks/useBatch";
 import { cn } from "@/lib/utils";
 
 /* ─── Switch primitives ─── */
@@ -114,12 +115,14 @@ const inputClass =
 
 /* ─── Modal ─── */
 
-const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: CreateBatchModalProps) => {
+const CreateBatchModal = ({ open, onOpenChange, collectionId }: CreateBatchModalProps) => {
   const [form, setForm] = useState<BatchFormState>(INITIAL_FORM);
   const [mentorQuery, setMentorQuery] = useState("");
   const [mentorResults, setMentorResults] = useState<MentorUser[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const fuzzySearch = useLearnerFuzzySearch();
+  const createBatch = useCreateBatch();
 
   const handleField = <K extends keyof BatchFormState>(key: K, value: BatchFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -158,14 +161,29 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire to batch creation API
-    console.log("Create batch payload:", { ...form });
-    onOpenChange(false);
-    setForm(INITIAL_FORM);
-    setMentorQuery("");
-    setMentorResults([]);
+    setSubmitError(null);
+    try {
+      await createBatch.mutateAsync({
+        courseId: collectionId,
+        name: form.batchName,
+        description: form.aboutBatch || undefined,
+        startDate: form.startDate,
+        endDate: form.endDate,
+        mentors: form.selectedMentorIds.length > 0 ? form.selectedMentorIds : undefined,
+        tandc: form.acceptTerms,
+        enrollmentEndDate: form.enrolmentEndDate || undefined,
+      });
+      onOpenChange(false);
+      setForm(INITIAL_FORM);
+      setMentorQuery("");
+      setMentorResults([]);
+    } catch (err: unknown) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to create batch. Please try again."
+      );
+    }
   };
 
   const handleClose = () => {
@@ -173,13 +191,15 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
     setForm(INITIAL_FORM);
     setMentorQuery("");
     setMentorResults([]);
+    setSubmitError(null);
   };
 
   const isSubmitDisabled =
     !form.batchName.trim() ||
     !form.startDate ||
     !form.endDate ||
-    !form.acceptTerms;
+    !form.acceptTerms ||
+    createBatch.isPending;
 
   return (
     <Dialog.Root open={open} onOpenChange={handleClose}>
@@ -395,12 +415,20 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
               />
             </div>
 
+            {/* Error message */}
+            {submitError && (
+              <p role="alert" className="text-xs text-red-600 font-['Rubik'] -mt-1">
+                {submitError}
+              </p>
+            )}
+
             {/* Footer Actions */}
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+                disabled={createBatch.isPending}
+                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-['Rubik']"
               >
                 Cancel
               </button>
@@ -408,13 +436,16 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId: _collectionId }: C
                 type="submit"
                 disabled={isSubmitDisabled}
                 className={cn(
-                  "rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
+                  "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
                   isSubmitDisabled
                     ? "bg-sunbird-brick/40 cursor-not-allowed"
                     : "bg-sunbird-brick hover:bg-opacity-90"
                 )}
               >
-                Create Batch
+                {createBatch.isPending && (
+                  <FiLoader className="w-4 h-4 animate-spin" />
+                )}
+                {createBatch.isPending ? "Creating…" : "Create Batch"}
               </button>
             </div>
           </form>

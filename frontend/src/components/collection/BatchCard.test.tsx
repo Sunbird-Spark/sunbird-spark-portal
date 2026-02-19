@@ -89,30 +89,40 @@ describe('BatchCard', () => {
 
   /* ── Batch list ── */
 
-  it('renders batch names when batches are returned', () => {
+  it('renders the first batch name directly when there is only one batch', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [{ id: 'b1', name: 'Solo Batch', status: '1', startDate: '2026-03-01', endDate: '2026-06-30' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText('Solo Batch')).toBeInTheDocument();
+    // No dropdown for a single batch
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  });
+
+  it('shows a dropdown when there are multiple batches', () => {
     mockUseBatchList.mockReturnValue({
       data: [
-        {
-          id: 'b1',
-          name: 'Batch Alpha',
-          status: '1',
-          startDate: '2026-03-01',
-          endDate: '2026-06-30',
-        },
-        {
-          id: 'b2',
-          name: 'Batch Beta',
-          status: '0',
-          startDate: '2026-07-01',
-          endDate: '2026-09-30',
-        },
+        { id: 'b1', name: 'Batch Alpha', status: '1', startDate: '2026-03-01', endDate: '2026-06-30' },
+        { id: 'b2', name: 'Batch Beta', status: '0', startDate: '2026-07-01', endDate: '2026-09-30' },
       ],
       isLoading: false,
       isError: false,
     });
     render(<BatchCard {...defaultProps} />);
+
+    // Dropdown is rendered
+    const dropdown = screen.getByRole('combobox', { name: /select batch/i });
+    expect(dropdown).toBeInTheDocument();
+
+    // Both batches appear as options
+    const options = Array.from(dropdown.querySelectorAll('option'));
+    expect(options.some((o) => o.textContent?.includes('Batch Alpha'))).toBe(true);
+    expect(options.some((o) => o.textContent?.includes('Batch Beta'))).toBe(true);
+
+    // First batch is displayed in the detail panel by default
     expect(screen.getByText('Batch Alpha')).toBeInTheDocument();
-    expect(screen.getByText('Batch Beta')).toBeInTheDocument();
   });
 
   it('shows "Ongoing" badge for status "1"', () => {

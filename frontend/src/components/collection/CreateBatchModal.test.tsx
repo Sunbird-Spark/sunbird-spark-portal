@@ -12,6 +12,16 @@ vi.mock('@/hooks/useUser', () => ({
   }),
 }));
 
+/* ── Mock useCreateBatch ── */
+const mockCreateBatchMutateAsync = vi.fn();
+let mockCreateBatchIsPending = false;
+vi.mock('@/hooks/useBatch', () => ({
+  useCreateBatch: () => ({
+    mutateAsync: mockCreateBatchMutateAsync,
+    isPending: mockCreateBatchIsPending,
+  }),
+}));
+
 /* ── Helpers ── */
 const defaultProps = {
   open: true,
@@ -35,6 +45,9 @@ const ControlledModal = ({ collectionId = 'col-123' }: { collectionId?: string }
 describe('CreateBatchModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCreateBatchIsPending = false;
+    // Default: batch creation resolves successfully
+    mockCreateBatchMutateAsync.mockResolvedValue({ data: { batchId: 'new-batch-1' } });
   });
 
   /* ────────────────────────────────────── Visibility ── */
@@ -394,6 +407,77 @@ describe('CreateBatchModal', () => {
         const chips = screen.getAllByText('Bob Jones');
         expect(chips.length).toBeGreaterThan(0);
       });
+    });
+  });
+
+  /* ─────────────────────────────────── Batch creation API ── */
+  describe('Batch creation API', () => {
+    /** Fill all required fields and submit */
+    const fillAndSubmit = () => {
+      fireEvent.change(screen.getByPlaceholderText('Enter batch name'), {
+        target: { value: 'Test Batch' },
+      });
+      fireEvent.change(screen.getByLabelText(/start date/i), {
+        target: { value: '2026-03-01' },
+      });
+      // Use exact "End Date" label — "Enrolment End Date" starts with "Enrolment"
+      fireEvent.change(screen.getByLabelText(/^end date/i), {
+        target: { value: '2026-06-30' },
+      });
+      fireEvent.click(screen.getByRole('checkbox'));
+      fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
+    };
+
+    it('calls useCreateBatch.mutateAsync with correct fields on submit', async () => {
+      render(<CreateBatchModal {...defaultProps} />);
+      fillAndSubmit();
+
+      await waitFor(() => {
+        expect(mockCreateBatchMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            courseId: 'col-123',
+            name: 'Test Batch',
+            startDate: '2026-03-01',
+            endDate: '2026-06-30',
+            tandc: true,
+          })
+        );
+      });
+    });
+
+    it('closes the modal on successful submission', async () => {
+      const onOpenChange = vi.fn();
+      render(
+        <CreateBatchModal open={true} onOpenChange={onOpenChange} collectionId="col-123" />
+      );
+      fillAndSubmit();
+
+      await waitFor(() => {
+        expect(onOpenChange).toHaveBeenCalledWith(false);
+      });
+    });
+
+    it('shows error message when API call fails', async () => {
+      mockCreateBatchMutateAsync.mockRejectedValue(new Error('Server error'));
+      render(<CreateBatchModal {...defaultProps} />);
+      fillAndSubmit();
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toHaveTextContent('Server error');
+      });
+    });
+
+    it('shows "Creating…" text on submit button while isPending', () => {
+      mockCreateBatchIsPending = true;
+      render(<CreateBatchModal {...defaultProps} />);
+      expect(screen.getByText('Creating…')).toBeInTheDocument();
+    });
+
+    it('submit button is disabled while isPending', () => {
+      mockCreateBatchIsPending = true;
+      render(<CreateBatchModal {...defaultProps} />);
+      const btn = screen.getByRole('button', { name: /creating/i });
+      expect(btn).toBeDisabled();
     });
   });
 });

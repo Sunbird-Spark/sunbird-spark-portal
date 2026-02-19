@@ -22,6 +22,24 @@ export interface BatchListResponse {
   };
 }
 
+export interface CreateBatchRequest {
+  courseId: string;
+  name: string;
+  description?: string;
+  enrollmentType: 'open';
+  startDate: string;
+  endDate: string;
+  createdBy: string;
+  createdFor: string[];
+  mentors?: string[];
+  tandc: boolean;
+  enrollmentEndDate?: string;
+}
+
+export interface CreateBatchResponse {
+  batchId: string;
+}
+
 export class BatchService {
   async listBatches(
     courseId: string,
@@ -36,6 +54,14 @@ export class BatchService {
         },
         sort_by: { createdDate: 'desc' },
       },
+    });
+  }
+
+  async createBatch(
+    request: CreateBatchRequest
+  ): Promise<ApiResponse<CreateBatchResponse>> {
+    return getClient().post<CreateBatchResponse>('/learner/course/v1/batch/create', {
+      request,
     });
   }
 }
