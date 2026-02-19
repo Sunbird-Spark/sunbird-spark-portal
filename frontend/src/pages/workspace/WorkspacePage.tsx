@@ -29,19 +29,21 @@ import ContentNameDialog from "./ContentNameDialog";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import "../home/home.css";
 import "./workspace.css";
+import { QumlEditor } from "@/components/quml-editor";
 
 // Resource editor option IDs that should trigger the content editor
-const RESOURCE_EDITOR_OPTIONS = ['interactive', 'quiz', 'story'];
+const RESOURCE_EDITOR_OPTIONS = ['quiz', 'story'];
 
 // Collection editor option IDs that should trigger the collection editor
-const COLLECTION_EDITOR_OPTIONS = ['course', 'textbook', 'collection'];
+const COLLECTION_EDITOR_OPTIONS = ['course','collection'];
+
+/** QuML editor option IDs */
+const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
 const EDITOR_OPTION_LABELS: Record<string, string> = {
-  interactive: 'Interactive Activity',
   quiz: 'Quiz & Assessment',
   story: 'Story & Game',
   course: 'Course',
-  textbook: 'Textbook',
   collection: 'Collection',
 };
 
@@ -59,13 +61,6 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
     resourceType: 'Course',
     description: 'Enter description for Course',
   },
-  textbook: {
-    mimeType: 'application/vnd.ekstep.content-collection',
-    contentType: 'TextBook',
-    primaryCategory: 'Digital Textbook',
-    resourceType: 'Book',
-    description: 'Enter description for Textbook',
-  },
   collection: {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Collection',
@@ -77,7 +72,7 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
 
 const contentService = new ContentService();
 /** Option IDs that should open the generic (upload) editor */
-const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video', 'upload-youtube'];
+const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video'];
 
 const WorkspacePage = () => {
   const isMobile = useIsMobile();
@@ -191,7 +186,14 @@ const WorkspacePage = () => {
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
       navigate('/workspace/content/edit/generic');
       return;
+    }else if (QUML_EDITOR_OPTIONS.includes(optionId)) {
+      setShowCreateModal(false);
+      toast({
+        title: "Starting Editor",
+        description: `Launching ${optionId.replace('-', ' ')} editor...`
+      });
     } else {
+      setShowCreateModal(false);
       toast({
         title: "Starting Editor",
         description: `Launching ${optionId.replace('-', ' ')} editor...`

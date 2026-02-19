@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { IconType } from 'react-icons';
 
 export type WorkspaceView =
@@ -35,6 +36,7 @@ export interface EditorCategory {
   options: EditorOption[];
   accentColor: string;
   borderColor: string;
+  headerStyle?: React.CSSProperties;
 }
 
 export interface WorkspaceSidebarCounts {
