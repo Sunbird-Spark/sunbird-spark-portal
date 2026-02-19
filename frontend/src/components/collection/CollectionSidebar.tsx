@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { FiCheck, FiLoader } from "react-icons/fi";
 import {
@@ -11,19 +10,21 @@ import { VideoIcon, DocumentIcon } from "./CollectionIcons";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import type { Lesson, Module } from "@/types/collectionTypes";
 
-function getLessonHref(lesson: Lesson): string {
+function getLessonHref(lesson: Lesson, collectionId: string): string {
   const mime = (lesson.mimeType ?? '').toLowerCase();
   const isCollection = mime === 'application/vnd.ekstep.content-collection';
-  return isCollection ? `/collection/${lesson.id}` : `/content/${lesson.id}`;
+  return isCollection ? `/collection/${lesson.id}` : `/collection/${collectionId}/content/${lesson.id}`;
 }
 
 /** 0 = Not started, 1 = In progress, 2 = Completed */
 export type ContentStatus = 0 | 1 | 2;
 
 interface CollectionSidebarProps {
+  collectionId: string;
   modules: Module[];
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
+  activeLessonId?: string | null;
   contentBlocked?: boolean;
   /** Map of content/lesson id to status (0/1/2). When provided, each lesson shows status label. */
   contentStatusMap?: Record<string, number>;
@@ -36,17 +37,15 @@ function getStatusLabel(status: number | undefined): string {
 }
 
 const CollectionSidebar = ({
+  collectionId,
   modules,
   expandedModules,
   toggleModule,
+  activeLessonId = null,
   contentBlocked = false,
   contentStatusMap,
 }: CollectionSidebarProps) => {
-  const [activeLessonId, setActiveLessonId] = useState<string | null>(
-    modules?.[0]?.lessons?.[0]?.id ?? null
-  );
   const { t } = useAppI18n();
-
   return (
     <div className="space-y-3">
       {modules.map((module) => {
@@ -118,8 +117,7 @@ const CollectionSidebar = ({
                     return (
                       <Link
                         key={lesson.id}
-                        to={getLessonHref(lesson)}
-                        onClick={() => setActiveLessonId(lesson.id)}
+                        to={getLessonHref(lesson, collectionId)}
                         className={`${baseClass} ${interactiveClass}`}
                       >
                         {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
