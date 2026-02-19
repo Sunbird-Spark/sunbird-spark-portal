@@ -30,7 +30,7 @@ const SearchResultCard = ({
     className="group bg-white rounded-[1.25rem] overflow-hidden shadow-[0.125rem_0.125rem_1.25rem_0rem_rgba(0,0,0,0.09)] hover:shadow-lg transition-all duration-300 no-underline flex flex-col"
   >
     <div className="px-5 pt-5">
-      <div className="relative overflow-hidden rounded-[1.25rem] h-[10.125rem]">
+      <div className="relative overflow-hidden rounded-[1.25rem] aspect-video">
         {item.appIcon ? (
           <img
             src={item.appIcon}
@@ -43,7 +43,7 @@ const SearchResultCard = ({
       </div>
     </div>
 
-    <div className="px-5 pt-4 pb-5 flex flex-col flex-grow">
+    <div className="px-5 pt-4 pb-6 flex flex-col flex-grow">
       {item.primaryCategory && (
         <Badge
           className={`inline-flex items-center justify-center p-0 rounded-[2.25rem] mb-4 h-[1.875rem] px-3 w-fit ${badgeStyle}`}
@@ -108,13 +108,13 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex flex-col">
       {/* White search panel */}
-      <div className="bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-        <div className="container mx-auto px-4 lg:px-[3.75rem] pt-5 pb-6">
+      <div className="bg-white shadow-[0_0.5rem_1.5rem_rgba(0,0,0,0.12)]">
+        <div className="container mx-auto px-4 lg:px-[3.75rem] pt-6 pb-10">
           {/* Search bar row */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-6">
+            <div className="flex-1 flex items-center gap-3 border border-gray-200 rounded-2xl px-5 py-4">
               <FiSearch className="w-5 h-5 text-sunbird-brick flex-shrink-0" />
-              <div className="w-px h-5 bg-gray-300" />
+              <div className="w-[0.0625rem] h-5 bg-gray-300" />
               <input
                 ref={inputRef}
                 type="text"
@@ -145,41 +145,45 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
           </div>
 
           {/* Results section */}
-          <div className="mt-8">
-            <h2 className="font-rubik font-semibold text-[1.5rem] leading-[2rem] text-foreground mb-5">
+          <div className="mt-10">
+            <h2 className="font-rubik font-bold text-[1.75rem] leading-[2.25rem] text-foreground mb-6">
               {sectionTitle}
             </h2>
 
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sunbird-brick" />
-              </div>
-            ) : results.length > 0 ? (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {results.map((item) => (
-                    <SearchResultCard
-                      key={item.identifier}
-                      item={item}
-                      onClose={onClose}
-                      t={t}
-                    />
-                  ))}
+            <div className="min-h-96 flex flex-col">
+              {isLoading ? (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sunbird-brick" />
                 </div>
+              ) : results.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {results.map((item) => (
+                      <SearchResultCard
+                        key={item.identifier}
+                        item={item}
+                        onClose={onClose}
+                        t={t}
+                      />
+                    ))}
+                  </div>
 
-                <div className="mt-6 flex justify-center">
-                  <button
-                    onClick={handleViewMore}
-                    className="flex items-center gap-2 font-rubik font-medium text-sunbird-brick hover:opacity-80 transition-opacity"
-                  >
-                    {t("view_all_results")}
-                    <span aria-hidden="true">→</span>
-                  </button>
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      onClick={handleViewMore}
+                      className="flex items-center gap-2 font-rubik font-medium text-sunbird-brick hover:opacity-80 transition-opacity"
+                    >
+                      {t("view_all_results")}
+                      <span aria-hidden="true">→</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-1 items-center justify-center">
+                  <p className="text-muted-foreground text-xl">{t("no_results_found")}</p>
                 </div>
-              </>
-            ) : (
-              <p className="text-muted-foreground text-sm">{t("no_results_found")}</p>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
