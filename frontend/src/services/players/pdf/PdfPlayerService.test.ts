@@ -55,6 +55,11 @@ describe('PdfPlayerService', () => {
       },
     });
 
+    // Mock the custom element to prevent script loading
+    if (!customElements.get('sunbird-pdf-player')) {
+      customElements.define('sunbird-pdf-player', class extends HTMLElement {});
+    }
+
     service = new PdfPlayerService();
   });
 

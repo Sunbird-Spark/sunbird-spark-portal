@@ -16,6 +16,27 @@ export class PdfPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
   private orgService = new OrganizationService();
   private static stylesLoaded = false;
+  private static scriptLoaded = false;
+  private static scriptLoading?: Promise<void>;
+
+  private loadScript(): Promise<void> {
+    if (PdfPlayerService.scriptLoaded || customElements.get('sunbird-pdf-player')) {
+      PdfPlayerService.scriptLoaded = true;
+      return Promise.resolve();
+    }
+    if (PdfPlayerService.scriptLoading) {
+      return PdfPlayerService.scriptLoading;
+    }
+    PdfPlayerService.scriptLoading = new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/assets/pdf-player/sunbird-pdf-player.js';
+      script.setAttribute('data-pdf-player-script', 'true');
+      script.onload = () => { PdfPlayerService.scriptLoaded = true; PdfPlayerService.scriptLoading = undefined; resolve(); };
+      script.onerror = () => { PdfPlayerService.scriptLoading = undefined; reject(new Error('Failed to load sunbird-pdf-player script')); };
+      document.body.appendChild(script);
+    });
+    return PdfPlayerService.scriptLoading;
+  }
 
   /**
    * Create PDF player configuration with context props and metadata
@@ -26,6 +47,7 @@ export class PdfPlayerService {
     metadata: PdfPlayerMetadata,
     contextProps?: PdfPlayerContextProps
   ): Promise<PdfPlayerConfig> {
+    await this.loadScript();
     // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
     const uid = userAuthInfoService.getUserId() || 'anonymous';
@@ -120,6 +142,19 @@ export class PdfPlayerService {
     document.head.appendChild(styleLink);
 
     PdfPlayerService.stylesLoaded = true;
+  }
+
+  /**
+   * Remove PDF player styles from the document head.
+   * Called when the player component unmounts to prevent style bleed
+   * into other pages during SPA navigation.
+   */
+  static unloadStyles(): void {
+    const styleLink = document.querySelector('[data-pdf-player-styles="true"]');
+    if (styleLink) {
+      styleLink.remove();
+    }
+    PdfPlayerService.stylesLoaded = false;
   }
 
   /**

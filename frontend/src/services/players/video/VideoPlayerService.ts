@@ -19,6 +19,35 @@ export class VideoPlayerService {
   >();
   private orgService = new OrganizationService();
   private static stylesLoaded = false;
+  private static scriptLoaded = false;
+  private static scriptLoading?: Promise<void>;
+
+  private loadScript(): Promise<void> {
+    if (VideoPlayerService.scriptLoaded || customElements.get('sunbird-video-player')) {
+      VideoPlayerService.scriptLoaded = true;
+      return Promise.resolve();
+    }
+    if (VideoPlayerService.scriptLoading) {
+      return VideoPlayerService.scriptLoading;
+    }
+    VideoPlayerService.scriptLoading = new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/assets/video-player/sunbird-video-player.js';
+      script.setAttribute('data-video-player-script', 'true');
+      script.onload = () => { VideoPlayerService.scriptLoaded = true; VideoPlayerService.scriptLoading = undefined; resolve(); };
+      script.onerror = () => { VideoPlayerService.scriptLoading = undefined; reject(new Error('Failed to load sunbird-video-player script')); };
+      document.body.appendChild(script);
+    });
+    return VideoPlayerService.scriptLoading;
+  }
+
+  static unloadStyles(): void {
+    const styleLink = document.querySelector('[data-video-player-styles="true"]');
+    if (styleLink) {
+      styleLink.remove();
+    }
+    VideoPlayerService.stylesLoaded = false;
+  }
 
   /**
    * Create video player configuration with context props and metadata
@@ -29,6 +58,7 @@ export class VideoPlayerService {
     metadata: VideoPlayerMetadata,
     contextProps?: VideoPlayerContextProps
   ): Promise<VideoPlayerConfig> {
+    await this.loadScript();
     // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
     const uid = userAuthInfoService.getUserId() || 'anonymous';

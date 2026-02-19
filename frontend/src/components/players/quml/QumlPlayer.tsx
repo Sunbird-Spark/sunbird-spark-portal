@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { qumlPlayerService } from '../../../services/players/quml';
+import { qumlPlayerService, QumlPlayerService } from '../../../services/players/quml';
 import type { QumlPlayerEvent, QumlPlayerContextProps, QumlPlayerMetadata } from '../../../services/players/quml/types';
 import styles from './QumlPlayer.module.css';
 
@@ -103,6 +103,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({
         playerElement.remove();
         playerElementRef.current = null;
       }
+      QumlPlayerService.unloadStyles();
     };
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 

@@ -16,6 +16,27 @@ export class EpubPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
   private orgService = new OrganizationService();
   private static stylesLoaded = false;
+  private static scriptLoaded = false;
+  private static scriptLoading?: Promise<void>;
+
+  private loadScript(): Promise<void> {
+    if (EpubPlayerService.scriptLoaded || customElements.get('sunbird-epub-player')) {
+      EpubPlayerService.scriptLoaded = true;
+      return Promise.resolve();
+    }
+    if (EpubPlayerService.scriptLoading) {
+      return EpubPlayerService.scriptLoading;
+    }
+    EpubPlayerService.scriptLoading = new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/assets/epub-player/sunbird-epub-player.js';
+      script.setAttribute('data-epub-player-script', 'true');
+      script.onload = () => { EpubPlayerService.scriptLoaded = true; EpubPlayerService.scriptLoading = undefined; resolve(); };
+      script.onerror = () => { EpubPlayerService.scriptLoading = undefined; reject(new Error('Failed to load sunbird-epub-player script')); };
+      document.body.appendChild(script);
+    });
+    return EpubPlayerService.scriptLoading;
+  }
 
   /**
    * Create EPUB player configuration with context props and metadata
@@ -26,6 +47,7 @@ export class EpubPlayerService {
     metadata: EpubPlayerMetadata,
     contextProps?: EpubPlayerContextProps
   ): Promise<EpubPlayerConfig> {
+    await this.loadScript();
     // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId();
     const uid = userAuthInfoService.getUserId() || 'anonymous';
@@ -112,6 +134,19 @@ export class EpubPlayerService {
     document.head.appendChild(styleLink);
 
     EpubPlayerService.stylesLoaded = true;
+  }
+
+  /**
+   * Remove EPUB player styles from the document head.
+   * Called when the player component unmounts to prevent style bleed
+   * into other pages during SPA navigation.
+   */
+  static unloadStyles(): void {
+    const styleLink = document.querySelector('[data-epub-player-styles="true"]');
+    if (styleLink) {
+      styleLink.remove();
+    }
+    EpubPlayerService.stylesLoaded = false;
   }
 
   /**
