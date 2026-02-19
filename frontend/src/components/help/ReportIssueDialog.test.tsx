@@ -260,4 +260,28 @@ describe('ReportIssueDialog', () => {
       expect(mockFormRead).toHaveBeenCalledTimes(2);
     });
   });
+
+  it('clears submitted state when dialog is closed before timer fires', async () => {
+    const onOpenChange = vi.fn();
+    const { rerender } = render(<ReportIssueDialog open={true} onOpenChange={onOpenChange} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Submit Feedback')).toBeInTheDocument();
+    });
+
+    // Success banner is not shown initially
+    expect(screen.queryByText(/Thanks for your feedback/)).not.toBeInTheDocument();
+
+    // Close the dialog before the 5-second auto-close timer fires
+    rerender(<ReportIssueDialog open={false} onOpenChange={onOpenChange} />);
+
+    // Reopen — the dialog should be in a clean state with no banner
+    rerender(<ReportIssueDialog open={true} onOpenChange={onOpenChange} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Submit Feedback')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText(/Thanks for your feedback/)).not.toBeInTheDocument();
+  });
 });

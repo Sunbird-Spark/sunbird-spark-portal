@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import {
   Dialog,
@@ -39,20 +39,35 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
   const [subcategoryOptionsMap, setSubcategoryOptionsMap] = useState<Record<string, Option[]>>({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const submitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset submitted state and clear any pending timer when dialog closes
+  useEffect(() => {
+    if (!open) {
+      if (submitTimerRef.current !== null) {
+        clearTimeout(submitTimerRef.current);
+        submitTimerRef.current = null;
+      }
+      setSubmitted(false);
+      setCategory("");
+      setSubcategory("");
+      setDescription("");
+    }
+  }, [open]);
 
   useEffect(() => {
     const fetchFormData = async () => {
       setLoading(true);
       try {
-        const response = await formService.formRead({
+        const response = await formService.formRead<FormConfigResponse>({
           type: "config",
           subType: "faq",
           action: "reportissue",
           component: "portal",
         });
 
-        const responseData = response.data as unknown as FormConfigResponse & { form?: FormConfigResponse["result"]["form"] };
-        const formData = responseData.result?.form ?? responseData.form;
+        const responseData = response.data;
+        const formData = responseData.result?.form ?? (responseData as any).form;
         const fields: Array<{ code: string; templateOptions?: { options?: Option[] | Record<string, Option[]> } }> = formData?.data?.fields ?? [];
         const categoryField = fields.find((field) => field.code === "category");
         const subcategoryField = fields.find((field) => field.code === "subcategory");
@@ -91,11 +106,8 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
 
   const handleSubmit = () => {
     setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setCategory("");
-      setSubcategory("");
-      setDescription("");
+    submitTimerRef.current = setTimeout(() => {
+      submitTimerRef.current = null;
       onOpenChange(false);
     }, 5000);
   };
