@@ -78,11 +78,12 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 vi.mock('@/components/collection/CollectionOverview', () => ({
-  default: ({ collectionData, contentId, playerIsLoading }: any) => (
+  default: ({ collectionData, contentId, playerIsLoading, playerError }: any) => (
     <div
       data-testid="collection-overview"
       data-content-id={contentId ?? ''}
       data-player-loading={String(!!playerIsLoading)}
+      data-player-error={playerError?.message ?? ''}
     >
       {collectionData.title}
     </div>
@@ -229,6 +230,59 @@ describe('CollectionDetailPage', () => {
     );
   });
 
+  it('does not auto-navigate when collection has no modules', () => {
+    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
+    mockUseCollection.mockReturnValue({
+      data: {
+        ...mockCollectionData,
+        modules: [],
+      },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      expect.stringContaining('/content/'),
+      expect.anything()
+    );
+  });
+
+  it('does not auto-navigate when first module has no lessons', () => {
+    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
+    mockUseCollection.mockReturnValue({
+      data: {
+        ...mockCollectionData,
+        modules: [{
+          id: 'mod-1',
+          title: 'Module 1',
+          subtitle: 'Subtitle',
+          lessons: [],
+        }],
+      },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      expect.stringContaining('/content/'),
+      expect.anything()
+    );
+  });
+
+  it('does not auto-navigate when modules is undefined', () => {
+    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
+    mockUseCollection.mockReturnValue({
+      data: {
+        ...mockCollectionData,
+        modules: undefined,
+      },
+      isLoading: false,
+    });
+    renderWithProviders(<CollectionDetailPage />);
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      expect.stringContaining('/content/'),
+      expect.anything()
+    );
+  });
+
   it('navigates back when go back button is clicked', () => {
     renderWithProviders(<CollectionDetailPage />);
     const goBackBtn = screen.getByRole('button', { name: /button\.goBack/i });
@@ -348,5 +402,207 @@ describe('CollectionDetailPage', () => {
     renderWithProviders(<CollectionDetailPage />);
     expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
     expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
+  });
+
+  describe('QUML content handling', () => {
+    it('calls useQumlContent with enabled: true when content has questionset mimeType', () => {
+      const questionSetContent = {
+        data: {
+          content: {
+            identifier: 'q1',
+            name: 'Question Set',
+            mimeType: 'application/vnd.sunbird.questionset',
+          },
+        },
+      };
+      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      renderWithProviders(<CollectionDetailPage />);
+      expect(mockUseQumlContent).toHaveBeenCalledWith('l1', { enabled: true });
+    });
+
+    it('calls useQumlContent with enabled: true when content has question mimeType', () => {
+      const questionContent = {
+        data: {
+          content: {
+            identifier: 'q2',
+            name: 'Single Question',
+            mimeType: 'application/vnd.sunbird.question',
+          },
+        },
+      };
+      mockUseContentRead.mockReturnValue({ data: questionContent, isLoading: false, error: null });
+      renderWithProviders(<CollectionDetailPage />);
+      expect(mockUseQumlContent).toHaveBeenCalledWith('l1', { enabled: true });
+    });
+
+    it('calls useQumlContent with enabled: false when content is not QUML', () => {
+      const videoContent = {
+        data: {
+          content: {
+            identifier: 'v1',
+            name: 'Video Content',
+            mimeType: 'video/mp4',
+          },
+        },
+      };
+      mockUseContentRead.mockReturnValue({ data: videoContent, isLoading: false, error: null });
+      renderWithProviders(<CollectionDetailPage />);
+      expect(mockUseQumlContent).toHaveBeenCalledWith('l1', { enabled: false });
+    });
+
+    it('uses qumlData as playerMetadata when content is QUML', () => {
+      const questionSetContent = {
+        data: {
+          content: {
+            identifier: 'q1',
+            name: 'Question Set',
+            mimeType: 'application/vnd.sunbird.questionset',
+          },
+        },
+      };
+      const qumlMetadata = {
+        identifier: 'q1',
+        name: 'Question Set',
+        mimeType: 'application/vnd.sunbird.questionset',
+        children: [{ identifier: 'q1-1', body: 'Question 1' }],
+      };
+      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseQumlContent.mockReturnValue({ data: qumlMetadata, isLoading: false, error: null });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      // The CollectionOverview mock doesn't expose playerMetadata, but we can verify
+      // that the component rendered successfully with the QUML data
+      expect(screen.getByTestId('collection-overview')).toBeInTheDocument();
+    });
+
+    it('shows loading state when QUML content is loading', () => {
+      const questionSetContent = {
+        data: {
+          content: {
+            identifier: 'q1',
+            name: 'Question Set',
+            mimeType: 'application/vnd.sunbird.questionset',
+          },
+        },
+      };
+      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseQumlContent.mockReturnValue({ data: null, isLoading: true, error: null });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-loading', 'true');
+    });
+
+    it('uses selectedContentData as playerMetadata when content is not QUML', () => {
+      const videoContent = {
+        data: {
+          content: {
+            identifier: 'v1',
+            name: 'Video Content',
+            mimeType: 'video/mp4',
+            artifactUrl: 'https://example.com/video.mp4',
+          },
+        },
+      };
+      mockUseContentRead.mockReturnValue({ data: videoContent, isLoading: false, error: null });
+      mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      expect(screen.getByTestId('collection-overview')).toBeInTheDocument();
+    });
+  });
+
+  describe('Error handling', () => {
+    it('passes contentError to CollectionOverview when non-QUML content fails to load', () => {
+      const error = new Error('Failed to load content');
+      mockUseContentRead.mockReturnValue({ data: null, isLoading: false, error });
+      mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-error', 'Failed to load content');
+    });
+
+    it('passes qumlError to CollectionOverview when QUML content fails to load', () => {
+      const questionSetContent = {
+        data: {
+          content: {
+            identifier: 'q1',
+            name: 'Question Set',
+            mimeType: 'application/vnd.sunbird.questionset',
+          },
+        },
+      };
+      const qumlError = new Error('Failed to load QUML data');
+      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: qumlError });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-error', 'Failed to load QUML data');
+    });
+
+    it('prioritizes qumlError over contentError when content is QUML', () => {
+      const questionSetContent = {
+        data: {
+          content: {
+            identifier: 'q1',
+            name: 'Question Set',
+            mimeType: 'application/vnd.sunbird.questionset',
+          },
+        },
+      };
+      const contentError = new Error('Content error');
+      const qumlError = new Error('QUML error');
+      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: contentError });
+      mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: qumlError });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      // Should use qumlError since content is QUML
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-error', 'QUML error');
+    });
+
+    it('passes null playerError when no error occurs', () => {
+      const videoContent = {
+        data: {
+          content: {
+            identifier: 'v1',
+            name: 'Video Content',
+            mimeType: 'video/mp4',
+            artifactUrl: 'https://example.com/video.mp4',
+          },
+        },
+      };
+      mockUseContentRead.mockReturnValue({ data: videoContent, isLoading: false, error: null });
+      mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-error', '');
+    });
+
+
+    it('does not show loading when error occurs for QUML content', () => {
+      const questionSetContent = {
+        data: {
+          content: {
+            identifier: 'q1',
+            name: 'Question Set',
+            mimeType: 'application/vnd.sunbird.questionset',
+          },
+        },
+      };
+      const qumlError = new Error('Failed to load QUML data');
+      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: qumlError });
+      
+      renderWithProviders(<CollectionDetailPage />);
+      
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-loading', 'false');
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-error', 'Failed to load QUML data');
+    });
   });
 });

@@ -55,7 +55,7 @@ const CollectionOverview = ({
             /* No Content Error */
             <div className="aspect-video flex items-center justify-center bg-gray-100">
               <PageLoader 
-                error={t("error.contentNotAvailable")} 
+                error={t("noContentFound")} 
                 onRetry={() => window.location.reload()} 
                 fullPage={false} 
               />
