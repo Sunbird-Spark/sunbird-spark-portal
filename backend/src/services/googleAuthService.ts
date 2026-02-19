@@ -1,14 +1,14 @@
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import { envConfig } from '../config/env.js';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import * as oidcClient from 'openid-client';
 import { getGoogleOIDCConfig, decodeJwtPayload } from '../auth/oidcProvider.js';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
 import { saveSession } from '../utils/sessionUtils.js';
 
-export const createSession = async (emailId: string, req: Request, res: Response): Promise<{ access_token: string; expires_at: number }> => {
+export const createSession = async (emailId: string, req: Request): Promise<{ access_token: string; expires_at: number }> => {
     let tokens;
 
     try {
@@ -260,8 +260,7 @@ export const validateRedirectUrl = (url: string | undefined): string => {
 export const handleUserAuthentication = async (
     googleUser: { emailId?: string; name?: string },
     client_id: string,
-    req: Request,
-    res: Response
+    req: Request
 ): Promise<boolean> => {
     if (!googleUser.emailId) {
         throw new Error('GOOGLE_EMAIL_NOT_FOUND');
@@ -287,7 +286,7 @@ export const handleUserAuthentication = async (
     }
 
     try {
-        await createSession(googleUser.emailId, req, res);
+        await createSession(googleUser.emailId, req);
     } catch (error) {
         logger.error('Error creating session:', error);
         throw new Error('SESSION_CREATION_FAILED');

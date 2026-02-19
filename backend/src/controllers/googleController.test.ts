@@ -313,8 +313,7 @@ describe('GoogleController', () => {
             expect(mockHandleUserAuthentication).toHaveBeenCalledWith(
                 { emailId: 'newuser@example.com', name: 'New User' },
                 'test-client',
-                mockReq,
-                mockRes
+                mockReq
             );
         });
 
