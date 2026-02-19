@@ -34,7 +34,6 @@ const mockItem: WorkspaceItem = {
   updatedAt: '2024-01-02T00:00:00Z',
   author: 'user-1',
   primaryCategory: 'Course',
-  contentType: 'Course',
 };
 
 vi.mock('@/components/workspace/CreateOptions', () => ({
