@@ -1,0 +1,75 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import DynamicResourceSection from './DynamicResourceSection';
+import { useContentSearch } from '@/hooks/useContent';
+
+vi.mock('@/hooks/useContent', () => ({
+  useContentSearch: vi.fn(),
+}));
+
+vi.mock('@/components/content/ResourceCard', () => ({
+  default: ({ item }: any) => (
+    <div data-testid="resource-card">{item.name}</div>
+  ),
+}));
+
+describe('DynamicResourceSection', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders loading state', () => {
+    (useContentSearch as any).mockReturnValue({ isLoading: true });
+    const { container } = render(
+      <BrowserRouter>
+        <DynamicResourceSection title="Test Resources" />
+      </BrowserRouter>
+    );
+    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+  });
+
+  it('renders resource cards when data is loaded', () => {
+    const mockData = {
+      data: {
+        content: [
+          { identifier: '1', name: 'Resource 1', appIcon: 'icon1.png' },
+          { identifier: '2', name: 'Resource 2', appIcon: 'icon2.png' },
+          { identifier: '3', name: 'Resource 3', appIcon: 'icon3.png' },
+        ]
+      }
+    };
+    (useContentSearch as any).mockReturnValue({ data: mockData, isLoading: false });
+
+    render(
+      <BrowserRouter>
+        <DynamicResourceSection title="Popular Resources" criteria={{ request: {} } as any} />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText('Popular Resources')).toBeInTheDocument();
+    expect(screen.getByText('Resource 1')).toBeInTheDocument();
+    expect(screen.getByText('Resource 2')).toBeInTheDocument();
+    expect(screen.getByText('Resource 3')).toBeInTheDocument();
+  });
+
+  it('returns null on error', () => {
+    (useContentSearch as any).mockReturnValue({ error: new Error('fail'), isLoading: false });
+    const { container } = render(
+      <BrowserRouter>
+        <DynamicResourceSection title="Fail" />
+      </BrowserRouter>
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('returns null when no content data', () => {
+    (useContentSearch as any).mockReturnValue({ data: null, isLoading: false });
+    const { container } = render(
+      <BrowserRouter>
+        <DynamicResourceSection title="No Data" />
+      </BrowserRouter>
+    );
+    expect(container.firstChild).toBeNull();
+  });
+});

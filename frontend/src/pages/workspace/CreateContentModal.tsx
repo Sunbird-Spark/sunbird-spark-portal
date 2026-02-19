@@ -22,7 +22,7 @@ export default function CreateContentModal({
       aria-label="Create content"
     >
       <div
-        className="bg-sunbird-gray-f3 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto p-6"
+        className="bg-sunbird-gray-f3 rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">

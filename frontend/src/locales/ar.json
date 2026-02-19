@@ -201,7 +201,9 @@
     "weeks": "أسابيع",
     "skills": "المهارات التي ستتعلمها",
     "suitedFor": "الأفضل ل",
-    "relatedContent": "محتوى ذو صلة"
+    "relatedContent": "محتوى ذو صلة",
+    "unlockLearningTitle": "افتح تعلمك.",
+    "unlockLearningDescription": "سجّل الدخول لبدء رحلة التعلم معنا."
   },
   "resource": {
     "title": "ابق في المقدمة. ما هو التالي يبدأ هنا.",

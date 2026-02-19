@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
@@ -32,7 +33,7 @@ const mockModules: Module[] = [
 ];
 
 describe('CollectionSidebar', () => {
-  const defaultProps = {
+  const defaultProps: React.ComponentProps<typeof CollectionSidebar> = {
     modules: mockModules,
     expandedModules: ['mod-1'],
     toggleModule: vi.fn(),
@@ -136,5 +137,39 @@ describe('CollectionSidebar', () => {
     expect(screen.getByText('5:00')).toBeInTheDocument();
     const durationDashes = screen.getAllByText('—');
     expect(durationDashes.length).toBeGreaterThanOrEqual(1);
+  });
+
+  describe('when contentBlocked is true', () => {
+    it('renders lessons as non-focusable divs without links', () => {
+      renderSidebar({ ...defaultProps, contentBlocked: true });
+
+      expect(screen.queryByRole('link', { name: /Video Lesson/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /Document Lesson/ })).not.toBeInTheDocument();
+      expect(screen.getByText('Video Lesson')).toBeInTheDocument();
+      expect(screen.getByText('Document Lesson')).toBeInTheDocument();
+    });
+
+    it('renders lessons with aria-disabled', () => {
+      renderSidebar({ ...defaultProps, contentBlocked: true });
+
+      const videoLessonRow = screen.getByText('Video Lesson').closest('[aria-disabled="true"]');
+      expect(videoLessonRow).toBeInTheDocument();
+    });
+
+    it('does not show any lesson as active (no brick border)', () => {
+      renderSidebar({ ...defaultProps, contentBlocked: true });
+
+      const videoLessonRow = screen.getByText('Video Lesson').closest('div');
+      expect(videoLessonRow).not.toHaveClass('border-sunbird-brick');
+    });
+  });
+
+  describe('when contentBlocked is false (default)', () => {
+    it('renders lessons as links', () => {
+      renderSidebar();
+
+      expect(screen.getByRole('link', { name: /Video Lesson/ })).toHaveAttribute('href', '/content/lesson-1');
+      expect(screen.getByRole('link', { name: /Document Lesson/ })).toHaveAttribute('href', '/content/lesson-2');
+    });
   });
 });

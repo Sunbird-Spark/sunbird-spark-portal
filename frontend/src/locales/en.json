@@ -208,7 +208,9 @@
     "weeks": "Weeks",
     "skills": "Skills you will learn",
     "suitedFor": "Best Suited For",
-    "relatedContent": "Related Content"
+    "relatedContent": "Related Content",
+    "unlockLearningTitle": "Unlock your learning.",
+    "unlockLearningDescription": "Log in to begin your learning journey with us."
   },
   "resource": {
     "title": "Stay ahead. What's next starts here.",
