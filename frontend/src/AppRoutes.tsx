@@ -47,8 +47,9 @@ const AppRoutes: React.FC = () => {
         <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/explore" element={<Explore />} /> 
-        <Route path="/collection/:collectionId" element={<CollectionDetailPage />} />
-        <Route path="/collection/:collectionId/batch/:batchId" element={<CollectionDetailPage />} />
+        <Route path="/collection/:collectionId" element={<CollectionDetailPage />}>
+          <Route path="content/:contentId" element={null} />
+        </Route>
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
