@@ -8,7 +8,6 @@ export interface FormReadRequest {
   rootOrgId?: string;
   framework?: string;
 }
-
 export interface FormReadResponse {
   form: {
     framework: string;

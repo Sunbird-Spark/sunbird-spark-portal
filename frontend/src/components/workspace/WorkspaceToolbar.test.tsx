@@ -52,6 +52,8 @@ const renderToolbar = (overrides?: Partial<{
   typeFilter: ContentTypeFilter;
   contentCount?: number;
   counts: typeof baseCounts;
+  hasCreatorRole: boolean;
+  hasReviewerRole: boolean;
 }>) => {
   const onViewChange = vi.fn();
   const onRoleChange = vi.fn();
@@ -66,6 +68,8 @@ const renderToolbar = (overrides?: Partial<{
     viewMode: 'grid' as ViewMode,
     typeFilter: 'all' as ContentTypeFilter,
     contentCount: 5,
+    hasCreatorRole: true,
+    hasReviewerRole: true,
     onViewChange,
     onRoleChange,
     onViewModeChange,
