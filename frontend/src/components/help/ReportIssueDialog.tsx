@@ -164,8 +164,8 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
         />
 
         {submitted && (
-          <div className="absolute top-[2.25rem] left-[4.125rem] right-[4.125rem] flex items-start gap-3 bg-[#F0F4F0] border-l-4 border-[#4CAF50] rounded-[0.625rem] px-4 py-3 z-10">
-            <span className="text-[#4CAF50] text-lg mt-0.5">✓</span>
+          <div className="absolute top-[2.25rem] left-[4.125rem] right-[4.125rem] flex items-start gap-3 bg-sunbird-success-message-bg border-l-4 border-sunbird-success-message rounded-[0.625rem] px-4 py-3 z-10">
+            <span className="text-sunbird-success-message text-lg mt-0.5">✓</span>
             <p className="font-['Rubik'] text-[0.875rem] leading-[1.4] text-foreground">
               Thanks for your feedback. We may not be able to respond to every suggestion, but your feedback helps make {(import.meta as any).env?.VITE_APP_NAME || "this application"} better for everyone.
             </p>
