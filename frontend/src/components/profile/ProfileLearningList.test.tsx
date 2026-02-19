@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
 import ProfileLearningList from './ProfileLearningList';
 import { useUserEnrolledCollections } from '@/hooks/useUserEnrolledCollections';
 
@@ -28,7 +29,7 @@ vi.mock('@/components/common/PageLoader', () => ({
 describe('ProfileLearningList', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (useUserEnrolledCollections as any).mockReturnValue({
+        (useUserEnrolledCollections as Mock).mockReturnValue({
             data: {
                 data: {
                     courses: [
@@ -79,7 +80,7 @@ describe('ProfileLearningList', () => {
     });
 
     it('shows empty state when no courses match filter', () => {
-        (useUserEnrolledCollections as any).mockReturnValue({
+        (useUserEnrolledCollections as Mock).mockReturnValue({
             data: {
                 data: {
                     courses: [

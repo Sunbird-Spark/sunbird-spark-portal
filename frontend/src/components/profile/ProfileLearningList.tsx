@@ -114,10 +114,8 @@ const CourseRow = ({ course }: CourseRowProps) => {
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                     onClick={() => {
                         if (status === "completed") {
-                            console.log("Downloading certificate for:", title);
                             // TODO: Implement actual download logic
                         } else {
-                            console.log("Previewing certificate for:", title);
                             // TODO: Implement actual preview logic
                         }
                     }}
