@@ -61,7 +61,7 @@ describe('CollectionOverview', () => {
       render(<CollectionOverview collectionData={mockCollectionData} />);
       const loader = screen.getByTestId('page-loader');
       expect(loader).toBeInTheDocument();
-      expect(loader).toHaveAttribute('data-error', 'error.contentNotAvailable');
+      expect(loader).toHaveAttribute('data-error', 'noContentFound');
     });
 
     it('does not render ContentPlayer when contentId is absent', () => {

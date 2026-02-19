@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
@@ -125,10 +125,9 @@ function renderWithProviders(ui: React.ReactElement) {
   );
 }
 
-describe('CollectionDetailPage', () => {
+describe('CollectionDetailPage - QUML Content & Error Handling', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: contentId is set so the auto-navigate effect does not fire
     mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: 'l1' });
     vi.mocked(useAuth).mockReturnValue({
       isAuthenticated: false,
@@ -141,267 +140,6 @@ describe('CollectionDetailPage', () => {
     mockUseContentSearch.mockReturnValue({ data: { data: { content: [] } }, isLoading: false });
     mockUseContentRead.mockReturnValue({ data: null, isLoading: false, error: null });
     mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
-  });
-
-  it('renders loading state when useCollection isLoading is true', () => {
-    mockUseCollection.mockReturnValue({ data: null, isLoading: true });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
-  });
-
-  it('renders collection content when data is loaded', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByTestId('header')).toBeInTheDocument();
-    expect(screen.getByTestId('footer')).toBeInTheDocument();
-    expect(screen.getAllByText('Test Collection').length).toBeGreaterThan(0);
-    expect(screen.getByTestId('collection-overview')).toHaveTextContent('Test Collection');
-    expect(screen.getByTestId('collection-sidebar')).toBeInTheDocument();
-    expect(screen.getByTestId('faq')).toBeInTheDocument();
-  });
-
-  it('calls useCollection with collectionId from route params', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockUseCollection).toHaveBeenCalledWith('col-123');
-  });
-
-  it('calls useContentSearch when collection data is available', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockUseContentSearch).toHaveBeenCalledWith(
-      expect.objectContaining({ request: { limit: 20, offset: 0 }, enabled: true })
-    );
-  });
-
-  it('calls useContentRead with contentId from URL params', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockUseContentRead).toHaveBeenCalledWith('l1');
-  });
-
-  it('passes contentId to CollectionOverview', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-id', 'l1');
-  });
-
-  it('passes playerIsLoading=true to CollectionOverview while content is loading', () => {
-    mockUseContentRead.mockReturnValue({ data: null, isLoading: true, error: null });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-loading', 'true');
-  });
-
-  it('passes collectionId and activeLessonId to CollectionSidebar', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    const sidebar = screen.getByTestId('collection-sidebar');
-    expect(sidebar).toHaveAttribute('data-collection-id', 'col-123');
-    expect(sidebar).toHaveAttribute('data-active-lesson-id', 'l1');
-  });
-
-  it('auto-navigates to first non-collection lesson when no contentId in URL', () => {
-    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockNavigate).toHaveBeenCalledWith('/collection/col-123/content/l1', { replace: true });
-  });
-
-  it('does not auto-navigate when contentId is already present in URL', () => {
-    // Default beforeEach sets contentId: 'l1'
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockNavigate).not.toHaveBeenCalledWith(
-      expect.stringContaining('/content/'),
-      expect.anything()
-    );
-  });
-
-  it('does not auto-navigate when first lesson is a nested collection', () => {
-    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-    mockUseCollection.mockReturnValue({
-      data: {
-        ...mockCollectionData,
-        modules: [{
-          id: 'mod-1',
-          title: 'Module 1',
-          subtitle: 'Subtitle',
-          lessons: [{ id: 'nested-col', title: 'Sub Course', duration: '—', type: 'document' as const, mimeType: 'application/vnd.ekstep.content-collection' }],
-        }],
-      },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockNavigate).not.toHaveBeenCalledWith(
-      expect.stringContaining('/content/'),
-      expect.anything()
-    );
-  });
-
-  it('does not auto-navigate when collection has no modules', () => {
-    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-    mockUseCollection.mockReturnValue({
-      data: {
-        ...mockCollectionData,
-        modules: [],
-      },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockNavigate).not.toHaveBeenCalledWith(
-      expect.stringContaining('/content/'),
-      expect.anything()
-    );
-  });
-
-  it('does not auto-navigate when first module has no lessons', () => {
-    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-    mockUseCollection.mockReturnValue({
-      data: {
-        ...mockCollectionData,
-        modules: [{
-          id: 'mod-1',
-          title: 'Module 1',
-          subtitle: 'Subtitle',
-          lessons: [],
-        }],
-      },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockNavigate).not.toHaveBeenCalledWith(
-      expect.stringContaining('/content/'),
-      expect.anything()
-    );
-  });
-
-  it('does not auto-navigate when modules is undefined', () => {
-    mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-    mockUseCollection.mockReturnValue({
-      data: {
-        ...mockCollectionData,
-        modules: undefined,
-      },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(mockNavigate).not.toHaveBeenCalledWith(
-      expect.stringContaining('/content/'),
-      expect.anything()
-    );
-  });
-
-  it('navigates back when go back button is clicked', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    const goBackBtn = screen.getByRole('button', { name: /button\.goBack/i });
-    fireEvent.click(goBackBtn);
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
-  });
-
-  it('shows stats row with lessons count', () => {
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByText(/12/)).toBeInTheDocument();
-  });
-
-  it('does not show related content cards when search returns empty', () => {
-    mockUseContentSearch.mockReturnValue({
-      data: { data: { content: [] } },
-      isLoading: false,
-      isError: false,
-      isFetching: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.queryByText('Related 1')).not.toBeInTheDocument();
-  });
-
-  it('shows related content when search returns results', () => {
-    mockUseContentSearch.mockReturnValue({
-      data: {
-        data: {
-          content: [
-            {
-              identifier: 'search-1',
-              name: 'Search Result 1',
-              appIcon: '',
-              posterImage: '',
-              visibility: 'Default',
-              mimeType: 'video/mp4',
-              primaryCategory: 'Course',
-            },
-          ],
-        },
-      },
-      isLoading: false,
-      isError: false,
-      isFetching: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByText('Search Result 1')).toBeInTheDocument();
-  });
-
-  it('shows LoginToUnlockCard when collection is trackable and user is not authenticated', () => {
-    mockUseCollection.mockReturnValue({
-      data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
-    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
-  });
-
-  it('does not show LoginToUnlockCard when user is authenticated (trackable collection)', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      isAuthenticated: true,
-      user: { id: '1', name: 'User', role: 'guest' },
-      login: vi.fn(),
-      logout: vi.fn(),
-    });
-    mockUseCollection.mockReturnValue({
-      data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
-    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
-  });
-
-  it('does not show LoginToUnlockCard when collection is not trackable', () => {
-    mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
-    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
-  });
-
-  it('does not show LoginToUnlockCard when trackable.enabled is "No"', () => {
-    mockUseCollection.mockReturnValue({
-      data: { ...mockCollectionData, trackable: { enabled: 'No' } },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
-    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
-  });
-
-  it('does not show LoginToUnlockCard when trackable exists but enabled is undefined', () => {
-    mockUseCollection.mockReturnValue({
-      data: { ...mockCollectionData, trackable: {} },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
-    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
-  });
-
-  it('shows LoginToUnlockCard when trackable.enabled is "YES" (uppercase) and user not authenticated', () => {
-    mockUseCollection.mockReturnValue({
-      data: { ...mockCollectionData, trackable: { enabled: 'YES' as const } },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
-    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
-  });
-
-  it('shows LoginToUnlockCard when trackable.enabled is "yes" (lowercase) and user not authenticated', () => {
-    mockUseCollection.mockReturnValue({
-      data: { ...mockCollectionData, trackable: { enabled: 'yes' as const } },
-      isLoading: false,
-    });
-    renderWithProviders(<CollectionDetailPage />);
-    expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
-    expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
   });
 
   describe('QUML content handling', () => {
@@ -471,8 +209,6 @@ describe('CollectionDetailPage', () => {
       
       renderWithProviders(<CollectionDetailPage />);
       
-      // The CollectionOverview mock doesn't expose playerMetadata, but we can verify
-      // that the component rendered successfully with the QUML data
       expect(screen.getByTestId('collection-overview')).toBeInTheDocument();
     });
 
@@ -561,7 +297,6 @@ describe('CollectionDetailPage', () => {
       
       renderWithProviders(<CollectionDetailPage />);
       
-      // Should use qumlError since content is QUML
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-error', 'QUML error');
     });
 
@@ -583,7 +318,6 @@ describe('CollectionDetailPage', () => {
       
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-error', '');
     });
-
 
     it('does not show loading when error occurs for QUML content', () => {
       const questionSetContent = {
