@@ -118,7 +118,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="search for content..."
+                placeholder={t("search_for_content_placeholder")}
                 className="flex-1 outline-none font-rubik text-base text-gray-700 placeholder-gray-400 bg-transparent"
               />
               {query && (
