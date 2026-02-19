@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { FiCheck, FiLoader } from "react-icons/fi";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./collapsible"
+} from "./collapsible";
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
-import type { Lesson, Module } from "@/types/collectionTypes"
+import { useAppI18n } from "@/hooks/useAppI18n";
+import type { Lesson, Module } from "@/types/collectionTypes";
 
 function getLessonHref(lesson: Lesson): string {
   const mime = (lesson.mimeType ?? '').toLowerCase();
@@ -15,11 +17,22 @@ function getLessonHref(lesson: Lesson): string {
   return isCollection ? `/collection/${lesson.id}` : `/content/${lesson.id}`;
 }
 
+/** 0 = Not started, 1 = In progress, 2 = Completed */
+export type ContentStatus = 0 | 1 | 2;
+
 interface CollectionSidebarProps {
   modules: Module[];
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
   contentBlocked?: boolean;
+  /** Map of content/lesson id to status (0/1/2). When provided, each lesson shows status label. */
+  contentStatusMap?: Record<string, number>;
+}
+
+function getStatusLabel(status: number | undefined): string {
+  if (status === 2) return "courseDetails.contentStatusCompleted";
+  if (status === 1) return "courseDetails.contentStatusInProgress";
+  return "courseDetails.contentStatusNotViewed";
 }
 
 const CollectionSidebar = ({
@@ -27,10 +40,12 @@ const CollectionSidebar = ({
   expandedModules,
   toggleModule,
   contentBlocked = false,
+  contentStatusMap,
 }: CollectionSidebarProps) => {
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
     modules?.[0]?.lessons?.[0]?.id ?? null
   );
+  const { t } = useAppI18n();
 
   return (
     <div className="space-y-3">
@@ -77,6 +92,9 @@ const CollectionSidebar = ({
                       ? ""
                       : "hover:bg-gray-200 transition-colors cursor-pointer";
 
+                    const lessonStatus = contentStatusMap?.[lesson.id];
+                    const showStatus = contentStatusMap !== undefined;
+
                     if (contentBlocked) {
                       return (
                         <div
@@ -88,9 +106,11 @@ const CollectionSidebar = ({
                           <span className="flex-1 text-base leading-snug">
                             {lesson.title}
                           </span>
-                          <span className="text-sm text-muted-foreground flex-shrink-0 font-medium">
-                            {lesson.duration}
-                          </span>
+                          {showStatus && (
+                            <span className="text-xs text-muted-foreground flex-shrink-0">
+                              {t(getStatusLabel(lessonStatus))}
+                            </span>
+                          )}
                         </div>
                       );
                     }
@@ -106,9 +126,21 @@ const CollectionSidebar = ({
                         <span className="flex-1 text-base leading-snug">
                           {lesson.title}
                         </span>
-                        <span className="text-sm text-muted-foreground flex-shrink-0 font-medium">
-                          {lesson.duration}
-                        </span>
+                        {showStatus && (
+                          <span
+                            className={`text-xs flex-shrink-0 flex items-center gap-1 ${
+                              lessonStatus === 2
+                                ? "text-green-600"
+                                : lessonStatus === 1
+                                  ? "text-sunbird-brick"
+                                  : "text-muted-foreground"
+                            }`}
+                          >
+                            {lessonStatus === 2 && <FiCheck className="w-3.5 h-3.5" />}
+                            {lessonStatus === 1 && <FiLoader className="w-3.5 h-3.5" />}
+                            {t(getStatusLabel(lessonStatus))}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}

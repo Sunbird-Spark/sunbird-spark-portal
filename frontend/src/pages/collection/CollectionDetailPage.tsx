@@ -9,28 +9,56 @@ import RelatedContent from "@/components/common/RelatedContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useContentSearch } from "@/hooks/useContent";
+import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
+import CourseProgressCard from "@/components/collection/CourseProgressCard";
+import UpcomingBatchesCard from "@/components/collection/UpcomingBatchesCard";
+import CertificateCard from "@/components/collection/CertificateCard";
+import CertificatePreviewModal from "@/components/collection/CertificatePreviewModal";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import { useAuth } from "@/auth/AuthContext";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
-  const { collectionId } = useParams();
+  const { collectionId, batchId: batchIdParam } = useParams<{ collectionId: string; batchId?: string }>();
   const navigate = useNavigate();
   const { t } = useAppI18n();
   const { isAuthenticated: contextAuth } = useAuth();
   const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+  const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
+  const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
+
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
-  const isTrackable =
-    (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
+  const collectionData = collectionDataFromApi ?? null;
+  const enrollment = useCollectionEnrollment(
+    collectionId,
+    batchIdParam,
+    collectionData,
+    isAuthenticated
+  );
+  const {
+    isEnrolled,
+    contentStatusMap,
+    courseProgressProps,
+    batches,
+    batchListLoading,
+    batchListError,
+    firstCertPreviewUrl,
+    hasCertificate,
+    joinLoading,
+    joinError,
+    handleJoinCourse,
+    handleBatchSelect,
+  } = enrollment;
+
+  const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const contentBlocked = isTrackable && !isAuthenticated;
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
-  const collectionData = collectionDataFromApi ?? null;
   const displayCollectionData = useMemo(
     () =>
       collectionData
@@ -50,6 +78,18 @@ const CollectionDetailPage = () => {
   });
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
+  const leftColRef = useRef<HTMLDivElement>(null);
+  const [leftColHeight, setLeftColHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = leftColRef.current;
+    if (!el) return;
+    const sync = () => setLeftColHeight(el.getBoundingClientRect().height);
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    sync();
+    return () => ro.disconnect();
+  }, [hierarchySuccess]);
 
   useEffect(() => {
     const firstId = collectionData?.modules?.[0]?.id;
@@ -58,7 +98,6 @@ const CollectionDetailPage = () => {
       initialExpandedSet.current = true;
     }
   }, [collectionData?.modules]);
-
   useEffect(() => {
     initialExpandedSet.current = false;
     setExpandedModules([]);
@@ -76,7 +115,6 @@ const CollectionDetailPage = () => {
     }
     return [];
   }, [hasSearchResults, searchData?.data?.content, collectionData?.id]);
-
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) =>
@@ -133,16 +171,22 @@ const CollectionDetailPage = () => {
           <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-[1fr_340px] gap-8">
-          {/* Left Column */}
-          <CollectionOverview collectionData={displayCollectionData} />
-
-          {/* Right Sidebar - Lessons Accordion */}
-          <div className="lg:sticky lg:top-6 flex flex-col max-h-[calc(100vh_-_120px)] pr-3">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <div ref={leftColRef} className="flex-1 min-w-0 w-full">
+            <CollectionOverview collectionData={displayCollectionData} />
+          </div>
+          <div
+            className="w-full lg:w-[340px] lg:flex-shrink-0 flex flex-col min-h-0 pr-3"
+            style={leftColHeight != null ? { maxHeight: leftColHeight } : undefined}
+          >
             {contentBlocked && (
               <div className="flex-shrink-0 mb-4">
                 <LoginToUnlockCard />
+              </div>
+            )}
+            {isTrackable && !contentBlocked && isEnrolled && courseProgressProps && (
+              <div className="flex-shrink-0 mb-4">
+                <CourseProgressCard {...courseProgressProps} />
               </div>
             )}
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
@@ -151,13 +195,33 @@ const CollectionDetailPage = () => {
                 expandedModules={expandedModules}
                 toggleModule={toggleModule}
                 contentBlocked={contentBlocked}
+                contentStatusMap={isEnrolled ? contentStatusMap : undefined}
               />
             </div>
+            {isTrackable && !contentBlocked && (
+              <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
+                {!isEnrolled && (
+                  <UpcomingBatchesCard
+                    batches={batches}
+                    selectedBatchId={batchIdParam ?? ""}
+                    onBatchSelect={handleBatchSelect}
+                    onJoinCourse={handleJoinCourse}
+                    isLoading={batchListLoading}
+                    joinLoading={joinLoading}
+                    error={batchListError}
+                    joinError={joinError}
+                  />
+                )}
+                <CertificateCard
+                  hasCertificate={hasCertificate}
+                  previewUrl={firstCertPreviewUrl}
+                  onPreviewClick={() => { if (firstCertPreviewUrl) { setCertificatePreviewUrl(firstCertPreviewUrl); setCertificatePreviewOpen(true); } }}
+                />
+              </div>
+            )}
           </div>
-
         </div>
 
-        {/* Related Content Section */}
         <section className="mt-16">
           {(searchError || (searchFetching && relatedContentItems.length === 0)) && (
             <div className="content-player-related-header mb-6">
@@ -194,6 +258,11 @@ const CollectionDetailPage = () => {
         )}
       </main>
 
+      <CertificatePreviewModal
+        open={certificatePreviewOpen}
+        onClose={() => setCertificatePreviewOpen(false)}
+        previewUrl={certificatePreviewUrl}
+      />
       <Footer />
     </div>
   );

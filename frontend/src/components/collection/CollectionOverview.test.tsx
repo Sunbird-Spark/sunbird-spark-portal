@@ -27,8 +27,8 @@ const mockCollectionData: CollectionData = {
       title: 'Introduction Unit',
       subtitle: 'Getting started',
       lessons: [
-        { id: 'l1', title: 'Lesson 1', duration: '5:00', type: 'video' },
-        { id: 'l2', title: 'Lesson 2', duration: '10:00', type: 'document' },
+        { id: 'l1', title: 'Lesson 1', type: 'video' },
+        { id: 'l2', title: 'Lesson 2', type: 'document' },
       ],
     },
   ],

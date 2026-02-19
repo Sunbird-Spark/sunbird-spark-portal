@@ -210,7 +210,20 @@
     "suitedFor": "Best Suited For",
     "relatedContent": "Related Content",
     "unlockLearningTitle": "Unlock your learning.",
-    "unlockLearningDescription": "Log in to begin your learning journey with us."
+    "unlockLearningDescription": "Log in to begin your learning journey with us.",
+    "upcomingBatches": "Upcoming Batches",
+    "selectBatchToStart": "Select a batch to start learning.",
+    "selectBatch": "Select a Batch",
+    "joinTheCourse": "Join The Course",
+    "certificate": "Certificate",
+    "certificateEarnDescription": "Earn a certificate on completion of the course. Verify the details before completing the course.",
+    "certificateNotAvailable": "Currently, this course does not have a certificate. The course creator may attach a certificate later.",
+    "previewCertificate": "Preview Certificate",
+    "courseProgress": "Course Progress",
+    "batchStartedOn": "Batch Started on",
+    "contentStatusCompleted": "Completed",
+    "contentStatusInProgress": "In Progress",
+    "contentStatusNotViewed": "Not viewed"
   },
   "resource": {
     "title": "Stay ahead. What's next starts here.",

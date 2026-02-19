@@ -194,7 +194,20 @@
     "suitedFor": "Melhor para",
     "relatedContent": "Conteúdo relacionado",
     "unlockLearningTitle": "Desbloqueie seu aprendizado.",
-    "unlockLearningDescription": "Faça login para começar sua jornada de aprendizado conosco."
+    "unlockLearningDescription": "Faça login para começar sua jornada de aprendizado conosco.",
+    "upcomingBatches": "Próximas Turmas",
+    "selectBatchToStart": "Selecione uma turma para começar a aprender.",
+    "selectBatch": "Selecione uma Turma",
+    "joinTheCourse": "Entrar no Curso",
+    "certificate": "Certificado",
+    "certificateEarnDescription": "Obtenha um certificado ao concluir o curso. Verifique os detalhes antes de concluir o curso.",
+    "certificateNotAvailable": "Atualmente, este curso não possui certificado. O criador do curso pode anexar um certificado posteriormente.",
+    "previewCertificate": "Visualizar Certificado",
+    "courseProgress": "Progresso do Curso",
+    "batchStartedOn": "Turma iniciada em",
+    "contentStatusCompleted": "Concluído",
+    "contentStatusInProgress": "Em andamento",
+    "contentStatusNotViewed": "Não visualizado"
   },
   "resource": {
     "title": "Fique à frente. O que vem a seguir começa aqui.",

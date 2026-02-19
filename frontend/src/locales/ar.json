@@ -203,7 +203,20 @@
     "suitedFor": "الأفضل ل",
     "relatedContent": "محتوى ذو صلة",
     "unlockLearningTitle": "افتح تعلمك.",
-    "unlockLearningDescription": "سجّل الدخول لبدء رحلة التعلم معنا."
+    "unlockLearningDescription": "سجّل الدخول لبدء رحلة التعلم معنا.",
+    "upcomingBatches": "الدفعات القادمة",
+    "selectBatchToStart": "اختر دفعة لبدء التعلم.",
+    "selectBatch": "اختر دفعة",
+    "joinTheCourse": "انضم إلى الدورة",
+    "certificate": "الشهادة",
+    "certificateEarnDescription": "احصل على شهادة عند إكمال الدورة. تحقق من التفاصيل قبل إكمال الدورة.",
+    "certificateNotAvailable": "حاليًا، لا تحتوي هذه الدورة على شهادة. قد يضيف منشئ الدورة شهادة لاحقًا.",
+    "previewCertificate": "معاينة الشهادة",
+    "courseProgress": "تقدم الدورة",
+    "batchStartedOn": "بدأت الدفعة في",
+    "contentStatusCompleted": "مكتمل",
+    "contentStatusInProgress": "قيد التقدم",
+    "contentStatusNotViewed": "لم تتم المشاهدة"
   },
   "resource": {
     "title": "ابق في المقدمة. ما هو التالي يبدأ هنا.",
