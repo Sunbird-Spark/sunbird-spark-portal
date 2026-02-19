@@ -145,6 +145,11 @@
     --sunbird-gray-ef: 0 0% 93.7%;
     /* #EFEFEF */
 
+    --sunbird-success-message: 122 39% 49%;
+    /* #4CAF50 */
+    --sunbird-success-message-bg: 120 16% 95%;
+    /* #F0F4F0 */
+
     /* Category Card Gradients */
     --category-gradient-1: linear-gradient(to right, #45C0ED, #8E46C5);
     --category-gradient-2: linear-gradient(to right, #D55E1D, #F6C35C);
@@ -440,12 +445,12 @@
   }
 
   .content-player-resource-title {
-    @apply font-rubik font-medium text-[26px] leading-[38px] tracking-normal text-white font-semibold mb-2;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+    @apply font-rubik font-medium text-[1.625rem] leading-[2.375rem] tracking-normal text-white font-semibold mb-2;
+    text-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.55);
   }
 
   .content-player-resource-subtitle {
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+    text-shadow: 0 0.0625rem 0.375rem rgba(0, 0, 0, 0.45);
   }
 
 
@@ -468,7 +473,7 @@
   }
 
   .content-player-title {
-    @apply font-rubik font-semibold text-[26px] leading-[38px] tracking-normal text-foreground;
+    @apply font-rubik font-semibold text-[1.625rem] leading-[2.375rem] tracking-normal text-foreground;
   }
 
   .content-player-share-btn {
@@ -546,26 +551,28 @@
 
 
   .related-resource-card-subtitle {
-    @apply font-rubik font-medium text-[16px] leading-[24px] tracking-normal text-[#FFFFFF] text-center;
+    @apply font-rubik font-medium text-[1rem] leading-[1.5rem] tracking-normal text-[#FFFFFF] text-center;
   }
+
   .related-resource-card-link {
     @apply flex justify-center;
   }
 
   .related-resource-card-container {
-    @apply bg-white rounded-[20px] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-[2px_2px_20px_0px_rgba(0,0,0,0.09)] w-[370px] h-[392px] flex flex-col;
+    @apply bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[24.5rem] flex flex-col;
+    box-shadow: 0.125rem 0.125rem 1.25rem 0rem rgba(0, 0, 0, 0.09);
   }
 
   .related-resource-card-image-wrapper {
-    @apply px-[20px] pt-[20px] w-full;
+    @apply px-[1.25rem] pt-[1.25rem] w-full;
   }
 
   .related-resource-card-image-inner {
-    @apply relative overflow-hidden rounded-[20px] h-[162px] w-full;
+    @apply relative overflow-hidden rounded-[1.25rem] h-[10.125rem] w-full;
   }
 
   .related-resource-card-image {
-    @apply absolute inset-0 w-full h-full rounded-[20px];
+    @apply absolute inset-0 w-full h-full rounded-[1.25rem];
     object-fit: cover;
     -o-object-fit: cover;
     transition-property: transform;
@@ -579,19 +586,19 @@
   }
 
   .related-resource-card-content-wrapper {
-    @apply px-[20px] pt-[20px] pb-5 flex flex-col flex-grow;
+    @apply px-[1.25rem] pt-[1.25rem] pb-5 flex flex-col flex-grow;
   }
 
   .related-resource-card-badge {
-    @apply inline-flex items-center justify-center px-3 rounded-[36px] mb-[20px] h-[30px] bg-sunbird-beige-light text-foreground font-rubik font-medium text-[14px] leading-[18px] border-[#CC8545] border-[1px] w-fit;
+    @apply inline-flex items-center justify-center px-3 rounded-[2.25rem] mb-[1.25rem] h-[1.875rem] bg-sunbird-beige-light text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-[#CC8545] border-[0.0625rem] w-fit;
   }
 
   .related-resource-card-title {
-    @apply font-rubik font-medium text-[20px] leading-[28px] tracking-normal bg-transparent border-0 text-foreground mb-[20px] min-h-[56px];
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] tracking-normal bg-transparent border-0 text-foreground mb-[1.25rem] min-h-[3.5rem];
   }
 
   .related-resource-card-stats {
-    @apply flex items-center gap-1.5 text-xs text-muted-foreground pt-[2px] mt-auto;
+    @apply flex items-center gap-1.5 text-xs text-muted-foreground pt-[0.125rem] mt-auto;
   }
 
   .related-resource-card-rating {
@@ -612,7 +619,7 @@
   }
 
   .resource-card-container {
-    @apply relative w-full h-[392px] rounded-[20px] overflow-hidden;
+    @apply relative w-full h-[24.5rem] rounded-[1.25rem] overflow-hidden;
   }
 
   .resource-card-image-wrapper {
@@ -620,7 +627,7 @@
   }
 
   .resource-card-image {
-    @apply w-full h-full object-cover transition-transform duration-700 ease-out rounded-[20px];
+    @apply w-full h-full object-cover transition-transform duration-700 ease-out rounded-[1.25rem];
   }
 
   .group:hover .resource-card-image {
@@ -628,25 +635,25 @@
   }
 
   .resource-card-badge-wrapper {
-    @apply absolute top-[44px] left-[34px] z-[5];
+    @apply absolute top-[2.75rem] left-[2.125rem] z-[5];
   }
 
   .resource-card-badge {
-    @apply flex items-center justify-center bg-white text-black font-medium text-[16px] px-3 w-[78px] h-[36px] rounded-[4px] shadow-sm tracking-wide;
+    @apply flex items-center justify-center bg-white text-black font-medium text-[1rem] px-3 w-[4.875rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide;
     font-weight: 500;
   }
 
   .resource-card-content {
-    @apply absolute bottom-[62px] left-[34px] right-[24px] z-10 flex flex-col items-start gap-1.5;
+    @apply absolute bottom-[3.875rem] left-[2.125rem] right-[1.5rem] z-10 flex flex-col items-start gap-1.5;
   }
 
   .resource-card-title {
-    @apply font-rubik font-medium text-[20px] leading-[28px] tracking-normal text-white;
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] tracking-normal text-white;
     text-wrap: balance;
   }
 
   .resource-card-action {
-    @apply flex items-center gap-2 text-white/95 font-semibold text-[14px] transition-all;
+    @apply flex items-center gap-2 text-white/95 font-semibold text-[0.875rem] transition-all;
   }
 
   .group:hover .resource-card-action {
@@ -658,13 +665,13 @@
   }
 
   .card-mask-custom {
-    -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
-    mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
+    mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
   }
 
   [dir="rtl"] .card-mask-custom {
-    -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
-    mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 1px));
+    -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
+    mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
   }
 
   /* Terms and Conditions Popover Close Button */
@@ -749,37 +756,6 @@
     }
   }
 
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Rubik', sans-serif;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: 'Rubik', sans-serif;
-    font-weight: 600;
-  }
-
-  .auth-bg-wave {
-    background-image: url('./assets/auth-wave-bg.svg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-  }
-
-}
-
   /* Collection Overview Styles */
   .collection-overview-container {
     @apply space-y-6;
@@ -846,3 +822,34 @@
   .collection-audience-item {
     @apply flex items-start gap-2 text-base text-muted-foreground;
   }
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Rubik', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+  }
+
+  .auth-bg-wave {
+    background-image: url('./assets/auth-wave-bg.svg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+}

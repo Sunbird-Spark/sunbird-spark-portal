@@ -26,6 +26,7 @@ describe('contentMapper', () => {
         createdAt: '2024-01-01',
         updatedAt: '2024-01-15',
         author: 'Author Name',
+        primaryCategory: '',
       });
     });
 

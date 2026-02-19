@@ -15,3 +15,4 @@ export {
   STATUS_CONFIG,
   EMPTY_STATE_VARIANT_STYLES,
 } from './contentDisplayConfig';
+export { getWorkspaceItemActionVisibility } from './workspaceItemActions';
