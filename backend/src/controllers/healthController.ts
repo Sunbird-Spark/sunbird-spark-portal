@@ -1,12 +1,14 @@
 import { Request, Response as ExpressResponse } from 'express';
-import { Pool } from '@yugabytedb/pg';
+import pg from '@yugabytedb/pg';
+const { Pool } = pg;
+import { type Pool as PgPool } from 'pg';
 import { envConfig } from '../config/env.js';
 import { Response } from '../models/Response.js';
 import { logger } from '../utils/logger.js';
 
-let healthPool: Pool | null = null;
+let healthPool: PgPool | null = null;
 
-const getHealthPool = (): Pool => {
+const getHealthPool = (): PgPool => {
     if (!healthPool) {
         healthPool = new Pool({
             host: envConfig.SUNBIRD_YUGABYTE_HOST,
@@ -35,7 +37,11 @@ const getHealthPool = (): Pool => {
 const checkYugabyteHealth = async () => {
     try {
         const pool = getHealthPool();
-        await pool.query('SELECT 1');
+        // Use a timeout to avoid hanging indefinitely if the DB is unresponsive
+        await pool.query({
+            text: 'SELECT 1',
+            timeout: 5000 // 5 seconds timeout
+        } as any);
         return {
             name: 'YugabyteDB',
             healthy: true,
