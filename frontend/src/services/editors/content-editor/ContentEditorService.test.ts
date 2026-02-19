@@ -153,7 +153,7 @@ describe('ContentEditorService', () => {
     it('should include editor-specific config fields', async () => {
       const result = await service.buildConfig(mockMetadata);
 
-      expect(result.config.apislug).toBe('/portal');
+      expect(result.config.apislug).toBe('/action');
       expect(result.config.pluginRepo).toBe('/content-plugins');
       expect(result.config.plugins).toHaveLength(5);
       expect(result.config.corePluginsPackaged).toBe(true);
