@@ -131,6 +131,23 @@ describe('CollectionEditorPage', () => {
       );
     });
 
+    expect(screen.getByText('Failed to load content metadata.')).toBeInTheDocument();
+    expect(screen.queryByTestId('collection-editor')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Back to workspace' })).toBeInTheDocument();
+  });
+
+  it('shows missing identifier fallback when contentId is absent', async () => {
+    mockParams.contentId = undefined;
+
+    render(<CollectionEditorPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Missing content identifier.')).toBeInTheDocument();
+    });
+
+    expect(mockContentRead).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('collection-editor')).not.toBeInTheDocument();
   });
 
   it('navigates back to workspace when editor emits close event', async () => {

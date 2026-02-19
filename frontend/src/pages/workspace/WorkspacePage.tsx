@@ -99,7 +99,7 @@ const WorkspacePage = () => {
         console.warn('Failed to fetch org data:', err);
       });
     }
-  }, [slug]);
+  }, [slug, orgData, orgSearch]);
 
   // Pre-fetch channel/framework data using tanstack query when org is available
   const orgChannelId = orgData?.hashTagId || orgData?.identifier || '';

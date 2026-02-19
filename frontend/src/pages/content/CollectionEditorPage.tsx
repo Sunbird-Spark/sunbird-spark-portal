@@ -30,9 +30,13 @@ const CollectionEditorPage = () => {
   const navigate = useNavigate();
   const [metadata, setMetadata] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoadError(null);
+
     if (!contentId) {
+      setLoadError('Missing content identifier.');
       setLoading(false);
       return;
     }
@@ -44,7 +48,10 @@ const CollectionEditorPage = () => {
         if (!content) throw new Error('No content found');
         setMetadata(content);
       })
-      .catch((e: any) => toast({ title: 'Error', description: 'Failed to load content metadata.', variant: 'destructive' }))
+      .catch(() => {
+        setLoadError('Failed to load content metadata.');
+        toast({ title: 'Error', description: 'Failed to load content metadata.', variant: 'destructive' });
+      })
       .finally(() => setLoading(false));
   }, [contentId]);
 
@@ -78,6 +85,30 @@ const CollectionEditorPage = () => {
 
   if (loading) {
     return <PageLoader message="Loading editor..." />;
+  }
+
+  if (loadError || !metadata) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
+        <div className="text-red-600 font-semibold">{loadError || 'Content not found'}</div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Retry
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/workspace')}
+            className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
+          >
+            Back to workspace
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
