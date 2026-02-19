@@ -23,11 +23,21 @@ vi.mock('./CreateBatchModal', () => ({
     ) : null,
 }));
 
+// Mock useBatchList so we control the API response in tests
+const mockUseBatchList = vi.fn();
+vi.mock('@/hooks/useBatch', () => ({
+  useBatchList: (courseId: string) => mockUseBatchList(courseId),
+}));
+
+/** Default hook state — no batches, not loading */
+const defaultHookState = { data: [], isLoading: false, isError: false };
+
 describe('BatchCard', () => {
   const defaultProps = { collectionId: 'test-collection-123' };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseBatchList.mockReturnValue(defaultHookState);
   });
 
   /* ── Rendering ── */
@@ -45,6 +55,152 @@ describe('BatchCard', () => {
   it('Create Batch button has type="button" (not submit)', () => {
     render(<BatchCard {...defaultProps} />);
     expect(screen.getByRole('button', { name: /create batch/i })).toHaveAttribute('type', 'button');
+  });
+
+  it('calls useBatchList with the collectionId', () => {
+    render(<BatchCard collectionId="col-abc" />);
+    expect(mockUseBatchList).toHaveBeenCalledWith('col-abc');
+  });
+
+  /* ── Empty state ── */
+
+  it('shows "No batches created yet" when there are no batches', () => {
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText('No batches created yet.')).toBeInTheDocument();
+  });
+
+  /* ── Loading state ── */
+
+  it('shows a loading spinner when isLoading is true', () => {
+    mockUseBatchList.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+    render(<BatchCard {...defaultProps} />);
+    // Spinner is an SVG icon; the "No batches" text should NOT appear
+    expect(screen.queryByText('No batches created yet.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Failed to load batches.')).not.toBeInTheDocument();
+  });
+
+  /* ── Error state ── */
+
+  it('shows error message when isError is true', () => {
+    mockUseBatchList.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText('Failed to load batches.')).toBeInTheDocument();
+  });
+
+  /* ── Batch list ── */
+
+  it('renders batch names when batches are returned', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Batch Alpha',
+          status: '1',
+          startDate: '2026-03-01',
+          endDate: '2026-06-30',
+        },
+        {
+          id: 'b2',
+          name: 'Batch Beta',
+          status: '0',
+          startDate: '2026-07-01',
+          endDate: '2026-09-30',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText('Batch Alpha')).toBeInTheDocument();
+    expect(screen.getByText('Batch Beta')).toBeInTheDocument();
+  });
+
+  it('shows "Ongoing" badge for status "1"', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [{ id: 'b1', name: 'My Batch', status: '1', startDate: '2026-01-01', endDate: '2026-06-01' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText('Ongoing')).toBeInTheDocument();
+  });
+
+  it('shows "Upcoming" badge for status "0"', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [{ id: 'b1', name: 'My Batch', status: '0', startDate: '2026-08-01', endDate: '2026-12-01' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText('Upcoming')).toBeInTheDocument();
+  });
+
+  it('shows "Expired" badge for status "2"', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [{ id: 'b1', name: 'My Batch', status: '2', startDate: '2025-01-01', endDate: '2025-06-01' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText('Expired')).toBeInTheDocument();
+  });
+
+  it('shows "Edit Certificate" when certTemplates is non-empty', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Cert Batch',
+          status: '1',
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+          certTemplates: { 'template-1': { name: 'Template One' } },
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /edit certificate/i })).toBeInTheDocument();
+  });
+
+  it('shows "Add Certificate" when certTemplates is absent', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [{ id: 'b1', name: 'No Cert Batch', status: '1', startDate: '2026-01-01', endDate: '2026-06-01' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /add certificate/i })).toBeInTheDocument();
+  });
+
+  it('shows enrolment end date when provided', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Enrol Batch',
+          status: '1',
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+          enrollmentEndDate: '2026-03-15',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByText(/enrolment ends/i)).toBeInTheDocument();
+  });
+
+  it('does NOT show "No batches created yet" when batches are present', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [{ id: 'b1', name: 'Some Batch', status: '1', startDate: '', endDate: '' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.queryByText('No batches created yet.')).not.toBeInTheDocument();
   });
 
   /* ── Modal closed by default ── */

@@ -21,7 +21,7 @@ import "./collection.css";
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated: contextAuth } = useAuth();
+  const { isAuthenticated: contextAuth, user } = useAuth();
   const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const { t } = useAppI18n();
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
@@ -136,7 +136,7 @@ const CollectionDetailPage = () => {
 
           {/* Right Sidebar - Batch Card + Lessons Accordion */}
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
-            {isAuthenticated && collectionId && (
+            {isAuthenticated && user?.role === 'content_creator' && collectionId && (
               <div className="mb-4">
                 <BatchCard collectionId={collectionId} />
               </div>
