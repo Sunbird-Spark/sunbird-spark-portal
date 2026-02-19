@@ -14,6 +14,8 @@ const getHealthPool = (): Pool => {
             database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
             user: envConfig.SUNBIRD_YUGABYTE_USER,
             password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
+            // Use a very small pool for health checks to minimize connection impact
+            max: 1,
         });
 
         healthPool.on('error', (err: Error) => {
