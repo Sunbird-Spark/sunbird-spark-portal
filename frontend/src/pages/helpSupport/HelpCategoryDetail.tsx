@@ -122,7 +122,8 @@ const HelpCategoryDetail = () => {
                             </button>
                             <button
                                 onClick={() => setIsReportIssueOpen(true)}
-                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
+                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
+                                aria-label="Report an issue with this help content">
                                 Report an Issue
                             </button>
                         </div>

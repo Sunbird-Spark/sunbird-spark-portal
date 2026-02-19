@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
   DialogClose,
 } from "@/components/common/Dialog";
 import {
@@ -16,6 +17,7 @@ import {
 import { Textarea } from "@/components/common/TextArea";
 import { toast } from "@/hooks/useToast";
 import { FormService } from "@/services/FormService";
+import { FormConfigResponse } from "@/types/formTypes";
 
 interface ReportIssueDialogProps {
   open: boolean;
@@ -49,19 +51,18 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
           component: "portal",
         });
 
-        console.log("[ReportIssueDialog] raw response:", JSON.stringify(response));
-        const formData = (response.data as any).result?.form || (response.data as any).form;
-        const fields = formData?.data?.fields;
-        console.log("[ReportIssueDialog] fields:", fields);
-        const categoryField = fields?.find((field: any) => field.code === "category");
-        const subcategoryField = fields?.find((field: any) => field.code === "subcategory");
+        const responseData = response.data as unknown as FormConfigResponse & { form?: FormConfigResponse["result"]["form"] };
+        const formData = responseData.result?.form ?? responseData.form;
+        const fields: Array<{ code: string; templateOptions?: { options?: Option[] | Record<string, Option[]> } }> = formData?.data?.fields ?? [];
+        const categoryField = fields.find((field) => field.code === "category");
+        const subcategoryField = fields.find((field) => field.code === "subcategory");
 
         if (categoryField?.templateOptions?.options) {
-          setCategoryOptions(categoryField.templateOptions.options);
+          setCategoryOptions(categoryField.templateOptions.options as Option[]);
         }
 
         if (subcategoryField?.templateOptions?.options) {
-          setSubcategoryOptionsMap(subcategoryField.templateOptions.options);
+          setSubcategoryOptionsMap(subcategoryField.templateOptions.options as Record<string, Option[]>);
         }
       } catch (e) {
         console.error("Failed to fetch form data", e);
@@ -103,18 +104,21 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideCloseButton className="sm:max-w-[43.625rem] p-[4.125rem] rounded-[50px] bg-white gap-6">
         <DialogClose className="absolute right-[2.75rem] top-[2.375rem] opacity-100 focus:outline-none text-sunbird-brick">
-          <AiOutlineClose className="w-[24px] h-[24px]" style={{ strokeWidth: "20px" }} />
+          <AiOutlineClose className="w-[24px] h-[24px]" />
         </DialogClose>
         <div className="flex justify-between items-center">
           <DialogTitle className="font-['Rubik'] font-medium text-[1.5rem] leading-[1.25rem] tracking-normal text-foreground">
             Report an Issue
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Report an issue by selecting a category and describing the problem
+          </DialogDescription>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-8">
-          <Select value={category} onValueChange={handleCategoryChange}>
+          <Select value={category} onValueChange={handleCategoryChange} disabled={loading}>
             <SelectTrigger className="border-sunbird-gray-d0 rounded-[0.625rem] h-[3rem] px-4 font-['Rubik'] font-normal text-[1rem] leading-[1.25rem] tracking-normal bg-white text-left [&>svg]:text-sunbird-brick [&>svg]:opacity-100 [&>svg]:w-[1.5rem] [&>svg]:h-[1.5rem]">
-              <SelectValue placeholder={<span className="text-muted-foreground">Select Category</span>} />
+              <SelectValue placeholder={<span className="text-muted-foreground">{loading ? "Loading..." : "Select Category"}</span>} />
             </SelectTrigger>
             <SelectContent className="bg-white z-[100]">
               {categoryOptions.map((cat) => (
@@ -126,7 +130,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
           </Select>
 
           {category !== "otherissues" && (
-            <Select value={subcategory} onValueChange={setSubcategory} disabled={!category || currentSubcategoryOptions.length === 0}>
+            <Select value={subcategory} onValueChange={setSubcategory} disabled={loading || !category || currentSubcategoryOptions.length === 0}>
               <SelectTrigger className="border-sunbird-gray-d0 rounded-[0.625rem] h-[3rem] px-4 font-['Rubik'] font-normal text-[1rem] leading-[1.25rem] tracking-normal bg-white text-left [&>svg]:text-sunbird-brick [&>svg]:opacity-100 [&>svg]:w-[1.5rem] [&>svg]:h-[1.5rem]">
                 <SelectValue placeholder={<span className="text-muted-foreground">Select Subcategory</span>} />
               </SelectTrigger>
@@ -153,7 +157,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
           <div className="absolute top-[2.25rem] left-[4.125rem] right-[4.125rem] flex items-start gap-3 bg-[#F0F4F0] border-l-4 border-[#4CAF50] rounded-[0.625rem] px-4 py-3 z-10">
             <span className="text-[#4CAF50] text-lg mt-0.5">✓</span>
             <p className="font-['Rubik'] text-[0.875rem] leading-[1.4] text-foreground">
-              Thanks for your feedback. We may not be able to respond to every suggestion, but your feedback helps make SUNBIRD better for everyone.
+              Thanks for your feedback. We may not be able to respond to every suggestion, but your feedback helps make {(import.meta as any).env?.VITE_APP_NAME || "this application"} better for everyone.
             </p>
           </div>
         )}

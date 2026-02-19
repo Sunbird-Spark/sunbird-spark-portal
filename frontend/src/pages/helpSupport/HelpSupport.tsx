@@ -87,6 +87,7 @@ const HelpSupport = () => {
                             </h1>
                             <button
                                 onClick={() => setIsReportIssueOpen(true)}
+                                aria-label="Report an issue with the application"
                                 className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
                                 Report an Issue
                             </button>
