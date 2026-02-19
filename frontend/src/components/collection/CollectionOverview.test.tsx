@@ -56,6 +56,33 @@ const mockPlayerMetadata = {
 };
 
 describe('CollectionOverview', () => {
+  describe('player area — when contentAccessBlocked is true', () => {
+    it('shows mustJoinToAccessContent message and no PageLoader or ContentPlayer', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentAccessBlocked={true}
+        />
+      );
+      expect(screen.getByText('courseDetails.mustJoinToAccessContent')).toBeInTheDocument();
+      expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+
+    it('shows mustJoinToAccessContent even when contentId is provided', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          contentAccessBlocked={true}
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.mustJoinToAccessContent')).toBeInTheDocument();
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+  });
+
   describe('player area — when no contentId is provided', () => {
     it('shows error PageLoader when contentId is absent', () => {
       render(<CollectionOverview collectionData={mockCollectionData} />);

@@ -50,6 +50,9 @@ const AppRoutes: React.FC = () => {
         <Route path="/collection/:collectionId" element={<CollectionDetailPage />}>
           <Route path="content/:contentId" element={null} />
         </Route>
+        <Route path="/collection/:collectionId/batch/:batchId" element={<CollectionDetailPage />}>
+          <Route path="content/:contentId" element={null} />
+        </Route>
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />

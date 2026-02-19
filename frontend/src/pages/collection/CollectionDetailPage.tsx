@@ -84,32 +84,22 @@ const CollectionDetailPage = () => {
 
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
-  const leftColRef = useRef<HTMLDivElement>(null);
-  const [leftColHeight, setLeftColHeight] = useState<number | null>(null);
-
-  useEffect(() => {
-    const el = leftColRef.current;
-    if (!el) return;
-    const sync = () => setLeftColHeight(el.getBoundingClientRect().height);
-    const ro = new ResizeObserver(sync);
-    ro.observe(el);
-    sync();
-    return () => ro.disconnect();
-  }, [hierarchySuccess]);
 
   // Auto-navigate to first content when collection loads without a selected contentId
   useEffect(() => {
-    if (!contentId && collectionData) {
-      const firstLesson = collectionData.modules?.[0]?.lessons?.[0];
-      if (firstLesson) {
-        const mime = (firstLesson.mimeType ?? '').toLowerCase();
-        const isCollection = mime === 'application/vnd.ekstep.content-collection';
-        if (!isCollection) {
-          navigate(`/collection/${collectionId}/content/${firstLesson.id}`, { replace: true });
-        }
-      }
+    if (!collectionData || contentId) return;
+    const firstLesson = collectionData.modules?.[0]?.lessons?.[0];
+    if (!firstLesson) return;
+    const mime = (firstLesson.mimeType ?? '').toLowerCase();
+    if (mime === 'application/vnd.ekstep.content-collection') return;
+    if (!isTrackable) {
+      navigate(`/collection/${collectionId}/content/${firstLesson.id}`, { replace: true });
+      return;
     }
-  }, [contentId, collectionData, collectionId, navigate]);
+    if (hasBatchInRoute && batchIdParam) {
+      navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstLesson.id}`, { replace: true });
+    }
+  }, [contentId, collectionData, collectionId, navigate, isTrackable, hasBatchInRoute, batchIdParam]);
 
   useEffect(() => {
     const firstId = collectionData?.modules?.[0]?.id;
@@ -177,12 +167,12 @@ const CollectionDetailPage = () => {
         </div>
 
 
-        {/* Main Content Grid */}
         <div className="grid lg:grid-cols-[1fr_340px] gap-8">
           {/* Left Column */}
           <CollectionOverview
             collectionData={displayCollectionData}
             contentId={contentId}
+            contentAccessBlocked={isTrackable && (contentBlocked || !isEnrolledInCurrentBatch)}
             playerMetadata={playerMetadata}
             playerIsLoading={playerIsLoading}
             playerError={playerError ?? null}
@@ -205,6 +195,7 @@ const CollectionDetailPage = () => {
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               <CollectionSidebar
                 collectionId={collectionId ?? ''}
+                batchId={hasBatchInRoute ? batchIdParam ?? null : null}
                 modules={collectionData.modules}
                 expandedModules={expandedModules}
                 toggleModule={toggleModule}

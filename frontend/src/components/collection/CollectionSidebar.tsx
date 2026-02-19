@@ -10,10 +10,12 @@ import { VideoIcon, DocumentIcon } from "./CollectionIcons";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import type { Lesson, Module } from "@/types/collectionTypes";
 
-function getLessonHref(lesson: Lesson, collectionId: string): string {
+function getLessonHref(lesson: Lesson, collectionId: string, batchId?: string | null): string {
   const mime = (lesson.mimeType ?? '').toLowerCase();
   const isCollection = mime === 'application/vnd.ekstep.content-collection';
-  return isCollection ? `/collection/${lesson.id}` : `/collection/${collectionId}/content/${lesson.id}`;
+  if (isCollection) return `/collection/${lesson.id}`;
+  if (batchId) return `/collection/${collectionId}/batch/${batchId}/content/${lesson.id}`;
+  return `/collection/${collectionId}/content/${lesson.id}`;
 }
 
 /** 0 = Not started, 1 = In progress, 2 = Completed */
@@ -21,6 +23,8 @@ export type ContentStatus = 0 | 1 | 2;
 
 interface CollectionSidebarProps {
   collectionId: string;
+  /** When set (trackable + batch in route), lesson links include batch in path. */
+  batchId?: string | null;
   modules: Module[];
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
@@ -38,6 +42,7 @@ function getStatusLabel(status: number | undefined): string {
 
 const CollectionSidebar = ({
   collectionId,
+  batchId = null,
   modules,
   expandedModules,
   toggleModule,
@@ -117,7 +122,7 @@ const CollectionSidebar = ({
                     return (
                       <Link
                         key={lesson.id}
-                        to={getLessonHref(lesson, collectionId)}
+                        to={getLessonHref(lesson, collectionId, batchId)}
                         className={`${baseClass} ${interactiveClass}`}
                       >
                         {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
