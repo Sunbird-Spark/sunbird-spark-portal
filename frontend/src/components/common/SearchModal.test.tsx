@@ -348,8 +348,12 @@ describe('SearchModal', () => {
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
 
+      expect(focusableElements.length).toBeGreaterThan(0);
+
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) return;
 
       lastElement.focus();
       expect(lastElement).toHaveFocus();
@@ -367,8 +371,12 @@ describe('SearchModal', () => {
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
 
+      expect(focusableElements.length).toBeGreaterThan(0);
+
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) return;
 
       firstElement.focus();
       expect(firstElement).toHaveFocus();
