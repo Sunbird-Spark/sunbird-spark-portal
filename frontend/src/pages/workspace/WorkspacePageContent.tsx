@@ -140,7 +140,6 @@ export default function WorkspacePageContent({
             <WorkspaceContentCard
               key={item.id}
               item={item}
-              userRole={userRole}
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
@@ -150,7 +149,6 @@ export default function WorkspacePageContent({
       ) : (
         <WorkspaceContentList
           items={filteredItems}
-          userRole={userRole}
           onEdit={onEdit}
           onDelete={onDelete}
           onView={onView}

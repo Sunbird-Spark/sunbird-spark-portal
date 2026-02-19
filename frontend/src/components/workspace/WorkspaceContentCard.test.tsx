@@ -39,7 +39,6 @@ describe('WorkspaceContentCard', () => {
     render(
       <WorkspaceContentCard
         item={defaultItem}
-        userRole="creator"
         onEdit={onEdit}
         onDelete={onDelete}
         onView={onView}
@@ -55,7 +54,6 @@ describe('WorkspaceContentCard', () => {
     render(
       <WorkspaceContentCard
         item={publishedItem}
-        userRole="creator"
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={onView}
@@ -70,7 +68,6 @@ describe('WorkspaceContentCard', () => {
     render(
       <WorkspaceContentCard
         item={defaultItem}
-        userRole="creator"
         onEdit={onEdit}
         onDelete={vi.fn()}
         onView={vi.fn()}
@@ -87,7 +84,6 @@ describe('WorkspaceContentCard', () => {
     render(
       <WorkspaceContentCard
         item={publishedItem}
-        userRole="creator"
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={onView}
@@ -102,7 +98,6 @@ describe('WorkspaceContentCard', () => {
     render(
       <WorkspaceContentCard
         item={defaultItem}
-        userRole="creator"
         onEdit={vi.fn()}
         onDelete={onDelete}
         onView={vi.fn()}
