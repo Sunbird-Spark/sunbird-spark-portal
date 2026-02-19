@@ -70,7 +70,7 @@ describe('QuestionSetService', () => {
 
       const result = await service.getQuestionset('do_123');
 
-      expect(mockClient.get).toHaveBeenCalledWith('/questionset/v2/read/do_123');
+      expect(mockClient.get).toHaveBeenCalledWith('/questionset/v2/read/do_123?mode=edit');
       expect(result).toEqual(mockResponse.data);
     });
 

@@ -30,6 +30,7 @@ const defaultItems: WorkspaceItem[] = [
     updatedAt: '2024-01-02',
     author: 'user-1',
     primaryCategory: 'Learning Resource',
+    contentType: '',
   },
 ];
 
@@ -38,6 +39,7 @@ describe('WorkspaceContentList', () => {
     render(
       <WorkspaceContentList
         items={defaultItems}
+        userRole="creator"
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={vi.fn()}
@@ -53,6 +55,7 @@ describe('WorkspaceContentList', () => {
     render(
       <WorkspaceContentList
         items={publishedItems}
+        userRole="creator"
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={onView}
@@ -67,6 +70,7 @@ describe('WorkspaceContentList', () => {
     render(
       <WorkspaceContentList
         items={defaultItems}
+        userRole="creator"
         onEdit={onEdit}
         onDelete={vi.fn()}
         onView={vi.fn()}
@@ -81,6 +85,7 @@ describe('WorkspaceContentList', () => {
     render(
       <WorkspaceContentList
         items={defaultItems}
+        userRole="creator"
         onEdit={vi.fn()}
         onDelete={onDelete}
         onView={vi.fn()}

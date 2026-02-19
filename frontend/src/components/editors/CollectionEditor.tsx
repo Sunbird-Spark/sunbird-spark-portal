@@ -92,8 +92,6 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
         serviceRef.current.removeEventListeners(editorElement);
         editorElement.remove();
       }
-      // Reset status so the guard stops and the next mount starts fresh.
-      setStatus('loading');
     };
   }, [identifier, metadata, contextProps, handleEditorEvent, handleTelemetryEvent]);
 

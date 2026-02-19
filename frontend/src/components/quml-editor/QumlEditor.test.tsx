@@ -159,7 +159,7 @@ describe('QumlEditor', () => {
 
   it('shows loading state initially', () => {
     const { container } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
-    expect(container.textContent).toContain('Loading Editor');
+    expect(container.textContent).toContain('Loading editor...');
   });
 
   it('does not initialize without metadata', async () => {

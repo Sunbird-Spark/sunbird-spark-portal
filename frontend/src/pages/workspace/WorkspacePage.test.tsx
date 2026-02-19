@@ -6,9 +6,10 @@ import { MemoryRouter } from 'react-router-dom';
 import WorkspacePage from './WorkspacePage';
 import type { UseWorkspaceReturn } from '@/types/workspaceTypes';
 
-const { mockNavigate, mockContentCreate } = vi.hoisted(() => ({
+const { mockNavigate, mockContentCreate, mockQuestionSetMutateAsync } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
   mockContentCreate: vi.fn(),
+  mockQuestionSetMutateAsync: vi.fn(),
 }));
 
 const mockUseWorkspace = vi.fn<() => UseWorkspaceReturn>();
@@ -54,6 +55,10 @@ vi.mock('@/hooks/useSystemSetting', () => ({
 
 vi.mock('@/hooks/useOrganization', () => ({
   useOrganizationSearch: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useQuestionSetCreate', () => ({
+  useQuestionSetCreate: () => ({ mutateAsync: mockQuestionSetMutateAsync }),
 }));
 
 vi.mock('@/hooks/useChannel', () => ({
@@ -284,6 +289,7 @@ describe('WorkspacePage', () => {
   });
 
   it('creates question set from create options and navigates to quml editor', async () => {
+    mockQuestionSetMutateAsync.mockResolvedValue({ identifier: 'do_qs_123' });
     renderWithProviders(<WorkspacePage />);
 
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
@@ -305,11 +311,10 @@ describe('WorkspacePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
     await waitFor(() => {
-      expect(mockContentCreate).toHaveBeenCalledWith(
-        'My Question Set',
+      expect(mockQuestionSetMutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({
-          mimeType: 'application/vnd.sunbird.questionset',
-          primaryCategory: 'Practice Question Set',
+          name: 'My Question Set',
+          createdBy: 'test-user-id',
         }),
       );
     });

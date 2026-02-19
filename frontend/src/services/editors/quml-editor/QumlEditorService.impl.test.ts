@@ -213,7 +213,7 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
       const config = await service.createConfig(metadata);
 
       expect(config.context.channel).toBe('');
-      expect(consoleWarn).toHaveBeenCalledWith('Failed to fetch channel from org service:', expect.any(Error));
+      expect(consoleWarn).toHaveBeenCalledWith('Failed to fetch channel info:', expect.any(Error));
 
       consoleWarn.mockRestore();
     });

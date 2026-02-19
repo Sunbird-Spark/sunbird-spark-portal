@@ -36,7 +36,7 @@ describe('QumlEditorService', () => {
     vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({ 
       data: { 
         response: { 
-          content: [{ channel: 'channel-from-metadata' }] 
+          content: [{ hashTagId: 'channel-from-metadata' }]
         } 
       } 
     });

@@ -94,7 +94,7 @@ export function useWorkspace({
           primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
         },
         facets: ['status'],
-        limit: isReviewerMode ? WORKSPACE_PAGE_LIMIT : 1,
+        limit: 1,
         offset: 0,
       }),
     enabled: queryEnabled,

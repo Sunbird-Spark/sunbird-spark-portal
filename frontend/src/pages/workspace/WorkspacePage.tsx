@@ -203,12 +203,6 @@ const WorkspacePage = () => {
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
       navigate('/workspace/content/edit/generic');
       return;
-    }else if (QUML_EDITOR_OPTIONS.includes(optionId)) {
-      setShowCreateModal(false);
-      toast({
-        title: "Starting Editor",
-        description: `Launching ${optionId.replace('-', ' ')} editor...`
-      });
     } else {
       setShowCreateModal(false);
       toast({
