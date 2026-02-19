@@ -26,7 +26,7 @@ const Index = () => {
   }
 
   const sections = formData?.data?.form?.data?.sections || [];
-  
+
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
 
   const renderSection = (section: FormSection) => {
