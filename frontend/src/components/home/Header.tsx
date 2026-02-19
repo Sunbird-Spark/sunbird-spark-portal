@@ -100,8 +100,9 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
               <button
                 className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setIsSearchOpen(true)}
+                aria-label={t("header.search")}
               >
-                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" />
+                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" aria-hidden="true" />
               </button>
 
 
