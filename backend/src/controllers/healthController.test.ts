@@ -22,13 +22,18 @@ vi.mock('@yugabytedb/pg', () => {
     };
 });
 
-import { checkHealth } from './healthController.js';
+// Remove static import
+// import { checkHealth } from './healthController.js';
 
 describe('HealthController', () => {
     let req: Partial<Request>;
     let res: Partial<ExpressResponse>;
+    let checkHealth: any;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // Reset modules to ensure a fresh singleton instance of healthPool in the controller
+        vi.resetModules();
+
         req = {};
         res = {
             status: vi.fn().mockReturnThis(),
@@ -37,6 +42,10 @@ describe('HealthController', () => {
         vi.clearAllMocks();
         mockQuery.mockReset();
         mockOn.mockReset();
+
+        // Dynamically import the controller
+        const module = await import('./healthController.js');
+        checkHealth = module.checkHealth;
     });
 
     it('should return 200 and healthy true when database is connected', async () => {
