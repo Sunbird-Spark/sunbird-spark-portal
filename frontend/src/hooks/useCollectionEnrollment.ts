@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import { useBatchList, useBatchRead, useContentState } from "./useCollection";
-import { useUserEnrolledCollections } from "./useUserEnrolledCollections";
-import { collectionService } from "../services/collection";
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useBatchList, useBatchRead, useContentState } from './useCollection';
+import { useUserEnrolledCollections } from './useUserEnrolledCollections';
+import { collectionService } from '../services/collection';
 import {
   getEnrollmentForCollection,
   getLeafContentIds,
@@ -11,16 +11,15 @@ import {
   getCourseProgressProps,
   getFirstCertPreviewUrl,
   getEnrollableBatches,
-  getBatchesForDropdown,
-} from "../services/collection/enrollmentMapper";
-import userAuthInfoService from "../services/userAuthInfoService/userAuthInfoService";
-import type { CollectionData } from "../types/collectionTypes";
+} from '../services/collection/enrollmentMapper';
+import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import type { CollectionData } from '../types/collectionTypes';
 
 export function useCollectionEnrollment(
   collectionId: string | undefined,
   batchIdParam: string | undefined,
   collectionData: CollectionData | null,
-  isAuthenticated: boolean
+  isAuthenticated: boolean,
 ) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -30,11 +29,12 @@ export function useCollectionEnrollment(
 
   const enrollmentForCollection = useMemo(
     () => getEnrollmentForCollection(enrollmentsResponse?.data?.courses, collectionId),
-    [collectionId, enrollmentsResponse?.data?.courses]
+    [collectionId, enrollmentsResponse?.data?.courses],
   );
   const hasBatchInRoute = !!batchIdParam;
   const isEnrolledInCurrentBatch =
-    !!enrollmentForCollection && (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam);
+    !!enrollmentForCollection &&
+    (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam);
   const effectiveBatchId = batchIdParam ?? enrollmentForCollection?.batchId;
 
   const leafContentIds = useMemo(() => getLeafContentIds(collectionData), [collectionData]);
@@ -42,7 +42,12 @@ export function useCollectionEnrollment(
     if (!collectionId || !effectiveBatchId || leafContentIds.length === 0) return null;
     const userId = userAuthInfoService.getUserId();
     if (!userId) return null;
-    return { userId, courseId: collectionId, batchId: effectiveBatchId, contentIds: leafContentIds };
+    return {
+      userId,
+      courseId: collectionId,
+      batchId: effectiveBatchId,
+      contentIds: leafContentIds,
+    };
   }, [collectionId, effectiveBatchId, leafContentIds]);
 
   const { data: contentStateResponse } = useContentState(contentStateRequest, {
@@ -59,63 +64,54 @@ export function useCollectionEnrollment(
         enrollmentForCollection,
         collectionData,
         totalFromState,
-        completedFromState
+        completedFromState,
       ),
-    [enrollmentForCollection, collectionData, totalFromState, completedFromState]
+    [enrollmentForCollection, collectionData, totalFromState, completedFromState],
   );
 
-  const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
-  const { data: batchListResponse, isLoading: batchListLoading, error: batchListError } = useBatchList(
-    collectionId,
-    { enabled: isAuthenticated && isTrackableForBatch }
-  );
+  const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? '') === 'yes';
+  const {
+    data: batchListResponse,
+    isLoading: batchListLoading,
+    error: batchListError,
+  } = useBatchList(collectionId, {
+    enabled: isAuthenticated && isTrackableForBatch && !enrollmentForCollection,
+  });
   const rawContent = batchListResponse?.data?.response?.content ?? [];
-  const enrollableBatches = useMemo(
-    () => getEnrollableBatches(rawContent, new Date()),
-    [rawContent]
-  );
   const batches = useMemo(
-    () => getBatchesForDropdown(enrollableBatches, enrollmentForCollection),
-    [enrollableBatches, enrollmentForCollection]
+    () => getEnrollableBatches(rawContent, new Date()),
+    [rawContent],
   );
 
   const { data: batchReadResponse } = useBatchRead(
     isEnrolledInCurrentBatch ? effectiveBatchId : undefined,
-    { enabled: isEnrolledInCurrentBatch && !!effectiveBatchId }
+    { enabled: isEnrolledInCurrentBatch && !!effectiveBatchId },
   );
   const firstCertPreviewUrl = useMemo(
     () => getFirstCertPreviewUrl(batchReadResponse?.data?.response?.cert_templates),
-    [batchReadResponse?.data?.response?.cert_templates]
+    [batchReadResponse?.data?.response?.cert_templates],
   );
   const hasCertificate = !!firstCertPreviewUrl;
 
   const [joinLoading, setJoinLoading] = useState(false);
-  const [joinError, setJoinError] = useState("");
-  const handleJoinOrGo = async (selectedBatchId: string) => {
+  const [joinError, setJoinError] = useState('');
+  const handleJoinCourse = async (selectedBatchId: string) => {
     if (!collectionId || !selectedBatchId) return;
     const uid = userAuthInfoService.getUserId();
-    const alreadyEnrolledInSelected = enrollmentForCollection?.batchId === selectedBatchId;
-    if (alreadyEnrolledInSelected) {
-      navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
-      return;
-    }
     if (!uid) return;
-    setJoinError("");
+    setJoinError('');
     setJoinLoading(true);
     try {
       await collectionService.enrol(collectionId, uid, selectedBatchId);
-      await queryClient.invalidateQueries({ queryKey: ["userEnrollments"] });
+      await queryClient.invalidateQueries({ queryKey: ['userEnrollments'] });
       refetchEnrollments();
       navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
     } catch (e) {
-      setJoinError(e instanceof Error ? e.message : "Failed to join course.");
+      setJoinError(e instanceof Error ? e.message : 'Failed to join course.');
     } finally {
       setJoinLoading(false);
     }
   };
-
-  const isSelectedBatchEnrolled = (selectedBatchId: string) =>
-    !!enrollmentForCollection && enrollmentForCollection.batchId === selectedBatchId;
 
   return {
     enrollmentForCollection,
@@ -130,7 +126,6 @@ export function useCollectionEnrollment(
     hasCertificate,
     joinLoading,
     joinError,
-    handleJoinOrGo,
-    isSelectedBatchEnrolled,
+    handleJoinCourse,
   };
 }

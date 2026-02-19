@@ -22,26 +22,6 @@ export function getEnrollableBatches(
   });
 }
 
-/** Merges enrollable batches with the batch the user is enrolled in (if not already in the list). */
-export function getBatchesForDropdown(
-  enrollableBatches: BatchListItem[],
-  enrollment: TrackableCollection | undefined
-): BatchListItem[] {
-  if (!enrollment?.batch) return enrollableBatches;
-  const enrolledId = enrollment.batch.identifier || enrollment.batch.batchId || enrollment.batchId;
-  if (enrollableBatches.some((b) => b.identifier === enrolledId)) return enrollableBatches;
-  const b = enrollment.batch;
-  const item: BatchListItem = {
-    identifier: b.identifier || b.batchId,
-    name: b.name,
-    startDate: b.startDate,
-    endDate: b.endDate,
-    status: b.status,
-    enrollmentType: b.enrollmentType,
-  };
-  return [...enrollableBatches, item];
-}
-
 /** Format batch date for display; returns "-" if missing or invalid. */
 export function formatBatchDisplayDate(dateStr: string | null | undefined): string {
   if (dateStr == null || dateStr === '') return '-';

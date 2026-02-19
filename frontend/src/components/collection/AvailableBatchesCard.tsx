@@ -1,39 +1,27 @@
 import { useState, useRef, useEffect } from "react";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { FiChevronDown } from "react-icons/fi";
-import type { BatchListItem } from "@/types/collectionTypes";
+import type { BatchListItem, AvailableBatchesCardProps } from "@/types/collectionTypes";
 import { formatBatchDisplayDate } from "@/services/collection/enrollmentMapper";
-
-interface AvailableBatchesCardProps {
-  batches: BatchListItem[];
-  selectedBatchId: string;
-  onBatchSelect: (batchId: string) => void;
-  onJoinOrGo: () => void;
-  isSelectedBatchEnrolled: boolean;
-  isLoading?: boolean;
-  joinLoading?: boolean;
-  error?: string;
-  joinError?: string;
-}
-
-function getEndDateValue(batch: BatchListItem): string | null | undefined {
-  const v = batch.endDate ?? (batch as Record<string, unknown>).end_date;
-  return typeof v === "string" ? v : null;
-}
 
 function BatchOptionLabel({ batch }: { batch: BatchListItem }) {
   const { t } = useAppI18n();
   const start = formatBatchDisplayDate(batch.startDate);
-  const endDateValue = getEndDateValue(batch);
-  const end =
-    endDateValue != null && endDateValue !== ""
-      ? formatBatchDisplayDate(endDateValue)
+  const timelineEnd =
+    batch.endDate != null && batch.endDate !== "" ? formatBatchDisplayDate(batch.endDate) : t("courseDetails.noEndDate");
+  const timelineText = `${start}–${timelineEnd}`;
+  const enrollmentEndText =
+    batch.enrollmentEndDate != null && batch.enrollmentEndDate !== ""
+      ? formatBatchDisplayDate(batch.enrollmentEndDate)
       : t("courseDetails.noEndDate");
   return (
     <span className="block text-left">
       <span className="font-medium text-foreground">{batch.name ?? batch.identifier}</span>
       <span className="block text-xs text-muted-foreground mt-0.5">
-        {t("courseDetails.batchStart")}: {start} · {t("courseDetails.batchEnd")}: {end}
+        {t("courseDetails.timeline")}: {timelineText}
+      </span>
+      <span className="block text-xs text-muted-foreground mt-0.5">
+        {t("courseDetails.enrollmentEndsBy")}: {enrollmentEndText}
       </span>
     </span>
   );
@@ -43,8 +31,7 @@ const AvailableBatchesCard = ({
   batches,
   selectedBatchId,
   onBatchSelect,
-  onJoinOrGo,
-  isSelectedBatchEnrolled,
+  onJoinCourse,
   isLoading = false,
   joinLoading = false,
   error,
@@ -70,10 +57,6 @@ const AvailableBatchesCard = ({
     onBatchSelect(batchId);
     setDropdownOpen(false);
   };
-
-  const primaryButtonLabel = isSelectedBatchEnrolled
-    ? t("courseDetails.goToCourse")
-    : t("courseDetails.joinTheCourse");
 
   const isEmpty = batches.length === 0 && !isLoading;
 
@@ -132,7 +115,7 @@ const AvailableBatchesCard = ({
                     role="option"
                     aria-selected={batch.identifier === selectedBatchId}
                     onClick={() => handleSelect(batch.identifier)}
-                    className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                    className="px-4 py-1.5 cursor-pointer hover:bg-gray-50 border-b border-gray-300 last:border-b-0"
                   >
                     <BatchOptionLabel batch={batch} />
                   </li>
@@ -147,11 +130,11 @@ const AvailableBatchesCard = ({
           )}
           <button
             type="button"
-            onClick={onJoinOrGo}
+            onClick={onJoinCourse}
             disabled={!selectedBatchId || joinLoading}
             className="font-rubik font-medium text-[1rem] leading-normal w-full h-[2.25rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center"
           >
-            {joinLoading ? t("loading") : primaryButtonLabel}
+            {joinLoading ? t("loading") : t("courseDetails.joinTheCourse")}
           </button>
         </>
       )}

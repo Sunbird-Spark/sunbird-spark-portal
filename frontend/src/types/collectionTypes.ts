@@ -64,6 +64,17 @@ export interface BatchListResponse {
   };
 }
 
+export interface AvailableBatchesCardProps {
+  batches: BatchListItem[];
+  selectedBatchId: string;
+  onBatchSelect: (batchId: string) => void;
+  onJoinCourse: () => void;
+  isLoading?: boolean;
+  joinLoading?: boolean;
+  error?: string;
+  joinError?: string;
+}
+
 export interface CertTemplate {
   identifier: string;
   previewUrl?: string;

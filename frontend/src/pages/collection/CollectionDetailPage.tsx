@@ -36,12 +36,15 @@ const CollectionDetailPage = () => {
   const collectionData = collectionDataFromApi ?? null;
   const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
   const { isEnrolledInCurrentBatch, contentStatusMap, courseProgressProps, batches, batchListLoading, batchListError,
-    firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinOrGo, isSelectedBatchEnrolled } = enrollment;
+    firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
+
   useEffect(() => {
-    if (!hasBatchInRoute) setSelectedBatchId(enrollment.enrollmentForCollection?.batchId ?? "");
-  }, [hasBatchInRoute, enrollment.enrollmentForCollection?.batchId]);
+    if (!collectionId || hasBatchInRoute) return;
+    const batchId = enrollment.enrollmentForCollection?.batchId;
+    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true });
+  }, [collectionId, hasBatchInRoute, enrollment.enrollmentForCollection?.batchId, navigate]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const contentBlocked = isTrackable && !isAuthenticated;
@@ -167,8 +170,7 @@ const CollectionDetailPage = () => {
                     batches={batches}
                     selectedBatchId={selectedBatchId}
                     onBatchSelect={setSelectedBatchId}
-                    onJoinOrGo={() => handleJoinOrGo(selectedBatchId)}
-                    isSelectedBatchEnrolled={isSelectedBatchEnrolled(selectedBatchId)}
+                    onJoinCourse={() => handleJoinCourse(selectedBatchId)}
                     isLoading={batchListLoading}
                     joinLoading={joinLoading}
                     error={batchListError}
