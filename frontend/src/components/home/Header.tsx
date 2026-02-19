@@ -12,8 +12,9 @@ import {
 } from "@/components/common/DropdownMenu";
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import SearchModal from "@/components/common/SearchModal";
 
 interface HeaderProps {
   isSidebarOpen?: boolean;
@@ -26,9 +27,9 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
   const { isAuthenticated: contextAuth } = useAuth();
   const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const location = useLocation();
-  const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   if (isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
     if (import.meta.env.MODE !== "production") {
@@ -59,6 +60,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
 
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)]">
       <div className="container mx-auto px-0">
         <div className="flex items-center justify-between h-16 md:h-[4.5rem] px-4 lg:pl-[3.75rem] lg:pr-[7.9375rem]">
@@ -95,8 +97,12 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
           <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-1">
               {/* Search */}
-              <button className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors" onClick={() => { navigate("/search") }}>
-                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" />
+              <button
+                className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setIsSearchOpen(true)}
+                aria-label={t("header.search")}
+              >
+                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" aria-hidden="true" />
               </button>
 
 
@@ -165,7 +171,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
               <button
                 className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-sunbird-brick"
                 onClick={() => {
-                  navigate("/search");
+                  setIsSearchOpen(true);
                   setIsMenuOpen(false);
                 }}
               >
@@ -204,6 +210,8 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
         </div>
       )}
     </header>
+    <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 };
 
