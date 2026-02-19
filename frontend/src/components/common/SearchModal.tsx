@@ -18,9 +18,11 @@ const badgeStyle =
 const SearchResultCard = ({
   item,
   onClose,
+  t,
 }: {
   item: ContentSearchItem;
   onClose: () => void;
+  t: (key: string) => string;
 }) => (
   <Link
     to={`/collection/${item.identifier}`}
@@ -50,7 +52,7 @@ const SearchResultCard = ({
         </Badge>
       )}
       <h3 className="font-rubik font-medium text-[1.125rem] leading-[1.625rem] text-foreground flex-grow">
-        {item.name || "Untitled"}
+        {item.name || t("untitled")}
       </h3>
     </div>
   </Link>
@@ -100,8 +102,8 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   };
 
   const sectionTitle = debouncedQuery.trim()
-    ? `Results for "${debouncedQuery}"`
-    : "Recommended";
+    ? t("results_for", { query: debouncedQuery })
+    : t("recommended");
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col">
@@ -128,7 +130,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                     inputRef.current?.focus();
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-                  aria-label="Clear search"
+                  aria-label={t("clear_search")}
                 >
                   <FiX className="w-4 h-4" />
                 </button>
@@ -160,6 +162,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                       key={item.identifier}
                       item={item}
                       onClose={onClose}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -169,13 +172,13 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                     onClick={handleViewMore}
                     className="flex items-center gap-2 font-rubik font-medium text-sunbird-brick hover:opacity-80 transition-opacity"
                   >
-                    View All Results
+                    {t("view_all_results")}
                     <span aria-hidden="true">→</span>
                   </button>
                 </div>
               </>
             ) : (
-              <p className="text-muted-foreground text-sm">No results found.</p>
+              <p className="text-muted-foreground text-sm">{t("no_results_found")}</p>
             )}
           </div>
         </div>
