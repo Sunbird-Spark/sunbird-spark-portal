@@ -21,6 +21,7 @@ import { buildCategoryFaqsMap } from "../../services/HelpSupportService";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 import "../profile/profile.css";
+import ReportIssueDialog from "@/components/help/ReportIssueDialog";
 
 const HelpCategoryDetail = () => {
 
@@ -31,6 +32,7 @@ const HelpCategoryDetail = () => {
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
     const [feedback, setFeedback] = useState<Record<number, "yes" | "no" | "submitted" | null>>({});
     const [feedbackText, setFeedbackText] = useState<Record<number, string>>({});
+    const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
@@ -118,7 +120,9 @@ const HelpCategoryDetail = () => {
                                 <FaArrowLeftLong className="w-[1rem] h-[1rem]" />
                                 Go Back
                             </button>
-                            <button className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
+                            <button
+                                onClick={() => setIsReportIssueOpen(true)}
+                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
                                 Report an Issue
                             </button>
                         </div>
@@ -228,6 +232,7 @@ const HelpCategoryDetail = () => {
             </div>
 
             <Footer />
+            <ReportIssueDialog open={isReportIssueOpen} onOpenChange={setIsReportIssueOpen} />
         </div >
     );
 };

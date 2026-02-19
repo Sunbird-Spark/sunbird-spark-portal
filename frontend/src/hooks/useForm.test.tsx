@@ -8,11 +8,11 @@ import React from 'react';
 // Mock FormService
 vi.mock('../services/FormService', () => {
   return {
-    FormService: function() {
+    FormService: function () {
       return {
-        formRead: () => Promise.resolve({ 
-          data: { 
-            form: { 
+        formRead: () => Promise.resolve({
+          data: {
+            form: {
               type: 'page',
               subtype: 'landing',
               action: 'sections',
@@ -24,8 +24,8 @@ vi.mock('../services/FormService', () => {
               created_on: '2024-01-01',
               last_modified_on: '2024-01-01',
               rootOrgId: 'test-org'
-            } 
-          } 
+            }
+          }
         }),
       };
     },
@@ -59,6 +59,6 @@ describe('useFormRead', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data?.data.form.type).toBe('page');
+    expect(result.current.data?.data.result.form.type).toBe('page');
   });
 });

@@ -10,16 +10,25 @@ export interface FormReadRequest {
 }
 
 export interface FormReadResponse {
-  form: {
-    framework: string;
-    type: string;
-    subtype: string;
-    action: string;
-    component: string;
-    data: any;
-    created_on: string;
-    last_modified_on: string;
-    rootOrgId: string;
+  id: string;
+  params: {
+    resmsgid: string;
+    msgid: string;
+    status: string;
+  };
+  responseCode: string;
+  result: {
+    form: {
+      framework: string;
+      type: string;
+      subtype: string;
+      action: string;
+      component: string;
+      data: any;
+      created_on: string;
+      last_modified_on: string;
+      rootOrgId: string;
+    };
   };
 }
 
