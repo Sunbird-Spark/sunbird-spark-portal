@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 
 describe('ConfirmDialog', () => {
   const onClose = vi.fn();
   const onConfirm = vi.fn();
 
-  const renderDialog = (props?: Partial<React.ComponentProps<typeof ConfirmDialog>>) =>
+  const renderDialog = (props?: Partial<ComponentProps<typeof ConfirmDialog>>) =>
     render(
       <ConfirmDialog
         open
