@@ -795,6 +795,7 @@
 
   .collection-player-loading {
     @apply aspect-video flex items-center justify-center bg-gray-100;
+    border-radius: 1.125rem;
   }
 
   .collection-player-error {
