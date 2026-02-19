@@ -15,7 +15,6 @@ import { useAppI18n } from '../hooks/useAppI18n';
 import HomeSidebar from '../components/home/HomeSidebar';
 import { Sheet, SheetContent, SheetTitle } from '../components/home/Sheet';
 import { useIsMobile } from '../hooks/use-mobile';
-import { useEffect } from 'react';
 import "./home/home.css";
 import { useSidebarState } from '../hooks/useSidebarState';
 
@@ -38,14 +37,10 @@ const Explore = () => {
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
   const [sortLabel, setSortLabel] = useState('Newest');
   const [activeNav, setActiveNav] = useState("explore");
-  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
-  useEffect(() => {
-    // For Explore page, we always want it closed by default when mounting
-    setIsSidebarOpen(false);
-  }, [setIsSidebarOpen]);
+  const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
   return (
     <div className="home-container">
-      <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
+      <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
 
       <div className="flex flex-1 relative transition-all">
         {/* Sidebar - Mobile */}
