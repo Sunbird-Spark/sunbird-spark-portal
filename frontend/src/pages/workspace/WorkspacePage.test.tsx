@@ -12,6 +12,32 @@ vi.mock('@/hooks/useWorkspace', () => ({
   useWorkspace: (...args: unknown[]) => mockUseWorkspace(),
 }));
 
+vi.mock('@/hooks/useUserRead', () => ({
+  useUserRead: () => ({
+    data: {
+      data: {
+        response: {
+          firstName: 'Test',
+          lastName: 'User',
+          roles: [{ role: 'CONTENT_CREATOR' }],
+        },
+      },
+    },
+  }),
+}));
+
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: undefined }),
+}));
+
+vi.mock('@/hooks/useOrganization', () => ({
+  useOrganizationSearch: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useChannel', () => ({
+  useChannel: () => ({ data: undefined }),
+}));
+
 vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => ({
     isAuthenticated: true,
@@ -123,11 +149,12 @@ describe('WorkspacePage', () => {
       isLoading: false,
       isLoadingMore: false,
       isCountsLoading: false,
+      isRefreshing: false,
       error: null,
       hasMore: false,
       loadMore: vi.fn(),
-      refetchCounts: vi.fn(),
-      refetchAll: vi.fn(),
+      refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
     });
   });
 
@@ -150,11 +177,12 @@ describe('WorkspacePage', () => {
       isLoading: true,
       isLoadingMore: false,
       isCountsLoading: true,
+      isRefreshing: false,
       error: null,
       hasMore: false,
       loadMore: vi.fn(),
-      refetchCounts: vi.fn(),
-      refetchAll: vi.fn(),
+      refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
     });
     renderWithProviders(<WorkspacePage />);
     expect(screen.getByText('loading')).toBeInTheDocument();
@@ -194,7 +222,7 @@ describe('WorkspacePage', () => {
     });
   });
 
-  it('calls handleCreateOption and closes modal when an option is selected', async () => {
+  it('opens name dialog when a create option is selected', async () => {
     renderWithProviders(<WorkspacePage />);
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
     await waitFor(() => {
@@ -204,12 +232,7 @@ describe('WorkspacePage', () => {
     const courseOption = within(dialog).getByRole('button', { name: /Course/ });
     fireEvent.click(courseOption);
     await waitFor(() => {
-      expect(mockToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Starting Editor',
-          description: expect.stringContaining('course'),
-        })
-      );
+      expect(screen.getByRole('dialog', { name: 'Enter content name' })).toBeInTheDocument();
     });
     expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
   });

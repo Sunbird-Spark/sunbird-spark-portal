@@ -42,6 +42,8 @@ interface UseWorkspaceOptions {
   sortBy: SortOption;
   typeFilter: ContentTypeFilter;
   userRole?: 'creator' | 'reviewer';
+  /** Organisation channel ID — used to scope reviewer content to the same org. */
+  orgId?: string;
   enabled?: boolean;
 }
 
@@ -60,22 +62,31 @@ export function useWorkspace({
   sortBy,
   typeFilter,
   userRole = 'creator',
+  orgId,
   enabled = true,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create', 'uploads', 'collaborations'].includes(activeTab);
   const queryEnabled = enabled && !!userId && isContentTab;
 
-  // Whether this tab shows the current user's own content
-  const isOwnContentTab = !['pending-review'].includes(activeTab) || userRole === 'creator';
+  // Whether the user is operating in reviewer mode (affects counts & content filters).
+  // For the counts query we use `userRole` alone so the query fires with correct
+  // filters even before the activeTab state has settled after a role switch.
+  const isReviewerMode = userRole === 'reviewer';
+
+  // Whether this specific tab shows the current user's own content.
+  // Reviewer tabs (pending-review, my-published) show other people's content.
+  const isReviewerTab = isReviewerMode && ['pending-review', 'my-published'].includes(activeTab);
+  const isOwnContentTab = !isReviewerTab;
 
   // ── Counts query (runs once, shared across tabs) ──────────────────────
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId],
+    queryKey: ['workspace-counts', userId, userRole, orgId],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
           ...(isOwnContentTab ? { createdBy: userId ?? '' } : {}),
+          ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
           status: [...WORKSPACE_STATUS_FILTER],
           primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
         },
@@ -107,11 +118,12 @@ export function useWorkspace({
     getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: {
           ...(isOwnContentTab ? { createdBy: userId ?? '' } : {}),
+          ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
           status: statusFilter,
           primaryCategory: primaryCategoryFilter,
         },
@@ -148,13 +160,23 @@ export function useWorkspace({
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const refetchCounts = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
+  const refetchCounts = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
+    await queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' });
   }, [queryClient, userId]);
 
-  const refetchAll = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
-    void queryClient.invalidateQueries({ queryKey: ['workspace-content', userId] });
+  const refetchAll = useCallback(async () => {
+    // Invalidate + immediately refetch active queries so callers can await
+    // completion and safely reflect updated list/counts after actions like delete.
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] }),
+      queryClient.invalidateQueries({ queryKey: ['workspace-content', userId] }),
+    ]);
+
+    await Promise.all([
+      queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' }),
+      queryClient.refetchQueries({ queryKey: ['workspace-content', userId], type: 'active' }),
+    ]);
   }, [queryClient, userId]);
 
   return {
@@ -164,6 +186,7 @@ export function useWorkspace({
     isLoading: contentQuery.isLoading,
     isLoadingMore: isFetchingNextPage,
     isCountsLoading: countsQuery.isLoading,
+    isRefreshing: contentQuery.isRefetching && !contentQuery.isLoading && !isFetchingNextPage,
     error: contentQuery.error,
     hasMore: !!hasNextPage,
     loadMore,
