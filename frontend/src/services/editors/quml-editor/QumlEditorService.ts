@@ -1,20 +1,83 @@
-import '../jquery-setup'; // Must be first - sets up jQuery globally
+import jQuery from '../jquery-setup'; // Must be first - sets up jQuery globally
 import 'jquery-ui-dist/jquery-ui';
 import { QumlEditorConfig, QumlEditorContextOverrides, QumlEditorEvent, QuestionSetMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import { SystemSettingService } from '../../SystemSettingService';
 
 export class QumlEditorService {
   private static stylesLoaded = false;
+  private static scriptLoaded = false;
+  private static scriptLoading?: Promise<void>;
   private static dependenciesLoaded = false;
   private static dependenciesLoading?: Promise<void>;
+  private static fancytreeJQueryRef: any;
+  private systemSettingService = new SystemSettingService();
 
   private orgService = new OrganizationService();
   private eventHandlers = new WeakMap<HTMLElement, {
     editor: (event: Event) => void;
     telemetry?: (event: Event) => void;
   }>();
+
+  private getGlobalJQuery(): any {
+    return (globalThis as any).$ || (globalThis as any).jQuery;
+  }
+
+  private setGlobalJQuery(jq: any): void {
+    if (!jq) return;
+    (globalThis as any).$ = jq;
+    (globalThis as any).jQuery = jq;
+  }
+
+  private captureFancyTreeJQueryRef(): void {
+    const jq = this.getGlobalJQuery();
+    if (jq?.fn?.fancytree) {
+      QumlEditorService.fancytreeJQueryRef = jq;
+    }
+  }
+
+  private restoreFancytreeJQuery(): void {
+    const jqCurrent = this.getGlobalJQuery();
+    if (jqCurrent?.fn?.fancytree) {
+      QumlEditorService.fancytreeJQueryRef = jqCurrent;
+      return;
+    }
+
+    if (QumlEditorService.fancytreeJQueryRef?.fn?.fancytree) {
+      this.setGlobalJQuery(QumlEditorService.fancytreeJQueryRef);
+    }
+  }
+
+  private loadScript(): Promise<void> {
+    if (QumlEditorService.scriptLoaded || customElements.get('lib-questionset-editor')) {
+      QumlEditorService.scriptLoaded = true;
+      return Promise.resolve();
+    }
+
+    if (QumlEditorService.scriptLoading) {
+      return QumlEditorService.scriptLoading;
+    }
+
+    QumlEditorService.scriptLoading = new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/assets/quml-editor/sunbird-questionset-editor.js';
+      script.setAttribute('data-quml-editor-script', 'true');
+      script.onload = () => {
+        QumlEditorService.scriptLoaded = true;
+        QumlEditorService.scriptLoading = undefined;
+        resolve();
+      };
+      script.onerror = () => {
+        QumlEditorService.scriptLoading = undefined;
+        reject(new Error('Failed to load sunbird-questionset-editor script'));
+      };
+      document.body.appendChild(script);
+    });
+
+    return QumlEditorService.scriptLoading;
+  }
 
   async initializeDependencies(): Promise<void> {
     // Return early if already loaded
@@ -30,11 +93,12 @@ export class QumlEditorService {
     // Create loading promise to prevent concurrent initialization
     QumlEditorService.dependenciesLoading = (async () => {
       try {
-        const $global = (globalThis as any).$;
+        const jq = this.getGlobalJQuery() || jQuery;
+        this.setGlobalJQuery(jq);
 
         // jQuery and jQuery UI are now loaded via static imports
         // Load FancyTree modules from npm
-        if (!$global.fn?.fancytree) {
+        if (!jq?.fn?.fancytree) {
           // Load all FancyTree modules in sequence
           await import('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
           await import('jquery.fancytree/dist/modules/jquery.fancytree');
@@ -43,14 +107,23 @@ export class QumlEditorService {
           await import('jquery.fancytree/dist/modules/jquery.fancytree.filter');
           await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph');
           await import('jquery.fancytree/dist/modules/jquery.fancytree.table');
-
-          // Verify FancyTree attached to jQuery
-          if (!$global.fn?.fancytree) {
-            throw new Error('FancyTree failed to attach to jQuery');
-          }
         }
 
-        this.loadAssets();
+        // Verify FancyTree attached to the active global jQuery.
+        this.captureFancyTreeJQueryRef();
+        if (!QumlEditorService.fancytreeJQueryRef?.fn?.fancytree) {
+          throw new Error('FancyTree failed to attach to jQuery');
+        }
+
+        await this.loadScript();
+
+        // Questionset editor bundle can overwrite global jQuery; restore FancyTree-capable instance.
+        this.restoreFancytreeJQuery();
+        this.captureFancyTreeJQueryRef();
+        if (!QumlEditorService.fancytreeJQueryRef?.fn?.fancytree) {
+          throw new Error('FancyTree became unavailable after loading questionset editor script');
+        }
+
         QumlEditorService.dependenciesLoaded = true;
       } catch (error) {
         // Reset loading promise on failure so retry is possible
@@ -78,13 +151,23 @@ export class QumlEditorService {
 
     let channel = '';
     try {
-      const orgResponse = await this.orgService.search({ filters: { isTenant: true } });
+      const filters: Record<string, any> = { isTenant: true };
+      try {
+        const settingResponse = await this.systemSettingService.read('default_channel');
+        const slugValue = settingResponse?.data?.response?.value;
+        if (slugValue) {
+          filters.slug = slugValue;
+        }
+      } catch (err) {
+        console.warn('Failed to fetch default channel system setting:', err);
+      }
+      const orgResponse = await this.orgService.search({ filters });
       const org = orgResponse?.data?.response?.content?.[0];
-      if (org?.channel) {
-        channel = org.channel;
+      if (org) {
+        channel = org.hashTagId || org.identifier;
       }
     } catch (error) {
-      console.warn('Failed to fetch channel from org service:', error);
+      console.warn('Failed to fetch channel info:', error);
     }
 
     const pdata = await appCoreService.getPData();
@@ -126,7 +209,7 @@ export class QumlEditorService {
     };
   }
 
-  private loadAssets(): void {
+  loadAssets(): void {
     if (QumlEditorService.stylesLoaded) return;
 
     const styleLink = document.createElement('link');
@@ -136,6 +219,14 @@ export class QumlEditorService {
     document.head.appendChild(styleLink);
 
     QumlEditorService.stylesLoaded = true;
+  }
+
+  removeAssets(): void {
+    const link = document.querySelector('link[data-quml-editor-styles]');
+    if (link) {
+      link.remove();
+    }
+    QumlEditorService.stylesLoaded = false;
   }
 
   createElement(config: QumlEditorConfig): HTMLElement {

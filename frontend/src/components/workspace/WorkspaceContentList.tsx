@@ -8,7 +8,7 @@ import {
 } from "@/components/common/DropdownMenu";
 import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
 import {
   CONTENT_TYPE_ICONS,
   CONTENT_TYPE_COLORS,
@@ -18,6 +18,7 @@ import {
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
+  userRole: UserRole;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
@@ -25,6 +26,7 @@ interface WorkspaceContentListProps {
 
 const WorkspaceContentList = ({
   items,
+  userRole,
   onEdit,
   onDelete,
   onView,
@@ -47,7 +49,7 @@ const WorkspaceContentList = ({
           const status = STATUS_CONFIG[item.status];
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
-          const { showView, showEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
+          const { showView, showEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
 
           return (
             <div

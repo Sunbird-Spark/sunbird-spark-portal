@@ -37,10 +37,14 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
 
   let mockElement: HTMLElement;
   let mockServiceInstance: any;
+  let mockLoadAssets: ReturnType<typeof vi.fn>;
+  let mockRemoveAssets: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockElement = document.createElement('lib-questionset-editor');
+    mockLoadAssets = vi.fn();
+    mockRemoveAssets = vi.fn();
 
     mockServiceInstance = {
       initializeDependencies: vi.fn().mockResolvedValue(undefined),
@@ -48,6 +52,8 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
       createElement: vi.fn().mockReturnValue(mockElement),
       attachEventListeners: vi.fn(),
       removeEventListeners: vi.fn(),
+      loadAssets: mockLoadAssets,
+      removeAssets: mockRemoveAssets,
     };
 
     (QumlEditorService as any).mockImplementation(function() {
@@ -60,6 +66,8 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
     (globalThis as any).$ = mockJQuery;
 
     render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+
+    expect(mockLoadAssets).toHaveBeenCalledTimes(1);
 
     await waitFor(() => {
       expect(mockServiceInstance.initializeDependencies).toHaveBeenCalled();

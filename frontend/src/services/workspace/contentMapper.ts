@@ -29,5 +29,6 @@ export function mapContentToWorkspaceItem(item: ContentSearchItem): WorkspaceIte
     updatedAt: item.lastUpdatedOn ?? item.createdOn ?? null,
     author: item.creator ?? item.createdBy ?? 'Unknown',
     primaryCategory: item.primaryCategory ?? '',
+    contentType: item.contentType ?? '',
   };
 }

@@ -6,7 +6,29 @@ import { MemoryRouter } from 'react-router-dom';
 import WorkspacePage from './WorkspacePage';
 import type { UseWorkspaceReturn } from '@/types/workspaceTypes';
 
+const { mockNavigate, mockContentCreate } = vi.hoisted(() => ({
+  mockNavigate: vi.fn(),
+  mockContentCreate: vi.fn(),
+}));
+
 const mockUseWorkspace = vi.fn<() => UseWorkspaceReturn>();
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+vi.mock('@/services/ContentService', () => ({
+  ContentService: class MockContentService {
+    contentCreate(...args: unknown[]) {
+      return mockContentCreate(...args);
+    }
+    contentRetire = vi.fn();
+  },
+}));
 
 vi.mock('@/hooks/useWorkspace', () => ({
   useWorkspace: (...args: unknown[]) => mockUseWorkspace(),
@@ -141,6 +163,10 @@ function renderWithProviders(ui: React.ReactElement) {
 
 describe('WorkspacePage', () => {
   beforeEach(() => {
+    mockNavigate.mockReset();
+    mockContentCreate.mockReset();
+    mockContentCreate.mockResolvedValue({ data: { identifier: 'do_qs_123' } });
+
     mockUseIsMobile.mockReturnValue(false);
     mockUseWorkspace.mockReturnValue({
       contents: [],
@@ -255,5 +281,41 @@ describe('WorkspacePage', () => {
     renderWithProviders(<WorkspacePage />);
     fireEvent.click(screen.getByRole('button', { name: 'Create view' }));
     expect(screen.getByText('Collection Editor')).toBeInTheDocument();
+  });
+
+  it('creates question set from create options and navigates to quml editor', async () => {
+    renderWithProviders(<WorkspacePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    fireEvent.click(within(dialog).getByRole('button', { name: /Question Set/ }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Enter content name' })).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Untitled Content'), {
+      target: { value: 'My Question Set' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+
+    await waitFor(() => {
+      expect(mockContentCreate).toHaveBeenCalledWith(
+        'My Question Set',
+        expect.objectContaining({
+          mimeType: 'application/vnd.sunbird.questionset',
+          primaryCategory: 'Practice Question Set',
+        }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/edit/quml-editor/do_qs_123');
+    });
   });
 });

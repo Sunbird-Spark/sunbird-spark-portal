@@ -34,4 +34,29 @@ describe('workspaceItemActions', () => {
       showDelete: false,
     });
   });
+
+  it('hides view for creator when status is review', () => {
+    const result = getWorkspaceItemActionVisibility('review', 'creator');
+    expect(result.showView).toBe(false);
+    expect(result.showEdit).toBe(false);
+    expect(result.showDelete).toBe(false);
+  });
+
+  it('shows view for creator when status is published', () => {
+    const result = getWorkspaceItemActionVisibility('published', 'creator');
+    expect(result.showView).toBe(true);
+    expect(result.showEdit).toBe(false);
+  });
+
+  it('hides view and edit for reviewer when status is published', () => {
+    const result = getWorkspaceItemActionVisibility('published', 'reviewer');
+    expect(result.showView).toBe(false);
+    expect(result.showEdit).toBe(false);
+  });
+
+  it('shows view for reviewer when status is review', () => {
+    const result = getWorkspaceItemActionVisibility('review', 'reviewer');
+    expect(result.showView).toBe(true);
+    expect(result.showEdit).toBe(false);
+  });
 });
