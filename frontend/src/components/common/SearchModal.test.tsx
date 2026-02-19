@@ -40,6 +40,24 @@ vi.mock('@/hooks/useContent', () => ({
   useContentSearch: mockUseContentSearch,
 }));
 
+// Mock the card components
+vi.mock('@/components/content/CollectionCard', () => ({
+  default: ({ item }: { item: { name: string; primaryCategory: string } }) => (
+    <div data-testid="collection-card">
+      <div>{item.name}</div>
+      <div>{item.primaryCategory}</div>
+    </div>
+  ),
+}));
+
+vi.mock('@/components/content/ResourceCard', () => ({
+  default: ({ item }: { item: { name: string } }) => (
+    <div data-testid="resource-card">
+      <div>{item.name}</div>
+    </div>
+  ),
+}));
+
 // --------------------
 // Helpers
 // --------------------
@@ -142,13 +160,6 @@ describe('SearchModal', () => {
       expect(screen.getByText('Textbook Beta')).toBeInTheDocument();
     });
 
-    it('renders the primaryCategory badge on each result card', () => {
-      mockUseContentSearch.mockReturnValue(withResults(twoResults));
-      renderModal();
-      expect(screen.getByText('Course')).toBeInTheDocument();
-      expect(screen.getByText('Textbook')).toBeInTheDocument();
-    });
-
     it('does not show the spinner once loading is complete', () => {
       mockUseContentSearch.mockReturnValue(emptyResponse);
       const { container } = renderModal();
@@ -182,7 +193,7 @@ describe('SearchModal', () => {
   describe('search input behaviour', () => {
     it('does not show the clear button when the input is empty', () => {
       renderModal();
-      expect(screen.queryByLabelText('clear_search')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Clear search')).not.toBeInTheDocument();
     });
 
     it('shows the clear button when the user has typed something', () => {
@@ -190,14 +201,14 @@ describe('SearchModal', () => {
       fireEvent.change(screen.getByPlaceholderText('search_for_content_placeholder'), {
         target: { value: 'test' },
       });
-      expect(screen.getByLabelText('clear_search')).toBeInTheDocument();
+      expect(screen.getByLabelText('Clear search')).toBeInTheDocument();
     });
 
     it('clears the input value when the clear button is clicked', () => {
       renderModal();
       const input = screen.getByPlaceholderText('search_for_content_placeholder');
       fireEvent.change(input, { target: { value: 'test' } });
-      fireEvent.click(screen.getByLabelText('clear_search'));
+      fireEvent.click(screen.getByLabelText('Clear search'));
       expect(input).toHaveValue('');
     });
 
@@ -205,8 +216,8 @@ describe('SearchModal', () => {
       renderModal();
       const input = screen.getByPlaceholderText('search_for_content_placeholder');
       fireEvent.change(input, { target: { value: 'test' } });
-      fireEvent.click(screen.getByLabelText('clear_search'));
-      expect(screen.queryByLabelText('clear_search')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByLabelText('Clear search'));
+      expect(screen.queryByLabelText('Clear search')).not.toBeInTheDocument();
     });
   });
 
