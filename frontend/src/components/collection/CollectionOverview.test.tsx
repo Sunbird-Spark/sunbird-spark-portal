@@ -13,6 +13,20 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
+vi.mock('@/components/players', () => ({
+  ContentPlayer: ({ mimeType }: { mimeType: string }) => (
+    <div data-testid="content-player" data-mime-type={mimeType}>Content Player</div>
+  ),
+}));
+
+vi.mock('@/components/common/PageLoader', () => ({
+  default: ({ message, error }: { message?: string; error?: string }) => (
+    <div data-testid="page-loader" data-error={error ?? ''}>
+      {message || error}
+    </div>
+  ),
+}));
+
 const mockCollectionData: CollectionData = {
   id: 'col-1',
   title: 'Test Course Title',
@@ -34,54 +48,152 @@ const mockCollectionData: CollectionData = {
   ],
 };
 
+const mockPlayerMetadata = {
+  identifier: 'content-1',
+  name: 'Test Video',
+  mimeType: 'video/mp4',
+  artifactUrl: 'https://example.com/video.mp4',
+};
+
 describe('CollectionOverview', () => {
-  it('renders collection image with correct alt text', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    const img = screen.getByRole('img', { name: mockCollectionData.title });
-    expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute('src', mockCollectionData.image);
-  });
+  describe('player area — when no contentId is provided', () => {
+    it('shows error PageLoader when contentId is absent', () => {
+      render(<CollectionOverview collectionData={mockCollectionData} />);
+      const loader = screen.getByTestId('page-loader');
+      expect(loader).toBeInTheDocument();
+      expect(loader).toHaveAttribute('data-error', 'noContentFound');
+    });
 
-  it('renders first module title as unit label when modules exist', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    expect(screen.getByText('Introduction Unit')).toBeInTheDocument();
-  });
-
-  it('does not render unit label when modules array is empty', () => {
-    const dataWithoutModules = { ...mockCollectionData, modules: [] };
-    render(<CollectionOverview collectionData={dataWithoutModules} />);
-    expect(screen.queryByText('Introduction Unit')).not.toBeInTheDocument();
-  });
-
-  it('renders overview section with i18n key', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    expect(screen.getByText('courseDetails.overview')).toBeInTheDocument();
-  });
-
-  it('renders units and lessons stats', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    expect(screen.getByText('courseDetails.units')).toBeInTheDocument();
-    expect(screen.getByText('contentStats.lessons')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('15')).toBeInTheDocument();
-  });
-
-  it('renders description', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
-  });
-
-  it('renders best suited for section with all roles', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    expect(screen.getByText('courseDetails.suitedFor')).toBeInTheDocument();
-    mockCollectionData.audience.forEach((role) => {
-      expect(screen.getByText(role)).toBeInTheDocument();
+    it('does not render ContentPlayer when contentId is absent', () => {
+      render(<CollectionOverview collectionData={mockCollectionData} />);
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
     });
   });
 
-  it('renders play button', () => {
-    render(<CollectionOverview collectionData={mockCollectionData} />);
-    const playButton = screen.getByRole('button');
-    expect(playButton).toBeInTheDocument();
+  describe('player area — when contentId is provided', () => {
+    it('shows loading PageLoader when playerIsLoading is true', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerIsLoading={true}
+        />
+      );
+      const loader = screen.getByTestId('page-loader');
+      expect(loader).toBeInTheDocument();
+      expect(loader).toHaveTextContent('loading');
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+
+    it('shows error message when playerError is set', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerIsLoading={false}
+          playerError={new Error('Failed to load content')}
+        />
+      );
+      expect(screen.getByText('Failed to load content')).toBeInTheDocument();
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+
+    it('renders ContentPlayer with correct mimeType when playerMetadata is available', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerIsLoading={false}
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      const player = screen.getByTestId('content-player');
+      expect(player).toBeInTheDocument();
+      expect(player).toHaveAttribute('data-mime-type', 'video/mp4');
+    });
+
+    it('does not render ContentPlayer when playerMetadata is undefined', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerIsLoading={false}
+          playerMetadata={undefined}
+        />
+      );
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+
+    it('does not render ContentPlayer while loading even if stale metadata is present', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerIsLoading={true}
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+      expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+    });
+  });
+
+  // Course overview section is always visible regardless of contentId / player state
+  describe('course overview section', () => {
+    it('renders overview heading', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.overview')).toBeInTheDocument();
+    });
+
+    it('renders units and lessons stats', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.units')).toBeInTheDocument();
+      expect(screen.getByText('contentStats.lessons')).toBeInTheDocument();
+      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByText('15')).toBeInTheDocument();
+    });
+
+    it('renders description', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
+    });
+
+    it('renders best suited for section with all audience roles', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.suitedFor')).toBeInTheDocument();
+      mockCollectionData.audience.forEach((role) => {
+        expect(screen.getByText(role)).toBeInTheDocument();
+      });
+    });
+
+    it('renders overview section even when no contentId is provided', () => {
+      render(<CollectionOverview collectionData={mockCollectionData} />);
+      expect(screen.getByText('courseDetails.overview')).toBeInTheDocument();
+      expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
+    });
   });
 });
