@@ -28,7 +28,6 @@ const defaultItem = {
   updatedAt: '2024-01-02',
   author: 'user-1',
   primaryCategory: 'Learning Resource',
-  contentType: 'Content',
 };
 
 describe('WorkspaceContentCard', () => {
