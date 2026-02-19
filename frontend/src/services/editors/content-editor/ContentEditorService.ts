@@ -63,7 +63,7 @@ export class ContentEditorService {
 
     const config = {
       baseURL: '',
-      apislug: '/portal',
+      apislug: '/action',
       build_number: '1.0',
       pluginRepo: '/content-plugins',
       aws_s3_urls: [],
