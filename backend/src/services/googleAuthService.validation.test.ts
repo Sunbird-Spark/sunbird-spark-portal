@@ -2,19 +2,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
 
 // Use vi.hoisted to create mocks that can be used in vi.mock factories
-const { 
-    mockObtainFromClientCredentials,
-    mockStoreGrant,
-    mockAuthenticated
+const {
+    mockClientCredentialsGrant,
+    mockGetGoogleOIDCConfig,
+    mockDecodeJwtPayload,
+    mockSaveSession
 } = vi.hoisted(() => {
-    const mockObtainFromClientCredentials = vi.fn();
-    const mockStoreGrant = vi.fn();
-    const mockAuthenticated = vi.fn();
-    
+    const mockClientCredentialsGrant = vi.fn();
+    const mockGetGoogleOIDCConfig = vi.fn().mockResolvedValue({});
+    const mockDecodeJwtPayload = vi.fn().mockReturnValue({ exp: 1234567890 });
+    const mockSaveSession = vi.fn().mockResolvedValue(undefined);
+
     return {
-        mockObtainFromClientCredentials,
-        mockStoreGrant,
-        mockAuthenticated
+        mockClientCredentialsGrant,
+        mockGetGoogleOIDCConfig,
+        mockDecodeJwtPayload,
+        mockSaveSession
     };
 });
 
@@ -30,14 +33,17 @@ vi.mock('google-auth-library', () => ({
     OAuth2Client: vi.fn()
 }));
 
-vi.mock('../auth/keycloakManager.js', () => ({
-    getKeycloakClient: vi.fn(() => ({
-        grantManager: {
-            obtainFromClientCredentials: mockObtainFromClientCredentials
-        },
-        storeGrant: mockStoreGrant,
-        authenticated: mockAuthenticated
-    }))
+vi.mock('../auth/oidcProvider.js', () => ({
+    getGoogleOIDCConfig: mockGetGoogleOIDCConfig,
+    decodeJwtPayload: mockDecodeJwtPayload
+}));
+
+vi.mock('openid-client', () => ({
+    clientCredentialsGrant: mockClientCredentialsGrant
+}));
+
+vi.mock('../utils/sessionUtils.js', () => ({
+    saveSession: mockSaveSession
 }));
 
 vi.mock('../utils/sessionStore.js', () => ({
@@ -62,11 +68,11 @@ vi.mock('../config/env.js', () => ({
     }
 }));
 
-import { 
-    validateOAuthSession, 
-    validateOAuthCallback, 
+import {
+    validateOAuthSession,
+    validateOAuthCallback,
     markSessionAsUsed,
-    handleUserAuthentication 
+    handleUserAuthentication
 } from './googleAuthService.js';
 
 describe('GoogleAuthService - Validation & Helpers', () => {
@@ -75,9 +81,10 @@ describe('GoogleAuthService - Validation & Helpers', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        mockObtainFromClientCredentials.mockReset();
-        mockStoreGrant.mockReset();
-        mockAuthenticated.mockReset();
+        mockClientCredentialsGrant.mockReset();
+        mockGetGoogleOIDCConfig.mockResolvedValue({});
+        mockDecodeJwtPayload.mockReturnValue({ exp: 1234567890 });
+        mockSaveSession.mockResolvedValue(undefined);
 
         mockRequest = {
             get: vi.fn((header: string) => {
@@ -85,7 +92,7 @@ describe('GoogleAuthService - Validation & Helpers', () => {
                 return undefined;
             }) as any,
             session: {} as any,
-            kauth: undefined
+            oidc: undefined
         };
 
         mockResponse = {
@@ -168,8 +175,13 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             vi.clearAllMocks();
             mockGetUserByEmail.mockReset();
             mockCreateUserWithEmail.mockReset();
-            mockObtainFromClientCredentials.mockResolvedValue({ access_token: { token: 'test-access-token', content: { exp: 1234567890 } } });
-            mockAuthenticated.mockResolvedValue(undefined);
+            mockClientCredentialsGrant.mockResolvedValue({
+                access_token: 'test-access-token',
+                refresh_token: 'test-refresh-token',
+                id_token: 'test-id-token'
+            });
+            mockDecodeJwtPayload.mockReturnValue({ exp: 1234567890 });
+            mockSaveSession.mockResolvedValue(undefined);
             vi.doMock('./userService.js', () => ({ getUserByEmail: mockGetUserByEmail, createUserWithEmail: mockCreateUserWithEmail }));
         });
 
@@ -203,7 +215,7 @@ describe('GoogleAuthService - Validation & Helpers', () => {
 
             // Session creation error
             mockGetUserByEmail.mockResolvedValue({ email: 'test@example.com' });
-            mockObtainFromClientCredentials.mockRejectedValue(new Error('Session error'));
+            mockClientCredentialsGrant.mockRejectedValue(new Error('Session error'));
             await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request, mockResponse as Response)).rejects.toThrow('SESSION_CREATION_FAILED');
         });
     });

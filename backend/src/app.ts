@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { keycloak } from './auth/keycloakProvider.js';
+import { oidcSession, requireAuth } from './auth/oidcMiddleware.js';
 import formRoutes from './routes/formsRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
@@ -42,15 +42,15 @@ app.use('/portal', portalAuthRoutes);
 // Apply anonymous session middleware to API routes (once per route tree)
 
 app.use('/data/v1/form', formRoutes);
-app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), authRoutes);
+app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), authRoutes);
 app.use('/google', googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Content Editor Proxy Routes (serves /action/*, /content-plugins/*, /plugins/*, etc.)
-// keycloak.middleware() deserializes the session grant into req.kauth so that
+// oidcSession() deserializes the session tokens into req.oidc so that
 // decorateRequestHeaders can read the user's access token for upstream auth.
-app.use('/', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware(), knowlgMwProxyRoutes);
+app.use('/', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), knowlgMwProxyRoutes);
 
 // Apply anonymous session middleware to portal routes (once per route tree)
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
@@ -61,7 +61,7 @@ app.use('/portal', portalProxyRoutes);
 app.use('/action', sessionMiddleware);
 
 // Portal Proxy Routes (authenticated only)
-app.all('/action/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), kongProxy);
+app.all('/action/*rest', oidcSession(), requireAuth(), kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 

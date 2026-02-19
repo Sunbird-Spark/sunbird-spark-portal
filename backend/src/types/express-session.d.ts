@@ -21,7 +21,6 @@ declare module 'express-session' {
         userAccessToken?: string;
         roles?: string[];
         permissions?: string[];
-        keycloakToken?: string;
         rootOrgId?: string;
         sessionEvents?: string[];
         realm?: string;
@@ -47,17 +46,15 @@ declare module 'express-session' {
         managedToken?: string;
         logSession?: boolean;
         deviceId?: string;
-        'keycloak-token'?: {
+        'oidc-tokens'?: {
             access_token?: string;
             refresh_token?: string;
             id_token?: string;
-            expires_in?: number;
-            refresh_expires_in?: number;
-            token_type?: string;
-            session_state?: string;
-            scope?: string;
+            expires_at?: number;
             [key: string]: any;
         };
+        oidcCodeVerifier?: string;
+        oidcState?: string;
         auth_redirect_uri?: string;
         googleOAuth?: {
             nonce: string;
