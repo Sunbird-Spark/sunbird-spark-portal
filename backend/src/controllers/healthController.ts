@@ -1,7 +1,32 @@
 import { Request, Response as ExpressResponse } from 'express';
-import { ysqlPool } from '../utils/sessionStore.js';
+import { Pool } from '@yugabytedb/pg';
+import { envConfig } from '../config/env.js';
 import { Response } from '../models/Response.js';
 import { logger } from '../utils/logger.js';
+
+let healthPool: Pool | null = null;
+
+const getHealthPool = (): Pool => {
+    if (!healthPool) {
+        healthPool = new Pool({
+            host: envConfig.SUNBIRD_YUGABYTE_HOST,
+            port: envConfig.SUNBIRD_YUGABYTE_PORT,
+            database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
+            user: envConfig.SUNBIRD_YUGABYTE_USER,
+            password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
+            // Use a very small pool for health checks to minimize connection impact
+            max: 1,
+        });
+
+        healthPool.on('error', (err: Error) => {
+            const details = err instanceof Error
+                ? (err.stack || err.message)
+                : String(err);
+            logger.error(`YugabyteDB Health Pool Error: ${details}`);
+        });
+    }
+    return healthPool;
+};
 
 /**
  * Controller for health check operations.
@@ -9,10 +34,8 @@ import { logger } from '../utils/logger.js';
  */
 const checkYugabyteHealth = async () => {
     try {
-        if (!ysqlPool) {
-            throw new Error('YugabyteDB pool not initialized');
-        }
-        await ysqlPool.query('SELECT 1');
+        const pool = getHealthPool();
+        await pool.query('SELECT 1');
         return {
             name: 'YugabyteDB',
             healthy: true,
