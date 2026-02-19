@@ -17,8 +17,10 @@ interface SearchModalProps {
 
 const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 400);
+  const debouncedQuery = useDebounce(query, 600);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
   const { t } = useAppI18n();
   const navigate = useNavigate();
 
@@ -33,21 +35,51 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
   const results: ContentSearchItem[] = data?.data?.content ?? [];
 
+  // Store the previously focused element and restore focus on close
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement;
+      inputRef.current?.focus();
+    } else {
+      setQuery("");
+      previousActiveElement.current?.focus();
     }
   }, [isOpen]);
 
+  // Focus trap implementation
   useEffect(() => {
-    if (!isOpen) setQuery("");
-  }, [isOpen]);
+    if (!isOpen || !dialogRef.current) return;
 
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      // Focus trap: keep focus within the dialog
+      if (e.key === "Tab") {
+        const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        
+        if (!focusableElements || focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (!firstElement || !lastElement) return;
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
     };
-    if (isOpen) document.addEventListener("keydown", handleKeyDown);
+
+    document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
@@ -63,7 +95,13 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
     : t("recommended");
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col">
+    <div 
+      ref={dialogRef}
+      className="fixed inset-0 z-50 flex flex-col"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("search_for_content_placeholder")}
+    >
       {/* White search panel */}
       <div className="bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
         <div className="container mx-auto px-4 lg:px-[3.75rem] pt-5 pb-6">
@@ -145,7 +183,11 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
       </div>
 
       {/* Dimmed backdrop over remaining page */}
-      <div className="flex-1 bg-black/20" onClick={onClose} />
+      <div 
+        className="flex-1 bg-black/20" 
+        onClick={onClose}
+        aria-hidden="true"
+      />
     </div>
   );
 };
