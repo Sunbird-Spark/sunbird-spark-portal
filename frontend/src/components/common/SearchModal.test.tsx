@@ -23,7 +23,12 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => key,
+    t: (key: string, params?: Record<string, string>) => {
+      if (key === 'results_for' && params?.query) {
+        return `Results for "${params.query}"`;
+      }
+      return key;
+    },
   }),
 }));
 
@@ -127,7 +132,7 @@ describe('SearchModal', () => {
     it('shows "No results found." when the API returns an empty array', () => {
       mockUseContentSearch.mockReturnValue(emptyResponse);
       renderModal();
-      expect(screen.getByText('No results found.')).toBeInTheDocument();
+      expect(screen.getByText('no_results_found')).toBeInTheDocument();
     });
 
     it('renders a card for each result returned by the API', () => {
@@ -154,7 +159,7 @@ describe('SearchModal', () => {
   describe('section title', () => {
     it('shows "Recommended" when no query has been typed', () => {
       renderModal();
-      expect(screen.getByRole('heading', { name: 'Recommended' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'recommended' })).toBeInTheDocument();
     });
 
     it('shows \'Results for "..."\' when the user types a query', () => {
@@ -170,14 +175,14 @@ describe('SearchModal', () => {
       const input = screen.getByPlaceholderText('search_for_content_placeholder');
       fireEvent.change(input, { target: { value: 'Eng' } });
       fireEvent.change(input, { target: { value: '' } });
-      expect(screen.getByRole('heading', { name: 'Recommended' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'recommended' })).toBeInTheDocument();
     });
   });
 
   describe('search input behaviour', () => {
     it('does not show the clear button when the input is empty', () => {
       renderModal();
-      expect(screen.queryByLabelText('Clear search')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('clear_search')).not.toBeInTheDocument();
     });
 
     it('shows the clear button when the user has typed something', () => {
@@ -185,14 +190,14 @@ describe('SearchModal', () => {
       fireEvent.change(screen.getByPlaceholderText('search_for_content_placeholder'), {
         target: { value: 'test' },
       });
-      expect(screen.getByLabelText('Clear search')).toBeInTheDocument();
+      expect(screen.getByLabelText('clear_search')).toBeInTheDocument();
     });
 
     it('clears the input value when the clear button is clicked', () => {
       renderModal();
       const input = screen.getByPlaceholderText('search_for_content_placeholder');
       fireEvent.change(input, { target: { value: 'test' } });
-      fireEvent.click(screen.getByLabelText('Clear search'));
+      fireEvent.click(screen.getByLabelText('clear_search'));
       expect(input).toHaveValue('');
     });
 
@@ -200,8 +205,8 @@ describe('SearchModal', () => {
       renderModal();
       const input = screen.getByPlaceholderText('search_for_content_placeholder');
       fireEvent.change(input, { target: { value: 'test' } });
-      fireEvent.click(screen.getByLabelText('Clear search'));
-      expect(screen.queryByLabelText('Clear search')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByLabelText('clear_search'));
+      expect(screen.queryByLabelText('clear_search')).not.toBeInTheDocument();
     });
   });
 
@@ -252,7 +257,7 @@ describe('SearchModal', () => {
 
     it('is visible when results are present', () => {
       renderModal();
-      expect(screen.getByText('View All Results')).toBeInTheDocument();
+      expect(screen.getByText('view_all_results')).toBeInTheDocument();
     });
 
     it('navigates to /explore with the encoded query on click', () => {
@@ -260,20 +265,20 @@ describe('SearchModal', () => {
       fireEvent.change(screen.getByPlaceholderText('search_for_content_placeholder'), {
         target: { value: 'machine learning' },
       });
-      fireEvent.click(screen.getByText('View All Results'));
+      fireEvent.click(screen.getByText('view_all_results'));
       expect(mockNavigate).toHaveBeenCalledWith('/explore?q=machine%20learning');
     });
 
     it('calls onClose when "View All Results" is clicked', () => {
       renderModal();
-      fireEvent.click(screen.getByText('View All Results'));
+      fireEvent.click(screen.getByText('view_all_results'));
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
     it('is not visible when results are empty', () => {
       mockUseContentSearch.mockReturnValue(emptyResponse);
       renderModal();
-      expect(screen.queryByText('View All Results')).not.toBeInTheDocument();
+      expect(screen.queryByText('view_all_results')).not.toBeInTheDocument();
     });
   });
 
