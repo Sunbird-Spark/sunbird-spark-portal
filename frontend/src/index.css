@@ -791,7 +791,6 @@
 
   .collection-player-wrapper {
     @apply p-4;
-    box-shadow: 2px 2px 34px 0px #00000066;
   }
 
   .collection-player-loading {
