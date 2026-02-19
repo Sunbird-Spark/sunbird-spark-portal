@@ -108,14 +108,19 @@ export default function WorkspacePageContent({
     );
   }
 
+  const pageTitleMap: Record<string, { title: string; desc: string }> = {
+    'pending-review': { title: "No contents to review", desc: "There are no contents pending your review at this time." },
+    'my-published': { title: "No published contents", desc: "You have not published any contents yet." },
+  };
+
   // Empty state
   if (filteredItems.length === 0) {
-    const isReviewerTab = userRole === 'reviewer' && ['pending-review', 'my-published'].includes(activeView);
-    if (isReviewerTab) {
+    if (userRole === 'reviewer' && pageTitleMap[activeView]) {
+      const { title, desc } = pageTitleMap[activeView];
       return (
         <EmptyState
-          title="No contents to review"
-          description="There are no contents pending your review at this time."
+          title={title}
+          description={desc}
           variant="default"
         />
       );
