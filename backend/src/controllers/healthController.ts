@@ -16,7 +16,7 @@ const getHealthPool = (): Pool => {
             password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
         });
 
-        healthPool.on('error', (err) => {
+        healthPool.on('error', (err: Error) => {
             logger.error('YugabyteDB Health Pool Error:', err);
         });
     }
