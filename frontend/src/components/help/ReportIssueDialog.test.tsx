@@ -19,37 +19,43 @@ const mockFormResponse = {
   status: 200,
   headers: {},
   data: {
-    result: {
-      form: {
-        data: {
-          fields: [
-            {
-              code: 'category',
-              templateOptions: {
-                options: [
-                  { value: 'technical', label: 'Technical Issue' },
-                  { value: 'content', label: 'Content Issue' },
-                  { value: 'otherissues', label: 'Other Issues' },
+    form: {
+      data: {
+        fields: [
+          {
+            code: 'category',
+            templateOptions: {
+              options: [
+                { value: 'technical', label: 'Technical Issue' },
+                { value: 'content', label: 'Content Issue' },
+                { value: 'otherissues', label: 'Other Issues' },
+              ],
+            },
+          },
+          {
+            code: 'subcategory',
+            templateOptions: {
+              options: {
+                technical: [
+                  { value: 'login', label: 'Login Problem' },
+                  { value: 'crash', label: 'App Crash' },
+                ],
+                content: [
+                  { value: 'broken', label: 'Broken Content' },
                 ],
               },
             },
-            {
-              code: 'subcategory',
-              templateOptions: {
-                options: {
-                  technical: [
-                    { value: 'login', label: 'Login Problem' },
-                    { value: 'crash', label: 'App Crash' },
-                  ],
-                  content: [
-                    { value: 'broken', label: 'Broken Content' },
-                  ],
-                },
-              },
-            },
-          ],
-        },
+          },
+        ],
       },
+      framework: 'form-framework',
+      type: 'config',
+      subtype: 'faq',
+      action: 'reportissue',
+      component: 'portal',
+      created_on: '2022-01-01',
+      last_modified_on: '2022-01-01',
+      rootOrgId: 'org1',
     },
   },
 };

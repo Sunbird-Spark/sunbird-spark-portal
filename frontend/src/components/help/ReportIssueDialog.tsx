@@ -17,7 +17,6 @@ import {
 import { Textarea } from "@/components/common/TextArea";
 import { toast } from "@/hooks/useToast";
 import { FormService } from "@/services/FormService";
-import { FormConfigResponse } from "@/types/formTypes";
 
 interface ReportIssueDialogProps {
   open: boolean;
@@ -59,15 +58,14 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
     const fetchFormData = async () => {
       setLoading(true);
       try {
-        const response = await formService.formRead<FormConfigResponse>({
+        const response = await formService.formRead({
           type: "config",
           subType: "faq",
           action: "reportissue",
           component: "portal",
         });
 
-        const responseData = response.data;
-        const formData = responseData.result?.form ?? (responseData as any).form;
+        const formData = response.data.form;
         const fields: Array<{ code: string; templateOptions?: { options?: Option[] | Record<string, Option[]> } }> = formData?.data?.fields ?? [];
         const categoryField = fields.find((field) => field.code === "category");
         const subcategoryField = fields.find((field) => field.code === "subcategory");

@@ -2,10 +2,10 @@ import { getClient, ApiResponse } from '../lib/http-client';
 import { FormReadRequest, FormReadResponse } from '../types/formTypes';
 
 export class FormService {
-  public async formRead<T = FormReadResponse>(
+  public async formRead(
     request: FormReadRequest
-  ): Promise<ApiResponse<T>> {
-    return getClient().post<T>('/data/v1/form/read', {
+  ): Promise<ApiResponse<FormReadResponse>> {
+    return getClient().post<FormReadResponse>('/data/v1/form/read', {
       request: {
         type: request.type,
         subType: request.subType ?? '',
