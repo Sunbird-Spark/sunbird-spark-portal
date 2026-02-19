@@ -218,17 +218,7 @@
     @apply text-sm font-medium text-foreground;
 }
 
-.learning-filter-select-wrapper {
-    @apply relative flex items-center;
-}
 
-.learning-filter-select {
-    @apply text-sm text-foreground border-none bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 font-medium;
-}
-
-.learning-filter-chevron {
-    @apply absolute right-0 pointer-events-none text-sunbird-brick w-4 h-4;
-}
 
 .learning-list-container {
     @apply space-y-3;
