@@ -27,7 +27,6 @@ describe('contentMapper', () => {
         updatedAt: '2024-01-15',
         author: 'Author Name',
         primaryCategory: '',
-        contentType: 'Content',
       });
     });
 
