@@ -58,18 +58,18 @@ vi.mock('react-router-dom', async () => {
 });
 
 /* ── Auth (mutable so we can flip between tests) ── */
-const mockAuthState = {
-  isAuthenticated: false,
-  role: undefined as string | undefined,
-};
+const mockAuthState = { isAuthenticated: false };
 vi.mock('@/auth/AuthContext', () => ({
-  useAuth: () => ({
-    isAuthenticated: mockAuthState.isAuthenticated,
-    user: mockAuthState.role ? { role: mockAuthState.role } : null,
-  }),
+  useAuth: () => ({ isAuthenticated: mockAuthState.isAuthenticated }),
 }));
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: { isUserAuthenticated: () => false },
+}));
+
+/* ── useIsContentCreator (mutable) ── */
+let mockIsContentCreator = false;
+vi.mock('@/hooks/useUser', () => ({
+  useIsContentCreator: () => mockIsContentCreator,
 }));
 
 /* ── Child components ── */
@@ -129,7 +129,7 @@ describe('CollectionDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuthState.isAuthenticated = false; // default: unauthenticated
-    mockAuthState.role = undefined;
+    mockIsContentCreator = false; // default: not a content creator
 
     mockUseCollection.mockReturnValue({
       data: mockCollectionData,
@@ -267,38 +267,39 @@ describe('CollectionDetailPage', () => {
     });
   });
 
-  /* ─── BatchCard — authentication guard ─── */
+  /* ─── BatchCard — authentication + role guard ─── */
   describe('BatchCard authentication guard', () => {
     it('does NOT render BatchCard when user is NOT authenticated', () => {
       mockAuthState.isAuthenticated = false;
+      mockIsContentCreator = false;
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
     });
 
-    it('renders BatchCard when user IS authenticated AND has content_creator role', () => {
+    it('renders BatchCard when user IS authenticated AND useIsContentCreator returns true', () => {
       mockAuthState.isAuthenticated = true;
-      mockAuthState.role = 'content_creator';
+      mockIsContentCreator = true;
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('batch-card')).toBeInTheDocument();
     });
 
-    it('does NOT render BatchCard when authenticated but role is NOT content_creator', () => {
+    it('does NOT render BatchCard when authenticated but useIsContentCreator returns false', () => {
       mockAuthState.isAuthenticated = true;
-      mockAuthState.role = 'guest';
+      mockIsContentCreator = false;
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
     });
 
-    it('does NOT render BatchCard when authenticated but role is content_reviewer', () => {
-      mockAuthState.isAuthenticated = true;
-      mockAuthState.role = 'content_reviewer';
+    it('does NOT render BatchCard when unauthenticated even if useIsContentCreator returns true', () => {
+      mockAuthState.isAuthenticated = false;
+      mockIsContentCreator = true;
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
     });
 
     it('passes the correct collectionId to BatchCard', () => {
       mockAuthState.isAuthenticated = true;
-      mockAuthState.role = 'content_creator';
+      mockIsContentCreator = true;
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('batch-card')).toHaveAttribute('data-collection-id', 'col-123');
     });
@@ -308,7 +309,7 @@ describe('CollectionDetailPage', () => {
   describe('BatchCard DOM position', () => {
     it('renders BatchCard BEFORE CollectionSidebar in the DOM', () => {
       mockAuthState.isAuthenticated = true;
-      mockAuthState.role = 'content_creator';
+      mockIsContentCreator = true;
       renderWithProviders(<CollectionDetailPage />);
 
       const batchCard = screen.getByTestId('batch-card');
@@ -321,7 +322,7 @@ describe('CollectionDetailPage', () => {
 
     it('CollectionSidebar is present after BatchCard (array index check)', () => {
       mockAuthState.isAuthenticated = true;
-      mockAuthState.role = 'content_creator';
+      mockIsContentCreator = true;
       renderWithProviders(<CollectionDetailPage />);
 
       const batchCard = screen.getByTestId('batch-card');
@@ -335,7 +336,7 @@ describe('CollectionDetailPage', () => {
 
     it('both BatchCard and CollectionSidebar share the same parent container', () => {
       mockAuthState.isAuthenticated = true;
-      mockAuthState.role = 'content_creator';
+      mockIsContentCreator = true;
       renderWithProviders(<CollectionDetailPage />);
 
       const batchCard = screen.getByTestId('batch-card');

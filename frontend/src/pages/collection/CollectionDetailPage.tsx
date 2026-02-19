@@ -15,14 +15,16 @@ import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
 import { useAuth } from "@/auth/AuthContext";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { useIsContentCreator } from "@/hooks/useUser";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated: contextAuth, user } = useAuth();
+  const { isAuthenticated: contextAuth } = useAuth();
   const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+  const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const showLoading = isLoading || (isError && isFetching);
@@ -136,7 +138,7 @@ const CollectionDetailPage = () => {
 
           {/* Right Sidebar - Batch Card + Lessons Accordion */}
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
-            {isAuthenticated && user?.role === 'content_creator' && collectionId && (
+            {isAuthenticated && isContentCreator && collectionId && (
               <div className="mb-4">
                 <BatchCard collectionId={collectionId} />
               </div>

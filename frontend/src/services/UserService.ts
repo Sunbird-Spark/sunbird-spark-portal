@@ -134,6 +134,12 @@ export class UserService {
         );
     }
 
+    public async getUserRoles(userId: string): Promise<ApiResponse<UserReadResponse>> {
+        return getClient().get<UserReadResponse>(
+            `/user/v5/read/${userId}?fields=roles`
+        );
+    }
+
     public async getUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
         const searchParams = new URLSearchParams({
             orgdetails: ORG_DETAILS_FIELDS.join(','),
