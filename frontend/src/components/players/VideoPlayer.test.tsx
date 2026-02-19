@@ -11,12 +11,14 @@ const mockRemoveEventListeners = vi.fn();
 
 // Mock the VideoPlayerService
 vi.mock('../../services/players/video', () => {
-  const MockVideoPlayerService = vi.fn(function(this: any) {
+  const MockVideoPlayerService: any = vi.fn(function(this: any) {
     this.createConfig = mockCreateConfig;
     this.createElement = mockCreateElement;
     this.attachEventListeners = mockAttachEventListeners;
     this.removeEventListeners = mockRemoveEventListeners;
   });
+  
+  MockVideoPlayerService.unloadStyles = vi.fn();
   
   return {
     VideoPlayerService: MockVideoPlayerService,

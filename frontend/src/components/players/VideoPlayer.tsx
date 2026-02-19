@@ -86,6 +86,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       if (playerElement) {
         service.removeEventListeners(playerElement);
         playerElement.remove();
+        VideoPlayerService.unloadStyles();
       }
     };
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
