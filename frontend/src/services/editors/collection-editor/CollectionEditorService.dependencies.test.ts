@@ -20,6 +20,7 @@ describe('CollectionEditorService - Dependencies', () => {
     (CollectionEditorService as any).stylesLoaded = false;
     (CollectionEditorService as any).scriptLoaded = false;
     (CollectionEditorService as any).scriptLoading = undefined;
+    (CollectionEditorService as any).fancytreeJQueryRef = undefined;
     
     // Setup mock jQuery
     const mockJQuery: any = vi.fn();
@@ -68,6 +69,7 @@ describe('CollectionEditorService - Dependencies', () => {
     it('throws error if FancyTree fails to attach to jQuery', async () => {
       // FancyTree modules load but don't attach to jQuery
       (globalThis as any).$.fn.fancytree = undefined;
+      (globalThis as any).jQuery.fn.fancytree = undefined;
 
       await expect(service.initializeDependencies()).rejects.toThrow('FancyTree failed to attach to jQuery');
     });

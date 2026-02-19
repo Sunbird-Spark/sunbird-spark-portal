@@ -1,4 +1,4 @@
-import '../jquery-setup'; // Must be first - sets up jQuery globally
+import jQuery from '../jquery-setup'; // Must be first - sets up jQuery globally
 import 'jquery-ui-dist/jquery-ui';
 import { CollectionEditorConfig, CollectionEditorContextProps, CollectionEditorEvent } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
@@ -17,6 +17,40 @@ export class CollectionEditorService {
     private static scriptLoading?: Promise<void>;
     private static dependenciesLoaded = false;
     private static dependenciesLoading?: Promise<void>;
+    private static fancytreeJQueryRef: any;
+
+    private getGlobalJQuery(): any {
+        return (globalThis as any).$ || (globalThis as any).jQuery;
+    }
+
+    private setGlobalJQuery(jq: any): void {
+        if (!jq) return;
+        (globalThis as any).$ = jq;
+        (globalThis as any).jQuery = jq;
+    }
+
+    private captureFancyTreeJQueryRef(): void {
+        const jq = this.getGlobalJQuery();
+        if (jq?.fn?.fancytree) {
+            CollectionEditorService.fancytreeJQueryRef = jq;
+        }
+    }
+
+    getFancytreeJQueryRef(): any {
+        return CollectionEditorService.fancytreeJQueryRef;
+    }
+
+    restoreFancytreeJQuery(): void {
+        const jqCurrent = this.getGlobalJQuery();
+        if (jqCurrent?.fn?.fancytree) {
+            CollectionEditorService.fancytreeJQueryRef = jqCurrent;
+            return;
+        }
+
+        if (CollectionEditorService.fancytreeJQueryRef?.fn?.fancytree) {
+            this.setGlobalJQuery(CollectionEditorService.fancytreeJQueryRef);
+        }
+    }
 
     private loadScript(): Promise<void> {
         if (CollectionEditorService.scriptLoaded || customElements.get('lib-editor')) {
@@ -52,11 +86,12 @@ export class CollectionEditorService {
         // Create loading promise to prevent concurrent initialization
         CollectionEditorService.dependenciesLoading = (async () => {
             try {
-                const $global = (globalThis as any).$;
+                const jq = this.getGlobalJQuery() || jQuery;
+                this.setGlobalJQuery(jq);
 
                 // jQuery and jQuery UI are loaded via static imports at the top
                 // Now load FancyTree with ALL extensions from npm module
-                if (!$global.fn?.fancytree) {
+                if (!jq?.fn?.fancytree) {
                     // Import the full FancyTree bundle with all extensions (glyph, table, etc.)
                     await import('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
                     await import('jquery.fancytree/dist/modules/jquery.fancytree');
@@ -65,14 +100,23 @@ export class CollectionEditorService {
                     await import('jquery.fancytree/dist/modules/jquery.fancytree.filter');
                     await import('jquery.fancytree/dist/modules/jquery.fancytree.glyph');
                     await import('jquery.fancytree/dist/modules/jquery.fancytree.table');
-                    
-                    // Verify FancyTree attached to jQuery
-                    if (!$global.fn?.fancytree) {
-                        throw new Error('FancyTree failed to attach to jQuery');
-                    }
+                }
+
+                // Verify FancyTree attached to the active global jQuery
+                this.captureFancyTreeJQueryRef();
+                if (!CollectionEditorService.fancytreeJQueryRef?.fn?.fancytree) {
+                    throw new Error('FancyTree failed to attach to jQuery');
                 }
 
                 await this.loadScript();
+
+                // The editor bundle may overwrite global $/jQuery; restore FancyTree-capable instance if needed.
+                this.restoreFancytreeJQuery();
+                this.captureFancyTreeJQueryRef();
+                if (!CollectionEditorService.fancytreeJQueryRef?.fn?.fancytree) {
+                    throw new Error('FancyTree became unavailable after loading collection editor script');
+                }
+
                 this.loadAssets();
                 CollectionEditorService.dependenciesLoaded = true;
             } catch (error) {
