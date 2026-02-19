@@ -22,6 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -45,6 +46,7 @@ const EDITOR_OPTION_LABELS: Record<string, string> = {
   story: 'Story & Game',
   course: 'Course',
   collection: 'Collection',
+  questionset: 'Question Set',
 };
 
 const COLLECTION_CONTENT_CONFIG: Record<string, {
@@ -61,12 +63,26 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
     resourceType: 'Course',
     description: 'Enter description for Course',
   },
-  collection: {
+  'content-playlist': {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Collection',
     primaryCategory: 'Content Playlist',
     resourceType: 'Collection',
-    description: 'Enter description for Collection',
+    description: 'Enter description for Collection'
+  },
+  'digital-textbook': {
+    mimeType: 'application/vnd.ekstep.content-collection',
+    contentType: 'TextBook',
+    primaryCategory: 'Digital Textbook',
+    resourceType: 'Collection',
+    description: 'Enter description for Digital Textbook'
+  },
+  'question-paper': {
+    mimeType: 'application/vnd.ekstep.content-collection',
+    contentType: 'Collection',
+    primaryCategory: 'Question paper',
+    resourceType: 'Collection',
+    description: 'Enter description for Question Paper'
   },
 };
 
@@ -83,6 +99,7 @@ const WorkspacePage = () => {
 
   // Pre-fetch org data using tanstack mutation when slug becomes available
   const orgSearch = useOrganizationSearch();
+  const questionSetCreate = useQuestionSetCreate();
   const [orgData, setOrgData] = useState<any>(null);
 
   useEffect(() => {
@@ -180,7 +197,7 @@ const WorkspacePage = () => {
 
   const handleCreateOption = (optionId: string) => {
     setShowCreateModal(false);
-    if (RESOURCE_EDITOR_OPTIONS.includes(optionId) || COLLECTION_EDITOR_OPTIONS.includes(optionId)) {
+    if (RESOURCE_EDITOR_OPTIONS.includes(optionId) || COLLECTION_EDITOR_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
@@ -220,7 +237,7 @@ const WorkspacePage = () => {
     navigate(`/edit/content-editor/${contentId}`);
   };
 
-  const handleCollectionCreate = async (name: string, optionId: string) => {
+  const handleCollectionCreate = async (name: string, optionId: string, description?: string) => {
     const first = userData?.data?.response?.firstName?.trim();
     const last = userData?.data?.response?.lastName?.trim();
     const creator = first || last ? [first, last].filter(Boolean).join(" ") : "anonymous";
@@ -234,6 +251,7 @@ const WorkspacePage = () => {
       createdBy: userAuthInfoService.getUserId() || '',
       creator,
       ...config,
+      ...(description ? { description } : {}),
       organisation,
       createdFor,
       targetFWIds,
@@ -246,11 +264,34 @@ const WorkspacePage = () => {
     navigate(`/edit/collection-editor/${contentId}`);
   };
 
-  const handleContentNameSubmit = async (name: string) => {
+  const handleQuestionSetCreate = async (name: string) => {
+    const createdFor: string[] = orgChannelId ? [orgChannelId] : [];
+
+    const response = await questionSetCreate.mutateAsync({
+      name,
+      createdBy: userAuthInfoService.getUserId() || '',
+      createdFor,
+      framework: orgFramework || '',
+    });
+
+    const contentId = response?.identifier;
+    if (!contentId) {
+      console.error("Question set creation response missing identifier:", response);
+      throw new Error("Unexpected server response. Please try again.");
+    }
+
+    navigate(`/edit/quml-editor/${contentId}`);
+  };
+
+  const handleContentNameSubmit = async (name: string, extra?: { description?: string; collectionType?: string }) => {
     setIsCreating(true);
     try {
-      if (selectedOption && COLLECTION_EDITOR_OPTIONS.includes(selectedOption)) {
+      if (selectedOption === 'collection' && extra?.collectionType) {
+        await handleCollectionCreate(name, extra.collectionType, extra.description);
+      } else if (selectedOption && COLLECTION_EDITOR_OPTIONS.includes(selectedOption)) {
         await handleCollectionCreate(name, selectedOption);
+      } else if (selectedOption && QUML_EDITOR_OPTIONS.includes(selectedOption)) {
+        await handleQuestionSetCreate(name);
       } else {
         await handleResourceCreate(name);
       }
@@ -269,8 +310,11 @@ const WorkspacePage = () => {
   const getEditorRoute = (id: string): string | null => {
     const item = visibleContents.find((c) => c.id === id);
     if (!item) return null;
-    if (["Course", "TextBook", "Collection"].includes(item.primaryCategory)) {
+    if (["Course", "TextBook", "Collection"].includes(item.contentType)) {
       return `/edit/collection-editor/${id}`;
+    }
+    if (item.primaryCategory === 'Practice Question Set') {
+      return `/edit/quml-editor/${id}`;
     }
     return `/edit/content-editor/${id}`;
   };
@@ -387,6 +431,7 @@ const WorkspacePage = () => {
                   hasMore={hasMore}
                   isError={!!error}
                   error={error}
+                  userRole={userRole}
                   onLoadMore={loadMore}
                   onRetry={refetchAll}
                   onCreateOption={handleCreateOption}
@@ -415,6 +460,7 @@ const WorkspacePage = () => {
             onSubmit={handleContentNameSubmit}
             isLoading={isCreating}
             optionTitle={selectedOption ? EDITOR_OPTION_LABELS[selectedOption] : undefined}
+            optionId={selectedOption ?? undefined}
           />
         </div>
       </div>

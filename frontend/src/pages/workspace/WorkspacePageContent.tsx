@@ -5,7 +5,7 @@ import WorkspaceContentCard from "@/components/workspace/WorkspaceContentCard";
 import WorkspaceContentList from "@/components/workspace/WorkspaceContentList";
 import EmptyState from "@/components/workspace/EmptyState";
 import { Button } from "@/components/common/Button";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
 
 interface WorkspacePageContentProps {
   showCreateModal: boolean;
@@ -18,6 +18,7 @@ interface WorkspacePageContentProps {
   hasMore: boolean;
   isError: boolean;
   error: Error | null;
+  userRole: UserRole;
   onLoadMore: () => void;
   onRetry: () => void;
   onCreateOption: (optionId: string) => void;
@@ -45,6 +46,7 @@ export default function WorkspacePageContent({
   onEdit,
   onDelete,
   onView,
+  userRole,
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
@@ -108,6 +110,16 @@ export default function WorkspacePageContent({
 
   // Empty state
   if (filteredItems.length === 0) {
+    const isReviewerTab = userRole === 'reviewer' && ['pending-review', 'my-published'].includes(activeView);
+    if (isReviewerTab) {
+      return (
+        <EmptyState
+          title="No contents to review"
+          description="There are no contents pending your review at this time."
+          variant="default"
+        />
+      );
+    }
     return (
       <EmptyState
         title={t('createFirst')}
@@ -128,6 +140,7 @@ export default function WorkspacePageContent({
             <WorkspaceContentCard
               key={item.id}
               item={item}
+              userRole={userRole}
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
@@ -137,6 +150,7 @@ export default function WorkspacePageContent({
       ) : (
         <WorkspaceContentList
           items={filteredItems}
+          userRole={userRole}
           onEdit={onEdit}
           onDelete={onDelete}
           onView={onView}

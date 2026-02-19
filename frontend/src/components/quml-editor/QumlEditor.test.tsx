@@ -37,11 +37,15 @@ describe('QumlEditor', () => {
 
   let mockElement: HTMLElement;
   let mockServiceInstance: any;
+  let mockLoadAssets: ReturnType<typeof vi.fn>;
+  let mockRemoveAssets: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     (globalThis as any).$ = { fn: { fancytree: vi.fn() } };
     mockElement = document.createElement('lib-questionset-editor');
+    mockLoadAssets = vi.fn();
+    mockRemoveAssets = vi.fn();
 
     mockServiceInstance = {
       initializeDependencies: vi.fn().mockResolvedValue(undefined),
@@ -49,6 +53,8 @@ describe('QumlEditor', () => {
       createElement: vi.fn().mockReturnValue(mockElement),
       attachEventListeners: vi.fn(),
       removeEventListeners: vi.fn(),
+      loadAssets: mockLoadAssets,
+      removeAssets: mockRemoveAssets,
     };
 
     (QumlEditorService as any).mockImplementation(function() {
@@ -58,6 +64,8 @@ describe('QumlEditor', () => {
 
   it('initializes dependencies on mount', async () => {
     render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+
+    expect(mockLoadAssets).toHaveBeenCalledTimes(1);
 
     await waitFor(() => {
       expect(mockServiceInstance.initializeDependencies).toHaveBeenCalled();
@@ -186,10 +194,11 @@ describe('QumlEditor', () => {
     unmount();
 
     expect(mockServiceInstance.removeEventListeners).toHaveBeenCalledWith(mockElement);
+    expect(mockRemoveAssets).toHaveBeenCalledTimes(1);
   });
 
   it('clears FancyTree guard interval on unmount', async () => {
-    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
     const { unmount } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
 
@@ -197,8 +206,8 @@ describe('QumlEditor', () => {
 
     unmount();
 
-    expect(clearIntervalSpy).toHaveBeenCalled();
+    expect(clearTimeoutSpy).toHaveBeenCalled();
 
-    clearIntervalSpy.mockRestore();
+    clearTimeoutSpy.mockRestore();
   });
 });
