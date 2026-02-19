@@ -56,6 +56,11 @@ describe('EpubPlayerService', () => {
       },
     });
 
+    // Mock the custom element to prevent script loading
+    if (!customElements.get('sunbird-epub-player')) {
+      customElements.define('sunbird-epub-player', class extends HTMLElement {});
+    }
+
     service = new EpubPlayerService();
   });
 
