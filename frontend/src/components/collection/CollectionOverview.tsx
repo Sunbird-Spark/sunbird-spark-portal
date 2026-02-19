@@ -26,20 +26,20 @@ const CollectionOverview = ({
   const { t } = useAppI18n();
 
   return (
-    <div className="space-y-6">
+    <div className="collection-overview-container">
       {/* Player Card */}
-      <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
+      <div className="collection-player-card">
           {contentId ? (
             /* Content Player */
-            <div>
+            <div className="collection-player-wrapper">
               {playerIsLoading && (
-                <div className="aspect-video flex items-center justify-center bg-gray-100">
+                <div className="collection-player-loading">
                   <PageLoader message={t("loading")} fullPage={false} />
                 </div>
               )}
               {!playerIsLoading && playerError && (
-                <div className="aspect-video flex items-center justify-center bg-gray-100">
-                  <p className="text-sm text-red-500">{playerError.message}</p>
+                <div className="collection-player-error">
+                  <p className="collection-player-error-text">{playerError.message}</p>
                 </div>
               )}
               {!playerIsLoading && !playerError && playerMetadata && (
@@ -53,7 +53,7 @@ const CollectionOverview = ({
             </div>
           ) : (
             /* No Content Error */
-            <div className="aspect-video flex items-center justify-center bg-gray-100">
+            <div className="collection-player-error">
               <PageLoader 
                 error={t("noContentFound")} 
                 onRetry={() => window.location.reload()} 
@@ -64,40 +64,40 @@ const CollectionOverview = ({
 
 
         {/* Course Overview Section */}
-        <div className="px-6 pb-6 pt-0">
-          <h2 className="text-xl font-bold text-foreground mb-4">{t("courseDetails.overview")}</h2>
+        <div className="collection-overview-section">
+          <h2 className="collection-overview-title">{t("courseDetails.overview")}</h2>
 
           {/* Stats: Units & Lessons */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-            <span className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-sunbird-brick">
+          <div className="collection-stats-container">
+            <span className="collection-stat-item">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="collection-stat-icon">
                 <rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M2 6H14" stroke="currentColor" strokeWidth="1.5" />
               </svg>
-              <span className="text-black font-bold">
+              <span className="collection-stat-value">
                 {collectionData.modules?.length ?? 0}
               </span>
               {t("courseDetails.units")}
             </span>
-            <span className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-sunbird-brick">
+            <span className="collection-stat-item">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="collection-stat-icon">
                 <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M5 8H11M5 11H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
-              <span className="text-black font-bold">{collectionData.lessons}</span> {t("contentStats.lessons")}
+              <span className="collection-stat-value">{collectionData.lessons}</span> {t("contentStats.lessons")}
             </span>
           </div>
 
-          <p className="text-base text-[#222222] leading-relaxed mb-6">
+          <p className="collection-description">
             {collectionData.description}
           </p>
 
           {/* Best Suited For */}
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.suitedFor")}</h3>
-            <ul className="space-y-3">
+            <h3 className="collection-suited-title">{t("courseDetails.suitedFor")}</h3>
+            <ul className="collection-audience-list">
               {collectionData.audience.map((role, index) => (
-                <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
+                <li key={index} className="collection-audience-item">
                   <CheckIcon />
                   <span>{role}</span>
                 </li>

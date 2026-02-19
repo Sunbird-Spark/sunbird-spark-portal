@@ -779,3 +779,70 @@
   }
 
 }
+
+  /* Collection Overview Styles */
+  .collection-overview-container {
+    @apply space-y-6;
+  }
+
+  .collection-player-card {
+    @apply bg-white rounded-xl overflow-hidden border border-gray-100;
+  }
+
+  .collection-player-wrapper {
+    @apply p-4;
+    box-shadow: 2px 2px 34px 0px #00000066;
+  }
+
+  .collection-player-loading {
+    @apply aspect-video flex items-center justify-center bg-gray-100;
+  }
+
+  .collection-player-error {
+    @apply aspect-video flex items-center justify-center bg-gray-100;
+  }
+
+  .collection-player-error-text {
+    @apply text-sm text-red-500;
+  }
+
+  .collection-overview-section {
+    @apply px-6 pb-6 pt-0;
+  }
+
+  .collection-overview-title {
+    @apply text-xl font-bold text-foreground mb-4;
+  }
+
+  .collection-stats-container {
+    @apply flex items-center gap-4 text-sm text-muted-foreground mb-4;
+  }
+
+  .collection-stat-item {
+    @apply flex items-center gap-2;
+  }
+
+  .collection-stat-icon {
+    @apply text-sunbird-brick;
+  }
+
+  .collection-stat-value {
+    @apply text-black font-bold;
+  }
+
+  .collection-description {
+    @apply text-base leading-relaxed mb-6;
+    color: #222222;
+  }
+
+  .collection-suited-title {
+    @apply text-lg font-semibold text-foreground mb-3;
+  }
+
+  .collection-audience-list {
+    @apply space-y-3;
+  }
+
+  .collection-audience-item {
+    @apply flex items-start gap-2 text-base text-muted-foreground;
+  }
