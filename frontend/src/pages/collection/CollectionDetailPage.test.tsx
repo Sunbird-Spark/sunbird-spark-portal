@@ -20,9 +20,9 @@ const mockCollectionData = {
       id: 'mod-1',
       title: 'Module 1',
       subtitle: 'Subtitle',
-      lessons: [
-        { id: 'l1', title: 'Lesson 1', duration: '5:00', type: 'video' as const },
-        { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document' as const },
+        lessons: [
+        { id: 'l1', title: 'Lesson 1', type: 'video' as const },
+        { id: 'l2', title: 'Lesson 2', type: 'document' as const },
       ],
     },
   ],
