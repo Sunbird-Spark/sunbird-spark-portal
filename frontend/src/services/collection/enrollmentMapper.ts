@@ -1,5 +1,54 @@
-import type { CollectionData, ContentStateItem, CertTemplate } from '../../types/collectionTypes';
+import type {
+  CollectionData,
+  ContentStateItem,
+  CertTemplate,
+  BatchListItem,
+} from '../../types/collectionTypes';
+import { BATCH_STATUS } from '../../types/collectionTypes';
 import type { TrackableCollection } from '../../types/TrackableCollections';
+
+/** Filter to batches that are enrollable: status Ongoing/Upcoming and enrollment end date not passed (or null). Uses current time for enrollmentEndDate. */
+export function getEnrollableBatches(
+  batches: BatchListItem[] | undefined,
+  now: Date = new Date()
+): BatchListItem[] {
+  if (!batches?.length) return [];
+  const nowMs = now.getTime();
+  return batches.filter((b) => {
+    if (b.status !== BATCH_STATUS.Ongoing && b.status !== BATCH_STATUS.Upcoming) return false;
+    if (b.enrollmentEndDate == null || b.enrollmentEndDate === '') return true;
+    const endMs = new Date(b.enrollmentEndDate).getTime();
+    return Number.isFinite(endMs) && endMs >= nowMs;
+  });
+}
+
+/** Merges enrollable batches with the batch the user is enrolled in (if not already in the list). */
+export function getBatchesForDropdown(
+  enrollableBatches: BatchListItem[],
+  enrollment: TrackableCollection | undefined
+): BatchListItem[] {
+  if (!enrollment?.batch) return enrollableBatches;
+  const enrolledId = enrollment.batch.identifier || enrollment.batch.batchId || enrollment.batchId;
+  if (enrollableBatches.some((b) => b.identifier === enrolledId)) return enrollableBatches;
+  const b = enrollment.batch;
+  const item: BatchListItem = {
+    identifier: b.identifier || b.batchId,
+    name: b.name,
+    startDate: b.startDate,
+    endDate: b.endDate,
+    status: b.status,
+    enrollmentType: b.enrollmentType,
+  };
+  return [...enrollableBatches, item];
+}
+
+/** Format batch date for display; returns "-" if missing or invalid. */
+export function formatBatchDisplayDate(dateStr: string | null | undefined): string {
+  if (dateStr == null || dateStr === '') return '-';
+  const d = new Date(dateStr);
+  if (!Number.isFinite(d.getTime())) return '-';
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export function getEnrollmentForCollection(
   courses: TrackableCollection[] | undefined,

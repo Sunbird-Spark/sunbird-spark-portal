@@ -42,14 +42,18 @@ export interface CourseHierarchyResponse {
   content: HierarchyContentNode;
 }
 
+export const BATCH_STATUS = { Upcoming: 0, Ongoing: 1, Expired: 2 } as const;
+
 export interface BatchListItem {
   identifier: string;
   name?: string;
   startDate?: string;
   endDate?: string;
+  enrollmentEndDate?: string | null;
   status?: number;
   enrollmentType?: string;
   createdBy?: string;
+  batchId?: string;
   [key: string]: unknown;
 }
 

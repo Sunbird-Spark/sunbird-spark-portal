@@ -10,6 +10,8 @@ import {
   getContentStatusMap,
   getCourseProgressProps,
   getFirstCertPreviewUrl,
+  getEnrollableBatches,
+  getBatchesForDropdown,
 } from "../services/collection/enrollmentMapper";
 import userAuthInfoService from "../services/userAuthInfoService/userAuthInfoService";
 import type { CollectionData } from "../types/collectionTypes";
@@ -30,8 +32,10 @@ export function useCollectionEnrollment(
     () => getEnrollmentForCollection(enrollmentsResponse?.data?.courses, collectionId),
     [collectionId, enrollmentsResponse?.data?.courses]
   );
-  const isEnrolled = !!enrollmentForCollection;
-  const effectiveBatchId = enrollmentForCollection?.batchId ?? batchIdParam;
+  const hasBatchInRoute = !!batchIdParam;
+  const isEnrolledInCurrentBatch =
+    !!enrollmentForCollection && (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam);
+  const effectiveBatchId = batchIdParam ?? enrollmentForCollection?.batchId;
 
   const leafContentIds = useMemo(() => getLeafContentIds(collectionData), [collectionData]);
   const contentStateRequest = useMemo(() => {
@@ -42,7 +46,7 @@ export function useCollectionEnrollment(
   }, [collectionId, effectiveBatchId, leafContentIds]);
 
   const { data: contentStateResponse } = useContentState(contentStateRequest, {
-    enabled: isEnrolled && contentStateRequest !== null,
+    enabled: isEnrolledInCurrentBatch && contentStateRequest !== null,
   });
   const contentList = contentStateResponse?.data?.contentList ?? [];
   const contentStatusMap = useMemo(() => getContentStatusMap(contentList), [contentList]);
@@ -63,13 +67,22 @@ export function useCollectionEnrollment(
   const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const { data: batchListResponse, isLoading: batchListLoading, error: batchListError } = useBatchList(
     collectionId,
-    { enabled: !isEnrolled && isAuthenticated && isTrackableForBatch }
+    { enabled: isAuthenticated && isTrackableForBatch }
   );
-  const batches = batchListResponse?.data?.response?.content ?? [];
+  const rawContent = batchListResponse?.data?.response?.content ?? [];
+  const enrollableBatches = useMemo(
+    () => getEnrollableBatches(rawContent, new Date()),
+    [rawContent]
+  );
+  const batches = useMemo(
+    () => getBatchesForDropdown(enrollableBatches, enrollmentForCollection),
+    [enrollableBatches, enrollmentForCollection]
+  );
 
-  const { data: batchReadResponse } = useBatchRead(isEnrolled ? effectiveBatchId : undefined, {
-    enabled: isEnrolled && !!effectiveBatchId,
-  });
+  const { data: batchReadResponse } = useBatchRead(
+    isEnrolledInCurrentBatch ? effectiveBatchId : undefined,
+    { enabled: isEnrolledInCurrentBatch && !!effectiveBatchId }
+  );
   const firstCertPreviewUrl = useMemo(
     () => getFirstCertPreviewUrl(batchReadResponse?.data?.response?.cert_templates),
     [batchReadResponse?.data?.response?.cert_templates]
@@ -78,15 +91,22 @@ export function useCollectionEnrollment(
 
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState("");
-  const handleJoinCourse = async () => {
+  const handleJoinOrGo = async (selectedBatchId: string) => {
+    if (!collectionId || !selectedBatchId) return;
     const uid = userAuthInfoService.getUserId();
-    if (!collectionId || !effectiveBatchId || !uid) return;
+    const alreadyEnrolledInSelected = enrollmentForCollection?.batchId === selectedBatchId;
+    if (alreadyEnrolledInSelected) {
+      navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
+      return;
+    }
+    if (!uid) return;
     setJoinError("");
     setJoinLoading(true);
     try {
-      await collectionService.enrol(collectionId, uid, effectiveBatchId);
+      await collectionService.enrol(collectionId, uid, selectedBatchId);
       await queryClient.invalidateQueries({ queryKey: ["userEnrollments"] });
       refetchEnrollments();
+      navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
     } catch (e) {
       setJoinError(e instanceof Error ? e.message : "Failed to join course.");
     } finally {
@@ -94,14 +114,12 @@ export function useCollectionEnrollment(
     }
   };
 
-  const handleBatchSelect = (batchId: string) => {
-    if (!collectionId) return;
-    navigate(batchId ? `/collection/${collectionId}/batch/${batchId}` : `/collection/${collectionId}`);
-  };
+  const isSelectedBatchEnrolled = (selectedBatchId: string) =>
+    !!enrollmentForCollection && enrollmentForCollection.batchId === selectedBatchId;
 
   return {
     enrollmentForCollection,
-    isEnrolled,
+    isEnrolledInCurrentBatch,
     effectiveBatchId,
     contentStatusMap,
     courseProgressProps,
@@ -112,7 +130,7 @@ export function useCollectionEnrollment(
     hasCertificate,
     joinLoading,
     joinError,
-    handleJoinCourse,
-    handleBatchSelect,
+    handleJoinOrGo,
+    isSelectedBatchEnrolled,
   };
 }

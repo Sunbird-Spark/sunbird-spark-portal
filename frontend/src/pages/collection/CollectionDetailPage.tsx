@@ -15,7 +15,7 @@ import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import CourseProgressCard from "@/components/collection/CourseProgressCard";
-import UpcomingBatchesCard from "@/components/collection/UpcomingBatchesCard";
+import AvailableBatchesCard from "@/components/collection/AvailableBatchesCard";
 import CertificateCard from "@/components/collection/CertificateCard";
 import CertificatePreviewModal from "@/components/collection/CertificatePreviewModal";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
@@ -34,48 +34,25 @@ const CollectionDetailPage = () => {
 
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const collectionData = collectionDataFromApi ?? null;
-  const enrollment = useCollectionEnrollment(
-    collectionId,
-    batchIdParam,
-    collectionData,
-    isAuthenticated
-  );
-  const {
-    isEnrolled,
-    contentStatusMap,
-    courseProgressProps,
-    batches,
-    batchListLoading,
-    batchListError,
-    firstCertPreviewUrl,
-    hasCertificate,
-    joinLoading,
-    joinError,
-    handleJoinCourse,
-    handleBatchSelect,
-  } = enrollment;
+  const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
+  const { isEnrolledInCurrentBatch, contentStatusMap, courseProgressProps, batches, batchListLoading, batchListError,
+    firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinOrGo, isSelectedBatchEnrolled } = enrollment;
+  const hasBatchInRoute = !!batchIdParam;
+  const [selectedBatchId, setSelectedBatchId] = useState("");
+  useEffect(() => {
+    if (!hasBatchInRoute) setSelectedBatchId(enrollment.enrollmentForCollection?.batchId ?? "");
+  }, [hasBatchInRoute, enrollment.enrollmentForCollection?.batchId]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const contentBlocked = isTrackable && !isAuthenticated;
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const displayCollectionData = useMemo(
-    () =>
-      collectionData
-        ? { ...collectionData, image: collectionData.image || defaultCollectionImage }
-        : null,
+    () => (collectionData ? { ...collectionData, image: collectionData.image || defaultCollectionImage } : null),
     [collectionData]
   );
-  const {
-    data: searchData,
-    isError: searchError,
-    error: searchErrorObj,
-    refetch: searchRefetch,
-    isFetching: searchFetching,
-  } = useContentSearch({
-    request: { limit: 20, offset: 0 },
-    enabled: hierarchySuccess,
-  });
+  const { data: searchData, isError: searchError, error: searchErrorObj, refetch: searchRefetch, isFetching: searchFetching } =
+    useContentSearch({ request: { limit: 20, offset: 0 }, enabled: hierarchySuccess });
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
   const leftColRef = useRef<HTMLDivElement>(null);
@@ -98,23 +75,14 @@ const CollectionDetailPage = () => {
       initialExpandedSet.current = true;
     }
   }, [collectionData?.modules]);
-  useEffect(() => {
-    initialExpandedSet.current = false;
-    setExpandedModules([]);
-  }, [collectionId]);
+  useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
 
   const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
 
-  const relatedContentItems = useMemo(() => {
-    if (hasSearchResults) {
-      return mapSearchContentToRelatedContentItems(
-        searchData?.data?.content,
-        collectionData?.id ?? undefined,
-        3
-      );
-    }
-    return [];
-  }, [hasSearchResults, searchData?.data?.content, collectionData?.id]);
+  const relatedContentItems = useMemo(
+    () => (hasSearchResults ? mapSearchContentToRelatedContentItems(searchData?.data?.content, collectionData?.id ?? undefined, 3) : []),
+    [hasSearchResults, searchData?.data?.content, collectionData?.id]
+  );
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) =>
@@ -158,15 +126,9 @@ const CollectionDetailPage = () => {
 
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
           <>
-        {/* Title Row */}
         <div className="flex items-start justify-between mb-2">
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">
-            {collectionData.title}
-          </h1>
-
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">{collectionData.title}</h1>
         </div>
-
-        {/* Stats Row */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
         </div>
@@ -184,7 +146,7 @@ const CollectionDetailPage = () => {
                 <LoginToUnlockCard />
               </div>
             )}
-            {isTrackable && !contentBlocked && isEnrolled && courseProgressProps && (
+            {isTrackable && !contentBlocked && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
               <div className="flex-shrink-0 mb-4">
                 <CourseProgressCard {...courseProgressProps} />
               </div>
@@ -195,17 +157,18 @@ const CollectionDetailPage = () => {
                 expandedModules={expandedModules}
                 toggleModule={toggleModule}
                 contentBlocked={contentBlocked}
-                contentStatusMap={isEnrolled ? contentStatusMap : undefined}
+                contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch ? contentStatusMap : undefined}
               />
             </div>
             {isTrackable && !contentBlocked && (
               <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
-                {!isEnrolled && (
-                  <UpcomingBatchesCard
+                {!hasBatchInRoute && (
+                  <AvailableBatchesCard
                     batches={batches}
-                    selectedBatchId={batchIdParam ?? ""}
-                    onBatchSelect={handleBatchSelect}
-                    onJoinCourse={handleJoinCourse}
+                    selectedBatchId={selectedBatchId}
+                    onBatchSelect={setSelectedBatchId}
+                    onJoinOrGo={() => handleJoinOrGo(selectedBatchId)}
+                    isSelectedBatchEnrolled={isSelectedBatchEnrolled(selectedBatchId)}
                     isLoading={batchListLoading}
                     joinLoading={joinLoading}
                     error={batchListError}
@@ -230,30 +193,19 @@ const CollectionDetailPage = () => {
           )}
           {searchError && searchErrorObj && (
             <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
-              <PageLoader
-                error={searchErrorObj.message}
-                onRetry={() => searchRefetch()}
-                fullPage={false}
-              />
+              <PageLoader error={searchErrorObj.message} onRetry={() => searchRefetch()} fullPage={false} />
             </div>
           )}
-
           {!searchError && searchFetching && relatedContentItems.length === 0 && (
             <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
               <PageLoader message={t("loading")} fullPage={false} />
             </div>
           )}
-
           {!searchError && (relatedContentItems.length > 0 || !searchFetching) && (
-            <RelatedContent
-              items={relatedContentItems}
-              cardType="collection"
-            />
+            <RelatedContent items={relatedContentItems} cardType="collection" />
           )}
         </section>
-        <div className="mt-16">
-          <FAQSection />
-        </div>
+        <div className="mt-16"><FAQSection /></div>
           </>
         )}
       </main>
