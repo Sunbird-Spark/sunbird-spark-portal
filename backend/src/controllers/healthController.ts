@@ -19,7 +19,10 @@ const getHealthPool = (): Pool => {
         });
 
         healthPool.on('error', (err: Error) => {
-            logger.error('YugabyteDB Health Pool Error:', err);
+            const details = err instanceof Error
+                ? (err.stack || err.message)
+                : String(err);
+            logger.error(`YugabyteDB Health Pool Error: ${details}`);
         });
     }
     return healthPool;
