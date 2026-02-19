@@ -1,20 +1,20 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter, useLocation } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import Header from '../home/Header';
 
-// Mock useLocation
+// --------------------
+// Mocks
+// --------------------
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useLocation: () => ({
-      pathname: '/',
-    }),
+    useLocation: () => ({ pathname: '/' }),
   };
 });
 
-// Mock the hooks
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => key,
@@ -22,13 +22,12 @@ vi.mock('@/hooks/useAppI18n', () => ({
       { code: 'en', label: 'English' },
       { code: 'fr', label: 'Français' },
     ],
-    currentCode: 'en', // Changed from currentLanguage object to currentCode string to match component
+    currentCode: 'en',
     changeLanguage: vi.fn(),
     dir: 'ltr',
   }),
 }));
 
-// Mock useAuth
 vi.mock('@/auth/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     isAuthenticated: false,
@@ -38,57 +37,146 @@ vi.mock('@/auth/AuthContext', () => ({
   })),
 }));
 
-const renderHeader = () => {
-  return render(
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: {
+    isUserAuthenticated: vi.fn(() => false),
+  },
+}));
+
+// Mock AuthenticatedHeader so Header can import it without side effects
+vi.mock('./AuthenticatedHeader', () => ({
+  default: () => <div data-testid="authenticated-header">Authenticated Header</div>,
+}));
+
+// SearchModal mock — renders visibly only when isOpen=true so we can assert on it
+vi.mock('@/components/common/SearchModal', () => ({
+  default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
+    isOpen ? (
+      <div data-testid="search-modal">
+        <button onClick={onClose}>close-modal</button>
+      </div>
+    ) : null,
+}));
+
+// --------------------
+// Helper
+// --------------------
+
+const renderHeader = () =>
+  render(
     <BrowserRouter>
       <Header />
     </BrowserRouter>
   );
-};
+
+// --------------------
+// Tests
+// --------------------
 
 describe('Header', () => {
-  it('renders logo', () => {
-    renderHeader();
-    const logo = screen.getByAltText('Sunbird');
-    expect(logo).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('toggles mobile menu', () => {
-    renderHeader();
-    const menuButton = screen.getAllByRole('button').find(btn =>
-      btn.querySelector('svg')?.classList.contains('w-5')
-    );
-
-    if (menuButton) {
-      fireEvent.click(menuButton);
-    }
-  });
-
-  it('toggles mobile search', () => {
-    renderHeader();
-    const buttons = screen.getAllByRole('button');
-    const searchButton = buttons.find(btn => {
-      const svg = btn.querySelector('svg');
-      return svg !== null;
+  describe('static rendering', () => {
+    it('renders the Sunbird logo', () => {
+      renderHeader();
+      expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
     });
 
-    if (searchButton) {
-      fireEvent.click(searchButton);
-    }
+    it('renders the desktop navigation links', () => {
+      renderHeader();
+      // The t() mock returns the key itself
+      expect(screen.getAllByText('nav.home').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('nav.explore').length).toBeGreaterThan(0);
+    });
+
+    it('renders the login button', () => {
+      renderHeader();
+      expect(screen.getByText('login')).toBeInTheDocument();
+    });
   });
 
-  it('handles notification deletion', () => {
-    renderHeader();
-    expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
+  describe('mobile menu', () => {
+    it('opens the mobile menu when the hamburger button is clicked', () => {
+      renderHeader();
+      const menuButton = screen.getByLabelText('Open menu');
+      fireEvent.click(menuButton);
+      // After opening, the aria-label changes and nav links appear in mobile panel
+      expect(screen.getByLabelText('Close menu')).toBeInTheDocument();
+    });
+
+    it('closes the mobile menu when the close button is clicked', () => {
+      renderHeader();
+      fireEvent.click(screen.getByLabelText('Open menu'));
+      fireEvent.click(screen.getByLabelText('Close menu'));
+      expect(screen.getByLabelText('Open menu')).toBeInTheDocument();
+    });
   });
 
-  it('changes language', () => {
-    renderHeader();
-    expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
+  describe('search modal — desktop', () => {
+    it('does not show the search modal on initial render', () => {
+      renderHeader();
+      expect(screen.queryByTestId('search-modal')).not.toBeInTheDocument();
+    });
+
+    it('opens the search modal when the desktop search icon button is clicked', () => {
+      renderHeader();
+      // The desktop search button is the one with aria-label-less FiSearch inside .hidden.md:flex section
+      // It is the first button that contains an SVG and has the sunbird-brick class
+      const allButtons = screen.getAllByRole('button');
+      // Find the desktop search button by its class (p-2.5 text-sunbird-brick)
+      const searchButton = allButtons.find(
+        (btn) =>
+          btn.className.includes('p-2.5') &&
+          btn.className.includes('sunbird-brick') &&
+          !btn.className.includes('md:hidden')
+      );
+      expect(searchButton).toBeDefined();
+      fireEvent.click(searchButton!);
+      expect(screen.getByTestId('search-modal')).toBeInTheDocument();
+    });
+
+    it('closes the search modal when the modal calls onClose', () => {
+      renderHeader();
+      const allButtons = screen.getAllByRole('button');
+      const searchButton = allButtons.find(
+        (btn) =>
+          btn.className.includes('p-2.5') &&
+          btn.className.includes('sunbird-brick') &&
+          !btn.className.includes('md:hidden')
+      );
+      fireEvent.click(searchButton!);
+      expect(screen.getByTestId('search-modal')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('close-modal'));
+      expect(screen.queryByTestId('search-modal')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders navigation links', () => {
-    renderHeader();
-    expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
+  describe('search modal — mobile', () => {
+    it('opens the search modal from the mobile menu', () => {
+      renderHeader();
+      // Open mobile menu first
+      fireEvent.click(screen.getByLabelText('Open menu'));
+      // Click the mobile search button (shows the text label via t() key)
+      fireEvent.click(screen.getByText('header.search'));
+      expect(screen.getByTestId('search-modal')).toBeInTheDocument();
+    });
+
+    it('closes the mobile menu when the mobile search button is clicked', () => {
+      renderHeader();
+      fireEvent.click(screen.getByLabelText('Open menu'));
+      fireEvent.click(screen.getByText('header.search'));
+      // Mobile menu close button should no longer be visible (menu is closed)
+      expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('language selector', () => {
+    it('renders language options', () => {
+      renderHeader();
+      expect(screen.getByAltText('Language')).toBeInTheDocument();
+    });
   });
 });
