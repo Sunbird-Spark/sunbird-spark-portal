@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button } from "../../components/ui/Button";
-import { Input } from "../../components/ui/Input";
+import { Button } from "@/components/common/Button";
+import { Input } from "@/components/common/Input";
 import { useNavigate } from "react-router-dom";
 import sunbirdLogo from "../../../src/assets/sunbird-logo.svg";
 import onboardingImage from "../../../src/assets/onboarding-image.svg";
