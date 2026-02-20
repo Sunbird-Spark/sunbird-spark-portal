@@ -1,14 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useLearnerFuzzySearch, useResetPassword, useSignup } from './useUser';
+import { useLearnerFuzzySearch, useResetPassword, useSignup, useIsContentCreator } from './useUser';
 import React from 'react';
 
-const { mockUserService } = vi.hoisted(() => ({
+const { mockUserService, mockUserAuthInfoService } = vi.hoisted(() => ({
   mockUserService: {
     searchUser: vi.fn(),
     resetPassword: vi.fn(),
     signup: vi.fn(),
+    getUserRoles: vi.fn(),
+  },
+  mockUserAuthInfoService: {
+    getUserId: vi.fn(),
+    getAuthInfo: vi.fn(),
   },
 }));
 
@@ -16,6 +21,10 @@ vi.mock('../services/UserService', () => ({
   UserService: vi.fn(function () {
     return mockUserService;
   }),
+}));
+
+vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
+  default: mockUserAuthInfoService,
 }));
 
 const createWrapper = () => {
@@ -34,6 +43,8 @@ const createWrapper = () => {
 describe('useUser hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: userId available from cache, no getAuthInfo needed
+    mockUserAuthInfoService.getUserId.mockReturnValue('user-123');
   });
 
   describe('useLearnerFuzzySearch', () => {
@@ -69,6 +80,100 @@ describe('useUser hooks', () => {
       await result.current.mutateAsync({ request });
 
       expect(mockUserService.resetPassword).toHaveBeenCalledWith(request);
+    });
+  });
+
+  /* ── useIsContentCreator ── */
+  describe('useIsContentCreator', () => {
+    it('returns true when API response includes CONTENT_CREATOR role', async () => {
+      mockUserService.getUserRoles.mockResolvedValue({
+        data: {
+          response: {
+            roles: [{ role: 'CONTENT_CREATOR' }, { role: 'PUBLIC' }],
+          },
+        },
+      });
+
+      const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current).toBe(true);
+      });
+      expect(mockUserService.getUserRoles).toHaveBeenCalledWith('user-123');
+    });
+
+    it('returns false when API response does NOT include CONTENT_CREATOR role', async () => {
+      mockUserService.getUserRoles.mockResolvedValue({
+        data: {
+          response: {
+            roles: [{ role: 'PUBLIC' }, { role: 'REPORT_VIEWER' }],
+          },
+        },
+      });
+
+      const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(mockUserService.getUserRoles).toHaveBeenCalled();
+      });
+      expect(result.current).toBe(false);
+    });
+
+    it('returns false when roles array is empty', async () => {
+      mockUserService.getUserRoles.mockResolvedValue({
+        data: { response: { roles: [] } },
+      });
+
+      const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(mockUserService.getUserRoles).toHaveBeenCalled();
+      });
+      expect(result.current).toBe(false);
+    });
+
+    it('returns false (loading) before the query resolves', () => {
+      // Never resolves — query stays in pending state
+      mockUserService.getUserRoles.mockImplementation(() => new Promise(() => {}));
+
+      const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
+
+      // While loading, data is undefined → false
+      expect(result.current).toBe(false);
+    });
+
+    it('falls back to getAuthInfo when getUserId returns null', async () => {
+      mockUserAuthInfoService.getUserId.mockReturnValue(null);
+      mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: 'auth-user-456' });
+      mockUserService.getUserRoles.mockResolvedValue({
+        data: {
+          response: {
+            roles: [{ role: 'CONTENT_CREATOR' }],
+          },
+        },
+      });
+
+      const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current).toBe(true);
+      });
+      expect(mockUserAuthInfoService.getAuthInfo).toHaveBeenCalled();
+      expect(mockUserService.getUserRoles).toHaveBeenCalledWith('auth-user-456');
+    });
+
+    it('returns false when both getUserId and getAuthInfo return no userId', async () => {
+      mockUserAuthInfoService.getUserId.mockReturnValue(null);
+      mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: null });
+
+      const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
+
+      // queryFn returns [] when userId is absent — hook returns false
+      await waitFor(() => {
+        expect(mockUserAuthInfoService.getAuthInfo).toHaveBeenCalled();
+      });
+      expect(result.current).toBe(false);
+      expect(mockUserService.getUserRoles).not.toHaveBeenCalled();
     });
   });
 

@@ -11,6 +11,7 @@ describe('CollectionService', () => {
       post: vi.fn(),
       put: vi.fn(),
       delete: vi.fn(),
+      patch: vi.fn(),
       updateHeaders: vi.fn(),
     };
     init(mockClient);

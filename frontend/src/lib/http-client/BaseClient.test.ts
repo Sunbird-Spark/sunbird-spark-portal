@@ -6,6 +6,7 @@ class TestClient extends BaseClient {
     public mockGet = vi.fn();
     public mockPost = vi.fn();
     public mockPut = vi.fn();
+    public mockPatch = vi.fn();
     public mockDelete = vi.fn();
     public mockUpdateHeaders = vi.fn();
 
@@ -17,6 +18,9 @@ class TestClient extends BaseClient {
     }
     protected async _put<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>> {
         return this.mockPut(url, data, headers);
+    }
+    protected async _patch<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+        return this.mockPatch(url, data, headers);
     }
     protected async _delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
         return this.mockDelete(url, headers);
