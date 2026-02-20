@@ -25,7 +25,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const { t } = useAppI18n();
   const navigate = useNavigate();
 
-  const { data, isLoading, error } = useContentSearch({
+  const { data, isLoading, error, refetch } = useContentSearch({
     request: {
       limit: 3,
       query: debouncedQuery || "", // Empty string to fetch default results
@@ -154,7 +154,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
               <div className="min-h-[20rem]">
                 <PageLoader 
                   error={error.message || t("failed_to_search")} 
-                  onRetry={() => window.location.reload()}
+                  onRetry={() => refetch()}
                   fullPage={false} 
                 />
               </div>
