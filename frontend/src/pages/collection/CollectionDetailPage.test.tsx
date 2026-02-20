@@ -86,6 +86,12 @@ vi.mock('@/hooks/useContentPlayer', () => ({
   }),
 }));
 
+vi.mock('@/services/collection', () => ({
+  mapSearchContentToRelatedContentItems: (content?: Array<any>) => {
+    return content && content.length > 0 ? content.slice(0, 3) : [];
+  },
+}));
+
 /* ── Router ── */
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -153,17 +159,55 @@ vi.mock('@/components/common/RelatedContent', () => ({
 }));
 
 vi.mock('@/components/collection/RelatedContentSection', () => ({
-  default: ({ searchError, searchFetching }: { searchError?: boolean; searchFetching?: boolean }) => (
-    <section data-testid="related-content-section" data-loading={String(!!searchFetching)} data-error={String(!!searchError)}>
-      Related Content Section
+  default: ({
+    searchError,
+    searchFetching,
+    relatedContentItems
+  }: {
+    searchError?: boolean;
+    searchFetching?: boolean;
+    relatedContentItems?: Array<{ identifier?: string; name?: string }>;
+  }) => (
+    <section
+      data-testid="related-content-section"
+      data-loading={String(!!searchFetching)}
+      data-error={String(!!searchError)}
+    >
+      {relatedContentItems &&
+        relatedContentItems.map((item) => (
+          <div key={item.identifier} data-testid="related-content">
+            {item.name}
+          </div>
+        ))}
     </section>
   ),
 }));
 
 vi.mock('@/components/collection/CollectionContentArea', () => ({
-  default: ({ collectionData, contentId }: { collectionData: any; contentId?: string }) => (
+  default: ({
+    collectionData,
+    contentId,
+    isContentCreator,
+    collectionId,
+    isAuthenticated
+  }: {
+    collectionData: any;
+    contentId?: string;
+    isContentCreator?: boolean;
+    collectionId?: string;
+    isAuthenticated?: boolean;
+  }) => (
     <div data-testid="collection-content-area" data-content-id={contentId ?? ''}>
-      Collection Content Area: {collectionData?.title}
+      <div data-testid="collection-overview">{collectionData?.title}</div>
+      <div>
+        {isAuthenticated && isContentCreator && (
+          <div data-testid="batch-card" data-collection-id={collectionId}>
+            Batch Card
+          </div>
+        )}
+      </div>
+      <aside data-testid="collection-sidebar">Sidebar</aside>
+      <div>Stats: {collectionData?.lessons} lessons</div>
     </div>
   ),
 }));
