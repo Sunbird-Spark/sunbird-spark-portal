@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Sheet,
@@ -84,17 +84,20 @@ const WorkspacePage = () => {
   // Pre-fetch org data using tanstack mutation when slug becomes available
   const orgSearch = useOrganizationSearch();
   const [orgData, setOrgData] = useState<any>(null);
+  const orgFetchAttempted = useRef(false);
 
   useEffect(() => {
-    if (slug && !orgData) {
+    if (slug && !orgFetchAttempted.current) {
+      orgFetchAttempted.current = true;
       const filters: Record<string, any> = { isTenant: true, slug };
       orgSearch.mutateAsync({ filters }).then((res) => {
         setOrgData(res?.data?.response?.content?.[0] ?? null);
       }).catch((err) => {
+        orgFetchAttempted.current = false;
         console.warn('Failed to fetch org data:', err);
       });
     }
-  }, [slug, orgData, orgSearch]);
+  }, [slug]);
 
   // Pre-fetch channel/framework data using tanstack query when org is available
   const orgChannelId = orgData?.hashTagId || orgData?.identifier || '';
