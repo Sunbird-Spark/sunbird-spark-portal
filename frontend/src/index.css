@@ -823,37 +823,6 @@
     @apply flex items-start gap-2 text-base text-muted-foreground;
   }
 
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Rubik', sans-serif;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: 'Rubik', sans-serif;
-    font-weight: 600;
-  }
-
-  .auth-bg-wave {
-    background-image: url('./assets/auth-wave-bg.svg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-  }
-
-}
-
   /* Onboarding Page Styles */
   .onboarding-logo {
     height: 1.75rem;
@@ -981,7 +950,6 @@
     border-radius: 1.5rem;
   }
 
-  /* Ensure onboarding page doesn't scroll */
   .onboarding-container {
     height: 100vh;
     overflow: hidden;
@@ -1004,3 +972,34 @@
       transform: rotate(360deg);
     }
   }
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Rubik', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+  }
+
+  .auth-bg-wave {
+    background-image: url('./assets/auth-wave-bg.svg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+}
