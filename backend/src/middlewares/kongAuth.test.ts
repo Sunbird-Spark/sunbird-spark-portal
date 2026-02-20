@@ -116,7 +116,6 @@ describe('kongAuth middleware', () => {
         it('should refresh authenticated session TTL when near expiry', async () => {
             vi.doMock('../config/env.js', () => ({ envConfig: mockEnvConfig }));
             const { registerDeviceWithKong } = await import('./kongAuth.js');
-            const logger = (await import('../utils/logger.js')).default;
 
             // Simulate an authenticated user with a session near expiry
             (mockRequest as any).userId = 'test-user-id';
@@ -141,7 +140,6 @@ describe('kongAuth middleware', () => {
         it('should skip refresh for authenticated user when session is not near expiry', async () => {
             vi.doMock('../config/env.js', () => ({ envConfig: mockEnvConfig }));
             const { registerDeviceWithKong } = await import('./kongAuth.js');
-            const logger = (await import('../utils/logger.js')).default;
 
             // Simulate an authenticated user with a session well within TTL
             (mockRequest as any).userId = 'test-user-id';
