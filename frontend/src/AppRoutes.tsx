@@ -48,10 +48,15 @@ const AppRoutes: React.FC = () => {
         <Route path="/help-support" element={<HelpSupport />} />
         <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
-         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/explore" element={<Explore />} /> 
-        <Route path="/collection/:collectionId" element={<CollectionDetailPage />}>
-          <Route path="content/:contentId" element={null} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="collection">
+          <Route path=":collectionId" element={<CollectionDetailPage />}>
+            <Route path="content/:contentId" element={null} />
+          </Route>
+          <Route path=":collectionId/batch/:batchId" element={<CollectionDetailPage />}>
+            <Route path="content/:contentId" element={null} />
+          </Route>
         </Route>
 
         {/* Protected routes */}
