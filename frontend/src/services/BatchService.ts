@@ -13,6 +13,8 @@ export interface Batch {
   enrollmentType?: string;
   /** If present and non-empty, the batch already has a certificate template */
   certTemplates?: Record<string, unknown>;
+  /** Whether certificate issuance is enabled for this batch */
+  issueCertificate?: boolean;
   mentors?: string[];
   createdBy?: string;
   createdDate?: string;
@@ -38,6 +40,7 @@ export interface CreateBatchRequest {
   mentors?: string[];
   tandc: boolean;
   enrollmentEndDate?: string;
+  issueCertificate?: boolean;
 }
 
 export interface UpdateBatchRequest {
@@ -51,6 +54,7 @@ export interface UpdateBatchRequest {
   createdFor: string[];
   mentors: string[];
   enrollmentEndDate?: string;
+  issueCertificate?: boolean;
 }
 
 export interface CreateBatchResponse {

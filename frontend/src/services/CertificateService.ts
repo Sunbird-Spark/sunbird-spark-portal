@@ -1,5 +1,23 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 
+export interface CertSignatory {
+  name: string;
+  designation: string;
+  id: string;
+  /** base64 or URL — always required by the API */
+  image: string;
+}
+
+export interface CertTemplateSummary {
+  identifier: string;
+  name: string;
+  previewUrl?: string;
+  artifactUrl?: string;
+  downloadUrl?: string;
+  issuer?: { name: string; url: string };
+  signatoryList?: CertSignatory[];
+}
+
 export interface CreateAssetRequest {
   name: string;
   code: string;
@@ -14,7 +32,8 @@ export interface CreateAssetRequest {
     name: string;
     designation: string;
     id: string;
-    image?: string;
+    /** Always required — pass base64 dataURL or CDN URL; never omit */
+    image: string;
   }>;
 }
 
@@ -41,37 +60,82 @@ export interface AddTemplateRequest {
         name: string;
         designation: string;
         id: string;
-        image?: string;
+        /** Always required by the API — pass empty string if no image */
+        image: string;
       }>;
     };
   };
 }
 
 export class CertificateService {
-  /** Step 1: Create the certificate asset record */
+  /** Create the certificate asset record (SVG template) */
   async createAsset(
     assetData: CreateAssetRequest,
     headers?: Record<string, string>
   ): Promise<ApiResponse<AssetCreateResponse>> {
     return getClient().post<AssetCreateResponse>(
-      '/content/asset/v1/create',
+      '/asset/v1/create',
       { request: { asset: assetData } },
       headers
     );
   }
 
-  /** Step 2: Upload the SVG file to the created asset */
+  /** Create a generic image asset record (for logo/signature prior to upload) */
+  async createImageAsset(
+    name: string,
+    mimeType: string,
+    channel: string,
+    headers?: Record<string, string>
+  ): Promise<ApiResponse<AssetCreateResponse>> {
+    return getClient().post<AssetCreateResponse>(
+      '/asset/v1/create',
+      {
+        request: {
+          asset: {
+            name,
+            code: name,
+            mimeType,
+            license: 'CC BY 4.0',
+            primaryCategory: 'Asset',
+            mediaType: 'image',
+            channel,
+          },
+        },
+      },
+      headers
+    );
+  }
+
+  /** Upload an SVG file to the created asset */
   async uploadAsset(
     assetId: string,
     svgBlob: Blob,
     fileName: string,
     headers?: Record<string, string>
   ): Promise<ApiResponse<{ artifactUrl: string; content_url: string }>> {
-    const formData = new FormData();
-    formData.append('file', svgBlob, fileName);
+    return this._uploadFile(assetId, svgBlob, fileName, headers);
+  }
 
-    // We need to send multipart — use fetch directly since our http-client doesn't support FormData
-    const response = await fetch(`/portal/content/asset/v1/upload/${assetId}`, {
+  /** Upload a PNG/JPG image asset (logo or signature) */
+  async uploadImageAsset(
+    assetId: string,
+    imageFile: File | Blob,
+    fileName: string,
+    headers?: Record<string, string>
+  ): Promise<ApiResponse<{ artifactUrl: string; content_url: string }>> {
+    return this._uploadFile(assetId, imageFile, fileName, headers);
+  }
+
+  private async _uploadFile(
+    assetId: string,
+    file: File | Blob,
+    fileName: string,
+    headers?: Record<string, string>
+  ): Promise<ApiResponse<{ artifactUrl: string; content_url: string }>> {
+    const formData = new FormData();
+    formData.append('file', file, fileName);
+
+    const response = await fetch(`/portal/asset/v1/upload/${assetId}`, {
       method: 'POST',
       body: formData,
       headers: headers ?? {},
@@ -96,38 +160,86 @@ export class CertificateService {
     };
   }
 
-  /** Step 3: Attach the certificate template to the batch */
+  /** Attach the certificate template to the batch */
   async addTemplateToBatch(
     request: AddTemplateRequest,
     headers?: Record<string, string>
   ): Promise<ApiResponse<unknown>> {
     return getClient().patch<unknown>(
-      '/certreg/v1/template/add',
+      'course/batch/cert/v1/template/add',
       { request },
       headers
     );
   }
 
-  /** Search for image assets (logos) in the org */
+  /** Search for image assets (logos/signatures already uploaded) in the org.
+   *  Pass `createdBy` to filter to the current user's own uploads (My Images tab).
+   *  Omit it to get all org images (All Images tab).
+   */
   async searchLogos(
     channel: string,
-    offset = 0
+    createdBy?: string
   ): Promise<ApiResponse<{ count: number; content: any[] }>> {
+    const filters: Record<string, unknown> = {
+      mediaType: ['image'],
+      contentType: ['Asset'],
+      compatibilityLevel: { min: 1, max: 2 },
+      status: ['Live'],
+      primaryCategory: 'Asset',
+      channel,
+    };
+    if (createdBy) filters.createdBy = createdBy;
+
     return getClient().post<{ count: number; content: any[] }>(
-      '/api/content/v1/search',
+      '/content/v1/search',
+      {
+        request: {
+          filters,
+          sort_by: { lastUpdatedOn: 'desc' },
+          limit: 50,
+          offset: 0,
+        },
+      }
+    );
+  }
+
+  /** Fetch the full details of a single cert template (includes signatoryList.image) */
+  async readCertTemplate(
+    identifier: string
+  ): Promise<ApiResponse<{ content: any }>> {
+    return getClient().get<{ content: any }>(
+      `/content/v1/read/${identifier}?fields=signatoryList,issuer,artifactUrl,name,identifier`
+    );
+  }
+
+  /** Search existing certificate templates in the org */
+
+  async searchCertTemplates(
+    channel: string
+  ): Promise<ApiResponse<{ count: number; content: CertTemplateSummary[] }>> {
+    return getClient().post<{ count: number; content: CertTemplateSummary[] }>(
+      '/content/v1/search',
       {
         request: {
           filters: {
-            mediaType: ['image'],
-            contentType: ['Asset'],
-            compatibilityLevel: { min: 1, max: 2 },
-            status: ['Live'],
-            primaryCategory: 'Asset',
+            certType: 'cert template',
             channel,
+            mediaType: 'image',
           },
           sort_by: { lastUpdatedOn: 'desc' },
-          limit: 50,
-          offset,
+          fields: [
+            'identifier',
+            'name',
+            'code',
+            'certType',
+            'data',
+            'issuer',
+            'signatoryList',
+            'artifactUrl',
+            'primaryCategory',
+            'channel',
+          ],
+          limit: 100,
         },
       }
     );

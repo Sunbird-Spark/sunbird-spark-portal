@@ -21,7 +21,7 @@ export const useBatchList = (courseId: string | undefined): UseQueryResult<Batch
       return response?.data?.response?.content ?? [];
     },
     enabled: !!courseId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 0,
     retry: 1,
   });
 };
@@ -36,6 +36,7 @@ export interface CreateBatchFormData {
   mentors?: string[];
   tandc: boolean;
   enrollmentEndDate?: string;
+  issueCertificate?: boolean;
 }
 
 /** Data for updating an existing batch */
@@ -48,6 +49,7 @@ export interface UpdateBatchFormData {
   endDate: string;
   mentors?: string[];
   enrollmentEndDate?: string;
+  issueCertificate?: boolean;
 }
 
 async function resolveUserAndOrg() {
@@ -91,13 +93,13 @@ export const useCreateBatch = () => {
       if (formData.description) request.description = formData.description;
       if (formData.mentors?.length) request.mentors = formData.mentors;
       if (formData.enrollmentEndDate) request.enrollmentEndDate = formData.enrollmentEndDate;
+      if (formData.issueCertificate !== undefined) request.issueCertificate = formData.issueCertificate;
 
       const reqHeaders: Record<string, string> = {
         'X-User-ID': userId,
       };
       if (rootOrgId) {
         reqHeaders['X-Channel-Id'] = rootOrgId;
-        reqHeaders['X-Org-code'] = rootOrgId;
       }
 
       return batchService.createBatch(request, reqHeaders);
@@ -133,6 +135,7 @@ export const useUpdateBatch = () => {
       };
       if (formData.description) request.description = formData.description;
       if (formData.enrollmentEndDate) request.enrollmentEndDate = formData.enrollmentEndDate;
+      if (formData.issueCertificate !== undefined) request.issueCertificate = formData.issueCertificate;
 
       const reqHeaders: Record<string, string> = {
         'X-User-ID': userId,

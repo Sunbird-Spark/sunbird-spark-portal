@@ -96,7 +96,8 @@ const makeInitialForm = (batch?: Batch): BatchFormState => ({
   startDate: batch?.startDate ?? "",
   endDate: batch?.endDate ?? "",
   enrolmentEndDate: batch?.enrollmentEndDate ?? "",
-  issueCertificate: false,
+  issueCertificate: batch?.issueCertificate ??
+    (batch?.certTemplates != null && Object.keys(batch.certTemplates).length > 0),
   enableDiscussion: false,
   batchType: "Open",
   selectedMentorIds: batch?.mentors ?? [],
@@ -169,6 +170,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
           endDate: form.endDate,
           mentors: form.selectedMentorIds.length > 0 ? form.selectedMentorIds : undefined,
           enrollmentEndDate: form.enrolmentEndDate || undefined,
+          issueCertificate: form.issueCertificate,
         });
       } else {
         await createBatch.mutateAsync({
@@ -180,6 +182,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
           mentors: form.selectedMentorIds.length > 0 ? form.selectedMentorIds : undefined,
           tandc: form.acceptTerms,
           enrollmentEndDate: form.enrolmentEndDate || undefined,
+          issueCertificate: form.issueCertificate,
         });
       }
       onOpenChange(false);
@@ -203,7 +206,6 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
   const isSubmitDisabled =
     !form.batchName.trim() ||
     !form.startDate ||
-    !form.endDate ||
     (!isEditMode && !form.acceptTerms) ||
     isPending;
 
@@ -264,6 +266,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
 
             {/* 3-5. Dates */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Start Date (required) */}
               <div>
                 <label htmlFor="startDate" className={labelClass}>
                   Start Date <span className="text-red-500">*</span>
@@ -273,24 +276,44 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                   type="date"
                   className={inputClass}
                   value={form.startDate}
-                  onChange={(e) => handleField("startDate", e.target.value)}
+                  onChange={(e) => {
+                    const newStart = e.target.value;
+                    const updates: Partial<BatchFormState> = { startDate: newStart };
+                    if (form.enrolmentEndDate && newStart > form.enrolmentEndDate)
+                      updates.enrolmentEndDate = "";
+                    if (form.endDate && newStart > form.endDate)
+                      updates.endDate = "";
+                    setForm((prev) => ({ ...prev, ...updates }));
+                  }}
                   required
                 />
               </div>
+
+              {/* End Date — optional; must be >= startDate AND >= enrolmentEndDate */}
               <div>
                 <label htmlFor="endDate" className={labelClass}>
-                  End Date <span className="text-red-500">*</span>
+                  End Date
                 </label>
                 <input
                   id="endDate"
                   type="date"
                   className={inputClass}
                   value={form.endDate}
-                  min={form.startDate}
+                  min={
+                    form.enrolmentEndDate && form.enrolmentEndDate > (form.startDate || "")
+                      ? form.enrolmentEndDate
+                      : form.startDate || undefined
+                  }
                   onChange={(e) => handleField("endDate", e.target.value)}
-                  required
                 />
+                {form.enrolmentEndDate && !form.endDate && (
+                  <p className="mt-0.5 text-xs text-amber-600 font-['Rubik']">
+                    Must be on or after enrolment end date
+                  </p>
+                )}
               </div>
+
+              {/* Enrolment End Date — optional; bounded between startDate and endDate */}
               <div>
                 <label htmlFor="enrolmentEndDate" className={labelClass}>
                   Enrolment End Date
@@ -300,9 +323,15 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                   type="date"
                   className={inputClass}
                   value={form.enrolmentEndDate}
+                  min={form.startDate || undefined}
                   max={form.endDate || undefined}
                   onChange={(e) => handleField("enrolmentEndDate", e.target.value)}
                 />
+                {form.startDate && (
+                  <p className="mt-0.5 text-xs text-muted-foreground font-['Rubik']">
+                    Between start{form.endDate ? " & end date" : " date"}
+                  </p>
+                )}
               </div>
             </div>
 
