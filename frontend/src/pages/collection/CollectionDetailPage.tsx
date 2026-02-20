@@ -12,12 +12,19 @@ import { useContentSearch } from "@/hooks/useContent";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
+import BatchCard from "@/components/collection/BatchCard";
+import { useAuth } from "@/auth/AuthContext";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { useIsContentCreator } from "@/hooks/useUser";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated: contextAuth } = useAuth();
+  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+  const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const showLoading = isLoading || (isError && isFetching);
@@ -113,11 +120,10 @@ const CollectionDetailPage = () => {
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
           <>
         {/* Title Row */}
-        <div className="flex items-start justify-between mb-2">
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">
+        <div className="mb-2">
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground">
             {collectionData.title}
           </h1>
-
         </div>
 
         {/* Stats Row */}
@@ -130,8 +136,13 @@ const CollectionDetailPage = () => {
           {/* Left Column */}
           <CollectionOverview collectionData={displayCollectionData} />
 
-          {/* Right Sidebar - Lessons Accordion */}
+          {/* Right Sidebar - Batch Card + Lessons Accordion */}
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
+            {isAuthenticated && isContentCreator && collectionId && (
+              <div className="mb-4">
+                <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
+              </div>
+            )}
             <CollectionSidebar
               modules={collectionData.modules}
               expandedModules={expandedModules}

@@ -11,6 +11,7 @@ describe('OrganizationService', () => {
       post: vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} }),
       put: vi.fn(),
       delete: vi.fn(),
+      patch: vi.fn(),
       updateHeaders: vi.fn(),
     };
     init(mockClient);
