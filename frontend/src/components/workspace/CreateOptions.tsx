@@ -23,14 +23,14 @@ const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
       </div>
 
       {/* Editor Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {editorCategories.map((category) => (
           <div
             key={category.id}
             className={`bg-white rounded-[1.25rem] border-2 ${category.borderColor} shadow-md overflow-hidden`}
           >
             {/* Category Header */}
-            <div className={`${category.accentColor} px-5 py-4`}>
+            <div className={`${category.accentColor} px-5 py-4`} style={category.headerStyle}>
               <h3 className="text-lg font-semibold text-white font-rubik">
                 {category.title}
               </h3>
