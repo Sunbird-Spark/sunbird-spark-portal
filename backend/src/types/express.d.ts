@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 import 'express';
 import { Grant } from 'keycloak-connect';
 
