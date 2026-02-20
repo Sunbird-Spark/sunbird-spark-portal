@@ -52,10 +52,7 @@ const CourseProgressCard = ({
 
   const progressPercentage =
     totalContentCount > 0
-      ? Math.min(
-          100,
-          Math.round((completedContentCount / totalContentCount) * 100)
-        )
+      ? Math.min(100, Math.ceil((completedContentCount / totalContentCount) * 100))
       : 0;
 
   const displayDate = batchStartDate ? formatBatchStartDate(batchStartDate) : null;
