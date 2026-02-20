@@ -23,6 +23,7 @@ const defaultProps = {
   onEdit: vi.fn(),
   onDelete: vi.fn(),
   onView: vi.fn(),
+  userRole: 'creator' as const,
 };
 const mockItem: WorkspaceItem = {
   id: 'item-1',
@@ -34,6 +35,7 @@ const mockItem: WorkspaceItem = {
   updatedAt: '2024-01-02T00:00:00Z',
   author: 'user-1',
   primaryCategory: 'Course',
+  contentType: '',
 };
 
 vi.mock('@/components/workspace/CreateOptions', () => ({

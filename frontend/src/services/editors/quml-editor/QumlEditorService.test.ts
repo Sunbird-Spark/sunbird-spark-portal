@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QumlEditorService, type QuestionSetMetadata } from './';
 import appCoreService from '../../AppCoreService';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
+import { SystemSettingService } from '../../SystemSettingService';
 
 vi.mock('../../userAuthInfoService/userAuthInfoService');
+vi.mock('../../SystemSettingService');
 
 describe('QumlEditorService', () => {
   beforeEach(() => {
@@ -32,11 +34,14 @@ describe('QumlEditorService', () => {
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
     vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-123');
     vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' });
+    vi.spyOn(SystemSettingService.prototype, 'read').mockResolvedValue({
+      data: { response: { value: 'default-channel' } },
+    } as any);
     // Match the structure expected by QumlEditorService: data.response.content
     vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({ 
       data: { 
         response: { 
-          content: [{ channel: 'channel-from-metadata' }] 
+          content: [{ hashTagId: 'channel-from-metadata' }]
         } 
       } 
     });
