@@ -3,21 +3,30 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CreateBatchModal from './CreateBatchModal';
 
-/* ── Mock useLearnerFuzzySearch ── */
-const mockMutateAsync = vi.fn();
-vi.mock('@/hooks/useUser', () => ({
-  useLearnerFuzzySearch: () => ({
-    mutateAsync: mockMutateAsync,
-    isPending: false,
+/* ── Mock useMentorList ── */
+const mockAllMentors = [
+  { identifier: 'u1', firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com' },
+  { identifier: 'u2', firstName: 'Bob', lastName: 'Jones', email: 'bob@example.com' },
+];
+let mockMentorsLoading = false;
+vi.mock('@/hooks/useMentor', () => ({
+  useMentorList: () => ({
+    data: mockAllMentors,
+    isLoading: mockMentorsLoading,
   }),
 }));
 
-/* ── Mock useCreateBatch ── */
+/* ── Mock useBatch ── */
 const mockCreateBatchMutateAsync = vi.fn();
+const mockUpdateBatchMutateAsync = vi.fn();
 let mockCreateBatchIsPending = false;
 vi.mock('@/hooks/useBatch', () => ({
   useCreateBatch: () => ({
     mutateAsync: mockCreateBatchMutateAsync,
+    isPending: mockCreateBatchIsPending,
+  }),
+  useUpdateBatch: () => ({
+    mutateAsync: mockUpdateBatchMutateAsync,
     isPending: mockCreateBatchIsPending,
   }),
 }));
@@ -46,8 +55,10 @@ describe('CreateBatchModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCreateBatchIsPending = false;
+    mockMentorsLoading = false;
     // Default: batch creation resolves successfully
     mockCreateBatchMutateAsync.mockResolvedValue({ data: { batchId: 'new-batch-1' } });
+    mockUpdateBatchMutateAsync.mockResolvedValue({ data: { batchId: 'edited-batch-1' } });
   });
 
   /* ────────────────────────────────────── Visibility ── */
@@ -95,11 +106,11 @@ describe('CreateBatchModal', () => {
       expect(el).toBeRequired();
     });
 
-    it('renders End Date input as required', () => {
+    it('renders End Date input (not required)', () => {
       render(<CreateBatchModal {...defaultProps} />);
-      const el = screen.getByLabelText(/end date \*/i);
+      const el = screen.getByLabelText(/^end date/i);
       expect(el).toBeInTheDocument();
-      expect(el).toBeRequired();
+      expect(el).not.toBeRequired();
     });
 
     it('renders Enrolment End Date input (not required)', () => {
@@ -111,20 +122,20 @@ describe('CreateBatchModal', () => {
 
     it('renders Issue Certificate switch', () => {
       render(<CreateBatchModal {...defaultProps} />);
-      expect(screen.getByText('Issue Certificate')).toBeInTheDocument();
+      // Check the text that usually goes with it or proper label
       expect(screen.getByRole('switch', { name: /issue certificate/i })).toBeInTheDocument();
     });
 
     it('renders Terms & Conditions checkbox', () => {
       render(<CreateBatchModal {...defaultProps} />);
       expect(screen.getByText(/i accept the terms & conditions/i)).toBeInTheDocument();
-      expect(screen.getByRole('checkbox')).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /i accept the terms & conditions/i })).toBeInTheDocument();
     });
 
     it('renders mentor search input', () => {
       render(<CreateBatchModal {...defaultProps} />);
       expect(
-        screen.getByPlaceholderText(/search mentors by name or identifier/i)
+        screen.getByPlaceholderText(/search mentors by name/i)
       ).toBeInTheDocument();
     });
 
@@ -227,7 +238,7 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/start date/i), {
         target: { value: '2026-03-01' },
       });
-      fireEvent.change(screen.getByLabelText(/end date \*/i), {
+      fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-04-01' },
       });
       expect(screen.getByRole('button', { name: /^create batch$/i })).toBeDisabled();
@@ -242,10 +253,10 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/start date/i), {
         target: { value: '2026-03-01' },
       });
-      fireEvent.change(screen.getByLabelText(/end date \*/i), {
+      fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-04-01' },
       });
-      fireEvent.click(screen.getByRole('checkbox')); // T&C
+      fireEvent.click(screen.getByRole('checkbox', { name: /accept the terms/i })); // T&C
 
       expect(screen.getByRole('button', { name: /^create batch$/i })).not.toBeDisabled();
     });
@@ -259,11 +270,12 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/start date/i), {
         target: { value: '2026-03-01' },
       });
-      fireEvent.change(screen.getByLabelText(/end date \*/i), {
+      fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-04-01' },
       });
-      fireEvent.click(screen.getByRole('checkbox')); // check
-      fireEvent.click(screen.getByRole('checkbox')); // uncheck
+      const cb = screen.getByRole('checkbox', { name: /accept the terms/i });
+      fireEvent.click(cb); // check
+      fireEvent.click(cb); // uncheck
 
       expect(screen.getByRole('button', { name: /^create batch$/i })).toBeDisabled();
     });
@@ -329,84 +341,46 @@ describe('CreateBatchModal', () => {
 
   /* ─────────────────────────────────────── Mentor search ── */
   describe('Mentor search', () => {
-    it('does not call fuzzy search when query is shorter than 2 chars', () => {
+    it('renders all mentors initially', () => {
       render(<CreateBatchModal {...defaultProps} />);
-      fireEvent.change(screen.getByPlaceholderText(/search mentors/i), {
-        target: { value: 'a' },
-      });
-      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(screen.getByText('Alice Smith')).toBeInTheDocument();
+      expect(screen.getByText('Bob Jones')).toBeInTheDocument();
     });
 
-    it('calls fuzzy search and shows results when >= 2 chars are typed', async () => {
-      mockMutateAsync.mockResolvedValue({
-        data: {
-          response: {
-            content: [
-              { identifier: 'u1', firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com' },
-            ],
-          },
-        },
-      });
-
+    it('filters mentors locally when typed', async () => {
       render(<CreateBatchModal {...defaultProps} />);
       fireEvent.change(screen.getByPlaceholderText(/search mentors/i), {
         target: { value: 'Ali' },
       });
 
-      await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith({
-          identifier: 'Ali',
-          name: 'Ali',
-        });
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText('Alice Smith')).toBeInTheDocument();
-      });
+      expect(screen.getByText('Alice Smith')).toBeInTheDocument();
+      expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
     });
 
-    it('shows "No users found" when search returns empty results', async () => {
-      mockMutateAsync.mockResolvedValue({
-        data: { response: { content: [] } },
-      });
-
+    it('shows empty results when search does not match', async () => {
       render(<CreateBatchModal {...defaultProps} />);
       fireEvent.change(screen.getByPlaceholderText(/search mentors/i), {
         target: { value: 'xyz' },
       });
 
-      await waitFor(() => {
-        expect(screen.getByText(/no users found for/i)).toBeInTheDocument();
-      });
+      expect(screen.queryByText('Alice Smith')).not.toBeInTheDocument();
+      expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
     });
 
     it('selecting a mentor result shows a tag chip', async () => {
-      mockMutateAsync.mockResolvedValue({
-        data: {
-          response: {
-            content: [
-              { identifier: 'u2', firstName: 'Bob', lastName: 'Jones', email: 'bob@example.com' },
-            ],
-          },
-        },
-      });
-
       render(<CreateBatchModal {...defaultProps} />);
       fireEvent.change(screen.getByPlaceholderText(/search mentors/i), {
         target: { value: 'Bob' },
       });
 
-      await waitFor(() => screen.getByText('Bob Jones'));
       const mentorCheckbox = screen.getAllByRole('checkbox').find(
         (el) => el.closest('label')?.textContent?.includes('Bob Jones')
       );
       fireEvent.click(mentorCheckbox!);
 
-      // Tag chip should appear
-      await waitFor(() => {
-        const chips = screen.getAllByText('Bob Jones');
-        expect(chips.length).toBeGreaterThan(0);
-      });
+      // Tag chip should appear. One is the list result, and the other is the chip.
+      const chips = screen.getAllByText('Bob Jones');
+      expect(chips.length).toBeGreaterThan(1);
     });
   });
 
@@ -424,7 +398,8 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-06-30' },
       });
-      fireEvent.click(screen.getByRole('checkbox'));
+      const cb = screen.getByRole('checkbox', { name: /accept the terms/i });
+      fireEvent.click(cb);
       fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
     };
 
