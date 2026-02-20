@@ -34,6 +34,11 @@ vi.mock('@/hooks/use-mobile', () => ({
     useIsMobile: () => mockUseIsMobile(),
 }));
 
+vi.mock('@/components/common/SearchModal', () => ({
+    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
+        isOpen ? <div data-testid="search-modal">Search Modal<button onClick={onClose}>Close</button></div> : null,
+}));
+
 describe('AuthenticatedHeader', () => {
     const mockOnToggleSidebar = vi.fn();
 
@@ -64,27 +69,27 @@ describe('AuthenticatedHeader', () => {
             expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
         });
 
-        it('renders search input on desktop', () => {
+        it('renders search button on desktop', () => {
             render(
                 <MemoryRouter>
                     <AuthenticatedHeader isSidebarOpen={true} onToggleSidebar={mockOnToggleSidebar} />
                 </MemoryRouter>
             );
 
-            expect(screen.getByPlaceholderText('header.search')).toBeInTheDocument();
+            expect(screen.getByLabelText('Search')).toBeInTheDocument();
         });
 
-        it('navigates to search page when search container is clicked', () => {
+        it('opens search modal when search button is clicked', () => {
             render(
                 <MemoryRouter>
                     <AuthenticatedHeader isSidebarOpen={true} onToggleSidebar={mockOnToggleSidebar} />
                 </MemoryRouter>
             );
 
-            const searchContainer = screen.getByPlaceholderText('header.search').closest('div');
-            fireEvent.click(searchContainer!);
+            const searchButton = screen.getByLabelText('Search');
+            fireEvent.click(searchButton);
 
-            expect(mockNavigate).toHaveBeenCalledWith('/search');
+            expect(screen.getByTestId('search-modal')).toBeInTheDocument();
         });
     });
 
@@ -111,10 +116,9 @@ describe('AuthenticatedHeader', () => {
             );
 
             expect(screen.getByLabelText('Search')).toBeInTheDocument();
-            expect(screen.queryByPlaceholderText('header.search')).not.toBeInTheDocument();
         });
 
-        it('navigates to search when mobile search button is clicked', () => {
+        it('opens search modal when mobile search button is clicked', () => {
             render(
                 <MemoryRouter>
                     <AuthenticatedHeader isSidebarOpen={true} onToggleSidebar={mockOnToggleSidebar} />
@@ -124,7 +128,7 @@ describe('AuthenticatedHeader', () => {
             const searchBtn = screen.getByLabelText('Search');
             fireEvent.click(searchBtn);
 
-            expect(mockNavigate).toHaveBeenCalledWith('/search');
+            expect(screen.getByTestId('search-modal')).toBeInTheDocument();
         });
 
         it('calls onToggleSidebar when mobile menu is clicked', () => {

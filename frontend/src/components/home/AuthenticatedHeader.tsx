@@ -1,14 +1,14 @@
+import { useState } from "react";
 import { FiSearch, FiBell, FiChevronDown } from "react-icons/fi";
-import { Input } from "@/components/common/Input";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/common/DropdownMenu";
-import { useNavigate } from "react-router-dom";
 import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import { useIsMobile } from "@/hooks/use-mobile";
+import SearchModal from "@/components/common/SearchModal";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
@@ -19,9 +19,9 @@ interface AuthenticatedHeaderProps {
 }
 
 const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHeaderProps) => {
-    const navigate = useNavigate();
     const isMobile = useIsMobile();
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     return (
         <header className={`profile-header ${isMobile ? 'mobile' : ''}`}>
@@ -56,29 +56,13 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
 
                 {/* Right: Search + Notifications + Language */}
                 <div className="profile-header-actions">
-                    {isMobile ? (
-                        <button
-                            onClick={() => navigate('/search')}
-                            className="profile-search-btn-mobile"
-                            aria-label="Search"
-                        >
-                            <FiSearch className="h-5 w-5" />
-                        </button>
-                    ) : (
-                        <div
-                            className="profile-search-container"
-                            onClick={() => navigate('/search')}
-                        >
-                            <Input
-                                placeholder={t("header.search")}
-                                readOnly
-                                className="pl-4 pr-10 bg-white border-border focus:border-sunbird-ginger focus:ring-sunbird-ginger/20 rounded-[0.5625rem] h-[2.875rem] text-base cursor-pointer placeholder:text-sunbird-obsidian pointer-events-none"
-                            />
-                            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-brick hover:text-sunbird-brick/80">
-                                <FiSearch className="w-4 h-4" />
-                            </button>
-                        </div>
-                    )}
+                    <button
+                        onClick={() => setIsSearchOpen(true)}
+                        className="profile-action-btn"
+                        aria-label="Search"
+                    >
+                        <FiSearch className="profile-action-icon" aria-hidden="true" />
+                    </button>
 
                     {/* Notifications */}
                     <button className="profile-action-btn" aria-label="Notifications">
@@ -110,6 +94,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                     </DropdownMenu>
                 </div>
             </div>
+            <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         </header>
     );
 };

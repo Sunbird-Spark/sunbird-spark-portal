@@ -19,6 +19,11 @@ vi.mock('@/components/home/HomeInProgressGrid', () => ({ default: () => <div dat
 vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
 vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
+vi.mock('@/components/common/SearchModal', () => ({
+    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
+        isOpen ? <div data-testid="search-modal">Search Modal<button onClick={onClose}>Close</button></div> : null,
+}));
+
 // Mock DropdownMenu to render content inline
 vi.mock('@/components/common/DropdownMenu', () => ({
     DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -136,14 +141,17 @@ describe('Home Page', () => {
         expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();
     });
 
-    it('navigates to search when search bar is clicked', async () => {
+    it('opens search modal when search button is clicked', async () => {
         renderHome();
         await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        const searchInput = screen.getByPlaceholderText('header.search');
-        fireEvent.click(searchInput.parentElement!);
+        const searchButton = screen.getByLabelText('Search');
+        fireEvent.click(searchButton);
 
-        expect(mockNavigate).toHaveBeenCalledWith('/search');
+        // SearchModal should open (mocked in the test setup)
+        await waitFor(() => {
+            expect(screen.getByTestId('search-modal')).toBeInTheDocument();
+        });
     });
 
     it('changes language through the dropdown', async () => {
