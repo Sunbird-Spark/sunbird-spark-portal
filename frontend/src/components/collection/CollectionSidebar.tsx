@@ -52,7 +52,10 @@ const CollectionSidebar = ({
 }: CollectionSidebarProps) => {
   const { t } = useAppI18n();
   return (
-    <div className="space-y-3">
+    <div
+      className={`space-y-3 ${contentBlocked ? "opacity-80 select-none" : ""}`}
+      aria-disabled={contentBlocked || undefined}
+    >
       {modules.map((module) => {
         const isExpanded = expandedModules.includes(module.id);
 
@@ -62,21 +65,49 @@ const CollectionSidebar = ({
             open={isExpanded}
             onOpenChange={() => toggleModule(module.id)}
           >
-            <div className="bg-white rounded-xl border border-gray-100 transition-all duration-300 overflow-hidden">
+            <div
+              className={`rounded-xl border transition-all duration-300 overflow-hidden ${
+                contentBlocked
+                  ? "bg-gray-100 border-gray-200"
+                  : "bg-white border-gray-100"
+              }`}
+            >
               <CollapsibleTrigger asChild>
-                <button className="w-full p-4 flex items-start justify-between text-left hover:bg-gray-50 transition-colors">
+                <button
+                  className={`w-full p-4 flex items-start justify-between text-left transition-colors ${
+                    contentBlocked
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:bg-gray-50"
+                  }`}
+                >
                   <div className="flex-1 pr-4">
-                    <h3 className="font-bold text-lg mb-1 text-foreground">
+                    <h3
+                      className={`font-bold text-lg mb-1 ${
+                        contentBlocked ? "text-muted-foreground" : "text-foreground"
+                      }`}
+                    >
                       {module.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p
+                      className={`text-sm ${
+                        contentBlocked ? "text-gray-400" : "text-muted-foreground"
+                      }`}
+                    >
                       {module.subtitle}
                     </p>
                   </div>
                   {isExpanded ? (
-                    <FiChevronUp className="w-5 h-5 text-sunbird-brick flex-shrink-0 mt-0.5" />
+                    <FiChevronUp
+                      className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                        contentBlocked ? "text-muted-foreground" : "text-sunbird-brick"
+                      }`}
+                    />
                   ) : (
-                    <FiChevronDown className="w-5 h-5 text-sunbird-brick flex-shrink-0 mt-0.5" />
+                    <FiChevronDown
+                      className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                        contentBlocked ? "text-muted-foreground" : "text-sunbird-brick"
+                      }`}
+                    />
                   )}
                 </button>
               </CollapsibleTrigger>
