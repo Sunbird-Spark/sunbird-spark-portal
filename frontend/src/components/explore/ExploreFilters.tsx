@@ -39,7 +39,11 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
         [...(group.options ?? group.list ?? [])].sort((a, b) => a.index - b.index);
 
     const getValues = (option: ExploreFilterOption): string[] =>
-        Array.isArray(option.value) ? option.value : [option.value];
+        Array.isArray(option.value)
+            ? option.value
+            : option.value
+                ? [option.value]
+                : [];
 
     const isChecked = (option: ExploreFilterOption): boolean => {
         const values = getValues(option);
