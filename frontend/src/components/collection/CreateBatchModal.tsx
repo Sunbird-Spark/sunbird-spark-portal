@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiX, FiCheck, FiSearch, FiLoader } from "react-icons/fi";
@@ -7,65 +7,10 @@ import { useMentorList, MentorUser } from "@/hooks/useMentor";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
-/* ─── Switch primitives ─── */
-
-const SwitchToggle = ({
-  id,
-  checked,
-  onChange,
-}: {
-  id: string;
-  checked: boolean;
-  onChange: (val: boolean) => void;
-}) => (
-  <button
-    id={id}
-    type="button"
-    role="switch"
-    aria-checked={checked}
-    onClick={() => onChange(!checked)}
-    className={cn(
-      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-sunbird-brick/30 focus:ring-offset-2",
-      checked ? "bg-sunbird-brick" : "bg-gray-300"
-    )}
-  >
-    <span
-      className={cn(
-        "inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200",
-        checked ? "translate-x-6" : "translate-x-1"
-      )}
-    />
-  </button>
-);
-
-interface SwitchRowProps {
-  id: string;
-  checked: boolean;
-  onChange: (val: boolean) => void;
-  label: string;
-  valueLabel?: string;
-}
-
-const SwitchRow = ({ id, checked, onChange, label, valueLabel }: SwitchRowProps) => (
-  <div className="flex items-center justify-between gap-4">
-    <label htmlFor={id} className="text-sm font-medium text-foreground font-['Rubik'] cursor-pointer">
-      {label}
-    </label>
-    <div className="flex items-center gap-2">
-      {valueLabel && (
-        <span
-          className={cn(
-            "text-xs font-medium font-['Rubik'] transition-colors",
-            checked ? "text-sunbird-brick" : "text-muted-foreground"
-          )}
-        >
-          {valueLabel}
-        </span>
-      )}
-      <SwitchToggle id={id} checked={checked} onChange={onChange} />
-    </div>
-  </div>
-);
+import { SwitchRow } from "@/components/common/Switch";
+import { CheckboxRow } from "@/components/common/CheckboxRow";
+import { MentorSection } from "@/components/collection/MentorSection";
+import { BatchFormFields, BatchFormState } from "@/components/collection/BatchFormFields";
 
 /* ─── Types ─── */
 
@@ -77,18 +22,7 @@ interface CreateBatchModalProps {
   initialBatch?: Batch;
 }
 
-interface BatchFormState {
-  batchName: string;
-  aboutBatch: string;
-  startDate: string;
-  endDate: string;
-  enrolmentEndDate: string;
-  issueCertificate: boolean;
-  enableDiscussion: boolean;
-  batchType: string;
-  selectedMentorIds: string[];
-  acceptTerms: boolean;
-}
+
 
 const makeInitialForm = (batch?: Batch): BatchFormState => ({
   batchName: batch?.name ?? "",
@@ -145,16 +79,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     }));
   };
 
-  // Filter mentors by query text (client-side filter since the list is usually small)
-  const filteredMentors: MentorUser[] =
-    mentorQuery.trim().length >= 1
-      ? allMentors.filter((u) => {
-          const name = [u.firstName, u.lastName].filter(Boolean).join(" ").toLowerCase();
-          const email = (u.maskedEmail ?? u.email ?? "").toLowerCase();
-          const q = mentorQuery.toLowerCase();
-          return name.includes(q) || email.includes(q) || u.identifier.toLowerCase().includes(q);
-        })
-      : allMentors;
+  const filteredMentors = undefined; // Removed inline filtering logic
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,107 +158,14 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
 
-            {/* 1. Name of Batch */}
-            <div>
-              <label htmlFor="batchName" className={labelClass}>
-                Name of Batch <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="batchName"
-                type="text"
-                className={inputClass}
-                placeholder="Enter batch name"
-                value={form.batchName}
-                onChange={(e) => handleField("batchName", e.target.value)}
-                required
-              />
-            </div>
-
-            {/* 2. About Batch */}
-            <div>
-              <label htmlFor="aboutBatch" className={labelClass}>
-                About Batch
-              </label>
-              <textarea
-                id="aboutBatch"
-                rows={3}
-                className={cn(inputClass, "resize-none")}
-                placeholder="Brief description about this batch"
-                value={form.aboutBatch}
-                onChange={(e) => handleField("aboutBatch", e.target.value)}
-              />
-            </div>
-
-            {/* 3-5. Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Start Date (required) */}
-              <div>
-                <label htmlFor="startDate" className={labelClass}>
-                  Start Date <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="startDate"
-                  type="date"
-                  className={inputClass}
-                  value={form.startDate}
-                  onChange={(e) => {
-                    const newStart = e.target.value;
-                    const updates: Partial<BatchFormState> = { startDate: newStart };
-                    if (form.enrolmentEndDate && newStart > form.enrolmentEndDate)
-                      updates.enrolmentEndDate = "";
-                    if (form.endDate && newStart > form.endDate)
-                      updates.endDate = "";
-                    setForm((prev) => ({ ...prev, ...updates }));
-                  }}
-                  required
-                />
-              </div>
-
-              {/* End Date — optional; must be >= startDate AND >= enrolmentEndDate */}
-              <div>
-                <label htmlFor="endDate" className={labelClass}>
-                  End Date
-                </label>
-                <input
-                  id="endDate"
-                  type="date"
-                  className={inputClass}
-                  value={form.endDate}
-                  min={
-                    form.enrolmentEndDate && form.enrolmentEndDate > (form.startDate || "")
-                      ? form.enrolmentEndDate
-                      : form.startDate || undefined
-                  }
-                  onChange={(e) => handleField("endDate", e.target.value)}
-                />
-                {form.enrolmentEndDate && !form.endDate && (
-                  <p className="mt-0.5 text-xs text-amber-600 font-['Rubik']">
-                    Must be on or after enrolment end date
-                  </p>
-                )}
-              </div>
-
-              {/* Enrolment End Date — optional; bounded between startDate and endDate */}
-              <div>
-                <label htmlFor="enrolmentEndDate" className={labelClass}>
-                  Enrolment End Date
-                </label>
-                <input
-                  id="enrolmentEndDate"
-                  type="date"
-                  className={inputClass}
-                  value={form.enrolmentEndDate}
-                  min={form.startDate || undefined}
-                  max={form.endDate || undefined}
-                  onChange={(e) => handleField("enrolmentEndDate", e.target.value)}
-                />
-                {form.startDate && (
-                  <p className="mt-0.5 text-xs text-muted-foreground font-['Rubik']">
-                    Between start{form.endDate ? " & end date" : " date"}
-                  </p>
-                )}
-              </div>
-            </div>
+            {/* 1-5. Batch form fields */}
+            <BatchFormFields
+              form={form}
+              handleField={handleField}
+              setForm={setForm}
+              labelClass={labelClass}
+              inputClass={inputClass}
+            />
 
             {/* 6. Issue Certificate + Batch Type */}
             <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
@@ -352,93 +184,16 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
             </div>
 
             {/* 7. Mentors */}
-            <div>
-              <label className={labelClass}>Mentors in the Batch</label>
-
-              {/* Search box */}
-              <div className="relative mb-2">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  className={cn(inputClass, "pl-9")}
-                  placeholder="Search mentors by name or email…"
-                  value={mentorQuery}
-                  onChange={(e) => setMentorQuery(e.target.value)}
-                />
-                {mentorsLoading && (
-                  <FiLoader className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
-                )}
-              </div>
-
-              {/* Mentor list */}
-              {filteredMentors.length > 0 && (
-                <div className="rounded-lg border border-border bg-white shadow-sm max-h-40 overflow-y-auto divide-y divide-border">
-                  {filteredMentors.map((user) => {
-                    const isSelected = form.selectedMentorIds.includes(user.identifier);
-                    const displayName =
-                      [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-                      user.maskedEmail ||
-                      user.email ||
-                      user.identifier;
-                    return (
-                      <label
-                        key={user.identifier}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors",
-                          isSelected && "bg-sunbird-brick/5"
-                        )}
-                      >
-                        <Checkbox.Root
-                          checked={isSelected}
-                          onCheckedChange={() => toggleMentor(user.identifier)}
-                          className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-brick data-[state=checked]:bg-sunbird-brick data-[state=checked]:text-white focus:outline-none"
-                        >
-                          <Checkbox.Indicator>
-                            <FiCheck className="w-3 h-3" />
-                          </Checkbox.Indicator>
-                        </Checkbox.Root>
-                        <span className="text-sm text-foreground font-['Rubik']">{displayName}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-
-              {!mentorsLoading && allMentors.length === 0 && (
-                <p className="text-xs text-muted-foreground mt-1">No mentors found in your organisation.</p>
-              )}
-
-              {/* Selected mentor tags */}
-              {form.selectedMentorIds.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {form.selectedMentorIds.map((id) => {
-                    const user = allMentors.find((u) => u.identifier === id);
-                    const name = user
-                      ? [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-                        user.maskedEmail ||
-                        user.email ||
-                        id
-                      : id;
-                    return (
-                      <span
-                        key={id}
-                        className="inline-flex items-center gap-1 text-xs bg-sunbird-brick/10 text-sunbird-brick rounded-full px-2.5 py-0.5 font-['Rubik']"
-                      >
-                        {name}
-                        <button
-                          type="button"
-                          onClick={() => toggleMentor(id)}
-                          className="hover:opacity-70"
-                          aria-label={`Remove ${name}`}
-                        >
-                          <FiX className="w-3 h-3" />
-                        </button>
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <MentorSection
+              mentorsLoading={mentorsLoading}
+              allMentors={allMentors}
+              mentorQuery={mentorQuery}
+              setMentorQuery={setMentorQuery}
+              selectedMentorIds={form.selectedMentorIds}
+              toggleMentor={toggleMentor}
+              labelClass={labelClass}
+              inputClass={inputClass}
+            />
 
             {/* 8. Terms & Conditions (create mode only) */}
             {!isEditMode && (
@@ -497,34 +252,6 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
   );
 };
 
-/* ─── Checkbox (used only for T&C) ─── */
 
-interface CheckboxRowProps {
-  id: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean | "indeterminate") => void;
-  label: string;
-  required?: boolean;
-}
-
-const CheckboxRow = ({ id, checked, onCheckedChange, label, required }: CheckboxRowProps) => (
-  <label htmlFor={id} className="flex items-center gap-3 cursor-pointer select-none">
-    <Checkbox.Root
-      id={id}
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      required={required}
-      className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-brick data-[state=checked]:bg-sunbird-brick data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40"
-    >
-      <Checkbox.Indicator>
-        <FiCheck className="w-3 h-3" />
-      </Checkbox.Indicator>
-    </Checkbox.Root>
-    <span className="text-sm text-foreground font-['Rubik']">
-      {label}
-      {required && <span className="text-red-500 ml-0.5">*</span>}
-    </span>
-  </label>
-);
 
 export default CreateBatchModal;

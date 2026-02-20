@@ -28,6 +28,7 @@ export type EnrolParams = { courseId: string; userId: string; batchId: string };
  *
  * The overload signatures let callers get the correct return type automatically.
  */
+/* eslint-disable no-redeclare */
 export function useBatchList(
   courseId: string | undefined,
   options: { createdByMe: true; enabled?: boolean }
