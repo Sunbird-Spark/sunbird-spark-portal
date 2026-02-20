@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import { FilterState } from "../../pages/Explore";
@@ -7,9 +6,12 @@ import { FiSearch } from "react-icons/fi";
 import CollectionCard from "../content/CollectionCard";
 import ResourceCard from "../content/ResourceCard";
 import { ContentSearchItem } from "@/types/workspaceTypes";
+import PageLoader from "../common/PageLoader";
 
 // Components
 import EmptyState from "../workspace/EmptyState";
+
+const COLLECTION_MIME_TYPE = "application/vnd.ekstep.content-collection";
 
 interface ExploreGridProps {
     filters: FilterState;
@@ -112,18 +114,37 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
     const isLoading = isQueryLoading && offset === 0;
     const isFetchingMore = isQueryLoading && offset > 0;
 
+    // Show PageLoader for initial load
+    if (isLoading) {
+        return (
+            <div className="flex flex-col pb-8">
+                <PageLoader message={t("loading")} fullPage={false} />
+            </div>
+        );
+    }
+
+    // Show PageLoader for error state
+    if (error && offset === 0) {
+        return (
+            <div className="flex flex-col pb-8">
+                <PageLoader 
+                    error={error} 
+                    onRetry={() => window.location.reload()}
+                    fullPage={false} 
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col pb-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-fr">
                 {displayItems.map((item) => {
-                    const isResource = ['application/pdf', 'application/epub+zip'].includes(item.mimeType || '') || 
-                                     (item.mimeType && (item.mimeType.startsWith('video/') || item.mimeType === 'application/x-mpegURL'));
-                    
-                    if (isResource) {
-                        return <ResourceCard key={item.identifier} item={item} />;
-                    }
-                    
-                    return <CollectionCard key={item.identifier} item={item} />;
+                    return item.mimeType === COLLECTION_MIME_TYPE ? (
+                        <CollectionCard key={item.identifier} item={item} />
+                    ) : (
+                        <ResourceCard key={item.identifier} item={item} />
+                    );
                 })}
                 
                 {!isLoading && displayItems.length === 0 && !error && (
@@ -138,11 +159,10 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
             </div>
             
             <div ref={observerTarget} className="h-10 w-full flex items-center justify-center mt-6">
-                 {(isLoading || isFetchingMore) && (
+                 {isFetchingMore && (
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sunbird-brick"></div>
                 )}
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-                {!hasMore && !(isLoading || isFetchingMore) && displayItems.length > 0 && (
+                {!hasMore && !isFetchingMore && displayItems.length > 0 && (
                     <p className="text-muted-foreground text-sm">No more content to show</p>
                 )}
             </div>
