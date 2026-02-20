@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useNotification";
 import { NotificationFeed } from "@/types/notificationTypes";
 import dayjs from "dayjs";
+import React from 'react';
 
 export const NotificationPopover = () => {
     const [isOpen, setIsOpen] = useState(false);
