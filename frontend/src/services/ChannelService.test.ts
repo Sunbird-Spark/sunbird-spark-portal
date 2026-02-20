@@ -10,6 +10,7 @@ describe('ChannelService', () => {
       get: vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} }),
       post: vi.fn(),
       put: vi.fn(),
+      patch: vi.fn(),
       delete: vi.fn(),
       patch: vi.fn(),
       updateHeaders: vi.fn(),

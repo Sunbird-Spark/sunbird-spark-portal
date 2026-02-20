@@ -54,6 +54,7 @@ export abstract class BaseClient implements IHttpClient {
     this.onResponse(response);
     return response;
   }
+
   public async delete<T>(url: string, data?: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>> {
     const response = await this._delete<T>(url, data, headers);
     this.onResponse(response);
