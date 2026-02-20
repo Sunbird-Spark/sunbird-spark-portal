@@ -30,11 +30,40 @@ const mockCollectionData = {
 /* ── Data hooks ── */
 const mockUseCollection = vi.fn();
 const mockUseContentSearch = vi.fn();
+const mockUseContentRead = vi.fn();
+const mockUseCollectionEnrollment = vi.fn();
+const mockUseQumlContent = vi.fn();
 vi.mock('@/hooks/useCollection', () => ({
   useCollection: (id: string | undefined) => mockUseCollection(id),
 }));
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: (opts: { request?: object; enabled?: boolean }) => mockUseContentSearch(opts),
+  useContentRead: (contentId: string, options?: { enabled?: boolean; fields?: string[] }) => mockUseContentRead(contentId, options),
+}));
+
+const mockEnrollment = {
+  enrollmentForCollection: undefined,
+  isEnrolledInCurrentBatch: false,
+  effectiveBatchId: undefined,
+  contentStatusMap: undefined,
+  courseProgressProps: undefined,
+  batches: [],
+  batchListLoading: false,
+  batchListError: undefined,
+  firstCertPreviewUrl: undefined,
+  hasCertificate: false,
+  joinLoading: false,
+  joinError: '',
+  handleJoinCourse: vi.fn(),
+};
+
+vi.mock('@/hooks/useCollectionEnrollment', () => ({
+  useCollectionEnrollment: (
+    collectionId: string | undefined,
+    batchIdParam: string | undefined,
+    collectionData: any,
+    isAuthenticated: boolean
+  ) => mockUseCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated),
 }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -43,6 +72,17 @@ vi.mock('@/hooks/useAppI18n', () => ({
     languages: [{ code: 'en', label: 'English' }],
     currentCode: 'en',
     changeLanguage: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useQumlContent', () => ({
+  useQumlContent: (questionSetId: string, options?: { enabled?: boolean }) => mockUseQumlContent(questionSetId, options),
+}));
+
+vi.mock('@/hooks/useContentPlayer', () => ({
+  useContentPlayer: (options?: any) => ({
+    handlePlayerEvent: vi.fn(),
+    handleTelemetryEvent: vi.fn(),
   }),
 }));
 
@@ -112,6 +152,28 @@ vi.mock('@/components/common/RelatedContent', () => ({
   ),
 }));
 
+vi.mock('@/components/collection/RelatedContentSection', () => ({
+  default: ({ searchError, searchFetching }: { searchError?: boolean; searchFetching?: boolean }) => (
+    <section data-testid="related-content-section" data-loading={String(!!searchFetching)} data-error={String(!!searchError)}>
+      Related Content Section
+    </section>
+  ),
+}));
+
+vi.mock('@/components/collection/CollectionContentArea', () => ({
+  default: ({ collectionData, contentId }: { collectionData: any; contentId?: string }) => (
+    <div data-testid="collection-content-area" data-content-id={contentId ?? ''}>
+      Collection Content Area: {collectionData?.title}
+    </div>
+  ),
+}));
+
+vi.mock('@/components/collection/CertificatePreviewModal', () => ({
+  default: ({ open, onClose }: { open: boolean; onClose: () => void }) => (
+    open ? <div data-testid="certificate-modal">Certificate Preview</div> : null
+  ),
+}));
+
 /* ── Provider wrapper ── */
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -141,6 +203,19 @@ describe('CollectionDetailPage', () => {
       data: { data: { content: [] } },
       isLoading: false,
       isError: false,
+      isFetching: false,
+    });
+    mockUseContentRead.mockReturnValue({
+      data: { data: { content: null } },
+      isLoading: false,
+      error: null,
+      isFetching: false,
+    });
+    mockUseCollectionEnrollment.mockReturnValue(mockEnrollment);
+    mockUseQumlContent.mockReturnValue({
+      data: null,
+      isLoading: false,
+      error: null,
       isFetching: false,
     });
   });
