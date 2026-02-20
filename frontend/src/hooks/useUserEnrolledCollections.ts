@@ -22,6 +22,6 @@ export const useUserEnrolledCollections = (): UseQueryResult<ApiResponse<CourseE
       return userService.getUserEnrollments(userId);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes cache
-    retry: 1,
+    retry: 1
   });
 };
