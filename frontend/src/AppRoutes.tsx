@@ -23,6 +23,7 @@ import CollectionEditorPage from './pages/content/CollectionEditorPage';
 import Explore from './pages/Explore';
 import MyLearning from './pages/myLearning/MyLearning';
 import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
+import QumlEditorPage from './pages/content/QumlEditorPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
