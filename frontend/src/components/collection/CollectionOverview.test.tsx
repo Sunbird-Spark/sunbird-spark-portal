@@ -41,8 +41,8 @@ const mockCollectionData: CollectionData = {
       title: 'Introduction Unit',
       subtitle: 'Getting started',
       lessons: [
-        { id: 'l1', title: 'Lesson 1', duration: '5:00', type: 'video' },
-        { id: 'l2', title: 'Lesson 2', duration: '10:00', type: 'document' },
+        { id: 'l1', title: 'Lesson 1', type: 'video' },
+        { id: 'l2', title: 'Lesson 2', type: 'document' },
       ],
     },
   ],
@@ -56,6 +56,33 @@ const mockPlayerMetadata = {
 };
 
 describe('CollectionOverview', () => {
+  describe('player area — when contentAccessBlocked is true', () => {
+    it('shows mustJoinToAccessContent message and no PageLoader or ContentPlayer', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentAccessBlocked={true}
+        />
+      );
+      expect(screen.getByText('courseDetails.mustJoinToAccessContent')).toBeInTheDocument();
+      expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+
+    it('shows mustJoinToAccessContent even when contentId is provided', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentId="content-1"
+          contentAccessBlocked={true}
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.mustJoinToAccessContent')).toBeInTheDocument();
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+  });
+
   describe('player area — when no contentId is provided', () => {
     it('shows error PageLoader when contentId is absent', () => {
       render(<CollectionOverview collectionData={mockCollectionData} />);

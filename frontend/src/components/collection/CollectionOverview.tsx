@@ -7,6 +7,8 @@ import PageLoader from "@/components/common/PageLoader";
 interface CollectionOverviewProps {
   collectionData: CollectionData;
   contentId?: string;
+  /** When true (trackable + not logged in or not enrolled), show join message instead of player/error. */
+  contentAccessBlocked?: boolean;
   playerMetadata?: any;
   playerIsLoading?: boolean;
   playerError?: Error | null;
@@ -17,6 +19,7 @@ interface CollectionOverviewProps {
 const CollectionOverview = ({
   collectionData,
   contentId,
+  contentAccessBlocked = false,
   playerMetadata,
   playerIsLoading,
   playerError,
@@ -29,7 +32,15 @@ const CollectionOverview = ({
     <div className="collection-overview-container">
       {/* Player Card */}
       <div className="collection-player-card">
-          {contentId ? (
+          {contentAccessBlocked ? (
+            <div className="collection-player-wrapper">
+              <div className="collection-player-loading">
+                <p className="text-center text-muted-foreground text-sm px-4">
+                  {t("courseDetails.mustJoinToAccessContent")}
+                </p>
+              </div>
+            </div>
+          ) : contentId ? (
             /* Content Player */
             <div className="collection-player-wrapper">
               {playerIsLoading && (

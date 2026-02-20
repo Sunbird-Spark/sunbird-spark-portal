@@ -1,7 +1,6 @@
 export interface Lesson {
   id: string;
   title: string;
-  duration: string;
   type: 'video' | 'document';
   mimeType?: string;
 }
@@ -43,6 +42,78 @@ export interface CourseHierarchyResponse {
   content: HierarchyContentNode;
 }
 
+export const BATCH_STATUS = { Upcoming: 0, Ongoing: 1, Expired: 2 } as const;
+
+export interface BatchListItem {
+  identifier: string;
+  name?: string;
+  startDate?: string;
+  endDate?: string;
+  enrollmentEndDate?: string | null;
+  status?: number;
+  enrollmentType?: string;
+  createdBy?: string;
+  batchId?: string;
+  [key: string]: unknown;
+}
+
+export interface BatchListResponse {
+  response?: {
+    content?: BatchListItem[];
+    count?: number;
+  };
+}
+
+export interface AvailableBatchesCardProps {
+  batches: BatchListItem[];
+  selectedBatchId: string;
+  onBatchSelect: (batchId: string) => void;
+  onJoinCourse: () => void;
+  isLoading?: boolean;
+  joinLoading?: boolean;
+  error?: string;
+  joinError?: string;
+}
+
+export interface CertTemplate {
+  identifier: string;
+  previewUrl?: string;
+  url?: string;
+  name?: string;
+  description?: string;
+  criteria?: unknown;
+  issuer?: unknown;
+  signatoryList?: unknown[];
+}
+
+export interface BatchReadResponse {
+  response?: {
+    identifier?: string;
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+    cert_templates?: Record<string, CertTemplate>;
+    [key: string]: unknown;
+  };
+}
+
+export interface ContentStateItem {
+  contentId: string;
+  status?: number;
+  lastAccessTime?: number;
+  [key: string]: unknown;
+}
+
+export interface ContentStateReadResponse {
+  contentList?: ContentStateItem[];
+}
+
+export interface ContentStateReadRequest {
+  userId: string;
+  courseId: string;
+  batchId: string;
+  contentIds: string[];
+}
 
 import type { ContentSearchItem } from './workspaceTypes';
 

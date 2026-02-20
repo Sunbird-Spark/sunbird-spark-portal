@@ -11,12 +11,11 @@ const mockModules: Module[] = [
     title: 'Module One',
     subtitle: 'First module subtitle',
     lessons: [
-      { id: 'lesson-1', title: 'Video Lesson', duration: '5:00', type: 'video', mimeType: 'video/mp4' },
-      { id: 'lesson-2', title: 'Document Lesson', duration: '—', type: 'document', mimeType: 'application/pdf' },
+      { id: 'lesson-1', title: 'Video Lesson', type: 'video', mimeType: 'video/mp4' },
+      { id: 'lesson-2', title: 'Document Lesson', type: 'document', mimeType: 'application/pdf' },
       {
         id: 'lesson-col',
         title: 'Nested Course',
-        duration: '—',
         type: 'document',
         mimeType: 'application/vnd.ekstep.content-collection',
       },
@@ -27,7 +26,7 @@ const mockModules: Module[] = [
     title: 'Module Two',
     subtitle: 'Second module subtitle',
     lessons: [
-      { id: 'lesson-3', title: 'Another Video', duration: '10:00', type: 'video' },
+      { id: 'lesson-3', title: 'Another Video', type: 'video' },
     ],
   },
 ];
@@ -150,14 +149,6 @@ describe('CollectionSidebar', () => {
     renderSidebar({ ...defaultProps, modules: [] });
 
     expect(screen.queryByText('Module One')).not.toBeInTheDocument();
-  });
-
-  it('renders lesson duration', () => {
-    renderSidebar();
-
-    expect(screen.getByText('5:00')).toBeInTheDocument();
-    const durationDashes = screen.getAllByText('—');
-    expect(durationDashes.length).toBeGreaterThanOrEqual(1);
   });
 
   describe('when contentBlocked is true', () => {
