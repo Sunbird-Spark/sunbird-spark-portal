@@ -1,4 +1,5 @@
-import { FiSearch, FiBell, FiChevronDown } from "react-icons/fi";
+import { useState } from "react";
+import { FiSearch, FiBell, FiChevronDown, FiTrash2 } from "react-icons/fi";
 import { Input } from "@/components/common/Input";
 import {
     DropdownMenu,
@@ -6,12 +7,28 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/common/DropdownMenu";
+import * as Popover from "@radix-ui/react-popover";
 import { useNavigate } from "react-router-dom";
 import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
+
+interface Notification {
+    id: string;
+    message: string;
+    timestamp: string;
+    group: "Today" | "Yesterday" | "Older";
+}
+
+const initialNotifications: Notification[] = [
+    { id: "1", message: "New course has been assigned to group 1 by the book reviewer.", timestamp: "Sun, 08 February, 09:30 am", group: "Today" },
+    { id: "2", message: "An assignment has been added to course module 1.", timestamp: "Sun, 08 February, 08:35 am", group: "Today" },
+    { id: "3", message: "New course has been assigned to group 1 by the book reviewer.", timestamp: "Sat, 07 February, 16:30 pm", group: "Yesterday" },
+    { id: "4", message: "An assignment has been added to course module 1.", timestamp: "Sat, 07 February, 10:30 am", group: "Yesterday" },
+    { id: "5", message: "An assignment has been added to course module 1.", timestamp: "Fri, 06 February, 11:45 am", group: "Older" },
+];
 
 interface AuthenticatedHeaderProps {
     isSidebarOpen: boolean;
@@ -22,6 +39,17 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const { t, languages, currentCode, changeLanguage } = useAppI18n();
+    const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+
+    const handleDeleteNotification = (id: string) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+    };
+
+    const handleDeleteAll = () => {
+        setNotifications([]);
+    };
+
+    const groups: Array<"Today" | "Yesterday" | "Older"> = ["Today", "Yesterday", "Older"];
 
     return (
         <header className={`profile-header ${isMobile ? 'mobile' : ''}`}>
@@ -81,9 +109,66 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                     )}
 
                     {/* Notifications */}
-                    <button className="profile-action-btn" aria-label="Notifications">
-                        <FiBell className="profile-action-icon" aria-hidden="true" />
-                    </button>
+                    <Popover.Root>
+                        <Popover.Trigger asChild>
+                            <button className="profile-action-btn relative" aria-label="Notifications">
+                                <FiBell className="profile-action-icon" aria-hidden="true" />
+                                {notifications.length > 0 && (
+                                    <span className="notification-badge"></span>
+                                )}
+                            </button>
+                        </Popover.Trigger>
+                        <Popover.Portal>
+                        <Popover.Content
+                            align="end"
+                            sideOffset={8}
+                            className="notification-popover-content"
+                        >
+                            <Popover.Arrow className="notification-popover-arrow" width={12} height={6} />
+                            <div className="notification-popover-header">
+                                <h3 className="notification-popover-title">Notifications</h3>
+                                {notifications.length > 0 && (
+                                    <button onClick={handleDeleteAll} className="notification-delete-all-btn">
+                                        Delete All
+                                    </button>
+                                )}
+                            </div>
+                            <div className="notification-list">
+                                {notifications.length === 0 ? (
+                                    <div className="notification-empty">
+                                        No notifications
+                                    </div>
+                                ) : (
+                                    groups.map(group => {
+                                        const items = notifications.filter(n => n.group === group);
+                                        if (items.length === 0) return null;
+                                        return (
+                                            <div key={group}>
+                                                <div className="notification-group-label-wrapper">
+                                                    <span className="notification-group-label">{group}</span>
+                                                </div>
+                                                {items.map(item => (
+                                                    <div key={item.id} className="notification-item">
+                                                        <div className="notification-item-body">
+                                                            <p className="notification-item-message">{item.message}</p>
+                                                            <p className="notification-item-timestamp">{item.timestamp}</p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleDeleteNotification(item.id)}
+                                                            className="notification-item-delete-btn"
+                                                        >
+                                                            <FiTrash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </Popover.Content>
+                        </Popover.Portal>
+                    </Popover.Root>
 
                     {/* Language Dropdown */}
                     <DropdownMenu>
