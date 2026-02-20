@@ -66,6 +66,7 @@
 .notification-popover-content {
     @apply z-50 p-0 rounded-md shadow-md outline-none;
     width: 28rem;
+    max-width: calc(100vw - 1rem);
     background: #F4F4F4;
     border: 0.09375rem solid #D4D4D4;
     padding: 1.5rem;
@@ -73,6 +74,7 @@
     top: 1.2rem !important;
     right: -10rem !important;
 }
+
 .notification-popover-content[data-state=open] {
     @apply animate-in fade-in-0 zoom-in-95;
 }
@@ -102,6 +104,16 @@
     stroke: #D4D4D4;
     stroke-width: 1.5;
     stroke-linejoin: round;
+    /*
+     * Radix Arrow: viewBox="0 0 30 10", polygon="0,0 30,0 15,10"
+     * For side="bottom" the SVG is rotated 180deg, so:
+     *   Edge 1  0,0→30,0  (length 30)  = visual base   → no stroke
+     *   Edge 2  30,0→15,10 (≈18.03)   = right side     → stroke
+     *   Edge 3  15,10→0,0  (≈18.03)   = left side      → stroke
+     * stroke-dashoffset: 36.06 shifts the gap to land on edge 1 (base).
+     */
+    stroke-dasharray: 36.06 30;
+    stroke-dashoffset: 36.06;
 }
 
 .notification-popover-header {
@@ -118,7 +130,8 @@
 }
 
 .notification-list {
-    @apply max-h-[400px] overflow-y-auto;
+    max-height: min(400px, 60vh);
+    overflow-y: auto;
 }
 
 .notification-empty {
@@ -339,17 +352,7 @@
     @apply text-sm font-medium text-foreground;
 }
 
-.learning-filter-select-wrapper {
-    @apply relative flex items-center;
-}
 
-.learning-filter-select {
-    @apply text-sm text-foreground border-none bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 font-medium;
-}
-
-.learning-filter-chevron {
-    @apply absolute right-0 pointer-events-none text-sunbird-brick w-4 h-4;
-}
 
 .learning-list-container {
     @apply space-y-3;

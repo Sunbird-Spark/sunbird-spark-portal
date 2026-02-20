@@ -1,36 +1,140 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from './App';
 
-describe('App Component - RBAC Integration', () => {
-  it('renders without crashing', () => {
-    render(<App />);
-    expect(document.body).toBeInTheDocument();
+// Mock portalInitializer
+vi.mock('./utils/portalInitializer', () => ({
+  portalInitializer: vi.fn(),
+}));
+
+// Mock AppRoutes
+vi.mock('./AppRoutes', () => ({
+  default: () => <div data-testid="app-routes">App Routes</div>,
+}));
+
+// Mock PageLoader
+vi.mock('@/components/common/PageLoader', () => ({
+  default: ({ message, error, onRetry, fullPage }: { message?: string; error?: string | null; onRetry?: () => void; fullPage?: boolean }) => (
+    <div data-testid="page-loader" data-fullpage={fullPage}>
+      {message && <span data-testid="loader-message">{message}</span>}
+      {error && <span data-testid="loader-error">{error}</span>}
+      {onRetry && <button data-testid="retry-button" onClick={onRetry}>Retry</button>}
+    </div>
+  ),
+}));
+
+// Mock useAppI18n
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+    dir: 'ltr',
+    isRtl: false,
+  }),
+}));
+
+import { portalInitializer } from './utils/portalInitializer';
+
+describe('App Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('renders the landing page after loading', async () => {
+  it('shows PageLoader while portalInitializer is in progress', () => {
+    // Keep the promise pending (never resolves)
+    (portalInitializer as Mock).mockReturnValue(new Promise(() => { }));
+
     render(<App />);
-    
-    // Wait for loading to complete
-    await waitFor(() => {
-      expect(screen.queryByText('Loading Sunbird Spark...')).not.toBeInTheDocument();
-    }, { timeout: 2000 });
-    
-    // The root route now shows the Index/LMS landing page, not HomePage
-    // Check for elements that exist on the Index page
-    expect(document.body).toBeInTheDocument();
+
+    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+    expect(screen.getByTestId('loader-message')).toHaveTextContent('loading');
+    expect(screen.getByTestId('page-loader')).toHaveAttribute('data-fullpage', 'true');
+    expect(screen.queryByTestId('app-routes')).not.toBeInTheDocument();
   });
 
-  it('displays the LMS landing page content', async () => {
+  it('renders AppRoutes after portalInitializer succeeds', async () => {
+    (portalInitializer as Mock).mockResolvedValue(undefined);
+
     render(<App />);
-    
-    // Wait for loading to complete
+
     await waitFor(() => {
-      expect(screen.queryByText('Loading Sunbird Spark...')).not.toBeInTheDocument();
-    }, { timeout: 2000 });
-    
-    // The Index page should be rendered
-    expect(document.body).toBeInTheDocument();
+      expect(screen.getByTestId('app-routes')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
+  });
+
+  it('shows error PageLoader with retry button when portalInitializer fails', async () => {
+    (portalInitializer as Mock).mockRejectedValue(new Error('Network error'));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loader-error')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('loader-error')).toHaveTextContent('Network error');
+    expect(screen.getByTestId('retry-button')).toBeInTheDocument();
+    expect(screen.getByTestId('page-loader')).toHaveAttribute('data-fullpage', 'true');
+    expect(screen.queryByTestId('app-routes')).not.toBeInTheDocument();
+  });
+
+  it('shows fallback error message when error is not an Error instance', async () => {
+    (portalInitializer as Mock).mockRejectedValue('string error');
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loader-error')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('loader-error')).toHaveTextContent('Portal initialization failed');
+  });
+
+  it('retries portalInitializer when retry button is clicked and succeeds', async () => {
+    (portalInitializer as Mock)
+      .mockRejectedValueOnce(new Error('First failure'))
+      .mockResolvedValueOnce(undefined);
+
+    render(<App />);
+
+    // Wait for error state
+    await waitFor(() => {
+      expect(screen.getByTestId('retry-button')).toBeInTheDocument();
+    });
+
+    // Click retry
+    fireEvent.click(screen.getByTestId('retry-button'));
+
+    // Should show AppRoutes after successful retry
+    await waitFor(() => {
+      expect(screen.getByTestId('app-routes')).toBeInTheDocument();
+    });
+
+    expect(portalInitializer).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows error again when retry also fails', async () => {
+    (portalInitializer as Mock)
+      .mockRejectedValueOnce(new Error('First failure'))
+      .mockRejectedValueOnce(new Error('Second failure'));
+
+    render(<App />);
+
+    // Wait for first error
+    await waitFor(() => {
+      expect(screen.getByTestId('loader-error')).toHaveTextContent('First failure');
+    });
+
+    // Click retry
+    fireEvent.click(screen.getByTestId('retry-button'));
+
+    // Should show second error
+    await waitFor(() => {
+      expect(screen.getByTestId('loader-error')).toHaveTextContent('Second failure');
+    });
+
+    expect(portalInitializer).toHaveBeenCalledTimes(2);
   });
 });
