@@ -67,12 +67,6 @@ const Explore = () => {
     setSearchQuery(q);
   }, [searchParams]);
 
-  // Persist filters (and current search query) to URL query params.
-  // Uses replace:true so filter changes don't create extra browser history entries.
-  // URL shape: ?q=<search>&<code>=<value>&<code>=<value>…
-  // e.g. ?primaryCategory=Course&mimeType=video%2Fmp4&mimeType=video%2Fwebm
-  // Guard: skip the first render — on mount, debouncedSearchQuery hasn't settled yet
-  // and would wipe the q param from the URL before the debounce fires.
   const hasInitiallyMounted = useRef(false);
   useEffect(() => {
     if (!hasInitiallyMounted.current) {
@@ -85,7 +79,7 @@ const Explore = () => {
       values.forEach((value) => next.append(code, value));
     });
     setSearchParams(next, { replace: true });
-  }, [filters, debouncedSearchQuery]);
+  }, [filters, debouncedSearchQuery, setSearchParams]);
   return (
     <div className="home-container">
       <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
