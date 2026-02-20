@@ -7,21 +7,67 @@ import type { ContentSearchResponse, UseContentSearchOptions } from '../types/wo
 
 const contentService = new ContentService();
 
+// Fallback list used when no primaryCategory filter is selected by the user.
+// Ensures the search returns all known content categories by default.
+const DEFAULT_PRIMARY_CATEGORIES = [
+  'Collection',
+  'Resource',
+  'Content Playlist',
+  'Course',
+  'Course Assessment',
+  'Digital Textbook',
+  'eTextbook',
+  'Explanation Content',
+  'Learning Resource',
+  'Lesson Plan Unit',
+  'Practice Question Set',
+  'Teacher Resource',
+  'Textbook Unit',
+  'LessonPlan',
+  'FocusSpot',
+  'Learning Outcome Definition',
+  'Curiosity Questions',
+  'MarkingSchemeRubric',
+  'ExplanationResource',
+  'ExperientialResource',
+  'Practice Resource',
+  'TVLesson',
+  'Course Unit',
+  'Exam Question',
+  'Question paper',
+];
+
 export const useContentSearch = (
   options?: UseContentSearchOptions
 ): UseQueryResult<ApiResponse<ContentSearchResponse>, Error> => {
   const request = options?.request;
   const enabled = options?.enabled ?? true;
-  
-  // Serialize the request to create a stable queryKey
-  const queryKey = useMemo(() => 
-    ['content-search', JSON.stringify(request)],
-    [request]
+
+  // Inject the primaryCategory fallback when the user hasn't selected any category filter.
+  const effectiveRequest = useMemo(() => {
+    if (!request) return request;
+    const hasPrimaryCategory = Array.isArray(request.filters?.primaryCategory)
+      ? request.filters.primaryCategory.length > 0
+      : !!request.filters?.primaryCategory;
+    if (hasPrimaryCategory) return request;
+    return {
+      ...request,
+      filters: {
+        ...request.filters,
+        primaryCategory: DEFAULT_PRIMARY_CATEGORIES,
+      },
+    };
+  }, [request]);
+
+  // Serialize the effective request to create a stable queryKey
+  const queryKey = useMemo(() =>
+    ['content-search', JSON.stringify(effectiveRequest)],
+    [effectiveRequest]
   );
-  
+
   return useQuery({
     queryKey,
-    queryFn: () => contentService.contentSearch(request),
+    queryFn: () => contentService.contentSearch(effectiveRequest),
     enabled,
   });
 };
