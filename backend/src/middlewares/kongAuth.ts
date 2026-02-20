@@ -1,35 +1,40 @@
 import { Request, Response, NextFunction } from 'express';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
-import { generateKongToken, refreshSessionTTL } from '../services/kongAuthService.js';
+import { generateKongToken, refreshSessionTTL, isSessionNearExpiry } from '../services/kongAuthService.js';
 import { saveSession } from '../utils/sessionUtils.js';
 
 export const registerDeviceWithKong = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
         logger.info(`registerDeviceWithKong :: ${req.method} ${req.originalUrl}`);
+        const isAnonymous = !req.session.userId;
+
+        // Reuse existing token — only refresh if session is near expiry
         if (req.session.kongToken) {
-            const isAuthenticated = req.session.userId && req.kauth;
-            const isAnonymous = !req.session.userId;
-
-            if (isAuthenticated || isAnonymous) {
+            if (!isSessionNearExpiry(req)) {
                 if (isAnonymous) {
-                    logger.info('ANONYMOUS_KONG_TOKEN :: using existing token');
+                    logger.info('ANONYMOUS_KONG_TOKEN :: session still valid, skipping refresh');
                 }
-
-                refreshSessionTTL(req);
-                try {
-                    await saveSession(req);
-                    if (isAnonymous) {
-                        logger.info(`ANONYMOUS_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
-                    }
-                    return next();
-                } catch (err) {
-                    if (isAnonymous) {
-                        logger.error('ANONYMOUS_KONG_TOKEN :: failed to save session', err);
-                    }
-                    return next(err);
-                }
+                return next();
             }
+
+            if (isAnonymous) {
+                logger.info('ANONYMOUS_KONG_TOKEN :: refreshing near-expiry session');
+            }
+
+            refreshSessionTTL(req);
+            try {
+                await saveSession(req);
+                if (isAnonymous) {
+                    logger.info(`ANONYMOUS_KONG_TOKEN :: session saved successfully with ID: ${req.sessionID}`);
+                }
+            } catch (err) {
+                if (isAnonymous) {
+                    logger.error('ANONYMOUS_KONG_TOKEN :: failed to save session', err);
+                }
+                return next(err);
+            }
+            return next();
         }
 
         // Only generate anonymous token for non-authenticated users
