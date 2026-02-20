@@ -24,11 +24,13 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
+// Mock useAppI18n
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
     t: (key: string) => key,
     i18n: { language: 'en' },
+    dir: 'ltr',
+    isRtl: false,
   }),
 }));
 
