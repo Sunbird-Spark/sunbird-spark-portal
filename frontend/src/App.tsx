@@ -35,7 +35,7 @@ export default function App() {
   }
 
   if (error) {
-    return <PageLoader message={t("loading")} error={error} onRetry={initPortal} fullPage={true} />;
+    return <PageLoader error={error} onRetry={initPortal} fullPage={true} />;
   }
 
   return (
