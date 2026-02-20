@@ -5,7 +5,7 @@ import WorkspaceContentCard from "@/components/workspace/WorkspaceContentCard";
 import WorkspaceContentList from "@/components/workspace/WorkspaceContentList";
 import EmptyState from "@/components/workspace/EmptyState";
 import { Button } from "@/components/common/Button";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
 
 interface WorkspacePageContentProps {
   showCreateModal: boolean;
@@ -18,6 +18,7 @@ interface WorkspacePageContentProps {
   hasMore: boolean;
   isError: boolean;
   error: Error | null;
+  userRole: UserRole;
   onLoadMore: () => void;
   onRetry: () => void;
   onCreateOption: (optionId: string) => void;
@@ -45,6 +46,7 @@ export default function WorkspacePageContent({
   onEdit,
   onDelete,
   onView,
+  userRole,
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
@@ -106,8 +108,23 @@ export default function WorkspacePageContent({
     );
   }
 
+  const pageTitleMap: Record<string, { title: string; desc: string }> = {
+    'pending-review': { title: "No contents to review", desc: "There are no contents pending your review at this time." },
+    'my-published': { title: "No published contents", desc: "You have not published any contents yet." },
+  };
+
   // Empty state
   if (filteredItems.length === 0) {
+    if (userRole === 'reviewer' && pageTitleMap[activeView]) {
+      const { title, desc } = pageTitleMap[activeView];
+      return (
+        <EmptyState
+          title={title}
+          description={desc}
+          variant="default"
+        />
+      );
+    }
     return (
       <EmptyState
         title={t('createFirst')}
