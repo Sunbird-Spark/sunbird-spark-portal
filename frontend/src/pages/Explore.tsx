@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "../components/common/DropdownMenu";
 import { useAppI18n } from '../hooks/useAppI18n';
+import useDebounce from '../hooks/useDebounce';
 import HomeSidebar from '../components/home/HomeSidebar';
 import { Sheet, SheetContent, SheetTitle } from '../components/home/Sheet';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -35,7 +36,7 @@ const Explore = () => {
     categories: [],
   });
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
-  const [activeSearchQuery, setActiveSearchQuery] = useState(() => searchParams.get('q') ?? '');
+  const debouncedSearchQuery = useDebounce(searchQuery, 600);
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
   const [sortLabel, setSortLabel] = useState('Newest');
   const [activeNav, setActiveNav] = useState("explore");
@@ -49,7 +50,6 @@ const Explore = () => {
   useEffect(() => {
     const q = searchParams.get('q') ?? '';
     setSearchQuery(q);
-    setActiveSearchQuery(q);
   }, [searchParams]);
   return (
     <div className="home-container">
@@ -102,11 +102,6 @@ const Explore = () => {
                         placeholder={t('searchPlaceholder') || 'Search for courses, lessons...'}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            setActiveSearchQuery(searchQuery);
-                          }
-                        }}
                         className="pl-10 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[1rem] placeholder:text-[#999999] w-full"
                       />
                     </div>
@@ -163,7 +158,7 @@ const Explore = () => {
                 </div>
 
                 <div>
-                  <ExploreGrid filters={filters} query={activeSearchQuery} sortBy={sortBy} />
+                  <ExploreGrid filters={filters} query={debouncedSearchQuery} sortBy={sortBy} />
                 </div>
               </div>
             </div>

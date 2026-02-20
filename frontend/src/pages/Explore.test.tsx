@@ -78,6 +78,10 @@ vi.mock('@/hooks/useSidebarState', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useDebounce', () => ({
+  default: (value: string) => value, // Return value immediately for testing
+}));
+
 // --------------------
 // Helpers
 // --------------------
@@ -140,23 +144,22 @@ describe('Explore Page', () => {
   });
 
   describe('search input', () => {
-    it('updates the grid query when Enter is pressed', async () => {
+    it('updates the grid query when typing (with debounce mocked)', async () => {
       renderComponent();
       const input = screen.getByPlaceholderText('searchPlaceholder');
 
       fireEvent.change(input, { target: { value: 'test query' } });
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
+      // Since useDebounce is mocked to return immediately, the query updates right away
       expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: test query');
     });
 
-    it('does not update the active grid query while typing (before Enter)', () => {
+    it('updates the input value while typing', () => {
       renderComponent();
       const input = screen.getByPlaceholderText('searchPlaceholder');
 
       fireEvent.change(input, { target: { value: 'partial' } });
-      // No Enter pressed — activeSearchQuery stays empty
-      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: ,');
+      expect(input).toHaveValue('partial');
     });
   });
 
@@ -165,6 +168,7 @@ describe('Explore Page', () => {
       renderComponent('/explore');
       const input = screen.getByPlaceholderText('searchPlaceholder');
       expect(input).toHaveValue('');
+      // With debounce mocked to return immediately, empty string is passed to grid
       expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: ,');
     });
 
@@ -174,8 +178,9 @@ describe('Explore Page', () => {
       expect(input).toHaveValue('tensorflow');
     });
 
-    it('passes the q param value as the active grid query immediately', () => {
+    it('passes the q param value as the grid query immediately', () => {
       renderComponent('/explore?q=tensorflow');
+      // With debounce mocked, the query is passed through immediately
       expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: tensorflow');
     });
 
