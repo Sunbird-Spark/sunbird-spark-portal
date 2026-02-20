@@ -136,4 +136,65 @@ describe('ContentNameDialog', () => {
     const reopenedInput = screen.getByPlaceholderText('Untitled Content');
     expect(reopenedInput).toHaveValue('');
   });
+
+  describe('collection mode (optionId="collection")', () => {
+    const collectionProps = { ...defaultProps, optionId: 'collection', optionTitle: 'Collection' };
+
+    it('should render description and collection type fields', () => {
+      render(<ContentNameDialog {...collectionProps} />);
+
+      expect(screen.getByText('Description')).toBeInTheDocument();
+      expect(screen.getByText(/Collection Type/)).toBeInTheDocument();
+      expect(screen.getByText('Select a collection type')).toBeInTheDocument();
+    });
+
+    it('should disable Create button when collection type is not selected', () => {
+      render(<ContentNameDialog {...collectionProps} />);
+
+      const input = screen.getByPlaceholderText('Untitled Content');
+      fireEvent.change(input, { target: { value: 'My Collection' } });
+
+      const createButton = screen.getByRole('button', { name: 'Create' });
+      expect(createButton).toBeDisabled();
+    });
+
+    it('should enable Create button when name and collection type are filled', () => {
+      render(<ContentNameDialog {...collectionProps} />);
+
+      fireEvent.change(screen.getByPlaceholderText('Untitled Content'), { target: { value: 'My Collection' } });
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'content-playlist' } });
+
+      const createButton = screen.getByRole('button', { name: 'Create' });
+      expect(createButton).not.toBeDisabled();
+    });
+
+    it('should call onSubmit with name and extra data', () => {
+      render(<ContentNameDialog {...collectionProps} />);
+
+      fireEvent.change(screen.getByPlaceholderText('Untitled Content'), { target: { value: 'My Collection' } });
+      fireEvent.change(screen.getByPlaceholderText('Enter a description'), { target: { value: 'A description' } });
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'digital-textbook' } });
+
+      fireEvent.submit(screen.getByPlaceholderText('Untitled Content').closest('form')!);
+
+      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', {
+        description: 'A description',
+        collectionType: 'digital-textbook',
+      });
+    });
+
+    it('should not include description when it is empty', () => {
+      render(<ContentNameDialog {...collectionProps} />);
+
+      fireEvent.change(screen.getByPlaceholderText('Untitled Content'), { target: { value: 'My Collection' } });
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'question-paper' } });
+
+      fireEvent.submit(screen.getByPlaceholderText('Untitled Content').closest('form')!);
+
+      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', {
+        description: undefined,
+        collectionType: 'question-paper',
+      });
+    });
+  });
 });

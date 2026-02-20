@@ -1,12 +1,19 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/common/Button";
 
+const COLLECTION_TYPES = [
+  { value: 'content-playlist', label: 'Content Playlist' },
+  { value: 'digital-textbook', label: 'Digital Textbook' },
+  { value: 'question-paper', label: 'Question Paper' },
+] as const;
+
 interface ContentNameDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (name: string) => void;
+  onSubmit: (name: string, extra?: { description?: string; collectionType?: string }) => void;
   isLoading?: boolean;
   optionTitle?: string;
+  optionId?: string;
 }
 
 export default function ContentNameDialog({
@@ -15,18 +22,27 @@ export default function ContentNameDialog({
   onSubmit,
   isLoading = false,
   optionTitle,
+  optionId,
 }: ContentNameDialogProps) {
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [collectionType, setCollectionType] = useState("");
 
-  // Reset name when dialog is closed (including from parent via open prop)
+  const isCollection = optionId === 'collection';
+
+  // Reset fields when dialog is closed
   useEffect(() => {
     if (!open) {
       setName("");
+      setDescription("");
+      setCollectionType("");
     }
   }, [open]);
 
   const handleClose = useCallback(() => {
     setName("");
+    setDescription("");
+    setCollectionType("");
     onClose();
   }, [onClose]);
 
@@ -44,10 +60,16 @@ export default function ContentNameDialog({
 
   if (!open) return null;
 
+  const canSubmit = name.trim() && (!isCollection || collectionType);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (trimmed) {
+    if (!trimmed) return;
+    if (isCollection) {
+      if (!collectionType) return;
+      onSubmit(trimmed, { description: description.trim() || undefined, collectionType });
+    } else {
       onSubmit(trimmed);
     }
   };
@@ -58,7 +80,7 @@ export default function ContentNameDialog({
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Enter content name"
+      aria-label={isCollection ? "Create Collection" : "Enter content name"}
     >
       <div
         className="bg-white rounded-2xl max-w-md w-full p-6"
@@ -68,9 +90,14 @@ export default function ContentNameDialog({
           Create {optionTitle || "Content"}
         </h2>
         <p className="text-sm text-muted-foreground mb-4 font-rubik">
-          Enter a name for your new content
+          {isCollection
+            ? "Enter details for your new collection"
+            : "Enter a name for your new content"}
         </p>
         <form onSubmit={handleSubmit}>
+          <label className="block text-sm font-medium font-rubik text-foreground mb-1">
+            Name
+          </label>
           <input
             type="text"
             value={name}
@@ -80,6 +107,38 @@ export default function ContentNameDialog({
             autoFocus
             disabled={isLoading}
           />
+
+          {isCollection && (
+            <>
+              <label className="block text-sm font-medium font-rubik text-foreground mb-1">
+                Description
+              </label>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter a description"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4"
+                disabled={isLoading}
+              />
+
+              <label className="block text-sm font-medium font-rubik text-foreground mb-1">
+                Collection Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={collectionType}
+                onChange={(e) => setCollectionType(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4 bg-white"
+                disabled={isLoading}
+              >
+                <option value="" disabled>Select a collection type</option>
+                {COLLECTION_TYPES.map((ct) => (
+                  <option key={ct.value} value={ct.value}>{ct.label}</option>
+                ))}
+              </select>
+            </>
+          )}
+
           <div className="flex justify-end gap-3">
             <Button
               type="button"
@@ -93,7 +152,7 @@ export default function ContentNameDialog({
             <Button
               type="submit"
               size="sm"
-              disabled={!name.trim() || isLoading}
+              disabled={!canSubmit || isLoading}
               className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
             >
               {isLoading ? "Creating..." : "Create"}

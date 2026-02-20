@@ -37,10 +37,14 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
 
   let mockElement: HTMLElement;
   let mockServiceInstance: any;
+  let mockLoadAssets: ReturnType<typeof vi.fn>;
+  let mockRemoveAssets: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockElement = document.createElement('lib-questionset-editor');
+    mockLoadAssets = vi.fn();
+    mockRemoveAssets = vi.fn();
 
     mockServiceInstance = {
       initializeDependencies: vi.fn().mockResolvedValue(undefined),
@@ -48,6 +52,8 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
       createElement: vi.fn().mockReturnValue(mockElement),
       attachEventListeners: vi.fn(),
       removeEventListeners: vi.fn(),
+      loadAssets: mockLoadAssets,
+      removeAssets: mockRemoveAssets,
     };
 
     (QumlEditorService as any).mockImplementation(function() {
@@ -61,43 +67,43 @@ describe('QumlEditor - FancyTree Guard & Re-initialization', () => {
 
     render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
 
+    expect(mockLoadAssets).toHaveBeenCalledTimes(1);
+
     await waitFor(() => {
       expect(mockServiceInstance.initializeDependencies).toHaveBeenCalled();
     });
   });
 
-  it('sets up FancyTree guard interval', async () => {
-    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+  it('sets up FancyTree guard via property setter trap', async () => {
+    const mockJQuery = { fn: { fancytree: vi.fn() } };
+    (globalThis as any).$ = mockJQuery;
 
     render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
 
+    // Wait for the guard useEffect to fire after status becomes 'ready'
     await waitFor(() => {
-      expect(mockServiceInstance.createElement).toHaveBeenCalled();
+      const desc = Object.getOwnPropertyDescriptor(globalThis, '$');
+      expect(desc?.set).toBeDefined();
     });
-
-    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 800);
-
-    setTimeoutSpy.mockRestore();
   });
 
-  it('restores jQuery when FancyTree is lost', async () => {
+  it('restores jQuery when FancyTree is lost via setter trap', async () => {
     const mockJQueryWithFancytree = { fn: { fancytree: vi.fn() } };
     (globalThis as any).$ = mockJQueryWithFancytree;
 
     render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
 
+    // Wait for the guard to be installed
     await waitFor(() => {
-      expect(mockServiceInstance.createElement).toHaveBeenCalled();
+      const desc = Object.getOwnPropertyDescriptor(globalThis, '$');
+      expect(desc?.set).toBeDefined();
     });
 
-    // Simulate FancyTree being lost
+    // Simulate FancyTree being lost — the setter trap fires synchronously
     (globalThis as any).$ = { fn: {} };
 
-    // Wait for the guard interval to trigger
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // jQuery should be restored
-    expect((globalThis as any).$).toBe(mockJQueryWithFancytree);
+    // jQuery should be restored immediately by the setter trap
+    expect((globalThis as any).$.fn.fancytree).toBeDefined();
   });
 
   it('does not restore jQuery if FancyTree is still available', async () => {

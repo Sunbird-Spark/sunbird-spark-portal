@@ -4,6 +4,7 @@ import {
   CollectionEditorService,
   type CollectionEditorContextProps,
 } from '../../services/editors/collection-editor';
+import { useFancytreeGuard } from '../../hooks/useFancytreeGuard';
 import PageLoader from '../common/PageLoader';
 
 interface CollectionEditorProps {
@@ -24,10 +25,8 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const serviceRef = useRef<CollectionEditorService>(new CollectionEditorService());
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const fancytreeGuardRef = useRef<number | null>(null);
-  const fancyJQRef = useRef<any>(null);
 
-  // Memoize event handler to maintain referential equality
+  // Memoize event handlers to maintain referential equality across renders.
   const handleEditorEvent = useCallback(
     (event: CollectionEditorEvent) => {
       onEditorEvent?.(event);
@@ -42,10 +41,15 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
     [onTelemetryEvent],
   );
 
-  // CSS lifecycle: add the collection-editor stylesheet on mount,
+  // Guard: keep the FancyTree-capable jQuery alive on globalThis.
+  // Starts only after the editor is fully mounted (status === 'ready').
+  // All scheduling state is managed inside the hook via refs — no re-renders.
+  useFancytreeGuard(status === 'ready');
+
+  // CSS lifecycle: inject the collection-editor stylesheet on mount,
   // remove it on unmount so it doesn't bleed into the rest of the portal.
   useEffect(() => {
-  serviceRef.current.loadAssets();
+    serviceRef.current.loadAssets();
     return () => {
       serviceRef.current.removeAssets();
     };
@@ -61,19 +65,12 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
           console.warn('[CollectionEditor] Container or metadata not available');
           return;
         }
+
         await serviceRef.current.initializeDependencies();
-
         if (cancelled) return;
-
-        // Keep a jQuery reference that already has FancyTree attached.
-        const $global = (globalThis as any).$;
-        if ($global?.fn?.fancytree) {
-          fancyJQRef.current = $global;
-        }
 
         const service = serviceRef.current;
         const config = await service.createConfig(metadata, contextProps);
-
         if (cancelled) return;
 
         editorElement = service.createElement(config);
@@ -81,25 +78,6 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
 
         containerRef.current.appendChild(editorElement);
         setStatus('ready');
-
-        // Guard: restore FancyTree-capable jQuery if editor bundle/web-component overwrites global $.
-        let guardInterval = 800;
-        const scheduleGuard = () => {
-          fancytreeGuardRef.current = window.setTimeout(() => {
-            const jqCurrent = (globalThis as any).$ || (globalThis as any).jQuery;
-            if (jqCurrent?.fn?.fancytree) {
-              guardInterval = Math.min(guardInterval * 2, 30_000);
-            } else {
-              if (fancyJQRef.current?.fn?.fancytree) {
-                (globalThis as any).$ = fancyJQRef.current;
-                (globalThis as any).jQuery = fancyJQRef.current;
-              }
-              guardInterval = 800;
-            }
-            scheduleGuard();
-          }, guardInterval);
-        };
-        scheduleGuard();
       } catch (error: any) {
         console.error('Failed to initialize Collection Editor:', error);
         setStatus('error');
@@ -113,10 +91,6 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
       if (editorElement) {
         serviceRef.current.removeEventListeners(editorElement);
         editorElement.remove();
-      }
-      if (fancytreeGuardRef.current) {
-        clearTimeout(fancytreeGuardRef.current);
-        fancytreeGuardRef.current = null;
       }
     };
   }, [identifier, metadata, contextProps, handleEditorEvent, handleTelemetryEvent]);

@@ -58,6 +58,127 @@
     @apply flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors;
 }
 
+/* Notification Popover */
+.notification-badge {
+    @apply absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#22C55E] rounded-full border-2 border-white;
+}
+
+.notification-popover-content {
+    @apply z-50 p-0 rounded-md shadow-md outline-none;
+    width: 28rem;
+    background: #F4F4F4;
+    border: 0.09375rem solid #D4D4D4;
+    padding: 1.5rem;
+    position: fixed !important;
+    top: 1.2rem !important;
+    right: -10rem !important;
+}
+.notification-popover-content[data-state=open] {
+    @apply animate-in fade-in-0 zoom-in-95;
+}
+.notification-popover-content[data-state=closed] {
+    @apply animate-out fade-out-0 zoom-out-95;
+}
+.notification-popover-content[data-side=bottom] {
+    @apply slide-in-from-top-2;
+}
+.notification-popover-content[data-side=left] {
+    @apply slide-in-from-right-2;
+}
+.notification-popover-content[data-side=right] {
+    @apply slide-in-from-left-2;
+}
+.notification-popover-content[data-side=top] {
+    @apply slide-in-from-bottom-2;
+}
+
+.notification-popover-arrow {
+    fill: #F4F4F4;
+    position: absolute !important;
+    right: 3.25rem !important;
+}
+
+.notification-popover-arrow polygon {
+    stroke: #D4D4D4;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.notification-popover-header {
+    @apply flex items-center justify-between px-4 py-3 border-gray-100;
+}
+
+.notification-popover-title {
+    @apply text-base font-semibold text-[#1A1A1A];
+}
+
+.notification-delete-all-btn {
+    @apply text-sm text-sunbird-brick;
+    font-size: 12px;
+}
+
+.notification-list {
+    @apply max-h-[400px] overflow-y-auto;
+}
+
+.notification-empty {
+    @apply px-4 py-8 text-center text-sm text-gray-400;
+}
+
+.notification-group-label-wrapper {
+    @apply px-4 pt-3 pb-1 flex items-center justify-between;
+}
+
+.notification-group-label {
+    @apply text-xs text-muted-foreground font-medium;
+}
+
+.notification-item {
+    @apply flex items-start gap-3 px-4 py-4 transition-colors mx-4 mb-3 relative;
+    background: #FFFFFF;
+    border: 1px solid transparent;
+    box-shadow: 2px 2px 20px 0px #00000017;
+    border-radius: 14px;
+}
+
+.notification-item::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 30%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: #CC8545;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.notification-item:hover {
+    border: 1px solid #CC8545;
+}
+
+.notification-item:hover::before {
+    opacity: 1;
+}
+
+.notification-item-body {
+    @apply flex-1 min-w-0;
+}
+
+.notification-item-message {
+    @apply text-sm font-medium text-[#1A1A1A] leading-snug;
+}
+
+.notification-item-timestamp {
+    @apply text-xs text-gray-400 mt-0.5 mb-0;
+}
+
+.notification-item-delete-btn {
+    @apply text-sunbird-brick hover:text-sunbird-brick/80 shrink-0 self-center;
+}
+
 /* Stats Cards Grid */
 .profile-stats-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
