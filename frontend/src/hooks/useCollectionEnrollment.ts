@@ -1,9 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useBatchList, useBatchRead, useContentState } from './useCollection';
+import { useBatchList, useBatchRead, useContentState, useEnrol } from './useBatch';
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
-import { collectionService } from '../services/collection';
 import {
   getEnrollmentForCollection,
   getLeafContentIds,
@@ -94,25 +93,22 @@ export function useCollectionEnrollment(
   );
   const hasCertificate = !!firstCertPreviewUrl;
 
-  const [joinLoading, setJoinLoading] = useState(false);
-  const [joinError, setJoinError] = useState('');
+  const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
   const handleJoinCourse = async (selectedBatchId: string) => {
     if (!collectionId || !selectedBatchId) return;
     const uid = userAuthInfoService.getUserId();
     if (!uid) return;
-    setJoinError('');
-    setJoinLoading(true);
+    resetEnrol();
     try {
-      await collectionService.enrol(collectionId, uid, selectedBatchId);
+      await enrol({ courseId: collectionId, userId: uid, batchId: selectedBatchId });
       await queryClient.invalidateQueries({ queryKey: ['userEnrollments'] });
       refetchEnrollments();
       navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
-    } catch (e) {
-      setJoinError(e instanceof Error ? e.message : 'Failed to join course.');
-    } finally {
-      setJoinLoading(false);
+    } catch {
+      // Error is exposed via joinErrorMutation
     }
   };
+  const joinError = joinErrorMutation?.message ?? '';
 
   return {
     enrollmentForCollection,
