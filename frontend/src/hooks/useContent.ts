@@ -59,11 +59,15 @@ export const useContentSearch = (
     };
   }, [request]);
 
-  // Serialize the effective request to create a stable queryKey
-  const queryKey = useMemo(() =>
-    ['content-search', JSON.stringify(effectiveRequest)],
-    [effectiveRequest]
-  );
+  // Build a stable queryKey from individual fields so property order never affects caching
+  const queryKey = useMemo(() => [
+    'content-search',
+    effectiveRequest?.query,
+    effectiveRequest?.offset,
+    effectiveRequest?.limit,
+    JSON.stringify(effectiveRequest?.sort_by),
+    JSON.stringify(effectiveRequest?.filters),
+  ], [effectiveRequest]);
 
   return useQuery({
     queryKey,
