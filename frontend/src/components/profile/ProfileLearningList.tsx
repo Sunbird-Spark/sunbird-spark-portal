@@ -12,7 +12,7 @@ import {
 
 type FilterType = "all" | "ongoing" | "completed";
 
-const VIEW_LIMIT = 3;
+const VIEW_LIMIT = 6;
 
 const getCompletionStatus = (status: number): "ongoing" | "completed" =>
     status === 2 ? "completed" : "ongoing";
