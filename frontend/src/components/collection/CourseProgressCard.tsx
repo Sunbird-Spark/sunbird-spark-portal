@@ -1,17 +1,7 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { formatBatchDisplayDate } from "@/services/collection/enrollmentMapper";
 
 const CONTENT_STATUS_COMPLETED = 2;
-
-function formatBatchStartDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) return dateStr;
-  const day = date.getDate();
-  const ordinals = ["th", "st", "nd", "rd"];
-  const v = day % 100;
-  const suffix = ordinals[(v - 20) % 10] ?? ordinals[v] ?? ordinals[0];
-  const month = date.toLocaleDateString("en-US", { month: "short" });
-  return `${day}${suffix} ${month}`;
-}
 
 function getCompletedCount(
   contentStatus: Record<string, number> | undefined,
@@ -55,7 +45,7 @@ const CourseProgressCard = ({
       ? Math.min(100, Math.ceil((completedContentCount / totalContentCount) * 100))
       : 0;
 
-  const displayDate = batchStartDate ? formatBatchStartDate(batchStartDate) : null;
+  const displayDate = batchStartDate ? formatBatchDisplayDate(batchStartDate) : null;
 
   return (
     <div

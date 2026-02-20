@@ -54,8 +54,11 @@ export const useContentState = (
   options?: { enabled?: boolean }
 ): UseQueryResult<ApiResponse<ContentStateReadResponse>, Error> => {
   const enabled = options?.enabled ?? true;
+  const contentIdsKey = request?.contentIds?.length
+    ? request.contentIds.join(',')
+    : '';
   return useQuery({
-    queryKey: ['contentState', request?.userId, request?.courseId, request?.batchId],
+    queryKey: ['contentState', request?.userId, request?.courseId, request?.batchId, contentIdsKey],
     queryFn: () => collectionService.contentStateRead(request!),
     enabled: enabled && !!request && request.contentIds.length > 0,
   });

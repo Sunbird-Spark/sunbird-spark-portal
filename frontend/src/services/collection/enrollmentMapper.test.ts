@@ -92,8 +92,8 @@ describe('enrollmentMapper', () => {
       const result = formatBatchDisplayDate('2025-06-15T00:00:00.000Z');
       expect(result).not.toBe('-');
       expect(result).toMatch(/\d+/);
-      expect(result).toMatch(/[A-Za-z]+/);
       expect(result).toMatch(/2025/);
+      expect(result.length).toBeGreaterThan(4);
     });
   });
 

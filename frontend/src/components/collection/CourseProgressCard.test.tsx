@@ -46,7 +46,8 @@ describe('CourseProgressCard', () => {
     expect(screen.getByText(/courseDetails\.batchStartedOn/)).toBeInTheDocument();
     const batchStartedText = screen.getByText(/courseDetails\.batchStartedOn/);
     expect(batchStartedText).toBeInTheDocument();
-    expect(batchStartedText.textContent).toMatch(/\d+(st|nd|rd|th)\s+[A-Za-z]+/);
+    expect(batchStartedText?.textContent).toMatch(/\d+/);
+    expect(batchStartedText?.textContent).toMatch(/2025/);
   });
 
   it('does not render batch start date when batchStartDate is not provided', () => {
