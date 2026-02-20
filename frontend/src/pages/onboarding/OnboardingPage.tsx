@@ -33,9 +33,7 @@ const Onboarding = () => {
   };
 
   const handleNext = () => {
-    if (step < 3) {
-      setStep((step + 1) as OnboardingStep);
-    }
+    setStep((prev) => (prev < 3 ? ((prev + 1) as OnboardingStep) : prev));
   };
 
   const handleSubmit = () => {
