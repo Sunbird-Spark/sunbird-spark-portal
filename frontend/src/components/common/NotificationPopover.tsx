@@ -1,10 +1,15 @@
 import * as Popover from "@radix-ui/react-popover";
 import { FiBell, FiTrash2 } from "react-icons/fi";
 import { useNotification } from "@/hooks/useNotification";
+import dayjs from "dayjs";
 
 export const NotificationPopover = () => {
     const { groupedNotifications, unreadCount, getMessage, deleteNotification, deleteAll } = useNotification();
     const hasNotifications = groupedNotifications.length > 0;
+
+    const formatTimestamp = (timestamp: string) => {
+        return dayjs(timestamp).format('ddd, DD MMMM, hh:mm a');
+    };
 
     return (
         <Popover.Root>
@@ -48,7 +53,7 @@ export const NotificationPopover = () => {
                                         <div key={item.id} className="notification-item">
                                             <div className="notification-item-body">
                                                 <p className="notification-item-message">{getMessage(item)}</p>
-                                                <p className="notification-item-timestamp">{item.createdOn}</p>
+                                                <p className="notification-item-timestamp">{formatTimestamp(item.createdOn)}</p>
                                             </div>
                                             <button
                                                 onClick={() => deleteNotification(item.id)}
