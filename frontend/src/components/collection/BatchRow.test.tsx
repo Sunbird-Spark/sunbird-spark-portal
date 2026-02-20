@@ -11,8 +11,8 @@ vi.mock('dayjs', async () => {
 });
 
 describe('BatchRow', () => {
-  let onEditClick: jest.Mock;
-  let onCertificateClick: jest.Mock;
+  let onEditClick: any;
+  let onCertificateClick: any;
   const tomorrowDate = dayjs().add(1, 'day').format('YYYY-MM-DD');
   const yesterdayDate = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
   const today = dayjs().format('YYYY-MM-DD');

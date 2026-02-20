@@ -5,8 +5,8 @@ import { BatchFormFields, BatchFormState } from './BatchFormFields';
 
 describe('BatchFormFields', () => {
   let form: BatchFormState;
-  let handleField: jest.Mock;
-  let setForm: jest.Mock;
+  let handleField: any;
+  let setForm: any;
 
   beforeEach(() => {
     form = {
