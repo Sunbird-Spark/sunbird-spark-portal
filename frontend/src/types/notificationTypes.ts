@@ -19,6 +19,8 @@ export interface NotificationAdditionalInfo {
     activity?: NotificationActivity;
     groupRole?: string;
     group?: NotificationGroup;
+    contentURL?: string;
+    deepLink?: string;
 }
 
 export interface NotificationTemplate {
