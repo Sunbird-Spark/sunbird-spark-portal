@@ -169,6 +169,9 @@ describe('ProfileLearningList', () => {
                         { courseId: '2', status: 1, courseName: 'Course 2' },
                         { courseId: '3', status: 1, courseName: 'Course 3' },
                         { courseId: '4', status: 1, courseName: 'Course 4' },
+                        { courseId: '5', status: 1, courseName: 'Course 5' },
+                        { courseId: '6', status: 1, courseName: 'Course 6' },
+                        { courseId: '7', status: 1, courseName: 'Course 7' },
                     ]
                 }
             },
@@ -178,23 +181,26 @@ describe('ProfileLearningList', () => {
 
         render(<ProfileLearningList />);
 
-        // Initially should show 3 courses and "View More Courses" button
+        // Initially should show 6 courses and "View More Courses" button
         expect(screen.getByText('Course 1')).toBeInTheDocument();
         expect(screen.getByText('Course 2')).toBeInTheDocument();
         expect(screen.getByText('Course 3')).toBeInTheDocument();
-        expect(screen.queryByText('Course 4')).not.toBeInTheDocument();
+        expect(screen.getByText('Course 4')).toBeInTheDocument();
+        expect(screen.getByText('Course 5')).toBeInTheDocument();
+        expect(screen.getByText('Course 6')).toBeInTheDocument();
+        expect(screen.queryByText('Course 7')).not.toBeInTheDocument();
 
         const toggleButton = screen.getByText('View More Courses');
         expect(toggleButton).toBeInTheDocument();
 
         // Click to view more
         fireEvent.click(toggleButton);
-        expect(screen.getByText('Course 4')).toBeInTheDocument();
+        expect(screen.getByText('Course 7')).toBeInTheDocument();
         expect(screen.getByText('View Less')).toBeInTheDocument();
 
         // Click to view less
         fireEvent.click(screen.getByText('View Less'));
-        expect(screen.queryByText('Course 4')).not.toBeInTheDocument();
+        expect(screen.queryByText('Course 7')).not.toBeInTheDocument();
         expect(screen.getByText('View More Courses')).toBeInTheDocument();
     });
 
@@ -207,10 +213,10 @@ describe('ProfileLearningList', () => {
                         { courseId: '2', status: 1, courseName: 'Ongoing 2' },
                         { courseId: '3', status: 1, courseName: 'Ongoing 3' },
                         { courseId: '4', status: 1, courseName: 'Ongoing 4' },
-                        { courseId: '5', status: 2, courseName: 'Completed 1' },
-                        { courseId: '6', status: 2, courseName: 'Completed 2' },
-                        { courseId: '7', status: 2, courseName: 'Completed 3' },
-                        { courseId: '8', status: 2, courseName: 'Completed 4' },
+                        { courseId: '5', status: 1, courseName: 'Ongoing 5' },
+                        { courseId: '6', status: 1, courseName: 'Ongoing 6' },
+                        { courseId: '7', status: 1, courseName: 'Ongoing 7' },
+                        { courseId: '8', status: 2, courseName: 'Completed 1' },
                     ]
                 }
             },
@@ -222,14 +228,14 @@ describe('ProfileLearningList', () => {
 
         // Expand list
         fireEvent.click(screen.getByText('View More Courses'));
-        expect(screen.getByText('Ongoing 4')).toBeInTheDocument();
+        expect(screen.getByText('Ongoing 7')).toBeInTheDocument();
         expect(screen.getByText('View Less')).toBeInTheDocument();
 
         // Change filter to Ongoing
         fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
-        // Verification: showAll should be reset to false, meaning we only see 3 items and "View More Courses"
-        expect(screen.queryByText('Ongoing 4')).not.toBeInTheDocument();
+        // Verification: showAll should be reset to false, meaning we only see 6 items and "View More Courses"
+        expect(screen.queryByText('Ongoing 7')).not.toBeInTheDocument();
         expect(screen.getByText('View More Courses')).toBeInTheDocument();
     });
 });
