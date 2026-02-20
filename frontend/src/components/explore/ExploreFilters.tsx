@@ -89,7 +89,7 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
     const defaultOpenId = filterGroups[0]?.id;
 
     return (
-        <div className="bg-[#F8F9FA] rounded-[1.375rem] p-5">
+        <div data-testid="explore-filters" className="bg-[#F8F9FA] rounded-[1.375rem] p-5">
             {/* Filters Title */}
             <h2 className="text-lg font-bold text-foreground mb-4 px-1">{t("filters")}</h2>
 
