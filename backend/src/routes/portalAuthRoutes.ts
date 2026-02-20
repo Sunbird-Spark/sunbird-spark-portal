@@ -69,9 +69,16 @@ router.get('/auth/callback',
     async (req: Request, res: Response) => {
         logger.info('Entered /portal/auth/callback handler');
 
-        // If no code is present, restart login flow
+        // Validate required session parameters and authorization code
         if (!req.query.code) {
             logger.warn('Callback received without authorization code. Restarting login flow.');
+            return res.redirect('/portal/login');
+        }
+
+        if (!req.session.oidcCodeVerifier || !req.session.oidcState) {
+            logger.warn('Callback received without PKCE verifier or state in session. Restarting login flow.');
+            delete req.session.oidcCodeVerifier;
+            delete req.session.oidcState;
             return res.redirect('/portal/login');
         }
 
@@ -84,10 +91,12 @@ router.get('/auth/callback',
             );
 
             // Exchange the authorization code for tokens
+            const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
             const tokens = await oidcClient.authorizationCodeGrant(config, currentUrl, {
                 pkceCodeVerifier: req.session.oidcCodeVerifier,
                 expectedState: req.session.oidcState,
-            });
+                idTokenExpected: true,
+            }, { redirect_uri: callbackUrl });
 
             // Clean up PKCE/state from session
             delete req.session.oidcCodeVerifier;
@@ -115,11 +124,10 @@ router.get('/auth/callback',
                 refreshTokenClaims: refreshClaims || undefined,
             };
 
-            await saveSession(req);
-            logger.info('OIDC authenticated successfully - Session saved');
+            logger.info('OIDC authenticated successfully');
 
             if (req.session) {
-                // Regenerate session
+                // Regenerate session (this persists the tokens)
                 await regenerateSession(req);
                 setSessionTTLFromToken(req);
 
@@ -143,34 +151,38 @@ router.get('/auth/callback',
             }
         } catch (err) {
             logger.error('Error in OIDC callback', err);
+            // Clean up PKCE/state from session on failure
+            delete req.session?.oidcCodeVerifier;
+            delete req.session?.oidcState;
             res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
         }
     }
 );
 
 router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => {
+    // Extract ID token before clearing session so we can pass it to the provider
+    const idToken = req.session?.['oidc-tokens']?.id_token;
+    const redirectUri = envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/';
+
     try {
-        const idToken = req.session?.['oidc-tokens']?.id_token;
-
         await regenerateAnonymousSession(req);
-
-        // Use OIDC end_session_endpoint via discovery
-        try {
-            const config = await getPortalOIDCConfig();
-            const redirectUri = envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/';
-            const logoutUrl = oidcClient.buildEndSessionUrl(config, {
-                post_logout_redirect_uri: redirectUri,
-                ...(idToken ? { id_token_hint: idToken } : {}),
-            });
-            res.redirect(logoutUrl.href);
-        } catch {
-            // Fallback: construct logout URL from known OIDC issuer pattern
-            const logoutUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/')}`;
-            res.redirect(logoutUrl);
-        }
     } catch (err) {
         logger.error('Error regenerating session on logout', err);
-        res.redirect('/');
+        // Continue with provider logout even if local session clear failed
+    }
+
+    // Redirect to OIDC provider logout
+    try {
+        const config = await getPortalOIDCConfig();
+        const logoutUrl = oidcClient.buildEndSessionUrl(config, {
+            post_logout_redirect_uri: redirectUri,
+            ...(idToken ? { id_token_hint: idToken } : {}),
+        });
+        res.redirect(logoutUrl.href);
+    } catch {
+        // Fallback: construct logout URL from known OIDC issuer pattern
+        const logoutUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(redirectUri)}`;
+        res.redirect(logoutUrl);
     }
 });
 

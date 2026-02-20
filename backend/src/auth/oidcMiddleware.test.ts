@@ -71,6 +71,71 @@ describe('oidcMiddleware', () => {
             expect(mockNext).toHaveBeenCalled();
         });
 
+        it('should refresh expired access token when refresh token is available', async () => {
+            const { refreshTokenGrant } = await import('openid-client');
+            (refreshTokenGrant as any).mockResolvedValue({
+                access_token: 'new-access-token',
+                refresh_token: 'new-refresh-token',
+                id_token: 'new-id-token',
+            });
+
+            mockReq.session = {
+                'oidc-tokens': {
+                    access_token: 'expired-access-token',
+                    refresh_token: 'valid-refresh-token',
+                },
+                save: vi.fn((cb: any) => cb && cb(null)),
+            } as any;
+
+            const middleware = oidcSession();
+            await middleware(mockReq as Request, mockRes as Response, mockNext);
+
+            expect(refreshTokenGrant).toHaveBeenCalled();
+            expect(mockReq.oidc?.isAuthenticated).toBe(true);
+            expect(mockReq.oidc?.accessToken).toBe('new-access-token');
+            expect((mockReq.session as any)['oidc-tokens'].access_token).toBe('new-access-token');
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should clear auth state when token refresh fails', async () => {
+            const { refreshTokenGrant } = await import('openid-client');
+            (refreshTokenGrant as any).mockRejectedValue(new Error('refresh failed'));
+
+            mockReq.session = {
+                'oidc-tokens': {
+                    access_token: 'expired-access-token',
+                    refresh_token: 'valid-refresh-token',
+                },
+                save: vi.fn((cb: any) => cb && cb(null)),
+            } as any;
+
+            const middleware = oidcSession();
+            await middleware(mockReq as Request, mockRes as Response, mockNext);
+
+            expect(mockReq.oidc?.isAuthenticated).toBe(false);
+            expect((mockReq.session as any)['oidc-tokens']).toBeUndefined();
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should not refresh when access token is still valid', async () => {
+            const { refreshTokenGrant } = await import('openid-client');
+
+            mockReq.session = {
+                'oidc-tokens': {
+                    access_token: 'valid-access-token',
+                    refresh_token: 'valid-refresh-token',
+                },
+                save: vi.fn((cb: any) => cb && cb(null)),
+            } as any;
+
+            const middleware = oidcSession();
+            await middleware(mockReq as Request, mockRes as Response, mockNext);
+
+            expect(refreshTokenGrant).not.toHaveBeenCalled();
+            expect(mockReq.oidc?.isAuthenticated).toBe(true);
+            expect(mockReq.oidc?.accessToken).toBe('valid-access-token');
+        });
+
         it('should handle missing session gracefully', async () => {
             mockReq.session = undefined as any;
 

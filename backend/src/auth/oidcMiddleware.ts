@@ -32,6 +32,11 @@ export function oidcSession() {
                     if (newTokens.id_token) tokens.id_token = newTokens.id_token;
                     req.session['oidc-tokens'] = tokens;
 
+                    // Explicitly persist refreshed tokens so they survive request failures
+                    req.session.save((err) => {
+                        if (err) logger.error('Failed to persist refreshed tokens to session', err);
+                    });
+
                     const newClaims = decodeJwtPayload(tokens.access_token);
                     const refreshClaims = tokens.refresh_token
                         ? decodeJwtPayload(tokens.refresh_token)
