@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Explore from './Explore';
+import { useFormRead } from '../hooks/useForm';
 
 // --------------------
 // Mocks
@@ -82,6 +83,11 @@ vi.mock('@/hooks/useDebounce', () => ({
   default: (value: string) => value, // Return value immediately for testing
 }));
 
+// Mock useFormRead — controls whether the filter sidebar is shown.
+// Default: returns one filter group so showFilters = true and ExploreFilters renders.
+vi.mock('../hooks/useForm');
+
+
 // --------------------
 // Helpers
 // --------------------
@@ -100,6 +106,16 @@ const setupMatchMedia = () => {
       dispatchEvent: vi.fn(),
     })),
   });
+};
+
+const validFormData = {
+  data: {
+    form: {
+      data: {
+        filters: [{ id: 'collection', index: 1, label: 'Collections', options: [] }],
+      },
+    },
+  },
 };
 
 /**
@@ -121,6 +137,12 @@ describe('Explore Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     setupMatchMedia();
+    // Default: showFilters = true so ExploreFilters is rendered in every test
+    vi.mocked(useFormRead).mockReturnValue({
+      data: validFormData,
+      isLoading: false,
+      isError: false,
+    } as any);
   });
 
   describe('static rendering', () => {
@@ -140,6 +162,38 @@ describe('Explore Page', () => {
     it('renders the sort dropdown with "Newest" as the default label', () => {
       renderComponent();
       expect(screen.getByText('Newest')).toBeInTheDocument();
+    });
+  });
+
+  describe('filter sidebar visibility (scenario 3)', () => {
+    it('hides the filter sidebar when the form API returns an error', () => {
+      vi.mocked(useFormRead).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+      } as any);
+      renderComponent();
+      expect(screen.queryByTestId('explore-filters')).not.toBeInTheDocument();
+    });
+
+    it('hides the filter sidebar when the form API returns empty filters', () => {
+      vi.mocked(useFormRead).mockReturnValue({
+        data: { data: { form: { data: { filters: [] } } } },
+        isLoading: false,
+        isError: false,
+      } as any);
+      renderComponent();
+      expect(screen.queryByTestId('explore-filters')).not.toBeInTheDocument();
+    });
+
+    it('shows the filter sidebar while the form API is loading', () => {
+      vi.mocked(useFormRead).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+      } as any);
+      renderComponent();
+      expect(screen.getByTestId('explore-filters')).toBeInTheDocument();
     });
   });
 
@@ -168,7 +222,6 @@ describe('Explore Page', () => {
       renderComponent('/explore');
       const input = screen.getByPlaceholderText('searchPlaceholder');
       expect(input).toHaveValue('');
-      // With debounce mocked to return immediately, empty string is passed to grid
       expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: ,');
     });
 
@@ -180,7 +233,6 @@ describe('Explore Page', () => {
 
     it('passes the q param value as the grid query immediately', () => {
       renderComponent('/explore?q=tensorflow');
-      // With debounce mocked, the query is passed through immediately
       expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: tensorflow');
     });
 
@@ -191,10 +243,40 @@ describe('Explore Page', () => {
       expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: machine learning');
     });
 
-    it('handles a missing q param as an empty string', () => {
-      renderComponent('/explore?sort=newest');
+    it('treats a URL with no q param as an empty search string', () => {
+      renderComponent('/explore');
       const input = screen.getByPlaceholderText('searchPlaceholder');
       expect(input).toHaveValue('');
+    });
+  });
+
+  describe('URL filter persistence', () => {
+    it('initializes filters from URL query params on mount', () => {
+      renderComponent('/explore?primaryCategory=Course&primaryCategory=Content+Playlist');
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent(
+        'Filters: {"primaryCategory":["Course","Content Playlist"]}'
+      );
+    });
+
+    it('initializes multiple filter codes from URL', () => {
+      renderComponent('/explore?primaryCategory=Course&mimeType=video%2Fmp4');
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent(
+        'Filters: {"primaryCategory":["Course"],"mimeType":["video/mp4"]}'
+      );
+    });
+
+    it('initializes with empty filters when no filter params are in the URL', () => {
+      renderComponent('/explore');
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Filters: {}');
+    });
+
+    it('does not treat the q param as a filter code', () => {
+      renderComponent('/explore?q=react&primaryCategory=Course');
+      // q must not appear in the filters object passed to ExploreGrid
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent(
+        'Filters: {"primaryCategory":["Course"]}'
+      );
+      expect(screen.getByTestId('explore-grid')).not.toHaveTextContent('"q"');
     });
   });
 
@@ -220,8 +302,9 @@ describe('Explore Page', () => {
     it('passes updated filters down to ExploreGrid', () => {
       renderComponent();
       fireEvent.click(screen.getByText('Update Filters'));
+      // FilterState is Record<string, string[]>; initial state is {}, after update: { collections: [...] }
       expect(screen.getByTestId('explore-grid')).toHaveTextContent(
-        'Filters: {"collections":["TestCollection"],"contentTypes":[],"categories":[]}'
+        'Filters: {"collections":["TestCollection"]}'
       );
     });
   });

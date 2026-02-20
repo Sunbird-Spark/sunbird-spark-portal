@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import ExploreGrid from './ExploreGrid';
 import { useContentSearch } from '../../hooks/useContent';
+import type { FilterState } from '../../pages/Explore';
 
 // Mock dependencies
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -67,12 +68,9 @@ const mockContent: any[] = [
 ];
 
 describe('ExploreGrid', () => {
+  // FilterState is now Record<string, string[]> — keys are API `code` values
   const defaultProps = {
-    filters: {
-      collections: [],
-      contentTypes: [],
-      categories: []
-    },
+    filters: {} as FilterState,
     query: '',
     sortBy: { lastUpdatedOn: 'desc' }
   };
@@ -195,11 +193,11 @@ describe('ExploreGrid', () => {
             <ExploreGrid {...defaultProps} />
         </BrowserRouter>
     );
-    
-    const newFilters = {
-        collections: ['Collection1'],
-        contentTypes: ['Course'],
-        categories: ['Math']
+
+    // FilterState keys are API `code` values — passed directly into the search request
+    const newFilters: FilterState = {
+        primaryCategory: ['Collection1'],
+        mimeType: ['video/mp4', 'video/webm'],
     };
 
     rerender(
@@ -212,12 +210,36 @@ describe('ExploreGrid', () => {
         expect(useContentSearch).toHaveBeenLastCalledWith(
             expect.objectContaining({
                 request: expect.objectContaining({
-                    filters: expect.objectContaining({ 
+                    filters: expect.objectContaining({
+                        objectType: 'Content',
                         primaryCategory: ['Collection1'],
-                        contentType: ['Course'],
-                        se_subjects: ['Math'],
-                        objectType: 'Content'
+                        mimeType: ['video/mp4', 'video/webm'],
                     })
+                })
+            })
+        );
+    });
+  });
+
+  it('excludes filter codes with empty value arrays from the search request', async () => {
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: [] } },
+        isLoading: false,
+        error: null,
+    } as any);
+
+    // Empty arrays should be stripped — only objectType should be in filters
+    render(
+        <BrowserRouter>
+            <ExploreGrid {...defaultProps} filters={{ primaryCategory: [] }} />
+        </BrowserRouter>
+    );
+
+    await waitFor(() => {
+        expect(useContentSearch).toHaveBeenCalledWith(
+            expect.objectContaining({
+                request: expect.objectContaining({
+                    filters: { objectType: 'Content' }
                 })
             })
         );

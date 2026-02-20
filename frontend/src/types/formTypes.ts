@@ -45,3 +45,19 @@ export interface UseFormReadOptions {
   request: FormReadRequest;
   enabled?: boolean;
 }
+
+export interface ExploreFilterOption {
+  id: string;
+  index: number;
+  label: string;
+  code: string;
+  value: string | string[];
+}
+
+export interface ExploreFilterGroup {
+  id: string;
+  index: number;
+  label: string;
+  options?: ExploreFilterOption[];
+  list?: ExploreFilterOption[];
+}

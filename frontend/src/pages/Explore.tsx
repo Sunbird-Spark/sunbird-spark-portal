@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
 import ExploreFilters from '../components/explore/ExploreFilters';
@@ -19,28 +19,43 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { useSearchParams } from 'react-router-dom';
 import "./home/home.css";
 import { useSidebarState } from '../hooks/useSidebarState';
+import { useFormRead } from '../hooks/useForm';
 
-export interface FilterState {
-  collections: string[];
-  contentTypes: string[];
-  categories: string[];
-}
+// Keys are the API `code` field (e.g. "primaryCategory", "mimeType"), values are selected option values
+export type FilterState = Record<string, string[]>;
 
 const Explore = () => {
   const { t } = useAppI18n();
   const isMobile = useIsMobile();
-  const [searchParams] = useSearchParams();
-  const [filters, setFilters] = useState<FilterState>({
-    collections: [],
-    contentTypes: [],
-    categories: [],
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize filters from URL on mount — every param except 'q' is treated as a filter code.
+  // e.g. ?primaryCategory=Course&primaryCategory=Content+Playlist&mimeType=video%2Fmp4
+  const [filters, setFilters] = useState<FilterState>(() => {
+    const initial: FilterState = {};
+    searchParams.forEach((value, key) => {
+      if (key === 'q') return;
+      if (!initial[key]) initial[key] = [];
+      initial[key].push(value);
+    });
+    return initial;
   });
+
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
   const [sortLabel, setSortLabel] = useState('Newest');
   const [activeNav, setActiveNav] = useState("explore");
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
+
+  // Same query key as ExploreFilters — React Query returns cached data, no extra API call.
+  // Used here only to control whether the aside is rendered (scenario 3: hide layout when empty/errored).
+  const { data: formData, isLoading: isFiltersLoading, isError: isFiltersError } = useFormRead({
+    request: { type: 'portal', subType: 'explorepage', action: 'filters', component: 'portal' },
+  });
+  const rawGroups = (formData?.data as any)?.form?.data?.filters;
+  const showFilters = isFiltersLoading || (!isFiltersError && Array.isArray(rawGroups) && rawGroups.length > 0);
+
   useEffect(() => {
     // For Explore page, we always want it closed by default when mounting
     setIsSidebarOpen(false);
@@ -51,6 +66,20 @@ const Explore = () => {
     const q = searchParams.get('q') ?? '';
     setSearchQuery(q);
   }, [searchParams]);
+
+  const hasInitiallyMounted = useRef(false);
+  useEffect(() => {
+    if (!hasInitiallyMounted.current) {
+      hasInitiallyMounted.current = true;
+      return;
+    }
+    const next = new URLSearchParams();
+    if (debouncedSearchQuery) next.set('q', debouncedSearchQuery);
+    Object.entries(filters).forEach(([code, values]) => {
+      values.forEach((value) => next.append(code, value));
+    });
+    setSearchParams(next, { replace: true });
+  }, [filters, debouncedSearchQuery, setSearchParams]);
   return (
     <div className="home-container">
       <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
@@ -86,10 +115,12 @@ const Explore = () => {
         <main className="flex-1 bg-white relative">
           <div className="w-full px-[1.875rem] py-6 md:py-8 transition-all">
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-              {/* Filters Sidebar */}
-              <aside className="w-full md:w-[21.875rem] shrink-0">
-                <ExploreFilters filters={filters} setFilters={setFilters} />
-              </aside>
+              {/* Filters Sidebar — hidden if form API errored or returned no groups (scenario 3) */}
+              {showFilters && (
+                <aside className="w-full md:w-[21.875rem] shrink-0">
+                  <ExploreFilters filters={filters} setFilters={setFilters} />
+                </aside>
+              )}
 
               {/* Content Grid */}
               <div className="flex-1">

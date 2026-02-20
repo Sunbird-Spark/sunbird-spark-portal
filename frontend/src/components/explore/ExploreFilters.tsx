@@ -1,4 +1,3 @@
-
 import React, { BaseSyntheticEvent } from "react";
 import { Checkbox } from "../common/CheckBox";
 import { useAppI18n } from "../../hooks/useAppI18n";
@@ -9,6 +8,8 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "../landing/Accordion";
+import { useFormRead } from "../../hooks/useForm";
+import type { ExploreFilterGroup, ExploreFilterOption } from "../../types/formTypes";
 
 interface ExploreFiltersProps {
     filters: FilterState;
@@ -18,144 +19,122 @@ interface ExploreFiltersProps {
 const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
     const { t } = useAppI18n();
 
-    //TODO: Hardcoded filters, to be replaced with dynamic filters
-    const collections = [
-        { id: "Collection", label: "Collection" },
-        { id: "Resource", label: "Resource" },
-        { id: "Content Playlist", label: "Content Playlist" },
-        { id: "Course", label: "Course" },
-        { id: "Course Assessment", label: "Course Assessment" },
-    ];
+    const { data: formData, isLoading, isError } = useFormRead({
+        request: {
+            type: 'portal',
+            subType: 'explorepage',
+            action: 'filters',
+            component: 'portal',
+        },
+    });
 
-    const contentTypes = [
-        { id: "video", label: "Video" },
-        { id: "audio", label: "Audio" },
-        { id: "pdf", label: "PDF" },
-        { id: "epub", label: "Epub" },
-        { id: "youtube", label: "Youtube" },
-        { id: "html", label: "HTML" },
-        { id: "interactive", label: "Interactive" },
-    ];
+    // Scenario 1: sort groups by index (spread to avoid mutating original)
+    const rawGroups = (formData?.data as any)?.form?.data?.filters;
+    const filterGroups: ExploreFilterGroup[] = Array.isArray(rawGroups)
+        ? [...rawGroups].sort((a, b) => a.index - b.index)
+        : [];
 
-    const categories = [
-        { id: "ai-ml", label: "AI/ML" },
-        { id: "cyber-security", label: "Cyber Security" },
-        { id: "ux-design", label: "UX Design" },
-        { id: "devops", label: "DevOps" },
-        { id: "data-science", label: "Data Science" },
-        { id: "blockchain", label: "Blockchain" },
-    ];
+    // Scenario 2: option value may be a string or string[] — normalise to string[]
+    const getItems = (group: ExploreFilterGroup): ExploreFilterOption[] =>
+        [...(group.options ?? group.list ?? [])].sort((a, b) => a.index - b.index);
 
-    const handleCheckboxChange = (
-        category: keyof FilterState,
-        id: string,
-        checked: boolean
-    ) => {
-        setFilters((prev) => ({
-            ...prev,
-            [category]: checked
-                ? [...prev[category], id]
-                : prev[category].filter((item) => item !== id),
-        }));
+    const getValues = (option: ExploreFilterOption): string[] =>
+        Array.isArray(option.value)
+            ? option.value
+            : option.value
+                ? [option.value]
+                : [];
+
+    const isChecked = (option: ExploreFilterOption): boolean => {
+        const values = getValues(option);
+        const current = filters[option.code] ?? [];
+        return values.every((v) => current.includes(v));
+    };
+
+    // Scenario 2: key = option.code, value = option.value (string | string[])
+    const handleCheckboxChange = (option: ExploreFilterOption, checked: boolean) => {
+        const values = getValues(option);
+        setFilters((prev) => {
+            const current = prev[option.code] ?? [];
+            const updated = checked
+                ? [...new Set([...current, ...values])]
+                : current.filter((v) => !values.includes(v));
+            return { ...prev, [option.code]: updated };
+        });
     };
 
     const handleAccordionItemClick = (e: BaseSyntheticEvent) => {
         e.stopPropagation();
+    };
+
+    if (isLoading) {
+        return (
+            <div className="bg-[#F8F9FA] rounded-[1.375rem] p-5">
+                <div className="animate-pulse space-y-3">
+                    <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-28 bg-gray-200 rounded-xl"></div>
+                    <div className="h-28 bg-gray-200 rounded-xl"></div>
+                    <div className="h-28 bg-gray-200 rounded-xl"></div>
+                </div>
+            </div>
+        );
     }
 
+    // Scenario 3: hide the filter panel if the API errored or returned no filter groups
+    if (isError || filterGroups.length === 0) {
+        return null;
+    }
+
+    // Scenario 4: only open the first section by default
+    const defaultOpenId = filterGroups[0]?.id;
+
     return (
-        <div className="bg-[#F8F9FA] rounded-[1.375rem] p-5">
+        <div data-testid="explore-filters" className="bg-[#F8F9FA] rounded-[1.375rem] p-5">
             {/* Filters Title */}
             <h2 className="text-lg font-bold text-foreground mb-4 px-1">{t("filters")}</h2>
 
-            <Accordion type="multiple" defaultValue={["collections", "contentTypes", "categories"]} className="w-full space-y-3">
-                {/* Collections Section */}
-                <AccordionItem value="collections" className="bg-white rounded-xl border-none px-4 shadow-sm">
-                    <AccordionTrigger className="hover:no-underline py-4 [&>svg]:text-sunbird-brick">
-                        <span className="text-sm font-semibold text-foreground">{t("collections")}</span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <div className="space-y-4 pt-1 pb-4">
-                            {collections.map((item) => (
-                                <label
-                                    key={item.id}
-                                    className="flex items-center justify-start gap-3 cursor-pointer group"
-                                    onClick={handleAccordionItemClick}
-                                >
-                                    <Checkbox
-                                        checked={filters.collections.includes(item.id)}
-                                        onCheckedChange={(checked) =>
-                                            handleCheckboxChange("collections", item.id, checked as boolean)
-                                        }
-                                        className="h-5 w-5 rounded border-sunbird-ginger data-[state=checked]:bg-sunbird-ginger data-[state=checked]:border-sunbird-ginger"
-                                    />
-                                    <span className="text-sm text-foreground group-hover:text-primary transition-colors">
-                                        {item.label}
-                                    </span>
-                                </label>
-                            ))}
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-
-                {/* Content Type Section */}
-                <AccordionItem value="contentTypes" className="bg-white rounded-xl border-none px-4 shadow-sm">
-                    <AccordionTrigger className="hover:no-underline py-4 [&>svg]:text-sunbird-brick">
-                        <span className="text-sm font-semibold text-foreground">{t("contentType")}</span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <div className="space-y-4 pt-1 pb-4">
-                            {contentTypes.map((item) => (
-                                <label
-                                    key={item.id}
-                                    className="flex items-center justify-start gap-3 cursor-pointer group"
-                                    onClick={handleAccordionItemClick}
-
-                                >
-                                    <Checkbox
-                                        checked={filters.contentTypes.includes(item.id)}
-                                        onCheckedChange={(checked) =>
-                                            handleCheckboxChange("contentTypes", item.id, checked as boolean)
-                                        }
-                                        className="h-5 w-5 rounded border-sunbird-ginger data-[state=checked]:bg-sunbird-ginger data-[state=checked]:border-sunbird-ginger"
-                                    />
-                                    <span className="text-sm text-foreground group-hover:text-primary transition-colors">
-                                        {t(`contentTypes.${item.id}`)}
-                                    </span>
-                                </label>
-                            ))}
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-
-                {/* Categories Section */}
-                <AccordionItem value="categories" className="bg-white rounded-xl border-none px-4 shadow-sm">
-                    <AccordionTrigger className="hover:no-underline py-4 [&>svg]:text-sunbird-brick">
-                        <span className="text-sm font-semibold text-foreground">{t("categories")}</span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <div className="space-y-4 pt-1 pb-4">
-                            {categories.map((item) => (
-                                <label
-                                    key={item.id}
-                                    className="flex items-center justify-start gap-3 cursor-pointer group"
-                                    onClick={handleAccordionItemClick}
-                                >
-                                    <Checkbox
-                                        checked={filters.categories.includes(item.id)}
-                                        onCheckedChange={(checked) =>
-                                            handleCheckboxChange("categories", item.id, checked as boolean)
-                                        }
-                                        className="h-5 w-5 rounded border-sunbird-ginger data-[state=checked]:bg-sunbird-ginger data-[state=checked]:border-sunbird-ginger"
-                                    />
-                                    <span className="text-sm text-foreground group-hover:text-primary transition-colors">
-                                        {t(`categoriesList.${item.id}`)}
-                                    </span>
-                                </label>
-                            ))}
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
+            <Accordion
+                type="multiple"
+                defaultValue={defaultOpenId ? [defaultOpenId] : []}
+                className="w-full space-y-3"
+            >
+                {/* Scenario 1: groups already sorted above */}
+                {filterGroups.map((group) => (
+                    <AccordionItem
+                        key={group.id}
+                        value={group.id}
+                        className="bg-white rounded-xl border-none px-4 shadow-sm"
+                    >
+                        <AccordionTrigger className="hover:no-underline py-4 [&>svg]:text-sunbird-brick">
+                            <span className="text-sm font-semibold text-foreground">
+                                {group.label}
+                            </span>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="space-y-4 pt-1 pb-4">
+                                {/* Scenario 1: options sorted by index inside getItems() */}
+                                {getItems(group).map((option) => (
+                                    <label
+                                        key={option.id}
+                                        className="flex items-center justify-start gap-3 cursor-pointer group"
+                                        onClick={handleAccordionItemClick}
+                                    >
+                                        <Checkbox
+                                            checked={isChecked(option)}
+                                            onCheckedChange={(checked) =>
+                                                handleCheckboxChange(option, checked as boolean)
+                                            }
+                                            className="h-5 w-5 rounded border-sunbird-ginger data-[state=checked]:bg-sunbird-ginger data-[state=checked]:border-sunbird-ginger"
+                                        />
+                                        <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+                                            {option.label}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
             </Accordion>
         </div>
     );
