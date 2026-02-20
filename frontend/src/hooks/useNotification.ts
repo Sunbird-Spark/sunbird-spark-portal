@@ -6,8 +6,6 @@ import { notificationService } from '../services/NotificationService';
 import { NotificationFeed, NotificationDateGroup, GroupedNotification } from '../types/notificationTypes';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 
-const NOTIFICATION_QUERY_KEY = 'notificationFeed';
-
 export interface UseNotificationReadReturn {
     notifications: NotificationFeed[];
     isLoading: boolean;
@@ -17,7 +15,7 @@ export interface UseNotificationReadReturn {
 
 export const useNotificationRead = (): UseNotificationReadReturn => {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: [NOTIFICATION_QUERY_KEY],
+        queryKey: ['notificationFeed'],
         queryFn: async () => {
             const userId = userAuthInfoService.getUserId() ??
                 (await userAuthInfoService.getAuthInfo())?.uid;
@@ -57,45 +55,66 @@ function parseTemplateMessage(templateData: string): string {
     }
 }
 
-export interface UseNotificationReturn {
-    notifications: NotificationFeed[];
-    groupedNotifications: GroupedNotification[];
-    unreadCount: number;
-    isLoading: boolean;
-    error: Error | null;
-    getMessage: (feed: NotificationFeed) => string;
-    deleteNotification: (id: string) => void;
-    deleteAll: () => void;
-}
-
 export const useNotificationUpdate = (): UseMutationResult<
     ApiResponse<unknown>,
     Error,
     { ids: string[]; userId: string }
 > => {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ ids, userId }: { ids: string[]; userId: string }) =>
             notificationService.notificationsUpdate(ids, userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notificationFeed'] });
+        },
     });
 };
 
-export const useNotificationDelete = (): UseMutationResult<
-    ApiResponse<unknown>,
-    Error,
-    { ids: string[]; userId: string; category: string }
-> => {
-    return useMutation({
-        mutationFn: ({ ids, userId, category }: { ids: string[]; userId: string; category: string }) =>
-            notificationService.notificationsDelete(ids, userId, category),
-    });
-};
-
-export const useNotification = (): UseNotificationReturn => {
+export const useNotificationDelete = () => {
     const queryClient = useQueryClient();
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
-    const { notifications: allNotifications, isLoading, error } = useNotificationRead();
-    const notifications = allNotifications.filter(n => !deletedIds.has(n.id));
 
+    const { mutateAsync: deleteApi } = useMutation({
+        mutationFn: ({ ids, userId, category }: { ids: string[]; userId: string; category: string }) =>
+            notificationService.notificationsDelete(ids, userId, category),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notificationFeed'] });
+        },
+    });
+
+    const deleteNotification = useCallback(async (notification: NotificationFeed): Promise<void> => {
+        setDeletedIds(prev => new Set(prev).add(notification.id));
+        await deleteApi({
+            ids: [notification.id],
+            userId: notification.userId,
+            category: notification.action.category,
+        });
+    }, [deleteApi]);
+
+    const deleteAll = useCallback(async (notifications: NotificationFeed[]): Promise<void> => {
+        setDeletedIds(new Set(notifications.map(n => n.id)));
+        await Promise.all(
+            notifications.map(n => deleteApi({
+                ids: [n.id],
+                userId: n.userId,
+                category: n.action.category,
+            }))
+        );
+    }, [deleteApi]);
+
+    const filterDeleted = useCallback((notifications: NotificationFeed[]) => {
+        return notifications.filter(n => !deletedIds.has(n.id));
+    }, [deletedIds]);
+
+    return {
+        deleteNotification,
+        deleteAll,
+        filterDeleted,
+        deletedIds,
+    };
+};
+
+export const useNotificationGrouping = (notifications: NotificationFeed[]) => {
     const groupedNotifications: GroupedNotification[] = (['Today', 'Yesterday', 'Older'] as NotificationDateGroup[])
         .map(group => ({
             group,
@@ -105,28 +124,16 @@ export const useNotification = (): UseNotificationReturn => {
 
     const unreadCount = notifications.filter(n => n.status === 'unread').length;
 
+    return {
+        groupedNotifications,
+        unreadCount,
+    };
+};
+
+export const useNotificationMessage = () => {
     const getMessage = useCallback((feed: NotificationFeed): string => {
         return parseTemplateMessage(feed.action.template.data);
     }, []);
 
-    const deleteNotification = useCallback((id: string) => {
-        setDeletedIds(prev => new Set(prev).add(id));
-    }, []);
-
-    const deleteAll = useCallback(() => {
-        const currentIds = (queryClient.getQueryData<NotificationFeed[]>([NOTIFICATION_QUERY_KEY]) ?? [])
-            .map(n => n.id);
-        setDeletedIds(new Set(currentIds));
-    }, [queryClient]);
-
-    return {
-        notifications,
-        groupedNotifications,
-        unreadCount,
-        isLoading,
-        error: error as Error | null,
-        getMessage,
-        deleteNotification,
-        deleteAll,
-    };
+    return { getMessage };
 };
