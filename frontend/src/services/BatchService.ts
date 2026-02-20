@@ -66,7 +66,7 @@ export class BatchService {
     courseId: string,
     createdBy: string
   ): Promise<ApiResponse<BatchListResponse>> {
-    return getClient().post<BatchListResponse>('/learner/course/v1/batch/list', {
+    return getClient().post<BatchListResponse>('/course/v1/batch/list', {
       request: {
         filters: {
           courseId,
@@ -83,7 +83,7 @@ export class BatchService {
     headers?: Record<string, string>
   ): Promise<ApiResponse<CreateBatchResponse>> {
     return getClient().post<CreateBatchResponse>(
-      '/learner/course/v1/batch/create',
+      '/course/v1/batch/create',
       { request },
       headers
     );
@@ -94,7 +94,7 @@ export class BatchService {
     headers?: Record<string, string>
   ): Promise<ApiResponse<unknown>> {
     return getClient().patch<unknown>(
-      '/learner/course/v1/batch/update',
+      '/course/v1/batch/update',
       { request },
       headers
     );

@@ -1,7 +1,6 @@
 import type { HierarchyContentNode } from '../../types/collectionTypes';
 import type { CollectionData, Module, Lesson } from '../../types/collectionTypes';
 
-const DEFAULT_LESSON_DURATION = '—';
 const DEFAULT_UNITS = 0;
 
 function lessonTypeFromMimeType(mimeType?: string): 'video' | 'document' {
@@ -16,7 +15,6 @@ function mapChildrenToLessons(children: HierarchyContentNode[] | undefined): Les
   return children.map((node) => ({
     id: node.identifier,
     title: node.name ?? 'Untitled',
-    duration: DEFAULT_LESSON_DURATION,
     type: lessonTypeFromMimeType(node.mimeType),
     mimeType: node.mimeType,
   }));

@@ -195,7 +195,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const [certBatch, setCertBatch]   = useState<Batch | null>(null);
   const [activeTab, setActiveTab]   = useState<ActiveTab>("Ongoing");
 
-  const { data: batches, isLoading, isError } = useBatchList(collectionId);
+  const { data: batches, isLoading, isError } = useBatchList(collectionId, { createdByMe: true });
 
   /* ── Per-tab filtered lists ── */
   const ongoing  = batches?.filter((b) => getBatchStatus(b.status) === "Ongoing")  ?? [];

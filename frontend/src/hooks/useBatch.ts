@@ -1,31 +1,110 @@
-import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import { batchService, Batch, CreateBatchRequest, UpdateBatchRequest } from '../services/BatchService';
+import { useQuery, useMutation, useQueryClient, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
+import { batchService as creatorBatchService, Batch, CreateBatchRequest, UpdateBatchRequest } from '../services/BatchService';
+import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
 import { userService } from '../services/UserService';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import type {
+  BatchListResponse,
+  BatchReadResponse,
+  ContentStateReadRequest,
+  ContentStateReadResponse,
+} from '../types/collectionTypes';
+import type { ApiResponse } from '../lib/http-client';
 
-export const useBatchList = (courseId: string | undefined): UseQueryResult<Batch[], Error> => {
+// ─── Shared learner batch service instance ───────────────────────────────────
+const learnerBatchService = new LearnerBatchService();
+
+// ─── Params ──────────────────────────────────────────────────────────────────
+export type EnrolParams = { courseId: string; userId: string; batchId: string };
+
+// ─── useBatchList ─────────────────────────────────────────────────────────────
+/**
+ * Unified batch list hook.
+ *
+ * - `createdByMe: true`  → resolves the current user's id and fetches only
+ *   batches they created (creator / BatchCard view). Returns `Batch[]`.
+ * - `createdByMe: false` → fetches all batches for the course without an auth
+ *   filter (learner / enrollment view). Returns `ApiResponse<BatchListResponse>`.
+ *
+ * The overload signatures let callers get the correct return type automatically.
+ */
+export function useBatchList(
+  courseId: string | undefined,
+  options: { createdByMe: true; enabled?: boolean }
+): UseQueryResult<Batch[], Error>;
+export function useBatchList(
+  courseId: string | undefined,
+  options?: { createdByMe?: false; enabled?: boolean }
+): UseQueryResult<ApiResponse<BatchListResponse>, Error>;
+export function useBatchList(
+  courseId: string | undefined,
+  options?: { createdByMe?: boolean; enabled?: boolean }
+): UseQueryResult<Batch[] | ApiResponse<BatchListResponse>, Error> {
+  const enabled = options?.enabled ?? true;
+  const createdByMe = options?.createdByMe ?? false;
+
   return useQuery({
-    queryKey: ['batchList', courseId],
-    queryFn: async (): Promise<Batch[]> => {
-      if (!courseId) return [];
+    queryKey: ['batchList', courseId, createdByMe],
+    queryFn: async () => {
+      if (!courseId) return createdByMe ? [] : ({ data: { response: { content: [], count: 0 } } } as unknown as ApiResponse<BatchListResponse>);
 
-      let userId = userAuthInfoService.getUserId();
-      if (!userId) {
-        const authInfo = await userAuthInfoService.getAuthInfo();
-        userId = authInfo?.uid;
+      if (createdByMe) {
+        // Creator view: fetch only batches created by the current user
+        let userId = userAuthInfoService.getUserId();
+        if (!userId) {
+          const authInfo = await userAuthInfoService.getAuthInfo();
+          userId = authInfo?.uid;
+        }
+        if (!userId) return [] as Batch[];
+        const response = await creatorBatchService.listBatches(courseId, userId);
+        return (response?.data?.response?.content ?? []) as Batch[];
+      } else {
+        // Learner view: fetch all batches for enrollment
+        return learnerBatchService.batchList(courseId);
       }
-
-      if (!userId) return [];
-
-      const response = await batchService.listBatches(courseId, userId);
-      return response?.data?.response?.content ?? [];
     },
-    enabled: !!courseId,
-    staleTime: 0,
-    retry: 1,
+    enabled: enabled && !!courseId,
+    staleTime: createdByMe ? 0 : undefined,
+    retry: createdByMe ? 1 : undefined,
+  });
+}
+
+// ─── useBatchRead ─────────────────────────────────────────────────────────────
+export const useBatchRead = (
+  batchId: string | undefined,
+  options?: { enabled?: boolean }
+): UseQueryResult<ApiResponse<BatchReadResponse>, Error> => {
+  const enabled = options?.enabled ?? true;
+  return useQuery({
+    queryKey: ['batchRead', batchId],
+    queryFn: () => learnerBatchService.batchRead(batchId!),
+    enabled: enabled && !!batchId,
   });
 };
 
+// ─── useContentState ──────────────────────────────────────────────────────────
+export const useContentState = (
+  request: ContentStateReadRequest | null,
+  options?: { enabled?: boolean }
+): UseQueryResult<ApiResponse<ContentStateReadResponse>, Error> => {
+  const enabled = options?.enabled ?? true;
+  const contentIdsKey = request?.contentIds?.length ? request.contentIds.join(',') : '';
+  return useQuery({
+    queryKey: ['contentState', request?.userId, request?.courseId, request?.batchId, contentIdsKey],
+    queryFn: () => learnerBatchService.contentStateRead(request!),
+    enabled: enabled && !!request && request.contentIds.length > 0,
+  });
+};
+
+// ─── useEnrol ─────────────────────────────────────────────────────────────────
+export const useEnrol = (): UseMutationResult<ApiResponse<unknown>, Error, EnrolParams> => {
+  return useMutation({
+    mutationFn: ({ courseId, userId, batchId }: EnrolParams) =>
+      learnerBatchService.enrol(courseId, userId, batchId),
+  });
+};
+
+// ─── Creator-side form interfaces ────────────────────────────────────────────
 /** Data the form hands us — excludes server-resolved fields (createdBy, createdFor) */
 export interface CreateBatchFormData {
   courseId: string;
@@ -68,6 +147,7 @@ async function resolveUserAndOrg() {
   return { userId, rootOrgId };
 }
 
+// ─── useCreateBatch ───────────────────────────────────────────────────────────
 /**
  * Mutation that resolves the current user's id + rootOrgId and posts to
  * POST /learner/course/v1/batch/create. On success it invalidates the
@@ -95,22 +175,19 @@ export const useCreateBatch = () => {
       if (formData.enrollmentEndDate) request.enrollmentEndDate = formData.enrollmentEndDate;
       if (formData.issueCertificate !== undefined) request.issueCertificate = formData.issueCertificate;
 
-      const reqHeaders: Record<string, string> = {
-        'X-User-ID': userId,
-      };
-      if (rootOrgId) {
-        reqHeaders['X-Channel-Id'] = rootOrgId;
-      }
+      const reqHeaders: Record<string, string> = { 'X-User-ID': userId };
+      if (rootOrgId) reqHeaders['X-Channel-Id'] = rootOrgId;
 
-      return batchService.createBatch(request, reqHeaders);
+      return creatorBatchService.createBatch(request, reqHeaders);
     },
 
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId] });
+      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
     },
   });
 };
 
+// ─── useUpdateBatch ───────────────────────────────────────────────────────────
 /**
  * Mutation that resolves the current user's rootOrgId and patches
  * PATCH /learner/course/v1/batch/update. On success it invalidates the
@@ -137,19 +214,17 @@ export const useUpdateBatch = () => {
       if (formData.enrollmentEndDate) request.enrollmentEndDate = formData.enrollmentEndDate;
       if (formData.issueCertificate !== undefined) request.issueCertificate = formData.issueCertificate;
 
-      const reqHeaders: Record<string, string> = {
-        'X-User-ID': userId,
-      };
+      const reqHeaders: Record<string, string> = { 'X-User-ID': userId };
       if (rootOrgId) {
         reqHeaders['X-Channel-Id'] = rootOrgId;
         reqHeaders['X-Org-code'] = rootOrgId;
       }
 
-      return batchService.updateBatch(request, reqHeaders);
+      return creatorBatchService.updateBatch(request, reqHeaders);
     },
 
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId] });
+      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
     },
   });
 };

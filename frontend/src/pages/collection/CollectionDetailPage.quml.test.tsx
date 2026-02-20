@@ -36,6 +36,25 @@ const mockUseQumlContent = vi.fn();
 vi.mock('@/hooks/useCollection', () => ({
   useCollection: (id: string | undefined) => mockUseCollection(id),
 }));
+
+const mockEnrollment = {
+  enrollmentForCollection: undefined as { batchId: string } | undefined,
+  isEnrolledInCurrentBatch: false,
+  effectiveBatchId: undefined as string | undefined,
+  contentStatusMap: undefined as Record<string, number> | undefined,
+  courseProgressProps: undefined as object | undefined,
+  batches: [],
+  batchListLoading: false,
+  batchListError: undefined as string | undefined,
+  firstCertPreviewUrl: undefined as string | undefined,
+  hasCertificate: false,
+  joinLoading: false,
+  joinError: '',
+  handleJoinCourse: vi.fn(),
+};
+vi.mock('@/hooks/useCollectionEnrollment', () => ({
+  useCollectionEnrollment: () => mockEnrollment,
+}));
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: (opts: { request?: object; enabled?: boolean }) => mockUseContentSearch(opts),
   useContentRead: (id: string) => mockUseContentRead(id),
@@ -78,10 +97,23 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 vi.mock('@/components/collection/CollectionOverview', () => ({
-  default: ({ collectionData, contentId, playerIsLoading, playerError }: any) => (
+  default: ({
+    collectionData,
+    contentId,
+    contentAccessBlocked,
+    playerIsLoading,
+    playerError,
+  }: {
+    collectionData: { title: string };
+    contentId?: string;
+    contentAccessBlocked?: boolean;
+    playerIsLoading?: boolean;
+    playerError?: Error | null;
+  }) => (
     <div
       data-testid="collection-overview"
       data-content-id={contentId ?? ''}
+      data-content-access-blocked={String(!!contentAccessBlocked)}
       data-player-loading={String(!!playerIsLoading)}
       data-player-error={playerError?.message ?? ''}
     >
@@ -101,7 +133,15 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: { isUserAuthenticated: vi.fn(() => false) },
 }));
 vi.mock('@/components/collection/CollectionSidebar', () => ({
-  default: ({ collectionId, contentBlocked, activeLessonId }: any) => (
+  default: ({
+    collectionId,
+    contentBlocked,
+    activeLessonId,
+  }: {
+    collectionId: string;
+    contentBlocked?: boolean;
+    activeLessonId?: string;
+  }) => (
     <aside
       data-testid="collection-sidebar"
       data-content-blocked={String(!!contentBlocked)}

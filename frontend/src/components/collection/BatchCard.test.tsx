@@ -26,7 +26,7 @@ vi.mock('./CreateBatchModal', () => ({
 // Mock useBatchList so we control the API response in tests
 const mockUseBatchList = vi.fn();
 vi.mock('@/hooks/useBatch', () => ({
-  useBatchList: (courseId: string) => mockUseBatchList(courseId),
+  useBatchList: (courseId: string, options?: any) => mockUseBatchList(courseId, options),
 }));
 
 /** Default hook state — no batches, not loading */
