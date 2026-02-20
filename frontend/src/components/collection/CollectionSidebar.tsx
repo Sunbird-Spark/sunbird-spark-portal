@@ -1,39 +1,61 @@
 import { Link } from "react-router-dom";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { FiCheck, FiLoader } from "react-icons/fi";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./collapsible"
+} from "./collapsible";
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
-import type { Lesson, Module } from "@/types/collectionTypes"
+import { useAppI18n } from "@/hooks/useAppI18n";
+import type { Lesson, Module } from "@/types/collectionTypes";
 
-function getLessonHref(lesson: Lesson, collectionId: string): string {
+function getLessonHref(lesson: Lesson, collectionId: string, batchId?: string | null): string {
   const mime = (lesson.mimeType ?? '').toLowerCase();
   const isCollection = mime === 'application/vnd.ekstep.content-collection';
-  return isCollection ? `/collection/${lesson.id}` : `/collection/${collectionId}/content/${lesson.id}`;
+  if (isCollection) return `/collection/${lesson.id}`;
+  if (batchId) return `/collection/${collectionId}/batch/${batchId}/content/${lesson.id}`;
+  return `/collection/${collectionId}/content/${lesson.id}`;
 }
+
+/** 0 = Not started, 1 = In progress, 2 = Completed */
+export type ContentStatus = 0 | 1 | 2;
 
 interface CollectionSidebarProps {
   collectionId: string;
+  /** When set (trackable + batch in route), lesson links include batch in path. */
+  batchId?: string | null;
   modules: Module[];
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
   activeLessonId?: string | null;
   contentBlocked?: boolean;
+  /** Map of content/lesson id to status (0/1/2). When provided, each lesson shows status label. */
+  contentStatusMap?: Record<string, number>;
+}
+
+function getStatusLabel(status: number | undefined): string {
+  if (status === 2) return "courseDetails.contentStatusCompleted";
+  if (status === 1) return "courseDetails.contentStatusInProgress";
+  return "courseDetails.contentStatusNotViewed";
 }
 
 const CollectionSidebar = ({
   collectionId,
+  batchId = null,
   modules,
   expandedModules,
   toggleModule,
   activeLessonId = null,
   contentBlocked = false,
+  contentStatusMap,
 }: CollectionSidebarProps) => {
-
+  const { t } = useAppI18n();
   return (
-    <div className="space-y-3">
+    <div
+      className={`space-y-3 ${contentBlocked ? "opacity-80 select-none" : ""}`}
+      aria-disabled={contentBlocked || undefined}
+    >
       {modules.map((module) => {
         const isExpanded = expandedModules.includes(module.id);
 
@@ -43,21 +65,49 @@ const CollectionSidebar = ({
             open={isExpanded}
             onOpenChange={() => toggleModule(module.id)}
           >
-            <div className="bg-white rounded-xl border border-gray-100 transition-all duration-300 overflow-hidden">
+            <div
+              className={`rounded-xl border transition-all duration-300 overflow-hidden ${
+                contentBlocked
+                  ? "bg-gray-100 border-gray-200"
+                  : "bg-white border-gray-100"
+              }`}
+            >
               <CollapsibleTrigger asChild>
-                <button className="w-full p-4 flex items-start justify-between text-left hover:bg-gray-50 transition-colors">
+                <button
+                  className={`w-full p-4 flex items-start justify-between text-left transition-colors ${
+                    contentBlocked
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:bg-gray-50"
+                  }`}
+                >
                   <div className="flex-1 pr-4">
-                    <h3 className="font-bold text-lg mb-1 text-foreground">
+                    <h3
+                      className={`font-bold text-lg mb-1 ${
+                        contentBlocked ? "text-muted-foreground" : "text-foreground"
+                      }`}
+                    >
                       {module.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p
+                      className={`text-sm ${
+                        contentBlocked ? "text-gray-400" : "text-muted-foreground"
+                      }`}
+                    >
                       {module.subtitle}
                     </p>
                   </div>
                   {isExpanded ? (
-                    <FiChevronUp className="w-5 h-5 text-sunbird-brick flex-shrink-0 mt-0.5" />
+                    <FiChevronUp
+                      className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                        contentBlocked ? "text-muted-foreground" : "text-sunbird-brick"
+                      }`}
+                    />
                   ) : (
-                    <FiChevronDown className="w-5 h-5 text-sunbird-brick flex-shrink-0 mt-0.5" />
+                    <FiChevronDown
+                      className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                        contentBlocked ? "text-muted-foreground" : "text-sunbird-brick"
+                      }`}
+                    />
                   )}
                 </button>
               </CollapsibleTrigger>
@@ -77,6 +127,9 @@ const CollectionSidebar = ({
                       ? ""
                       : "hover:bg-gray-200 transition-colors cursor-pointer";
 
+                    const lessonStatus = contentStatusMap?.[lesson.id];
+                    const showStatus = contentStatusMap !== undefined;
+
                     if (contentBlocked) {
                       return (
                         <div
@@ -88,9 +141,11 @@ const CollectionSidebar = ({
                           <span className="flex-1 text-base leading-snug">
                             {lesson.title}
                           </span>
-                          <span className="text-sm text-muted-foreground flex-shrink-0 font-medium">
-                            {lesson.duration}
-                          </span>
+                          {showStatus && (
+                            <span className="text-xs text-muted-foreground flex-shrink-0">
+                              {t(getStatusLabel(lessonStatus))}
+                            </span>
+                          )}
                         </div>
                       );
                     }
@@ -98,16 +153,28 @@ const CollectionSidebar = ({
                     return (
                       <Link
                         key={lesson.id}
-                        to={getLessonHref(lesson, collectionId)}
+                        to={getLessonHref(lesson, collectionId, batchId)}
                         className={`${baseClass} ${interactiveClass}`}
                       >
                         {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
                         <span className="flex-1 text-base leading-snug">
                           {lesson.title}
                         </span>
-                        <span className="text-sm text-muted-foreground flex-shrink-0 font-medium">
-                          {lesson.duration}
-                        </span>
+                        {showStatus && (
+                          <span
+                            className={`text-xs flex-shrink-0 flex items-center gap-1 ${
+                              lessonStatus === 2
+                                ? "text-green-600"
+                                : lessonStatus === 1
+                                  ? "text-sunbird-brick"
+                                  : "text-muted-foreground"
+                            }`}
+                          >
+                            {lessonStatus === 2 && <FiCheck className="w-3.5 h-3.5" />}
+                            {lessonStatus === 1 && <FiLoader className="w-3.5 h-3.5" />}
+                            {t(getStatusLabel(lessonStatus))}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}

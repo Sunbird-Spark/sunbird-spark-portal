@@ -84,8 +84,8 @@ describe('collectionMapper', () => {
         title: 'Unit 1',
         subtitle: 'Course Unit',
         lessons: [
-          { id: 'l1', title: 'Lesson 1', duration: '—', type: 'video', mimeType: 'video/mp4' },
-          { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document', mimeType: 'application/pdf' },
+          { id: 'l1', title: 'Lesson 1', type: 'video', mimeType: 'video/mp4' },
+          { id: 'l2', title: 'Lesson 2', type: 'document', mimeType: 'application/pdf' },
         ],
       });
       expect(result.units).toBe(1);

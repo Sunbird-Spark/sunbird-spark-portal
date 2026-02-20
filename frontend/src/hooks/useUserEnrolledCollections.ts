@@ -4,9 +4,17 @@ import { CourseEnrollmentResponse } from '../types/TrackableCollections';
 import { ApiResponse } from '../lib/http-client';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 
-export const useUserEnrolledCollections = (): UseQueryResult<ApiResponse<CourseEnrollmentResponse>, Error> => {
+export interface UseUserEnrolledCollectionsOptions {
+  enabled?: boolean;
+}
+
+export const useUserEnrolledCollections = (
+  options?: UseUserEnrolledCollectionsOptions
+): UseQueryResult<ApiResponse<CourseEnrollmentResponse>, Error> => {
+  const { enabled = true } = options ?? {};
   return useQuery({
     queryKey: ['userEnrollments'],
+    enabled,
     queryFn: async () => {
       let userId = userAuthInfoService.getUserId();
       
