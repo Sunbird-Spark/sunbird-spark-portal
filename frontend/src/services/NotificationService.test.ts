@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NotificationService } from './NotificationService';
+import { NotificationService, getDateGroup, parseTemplateMessage } from './NotificationService';
 import { getClient } from '../lib/http-client';
+import dayjs from 'dayjs';
 
 vi.mock('../lib/http-client', () => ({
     getClient: vi.fn(),
@@ -85,5 +86,53 @@ describe('NotificationService', () => {
                 request: { ids: ['notif-1', 'notif-2'], userId: 'user-123', category: 'group-feed' },
             });
         });
+    });
+});
+
+describe('getDateGroup', () => {
+    it('returns "Today" for current date', () => {
+        const today = dayjs().format('YYYY-MM-DDTHH:mm:ss');
+        expect(getDateGroup(today)).toBe('Today');
+    });
+
+    it('returns "Yesterday" for yesterday\'s date', () => {
+        const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DDTHH:mm:ss');
+        expect(getDateGroup(yesterday)).toBe('Yesterday');
+    });
+
+    it('returns "Older" for dates before yesterday', () => {
+        const twoDaysAgo = dayjs().subtract(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
+        expect(getDateGroup(twoDaysAgo)).toBe('Older');
+    });
+
+    it('returns "Older" for dates in the past', () => {
+        const lastWeek = dayjs().subtract(7, 'days').format('YYYY-MM-DDTHH:mm:ss');
+        expect(getDateGroup(lastWeek)).toBe('Older');
+    });
+});
+
+describe('parseTemplateMessage', () => {
+    it('parses JSON and returns description if present', () => {
+        const templateData = JSON.stringify({ description: 'Test description', title: 'Test title' });
+        expect(parseTemplateMessage(templateData)).toBe('Test description');
+    });
+
+    it('parses JSON and returns title if description is not present', () => {
+        const templateData = JSON.stringify({ title: 'Test title' });
+        expect(parseTemplateMessage(templateData)).toBe('Test title');
+    });
+
+    it('returns original string if neither description nor title is present', () => {
+        const templateData = JSON.stringify({ message: 'Test message' });
+        expect(parseTemplateMessage(templateData)).toBe(templateData);
+    });
+
+    it('returns original string if JSON parsing fails', () => {
+        const invalidJson = 'not a valid json';
+        expect(parseTemplateMessage(invalidJson)).toBe(invalidJson);
+    });
+
+    it('handles empty string', () => {
+        expect(parseTemplateMessage('')).toBe('');
     });
 });

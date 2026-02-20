@@ -25,9 +25,13 @@ const { mockNotificationService, mockUserAuthInfoService } = vi.hoisted(() => ({
     },
 }));
 
-vi.mock('../services/NotificationService', () => ({
-    notificationService: mockNotificationService,
-}));
+vi.mock('../services/NotificationService', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../services/NotificationService')>();
+    return {
+        ...actual,
+        notificationService: mockNotificationService,
+    };
+});
 
 vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
     default: mockUserAuthInfoService,
@@ -111,19 +115,22 @@ describe('useNotificationGrouping', () => {
     it('groups a notification as Today when createdOn is today', () => {
         const feed = makeFeed({ createdOn: dayjs().toISOString() });
         const { result } = renderHook(() => useNotificationGrouping([feed]));
-        expect(result.current.groupedNotifications[0].group).toBe('Today');
+        expect(result.current.groupedNotifications).toHaveLength(1);
+        expect(result.current.groupedNotifications[0]!.group).toBe('Today');
     });
 
     it('groups a notification as Yesterday when createdOn is yesterday', () => {
         const feed = makeFeed({ createdOn: dayjs().subtract(1, 'day').toISOString() });
         const { result } = renderHook(() => useNotificationGrouping([feed]));
-        expect(result.current.groupedNotifications[0].group).toBe('Yesterday');
+        expect(result.current.groupedNotifications).toHaveLength(1);
+        expect(result.current.groupedNotifications[0]!.group).toBe('Yesterday');
     });
 
     it('groups a notification as Older when createdOn is more than a day ago', () => {
         const feed = makeFeed({ createdOn: dayjs().subtract(5, 'day').toISOString() });
         const { result } = renderHook(() => useNotificationGrouping([feed]));
-        expect(result.current.groupedNotifications[0].group).toBe('Older');
+        expect(result.current.groupedNotifications).toHaveLength(1);
+        expect(result.current.groupedNotifications[0]!.group).toBe('Older');
     });
 
     it('filters out groups that have no items', () => {

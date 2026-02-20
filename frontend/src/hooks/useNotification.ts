@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient, useMutation, UseMutationResult } from '@tanstack/react-query';
 import { ApiResponse } from '../lib/http-client';
-import dayjs from 'dayjs';
-import { notificationService } from '../services/NotificationService';
+import { notificationService, getDateGroup, parseTemplateMessage } from '../services/NotificationService';
 import { NotificationFeed, NotificationDateGroup, GroupedNotification } from '../types/notificationTypes';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 
@@ -35,25 +34,6 @@ export const useNotificationRead = (): UseNotificationReadReturn => {
         refetch,
     };
 };
-
-function getDateGroup(createdOn: string): NotificationDateGroup {
-    const today = dayjs().startOf('day');
-    const yesterday = today.subtract(1, 'day');
-    const date = dayjs(createdOn).startOf('day');
-
-    if (date.isSame(today)) return 'Today';
-    if (date.isSame(yesterday)) return 'Yesterday';
-    return 'Older';
-}
-
-function parseTemplateMessage(templateData: string): string {
-    try {
-        const parsed = JSON.parse(templateData);
-        return parsed.description ?? parsed.title ?? templateData;
-    } catch {
-        return templateData;
-    }
-}
 
 export const useNotificationUpdate = (): UseMutationResult<
     ApiResponse<unknown>,
