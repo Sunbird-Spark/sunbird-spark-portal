@@ -56,6 +56,15 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
         }
     });
 
+    // Refs so the IntersectionObserver callback always reads the latest state
+    // without needing the observer to be recreated on every state change.
+    const hasMoreRef = useRef(hasMore);
+    const isQueryLoadingRef = useRef(isQueryLoading);
+    const displayItemsLengthRef = useRef(displayItems.length);
+    hasMoreRef.current = hasMore;
+    isQueryLoadingRef.current = isQueryLoading;
+    displayItemsLengthRef.current = displayItems.length;
+
     // Update display items when data arrives
     useEffect(() => {
         if (data?.data?.content) {
@@ -87,13 +96,19 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
         }
     }, [queryError]);
 
-    // Infinite scroll observer
+    // Infinite scroll observer — created once on mount.
+    // State is read via refs so the observer never needs to be torn down and
+    // re-registered (which would cause an immediate re-fire if the target is
+    // already in the viewport, leading to infinite fetches).
     useEffect(() => {
-        if (!hasMore || isQueryLoading) return;
-
         const observer = new IntersectionObserver(
             entries => {
-                if (entries?.[0]?.isIntersecting && hasMore && !isQueryLoading && displayItems.length > 0) {
+                if (
+                    entries?.[0]?.isIntersecting &&
+                    hasMoreRef.current &&
+                    !isQueryLoadingRef.current &&
+                    displayItemsLengthRef.current > 0
+                ) {
                     setOffset(prev => prev + limit);
                 }
             },
@@ -104,12 +119,9 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
             observer.observe(observerTarget.current);
         }
 
-        return () => {
-            if (observerTarget.current) {
-                observer.unobserve(observerTarget.current);
-            }
-        };
-    }, [hasMore, isQueryLoading, displayItems.length]);
+        return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const isLoading = isQueryLoading && offset === 0;
     const isFetchingMore = isQueryLoading && offset > 0;
