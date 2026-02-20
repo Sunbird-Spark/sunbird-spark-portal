@@ -86,7 +86,7 @@ const mockFormData = {
 
 const renderComponent = (
   filters: FilterState = {},
-  setFilters: ReturnType<typeof vi.fn> = vi.fn()
+  setFilters: React.Dispatch<React.SetStateAction<FilterState>> = vi.fn()
 ) => render(<ExploreFilters filters={filters} setFilters={setFilters} />);
 
 // --------------------
@@ -183,9 +183,10 @@ describe('ExploreFilters', () => {
       const setFilters = vi.fn();
       renderComponent({}, setFilters);
 
-      fireEvent.click(screen.getAllByRole('checkbox')[0]); // Course
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[0]!); // Course
 
-      const updater = setFilters.mock.calls[0][0] as (prev: FilterState) => FilterState;
+      const updater = setFilters.mock.calls[0]![0] as (prev: FilterState) => FilterState;
       expect(updater({})).toEqual({ primaryCategory: ['Course'] });
     });
 
@@ -193,9 +194,10 @@ describe('ExploreFilters', () => {
       const setFilters = vi.fn();
       renderComponent({}, setFilters);
 
-      fireEvent.click(screen.getAllByRole('checkbox')[2]); // Video
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[2]!); // Video
 
-      const updater = setFilters.mock.calls[0][0] as (prev: FilterState) => FilterState;
+      const updater = setFilters.mock.calls[0]![0] as (prev: FilterState) => FilterState;
       expect(updater({})).toEqual({ mimeType: ['video/mp4', 'video/webm'] });
     });
 
@@ -203,9 +205,10 @@ describe('ExploreFilters', () => {
       const setFilters = vi.fn();
       renderComponent({ primaryCategory: ['Digital Textbook'] }, setFilters);
 
-      fireEvent.click(screen.getAllByRole('checkbox')[0]); // Add Course
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[0]!); // Add Course
 
-      const updater = setFilters.mock.calls[0][0] as (prev: FilterState) => FilterState;
+      const updater = setFilters.mock.calls[0]![0] as (prev: FilterState) => FilterState;
       expect(updater({ primaryCategory: ['Digital Textbook'] })).toEqual({
         primaryCategory: ['Digital Textbook', 'Course'],
       });
@@ -215,9 +218,10 @@ describe('ExploreFilters', () => {
       const setFilters = vi.fn();
       renderComponent({ mimeType: ['video/mp4', 'video/webm'] }, setFilters);
 
-      fireEvent.click(screen.getAllByRole('checkbox')[2]); // Uncheck Video
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[2]!); // Uncheck Video
 
-      const updater = setFilters.mock.calls[0][0] as (prev: FilterState) => FilterState;
+      const updater = setFilters.mock.calls[0]![0] as (prev: FilterState) => FilterState;
       expect(updater({ mimeType: ['video/mp4', 'video/webm'] })).toEqual({ mimeType: [] });
     });
 
@@ -239,9 +243,10 @@ describe('ExploreFilters', () => {
       const setFilters = vi.fn();
       renderComponent({}, setFilters);
 
-      fireEvent.click(screen.getAllByRole('checkbox')[0]); // Course (first click)
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[0]!); // Course (first click)
 
-      const updater = setFilters.mock.calls[0][0] as (prev: FilterState) => FilterState;
+      const updater = setFilters.mock.calls[0]![0] as (prev: FilterState) => FilterState;
       // Simulate already having Course in filters
       const result = updater({ primaryCategory: ['Course'] });
       expect(result.primaryCategory).toEqual(['Course']); // no duplicate
