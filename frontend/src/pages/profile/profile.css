@@ -69,6 +69,9 @@
     background: #F4F4F4;
     border: 0.09375rem solid #D4D4D4;
     padding: 1.5rem;
+    position: fixed !important;
+    top: 1.2rem !important;
+    right: -10rem !important;
 }
 .notification-popover-content[data-state=open] {
     @apply animate-in fade-in-0 zoom-in-95;
@@ -90,12 +93,15 @@
 }
 
 .notification-popover-arrow {
-    @apply fill-white;
+    fill: #F4F4F4;
+    position: absolute !important;
+    right: 3.25rem !important;
 }
 
 .notification-popover-arrow polygon {
-    stroke: theme('colors.gray.200');
-    stroke-width: 1;
+    stroke: #D4D4D4;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
 }
 
 .notification-popover-header {
@@ -108,7 +114,7 @@
 
 .notification-delete-all-btn {
     @apply text-sm text-sunbird-brick;
-    font-size: 12px
+    font-size: 12px;
 }
 
 .notification-list {

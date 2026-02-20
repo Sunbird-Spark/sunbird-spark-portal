@@ -120,11 +120,12 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                         </Popover.Trigger>
                         <Popover.Portal>
                         <Popover.Content
+                            side="bottom"
                             align="end"
                             sideOffset={8}
                             className="notification-popover-content"
                         >
-                            <Popover.Arrow className="notification-popover-arrow" width={12} height={6} />
+                            <Popover.Arrow className="notification-popover-arrow" width={24} height={18} />
                             <div className="notification-popover-header">
                                 <h3 className="notification-popover-title">Notifications</h3>
                             </div>
