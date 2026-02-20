@@ -108,6 +108,7 @@
 
 .notification-delete-all-btn {
     @apply text-sm text-sunbird-brick;
+    font-size: 12px
 }
 
 .notification-list {
@@ -138,7 +139,7 @@
     content: '';
     position: absolute;
     left: -4px;
-    top: 25%;
+    top: 30%;
     transform: translateY(-50%);
     width: 8px;
     height: 8px;
