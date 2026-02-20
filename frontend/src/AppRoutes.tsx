@@ -23,6 +23,8 @@ import CollectionEditorPage from './pages/content/CollectionEditorPage';
 import Explore from './pages/Explore';
 import MyLearning from './pages/myLearning/MyLearning';
 import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
+import QumlEditorPage from './pages/content/QumlEditorPage';
+import Onboarding from './pages/onboarding/OnboardingPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -54,6 +56,7 @@ const AppRoutes: React.FC = () => {
           <Route path=":collectionId/batch/:batchId" element={<CollectionDetailPage />}>
             <Route path="content/:contentId" element={null} />
           </Route>
+         <Route path="/onboarding" element={<Onboarding />} />
         </Route>
 
         {/* Protected routes */}
@@ -64,6 +67,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
         <Route path="/my-learning" element={<MyLearning />} />
         <Route path="/edit/collection-editor/:contentId" element={<CollectionEditorPage />} />
+        <Route path="/edit/quml-editor/:contentId" element={<QumlEditorPage />} />
 
         {/* Generic Editor routes */}
         <Route path="/workspace/content/edit/generic" element={<GenericEditorPage />} />

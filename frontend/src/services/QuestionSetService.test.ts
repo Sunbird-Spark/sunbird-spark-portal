@@ -70,7 +70,7 @@ describe('QuestionSetService', () => {
 
       const result = await service.getQuestionset('do_123');
 
-      expect(mockClient.get).toHaveBeenCalledWith('/questionset/v2/read/do_123');
+      expect(mockClient.get).toHaveBeenCalledWith('/questionset/v2/read/do_123?mode=edit');
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -135,6 +135,96 @@ describe('QuestionSetService', () => {
       mockClient.post = vi.fn().mockRejectedValue(new Error('API error'));
 
       await expect(service.getQuestionList(['do_q1'])).rejects.toThrow('API error');
+    });
+  });
+
+  describe('createQuestionSet', () => {
+    const createOptions = {
+      name: 'Practice Set 1',
+      createdBy: 'user-123',
+      createdFor: ['org-456'],
+      framework: 'NCF',
+    };
+
+    it('should call client.post with correct url and payload structure', async () => {
+      const mockUuid = 'generated-uuid-123';
+      vi.stubGlobal('crypto', {
+        randomUUID: vi.fn().mockReturnValue(mockUuid),
+      });
+
+      const mockResponse = {
+        data: {
+          result: {
+            identifier: 'do_qs_789',
+            versionKey: 'vk_abc',
+          },
+        },
+        status: 200,
+        headers: {},
+      };
+      mockClient.post = vi.fn().mockResolvedValue(mockResponse);
+
+      const result = await service.createQuestionSet(createOptions);
+
+      expect(mockClient.post).toHaveBeenCalledWith('/questionset/v2/create', {
+        request: {
+          questionset: {
+            name: createOptions.name,
+            mimeType: 'application/vnd.sunbird.questionset',
+            primaryCategory: 'Practice Question Set',
+            createdBy: createOptions.createdBy,
+            createdFor: createOptions.createdFor,
+            framework: createOptions.framework,
+            code: mockUuid,
+          },
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should include generated UUID in payload', async () => {
+      const mockUuid = 'unique-uuid-xyz';
+      vi.stubGlobal('crypto', {
+        randomUUID: vi.fn().mockReturnValue(mockUuid),
+      });
+
+      mockClient.post = vi.fn().mockResolvedValue({
+        data: { result: { identifier: 'do_new' } },
+      });
+
+      await service.createQuestionSet(createOptions);
+
+      const callArgs = (mockClient.post as ReturnType<typeof vi.fn>).mock.calls[0];
+      expect(callArgs).toBeDefined();
+      const callPayload = callArgs![1] as { request: { questionset: { code: string } } };
+      expect(callPayload.request.questionset.code).toBe(mockUuid);
+    });
+
+    it('should return identifier and versionKey from API response', async () => {
+      vi.stubGlobal('crypto', { randomUUID: vi.fn().mockReturnValue('uuid') });
+      mockClient.post = vi.fn().mockResolvedValue({
+        data: {
+          result: {
+            identifier: 'do_qs_new_123',
+            versionKey: 'version_key_456',
+          },
+        },
+      });
+
+      const result = await service.createQuestionSet(createOptions);
+
+      expect(result).toEqual({
+        result: {
+          identifier: 'do_qs_new_123',
+          versionKey: 'version_key_456',
+        },
+      });
+    });
+
+    it('should handle errors', async () => {
+      mockClient.post = vi.fn().mockRejectedValue(new Error('Create failed'));
+
+      await expect(service.createQuestionSet(createOptions)).rejects.toThrow('Create failed');
     });
   });
 });

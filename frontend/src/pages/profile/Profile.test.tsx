@@ -20,6 +20,11 @@ vi.mock('@/components/profile/ProfileLearningList', () => ({ default: () => <div
 vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 vi.mock('@/components/common/PageLoader', () => ({ default: () => <div>Loading...</div> }));
 
+vi.mock('@/components/common/SearchModal', () => ({
+    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
+        isOpen ? <div data-testid="search-modal">Search Modal<button onClick={onClose}>Close</button></div> : null,
+}));
+
 // Mock DropdownMenu to render content inline
 vi.mock('@/components/common/DropdownMenu', () => ({
     DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -174,6 +179,8 @@ describe('Profile Page', () => {
 
         expect(mobileSearchBtn).toBeInTheDocument();
         fireEvent.click(mobileSearchBtn);
-        expect(mockNavigate).toHaveBeenCalledWith('/search');
+        
+        // SearchModal should open instead of navigating
+        expect(screen.getByTestId('search-modal')).toBeInTheDocument();
     });
 });

@@ -21,13 +21,31 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
     service = new QumlEditorService();
     (QumlEditorService as any).dependenciesLoaded = false;
     (QumlEditorService as any).dependenciesLoading = undefined;
+    (QumlEditorService as any).stylesLoaded = false;
+    (QumlEditorService as any).scriptLoaded = false;
+    (QumlEditorService as any).scriptLoading = undefined;
+    (QumlEditorService as any).fancytreeJQueryRef = undefined;
     
     // Setup jQuery mock with .each method to prevent FancyTree initialization errors
     const mockJQuery: any = { fn: {}, ui: {}, each: vi.fn() };
     (globalThis as any).$ = mockJQuery;
+    (globalThis as any).jQuery = mockJQuery;
+
+    // Prevent happy-dom from trying to fetch script/link assets during tests.
+    vi.spyOn(document.body, 'appendChild').mockImplementation(((node: Node) => {
+      if (node instanceof HTMLScriptElement && node.src.includes('sunbird-questionset-editor.js')) {
+        node.onload?.(new Event('load'));
+      }
+      return node;
+    }) as typeof document.body.appendChild);
+
+    vi.spyOn(document.head, 'appendChild').mockImplementation(((node: Node) => node) as typeof document.head.appendChild);
   });
 
   afterEach(() => {
+    document.querySelectorAll('[data-quml-editor-styles]').forEach(el => el.remove());
+    document.querySelectorAll('script[data-quml-editor-script]').forEach(el => el.remove());
+    vi.restoreAllMocks();
     vi.clearAllMocks();
   });
 
@@ -81,17 +99,6 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
 
 
   describe('createElement', () => {
-    beforeEach(() => {
-      // Mock document methods for createElement tests
-      document.createElement = vi.fn().mockImplementation((tag) => ({
-        setAttribute: vi.fn(),
-        removeEventListener: vi.fn(),
-        addEventListener: vi.fn(),
-        tagName: tag.toUpperCase(),
-      })) as any;
-      document.head.appendChild = vi.fn();
-    });
-
     it('creates lib-questionset-editor element', () => {
       const service = new QumlEditorService();
       const mockConfig: any = {
@@ -102,25 +109,26 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
 
       const element = service.createElement(mockConfig);
 
-      expect(document.createElement).toHaveBeenCalledWith('lib-questionset-editor');
-      expect(element.setAttribute).toHaveBeenCalledWith('editor-config', JSON.stringify(mockConfig));
+      expect(element.tagName.toLowerCase()).toBe('lib-questionset-editor');
+      expect(element.getAttribute('editor-config')).toBe(JSON.stringify(mockConfig));
     });
 
     it('loads styles only once', () => {
       const service = new QumlEditorService();
-      const mockConfig: any = {
-        context: { identifier: 'do_123' },
-        config: { mode: 'edit' as const },
-        metadata: {} as any,
-      };
 
-      service.createElement(mockConfig);
-      const firstCallCount = (document.head.appendChild as any).mock.calls.length;
+      service.loadAssets();
+      service.loadAssets();
 
-      service.createElement(mockConfig);
-      const secondCallCount = (document.head.appendChild as any).mock.calls.length;
+      expect(document.head.appendChild).toHaveBeenCalledTimes(1);
+    });
 
-      expect(secondCallCount).toBe(firstCallCount);
+    it('removes styles when removeAssets is called', () => {
+      const service = new QumlEditorService();
+
+      service.loadAssets();
+      service.removeAssets();
+
+      expect(document.querySelector('link[data-quml-editor-styles]')).toBeNull();
     });
   });
 
@@ -205,7 +213,7 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
       const config = await service.createConfig(metadata);
 
       expect(config.context.channel).toBe('');
-      expect(consoleWarn).toHaveBeenCalledWith('Failed to fetch channel from org service:', expect.any(Error));
+      expect(consoleWarn).toHaveBeenCalledWith('Failed to fetch channel info:', expect.any(Error));
 
       consoleWarn.mockRestore();
     });
