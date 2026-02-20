@@ -10,6 +10,7 @@ describe('OrganizationService', () => {
       get: vi.fn(),
       post: vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} }),
       put: vi.fn(),
+      patch: vi.fn(),
       delete: vi.fn(),
       updateHeaders: vi.fn(),
     };
