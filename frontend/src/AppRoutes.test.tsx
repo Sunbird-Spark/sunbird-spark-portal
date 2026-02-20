@@ -15,6 +15,7 @@ vi.mock("./pages/reports/ReportsPage", () => ({ default: () => <div>Reports Page
 vi.mock("./pages/content/CreateContentPage", () => ({ default: () => <div>Create Content Page</div> }));
 vi.mock("./pages/Explore", () => ({ default: () => <div>Explore Page</div> }));
 vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
+vi.mock("./pages/onboarding/OnboardingPage", () => ({ default: () => <div>Onboarding Page</div> }));
 
 // --------------------
 // Mock AuthContext
@@ -65,6 +66,20 @@ describe("AppRoutes (RBAC routing tests)", () => {
 
     renderWithRoute("/explore");
     expect(screen.getByText("Explore Page")).toBeInTheDocument();
+  });
+
+  it("public route: /onboarding renders OnboardingPage", () => {
+    mockUseAuth.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refetchUser: vi.fn(),
+    });
+
+    renderWithRoute("/onboarding");
+    expect(screen.getByText("Onboarding Page")).toBeInTheDocument();
   });
 
   it("public route: /unauthorized renders UnauthorizedPage", () => {
