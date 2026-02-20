@@ -1,4 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { ContentService } from '../services/ContentService';
 import { ApiResponse } from '../lib/http-client';
 import { ContentApiResponse } from '../types/contentTypes';
@@ -11,8 +12,15 @@ export const useContentSearch = (
 ): UseQueryResult<ApiResponse<ContentSearchResponse>, Error> => {
   const request = options?.request;
   const enabled = options?.enabled ?? true;
+  
+  // Serialize the request to create a stable queryKey
+  const queryKey = useMemo(() => 
+    ['content-search', JSON.stringify(request)],
+    [request]
+  );
+  
   return useQuery({
-    queryKey: ['content-search', request],
+    queryKey,
     queryFn: () => contentService.contentSearch(request),
     enabled,
   });

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import { FilterState } from "../../pages/Explore";
 import { useContentSearch } from "../../hooks/useContent";
@@ -27,29 +27,22 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
     const observerTarget = useRef<HTMLDivElement>(null);
     const limit = 9;
 
+    // Build active filters — memoized to prevent infinite re-renders
+    const activeFilters = useMemo(() => {
+        return {
+            objectType: 'Content',
+            ...Object.fromEntries(
+                Object.entries(filters).filter(([, values]) => values.length > 0)
+            ),
+        };
+    }, [filters]);
+
     // Reset when search parameters change
     useEffect(() => {
         setOffset(0);
         setDisplayItems([]);
         setHasMore(true);
-    }, [query, filters, sortBy]);
-
-    // Build active filters
-    const activeFilters: any = {
-        objectType: 'Content'
-    };
-    
-    if (filters.contentTypes.length > 0) {
-         activeFilters.contentType = filters.contentTypes;
-    }
-    
-    if (filters.categories.length > 0) {
-         activeFilters.se_subjects = filters.categories;
-    }
-     
-    if(filters.collections.length > 0) {
-        activeFilters.primaryCategory = filters.collections;
-    }
+    }, [query, activeFilters, sortBy]);
 
     const { data, isLoading: isQueryLoading, error: queryError } = useContentSearch({
         request: {
