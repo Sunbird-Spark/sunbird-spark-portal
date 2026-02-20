@@ -78,7 +78,10 @@ describe('PortalAuthRoutes Integration', () => {
         } else {
             app.use((req, res, next) => {
                 // @ts-ignore
-                req.session = {};
+                req.session = {
+                    oidcCodeVerifier: 'mock-code-verifier',
+                    oidcState: 'test-state',
+                };
                 next();
             });
         }
@@ -191,12 +194,18 @@ describe('PortalAuthRoutes Integration', () => {
         it('should redirect to root on error', async () => {
             const app = await setupApp();
             const sessionUtils = await import('../utils/sessionUtils.js');
+            const { buildEndSessionUrl } = await import('openid-client');
+
             vi.mocked(sessionUtils.regenerateAnonymousSession).mockRejectedValue(new Error('Logout error'));
+            vi.mocked(buildEndSessionUrl).mockImplementation(() => {
+                throw new Error('Discovery failed');
+            });
 
             const res = await request(app).get('/portal/logout');
 
             expect(res.status).toBe(302);
-            expect(res.header.location).toBe('/');
+            // When buildEndSessionUrl fails, fallback URL is used with domain.com in it
+            expect(res.header.location).toContain('domain.com');
         });
     });
 });

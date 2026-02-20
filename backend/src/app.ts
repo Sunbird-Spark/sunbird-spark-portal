@@ -55,8 +55,8 @@ app.use('/', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), knowlgMw
 // Apply anonymous session middleware to portal routes (once per route tree)
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
 
-// Portal Proxy Routes
-app.use('/portal', portalProxyRoutes);
+// Portal Proxy Routes (authenticated — oidcSession populates req.oidc for requireAuth)
+app.use('/portal', oidcSession(), portalProxyRoutes);
 
 app.use('/action', sessionMiddleware);
 
