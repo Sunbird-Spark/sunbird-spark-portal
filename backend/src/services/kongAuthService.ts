@@ -24,8 +24,8 @@ export const refreshSessionTTL = (req: Request) => {
 
 export const isSessionNearExpiry = (req: Request): boolean => {
     const expiresAt = req.session?.cookie?.expires;
-    if (!expiresAt) return true;
-    const remaining = new Date(expiresAt).getTime() - Date.now();
+    if (!expiresAt || !(expiresAt instanceof Date)) return true;
+    const remaining = expiresAt.getTime() - Date.now();
     const maxAge = req.session?.cookie?.maxAge ?? SUNBIRD_ANONYMOUS_SESSION_TTL;
     const threshold = maxAge / 2;
     return remaining <= threshold;
