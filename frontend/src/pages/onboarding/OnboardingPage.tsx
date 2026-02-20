@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { useNavigate } from "react-router-dom";
@@ -16,8 +16,20 @@ const Onboarding = () => {
   const [otherSkillText, setOtherSkillText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSkip = () => {
-    navigate("/home");
+    if (!isLoading) {
+      navigate("/home");
+    }
   };
 
   const handleNext = () => {
@@ -29,7 +41,7 @@ const Onboarding = () => {
   const handleSubmit = () => {
     setIsLoading(true);
     // Simulate saving preferences
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setIsLoading(false);
       navigate("/home");
     }, 1000);
@@ -219,7 +231,8 @@ const Onboarding = () => {
           <button
             type="button"
             onClick={handleSkip}
-            className="text-primary hover:text-primary/80 font-medium transition-colors text-sm"
+            disabled={isLoading}
+            className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Skip Onboarding
           </button>
