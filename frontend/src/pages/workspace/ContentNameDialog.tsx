@@ -102,7 +102,7 @@ export default function ContentNameDialog({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Untitled Content"
+            placeholder={`Enter ${optionTitle?.toLowerCase() || "content"} name`}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4"
             autoFocus
             disabled={isLoading}

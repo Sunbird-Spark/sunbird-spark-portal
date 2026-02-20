@@ -2,12 +2,15 @@ import { ContentEditorConfig, ContentEditorMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import { SystemSettingService } from '../../SystemSettingService';
+import { ChannelService } from '../../ChannelService';
 
 const CONTENT_EDITOR_URL = '/content-editor/index.html';
 
 export class ContentEditorService {
   private orgService = new OrganizationService();
-
+  private systemSettingService = new SystemSettingService();
+  private channelService = new ChannelService();
   async buildConfig(
     metadata: ContentEditorMetadata
   ): Promise<ContentEditorConfig> {
@@ -22,23 +25,39 @@ export class ContentEditorService {
     }
 
     let channel = '';
-    let hashTagId = '';
     try {
-      const orgResponse = await this.orgService.search({
-        filters: { isTenant: true },
-      });
-      const org = orgResponse?.data?.result?.response?.content?.[0];
-      if (org?.channel) {
-        channel = org.channel;
+      const filters: Record<string, any> = { isTenant: true };
+      try {
+        const settingResponse = await this.systemSettingService.read('default_channel');
+        const slugValue = settingResponse?.data?.response?.value;
+        if (slugValue) {
+          filters.slug = slugValue;
+        }
+      } catch (err) {
+        console.warn('Failed to fetch default channel system setting:', err);
       }
-      if (org?.hashTagId) {
-        hashTagId = org.hashTagId;
+      const orgResponse = await this.orgService.search({ filters });
+      const org = orgResponse?.data?.response?.content?.[0];
+      if (org) {
+        channel = org.hashTagId || org.identifier;
       }
     } catch (error) {
-      console.warn('Failed to fetch channel from org service:', error);
+      console.warn('Failed to fetch channel info:', error);
     }
+    const tags = channel ? [channel] : [];
 
-    const tags = hashTagId ? [hashTagId] : channel ? [channel] : [];
+    let framework = '';
+    if (channel) {
+      try {
+        const channelResponse = await this.channelService.read(channel);
+        const frameworks = channelResponse?.data?.channel?.frameworks;
+        if (Array.isArray(frameworks) && frameworks.length > 0) {
+          framework = frameworks[0]?.identifier || '';
+        }
+      } catch (error) {
+        console.warn('Failed to fetch channel framework:', error);
+      }
+    }
     const pdata = await appCoreService.getPData();
 
     const context = {
@@ -52,7 +71,7 @@ export class ContentEditorService {
       contentId: metadata.identifier,
       pdata,
       channel,
-      framework: metadata.framework || 'NCF',
+      framework,
       uid,
       did,
       defaultLicense: 'CC BY 4.0',
