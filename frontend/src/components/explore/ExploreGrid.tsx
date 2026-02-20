@@ -120,7 +120,6 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
         }
 
         return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const isLoading = isQueryLoading && offset === 0;
