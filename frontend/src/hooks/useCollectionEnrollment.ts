@@ -56,7 +56,8 @@ export function useCollectionEnrollment(
   const contentList = contentStateResponse?.data?.contentList ?? [];
   const contentStatusMap = useMemo(() => getContentStatusMap(contentList), [contentList]);
   const completedFromState = contentList.filter((c) => c.status === 2).length;
-  const totalFromState = leafContentIds.length;
+  const stateIsAuthoritative = contentStateResponse !== undefined;
+  const totalFromState = stateIsAuthoritative ? leafContentIds.length : 0;
 
   const courseProgressProps = useMemo(
     () =>

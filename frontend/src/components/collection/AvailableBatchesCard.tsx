@@ -1,8 +1,13 @@
-import { useState, useRef, useEffect } from "react";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { FiChevronDown } from "react-icons/fi";
 import type { BatchListItem, AvailableBatchesCardProps } from "@/types/collectionTypes";
 import { formatBatchDisplayDate } from "@/services/collection/enrollmentMapper";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/common/Select";
 
 function BatchOptionLabel({ batch }: { batch: BatchListItem }) {
   const { t } = useAppI18n();
@@ -38,25 +43,6 @@ const AvailableBatchesCard = ({
   joinError,
 }: AvailableBatchesCardProps) => {
   const { t } = useAppI18n();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const selectedBatch = batches.find((b) => b.identifier === selectedBatchId);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSelect = (batchId: string) => {
-    onBatchSelect(batchId);
-    setDropdownOpen(false);
-  };
 
   const isEmpty = batches.length === 0 && !isLoading;
 
@@ -82,47 +68,33 @@ const AvailableBatchesCard = ({
           <p className="font-rubik font-normal text-[0.8125rem] leading-[100%] text-muted-foreground">
             {t("courseDetails.selectBatchToStart")}
           </p>
-          <div className="relative" ref={containerRef}>
-            <button
-              type="button"
-              onClick={() => !isLoading && batches.length > 0 && setDropdownOpen((o) => !o)}
-              disabled={isLoading || batches.length === 0}
-              className="font-rubik w-full flex items-center justify-between rounded-[0.375rem] border border-sunbird-status-ongoing-border bg-white px-4 py-2.5 pr-10 text-[0.875rem] text-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-status-ongoing-border/50 disabled:opacity-60 text-left"
+          <Select
+            value={selectedBatchId || ""}
+            onValueChange={onBatchSelect}
+            disabled={isLoading || batches.length === 0}
+          >
+            <SelectTrigger
+              className="font-rubik w-full rounded-[0.375rem] border-sunbird-status-ongoing-border bg-white px-4 py-2.5 text-[0.875rem] text-foreground focus:ring-sunbird-status-ongoing-border/50 text-left disabled:opacity-60 [&>svg]:relative [&>svg]:right-0"
               data-testid="batch-select"
-              aria-haspopup="listbox"
-              aria-expanded={dropdownOpen}
               aria-label={t("courseDetails.selectBatch")}
             >
-              {selectedBatch ? (
-                <BatchOptionLabel batch={selectedBatch} />
-              ) : (
-                <span className="text-muted-foreground">{t("courseDetails.selectBatch")}</span>
-              )}
-              <FiChevronDown
-                className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground shrink-0 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
-                aria-hidden
-              />
-            </button>
-            {dropdownOpen && batches.length > 0 && (
-              <ul
-                role="listbox"
-                className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-[0.375rem] border border-sunbird-status-ongoing-border bg-white shadow-lg py-1"
-                data-testid="batch-select-list"
-              >
-                {batches.map((batch) => (
-                  <li
-                    key={batch.identifier}
-                    role="option"
-                    aria-selected={batch.identifier === selectedBatchId}
-                    onClick={() => handleSelect(batch.identifier)}
-                    className="px-4 py-1.5 cursor-pointer hover:bg-gray-50 border-b border-gray-300 last:border-b-0"
-                  >
-                    <BatchOptionLabel batch={batch} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+              <SelectValue placeholder={t("courseDetails.selectBatch")} />
+            </SelectTrigger>
+            <SelectContent
+              className="max-h-60 border-sunbird-status-ongoing-border [&_[data-radix-select-viewport]>*>span:first-of-type]:hidden"
+              data-testid="batch-select-list"
+            >
+              {batches.map((batch) => (
+                <SelectItem
+                  key={batch.identifier}
+                  value={batch.identifier}
+                  className="pl-4 pr-2 focus:bg-gray-50 focus:text-foreground hover:bg-gray-50"
+                >
+                  <BatchOptionLabel batch={batch} />
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {joinError && (
             <p className="font-rubik text-[0.8125rem] text-red-600" role="alert">
               {joinError}

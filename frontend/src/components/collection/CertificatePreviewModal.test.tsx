@@ -3,6 +3,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import CertificatePreviewModal from './CertificatePreviewModal';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
 vi.mock('@/components/common/Button', () => ({
   Button: ({
     children,
@@ -39,9 +43,9 @@ describe('CertificatePreviewModal', () => {
         previewUrl="https://example.com/cert.png"
       />
     );
-    expect(screen.getByRole('dialog', { name: 'Certificate preview' })).toBeInTheDocument();
-    expect(screen.getByText('Certificate Preview')).toBeInTheDocument();
-    expect(screen.getByAltText('Certificate preview')).toHaveAttribute('src', 'https://example.com/cert.png');
+    expect(screen.getByRole('dialog', { name: 'courseDetails.previewCertificate' })).toBeInTheDocument();
+    expect(screen.getByText('courseDetails.previewCertificate')).toBeInTheDocument();
+    expect(screen.getByAltText('courseDetails.previewCertificate')).toHaveAttribute('src', 'https://example.com/cert.png');
   });
 
   it('calls onClose when close button is clicked', () => {
@@ -53,7 +57,7 @@ describe('CertificatePreviewModal', () => {
         previewUrl="https://example.com/cert.png"
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: 'close' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -80,7 +84,7 @@ describe('CertificatePreviewModal', () => {
         previewUrl="https://example.com/cert.png"
       />
     );
-    fireEvent.click(screen.getByText('Certificate Preview'));
+    fireEvent.click(screen.getByText('courseDetails.previewCertificate'));
     expect(onClose).not.toHaveBeenCalled();
   });
 });
