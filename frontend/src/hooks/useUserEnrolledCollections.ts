@@ -9,7 +9,7 @@ export const useUserEnrolledCollections = (): UseQueryResult<ApiResponse<CourseE
     queryKey: ['userEnrollments'],
     queryFn: async () => {
       let userId = userAuthInfoService.getUserId();
-
+      
       if (!userId) {
         const authInfo = await userAuthInfoService.getAuthInfo();
         userId = authInfo.uid;
@@ -22,7 +22,6 @@ export const useUserEnrolledCollections = (): UseQueryResult<ApiResponse<CourseE
       return userService.getUserEnrollments(userId);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes cache
-    retry: 2,
-    refetchOnMount: true,
+    retry: 1,
   });
 };

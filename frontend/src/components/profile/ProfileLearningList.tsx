@@ -171,7 +171,9 @@ const ProfileLearningList = () => {
                     <span className="learning-filter-label">Filter :</span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm font-normal text-foreground hover:bg-gray-50 transition-colors min-w-[8rem] justify-between">
+                            <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm font-normal text-foreground hover:bg-gray-50 transition-colors min-w-[8rem] justify-between"
+                                aria-label="Filter courses by status"
+                            >
                                 <span className="capitalize">{filter}</span>
                                 <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                             </button>
@@ -228,8 +230,8 @@ const ProfileLearningList = () => {
                         </p>
                     </div>
                 ) : (
-                    visibleCourses.map((course) => (
-                        <CourseRow key={course.courseId || course.batchId} course={course} />
+                    visibleCourses.map((course, index) => (
+                        <CourseRow key={course.courseId || index} course={course} />
                     ))
                 )}
             </div>

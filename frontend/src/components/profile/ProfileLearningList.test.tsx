@@ -23,7 +23,25 @@ vi.mock('@/components/common/DropdownMenu', () => ({
 
 // Mock PageLoader
 vi.mock('@/components/common/PageLoader', () => ({
-    default: ({ message }: { message: string }) => <div>{message}</div>,
+    default: ({
+        message,
+        error,
+        onRetry,
+    }: {
+        message: string;
+        error?: string;
+        onRetry?: () => void;
+    }) => (
+        <div>
+            <div>{message}</div>
+            {error && <div>{error}</div>}
+            {onRetry && (
+                <button type="button" onClick={onRetry}>
+                    Retry
+                </button>
+            )}
+        </div>
+    ),
 }));
 
 describe('ProfileLearningList', () => {
@@ -98,5 +116,120 @@ describe('ProfileLearningList', () => {
         fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
         expect(screen.getByText('No ongoing courses found.')).toBeInTheDocument();
+    });
+
+    it('shows loading state', () => {
+        (useUserEnrolledCollections as Mock).mockReturnValue({
+            data: null,
+            isLoading: true,
+            isError: false,
+        });
+
+        render(<ProfileLearningList />);
+        expect(screen.getByText('Loading your courses...')).toBeInTheDocument();
+    });
+
+    it('shows error state and handles retry', () => {
+        const mockRefetch = vi.fn();
+        (useUserEnrolledCollections as Mock).mockReturnValue({
+            data: null,
+            isLoading: false,
+            isError: true,
+            refetch: mockRefetch,
+        });
+
+        render(<ProfileLearningList />);
+        expect(screen.getByText('Failed to load courses. Please try again.')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText('Retry'));
+        expect(mockRefetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows empty state when no courses are enrolled', () => {
+        (useUserEnrolledCollections as Mock).mockReturnValue({
+            data: {
+                data: {
+                    courses: []
+                }
+            },
+            isLoading: false,
+            isError: false,
+        });
+
+        render(<ProfileLearningList />);
+        expect(screen.getByText('No courses enrolled yet.')).toBeInTheDocument();
+    });
+
+    it('handles View More/View Less toggle functionality', () => {
+        (useUserEnrolledCollections as Mock).mockReturnValue({
+            data: {
+                data: {
+                    courses: [
+                        { courseId: '1', status: 1, courseName: 'Course 1' },
+                        { courseId: '2', status: 1, courseName: 'Course 2' },
+                        { courseId: '3', status: 1, courseName: 'Course 3' },
+                        { courseId: '4', status: 1, courseName: 'Course 4' },
+                    ]
+                }
+            },
+            isLoading: false,
+            isError: false,
+        });
+
+        render(<ProfileLearningList />);
+
+        // Initially should show 3 courses and "View More Courses" button
+        expect(screen.getByText('Course 1')).toBeInTheDocument();
+        expect(screen.getByText('Course 2')).toBeInTheDocument();
+        expect(screen.getByText('Course 3')).toBeInTheDocument();
+        expect(screen.queryByText('Course 4')).not.toBeInTheDocument();
+
+        const toggleButton = screen.getByText('View More Courses');
+        expect(toggleButton).toBeInTheDocument();
+
+        // Click to view more
+        fireEvent.click(toggleButton);
+        expect(screen.getByText('Course 4')).toBeInTheDocument();
+        expect(screen.getByText('View Less')).toBeInTheDocument();
+
+        // Click to view less
+        fireEvent.click(screen.getByText('View Less'));
+        expect(screen.queryByText('Course 4')).not.toBeInTheDocument();
+        expect(screen.getByText('View More Courses')).toBeInTheDocument();
+    });
+
+    it('resets showAll state when filter changes', () => {
+        (useUserEnrolledCollections as Mock).mockReturnValue({
+            data: {
+                data: {
+                    courses: [
+                        { courseId: '1', status: 1, courseName: 'Ongoing 1' },
+                        { courseId: '2', status: 1, courseName: 'Ongoing 2' },
+                        { courseId: '3', status: 1, courseName: 'Ongoing 3' },
+                        { courseId: '4', status: 1, courseName: 'Ongoing 4' },
+                        { courseId: '5', status: 2, courseName: 'Completed 1' },
+                        { courseId: '6', status: 2, courseName: 'Completed 2' },
+                        { courseId: '7', status: 2, courseName: 'Completed 3' },
+                        { courseId: '8', status: 2, courseName: 'Completed 4' },
+                    ]
+                }
+            },
+            isLoading: false,
+            isError: false,
+        });
+
+        render(<ProfileLearningList />);
+
+        // Expand list
+        fireEvent.click(screen.getByText('View More Courses'));
+        expect(screen.getByText('Ongoing 4')).toBeInTheDocument();
+        expect(screen.getByText('View Less')).toBeInTheDocument();
+
+        // Change filter to Ongoing
+        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
+
+        // Verification: showAll should be reset to false, meaning we only see 3 items and "View More Courses"
+        expect(screen.queryByText('Ongoing 4')).not.toBeInTheDocument();
+        expect(screen.getByText('View More Courses')).toBeInTheDocument();
     });
 });
