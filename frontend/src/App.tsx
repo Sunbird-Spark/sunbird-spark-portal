@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import AppRoutes from './AppRoutes';
 import PageLoader from '@/components/common/PageLoader';
 import { portalInitializer } from './utils/portalInitializer';
@@ -9,7 +9,7 @@ import { portalInitializer } from './utils/portalInitializer';
 const queryClient = new QueryClient();
 
 export default function App() {
-  const { t } = useTranslation();
+  const { t } = useAppI18n();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
