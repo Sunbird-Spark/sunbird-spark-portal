@@ -127,11 +127,6 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                             <Popover.Arrow className="notification-popover-arrow" width={12} height={6} />
                             <div className="notification-popover-header">
                                 <h3 className="notification-popover-title">Notifications</h3>
-                                {notifications.length > 0 && (
-                                    <button onClick={handleDeleteAll} className="notification-delete-all-btn">
-                                        Delete All
-                                    </button>
-                                )}
                             </div>
                             <div className="notification-list">
                                 {notifications.length === 0 ? (
@@ -139,13 +134,18 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                                         No notifications
                                     </div>
                                 ) : (
-                                    groups.map(group => {
+                                    groups.map((group, index) => {
                                         const items = notifications.filter(n => n.group === group);
                                         if (items.length === 0) return null;
                                         return (
                                             <div key={group}>
                                                 <div className="notification-group-label-wrapper">
                                                     <span className="notification-group-label">{group}</span>
+                                                    {index === 0 && notifications.length > 0 && (
+                                                        <button onClick={handleDeleteAll} className="notification-delete-all-btn">
+                                                            Delete All
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 {items.map(item => (
                                                     <div key={item.id} className="notification-item">

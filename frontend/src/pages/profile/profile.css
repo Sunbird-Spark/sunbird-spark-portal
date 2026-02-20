@@ -119,7 +119,7 @@
 }
 
 .notification-group-label-wrapper {
-    @apply px-4 pt-3 pb-1;
+    @apply px-4 pt-3 pb-1 flex items-center justify-between;
 }
 
 .notification-group-label {
