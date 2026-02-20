@@ -113,6 +113,54 @@ describe('kongAuth middleware', () => {
             expect(axios.post).not.toHaveBeenCalled();
         });
 
+        it('should refresh authenticated session TTL when near expiry', async () => {
+            vi.doMock('../config/env.js', () => ({ envConfig: mockEnvConfig }));
+            const { registerDeviceWithKong } = await import('./kongAuth.js');
+            const logger = (await import('../utils/logger.js')).default;
+
+            // Simulate an authenticated user with a session near expiry
+            (mockRequest as any).userId = 'test-user-id';
+            (mockRequest as any).kauth = { dummy: true };
+
+            if (mockRequest.session) {
+                mockRequest.session.kongToken = 'existing-token';
+                // Set cookie to expire in 10s — well within the 30s threshold (half of 60s TTL)
+                mockRequest.session.cookie.expires = new Date(Date.now() + 10000);
+                mockRequest.session.cookie.maxAge = 60000;
+            }
+
+            await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
+
+            // For authenticated users we still expect the session TTL to be refreshed
+            expect(mockRequest.session?.cookie.maxAge).toBe(60000);
+            expect(mockRequest.session?.save).toHaveBeenCalled();
+            // Authenticated flow should not trigger an anonymous token request
+            expect(axios.post).not.toHaveBeenCalled();
+        });
+
+        it('should skip refresh for authenticated user when session is not near expiry', async () => {
+            vi.doMock('../config/env.js', () => ({ envConfig: mockEnvConfig }));
+            const { registerDeviceWithKong } = await import('./kongAuth.js');
+            const logger = (await import('../utils/logger.js')).default;
+
+            // Simulate an authenticated user with a session well within TTL
+            (mockRequest as any).userId = 'test-user-id';
+            (mockRequest as any).kauth = { dummy: true };
+
+            if (mockRequest.session) {
+                mockRequest.session.kongToken = 'existing-token';
+                // Set cookie to expire in 50s — well above the 30s threshold
+                mockRequest.session.cookie.expires = new Date(Date.now() + 50000);
+                mockRequest.session.cookie.maxAge = 60000;
+            }
+
+            await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
+
+            // Authenticated session should be considered still valid, so no refresh
+            expect(mockRequest.session?.save).not.toHaveBeenCalled();
+            expect(mockNext).toHaveBeenCalled();
+            expect(axios.post).not.toHaveBeenCalled();
+        });
         it('should generate new token when kongToken does not exist', async () => {
             vi.doMock('../config/env.js', () => ({ envConfig: mockEnvConfig }));
             const { registerDeviceWithKong } = await import('./kongAuth.js');
