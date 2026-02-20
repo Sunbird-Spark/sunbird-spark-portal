@@ -22,7 +22,7 @@ export class QuestionSetService {
     createdBy: string;
     createdFor: string[];
     framework: string;
-  }) {
+  }): Promise<{identifier: string, versionKey?: string}> {
     const payload = {
       request: {
         questionset: {
@@ -36,7 +36,7 @@ export class QuestionSetService {
         },
       },
     };
-    const res = await getClient().post<any>('/questionset/v1/create', payload);
+    const res = await getClient().post<any>('/questionset/v2/create', payload);
     return res.data;
   }
 }

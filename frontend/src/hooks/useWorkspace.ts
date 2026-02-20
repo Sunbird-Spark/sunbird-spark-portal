@@ -159,6 +159,9 @@ export function useWorkspace({
     getNextPageParam: (lastPage, allPages) => {
       const totalLoaded = allPages.length * WORKSPACE_PAGE_LIMIT;
       const total = lastPage.data?.count ?? 0;
+      // For reviewer tabs we filter client-side (exclude own content), so the API
+      // total includes items we filter out. We still load until the API is exhausted
+      // to ensure we don't miss any displayable items.
       return totalLoaded < total ? totalLoaded : undefined;
     },
     enabled: queryEnabled,
@@ -179,6 +182,9 @@ export function useWorkspace({
     });
   }, [contentQuery.data, isReviewerTab, userId]);
 
+  // Creator: use API count (stable from first page). Reviewer: use displayable count;
+  // we filter client-side so we don't have a server-provided total for displayable
+  // items—contents.length is correct once loading completes and grows as we load.
   const totalCount = isReviewerTab ? contents.length : (contentQuery.data?.pages[0]?.data?.count ?? 0);
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = contentQuery;
