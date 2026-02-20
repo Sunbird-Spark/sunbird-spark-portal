@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import { Request } from 'express';
-import { refreshSessionTTL, generateKongToken, generateLoggedInKongToken, saveKongTokenToSession } from './kongAuthService.js';
+import { refreshSessionTTL, generateKongToken, generateLoggedInKongToken, saveKongTokenToSession, isSessionNearExpiry } from './kongAuthService.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 vi.mock('axios');
@@ -80,6 +80,26 @@ describe('Kong Auth Service', () => {
 
             expect(setSessionTTLFromToken).not.toHaveBeenCalled();
             expect(mockRequest.session!.cookie.maxAge).toBe(60000);
+        });
+    });
+
+    describe('isSessionNearExpiry', () => {
+        it('should return true when cookie.expires is not set', () => {
+            mockRequest.session!.cookie.expires = undefined as any;
+            mockRequest.session!.cookie.maxAge = 60000;
+            expect(isSessionNearExpiry(mockRequest as Request)).toBe(true);
+        });
+
+        it('should return true when remaining time is within threshold', () => {
+            mockRequest.session!.cookie.expires = new Date(Date.now() + 10000);
+            mockRequest.session!.cookie.maxAge = 60000;
+            expect(isSessionNearExpiry(mockRequest as Request)).toBe(true);
+        });
+
+        it('should return false when remaining time is above threshold', () => {
+            mockRequest.session!.cookie.expires = new Date(Date.now() + 50000);
+            mockRequest.session!.cookie.maxAge = 60000;
+            expect(isSessionNearExpiry(mockRequest as Request)).toBe(false);
         });
     });
 
