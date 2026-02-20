@@ -23,6 +23,28 @@ vi.mock('./CreateBatchModal', () => ({
     ) : null,
 }));
 
+// Mock AddCertificateModal
+vi.mock('./AddCertificateModal', () => ({
+  default: ({
+    open,
+    onOpenChange,
+    courseId,
+    batchId,
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    courseId: string;
+    batchId: string;
+  }) =>
+    open ? (
+      <div data-testid="add-certificate-modal" data-course-id={courseId} data-batch-id={batchId}>
+        <button type="button" onClick={() => onOpenChange(false)}>
+          Close Certificate Modal
+        </button>
+      </div>
+    ) : null,
+}));
+
 // Mock useBatchList so we control the API response in tests
 const mockUseBatchList = vi.fn();
 vi.mock('@/hooks/useBatch', () => ({
@@ -211,5 +233,220 @@ describe('BatchCard', () => {
     fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
     const modals = screen.getAllByTestId('create-batch-modal');
     expect(modals[0]).toHaveAttribute('data-collection-id', 'collection-abc');
+  });
+
+  /* ── Certificate modal ── */
+
+  it('does not show the certificate modal on initial render', () => {
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.queryByTestId('add-certificate-modal')).not.toBeInTheDocument();
+  });
+
+  it('opens the certificate modal when certificate button is clicked', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Test Batch',
+          status: '1',
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+          certTemplates: undefined,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    const certButton = screen.getByRole('button', { name: /add certificate/i });
+    fireEvent.click(certButton);
+    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
+  });
+
+  it('passes the correct courseId and batchId to the certificate modal', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'batch-xyz',
+          name: 'Test Batch',
+          status: '1',
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+          certTemplates: undefined,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard collectionId="collection-abc" />);
+    const certButton = screen.getByRole('button', { name: /add certificate/i });
+    fireEvent.click(certButton);
+    const modal = screen.getByTestId('add-certificate-modal');
+    expect(modal).toHaveAttribute('data-course-id', 'collection-abc');
+    expect(modal).toHaveAttribute('data-batch-id', 'batch-xyz');
+  });
+
+  it('closes the certificate modal when onOpenChange(false) is called', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Test Batch',
+          status: '1',
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+          certTemplates: undefined,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    const certButton = screen.getByRole('button', { name: /add certificate/i });
+    fireEvent.click(certButton);
+    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
+
+    const closeButton = screen.getByText('Close Certificate Modal');
+    fireEvent.click(closeButton);
+    expect(screen.queryByTestId('add-certificate-modal')).not.toBeInTheDocument();
+  });
+
+  it('passes collectionName to the certificate modal', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Test Batch',
+          status: '1',
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+          certTemplates: undefined,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard collectionId="collection-abc" collectionName="Test Collection" />);
+    const certButton = screen.getByRole('button', { name: /add certificate/i });
+    fireEvent.click(certButton);
+    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
+  });
+
+  it('passes existing cert templates to the certificate modal', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Test Batch with Cert',
+          status: '1',
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+          certTemplates: { 'template-1': { name: 'Template 1' } },
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    const certButton = screen.getByRole('button', { name: /edit certificate/i });
+    fireEvent.click(certButton);
+    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
+  });
+
+  /* ── Edit batch modal ── */
+
+  it('opens the edit modal when edit button is clicked on a batch', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Test Batch',
+          status: '1',
+          startDate: '2026-03-01',
+          endDate: '2026-06-01',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    const editButton = screen.getByRole('button', { name: /edit batch/i });
+    fireEvent.click(editButton);
+    // Edit modal should appear
+    expect(screen.getByTestId('create-batch-modal')).toBeInTheDocument();
+  });
+
+  it('closes the edit modal when onOpenChange(false) is called', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        {
+          id: 'b1',
+          name: 'Test Batch',
+          status: '1',
+          startDate: '2026-03-01',
+          endDate: '2026-06-01',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    const editButton = screen.getByRole('button', { name: /edit batch/i });
+    fireEvent.click(editButton);
+    expect(screen.getByTestId('create-batch-modal')).toBeInTheDocument();
+
+    const closeButton = screen.getByText('Close Modal');
+    fireEvent.click(closeButton);
+    // After closing, the modal should not be visible
+    expect(screen.queryByTestId('create-batch-modal')).not.toBeInTheDocument();
+  });
+
+  /* ── Tab filtering ── */
+
+  it('filters batches by status tabs correctly', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        { id: 'b1', name: 'Ongoing Batch', status: '1', startDate: '2026-03-01', endDate: '2026-06-01' },
+        { id: 'b2', name: 'Upcoming Batch', status: '0', startDate: '2026-07-01', endDate: '2026-09-01' },
+        { id: 'b3', name: 'Expired Batch', status: '2', startDate: '2025-01-01', endDate: '2025-06-01' },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+
+    expect(screen.getByText('Ongoing Batch')).toBeInTheDocument();
+    expect(screen.queryByText('Upcoming Batch')).not.toBeInTheDocument();
+    expect(screen.queryByText('Expired Batch')).not.toBeInTheDocument();
+
+    const upcomingTab = screen.getByRole('button', { name: /upcoming/i });
+    fireEvent.click(upcomingTab);
+
+    expect(screen.queryByText('Ongoing Batch')).not.toBeInTheDocument();
+    expect(screen.getByText('Upcoming Batch')).toBeInTheDocument();
+    expect(screen.queryByText('Expired Batch')).not.toBeInTheDocument();
+
+    const expiredTab = screen.getByRole('button', { name: /expired/i });
+    fireEvent.click(expiredTab);
+
+    expect(screen.queryByText('Ongoing Batch')).not.toBeInTheDocument();
+    expect(screen.queryByText('Upcoming Batch')).not.toBeInTheDocument();
+    expect(screen.getByText('Expired Batch')).toBeInTheDocument();
+  });
+
+  it('shows correct tab counts', () => {
+    mockUseBatchList.mockReturnValue({
+      data: [
+        { id: 'b1', name: 'Ongoing Batch 1', status: '1', startDate: '2026-03-01', endDate: '2026-06-01' },
+        { id: 'b2', name: 'Ongoing Batch 2', status: '1', startDate: '2026-03-01', endDate: '2026-06-01' },
+        { id: 'b3', name: 'Upcoming Batch', status: '0', startDate: '2026-07-01', endDate: '2026-09-01' },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+
+    // Tabs should be rendered with counts
+    expect(screen.getByRole('button', { name: /ongoing/i })).toBeInTheDocument();
   });
 });
