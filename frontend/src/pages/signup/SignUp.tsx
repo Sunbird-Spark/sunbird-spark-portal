@@ -9,6 +9,7 @@ import { SignUpSuccess } from '@/components/signup/SignUpSuccess';
 import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
+import { useAcceptTnc } from '@/hooks/useTnc';
 import { SignupService } from '@/services/SignupService';
 
 const SignUp: React.FC = () => {
@@ -28,10 +29,12 @@ const SignUp: React.FC = () => {
 
     const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
     const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
+    const { data: tncConfig } = useSystemSetting('tncConfig');
 
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
     const generateOtpMutation = useGenerateOtp();
+    const acceptTncMutation = useAcceptTnc();
 
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
     const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword && isTermsAccepted);
@@ -111,6 +114,11 @@ const SignUp: React.FC = () => {
                 variant: "destructive",
             });
             return;
+        }
+
+        // Accept TNC if terms were accepted during signup
+        if (isTermsAccepted && tncConfig) {
+            acceptTncMutation.mutate({ tncConfig, identifier: emailOrMobile });
         }
 
         setStep(3);

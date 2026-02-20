@@ -76,6 +76,12 @@
   "contact": "Contato",
   "signup": "Cadastrar",
   "searchPlaceholder": "Buscar cursos...",
+  "search_for_content_placeholder": "Buscar conteúdo...",
+  "recommended": "Recomendado",
+  "results_for": "Resultados para \"{{query}}\"",
+  "view_all_results": "Ver todos os resultados",
+  "no_results_found": "Nenhum resultado encontrado.",
+  "clear_search": "Limpar pesquisa",
   "featuredCourses": "Cursos em Destaque",
   "popularCourses": "Cursos Populares",
   "browseCategories": "Explorar por Categoria",
@@ -192,7 +198,9 @@
     "weeks": "Semanas",
     "skills": "Habilidades que você aprenderá",
     "suitedFor": "Melhor para",
-    "relatedContent": "Conteúdo relacionado"
+    "relatedContent": "Conteúdo relacionado",
+    "unlockLearningTitle": "Desbloqueie seu aprendizado.",
+    "unlockLearningDescription": "Faça login para começar sua jornada de aprendizado conosco."
   },
   "resource": {
     "title": "Fique à frente. O que vem a seguir começa aqui.",

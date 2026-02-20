@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import express, { Request, Response } from 'express';
 import type { Server } from 'http';
+import type { AddressInfo } from 'net';
 
 vi.mock('../utils/logger.js', () => ({
     default: {
@@ -12,12 +13,6 @@ vi.mock('../utils/logger.js', () => ({
 
 vi.mock('../utils/proxyUtils.js', () => ({
     decorateRequestHeaders: vi.fn()
-}));
-
-vi.mock('../config/env.js', () => ({
-    envConfig: {
-        LEARN_BASE_URL: 'http://localhost:9000'
-    }
 }));
 
 describe('userProxy', () => {
@@ -52,16 +47,22 @@ describe('userProxy', () => {
             });
         });
 
-        serverInstance = mockUserServer.listen(9000);
+        // Use port 0 to let the OS assign an available port
+        serverInstance = mockUserServer.listen(0);
+        const port = (serverInstance.address() as AddressInfo).port;
+
+        // Mock env config with the dynamically assigned port
+        vi.doMock('../config/env.js', () => ({
+            envConfig: {
+                LEARN_BASE_URL: `http://localhost:${port}`
+            }
+        }));
 
         // Import the proxy middleware (it reads envConfig on import)
         const { userProxy } = await import('./userProxy.js');
 
         app = express();
-        app.use(express.json()); // Body parser needed to test fixRequestBody? 
-        // Actually fixRequestBody is needed because body-parser consumes the stream.
-        // So we MUST use body-parser in the main app to simulate the real scenario.
-
+        app.use(express.json());
         app.use('/portal', userProxy);
     });
 
@@ -94,12 +95,6 @@ describe('userProxy', () => {
     });
 
     it('should fix request body for POST requests', async () => {
-        // fixRequestBody is internal to http-proxy-middleware or we are mocking it?
-        // In userProxy.ts: import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
-        // We are using the real http-proxy-middleware.
-        // If we use express.json() in the app, the body is parsed.
-        // fixRequestBody allows the proxy to re-stream the parsed body.
-
         const res = await request(app)
             .post('/portal/some/path')
             .send({ key: 'value' });

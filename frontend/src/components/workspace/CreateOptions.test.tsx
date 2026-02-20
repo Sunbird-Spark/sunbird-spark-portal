@@ -25,7 +25,7 @@ describe('CreateOptions', () => {
   it('calls onOptionSelect when another option is clicked', () => {
     const onOptionSelect = vi.fn();
     render(<CreateOptions onOptionSelect={onOptionSelect} />);
-    fireEvent.click(screen.getByRole('button', { name: /Textbook/ }));
-    expect(onOptionSelect).toHaveBeenCalledWith('textbook');
+    fireEvent.click(screen.getByRole('button', { name: /Collection/ }));
+    expect(onOptionSelect).toHaveBeenCalledWith('collection');
   });
 });

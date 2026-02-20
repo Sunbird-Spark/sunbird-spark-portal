@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
@@ -32,7 +33,8 @@ const mockModules: Module[] = [
 ];
 
 describe('CollectionSidebar', () => {
-  const defaultProps = {
+  const defaultProps: React.ComponentProps<typeof CollectionSidebar> = {
+    collectionId: 'col-123',
     modules: mockModules,
     expandedModules: ['mod-1'],
     toggleModule: vi.fn(),
@@ -83,35 +85,55 @@ describe('CollectionSidebar', () => {
     expect(screen.queryByText('Document Lesson')).not.toBeInTheDocument();
   });
 
-  it('renders video lesson link with correct href for content route', () => {
+  it('renders video lesson link with correct collection-relative href', () => {
     renderSidebar();
 
     const videoLink = screen.getByRole('link', { name: /Video Lesson/ });
-    expect(videoLink).toHaveAttribute('href', '/content/lesson-1');
+    expect(videoLink).toHaveAttribute('href', '/collection/col-123/content/lesson-1');
   });
 
-  it('renders document lesson link with correct href for content route', () => {
+  it('renders document lesson link with correct collection-relative href', () => {
     renderSidebar();
 
     const documentLink = screen.getByRole('link', { name: /Document Lesson/ });
-    expect(documentLink).toHaveAttribute('href', '/content/lesson-2');
+    expect(documentLink).toHaveAttribute('href', '/collection/col-123/content/lesson-2');
   });
 
-  it('renders collection lesson link with correct href for collection route', () => {
+  it('renders nested collection lesson link with /collection route href', () => {
     renderSidebar();
 
     const collectionLink = screen.getByRole('link', { name: /Nested Course/ });
     expect(collectionLink).toHaveAttribute('href', '/collection/lesson-col');
   });
 
-  it('updates active lesson when a lesson link is clicked', () => {
-    renderSidebar();
-
-    const documentLink = screen.getByRole('link', { name: /Document Lesson/ });
-    fireEvent.click(documentLink);
+  it('highlights the active lesson when activeLessonId prop matches', () => {
+    renderSidebar({ ...defaultProps, activeLessonId: 'lesson-2' });
 
     const activeLink = screen.getByRole('link', { name: /Document Lesson/ });
     expect(activeLink).toHaveClass('border-sunbird-brick');
+  });
+
+  it('highlights the first lesson when activeLessonId matches lesson-1', () => {
+    renderSidebar({ ...defaultProps, activeLessonId: 'lesson-1' });
+
+    const activeLink = screen.getByRole('link', { name: /Video Lesson/ });
+    expect(activeLink).toHaveClass('border-sunbird-brick');
+  });
+
+  it('does not highlight any lesson when activeLessonId is null', () => {
+    renderSidebar({ ...defaultProps, activeLessonId: null });
+
+    const videoLink = screen.getByRole('link', { name: /Video Lesson/ });
+    const documentLink = screen.getByRole('link', { name: /Document Lesson/ });
+    expect(videoLink).not.toHaveClass('border-sunbird-brick');
+    expect(documentLink).not.toHaveClass('border-sunbird-brick');
+  });
+
+  it('does not highlight any lesson when activeLessonId is not provided', () => {
+    renderSidebar(); // no activeLessonId in defaultProps
+
+    const videoLink = screen.getByRole('link', { name: /Video Lesson/ });
+    expect(videoLink).not.toHaveClass('border-sunbird-brick');
   });
 
   it('renders expand/collapse chevron for each module', () => {
@@ -136,5 +158,45 @@ describe('CollectionSidebar', () => {
     expect(screen.getByText('5:00')).toBeInTheDocument();
     const durationDashes = screen.getAllByText('—');
     expect(durationDashes.length).toBeGreaterThanOrEqual(1);
+  });
+
+  describe('when contentBlocked is true', () => {
+    it('renders lessons as non-focusable divs without links', () => {
+      renderSidebar({ ...defaultProps, contentBlocked: true });
+
+      expect(screen.queryByRole('link', { name: /Video Lesson/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /Document Lesson/ })).not.toBeInTheDocument();
+      expect(screen.getByText('Video Lesson')).toBeInTheDocument();
+      expect(screen.getByText('Document Lesson')).toBeInTheDocument();
+    });
+
+    it('renders lessons with aria-disabled', () => {
+      renderSidebar({ ...defaultProps, contentBlocked: true });
+
+      const videoLessonRow = screen.getByText('Video Lesson').closest('[aria-disabled="true"]');
+      expect(videoLessonRow).toBeInTheDocument();
+    });
+
+    it('does not show any lesson as active even when activeLessonId matches', () => {
+      renderSidebar({ ...defaultProps, contentBlocked: true, activeLessonId: 'lesson-1' });
+
+      const videoLessonRow = screen.getByText('Video Lesson').closest('div');
+      expect(videoLessonRow).not.toHaveClass('border-sunbird-brick');
+    });
+  });
+
+  describe('when contentBlocked is false (default)', () => {
+    it('renders lessons as collection-relative links', () => {
+      renderSidebar();
+
+      expect(screen.getByRole('link', { name: /Video Lesson/ })).toHaveAttribute(
+        'href',
+        '/collection/col-123/content/lesson-1'
+      );
+      expect(screen.getByRole('link', { name: /Document Lesson/ })).toHaveAttribute(
+        'href',
+        '/collection/col-123/content/lesson-2'
+      );
+    });
   });
 });

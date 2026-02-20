@@ -12,9 +12,11 @@ const MIME_TYPE_PLAYERS = {
   'video/webm': VideoPlayer,
   'video/mp4': VideoPlayer,
   'application/pdf': PdfPlayer,
+  'application/vnd.ekstep.h5p-archive': EcmlPlayer,
   'application/vnd.ekstep.ecml-archive': EcmlPlayer,
   'application/vnd.sunbird.questionset': QumlPlayer,
   'application/vnd.sunbird.question': QumlPlayer,
+  'application/vnd.ekstep.html-archive': EcmlPlayer
 } as const;
 
 type SupportedMimeType = keyof typeof MIME_TYPE_PLAYERS;
@@ -40,24 +42,8 @@ export const ContentPlayer: React.FC<ContentPlayerProps> = ({
   onPlayerEvent,
   onTelemetryEvent,
 }) => {
-    // Get the appropriate player component for the MIME type
-  const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType];
-
-  // If no player is found for the MIME type, show unsupported content message
-  if (!PlayerComponent) {
-    return (
-      <div className="w-full h-full min-h-[600px] relative flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="text-4xl mb-4">❌</div>
-          <h3 className="text-lg font-semibold mb-2">Unsupported Content Type</h3>
-          <p className="text-gray-600">
-            No player available for MIME type: <code className="bg-gray-200 px-2 py-1 rounded">{mimeType}</code>
-          </p>
-          <p className="text-sm text-gray-500 mt-2">Content: {metadata?.name || 'Unknown'}</p>
-        </div>
-      </div>
-    );
-  }
+  // Get the appropriate player component for the MIME type, fallback to EcmlPlayer
+  const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType] || EcmlPlayer;
 
   // Render the appropriate player component
   return (

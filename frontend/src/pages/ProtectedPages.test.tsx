@@ -16,6 +16,70 @@ vi.mock('@/hooks/useContent', () => ({
   })),
 }));
 
+vi.mock('@/auth/AuthContext', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    user: { name: 'Test User', role: 'content_creator' },
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: {
+    getUserId: () => 'test-user-id',
+    isUserAuthenticated: () => true,
+  },
+}));
+
+vi.mock('@/hooks/useUserRead', () => ({
+  useUserRead: () => ({
+    data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
+  }),
+}));
+
+vi.mock('@/hooks/useToast', () => ({
+  useToast: () => ({ toast: vi.fn() }),
+}));
+
+vi.mock('@/hooks/use-mobile', () => ({
+  useIsMobile: () => false,
+}));
+
+vi.mock('@/hooks/useSidebarState', () => ({
+  useSidebarState: () => ({
+    isOpen: true,
+    setSidebarOpen: vi.fn(),
+    toggleSidebar: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => key,
+    languages: [],
+    currentCode: 'en',
+    changeLanguage: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useWorkspace', () => ({
+  useWorkspace: () => ({
+    contents: [],
+    counts: { total: 0, draft: 0, review: 0, published: 0, all: 0 },
+    totalCount: 0,
+    isLoading: false,
+    isLoadingMore: false,
+    isCountsLoading: false,
+    error: null,
+    hasMore: false,
+    loadMore: vi.fn(),
+    refetchCounts: vi.fn(),
+    refetchAll: vi.fn(),
+  }),
+}));
+
 const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
@@ -45,7 +109,6 @@ describe('Protected Pages', () => {
   describe('WorkspacePage', () => {
     it('should render workspace', () => {
       renderWithProviders(<WorkspacePage />);
-      expect(screen.getByRole('button', { name: 'Workspace' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
     });
   });

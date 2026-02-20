@@ -8,25 +8,33 @@ import FAQSection from "@/components/landing/FAQSection";
 import RelatedContent from "@/components/common/RelatedContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
-import { useContentSearch } from "@/hooks/useContent";
+import { useContentRead, useContentSearch } from "@/hooks/useContent";
+import { useQumlContent } from "@/hooks/useQumlContent";
+import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
+import { useIsContentCreator } from "@/hooks/useUser";
+import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
+import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import { useAuth } from "@/auth/AuthContext";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
-import { useIsContentCreator } from "@/hooks/useUser";
-import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
-  const { collectionId } = useParams();
+  const { collectionId, contentId } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated: contextAuth } = useAuth();
   const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
+  const { isAuthenticated: contextAuth } = useAuth();
+  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
+  const isTrackable =
+    (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
+  const contentBlocked = isTrackable && !isAuthenticated;
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const collectionData = collectionDataFromApi ?? null;
@@ -47,8 +55,37 @@ const CollectionDetailPage = () => {
     request: { limit: 20, offset: 0 },
     enabled: hierarchySuccess,
   });
+  // Fetch selected content when contentId is in the URL
+  const { data: contentReadData, isLoading: contentIsLoading, error: contentError } = useContentRead(contentId ?? '');
+  const selectedContentData = contentReadData?.data?.content;
+  const isQumlContent = selectedContentData?.mimeType === 'application/vnd.sunbird.questionset' ||
+    selectedContentData?.mimeType === 'application/vnd.sunbird.question';
+  const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
+  const playerMetadata = isQumlContent ? qumlData : selectedContentData;
+  const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading ) : false;
+  const playerError = isQumlContent ? qumlError : contentError;
+
+  const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
+    onPlayerEvent: (event) => console.log('Collection content player event:', event),
+    onTelemetryEvent: (event) => console.log('Collection content telemetry event:', event),
+  });
+
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
+
+  // Auto-navigate to first content when collection loads without a selected contentId
+  useEffect(() => {
+    if (!contentId && collectionData) {
+      const firstLesson = collectionData.modules?.[0]?.lessons?.[0];
+      if (firstLesson) {
+        const mime = (firstLesson.mimeType ?? '').toLowerCase();
+        const isCollection = mime === 'application/vnd.ekstep.content-collection';
+        if (!isCollection) {
+          navigate(`/collection/${collectionId}/content/${firstLesson.id}`, { replace: true });
+        }
+      }
+    }
+  }, [contentId, collectionData, collectionId, navigate]);
 
   useEffect(() => {
     const firstId = collectionData?.modules?.[0]?.id;
@@ -134,7 +171,15 @@ const CollectionDetailPage = () => {
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-[1fr_340px] gap-8">
           {/* Left Column */}
-          <CollectionOverview collectionData={displayCollectionData} />
+          <CollectionOverview
+            collectionData={displayCollectionData}
+            contentId={contentId}
+            playerMetadata={playerMetadata}
+            playerIsLoading={playerIsLoading}
+            playerError={playerError ?? null}
+            onPlayerEvent={handlePlayerEvent}
+            onTelemetryEvent={handleTelemetryEvent}
+          />
 
           {/* Right Sidebar - Batch Card + Lessons Accordion */}
           <div className="lg:sticky lg:top-6 h-fit max-h-[calc(100vh_-_120px)] overflow-y-scroll pr-3 custom-scrollbar">
@@ -148,6 +193,24 @@ const CollectionDetailPage = () => {
               expandedModules={expandedModules}
               toggleModule={toggleModule}
             />
+          {/* Right Sidebar - Lessons Accordion */}
+          <div className="lg:sticky lg:top-6 flex flex-col max-h-[calc(100vh_-_120px)] pr-3">
+            {contentBlocked && (
+              <div className="flex-shrink-0 mb-4">
+                <LoginToUnlockCard />
+              </div>
+            )}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+              <CollectionSidebar
+                collectionId={collectionId ?? ''}
+                modules={collectionData.modules}
+                expandedModules={expandedModules}
+                toggleModule={toggleModule}
+                activeLessonId={contentId ?? null}
+                contentBlocked={contentBlocked}
+              />
+            </div>
+
           </div>
 
         </div>

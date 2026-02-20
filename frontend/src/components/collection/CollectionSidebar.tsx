@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import {
   Collapsible,
@@ -9,22 +8,29 @@ import {
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
 import type { Lesson, Module } from "@/types/collectionTypes"
 
-function getLessonHref(lesson: Lesson): string {
+function getLessonHref(lesson: Lesson, collectionId: string): string {
   const mime = (lesson.mimeType ?? '').toLowerCase();
   const isCollection = mime === 'application/vnd.ekstep.content-collection';
-  return isCollection ? `/collection/${lesson.id}` : `/content/${lesson.id}`;
+  return isCollection ? `/collection/${lesson.id}` : `/collection/${collectionId}/content/${lesson.id}`;
 }
 
 interface CollectionSidebarProps {
+  collectionId: string;
   modules: Module[];
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
+  activeLessonId?: string | null;
+  contentBlocked?: boolean;
 }
 
-const CollectionSidebar = ({ modules, expandedModules, toggleModule }: CollectionSidebarProps) => {
-  const [activeLessonId, setActiveLessonId] = useState<string | null>(
-    modules?.[0]?.lessons?.[0]?.id ?? null
-  );
+const CollectionSidebar = ({
+  collectionId,
+  modules,
+  expandedModules,
+  toggleModule,
+  activeLessonId = null,
+  contentBlocked = false,
+}: CollectionSidebarProps) => {
 
   return (
     <div className="space-y-3">
@@ -59,16 +65,41 @@ const CollectionSidebar = ({ modules, expandedModules, toggleModule }: Collectio
               <CollapsibleContent>
                 <div className="p-3 pt-0 space-y-2">
                   {module.lessons.map((lesson) => {
-                    const isActive = activeLessonId === lesson.id;
+                    const isActive =
+                      !contentBlocked && activeLessonId === lesson.id;
+                    const baseClass = contentBlocked
+                      ? "flex items-center gap-3 rounded-[10px] px-4 py-3 w-full h-[70px] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-60 pointer-events-none cursor-not-allowed select-none"
+                      : `flex items-center gap-3 rounded-[10px] px-4 py-3 w-full h-[70px] ${isActive
+                        ? 'border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100'
+                        : 'border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-90'
+                        }`;
+                    const interactiveClass = contentBlocked
+                      ? ""
+                      : "hover:bg-gray-200 transition-colors cursor-pointer";
+
+                    if (contentBlocked) {
+                      return (
+                        <div
+                          key={lesson.id}
+                          className={`${baseClass} ${interactiveClass}`}
+                          aria-disabled="true"
+                        >
+                          {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
+                          <span className="flex-1 text-base leading-snug">
+                            {lesson.title}
+                          </span>
+                          <span className="text-sm text-muted-foreground flex-shrink-0 font-medium">
+                            {lesson.duration}
+                          </span>
+                        </div>
+                      );
+                    }
+
                     return (
                       <Link
                         key={lesson.id}
-                        to={getLessonHref(lesson)}
-                        onClick={() => setActiveLessonId(lesson.id)}
-                        className={`flex items-center gap-3 rounded-[10px] px-4 py-3 hover:bg-gray-200 transition-colors w-full h-[70px] ${isActive
-                          ? 'border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100'
-                          : 'border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-90'
-                          }`}
+                        to={getLessonHref(lesson, collectionId)}
+                        className={`${baseClass} ${interactiveClass}`}
                       >
                         {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
                         <span className="flex-1 text-base leading-snug">

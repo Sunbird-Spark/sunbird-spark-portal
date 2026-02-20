@@ -90,6 +90,12 @@
   "contact": "Contact",
   "signup": "Sign Up",
   "searchPlaceholder": "Search courses...",
+  "search_for_content_placeholder": "Search for content...",
+  "recommended": "Recommended",
+  "results_for": "Results for \"{{query}}\"",
+  "view_all_results": "View All Results",
+  "no_results_found": "No results found",
+  "clear_search": "Clear search",
   "featuredCourses": "Featured Courses",
   "popularCourses": "Popular Courses",
   "browseCategories": "Browse Through Categories",
@@ -208,7 +214,9 @@
     "weeks": "Weeks",
     "skills": "Skills you will learn",
     "suitedFor": "Best Suited For",
-    "relatedContent": "Related Content"
+    "relatedContent": "Related Content",
+    "unlockLearningTitle": "Unlock your learning.",
+    "unlockLearningDescription": "Log in to begin your learning journey with us."
   },
   "resource": {
     "title": "Stay ahead. What's next starts here.",

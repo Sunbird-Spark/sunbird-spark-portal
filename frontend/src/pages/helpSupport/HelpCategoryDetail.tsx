@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
@@ -7,6 +7,7 @@ import HomeSidebar from "@/components/home/HomeSidebar";
 import PageLoader from "@/components/common/PageLoader";
 import Header from "@/components/home/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSidebarState } from "@/hooks/useSidebarState";
 import { useHelpFaqData } from "@/hooks/useFaqData";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import {
@@ -20,6 +21,7 @@ import { buildCategoryFaqsMap } from "../../services/HelpSupportService";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 import "../profile/profile.css";
+import ReportIssueDialog from "@/components/help/ReportIssueDialog";
 
 const HelpCategoryDetail = () => {
 
@@ -27,9 +29,10 @@ const HelpCategoryDetail = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
     const [feedback, setFeedback] = useState<Record<number, "yes" | "no" | "submitted" | null>>({});
     const [feedbackText, setFeedbackText] = useState<Record<number, string>>({});
+    const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
@@ -38,15 +41,19 @@ const HelpCategoryDetail = () => {
 
     // Look up current category by slug
     const category = useMemo(() => {
-        const rawCategory = buildCategoryFaqsMap(allCategories)[categoryId || ""];
+        if (!allCategories || !Array.isArray(allCategories)) return null;
+
+        const categoryMap = buildCategoryFaqsMap(allCategories);
+        const rawCategory = categoryMap?.[categoryId || ""];
+
         if (!rawCategory) return null;
 
         return {
             ...rawCategory,
-            title: rawCategory.title.replace(/{{APP_NAME}}/g, appName),
-            faqs: rawCategory.faqs.map(faq => ({
+            title: rawCategory.title.replace(/{{APP_NAME}}/g, appName) || "",
+            faqs: (rawCategory.faqs || []).map(faq => ({
                 ...faq,
-                question: faq.question.replace(/{{APP_NAME}}/g, appName)
+                question: faq.question.replace(/{{APP_NAME}}/g, appName) || ""
             }))
         };
     }, [allCategories, categoryId, appName]);
@@ -60,9 +67,6 @@ const HelpCategoryDetail = () => {
         [category, appName]
     );
 
-    useEffect(() => {
-        setIsSidebarOpen(!isMobile);
-    }, [isMobile]);
 
     const handleFeedback = (index: number, value: "yes" | "no") => {
         setFeedback((prev) => ({ ...prev, [index]: value }));
@@ -116,7 +120,10 @@ const HelpCategoryDetail = () => {
                                 <FaArrowLeftLong className="w-[1rem] h-[1rem]" />
                                 Go Back
                             </button>
-                            <button className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
+                            <button
+                                onClick={() => setIsReportIssueOpen(true)}
+                                className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
+                                aria-label="Report an issue with this help content">
                                 Report an Issue
                             </button>
                         </div>
@@ -134,6 +141,13 @@ const HelpCategoryDetail = () => {
                             <PageLoader
                                 message="Loading..."
                                 error="Category not found."
+                                onRetry={() => navigate("/help-support")}
+                                fullPage={false}
+                            />
+                        ) : sanitizedFaqs.length === 0 ? (
+                            <PageLoader
+                                message="Loading..."
+                                error="No FAQs available for this category."
                                 onRetry={() => navigate("/help-support")}
                                 fullPage={false}
                             />
@@ -219,6 +233,7 @@ const HelpCategoryDetail = () => {
             </div>
 
             <Footer />
+            <ReportIssueDialog open={isReportIssueOpen} onOpenChange={setIsReportIssueOpen} />
         </div >
     );
 };

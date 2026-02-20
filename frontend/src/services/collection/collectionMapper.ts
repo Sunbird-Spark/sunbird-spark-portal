@@ -45,5 +45,6 @@ export function mapToCollectionData(content: HierarchyContentNode): CollectionDa
     description: content.description ?? '',
     audience: Array.isArray(content.audience) ? content.audience : [],
     modules,
+    trackable: content.trackable,
   };
 }
