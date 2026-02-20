@@ -7,6 +7,7 @@ import { useContentSearch } from "@/hooks/useContent";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 import CollectionCard from "@/components/content/CollectionCard";
 import ResourceCard from "@/components/content/ResourceCard";
+import PageLoader from "@/components/common/PageLoader";
 
 const COLLECTION_MIME_TYPE = "application/vnd.ekstep.content-collection";
 
@@ -24,7 +25,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const { t } = useAppI18n();
   const navigate = useNavigate();
 
-  const { data, isLoading } = useContentSearch({
+  const { data, isLoading, error } = useContentSearch({
     request: {
       limit: 3,
       query: debouncedQuery || "", // Empty string to fetch default results
@@ -146,8 +147,16 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
             </h2>
 
             {isLoading ? (
-              <div className="flex justify-center items-center py-8 min-h-[20rem]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sunbird-brick" />
+              <div className="min-h-[20rem]">
+                <PageLoader message={t("loading")} fullPage={false} />
+              </div>
+            ) : error ? (
+              <div className="min-h-[20rem]">
+                <PageLoader 
+                  error={error.message || t("failed_to_search")} 
+                  onRetry={() => window.location.reload()}
+                  fullPage={false} 
+                />
               </div>
             ) : results.length > 0 ? (
               <>
