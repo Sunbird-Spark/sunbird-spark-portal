@@ -10,6 +10,7 @@ describe('BatchService', () => {
       get: vi.fn().mockResolvedValue({ data: { response: {} }, status: 200, headers: {} }),
       post: vi.fn(),
       put: vi.fn(),
+      patch: vi.fn(),
       delete: vi.fn(),
       updateHeaders: vi.fn(),
     };
