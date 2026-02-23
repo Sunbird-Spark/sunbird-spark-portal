@@ -5,13 +5,12 @@ import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import FAQSection from "@/components/landing/FAQSection";
-import RelatedContent from "@/components/common/RelatedContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
-import { useContentPlayer } from "@/hooks/useContentPlayer";
+import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import { useIsContentCreator } from "@/hooks/useUser";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
@@ -36,7 +35,7 @@ const CollectionDetailPage = () => {
   const collectionData = collectionDataFromApi ?? null;
   const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
   const { isEnrolledInCurrentBatch, contentStatusMap, courseProgressProps, batches, batchListLoading, batchListError,
-    firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse } = enrollment;
+    firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse, effectiveBatchId, isBatchEnded } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
 
@@ -75,9 +74,15 @@ const CollectionDetailPage = () => {
   const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading ) : false;
   const playerError = isQumlContent ? qumlError : contentError;
 
-  const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
-    onPlayerEvent: (event) => console.log('Collection content player event:', event),
-    onTelemetryEvent: (event) => console.log('Collection content telemetry event:', event),
+  const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
+  const { handlePlayerEvent, handleTelemetryEvent } = useCollectionDetailPlayer({
+    collectionId,
+    contentId: contentId ?? undefined,
+    effectiveBatchId,
+    isEnrolledInCurrentBatch,
+    isBatchEnded,
+    mimeType: playerMetadata?.mimeType,
+    currentContentStatus,
   });
 
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
