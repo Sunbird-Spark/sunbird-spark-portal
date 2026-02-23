@@ -1,10 +1,10 @@
+/* eslint-disable max-lines */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, Mock, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
 import Onboarding from './OnboardingPage';
 import { useFormRead } from '@/hooks/useForm';
-import { OnboardingFormData } from '@/types/formTypes';
 
 // Mock dependencies
 vi.mock('@/hooks/useForm');
@@ -544,5 +544,194 @@ describe('Onboarding Component', () => {
     
     expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
     expect(screen.getByAltText('Onboarding Image')).toBeInTheDocument();
+  });
+
+  it('does not show back button on first screen', () => {
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: mockOnboardingData,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    const backButton = screen.queryByLabelText('Go back');
+    expect(backButton).not.toBeInTheDocument();
+  });
+
+  it('shows back button on second screen', () => {
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: mockOnboardingData,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Navigate to second screen
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Back button should now be visible
+    const backButton = screen.getByLabelText('Go back');
+    expect(backButton).toBeInTheDocument();
+    expect(backButton).not.toBeDisabled();
+  });
+
+  it('navigates back to previous screen when back button is clicked', () => {
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: mockOnboardingData,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Navigate to second screen
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Should be on skills screen
+    expect(screen.getByText('What skills are you interested in?')).toBeInTheDocument();
+    expect(screen.getByText('2/3')).toBeInTheDocument();
+    
+    // Click back button
+    const backButton = screen.getByLabelText('Go back');
+    fireEvent.click(backButton);
+    
+    // Should be back on first screen
+    expect(screen.getByText('What is your role?')).toBeInTheDocument();
+    expect(screen.getByText('1/3')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Go back')).not.toBeInTheDocument();
+  });
+
+  it('disables back button during submission', () => {
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: mockOnboardingData,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Navigate to final screen
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    fireEvent.click(screen.getByText('Mathematics').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Back button should be visible and enabled
+    const backButton = screen.getByLabelText('Go back');
+    expect(backButton).not.toBeDisabled();
+    
+    // Select an option and submit
+    fireEvent.click(screen.getByText('Beginner').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
+    
+    // Back button should now be disabled
+    expect(backButton).toBeDisabled();
+  });
+
+  it('maintains navigation history correctly through multiple screens', () => {
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: mockOnboardingData,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Navigate forward through all screens
+    expect(screen.getByText('1/3')).toBeInTheDocument();
+    
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    expect(screen.getByText('2/3')).toBeInTheDocument();
+    
+    fireEvent.click(screen.getByText('Mathematics').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    expect(screen.getByText('3/3')).toBeInTheDocument();
+    
+    // Navigate back
+    fireEvent.click(screen.getByLabelText('Go back'));
+    expect(screen.getByText('2/3')).toBeInTheDocument();
+    expect(screen.getByText('What skills are you interested in?')).toBeInTheDocument();
+    
+    // Navigate back again
+    fireEvent.click(screen.getByLabelText('Go back'));
+    expect(screen.getByText('1/3')).toBeInTheDocument();
+    expect(screen.getByText('What is your role?')).toBeInTheDocument();
+    
+    // Back button should not be visible on first screen
+    expect(screen.queryByLabelText('Go back')).not.toBeInTheDocument();
+  });
+
+  it('clears other text when navigating back', () => {
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: mockOnboardingData,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Navigate to skills screen
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Select "Others" and type
+    fireEvent.click(screen.getByText('Others').closest('button')!);
+    const input = screen.getByPlaceholderText('Please type your preference here');
+    fireEvent.change(input, { target: { value: 'Custom skill' } });
+    expect(input).toHaveValue('Custom skill');
+    
+    // Navigate back
+    fireEvent.click(screen.getByLabelText('Go back'));
+    
+    // Navigate forward again
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Select "Others" again - input should be empty
+    fireEvent.click(screen.getByText('Others').closest('button')!);
+    const newInput = screen.getByPlaceholderText('Please type your preference here');
+    expect(newInput).toHaveValue('');
   });
 });
