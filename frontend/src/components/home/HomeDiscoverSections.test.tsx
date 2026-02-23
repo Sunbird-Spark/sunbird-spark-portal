@@ -1,0 +1,215 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import HomeDiscoverSections from './HomeDiscoverSections';
+import { useFormRead } from '@/hooks/useForm';
+
+vi.mock('@/hooks/useForm', () => ({
+  useFormRead: vi.fn(),
+}));
+
+vi.mock('@/components/common/PageLoader', () => ({
+  default: ({ message }: { message: string }) => (
+    <div data-testid="page-loader">{message}</div>
+  ),
+}));
+
+vi.mock('@/components/landing/DynamicContentSection', () => ({
+  default: ({ title }: { title: string }) => (
+    <div data-testid="dynamic-content-section">{title}</div>
+  ),
+}));
+
+vi.mock('@/components/landing/DynamicCategorySection', () => ({
+  default: ({ title }: { title: string }) => (
+    <div data-testid="dynamic-category-section">{title}</div>
+  ),
+}));
+
+vi.mock('@/components/landing/DynamicResourceSection', () => ({
+  default: ({ title }: { title: string }) => (
+    <div data-testid="dynamic-resource-section">{title}</div>
+  ),
+}));
+
+const mockFormData = (sections: object[]) => ({
+  data: {
+    form: {
+      data: {
+        sections,
+      },
+    },
+  },
+});
+
+describe('HomeDiscoverSections', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders loading state while form data is fetching', () => {
+    (useFormRead as any).mockReturnValue({ isLoading: true, error: null, data: undefined });
+
+    render(<HomeDiscoverSections />);
+
+    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+    expect(screen.getByText('Loading content...')).toBeInTheDocument();
+  });
+
+  it('returns null when form data fetch fails', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: new Error('fetch failed'),
+      data: undefined,
+    });
+
+    const { container } = render(<HomeDiscoverSections />);
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders nothing when sections list is empty', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([]),
+    });
+
+    const { container } = render(<HomeDiscoverSections />);
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders DynamicContentSection for content-type section', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([
+        { id: 's1', index: 1, type: 'content', title: 'Featured Courses' },
+      ]),
+    });
+
+    render(<HomeDiscoverSections />);
+
+    const section = screen.getByTestId('dynamic-content-section');
+    expect(section).toBeInTheDocument();
+    expect(section).toHaveTextContent('Featured Courses');
+  });
+
+  it('renders DynamicCategorySection for categories-type section', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([
+        { id: 's2', index: 1, type: 'categories', title: 'Browse Categories', list: [] },
+      ]),
+    });
+
+    render(<HomeDiscoverSections />);
+
+    const section = screen.getByTestId('dynamic-category-section');
+    expect(section).toBeInTheDocument();
+    expect(section).toHaveTextContent('Browse Categories');
+  });
+
+  it('renders DynamicResourceSection for resources-type section', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([
+        { id: 's3', index: 1, type: 'resources', title: 'Top Resources' },
+      ]),
+    });
+
+    render(<HomeDiscoverSections />);
+
+    const section = screen.getByTestId('dynamic-resource-section');
+    expect(section).toBeInTheDocument();
+    expect(section).toHaveTextContent('Top Resources');
+  });
+
+  it('renders sections sorted by index regardless of input order', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([
+        { id: 's3', index: 3, type: 'resources', title: 'Resources' },
+        { id: 's1', index: 1, type: 'content', title: 'Content' },
+        { id: 's2', index: 2, type: 'categories', title: 'Categories', list: [] },
+      ]),
+    });
+
+    render(<HomeDiscoverSections />);
+
+    const allSections = [
+      screen.getByTestId('dynamic-content-section'),
+      screen.getByTestId('dynamic-category-section'),
+      screen.getByTestId('dynamic-resource-section'),
+    ];
+
+    // All three should be rendered
+    expect(allSections).toHaveLength(3);
+
+    // Verify DOM order matches sorted index order (content=1, categories=2, resources=3)
+    const sectionIds = allSections.map((el) => el.getAttribute('data-testid'));
+    expect(sectionIds).toEqual([
+      'dynamic-content-section',
+      'dynamic-category-section',
+      'dynamic-resource-section',
+    ]);
+  });
+
+  it('renders multiple sections of the same type', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([
+        { id: 's1', index: 1, type: 'content', title: 'Popular Courses' },
+        { id: 's2', index: 2, type: 'content', title: 'Recent Courses' },
+      ]),
+    });
+
+    render(<HomeDiscoverSections />);
+
+    const contentSections = screen.getAllByTestId('dynamic-content-section');
+    expect(contentSections).toHaveLength(2);
+    expect(contentSections[0]).toHaveTextContent('Popular Courses');
+    expect(contentSections[1]).toHaveTextContent('Recent Courses');
+  });
+
+  it('skips unknown section types silently', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([
+        { id: 's1', index: 1, type: 'content', title: 'Known Section' },
+        { id: 's2', index: 2, type: 'unknown_type', title: 'Unknown Section' },
+      ]),
+    });
+
+    render(<HomeDiscoverSections />);
+
+    expect(screen.getByTestId('dynamic-content-section')).toBeInTheDocument();
+    expect(screen.queryByText('Unknown Section')).not.toBeInTheDocument();
+  });
+
+  it('calls useFormRead with the correct home page parameters', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockFormData([]),
+    });
+
+    render(<HomeDiscoverSections />);
+
+    expect(useFormRead).toHaveBeenCalledWith({
+      request: {
+        type: 'page',
+        subType: 'home',
+        action: 'sections',
+        component: 'portal',
+        framework: '*',
+        rootOrgId: '*',
+      },
+    });
+  });
+});

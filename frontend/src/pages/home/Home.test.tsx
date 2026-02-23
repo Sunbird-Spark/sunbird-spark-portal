@@ -17,6 +17,7 @@ vi.mock('@/components/home/HomeStatsCards', () => ({ default: () => <div data-te
 vi.mock('@/components/home/HomeContinueLearning', () => ({ default: () => <div data-testid="continue-learning" /> }));
 vi.mock('@/components/home/HomeInProgressGrid', () => ({ default: () => <div data-testid="inprogress-grid" /> }));
 vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
+vi.mock('@/components/home/HomeDiscoverSections', () => ({ default: () => <div data-testid="discover-sections" /> }));
 vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
 vi.mock('@/components/common/SearchModal', () => ({
@@ -78,6 +79,12 @@ vi.mock('@/hooks/useUserRead', () => ({
     useUserRead: () => mockUseUserRead(),
 }));
 
+// Mock useUserEnrolledCollections
+const mockUseUserEnrolledCollections = vi.fn();
+vi.mock('@/hooks/useUserEnrolledCollections', () => ({
+    useUserEnrolledCollections: () => mockUseUserEnrolledCollections(),
+}));
+
 describe('Home Page', () => {
     beforeEach(() => {
         mockUseIsMobile.mockReturnValue(false); // Default to desktop
@@ -93,6 +100,14 @@ describe('Home Page', () => {
             isLoading: false,
             error: null,
             refetch: vi.fn(),
+        });
+        // Default to 2 enrollments so the full dashboard path is exercised
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [{ courseId: 'c1' }, { courseId: 'c2' }],
+                },
+            },
         });
     });
 
@@ -230,5 +245,52 @@ describe('Home Page', () => {
         renderHome();
 
         expect(screen.getByText('Continue from where you left')).toBeInTheDocument();
+    });
+
+    it('renders HomeDiscoverSections when user has no enrollments', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [] } },
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('discover-sections')).toBeInTheDocument();
+        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('continue-learning')).not.toBeInTheDocument();
+    });
+
+    it('renders HomeDiscoverSections when enrollment data is unavailable', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({ data: undefined });
+
+        renderHome();
+
+        expect(screen.getByTestId('discover-sections')).toBeInTheDocument();
+        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
+    });
+
+    it('renders full dashboard when user has enrollments', () => {
+        renderHome();
+
+        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
+        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
+        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
+        expect(screen.getByTestId('recommended-section')).toBeInTheDocument();
+    });
+
+    it('shows in-progress grid when enrolled in more than one course', () => {
+        renderHome();
+
+        expect(screen.getByTestId('inprogress-grid')).toBeInTheDocument();
+    });
+
+    it('hides in-progress grid when enrolled in exactly one course', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [{ courseId: 'c1' }] } },
+        });
+
+        renderHome();
+
+        expect(screen.queryByTestId('inprogress-grid')).not.toBeInTheDocument();
+        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
     });
 });
