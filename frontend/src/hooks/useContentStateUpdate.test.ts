@@ -77,6 +77,15 @@ describe('useContentStateUpdate', () => {
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
+  it('does not call contentStateUpdate when skipContentStateUpdate is true', () => {
+    const { result } = renderHook(() =>
+      useContentStateUpdate({ ...defaultParams, skipContentStateUpdate: true })
+    );
+    result.current({ eid: 'START' });
+    result.current({ eid: 'END', edata: { summary: [{ progress: 100 }] } });
+    expect(mockMutateAsync).not.toHaveBeenCalled();
+  });
+
   it('calls contentStateUpdate with status 1 and does not invalidate on START', async () => {
     const { result } = renderHook(() => useContentStateUpdate(defaultParams));
     result.current({ eid: 'START' });
