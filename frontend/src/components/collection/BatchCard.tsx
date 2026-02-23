@@ -3,7 +3,7 @@ import { FiPlus, FiLoader, FiAward, FiCalendar, FiEdit2, FiLock } from "react-ic
 import dayjs from "dayjs";
 import CreateBatchModal from "./CreateBatchModal";
 import AddCertificateModal from "./AddCertificateModal";
-import { useBatchList } from "@/hooks/useBatch";
+import { useBatchListForCreator } from "@/hooks/useBatch";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const [certBatch, setCertBatch]   = useState<Batch | null>(null);
   const [activeTab, setActiveTab]   = useState<ActiveTab>("Ongoing");
 
-  const { data: batches, isLoading, isError } = useBatchList(collectionId, { createdByMe: true });
+  const { data: batches, isLoading, isError } = useBatchListForCreator(collectionId);
 
   /* ── Per-tab filtered lists ── */
   const ongoing  = batches?.filter((b) => getBatchStatus(b.status) === "Ongoing")  ?? [];
@@ -119,7 +119,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
       {/* Edit batch modal */}
       <CreateBatchModal
         open={!!editBatch}
-        onOpenChange={(open) => { if (!open) setEditBatch(null); }}
+        onOpenChange={(open: boolean) => { if (!open) setEditBatch(null); }}
         collectionId={collectionId}
         initialBatch={editBatch ?? undefined}
       />
@@ -128,7 +128,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
       {certBatch && (
         <AddCertificateModal
           open={!!certBatch}
-          onOpenChange={(open) => { if (!open) setCertBatch(null); }}
+          onOpenChange={(open: boolean) => { if (!open) setCertBatch(null); }}
           courseId={collectionId}
           batchId={certBatch.id}
           courseName={collectionName}

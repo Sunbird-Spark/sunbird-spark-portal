@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useBatchList, useBatchRead, useContentState, useEnrol, useCreateBatch, useUpdateBatch } from './useBatch';
+import { useBatchListForCreator, useBatchListForLearner, useBatchRead, useContentState, useEnrol, useCreateBatch, useUpdateBatch } from './useBatch';
 import { batchService as creatorBatchService } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
 import { userService } from '../services/UserService';
@@ -55,19 +55,21 @@ describe('useBatch hooks test', () => {
     (useQueryClient as import('vitest').Mock).mockReturnValue(mockQueryClient);
   });
 
-  describe('useBatchList', () => {
-    it('sets up generic learner batch list query when createdByMe is false', () => {
+  describe('useBatchListForLearner', () => {
+    it('sets up generic learner batch list query', () => {
       (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
-      const queryParams = useBatchList('course_123', { createdByMe: false });
+      const queryParams = useBatchListForLearner('course_123');
       
       expect(useQuery).toHaveBeenCalled();
       expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', false]);
       expect((queryParams as any).enabled).toBe(true);
     });
+  });
 
-    it('sets up creator batch list query with correct staleTime when createdByMe is true', () => {
+  describe('useBatchListForCreator', () => {
+    it('sets up creator batch list query with correct staleTime', () => {
       (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
-      const queryParams = useBatchList('course_123', { createdByMe: true });
+      const queryParams = useBatchListForCreator('course_123');
       
       expect(useQuery).toHaveBeenCalled();
       expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', true]);
