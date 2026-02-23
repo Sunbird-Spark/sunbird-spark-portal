@@ -725,13 +725,16 @@ describe('Onboarding Component', () => {
     // Navigate back
     fireEvent.click(screen.getByLabelText('Go back'));
     
+    // Should be back on first screen
+    expect(screen.getByText('What is your role?')).toBeInTheDocument();
+    
     // Navigate forward again
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
     
-    // Select "Others" again - input should be empty
-    fireEvent.click(screen.getByText('Others').closest('button')!);
-    const newInput = screen.getByPlaceholderText('Please type your preference here');
-    expect(newInput).toHaveValue('');
+    // The "Others" selection is still in state, so input is shown
+    // But the otherText state was cleared by handleBack
+    const clearedInput = screen.getByPlaceholderText('Please type your preference here');
+    expect(clearedInput).toHaveValue('');
   });
 });
