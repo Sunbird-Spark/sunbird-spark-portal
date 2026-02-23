@@ -67,11 +67,15 @@ const HomeInProgressGrid = () => {
                         </div>
                         {/* Thumbnail */}
                         <div className="w-[5.5rem] h-[5.5rem] rounded-2xl overflow-hidden shrink-0">
-                            <img
-                                src={course.courseLogoUrl || course.content?.appIcon || "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=200&h=120&fit=crop"}
-                                alt={course.courseName}
-                                className="w-full h-full object-cover"
-                            />
+                            {course.courseLogoUrl || course.content?.appIcon ? (
+                                <img
+                                    src={course.courseLogoUrl || course.content?.appIcon}
+                                    alt={course.courseName}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-black" />
+                            )}
                         </div>
                     </Link>
                 ))}
