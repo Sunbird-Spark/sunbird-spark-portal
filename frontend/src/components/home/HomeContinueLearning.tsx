@@ -50,9 +50,7 @@ const HomeContinueLearning = () => {
             (b.lastContentAccessTime ?? 0) - (a.lastContentAccessTime ?? 0)
         )[0];
 
-    // Fetch hierarchy only when lastReadContentId is absent, to find the first lesson
-    const needsHierarchy = !!lastAccessedCourse && !lastAccessedCourse.lastReadContentId;
-    const { data: collectionData } = useCollection(needsHierarchy ? lastAccessedCourse?.collectionId : undefined);
+    const { data: collectionData } = useCollection(lastAccessedCourse?.collectionId);
 
     if (isLoading || !lastAccessedCourse) return null;
 
@@ -60,9 +58,7 @@ const HomeContinueLearning = () => {
     const contentId = lastAccessedCourse.lastReadContentId
         ?? collectionData?.modules[0]?.lessons[0]?.id;
 
-    const continueTo = contentId
-        ? `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`
-        : `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}`;
+    const continueTo = `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
 
     const thumbnail = lastAccessedCourse.courseLogoUrl || lastAccessedCourse.content?.appIcon;
     const title = lastAccessedCourse.courseName || lastAccessedCourse.content?.name || "Untitled Course";
