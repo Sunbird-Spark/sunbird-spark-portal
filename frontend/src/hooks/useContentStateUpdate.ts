@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { batchService } from "../services/collection";
+import { useContentStateUpdateMutation } from "./useBatch";
 import {
   calculateContentProgress,
   progressToStatus,
@@ -43,6 +43,7 @@ export function useContentStateUpdate({
   currentContentStatus,
 }: UseContentStateUpdateParams): (event: TelemetryEvent) => void {
   const queryClient = useQueryClient();
+  const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
   const lastSentStatusRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -55,7 +56,7 @@ export function useContentStateUpdate({
       const userId = userAuthInfoService.getUserId();
       if (!userId) return;
       try {
-        await batchService.contentStateUpdate({
+        await contentStateUpdate({
           userId,
           courseId: collectionId,
           batchId: effectiveBatchId,
@@ -68,7 +69,7 @@ export function useContentStateUpdate({
         console.error("Content state update failed:", err);
       }
     },
-    [collectionId, contentId, effectiveBatchId, queryClient]
+    [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]
   );
 
   return useCallback(
