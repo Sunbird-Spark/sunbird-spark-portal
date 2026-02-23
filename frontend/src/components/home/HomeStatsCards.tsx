@@ -40,18 +40,22 @@ const CertificationsIcon = () => (
 );
 
 const HomeStatsCards = () => {
-    const { data } = useUserEnrolledCollections();
+    const { data: enrolledCollections } = useUserEnrolledCollections();
     const { data: certificatesData } = useUserCertificates();
-    const courses = data?.data?.courses || [];
+    const courses = enrolledCollections?.data?.courses || [];
 
-    // Calculate metrics using the same method as MyLearning page
-    const totalCourses = courses.length;
-    const contentsInProgress = courses.filter(course => 
-        course.completionPercentage > 0 && course.completionPercentage < 100
-    ).length;
-    const contentsCompleted = courses.filter(course => 
-        course.completionPercentage === 100
-    ).length;
+    // Total leaf-node contents across all enrolled courses
+    const totalCourses = courses.reduce((acc, course) => acc + (course.leafNodesCount || 0), 0);
+
+    // Count individual contents by status from contentStatus map (1 = in progress, 2 = completed)
+    const contentsInProgress = courses.reduce((acc, course) => {
+        const statuses = Object.values(course.contentStatus || {});
+        return acc + statuses.filter(s => s === 1).length;
+    }, 0);
+    const contentsCompleted = courses.reduce((acc, course) => {
+        const statuses = Object.values(course.contentStatus || {});
+        return acc + statuses.filter(s => s === 2).length;
+    }, 0);
     
     // Get certificate count from the certificate search API
     // The API returns an array of certificates directly
