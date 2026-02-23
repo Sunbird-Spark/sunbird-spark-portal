@@ -112,28 +112,18 @@ describe('CertificateService', () => {
     });
 
     it('throws error when post response is not ok (JSON error)', async () => {
-      mockPost.mockRejectedValue({
-        response: {
-          status: 400,
-          data: { params: { errmsg: 'Bad request' } }
-        }
-      });
+      mockPost.mockRejectedValue(new Error('Bad request'));
 
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await expect(service.uploadAsset('asset-1', svgBlob, 'cert.svg')).rejects.toThrow('Bad request');
     });
 
     it('throws generic error when post fails with non-JSON body', async () => {
-      mockPost.mockRejectedValue({
-        response: {
-          status: 500,
-          data: 'Internal Server Error',
-        }
-      });
+      mockPost.mockRejectedValue(new Error('Internal Server Error'));
 
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await expect(service.uploadAsset('asset-1', svgBlob, 'cert.svg')).rejects.toThrow(
-        'Upload failed (500). Raw response: "Internal Server Error"'
+        'Internal Server Error'
       );
     });
 
@@ -154,16 +144,11 @@ describe('CertificateService', () => {
     });
 
     it('handles missing params.errmsg in error JSON gracefully', async () => {
-      mockPost.mockRejectedValue({
-        response: {
-          status: 422,
-          data: { error: 'unprocessable' }
-        }
-      });
+      mockPost.mockRejectedValue(new Error('unprocessable'));
 
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await expect(service.uploadAsset('asset-1', svgBlob, 'cert.svg')).rejects.toThrow(
-        'Upload failed (422). Raw response: {"error":"unprocessable"}'
+        'unprocessable'
       );
     });
   });

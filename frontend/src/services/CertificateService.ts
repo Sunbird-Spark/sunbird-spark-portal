@@ -156,19 +156,7 @@ export class CertificateService {
       
       return response;
     } catch (error: any) {
-      let errmsg = `Upload failed`;
-      const status = error.response?.status || 'Unknown';
-      const errorData = error.response?.data;
-      
-      if (errorData?.params?.errmsg) {
-        errmsg = errorData.params.errmsg;
-      } else if (errorData) {
-        errmsg = `${errmsg} (${status}). Raw response: ${JSON.stringify(errorData)}`;
-      } else {
-         errmsg = `${errmsg} (${status}). Raw response: ${error.message}`;
-      }
-      
-      throw new Error(errmsg);
+      throw new Error(error.message || 'Upload failed');
     }
   }
 
