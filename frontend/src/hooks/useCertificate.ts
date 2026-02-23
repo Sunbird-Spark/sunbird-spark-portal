@@ -129,5 +129,5 @@ export const useUserCertificates = (): UseQueryResult<ApiResponse<CertificateSea
       return certificateService.searchCertificates(userId);
     },
     staleTime: 5 * 60 * 1000,
-  })
+  });
 }

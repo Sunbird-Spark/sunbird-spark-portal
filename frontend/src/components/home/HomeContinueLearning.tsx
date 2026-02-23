@@ -65,7 +65,7 @@ const HomeContinueLearning = () => {
 
     return (
         <div className="home-continue-learning-card">
-            <div className="flex flex-col lg:flex-row gap-5">
+            <div className="home-continue-learning-inner">
                 {/* Thumbnail */}
                 <div className="home-continue-learning-thumbnail">
                     {thumbnail ? (
@@ -80,23 +80,22 @@ const HomeContinueLearning = () => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="home-continue-learning-content">
                     <div>
                         <h4 className="home-continue-learning-title">
                             {title}
                         </h4>
-
-                        {/* Progress */}
-                        <div className="flex items-center gap-2 pt-4 lg:pt-5">
-                            <CircularProgress progress={lastAccessedCourse.completionPercentage} />
-                            <span className="text-sm text-muted-foreground">
-                                Completed : {lastAccessedCourse.completionPercentage}%
-                            </span>
-                        </div>
+                    </div>
+                    {/* Progress */}
+                    <div className="home-continue-learning-progress">
+                        <CircularProgress progress={lastAccessedCourse.completionPercentage} />
+                        <span className="home-continue-learning-progress-label">
+                            Completed : {lastAccessedCourse.completionPercentage}%
+                        </span>
                     </div>
 
                     {/* CTA Button */}
-                    <div className="mt-6 lg:mt-0">
+                    <div className="home-continue-learning-cta">
                         <Button
                             onClick={() => navigate(continueTo)}
                             className="home-continue-learning-btn group"

@@ -42,7 +42,7 @@ const HomeInProgressGrid = () => {
                         className="home-inprogress-card no-underline"
                     >
                         {/* Content */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-1">
+                        <div className="home-inprogress-content">
                             <div>
                                 <div className="flex-1 min-w-0">
                                     <span className="home-inprogress-badge">
@@ -51,30 +51,31 @@ const HomeInProgressGrid = () => {
                                     <h4 className="home-inprogress-card-title">
                                         {course.courseName || course.content?.name || "Untitled Course"}
                                     </h4>
-                                    <div className="flex items-center gap-3 mt-auto">
-                                        <div className="flex-1">
-                                            <div className="w-21 h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-sunbird-brick rounded-full"
-                                                    style={{ width: `${course.completionPercentage}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <span className="text-[0.625rem] font-medium text-sunbird-gray-77 shrink-0">{course.completionPercentage}%</span>
+
+                                </div>
+                            </div>
+                            <div className="home-inprogress-progress-container">
+                                <div className="home-inprogress-progress-bar-wrapper">
+                                    <div className="home-inprogress-progress-bar-bg">
+                                        <div
+                                            className="home-inprogress-progress-bar-fill"
+                                            style={{ width: `${course.completionPercentage}%` }}
+                                        />
                                     </div>
                                 </div>
+                                <span className="home-inprogress-progress-text">{course.completionPercentage}%</span>
                             </div>
                         </div>
                         {/* Thumbnail */}
-                        <div className="w-[5.5rem] h-[5.5rem] rounded-2xl overflow-hidden shrink-0">
+                        <div className="home-inprogress-thumbnail">
                             {course.courseLogoUrl || course.content?.appIcon ? (
                                 <img
                                     src={course.courseLogoUrl || course.content?.appIcon}
                                     alt={course.courseName}
-                                    className="w-full h-full object-cover"
+                                    className="home-inprogress-thumbnail-img"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-black" />
+                                <div className="home-inprogress-thumbnail-placeholder" />
                             )}
                         </div>
                     </Link>

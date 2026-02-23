@@ -66,7 +66,7 @@ const HomeStatsCards = () => {
     const statsData = [
         {
             id: "total",
-            value: totalCourses.toString().padStart(2, '0'),
+            value: totalCourses === 0 ? '0' : totalCourses.toString().padStart(2, '0'),
             label: "Total Contents",
             bgColor: "bg-sunbird-blue-light",
             iconBg: "hsl(var(--sunbird-blue-medium))",
@@ -74,7 +74,7 @@ const HomeStatsCards = () => {
         },
         {
             id: "progress",
-            value: contentsInProgress.toString().padStart(2, '0'),
+            value: contentsInProgress === 0 ? '0' : contentsInProgress.toString().padStart(2, '0'),
             label: "Contents in Progress",
             bgColor: "bg-sunbird-ginger",
             iconBg: "hsl(var(--sunbird-brown-dark))",
@@ -82,7 +82,7 @@ const HomeStatsCards = () => {
         },
         {
             id: "completed",
-            value: contentsCompleted.toString().padStart(2, '0'),
+            value: contentsCompleted === 0 ? '0' : contentsCompleted.toString().padStart(2, '0'),
             label: "Contents Completed",
             bgColor: "bg-sunbird-moss",
             iconBg: "hsl(var(--sunbird-green-dark))",
@@ -90,7 +90,7 @@ const HomeStatsCards = () => {
         },
         {
             id: "certs",
-            value: certificatesEarned.toString().padStart(2, '0'),
+            value: certificatesEarned === 0 ? '0' : certificatesEarned.toString().padStart(2, '0'),
             label: "Certifications Earned",
             bgColor: "bg-sunbird-lavender",
             iconBg: "hsl(var(--sunbird-purple-dark))",
