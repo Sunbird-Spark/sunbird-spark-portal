@@ -136,4 +136,71 @@ describe('BatchService', () => {
     expect(result.data).toEqual(mockData);
     expect(result.status).toBe(200);
   });
+
+  it('should call client.patch with correct url and payload for contentStateUpdate', async () => {
+    mockClient.patch = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+
+    const service = new BatchService();
+    await service.contentStateUpdate({
+      userId: 'user_1',
+      courseId: 'course_1',
+      batchId: 'batch_1',
+      contents: [{ contentId: 'content_a', status: 1 }],
+    });
+
+    expect(mockClient.patch).toHaveBeenCalledWith('/course/v1/content/state/update', {
+      request: {
+        userId: 'user_1',
+        contents: [
+          {
+            contentId: 'content_a',
+            status: 1,
+            courseId: 'course_1',
+            batchId: 'batch_1',
+          },
+        ],
+      },
+    });
+  });
+
+  it('should map multiple contents with courseId and batchId in contentStateUpdate', async () => {
+    mockClient.patch = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+
+    const service = new BatchService();
+    await service.contentStateUpdate({
+      userId: 'user_2',
+      courseId: 'course_2',
+      batchId: 'batch_2',
+      contents: [
+        { contentId: 'c1', status: 0 },
+        { contentId: 'c2', status: 2 },
+      ],
+    });
+
+    expect(mockClient.patch).toHaveBeenCalledWith('/course/v1/content/state/update', {
+      request: {
+        userId: 'user_2',
+        contents: [
+          { contentId: 'c1', status: 0, courseId: 'course_2', batchId: 'batch_2' },
+          { contentId: 'c2', status: 2, courseId: 'course_2', batchId: 'batch_2' },
+        ],
+      },
+    });
+  });
+
+  it('should return contentStateUpdate response', async () => {
+    const mockData = { result: 'updated' };
+    mockClient.patch = vi.fn().mockResolvedValue({ data: mockData, status: 200, headers: {} });
+
+    const service = new BatchService();
+    const result = await service.contentStateUpdate({
+      userId: 'user_1',
+      courseId: 'course_1',
+      batchId: 'batch_1',
+      contents: [{ contentId: 'content_a', status: 2 }],
+    });
+
+    expect(result.data).toEqual(mockData);
+    expect(result.status).toBe(200);
+  });
 });
