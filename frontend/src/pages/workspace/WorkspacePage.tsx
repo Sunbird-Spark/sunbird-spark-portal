@@ -234,7 +234,7 @@ const WorkspacePage = () => {
       description: isQuiz ? `Enter description for ${name}` : undefined,
       organisation,
       createdFor,
-      framework: orgFramework || undefined,
+      framework: orgFramework,
     });
     const contentId = response.data?.identifier || response.data?.content_id;
     if (!contentId) {
