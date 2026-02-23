@@ -1,29 +1,17 @@
-import { useState, useRef, useCallback, MutableRefObject } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { certificateService } from "@/services/CertificateService";
 import { useCertTemplates } from "@/hooks/useCertificate";
 import { IssueTo, ModalView, Step, NewTemplateForm, CERT_TEMPLATE_SVG_URL } from "./types";
 import { emptyNewTemplate, resolveUserAndOrg } from "./utils";
-
-/**
- * Resolves the signatory list to use for a certificate template.
- * Fallback order:
- * 1. Signatories found in the template's content (fullSignatoryList)
- * 2. The most recently built signatories list (lastBuiltSignatoryListRef)
- * 3. A hardcoded default "Director" signatory
- */
-function resolveSignatoryList(
-  fullSignatoryList: Array<{ name: string; designation: string; id: string; image: string }> | undefined,
-  lastBuiltSignatoryListRef: MutableRefObject<Array<{ name: string; designation: string; id: string; image: string }>>
-) {
-  if (fullSignatoryList && fullSignatoryList.length > 0) {
-    return fullSignatoryList;
-  }
-  if (lastBuiltSignatoryListRef.current.length > 0) {
-    return lastBuiltSignatoryListRef.current;
-  }
-  return [{ name: "Director", designation: "", id: "Director/Director", image: "" }];
-}
+import {
+  Signatory,
+  resolveSignatoryList,
+  buildSignatoryListFromForm,
+  isNewTemplateValid,
+  buildCreateAssetRequest,
+  applyOptimisticBatchCertUpdate,
+} from "./useCertificateModalState.helpers";
 
 export function useCertificateModalState(
   courseId: string,
@@ -52,9 +40,7 @@ export function useCertificateModalState(
 
   const { data: certTemplates = [], isLoading: templatesLoading } = useCertTemplates();
 
-  const lastBuiltSignatoryListRef = useRef<
-    Array<{ name: string; designation: string; id: string; image: string }>
-  >([]);
+  const lastBuiltSignatoryListRef = useRef<Signatory[]>([]);
 
   const selectedTemplate = certTemplates.find((t) => t.identifier === selectedTemplateId);
 
@@ -94,43 +80,9 @@ export function useCertificateModalState(
         "X-Org-code": rootOrgId,
       };
 
-      const sigList: Array<{ name: string; designation: string; id: string; image: string }> = [];
-      if (newTmpl.sig1Designation || newTmpl.sig1.preview) {
-        sigList.push({
-          name: newTmpl.name || "Signatory 1",
-          designation: newTmpl.sig1Designation || "",
-          id: `${newTmpl.sig1Designation || "sig1"}/${newTmpl.sig1Designation || "sig1"}`,
-          image: newTmpl.sig1.preview || "",
-        });
-      }
-      if (newTmpl.sig2Designation || newTmpl.sig2.preview) {
-        sigList.push({
-          name: newTmpl.name || "Signatory 2",
-          designation: newTmpl.sig2Designation || "",
-          id: `${newTmpl.sig2Designation || "sig2"}/${newTmpl.sig2Designation || "sig2"}`,
-          image: newTmpl.sig2.preview || "",
-        });
-      }
-
-      const assetCode = newTmpl.certTitle.trim() || "Certificate";
-      const createResp = await certificateService.createAsset(
-        {
-          name: assetCode,
-          code: assetCode,
-          mimeType: "image/svg+xml",
-          license: "CC BY 4.0",
-          primaryCategory: "Certificate Template",
-          mediaType: "image",
-          certType: "cert template",
-          channel: rootOrgId,
-          issuer: { name: rootOrgId, url: window.location.origin },
-          signatoryList:
-            sigList.length > 0
-              ? sigList
-              : [{ name: "Director", designation: "", id: "Director/Director", image: "" }],
-        },
-        reqHeaders
-      );
+      const sigList = buildSignatoryListFromForm(newTmpl);
+      const reqBody = buildCreateAssetRequest(newTmpl, rootOrgId, sigList);
+      const createResp = await certificateService.createAsset(reqBody, reqHeaders);
 
       const assetId = createResp.data?.identifier;
       if (!assetId) throw new Error("Failed to create certificate asset");
@@ -174,7 +126,7 @@ export function useCertificateModalState(
       };
 
       setStepLabel("Fetching template details…");
-      let fullSignatoryList: Array<{ name: string; designation: string; id: string; image: string }> | undefined;
+      let fullSignatoryList: Signatory[] | undefined;
       let fullPreviewUrl = selectedTemplate.previewUrl ?? selectedTemplate.artifactUrl ?? "";
       let fullIssuer = selectedTemplate.issuer;
       try {
@@ -204,7 +156,7 @@ export function useCertificateModalState(
         criteria.user = { rootOrgId };
       }
 
-      const signatoryList = resolveSignatoryList(fullSignatoryList, lastBuiltSignatoryListRef);
+      const signatoryList = resolveSignatoryList(fullSignatoryList, lastBuiltSignatoryListRef.current);
 
       await certificateService.addTemplateToBatch(
         {
@@ -225,24 +177,9 @@ export function useCertificateModalState(
       );
 
       // Optimistically update the cache so the UI reflects instantly
-      queryClient.setQueryData<any[]>(["batchList", courseId, true], (old) => {
-        if (!old) return old;
-        return old.map((b) => {
-          if (b.id === batchId) {
-            return {
-              ...b,
-              certTemplates: {
-                ...(b.certTemplates || {}),
-                [selectedTemplateId]: {
-                  identifier: selectedTemplateId,
-                  name: selectedTemplate.name,
-                },
-              },
-            };
-          }
-          return b;
-        });
-      });
+      queryClient.setQueryData<any[]>(["batchList", courseId, true], (old) =>
+        applyOptimisticBatchCertUpdate(old, batchId, selectedTemplateId, selectedTemplate)
+      );
 
       // Invalidate after a delay for ES to index
       setTimeout(() => {
@@ -256,14 +193,7 @@ export function useCertificateModalState(
     }
   };
 
-  const isNewTmplValid = Boolean(
-    newTmpl.certTitle.trim() &&
-    newTmpl.name.trim() &&
-    !!newTmpl.logo1.preview &&
-    !!newTmpl.sig1.preview &&
-    !!newTmpl.sig1Designation.trim() &&
-    newTmpl.termsAccepted
-  );
+  const isNewTmplValid = isNewTemplateValid(newTmpl);
 
   const handleRefreshTemplates = async () => {
     setTemplatesRefreshing(true);
