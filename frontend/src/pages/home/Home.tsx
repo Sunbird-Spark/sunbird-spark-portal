@@ -3,14 +3,9 @@ import { useUserRead } from "@/hooks/useUserRead";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
-import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
-import HomeStatsCards from "@/components/home/HomeStatsCards";
-import HomeContinueLearning from "@/components/home/HomeContinueLearning";
-import HomeInProgressGrid from "@/components/home/HomeInProgressGrid";
-import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
-import HomeDiscoverSections from "@/components/home/HomeDiscoverSections";
+import HomeDashboardContent from "@/components/home/HomeDashboardContent";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 
@@ -20,7 +15,11 @@ const Home = () => {
     const isMobile = useIsMobile();
     const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead();
     const userProfile = userReadData?.data?.response;
-    const { data: enrolledCollections } = useUserEnrolledCollections();
+    const { 
+        data: enrolledCollections, 
+        isLoading: enrollmentsLoading, 
+        error: enrollmentsError 
+    } = useUserEnrolledCollections();
     const enrolledCount = enrolledCollections?.data?.courses?.length ?? 0;
     const [activeNav, setActiveNav] = useState("home");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
@@ -71,43 +70,13 @@ const Home = () => {
                                     : "Welcome to a learning experience made just for you."}
                             </p>
                         </div>
-                        {enrolledCount === 0 ? (
-                            <HomeDiscoverSections />
-                        ) : (
-                            <>
 
-                                {userLoading || error ? (
-                                    <PageLoader
-                                        message="Loading your dashboard..."
-                                        fullPage={false}
-                                        error={error ? (error.message || "Failed to load dashboard") : undefined}
-                                        onRetry={refetch}
-                                    />
-                                ) : (
-                                    <>
-                                        {/* Stats Cards */}
-                                        <HomeStatsCards />
-
-                                        {/* Continue Learning Section */}
-                                        <div className="home-continue-section">
-                                            <h3 className="home-continue-section-title">Continue from where you left</h3>
-                                            <div className="home-continue-grid">
-                                                <div className="w-full lg:w-[65%]">
-                                                    <HomeContinueLearning />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* In Progress Contents - show only when multiple enrollments */}
-                                        {enrolledCount > 1 && <HomeInProgressGrid />}
-
-                                        {/* Recommended Contents */}
-                                        <HomeRecommendedSection />
-
-                                    </>
-                                )}
-                            </>
-                        )}
+                        <HomeDashboardContent
+                            loading={userLoading || enrollmentsLoading}
+                            error={error?.message || enrollmentsError?.message}
+                            enrolledCount={enrolledCount}
+                            onRetry={refetch}
+                        />
                     </div>
                 </main>
             </div>

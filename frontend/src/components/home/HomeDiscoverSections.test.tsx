@@ -138,24 +138,21 @@ describe('HomeDiscoverSections', () => {
       ]),
     });
 
-    render(<HomeDiscoverSections />);
+    const { container } = render(<HomeDiscoverSections />);
 
-    const allSections = [
-      screen.getByTestId('dynamic-content-section'),
-      screen.getByTestId('dynamic-category-section'),
-      screen.getByTestId('dynamic-resource-section'),
-    ];
-
+    // Query all sections in actual DOM order
+    const allSections = container.querySelectorAll('[data-testid^="dynamic-"]');
+    
     // All three should be rendered
     expect(allSections).toHaveLength(3);
 
     // Verify DOM order matches sorted index order (content=1, categories=2, resources=3)
-    const sectionIds = allSections.map((el) => el.getAttribute('data-testid'));
-    expect(sectionIds).toEqual([
-      'dynamic-content-section',
-      'dynamic-category-section',
-      'dynamic-resource-section',
-    ]);
+    expect(allSections[0]).toHaveAttribute('data-testid', 'dynamic-content-section');
+    expect(allSections[0]).toHaveTextContent('Content');
+    expect(allSections[1]).toHaveAttribute('data-testid', 'dynamic-category-section');
+    expect(allSections[1]).toHaveTextContent('Categories');
+    expect(allSections[2]).toHaveAttribute('data-testid', 'dynamic-resource-section');
+    expect(allSections[2]).toHaveTextContent('Resources');
   });
 
   it('renders multiple sections of the same type', () => {
