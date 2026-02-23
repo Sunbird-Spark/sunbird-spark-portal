@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useUserRead } from "@/hooks/useUserRead";
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
@@ -18,6 +19,8 @@ const Home = () => {
     const isMobile = useIsMobile();
     const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead();
     const userProfile = userReadData?.data?.response;
+    const { data: enrolledCollections } = useUserEnrolledCollections();
+    const enrolledCount = enrolledCollections?.data?.courses?.length ?? 0;
     const [activeNav, setActiveNav] = useState("home");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
 
@@ -76,7 +79,7 @@ const Home = () => {
                                 {/* Stats Cards */}
                                 <HomeStatsCards />
 
-                                {/* Continue Learning + Performance */}
+                                {/* Continue Learning Section */}
                                 <div className="home-continue-section">
                                     <h3 className="home-continue-section-title">Continue from where you left</h3>
                                     <div className="home-continue-grid">
@@ -86,8 +89,8 @@ const Home = () => {
                                     </div>
                                 </div>
 
-                                {/* In Progress Contents */}
-                                <HomeInProgressGrid />
+                                {/* In Progress Contents - show only when multiple enrollments */}
+                                {enrolledCount > 1 && <HomeInProgressGrid />}
 
                                 {/* Recommended Contents */}
                                 <HomeRecommendedSection />
