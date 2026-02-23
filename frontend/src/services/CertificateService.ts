@@ -1,4 +1,7 @@
 import { getClient, ApiResponse } from '../lib/http-client';
+import type { Certificate, CertificateSearchResponse } from '../components/collection/certificate/types';
+
+export type { Certificate, CertificateSearchResponse };
 
 export interface CertSignatory {
   name: string;
@@ -243,6 +246,18 @@ export class CertificateService {
         },
       }
     );
+  }
+
+  public async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
+    return getClient().post<CertificateSearchResponse>('/rc/certificate/v1/search', {
+      filters: {
+        recipient: {
+          id: {
+            eq: userId,
+          },
+        },
+      },
+    });
   }
 }
 
