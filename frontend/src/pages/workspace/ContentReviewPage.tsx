@@ -104,7 +104,6 @@ const ContentReviewPage = () => {
     mode: 'publish' | 'request-changes',
     action: string,
     setLoading: (loading: boolean) => void,
-    fallback?: () => Promise<void>,
   ) => {
     setLoading(true);
     try {
@@ -114,8 +113,6 @@ const ContentReviewPage = () => {
       if (response.data?.form?.data?.fields) {
         setDialogFormFields(response.data.form.data.fields);
         setDialogMode(mode);
-      } else if (fallback) {
-        await fallback();
       } else {
         toast({ title: 'Error', description: `Failed to load ${action} form.`, variant: 'destructive' });
       }
@@ -127,7 +124,7 @@ const ContentReviewPage = () => {
   };
 
   const handlePublishClick = () =>
-    loadFormAndShow('publish', 'publish', setIsLoadingPublishForm, handlePublishConfirm);
+    loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
 
   const handleRequestChangesClick = () =>
     loadFormAndShow('request-changes', 'requestforchanges', setIsLoadingRequestChangesForm);
