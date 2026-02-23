@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -45,12 +46,9 @@ const ContentReviewPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
-  const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [showRequestChangesDialog, setShowRequestChangesDialog] = useState(false);
-  const [publishFormFields, setPublishFormFields] = useState<CheckListFormField[]>([]);
-  const [requestChangesFormFields, setRequestChangesFormFields] = useState<CheckListFormField[]>([]);
+  const [dialogMode, setDialogMode] = useState<'publish' | 'request-changes' | null>(null);
+  const [dialogFormFields, setDialogFormFields] = useState<CheckListFormField[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingPublishForm, setIsLoadingPublishForm] = useState(false);
   const [isLoadingRequestChangesForm, setIsLoadingRequestChangesForm] = useState(false);
 
@@ -103,9 +101,8 @@ const ContentReviewPage = () => {
     Promise.all(WORKSPACE_QUERY_KEYS.map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
 
   const loadFormAndShow = async (
+    mode: 'publish' | 'request-changes',
     action: string,
-    setFields: (fields: CheckListFormField[]) => void,
-    setShow: (show: boolean) => void,
     setLoading: (loading: boolean) => void,
     fallback?: () => Promise<void>,
   ) => {
@@ -115,8 +112,8 @@ const ContentReviewPage = () => {
         type: 'content', action, subType: 'resource', rootOrgId: '*',
       });
       if (response.data?.form?.data?.fields) {
-        setFields(response.data.form.data.fields);
-        setShow(true);
+        setDialogFormFields(response.data.form.data.fields);
+        setDialogMode(mode);
       } else if (fallback) {
         await fallback();
       } else {
@@ -130,42 +127,44 @@ const ContentReviewPage = () => {
   };
 
   const handlePublishClick = () =>
-    loadFormAndShow('publish', setPublishFormFields, setShowPublishDialog, setIsLoadingPublishForm, handlePublishConfirm);
+    loadFormAndShow('publish', 'publish', setIsLoadingPublishForm, handlePublishConfirm);
 
   const handleRequestChangesClick = () =>
-    loadFormAndShow('requestforchanges', setRequestChangesFormFields, setShowRequestChangesDialog, setIsLoadingRequestChangesForm);
+    loadFormAndShow('request-changes', 'requestforchanges', setIsLoadingRequestChangesForm);
+
+  const closeDialog = () => setDialogMode(null);
 
   const handlePublishConfirm = async () => {
     if (!contentId) return;
-    setIsPublishing(true);
+    setIsSubmitting(true);
     try {
       await contentService.contentPublish(contentId, userAuthInfoService.getUserId() || '');
-      setShowPublishDialog(false);
+      closeDialog();
       toast({ title: 'Success', description: 'Content is published successfully.' });
       await invalidateWorkspaceQueries();
       navigate('/workspace');
     } catch {
-      setShowPublishDialog(false);
+      closeDialog();
       toast({ title: 'Error', description: 'Failed to publish content.', variant: 'destructive' });
     } finally {
-      setIsPublishing(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleRequestChangesConfirm = async (rejectReasons: string[], rejectComment: string) => {
     if (!contentId) return;
-    setIsRejecting(true);
+    setIsSubmitting(true);
     try {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
-      setShowRequestChangesDialog(false);
+      closeDialog();
       toast({ title: 'Success', description: 'Request for changes is submitted successfully.' });
       await invalidateWorkspaceQueries();
       navigate('/workspace');
     } catch {
-      setShowRequestChangesDialog(false);
+      closeDialog();
       toast({ title: 'Error', description: 'Failed to request for changes.', variant: 'destructive' });
     } finally {
-      setIsRejecting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -184,14 +183,14 @@ const ContentReviewPage = () => {
             <button
               className="content-review-btn-publish"
               onClick={handlePublishClick}
-              disabled={isPublishing || isRejecting || isLoadingPublishForm}
+              disabled={isSubmitting || isLoadingPublishForm}
             >
-              {isLoadingPublishForm ? 'Loading...' : isPublishing ? 'Publishing...' : 'Publish'}
+              {isLoadingPublishForm ? 'Loading...' : isSubmitting && dialogMode === 'publish' ? 'Publishing...' : 'Publish'}
             </button>
             <button
               className="content-review-btn-reject"
               onClick={handleRequestChangesClick}
-              disabled={isPublishing || isRejecting || isLoadingRequestChangesForm}
+              disabled={isSubmitting || isLoadingRequestChangesForm}
             >
               {isLoadingRequestChangesForm ? 'Loading...' : 'Request for Changes'}
             </button>
@@ -225,22 +224,17 @@ const ContentReviewPage = () => {
           </div>
         </div>
       </div>
-      <ChecklistDialog
-        isOpen={showPublishDialog}
-        onClose={() => setShowPublishDialog(false)}
-        onPublish={handlePublishConfirm}
-        formFields={publishFormFields}
-        isLoading={isPublishing}
-        mode="publish"
-      />
-      <ChecklistDialog
-        isOpen={showRequestChangesDialog}
-        onClose={() => setShowRequestChangesDialog(false)}
-        onRequestChanges={handleRequestChangesConfirm}
-        formFields={requestChangesFormFields}
-        isLoading={isRejecting}
-        mode="request-changes"
-      />
+      {dialogMode && (
+        <ChecklistDialog
+          isOpen={true}
+          onClose={closeDialog}
+          onPublish={dialogMode === 'publish' ? handlePublishConfirm : undefined}
+          onRequestChanges={dialogMode === 'request-changes' ? handleRequestChangesConfirm : undefined}
+          formFields={dialogFormFields}
+          isLoading={isSubmitting}
+          mode={dialogMode}
+        />
+      )}
     </ReviewPageLayout>
   );
 };
