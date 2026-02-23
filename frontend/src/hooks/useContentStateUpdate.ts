@@ -83,7 +83,7 @@ export function useContentStateUpdate({
       if (eidUpper === "START") {
         if (lastSentStatusRef.current !== 1) {
           lastSentStatusRef.current = 1;
-          void handleContentStateUpdate(1, true);
+          void handleContentStateUpdate(1, false);
         }
         return;
       }

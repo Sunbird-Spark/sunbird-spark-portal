@@ -1,5 +1,4 @@
 /**
- * Replicates CsContentProgressCalculator: effective progress (0-100) from consumption summary.
  * Playback types: calculatePlaybackProgress (endpageseen/visitedcontentend or >20% viewed → 100, else progress).
  * Other (H5P/HTML/ECML): absoluteProgress(progress, 0) → progress >= 0 ? 100 : 0.
  * Rest: absoluteProgress(progress, 100) → progress >= 100 ? 100 : 0.
