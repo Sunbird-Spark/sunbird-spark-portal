@@ -135,19 +135,20 @@ const ContentReviewPage = () => {
     try {
       const userId = userAuthInfoService.getUserId() || '';
       await contentService.contentPublish(contentId, userId);
-      toast({
-        title: 'Published',
-        description: 'Content has been published successfully.',
-      });
       setShowPublishDialog(false);
+      toast({
+        title: 'Success',
+        description: 'Content is published successfully.',
+      });
       await queryClient.invalidateQueries({ queryKey: ['workspace-counts'] });
       await queryClient.invalidateQueries({ queryKey: ['workspace-own-counts'] });
       await queryClient.invalidateQueries({ queryKey: ['workspace-content'] });
       navigate('/workspace');
     } catch (err) {
+      setShowPublishDialog(false);
       toast({
         title: 'Error',
-        description: (err as Error).message || 'Failed to publish content.',
+        description: 'Failed to publish content.',
         variant: 'destructive',
       });
     } finally {
@@ -193,19 +194,20 @@ const ContentReviewPage = () => {
     setIsRejecting(true);
     try {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
-      toast({
-        title: 'Changes Requested',
-        description: 'Content has been sent back for changes.',
-      });
       setShowRequestChangesDialog(false);
+      toast({
+        title: 'Success',
+        description: 'Request for changes is submitted successfully.',
+      });
       await queryClient.invalidateQueries({ queryKey: ['workspace-counts'] });
       await queryClient.invalidateQueries({ queryKey: ['workspace-own-counts'] });
       await queryClient.invalidateQueries({ queryKey: ['workspace-content'] });
       navigate('/workspace');
     } catch (err) {
+      setShowRequestChangesDialog(false);
       toast({
         title: 'Error',
-        description: (err as Error).message || 'Failed to request changes.',
+        description: 'Failed to request for changes.',
         variant: 'destructive',
       });
     } finally {
