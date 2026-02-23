@@ -48,7 +48,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: today,
         endDate: tomorrowDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText('Test Batch')).toBeInTheDocument();
     });
@@ -60,7 +60,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: today,
         endDate: tomorrowDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText('Ongoing')).toBeInTheDocument();
     });
@@ -72,7 +72,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: '2026-03-01',
         endDate: '2026-06-30',
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText(/01 Mar 2026.*–.*30 Jun 2026/)).toBeInTheDocument();
     });
@@ -85,7 +85,7 @@ describe('BatchRow', () => {
         startDate: '2026-03-01',
         endDate: '2026-06-30',
         enrollmentEndDate: '2026-05-15',
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText(/enrolment ends/i)).toBeInTheDocument();
       expect(screen.getByText(/15 May 2026/)).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: undefined,
         endDate: tomorrowDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText(/—/)).toBeInTheDocument();
     });
@@ -110,7 +110,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: 'invalid-date',
         endDate: 'invalid-date',
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText(/—.*–.*—/)).toBeInTheDocument();
     });
@@ -124,7 +124,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: tomorrowDate,
         endDate: dayjs().add(2, 'day').format('YYYY-MM-DD'),
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const editButton = screen.getByRole('button', { name: /edit batch/i });
       expect(editButton).toBeInTheDocument();
@@ -137,7 +137,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: yesterdayDate,
         endDate: tomorrowDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       // Check for the lock icon (it's an FiLock component)
       const lockElements = screen.getAllByTitle(/cannot be edited after/i);
@@ -151,7 +151,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: today,
         endDate: tomorrowDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const editButton = screen.getByRole('button', { name: /edit batch/i });
       expect(editButton).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: undefined,
         endDate: tomorrowDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const editButton = screen.getByRole('button', { name: /edit batch/i });
       expect(editButton).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: tomorrowDate,
         endDate: dayjs().add(2, 'day').format('YYYY-MM-DD'),
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const editButton = screen.getByRole('button', { name: /edit batch/i });
       fireEvent.click(editButton);
@@ -194,7 +194,7 @@ describe('BatchRow', () => {
         startDate: yesterdayDate,
         endDate: tomorrowDate,
         certTemplates: undefined,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByRole('button', { name: /add certificate/i })).toBeInTheDocument();
     });
@@ -207,7 +207,7 @@ describe('BatchRow', () => {
         startDate: yesterdayDate,
         endDate: tomorrowDate,
         certTemplates: { 'template-1': { name: 'Template 1' } },
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByRole('button', { name: /edit certificate/i })).toBeInTheDocument();
     });
@@ -220,7 +220,7 @@ describe('BatchRow', () => {
         startDate: dayjs().subtract(2, 'day').format('YYYY-MM-DD'),
         endDate: yesterdayDate,
         certTemplates: undefined,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText(/certificate unavailable/i)).toBeInTheDocument();
     });
@@ -233,7 +233,7 @@ describe('BatchRow', () => {
         startDate: dayjs().subtract(2, 'day').format('YYYY-MM-DD'),
         endDate: yesterdayDate,
         certTemplates: { 'template-1': { name: 'Template 1' } },
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText(/certificate locked/i)).toBeInTheDocument();
     });
@@ -246,7 +246,7 @@ describe('BatchRow', () => {
         startDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
         endDate: today,
         certTemplates: undefined,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByRole('button', { name: /add certificate/i })).toBeInTheDocument();
     });
@@ -259,7 +259,7 @@ describe('BatchRow', () => {
         startDate: yesterdayDate,
         endDate: tomorrowDate,
         certTemplates: undefined,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const certButton = screen.getByRole('button', { name: /add certificate/i });
       fireEvent.click(certButton);
@@ -274,7 +274,7 @@ describe('BatchRow', () => {
         startDate: dayjs().subtract(2, 'day').format('YYYY-MM-DD'),
         endDate: yesterdayDate,
         certTemplates: undefined,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const lockedText = screen.getByText(/certificate unavailable/i);
       expect(lockedText).toBeInTheDocument();
@@ -289,7 +289,7 @@ describe('BatchRow', () => {
         startDate: yesterdayDate,
         endDate: tomorrowDate,
         certTemplates: {},
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByRole('button', { name: /add certificate/i })).toBeInTheDocument();
     });
@@ -303,7 +303,7 @@ describe('BatchRow', () => {
         status: '0',
         startDate: tomorrowDate,
         endDate: dayjs().add(2, 'day').format('YYYY-MM-DD'),
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const statusBadge = screen.getByText('Upcoming');
       expect(statusBadge).toHaveClass('bg-yellow-100');
@@ -316,7 +316,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: yesterdayDate,
         endDate: tomorrowDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const statusBadge = screen.getByText('Ongoing');
       expect(statusBadge).toHaveClass('bg-green-100');
@@ -329,7 +329,7 @@ describe('BatchRow', () => {
         status: '2',
         startDate: dayjs().subtract(2, 'day').format('YYYY-MM-DD'),
         endDate: yesterdayDate,
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       const statusBadge = screen.getByText('Expired');
       expect(statusBadge).toHaveClass('bg-gray-100');
@@ -342,7 +342,7 @@ describe('BatchRow', () => {
         id: 'b1',
         name: 'No Date Batch',
         status: '1',
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.getByText('No Date Batch')).toBeInTheDocument();
     });
@@ -354,7 +354,7 @@ describe('BatchRow', () => {
         status: '1',
         startDate: '2026-03-01',
         endDate: '2026-06-30',
-      } as Batch;
+      } as unknown as Batch;
       render(<BatchRow batch={batch} onEditClick={onEditClick} onCertificateClick={onCertificateClick} />);
       expect(screen.queryByText(/enrolment ends/i)).not.toBeInTheDocument();
     });
