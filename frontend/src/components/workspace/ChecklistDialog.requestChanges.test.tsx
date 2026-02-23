@@ -43,14 +43,14 @@ const checkAllChecklistItems = (container: HTMLElement, count: number) => {
 };
 
 describe('ChecklistDialog - Request-Changes Validation', () => {
-  it('should require all checkboxes checked to enable submit button', () => {
+  it('should require atleast one checkbox checked to enable submit button', () => {
     const { container } = renderRequestChanges();
     const btn = screen.getByRole('button', { name: 'Request for Changes' });
     const checkboxes = container.querySelectorAll<HTMLInputElement>('.review-dialog-checkbox');
     expect(btn).toBeDisabled();
     fireEvent.click(checkboxes[0]!);
     fireEvent.click(checkboxes[1]!);
-    expect(btn).toBeDisabled();
+    expect(btn).not.toBeDisabled();
     fireEvent.click(checkboxes[2]!);
     fireEvent.click(checkboxes[3]!);
     expect(btn).not.toBeDisabled();

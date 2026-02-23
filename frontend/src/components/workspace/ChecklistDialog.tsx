@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { CheckListFormField } from '@/types/formTypes';
+import { CheckListFormField, CheckListFormFieldContent } from '@/types/formTypes';
 import './ChecklistDialog.css';
 
 interface ChecklistDialogProps {
@@ -55,7 +55,7 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   const getTotalCheckboxes = () => {
     let total = 0;
     formFields.forEach((field) => {
-      field.contents?.forEach((content: { checkList: string[] }) => {
+      field.contents?.forEach((content: CheckListFormFieldContent) => {
         total += content.checkList.length;
       });
     });
@@ -68,15 +68,14 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
 
   // Mode-specific validation
   const isValid = () => {
-    const allCheckboxesChecked = getCheckedCount() === getTotalCheckboxes();
-    
     if (mode === 'publish') {
-      return allCheckboxesChecked;
+      return getCheckedCount() === getTotalCheckboxes();
     }
-    
-    // request-changes mode
+
+    // request-changes mode: require at least one reason selected
+    const hasAtLeastOneReason = getCheckedCount() > 0 || otherReasonChecked;
     const hasOtherReasonText = !otherReasonChecked || otherReasonText.trim().length > 0;
-    return allCheckboxesChecked && hasOtherReasonText;
+    return hasAtLeastOneReason && hasOtherReasonText;
   };
 
   // Collect selected checklist items as reject reasons for the API
@@ -84,7 +83,7 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
     const reasons: string[] = [];
 
     formFields.forEach((field, fieldIndex) => {
-      field.contents?.forEach((content: Record<string,any>, contentIndex: number) => {
+      field.contents?.forEach((content: CheckListFormFieldContent, contentIndex: number) => {
         content.checkList.forEach((item: string, itemIndex: number) => {
           const checkboxKey = `${fieldIndex}-${contentIndex}-${itemIndex}`;
           if (checkedItems[checkboxKey]) {

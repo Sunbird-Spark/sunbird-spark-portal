@@ -133,11 +133,13 @@ export function useWorkspace({
       const getOwnFacetCount = (name: string) =>
         ownStatusFacet?.values.find((v) => v.name === name)?.count ?? 0;
 
-      const review = (getFacetCount('review') - getOwnFacetCount('review'))
+      const review = Math.max(0,
+        (getFacetCount('review') - getOwnFacetCount('review'))
         + (getFacetCount('processing') - getOwnFacetCount('processing'))
-        + (getFacetCount('flagreview') - getOwnFacetCount('flagreview'));
-      const published = (getFacetCount('live') - getOwnFacetCount('live'))
-        + (getFacetCount('unlisted') - getOwnFacetCount('unlisted'));
+        + (getFacetCount('flagreview') - getOwnFacetCount('flagreview')));
+      const published = Math.max(0,
+        (getFacetCount('live') - getOwnFacetCount('live'))
+        + (getFacetCount('unlisted') - getOwnFacetCount('unlisted')));
       const all = review + published;
 
       return { all, drafts: 0, review, published, pendingReview: review };

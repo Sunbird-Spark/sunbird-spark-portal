@@ -86,6 +86,13 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
   },
 };
 
+/** MIME types that identify collection-type content */
+const COLLECTION_MIMETYPES = [
+  "application/vnd.sunbird.questionset",
+  "application/vnd.sunbird.collection",
+  "application/vnd.ekstep.content-collection",
+];
+
 const contentService = new ContentService();
 /** Option IDs that should open the generic (upload) editor */
 const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video'];
@@ -331,11 +338,6 @@ const WorkspacePage = () => {
     const item = visibleContents.find((c) => c.id === id);
     if (!item) return;
 
-    const COLLECTION_MIMETYPES = [
-      "application/vnd.sunbird.questionset",
-      "application/vnd.sunbird.collection",
-      "application/vnd.ekstep.content-collection"
-    ];
     const isCollection = COLLECTION_MIMETYPES.includes(item.mimeType);
 
     if (!isCollection) {
