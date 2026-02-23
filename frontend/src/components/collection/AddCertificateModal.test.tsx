@@ -1,20 +1,67 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AddCertificateModal from './AddCertificateModal';
+import type { ModalView, Step, IssueTo } from './certificate/types';
+
+type CertTab = 'current' | 'change';
 
 /* ── Mock useCertificateModalState ── */
-const mockState = {
-  view: 'main' as const,
+const mockState: {
+  view: ModalView;
+  setView: ReturnType<typeof vi.fn>;
+  issueTo: IssueTo;
+  setIssueTo: ReturnType<typeof vi.fn>;
+  issueToAccepted: boolean;
+  setIssueToAccepted: ReturnType<typeof vi.fn>;
+  progressRule: string;
+  setProgressRule: ReturnType<typeof vi.fn>;
+  selectedTemplateId: string | null;
+  setSelectedTemplateId: ReturnType<typeof vi.fn>;
+  previewTemplate: string | null;
+  setPreviewTemplate: ReturnType<typeof vi.fn>;
+  newTmpl: {
+    certTitle: string;
+    name: string;
+    logo1: { preview: null; artifactUrl: null; file: null };
+    logo2: { preview: null; artifactUrl: null; file: null };
+    sig1: { preview: null; artifactUrl: null; file: null };
+    sig1Designation: string;
+    sig2: { preview: null; artifactUrl: null; file: null };
+    sig2Designation: string;
+    termsAccepted: boolean;
+  };
+  step: Step;
+  setStep: ReturnType<typeof vi.fn>;
+  stepLabel: string;
+  errorMsg: string;
+  setErrorMsg: ReturnType<typeof vi.fn>;
+  createLoading: boolean;
+  templatesRefreshing: boolean;
+  certTab: CertTab;
+  setCertTab: ReturnType<typeof vi.fn>;
+  certTemplates: any[];
+  templatesLoading: boolean;
+  selectedTemplate: null;
+  hasExistingCert: boolean;
+  handleClose: ReturnType<typeof vi.fn>;
+  handleNewTmplField: ReturnType<typeof vi.fn>;
+  handleSaveNewTemplate: ReturnType<typeof vi.fn>;
+  handleAddCertificate: ReturnType<typeof vi.fn>;
+  isNewTmplValid: boolean;
+  handleRefreshTemplates: ReturnType<typeof vi.fn>;
+  isAddCertEnabled: boolean;
+} = {
+  view: 'main',
   setView: vi.fn(),
-  issueTo: 'all' as const,
+  issueTo: 'all',
   setIssueTo: vi.fn(),
   issueToAccepted: false,
   setIssueToAccepted: vi.fn(),
   progressRule: '100',
   setProgressRule: vi.fn(),
-  selectedTemplateId: null as string | null,
+  selectedTemplateId: null,
   setSelectedTemplateId: vi.fn(),
-  previewTemplate: null as string | null,
+  previewTemplate: null,
   setPreviewTemplate: vi.fn(),
   newTmpl: {
     certTitle: '',
@@ -27,16 +74,16 @@ const mockState = {
     sig2Designation: '',
     termsAccepted: false,
   },
-  step: 'idle' as const,
+  step: 'idle',
   setStep: vi.fn(),
   stepLabel: '',
   errorMsg: '',
   setErrorMsg: vi.fn(),
   createLoading: false,
   templatesRefreshing: false,
-  certTab: 'change' as const,
+  certTab: 'change',
   setCertTab: vi.fn(),
-  certTemplates: [] as any[],
+  certTemplates: [],
   templatesLoading: false,
   selectedTemplate: null,
   hasExistingCert: false,
