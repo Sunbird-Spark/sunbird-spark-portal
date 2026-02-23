@@ -128,18 +128,36 @@ const Onboarding = () => {
     );
   }
   const currentScreen = onboardingData.screens[currentScreenId];
+
+  if (!currentScreen) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white">
+        <p className="text-muted-foreground">
+          Something went wrong.{" "}
+          <button
+            type="button"
+            onClick={() => navigate("/home")}
+            className="text-primary underline"
+          >
+            Go to Home
+          </button>
+        </p>
+      </div>
+    );
+  }
+
   const totalSteps = computeTotalSteps(onboardingData);
   const currentStep = screenHistory.length;
   const isFirstScreen = currentScreenId === onboardingData.initialScreenId;
   const selectedFieldId = selections[currentScreenId] ?? "";
-  const selectedField = currentScreen?.fields.find(f => f.id === selectedFieldId);
-  const hasScreenNext = !!currentScreen?.nextScreenId;
-  const anyFieldHasNext = currentScreen?.fields.some(f => !!f.nextScreenId) ?? false;
+  const selectedField = currentScreen.fields.find(f => f.id === selectedFieldId);
+  const hasScreenNext = !!currentScreen.nextScreenId;
+  const anyFieldHasNext = currentScreen.fields.some(f => !!f.nextScreenId);
   const selectedFieldHasNext = !!selectedField?.nextScreenId;
   const showNextButton =
     hasScreenNext || (anyFieldHasNext && (!selectedFieldId || selectedFieldHasNext));
   const showOtherInput = !!selectedField?.requiresTextInput;
-  const sortedFields = [...(currentScreen?.fields ?? [])].sort((a, b) => a.index - b.index);
+  const sortedFields = [...currentScreen.fields].sort((a, b) => a.index - b.index);
   const otherText = otherTexts[currentScreenId] ?? "";
   const isSubmitDisabled = isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
   return (
