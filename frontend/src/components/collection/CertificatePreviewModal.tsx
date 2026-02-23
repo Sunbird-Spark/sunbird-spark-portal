@@ -25,7 +25,7 @@ interface CertificatePreviewModalProps {
   details?: CertificatePreviewDetails;
 }
 
-function replacePlaceholders(
+export function replacePlaceholders(
   text: string,
   recipientName: string,
   trainingName: string,
