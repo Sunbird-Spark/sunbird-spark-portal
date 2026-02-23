@@ -15,7 +15,7 @@ describe('TncService', () => {
         mockPost = vi.fn();
         vi.mocked(getClient).mockReturnValue({
             post: mockPost,
-        } as any);
+        } as unknown as import('../lib/http-client').IHttpClient);
     });
 
     describe('getTncUrl', () => {
