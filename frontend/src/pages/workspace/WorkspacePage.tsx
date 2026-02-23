@@ -199,31 +199,6 @@ const WorkspacePage = () => {
     [contents, retiredContentIds],
   );
 
-  // Optimistically adjust tab counts by subtracting locally retired items
-  const adjustedCounts = useMemo(() => {
-    if (retiredContentIds.length === 0) return counts;
-    const retiredItems = contents.filter((c) => retiredContentIds.includes(c.id));
-    let draftsDelta = 0;
-    let reviewDelta = 0;
-    let publishedDelta = 0;
-    for (const item of retiredItems) {
-      if (item.status === 'draft') draftsDelta++;
-      else if (item.status === 'review') reviewDelta++;
-      else if (item.status === 'published') publishedDelta++;
-    }
-    const drafts = Math.max(0, counts.drafts - draftsDelta);
-    const review = Math.max(0, counts.review - reviewDelta);
-    const published = Math.max(0, counts.published - publishedDelta);
-    return {
-      ...counts,
-      drafts,
-      review,
-      published,
-      all: drafts + review + published,
-      pendingReview: Math.max(0, (counts.pendingReview ?? 0) - reviewDelta),
-    };
-  }, [counts, contents, retiredContentIds]);
-
   // Reset view when role changes
   useEffect(() => {
     const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';
@@ -422,7 +397,7 @@ const WorkspacePage = () => {
     onRoleChange: handleRoleChange,
     hasCreatorRole,
     hasReviewerRole,
-    counts: adjustedCounts,
+    counts,
     viewMode,
     onViewModeChange: setViewMode,
     typeFilter,
