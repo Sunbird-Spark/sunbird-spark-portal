@@ -1,13 +1,13 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { FormField } from '@/types/formTypes';
+import { CheckListFormField } from '@/types/formTypes';
 import './ChecklistDialog.css';
 
 interface ChecklistDialogProps {
   // Common props
   isOpen: boolean;
   onClose: () => void;
-  formFields: FormField[];
+  formFields: CheckListFormField[];
   isLoading: boolean;
   
   // Mode configuration
@@ -55,7 +55,7 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   const getTotalCheckboxes = () => {
     let total = 0;
     formFields.forEach((field) => {
-      field.contents?.forEach((content) => {
+      field.contents?.forEach((content: { checkList: string[] }) => {
         total += content.checkList.length;
       });
     });
@@ -84,8 +84,8 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
     const reasons: string[] = [];
 
     formFields.forEach((field, fieldIndex) => {
-      field.contents?.forEach((content, contentIndex) => {
-        content.checkList.forEach((item, itemIndex) => {
+      field.contents?.forEach((content: Record<string,any>, contentIndex: number) => {
+        content.checkList.forEach((item: string, itemIndex: number) => {
           const checkboxKey = `${fieldIndex}-${contentIndex}-${itemIndex}`;
           if (checkedItems[checkboxKey]) {
             reasons.push(item);
@@ -141,10 +141,10 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
             
             {/* Horizontal sections container */}
             <div className="review-dialog-sections-container">
-              {field.contents?.map((content, contentIndex) => (
+              {field.contents?.map((content: { name: string; checkList: string[] }, contentIndex: number) => (
                 <div key={contentIndex} className="review-dialog-section-column">
                   <h4 className="review-dialog-section-title">{content.name}</h4>
-                  {content.checkList.map((item, itemIndex) => {
+                  {content.checkList.map((item: string, itemIndex: number) => {
                     const checkboxKey = `${fieldIndex}-${contentIndex}-${itemIndex}`;
                     return (
                       <label key={itemIndex} className="review-dialog-checkbox-label">
