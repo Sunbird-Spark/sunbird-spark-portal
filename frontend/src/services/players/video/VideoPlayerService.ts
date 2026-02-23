@@ -150,6 +150,7 @@ export class VideoPlayerService {
         VideoPlayerService.cachedCss = '';
         VideoPlayerService.cssLoading = undefined;
         console.error('Failed to load video player styles:', error);
+        VideoPlayerService.cachedCss = '';
         return '';
       });
     return VideoPlayerService.cssLoading;
