@@ -3,6 +3,7 @@ import { batchService as creatorBatchService, Batch, CreateBatchRequest, UpdateB
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
 import { userService } from '../services/UserService';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { resolveUserAndOrg } from '../utils/userUtils';
 import type {
   BatchListResponse,
   BatchReadResponse,
@@ -17,56 +18,56 @@ const learnerBatchService = new LearnerBatchService();
 // ─── Params ──────────────────────────────────────────────────────────────────
 export type EnrolParams = { courseId: string; userId: string; batchId: string };
 
-// ─── useBatchList ─────────────────────────────────────────────────────────────
+// ─── useBatchListForCreator ─────────────────────────────────────────────────────
 /**
- * Unified batch list hook.
- *
- * - `createdByMe: true`  → resolves the current user's id and fetches only
- *   batches they created (creator / BatchCard view). Returns `Batch[]`.
- * - `createdByMe: false` → fetches all batches for the course without an auth
- *   filter (learner / enrollment view). Returns `ApiResponse<BatchListResponse>`.
- *
- * The overload signatures let callers get the correct return type automatically.
+ * Creator view: fetch only batches created by the current user
+ * Returns `Batch[]`.
  */
-/* eslint-disable no-redeclare */
-export function useBatchList(
+export function useBatchListForCreator(
   courseId: string | undefined,
-  options: { createdByMe: true; enabled?: boolean }
-): UseQueryResult<Batch[], Error>;
-export function useBatchList(
-  courseId: string | undefined,
-  options?: { createdByMe?: false; enabled?: boolean }
-): UseQueryResult<ApiResponse<BatchListResponse>, Error>;
-export function useBatchList(
-  courseId: string | undefined,
-  options?: { createdByMe?: boolean; enabled?: boolean }
-): UseQueryResult<Batch[] | ApiResponse<BatchListResponse>, Error> {
+  options?: { enabled?: boolean }
+): UseQueryResult<Batch[], Error> {
   const enabled = options?.enabled ?? true;
-  const createdByMe = options?.createdByMe ?? false;
 
   return useQuery({
-    queryKey: ['batchList', courseId, createdByMe],
+    queryKey: ['batchList', courseId, true],
     queryFn: async () => {
-      if (!courseId) return createdByMe ? [] : ({ data: { response: { content: [], count: 0 } } } as unknown as ApiResponse<BatchListResponse>);
+      if (!courseId) return [] as Batch[];
 
-      if (createdByMe) {
-        // Creator view: fetch only batches created by the current user
-        let userId = userAuthInfoService.getUserId();
-        if (!userId) {
-          const authInfo = await userAuthInfoService.getAuthInfo();
-          userId = authInfo?.uid;
-        }
-        if (!userId) return [] as Batch[];
-        const response = await creatorBatchService.listBatches(courseId, userId);
-        return (response?.data?.response?.content ?? []) as Batch[];
-      } else {
-        // Learner view: fetch all batches for enrollment
-        return learnerBatchService.batchList(courseId);
+      let userId = userAuthInfoService.getUserId();
+      if (!userId) {
+        const authInfo = await userAuthInfoService.getAuthInfo();
+        userId = authInfo?.uid;
       }
+      if (!userId) return [] as Batch[];
+      const response = await creatorBatchService.listBatches(courseId, userId);
+      return (response?.data?.response?.content ?? []) as Batch[];
     },
     enabled: enabled && !!courseId,
-    staleTime: createdByMe ? 0 : undefined,
-    retry: createdByMe ? 1 : undefined,
+    staleTime: 0,
+    retry: 1,
+  });
+}
+
+// ─── useBatchListForLearner ──────────────────────────────────────────────────
+/**
+ * Learner view: fetch all batches for enrollment
+ * Returns `ApiResponse<BatchListResponse>`.
+ */
+export function useBatchListForLearner(
+  courseId: string | undefined,
+  options?: { enabled?: boolean }
+): UseQueryResult<ApiResponse<BatchListResponse>, Error> {
+  const enabled = options?.enabled ?? true;
+
+  return useQuery({
+    queryKey: ['batchList', courseId, false],
+    queryFn: async () => {
+      if (!courseId) return ({ data: { response: { content: [], count: 0 } } } as unknown as ApiResponse<BatchListResponse>);
+
+      return learnerBatchService.batchList(courseId);
+    },
+    enabled: enabled && !!courseId,
   });
 }
 
@@ -132,21 +133,6 @@ export interface UpdateBatchFormData {
   issueCertificate?: boolean;
 }
 
-async function resolveUserAndOrg() {
-  let userId = userAuthInfoService.getUserId();
-  if (!userId) {
-    const authInfo = await userAuthInfoService.getAuthInfo();
-    userId = authInfo?.uid ?? null;
-  }
-  if (!userId) throw new Error('User not authenticated');
-
-  const userResponse = await userService.userRead(userId);
-  const rootOrgId = (userResponse.data.response as Record<string, unknown>).rootOrgId as
-    | string
-    | undefined;
-
-  return { userId, rootOrgId };
-}
 
 // ─── useCreateBatch ───────────────────────────────────────────────────────────
 /**

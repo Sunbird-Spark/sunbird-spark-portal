@@ -48,7 +48,7 @@ vi.mock('./AddCertificateModal', () => ({
 // Mock useBatchList so we control the API response in tests
 const mockUseBatchList = vi.fn();
 vi.mock('@/hooks/useBatch', () => ({
-  useBatchList: (courseId: string, options?: any) => mockUseBatchList(courseId, options),
+  useBatchListForCreator: (courseId: string, options?: any) => mockUseBatchList(courseId, options),
 }));
 
 /** Default hook state — no batches, not loading */
@@ -81,7 +81,7 @@ describe('BatchCard', () => {
 
   it('calls useBatchList with the collectionId', () => {
     render(<BatchCard collectionId="col-abc" />);
-    expect(mockUseBatchList).toHaveBeenCalledWith('col-abc', { createdByMe: true });
+    expect(mockUseBatchList).toHaveBeenCalledWith('col-abc', undefined);
   });
 
   /* ── Empty state ── */

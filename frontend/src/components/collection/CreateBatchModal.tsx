@@ -79,8 +79,6 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     }));
   };
 
-  const filteredMentors = undefined; // Removed inline filtering logic
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);

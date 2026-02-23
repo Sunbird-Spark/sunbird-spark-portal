@@ -1,6 +1,6 @@
 import { FiRefreshCw, FiPlus, FiLoader, FiAward } from "react-icons/fi";
 import { cn } from "@/lib/utils";
-import { TemplateThumbnail } from "./TemplateThumbnail";
+import { TemplateThumbnail } from "../TemplateThumbnail";
 import { ModalView } from "./types";
 
 interface CertificateTemplatesPanelProps {

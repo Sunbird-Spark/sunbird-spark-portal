@@ -5,6 +5,26 @@ import { useCertTemplates } from "@/hooks/useCertificate";
 import { IssueTo, ModalView, Step, NewTemplateForm, CERT_TEMPLATE_SVG_URL } from "./types";
 import { emptyNewTemplate, resolveUserAndOrg } from "./utils";
 
+/**
+ * Resolves the signatory list to use for a certificate template.
+ * Fallback order:
+ * 1. Signatories found in the template's content (fullSignatoryList)
+ * 2. The most recently built signatories list (lastBuiltSignatoryListRef)
+ * 3. A hardcoded default "Director" signatory
+ */
+function resolveSignatoryList(
+  fullSignatoryList: Array<{ name: string; designation: string; id: string; image: string }> | undefined,
+  lastBuiltSignatoryListRef: React.MutableRefObject<Array<{ name: string; designation: string; id: string; image: string }>>
+) {
+  if (fullSignatoryList && fullSignatoryList.length > 0) {
+    return fullSignatoryList;
+  }
+  if (lastBuiltSignatoryListRef.current.length > 0) {
+    return lastBuiltSignatoryListRef.current;
+  }
+  return [{ name: "Director", designation: "", id: "Director/Director", image: "" }];
+}
+
 export function useCertificateModalState(
   courseId: string,
   batchId: string,
@@ -184,11 +204,7 @@ export function useCertificateModalState(
         criteria.user = { rootOrgId };
       }
 
-      const signatoryList =
-        (fullSignatoryList && fullSignatoryList.length > 0 ? fullSignatoryList : null) ??
-        (lastBuiltSignatoryListRef.current.length > 0
-          ? lastBuiltSignatoryListRef.current
-          : [{ name: "Director", designation: "", id: "Director/Director", image: "" }]);
+      const signatoryList = resolveSignatoryList(fullSignatoryList, lastBuiltSignatoryListRef);
 
       await certificateService.addTemplateToBatch(
         {

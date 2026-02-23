@@ -126,6 +126,16 @@ export class CertificateService {
     return this._uploadFile(assetId, imageFile, fileName, headers);
   }
 
+  /** Removes CRLF characters to prevent header injection */
+  private _sanitizeHeaders(headers?: Record<string, string>): Record<string, string> {
+    if (!headers) return {};
+    const sanitized: Record<string, string> = {};
+    for (const [key, value] of Object.entries(headers)) {
+      sanitized[key] = value.replace(/[\r\n]/g, '');
+    }
+    return sanitized;
+  }
+
   private async _uploadFile(
     assetId: string,
     file: File | Blob,
@@ -135,10 +145,12 @@ export class CertificateService {
     const formData = new FormData();
     formData.append('file', file, fileName);
 
+    const sanitizedHeaders = this._sanitizeHeaders(headers);
+
     const response = await fetch(`/portal/asset/v1/upload/${assetId}`, {
       method: 'POST',
       body: formData,
-      headers: headers ?? {},
+      headers: sanitizedHeaders,
     });
 
     if (!response.ok) {
@@ -147,7 +159,10 @@ export class CertificateService {
       try {
         const json = JSON.parse(text);
         errmsg = json?.params?.errmsg ?? errmsg;
-      } catch { /* ignore */ }
+      } catch (e) {
+        console.error("Failed to parse JSON error response:", e);
+        errmsg = `${errmsg}. Raw response: ${text}`;
+      }
       throw new Error(errmsg);
     }
 
