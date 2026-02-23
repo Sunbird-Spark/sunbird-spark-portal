@@ -28,6 +28,18 @@ vi.mock('@/hooks/useToast', () => ({
   toast: mockToast,
 }));
 
+vi.mock('@/hooks/useUserRead', () => ({
+  useUserRead: () => ({
+    data: {
+      data: {
+        response: {
+          roles: [{ role: 'CONTENT_REVIEWER' }],
+        },
+      },
+    },
+  }),
+}));
+
 vi.mock('@/components/common/PageLoader', () => ({
   default: ({ message }: { message: string }) => <div data-testid="page-loader">{message}</div>,
 }));

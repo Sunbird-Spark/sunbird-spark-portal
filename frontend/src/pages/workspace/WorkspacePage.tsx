@@ -215,16 +215,26 @@ const WorkspacePage = () => {
     }
   };
 
-  const handleResourceCreate = async (name: string) => {
+  const handleResourceCreate = async (name: string, optionId?: string) => {
     const first = userData?.data?.response?.firstName?.trim();
     const last = userData?.data?.response?.lastName?.trim();
     const creator = first || last ? [first, last].filter(Boolean).join(" ") : "anonymous";
+
+    const organisation: string[] = orgData?.orgName ? [orgData.orgName] : [];
+    const createdFor: string[] = orgChannelId ? [orgChannelId] : [];
+
+    const isQuiz = optionId === 'quiz';
+
     const response = await contentService.contentCreate(name, {
       createdBy: userAuthInfoService.getUserId() || '',
       creator,
       mimeType: 'application/vnd.ekstep.ecml-archive',
-      contentType: 'Resource',
-      primaryCategory: 'Learning Resource',
+      contentType: isQuiz ? 'SelfAssess' : 'Resource',
+      primaryCategory: isQuiz ? 'Course Assessment' : 'Learning Resource',
+      description: isQuiz ? `Enter description for ${name}` : undefined,
+      organisation,
+      createdFor,
+      framework: orgFramework,
     });
     const contentId = response.data?.identifier || response.data?.content_id;
     if (!contentId) {
@@ -290,7 +300,7 @@ const WorkspacePage = () => {
       } else if (selectedOption && QUML_EDITOR_OPTIONS.includes(selectedOption)) {
         await handleQuestionSetCreate(name);
       } else {
-        await handleResourceCreate(name);
+        await handleResourceCreate(name, selectedOption ?? undefined);
       }
       setShowNameDialog(false);
       setSelectedOption(null);

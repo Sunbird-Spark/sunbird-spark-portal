@@ -305,7 +305,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByRole('dialog', { name: 'Enter content name' })).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByPlaceholderText('Untitled Content'), {
+    fireEvent.change(screen.getByPlaceholderText('Enter question set name'), {
       target: { value: 'My Question Set' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
