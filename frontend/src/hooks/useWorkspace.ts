@@ -98,7 +98,7 @@ export function useWorkspace({
         offset: 0,
       }),
     enabled: queryEnabled,
-    staleTime: 30_000,
+    staleTime: 0,
   });
 
   // Reviewer's own content facets — used to subtract from org-wide counts.
@@ -117,7 +117,7 @@ export function useWorkspace({
         offset: 0,
       }),
     enabled: queryEnabled && isReviewerMode,
-    staleTime: 30_000,
+    staleTime: 0,
   });
 
   const counts: WorkspaceCounts = useMemo(() => {
@@ -214,18 +214,26 @@ export function useWorkspace({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const refetchCounts = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
-    await queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] }),
+      queryClient.invalidateQueries({ queryKey: ['workspace-own-counts', userId] }),
+    ]);
+    await Promise.all([
+      queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' }),
+      queryClient.refetchQueries({ queryKey: ['workspace-own-counts', userId], type: 'active' }),
+    ]);
   }, [queryClient, userId]);
 
   const refetchAll = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] }),
+      queryClient.invalidateQueries({ queryKey: ['workspace-own-counts', userId] }),
       queryClient.invalidateQueries({ queryKey: ['workspace-content', userId] }),
     ]);
 
     await Promise.all([
       queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' }),
+      queryClient.refetchQueries({ queryKey: ['workspace-own-counts', userId], type: 'active' }),
       queryClient.refetchQueries({ queryKey: ['workspace-content', userId], type: 'active' }),
     ]);
   }, [queryClient, userId]);

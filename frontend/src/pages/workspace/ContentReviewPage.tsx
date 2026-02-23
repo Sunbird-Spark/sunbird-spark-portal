@@ -97,8 +97,9 @@ const ContentReviewPage = () => {
     );
   }, [playerMetadata, handlePlayerEvent, handleTelemetryEvent]);
 
-  const invalidateWorkspaceQueries = () =>
-    Promise.all(WORKSPACE_QUERY_KEYS.map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
+  const clearWorkspaceQueries = () => {
+    WORKSPACE_QUERY_KEYS.forEach((key) => queryClient.removeQueries({ queryKey: [key] }));
+  };
 
   const loadFormAndShow = async (
     mode: 'publish' | 'request-changes',
@@ -138,7 +139,7 @@ const ContentReviewPage = () => {
       await contentService.contentPublish(contentId, userAuthInfoService.getUserId() || '');
       closeDialog();
       toast({ title: 'Success', description: 'Content is published successfully.' });
-      await invalidateWorkspaceQueries();
+      clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
@@ -155,7 +156,7 @@ const ContentReviewPage = () => {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
       closeDialog();
       toast({ title: 'Success', description: 'Request for changes is submitted successfully.' });
-      await invalidateWorkspaceQueries();
+      clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
