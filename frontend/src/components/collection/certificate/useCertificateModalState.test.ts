@@ -53,7 +53,7 @@ vi.mock('./utils', async (importOriginal) => {
 });
 
 /* ── Mock global fetch for SVG download ── */
-global.fetch = vi.fn().mockResolvedValue({
+globalThis.fetch = vi.fn().mockResolvedValue({
   ok: true,
   text: () => Promise.resolve('<svg/>'),
 });
@@ -332,7 +332,7 @@ describe('useCertificateModalState', () => {
       await result.current.handleSaveNewTemplate();
     });
 
-    const assetCall = mockCreateAsset.mock.calls[0];
+    const assetCall = mockCreateAsset.mock.calls[0]!;
     const signatoryList = assetCall[0].signatoryList;
     expect(signatoryList.length).toBeGreaterThanOrEqual(2);
   });
