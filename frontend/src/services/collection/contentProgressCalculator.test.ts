@@ -71,10 +71,10 @@ describe('contentProgressCalculator', () => {
       expect(calculateContentProgress(summary, 'video/mp4')).toBe(100);
     });
 
-    it('returns 100 for other mime (h5p/html/ecml) when progress >= 0', () => {
-      expect(calculateContentProgress([{ progress: 1 }], 'application/vnd.h5p')).toBe(100);
-      expect(calculateContentProgress([{ progress: 0 }], 'text/html')).toBe(100);
-      expect(calculateContentProgress([{ progress: 50 }], 'application/vnd.ekstep.ecml-archive')).toBe(100);
+    it('returns 100 for other mime (h5p/html archive) when progress >= 0', () => {
+      expect(calculateContentProgress([{ progress: 1 }], 'application/vnd.ekstep.h5p-archive')).toBe(100);
+      expect(calculateContentProgress([{ progress: 0 }], 'application/vnd.ekstep.html-archive')).toBe(100);
+      expect(calculateContentProgress([{ progress: 50 }], 'application/vnd.ekstep.h5p-archive')).toBe(100);
     });
 
     it('returns 0 for other mime when progress is negative or NaN', () => {
