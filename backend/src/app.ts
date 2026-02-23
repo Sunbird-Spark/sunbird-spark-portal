@@ -5,6 +5,7 @@ import formRoutes from './routes/formsRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
 import portalProxyRoutes from './routes/portalProxyRoutes.js';
+import editorRoutes from './routes/editorRoutes.js';
 import { redirectTenant } from './controllers/tenantController.js';
 import { loadTenants } from './services/tenantService.js';
 import path from 'path';
@@ -16,7 +17,6 @@ import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
-import { kongProxy } from './proxies/kongProxy.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,7 +47,10 @@ app.use('/google', googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-// Content Editor Proxy Routes (serves /action/*, /content-plugins/*, /plugins/*, etc.)
+// Specific /action endpoints must always proxy to kong.
+app.use("/action", editorRoutes);
+
+// All remaining /action/* routes proxy to knowledge-mw-service.
 // keycloak.middleware() deserializes the session grant into req.kauth so that
 // decorateRequestHeaders can read the user's access token for upstream auth.
 app.use('/', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware(), knowlgMwProxyRoutes);
@@ -57,11 +60,6 @@ app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
 
 // Portal Proxy Routes
 app.use('/portal', portalProxyRoutes);
-
-app.use('/action', sessionMiddleware);
-
-// Portal Proxy Routes (authenticated only)
-app.all('/action/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 

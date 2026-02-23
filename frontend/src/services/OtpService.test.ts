@@ -13,7 +13,7 @@ describe('OtpService', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (getClient as any).mockReturnValue({
+        (getClient as import('vitest').Mock).mockReturnValue({
             post: mockPost
         });
         otpService = new OtpService();
