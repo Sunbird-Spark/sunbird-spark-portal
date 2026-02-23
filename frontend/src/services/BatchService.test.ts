@@ -47,14 +47,14 @@ describe('BatchService', () => {
     it('includes all status values (upcoming, ongoing, expired)', async () => {
       mockPost.mockResolvedValue({ data: { response: { content: [] } }, status: 200, headers: {} });
       await service.listBatches('course-1', 'user-1');
-      const call = mockPost.mock.calls[0];
+      const call = mockPost.mock.calls[0]!;
       expect(call[1].request.filters.status).toEqual(['0', '1', '2']);
     });
 
     it('sorts by createdDate descending', async () => {
       mockPost.mockResolvedValue({ data: { response: { content: [] } }, status: 200, headers: {} });
       await service.listBatches('course-1', 'user-1');
-      const call = mockPost.mock.calls[0];
+      const call = mockPost.mock.calls[0]!;
       expect(call[1].request.sort_by).toEqual({ createdDate: 'desc' });
     });
   });
