@@ -8,14 +8,6 @@ import { useFormRead } from '@/hooks/useForm';
 
 // Mock dependencies
 vi.mock('@/hooks/useForm');
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    useNavigate: () => vi.fn(),
-  };
-});
-
 // Mock assets
 vi.mock('../../../src/assets/sunbird-logo.svg', () => ({
   default: 'sunbird-logo.svg',
