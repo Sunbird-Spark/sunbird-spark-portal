@@ -53,10 +53,10 @@ vi.mock('./utils', async (importOriginal) => {
 });
 
 /* ── Mock global fetch for SVG download ── */
-globalThis.fetch = vi.fn().mockResolvedValue({
+vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
   ok: true,
   text: () => Promise.resolve('<svg/>'),
-});
+}));
 
 describe('useCertificateModalState', () => {
   const onOpenChange = vi.fn();
@@ -332,7 +332,7 @@ describe('useCertificateModalState', () => {
       await result.current.handleSaveNewTemplate();
     });
 
-    const assetCall = mockCreateAsset.mock.calls[0]!;
+    const assetCall = mockCreateAsset.mock.calls[0] as any[];
     const signatoryList = assetCall[0].signatoryList;
     expect(signatoryList.length).toBeGreaterThanOrEqual(2);
   });
