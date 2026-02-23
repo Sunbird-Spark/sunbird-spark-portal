@@ -41,6 +41,7 @@ const mockEnrollment = {
   enrollmentForCollection: undefined as { batchId: string } | undefined,
   isEnrolledInCurrentBatch: false,
   effectiveBatchId: undefined as string | undefined,
+  isBatchEnded: false,
   contentStatusMap: undefined as Record<string, number> | undefined,
   courseProgressProps: undefined as object | undefined,
   batches: [],

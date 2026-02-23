@@ -48,6 +48,7 @@ vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
 describe('useBatch hooks test', () => {
   const mockQueryClient = {
     invalidateQueries: vi.fn(),
+    setQueryData: vi.fn(),
   };
 
   beforeEach(() => {
@@ -127,11 +128,20 @@ describe('useBatch hooks test', () => {
       expect(useMutation).toHaveBeenCalled();
       expect(typeof (mutationParams as any).onSuccess).toBe('function');
 
-      // Call onSuccess to verify it invalidates
-      (mutationParams as any).onSuccess(null, { courseId: 'course_123' });
+      vi.useFakeTimers();
+      // call onSuccess (requires a dummy response and variables to satisfy signature)
+      (mutationParams as any).onSuccess({ data: { batchId: 'b1' } }, { courseId: 'course_123' });
+      
+      expect(mockQueryClient.setQueryData).toHaveBeenCalledWith(
+        ['batchList', 'course_123', true],
+        expect.any(Function)
+      );
+
+      vi.advanceTimersByTime(2000);
       expect(mockQueryClient.invalidateQueries).toHaveBeenCalledWith({
         queryKey: ['batchList', 'course_123', true]
       });
+      vi.useRealTimers();
     });
   });
 
@@ -143,11 +153,20 @@ describe('useBatch hooks test', () => {
       expect(useMutation).toHaveBeenCalled();
       expect(typeof (mutationParams as any).onSuccess).toBe('function');
 
+      vi.useFakeTimers();
       // Call onSuccess to verify it invalidates
-      (mutationParams as any).onSuccess(null, { courseId: 'course_123' });
+      (mutationParams as any).onSuccess(null, { courseId: 'course_123', batchId: 'b2' });
+      
+      expect(mockQueryClient.setQueryData).toHaveBeenCalledWith(
+        ['batchList', 'course_123', true],
+        expect.any(Function)
+      );
+
+      vi.advanceTimersByTime(2000);
       expect(mockQueryClient.invalidateQueries).toHaveBeenCalledWith({
         queryKey: ['batchList', 'course_123', true]
       });
+      vi.useRealTimers();
     });
   });
 });

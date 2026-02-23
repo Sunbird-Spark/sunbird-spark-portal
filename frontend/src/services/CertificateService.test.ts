@@ -14,9 +14,7 @@ vi.mock('../lib/http-client', () => ({
   }),
 }));
 
-/* ── Mock global fetch ── */
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
+
 
 describe('CertificateService', () => {
   let service: CertificateService;
@@ -95,91 +93,82 @@ describe('CertificateService', () => {
 
   /* ── uploadAsset (via _uploadFile) ── */
   describe('uploadAsset', () => {
-    it('calls fetch with correct URL and FormData', async () => {
-      const mockJson = { result: { artifactUrl: 'https://cdn.example.com/cert.svg' } };
-      mockFetch.mockResolvedValue({
-        ok: true,
+    it('calls post with correct URL and FormData', async () => {
+      const mockResult = { artifactUrl: 'https://cdn.example.com/cert.svg', content_url: 'https://cdn.example.com/cert.svg' };
+      mockPost.mockResolvedValue({
         status: 200,
-        json: () => Promise.resolve(mockJson),
+        data: mockResult,
+        headers: {},
       });
 
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       const result = await service.uploadAsset('asset-1', svgBlob, 'cert.svg');
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/portal/asset/v1/upload/asset-1',
-        expect.objectContaining({ method: 'POST' })
+      expect(mockPost).toHaveBeenCalledWith(
+        `/asset/v1/upload/asset-1`,
+        expect.any(FormData), // Form data matches are tricky, but checking if it's passed as 2nd arg
+        expect.any(Object)
       );
-      expect(result.data).toEqual({ artifactUrl: 'https://cdn.example.com/cert.svg' });
+      expect(result.data).toEqual(mockResult);
     });
 
-    it('throws error when fetch response is not ok (JSON error)', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 400,
-        text: () => Promise.resolve(JSON.stringify({ params: { errmsg: 'Bad request' } })),
-      });
+    it('throws error when post response is not ok (JSON error)', async () => {
+      mockPost.mockRejectedValue(new Error('Bad request'));
 
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await expect(service.uploadAsset('asset-1', svgBlob, 'cert.svg')).rejects.toThrow('Bad request');
     });
 
-    it('throws generic error when fetch fails with non-JSON body', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 500,
-        text: () => Promise.resolve('Internal Server Error'),
-      });
+    it('throws generic error when post fails with non-JSON body', async () => {
+      mockPost.mockRejectedValue(new Error('Internal Server Error'));
 
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await expect(service.uploadAsset('asset-1', svgBlob, 'cert.svg')).rejects.toThrow(
-        'Upload failed (500). Raw response: Internal Server Error'
+        'Internal Server Error'
       );
     });
 
     it('sanitizes headers to strip CRLF characters', async () => {
-      const mockJson = { result: { artifactUrl: 'https://cdn.example.com/cert.svg' } };
-      mockFetch.mockResolvedValue({
-        ok: true,
+      const mockResult = { artifactUrl: 'https://cdn.example.com/cert.svg', content_url: 'https://cdn.example.com/cert.svg' };
+      mockPost.mockResolvedValue({
         status: 200,
-        json: () => Promise.resolve(mockJson),
+        data: mockResult,
+        headers: {},
       });
 
       const headers = { 'X-User-ID': 'user\r\ninjection', 'X-Channel-Id': 'org-1' };
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await service.uploadAsset('asset-1', svgBlob, 'cert.svg', headers);
 
-      const fetchCall = mockFetch.mock.calls[0] as any[];
-      expect(fetchCall[1].headers['X-User-ID']).toBe('userinjection');
+      const postCall = mockPost.mock.calls.find(c => c[0].includes('upload/asset-1')) as any[];
+      expect(postCall[2]['X-User-ID']).toBe('userinjection');
     });
 
     it('handles missing params.errmsg in error JSON gracefully', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 422,
-        text: () => Promise.resolve(JSON.stringify({ error: 'unprocessable' })),
-      });
+      mockPost.mockRejectedValue(new Error('unprocessable'));
 
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await expect(service.uploadAsset('asset-1', svgBlob, 'cert.svg')).rejects.toThrow(
-        'Upload failed (422)'
+        'unprocessable'
       );
     });
   });
 
   /* ── uploadImageAsset ── */
   describe('uploadImageAsset', () => {
-    it('calls fetch with correct URL for image file', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
+    it('calls post with correct URL for image file', async () => {
+      const mockResult = { artifactUrl: 'https://cdn.example.com/logo.png', content_url: 'https://cdn.example.com/logo.png' };
+      mockPost.mockResolvedValue({
         status: 200,
-        json: () => Promise.resolve({ result: { artifactUrl: 'https://cdn.example.com/logo.png' } }),
+        data: mockResult,
+        headers: {},
       });
 
       const imageFile = new File(['data'], 'logo.png', { type: 'image/png' });
       const result = await service.uploadImageAsset('img-1', imageFile, 'logo.png');
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/portal/asset/v1/upload/img-1',
-        expect.objectContaining({ method: 'POST' })
+      expect(mockPost).toHaveBeenCalledWith(
+        `/asset/v1/upload/img-1`,
+        expect.any(FormData),
+        expect.any(Object)
       );
       expect(result.data.artifactUrl).toBe('https://cdn.example.com/logo.png');
     });

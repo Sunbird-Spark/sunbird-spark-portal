@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { batchService as creatorBatchService, Batch, CreateBatchRequest, UpdateBatchRequest } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
-import { userService } from '../services/UserService';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { resolveUserAndOrg } from '../utils/userUtils';
 import type {
@@ -9,6 +8,7 @@ import type {
   BatchReadResponse,
   ContentStateReadRequest,
   ContentStateReadResponse,
+  ContentStateUpdateRequest,
 } from '../types/collectionTypes';
 import type { ApiResponse } from '../lib/http-client';
 
@@ -106,6 +106,18 @@ export const useEnrol = (): UseMutationResult<ApiResponse<unknown>, Error, Enrol
   });
 };
 
+// ─── useContentStateUpdateMutation ────────────────────────────────────────────
+export const useContentStateUpdateMutation = (): UseMutationResult<
+  ApiResponse<unknown>,
+  Error,
+  ContentStateUpdateRequest
+> => {
+  return useMutation({
+    mutationFn: (request: ContentStateUpdateRequest) =>
+      learnerBatchService.contentStateUpdate(request),
+  });
+};
+
 // ─── Creator-side form interfaces ────────────────────────────────────────────
 /** Data the form hands us — excludes server-resolved fields (createdBy, createdFor) */
 export interface CreateBatchFormData {
@@ -168,8 +180,29 @@ export const useCreateBatch = () => {
       return creatorBatchService.createBatch(request, reqHeaders);
     },
 
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+    onSuccess: (response, variables) => {
+      // Optimistically update the cache to reflect instantly
+      queryClient.setQueryData<Batch[]>(['batchList', variables.courseId, true], (old) => {
+        if (!old) return old;
+        const newBatch: Batch = {
+          id: response.data?.batchId || Math.random().toString(),
+          courseId: variables.courseId,
+          name: variables.name,
+          description: variables.description,
+          status: "0", // Upcoming by default
+          startDate: variables.startDate,
+          endDate: variables.endDate,
+          enrollmentEndDate: variables.enrollmentEndDate,
+          issueCertificate: variables.issueCertificate,
+          mentors: variables.mentors,
+        };
+        return [newBatch, ...old];
+      });
+
+      // Invalidate after a delay to let the backend Elasticsearch index the update
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+      }, 2000);
     },
   });
 };
@@ -211,7 +244,16 @@ export const useUpdateBatch = () => {
     },
 
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+      // Optimistically update the cache
+      queryClient.setQueryData<Batch[]>(['batchList', variables.courseId, true], (old) => {
+        if (!old) return old;
+        return old.map(b => b.id === variables.batchId ? { ...b, ...variables } : b);
+      });
+
+      // Invalidate after a delay
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+      }, 2000);
     },
   });
 };

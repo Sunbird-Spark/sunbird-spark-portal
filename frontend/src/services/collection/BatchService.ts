@@ -4,6 +4,7 @@ import type {
   BatchReadResponse,
   ContentStateReadRequest,
   ContentStateReadResponse,
+  ContentStateUpdateRequest,
 } from '../../types/collectionTypes';
 
 export class BatchService {
@@ -32,6 +33,23 @@ export class BatchService {
         courseId: request.courseId,
         batchId: request.batchId,
         contentIds: request.contentIds,
+      },
+    });
+  }
+
+  public contentStateUpdate(
+    request: ContentStateUpdateRequest
+  ): Promise<ApiResponse<unknown>> {
+    const contents = request.contents.map((item) => ({
+      contentId: item.contentId,
+      status: item.status,
+      courseId: request.courseId,
+      batchId: request.batchId,
+    }));
+    return getClient().patch<unknown>('/course/v1/content/state/update', {
+      request: {
+        userId: request.userId,
+        contents,
       },
     });
   }
