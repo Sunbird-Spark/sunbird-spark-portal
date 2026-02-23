@@ -213,7 +213,7 @@ export class GenericEditorService {
         id: uid,
         name: 'User',
         orgIds: [],
-        organisations: {},
+        organisations: channel ? { [channel]: 'Default Organization' } : {},
       },
       did,
       sid,

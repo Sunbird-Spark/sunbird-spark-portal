@@ -80,9 +80,9 @@ export function useWorkspace({
   const isOwnContentTab = !isReviewerTab;
 
   // ── Counts query (runs once per role, shared across tabs) ──────────────
-  // Creator mode: fetches facets only (limit=1) for the user's own content.
-  // Reviewer mode: fetches items (limit=WORKSPACE_PAGE_LIMIT) for the org,
-  // then counts client-side after excluding the reviewer's own content.
+  // Both modes use facets (limit=1) for lightweight counting.
+  // Creator mode: single query scoped to the user's own content.
+  // Reviewer mode: org-wide facets minus the reviewer's own content facets.
   const countsQuery = useQuery({
     queryKey: ['workspace-counts', userId, userRole, orgId],
     queryFn: () =>
@@ -101,40 +101,56 @@ export function useWorkspace({
     staleTime: 30_000,
   });
 
+  // Reviewer's own content facets — used to subtract from org-wide counts.
+  const ownCountsQuery = useQuery({
+    queryKey: ['workspace-own-counts', userId, orgId],
+    queryFn: () =>
+      contentService.contentSearch({
+        filters: {
+          createdBy: userId ?? '',
+          ...(orgId ? { createdFor: [orgId] } : {}),
+          status: [...WORKSPACE_STATUS_FILTER],
+          primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
+        },
+        facets: ['status'],
+        limit: 1,
+        offset: 0,
+      }),
+    enabled: queryEnabled && isReviewerMode,
+    staleTime: 30_000,
+  });
+
   const counts: WorkspaceCounts = useMemo(() => {
-    if (isReviewerMode) {
-      // Reviewer mode: count from fetched items after filtering out own content
-      const allItems = countsQuery.data?.data?.content ?? [];
-      const questionSets = countsQuery.data?.data?.QuestionSet ?? [];
-      const combined = [...allItems, ...questionSets];
-      const filtered = userId
-        ? combined.filter((item) => item.createdBy !== userId)
-        : combined;
-
-      const review = filtered.filter((item) =>
-        ['review', 'processing', 'flagreview'].includes(item.status?.toLowerCase() ?? '')
-      ).length;
-      const published = filtered.filter((item) =>
-        ['live', 'unlisted'].includes(item.status?.toLowerCase() ?? '')
-      ).length;
-      const all = review + published;
-
-      return { all, drafts: 0, review, published, pendingReview: review };
-    }
-
-    // Creator mode: use facet counts from the API
     const facets = countsQuery.data?.data?.facets;
     const statusFacet = facets?.find((f) => f.name === 'status');
     const getFacetCount = (name: string) =>
       statusFacet?.values.find((v) => v.name === name)?.count ?? 0;
 
+    if (isReviewerMode) {
+      // Subtract the reviewer's own content counts from org-wide facets
+      const ownFacets = ownCountsQuery.data?.data?.facets;
+      const ownStatusFacet = ownFacets?.find((f) => f.name === 'status');
+      const getOwnFacetCount = (name: string) =>
+        ownStatusFacet?.values.find((v) => v.name === name)?.count ?? 0;
+
+      const review = (getFacetCount('review') - getOwnFacetCount('review'))
+        + (getFacetCount('processing') - getOwnFacetCount('processing'))
+        + (getFacetCount('flagreview') - getOwnFacetCount('flagreview'));
+      const published = (getFacetCount('live') - getOwnFacetCount('live'))
+        + (getFacetCount('unlisted') - getOwnFacetCount('unlisted'));
+      const all = review + published;
+
+      return { all, drafts: 0, review, published, pendingReview: review };
+    }
+
+    // Creator mode: use facet counts directly
     const drafts = getFacetCount('draft') + getFacetCount('flagdraft');
     const review = getFacetCount('review') + getFacetCount('processing') + getFacetCount('flagreview');
     const published = getFacetCount('live') + getFacetCount('unlisted');
     const all = countsQuery.data?.data?.count ?? 0;
 
     return { all, drafts, review, published, pendingReview: review };
-  }, [countsQuery.data, isReviewerMode, userId]);
+  }, [countsQuery.data, ownCountsQuery.data, isReviewerMode]);
 
   // ── Content query (per tab, paginated) ────────────────────────────────
   const statusFilter = getStatusFilterForTab(activeTab);
@@ -218,7 +234,7 @@ export function useWorkspace({
     totalCount,
     isLoading: contentQuery.isLoading,
     isLoadingMore: isFetchingNextPage,
-    isCountsLoading: countsQuery.isLoading,
+    isCountsLoading: countsQuery.isLoading || (isReviewerMode && ownCountsQuery.isLoading),
     isRefreshing: contentQuery.isRefetching && !contentQuery.isLoading && !isFetchingNextPage,
     error: contentQuery.error,
     hasMore: !!hasNextPage,

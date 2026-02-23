@@ -29,6 +29,7 @@ const defaultItem = {
   author: 'user-1',
   primaryCategory: 'Learning Resource',
   contentType: '',
+  mimeType: '',
 };
 
 describe('WorkspaceContentCard', () => {

@@ -36,7 +36,7 @@ import { QumlEditor } from "@/components/quml-editor";
 const RESOURCE_EDITOR_OPTIONS = ['quiz', 'story'];
 
 // Collection editor option IDs that should trigger the collection editor
-const COLLECTION_EDITOR_OPTIONS = ['course','collection'];
+const COLLECTION_EDITOR_OPTIONS = ['course', 'collection'];
 
 /** QuML editor option IDs */
 const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
@@ -328,6 +328,22 @@ const WorkspacePage = () => {
 
 
   const handleView = (id: string) => {
+    const item = visibleContents.find((c) => c.id === id);
+    if (!item) return;
+
+    const COLLECTION_MIMETYPES = [
+      "application/vnd.sunbird.questionset",
+      "application/vnd.sunbird.collection",
+      "application/vnd.ekstep.content-collection"
+    ];
+    const isCollection = COLLECTION_MIMETYPES.includes(item.mimeType);
+
+    if (!isCollection) {
+      const isReviewMode = userRole === 'reviewer' && item.status === 'review';
+      const mode = isReviewMode ? 'review' : 'view';
+      navigate(`/workspace/review/${id}?mode=${mode}`);
+      return;
+    }
     const route = getEditorRoute(id);
     if (route) navigate(route);
   };
