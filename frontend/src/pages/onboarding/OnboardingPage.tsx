@@ -15,7 +15,7 @@ const Onboarding = () => {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [otherText, setOtherText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: formApiData, isLoading, isError } = useFormRead({
     request: {
       type: "user",subType: "onboarding",action: "workflow",component: "portal",
@@ -93,7 +93,7 @@ const Onboarding = () => {
       };
     });
     console.log('[Onboarding] Formatted selections:', formattedSelections);
-    timeoutRef.current = window.setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setIsSubmitting(false);
       navigate("/home");
     }, 1000);
