@@ -79,6 +79,14 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useUserRead', () => ({
+  useUserRead: () => ({
+    data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 const mockNavigate = vi.fn();
 const mockUseParams = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -131,7 +139,10 @@ vi.mock('@/auth/AuthContext', () => ({
   })),
 }));
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
-  default: { isUserAuthenticated: vi.fn(() => false) },
+  default: {
+    isUserAuthenticated: vi.fn(() => false),
+    getUserId: vi.fn(() => undefined),
+  },
 }));
 vi.mock('@/components/collection/CollectionSidebar', () => ({
   default: ({

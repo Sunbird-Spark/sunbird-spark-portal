@@ -46,6 +46,6 @@ export function useCollectionDetailPlayer({
 
   return useContentPlayer({
     onTelemetryEvent: onTelemetryEventStable,
-    enableLogging: true,
+    enableLogging: false,
   });
 }

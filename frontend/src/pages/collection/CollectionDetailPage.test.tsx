@@ -109,13 +109,24 @@ vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => ({ isAuthenticated: mockAuthState.isAuthenticated }),
 }));
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
-  default: { isUserAuthenticated: () => false },
+  default: {
+    isUserAuthenticated: () => false,
+    getUserId: () => undefined,
+  },
 }));
 
 /* ── useIsContentCreator (mutable) ── */
 let mockIsContentCreator = false;
 vi.mock('@/hooks/useUser', () => ({
   useIsContentCreator: () => mockIsContentCreator,
+}));
+
+vi.mock('@/hooks/useUserRead', () => ({
+  useUserRead: () => ({
+    data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 /* ── Child components ── */
