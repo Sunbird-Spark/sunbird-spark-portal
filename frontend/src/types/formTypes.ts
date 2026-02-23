@@ -67,6 +67,7 @@ export interface OnboardingField {
   index: number;
   label: string;
   nextScreenId?: string;
+  requiresTextInput?: boolean;
 }
 
 export interface OnboardingScreen {

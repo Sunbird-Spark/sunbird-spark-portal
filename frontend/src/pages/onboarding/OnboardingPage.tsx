@@ -140,9 +140,7 @@ const Onboarding = () => {
   const selectedFieldHasNext = !!selectedField?.nextScreenId;
   const showNextButton =
     hasScreenNext || (anyFieldHasNext && (!selectedFieldId || selectedFieldHasNext));
-  const showOtherInput =
-    (selectedFieldId === "other" || selectedFieldId === "others") &&
-    currentScreenId.startsWith("skills_");
+  const showOtherInput = !!selectedField?.requiresTextInput;
   const sortedFields = [...(currentScreen?.fields ?? [])].sort((a, b) => a.index - b.index);
   const isSubmitDisabled = isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
   return (
