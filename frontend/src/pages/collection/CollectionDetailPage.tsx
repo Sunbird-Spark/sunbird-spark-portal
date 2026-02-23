@@ -13,14 +13,11 @@ import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
-import CollectionOverview from "@/components/collection/CollectionOverview";
-import CollectionSidebar from "@/components/collection/CollectionSidebar";
-import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
-import CourseProgressCard from "@/components/collection/CourseProgressCard";
-import AvailableBatchesCard from "@/components/collection/AvailableBatchesCard";
-import CertificateCard from "@/components/collection/CertificateCard";
-import CertificatePreviewModal from "@/components/collection/CertificatePreviewModal";
+import { useIsContentCreator } from "@/hooks/useUser";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
+import RelatedContentSection from "@/components/collection/RelatedContentSection";
+import CollectionContentArea from "@/components/collection/CollectionContentArea";
+import CertificatePreviewModal from "@/components/collection/CertificatePreviewModal";
 import { useAuth } from "@/auth/AuthContext";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import "./collection.css";
@@ -28,9 +25,10 @@ import "./collection.css";
 const CollectionDetailPage = () => {
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   const navigate = useNavigate();
-  const { t } = useAppI18n();
   const { isAuthenticated: contextAuth } = useAuth();
   const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+  const isContentCreator = useIsContentCreator();
+  const { t } = useAppI18n();
   const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
   const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
 
@@ -165,96 +163,53 @@ const CollectionDetailPage = () => {
 
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
           <>
-        <div className="flex items-start justify-between mb-2">
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">{collectionData.title}</h1>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
-        </div>
+            {/* Main Content Area */}
+            <CollectionContentArea
+              collectionData={displayCollectionData}
+              contentId={contentId}
+              isTrackable={isTrackable}
+              contentBlocked={contentBlocked}
+              isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
+              playerMetadata={playerMetadata}
+              playerIsLoading={playerIsLoading}
+              playerError={playerError}
+              handlePlayerEvent={handlePlayerEvent}
+              handleTelemetryEvent={handleTelemetryEvent}
+              isAuthenticated={isAuthenticated}
+              isContentCreator={isContentCreator}
+              collectionId={collectionId}
+              hasBatchInRoute={hasBatchInRoute}
+              courseProgressProps={courseProgressProps}
+              batchIdParam={batchIdParam}
+              expandedModules={expandedModules}
+              toggleModule={toggleModule}
+              contentStatusMap={contentStatusMap}
+              batches={batches}
+              selectedBatchId={selectedBatchId}
+              setSelectedBatchId={setSelectedBatchId}
+              handleJoinCourse={handleJoinCourse}
+              batchListLoading={batchListLoading}
+              joinLoading={joinLoading}
+              batchListError={batchListError}
+              joinError={joinError}
+              hasCertificate={hasCertificate}
+              firstCertPreviewUrl={firstCertPreviewUrl}
+              setCertificatePreviewUrl={setCertificatePreviewUrl}
+              setCertificatePreviewOpen={setCertificatePreviewOpen}
+            />
 
+            {/* Related Content Section */}
+            <RelatedContentSection
+              searchError={searchError}
+              searchErrorObj={searchErrorObj}
+              searchFetching={searchFetching}
+              relatedContentItems={relatedContentItems}
+              searchRefetch={searchRefetch}
+            />
 
-        <div className="grid lg:grid-cols-[1fr_340px] gap-8">
-          {/* Left Column */}
-          <CollectionOverview
-            collectionData={displayCollectionData}
-            contentId={contentId}
-            contentAccessBlocked={isTrackable && (contentBlocked || !isEnrolledInCurrentBatch)}
-            playerMetadata={playerMetadata}
-            playerIsLoading={playerIsLoading}
-            playerError={playerError ?? null}
-            onPlayerEvent={handlePlayerEvent}
-            onTelemetryEvent={handleTelemetryEvent}
-          />
-
-          {/* Right Sidebar - Lessons Accordion */}
-          <div className="lg:sticky lg:top-6 flex flex-col max-h-[calc(100vh_-_120px)] pr-3">
-            {contentBlocked && (
-              <div className="flex-shrink-0 mb-4">
-                <LoginToUnlockCard />
-              </div>
-            )}
-            {isTrackable && !contentBlocked && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
-              <div className="flex-shrink-0 mb-4">
-                <CourseProgressCard {...courseProgressProps} />
-              </div>
-            )}
-            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-              <CollectionSidebar
-                collectionId={collectionId ?? ''}
-                batchId={hasBatchInRoute ? batchIdParam ?? null : null}
-                modules={collectionData.modules}
-                expandedModules={expandedModules}
-                toggleModule={toggleModule}
-                activeLessonId={contentId ?? null}
-                contentBlocked={contentBlocked}
-                contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch ? contentStatusMap : undefined}
-              />
+            <div className="mt-16">
+              <FAQSection />
             </div>
-            {isTrackable && !contentBlocked && (
-              <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
-                {!hasBatchInRoute && (
-                  <AvailableBatchesCard
-                    batches={batches}
-                    selectedBatchId={selectedBatchId}
-                    onBatchSelect={setSelectedBatchId}
-                    onJoinCourse={() => handleJoinCourse(selectedBatchId)}
-                    isLoading={batchListLoading}
-                    joinLoading={joinLoading}
-                    error={batchListError}
-                    joinError={joinError}
-                  />
-                )}
-                <CertificateCard
-                  hasCertificate={hasCertificate}
-                  previewUrl={firstCertPreviewUrl}
-                  onPreviewClick={() => { if (firstCertPreviewUrl) { setCertificatePreviewUrl(firstCertPreviewUrl); setCertificatePreviewOpen(true); } }}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        <section className="mt-16">
-          {(searchError || (searchFetching && relatedContentItems.length === 0)) && (
-            <div className="content-player-related-header mb-6">
-              <h2 className="content-player-related-title">{t("courseDetails.relatedContent")}</h2>
-            </div>
-          )}
-          {searchError && searchErrorObj && (
-            <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
-              <PageLoader error={searchErrorObj.message} onRetry={() => searchRefetch()} fullPage={false} />
-            </div>
-          )}
-          {!searchError && searchFetching && relatedContentItems.length === 0 && (
-            <div className="min-h-[392px] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
-              <PageLoader message={t("loading")} fullPage={false} />
-            </div>
-          )}
-          {!searchError && (relatedContentItems.length > 0 || !searchFetching) && (
-            <RelatedContent items={relatedContentItems} cardType="collection" />
-          )}
-        </section>
-        <div className="mt-16"><FAQSection /></div>
           </>
         )}
       </main>

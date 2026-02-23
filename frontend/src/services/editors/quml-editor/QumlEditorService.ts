@@ -154,7 +154,7 @@ export class QumlEditorService {
       const filters: Record<string, any> = { isTenant: true };
       try {
         const settingResponse = await this.systemSettingService.read('default_channel');
-        const slugValue = settingResponse?.data?.response?.value;
+        const slugValue = (settingResponse as any)?.data?.response?.value;
         if (slugValue) {
           filters.slug = slugValue;
         }

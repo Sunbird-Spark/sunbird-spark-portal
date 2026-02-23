@@ -23,8 +23,8 @@ const ForgotPassword: React.FC = () => {
     const systemSettingService = new SystemSettingService();
     systemSettingService.read('portal_google_recaptcha_site_key')
       .then(res => {
-        if (res.data?.result?.value) {
-          setGoogleCaptchaSiteKey(res.data?.result?.value);
+        if ((res.data as any)?.result?.value) {
+          setGoogleCaptchaSiteKey((res.data as any).result.value);
         }
       })
       .catch(err => console.error('Error fetching captcha site key:', err));

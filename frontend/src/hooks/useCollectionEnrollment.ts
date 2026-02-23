@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useBatchList, useBatchRead, useContentState, useEnrol } from './useBatch';
+import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from './useBatch';
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
 import {
   getEnrollmentForCollection,
@@ -74,7 +74,7 @@ export function useCollectionEnrollment(
     data: batchListResponse,
     isLoading: batchListLoading,
     error: batchListError,
-  } = useBatchList(collectionId, {
+  } = useBatchListForLearner(collectionId, {
     enabled: isAuthenticated && isTrackableForBatch && !enrollmentForCollection,
   });
   const rawContent = batchListResponse?.data?.response?.content ?? [];

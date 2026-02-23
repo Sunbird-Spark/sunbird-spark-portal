@@ -48,7 +48,8 @@ describe('ContentService', () => {
   it('should call contentRead with default fields when no fields provided', async () => {
     mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
     await service.contentRead('do_123');
-    const callUrl = (mockClient.get as any).mock.calls[0][0] as string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
     expect(callUrl).toContain('/content/v1/read/do_123?fields=');
     expect(callUrl).toContain('body');
     expect(callUrl).toContain('mimeType');
@@ -191,7 +192,8 @@ describe('ContentService', () => {
         creator: 'Test User',
       });
 
-      const callArgs = (mockClient.post as any).mock.calls[0][1];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const callArgs = (mockClient as any).post.mock.calls[0][1];
       expect(callArgs.request.content).not.toHaveProperty('framework');
     });
 
