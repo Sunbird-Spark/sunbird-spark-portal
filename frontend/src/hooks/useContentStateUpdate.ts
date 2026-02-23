@@ -97,7 +97,8 @@ export function useContentStateUpdate({
           event?.data?.summary;
         const summary = Array.isArray(rawSummary) ? rawSummary : rawSummary ? [rawSummary] : [];
         const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
-        const status = progressToStatus(effectiveProgress);
+        let status = progressToStatus(effectiveProgress);
+        if (status === 0 && lastSentStatusRef.current === 1) status = 1;
         lastSentStatusRef.current = null;
         void handleContentStateUpdate(status, true);
       }

@@ -26,6 +26,15 @@ describe('contentProgressCalculator', () => {
       ).toBe(100);
     });
 
+    it('returns 100 for playback mime when progress is 0 but endpageseen is true', () => {
+      expect(
+        calculateContentProgress(
+          [{ progress: 0, endpageseen: true }],
+          'video/mp4'
+        )
+      ).toBe(100);
+    });
+
     it('returns 100 for playback mime when visitedcontentend is true', () => {
       expect(
         calculateContentProgress(
@@ -62,9 +71,9 @@ describe('contentProgressCalculator', () => {
       expect(calculateContentProgress(summary, 'video/mp4')).toBe(100);
     });
 
-    it('returns 100 for other mime (h5p/html/ecml) when progress > 0, 0 when progress is 0', () => {
+    it('returns 100 for other mime (h5p/html/ecml) when progress >= 0', () => {
       expect(calculateContentProgress([{ progress: 1 }], 'application/vnd.h5p')).toBe(100);
-      expect(calculateContentProgress([{ progress: 0 }], 'text/html')).toBe(0);
+      expect(calculateContentProgress([{ progress: 0 }], 'text/html')).toBe(100);
       expect(calculateContentProgress([{ progress: 50 }], 'application/vnd.ekstep.ecml-archive')).toBe(100);
     });
 

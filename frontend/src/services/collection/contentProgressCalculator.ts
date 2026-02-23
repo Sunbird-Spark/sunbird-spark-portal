@@ -89,12 +89,10 @@ export function calculateContentProgress(
   if (!Array.isArray(summary) || summary.length === 0) return 0;
 
   const summaryMap = mergeSummary(summary);
+  if (summaryMap.progress === undefined || summaryMap.progress === null) return 0;
 
-  if (!summaryMap.progress) return 0;
-
-  const progress = summaryMap.progress;
-
-  const progressNum = Number(progress);
+  const progressNumRaw = Number(summaryMap.progress);
+  const progressNum = Number.isNaN(progressNumRaw) ? 0 : progressNumRaw;
   const visitedLength = Number(summaryMap.visitedLength ?? summaryMap.visitedlength ?? 0);
   const totalLength = Number(summaryMap.totalLength ?? summaryMap.totallength ?? 0);
   const endPageSeen = Boolean(summaryMap.endpageseen);
