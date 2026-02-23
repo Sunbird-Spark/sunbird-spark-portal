@@ -143,6 +143,24 @@ describe('Home Page', () => {
         expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
     });
 
+    it('shows the onboarding subtitle when user has no enrollments', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [] } },
+        });
+
+        renderHome();
+
+        expect(screen.getByText('Your exciting learning journey starts here. Dive in!')).toBeInTheDocument();
+        expect(screen.queryByText('Welcome to a learning experience made just for you.')).not.toBeInTheDocument();
+    });
+
+    it('shows the returning-user subtitle when user has enrollments', () => {
+        renderHome();
+
+        expect(screen.getByText('Welcome to a learning experience made just for you.')).toBeInTheDocument();
+        expect(screen.queryByText('Your exciting learning journey starts here. Dive in!')).not.toBeInTheDocument();
+    });
+
     it('renders loading state when user data is loading', () => {
         mockUseUserRead.mockReturnValue({
             data: undefined,

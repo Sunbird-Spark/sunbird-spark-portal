@@ -65,7 +65,11 @@ const Home = () => {
                             <h2 className="home-welcome-title">
                                 Hi {[userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ') || 'there'}
                             </h2>
-                            <p className="home-welcome-subtitle">Welcome to a learning experience made just for you.</p>
+                            <p className="home-welcome-subtitle">
+                                {enrolledCount === 0
+                                    ? "Your exciting learning journey starts here. Dive in!"
+                                    : "Welcome to a learning experience made just for you."}
+                            </p>
                         </div>
                         {enrolledCount === 0 ? (
                             <HomeDiscoverSections />
