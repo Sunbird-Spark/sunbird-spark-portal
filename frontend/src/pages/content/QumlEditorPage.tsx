@@ -6,6 +6,7 @@ import type { QumlEditorEvent, QumlEditorContextOverrides } from '@/services/edi
 import { QuestionSetService } from '@/services/QuestionSetService';
 import { toast } from '@/hooks/useToast';
 import { useUserRead } from '@/hooks/useUserRead';
+import { getUserRole, getEditorMode } from '@/services/editors/editorModeService';
 
 const questionSetService = new QuestionSetService();
 
@@ -16,14 +17,7 @@ const QumlEditorPage = () => {
   const [metadata, setMetadata] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const userRole = useMemo((): 'creator' | 'reviewer' | null => {
-    const roles = userData?.data?.response?.roles;
-    if (!Array.isArray(roles)) return null;
-    const roleNames = roles.map((r: any) => r?.role).filter(Boolean);
-    if (roleNames.includes('CONTENT_REVIEWER')) return 'reviewer';
-    if (roleNames.includes('CONTENT_CREATOR')) return 'creator';
-    return null;
-  }, [userData]);
+  const userRole = useMemo(() => getUserRole(userData), [userData]);
 
   useEffect(() => {
     if (!contentId) {
@@ -42,22 +36,10 @@ const QumlEditorPage = () => {
       .finally(() => setLoading(false));
   }, [contentId]);
 
-  // Derive editor mode from the content's status and the user's role:
-  //   FlagDraft / FlagReview        → 'read'   (flagged content, no editing for anyone)
-  //   Review + creator              → 'read'   (creator cannot edit while under review)
-  //   Review + reviewer             → 'review' (reviewer can act on the review)
-  //   Processing                    → 'read'   (locked for both roles while processing)
-  //   Live + reviewer               → 'read'   (reviewer cannot edit published content)
-  //   everything else               → 'edit'   (Draft, Live for creator, Unlisted …)
-  const editorMode = useMemo((): 'read' | 'review' | 'edit' => {
-    const s = metadata?.status as string | undefined;
-    if (!s) return 'edit';
-    if (s === 'FlagDraft' || s === 'FlagReview') return 'read';
-    if (s === 'Processing') return 'read';
-    if (s === 'Review') return userRole === 'reviewer' ? 'review' : 'read';
-    if (s === 'Live' && userRole === 'reviewer') return 'read';
-    return 'edit';
-  }, [metadata?.status, userRole]);
+  const editorMode = useMemo(
+    () => getEditorMode(metadata?.status, userRole),
+    [metadata?.status, userRole],
+  );
 
   const contextOverrides: QumlEditorContextOverrides = useMemo(() => ({
     mode: editorMode,
