@@ -25,8 +25,10 @@ import MyLearning from './pages/myLearning/MyLearning';
 import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
+import UserManagementPage from './pages/user-management/UserManagementPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
+const UserManagementProtected = withRoles(['admin'])(UserManagementPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
@@ -61,6 +63,7 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
+        <Route path="/user-management" element={<UserManagementProtected />} />
         <Route path="/workspace" element={<WorkspacePage />} />
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentPage />} />
