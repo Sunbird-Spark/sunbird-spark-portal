@@ -737,4 +737,153 @@ describe('Onboarding Component', () => {
     const clearedInput = screen.getByPlaceholderText('Please type your preference here');
     expect(clearedInput).toHaveValue('');
   });
+
+  it('handles invalid nextScreenId gracefully', () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    const dataWithInvalidNext = {
+      isEnabled: true,
+      initialScreenId: 'role',
+      screens: {
+        role: {
+          title: 'What is your role?',
+          selectionType: 'single' as const,
+          nextScreenId: 'nonexistent_screen',
+          fields: [
+            { id: 'teacher', index: 0, label: 'Teacher' },
+          ],
+        },
+      },
+    };
+
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: dataWithInvalidNext,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Select an option
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    
+    // Try to proceed with invalid nextScreenId
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Should log error
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Invalid nextScreenId: "nonexistent_screen" does not exist in onboarding screens'
+    );
+    
+    // Should stay on current screen (not navigate)
+    expect(screen.getByText('What is your role?')).toBeInTheDocument();
+    
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('handles invalid field-level nextScreenId gracefully', () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    const dataWithInvalidFieldNext = {
+      isEnabled: true,
+      initialScreenId: 'role',
+      screens: {
+        role: {
+          title: 'What is your role?',
+          selectionType: 'single' as const,
+          fields: [
+            { id: 'teacher', index: 0, label: 'Teacher', nextScreenId: 'invalid_screen' },
+            { id: 'student', index: 1, label: 'Student' },
+          ],
+        },
+      },
+    };
+
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: dataWithInvalidFieldNext,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Select option with invalid nextScreenId
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    
+    // Try to proceed
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Should log error
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Invalid nextScreenId: "invalid_screen" does not exist in onboarding screens'
+    );
+    
+    // Should stay on current screen
+    expect(screen.getByText('What is your role?')).toBeInTheDocument();
+    
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('treats screen with invalid nextScreenId as terminal screen', () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    const dataWithInvalidNext = {
+      isEnabled: true,
+      initialScreenId: 'role',
+      screens: {
+        role: {
+          title: 'What is your role?',
+          selectionType: 'single' as const,
+          fields: [
+            { id: 'teacher', index: 0, label: 'Teacher', nextScreenId: 'nonexistent' },
+          ],
+        },
+      },
+    };
+
+    (useFormRead as Mock).mockReturnValue({
+      data: {
+        data: {
+          form: {
+            data: dataWithInvalidNext,
+          },
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    
+    // Select option
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    
+    // Should still show "Save and Proceed" button (because nextScreenId exists)
+    expect(screen.getByRole('button', { name: /Save and Proceed/i })).toBeInTheDocument();
+    
+    // Click the button to trigger the error
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+    
+    // Should log error and not navigate
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Invalid nextScreenId: "nonexistent" does not exist in onboarding screens'
+    );
+    
+    // Should stay on the same screen
+    expect(screen.getByText('What is your role?')).toBeInTheDocument();
+    
+    consoleErrorSpy.mockRestore();
+  });
 });
