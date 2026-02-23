@@ -91,8 +91,7 @@ const Onboarding = () => {
       };
     });
     console.log('[Onboarding] Formatted selections:', formattedSelections);
-    timeoutRef.current = setTimeout(() => {
-      setIsSubmitting(false);
+    timeoutRef.current = setTimeout(() => {setIsSubmitting(false);
       navigate("/home");
     }, 1000);
   };
@@ -128,7 +127,6 @@ const Onboarding = () => {
     );
   }
   const currentScreen = onboardingData.screens[currentScreenId];
-
   if (!currentScreen) {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
@@ -145,7 +143,6 @@ const Onboarding = () => {
       </div>
     );
   }
-
   const totalSteps = computeTotalSteps(onboardingData);
   const currentStep = screenHistory.length;
   const isFirstScreen = currentScreenId === onboardingData.initialScreenId;
@@ -200,17 +197,12 @@ const Onboarding = () => {
                   </div>
                 ) : (
                   <div className="space-y-4 max-w-md">
-                    <Input
-                      type="text"
-                      placeholder="Please type your preference here"
-                      value={otherText}
+                    <Input type="text"  placeholder="Please type your preference here" value={otherText}
                       onChange={e => {
                         const value = e.target.value;
                         setOtherTexts(prev => ({ ...prev, [currentScreenId]: value }));
                         // TODO: Remove this temporary logging once backend storage is configured
-                        console.log('[Onboarding] Other text input:', {
-                          screenId: currentScreenId,
-                          text: value,
+                        console.log('[Onboarding] Other text input:', {screenId: currentScreenId, text: value,
                         });
                       }}
                       className="onboarding-input"
@@ -219,16 +211,11 @@ const Onboarding = () => {
                 )}
               </div>
               {showNextButton ? (
-                <Button  onClick={handleNext}
-                  className={isFirstScreen ? "onboarding-button" : "onboarding-button-rounded"}
-                  disabled={!selectedFieldId}
-                >
+                <Button  onClick={handleNext} className={isFirstScreen ? "onboarding-button" : "onboarding-button-rounded"}  disabled={!selectedFieldId} >
                   Save and Proceed
                 </Button>
               ) : (
-                <Button
-                  onClick={handleSubmit}
-                  className="onboarding-button-rounded"
+                <Button onClick={handleSubmit} className="onboarding-button-rounded"
                   disabled={isSubmitDisabled}
                 >
                   {isSubmitting ? (
@@ -244,17 +231,14 @@ const Onboarding = () => {
             </div>
           </div>
           <div className="mt-6">
-            <button
-              type="button" onClick={handleSkip} disabled={isSubmitting}
-              className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            <button type="button" onClick={handleSkip} disabled={isSubmitting} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Skip Onboarding
             </button>
           </div>
         </div>
         <div className="hidden lg:block lg:w-1/2 relative overflow-hidden rounded-3xl">
-          <img
-            src={onboardingImage} alt="Onboarding Image" className="onboarding-image-reduced"
+          <img src={onboardingImage} alt="Onboarding Image" className="onboarding-image-reduced"
           />
         </div>
       </div>
