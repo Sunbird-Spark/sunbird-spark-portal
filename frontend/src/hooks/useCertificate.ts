@@ -1,8 +1,9 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { certificateService, CertificateSearchResponse, CertTemplateSummary } from '../services/CertificateService';
+import { certificateService, CertTemplateSummary } from '../services/CertificateService';
+import type { CertificateSearchResponse } from '../components/collection/certificate/types';
+import { userService } from '../services/UserService';
 import { ApiResponse } from '../lib/http-client';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
-import { userService } from '../services/UserService';
 
 /** Resolve the current user's userId */
 export async function resolveUserId(): Promise<string | null> {

@@ -1,33 +1,7 @@
 import { getClient, ApiResponse } from '../lib/http-client';
+import type { Certificate, CertificateSearchResponse } from '../components/collection/certificate/types';
 
-export interface Certificate {
-  osid: string;
-  osUpdatedAt: string;
-  osCreatedAt: string;
-  recipient: {
-    id: string;
-    name: string;
-    [key: string]: unknown;
-  };
-  issuer: {
-    url: string;
-    name: string;
-    [key: string]: unknown;
-  };
-  training: {
-    id: string;
-    name: string;
-    type: string;
-    batchId: string;
-    [key: string]: unknown;
-  };
-  templateUrl: string;
-  status: string;
-  certificateLabel: string;
-  [key: string]: unknown;
-}
-
-export type CertificateSearchResponse = Certificate[];
+export type { Certificate, CertificateSearchResponse };
 
 export interface CertSignatory {
   name: string;
