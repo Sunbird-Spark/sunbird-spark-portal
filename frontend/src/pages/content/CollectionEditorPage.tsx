@@ -5,6 +5,8 @@ import CollectionEditor from '@/components/editors/CollectionEditor';
 import type { CollectionEditorEvent, CollectionEditorContextProps } from '@/services/editors/collection-editor';
 import { ContentService } from '@/services/ContentService';
 import { toast } from '@/hooks/useToast';
+import { useUserRead } from '@/hooks/useUserRead';
+import { getUserRole, getEditorMode } from '@/services/editors/editorModeService';
 
 const COLLECTION_EDITOR_READ_FIELDS = [
   'identifier',
@@ -28,9 +30,12 @@ const contentService = new ContentService();
 const CollectionEditorPage = () => {
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
+  const { data: userData } = useUserRead();
   const [metadata, setMetadata] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const userRole = useMemo(() => getUserRole(userData), [userData]);
 
   useEffect(() => {
     setLoadError(null);
@@ -55,17 +60,10 @@ const CollectionEditorPage = () => {
       .finally(() => setLoading(false));
   }, [contentId]);
 
-  // Derive editor mode from the content's current backend status:
-  //   FlagDraft / FlagReview  → 'read'   (flagged content, no editing allowed)
-  //   Review / Processing     → 'review' (in-review workflow)
-  //   everything else         → 'edit'   (Draft, Live, Unlisted …)
-  const editorMode = useMemo((): 'read' | 'review' | 'edit' => {
-    const s = metadata?.status as string | undefined;
-    if (!s) return 'edit';
-    if (s === 'FlagDraft' || s === 'FlagReview') return 'read';
-    if (s === 'Review' || s === 'Processing') return 'review';
-    return 'edit';
-  }, [metadata?.status]);
+  const editorMode = useMemo(
+    () => getEditorMode(metadata?.status, userRole),
+    [metadata?.status, userRole],
+  );
 
   const contextProps: CollectionEditorContextProps = useMemo(() => ({
     mode: editorMode,

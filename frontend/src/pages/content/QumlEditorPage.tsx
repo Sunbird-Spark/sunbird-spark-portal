@@ -5,14 +5,19 @@ import QumlEditor from '@/components/quml-editor/QumlEditor';
 import type { QumlEditorEvent, QumlEditorContextOverrides } from '@/services/editors/quml-editor';
 import { QuestionSetService } from '@/services/QuestionSetService';
 import { toast } from '@/hooks/useToast';
+import { useUserRead } from '@/hooks/useUserRead';
+import { getUserRole, getEditorMode } from '@/services/editors/editorModeService';
 
 const questionSetService = new QuestionSetService();
 
 const QumlEditorPage = () => {
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
+  const { data: userData } = useUserRead();
   const [metadata, setMetadata] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const userRole = useMemo(() => getUserRole(userData), [userData]);
 
   useEffect(() => {
     if (!contentId) {
@@ -31,17 +36,10 @@ const QumlEditorPage = () => {
       .finally(() => setLoading(false));
   }, [contentId]);
 
-  // Derive editor mode from the content's current backend status:
-  //   FlagDraft / FlagReview  → 'read'   (flagged content, no editing allowed)
-  //   Review / Processing     → 'review' (in-review workflow)
-  //   everything else         → 'edit'   (Draft, Live, Unlisted …)
-  const editorMode = useMemo((): 'read' | 'review' | 'edit' => {
-    const s = metadata?.status as string | undefined;
-    if (!s) return 'edit';
-    if (s === 'FlagDraft' || s === 'FlagReview') return 'read';
-    if (s === 'Review' || s === 'Processing') return 'review';
-    return 'edit';
-  }, [metadata?.status]);
+  const editorMode = useMemo(
+    () => getEditorMode(metadata?.status, userRole),
+    [metadata?.status, userRole],
+  );
 
   const contextOverrides: QumlEditorContextOverrides = useMemo(() => ({
     mode: editorMode,
