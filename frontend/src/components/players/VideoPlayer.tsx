@@ -67,7 +67,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         if (cancelled) return;
 
-        playerElement = service.createElement(config);
+        playerElement = await service.createElement(config);
+
+        if (cancelled) return;
         service.attachEventListeners(playerElement, handlePlayerEvent, handleTelemetryEvent);
 
         if (containerRef.current) {
@@ -86,7 +88,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       if (playerElement) {
         service.removeEventListeners(playerElement);
         playerElement.remove();
-        VideoPlayerService.unloadStyles();
       }
     };
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);

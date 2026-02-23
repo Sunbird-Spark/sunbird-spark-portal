@@ -31,7 +31,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
     if (mode === undefined && cdata === undefined && contextRollup === undefined && objectRollup === undefined) {
       return undefined;
     }
-    
+
     return {
       ...(mode !== undefined && { mode }),
       ...(cdata !== undefined && { cdata }),
@@ -59,12 +59,13 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
     const initPlayer = async () => {
       try {
         const config = await service.createConfig(metadata, contextProps);
-        
+
         if (cancelled) return;
 
-        playerElement = service.createElement(config);
+        playerElement = await service.createElement(config);
+        if (cancelled) return;
         service.attachEventListeners(playerElement, handlePlayerEvent, handleTelemetryEvent);
-        
+
         if (containerRef.current) {
           containerRef.current.appendChild(playerElement);
         }
@@ -79,17 +80,16 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
       cancelled = true;
       if (playerElement) {
         service.removeEventListeners(playerElement);
-        playerElement.remove();
+        playerElement.remove(); // Scoped styles are cleaned up with the wrapper
       }
-      EpubPlayerService.unloadStyles();
     };
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="w-full h-full min-h-[37.5rem] relative"
-      
+
     />
   );
 };
