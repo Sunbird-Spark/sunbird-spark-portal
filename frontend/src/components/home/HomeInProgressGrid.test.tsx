@@ -1,19 +1,59 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import HomeInProgressGrid from './HomeInProgressGrid';
 
-// Mock useNavigate
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom');
-    return {
-        ...actual,
-        useNavigate: () => mockNavigate,
-    };
-});
+// Mock useUserEnrolledCollections
+const mockUseUserEnrolledCollections = vi.fn();
+vi.mock('../../hooks/useUserEnrolledCollections', () => ({
+    useUserEnrolledCollections: () => mockUseUserEnrolledCollections(),
+}));
+
+const mockCourses = [
+    {
+        courseId: 'course-1',
+        courseName: 'Data Engineering Foundations',
+        collectionId: 'col-1',
+        contentId: 'content-1',
+        batchId: 'batch-1',
+        completionPercentage: 70,
+        lastReadContentId: 'last-read-1',
+        courseLogoUrl: 'https://example.com/data-eng.png',
+        content: { primaryCategory: 'Course', name: 'Data Engineering Foundations', appIcon: '' },
+    },
+    {
+        courseId: 'course-2',
+        courseName: 'AI Engineer Course',
+        collectionId: 'col-2',
+        contentId: 'content-2',
+        batchId: 'batch-2',
+        completionPercentage: 30,
+        lastReadContentId: undefined,
+        courseLogoUrl: '',
+        content: { primaryCategory: 'Textbook', name: 'AI Engineer Course', appIcon: 'https://example.com/ai.png' },
+    },
+    {
+        courseId: 'course-3',
+        courseName: 'Completed Course',
+        collectionId: 'col-3',
+        contentId: 'content-3',
+        batchId: 'batch-3',
+        completionPercentage: 100,
+        lastReadContentId: 'last-read-3',
+        courseLogoUrl: '',
+        content: { primaryCategory: 'Course', name: 'Completed Course', appIcon: '' },
+    },
+];
 
 describe('HomeInProgressGrid', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: mockCourses } },
+            isLoading: false,
+        });
+    });
+
     const renderComponent = () => {
         return render(
             <BrowserRouter>
@@ -27,43 +67,78 @@ describe('HomeInProgressGrid', () => {
         expect(screen.getByText('In Progress')).toBeInTheDocument();
     });
 
-    it('renders all in-progress items', () => {
+    it('renders only in-progress items (excludes completed)', () => {
         renderComponent();
 
-        // Check for specific items
-        expect(screen.getAllByText('Data Engineering Foundations').length).toBeGreaterThan(0);
-        expect(screen.getAllByText(/The AI Engineer Course/).length).toBeGreaterThan(0);
+        expect(screen.getByText('Data Engineering Foundations')).toBeInTheDocument();
+        expect(screen.getByText('AI Engineer Course')).toBeInTheDocument();
 
-        // Should have 6 items in the grid
+        // Completed course should not appear
+        expect(screen.queryByText('Completed Course')).not.toBeInTheDocument();
+
         const cards = document.querySelectorAll('.home-inprogress-card');
-        expect(cards.length).toBe(6);
+        expect(cards.length).toBe(2);
     });
 
     it('displays the correct badge and progress for items', () => {
         renderComponent();
 
-        // Item 1: Course, 70%
         expect(screen.getAllByText('Course')[0]).toBeInTheDocument();
         expect(screen.getByText('70%')).toBeInTheDocument();
 
-        // Item 2: Textbook, 30%
-        expect(screen.getAllByText('Textbook')[0]).toBeInTheDocument();
-        expect(screen.getAllByText('30%')[0]).toBeInTheDocument();
+        expect(screen.getByText('Textbook')).toBeInTheDocument();
+        expect(screen.getByText('30%')).toBeInTheDocument();
     });
 
-    it('links to the course page when a card is clicked', () => {
+    it('links to collection/batch/content URL when lastReadContentId is present', () => {
         renderComponent();
 
         const firstCard = document.querySelectorAll('.home-inprogress-card')[0];
-        expect(firstCard).toHaveAttribute('href', '/course/1');
+        expect(firstCard).toHaveAttribute('href', '/collection/col-1/batch/batch-1/content/last-read-1');
+    });
+
+    it('links to collection/batch URL when lastReadContentId is missing', () => {
+        renderComponent();
+
+        const secondCard = document.querySelectorAll('.home-inprogress-card')[1];
+        expect(secondCard).toHaveAttribute('href', '/collection/col-2/batch/batch-2');
     });
 
     it('renders thumbnails with correct alt text', () => {
         renderComponent();
 
-        // Use a more specific query if needed, but let's check one
-        const altText = "Data Engineering Foundations";
-        const imgs = screen.getAllByAltText(altText);
-        expect(imgs.length).toBeGreaterThan(0);
+        const img = screen.getByAltText('Data Engineering Foundations');
+        expect(img).toBeInTheDocument();
+        expect(img).toHaveAttribute('src', 'https://example.com/data-eng.png');
+    });
+
+    it('falls back to content.appIcon when courseLogoUrl is empty', () => {
+        renderComponent();
+
+        const img = screen.getByAltText('AI Engineer Course');
+        expect(img).toHaveAttribute('src', 'https://example.com/ai.png');
+    });
+
+    it('shows loading state', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+        });
+
+        renderComponent();
+
+        expect(screen.getByText('In Progress')).toBeInTheDocument();
+        expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+
+    it('shows empty state when no in-progress courses', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [mockCourses[2]] } }, // only completed
+            isLoading: false,
+        });
+
+        renderComponent();
+
+        expect(screen.getByText('No courses in progress')).toBeInTheDocument();
     });
 });
