@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useHomeData } from "@/hooks/useHomeData"
 import { useUserRead } from "@/hooks/useUserRead";
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
@@ -17,8 +16,7 @@ import "./home.css";
 
 const Home = () => {
     const isMobile = useIsMobile();
-    const { loading: isLoading, error, refetch } = useHomeData();
-    const { data: userReadData, isLoading: userLoading } = useUserRead();
+    const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead();
     const userProfile = userReadData?.data?.response;
     const [activeNav, setActiveNav] = useState("home");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
@@ -66,7 +64,7 @@ const Home = () => {
                             <p className="home-welcome-subtitle">Welcome to a learning experience made just for you.</p>
                         </div>
 
-                        {isLoading || error ? (
+                        {userLoading || error ? (
                             <PageLoader
                                 message="Loading your dashboard..."
                                 fullPage={false}
