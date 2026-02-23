@@ -5,7 +5,6 @@ import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import FAQSection from "@/components/landing/FAQSection";
-import RelatedContent from "@/components/common/RelatedContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
