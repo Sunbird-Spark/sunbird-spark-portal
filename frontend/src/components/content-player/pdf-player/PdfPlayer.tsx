@@ -69,6 +69,8 @@ export const PdfPlayer: React.FC<PdfPlayerProps> = ({
         if (cancelled) return;
 
         playerElement = await service.createElement(config);
+
+        if (cancelled) return;
         service.attachEventListeners(playerElement, handlePlayerEvent, handleTelemetryEvent);
 
         if (containerRef.current) {
