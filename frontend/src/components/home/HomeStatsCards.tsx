@@ -40,12 +40,14 @@ const CertificationsIcon = () => (
 );
 
 const HomeStatsCards = () => {
-    const { data: enrolledCollections } = useUserEnrolledCollections();
-    const { data: certificatesData } = useUserCertificates();
+    const { data: enrolledCollections, isLoading: enrollmentsLoading } = useUserEnrolledCollections();
+    const { data: certificatesData, isLoading: certificatesLoading } = useUserCertificates();
     const courses = enrolledCollections?.data?.courses || [];
+    
+    const isLoading = enrollmentsLoading || certificatesLoading;
 
     // Total leaf-node contents across all enrolled courses
-    const totalCourses = courses.reduce((acc, course) => acc + (course.leafNodesCount || 0), 0);
+    const totalContents = courses.reduce((acc, course) => acc + (course.leafNodesCount || 0), 0);
 
     // Count individual contents by status from contentStatus map (1 = in progress, 2 = completed)
     const contentsInProgress = courses.reduce((acc, course) => {
@@ -66,7 +68,7 @@ const HomeStatsCards = () => {
     const statsData = [
         {
             id: "total",
-            value: totalCourses === 0 ? '0' : totalCourses.toString().padStart(2, '0'),
+            value: totalContents === 0 ? '0' : totalContents.toString().padStart(2, '0'),
             label: "Total Contents",
             bgColor: "bg-sunbird-blue-light",
             iconBg: "hsl(var(--sunbird-blue-medium))",
@@ -97,6 +99,28 @@ const HomeStatsCards = () => {
             icon: CertificationsIcon,
         },
     ];
+
+    if (isLoading) {
+        return (
+            <div className="home-stats-grid">
+                {statsData.map((stat) => (
+                    <div
+                        key={stat.id}
+                        className={`home-stat-card ${stat.bgColor} animate-pulse`}
+                    >
+                        <div
+                            className="home-stat-icon-wrapper"
+                            style={{ backgroundColor: stat.iconBg }}
+                        >
+                            <stat.icon />
+                        </div>
+                        <div className="home-stat-value opacity-50">--</div>
+                        <div className="home-stat-label">{stat.label}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="home-stats-grid">

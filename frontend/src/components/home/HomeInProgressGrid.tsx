@@ -71,7 +71,7 @@ const HomeInProgressGrid = () => {
                             {course.courseLogoUrl || course.content?.appIcon ? (
                                 <img
                                     src={course.courseLogoUrl || course.content?.appIcon}
-                                    alt={course.courseName}
+                                    alt={course.courseName || "Untitled Course"}
                                     className="home-inprogress-thumbnail-img"
                                 />
                             ) : (
