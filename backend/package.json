@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc && tsc-alias",
+    "build": "tsc",
     "build:full": "npm run build && npm run copy:frontend",
     "copy:frontend": "mkdir -p dist/public && [ -d ../frontend/dist ] && cp -r ../frontend/dist/* dist/public/ || echo 'Frontend dist not found, skipping copy'",
     "start": "[ \"$NODE_ENV\" = \"production\" ] && npm run build:full && node dist/server.js || npm run build && node dist/server.js",
@@ -69,7 +69,6 @@
     "prettier": "^3.7.4",
     "supertest": "^7.2.2",
     "ts-node-dev": "^2.0.0",
-    "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
