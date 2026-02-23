@@ -41,14 +41,14 @@ export interface CategoryItem {
   value: string;
 }
 
-export interface FormFieldContent {
+export interface CheckListFormFieldContent {
   name: string;
   checkList: string[];
 }
 
-export interface FormField {
+export interface CheckListFormField {
   title: string;
-  contents?: FormFieldContent[];
+  contents?: CheckListFormFieldContent[];
   otherReason?: string;
 }
 
