@@ -13,7 +13,7 @@ const Onboarding = () => {
   const [screenHistory, setScreenHistory] = useState<string[]>([]);
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);
   const [selections, setSelections] = useState<Record<string, string>>({});
-  const [otherText, setOtherText] = useState("");
+  const [otherText, setOtherText] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: formApiData, isLoading, isError } = useFormRead({

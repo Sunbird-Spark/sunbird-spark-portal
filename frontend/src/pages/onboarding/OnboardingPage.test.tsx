@@ -253,7 +253,7 @@ describe('Onboarding Component', () => {
     expect(screen.getByRole('button', { name: /Submit/i })).toBeInTheDocument();
   });
 
-  it('submits form and navigates to home', () => {
+  it('submits form and navigates to home', async () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -284,8 +284,8 @@ describe('Onboarding Component', () => {
     // Should show loading state
     expect(screen.getByText('Saving...')).toBeInTheDocument();
     
-    // Fast-forward timers
-    vi.advanceTimersByTime(1000);
+    // Fast-forward timers and run all pending timers
+    await vi.advanceTimersByTimeAsync(1000);
     
     expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
