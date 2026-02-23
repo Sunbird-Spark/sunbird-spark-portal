@@ -115,6 +115,18 @@ export interface ContentStateReadRequest {
   contentIds: string[];
 }
 
+export interface ContentStateUpdateContent {
+  contentId: string;
+  status: number;
+}
+
+export interface ContentStateUpdateRequest {
+  userId: string;
+  courseId: string;
+  batchId: string;
+  contents: ContentStateUpdateContent[];
+}
+
 import type { ContentSearchItem } from './workspaceTypes';
 
 export type RelatedContentItem = ContentSearchItem & { cardType?: 'collection' | 'resource' };

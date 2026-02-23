@@ -93,6 +93,13 @@ export function useCollectionEnrollment(
   );
   const hasCertificate = !!firstCertPreviewUrl;
 
+  const isBatchEnded = useMemo(() => {
+    const endDateStr = batchReadResponse?.data?.response?.endDate;
+    if (!endDateStr) return false;
+    const endMs = new Date(endDateStr).getTime();
+    return Number.isFinite(endMs) && endMs < Date.now();
+  }, [batchReadResponse?.data?.response?.endDate]);
+
   const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
   const handleJoinCourse = async (selectedBatchId: string) => {
     if (!collectionId || !selectedBatchId) return;
@@ -114,6 +121,7 @@ export function useCollectionEnrollment(
     enrollmentForCollection,
     isEnrolledInCurrentBatch,
     effectiveBatchId,
+    isBatchEnded,
     contentStatusMap,
     courseProgressProps,
     batches,
