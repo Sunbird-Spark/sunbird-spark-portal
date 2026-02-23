@@ -1,3 +1,6 @@
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
+import { useUserCertificates } from "@/hooks/useCertificate";
+
 // Custom icons matching the design
 const TotalContentsIcon = () => (
     <svg width="25" height="28" viewBox="0 0 25 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -36,42 +39,61 @@ const CertificationsIcon = () => (
     </svg>
 );
 
-const statsData = [
-    {
-        id: "total",
-        value: "30",
-        label: "Total Contents",
-        bgColor: "bg-sunbird-blue-light",
-        iconBg: "hsl(var(--sunbird-blue-medium))",
-        icon: TotalContentsIcon,
-    },
-    {
-        id: "progress",
-        value: "05",
-        label: "Contents in Progress",
-        bgColor: "bg-sunbird-ginger",
-        iconBg: "hsl(var(--sunbird-brown-dark))",
-        icon: InProgressIcon,
-    },
-    {
-        id: "completed",
-        value: "13",
-        label: "Contents Completed",
-        bgColor: "bg-sunbird-moss",
-        iconBg: "hsl(var(--sunbird-green-dark))",
-        icon: CompletedIcon,
-    },
-    {
-        id: "certs",
-        value: "06",
-        label: "Certifications Earned",
-        bgColor: "bg-sunbird-lavender",
-        iconBg: "hsl(var(--sunbird-purple-dark))",
-        icon: CertificationsIcon,
-    },
-];
-
 const HomeStatsCards = () => {
+    const { data } = useUserEnrolledCollections();
+    const { data: certificatesData } = useUserCertificates();
+    const courses = data?.data?.courses || [];
+
+    // Calculate metrics using the same method as MyLearning page
+    const totalCourses = courses.length;
+    const contentsInProgress = courses.filter(course => 
+        course.completionPercentage > 0 && course.completionPercentage < 100
+    ).length;
+    const contentsCompleted = courses.filter(course => 
+        course.completionPercentage === 100
+    ).length;
+    
+    // Get certificate count from the certificate search API
+    // The API returns an array of certificates directly
+    const certificatesEarned = Array.isArray(certificatesData?.data) 
+        ? certificatesData.data.length 
+        : 0;
+
+    const statsData = [
+        {
+            id: "total",
+            value: totalCourses.toString().padStart(2, '0'),
+            label: "Total Contents",
+            bgColor: "bg-sunbird-blue-light",
+            iconBg: "hsl(var(--sunbird-blue-medium))",
+            icon: TotalContentsIcon,
+        },
+        {
+            id: "progress",
+            value: contentsInProgress.toString().padStart(2, '0'),
+            label: "Contents in Progress",
+            bgColor: "bg-sunbird-ginger",
+            iconBg: "hsl(var(--sunbird-brown-dark))",
+            icon: InProgressIcon,
+        },
+        {
+            id: "completed",
+            value: contentsCompleted.toString().padStart(2, '0'),
+            label: "Contents Completed",
+            bgColor: "bg-sunbird-moss",
+            iconBg: "hsl(var(--sunbird-green-dark))",
+            icon: CompletedIcon,
+        },
+        {
+            id: "certs",
+            value: certificatesEarned.toString().padStart(2, '0'),
+            label: "Certifications Earned",
+            bgColor: "bg-sunbird-lavender",
+            iconBg: "hsl(var(--sunbird-purple-dark))",
+            icon: CertificationsIcon,
+        },
+    ];
+
     return (
         <div className="home-stats-grid">
             {statsData.map((stat) => {
