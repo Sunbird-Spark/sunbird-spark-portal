@@ -142,7 +142,7 @@ export class UserService {
 
     public async searchMentors(rootOrgId: string, query: string = ''): Promise<ApiResponse<any>> {
         return getClient().post(
-            '/learner/user/v3/search',
+            '/user/v3/search',
             {
                 request: {
                     filters: {
