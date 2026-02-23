@@ -195,6 +195,7 @@ export class PdfPlayerService {
     // Wrapper scopes the styles and keeps them alongside the player
     const wrapper = document.createElement('div');
     wrapper.setAttribute('data-pdf-player-wrapper', 'true');
+    wrapper.setAttribute('data-player-id', config.metadata.identifier);
     wrapper.style.width = '100%';
     wrapper.style.height = '100%';
 
