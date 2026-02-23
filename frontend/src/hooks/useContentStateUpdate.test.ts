@@ -2,17 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContentStateUpdate } from './useContentStateUpdate';
-import { batchService } from '../services/collection';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+
+const mockMutateAsync = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: vi.fn(),
 }));
 
-vi.mock('../services/collection', () => ({
-  batchService: {
-    contentStateUpdate: vi.fn().mockResolvedValue(undefined),
-  },
+vi.mock('./useBatch', () => ({
+  useContentStateUpdateMutation: vi.fn(() => ({ mutateAsync: mockMutateAsync })),
 }));
 
 vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
@@ -49,7 +48,7 @@ describe('useContentStateUpdate', () => {
       useContentStateUpdate({ ...defaultParams, isEnrolledInCurrentBatch: false })
     );
     result.current({ eid: 'START' });
-    expect(batchService.contentStateUpdate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call contentStateUpdate when collectionId is missing', () => {
@@ -57,7 +56,7 @@ describe('useContentStateUpdate', () => {
       useContentStateUpdate({ ...defaultParams, collectionId: undefined })
     );
     result.current({ eid: 'START' });
-    expect(batchService.contentStateUpdate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call contentStateUpdate when isBatchEnded is true', () => {
@@ -66,7 +65,7 @@ describe('useContentStateUpdate', () => {
     );
     result.current({ eid: 'START' });
     result.current({ eid: 'END', edata: { summary: [{ progress: 100 }] } });
-    expect(batchService.contentStateUpdate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call contentStateUpdate when currentContentStatus is 2', () => {
@@ -75,14 +74,14 @@ describe('useContentStateUpdate', () => {
     );
     result.current({ eid: 'START' });
     result.current({ eid: 'END', edata: { summary: [{ progress: 100 }] } });
-    expect(batchService.contentStateUpdate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('calls contentStateUpdate with status 1 and does not invalidate on START', async () => {
     const { result } = renderHook(() => useContentStateUpdate(defaultParams));
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
-      expect(batchService.contentStateUpdate).toHaveBeenCalledWith({
+      expect(mockMutateAsync).toHaveBeenCalledWith({
         userId: 'user_1',
         courseId: 'course_1',
         batchId: 'batch_1',
@@ -97,7 +96,7 @@ describe('useContentStateUpdate', () => {
     result.current({ eid: 'START' });
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
-      expect(batchService.contentStateUpdate).toHaveBeenCalledTimes(1);
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -108,7 +107,7 @@ describe('useContentStateUpdate', () => {
       edata: { summary: [{ progress: 100 }] },
     });
     await vi.waitFor(() => {
-      expect(batchService.contentStateUpdate).toHaveBeenCalledWith({
+      expect(mockMutateAsync).toHaveBeenCalledWith({
         userId: 'user_1',
         courseId: 'course_1',
         batchId: 'batch_1',
@@ -122,14 +121,14 @@ describe('useContentStateUpdate', () => {
     (userAuthInfoService.getUserId as ReturnType<typeof vi.fn>).mockReturnValue(undefined);
     const { result } = renderHook(() => useContentStateUpdate(defaultParams));
     result.current({ eid: 'START' });
-    expect(batchService.contentStateUpdate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('reads eid from event.data when present', async () => {
     const { result } = renderHook(() => useContentStateUpdate(defaultParams));
     result.current({ data: { eid: 'START' } });
     await vi.waitFor(() => {
-      expect(batchService.contentStateUpdate).toHaveBeenCalledWith(
+      expect(mockMutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({
           contents: [{ contentId: 'content_1', status: 1 }],
         })
@@ -144,7 +143,7 @@ describe('useContentStateUpdate', () => {
       data: { edata: { summary: [{ progress: 50 }] } },
     });
     await vi.waitFor(() => {
-      expect(batchService.contentStateUpdate).toHaveBeenCalledWith(
+      expect(mockMutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({
           contents: [{ contentId: 'content_1', status: 1 }],
         })
