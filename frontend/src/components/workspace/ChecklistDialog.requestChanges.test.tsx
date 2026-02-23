@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ChecklistDialog from './ChecklistDialog';
-import { FormField } from '@/types/formTypes';
+import { CheckListFormField } from '@/types/formTypes';
 
-const fieldsWithOtherReason: FormField[] = [
+const fieldsWithOtherReason: CheckListFormField[] = [
   {
     title: 'Content Review',
     contents: [
@@ -14,7 +14,7 @@ const fieldsWithOtherReason: FormField[] = [
   },
 ];
 
-const fieldsWithoutOtherReason: FormField[] = [
+const fieldsWithoutOtherReason: CheckListFormField[] = [
   {
     title: 'Content Review',
     contents: [
@@ -116,7 +116,7 @@ describe('ChecklistDialog - Request-Changes Validation', () => {
 });
 
 describe('ChecklistDialog - Other Reason Field Handlers', () => {
-  const smallFields: FormField[] = [
+  const smallFields: CheckListFormField[] = [
     { title: 'Review', contents: [{ name: 'Quality', checkList: ['Item 1', 'Item 2'] }], otherReason: 'Other Reason' },
   ];
 
@@ -219,7 +219,7 @@ describe('ChecklistDialog - Submit Callback & Comment Generation', () => {
   });
 
   it('should handle multiple sections correctly', () => {
-    const multiFields: FormField[] = [
+    const multiFields: CheckListFormField[] = [
       {
         title: 'Review',
         contents: [
