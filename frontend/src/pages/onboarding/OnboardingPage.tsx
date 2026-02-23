@@ -187,7 +187,7 @@ const Onboarding = () => {
                     isFirstScreen ? "text-2xl font-medium mb-6" : "text-base font-semibold mb-4"
                   } text-foreground`}
                 >
-                  {currentScreen?.title}
+                  {currentScreen.title}
                 </h2>             
                 {!showOtherInput ? (
                   <div className={isFirstScreen ? "onboarding-grid" : "grid grid-cols-3 gap-3 max-w-md"}>
