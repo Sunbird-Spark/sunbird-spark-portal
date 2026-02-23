@@ -169,8 +169,8 @@ export class PdfPlayerService {
     // Replace standalone html/body selectors and compound html[...]/body[...] selectors
     // with :scope, so base typography, colors, bg etc. apply to the wrapper.
     // Uses negative lookbehind/lookahead to avoid replacing inside words/URLs.
-    rewritten = rewritten.replace(/(?<![a-zA-Z-])html(?=\s*[{,\[:]|$)/g, ':scope');
-    rewritten = rewritten.replace(/(?<![a-zA-Z-])body(?=\s*[{,\[:]|$)/g, ':scope');
+    rewritten = rewritten.replace(/(?<![a-zA-Z-])html(?=\s*[{,[:]|$)/g, ':scope');
+    rewritten = rewritten.replace(/(?<![a-zA-Z-])body(?=\s*[{,[:]|$)/g, ':scope');
 
     return rewritten;
   }
