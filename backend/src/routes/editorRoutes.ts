@@ -1,7 +1,7 @@
 import express from 'express';
 import { kongProxy } from '../proxies/kongProxy.js';
 import { keycloak } from '../auth/keycloakProvider.js';
-import { sessionMiddleware } from '@/middlewares/conditionalSession.js';
+import { sessionMiddleware } from '../middlewares/conditionalSession.js';
 
 const router = express.Router();
 
