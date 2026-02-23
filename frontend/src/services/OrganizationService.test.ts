@@ -12,7 +12,6 @@ describe('OrganizationService', () => {
       put: vi.fn(),
       patch: vi.fn(),
       delete: vi.fn(),
-      patch: vi.fn(),
       updateHeaders: vi.fn(),
     };
     init(mockClient);
@@ -48,7 +47,7 @@ describe('OrganizationService', () => {
         headers: {},
       };
 
-      (mockClient.post as any).mockResolvedValue(mockResponse);
+      (mockClient.post! as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
       const result = await service.search({ filters: { slug: 'sunbird', isTenant: true } });
 

@@ -2,9 +2,9 @@ import { getClient, ApiResponse } from '../lib/http-client';
 
 export class OtpService {
     public async generateOtp(
-        request: any,
+        request: Record<string, unknown>,
         captchaResponse?: string
-    ): Promise<ApiResponse<any>> {
+    ): Promise<ApiResponse<unknown>> {
         const query = captchaResponse ? `?captchaResponse=${encodeURIComponent(captchaResponse)}` : '';
         return getClient().post(
             `/otp/v1/generate${query}`,
@@ -13,8 +13,8 @@ export class OtpService {
     }
 
     public async verifyOtp(
-        request: any
-    ): Promise<ApiResponse<any>> {
+        request: Record<string, unknown>
+    ): Promise<ApiResponse<unknown>> {
         return getClient().post(
             `/otp/v1/verify`,
             request
