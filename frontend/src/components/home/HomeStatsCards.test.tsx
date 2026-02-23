@@ -32,16 +32,18 @@ const mockCourses = [
     },
 ];
 
-// Expected: totalCourses=23, inProgress=3, completed=3
+// Expected: totalContents=23, inProgress=3, completed=3
 
 describe('HomeStatsCards', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockUseUserEnrolledCollections.mockReturnValue({
             data: { data: { courses: mockCourses } },
+            isLoading: false,
         });
         mockUseUserCertificates.mockReturnValue({
             data: { data: [{ id: 'cert-1' }, { id: 'cert-2' }] },
+            isLoading: false,
         });
     });
 
@@ -95,9 +97,11 @@ describe('HomeStatsCards', () => {
     it('handles empty courses data', () => {
         mockUseUserEnrolledCollections.mockReturnValue({
             data: { data: { courses: [] } },
+            isLoading: false,
         });
         mockUseUserCertificates.mockReturnValue({
             data: { data: [] },
+            isLoading: false,
         });
 
         render(<HomeStatsCards />);
@@ -107,18 +111,47 @@ describe('HomeStatsCards', () => {
         expect(screen.getByText('Contents Completed')).toBeInTheDocument();
         expect(screen.getByText('Certifications Earned')).toBeInTheDocument();
 
-        // All values should be "00"
-        const zeroValues = screen.getAllByText('00');
+        // All values should be "0" (not padded when zero)
+        const zeroValues = screen.getAllByText('0');
         expect(zeroValues.length).toBe(4);
     });
 
     it('handles undefined/null data gracefully', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({ data: undefined });
-        mockUseUserCertificates.mockReturnValue({ data: undefined });
+        mockUseUserEnrolledCollections.mockReturnValue({ 
+            data: undefined,
+            isLoading: false,
+        });
+        mockUseUserCertificates.mockReturnValue({ 
+            data: undefined,
+            isLoading: false,
+        });
 
         render(<HomeStatsCards />);
 
-        const zeroValues = screen.getAllByText('00');
+        const zeroValues = screen.getAllByText('0');
         expect(zeroValues.length).toBe(4);
+    });
+
+    it('shows loading state while data is being fetched', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+        });
+        mockUseUserCertificates.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+        });
+
+        render(<HomeStatsCards />);
+
+        // Should show loading placeholders
+        const loadingValues = screen.getAllByText('--');
+        expect(loadingValues.length).toBe(4);
+
+        // Cards should have pulse animation
+        const cards = document.querySelectorAll('.home-stat-card');
+        cards.forEach(card => {
+            expect(card).toHaveClass('animate-pulse');
+        });
     });
 });
