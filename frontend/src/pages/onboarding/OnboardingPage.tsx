@@ -13,7 +13,7 @@ const Onboarding = () => {
   const [screenHistory, setScreenHistory] = useState<string[]>([]);
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);
   const [selections, setSelections] = useState<Record<string, string>>({});
-  const [otherText, setOtherText] = useState<string>("");
+  const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: formApiData, isLoading, isError } = useFormRead({
@@ -44,7 +44,6 @@ const Onboarding = () => {
     const newHistory = screenHistory.slice(0, -1);
     setScreenHistory(newHistory);
     setCurrentScreenId(newHistory[newHistory.length - 1] ?? null);
-    setOtherText("");
   };
   const handleSkip = () => {
     // TODO: Remove this temporary logging once backend storage is configured
@@ -64,7 +63,6 @@ const Onboarding = () => {
       if (onboardingData.screens[nextId]) {
         setCurrentScreenId(nextId);
         setScreenHistory(prev => [...prev, nextId]);
-        setOtherText("");
       } else {
         console.error(`Invalid nextScreenId: "${nextId}" does not exist in onboarding screens`);
         // Fallback: treat as terminal screen and allow submission
@@ -76,7 +74,7 @@ const Onboarding = () => {
     // TODO: Remove this temporary logging once backend storage is configured
     console.log('[Onboarding] Final submission data:', {
       selections,
-      otherText: otherText || null,
+      otherText: otherTexts[currentScreenId ?? ''] || null,
       screenHistory,
       timestamp: new Date().toISOString(),
     });
@@ -89,7 +87,7 @@ const Onboarding = () => {
         screenTitle: screen?.title,
         fieldId,
         fieldLabel: field?.label,
-        otherText: fieldId === 'other' || fieldId === 'others' ? otherText : null,
+        otherText: field?.requiresTextInput ? otherTexts[screenId] ?? null : null,
       };
     });
     console.log('[Onboarding] Formatted selections:', formattedSelections);
@@ -101,7 +99,7 @@ const Onboarding = () => {
   const handleSelect = (fieldId: string) => {
     if (!currentScreenId) return;
     setSelections(prev => ({ ...prev, [currentScreenId]: fieldId }));
-    setOtherText("");   
+    setOtherTexts(prev => ({ ...prev, [currentScreenId]: "" }));
     // TODO: Remove this temporary logging once backend storage is configured
     console.log('[Onboarding] User selection:', {
       screenId: currentScreenId, fieldId,screenTitle: onboardingData?.screens[currentScreenId]?.title,
@@ -142,6 +140,7 @@ const Onboarding = () => {
     hasScreenNext || (anyFieldHasNext && (!selectedFieldId || selectedFieldHasNext));
   const showOtherInput = !!selectedField?.requiresTextInput;
   const sortedFields = [...(currentScreen?.fields ?? [])].sort((a, b) => a.index - b.index);
+  const otherText = otherTexts[currentScreenId] ?? "";
   const isSubmitDisabled = isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
   return (
     <div className="h-screen flex items-center justify-center bg-white p-4 md:p-6 lg:p-8">
@@ -189,7 +188,7 @@ const Onboarding = () => {
                       value={otherText}
                       onChange={e => {
                         const value = e.target.value;
-                        setOtherText(value);
+                        setOtherTexts(prev => ({ ...prev, [currentScreenId]: value }));
                         // TODO: Remove this temporary logging once backend storage is configured
                         console.log('[Onboarding] Other text input:', {
                           screenId: currentScreenId,

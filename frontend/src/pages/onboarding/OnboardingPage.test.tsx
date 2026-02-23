@@ -53,7 +53,7 @@ const mockOnboardingData = {
       fields: [
         { id: 'math', index: 0, label: 'Mathematics', nextScreenId: 'experience' },
         { id: 'science', index: 1, label: 'Science', nextScreenId: 'experience' },
-        { id: 'others', index: 2, label: 'Others' },
+        { id: 'others', index: 2, label: 'Others', requiresTextInput: true },
       ],
     },
     experience: {
@@ -400,7 +400,7 @@ describe('Onboarding Component', () => {
     expect(buttons[2]).toHaveTextContent('Parent');
   });
 
-  it('shows text input when others is selected and hides it when different option selected', () => {
+  it('shows text input when a field with requiresTextInput is selected', () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -414,35 +414,26 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate to skills screen
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // Initially, option chips should be visible
     expect(screen.getByText('Mathematics')).toBeInTheDocument();
     expect(screen.getByText('Science')).toBeInTheDocument();
     expect(screen.getByText('Others')).toBeInTheDocument();
-    
-    // Select "Others" - need to wait for re-render
-    const othersButton = screen.getByText('Others').closest('button');
-    fireEvent.click(othersButton!);
-    
-    // After selection, the input should appear
-    // Note: The component shows input based on selectedFieldId state
-    const input = screen.queryByPlaceholderText('Please type your preference here');
-    
-    // If input is shown, test it; otherwise the component keeps showing chips
-    if (input) {
-      expect(input).toBeInTheDocument();
-      expect(screen.queryByText('Mathematics')).not.toBeInTheDocument();
-      
-      fireEvent.change(input, { target: { value: 'Custom skill' } });
-      expect(input).toHaveValue('Custom skill');
-    } else {
-      // Component shows chips even when "Others" is selected
-      expect(screen.getByText('Others')).toBeInTheDocument();
-    }
+
+    // Select "Others" (has requiresTextInput: true)
+    fireEvent.click(screen.getByText('Others').closest('button')!);
+
+    // Text input should appear and chips should be hidden
+    const input = screen.getByPlaceholderText('Please type your preference here');
+    expect(input).toBeInTheDocument();
+    expect(screen.queryByText('Mathematics')).not.toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: 'Custom skill' } });
+    expect(input).toHaveValue('Custom skill');
   });
 
   it('renders logo and onboarding image', () => {
@@ -615,7 +606,7 @@ describe('Onboarding Component', () => {
     expect(screen.queryByLabelText('Go back')).not.toBeInTheDocument();
   });
 
-  it('clears other text when navigating back', () => {
+  it('preserves other text when navigating back and forward', () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -629,44 +620,28 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate to skills screen
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
-    // Verify we're on skills screen
-    expect(screen.getByText('What skills are you interested in?')).toBeInTheDocument();
-    
-    // Select "Others"
+
+    // Select "Others" and type text
     fireEvent.click(screen.getByText('Others').closest('button')!);
-    
-    // Check if input appears (it should based on showOtherInput logic)
-    const input = screen.queryByPlaceholderText('Please type your preference here');
-    
-    if (input) {
-      // If input is shown, type in it
-      fireEvent.change(input, { target: { value: 'Custom skill' } });
-      expect(input).toHaveValue('Custom skill');
-      
-      // Navigate back
-      fireEvent.click(screen.getByLabelText('Go back'));
-      
-      // Should be back on first screen
-      expect(screen.getByText('What is your role?')).toBeInTheDocument();
-      
-      // Navigate forward again
-      fireEvent.click(screen.getByText('Teacher').closest('button')!);
-      fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-      
-      // The "Others" selection is still in state, so input is shown
-      // But the otherText state was cleared by handleBack
-      const clearedInput = screen.getByPlaceholderText('Please type your preference here');
-      expect(clearedInput).toHaveValue('');
-    } else {
-      // If input doesn't show, just verify navigation works
-      fireEvent.click(screen.getByLabelText('Go back'));
-      expect(screen.getByText('What is your role?')).toBeInTheDocument();
-    }
+    const input = screen.getByPlaceholderText('Please type your preference here');
+    fireEvent.change(input, { target: { value: 'Custom skill' } });
+    expect(input).toHaveValue('Custom skill');
+
+    // Navigate back to first screen
+    fireEvent.click(screen.getByLabelText('Go back'));
+    expect(screen.getByText('What is your role?')).toBeInTheDocument();
+
+    // Navigate forward again
+    fireEvent.click(screen.getByText('Teacher').closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
+
+    // Text should be preserved
+    const restoredInput = screen.getByPlaceholderText('Please type your preference here');
+    expect(restoredInput).toHaveValue('Custom skill');
   });
 
   it('handles invalid nextScreenId gracefully', () => {
