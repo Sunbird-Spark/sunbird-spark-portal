@@ -2,30 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { FiArrowRight } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
-import { useQuery } from "@tanstack/react-query";
-import { CollectionService } from "@/services/collection/CollectionService";
+import { useCollection } from "@/hooks/useCollection";
 import type { TrackableCollection } from "@/types/TrackableCollections";
-import type { HierarchyContentNode } from "@/types/collectionTypes";
-
-const collectionService = new CollectionService();
-
-// Helper function to get the first leaf content ID from hierarchy
-const getFirstContentId = (node: HierarchyContentNode | undefined): string | null => {
-    if (!node) return null;
-    
-    // If this node has no children, it's a leaf node
-    if (!node.children || node.children.length === 0) {
-        return node.identifier;
-    }
-    
-    // Recursively search children for the first leaf node
-    for (const child of node.children) {
-        const firstId = getFirstContentId(child);
-        if (firstId) return firstId;
-    }
-    
-    return null;
-};
 
 // Circular progress component
 const CircularProgress = ({ progress }: { progress: number }) => {
@@ -72,28 +50,15 @@ const HomeContinueLearning = () => {
             (b.lastContentAccessTime ?? 0) - (a.lastContentAccessTime ?? 0)
         )[0];
 
-    // Fetch hierarchy only if we need to find the first content
-    const shouldFetchHierarchy = lastAccessedCourse && !lastAccessedCourse.lastReadContentId;
-    const { data: hierarchyData } = useQuery({
-        queryKey: ['course-hierarchy', lastAccessedCourse?.collectionId],
-        queryFn: async () => {
-            if (!lastAccessedCourse?.collectionId) return null;
-            return collectionService.getHierarchy(lastAccessedCourse.collectionId);
-        },
-        enabled: shouldFetchHierarchy,
-        staleTime: 5 * 60 * 1000,
-    });
+    // Fetch hierarchy only when lastReadContentId is absent, to find the first lesson
+    const needsHierarchy = !!lastAccessedCourse && !lastAccessedCourse.lastReadContentId;
+    const { data: collectionData } = useCollection(needsHierarchy ? lastAccessedCourse?.collectionId : undefined);
 
     if (isLoading || !lastAccessedCourse) return null;
 
     // Determine the content ID to navigate to
-    let contentId = lastAccessedCourse.lastReadContentId;
-    if (!contentId && hierarchyData?.data?.content) {
-        const firstContentId = getFirstContentId(hierarchyData.data.content);
-        if (firstContentId) {
-            contentId = firstContentId;
-        }
-    }
+    const contentId = lastAccessedCourse.lastReadContentId
+        ?? collectionData?.modules[0]?.lessons[0]?.id;
 
     const continueTo = contentId
         ? `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`
