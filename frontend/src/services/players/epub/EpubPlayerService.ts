@@ -142,6 +142,7 @@ export class EpubPlayerService {
         return css;
       })
       .catch(error => {
+        EpubPlayerService.cachedCss = '';
         EpubPlayerService.cssLoading = undefined;
         console.error('Failed to load epub player styles:', error);
         return '';

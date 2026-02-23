@@ -149,6 +149,7 @@ export class PdfPlayerService {
         return css;
       })
       .catch(error => {
+        PdfPlayerService.cachedCss = '';
         PdfPlayerService.cssLoading = undefined;
         console.error('Failed to load pdf player styles:', error);
         return '';

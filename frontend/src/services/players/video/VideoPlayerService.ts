@@ -147,6 +147,7 @@ export class VideoPlayerService {
         return css;
       })
       .catch(error => {
+        VideoPlayerService.cachedCss = '';
         VideoPlayerService.cssLoading = undefined;
         console.error('Failed to load video player styles:', error);
         return '';
