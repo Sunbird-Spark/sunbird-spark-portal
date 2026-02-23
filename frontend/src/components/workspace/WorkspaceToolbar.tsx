@@ -56,7 +56,7 @@ const WorkspaceToolbar = ({
     userRole === 'creator' ? getCreatorSegments(counts) : getReviewerSegments(counts);
   const showContentFilters = shouldShowContentFilters(activeView);
   const secondaryActions = getSecondaryActions(userRole);
-  const showRoleSwitcher = hasCreatorRole && hasReviewerRole;
+  const showRoleSwitcher = hasCreatorRole || hasReviewerRole;
 
   return (
     <div className="space-y-4 mb-6">
