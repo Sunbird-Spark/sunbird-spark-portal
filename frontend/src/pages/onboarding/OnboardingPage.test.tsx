@@ -1,8 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi, Mock, describe, beforeEach, it, expect } from 'vitest';
+import { vi, Mock, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
+import React from 'react';
 import Onboarding from './OnboardingPage';
 import { useFormRead } from '@/hooks/useForm';
+import { OnboardingFormData } from '@/types/formTypes';
 
 // Mock dependencies
 vi.mock('@/hooks/useForm');

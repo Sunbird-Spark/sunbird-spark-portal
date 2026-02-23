@@ -5,48 +5,14 @@ import { useNavigate } from "react-router-dom";
 import sunbirdLogo from "../../../src/assets/sunbird-logo.svg";
 import onboardingImage from "../../../src/assets/onboarding-image.svg";
 import { useFormRead } from "@/hooks/useForm";
-
-interface OnboardingField {
-  id: string;
-  index: number;
-  label: string;
-  nextScreenId?: string;
-}
-
-interface OnboardingScreen {
-  title: string;
-  selectionType: "single" | "multiple";
-  nextScreenId?: string;
-  fields: OnboardingField[];
-}
-
-interface OnboardingFormData {
-  isEnabled: boolean;
-  initialScreenId: string;
-  screens: Record<string, OnboardingScreen>;
-}
-
-// Trace the canonical path (screen-level next, then first field with a next)
-// to determine total number of steps for the progress indicator
-const computeTotalSteps = (data: OnboardingFormData): number => {
-  let current: string | undefined = data.initialScreenId;
-  let count = 0;
-  const visited = new Set<string>();
-  while (current && !visited.has(current)) {
-    visited.add(current);
-    count++;
-    const screenData: OnboardingScreen | undefined = data.screens[current];
-    if (!screenData) break;
-    current = screenData.nextScreenId ?? screenData.fields.find((f: OnboardingField) => f.nextScreenId)?.nextScreenId;
-  }
-  return count;
-};
+import { OnboardingFormData } from '@/types/formTypes';
+import { computeTotalSteps } from './utils';
+import { ProgressIndicator, OptionChip } from './OnboardingComponents';
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const [screenHistory, setScreenHistory] = useState<string[]>([]);
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);
-  // Per-screen single-selection: Record<screenId, selectedFieldId>
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [otherText, setOtherText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +28,7 @@ const Onboarding = () => {
   });
 
   const onboardingData: OnboardingFormData | undefined =
-    (formApiData?.data as any)?.form?.data;
+    (formApiData?.data as { form?: { data?: OnboardingFormData } })?.form?.data;
 
   useEffect(() => {
     if (onboardingData && !currentScreenId) {
@@ -109,7 +75,6 @@ const Onboarding = () => {
 
   const handleSubmit = () => {
     setIsSubmitting(true);
-    // TODO: persist selections to backend
     timeoutRef.current = window.setTimeout(() => {
       setIsSubmitting(false);
       navigate("/home");
@@ -122,7 +87,6 @@ const Onboarding = () => {
     setOtherText("");
   };
 
-  // Show spinner while form loads or while initializing the first screen
   if (isLoading || (onboardingData && !currentScreenId)) {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
@@ -155,94 +119,27 @@ const Onboarding = () => {
   const selectedFieldId = selections[currentScreenId] ?? "";
   const selectedField = currentScreen?.fields.find(f => f.id === selectedFieldId);
 
-  // Determine whether to show "Save and Proceed" or "Submit":
-  // - If the screen has a fixed nextScreenId → always "Save and Proceed"
-  // - If any field has a nextScreenId: show "Save and Proceed" until a terminal field is selected
-  // - Otherwise → "Submit"
   const hasScreenNext = !!currentScreen?.nextScreenId;
   const anyFieldHasNext = currentScreen?.fields.some(f => !!f.nextScreenId) ?? false;
   const selectedFieldHasNext = !!selectedField?.nextScreenId;
   const showNextButton =
     hasScreenNext || (anyFieldHasNext && (!selectedFieldId || selectedFieldHasNext));
 
-  // Show "other text input" only on skills screens when an "other/others" field is selected
   const showOtherInput =
     (selectedFieldId === "other" || selectedFieldId === "others") &&
     currentScreenId.startsWith("skills_");
 
-  const sortedFields = [...(currentScreen?.fields ?? [])].sort(
-    (a, b) => a.index - b.index
-  );
-
-  const isSubmitDisabled =
-    isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
-
-  const ProgressIndicator = () => (
-    <div className="flex items-center gap-2 mb-4">
-      {!isFirstScreen && (
-        <button
-          type="button"
-          onClick={handleBack}
-          disabled={isSubmitting}
-          className="flex items-center justify-center w-7 h-7 text-primary hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-          aria-label="Go back"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      )}
-      <div className="flex items-center gap-1">
-        {Array.from({ length: totalSteps }, (_, i) => (
-          <div
-            key={i}
-            className={`progress-dot ${i < currentStep ? "bg-primary" : "bg-[#C1C1C1]"}`}
-          />
-        ))}
-      </div>
-      <span className="text-base text-foreground ml-1">
-        {currentStep}/{totalSteps}
-      </span>
-    </div>
-  );
-
-  const OptionChip = ({
-    field,
-    isSelected,
-    onClick,
-  }: {
-    field: OnboardingField;
-    isSelected: boolean;
-    onClick: () => void;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`option-chip ${isSelected ? "option-chip-selected" : "option-chip-default"}`}
-    >
-      {isSelected && (
-        <div className="option-chip-checkmark">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="7.5" cy="7.5" r="6.5" stroke="rgba(255,255,255,0.6)" strokeWidth="2" />
-            <path d="M4 7.5L6.625 10L11 5" stroke="rgba(255,255,255,0.6)" strokeWidth="2" />
-          </svg>
-        </div>
-      )}
-      <span className="text-base font-normal">{field.label}</span>
-    </button>
-  );
+  const sortedFields = [...(currentScreen?.fields ?? [])].sort((a, b) => a.index - b.index);
+  const isSubmitDisabled = isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
 
   return (
     <div className="h-screen flex items-center justify-center bg-white p-4 md:p-6 lg:p-8">
       <div className="flex w-full max-w-7xl h-full max-h-[calc(100vh-4rem)] gap-6">
-        {/* Left Side - Form */}
         <div className="w-full lg:w-1/2 p-8 md:p-10 lg:p-12 flex flex-col bg-white rounded-3xl overflow-y-auto">
-          {/* Logo */}
           <div className="mb-6">
             <img src={sunbirdLogo} alt="Sunbird" className="onboarding-logo" />
           </div>
 
-          {/* Title */}
           <div className="mb-8">
             <h1 className="onboarding-title">
               We would love to help you personalize your experience!
@@ -251,7 +148,14 @@ const Onboarding = () => {
 
           <div className="flex-1">
             <div className={isFirstScreen ? "space-y-6" : "space-y-8"}>
-              <ProgressIndicator />
+              <ProgressIndicator
+                totalSteps={totalSteps}
+                currentStep={currentStep}
+                isFirstScreen={isFirstScreen}
+                onBack={handleBack}
+                isSubmitting={isSubmitting}
+              />
+              
               <div>
                 <h2
                   className={`${
@@ -260,6 +164,7 @@ const Onboarding = () => {
                 >
                   {currentScreen?.title}
                 </h2>
+                
                 {!showOtherInput ? (
                   <div className={isFirstScreen ? "onboarding-grid" : "grid grid-cols-3 gap-3 max-w-md"}>
                     {sortedFields.map(field => (
