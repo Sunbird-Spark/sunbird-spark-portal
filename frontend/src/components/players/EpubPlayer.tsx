@@ -63,6 +63,7 @@ export const EpubPlayer: React.FC<EpubPlayerProps> = ({
         if (cancelled) return;
 
         playerElement = await service.createElement(config);
+        if (cancelled) return;
         service.attachEventListeners(playerElement, handlePlayerEvent, handleTelemetryEvent);
 
         if (containerRef.current) {
