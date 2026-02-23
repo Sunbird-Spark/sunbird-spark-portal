@@ -16,7 +16,7 @@ vi.mock('../lib/http-client', () => ({
 
 /* ── Mock global fetch ── */
 const mockFetch = vi.fn();
-globalThis.fetch = mockFetch;
+vi.stubGlobal('fetch', mockFetch);
 
 describe('CertificateService', () => {
   let service: CertificateService;
@@ -148,7 +148,7 @@ describe('CertificateService', () => {
       const svgBlob = new Blob(['<svg/>'], { type: 'image/svg+xml' });
       await service.uploadAsset('asset-1', svgBlob, 'cert.svg', headers);
 
-      const fetchCall = mockFetch.mock.calls[0]!;
+      const fetchCall = mockFetch.mock.calls[0] as any[];
       expect(fetchCall[1].headers['X-User-ID']).toBe('userinjection');
     });
 
@@ -217,21 +217,21 @@ describe('CertificateService', () => {
     it('calls post with createdBy filter when provided', async () => {
       mockPost.mockResolvedValue({ data: { count: 0, content: [] }, status: 200, headers: {} });
       await service.searchLogos('org-1', 'user-1');
-      const call = mockPost.mock.calls[0]!;
+      const call = mockPost.mock.calls[0] as any[];
       expect(call[1].request.filters.createdBy).toBe('user-1');
     });
 
     it('calls post without createdBy when not provided', async () => {
       mockPost.mockResolvedValue({ data: { count: 0, content: [] }, status: 200, headers: {} });
       await service.searchLogos('org-1');
-      const call = mockPost.mock.calls[0]!;
+      const call = mockPost.mock.calls[0] as any[];
       expect(call[1].request.filters.createdBy).toBeUndefined();
     });
 
     it('passes correct channel filter', async () => {
       mockPost.mockResolvedValue({ data: { count: 0, content: [] }, status: 200, headers: {} });
       await service.searchLogos('org-abc');
-      const call = mockPost.mock.calls[0]!;
+      const call = mockPost.mock.calls[0] as any[];
       expect(call[1].request.filters.channel).toBe('org-abc');
     });
   });
@@ -252,7 +252,7 @@ describe('CertificateService', () => {
     it('calls post with certType filter', async () => {
       mockPost.mockResolvedValue({ data: { count: 0, content: [] }, status: 200, headers: {} });
       await service.searchCertTemplates('org-1');
-      const call = mockPost.mock.calls[0]!;
+      const call = mockPost.mock.calls[0] as any[];
       expect(call[1].request.filters.certType).toBe('cert template');
       expect(call[1].request.filters.channel).toBe('org-1');
     });
