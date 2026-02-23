@@ -108,6 +108,8 @@ describe('Home Page', () => {
                     courses: [{ courseId: 'c1' }, { courseId: 'c2' }],
                 },
             },
+            isLoading: false,
+            error: null,
         });
     });
 
@@ -146,6 +148,8 @@ describe('Home Page', () => {
     it('shows the onboarding subtitle when user has no enrollments', () => {
         mockUseUserEnrolledCollections.mockReturnValue({
             data: { data: { courses: [] } },
+            isLoading: false,
+            error: null,
         });
 
         renderHome();
@@ -172,6 +176,22 @@ describe('Home Page', () => {
         renderHome();
 
         expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
+        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
+    });
+
+    it('renders loading state when enrollments data is loading', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+        });
+
+        renderHome();
+
+        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
+        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
     });
 
     it('renders error state when user data fails to load', () => {
@@ -185,6 +205,22 @@ describe('Home Page', () => {
         renderHome();
 
         expect(screen.getByText('Network error')).toBeInTheDocument();
+        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
+    });
+
+    it('renders error state when enrollments data fails to load', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+            error: new Error('Failed to load enrollments'),
+        });
+
+        renderHome();
+
+        expect(screen.getByText('Failed to load enrollments')).toBeInTheDocument();
+        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
     });
 
     it('renders "Hi there" when user profile is not available', () => {
@@ -193,6 +229,11 @@ describe('Home Page', () => {
             isLoading: false,
             error: null,
             refetch: vi.fn(),
+        });
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [] } },
+            isLoading: false,
+            error: null,
         });
 
         renderHome();
@@ -268,6 +309,8 @@ describe('Home Page', () => {
     it('renders HomeDiscoverSections when user has no enrollments', () => {
         mockUseUserEnrolledCollections.mockReturnValue({
             data: { data: { courses: [] } },
+            isLoading: false,
+            error: null,
         });
 
         renderHome();
@@ -277,12 +320,17 @@ describe('Home Page', () => {
         expect(screen.queryByTestId('continue-learning')).not.toBeInTheDocument();
     });
 
-    it('renders HomeDiscoverSections when enrollment data is unavailable', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({ data: undefined });
+    it('does NOT render HomeDiscoverSections when enrollment data is still loading', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+        });
 
         renderHome();
 
-        expect(screen.getByTestId('discover-sections')).toBeInTheDocument();
+        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
+        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
         expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
     });
 
@@ -304,6 +352,8 @@ describe('Home Page', () => {
     it('hides in-progress grid when enrolled in exactly one course', () => {
         mockUseUserEnrolledCollections.mockReturnValue({
             data: { data: { courses: [{ courseId: 'c1' }] } },
+            isLoading: false,
+            error: null,
         });
 
         renderHome();
