@@ -13,11 +13,15 @@ vi.mock('@/components/home/HomeSidebar', () => ({
         </div>
     )
 }));
-vi.mock('@/components/home/HomeStatsCards', () => ({ default: () => <div data-testid="stats-cards" /> }));
-vi.mock('@/components/home/HomeContinueLearning', () => ({ default: () => <div data-testid="continue-learning" /> }));
-vi.mock('@/components/home/HomeInProgressGrid', () => ({ default: () => <div data-testid="inprogress-grid" /> }));
-vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
-vi.mock('@/components/home/HomeDiscoverSections', () => ({ default: () => <div data-testid="discover-sections" /> }));
+vi.mock('@/components/home/HomeDashboardContent', () => ({
+    default: ({ loading, error, enrolledCount }: { loading: boolean; error?: string; enrolledCount: number; onRetry: () => void }) => (
+        <div data-testid="dashboard-content"
+            data-loading={String(loading)}
+            data-error={error ?? ''}
+            data-enrolled={enrolledCount}
+        />
+    ),
+}));
 vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
 vi.mock('@/components/common/SearchModal', () => ({
@@ -142,7 +146,6 @@ describe('Home Page', () => {
         expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
         expect(screen.getByText('Welcome to a learning experience made just for you.')).toBeInTheDocument();
         expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
     });
 
     it('shows the onboarding subtitle when user has no enrollments', () => {
@@ -165,64 +168,6 @@ describe('Home Page', () => {
         expect(screen.queryByText('Your exciting learning journey starts here. Dive in!')).not.toBeInTheDocument();
     });
 
-    it('renders loading state when user data is loading', () => {
-        mockUseUserRead.mockReturnValue({
-            data: undefined,
-            isLoading: true,
-            error: null,
-            refetch: vi.fn(),
-        });
-
-        renderHome();
-
-        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
-        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
-    });
-
-    it('renders loading state when enrollments data is loading', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({
-            data: undefined,
-            isLoading: true,
-            error: null,
-        });
-
-        renderHome();
-
-        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
-        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
-    });
-
-    it('renders error state when user data fails to load', () => {
-        mockUseUserRead.mockReturnValue({
-            data: undefined,
-            isLoading: false,
-            error: new Error('Network error'),
-            refetch: vi.fn(),
-        });
-
-        renderHome();
-
-        expect(screen.getByText('Network error')).toBeInTheDocument();
-        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
-    });
-
-    it('renders error state when enrollments data fails to load', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({
-            data: undefined,
-            isLoading: false,
-            error: new Error('Failed to load enrollments'),
-        });
-
-        renderHome();
-
-        expect(screen.getByText('Failed to load enrollments')).toBeInTheDocument();
-        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
-    });
-
     it('renders "Hi there" when user profile is not available', () => {
         mockUseUserRead.mockReturnValue({
             data: undefined,
@@ -241,12 +186,60 @@ describe('Home Page', () => {
         expect(screen.getByText('Hi there')).toBeInTheDocument();
     });
 
+    it('passes loading=true to HomeDashboardContent when user data is loading', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+            refetch: vi.fn(),
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-loading', 'true');
+    });
+
+    it('passes loading=true to HomeDashboardContent when enrollments are loading', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-loading', 'true');
+    });
+
+    it('passes error message to HomeDashboardContent when user data fails', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+            error: new Error('Network error'),
+            refetch: vi.fn(),
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-error', 'Network error');
+    });
+
+    it('passes enrolledCount to HomeDashboardContent', () => {
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-enrolled', '2');
+    });
+
+    it('renders footer', () => {
+        renderHome();
+
+        expect(screen.getByTestId('footer')).toBeInTheDocument();
+    });
+
     it('handles sidebar toggle on desktop', () => {
         renderHome();
 
         expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-
-        // Sidebar is open by default on desktop
         expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
     });
 
@@ -286,79 +279,6 @@ describe('Home Page', () => {
         const changeNavBtn = screen.getByText('Change Nav');
         fireEvent.click(changeNavBtn);
 
-        // Verify the interaction happened without errors
         expect(changeNavBtn).toBeInTheDocument();
-    });
-
-    it('renders all main content sections when loaded', () => {
-        renderHome();
-
-        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
-        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
-        expect(screen.getByTestId('inprogress-grid')).toBeInTheDocument();
-        expect(screen.getByTestId('recommended-section')).toBeInTheDocument();
-        expect(screen.getByTestId('footer')).toBeInTheDocument();
-    });
-
-    it('renders the "Continue from where you left" section heading', () => {
-        renderHome();
-
-        expect(screen.getByText('Continue from where you left')).toBeInTheDocument();
-    });
-
-    it('renders HomeDiscoverSections when user has no enrollments', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({
-            data: { data: { courses: [] } },
-            isLoading: false,
-            error: null,
-        });
-
-        renderHome();
-
-        expect(screen.getByTestId('discover-sections')).toBeInTheDocument();
-        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('continue-learning')).not.toBeInTheDocument();
-    });
-
-    it('does NOT render HomeDiscoverSections when enrollment data is still loading', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({
-            data: undefined,
-            isLoading: true,
-            error: null,
-        });
-
-        renderHome();
-
-        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
-        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('stats-cards')).not.toBeInTheDocument();
-    });
-
-    it('renders full dashboard when user has enrollments', () => {
-        renderHome();
-
-        expect(screen.queryByTestId('discover-sections')).not.toBeInTheDocument();
-        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
-        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
-        expect(screen.getByTestId('recommended-section')).toBeInTheDocument();
-    });
-
-    it('shows in-progress grid when enrolled in more than one course', () => {
-        renderHome();
-
-        expect(screen.getByTestId('inprogress-grid')).toBeInTheDocument();
-    });
-
-    it('hides in-progress grid when enrolled in exactly one course', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({
-            data: { data: { courses: [{ courseId: 'c1' }] } },
-            isLoading: false,
-            error: null,
-        });
-
-        renderHome();
-
-        expect(screen.queryByTestId('inprogress-grid')).not.toBeInTheDocument();
-        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
     });
 });
