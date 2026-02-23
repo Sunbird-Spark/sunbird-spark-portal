@@ -8,6 +8,7 @@ import FAQSection from "@/components/landing/FAQSection";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
+import { useUserRead } from "@/hooks/useUserRead";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
@@ -16,7 +17,7 @@ import { useIsContentCreator } from "@/hooks/useUser";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import RelatedContentSection from "@/components/collection/RelatedContentSection";
 import CollectionContentArea from "@/components/collection/CollectionContentArea";
-import CertificatePreviewModal from "@/components/collection/CertificatePreviewModal";
+import CertificatePreviewModal, { formatIssuanceDateLong, type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import { useAuth } from "@/auth/AuthContext";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import "./collection.css";
@@ -33,6 +34,8 @@ const CollectionDetailPage = () => {
 
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const collectionData = collectionDataFromApi ?? null;
+  const { data: userReadData } = useUserRead();
+  const userProfile = userReadData?.data?.response;
   const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
   const { isEnrolledInCurrentBatch, contentStatusMap, courseProgressProps, batches, batchListLoading, batchListError,
     firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse, effectiveBatchId, isBatchEnded } = enrollment;
@@ -134,6 +137,17 @@ const CollectionDetailPage = () => {
     );
   };
 
+  const certificatePreviewDetails: CertificatePreviewDetails = useMemo(() => {
+    const recipientName = userProfile
+      ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined
+      : undefined;
+    return {
+      recipientName,
+      trainingName: collectionData?.title,
+      issuanceDate: formatIssuanceDateLong(new Date()),
+    };
+  }, [userProfile?.firstName, userProfile?.lastName, collectionData?.title]);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
@@ -226,6 +240,7 @@ const CollectionDetailPage = () => {
         open={certificatePreviewOpen}
         onClose={() => setCertificatePreviewOpen(false)}
         previewUrl={certificatePreviewUrl}
+        details={certificatePreviewDetails}
       />
       <Footer />
     </div>

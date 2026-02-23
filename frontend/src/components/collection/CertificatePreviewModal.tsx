@@ -1,20 +1,55 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { FiX } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
+
+export interface CertificatePreviewDetails {
+  recipientName?: string;
+  trainingName?: string;
+  /** Date string in "DD MMMM YYYY" format for template placeholder (e.g. "18 February 2025"). */
+  issuanceDate?: string;
+}
+
+/** Format date as "DD MMMM YYYY" for certificate template (e.g. 18 February 2025). */
+export function formatIssuanceDateLong(date: Date): string {
+  const day = date.getDate();
+  const d = day < 10 ? `0${day}` : String(day);
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return `${d} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
 
 interface CertificatePreviewModalProps {
   open: boolean;
   onClose: () => void;
   previewUrl: string;
+  details?: CertificatePreviewDetails;
+}
+
+function replacePlaceholders(
+  text: string,
+  recipientName: string,
+  trainingName: string,
+  issuanceDate: string
+): string {
+  let out = text
+    .replace(/\{\{\s*credentialSubject\.recipientName\s*\}\}/g, recipientName)
+    .replace(/\{\{\s*credentialSubject\.trainingName\s*\}\}/g, trainingName);
+  // Match dateFormat issuanceDate "format" (any quote, optional spaces). Case-insensitive for template variants.
+  out = out.replace(/\{\{\s*dateFormat\s+issuanceDate\s+["'][^"']*["']\s*\}\}/gi, issuanceDate);
+  out = out.replace(/\{\{\s*dateFormat\s*\(\s*issuanceDate\s*,\s*["'][^"']*["']\s*\)\s*\}\}/gi, issuanceDate);
+  return out;
 }
 
 export default function CertificatePreviewModal({
   open,
   onClose,
   previewUrl,
+  details,
 }: CertificatePreviewModalProps) {
   const { t } = useAppI18n();
+  const [src, setSrc] = useState<string>(previewUrl);
+  const [html, setHtml] = useState<string | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -24,6 +59,57 @@ export default function CertificatePreviewModal({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open || !previewUrl) {
+      setSrc(previewUrl);
+      setHtml(null);
+      return;
+    }
+    const name = details?.recipientName ?? "";
+    const course = details?.trainingName ?? "";
+    const date = details?.issuanceDate ?? "";
+    if (!name && !course && !date) {
+      setSrc(previewUrl);
+      setHtml(null);
+      return;
+    }
+
+    fetch(previewUrl)
+      .then((res) => (res.ok ? res.text() : null))
+      .then((text) => {
+        if (!text || (!text.includes("credentialSubject") && !text.includes("dateFormat"))) {
+          setSrc(previewUrl);
+          setHtml(null);
+          return;
+        }
+        const out = replacePlaceholders(text, name, course, date);
+        if (out.trim().toLowerCase().includes("<svg") || out.trim().toLowerCase().startsWith("<?xml")) {
+          if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+          const blob = new Blob([out], { type: "image/svg+xml" });
+          blobUrlRef.current = URL.createObjectURL(blob);
+          setSrc(blobUrlRef.current);
+          setHtml(null);
+        } else if (out.trim().toLowerCase().includes("<html") || out.trim().toLowerCase().includes("<body")) {
+          setHtml(out);
+          setSrc(previewUrl);
+        } else {
+          setSrc(previewUrl);
+          setHtml(null);
+        }
+      })
+      .catch(() => {
+        setSrc(previewUrl);
+        setHtml(null);
+      });
+
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, [open, previewUrl, details?.recipientName, details?.trainingName, details?.issuanceDate]);
 
   if (!open) return null;
 
@@ -54,11 +140,11 @@ export default function CertificatePreviewModal({
           </Button>
         </div>
         <div className="flex-1 min-h-0 p-4 overflow-auto">
-          <img
-            src={previewUrl}
-            alt={t("courseDetails.previewCertificate")}
-            className="w-full h-auto object-contain"
-          />
+          {html ? (
+            <iframe title={t("courseDetails.previewCertificate")} srcDoc={html} className="w-full min-h-[400px] border-0 rounded-lg bg-white" sandbox="allow-same-origin" />
+          ) : (
+            <img src={src} alt={t("courseDetails.previewCertificate")} className="w-full h-auto object-contain" />
+          )}
         </div>
       </div>
     </div>
