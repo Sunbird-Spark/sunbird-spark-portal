@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { FiLayout } from "react-icons/fi";
+import { Button } from "@/components/common/Button";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
@@ -75,6 +78,7 @@ export default function CollectionContentArea({
   setCertificatePreviewOpen,
 }: CollectionContentAreaProps) {
   const { t } = useAppI18n();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -104,9 +108,18 @@ export default function CollectionContentArea({
 
         {/* Right Sidebar */}
         <div className="lg:sticky lg:top-6 flex flex-col h-fit max-h-[calc(100vh_-_120px)] pr-3 custom-scrollbar">
-          {/* Creator: Batch management card */}
+          {/* Creator: Batch management card & Dashboard link */}
           {isAuthenticated && isContentCreator && collectionId && (
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col gap-3">
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 font-['Rubik'] text-sunbird-brick border-sunbird-brick hover:bg-sunbird-brick/5 bg-white shadow-sm"
+                onClick={() => navigate(`/collection/${collectionId}/dashboard/batches`)}
+                data-testid="view-dashboard-btn"
+              >
+                <FiLayout className="w-4 h-4" />
+                View Course Dashboard
+              </Button>
               <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
             </div>
           )}

@@ -1,5 +1,40 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 
+// ─── Dashboard cert-search / re-issue types ───────────────────────────────────
+export interface IssuedCertificate {
+  identifier: string;
+  name: string;
+  lastIssuedOn: string;
+  templateUrl: string;
+  token?: string;
+  type?: string;
+}
+
+export interface CertUserBatch {
+  batchId: string;
+  name: string;
+  courseId: string;
+  completionPercentage: number;
+  status: number;
+  issuedCertificates: IssuedCertificate[];
+  batch?: { batchId: string; name: string; createdBy: string };
+  completedOn?: number;
+  enrolledDate?: number;
+}
+
+export interface CertUserSearchResponse {
+  response: {
+    userId: string;
+    userName: string;
+    courses: {
+      courseId: string;
+      name: string;
+      contentType: string;
+      batches: CertUserBatch[];
+    };
+  };
+}
+
 export interface CertSignatory {
   name: string;
   designation: string;
@@ -240,6 +275,54 @@ export class CertificateService {
             'channel',
           ],
           limit: 100,
+        },
+      }
+    );
+  }
+
+  // ─── Dashboard: search a user's certificate status ───────────────────────────
+  /**
+   * Search for a user by Unique ID (userName) within a course.
+   * POST /certreg/v1/user/search
+   */
+  async searchCertUser(params: {
+    userName: string;
+    courseId: string;
+    createdBy: string;
+  }): Promise<ApiResponse<CertUserSearchResponse>> {
+    return getClient().post<CertUserSearchResponse>(
+      '/certreg/v1/user/search',
+      {
+        request: {
+          filters: {
+            userName: params.userName,
+            courseId: params.courseId,
+            createdBy: params.createdBy,
+          },
+        },
+      }
+    );
+  }
+
+  // ─── Dashboard: re-issue a certificate ───────────────────────────────────────
+  /**
+   * Re-issue a certificate for one or more users.
+   * POST /certreg/v1/cert/reissue
+   */
+  async reissueCertificate(params: {
+    courseId: string;
+    batchId: string;
+    userIds: string[];
+    createdBy: string;
+  }): Promise<ApiResponse<unknown>> {
+    return getClient().post<unknown>(
+      '/certreg/v1/cert/reissue',
+      {
+        request: {
+          courseId: params.courseId,
+          batchId: params.batchId,
+          userIds: params.userIds,
+          createdBy: params.createdBy,
         },
       }
     );

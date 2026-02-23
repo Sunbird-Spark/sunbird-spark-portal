@@ -25,6 +25,7 @@ import MyLearning from './pages/myLearning/MyLearning';
 import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
+import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
@@ -32,6 +33,7 @@ const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
 const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
 const GenericEditorProtected = withRoles(['content_creator'])(GenericEditorPage);
+const CourseDashboardProtected = withRoles(['content_creator'])(CourseDashboardPage);
 
 const AppRoutes: React.FC = () => {
   return (
@@ -57,6 +59,7 @@ const AppRoutes: React.FC = () => {
           <Route path=":collectionId/batch/:batchId" element={<CollectionDetailPage />}>
             <Route path="content/:contentId" element={null} />
           </Route>
+          <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardProtected />} />
         </Route>
 
         {/* Protected routes */}

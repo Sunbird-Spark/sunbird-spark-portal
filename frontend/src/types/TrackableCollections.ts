@@ -73,5 +73,5 @@ export interface TrackableCollection {
 }
 
 export interface CourseEnrollmentResponse {
-  courses: TrackableCollection[];
+  courses?: TrackableCollection[];
 }

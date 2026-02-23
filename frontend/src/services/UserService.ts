@@ -140,6 +140,19 @@ export class UserService {
         );
     }
 
+    public async searchUserByUserName(userName: string): Promise<ApiResponse<any>> {
+        return getClient().post(
+            '/user/v3/search',
+            {
+                request: {
+                    filters: {
+                        userName: userName.trim(),
+                    }
+                },
+            }
+        );
+    }
+
     public async searchMentors(rootOrgId: string, query: string = ''): Promise<ApiResponse<any>> {
         return getClient().post(
             '/user/v3/search',
