@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, MutableRefObject } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { certificateService } from "@/services/CertificateService";
 import { useCertTemplates } from "@/hooks/useCertificate";
@@ -14,7 +14,7 @@ import { emptyNewTemplate, resolveUserAndOrg } from "./utils";
  */
 function resolveSignatoryList(
   fullSignatoryList: Array<{ name: string; designation: string; id: string; image: string }> | undefined,
-  lastBuiltSignatoryListRef: React.MutableRefObject<Array<{ name: string; designation: string; id: string; image: string }>>
+  lastBuiltSignatoryListRef: MutableRefObject<Array<{ name: string; designation: string; id: string; image: string }>>
 ) {
   if (fullSignatoryList && fullSignatoryList.length > 0) {
     return fullSignatoryList;
