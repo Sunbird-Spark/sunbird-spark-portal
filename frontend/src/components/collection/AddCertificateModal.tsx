@@ -27,7 +27,7 @@ const AddCertificateModal = ({
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <Dialog.Content
-            className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 focus:outline-none overflow-hidden"
+            className="fixed left-1/2 top-1/2 z-50 flex flex-col -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 focus:outline-none overflow-hidden"
             style={{ width: "min(92vw, 56rem)", maxHeight: "90vh" }}
           >
             {/* Header */}
@@ -72,59 +72,61 @@ const AddCertificateModal = ({
             {/* Main view — two-panel */}
             {state.step === "idle" && state.view === "main" && (
               <>
-                {/* ── Current / Change tab bar (only when editing) ── */}
-                {state.hasExistingCert && (
-                  <div className="flex border-b border-border bg-white sticky top-0 z-0">
-                    {(["current", "change"] as const).map((tab) => (
-                      <button
-                        key={tab}
-                        type="button"
-                        onClick={() => state.setCertTab(tab)}
-                        className={cn(
-                          "flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors",
-                          state.certTab === tab
-                            ? "text-sunbird-brick"
-                            : "text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        {tab === "current" ? "Current Certificate" : "Change Certificate"}
-                        {state.certTab === tab && (
-                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div className="flex-1 overflow-y-auto min-h-0">
+                  {/* ── Current / Change tab bar (only when editing) ── */}
+                  {state.hasExistingCert && (
+                    <div className="flex border-b border-border bg-white sticky top-0 z-0">
+                      {(["current", "change"] as const).map((tab) => (
+                        <button
+                          key={tab}
+                          type="button"
+                          onClick={() => state.setCertTab(tab)}
+                          className={cn(
+                            "flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors",
+                            state.certTab === tab
+                              ? "text-sunbird-brick"
+                              : "text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          {tab === "current" ? "Current Certificate" : "Change Certificate"}
+                          {state.certTab === tab && (
+                            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {/* ── Current Certificate panel ── */}
-                {state.hasExistingCert && state.certTab === "current" && (
-                  <CurrentCertificatePanel existingCertTemplates={existingCertTemplates} />
-                )}
+                  {/* ── Current Certificate panel ── */}
+                  {state.hasExistingCert && state.certTab === "current" && (
+                    <CurrentCertificatePanel existingCertTemplates={existingCertTemplates} />
+                  )}
 
-                {/* ── Change Certificate panel (standard picker) ── */}
-                {(!state.hasExistingCert || state.certTab === "change") && (
-                  <div className="flex overflow-y-auto" style={{ maxHeight: "calc(90vh - 130px)" }}>
-                    <CertificateRulesPanel
-                      issueTo={state.issueTo}
-                      setIssueTo={state.setIssueTo}
-                      progressRule={state.progressRule}
-                      setProgressRule={state.setProgressRule}
-                      issueToAccepted={state.issueToAccepted}
-                      setIssueToAccepted={state.setIssueToAccepted}
-                      selectedTemplate={state.selectedTemplate}
-                    />
-                    <CertificateTemplatesPanel
-                      handleRefreshTemplates={state.handleRefreshTemplates}
-                      templatesRefreshing={state.templatesRefreshing}
-                      setView={state.setView}
-                      setErrorMsg={state.setErrorMsg}
-                      templatesLoading={state.templatesLoading}
-                      certTemplates={state.certTemplates}
-                      selectedTemplateId={state.selectedTemplateId}
-                      setPreviewTemplate={state.setPreviewTemplate}
-                    />
-                  </div>
-                )}
+                  {/* ── Change Certificate panel (standard picker) ── */}
+                  {(!state.hasExistingCert || state.certTab === "change") && (
+                    <div className="flex h-full">
+                      <CertificateRulesPanel
+                        issueTo={state.issueTo}
+                        setIssueTo={state.setIssueTo}
+                        progressRule={state.progressRule}
+                        setProgressRule={state.setProgressRule}
+                        issueToAccepted={state.issueToAccepted}
+                        setIssueToAccepted={state.setIssueToAccepted}
+                        selectedTemplate={state.selectedTemplate}
+                      />
+                      <CertificateTemplatesPanel
+                        handleRefreshTemplates={state.handleRefreshTemplates}
+                        templatesRefreshing={state.templatesRefreshing}
+                        setView={state.setView}
+                        setErrorMsg={state.setErrorMsg}
+                        templatesLoading={state.templatesLoading}
+                        certTemplates={state.certTemplates}
+                        selectedTemplateId={state.selectedTemplateId}
+                        setPreviewTemplate={state.setPreviewTemplate}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-white">
