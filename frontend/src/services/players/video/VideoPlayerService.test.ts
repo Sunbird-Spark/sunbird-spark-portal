@@ -249,16 +249,18 @@ describe('VideoPlayerService', () => {
   describe('createElement', () => {
     it('should create sunbird-video-player element', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
-      expect(element.tagName.toLowerCase()).toBe('sunbird-video-player');
+      const playerEl = element.querySelector('sunbird-video-player');
+      expect(playerEl?.tagName.toLowerCase()).toBe('sunbird-video-player');
     });
 
     it('should set player-config attribute with JSON config', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
-      const configAttr = element.getAttribute('player-config');
+      const playerEl = element.querySelector('sunbird-video-player');
+      const configAttr = playerEl?.getAttribute('player-config');
       expect(configAttr).toBeTruthy();
       
       const parsedConfig = JSON.parse(configAttr!);
@@ -267,16 +269,17 @@ describe('VideoPlayerService', () => {
 
     it('should set data-player-id attribute from metadata identifier', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
-      expect(element.getAttribute('data-player-id')).toBe('content-123');
+      const playerEl = element.querySelector('sunbird-video-player');
+      expect(playerEl?.getAttribute('data-player-id')).toBe('content-123');
     });
   });
 
   describe('attachEventListeners', () => {
     it('should attach playerEvent listener', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -284,7 +287,8 @@ describe('VideoPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'START', data: {} },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-video-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback).toHaveBeenCalled();
       expect(callback.mock.calls[0]?.[0].type).toBe('START');
@@ -292,7 +296,7 @@ describe('VideoPlayerService', () => {
 
     it('should attach telemetryEvent listener', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const telemetryCallback = vi.fn();
 
       service.attachEventListeners(element, undefined, telemetryCallback);
@@ -300,14 +304,15 @@ describe('VideoPlayerService', () => {
       const event = new CustomEvent('telemetryEvent', {
         detail: { event: 'IMPRESSION' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-video-player');
+      playerEl?.dispatchEvent(event);
 
       expect(telemetryCallback).toHaveBeenCalledWith({ event: 'IMPRESSION' });
     });
 
     it('should include playerId and timestamp in player event', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -315,7 +320,8 @@ describe('VideoPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'LOADED' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-video-player');
+      playerEl?.dispatchEvent(event);
 
       const eventData = callback.mock.calls[0]?.[0];
       expect(eventData?.playerId).toBe('content-123');
@@ -324,7 +330,7 @@ describe('VideoPlayerService', () => {
 
     it('should handle events without eid', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -332,14 +338,15 @@ describe('VideoPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { data: {} },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-video-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback.mock.calls[0]?.[0].type).toBe('unknown');
     });
 
     it('should be idempotent - calling multiple times should not create duplicate listeners', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -349,7 +356,8 @@ describe('VideoPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'START' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-video-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback).toHaveBeenCalledTimes(1);
     });
@@ -358,7 +366,7 @@ describe('VideoPlayerService', () => {
   describe('removeEventListeners', () => {
     it('should remove event listeners', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -367,14 +375,15 @@ describe('VideoPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'START' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-video-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback).not.toHaveBeenCalled();
     });
 
     it('should not throw error when removing listeners from element without listeners', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
       expect(() => service.removeEventListeners(element)).not.toThrow();
     });
