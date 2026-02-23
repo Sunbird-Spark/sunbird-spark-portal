@@ -152,34 +152,34 @@ describe('Express App', () => {
     expect(response.text).toBe('mock-kong-response');
   });
 
-  it('should handle /action/collection/v1/export via kongProxy', async () => {
+  it('should handle /action/collection/v1/export/:id via kongProxy', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
-      .post('/action/collection/v1/export')
+      .post('/action/collection/v1/export/do_123')
       .send({ request: {} })
       .expect(200);
 
     expect(response.text).toBe('mock-kong-response');
   });
 
-  it('should handle /action/collection/v1/import via kongProxy', async () => {
+  it('should handle /action/collection/v1/import/:id via kongProxy', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
-      .post('/action/collection/v1/import')
+      .post('/action/collection/v1/import/do_123')
       .send({ request: {} })
       .expect(200);
 
     expect(response.text).toBe('mock-kong-response');
   });
 
-  it('should handle /action/data/v3/telemetry via kongProxy', async () => {
+  it('should handle /action/data/v3/telemetry via knowlgMwProxy', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
       .post('/action/data/v3/telemetry')
       .send({ events: [] })
       .expect(200);
 
-    expect(response.text).toBe('mock-kong-response');
+    expect(response.text).toBe('mock-knowlg-response');
   });
 
   it('should handle POST requests to /action/* routes', async () => {

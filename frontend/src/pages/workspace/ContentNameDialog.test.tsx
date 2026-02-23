@@ -25,7 +25,7 @@ describe('ContentNameDialog', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Create Content')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Untitled Content')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Enter content name')).toBeInTheDocument();
   });
 
   it('should display custom optionTitle when provided', () => {
@@ -36,7 +36,7 @@ describe('ContentNameDialog', () => {
   it('should call onSubmit with trimmed name on form submit', () => {
     render(<ContentNameDialog {...defaultProps} />);
 
-    const input = screen.getByPlaceholderText('Untitled Content');
+    const input = screen.getByPlaceholderText('Enter content name');
     fireEvent.change(input, { target: { value: '  My Content  ' } });
     fireEvent.submit(input.closest('form')!);
 
@@ -46,7 +46,7 @@ describe('ContentNameDialog', () => {
   it('should not call onSubmit when name is empty or whitespace', () => {
     render(<ContentNameDialog {...defaultProps} />);
 
-    const input = screen.getByPlaceholderText('Untitled Content');
+    const input = screen.getByPlaceholderText('Enter content name');
     fireEvent.change(input, { target: { value: '   ' } });
     fireEvent.submit(input.closest('form')!);
 
@@ -63,7 +63,7 @@ describe('ContentNameDialog', () => {
   it('should enable Create button when name has content', () => {
     render(<ContentNameDialog {...defaultProps} />);
 
-    const input = screen.getByPlaceholderText('Untitled Content');
+    const input = screen.getByPlaceholderText('Enter content name');
     fireEvent.change(input, { target: { value: 'My Content' } });
 
     const createButton = screen.getByRole('button', { name: 'Create' });
@@ -87,7 +87,7 @@ describe('ContentNameDialog', () => {
   it('should not close when clicking dialog content area', () => {
     render(<ContentNameDialog {...defaultProps} />);
 
-    const input = screen.getByPlaceholderText('Untitled Content');
+    const input = screen.getByPlaceholderText('Enter content name');
     fireEvent.click(input.closest('.bg-white')!);
     expect(defaultProps.onClose).not.toHaveBeenCalled();
   });
@@ -96,14 +96,14 @@ describe('ContentNameDialog', () => {
     render(<ContentNameDialog {...defaultProps} isLoading={true} />);
 
     expect(screen.getByText('Creating...')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Untitled Content')).toBeDisabled();
+    expect(screen.getByPlaceholderText('Enter content name')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
   });
 
   it('should auto-focus the input field', () => {
     render(<ContentNameDialog {...defaultProps} />);
 
-    const input = screen.getByPlaceholderText('Untitled Content');
+    const input = screen.getByPlaceholderText('Enter content name');
     expect(input).toHaveFocus();
   });
 
@@ -124,7 +124,7 @@ describe('ContentNameDialog', () => {
   it('should reset name when dialog is closed via open prop', () => {
     const { rerender } = render(<ContentNameDialog {...defaultProps} />);
 
-    const input = screen.getByPlaceholderText('Untitled Content');
+    const input = screen.getByPlaceholderText('Enter content name');
     fireEvent.change(input, { target: { value: 'My Content' } });
 
     // Close the dialog by changing open to false
@@ -133,7 +133,7 @@ describe('ContentNameDialog', () => {
     // Reopen the dialog
     rerender(<ContentNameDialog {...defaultProps} open={true} />);
 
-    const reopenedInput = screen.getByPlaceholderText('Untitled Content');
+    const reopenedInput = screen.getByPlaceholderText('Enter content name');
     expect(reopenedInput).toHaveValue('');
   });
 
@@ -151,7 +151,7 @@ describe('ContentNameDialog', () => {
     it('should disable Create button when collection type is not selected', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
-      const input = screen.getByPlaceholderText('Untitled Content');
+      const input = screen.getByPlaceholderText('Enter collection name');
       fireEvent.change(input, { target: { value: 'My Collection' } });
 
       const createButton = screen.getByRole('button', { name: 'Create' });
@@ -161,7 +161,7 @@ describe('ContentNameDialog', () => {
     it('should enable Create button when name and collection type are filled', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
-      fireEvent.change(screen.getByPlaceholderText('Untitled Content'), { target: { value: 'My Collection' } });
+      fireEvent.change(screen.getByPlaceholderText('Enter collection name'), { target: { value: 'My Collection' } });
       fireEvent.change(screen.getByRole('combobox'), { target: { value: 'content-playlist' } });
 
       const createButton = screen.getByRole('button', { name: 'Create' });
@@ -171,11 +171,11 @@ describe('ContentNameDialog', () => {
     it('should call onSubmit with name and extra data', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
-      fireEvent.change(screen.getByPlaceholderText('Untitled Content'), { target: { value: 'My Collection' } });
+      fireEvent.change(screen.getByPlaceholderText('Enter collection name'), { target: { value: 'My Collection' } });
       fireEvent.change(screen.getByPlaceholderText('Enter a description'), { target: { value: 'A description' } });
       fireEvent.change(screen.getByRole('combobox'), { target: { value: 'digital-textbook' } });
 
-      fireEvent.submit(screen.getByPlaceholderText('Untitled Content').closest('form')!);
+      fireEvent.submit(screen.getByPlaceholderText('Enter collection name').closest('form')!);
 
       expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', {
         description: 'A description',
@@ -186,10 +186,10 @@ describe('ContentNameDialog', () => {
     it('should not include description when it is empty', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
-      fireEvent.change(screen.getByPlaceholderText('Untitled Content'), { target: { value: 'My Collection' } });
+      fireEvent.change(screen.getByPlaceholderText('Enter collection name'), { target: { value: 'My Collection' } });
       fireEvent.change(screen.getByRole('combobox'), { target: { value: 'question-paper' } });
 
-      fireEvent.submit(screen.getByPlaceholderText('Untitled Content').closest('form')!);
+      fireEvent.submit(screen.getByPlaceholderText('Enter collection name').closest('form')!);
 
       expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', {
         description: undefined,
