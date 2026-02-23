@@ -12,7 +12,10 @@ const PLAYBACK_MIME_TYPES = [
   'application/epub',
 ];
 
-const OTHER_MIME_TYPES = ['h5p', 'html', 'ecml'];
+const OTHER_MIME_TYPES = [
+  'application/vnd.ekstep.h5p-archive',
+  'application/vnd.ekstep.html-archive',
+];
 
 export interface ConsumptionSummary {
   progress?: number;
@@ -53,13 +56,11 @@ function calculatePlaybackProgress(
 }
 
 function isPlaybackMime(mimeType: string): boolean {
-  const mime = (mimeType || '').toLowerCase();
-  return PLAYBACK_MIME_TYPES.some((p) => mime.includes(p));
+  return PLAYBACK_MIME_TYPES.indexOf(mimeType ?? '') > -1;
 }
 
 function isOtherMimeType(mimeType: string): boolean {
-  const mime = (mimeType || '').toLowerCase();
-  return OTHER_MIME_TYPES.some((p) => mime.includes(p));
+  return OTHER_MIME_TYPES.indexOf(mimeType ?? '') > -1;
 }
 
 /**
