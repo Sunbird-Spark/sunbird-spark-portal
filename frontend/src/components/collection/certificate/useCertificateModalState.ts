@@ -224,7 +224,31 @@ export function useCertificateModalState(
         reqHeaders
       );
 
-      queryClient.refetchQueries({ queryKey: ["batchList", courseId] });
+      // Optimistically update the cache so the UI reflects instantly
+      queryClient.setQueryData<any[]>(["batchList", courseId, true], (old) => {
+        if (!old) return old;
+        return old.map((b) => {
+          if (b.id === batchId) {
+            return {
+              ...b,
+              certTemplates: {
+                ...(b.certTemplates || {}),
+                [selectedTemplateId]: {
+                  identifier: selectedTemplateId,
+                  name: selectedTemplate.name,
+                },
+              },
+            };
+          }
+          return b;
+        });
+      });
+
+      // Invalidate after a delay for ES to index
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["batchList", courseId] });
+      }, 2000);
+
       setStep("done");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.");
