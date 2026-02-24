@@ -19,7 +19,7 @@ const PersonalInformation = ({ user }: PersonalInformationProps) => {
     const pendingCaptchaAction = useRef<((token?: string) => void) | null>(null);
 
     const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
-    const googleCaptchaSiteKey = (captchaSiteKeyData as any)?.result?.response?.value || import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY || '';
+    const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
 
     const handleCaptchaChange = (token: string | null) => {
         if (token && pendingCaptchaAction.current) {

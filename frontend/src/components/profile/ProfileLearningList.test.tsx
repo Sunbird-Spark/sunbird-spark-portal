@@ -51,8 +51,8 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { courseId: '1', status: 1, courseName: 'Ongoing Course', completionPercentage: 50 },
-                        { courseId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
+                        { batchId: '1', status: 1, courseName: 'Ongoing Course', completionPercentage: 50 },
+                        { batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
                     ]
                 }
             },
@@ -102,7 +102,7 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { courseId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
+                        { batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
                     ]
                 }
             },
@@ -165,13 +165,13 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { courseId: '1', status: 1, courseName: 'Course 1' },
-                        { courseId: '2', status: 1, courseName: 'Course 2' },
-                        { courseId: '3', status: 1, courseName: 'Course 3' },
-                        { courseId: '4', status: 1, courseName: 'Course 4' },
-                        { courseId: '5', status: 1, courseName: 'Course 5' },
-                        { courseId: '6', status: 1, courseName: 'Course 6' },
-                        { courseId: '7', status: 1, courseName: 'Course 7' },
+                        { batchId: '1', status: 1, courseName: 'Course 1' },
+                        { batchId: '2', status: 1, courseName: 'Course 2' },
+                        { batchId: '3', status: 1, courseName: 'Course 3' },
+                        { batchId: '4', status: 1, courseName: 'Course 4' },
+                        { batchId: '5', status: 1, courseName: 'Course 5' },
+                        { batchId: '6', status: 1, courseName: 'Course 6' },
+                        { batchId: '7', status: 1, courseName: 'Course 7' },
                     ]
                 }
             },
@@ -209,14 +209,14 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { courseId: '1', status: 1, courseName: 'Ongoing 1' },
-                        { courseId: '2', status: 1, courseName: 'Ongoing 2' },
-                        { courseId: '3', status: 1, courseName: 'Ongoing 3' },
-                        { courseId: '4', status: 1, courseName: 'Ongoing 4' },
-                        { courseId: '5', status: 1, courseName: 'Ongoing 5' },
-                        { courseId: '6', status: 1, courseName: 'Ongoing 6' },
-                        { courseId: '7', status: 1, courseName: 'Ongoing 7' },
-                        { courseId: '8', status: 2, courseName: 'Completed 1' },
+                        { batchId: '1', status: 1, courseName: 'Ongoing 1' },
+                        { batchId: '2', status: 1, courseName: 'Ongoing 2' },
+                        { batchId: '3', status: 1, courseName: 'Ongoing 3' },
+                        { batchId: '4', status: 1, courseName: 'Ongoing 4' },
+                        { batchId: '5', status: 1, courseName: 'Ongoing 5' },
+                        { batchId: '6', status: 1, courseName: 'Ongoing 6' },
+                        { batchId: '7', status: 1, courseName: 'Ongoing 7' },
+                        { batchId: '8', status: 2, courseName: 'Completed 1' },
                     ]
                 }
             },

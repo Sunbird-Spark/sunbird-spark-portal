@@ -232,7 +232,7 @@ const ProfileLearningList = () => {
                 ) : (
                     visibleCourses.map((course, index) => (
                         <CourseRow
-                            key={`${course.courseId || "course"}-${index}`}
+                            key={`${course.batchId || "course"}-${index}`}
                             course={course}
                         />
                     ))
