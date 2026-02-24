@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useRef } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
 import ResourceFormField from "./ResourceFormField";
 import { useResourceForm } from "../../hooks/useResourceForm";
@@ -33,6 +33,8 @@ interface ResourceFormDialogProps {
   orgFramework: string;
   formSubType?: string;
   title?: string;
+  onFormLoadStart?: () => void;
+  onFormLoadComplete?: () => void;
 }
 
 const processFormSubmission = (
@@ -89,7 +91,10 @@ export default function ResourceFormDialog({
   orgFramework,
   formSubType = 'resource',
   title = 'Create Content',
+  onFormLoadStart,
+  onFormLoadComplete,
 }: ResourceFormDialogProps) {
+  const [showDialog, setShowDialog] = useState(false);
   const {
     fields,
     formValues,
@@ -97,24 +102,43 @@ export default function ResourceFormDialog({
     fetchError,
     openDropdown,
     setOpenDropdown,
-    fetchAttempted,
+    resetState,
     fetchFormAndFramework,
     getOptionsForField,
     handleFieldChange,
     handleMultiSelectToggle,
     canSubmit,
-  } = useResourceForm(open, orgChannelId, orgFramework, formSubType);
+  } = useResourceForm(orgChannelId, orgFramework, formSubType);
 
   const dropdownRef = useRef<HTMLDivElement>(null!);
 
   useEffect(() => {
-    if (!open) return;
+    if (open && !showDialog) {
+      onFormLoadStart?.();
+      fetchFormAndFramework()
+        .then(() => {
+          setShowDialog(true);
+          onFormLoadComplete?.();
+        })
+        .catch(() => {
+          setShowDialog(true);
+          onFormLoadComplete?.();
+        });
+    }
+    if (!open) {
+      setShowDialog(false);
+      resetState();
+    }
+  }, [open, showDialog, fetchFormAndFramework, resetState, onFormLoadStart, onFormLoadComplete]);
+
+  useEffect(() => {
+    if (!showDialog) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !isLoading) onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, isLoading, onClose]);
+  }, [showDialog, isLoading, onClose]);
 
   useEffect(() => {
     if (!openDropdown) return;
@@ -128,6 +152,19 @@ export default function ResourceFormDialog({
   }, [openDropdown, setOpenDropdown]);
 
   if (!open) return null;
+
+  if (isFetchingForm) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+          <p className="text-sm text-white font-rubik">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!showDialog) return null;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -149,9 +186,8 @@ export default function ResourceFormDialog({
       >
         <h2 className="text-xl font-bold font-rubik text-foreground mb-2">{title}</h2>
         <p className="text-sm text-muted-foreground mb-4 font-rubik">Fill in the details to create your content</p>
-        {isFetchingForm && <LoadingState />}
-        {fetchError && <ErrorState error={fetchError} onRetry={() => { fetchAttempted.current = false; fetchFormAndFramework(); }} />}
-        {!isFetchingForm && !fetchError && fields.length > 0 && (
+        {fetchError && <ErrorState error={fetchError} onRetry={fetchFormAndFramework} />}
+        {!fetchError && fields.length > 0 && (
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               {fields.map((field) => (
