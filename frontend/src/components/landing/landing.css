@@ -87,7 +87,7 @@
 
 /* ── DynamicCategorySection ─────────────────────────────────── */
 .category-section {
-    @apply pt-[2.5rem] pb-8 bg-white;
+    @apply pt-[3rem] pb-8 bg-white;
 }
 
 .category-section-header {
@@ -140,7 +140,7 @@
 
 /* ── DynamicContentSection ──────────────────────────────────── */
 .content-section {
-    @apply pt-8 lg:pt-[3.75rem] pb-8 bg-white;
+    @apply pt-1 pb-8 bg-white;
 }
 
 .content-section-home {
