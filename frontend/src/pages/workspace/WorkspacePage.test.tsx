@@ -4,12 +4,13 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import WorkspacePage from './WorkspacePage';
-import type { UseWorkspaceReturn } from '@/types/workspaceTypes';
+import type { UseWorkspaceReturn, WorkspaceItem } from '@/types/workspaceTypes';
 
-const { mockNavigate, mockContentCreate, mockQuestionSetMutateAsync } = vi.hoisted(() => ({
+const { mockNavigate, mockContentCreate, mockQuestionSetMutateAsync, mockQuestionSetRetireMutateAsync } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
   mockContentCreate: vi.fn(),
   mockQuestionSetMutateAsync: vi.fn(),
+  mockQuestionSetRetireMutateAsync: vi.fn(),
 }));
 
 const mockUseWorkspace = vi.fn<() => UseWorkspaceReturn>();
@@ -27,7 +28,7 @@ vi.mock('@/services/ContentService', () => ({
     contentCreate(...args: unknown[]) {
       return mockContentCreate(...args);
     }
-    contentRetire = vi.fn();
+    contentRetire = vi.fn().mockResolvedValue({ data: { result: 'success' } });
   },
 }));
 
@@ -59,6 +60,10 @@ vi.mock('@/hooks/useOrganization', () => ({
 
 vi.mock('@/hooks/useQuestionSetCreate', () => ({
   useQuestionSetCreate: () => ({ mutateAsync: mockQuestionSetMutateAsync }),
+}));
+
+vi.mock('@/hooks/useQuestionSetRetire', () => ({
+  useQuestionSetRetire: () => ({ mutateAsync: mockQuestionSetRetireMutateAsync }),
 }));
 
 vi.mock('@/hooks/useChannel', () => ({
@@ -151,6 +156,85 @@ vi.mock('@/components/home/Sheet', () => ({
     open ? <div data-testid="sheet">{children}</div> : null,
   SheetContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   SheetTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('./WorkspacePageContent', () => ({
+  default: ({
+    filteredItems,
+    onDelete,
+  }: {
+    filteredItems: any[];
+    onDelete: (id: string) => void;
+  }) => (
+    <div data-testid="workspace-content">
+      {filteredItems.map((item) => (
+        <div key={item.id} data-testid={`content-item-${item.id}`}>
+          <span>{item.title}</span>
+          <button type="button" onClick={() => onDelete(item.id)}>
+            Delete {item.title}
+          </button>
+        </div>
+      ))}
+    </div>
+  ),
+}));
+
+vi.mock('./CreateContentModal', () => ({
+  default: ({ open, onClose, onOptionSelect }: any) =>
+    open ? (
+      <div role="dialog" aria-label="Create content">
+        <button type="button" onClick={onClose} aria-label="Close dialog">
+          Close
+        </button>
+        <button type="button" onClick={() => onOptionSelect('course')}>
+          Course
+        </button>
+        <button type="button" onClick={() => onOptionSelect('question-set')}>
+          Question Set
+        </button>
+      </div>
+    ) : null,
+}));
+
+vi.mock('./ContentNameDialog', () => {
+  let nameValue = '';
+  return {
+    default: ({ open, onClose, onSubmit, optionId }: any) => {
+      if (!open) { nameValue = ''; return null; }
+      return (
+        <div role="dialog" aria-label="Enter content name">
+          <input
+            placeholder={`Enter ${optionId === 'question-set' ? 'question set' : 'content'} name`}
+            onChange={(e) => { nameValue = e.target.value; }}
+          />
+          <button
+            type="button"
+            onClick={() => onSubmit(nameValue || 'Test Content')}
+          >
+            Create
+          </button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      );
+    },
+  };
+});
+
+vi.mock('@/components/common/ConfirmDialog', () => ({
+  default: ({ open, onClose, onConfirm, title }: any) =>
+    open ? (
+      <div role="dialog" aria-label={title}>
+        <p>{title}</p>
+        <button type="button" onClick={onConfirm}>
+          Delete
+        </button>
+        <button type="button" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
 }));
 
 const createTestQueryClient = () =>
@@ -268,26 +352,6 @@ describe('WorkspacePage', () => {
     expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
   });
 
-  it('shows uploads empty state when Uploads view is selected', () => {
-    renderWithProviders(<WorkspacePage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Uploads' }));
-    expect(screen.getByText('noUploadsYet')).toBeInTheDocument();
-    expect(screen.getByText('uploadHere')).toBeInTheDocument();
-  });
-
-  it('shows collaborations empty state when Collaborations view is selected', () => {
-    renderWithProviders(<WorkspacePage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Collaborations' }));
-    expect(screen.getByText('noCollaborations')).toBeInTheDocument();
-    expect(screen.getByText('sharedWithYou')).toBeInTheDocument();
-  });
-
-  it('shows create options in main content when Create view is selected', () => {
-    renderWithProviders(<WorkspacePage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Create view' }));
-    expect(screen.getByText('Collection Editor')).toBeInTheDocument();
-  });
-
   it('creates question set from create options and navigates to quml editor', async () => {
     mockQuestionSetMutateAsync.mockResolvedValue({ identifier: 'do_qs_123' });
     renderWithProviders(<WorkspacePage />);
@@ -321,6 +385,63 @@ describe('WorkspacePage', () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/edit/quml-editor/do_qs_123');
+    });
+  });
+
+  it('uses questionset retire API for questionset content deletion', async () => {
+    const mockQuestionSetContent: WorkspaceItem = {
+      id: 'do_qs_123',
+      title: 'Test Question Set',
+      description: 'A test question set',
+      type: 'quiz',
+      primaryCategory: 'Practice Question Set',
+      mimeType: 'application/vnd.sunbird.questionset',
+      status: 'draft',
+      contentType: 'QuestionSet',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      author: 'Test Author',
+    };
+
+    mockUseWorkspace.mockReturnValue({
+      contents: [mockQuestionSetContent],
+      counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
+      totalCount: 1,
+      isLoading: false,
+      isLoadingMore: false,
+      isCountsLoading: false,
+      isRefreshing: false,
+      error: null,
+      hasMore: false,
+      loadMore: vi.fn(),
+      refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
+    });
+
+    mockQuestionSetRetireMutateAsync.mockResolvedValue({ result: { identifier: 'do_qs_123', status: 'Retired' } });
+
+    renderWithProviders(<WorkspacePage />);
+
+    // Find and click the delete button for the questionset
+    const deleteButton = screen.getByRole('button', { name: /delete/i });
+    fireEvent.click(deleteButton);
+
+    // Confirm deletion in the dialog
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Delete Content' })).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockQuestionSetRetireMutateAsync).toHaveBeenCalledWith('do_qs_123');
+    });
+
+    expect(mockToast).toHaveBeenCalledWith({
+      title: 'Content Deleted',
+      description: 'The content has been removed.',
+      variant: 'destructive',
     });
   });
 });

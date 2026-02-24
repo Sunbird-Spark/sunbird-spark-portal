@@ -1,15 +1,18 @@
 import { useContentSearch } from "@/hooks/useContent";
 import { CourseGrid } from "@/components/common/CourseGrid";
 import { ContentSearchRequest } from "@/types/workspaceTypes";
+import "./landing.css";
 
 interface DynamicContentSectionProps {
   title: string;
   criteria?: {
     request: ContentSearchRequest;
   };
+  sectionClassName?: string;
+  innerClassName?: string;
 }
 
-const DynamicContentSection = ({ title, criteria }: DynamicContentSectionProps) => {
+const DynamicContentSection = ({ title, criteria, sectionClassName = "content-section", innerClassName = "landing-section-inner" }: DynamicContentSectionProps) => {
   const { data, isLoading, error } = useContentSearch({
     request: criteria?.request,
     enabled: !!criteria?.request,
@@ -17,13 +20,13 @@ const DynamicContentSection = ({ title, criteria }: DynamicContentSectionProps) 
 
   if (isLoading) {
     return (
-      <section className="pt-8 lg:pt-[3.75rem] pb-8 bg-white">
-        <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
-          <div className="h-8 w-64 bg-gray-200 animate-pulse mb-6 rounded"></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-             {[1, 2, 3].map((i) => (
-               <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-[1.25rem]"></div>
-             ))}
+      <section className={sectionClassName}>
+        <div className={innerClassName}>
+          <div className="content-section-skeleton-title"></div>
+          <div className="content-section-skeleton-grid">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="content-section-skeleton-card"></div>
+            ))}
           </div>
         </div>
       </section>
@@ -37,8 +40,8 @@ const DynamicContentSection = ({ title, criteria }: DynamicContentSectionProps) 
   const contents = data.data.content || [];
 
   return (
-    <section className="pt-8 lg:pt-[3.75rem] pb-8 bg-white">
-      <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
+    <section className={sectionClassName}>
+      <div className={innerClassName}>
         <CourseGrid
           title={title}
           courses={contents}

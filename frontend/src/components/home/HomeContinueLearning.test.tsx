@@ -162,6 +162,77 @@ describe('HomeContinueLearning', () => {
         );
     });
 
+    it('renders a freshly joined course with no content accessed yet', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [{
+                        courseId: 'course-new',
+                        courseName: 'New Course',
+                        collectionId: 'col-new',
+                        batchId: 'batch-new',
+                        completionPercentage: 0,
+                        lastContentAccessTime: undefined,
+                        lastReadContentId: undefined,
+                        courseLogoUrl: 'https://example.com/new.png',
+                        content: { primaryCategory: 'Course', name: 'New Course', appIcon: '' },
+                    }],
+                },
+            },
+            isLoading: false,
+        });
+        mockUseCollection.mockReturnValue({
+            data: {
+                modules: [{ lessons: [{ id: 'first-lesson' }] }],
+            },
+        });
+
+        renderComponent();
+
+        expect(screen.getByText('New Course')).toBeInTheDocument();
+        expect(screen.getByText('Completed : 0%')).toBeInTheDocument();
+
+        const button = screen.getByRole('button', { name: /Continue Learning/i });
+        fireEvent.click(button);
+
+        // Falls back to the first lesson of the first module
+        expect(mockNavigate).toHaveBeenCalledWith(
+            '/collection/col-new/batch/batch-new/content/first-lesson'
+        );
+    });
+
+    it('prefers the most recently accessed course over a freshly joined course', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [
+                        {
+                            courseId: 'course-new',
+                            courseName: 'Just Joined Course',
+                            collectionId: 'col-new',
+                            batchId: 'batch-new',
+                            completionPercentage: 0,
+                            lastContentAccessTime: undefined,
+                            lastReadContentId: undefined,
+                            courseLogoUrl: '',
+                            content: { primaryCategory: 'Course', name: 'Just Joined Course', appIcon: '' },
+                        },
+                        {
+                            ...mockCourses[0], // has lastContentAccessTime: 1700000000
+                        },
+                    ],
+                },
+            },
+            isLoading: false,
+        });
+
+        renderComponent();
+
+        // The accessed course should be shown, not the freshly joined one
+        expect(screen.getByText('React Fundamentals')).toBeInTheDocument();
+        expect(screen.queryByText('Just Joined Course')).not.toBeInTheDocument();
+    });
+
     it('renders a placeholder when no thumbnail is available', () => {
         mockUseUserEnrolledCollections.mockReturnValue({
             data: {
