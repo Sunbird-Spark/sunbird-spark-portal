@@ -1,7 +1,5 @@
 /* Sunbird Joyful Design System - Professional Training LMS */
 
-@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -894,6 +892,9 @@
     transition: all 0.3s;
     width: 7rem;
     height: 5.125rem;
+    text-align: center;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .option-chip-selected {
@@ -1043,4 +1044,8 @@
     background-attachment: fixed;
   }
 
+  /* Hide Google reCAPTCHA Badge */
+  .grecaptcha-badge {
+    visibility: hidden !important;
+  }
 }

@@ -9,7 +9,28 @@
 }
 
 .home-content-wrapper {
-    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+    /* Single source of truth for horizontal padding - used for both padding and full-bleed calculations */
+    --hcw-pl: 1rem;
+    --hcw-pr: 1rem;
+    @apply py-4 transition-all;
+    padding-left: var(--hcw-pl);
+    padding-right: var(--hcw-pr);
+}
+
+@media (min-width: 768px) {
+    .home-content-wrapper {
+        --hcw-pl: 1.5rem;
+        --hcw-pr: 1.5rem;
+        @apply py-6;
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-content-wrapper {
+        --hcw-pl: 1.625rem;
+        --hcw-pr: 6.25rem;
+        @apply py-8;
+    }
 }
 
 .home-welcome-title {

@@ -39,11 +39,29 @@ const CollectionDetailPage = () => {
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
 
+  const currentUserId = userAuthInfoService.getUserId();
+  const isCreatorViewingOwnCollection =
+    !!isAuthenticated &&
+    !!collectionData?.createdBy &&
+    !!currentUserId &&
+    collectionData.createdBy === currentUserId;
+
+  const [, setAuthRefresh] = useState(0);
+  const triedAuthRefreshRef = useRef(false);
   useEffect(() => {
-    if (!collectionId || hasBatchInRoute) return;
+    if (!isAuthenticated || userAuthInfoService.getUserId() || triedAuthRefreshRef.current) return;
+    triedAuthRefreshRef.current = true;
+    userAuthInfoService
+      .getAuthInfo()
+      .then(() => setAuthRefresh((n) => n + 1))
+      .catch(() => {});
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!collectionId || hasBatchInRoute || isCreatorViewingOwnCollection) return;
     const batchId = enrollment.enrollmentForCollection?.batchId;
     if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true });
-  }, [collectionId, hasBatchInRoute, enrollment.enrollmentForCollection?.batchId, navigate]);
+  }, [collectionId, hasBatchInRoute, isCreatorViewingOwnCollection, enrollment.enrollmentForCollection?.batchId, navigate]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const contentBlocked = isTrackable && !isAuthenticated;
@@ -83,6 +101,7 @@ const CollectionDetailPage = () => {
     isBatchEnded,
     mimeType: playerMetadata?.mimeType,
     currentContentStatus,
+    skipContentStateUpdate: isCreatorViewingOwnCollection,
   });
 
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
@@ -95,14 +114,14 @@ const CollectionDetailPage = () => {
     if (!firstLesson) return;
     const mime = (firstLesson.mimeType ?? '').toLowerCase();
     if (mime === 'application/vnd.ekstep.content-collection') return;
-    if (!isTrackable) {
+    if (!isTrackable || isCreatorViewingOwnCollection) {
       navigate(`/collection/${collectionId}/content/${firstLesson.id}`, { replace: true });
       return;
     }
     if (hasBatchInRoute && batchIdParam) {
       navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstLesson.id}`, { replace: true });
     }
-  }, [contentId, collectionData, collectionId, navigate, isTrackable, hasBatchInRoute, batchIdParam]);
+  }, [contentId, collectionData, collectionId, navigate, isTrackable, isCreatorViewingOwnCollection, hasBatchInRoute, batchIdParam]);
 
   useEffect(() => {
     const firstId = collectionData?.modules?.[0]?.id;
@@ -195,6 +214,7 @@ const CollectionDetailPage = () => {
               firstCertPreviewUrl={firstCertPreviewUrl}
               setCertificatePreviewUrl={setCertificatePreviewUrl}
               setCertificatePreviewOpen={setCertificatePreviewOpen}
+              isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
             />
 
             {/* Related Content Section */}

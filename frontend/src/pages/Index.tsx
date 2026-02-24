@@ -10,7 +10,7 @@ import DynamicResourceSection from "@/components/landing/DynamicResourceSection"
 import { FormSection } from "@/types/formTypes";
 
 const Index = () => {
-  const { data: formData, isLoading, error } = useFormRead({
+  const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {
       type: "page",
       subType: "landing",
@@ -21,12 +21,7 @@ const Index = () => {
     }
   });
 
-  if (isLoading) {
-    return <PageLoader message="Loading Sunbird..." />;
-  }
-
   const sections = formData?.data?.form?.data?.sections || [];
-  
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
 
   const renderSection = (section: FormSection) => {
@@ -52,6 +47,7 @@ const Index = () => {
           <DynamicResourceSection
             key={section.id}
             title={section.title}
+            sectionLabel="resource.header"
             criteria={section.criteria}
           />
         );
@@ -60,12 +56,44 @@ const Index = () => {
     }
   };
 
+  const renderDynamicSections = () => {
+    if (isLoading) {
+      return (
+        <div className="container mx-auto px-4 py-16">
+          <PageLoader message="Loading sections..." fullPage={false} />
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="container mx-auto px-4 py-16">
+          <PageLoader 
+            error="Unable to load content sections. Please try again." 
+            onRetry={() => refetch()} 
+            fullPage={false} 
+          />
+        </div>
+      );
+    }
+
+    if (sections.length === 0) {
+      return (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-muted-foreground">No content sections available at the moment.</p>
+        </div>
+      );
+    }
+
+    return sortedSections.map(renderSection);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main>
         <HeroWithStats />
-        {sortedSections.map(renderSection)}
+        {renderDynamicSections()}
         <FAQSection />
       </main>
       <Footer />

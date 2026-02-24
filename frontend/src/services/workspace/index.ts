@@ -9,10 +9,12 @@ export {
 export { getSortLabels, getTypeLabels } from './workspaceFilterConfig';
 export type { TranslateFn } from './workspaceFilterConfig';
 export {
-  CONTENT_TYPE_ICONS,
   CONTENT_TYPE_COLORS,
   CONTENT_TYPE_CARD_COLORS,
   STATUS_CONFIG,
   EMPTY_STATE_VARIANT_STYLES,
+  getPrimaryCategoryCardTheme,
+  getPrimaryCategoryIcon,
 } from './contentDisplayConfig';
+export type { CardTheme } from './contentDisplayConfig';
 export { getWorkspaceItemActionVisibility } from './workspaceItemActions';

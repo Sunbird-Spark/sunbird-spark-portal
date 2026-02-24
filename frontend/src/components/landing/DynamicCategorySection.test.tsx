@@ -170,6 +170,6 @@ describe('DynamicCategorySection', () => {
     );
 
     const section = container.querySelector('section');
-    expect(section).toHaveClass('pt-[2.5rem]', 'pb-8', 'bg-white');
+    expect(section).toHaveClass('category-section');
   });
 });

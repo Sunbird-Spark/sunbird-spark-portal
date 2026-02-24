@@ -60,15 +60,14 @@
 
 /* Notification Popover */
 .notification-badge {
-    @apply absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#22C55E] rounded-full border-2 border-white;
+    @apply absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white;
 }
 
 .notification-popover-content {
     @apply z-50 p-0 rounded-md shadow-md outline-none;
     width: 28rem;
-    max-width: calc(100vw - 1rem);
-    background: #F4F4F4;
-    border: 0.09375rem solid #D4D4D4;
+    background: hsl(var(--sunbird-gray-f1));
+    border: 0.09375rem solid hsl(var(--sunbird-gray-d9));
     padding: 1.5rem;
     position: fixed !important;
     top: 1.2rem !important;
@@ -78,30 +77,35 @@
 .notification-popover-content[data-state=open] {
     @apply animate-in fade-in-0 zoom-in-95;
 }
+
 .notification-popover-content[data-state=closed] {
     @apply animate-out fade-out-0 zoom-out-95;
 }
+
 .notification-popover-content[data-side=bottom] {
     @apply slide-in-from-top-2;
 }
+
 .notification-popover-content[data-side=left] {
     @apply slide-in-from-right-2;
 }
+
 .notification-popover-content[data-side=right] {
     @apply slide-in-from-left-2;
 }
+
 .notification-popover-content[data-side=top] {
     @apply slide-in-from-bottom-2;
 }
 
 .notification-popover-arrow {
-    fill: #F4F4F4;
+    fill: hsl(var(--sunbird-gray-f1));
     position: absolute !important;
     right: 3.25rem !important;
 }
 
 .notification-popover-arrow polygon {
-    stroke: #D4D4D4;
+    stroke: hsl(var(--sunbird-gray-d9));
     stroke-width: 1.5;
     stroke-linejoin: round;
     /*
@@ -121,7 +125,7 @@
 }
 
 .notification-popover-title {
-    @apply text-base font-semibold text-[#1A1A1A];
+    @apply text-base font-semibold text-[hsl(var(--sunbird-obsidian))];
 }
 
 .notification-delete-all-btn {
@@ -148,9 +152,9 @@
 
 .notification-item {
     @apply flex items-start gap-3 px-4 py-4 transition-colors mx-4 mb-3 relative;
-    background: #FFFFFF;
+    background: hsl(var(--sunbird-white));
     border: 1px solid transparent;
-    box-shadow: 2px 2px 20px 0px #00000017;
+    box-shadow: 2px 2px 20px 0px rgba(0, 0, 0, 0.09);
     border-radius: 14px;
 }
 
@@ -162,14 +166,14 @@
     transform: translateY(-50%);
     width: 8px;
     height: 8px;
-    background: #CC8545;
+    background: hsl(var(--sunbird-ginger));
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.2s;
 }
 
 .notification-item:hover {
-    border: 1px solid #CC8545;
+    border: 1px solid hsl(var(--sunbird-ginger));
 }
 
 .notification-item:hover::before {
@@ -181,7 +185,7 @@
 }
 
 .notification-item-message {
-    @apply text-sm font-medium text-[#1A1A1A] leading-snug;
+    @apply text-sm font-medium text-[hsl(var(--sunbird-obsidian))] leading-snug;
 }
 
 .notification-item-timestamp {
