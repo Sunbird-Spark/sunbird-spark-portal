@@ -43,7 +43,7 @@ app.use('/portal', portalAuthRoutes);
 
 app.use('/data/v1/form', formRoutes);
 app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), authRoutes);
-app.use('/google', googleRoutes);
+app.use('/google', sessionMiddleware, googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
