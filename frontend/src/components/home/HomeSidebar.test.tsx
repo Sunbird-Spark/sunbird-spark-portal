@@ -58,7 +58,7 @@ describe('HomeSidebar', () => {
         vi.clearAllMocks();
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
         vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(true);
-        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' });
+        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
         vi.mocked(useIsAdmin).mockReturnValue(false);
     });
 
