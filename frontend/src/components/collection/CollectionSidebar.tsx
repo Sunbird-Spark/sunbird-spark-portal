@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
-import { FiCheck, FiLoader } from "react-icons/fi";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { CiCircleCheck } from "react-icons/ci";
 import {
   Collapsible,
   CollapsibleContent,
@@ -142,7 +143,7 @@ const CollectionSidebar = ({
                             {lesson.title}
                           </span>
                           {showStatus && (
-                            <span className="text-xs text-muted-foreground flex-shrink-0">
+                            <span className="font-rubik font-normal text-[10px] leading-[100%] text-muted-foreground flex-shrink-0">
                               {t(getStatusLabel(lessonStatus))}
                             </span>
                           )}
@@ -162,16 +163,20 @@ const CollectionSidebar = ({
                         </span>
                         {showStatus && (
                           <span
-                            className={`text-xs flex-shrink-0 flex items-center gap-1 ${
+                            className={`font-rubik font-normal text-[10px] leading-[100%] flex-shrink-0 flex items-center gap-1 ${
                               lessonStatus === 2
-                                ? "text-green-600"
+                                ? "text-sunbird-status-completed-border"
                                 : lessonStatus === 1
-                                  ? "text-sunbird-brick"
+                                  ? "text-sunbird-status-ongoing-border"
                                   : "text-muted-foreground"
                             }`}
                           >
-                            {lessonStatus === 2 && <FiCheck className="w-3.5 h-3.5" />}
-                            {lessonStatus === 1 && <FiLoader className="w-3.5 h-3.5" />}
+                            {lessonStatus === 2 && (
+                              <CiCircleCheck className="w-3.5 h-3.5 text-sunbird-status-completed-border" />
+                            )}
+                            {lessonStatus === 1 && (
+                              <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />
+                            )}
                             {t(getStatusLabel(lessonStatus))}
                           </span>
                         )}

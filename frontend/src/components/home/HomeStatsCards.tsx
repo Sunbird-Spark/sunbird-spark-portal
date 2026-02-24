@@ -1,3 +1,6 @@
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
+import { useUserCertificates } from "@/hooks/useCertificate";
+
 // Custom icons matching the design
 const TotalContentsIcon = () => (
     <svg width="25" height="28" viewBox="0 0 25 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -36,42 +39,89 @@ const CertificationsIcon = () => (
     </svg>
 );
 
-const statsData = [
-    {
-        id: "total",
-        value: "30",
-        label: "Total Contents",
-        bgColor: "bg-sunbird-blue-light",
-        iconBg: "hsl(var(--sunbird-blue-medium))",
-        icon: TotalContentsIcon,
-    },
-    {
-        id: "progress",
-        value: "05",
-        label: "Contents in Progress",
-        bgColor: "bg-sunbird-ginger",
-        iconBg: "hsl(var(--sunbird-brown-dark))",
-        icon: InProgressIcon,
-    },
-    {
-        id: "completed",
-        value: "13",
-        label: "Contents Completed",
-        bgColor: "bg-sunbird-moss",
-        iconBg: "hsl(var(--sunbird-green-dark))",
-        icon: CompletedIcon,
-    },
-    {
-        id: "certs",
-        value: "06",
-        label: "Certifications Earned",
-        bgColor: "bg-sunbird-lavender",
-        iconBg: "hsl(var(--sunbird-purple-dark))",
-        icon: CertificationsIcon,
-    },
-];
-
 const HomeStatsCards = () => {
+    const { data: enrolledCollections, isLoading: enrollmentsLoading } = useUserEnrolledCollections();
+    const { data: certificatesData, isLoading: certificatesLoading } = useUserCertificates();
+    const courses = enrolledCollections?.data?.courses || [];
+    
+    const isLoading = enrollmentsLoading || certificatesLoading;
+
+    // Total leaf-node contents across all enrolled courses
+    const totalContents = courses.reduce((acc, course) => acc + (course.leafNodesCount || 0), 0);
+
+    // Count individual contents by status from contentStatus map (1 = in progress, 2 = completed)
+    const contentsInProgress = courses.reduce((acc, course) => {
+        const statuses = Object.values(course.contentStatus || {});
+        return acc + statuses.filter(s => s === 1).length;
+    }, 0);
+    const contentsCompleted = courses.reduce((acc, course) => {
+        const statuses = Object.values(course.contentStatus || {});
+        return acc + statuses.filter(s => s === 2).length;
+    }, 0);
+    
+    // Get certificate count from the certificate search API
+    // The API returns an array of certificates directly
+    const certificatesEarned = Array.isArray(certificatesData?.data) 
+        ? certificatesData.data.length 
+        : 0;
+
+    const statsData = [
+        {
+            id: "total",
+            value: totalContents === 0 ? '0' : totalContents.toString().padStart(2, '0'),
+            label: "Total Contents",
+            bgColor: "bg-sunbird-blue-light",
+            iconBg: "hsl(var(--sunbird-blue-medium))",
+            icon: TotalContentsIcon,
+        },
+        {
+            id: "progress",
+            value: contentsInProgress === 0 ? '0' : contentsInProgress.toString().padStart(2, '0'),
+            label: "Contents in Progress",
+            bgColor: "bg-sunbird-ginger",
+            iconBg: "hsl(var(--sunbird-brown-dark))",
+            icon: InProgressIcon,
+        },
+        {
+            id: "completed",
+            value: contentsCompleted === 0 ? '0' : contentsCompleted.toString().padStart(2, '0'),
+            label: "Contents Completed",
+            bgColor: "bg-sunbird-moss",
+            iconBg: "hsl(var(--sunbird-green-dark))",
+            icon: CompletedIcon,
+        },
+        {
+            id: "certs",
+            value: certificatesEarned === 0 ? '0' : certificatesEarned.toString().padStart(2, '0'),
+            label: "Certifications Earned",
+            bgColor: "bg-sunbird-lavender",
+            iconBg: "hsl(var(--sunbird-purple-dark))",
+            icon: CertificationsIcon,
+        },
+    ];
+
+    if (isLoading) {
+        return (
+            <div className="home-stats-grid">
+                {statsData.map((stat) => (
+                    <div
+                        key={stat.id}
+                        className={`home-stat-card ${stat.bgColor} animate-pulse`}
+                    >
+                        <div
+                            className="home-stat-icon-wrapper"
+                            style={{ backgroundColor: stat.iconBg }}
+                        >
+                            <stat.icon />
+                        </div>
+                        <div className="home-stat-value opacity-50">--</div>
+                        <div className="home-stat-label">{stat.label}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
     return (
         <div className="home-stats-grid">
             {statsData.map((stat) => {

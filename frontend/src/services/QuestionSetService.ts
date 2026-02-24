@@ -1,17 +1,17 @@
 import { getClient } from '../lib/http-client';
 
 export class QuestionSetService {
-  async getHierarchy<T = any>(questionSetId: string): Promise<T> {
+  async getHierarchy<T = unknown>(questionSetId: string): Promise<T> {
     const res = await getClient().get<T>(`/questionset/v2/hierarchy/${questionSetId}`);
     return res.data;
   }
 
-  async getQuestionset<T = any>(questionSetId: string): Promise<T> {
+  async getQuestionset<T = unknown>(questionSetId: string): Promise<T> {
     const res = await getClient().get<T>(`/questionset/v2/read/${questionSetId}?mode=edit`);
     return res.data;
   }
 
-  async getQuestionList<T = any>(identifiers: string[]): Promise<T> {
+  async getQuestionList<T = unknown>(identifiers: string[]): Promise<T> {
     const payload = { request: { search: { identifier: identifiers } } };
     const res = await getClient().post<T>(`/question/v2/list`, payload);
     return res.data;

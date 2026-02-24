@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useBatchList, useBatchRead, useContentState, useEnrol } from './useBatch';
+import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from './useBatch';
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
 import {
   getEnrollmentForCollection,
@@ -74,7 +74,7 @@ export function useCollectionEnrollment(
     data: batchListResponse,
     isLoading: batchListLoading,
     error: batchListError,
-  } = useBatchList(collectionId, {
+  } = useBatchListForLearner(collectionId, {
     enabled: isAuthenticated && isTrackableForBatch && !enrollmentForCollection,
   });
   const rawContent = batchListResponse?.data?.response?.content ?? [];
@@ -92,6 +92,13 @@ export function useCollectionEnrollment(
     [batchReadResponse?.data?.response?.cert_templates],
   );
   const hasCertificate = !!firstCertPreviewUrl;
+
+  const isBatchEnded = useMemo(() => {
+    const endDateStr = batchReadResponse?.data?.response?.endDate;
+    if (!endDateStr) return false;
+    const endMs = new Date(endDateStr).getTime();
+    return Number.isFinite(endMs) && endMs < Date.now();
+  }, [batchReadResponse?.data?.response?.endDate]);
 
   const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
   const handleJoinCourse = async (selectedBatchId: string) => {
@@ -114,6 +121,7 @@ export function useCollectionEnrollment(
     enrollmentForCollection,
     isEnrolledInCurrentBatch,
     effectiveBatchId,
+    isBatchEnded,
     contentStatusMap,
     courseProgressProps,
     batches,

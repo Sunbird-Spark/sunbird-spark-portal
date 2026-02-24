@@ -134,6 +134,28 @@ export class UserService {
         );
     }
 
+    public async getUserRoles(userId: string): Promise<ApiResponse<UserReadResponse>> {
+        return getClient().get<UserReadResponse>(
+            `/user/v5/read/${userId}?fields=roles`
+        );
+    }
+
+    public async searchMentors(rootOrgId: string, query: string = ''): Promise<ApiResponse<any>> {
+        return getClient().post(
+            '/user/v3/search',
+            {
+                request: {
+                    filters: {
+                        status: '1',
+                        rootOrgId,
+                        'organisations.roles': ['COURSE_MENTOR'],
+                    },
+                    query,
+                },
+            }
+        );
+    }
+
     public async getUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
         const searchParams = new URLSearchParams({
             orgdetails: ORG_DETAILS_FIELDS.join(','),

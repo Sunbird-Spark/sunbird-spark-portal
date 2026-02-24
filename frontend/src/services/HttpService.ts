@@ -7,7 +7,7 @@ export class HttpService {
    * @param config - Optional axios request config
    * @returns Parsed response data
    */
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response = await axios.get<T>(url, config);
       return response.data;
@@ -19,7 +19,7 @@ export class HttpService {
     }
   }
 
-  static isCancel(error: any): boolean {
+  static isCancel(error: unknown): boolean {
     return axios.isCancel(error);
   }
 }

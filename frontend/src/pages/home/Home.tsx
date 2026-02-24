@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useHomeData } from "@/hooks/useHomeData"
+import { useUserRead } from "@/hooks/useUserRead";
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
@@ -16,7 +16,8 @@ import "./home.css";
 
 const Home = () => {
     const isMobile = useIsMobile();
-    const { loading: isLoading, error, refetch } = useHomeData();
+    const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead();
+    const userProfile = userReadData?.data?.response;
     const [activeNav, setActiveNav] = useState("home");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
 
@@ -57,11 +58,13 @@ const Home = () => {
                     <div className="home-content-wrapper">
                         {/* Welcome Section */}
                         <div className="mb-6 md:mb-8">
-                            <h2 className="home-welcome-title">Hi John Deo</h2>
+                            <h2 className="home-welcome-title">
+                                Hi {userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : 'there'}
+                            </h2>
                             <p className="home-welcome-subtitle">Welcome to a learning experience made just for you.</p>
                         </div>
 
-                        {isLoading || error ? (
+                        {userLoading || error ? (
                             <PageLoader
                                 message="Loading your dashboard..."
                                 fullPage={false}

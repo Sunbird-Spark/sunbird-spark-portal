@@ -169,7 +169,7 @@ export class GenericEditorService {
       let slug = '';
       try {
         const settingResponse = await this.systemSettingService.read('default_channel');
-        slug = settingResponse?.data?.response?.value || '';
+        slug = (settingResponse as any)?.data?.response?.value || '';
       } catch {
         console.warn('Failed to fetch default_channel system setting');
       }
@@ -191,7 +191,7 @@ export class GenericEditorService {
     if (!framework && channel) {
       try {
         const channelResponse = await this.channelService.read(channel);
-        const defaultFramework = channelResponse?.data?.channel?.defaultFramework;
+        const defaultFramework = (channelResponse as any)?.data?.channel?.defaultFramework;
         console.warn('Fetched default framework from channel:', defaultFramework);
         if (defaultFramework) {
           framework = defaultFramework;

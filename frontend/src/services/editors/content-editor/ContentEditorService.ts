@@ -29,7 +29,7 @@ export class ContentEditorService {
       const filters: Record<string, any> = { isTenant: true };
       try {
         const settingResponse = await this.systemSettingService.read('default_channel');
-        const slugValue = settingResponse?.data?.response?.value;
+        const slugValue = (settingResponse as any)?.data?.response?.value;
         if (slugValue) {
           filters.slug = slugValue;
         }
@@ -50,7 +50,7 @@ export class ContentEditorService {
     if (channel) {
       try {
         const channelResponse = await this.channelService.read(channel);
-        const frameworks = channelResponse?.data?.channel?.frameworks;
+        const frameworks = (channelResponse as any)?.data?.channel?.frameworks;
         if (Array.isArray(frameworks) && frameworks.length > 0) {
           framework = frameworks[0]?.identifier || '';
         }

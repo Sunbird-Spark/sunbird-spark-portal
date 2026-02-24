@@ -1,5 +1,4 @@
 import { getClient } from '../../lib/http-client';
-import type { ApiResponse } from '../../lib/http-client';
 
 interface AuthStatusResponse {
     sid: string;
@@ -38,9 +37,9 @@ class userAuthInfoService {
             this.isAuthenticated = response.data.isAuthenticated;
             return response.data;
         } catch (error) {
-            console.error('Error fetching auth status:', error);
             if (error && typeof error === 'object' && 'response' in error) {
-                const httpError = error as { response?: { status?: number; data?: any } };
+                const httpError = error as { response?: { status?: number; data?: { responseCode?: string; params?: { status?: string; errmsg?: string } } } };
+                console.error('Error fetching auth status:', error);
                 console.error('Status:', httpError.response?.status);
                 // Avoid logging full response data which may contain sensitive fields
                 const safeData = httpError.response?.data ? {

@@ -71,6 +71,37 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
       }
     };
 
+    /**
+     * The ECML player's iframeEvent plugin dispatches telemetry events as
+     * CustomEvents named "renderer:telemetry:event" on the parent document's
+     * iframe element (via window.parent.document.getElementById('contentPlayer').dispatchEvent).
+     * We must listen for these on the iframe element itself, not on window.
+     */
+    const telemetryCustomEventHandler = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const eventData = customEvent.detail;
+      if (!eventData) return;
+
+      const telemetryData = eventData.telemetryData ?? eventData;
+
+      const playerEvent: EcmlPlayerEvent = {
+        type: telemetryData.eid || telemetryData.event || 'unknown',
+        data: telemetryData,
+        playerId: metadata.identifier,
+        timestamp: Date.now(),
+      };
+
+      handlePlayerEvent(playerEvent);
+
+      if (telemetryData.eid) {
+        handleTelemetryEvent(telemetryData);
+      }
+    };
+
+    // Register CustomEvent listener on the iframe element BEFORE player init
+    // to avoid missing the START event fired immediately on initialization.
+    iframe.addEventListener('renderer:telemetry:event', telemetryCustomEventHandler);
+
     const initPlayer = async () => {
       try {
         const config = await service.createConfig(metadata, contextProps);
@@ -102,6 +133,7 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
     return () => {
       cancelled = true;
       window.removeEventListener('message', messageHandler);
+      iframe.removeEventListener('renderer:telemetry:event', telemetryCustomEventHandler);
       if (iframe) {
         iframe.onload = null;
       }
