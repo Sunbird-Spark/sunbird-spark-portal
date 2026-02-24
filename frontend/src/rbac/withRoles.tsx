@@ -28,7 +28,7 @@ export const withRoles = <P extends object>(
       const isAuthenticated = contextAuth || isBackendAuth;
 
       // Map frontend roles to backend roles
-      const allowedBackendRoles = useMemo(() => allowedRoles.map(r => r.toUpperCase()), []);
+      const allowedBackendRoles = useMemo(() => allowedRoles.map(r => r.toUpperCase()), [allowedRoles]);
 
       const [backendRoles, setBackendRoles] = useState<Array<{ role: string }>>([]);
       const [rolesLoading, setRolesLoading] = useState<boolean>(true);

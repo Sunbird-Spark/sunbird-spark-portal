@@ -195,30 +195,6 @@ export class CertificateService {
     );
   }
 
-  // ─── Dashboard: search a user's certificate status ───────────────────────────
-  /**
-   * Search for a user by Unique ID (userName) within a course.
-   * POST /certreg/v1/user/search
-   */
-  async searchCertUser(params: {
-    userName: string;
-    courseId: string;
-    createdBy: string;
-  }): Promise<ApiResponse<CertUserSearchResponse>> {
-    return getClient().post<CertUserSearchResponse>(
-      '/certreg/v1/user/search',
-      {
-        request: {
-          filters: {
-            userName: params.userName,
-            courseId: params.courseId,
-            createdBy: params.createdBy,
-          },
-        },
-      }
-    );
-  }
-
   // ─── Dashboard: re-issue a certificate ───────────────────────────────────────
   /**
    * Re-issue a certificate for one or more users.

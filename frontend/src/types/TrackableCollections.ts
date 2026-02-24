@@ -15,8 +15,8 @@ export interface IssuedCertificate {
   lastIssuedOn: string;
   name: string;
   templateUrl: string;
-  token: string;
-  type: string;
+  token?: string;
+  type?: string;
 }
 
 export interface TrackableCollection {

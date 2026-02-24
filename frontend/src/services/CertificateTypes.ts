@@ -1,11 +1,6 @@
-export interface IssuedCertificate {
-  identifier: string;
-  name: string;
-  lastIssuedOn: string;
-  templateUrl: string;
-  token?: string;
-  type?: string;
-}
+import { IssuedCertificate } from '../types/TrackableCollections';
+
+export type { IssuedCertificate };
 
 export interface CertUserBatch {
   batchId: string;

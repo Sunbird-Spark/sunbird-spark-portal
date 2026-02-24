@@ -4,7 +4,7 @@ import { CertUserSearchResponse, CertUserBatch } from '../services/CertificateTy
 import { ApiResponse } from '../lib/http-client';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { userService } from '../services/UserService';
-import { TrackableCollection } from '../types/TrackableCollections';
+import { TrackableCollection, IssuedCertificate } from '../types/TrackableCollections';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 async function resolveCreatedBy(): Promise<string> {
@@ -62,7 +62,7 @@ export const useCertUserSearch = (): UseMutationResult<
       const courseEnrollments = courses.filter((c: TrackableCollection) => c.courseId === courseId);
       
       const batches: CertUserBatch[] = courseEnrollments.map((enr: TrackableCollection) => {
-        let issuedCertificates: any[] = [];
+        let issuedCertificates: IssuedCertificate[] = [];
         if (enr.issuedCertificates && enr.issuedCertificates.length > 0) {
             issuedCertificates = enr.issuedCertificates;
         } else if (enr.certificates && enr.certificates.length > 0) {
@@ -83,14 +83,16 @@ export const useCertUserSearch = (): UseMutationResult<
       });
 
       // Assemble mock API response wrapper
+      const firstEnrollment = courseEnrollments.length > 0 ? courseEnrollments[0] : null;
+
       const responsePayload: CertUserSearchResponse = {
         response: {
           userId: userId,
           userName: resolvedUserName,
           courses: {
             courseId: courseId,
-            name: courseEnrollments[0]?.courseName || 'Course',
-            contentType: courseEnrollments[0]?.content?.contentType || 'Course',
+            name: firstEnrollment?.courseName || 'Course',
+            contentType: firstEnrollment?.content?.contentType || 'Course',
             batches: batches,
           }
         }
@@ -99,10 +101,8 @@ export const useCertUserSearch = (): UseMutationResult<
       return {
         data: responsePayload,
         status: 200,
-        statusText: 'OK',
         headers: {},
-        config: {} as any,
-      } as unknown as ApiResponse<CertUserSearchResponse>;
+      };
     },
   });
 };
