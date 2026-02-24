@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ResourceFormDialog from './ResourceFormDialog';
 
@@ -204,8 +204,9 @@ describe('ResourceFormDialog', () => {
     render(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
-      // Check for asterisks in required field labels
-      expect(screen.getByText('*')).toBeInTheDocument();
+      // Check for asterisks in required field labels - there should be multiple
+      const asterisks = screen.getAllByText('*');
+      expect(asterisks.length).toBeGreaterThan(0);
     });
   });
 
@@ -214,7 +215,9 @@ describe('ResourceFormDialog', () => {
 
     await waitFor(() => {
       const nameInput = screen.getByLabelText(/Content Name/);
-      fireEvent.change(nameInput, { target: { value: 'Test Content' } });
+      act(() => {
+        fireEvent.change(nameInput, { target: { value: 'Test Content' } });
+      });
       expect(nameInput).toHaveValue('Test Content');
     });
   });
@@ -236,7 +239,9 @@ describe('ResourceFormDialog', () => {
 
     await waitFor(() => {
       const dialog = screen.getByRole('dialog');
-      fireEvent.click(dialog);
+      act(() => {
+        fireEvent.click(dialog);
+      });
     });
 
     expect(onClose).toHaveBeenCalled();
@@ -248,7 +253,9 @@ describe('ResourceFormDialog', () => {
 
     await waitFor(() => {
       const dialogContent = screen.getByText('Fill in the details to create your content');
-      fireEvent.click(dialogContent);
+      act(() => {
+        fireEvent.click(dialogContent);
+      });
     });
 
     expect(onClose).not.toHaveBeenCalled();
@@ -258,7 +265,9 @@ describe('ResourceFormDialog', () => {
     const onClose = vi.fn();
     render(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
 
-    fireEvent.keyDown(window, { key: 'Escape' });
+    act(() => {
+      fireEvent.keyDown(window, { key: 'Escape' });
+    });
 
     expect(onClose).toHaveBeenCalled();
   });
@@ -267,7 +276,9 @@ describe('ResourceFormDialog', () => {
     const onClose = vi.fn();
     render(<ResourceFormDialog {...defaultProps} onClose={onClose} isLoading={true} />);
 
-    fireEvent.keyDown(window, { key: 'Escape' });
+    act(() => {
+      fireEvent.keyDown(window, { key: 'Escape' });
+    });
 
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -280,12 +291,16 @@ describe('ResourceFormDialog', () => {
       const nameInput = screen.getByLabelText(/Content Name/);
       const subjectSelect = screen.getByLabelText(/Subject/);
       
-      fireEvent.change(nameInput, { target: { value: 'Test Content' } });
-      fireEvent.change(subjectSelect, { target: { value: 'mathematics' } });
+      act(() => {
+        fireEvent.change(nameInput, { target: { value: 'Test Content' } });
+        fireEvent.change(subjectSelect, { target: { value: 'mathematics' } });
+      });
       
       const form = nameInput.closest('form');
       if (form) {
-        fireEvent.submit(form);
+        act(() => {
+          fireEvent.submit(form);
+        });
       }
     });
 
@@ -307,12 +322,16 @@ describe('ResourceFormDialog', () => {
       const nameInput = screen.getByLabelText(/Content Name/);
       const subjectSelect = screen.getByLabelText(/Subject/);
       
-      fireEvent.change(nameInput, { target: { value: 'Test Content' } });
-      fireEvent.change(subjectSelect, { target: { value: 'mathematics' } });
+      act(() => {
+        fireEvent.change(nameInput, { target: { value: 'Test Content' } });
+        fireEvent.change(subjectSelect, { target: { value: 'mathematics' } });
+      });
       
       const form = nameInput.closest('form');
       if (form) {
-        fireEvent.submit(form);
+        act(() => {
+          fireEvent.submit(form);
+        });
       }
     });
 
@@ -336,7 +355,9 @@ describe('ResourceFormDialog', () => {
     });
 
     const retryButton = screen.getByRole('button', { name: /Retry/ });
-    fireEvent.click(retryButton);
+    act(() => {
+      fireEvent.click(retryButton);
+    });
 
     await waitFor(() => {
       expect(screen.getByLabelText(/Content Name/)).toBeInTheDocument();
@@ -360,7 +381,9 @@ describe('ResourceFormDialog', () => {
 
     await waitFor(() => {
       const cancelButton = screen.getByRole('button', { name: /Cancel/ });
-      fireEvent.click(cancelButton);
+      act(() => {
+        fireEvent.click(cancelButton);
+      });
     });
 
     expect(onClose).toHaveBeenCalled();

@@ -18,11 +18,6 @@ interface FormField {
   renderingHints?: { semanticColumnWidth?: string };
 }
 
-interface FrameworkCategory {
-  code: string;
-  terms?: { name: string; code: string }[];
-}
-
 export interface ResourceFormData {
   name: string;
   description: string;

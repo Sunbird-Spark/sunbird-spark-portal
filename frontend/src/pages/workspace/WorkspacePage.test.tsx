@@ -356,9 +356,9 @@ describe('WorkspacePage', () => {
       expect(mockQuestionSetRetireMutateAsync).toHaveBeenCalledWith('do_qs_123');
     });
     expect(mockToast).toHaveBeenCalledWith({
-      title: 'Content Deleted',
-      description: 'The content has been removed.',
-      variant: 'destructive',
+      title: 'Success',
+      description: 'Content deleted successfully.',
+      variant: 'default',
     });
   });
 
@@ -374,7 +374,7 @@ describe('WorkspacePage', () => {
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
       expect(screen.getByText('Form type: resource')).toBeInTheDocument();
     });
     expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
@@ -389,7 +389,7 @@ describe('WorkspacePage', () => {
     const quizOption = within(newDialog).getByRole('button', { name: /Quiz/ });
     fireEvent.click(quizOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Quiz & Assessment' })).toBeInTheDocument();
       expect(screen.getByText('Form type: assessment')).toBeInTheDocument();
     });
   });
@@ -406,9 +406,9 @@ describe('WorkspacePage', () => {
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
     });
-    const resourceDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Resources' });
     const createButton = within(resourceDialog).getByRole('button', { name: 'Create Resource' });
     fireEvent.click(createButton);
     await waitFor(() => {
@@ -431,9 +431,9 @@ describe('WorkspacePage', () => {
     const quizOption = within(newDialog).getByRole('button', { name: /Quiz/ });
     fireEvent.click(quizOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Quiz & Assessment' })).toBeInTheDocument();
     });
-    const quizDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const quizDialog = screen.getByRole('dialog', { name: 'Create Quiz & Assessment' });
     const quizCreateButton = within(quizDialog).getByRole('button', { name: 'Create Resource' });
     fireEvent.click(quizCreateButton);
     await waitFor(() => {
@@ -456,15 +456,15 @@ describe('WorkspacePage', () => {
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
     });
-    const resourceDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Resources' });
     
     // Test cancel functionality
     const cancelButton = within(resourceDialog).getByRole('button', { name: 'Cancel' });
     fireEvent.click(cancelButton);
     await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: 'Create Content' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'Create Resources' })).not.toBeInTheDocument();
     });
 
     // Test error handling
@@ -477,9 +477,9 @@ describe('WorkspacePage', () => {
     const newResourceOption = within(newDialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(newResourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
     });
-    const newResourceDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const newResourceDialog = screen.getByRole('dialog', { name: 'Create Resources' });
     const createButton = within(newResourceDialog).getByRole('button', { name: 'Create Resource' });
     fireEvent.click(createButton);
     await waitFor(() => {

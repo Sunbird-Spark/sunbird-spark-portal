@@ -1,4 +1,4 @@
-import { type FormEvent } from "react";
+import React, { type FormEvent } from "react";
 import { Button } from "@/components/common/Button";
 import ResourceFormField from "./ResourceFormField";
 

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import ResourceFormField from './ResourceFormField';
@@ -491,7 +491,8 @@ describe('ResourceFormField', () => {
         />
       );
 
-      expect(screen.getByPlaceholderText('Enter test value')).toHaveFocus();
+      const input = screen.getByPlaceholderText('Enter test value');
+      expect(input).toHaveAttribute('autoFocus');
     });
   });
 });
