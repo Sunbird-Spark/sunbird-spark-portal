@@ -152,7 +152,6 @@ describe('ContentService', () => {
               creator: 'Test User',
               mimeType: 'application/vnd.ekstep.ecml-archive',
               contentType: 'Resource',
-              primaryCategory: 'Learning Resource',
             },
           },
         }
