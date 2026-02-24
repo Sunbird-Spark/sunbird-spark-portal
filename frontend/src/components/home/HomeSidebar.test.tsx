@@ -5,6 +5,7 @@ import HomeSidebar from './HomeSidebar';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+import { useIsAdmin } from '@/hooks/useUser';
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -33,6 +34,12 @@ vi.mock("@/hooks/use-mobile", () => ({
     useIsMobile: () => false,
 }));
 
+// Mock useIsAdmin — defaults to false (non-admin) so User Management link is hidden
+vi.mock('@/hooks/useUser', () => ({
+    useIsAdmin: vi.fn(),
+    useIsContentCreator: vi.fn(),
+}));
+
 describe('HomeSidebar', () => {
     const defaultProps = {
         activeNav: 'home',
@@ -52,6 +59,7 @@ describe('HomeSidebar', () => {
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
         vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(true);
         vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' });
+        vi.mocked(useIsAdmin).mockReturnValue(false);
     });
 
 
