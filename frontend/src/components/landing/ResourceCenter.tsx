@@ -30,7 +30,7 @@ const ResourceCenter = () => {
                     </span>
                     <div className="h-[0.0625rem] w-12 lg:w-[6.25rem] bg-[#333333]"></div>
                 </div>
-                <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-[#333333] text-center mb-[1.25rem]">
+                <h2 className="resource-section-title">
                     {t("resource.title")}
                 </h2>
 

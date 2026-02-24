@@ -5,21 +5,26 @@ import "./landing.css";
 
 interface DynamicResourceSectionProps {
     title: string;
+    sectionLabel?: string;
     criteria?: {
         request: ContentSearchRequest;
     };
+    sectionClassName?: string;
     innerClassName?: string;
 }
 
-const DynamicResourceSection = ({ title, criteria, innerClassName = "landing-section-inner" }: DynamicResourceSectionProps) => {
+const DynamicResourceSection = ({ title, sectionLabel, criteria, sectionClassName = "resource-section", innerClassName = "landing-section-inner" }: DynamicResourceSectionProps) => {
     const { data, isLoading, error } = useContentSearch({
         request: criteria?.request,
         enabled: !!criteria?.request,
     });
+    const skeletonClassName = sectionClassName === "resource-section-home"
+        ? "resource-section-skeleton-home"
+        : "resource-section-skeleton";
 
     if (isLoading) {
         return (
-            <section className="resource-section-skeleton">
+            <section className={skeletonClassName}>
                 <div className={innerClassName}>
                     <div className="resource-section-skeleton-title"></div>
                     <div className="resource-section-skeleton-subtitle"></div>
@@ -55,8 +60,15 @@ const DynamicResourceSection = ({ title, criteria, innerClassName = "landing-sec
         .filter(col => col.items.length > 0);
 
     return (
-        <section className="resource-section">
+        <section className={sectionClassName}>
             <div className={innerClassName}>
+                {sectionLabel && (
+                    <div className="resource-section-label-row">
+                        <hr className="resource-section-label-line" />
+                        <span className="resource-section-label">{sectionLabel}</span>
+                        <hr className="resource-section-label-line" />
+                    </div>
+                )}
                 <h2 className="resource-section-title">
                     {title}
                 </h2>

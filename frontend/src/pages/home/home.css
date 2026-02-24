@@ -9,7 +9,23 @@
 }
 
 .home-content-wrapper {
+    --hcw-pl: 1rem;
+    --hcw-pr: 1rem;
     @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+}
+
+@media (min-width: 768px) {
+    .home-content-wrapper {
+        --hcw-pl: 1.5rem;
+        --hcw-pr: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-content-wrapper {
+        --hcw-pl: 1.625rem;
+        --hcw-pr: 6.25rem;
+    }
 }
 
 .home-welcome-title {

@@ -10,7 +10,12 @@
 /* Used when Dynamic sections are rendered inside the home page layout,
    which already provides its own horizontal padding. */
 .home-discover-inner {
-    @apply w-full;
+    @apply w-full pr-[2.5rem];
+}
+
+/* Inner wrapper for the full-bleed resource section on the home page */
+.home-discover-resource-inner {
+    @apply w-full px-4 lg:pr-[7.9375rem] lg:pl-[2rem] pr-[2.5rem];
 }
 
 /* ── DynamicResourceSection ─────────────────────────────────── */
@@ -18,8 +23,21 @@
     @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7];
 }
 
+/* Full-bleed variant: overrides home-content-wrapper's horizontal padding */
+.resource-section-home {
+    @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7];
+    margin-left: calc(-1 * var(--hcw-pl, 1rem));
+    margin-right: calc(-1 * var(--hcw-pr, 1rem));
+}
+
 .resource-section-skeleton {
     @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7] animate-pulse;
+}
+
+.resource-section-skeleton-home {
+    @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7] animate-pulse;
+    margin-left: calc(-1 * var(--hcw-pl, 1rem));
+    margin-right: calc(-1 * var(--hcw-pr, 1rem));
 }
 
 .resource-section-skeleton-title {
@@ -38,8 +56,28 @@
     @apply h-[48rem] bg-gray-100 rounded-[1.25rem];
 }
 
+.resource-section-label-row {
+    @apply flex items-center justify-center gap-4 mb-[1rem];
+}
+
+.resource-section-label-line {
+    height: 0px;
+    border: 1px solid #222222;
+    width: 216px;
+}
+
+.resource-section-label {
+    @apply font-rubik font-normal text-[#222222] whitespace-nowrap text-center;
+    font-size: 20px;
+    line-height: 46px;
+    letter-spacing: 0%;
+}
+
 .resource-section-title {
-    @apply font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-[#333333] text-center mb-[1.25rem];
+    @apply font-rubik font-medium text-[#333333] text-center mb-[1.25rem];
+    font-size: 36px;
+    line-height: 46px;
+    letter-spacing: 0%;
 }
 
 .resource-section-grid {
