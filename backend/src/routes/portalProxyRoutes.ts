@@ -26,10 +26,9 @@ router.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 
 // Profile update: Sunbird API expects PATCH, frontend sends POST.
 // Convert the HTTP method before proxying to Kong.
-router.post('/user/v3/update',
+router.patch('/user/v3/update',
     keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
     keycloak.protect(),
-    (req: express.Request, _res: express.Response, next: express.NextFunction) => { req.method = 'PATCH'; next(); },
     kongProxy);
 
 // The catch-all proxy route

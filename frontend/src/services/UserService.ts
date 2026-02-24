@@ -159,7 +159,7 @@ export class UserService {
 public async updateProfile(
         request: UpdateProfileRequest
     ): Promise<ApiResponse<UpdateProfileResponse>> {
-        return getClient().post<UpdateProfileResponse>(
+        return getClient().patch<UpdateProfileResponse>(
             '/user/v3/update',
             request
         );
