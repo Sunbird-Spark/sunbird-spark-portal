@@ -23,6 +23,7 @@ import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
+import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -107,6 +108,7 @@ const WorkspacePage = () => {
   // Pre-fetch org data using tanstack mutation when slug becomes available
   const orgSearch = useOrganizationSearch();
   const questionSetCreate = useQuestionSetCreate();
+  const questionSetRetire = useQuestionSetRetire();
   const [orgData, setOrgData] = useState<any>(null);
   const orgFetchAttempted = useRef(false);
 
@@ -364,7 +366,14 @@ const WorkspacePage = () => {
     const { contentId } = confirmDialog;
     setIsConfirming(true);
     try {
-      await contentService.contentRetire([contentId]);
+      // Find the content item to determine if it's a questionset
+      const item = visibleContents.find((c) => c.id === contentId);
+      const isQuestionSet = item?.mimeType === 'application/vnd.sunbird.questionset';
+      if (isQuestionSet) {
+        await questionSetRetire.mutateAsync(contentId);
+      } else {
+        await contentService.contentRetire([contentId]);
+      }
       setRetiredContentIds((prev) => (prev.includes(contentId) ? prev : [...prev, contentId]));
 
       try {
