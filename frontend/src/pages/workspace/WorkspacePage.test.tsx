@@ -196,32 +196,31 @@ vi.mock('./CreateContentModal', () => ({
     ) : null,
 }));
 
-vi.mock('./ContentNameDialog', () => ({
-  default: ({ open, onClose, onSubmit, optionId }: any) =>
-    open ? (
-      <div role="dialog" aria-label="Enter content name">
-        <input
-          placeholder={`Enter ${optionId === 'question-set' ? 'question set' : 'content'} name`}
-          onChange={(e) => {
-            // Store the value for submission
-            (window as any).contentNameValue = e.target.value;
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            const name = (window as any).contentNameValue || 'Test Content';
-            onSubmit(name);
-          }}
-        >
-          Create
-        </button>
-        <button type="button" onClick={onClose}>
-          Cancel
-        </button>
-      </div>
-    ) : null,
-}));
+vi.mock('./ContentNameDialog', () => {
+  let nameValue = '';
+  return {
+    default: ({ open, onClose, onSubmit, optionId }: any) => {
+      if (!open) { nameValue = ''; return null; }
+      return (
+        <div role="dialog" aria-label="Enter content name">
+          <input
+            placeholder={`Enter ${optionId === 'question-set' ? 'question set' : 'content'} name`}
+            onChange={(e) => { nameValue = e.target.value; }}
+          />
+          <button
+            type="button"
+            onClick={() => onSubmit(nameValue || 'Test Content')}
+          >
+            Create
+          </button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      );
+    },
+  };
+});
 
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, onClose, onConfirm, title }: any) =>

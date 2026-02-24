@@ -21,25 +21,20 @@ describe('QuestionSetService', () => {
 
   describe('getHierarchy', () => {
     it('should call client.get with correct url', async () => {
-      const mockResponse = {
-        data: {
-          result: {
-            questionset: {
-              identifier: 'do_123',
-              name: 'Test QuestionSet',
-              children: []
-            }
-          }
-        },
-        status: 200,
-        headers: {}
+      const hierarchyData = {
+        questionset: {
+          identifier: 'do_123',
+          name: 'Test QuestionSet',
+          children: []
+        }
       };
+      const mockResponse = { data: hierarchyData, status: 200, headers: {} };
       mockClient.get = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await service.getHierarchy('do_123');
 
       expect(mockClient.get).toHaveBeenCalledWith('/questionset/v2/hierarchy/do_123');
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(hierarchyData);
     });
 
     it('should handle errors', async () => {
@@ -51,28 +46,23 @@ describe('QuestionSetService', () => {
 
   describe('getQuestionset', () => {
     it('should call client.get with correct url', async () => {
-      const mockResponse = {
-        data: {
-          result: {
-            questionset: {
-              identifier: 'do_123',
-              outcomeDeclaration: {
-                maxScore: {
-                  defaultValue: 1
-                }
-              }
+      const questionsetData = {
+        questionset: {
+          identifier: 'do_123',
+          outcomeDeclaration: {
+            maxScore: {
+              defaultValue: 1
             }
           }
-        },
-        status: 200,
-        headers: {}
+        }
       };
+      const mockResponse = { data: questionsetData, status: 200, headers: {} };
       mockClient.get = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await service.getQuestionset('do_123');
 
       expect(mockClient.get).toHaveBeenCalledWith('/questionset/v2/read/do_123?mode=edit');
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(questionsetData);
     });
 
     it('should handle errors', async () => {
@@ -85,20 +75,15 @@ describe('QuestionSetService', () => {
   describe('getQuestionList', () => {
     it('should call client.post with correct url and payload', async () => {
       const identifiers = ['do_q1', 'do_q2', 'do_q3'];
-      const mockResponse = {
-        data: {
-          result: {
-            questions: [
-              { identifier: 'do_q1', body: '<p>Question 1</p>' },
-              { identifier: 'do_q2', body: '<p>Question 2</p>' },
-              { identifier: 'do_q3', body: '<p>Question 3</p>' }
-            ],
-            count: 3
-          }
-        },
-        status: 200,
-        headers: {}
+      const listData = {
+        questions: [
+          { identifier: 'do_q1', body: '<p>Question 1</p>' },
+          { identifier: 'do_q2', body: '<p>Question 2</p>' },
+          { identifier: 'do_q3', body: '<p>Question 3</p>' }
+        ],
+        count: 3
       };
+      const mockResponse = { data: listData, status: 200, headers: {} };
       mockClient.post = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await service.getQuestionList(identifiers);
@@ -107,20 +92,12 @@ describe('QuestionSetService', () => {
         '/question/v2/list',
         { request: { search: { identifier: identifiers } } }
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(listData);
     });
 
     it('should handle empty identifiers array', async () => {
-      const mockResponse = {
-        data: {
-          result: {
-            questions: [],
-            count: 0
-          }
-        },
-        status: 200,
-        headers: {}
-      };
+      const listData = { questions: [], count: 0 };
+      const mockResponse = { data: listData, status: 200, headers: {} };
       mockClient.post = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await service.getQuestionList([]);
@@ -129,7 +106,7 @@ describe('QuestionSetService', () => {
         '/question/v2/list',
         { request: { search: { identifier: [] } } }
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(listData);
     });
 
     it('should handle errors', async () => {
@@ -153,16 +130,8 @@ describe('QuestionSetService', () => {
         randomUUID: vi.fn().mockReturnValue(mockUuid),
       });
 
-      const mockResponse = {
-        data: {
-          result: {
-            identifier: 'do_qs_789',
-            versionKey: 'vk_abc',
-          },
-        },
-        status: 200,
-        headers: {},
-      };
+      const createData = { identifier: 'do_qs_789', versionKey: 'vk_abc' };
+      const mockResponse = { data: createData, status: 200, headers: {} };
       mockClient.post = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await service.createQuestionSet(createOptions);
@@ -180,7 +149,7 @@ describe('QuestionSetService', () => {
           },
         },
       });
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(createData);
     });
 
     it('should include generated UUID in payload', async () => {
@@ -190,7 +159,7 @@ describe('QuestionSetService', () => {
       });
 
       mockClient.post = vi.fn().mockResolvedValue({
-        data: { result: { identifier: 'do_new' } },
+        data: { identifier: 'do_new' },
       });
 
       await service.createQuestionSet(createOptions);
@@ -203,23 +172,12 @@ describe('QuestionSetService', () => {
 
     it('should return identifier and versionKey from API response', async () => {
       vi.stubGlobal('crypto', { randomUUID: vi.fn().mockReturnValue('uuid') });
-      mockClient.post = vi.fn().mockResolvedValue({
-        data: {
-          result: {
-            identifier: 'do_qs_new_123',
-            versionKey: 'version_key_456',
-          },
-        },
-      });
+      const createData = { identifier: 'do_qs_new_123', versionKey: 'version_key_456' };
+      mockClient.post = vi.fn().mockResolvedValue({ data: createData });
 
       const result = await service.createQuestionSet(createOptions);
 
-      expect(result).toEqual({
-        result: {
-          identifier: 'do_qs_new_123',
-          versionKey: 'version_key_456',
-        },
-      });
+      expect(result).toEqual(createData);
     });
 
     it('should handle errors', async () => {
@@ -232,16 +190,8 @@ describe('QuestionSetService', () => {
   describe('retireQuestionSet', () => {
     it('should call client.delete with correct url and payload', async () => {
       const questionSetId = 'do_qs_123';
-      const mockResponse = {
-        data: {
-          result: {
-            identifier: questionSetId,
-            status: 'Retired'
-          }
-        },
-        status: 200,
-        headers: {}
-      };
+      const retireData = { identifier: questionSetId, status: 'Retired' };
+      const mockResponse = { data: retireData, status: 200, headers: {} };
       mockClient.delete = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await service.retireQuestionSet(questionSetId);
@@ -250,7 +200,7 @@ describe('QuestionSetService', () => {
         `/questionset/v2/retire/${questionSetId}`,
         { request: { questionset: {} } }
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(retireData);
     });
 
     it('should handle errors', async () => {
