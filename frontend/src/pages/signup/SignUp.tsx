@@ -180,7 +180,7 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        window.location.href = '/profile';
+        window.location.href = '/portal/login';
     };
 
     return (

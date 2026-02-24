@@ -39,6 +39,8 @@ interface CollectionContentAreaProps {
   firstCertPreviewUrl: string | undefined;
   setCertificatePreviewUrl: (url: string) => void;
   setCertificatePreviewOpen: (open: boolean) => void;
+  /** When true (creator viewing own collection), learner cards (progress, batches, certificate) are hidden. */
+  isCreatorViewingOwnCollection?: boolean;
 }
 
 export default function CollectionContentArea({
@@ -73,6 +75,7 @@ export default function CollectionContentArea({
   firstCertPreviewUrl,
   setCertificatePreviewUrl,
   setCertificatePreviewOpen,
+  isCreatorViewingOwnCollection = false,
 }: CollectionContentAreaProps) {
   const { t } = useAppI18n();
 
@@ -94,7 +97,7 @@ export default function CollectionContentArea({
         <CollectionOverview
           collectionData={collectionData}
           contentId={contentId}
-          contentAccessBlocked={isTrackable && (contentBlocked || !isEnrolledInCurrentBatch)}
+          contentAccessBlocked={isTrackable && (contentBlocked || (!isEnrolledInCurrentBatch && !isCreatorViewingOwnCollection))}
           playerMetadata={playerMetadata}
           playerIsLoading={playerIsLoading}
           playerError={playerError ?? null}
@@ -118,8 +121,8 @@ export default function CollectionContentArea({
             </div>
           )}
 
-          {/* Learner: Course progress */}
-          {isTrackable && !contentBlocked && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
+          {/* Learner: Course progress (hidden when creator viewing own collection) */}
+          {isTrackable && !contentBlocked && !isCreatorViewingOwnCollection && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
             <div className="flex-shrink-0 mb-4">
               <CourseProgressCard {...courseProgressProps} />
             </div>
@@ -139,8 +142,8 @@ export default function CollectionContentArea({
             />
           </div>
 
-          {/* Learner: Batch join + Certificate */}
-          {isTrackable && !contentBlocked && (
+          {/* Learner: Batch join + Certificate (hidden when creator viewing own collection) */}
+          {isTrackable && !contentBlocked && !isCreatorViewingOwnCollection && (
             <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
               {!hasBatchInRoute && (
                 <AvailableBatchesCard

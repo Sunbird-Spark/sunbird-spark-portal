@@ -12,6 +12,8 @@ interface UseCollectionDetailPlayerParams {
   mimeType: string | undefined;
   /** Current content status (0/1/2). When 2, no progress API calls are made for START/END. */
   currentContentStatus?: number;
+  /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
+  skipContentStateUpdate?: boolean;
 }
 
 export function useCollectionDetailPlayer({
@@ -22,6 +24,7 @@ export function useCollectionDetailPlayer({
   isBatchEnded,
   mimeType,
   currentContentStatus,
+  skipContentStateUpdate,
 }: UseCollectionDetailPlayerParams) {
   const handleContentStateFromTelemetry = useContentStateUpdate({
     collectionId,
@@ -31,6 +34,7 @@ export function useCollectionDetailPlayer({
     isBatchEnded,
     mimeType,
     currentContentStatus,
+    skipContentStateUpdate,
   });
 
   const onTelemetryEventStable = useCallback(

@@ -13,7 +13,7 @@ vi.mock('react-router-dom', async () => {
     return {
         ...actual,
         useNavigate: () => mockNavigate,
-        useLocation: vi.fn(() => ({ pathname: '/home' })),
+        useLocation: vi.fn(() => ({ pathname: '/home', search: '', hash: '', state: null, key: 'default', unstable_mask: undefined } as any)),
     };
 });
 
