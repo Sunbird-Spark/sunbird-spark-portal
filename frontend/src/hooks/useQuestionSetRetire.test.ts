@@ -20,10 +20,11 @@ const createWrapper = () => {
     },
   });
   
-  // eslint-disable-next-line react/display-name
-  return ({ children }: { children: React.ReactNode }) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
     return React.createElement(QueryClientProvider, { client: queryClient }, children);
   };
+  
+  return Wrapper;
 };
 
 describe('useQuestionSetRetire', () => {
