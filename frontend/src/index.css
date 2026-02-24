@@ -1046,4 +1046,8 @@
     background-attachment: fixed;
   }
 
+  /* Hide Google reCAPTCHA Badge */
+  .grecaptcha-badge {
+    visibility: hidden !important;
+  }
 }

@@ -1,0 +1,152 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import VerifyOtpDialog from './VerifyOtpDialog';
+import { OtpRequiredField, FieldOtpState, createInitialFieldOtpState } from '@/types/profileTypes';
+
+// Mock the common components
+vi.mock('@/components/common/Dialog', () => ({
+    Dialog: ({ children, open, onOpenChange }: any) =>
+        open ? <div data-testid="dialog">{children}</div> : null,
+    DialogContent: ({ children, className }: any) => <div className={className}>{children}</div>,
+    DialogTitle: ({ children, className }: any) => <h2 className={className}>{children}</h2>,
+}));
+
+vi.mock('@/components/common/InputOTP', () => ({
+    InputOTP: ({ children, value, onChange }: any) => (
+        <div data-testid="input-otp">
+            <input
+                data-testid="otp-input"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            {children}
+        </div>
+    ),
+    InputOTPGroup: ({ children, className }: any) => <div className={className}>{children}</div>,
+    InputOTPSlot: ({ index, className }: any) => <div data-testid={`otp-slot-${index}`} className={className} />,
+}));
+
+describe('VerifyOtpDialog', () => {
+    const defaultField: OtpRequiredField = 'mobileNumber';
+    const defaultFieldState: FieldOtpState = {
+        ...createInitialFieldOtpState(),
+        resendTimer: 0,
+        resendCount: 0,
+        maxResendAttempts: 4,
+    };
+
+    const defaultProps = {
+        field: defaultField,
+        fieldState: defaultFieldState,
+        setFieldOtp: vi.fn(),
+        verifyFieldOtp: vi.fn(),
+        resendFieldOtp: vi.fn(),
+        formatTime: vi.fn((s) => `00:${s.toString().padStart(2, '0')}`),
+        onClose: vi.fn(),
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('renders correctly for phone number field', () => {
+        render(<VerifyOtpDialog {...defaultProps} />);
+
+        expect(screen.getByText('Enter the code')).toBeInTheDocument();
+        expect(screen.getByText(/sent to your phone number/i)).toBeInTheDocument();
+        expect(screen.getByText('Submit')).toBeInTheDocument();
+        expect(screen.getByText('Resend OTP')).toBeInTheDocument();
+    });
+
+    it('renders correctly for email field', () => {
+        render(<VerifyOtpDialog {...defaultProps} field="emailId" />);
+
+        expect(screen.getByText(/sent to your email/i)).toBeInTheDocument();
+    });
+
+    it('calls setFieldOtp when OTP value changes', () => {
+        render(<VerifyOtpDialog {...defaultProps} />);
+
+        const input = screen.getByTestId('otp-input');
+        fireEvent.change(input, { target: { value: '123456' } });
+
+        expect(defaultProps.setFieldOtp).toHaveBeenCalledWith('mobileNumber', '123456');
+    });
+
+    it('calls verifyFieldOtp when Submit is clicked', async () => {
+        const fieldState = { ...defaultFieldState, otp: '123456' };
+        render(<VerifyOtpDialog {...defaultProps} fieldState={fieldState} />);
+
+        const submitBtn = screen.getByText('Submit');
+        fireEvent.click(submitBtn);
+
+        expect(defaultProps.verifyFieldOtp).toHaveBeenCalledWith('mobileNumber');
+    });
+
+    it('disables Submit button if OTP is not exactly 6 digits', () => {
+        const fieldState = { ...defaultFieldState, otp: '123' };
+        render(<VerifyOtpDialog {...defaultProps} fieldState={fieldState} />);
+
+        const submitBtn = screen.getByText('Submit');
+        expect(submitBtn).toBeDisabled();
+    });
+
+    it('shows "Submitting..." during verification', () => {
+        const fieldState = { ...defaultFieldState, otp: '123456', status: 'otp_verifying' as const };
+        render(<VerifyOtpDialog {...defaultProps} fieldState={fieldState} />);
+
+        expect(screen.getByText('Submitting...')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled();
+    });
+
+    it('calls resendFieldOtp when Resend OTP is clicked', () => {
+        render(<VerifyOtpDialog {...defaultProps} />);
+
+        const resendBtn = screen.getByText('Resend OTP');
+        fireEvent.click(resendBtn);
+
+        expect(defaultProps.resendFieldOtp).toHaveBeenCalledWith('mobileNumber');
+    });
+
+    it('disables Resend OTP button when timer is active', () => {
+        const fieldState = { ...defaultFieldState, resendTimer: 30 };
+        render(<VerifyOtpDialog {...defaultProps} fieldState={fieldState} />);
+
+        const resendBtn = screen.getByText('Resend OTP');
+        expect(resendBtn).toBeDisabled();
+    });
+
+    it('disables Resend OTP button after maximum attempts', () => {
+        const fieldState = { ...defaultFieldState, resendCount: 4, maxResendAttempts: 4 };
+        render(<VerifyOtpDialog {...defaultProps} fieldState={fieldState} />);
+
+        const resendBtn = screen.getByText('Resend OTP');
+        expect(resendBtn).toBeDisabled();
+    });
+
+    it('shows error message if present', () => {
+        const fieldState = { ...defaultFieldState, errorMessage: 'Invalid OTP' };
+        render(<VerifyOtpDialog {...defaultProps} fieldState={fieldState} />);
+
+        expect(screen.getByText('Invalid OTP')).toBeInTheDocument();
+    });
+
+    it('calls onClose when close button is clicked', () => {
+        render(<VerifyOtpDialog {...defaultProps} />);
+
+        // The close button has the MdOutlineClose icon
+        const closeBtn = screen.getByRole('button', { name: '' }); // It doesn't have a label in the component, but it's the only other button besides Submit and Resend
+        fireEvent.click(closeBtn);
+
+        expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    it('calls onClose automatically when status is verified', () => {
+        const { rerender } = render(<VerifyOtpDialog {...defaultProps} />);
+
+        const verifiedState = { ...defaultFieldState, status: 'verified' as const };
+        rerender(<VerifyOtpDialog {...defaultProps} fieldState={verifiedState} />);
+
+        expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+});
