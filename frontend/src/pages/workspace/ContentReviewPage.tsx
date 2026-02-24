@@ -20,7 +20,7 @@ import './ContentReviewPage.css';
 
 const contentService = new ContentService();
 const formService = new FormService();
-const WORKSPACE_QUERY_KEYS = ['workspace-counts', 'workspace-own-counts', 'workspace-content'];
+const WORKSPACE_QUERY_KEYS = ['workspace-counts', 'workspace-content'];
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return 'N/A';
