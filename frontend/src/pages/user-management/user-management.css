@@ -1,6 +1,11 @@
+/* ─── Search Row (inside right panel) ───────────────────────────────── */
+.um-tab-search-row {
+  @apply flex gap-3 items-center;
+}
+
 /* ─── Page Header ────────────────────────────────────────────────────── */
 .um-page-header {
-  @apply mb-6;
+  @apply mb-4;
 }
 
 .um-page-title {
@@ -34,7 +39,8 @@
 }
 
 .um-search-input {
-  @apply pl-9 font-rubik;
+  @apply font-rubik;
+  padding-left: 2.25rem !important; /* 36px — space for the search icon */
 }
 
 .um-search-btn {
@@ -104,11 +110,6 @@
   @apply w-36;
 }
 
-/* ─── User Link ──────────────────────────────────────────────────────── */
-.um-user-link {
-  @apply text-sunbird-brick hover:underline font-medium;
-}
-
 /* ─── Status Badge ───────────────────────────────────────────────────── */
 .um-status-badge {
   @apply inline-flex items-center px-2 py-0.5 rounded-full text-[0.75rem] font-rubik font-medium;
@@ -137,10 +138,6 @@
 
 .um-role-action-btn {
   @apply p-0.5 rounded transition-colors leading-none;
-}
-
-.um-role-edit-btn {
-  @apply text-sunbird-brick hover:bg-sunbird-brick/10;
 }
 
 .um-role-delete-btn {

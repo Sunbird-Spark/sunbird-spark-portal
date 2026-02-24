@@ -5,6 +5,7 @@ import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/auth/AuthContext";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { useIsAdmin } from "@/hooks/useUser";
 
 interface HomeSidebarProps {
     activeNav: string;
@@ -55,9 +56,9 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
-    const { isAuthenticated: contextAuth, user } = useAuth();
+    const { isAuthenticated: contextAuth } = useAuth();
     const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
-    const isAdmin = user?.role === 'admin';
+    const isAdmin = useIsAdmin();
 
     if (!isAuthenticated || location.pathname === "/") {
         return null;
