@@ -70,13 +70,20 @@ vi.mock('@/hooks/use-mobile', () => ({
     useIsMobile: () => mockUseIsMobile(),
 }));
 
-// Mock useAuth
-vi.mock('@/auth/AuthContext', () => ({
-    useAuth: vi.fn(() => ({
+vi.mock('@/hooks/usePermission', () => ({
+    usePermissions: vi.fn(() => ({
         isAuthenticated: true,
-        user: { id: '75a0d064-b41a-4ff8-ac22-38611acbddfe', name: 'Chetann Test0r8', role: 'student' },
-        login: vi.fn(),
-        logout: vi.fn(),
+        isLoading: false,
+        roles: ['CONTENT_CREATOR'],
+        primaryRole: 'CONTENT_CREATOR',
+        error: null,
+        hasRole: vi.fn(),
+        hasAnyRole: vi.fn(() => true),
+        hasAllRoles: vi.fn(),
+        canAccessRoute: vi.fn(),
+        canAccessFeature: vi.fn(),
+        getDefaultRoute: vi.fn(),
+        refetch: vi.fn(),
     })),
 }));
 

@@ -1,10 +1,12 @@
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FiHome, FiUser, FiLogOut, FiEdit } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/auth/AuthContext";
-import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { PermissionGate } from "@/rbac/PermissionGate";
+import { Feature } from "@/services/PermissionService";
+import { usePermissions } from "@/hooks/usePermission";
 
 interface HomeSidebarProps {
     activeNav: string;
@@ -38,11 +40,11 @@ const MyLearningIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const mainNavItems = [
+const mainNavItems: { id: string; label: string; icon: React.ElementType; path: string; feature?: Feature }[] = [
     { id: "home", label: "Home", icon: FiHome, path: "/home" },
     { id: "learning", label: "My Learning", icon: MyLearningIcon, path: "/my-learning" },
     { id: "explore", label: "Explore", icon: ExploreIcon, path: "/explore" },
-    { id: "workspace", label: "Workspace", icon: FiEdit, path: "/workspace" },
+    { id: "workspace", label: "Workspace", icon: FiEdit, path: "/workspace", feature: "view_workspace" },
     { id: "profile", label: "Profile", icon: FiUser, path: "/profile" },
 ];
 
@@ -55,10 +57,9 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
-    const { isAuthenticated: contextAuth } = useAuth();
-    const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+    const { isAuthenticated, isLoading } = usePermissions();
 
-    if (!isAuthenticated || location.pathname === "/") {
+    if (isLoading || !isAuthenticated || location.pathname === "/") {
         return null;
     }
 
@@ -84,7 +85,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                     Icon = GoHomeFill;
                 }
 
-                return (
+                const button = (
                     <li key={item.id}>
                         <button
                             onClick={() => handleNavClick(item)}
@@ -103,6 +104,16 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                         </button>
                     </li>
                 );
+
+                if (item.feature) {
+                    return (
+                        <PermissionGate key={item.id} feature={item.feature} hide>
+                            {button}
+                        </PermissionGate>
+                    );
+                }
+
+                return button;
             })}
         </ul>
     );

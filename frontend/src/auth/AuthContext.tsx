@@ -1,11 +1,14 @@
+// frontend/src/auth/AuthContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type Role = 'admin' | 'content_creator' | 'content_reviewer' | 'guest';
+// Use uppercase roles to match backend
+export type Role = 'ADMIN' | 'CONTENT_CREATOR' | 'CONTENT_REVIEWER' | 'GUEST';
 
 export interface User {
   id: string;
   name: string;
-  role: Role;
+  roles: Role[];
+  primaryRole: Role;
 }
 
 interface AuthContextType {

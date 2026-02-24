@@ -1,14 +1,18 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth, Role } from '../auth/AuthContext';
+import { Role } from '../auth/AuthContext';
+import { usePermissions } from '../hooks/usePermission';
+import PageLoader from '../components/common/PageLoader';
 
 interface WithRolesOptions {
-  unauthorizedTo?: string;       // <-- clearer naming than redirectTo
+  unauthorizedTo?: string;
   unauthenticatedTo?: string;
+  requireAll?: boolean;
 }
 
 /**
  * Higher Order Component that protects routes based on user roles
+ * Now uses the new permission system with usePermissions hook
  */
 export const withRoles = <P extends object>(
   allowedRoles: Role[],
@@ -16,17 +20,24 @@ export const withRoles = <P extends object>(
 ) => {
   return (Component: React.ComponentType<P>): React.FC<P> => {
     const WrappedComponent: React.FC<P> = (props) => {
-      const { user, isAuthenticated } = useAuth();
+      const { isAuthenticated, isLoading, hasAnyRole, hasAllRoles } = usePermissions();
       const location = useLocation();
 
-      // 1) Redirect unauthenticated users to home
+      // Show loader while checking permissions
+      if (isLoading) {
+        return <PageLoader message="Checking permissions..." />;
+      }
+
+      // Redirect unauthenticated users
       if (!isAuthenticated) {
         const loginPath = options?.unauthenticatedTo || '/home';
         return <Navigate to={loginPath} state={{ from: location }} replace />;
       }
 
-      // 2) Redirect authenticated but unauthorized users to unauthorized page
-      const hasPermission = user && allowedRoles.includes(user.role);
+      // Check permissions
+      const hasPermission = options?.requireAll
+        ? hasAllRoles(allowedRoles)
+        : hasAnyRole(allowedRoles);
 
       if (!hasPermission) {
         const unauthorizedPath = options?.unauthorizedTo || '/unauthorized';

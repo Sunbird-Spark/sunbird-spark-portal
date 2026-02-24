@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import UnauthorizedPage from './UnauthorizedPage';
-import { AuthProvider } from '../../auth/AuthContext';
-import * as AuthContext from '../../auth/AuthContext';
+import * as PermissionHook from '../../hooks/usePermission';
 
 const mockNavigate = vi.fn();
 
@@ -15,6 +14,23 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
+vi.mock('../../hooks/usePermission', () => ({
+  usePermissions: vi.fn(() => ({
+    primaryRole: 'GUEST',
+    roles: ['GUEST'],
+    isAuthenticated: false,
+    isLoading: false,
+    error: null,
+    hasRole: vi.fn(),
+    hasAnyRole: vi.fn(),
+    hasAllRoles: vi.fn(),
+    canAccessRoute: vi.fn(),
+    canAccessFeature: vi.fn(),
+    getDefaultRoute: vi.fn(),
+    refetch: vi.fn(),
+  })),
+}));
+
 describe('UnauthorizedPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,9 +39,7 @@ describe('UnauthorizedPage', () => {
   it('should render 403 error message', () => {
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
@@ -39,9 +53,7 @@ describe('UnauthorizedPage', () => {
   it('should render navigation buttons', () => {
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
@@ -52,9 +64,7 @@ describe('UnauthorizedPage', () => {
   it('should navigate to login when Change Role button is clicked', () => {
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
@@ -64,12 +74,10 @@ describe('UnauthorizedPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 
-  it('should navigate to home when Go Home is clicked for unauthenticated user', () => {
+  it('should navigate to home when Go Home is clicked for guest user', () => {
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
@@ -80,98 +88,106 @@ describe('UnauthorizedPage', () => {
   });
 
   it('should navigate to /reports for admin user', () => {
-    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
-    mockUseAuth.mockReturnValue({
-      user: { id: '1', name: 'Admin User', role: 'admin' },
+    vi.spyOn(PermissionHook, 'usePermissions').mockReturnValue({
+      primaryRole: 'ADMIN',
+      roles: ['ADMIN'],
       isAuthenticated: true,
-      login: vi.fn(),
-      logout: vi.fn(),
+      isLoading: false,
+      error: null,
+      hasRole: vi.fn(),
+      hasAnyRole: vi.fn(),
+      hasAllRoles: vi.fn(),
+      canAccessRoute: vi.fn(),
+      canAccessFeature: vi.fn(),
+      getDefaultRoute: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
-    fireEvent.click(goHomeButton);
-
+    fireEvent.click(screen.getByText('Go Home'));
     expect(mockNavigate).toHaveBeenCalledWith('/reports');
-    mockUseAuth.mockRestore();
   });
 
   it('should navigate to /workspace for content_creator user', () => {
-    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
-    mockUseAuth.mockReturnValue({
-      user: { id: '1', name: 'Creator', role: 'content_creator' },
+    vi.spyOn(PermissionHook, 'usePermissions').mockReturnValue({
+      primaryRole: 'CONTENT_CREATOR',
+      roles: ['CONTENT_CREATOR'],
       isAuthenticated: true,
-      login: vi.fn(),
-      logout: vi.fn(),
+      isLoading: false,
+      error: null,
+      hasRole: vi.fn(),
+      hasAnyRole: vi.fn(),
+      hasAllRoles: vi.fn(),
+      canAccessRoute: vi.fn(),
+      canAccessFeature: vi.fn(),
+      getDefaultRoute: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
-    fireEvent.click(goHomeButton);
-
+    fireEvent.click(screen.getByText('Go Home'));
     expect(mockNavigate).toHaveBeenCalledWith('/workspace');
-    mockUseAuth.mockRestore();
   });
 
   it('should navigate to /workspace for content_reviewer user', () => {
-    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
-    mockUseAuth.mockReturnValue({
-      user: { id: '1', name: 'Reviewer', role: 'content_reviewer' },
+    vi.spyOn(PermissionHook, 'usePermissions').mockReturnValue({
+      primaryRole: 'CONTENT_REVIEWER',
+      roles: ['CONTENT_REVIEWER'],
       isAuthenticated: true,
-      login: vi.fn(),
-      logout: vi.fn(),
+      isLoading: false,
+      error: null,
+      hasRole: vi.fn(),
+      hasAnyRole: vi.fn(),
+      hasAllRoles: vi.fn(),
+      canAccessRoute: vi.fn(),
+      canAccessFeature: vi.fn(),
+      getDefaultRoute: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
-    fireEvent.click(goHomeButton);
-
+    fireEvent.click(screen.getByText('Go Home'));
     expect(mockNavigate).toHaveBeenCalledWith('/workspace');
-    mockUseAuth.mockRestore();
   });
 
   it('should navigate to /home for guest user', () => {
-    const mockUseAuth = vi.spyOn(AuthContext, 'useAuth');
-    mockUseAuth.mockReturnValue({
-      user: { id: '1', name: 'Guest', role: 'guest' },
+    vi.spyOn(PermissionHook, 'usePermissions').mockReturnValue({
+      primaryRole: 'GUEST',
+      roles: ['GUEST'],
       isAuthenticated: true,
-      login: vi.fn(),
-      logout: vi.fn(),
+      isLoading: false,
+      error: null,
+      hasRole: vi.fn(),
+      hasAnyRole: vi.fn(),
+      hasAllRoles: vi.fn(),
+      canAccessRoute: vi.fn(),
+      canAccessFeature: vi.fn(),
+      getDefaultRoute: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
       <MemoryRouter>
-        <AuthProvider>
-          <UnauthorizedPage />
-        </AuthProvider>
+        <UnauthorizedPage />
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
-    fireEvent.click(goHomeButton);
-
+    fireEvent.click(screen.getByText('Go Home'));
     expect(mockNavigate).toHaveBeenCalledWith('/home');
-    mockUseAuth.mockRestore();
   });
 });

@@ -27,6 +27,11 @@ vi.mock("./auth/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+const mockUsePermissions = vi.fn();
+vi.mock("./hooks/usePermission", () => ({
+  usePermissions: () => mockUsePermissions(),
+}));
+
 function renderWithRoute(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
@@ -38,6 +43,20 @@ function renderWithRoute(route: string) {
 describe("AppRoutes (RBAC routing tests)", () => {
   beforeEach(() => {
     mockUseAuth.mockReset();
+    mockUsePermissions.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
+      roles: ['GUEST'],
+      primaryRole: 'GUEST',
+      error: null,
+      hasRole: vi.fn(),
+      hasAnyRole: vi.fn(() => false),
+      hasAllRoles: vi.fn(),
+      canAccessRoute: vi.fn(),
+      canAccessFeature: vi.fn(),
+      getDefaultRoute: vi.fn(),
+      refetch: vi.fn(),
+    });
   });
 
   it("public route: /home renders HomePage", () => {
@@ -143,13 +162,19 @@ describe("AppRoutes (RBAC routing tests)", () => {
   });
 
   it("protected: authenticated but wrong role visiting /admin redirects to /unauthorized", () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "2", name: "B", role: "content_creator" },
+    mockUsePermissions.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
+      roles: ['CONTENT_CREATOR'],
+      primaryRole: 'CONTENT_CREATOR',
+      error: null,
+      hasRole: vi.fn(),
+      hasAnyRole: vi.fn((roles: string[]) => roles.includes('CONTENT_CREATOR')),
+      hasAllRoles: vi.fn(),
+      canAccessRoute: vi.fn(),
+      canAccessFeature: vi.fn(),
+      getDefaultRoute: vi.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithRoute("/admin");
@@ -157,13 +182,19 @@ describe("AppRoutes (RBAC routing tests)", () => {
   });
 
   it("protected: authenticated admin can access /admin", () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "3", name: "C", role: "admin" },
+    mockUsePermissions.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
+      roles: ['ADMIN'],
+      primaryRole: 'ADMIN',
+      error: null,
+      hasRole: vi.fn(),
+      hasAnyRole: vi.fn((roles: string[]) => roles.includes('ADMIN')),
+      hasAllRoles: vi.fn(),
+      canAccessRoute: vi.fn(),
+      canAccessFeature: vi.fn(),
+      getDefaultRoute: vi.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithRoute("/admin");

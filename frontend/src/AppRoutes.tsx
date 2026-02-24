@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { withRoles } from './rbac/withRoles';
+import { ProtectedRoute } from './rbac/ProtectedRoute';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
@@ -27,12 +28,12 @@ import QumlEditorPage from './pages/content/QumlEditorPage';
 import ContentReviewPage from './pages/workspace/ContentReviewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
 
-const AdminProtected = withRoles(['admin'])(AdminPage);
-const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
-const ReportsProtected = withRoles(['admin'])(ReportsPage);
-const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
-const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
-const GenericEditorProtected = withRoles(['content_creator'])(GenericEditorPage);
+const AdminProtected = withRoles(['ADMIN'])(AdminPage);
+const WorkspaceProtected = withRoles(['CONTENT_CREATOR', 'CONTENT_REVIEWER'])(WorkspacePage);
+const ReportsProtected = withRoles(['ADMIN'])(ReportsPage);
+const CreateContentProtected = withRoles(['CONTENT_CREATOR'])(CreateContentPage);
+const ContentEditorProtected = withRoles(['CONTENT_CREATOR'])(ContentEditorPage);
+const GenericEditorProtected = withRoles(['CONTENT_CREATOR'])(GenericEditorPage);
 
 const AppRoutes: React.FC = () => {
   return (
@@ -62,7 +63,11 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
-        <Route path="/workspace" element={<WorkspacePage />} />
+        <Route path="/workspace" element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
+            <WorkspacePage />
+          </ProtectedRoute>
+        } />
         <Route path="/workspace/review/:contentId" element={<ContentReviewPage />} />
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentPage />} />

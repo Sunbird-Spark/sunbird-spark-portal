@@ -3,8 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import HomeSidebar from './HomeSidebar';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/auth/AuthContext';
-import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+import { usePermissions } from '@/hooks/usePermission';
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -17,15 +16,8 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
-// Mock authentication
-vi.mock('@/auth/AuthContext', () => ({
-    useAuth: vi.fn(),
-}));
-
-vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
-    default: {
-        isUserAuthenticated: vi.fn(),
-    },
+vi.mock('@/hooks/usePermission', () => ({
+    usePermissions: vi.fn(),
 }));
 
 // Mock useIsMobile to safely test desktop behavior
@@ -49,23 +41,33 @@ describe('HomeSidebar', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
-        vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(true);
+        vi.mocked(usePermissions).mockReturnValue({
+            isAuthenticated: true,
+            isLoading: false,
+            roles: ['CONTENT_CREATOR'],
+            primaryRole: 'CONTENT_CREATOR',
+            error: null,
+            hasRole: vi.fn(),
+            hasAnyRole: vi.fn(() => true),
+            hasAllRoles: vi.fn(),
+            canAccessRoute: vi.fn(),
+            canAccessFeature: vi.fn(),
+            getDefaultRoute: vi.fn(),
+            refetch: vi.fn(),
+        });
         vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
     });
 
 
 
     it('returns null when not authenticated', () => {
-        vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, login: vi.fn(), logout: vi.fn() } as any);
-        vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(false);
+        vi.mocked(usePermissions).mockReturnValue({ isAuthenticated: false, isLoading: false, roles: ['GUEST'], primaryRole: 'GUEST', error: null, hasRole: vi.fn(), hasAnyRole: vi.fn(), hasAllRoles: vi.fn(), canAccessRoute: vi.fn(), canAccessFeature: vi.fn(), getDefaultRoute: vi.fn(), refetch: vi.fn() });
 
         const { container } = renderSidebar();
         expect(container.firstChild).toBeNull();
     });
 
     it('returns null when on home route (/)', () => {
-        vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
         vi.mocked(useLocation).mockReturnValue({ pathname: '/', search: '', hash: '', state: null, key: 'default' } as any);
 
         const { container } = renderSidebar();
@@ -73,7 +75,6 @@ describe('HomeSidebar', () => {
     });
 
     it('renders all navigation items when authenticated and not on /', () => {
-        vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
         vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
 
         renderSidebar();

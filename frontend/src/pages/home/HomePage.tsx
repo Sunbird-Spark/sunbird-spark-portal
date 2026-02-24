@@ -5,7 +5,7 @@ import { getDefaultRouteForRole } from '../../rbac/roleConfig';
 import { v4 as uuidv4 } from 'uuid';
 
 const HomePage: React.FC = () => {
-  const [selectedRole, setSelectedRole] = useState<Role>('guest');
+  const [selectedRole, setSelectedRole] = useState<Role>('GUEST');
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,7 +19,8 @@ const HomePage: React.FC = () => {
     const user: User = {
       id: uuidv4(),
       name: `User (${selectedRole})`,
-      role: selectedRole,
+      roles: [selectedRole],
+      primaryRole: selectedRole,
     };
 
     login(user);
@@ -46,10 +47,10 @@ const HomePage: React.FC = () => {
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value as Role)}
           >
-            <option value="admin">Admin</option>
-            <option value="content_creator">Content Creator</option>
-            <option value="content_reviewer">Content Reviewer</option>
-            <option value="guest">Guest</option>
+            <option value="ADMIN">Admin</option>
+            <option value="CONTENT_CREATOR">Content Creator</option>
+            <option value="CONTENT_REVIEWER">Content Reviewer</option>
+            <option value="GUEST">Guest</option>
           </select>
         </div>
 

@@ -114,8 +114,21 @@ vi.mock('react-router-dom', async () => {
 
 /* ── Auth (mutable so we can flip between tests) ── */
 const mockAuthState = { isAuthenticated: false };
-vi.mock('@/auth/AuthContext', () => ({
-  useAuth: () => ({ isAuthenticated: mockAuthState.isAuthenticated }),
+vi.mock('@/hooks/usePermission', () => ({
+  usePermissions: () => ({
+    isAuthenticated: mockAuthState.isAuthenticated,
+    isLoading: false,
+    roles: mockAuthState.isAuthenticated ? ['CONTENT_CREATOR'] : ['GUEST'],
+    primaryRole: mockAuthState.isAuthenticated ? 'CONTENT_CREATOR' : 'GUEST',
+    error: null,
+    hasRole: vi.fn(),
+    hasAnyRole: vi.fn(),
+    hasAllRoles: vi.fn(),
+    canAccessRoute: vi.fn(),
+    canAccessFeature: vi.fn(),
+    getDefaultRoute: vi.fn(),
+    refetch: vi.fn(),
+  }),
 }));
 const mockGetUserId = vi.fn((): string | null => null);
 const mockGetAuthInfo = vi.fn(() =>

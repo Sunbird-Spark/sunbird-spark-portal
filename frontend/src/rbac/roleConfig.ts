@@ -1,66 +1,48 @@
+// frontend/src/rbac/roleConfig.ts
 import { Role } from '../auth/AuthContext';
 
-/**
- * Configuration for each role including default routes and allowed routes
- */
 interface RoleConfig {
   defaultRoute: string;
   allowedRoutes: string[];
   displayName: string;
 }
 
-/**
- * Centralized role configuration
- * Single source of truth for role permissions and routing
- */
 export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
-  admin: {
+  ADMIN: {
     defaultRoute: '/reports',
-    allowedRoutes: ['/admin', '/reports'],
+    allowedRoutes: ['/admin', '/reports', '/workspace', '/create'],
     displayName: 'Admin',
   },
-  content_creator: {
+  CONTENT_CREATOR: {
     defaultRoute: '/workspace',
     allowedRoutes: ['/workspace', '/create'],
     displayName: 'Content Creator',
   },
-  content_reviewer: {
+  CONTENT_REVIEWER: {
     defaultRoute: '/workspace',
     allowedRoutes: ['/workspace'],
     displayName: 'Content Reviewer',
   },
-  guest: {
+  GUEST: {
     defaultRoute: '/home',
     allowedRoutes: ['/home', '/unauthorized'],
     displayName: 'Guest',
   },
 };
 
-/**
- * Get the default home route for a given role
- */
 export const getDefaultRouteForRole = (role: Role): string => {
   return ROLE_CONFIGS[role]?.defaultRoute || '/home';
 };
 
-/**
- * Check if a role has access to a specific route
- */
 export const canRoleAccessRoute = (role: Role, route: string): boolean => {
   const config = ROLE_CONFIGS[role];
   return config?.allowedRoutes.includes(route) || false;
 };
 
-/**
- * Get all allowed routes for a role
- */
 export const getAllowedRoutesForRole = (role: Role): string[] => {
   return ROLE_CONFIGS[role]?.allowedRoutes || [];
 };
 
-/**
- * Get display name for a role
- */
 export const getRoleDisplayName = (role: Role): string => {
   return ROLE_CONFIGS[role]?.displayName || role;
 };

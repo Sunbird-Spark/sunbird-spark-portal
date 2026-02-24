@@ -1,20 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../auth/AuthContext';
+import { usePermissions } from '../../hooks/usePermission';
 import { getDefaultRouteForRole } from '../../rbac/roleConfig';
 
 const UnauthorizedPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { primaryRole } = usePermissions();
 
   const handleGoToLogin = () => {
     navigate('/home');
   };
 
-  // Determine safe home page based on user role
+  // Determine safe home page based on user's primary role
   const getSafeHomePage = (): string => {
-    if (!user) return '/home';
-    return getDefaultRouteForRole(user.role);
+    return getDefaultRouteForRole(primaryRole);
   };
 
   const handleGoHome = () => {
