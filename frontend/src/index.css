@@ -894,6 +894,9 @@
     transition: all 0.3s;
     width: 7rem;
     height: 5.125rem;
+    text-align: center;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .option-chip-selected {
