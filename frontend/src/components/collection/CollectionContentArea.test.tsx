@@ -174,6 +174,7 @@ describe('CollectionContentArea', () => {
       />
     );
     expect(screen.queryByTestId('view-dashboard-btn')).not.toBeInTheDocument();
+  });
   describe('Creator viewing own collection (isCreatorViewingOwnCollection)', () => {
     it('hides CourseProgressCard when isCreatorViewingOwnCollection is true', () => {
       render(
