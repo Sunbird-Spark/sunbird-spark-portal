@@ -31,6 +31,7 @@ const defaultItems: WorkspaceItem[] = [
     author: 'user-1',
     primaryCategory: 'Learning Resource',
     contentType: '',
+    mimeType: '',
   },
 ];
 
