@@ -79,13 +79,14 @@ describe('CollectionContentArea', () => {
     expect(screen.getByTestId('collection-sidebar')).toBeInTheDocument();
   });
 
-  it('renders BatchCard when user is creator (isAuthenticated && isContentCreator && collectionId)', () => {
+  it('renders BatchCard when user is creator viewing own collection (isCreatorViewingOwnCollection)', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
         isAuthenticated={true}
         isContentCreator={true}
         collectionId="col_123"
+        isCreatorViewingOwnCollection={true}
       />
     );
     expect(screen.getByTestId('batch-card')).toBeInTheDocument();
@@ -148,8 +149,8 @@ describe('CollectionContentArea', () => {
     expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
   });
 
-  describe('Creator viewing own collection (isCreatorViewingOwnCollection)', () => {
-    it('hides CourseProgressCard when isCreatorViewingOwnCollection is true', () => {
+  describe('Creator viewing own collection (contentCreatorPrivilege)', () => {
+    it('hides CourseProgressCard when contentCreatorPrivilege is true', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
@@ -157,48 +158,48 @@ describe('CollectionContentArea', () => {
           contentBlocked={false}
           hasBatchInRoute={true}
           isEnrolledInCurrentBatch={true}
-          isCreatorViewingOwnCollection={true}
+          contentCreatorPrivilege={true}
         />
       );
       expect(screen.queryByTestId('course-progress-card')).not.toBeInTheDocument();
     });
 
-    it('hides AvailableBatchesCard and CertificateCard when isCreatorViewingOwnCollection is true', () => {
+    it('hides AvailableBatchesCard and CertificateCard when contentCreatorPrivilege is true', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
           isTrackable={true}
           contentBlocked={false}
           hasBatchInRoute={false}
-          isCreatorViewingOwnCollection={true}
+          contentCreatorPrivilege={true}
         />
       );
       expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
       expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
     });
 
-    it('shows learner cards when isCreatorViewingOwnCollection is false', () => {
+    it('shows learner cards when contentCreatorPrivilege is false', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
           isTrackable={true}
           contentBlocked={false}
           hasBatchInRoute={false}
-          isCreatorViewingOwnCollection={false}
+          contentCreatorPrivilege={false}
         />
       );
       expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
       expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
     });
 
-    it('passes contentAccessBlocked=false to CollectionOverview when creator views own collection (content access without enrollment)', () => {
+    it('passes contentAccessBlocked=false to CollectionOverview when contentCreatorPrivilege (content access without enrollment)', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
           isTrackable={true}
           contentBlocked={false}
           isEnrolledInCurrentBatch={false}
-          isCreatorViewingOwnCollection={true}
+          contentCreatorPrivilege={true}
         />
       );
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');

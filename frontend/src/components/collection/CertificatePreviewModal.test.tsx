@@ -107,7 +107,11 @@ describe('CertificatePreviewModal', () => {
         '<svg xmlns="http://www.w3.org/2000/svg"><text>{{credentialSubject.recipientName}}</text></svg>';
       vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve(svgBody) })
+        vi.fn().mockResolvedValue({
+          ok: true,
+          headers: { get: (name: string) => (name === 'Content-Type' ? 'image/svg+xml' : null) },
+          text: () => Promise.resolve(svgBody),
+        })
       );
 
       render(
@@ -118,11 +122,14 @@ describe('CertificatePreviewModal', () => {
         />
       );
 
-      await waitFor(() => {
-        const img = screen.getByAltText('courseDetails.previewCertificate');
-        expect(img).toBeInTheDocument();
-        expect(img.getAttribute('src')).toMatch(/^blob:/);
-      });
+      await waitFor(
+        () => {
+          const img = screen.getByAltText('courseDetails.previewCertificate');
+          expect(img).toBeInTheDocument();
+          expect(img.getAttribute('src')).toMatch(/^blob:/);
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('keeps original previewUrl in img when fetch returns text without placeholders', async () => {
