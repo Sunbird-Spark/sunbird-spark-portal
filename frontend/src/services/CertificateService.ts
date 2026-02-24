@@ -241,7 +241,8 @@ export class CertificateService {
         },
       }
     );
-  public async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
+  }
+  async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
     return getClient().post<CertificateSearchResponse>('/rc/certificate/v1/search', {
       filters: {
         recipient: {

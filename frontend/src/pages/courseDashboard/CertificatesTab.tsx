@@ -66,7 +66,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
           type="text"
           value={uniqueId}
           onChange={(e) => setUniqueId(e.target.value)}
-          placeholder="Enter Unique ID"
+          placeholder="Enter Sunbird ID"
           className="max-w-md"
           data-testid="unique-id-input"
         />
@@ -87,15 +87,15 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
         onClick={() => setHintOpen((o) => !o)}
         data-testid="hint-toggle"
       >
-        {hintOpen ? '▲' : '▼'} What is Unique ID?
+        {hintOpen ? '▲' : '▼'} What is Sunbird ID?
       </button>
 
       {hintOpen && (
         <div className="bg-accent border border-border rounded-lg p-4 mb-6 text-sm max-w-md text-foreground" data-testid="hint-box">
-          <strong>How to find your Unique ID:</strong>
+          <strong>How to find your Sunbird ID:</strong>
           <ol className="mt-1.5 ml-5 list-decimal">
             <li>Click the <strong>Profile</strong> tab</li>
-            <li>The Unique ID is displayed below the user name</li>
+            <li>The Sunbird ID is displayed below the user name</li>
           </ol>
         </div>
       )}
