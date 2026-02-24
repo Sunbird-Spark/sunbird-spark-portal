@@ -6,11 +6,9 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 export interface CertificatePreviewDetails {
   recipientName?: string;
   trainingName?: string;
-  /** Date string in "DD MMMM YYYY" format for template placeholder (e.g. "18 February 2025"). */
   issuanceDate?: string;
 }
 
-/** Format date as "DD MMMM YYYY" for certificate template (e.g. 18 February 2025). */
 export function formatIssuanceDateLong(date: Date): string {
   const day = date.getDate();
   const d = day < 10 ? `0${day}` : String(day);
