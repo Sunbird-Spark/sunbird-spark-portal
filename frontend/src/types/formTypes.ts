@@ -41,6 +41,17 @@ export interface CategoryItem {
   value: string;
 }
 
+export interface CheckListFormFieldContent {
+  name: string;
+  checkList: string[];
+}
+
+export interface CheckListFormField {
+  title: string;
+  contents?: CheckListFormFieldContent[];
+  otherReason?: string;
+}
+
 export interface UseFormReadOptions {
   request: FormReadRequest;
   enabled?: boolean;

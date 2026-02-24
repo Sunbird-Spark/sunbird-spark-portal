@@ -44,6 +44,34 @@ export class ContentService {
     return getClient().delete('/content/v1/retire', { request: { contentIds } });
   }
 
+  public async contentPublish(
+    contentId: string,
+    lastPublishedBy: string
+  ): Promise<ApiResponse<any>> {
+    return getClient().post<any>(`/content/v1/publish/${contentId}`, {
+      request: {
+        content: {
+          lastPublishedBy,
+        },
+      },
+    });
+  }
+
+  public async contentReject(
+    contentId: string,
+    rejectReasons: string[],
+    rejectComment?: string
+  ): Promise<ApiResponse<any>> {
+    return getClient().post<any>(`/content/v1/reject/${contentId}`, {
+      request: {
+        content: {
+          rejectReasons: rejectReasons.length > 0 ? rejectReasons : ['Others'],
+          rejectComment: rejectComment || '',
+        },
+      },
+    });
+  }
+
   public async contentCreate(
     name: string,
     options: {
