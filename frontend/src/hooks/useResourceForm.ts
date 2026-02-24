@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { FormService } from "@/services/FormService";
-import { FrameworkService } from "@/services/FrameworkService";
+import { useFramework } from "./useFramework";
 
 interface FormField {
   code: string;
@@ -23,7 +23,6 @@ interface FrameworkCategory {
 }
 
 const formService = new FormService();
-const frameworkService = new FrameworkService();
 
 const createFormDefaults = (fields: FormField[]): Record<string, string | string[]> => {
   const defaults: Record<string, string | string[]> = {};
@@ -34,7 +33,6 @@ const createFormDefaults = (fields: FormField[]): Record<string, string | string
 };
 
 export const useResourceForm = (
-  open: boolean,
   orgChannelId: string,
   orgFramework: string,
   formSubType: string
@@ -45,7 +43,15 @@ export const useResourceForm = (
   const [isFetchingForm, setIsFetchingForm] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const fetchAttempted = useRef(false);
+  const [enableFrameworkFetch, setEnableFrameworkFetch] = useState(false);
+
+  const { data: frameworkData, isLoading: isFrameworkLoading } = useFramework(enableFrameworkFetch ? orgFramework : '');
+
+  useEffect(() => {
+    if (frameworkData?.data?.framework?.categories && enableFrameworkFetch) {
+      setFrameworkCategories(frameworkData.data.framework.categories);
+    }
+  }, [frameworkData, enableFrameworkFetch]);
 
   const resetState = useCallback(() => {
     setFields([]);
@@ -53,7 +59,7 @@ export const useResourceForm = (
     setFormValues({});
     setFetchError(null);
     setOpenDropdown(null);
-    fetchAttempted.current = false;
+    setEnableFrameworkFetch(false);
   }, []);
 
   const fetchFormAndFramework = useCallback(async () => {
@@ -76,29 +82,16 @@ export const useResourceForm = (
       setFormValues(createFormDefaults(sortedFields));
 
       if (orgFramework) {
-        try {
-          const fwResponse = await frameworkService.read<{ framework: { categories?: FrameworkCategory[] } }>(orgFramework);
-          const categories = fwResponse?.data?.framework?.categories ?? [];
-          setFrameworkCategories(categories);
-        } catch (fwErr) {
-          console.warn('Failed to fetch framework:', fwErr);
-        }
+        setEnableFrameworkFetch(true);
       }
     } catch (err) {
       console.error('Failed to fetch form config:', err);
       setFetchError('Failed to load form configuration. Please try again.');
+      throw err;
     } finally {
       setIsFetchingForm(false);
     }
   }, [orgChannelId, orgFramework, formSubType]);
-
-  useEffect(() => {
-    if (open && !fetchAttempted.current) {
-      fetchAttempted.current = true;
-      fetchFormAndFramework();
-    }
-    if (!open) resetState();
-  }, [open, fetchFormAndFramework, resetState]);
 
   const getOptionsForField = (field: FormField): { key: string; name: string }[] => {
     if (field.range && field.range.length > 0) return field.range;
@@ -133,11 +126,11 @@ export const useResourceForm = (
   return {
     fields,
     formValues,
-    isFetchingForm,
+    isFetchingForm: isFetchingForm || isFrameworkLoading,
     fetchError,
     openDropdown,
     setOpenDropdown,
-    fetchAttempted,
+    resetState,
     fetchFormAndFramework,
     getOptionsForField,
     handleFieldChange,
