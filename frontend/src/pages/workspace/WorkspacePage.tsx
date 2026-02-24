@@ -273,7 +273,7 @@ const WorkspacePage = () => {
       navigate(`/edit/content-editor/${contentId}`);
     } catch (error) {
       console.error('Failed to create content:', error);
-      toast({ title: "Error", description: "Failed to create content. Please try again.", variant: "destructive" });
+      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
     } finally {
       setIsCreating(false);
     }
@@ -334,7 +334,7 @@ const WorkspacePage = () => {
       setSelectedOption(null);
     } catch (error) {
       console.error('Failed to create content:', error);
-      toast({ title: "Error", description: "Failed to create content. Please try again.", variant: "destructive" });
+      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
     } finally {
       setIsCreating(false);
     }
@@ -401,9 +401,9 @@ const WorkspacePage = () => {
       }
 
       setConfirmDialog(null);
-      toast({ title: "Content Deleted", description: "The content has been removed.", variant: "destructive" });
+      toast({ title: "Deleted", description: "Content has been removed successfully." });
     } catch (err) {
-      toast({ title: "Error", description: (err as Error).message || "Failed to delete content.", variant: "destructive" });
+      toast({ title: "Delete Failed", description: (err as Error).message || "Unable to delete content. Please try again.", variant: "destructive" });
     } finally {
       setIsConfirming(false);
     }

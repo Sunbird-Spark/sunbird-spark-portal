@@ -115,10 +115,10 @@ const ContentReviewPage = () => {
         setDialogFormFields(response.data.form.data.fields);
         setDialogMode(mode);
       } else {
-        toast({ title: 'Error', description: `Failed to load ${action} form.`, variant: 'destructive' });
+        toast({ title: 'Form Load Failed', description: `Unable to load the ${action} form.`, variant: 'destructive' });
       }
     } catch {
-      toast({ title: 'Error', description: `Failed to load ${action} form. Please try again.`, variant: 'destructive' });
+      toast({ title: 'Form Load Failed', description: `Unable to load the ${action} form. Please try again.`, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -138,12 +138,12 @@ const ContentReviewPage = () => {
     try {
       await contentService.contentPublish(contentId, userAuthInfoService.getUserId() || '');
       closeDialog();
-      toast({ title: 'Success', description: 'Content is published successfully.' });
+      toast({ title: 'Published', description: 'Content has been published successfully.' });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
-      toast({ title: 'Error', description: 'Failed to publish content.', variant: 'destructive' });
+      toast({ title: 'Publish Failed', description: 'Unable to publish content. Please try again.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -155,12 +155,12 @@ const ContentReviewPage = () => {
     try {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
       closeDialog();
-      toast({ title: 'Success', description: 'Request for changes is submitted successfully.' });
+      toast({ title: 'Changes Requested', description: 'Request for changes has been submitted successfully.' });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
-      toast({ title: 'Error', description: 'Failed to request for changes.', variant: 'destructive' });
+      toast({ title: 'Request Failed', description: 'Unable to submit request for changes. Please try again.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }

@@ -356,9 +356,8 @@ describe('WorkspacePage', () => {
       expect(mockQuestionSetRetireMutateAsync).toHaveBeenCalledWith('do_qs_123');
     });
     expect(mockToast).toHaveBeenCalledWith({
-      title: 'Content Deleted',
-      description: 'The content has been removed.',
-      variant: 'destructive',
+      title: 'Deleted',
+      description: 'Content has been removed successfully.',
     });
   });
 
@@ -484,8 +483,8 @@ describe('WorkspacePage', () => {
     fireEvent.click(createButton);
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith({
-        title: 'Error',
-        description: 'Failed to create content. Please try again.',
+        title: 'Creation Failed',
+        description: 'Unable to create content. Please try again.',
         variant: 'destructive',
       });
     });
