@@ -230,7 +230,7 @@ describe('QuestionSetService', () => {
   });
 
   describe('retireQuestionSet', () => {
-    it('should call client.post with correct url and payload', async () => {
+    it('should call client.delete with correct url and payload', async () => {
       const questionSetId = 'do_qs_123';
       const mockResponse = {
         data: {
@@ -242,11 +242,11 @@ describe('QuestionSetService', () => {
         status: 200,
         headers: {}
       };
-      mockClient.post = vi.fn().mockResolvedValue(mockResponse);
+      mockClient.delete = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await service.retireQuestionSet(questionSetId);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
+      expect(mockClient.delete).toHaveBeenCalledWith(
         `/questionset/v2/retire/${questionSetId}`,
         { request: { questionset: {} } }
       );
@@ -255,7 +255,7 @@ describe('QuestionSetService', () => {
 
     it('should handle errors', async () => {
       const questionSetId = 'do_qs_123';
-      mockClient.post = vi.fn().mockRejectedValue(new Error('Retire failed'));
+      mockClient.delete = vi.fn().mockRejectedValue(new Error('Retire failed'));
 
       await expect(service.retireQuestionSet(questionSetId)).rejects.toThrow('Retire failed');
     });
