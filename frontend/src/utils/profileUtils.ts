@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import dayjs from 'dayjs';
 import { UserProfile } from '../types/userTypes';
 import {
     OtpRequiredField,
@@ -52,7 +53,5 @@ export const validateFieldFormat = (field: OtpRequiredField, value: string): str
 };
 
 export const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${_.padStart(String(mins), 2, '0')}:${_.padStart(String(secs), 2, '0')}`;
+    return dayjs().startOf('day').add(seconds, 'second').format('mm:ss');
 };
