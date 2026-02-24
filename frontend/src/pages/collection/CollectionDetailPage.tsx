@@ -46,6 +46,17 @@ const CollectionDetailPage = () => {
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
 
+  const [, setAuthRefresh] = useState(0);
+  const triedAuthRefreshRef = useRef(false);
+  useEffect(() => {
+    if (!isAuthenticated || userAuthInfoService.getUserId() || triedAuthRefreshRef.current) return;
+    triedAuthRefreshRef.current = true;
+    userAuthInfoService
+      .getAuthInfo()
+      .then(() => setAuthRefresh((n) => n + 1))
+      .catch(() => {});
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if (!collectionId || hasBatchInRoute || isCreatorViewingOwnCollection) return;
     const batchId = enrollment.enrollmentForCollection?.batchId;
@@ -53,7 +64,7 @@ const CollectionDetailPage = () => {
   }, [collectionId, hasBatchInRoute, isCreatorViewingOwnCollection, enrollment.enrollmentForCollection?.batchId, navigate]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
-  const contentBlocked = isTrackable && !isAuthenticated && !isCreatorViewingOwnCollection;
+  const contentBlocked = isTrackable && !isAuthenticated;
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const displayCollectionData = useMemo(
