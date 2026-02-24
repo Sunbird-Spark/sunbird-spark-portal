@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { SignupRequest, SignupResponse } from '../types/signupTypes'
 import { UserReadResponse } from '../types/userTypes';
 import { CourseEnrollmentResponse } from '../types/TrackableCollections';
+import { UpdateProfileRequest, UpdateProfileResponse } from '../types/profileTypes';
 
 const ORG_DETAILS_FIELDS = ['orgName', 'email'] as const;
 const LICENSE_DETAILS_FIELDS = ['name', 'description', 'url'] as const;
@@ -155,7 +156,14 @@ export class UserService {
             }
         );
     }
-
+public async updateProfile(
+        request: UpdateProfileRequest
+    ): Promise<ApiResponse<UpdateProfileResponse>> {
+        return getClient().patch<UpdateProfileResponse>(
+            '/user/v3/update',
+            request
+        );
+    }
     public async getUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
         const searchParams = new URLSearchParams({
             orgdetails: ORG_DETAILS_FIELDS.join(','),
