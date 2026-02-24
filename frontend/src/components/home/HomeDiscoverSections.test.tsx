@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import HomeDiscoverSections from './HomeDiscoverSections';
 import { useFormRead } from '@/hooks/useForm';
 
@@ -8,8 +8,12 @@ vi.mock('@/hooks/useForm', () => ({
 }));
 
 vi.mock('@/components/common/PageLoader', () => ({
-  default: ({ message }: { message: string }) => (
-    <div data-testid="page-loader">{message}</div>
+  default: ({ message, error, onRetry }: { message: string; error?: string; onRetry?: () => void }) => (
+    <div data-testid="page-loader">
+      <span>{message}</span>
+      {error && <span data-testid="error-message">{error}</span>}
+      {onRetry && <button onClick={onRetry}>Retry</button>}
+    </div>
   ),
 }));
 
@@ -55,16 +59,21 @@ describe('HomeDiscoverSections', () => {
     expect(screen.getByText('Loading content...')).toBeInTheDocument();
   });
 
-  it('returns null when form data fetch fails', () => {
+  it('shows error state with retry button when form data fetch fails', () => {
+    const mockRefetch = vi.fn();
     (useFormRead as any).mockReturnValue({
       isLoading: false,
       error: new Error('fetch failed'),
       data: undefined,
+      refetch: mockRefetch,
     });
 
-    const { container } = render(<HomeDiscoverSections />);
+    render(<HomeDiscoverSections />);
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+    expect(screen.getByTestId('error-message')).toHaveTextContent('fetch failed');
+    fireEvent.click(screen.getByRole('button', { name: /retry/i }));
+    expect(mockRefetch).toHaveBeenCalledOnce();
   });
 
   it('renders nothing when sections list is empty', () => {

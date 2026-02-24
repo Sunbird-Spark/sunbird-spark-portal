@@ -6,7 +6,7 @@ import { useFormRead } from "@/hooks/useForm";
 import { FormSection } from "@/types/formTypes";
 
 const HomeDiscoverSections = () => {
-  const { data: formData, isLoading, error } = useFormRead({
+  const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {
       type: "page",
       subType: "home",
@@ -22,7 +22,14 @@ const HomeDiscoverSections = () => {
   }
 
   if (error) {
-    return null;
+    return (
+      <PageLoader
+        message="Failed to load content."
+        fullPage={false}
+        error={error.message}
+        onRetry={refetch}
+      />
+    );
   }
 
   const sections: FormSection[] = formData?.data?.form?.data?.sections ?? [];
@@ -36,6 +43,8 @@ const HomeDiscoverSections = () => {
             key={section.id}
             title={section.title}
             criteria={section.criteria}
+            sectionClassName="content-section-home"
+            innerClassName="home-discover-inner"
           />
         );
       case "categories":
@@ -44,6 +53,7 @@ const HomeDiscoverSections = () => {
             key={section.id}
             title={section.title}
             list={section.list}
+            innerClassName="home-discover-inner"
           />
         );
       case "resources":
@@ -52,6 +62,7 @@ const HomeDiscoverSections = () => {
             key={section.id}
             title={section.title}
             criteria={section.criteria}
+            innerClassName="home-discover-inner"
           />
         );
       default:

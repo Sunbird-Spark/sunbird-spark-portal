@@ -26,7 +26,7 @@ describe('DynamicResourceSection', () => {
         <DynamicResourceSection title="Test Resources" />
       </BrowserRouter>
     );
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.resource-section-skeleton')).toBeInTheDocument();
   });
 
   it('renders resource cards when data is loaded', () => {
