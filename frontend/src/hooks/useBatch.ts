@@ -180,8 +180,29 @@ export const useCreateBatch = () => {
       return creatorBatchService.createBatch(request, reqHeaders);
     },
 
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+    onSuccess: (response, variables) => {
+      // Optimistically update the cache to reflect instantly
+      queryClient.setQueryData<Batch[]>(['batchList', variables.courseId, true], (old) => {
+        if (!old) return old;
+        const newBatch: Batch = {
+          id: response.data?.batchId || Math.random().toString(),
+          courseId: variables.courseId,
+          name: variables.name,
+          description: variables.description,
+          status: "0", // Upcoming by default
+          startDate: variables.startDate,
+          endDate: variables.endDate,
+          enrollmentEndDate: variables.enrollmentEndDate,
+          issueCertificate: variables.issueCertificate,
+          mentors: variables.mentors,
+        };
+        return [newBatch, ...old];
+      });
+
+      // Invalidate after a delay to let the backend Elasticsearch index the update
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+      }, 2000);
     },
   });
 };
@@ -223,7 +244,16 @@ export const useUpdateBatch = () => {
     },
 
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+      // Optimistically update the cache
+      queryClient.setQueryData<Batch[]>(['batchList', variables.courseId, true], (old) => {
+        if (!old) return old;
+        return old.map(b => b.id === variables.batchId ? { ...b, ...variables } : b);
+      });
+
+      // Invalidate after a delay
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['batchList', variables.courseId, true] });
+      }, 2000);
     },
   });
 };

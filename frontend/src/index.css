@@ -823,6 +823,47 @@
     @apply flex items-start gap-2 text-base text-muted-foreground;
   }
 
+  /* Home In Progress Styles */
+  .home-inprogress-content {
+    @apply flex-1 min-w-0 flex flex-col justify-between h-full py-1;
+  }
+
+  .home-inprogress-card-title {
+    @apply text-base font-medium text-foreground mb-2 line-clamp-2;
+  }
+
+  .home-inprogress-progress-container {
+    @apply flex items-center gap-3 mt-auto;
+  }
+
+  .home-inprogress-progress-bar-wrapper {
+    @apply flex-1;
+  }
+
+  .home-inprogress-progress-bar-bg {
+    @apply w-full h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden;
+  }
+
+  .home-inprogress-progress-bar-fill {
+    @apply h-full bg-sunbird-brick rounded-full;
+  }
+
+  .home-inprogress-progress-text {
+    @apply text-[0.625rem] font-medium text-sunbird-gray-77 shrink-0;
+  }
+
+  .home-inprogress-thumbnail {
+    @apply w-[4.371rem] h-[4.438rem] rounded-2xl overflow-hidden shrink-0;
+  }
+
+  .home-inprogress-thumbnail-img {
+    @apply w-full h-full object-cover;
+  }
+
+  .home-inprogress-thumbnail-placeholder {
+    @apply w-full h-full bg-black;
+  }
+
   /* Onboarding Page Styles */
   .onboarding-logo {
     height: 1.75rem;

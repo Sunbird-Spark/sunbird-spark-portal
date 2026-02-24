@@ -1,4 +1,7 @@
 import { getClient, ApiResponse } from '../lib/http-client';
+import type { Certificate, CertificateSearchResponse } from '../components/collection/certificate/types';
+
+export type { Certificate, CertificateSearchResponse };
 
 export interface CertSignatory {
   name: string;
@@ -147,32 +150,17 @@ export class CertificateService {
 
     const sanitizedHeaders = this._sanitizeHeaders(headers);
 
-    const response = await fetch(`/portal/asset/v1/upload/${assetId}`, {
-      method: 'POST',
-      body: formData,
-      headers: sanitizedHeaders,
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      let errmsg = `Upload failed (${response.status})`;
-      try {
-        const json = JSON.parse(text);
-        errmsg = json?.params?.errmsg ?? errmsg;
-      } catch (e) {
-        console.error("Failed to parse JSON error response:", e);
-        errmsg = `${errmsg}. Raw response: ${text}`;
-      }
-      throw new Error(errmsg);
+    try {
+      const response = await getClient().post<{ artifactUrl: string; content_url: string }>(
+        `/asset/v1/upload/${assetId}`,
+        formData,
+        sanitizedHeaders
+      );
+      
+      return response;
+    } catch (error: any) {
+      throw new Error(error.message || 'Upload failed');
     }
-
-    const json = await response.json();
-    const result = json?.result ?? json;
-    return {
-      data: result,
-      status: response.status,
-      headers: {} as Record<string, unknown>,
-    };
   }
 
   /** Attach the certificate template to the batch */
@@ -258,6 +246,18 @@ export class CertificateService {
         },
       }
     );
+  }
+
+  public async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
+    return getClient().post<CertificateSearchResponse>('/rc/certificate/v1/search', {
+      filters: {
+        recipient: {
+          id: {
+            eq: userId,
+          },
+        },
+      },
+    });
   }
 }
 
