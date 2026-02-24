@@ -39,6 +39,15 @@ export class QuestionSetService {
     const res = await getClient().post<any>('/questionset/v2/create', payload);
     return res.data;
   }
+  async retireQuestionSet(questionSetId: string): Promise<any> {
+    const payload = {
+      request: {
+        questionset: {}
+      }
+    };
+    const res = await getClient().delete<any>(`/questionset/v2/retire/${questionSetId}`, payload);
+    return res.data;
+  }
 }
 
 export const questionSetService = new QuestionSetService();

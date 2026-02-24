@@ -72,6 +72,7 @@ export interface WorkspaceItem {
   author: string;
   primaryCategory: string;
   contentType: string;
+  mimeType: string;
 }
 
 export interface FacetValue {

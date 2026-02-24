@@ -172,14 +172,14 @@ describe('Express App', () => {
     expect(response.text).toBe('mock-kong-response');
   });
 
-  it('should handle /action/data/v3/telemetry via knowlgMwProxy', async () => {
+  it('should handle /action/data/v3/telemetry via kong proxy', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
       .post('/action/data/v3/telemetry')
       .send({ events: [] })
       .expect(200);
 
-    expect(response.text).toBe('mock-knowlg-response');
+    expect(response.text).toBe('mock-kong-response');
   });
 
   it('should handle POST requests to /action/* routes', async () => {

@@ -23,6 +23,8 @@ export interface CollectionData {
   audience: string[];
   modules: Module[];
   trackable?: { enabled?: TrackableEnabled };
+  /** User ID of the collection creator (from hierarchy API). */
+  createdBy?: string;
 }
 
 export interface HierarchyContentNode {
@@ -36,6 +38,8 @@ export interface HierarchyContentNode {
   audience?: string[];
   children?: HierarchyContentNode[];
   trackable?: { enabled?: TrackableEnabled };
+  /** User ID of the collection creator (from /course/v1/hierarchy API). */
+  createdBy?: string;
 }
 
 export interface CourseHierarchyResponse {

@@ -10,11 +10,12 @@ import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import { type WorkspaceItem } from "@/types/workspaceTypes";
 import {
-  CONTENT_TYPE_ICONS,
   CONTENT_TYPE_CARD_COLORS,
   STATUS_CONFIG,
   getWorkspaceItemActionVisibility,
+  getPrimaryCategoryIcon,
 } from "@/services/workspace";
+import CardThumbnailBackground from "./CardThumbnailBackground";
 
 interface WorkspaceContentCardProps {
   item: WorkspaceItem;
@@ -29,7 +30,7 @@ const WorkspaceContentCard = ({
   onDelete,
   onView,
 }: WorkspaceContentCardProps) => {
-  const TypeIcon = CONTENT_TYPE_ICONS[item.type];
+  const TypeIcon = getPrimaryCategoryIcon(item.primaryCategory, item.type);
   const colors = CONTENT_TYPE_CARD_COLORS[item.type];
   const status = STATUS_CONFIG[item.status];
   const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
@@ -47,9 +48,7 @@ const WorkspaceContentCard = ({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className={cn("w-full h-full flex items-center justify-center", colors.bg)}>
-            <TypeIcon className={cn("w-12 h-12", colors.text, "opacity-40")} />
-          </div>
+          <CardThumbnailBackground type={item.type} primaryCategory={item.primaryCategory} />
         )}
 
         {/* Status Badge */}

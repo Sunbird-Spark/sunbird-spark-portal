@@ -1,14 +1,11 @@
 import { useState } from "react";
 import { useUserRead } from "@/hooks/useUserRead";
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import Header from "@/components/home/Header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
-import PageLoader from "@/components/common/PageLoader";
 import Footer from "@/components/home/Footer";
 import HomeSidebar from "@/components/home/HomeSidebar";
-import HomeStatsCards from "@/components/home/HomeStatsCards";
-import HomeContinueLearning from "@/components/home/HomeContinueLearning";
-import HomeInProgressGrid from "@/components/home/HomeInProgressGrid";
-import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
+import HomeDashboardContent from "@/components/home/HomeDashboardContent";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 
@@ -18,6 +15,12 @@ const Home = () => {
     const isMobile = useIsMobile();
     const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead();
     const userProfile = userReadData?.data?.response;
+    const { 
+        data: enrolledCollections, 
+        isLoading: enrollmentsLoading, 
+        error: enrollmentsError 
+    } = useUserEnrolledCollections();
+    const enrolledCount = enrolledCollections?.data?.courses?.length ?? 0;
     const [activeNav, setActiveNav] = useState("home");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
 
@@ -59,40 +62,21 @@ const Home = () => {
                         {/* Welcome Section */}
                         <div className="mb-6 md:mb-8">
                             <h2 className="home-welcome-title">
-                                Hi {userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : 'there'}
+                                Hi {[userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ') || 'there'}
                             </h2>
-                            <p className="home-welcome-subtitle">Welcome to a learning experience made just for you.</p>
+                            <p className="home-welcome-subtitle">
+                                {enrolledCount === 0
+                                    ? "Your exciting learning journey starts here. Dive in!"
+                                    : "Welcome to a learning experience made just for you."}
+                            </p>
                         </div>
 
-                        {userLoading || error ? (
-                            <PageLoader
-                                message="Loading your dashboard..."
-                                fullPage={false}
-                                error={error ? (error.message || "Failed to load dashboard") : undefined}
-                                onRetry={refetch}
-                            />
-                        ) : (
-                            <>
-                                {/* Stats Cards */}
-                                <HomeStatsCards />
-
-                                {/* Continue Learning + Performance */}
-                                <div className="home-continue-section">
-                                    <h3 className="home-continue-section-title">Continue from where you left</h3>
-                                    <div className="home-continue-grid">
-                                        <div className="w-full lg:w-[65%]">
-                                            <HomeContinueLearning />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* In Progress Contents */}
-                                <HomeInProgressGrid />
-
-                                {/* Recommended Contents */}
-                                <HomeRecommendedSection />
-                            </>
-                        )}
+                        <HomeDashboardContent
+                            loading={userLoading || enrollmentsLoading}
+                            error={error?.message || enrollmentsError?.message}
+                            enrolledCount={enrolledCount}
+                            onRetry={refetch}
+                        />
                     </div>
                 </main>
             </div>

@@ -1,0 +1,201 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ContentReviewPage from './ContentReviewPage';
+
+const mockNavigate = vi.fn();
+const mockToast = vi.fn();
+
+vi.mock('@/hooks/useContentPlayer', () => ({
+  useContentPlayer: () => ({
+    handlePlayerEvent: vi.fn(),
+    handleTelemetryEvent: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useContent', () => ({
+  useContentRead: () => ({
+    data: {
+      data: {
+        content: {
+          name: 'Test Content',
+          description: 'Test Description',
+          creator: 'Test Creator',
+          lastUpdatedOn: '2024-01-01',
+          createdOn: '2024-01-01',
+          primaryCategory: 'Resource',
+          mimeType: 'application/pdf',
+        },
+      },
+    },
+    isLoading: false,
+    error: null,
+  }),
+}));
+
+vi.mock('@/hooks/useQumlContent', () => ({
+  useQumlContent: () => ({
+    data: null,
+    isLoading: false,
+    error: null,
+  }),
+}));
+
+vi.mock('@/hooks/useToast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: { getUserId: () => 'test-user-id' },
+}));
+
+vi.mock('@/services/ContentService', () => ({
+  ContentService: class {
+    contentPublish = vi.fn().mockResolvedValue({});
+    contentReject = vi.fn().mockResolvedValue({});
+  },
+}));
+
+vi.mock('@/services/FormService', () => ({
+  FormService: class {
+    formRead = vi.fn().mockResolvedValue({
+      data: {
+        form: {
+          data: {
+            fields: [
+              {
+                title: 'Please confirm that ALL the following items are verified',
+                contents: [
+                  { name: 'Appropriateness', checkList: ['No Hate speech', 'No Discrimination'] },
+                ],
+                otherReason: 'Other Reason',
+              },
+            ],
+          },
+        },
+      },
+    });
+  },
+}));
+
+vi.mock('@/components/home/Header', () => ({
+  default: () => <div data-testid="header">Header</div>,
+}));
+
+vi.mock('@/components/home/Footer', () => ({
+  default: () => <div data-testid="footer">Footer</div>,
+}));
+
+vi.mock('@/components/common/PageLoader', () => ({
+  default: ({ message }: { message: string }) => <div data-testid="loader">{message}</div>,
+}));
+
+vi.mock('@/components/players', () => ({
+  ContentPlayer: () => <div data-testid="content-player">Content Player</div>,
+}));
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useParams: () => ({ contentId: 'test-content-id' }),
+    useNavigate: () => mockNavigate,
+    useSearchParams: () => [new URLSearchParams('mode=review')],
+  };
+});
+
+const renderPage = () =>
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <BrowserRouter>
+        <ContentReviewPage />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+
+describe('ContentReviewPage - Layout', () => {
+  beforeEach(() => vi.clearAllMocks());
+  afterEach(() => cleanup());
+
+  it('should arrange buttons horizontally with flexbox layout', () => {
+    renderPage();
+
+    const backButton = screen.getByRole('button', { name: /^Back$/i });
+    const publishButton = screen.getByText(/Publish/i);
+    const actionButtonsContainer = publishButton.closest('.content-review-actions');
+
+    expect(backButton).toBeInTheDocument();
+    expect(publishButton).toBeInTheDocument();
+    expect(screen.getByText(/Request for Changes/i)).toBeInTheDocument();
+    expect(actionButtonsContainer).toBeInTheDocument();
+
+    const parentContainer = backButton.closest('button')?.parentElement;
+    expect(parentContainer).toHaveClass('content-review-button-container');
+
+    const children = Array.from(parentContainer!.children);
+    expect(children).toContain(backButton.closest('button'));
+    expect(children).toContain(actionButtonsContainer);
+    expect(children.length).toBe(2);
+  });
+});
+
+describe('ContentReviewPage - Button Functionality', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockNavigate.mockClear();
+    mockToast.mockClear();
+  });
+  afterEach(() => cleanup());
+
+  it('should navigate to /workspace when Back button is clicked', () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /^Back$/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/workspace');
+  });
+
+  it('should have Publish button present, enabled, and clickable', () => {
+    renderPage();
+    const publishButton = screen.getByRole('button', { name: /^Publish$/i });
+    expect(publishButton).not.toBeDisabled();
+    expect(publishButton).toHaveClass('content-review-btn-publish');
+    expect(() => fireEvent.click(publishButton)).not.toThrow();
+  });
+
+  it('should open reject dialog when Request for Changes is clicked', async () => {
+    renderPage();
+    const rejectButton = screen.getByRole('button', { name: /Request for Changes/i });
+    expect(rejectButton).not.toBeDisabled();
+    expect(screen.queryByText(/Please confirm that ALL/i)).not.toBeInTheDocument();
+
+    fireEvent.click(rejectButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Please confirm that ALL/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should have proper CSS classes on all buttons', () => {
+    renderPage();
+    expect(screen.getByRole('button', { name: /^Back$/i })).toHaveClass('content-review-go-back');
+    expect(screen.getByRole('button', { name: /^Publish$/i })).toHaveClass('content-review-btn-publish');
+    const rejectButton = screen.getByRole('button', { name: /Request for Changes/i });
+    expect(rejectButton).toHaveClass('content-review-btn-reject');
+    expect(rejectButton.closest('.content-review-actions')).toBeInTheDocument();
+  });
+
+  it('should render all buttons at different viewport sizes', () => {
+    [375, 768, 1024, 1440].forEach((width) => {
+      globalThis.innerWidth = width;
+      window.dispatchEvent(new Event('resize'));
+
+      const { unmount } = renderPage();
+
+      expect(screen.getByRole('button', { name: /^Back$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^Publish$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Request for Changes/i })).toBeInTheDocument();
+
+      unmount();
+    });
+  });
+});

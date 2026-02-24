@@ -10,11 +10,12 @@ import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import { type WorkspaceItem } from "@/types/workspaceTypes";
 import {
-  CONTENT_TYPE_ICONS,
   CONTENT_TYPE_COLORS,
   STATUS_CONFIG,
   getWorkspaceItemActionVisibility,
+  getPrimaryCategoryIcon,
 } from "@/services/workspace";
+import CardThumbnailBackground from "./CardThumbnailBackground";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
@@ -43,7 +44,7 @@ const WorkspaceContentList = ({
       {/* Table Body */}
       <div className="divide-y divide-border">
         {items.map((item) => {
-          const TypeIcon = CONTENT_TYPE_ICONS[item.type];
+          const TypeIcon = getPrimaryCategoryIcon(item.primaryCategory, item.type);
           const status = STATUS_CONFIG[item.status];
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
@@ -60,9 +61,7 @@ const WorkspaceContentList = ({
                   {item.thumbnail ? (
                     <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <div className={cn("w-full h-full flex items-center justify-center", CONTENT_TYPE_COLORS[item.type])}>
-                      <TypeIcon className="w-4 h-4" />
-                    </div>
+                    <CardThumbnailBackground type={item.type} primaryCategory={item.primaryCategory} iconSize="sm" />
                   )}
                 </div>
                 <div className="min-w-0">

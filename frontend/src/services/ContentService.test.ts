@@ -68,6 +68,55 @@ describe('ContentService', () => {
     expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_789');
   });
 
+  describe('contentPublish', () => {
+    it('should call client.post with correct URL and request body', async () => {
+      mockClient.post = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+      await service.contentPublish('do_123', 'user-1');
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/publish/do_123',
+        {
+          request: {
+            content: {
+              lastPublishedBy: 'user-1',
+            },
+          },
+        }
+      );
+    });
+  });
+
+  describe('contentReject', () => {
+    it('should call client.post with reject reasons and comment', async () => {
+      mockClient.post = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+      await service.contentReject('do_456', ['Inappropriate content', 'Low quality'], 'Needs major revisions');
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/reject/do_456', {
+          request: {
+            content: {
+              rejectReasons: ['Inappropriate content', 'Low quality'],
+              rejectComment: 'Needs major revisions',
+            },
+          },
+      });
+    });
+
+    it('should default rejectComment to empty string when not provided', async () => {
+      mockClient.post = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+      await service.contentReject('do_101', ['Bad formatting']);
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/content/v1/reject/do_101',
+        {
+          request: {
+            content: {
+              rejectReasons: ['Bad formatting'],
+              rejectComment: '',
+            },
+          },
+        }
+      );
+    });
+  });
+
   describe('contentCreate', () => {
     const mockCreateResponse = {
       data: {

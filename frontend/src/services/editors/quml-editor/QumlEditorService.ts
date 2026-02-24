@@ -62,6 +62,7 @@ export class QumlEditorService {
 
     QumlEditorService.scriptLoading = new Promise<void>((resolve, reject) => {
       const script = document.createElement('script');
+      (window as any).CKEDITOR_VERSION = undefined;
       script.src = '/assets/quml-editor/sunbird-questionset-editor.js';
       script.setAttribute('data-quml-editor-script', 'true');
       script.onload = () => {

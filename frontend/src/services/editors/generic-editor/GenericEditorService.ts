@@ -164,6 +164,7 @@ export class GenericEditorService {
 
     // Fetch default channel slug from system settings, then get org details
     let channel = '';
+    let orgName = '';
     try {
       let slug = '';
       try {
@@ -180,6 +181,7 @@ export class GenericEditorService {
       if (org?.channel) {
         channel = org.hashTagId;
       }
+      orgName = org?.orgName || '';
     } catch {
       console.warn('Failed to get channel from org service');
     }
@@ -213,7 +215,7 @@ export class GenericEditorService {
         id: uid,
         name: 'User',
         orgIds: [],
-        organisations: {},
+        organisations: channel ? { [channel]: orgName } : {},
       },
       did,
       sid,

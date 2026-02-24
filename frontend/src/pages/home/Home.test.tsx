@@ -13,10 +13,15 @@ vi.mock('@/components/home/HomeSidebar', () => ({
         </div>
     )
 }));
-vi.mock('@/components/home/HomeStatsCards', () => ({ default: () => <div data-testid="stats-cards" /> }));
-vi.mock('@/components/home/HomeContinueLearning', () => ({ default: () => <div data-testid="continue-learning" /> }));
-vi.mock('@/components/home/HomeInProgressGrid', () => ({ default: () => <div data-testid="inprogress-grid" /> }));
-vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
+vi.mock('@/components/home/HomeDashboardContent', () => ({
+    default: ({ loading, error, enrolledCount }: { loading: boolean; error?: string; enrolledCount: number; onRetry: () => void }) => (
+        <div data-testid="dashboard-content"
+            data-loading={String(loading)}
+            data-error={error ?? ''}
+            data-enrolled={enrolledCount}
+        />
+    ),
+}));
 vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
 vi.mock('@/components/common/SearchModal', () => ({
@@ -78,6 +83,12 @@ vi.mock('@/hooks/useUserRead', () => ({
     useUserRead: () => mockUseUserRead(),
 }));
 
+// Mock useUserEnrolledCollections
+const mockUseUserEnrolledCollections = vi.fn();
+vi.mock('@/hooks/useUserEnrolledCollections', () => ({
+    useUserEnrolledCollections: () => mockUseUserEnrolledCollections(),
+}));
+
 describe('Home Page', () => {
     beforeEach(() => {
         mockUseIsMobile.mockReturnValue(false); // Default to desktop
@@ -93,6 +104,16 @@ describe('Home Page', () => {
             isLoading: false,
             error: null,
             refetch: vi.fn(),
+        });
+        // Default to 2 enrollments so the full dashboard path is exercised
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [{ courseId: 'c1' }, { courseId: 'c2' }],
+                },
+            },
+            isLoading: false,
+            error: null,
         });
     });
 
@@ -125,33 +146,26 @@ describe('Home Page', () => {
         expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
         expect(screen.getByText('Welcome to a learning experience made just for you.')).toBeInTheDocument();
         expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
     });
 
-    it('renders loading state when user data is loading', () => {
-        mockUseUserRead.mockReturnValue({
-            data: undefined,
-            isLoading: true,
-            error: null,
-            refetch: vi.fn(),
-        });
-
-        renderHome();
-
-        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
-    });
-
-    it('renders error state when user data fails to load', () => {
-        mockUseUserRead.mockReturnValue({
-            data: undefined,
+    it('shows the onboarding subtitle when user has no enrollments', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [] } },
             isLoading: false,
-            error: new Error('Network error'),
-            refetch: vi.fn(),
+            error: null,
         });
 
         renderHome();
 
-        expect(screen.getByText('Network error')).toBeInTheDocument();
+        expect(screen.getByText('Your exciting learning journey starts here. Dive in!')).toBeInTheDocument();
+        expect(screen.queryByText('Welcome to a learning experience made just for you.')).not.toBeInTheDocument();
+    });
+
+    it('shows the returning-user subtitle when user has enrollments', () => {
+        renderHome();
+
+        expect(screen.getByText('Welcome to a learning experience made just for you.')).toBeInTheDocument();
+        expect(screen.queryByText('Your exciting learning journey starts here. Dive in!')).not.toBeInTheDocument();
     });
 
     it('renders "Hi there" when user profile is not available', () => {
@@ -161,18 +175,71 @@ describe('Home Page', () => {
             error: null,
             refetch: vi.fn(),
         });
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [] } },
+            isLoading: false,
+            error: null,
+        });
 
         renderHome();
 
         expect(screen.getByText('Hi there')).toBeInTheDocument();
     });
 
+    it('passes loading=true to HomeDashboardContent when user data is loading', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+            refetch: vi.fn(),
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-loading', 'true');
+    });
+
+    it('passes loading=true to HomeDashboardContent when enrollments are loading', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-loading', 'true');
+    });
+
+    it('passes error message to HomeDashboardContent when user data fails', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+            error: new Error('Network error'),
+            refetch: vi.fn(),
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-error', 'Network error');
+    });
+
+    it('passes enrolledCount to HomeDashboardContent', () => {
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-enrolled', '2');
+    });
+
+    it('renders footer', () => {
+        renderHome();
+
+        expect(screen.getByTestId('footer')).toBeInTheDocument();
+    });
+
     it('handles sidebar toggle on desktop', () => {
         renderHome();
 
         expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-
-        // Sidebar is open by default on desktop
         expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
     });
 
@@ -212,23 +279,6 @@ describe('Home Page', () => {
         const changeNavBtn = screen.getByText('Change Nav');
         fireEvent.click(changeNavBtn);
 
-        // Verify the interaction happened without errors
         expect(changeNavBtn).toBeInTheDocument();
-    });
-
-    it('renders all main content sections when loaded', () => {
-        renderHome();
-
-        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
-        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
-        expect(screen.getByTestId('inprogress-grid')).toBeInTheDocument();
-        expect(screen.getByTestId('recommended-section')).toBeInTheDocument();
-        expect(screen.getByTestId('footer')).toBeInTheDocument();
-    });
-
-    it('renders the "Continue from where you left" section heading', () => {
-        renderHome();
-
-        expect(screen.getByText('Continue from where you left')).toBeInTheDocument();
     });
 });

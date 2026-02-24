@@ -24,6 +24,7 @@ import Explore from './pages/Explore';
 import MyLearning from './pages/myLearning/MyLearning';
 import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
+import ContentReviewPage from './pages/workspace/ContentReviewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
@@ -62,6 +63,7 @@ const AppRoutes: React.FC = () => {
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
         <Route path="/workspace" element={<WorkspacePage />} />
+        <Route path="/workspace/review/:contentId" element={<ContentReviewPage />} />
         <Route path="/reports" element={<ReportsProtected />} />
         <Route path="/create" element={<CreateContentPage />} />
         <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />

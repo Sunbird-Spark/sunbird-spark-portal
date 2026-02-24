@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiPlus, FiLoader, FiAward, FiCalendar, FiEdit2, FiLock } from "react-icons/fi";
+import { FiPlus, FiRefreshCw, FiLoader, FiAward, FiCalendar, FiEdit2, FiLock } from "react-icons/fi";
 import dayjs from "dayjs";
 import CreateBatchModal from "./CreateBatchModal";
 import AddCertificateModal from "./AddCertificateModal";
@@ -23,7 +23,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const [certBatch, setCertBatch]   = useState<Batch | null>(null);
   const [activeTab, setActiveTab]   = useState<ActiveTab>("Ongoing");
 
-  const { data: batches, isLoading, isError } = useBatchListForCreator(collectionId);
+  const { data: batches, isLoading, isError, refetch, isFetching } = useBatchListForCreator(collectionId);
 
   /* ── Per-tab filtered lists ── */
   const ongoing  = batches?.filter((b) => getBatchStatus(b.status) === "Ongoing")  ?? [];
@@ -56,14 +56,25 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
           <p className="text-sm font-semibold text-foreground font-['Rubik']">
             Manage batches for this course
           </p>
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            title="Create batch"
-            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors"
-          >
-            <FiPlus className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              title="Refresh batch list"
+              className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FiRefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              title="Create batch"
+              className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors"
+            >
+              <FiPlus className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* ── Tabs ── */}

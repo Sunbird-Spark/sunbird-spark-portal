@@ -53,8 +53,8 @@ interface UseWorkspaceOptions {
  *
  * Two separate queries:
  * 1. **Counts query** — fetches facet counts across all statuses (limit=1).
- *    In reviewer mode, fetches items (limit=WORKSPACE_PAGE_LIMIT) and counts
- *    client-side after filtering out the reviewer's own content.
+ *    In reviewer mode, uses `createdBy != userId` to exclude the reviewer's
+ *    own content directly at the API level.
  * 2. **Content query** — `useInfiniteQuery` that fetches pages of 20 items
  *    filtered by the active tab's status values.
  */
@@ -77,18 +77,17 @@ export function useWorkspace({
   // Whether this specific tab shows the current user's own content.
   // Reviewer tabs (pending-review, my-published) show other people's content.
   const isReviewerTab = isReviewerMode && ['pending-review', 'my-published'].includes(activeTab);
-  const isOwnContentTab = !isReviewerTab;
 
   // ── Counts query (runs once per role, shared across tabs) ──────────────
-  // Creator mode: fetches facets only (limit=1) for the user's own content.
-  // Reviewer mode: fetches items (limit=WORKSPACE_PAGE_LIMIT) for the org,
-  // then counts client-side after excluding the reviewer's own content.
+  // Both modes use facets (limit=1) for lightweight counting.
+  // Creator mode: scoped to the user's own content.
+  // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
   const countsQuery = useQuery({
     queryKey: ['workspace-counts', userId, userRole, orgId],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
-          ...(!isReviewerMode ? { createdBy: userId ?? '' } : {}),
+          createdBy: isReviewerMode ? { '!=': userId ?? '' } : (userId ?? ''),
           ...(isReviewerMode && orgId ? { createdFor: [orgId] } : {}),
           status: [...WORKSPACE_STATUS_FILTER],
           primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
@@ -98,43 +97,22 @@ export function useWorkspace({
         offset: 0,
       }),
     enabled: queryEnabled,
-    staleTime: 30_000,
+    staleTime: 0,
   });
 
   const counts: WorkspaceCounts = useMemo(() => {
-    if (isReviewerMode) {
-      // Reviewer mode: count from fetched items after filtering out own content
-      const allItems = countsQuery.data?.data?.content ?? [];
-      const questionSets = countsQuery.data?.data?.QuestionSet ?? [];
-      const combined = [...allItems, ...questionSets];
-      const filtered = userId
-        ? combined.filter((item) => item.createdBy !== userId)
-        : combined;
-
-      const review = filtered.filter((item) =>
-        ['review', 'processing', 'flagreview'].includes(item.status?.toLowerCase() ?? '')
-      ).length;
-      const published = filtered.filter((item) =>
-        ['live', 'unlisted'].includes(item.status?.toLowerCase() ?? '')
-      ).length;
-      const all = review + published;
-
-      return { all, drafts: 0, review, published, pendingReview: review };
-    }
-
-    // Creator mode: use facet counts from the API
     const facets = countsQuery.data?.data?.facets;
     const statusFacet = facets?.find((f) => f.name === 'status');
     const getFacetCount = (name: string) =>
       statusFacet?.values.find((v) => v.name === name)?.count ?? 0;
 
-    const drafts = getFacetCount('draft') + getFacetCount('flagdraft');
+    const drafts = isReviewerMode ? 0 : getFacetCount('draft') + getFacetCount('flagdraft');
     const review = getFacetCount('review') + getFacetCount('processing') + getFacetCount('flagreview');
     const published = getFacetCount('live') + getFacetCount('unlisted');
-    const all = countsQuery.data?.data?.count ?? 0;
+    const all = isReviewerMode ? review + published : (countsQuery.data?.data?.count ?? 0);
 
     return { all, drafts, review, published, pendingReview: review };
-  }, [countsQuery.data, isReviewerMode, userId]);
+  }, [countsQuery.data, isReviewerMode]);
 
   // ── Content query (per tab, paginated) ────────────────────────────────
   const statusFilter = getStatusFilterForTab(activeTab);
@@ -146,7 +124,7 @@ export function useWorkspace({
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: {
-          ...(isOwnContentTab ? { createdBy: userId ?? '' } : {}),
+          createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
           ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
           status: statusFilter,
           primaryCategory: primaryCategoryFilter,
@@ -159,9 +137,6 @@ export function useWorkspace({
     getNextPageParam: (lastPage, allPages) => {
       const totalLoaded = allPages.length * WORKSPACE_PAGE_LIMIT;
       const total = lastPage.data?.count ?? 0;
-      // For reviewer tabs we filter client-side (exclude own content), so the API
-      // total includes items we filter out. We still load until the API is exhausted
-      // to ensure we don't miss any displayable items.
       return totalLoaded < total ? totalLoaded : undefined;
     },
     enabled: queryEnabled,
@@ -173,19 +148,11 @@ export function useWorkspace({
     return contentQuery.data.pages.flatMap((page) => {
       const content = page.data?.content ?? [];
       const questionSets = page.data?.QuestionSet ?? [];
-      const items = [...content, ...questionSets];
-      // Exclude the reviewer's own content from reviewer tabs
-      const filtered = isReviewerTab && userId
-        ? items.filter((item) => item.createdBy !== userId)
-        : items;
-      return filtered.map(mapContentToWorkspaceItem);
+      return [...content, ...questionSets].map(mapContentToWorkspaceItem);
     });
-  }, [contentQuery.data, isReviewerTab, userId]);
+  }, [contentQuery.data]);
 
-  // Creator: use API count (stable from first page). Reviewer: use displayable count;
-  // we filter client-side so we don't have a server-provided total for displayable
-  // items—contents.length is correct once loading completes and grows as we load.
-  const totalCount = isReviewerTab ? contents.length : (contentQuery.data?.pages[0]?.data?.count ?? 0);
+  const totalCount = contentQuery.data?.pages[0]?.data?.count ?? 0;
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = contentQuery;
 
@@ -205,7 +172,6 @@ export function useWorkspace({
       queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] }),
       queryClient.invalidateQueries({ queryKey: ['workspace-content', userId] }),
     ]);
-
     await Promise.all([
       queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' }),
       queryClient.refetchQueries({ queryKey: ['workspace-content', userId], type: 'active' }),
