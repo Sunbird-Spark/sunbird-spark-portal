@@ -90,18 +90,6 @@ export class ContentService {
       extraFields?: Record<string, string | string[] | number>;
     }
   ): Promise<ApiResponse<ContentCreateResponse>> {
-    // Build dynamic fields, filtering out empty values
-    const dynamicFields: Record<string, string | string[] | number> = {};
-    if (options.extraFields) {
-      for (const [key, val] of Object.entries(options.extraFields)) {
-        if (typeof val === 'number') {
-          dynamicFields[key] = val;
-        } else if (val && (typeof val === 'string' ? val.trim() : val.length > 0)) {
-          dynamicFields[key] = val;
-        }
-      }
-    }
-
     return getClient().post<ContentCreateResponse>('/content/v1/create', {
       request: {
         content: {
@@ -118,7 +106,7 @@ export class ContentService {
           ...(options.organisation?.length && { organisation: options.organisation }),
           ...(options.createdFor?.length && { createdFor: options.createdFor }),
           ...(options.targetFWIds?.length && { targetFWIds: options.targetFWIds }),
-          ...dynamicFields,
+          ...options.extraFields,
         },
       },
     });

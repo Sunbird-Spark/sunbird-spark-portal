@@ -401,9 +401,9 @@ const WorkspacePage = () => {
       }
 
       setConfirmDialog(null);
-      toast({ title: "Success", description: "Content deleted successfully.", variant: "default" });
+      toast({ title: "Content Deleted", description: "The content has been removed.", variant: "destructive" });
     } catch (err) {
-      toast({ title: "Error", description: "Failed to delete content.", variant: "destructive" });
+      toast({ title: "Error", description: (err as Error).message || "Failed to delete content.", variant: "destructive" });
     } finally {
       setIsConfirming(false);
     }

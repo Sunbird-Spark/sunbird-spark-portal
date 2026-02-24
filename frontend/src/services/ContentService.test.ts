@@ -281,25 +281,6 @@ describe('ContentService', () => {
       );
     });
 
-    it('should filter out empty string extraFields', async () => {
-      await service.contentCreate('My Content', {
-        createdBy: 'user-1',
-        creator: 'Test User',
-        extraFields: {
-          subject: 'mathematics',
-          emptyString: '',
-          whitespaceString: '   ',
-          validString: 'valid',
-        },
-      });
-
-      const callArgs = (mockClient as any).post.mock.calls[0][1];
-      expect(callArgs.request.content).toHaveProperty('subject', 'mathematics');
-      expect(callArgs.request.content).toHaveProperty('validString', 'valid');
-      expect(callArgs.request.content).not.toHaveProperty('emptyString');
-      expect(callArgs.request.content).not.toHaveProperty('whitespaceString');
-    });
-
     it('should filter out empty array extraFields', async () => {
       await service.contentCreate('My Content', {
         createdBy: 'user-1',
@@ -314,7 +295,7 @@ describe('ContentService', () => {
       const callArgs = (mockClient as any).post.mock.calls[0][1];
       expect(callArgs.request.content).toHaveProperty('validArray', ['item1', 'item2']);
       expect(callArgs.request.content).toHaveProperty('validString', 'test');
-      expect(callArgs.request.content).not.toHaveProperty('emptyArray');
+      expect(callArgs.request.content).toHaveProperty('emptyArray');
     });
 
     it('should include number extraFields even when zero', async () => {
