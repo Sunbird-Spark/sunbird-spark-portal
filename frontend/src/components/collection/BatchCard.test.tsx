@@ -51,8 +51,10 @@ vi.mock('@/hooks/useBatch', () => ({
   useBatchListForCreator: (courseId: string, options?: any) => mockUseBatchList(courseId, options),
 }));
 
+const mockRefetch = vi.fn();
+
 /** Default hook state — no batches, not loading */
-const defaultHookState = { data: [], isLoading: false, isError: false };
+const defaultHookState = { data: [], isLoading: false, isError: false, refetch: mockRefetch, isFetching: false };
 
 describe('BatchCard', () => {
   const defaultProps = { collectionId: 'test-collection-123' };
@@ -94,7 +96,7 @@ describe('BatchCard', () => {
   /* ── Loading state ── */
 
   it('shows a loading spinner when isLoading is true', () => {
-    mockUseBatchList.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+    mockUseBatchList.mockReturnValue({ data: undefined, isLoading: true, isError: false, refetch: mockRefetch, isFetching: false });
     render(<BatchCard {...defaultProps} />);
     // Spinner is an SVG icon; the "No ongoing batches" text should NOT appear
     expect(screen.queryByText('No ongoing batches')).not.toBeInTheDocument();
@@ -104,7 +106,7 @@ describe('BatchCard', () => {
   /* ── Error state ── */
 
   it('shows error message when isError is true', () => {
-    mockUseBatchList.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    mockUseBatchList.mockReturnValue({ data: undefined, isLoading: false, isError: true, refetch: mockRefetch, isFetching: false });
     render(<BatchCard {...defaultProps} />);
     expect(screen.getByText('Failed to load batches.')).toBeInTheDocument();
   });
@@ -116,6 +118,8 @@ describe('BatchCard', () => {
       data: [{ id: 'b1', name: 'Ongoing Batch', status: '1', startDate: '2026-03-01', endDate: '2026-06-30' }],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     expect(screen.getByText('Ongoing Batch')).toBeInTheDocument();
@@ -128,6 +132,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
 
@@ -152,6 +158,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     expect(screen.getByRole('button', { name: /edit certificate/i })).toBeInTheDocument();
@@ -162,6 +170,8 @@ describe('BatchCard', () => {
       data: [{ id: 'b1', name: 'No Cert Batch', status: '1', startDate: '2026-01-01', endDate: '2026-06-01' }],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     expect(screen.getByRole('button', { name: /add certificate/i })).toBeInTheDocument();
@@ -181,6 +191,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     expect(screen.getByText(/enrolment ends/i)).toBeInTheDocument();
@@ -191,6 +203,8 @@ describe('BatchCard', () => {
       data: [{ id: 'b1', name: 'Some Batch', status: '1', startDate: '', endDate: '' }],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     expect(screen.queryByText('No ongoing batches')).not.toBeInTheDocument();
@@ -217,7 +231,7 @@ describe('BatchCard', () => {
   it('closes the modal when onOpenChange(false) is called by modal', () => {
     render(<BatchCard {...defaultProps} />);
     fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
-    
+
     // There can be multiple modals mocked (edit/create), find all close buttons
     const closeButtons = screen.getAllByText('Close Modal');
     if (closeButtons.length > 0 && closeButtons[0]) {
@@ -256,6 +270,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     const certButton = screen.getByRole('button', { name: /add certificate/i });
@@ -277,6 +293,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard collectionId="collection-abc" />);
     const certButton = screen.getByRole('button', { name: /add certificate/i });
@@ -300,6 +318,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     const certButton = screen.getByRole('button', { name: /add certificate/i });
@@ -325,6 +345,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard collectionId="collection-abc" collectionName="Test Collection" />);
     const certButton = screen.getByRole('button', { name: /add certificate/i });
@@ -346,6 +368,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     const certButton = screen.getByRole('button', { name: /edit certificate/i });
@@ -368,6 +392,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     const editButton = screen.getByRole('button', { name: /edit batch/i });
@@ -389,6 +415,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
     const editButton = screen.getByRole('button', { name: /edit batch/i });
@@ -412,6 +440,8 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
 
@@ -443,10 +473,39 @@ describe('BatchCard', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
 
     // Tabs should be rendered with counts
     expect(screen.getByRole('button', { name: /ongoing/i })).toBeInTheDocument();
+  });
+
+  /* ── Refresh button ── */
+
+  it('renders the refresh button', () => {
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /refresh batch list/i })).toBeInTheDocument();
+  });
+
+  it('calls refetch when the refresh button is clicked', () => {
+    render(<BatchCard {...defaultProps} />);
+    fireEvent.click(screen.getByRole('button', { name: /refresh batch list/i }));
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the refresh button when isFetching is true', () => {
+    mockUseBatchList.mockReturnValue({ ...defaultHookState, isFetching: true });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /refresh batch list/i })).toBeDisabled();
+  });
+
+  it('adds animate-spin class to the refresh icon when isFetching is true', () => {
+    mockUseBatchList.mockReturnValue({ ...defaultHookState, isFetching: true });
+    render(<BatchCard {...defaultProps} />);
+    const refreshBtn = screen.getByRole('button', { name: /refresh batch list/i });
+    const icon = refreshBtn.querySelector('svg');
+    expect(icon).toHaveClass('animate-spin');
   });
 });
