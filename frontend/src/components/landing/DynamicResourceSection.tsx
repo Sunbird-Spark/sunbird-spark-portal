@@ -1,15 +1,17 @@
 import { useContentSearch } from "@/hooks/useContent";
 import { ContentSearchRequest } from "@/types/workspaceTypes";
 import ResourceCard from "@/components/content/ResourceCard";
+import "./landing.css";
 
 interface DynamicResourceSectionProps {
     title: string;
     criteria?: {
         request: ContentSearchRequest;
     };
+    innerClassName?: string;
 }
 
-const DynamicResourceSection = ({ title, criteria }: DynamicResourceSectionProps) => {
+const DynamicResourceSection = ({ title, criteria, innerClassName = "landing-section-inner" }: DynamicResourceSectionProps) => {
     const { data, isLoading, error } = useContentSearch({
         request: criteria?.request,
         enabled: !!criteria?.request,
@@ -17,12 +19,12 @@ const DynamicResourceSection = ({ title, criteria }: DynamicResourceSectionProps
 
     if (isLoading) {
         return (
-            <section className="pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7] animate-pulse">
-                <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
-                    <div className="h-6 w-48 bg-gray-200 mx-auto mb-4 rounded"></div>
-                    <div className="h-8 w-96 bg-gray-300 mx-auto mb-8 rounded"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[1, 2, 3].map(i => <div key={i} className="h-[48rem] bg-gray-100 rounded-[1.25rem]"></div>)}
+            <section className="resource-section-skeleton">
+                <div className={innerClassName}>
+                    <div className="resource-section-skeleton-title"></div>
+                    <div className="resource-section-skeleton-subtitle"></div>
+                    <div className="resource-section-skeleton-grid">
+                        {[1, 2, 3].map(i => <div key={i} className="resource-section-skeleton-card"></div>)}
                     </div>
                 </div>
             </section>
@@ -53,18 +55,17 @@ const DynamicResourceSection = ({ title, criteria }: DynamicResourceSectionProps
         .filter(col => col.items.length > 0);
 
     return (
-        <section className="pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7]">
-            <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
-                <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-[#333333] text-center mb-[1.25rem]">
+        <section className="resource-section">
+            <div className={innerClassName}>
+                <h2 className="resource-section-title">
                     {title}
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="resource-section-grid">
                     {columns.map((col, colIdx) => (
-                        <div key={colIdx} className="flex flex-col gap-2">
+                        <div key={colIdx} className="resource-section-column">
                             {col.items.map((item) => {
                                 if (!item) return null;
-                                
                                 return (
                                     <ResourceCard
                                         key={item.identifier}
