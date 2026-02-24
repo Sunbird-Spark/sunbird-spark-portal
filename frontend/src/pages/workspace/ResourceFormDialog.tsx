@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useRef } from "react";
 import { Button } from "@/components/common/Button";
-import ResourceFormContent from "./ResourceFormContent";
+import ResourceFormField from "./ResourceFormField";
 import { useResourceForm } from "../../hooks/useResourceForm";
 
 interface FormField {
@@ -152,20 +152,17 @@ export default function ResourceFormDialog({
         {isFetchingForm && <LoadingState />}
         {fetchError && <ErrorState error={fetchError} onRetry={() => { fetchAttempted.current = false; fetchFormAndFramework(); }} />}
         {!isFetchingForm && !fetchError && fields.length > 0 && (
-          <ResourceFormContent
-            fields={fields}
-            formValues={formValues}
-            isLoading={isLoading}
-            openDropdown={openDropdown}
-            canSubmit={canSubmit}
-            getOptionsForField={getOptionsForField}
-            onFieldChange={handleFieldChange}
-            onMultiSelectToggle={handleMultiSelectToggle}
-            onDropdownToggle={setOpenDropdown}
-            onSubmit={handleSubmit}
-            onClose={onClose}
-            dropdownRef={dropdownRef}
-          />
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {fields.map((field) => (
+                <ResourceFormField key={field.code} field={field} value={formValues[field.code] || (field.inputType === 'multiSelect' ? [] : '')} options={getOptionsForField(field)} isLoading={isLoading} openDropdown={openDropdown} onFieldChange={handleFieldChange} onMultiSelectToggle={handleMultiSelectToggle} onDropdownToggle={setOpenDropdown} dropdownRef={dropdownRef} />
+              ))}
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>Cancel</Button>
+              <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{isLoading ? "Creating..." : "Create"}</Button>
+            </div>
+          </form>
         )}
       </div>
     </div>
