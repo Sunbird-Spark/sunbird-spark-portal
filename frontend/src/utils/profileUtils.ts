@@ -9,7 +9,7 @@ import {
 } from '../types/profileTypes';
 
 export const PHONE_REGEX = /^[6-9]\d{9}$/;
-export const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,4}$/;
+export const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
 export const createInitialFieldStates = (): Record<OtpRequiredField, FieldOtpState> => ({
     mobileNumber: createInitialFieldOtpState(),

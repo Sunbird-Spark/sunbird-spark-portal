@@ -535,6 +535,40 @@ describe('useEditProfile', () => {
         expect(result.current.isOpen).toBe(false);
       });
     });
+
+    it('calls updateProfile when only fullName is changed (no OTP required)', async () => {
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
+
+      mockUserService.updateProfile.mockResolvedValue({ data: { response: 'SUCCESS' }, status: 200, headers: {} });
+
+      act(() => {
+        result.current.openDialog();
+      });
+
+      // Change only the full name
+      act(() => {
+        result.current.updateField('fullName', 'Jane Smith');
+      });
+
+      expect(result.current.canSave).toBe(true);
+
+      await act(async () => {
+        result.current.handleSave();
+      });
+
+      expect(mockUserService.updateProfile).toHaveBeenCalledWith({
+        request: {
+          userId: 'user-123',
+          firstName: 'Jane',
+          lastName: 'Smith',
+        },
+      });
+
+      await waitFor(() => {
+        expect(result.current.isOpen).toBe(false);
+      });
+    });
   });
 
   it('resets verified field to modified when value is changed again', async () => {
