@@ -133,11 +133,17 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
   }, [updateFieldState, setFieldStates]);
 
   const canSave = useMemo(() => {
-    const hasAnyChange = form.fullName !== originalData.current.fullName ||
-      _.some(OTP_REQUIRED_FIELDS, (field) => fieldStates[field].status === 'verified');
+    const currentFullName = _.trim(form.fullName || '');
+    const originalFullName = _.trim(originalData.current.fullName || '');
+
+    const nameChanged = currentFullName !== originalFullName;
+    const anyOtpFieldVerified = _.some(OTP_REQUIRED_FIELDS, (field) => fieldStates[field].status === 'verified');
+
+    const hasAnyChange = nameChanged || anyOtpFieldVerified;
 
     if (!hasAnyChange) return false;
 
+    // Block save if any field is in 'modified' or 'error' state (needs validation/fixing)
     return _.every(OTP_REQUIRED_FIELDS, (field) => {
       const status = fieldStates[field].status;
       return status === 'pristine' || status === 'verified';
@@ -157,43 +163,54 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
       return;
     }
 
-    const primaryEmail = _.trim(form.emailId);
-    const recoveryEmail = _.trim(form.alternateEmail);
+    const request: UpdateProfileRequest = { request: { userId } };
+    let hasDataToUpdate = false;
 
-    if (recoveryEmail && primaryEmail && recoveryEmail === primaryEmail) {
-      const message = 'Alternate email cannot be the same as primary email';
-      toast({
-        variant: 'destructive',
-        title: 'Update failed',
-        description: message,
-      });
-      return;
+    // Handle Name Update
+    const currentFullName = _.trim(form.fullName || '');
+    const originalFullName = _.trim(originalData.current.fullName || '');
+    if (currentFullName !== originalFullName) {
+      hasDataToUpdate = true;
+      const spaceIndex = currentFullName.indexOf(' ');
+      if (spaceIndex > 0) {
+        request.request.firstName = _.trim(currentFullName.substring(0, spaceIndex));
+        request.request.lastName = _.trim(currentFullName.substring(spaceIndex + 1));
+      } else {
+        request.request.firstName = currentFullName;
+        request.request.lastName = '';
+      }
     }
 
-    const request: UpdateProfileRequest = { request: { userId } };
-
-    if (form.fullName !== originalData.current.fullName) {
-      const spaceIndex = _.indexOf(form.fullName, ' ');
-      if (spaceIndex > 0) {
-        request.request.firstName = form.fullName.substring(0, spaceIndex);
-        request.request.lastName = form.fullName.substring(spaceIndex + 1);
-      } else {
-        request.request.firstName = form.fullName;
-        request.request.lastName = '';
+    // Email cross-validation - only if one of them is actually being changed/verified
+    if (fieldStates.emailId.status === 'verified' || fieldStates.alternateEmail.status === 'verified') {
+      const primaryEmail = _.trim(form.emailId);
+      const recoveryEmail = _.trim(form.alternateEmail);
+      if (recoveryEmail && primaryEmail && recoveryEmail === primaryEmail) {
+        toast({
+          variant: 'destructive',
+          title: 'Update failed',
+          description: 'Alternate email cannot be the same as primary email',
+        });
+        return;
       }
     }
 
     if (fieldStates.mobileNumber.status === 'verified') {
       request.request.phone = _.trim(form.mobileNumber);
       request.request.phoneVerified = true;
+      hasDataToUpdate = true;
     }
     if (fieldStates.emailId.status === 'verified') {
       request.request.email = _.trim(form.emailId);
       request.request.emailVerified = true;
+      hasDataToUpdate = true;
     }
     if (fieldStates.alternateEmail.status === 'verified') {
       request.request.recoveryEmail = _.trim(form.alternateEmail);
+      hasDataToUpdate = true;
     }
+
+    if (!hasDataToUpdate) return;
 
     try {
       await updateProfileMutation.mutateAsync(request);
