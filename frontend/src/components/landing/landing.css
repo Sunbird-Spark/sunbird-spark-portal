@@ -7,8 +7,8 @@
     @apply w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem];
 }
 
-/* Used when Dynamic sections are rendered inside the home page layout,
-   which already provides its own horizontal padding. */
+/* Used when Dynamic sections are rendered inside the home page layout.
+   The layout provides base horizontal padding; this adds extra right padding. */
 .home-discover-inner {
     @apply w-full pr-[2.5rem];
 }

@@ -61,7 +61,7 @@ const HomeDiscoverSections = () => {
           <DynamicResourceSection
             key={section.id}
             title={section.title}
-            sectionLabel="Resource Center"
+            sectionLabel="resource.header"
             criteria={section.criteria}
             sectionClassName="resource-section-home"
             innerClassName="home-discover-resource-inner"
