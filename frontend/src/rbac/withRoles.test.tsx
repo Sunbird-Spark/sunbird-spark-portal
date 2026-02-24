@@ -26,6 +26,14 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
   };
 });
 
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useLocation: vi.fn().mockReturnValue({ pathname: '/test', search: '', hash: '', state: null, key: 'default' } as any),
+  };
+});
+
 vi.mock('../services/UserService', () => ({
   UserService: class {
     getUserRoles = vi.fn();
