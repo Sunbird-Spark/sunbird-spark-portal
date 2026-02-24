@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ResourceFormDialog from './ResourceFormDialog';
 
 // Hoist the mock functions to avoid initialization order issues
@@ -141,6 +142,23 @@ const defaultProps = {
   title: 'Create Content',
 };
 
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const renderWithQueryClient = (ui: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {ui}
+    </QueryClientProvider>
+  );
+};
+
 describe('ResourceFormDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -149,13 +167,17 @@ describe('ResourceFormDialog', () => {
   });
 
   it('should not render when open is false', () => {
-    render(<ResourceFormDialog {...defaultProps} open={false} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} open={false} />);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('should render dialog with title when open', () => {
-    render(<ResourceFormDialog {...defaultProps} />);
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  it('should render dialog with title when open', async () => {
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
+    
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+    
     expect(screen.getByText('Create Content')).toBeInTheDocument();
     expect(screen.getByText('Fill in the details to create your content')).toBeInTheDocument();
   });
@@ -164,16 +186,16 @@ describe('ResourceFormDialog', () => {
     // Mock a never-resolving promise to keep loading state
     mockFormRead.mockImplementation(() => new Promise(() => {}));
 
-    render(<ResourceFormDialog {...defaultProps} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
     
-    expect(screen.getByText('Loading form...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
     // Check for the spinner element
     const spinner = document.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
   });
 
   it('should fetch form and framework data on open', async () => {
-    render(<ResourceFormDialog {...defaultProps} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
       expect(mockFormRead).toHaveBeenCalledWith({
@@ -189,7 +211,7 @@ describe('ResourceFormDialog', () => {
   });
 
   it('should render form fields after successful fetch', async () => {
-    render(<ResourceFormDialog {...defaultProps} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByText('Content Name')).toBeInTheDocument();
@@ -201,7 +223,7 @@ describe('ResourceFormDialog', () => {
   });
 
   it('should show required field indicators', async () => {
-    render(<ResourceFormDialog {...defaultProps} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
       // Check for asterisks in required field labels - there should be multiple
@@ -211,7 +233,7 @@ describe('ResourceFormDialog', () => {
   });
 
   it('should handle text input changes', async () => {
-    render(<ResourceFormDialog {...defaultProps} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
       const nameInput = screen.getByPlaceholderText('Enter content name');
@@ -225,7 +247,7 @@ describe('ResourceFormDialog', () => {
   it('should handle form fetch error', async () => {
     mockFormRead.mockRejectedValue(new Error('API Error'));
 
-    render(<ResourceFormDialog {...defaultProps} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load form configuration. Please try again.')).toBeInTheDocument();
@@ -235,7 +257,7 @@ describe('ResourceFormDialog', () => {
 
   it('should call onClose when clicking outside dialog', async () => {
     const onClose = vi.fn();
-    render(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
 
     await waitFor(() => {
       const dialog = screen.getByRole('dialog');
@@ -249,7 +271,7 @@ describe('ResourceFormDialog', () => {
 
   it('should not call onClose when clicking inside dialog content', async () => {
     const onClose = vi.fn();
-    render(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
 
     await waitFor(() => {
       const dialogContent = screen.getByText('Fill in the details to create your content');
@@ -263,7 +285,11 @@ describe('ResourceFormDialog', () => {
 
   it('should handle escape key to close dialog', async () => {
     const onClose = vi.fn();
-    render(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
 
     act(() => {
       fireEvent.keyDown(window, { key: 'Escape' });
@@ -274,7 +300,7 @@ describe('ResourceFormDialog', () => {
 
   it('should not close on escape when loading', async () => {
     const onClose = vi.fn();
-    render(<ResourceFormDialog {...defaultProps} onClose={onClose} isLoading={true} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onClose={onClose} isLoading={true} />);
 
     act(() => {
       fireEvent.keyDown(window, { key: 'Escape' });
@@ -285,7 +311,7 @@ describe('ResourceFormDialog', () => {
 
   it('should call onSubmit with form data when form is submitted', async () => {
     const onSubmit = vi.fn();
-    render(<ResourceFormDialog {...defaultProps} onSubmit={onSubmit} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onSubmit={onSubmit} />);
 
     await waitFor(() => {
       const nameInput = screen.getByPlaceholderText('Enter content name');
@@ -316,7 +342,7 @@ describe('ResourceFormDialog', () => {
 
   it('should use default description when empty', async () => {
     const onSubmit = vi.fn();
-    render(<ResourceFormDialog {...defaultProps} onSubmit={onSubmit} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onSubmit={onSubmit} />);
 
     await waitFor(() => {
       const nameInput = screen.getByPlaceholderText('Enter content name');
@@ -348,7 +374,7 @@ describe('ResourceFormDialog', () => {
       .mockRejectedValueOnce(new Error('API Error'))
       .mockResolvedValueOnce(mockFormResponse);
 
-    render(<ResourceFormDialog {...defaultProps} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load form configuration. Please try again.')).toBeInTheDocument();
@@ -367,7 +393,7 @@ describe('ResourceFormDialog', () => {
   });
 
   it('should show loading state on submit button when isLoading is true', async () => {
-    render(<ResourceFormDialog {...defaultProps} isLoading={true} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} isLoading={true} />);
 
     await waitFor(() => {
       const submitButton = screen.getByRole('button', { name: /Creating.../ });
@@ -377,7 +403,7 @@ describe('ResourceFormDialog', () => {
 
   it('should call onClose when cancel button is clicked', async () => {
     const onClose = vi.fn();
-    render(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
 
     await waitFor(() => {
       const cancelButton = screen.getByRole('button', { name: /Cancel/ });

@@ -1,7 +1,8 @@
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/common/Button";
 import ResourceFormField from "./ResourceFormField";
-import { useResourceForm } from "../../hooks/useResourceForm";
+import { useFormRead } from "../../hooks/useForm";
+import { useFramework } from "../../hooks/useFramework";
 
 interface FormField {
   code: string;
@@ -66,6 +67,14 @@ const processFormSubmission = (
   };
 };
 
+const createFormDefaults = (fields: FormField[]): Record<string, string | string[]> => {
+  const defaults: Record<string, string | string[]> = {};
+  for (const field of fields) {
+    defaults[field.code] = field.inputType === 'multiSelect' ? [] : '';
+  }
+  return defaults;
+};
+
 const LoadingState = () => (
   <div className="flex flex-col items-center justify-center py-12 gap-3">
     <div className="w-8 h-8 border-3 border-sunbird-wave/30 border-t-sunbird-wave rounded-full animate-spin" />
@@ -95,41 +104,109 @@ export default function ResourceFormDialog({
   onFormLoadComplete,
 }: ResourceFormDialogProps) {
   const [showDialog, setShowDialog] = useState(false);
-  const {
-    fields,
-    formValues,
-    isFetchingForm,
-    fetchError,
-    openDropdown,
-    setOpenDropdown,
-    resetState,
-    fetchFormAndFramework,
-    getOptionsForField,
-    handleFieldChange,
-    handleMultiSelectToggle,
-    canSubmit,
-  } = useResourceForm(orgChannelId, orgFramework, formSubType);
+  const [enabled, setEnabled] = useState(false);
+  const [formValues, setFormValues] = useState<Record<string, string | string[]>>({});
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const { data: formData, isLoading: isFormLoading, error: formError, refetch: refetchForm } = useFormRead({
+    request: {
+      type: 'content',
+      action: 'create',
+      subType: formSubType,
+      rootOrgId: orgChannelId || '*',
+      framework: orgFramework || '*',
+    },
+    enabled,
+  });
+
+  const { data: frameworkData, isLoading: isFrameworkLoading, refetch: refetchFramework } = useFramework(
+    enabled && orgFramework ? orgFramework : ''
+  );
+
+  const fields = useMemo(() => {
+    const formFields: FormField[] = formData?.data?.form?.data?.fields ?? [];
+    return [...formFields]
+      .filter((f) => f.visible && f.inputType !== 'Concept')
+      .sort((a, b) => a.index - b.index);
+  }, [formData]);
+
+  const frameworkCategories = useMemo(() => {
+    return frameworkData?.data?.framework?.categories ?? [];
+  }, [frameworkData]);
+
+  const isFetchingForm = isFormLoading || isFrameworkLoading;
+  const fetchError = formError ? 'Failed to load form configuration. Please try again.' : null;
+
+  useEffect(() => {
+    if (fields.length > 0) {
+      setFormValues(createFormDefaults(fields));
+    }
+  }, [fields]);
+
+  const getOptionsForField = useCallback((field: FormField): { key: string; name: string }[] => {
+    if (field.range && field.range.length > 0) return field.range;
+    const category = frameworkCategories.find((cat: { code: string; terms?: { name: string; code: string }[] }) => cat.code === field.code);
+    if (category?.terms) {
+      return category.terms.map((term: { name: string; code: string }) => ({ key: term.name, name: term.name }));
+    }
+    return [];
+  }, [frameworkCategories]);
+
+  const handleFieldChange = useCallback((code: string, value: string | string[]) => {
+    setFormValues((prev) => ({ ...prev, [code]: value }));
+  }, []);
+
+  const handleMultiSelectToggle = useCallback((code: string, optionKey: string) => {
+    setFormValues((prev) => {
+      const current = (prev[code] as string[]) || [];
+      const next = current.includes(optionKey)
+        ? current.filter((v) => v !== optionKey)
+        : [...current, optionKey];
+      return { ...prev, [code]: next };
+    });
+  }, []);
+
+  const canSubmit = useMemo(() => {
+    return fields.every((field) => {
+      if (!field.required) return true;
+      const val = formValues[field.code];
+      if (Array.isArray(val)) return val.length > 0;
+      return typeof val === 'string' && val.trim().length > 0;
+    });
+  }, [fields, formValues]);
+
+  const resetState = useCallback(() => {
+    setFormValues({});
+    setOpenDropdown(null);
+    setEnabled(false);
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    refetchForm();
+    if (orgFramework) {
+      refetchFramework();
+    }
+  }, [refetchForm, refetchFramework, orgFramework]);
 
   const dropdownRef = useRef<HTMLDivElement>(null!);
 
   useEffect(() => {
-    if (open && !showDialog) {
+    if (open && !enabled) {
       onFormLoadStart?.();
-      fetchFormAndFramework()
-        .then(() => {
-          setShowDialog(true);
-          onFormLoadComplete?.();
-        })
-        .catch(() => {
-          setShowDialog(true);
-          onFormLoadComplete?.();
-        });
+      setEnabled(true);
     }
     if (!open) {
       setShowDialog(false);
       resetState();
     }
-  }, [open, showDialog, fetchFormAndFramework, resetState, onFormLoadStart, onFormLoadComplete]);
+  }, [open, enabled, resetState, onFormLoadStart]);
+
+  useEffect(() => {
+    if (enabled && !isFetchingForm && (formData || formError)) {
+      setShowDialog(true);
+      onFormLoadComplete?.();
+    }
+  }, [enabled, isFetchingForm, formData, formError, onFormLoadComplete]);
 
   useEffect(() => {
     if (!showDialog) return;
@@ -166,7 +243,7 @@ export default function ResourceFormDialog({
 
   if (!showDialog) return null;
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
     onSubmit(processFormSubmission(formValues, fields));
@@ -186,7 +263,7 @@ export default function ResourceFormDialog({
       >
         <h2 className="text-xl font-bold font-rubik text-foreground mb-2">{title}</h2>
         <p className="text-sm text-muted-foreground mb-4 font-rubik">Fill in the details to create your content</p>
-        {fetchError && <ErrorState error={fetchError} onRetry={fetchFormAndFramework} />}
+        {fetchError && <ErrorState error={fetchError} onRetry={handleRetry} />}
         {!fetchError && fields.length > 0 && (
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
