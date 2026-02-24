@@ -23,6 +23,7 @@ import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
+import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -107,6 +108,7 @@ const WorkspacePage = () => {
   // Pre-fetch org data using tanstack mutation when slug becomes available
   const orgSearch = useOrganizationSearch();
   const questionSetCreate = useQuestionSetCreate();
+  const questionSetRetire = useQuestionSetRetire();
   const [orgData, setOrgData] = useState<any>(null);
   const orgFetchAttempted = useRef(false);
 
@@ -166,7 +168,7 @@ const WorkspacePage = () => {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<{ type: 'delete'; contentId: string } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ type: 'delete'; contentId: string; mimeType: string } | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [retiredContentIds, setRetiredContentIds] = useState<string[]>([]);
 
@@ -356,15 +358,21 @@ const WorkspacePage = () => {
   };
 
   const handleDelete = (id: string) => {
-    setConfirmDialog({ type: 'delete', contentId: id });
+    const item = visibleContents.find((c) => c.id === id);
+    setConfirmDialog({ type: 'delete', contentId: id, mimeType: item?.mimeType ?? '' });
   };
 
   const handleConfirmAction = async () => {
     if (!confirmDialog) return;
-    const { contentId } = confirmDialog;
+    const { contentId, mimeType } = confirmDialog;
     setIsConfirming(true);
     try {
-      await contentService.contentRetire([contentId]);
+      const isQuestionSet = mimeType === 'application/vnd.sunbird.questionset';
+      if (isQuestionSet) {
+        await questionSetRetire.mutateAsync(contentId);
+      } else {
+        await contentService.contentRetire([contentId]);
+      }
       setRetiredContentIds((prev) => (prev.includes(contentId) ? prev : [...prev, contentId]));
 
       try {
