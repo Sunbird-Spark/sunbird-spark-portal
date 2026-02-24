@@ -74,10 +74,7 @@
 }
 
 .resource-section-title {
-    @apply font-rubik font-medium text-[#333333] text-center mb-[1.25rem];
-    font-size: 36px;
-    line-height: 46px;
-    letter-spacing: 0%;
+    @apply font-rubik font-medium text-[2.875rem] leading-[2.875rem] tracking-normal text-[#333333] text-center mb-[1.25rem];
 }
 
 .resource-section-grid {
