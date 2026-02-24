@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useRef } from "react";
 import { Button } from "@/components/common/Button";
 import ResourceFormContent from "./ResourceFormContent";
-import { useResourceForm } from "./useResourceForm";
+import { useResourceForm } from "../../hooks/useResourceForm";
 
 interface FormField {
   code: string;
