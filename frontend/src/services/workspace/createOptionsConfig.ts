@@ -82,7 +82,7 @@ export function getEditorCategories(): EditorCategory[] {
         },
         {
           id: 'story',
-          title: 'Story & Game',
+          title: 'Resource',
           description: 'Design interactive stories and gamified learning experiences.',
           icon: FiUpload,
           iconBg: 'bg-sunbird-moss/15',

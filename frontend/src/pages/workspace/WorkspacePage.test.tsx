@@ -192,6 +192,12 @@ vi.mock('./CreateContentModal', () => ({
         <button type="button" onClick={() => onOptionSelect('question-set')}>
           Question Set
         </button>
+        <button type="button" onClick={() => onOptionSelect('story')}>
+          Resource
+        </button>
+        <button type="button" onClick={() => onOptionSelect('quiz')}>
+          Quiz
+        </button>
       </div>
     ) : null,
 }));
@@ -221,6 +227,29 @@ vi.mock('./ContentNameDialog', () => {
     },
   };
 });
+
+vi.mock('./ResourceFormDialog', () => ({
+  default: ({ open, onClose, onSubmit, title, formSubType }: any) =>
+    open ? (
+      <div role="dialog" aria-label={title || 'Create Content'}>
+        <h2>{title || 'Create Content'}</h2>
+        <p>Form type: {formSubType}</p>
+        <button
+          type="button"
+          onClick={() => onSubmit({
+            name: 'Test Resource',
+            description: 'Test Description',
+            dynamicFields: { subject: 'mathematics' }
+          })}
+        >
+          Create Resource
+        </button>
+        <button type="button" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
+}));
 
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, onClose, onConfirm, title }: any) =>
@@ -443,5 +472,181 @@ describe('WorkspacePage', () => {
       description: 'The content has been removed.',
       variant: 'destructive',
     });
+  });
+
+  it('opens ResourceFormDialog when story option is selected', async () => {
+    renderWithProviders(<WorkspacePage />);
+    
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
+    fireEvent.click(resourceOption);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByText('Form type: resource')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
+  });
+
+  it('opens ResourceFormDialog when quiz option is selected', async () => {
+    renderWithProviders(<WorkspacePage />);
+    
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    const quizOption = within(dialog).getByRole('button', { name: /Quiz/ });
+    fireEvent.click(quizOption);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+      expect(screen.getByText('Form type: assessment')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
+  });
+
+  it('creates resource content via ResourceFormDialog and navigates to editor', async () => {
+    mockContentCreate.mockResolvedValue({ data: { identifier: 'do_resource_123' } });
+    
+    renderWithProviders(<WorkspacePage />);
+    
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
+    fireEvent.click(resourceOption);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+    });
+
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const createButton = within(resourceDialog).getByRole('button', { name: 'Create Resource' });
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(mockContentCreate).toHaveBeenCalledWith('Test Resource', expect.objectContaining({
+        createdBy: 'test-user-id',
+        creator: 'Test User',
+        mimeType: 'application/vnd.ekstep.ecml-archive',
+        contentType: 'Resource',
+        description: 'Test Description',
+        extraFields: { subject: 'mathematics' },
+      }));
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/edit/content-editor/do_resource_123');
+    });
+  });
+
+  it('creates quiz content via ResourceFormDialog with correct contentType', async () => {
+    mockContentCreate.mockResolvedValue({ data: { identifier: 'do_quiz_123' } });
+    
+    renderWithProviders(<WorkspacePage />);
+    
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    const quizOption = within(dialog).getByRole('button', { name: /Quiz/ });
+    fireEvent.click(quizOption);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+    });
+
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const createButton = within(resourceDialog).getByRole('button', { name: 'Create Resource' });
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(mockContentCreate).toHaveBeenCalledWith('Test Resource', expect.objectContaining({
+        contentType: 'SelfAssess',
+        primaryCategory: 'Course Assessment',
+      }));
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/edit/content-editor/do_quiz_123');
+    });
+  });
+
+  it('closes ResourceFormDialog when cancel is clicked', async () => {
+    renderWithProviders(<WorkspacePage />);
+    
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
+    fireEvent.click(resourceOption);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+    });
+
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const cancelButton = within(resourceDialog).getByRole('button', { name: 'Cancel' });
+    fireEvent.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Create Content' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('handles resource creation error gracefully', async () => {
+    mockContentCreate.mockRejectedValue(new Error('Creation failed'));
+    
+    renderWithProviders(<WorkspacePage />);
+    
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
+    fireEvent.click(resourceOption);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create Content' })).toBeInTheDocument();
+    });
+
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Content' });
+    const createButton = within(resourceDialog).getByRole('button', { name: 'Create Resource' });
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith({
+        title: 'Error',
+        description: 'Failed to create content. Please try again.',
+        variant: 'destructive',
+      });
+    });
+
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

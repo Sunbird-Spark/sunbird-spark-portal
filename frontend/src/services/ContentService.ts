@@ -86,8 +86,22 @@ export class ContentService {
       organisation?: string[];
       createdFor?: string[];
       targetFWIds?: string[];
+      /** Dynamic fields for framework related configs */
+      extraFields?: Record<string, string | string[] | number>;
     }
   ): Promise<ApiResponse<ContentCreateResponse>> {
+    // Build dynamic fields, filtering out empty values
+    const dynamicFields: Record<string, string | string[] | number> = {};
+    if (options.extraFields) {
+      for (const [key, val] of Object.entries(options.extraFields)) {
+        if (typeof val === 'number') {
+          dynamicFields[key] = val;
+        } else if (val && (typeof val === 'string' ? val.trim() : val.length > 0)) {
+          dynamicFields[key] = val;
+        }
+      }
+    }
+
     return getClient().post<ContentCreateResponse>('/content/v1/create', {
       request: {
         content: {
@@ -97,13 +111,14 @@ export class ContentService {
           creator: options.creator,
           mimeType: options.mimeType ?? 'application/vnd.ekstep.ecml-archive',
           contentType: options.contentType ?? 'Resource',
-          primaryCategory: options.primaryCategory ?? 'Learning Resource',
+          ...(options.primaryCategory ? { primaryCategory: options.primaryCategory } : {}),
           ...(options.framework && { framework: options.framework }),
           ...(options.description && { description: options.description }),
           ...(options.resourceType && { resourceType: options.resourceType }),
           ...(options.organisation?.length && { organisation: options.organisation }),
           ...(options.createdFor?.length && { createdFor: options.createdFor }),
           ...(options.targetFWIds?.length && { targetFWIds: options.targetFWIds }),
+          ...dynamicFields,
         },
       },
     });
