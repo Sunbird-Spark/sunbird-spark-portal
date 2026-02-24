@@ -156,7 +156,7 @@ export class CertificateService {
         formData,
         sanitizedHeaders
       );
-      
+
       return response;
     } catch (error: any) {
       throw new Error(error.message || 'Upload failed');
@@ -258,6 +258,10 @@ export class CertificateService {
         },
       },
     });
+  }
+
+  public async downloadCertificate(certificateId: string): Promise<ApiResponse<any>> {
+    return getClient().get<any>(`/rc/certificate/v1/download/${certificateId}`);
   }
 }
 

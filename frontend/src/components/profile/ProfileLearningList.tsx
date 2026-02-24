@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { FiChevronDown, FiDownload, FiEye } from "react-icons/fi";
+import { FiChevronDown, FiDownload } from "react-icons/fi";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { TrackableCollection } from "@/types/TrackableCollections";
 import PageLoader from "@/components/common/PageLoader";
+import { ProgressRing } from "./ProfileIcons";
+import { useCertificateDownload } from "@/hooks/useCertificateDownload";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,38 +19,7 @@ const VIEW_LIMIT = 6;
 const getCompletionStatus = (status: number): "ongoing" | "completed" =>
     status === 2 ? "completed" : "ongoing";
 
-// Progress Ring Component
-const ProgressRing = ({ progress }: { progress: number }) => {
-    const radius = 10;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (progress / 100) * circumference;
 
-    return (
-        <svg width="26" height="26" viewBox="0 0 26 26" className="transform -rotate-90">
-            {/* Background circle */}
-            <circle
-                cx="13"
-                cy="13"
-                r={radius}
-                fill="none"
-                stroke="hsl(var(--sunbird-progress-bg))"
-                strokeWidth="3"
-            />
-            {/* Progress circle */}
-            <circle
-                cx="13"
-                cy="13"
-                r={radius}
-                fill="none"
-                stroke="hsl(var(--sunbird-brick))"
-                strokeWidth="3"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-            />
-        </svg>
-    );
-};
 
 interface CourseRowProps {
     course: TrackableCollection;
@@ -59,6 +30,9 @@ const CourseRow = ({ course }: CourseRowProps) => {
     const progress = course.completionPercentage ?? 0;
     const thumbnail = course.courseLogoUrl || course.content?.appIcon;
     const title = course.courseName || course.content?.name || "Untitled Course";
+
+    const { downloadCertificate, hasCertificate, downloadingCourseId } = useCertificateDownload();
+    const isDownloading = downloadingCourseId === course.courseId;
 
     return (
         <div className="profile-learning-item">
@@ -72,11 +46,7 @@ const CourseRow = ({ course }: CourseRowProps) => {
                             className="w-[4.375rem] h-[4.375rem] rounded-xl object-cover"
                         />
                     ) : (
-                        <div className="w-[4.375rem] h-[4.375rem] rounded-xl bg-sunbird-gray-f3 flex items-center justify-center">
-                            <span className="text-sunbird-gray-75 text-xs text-center px-1 leading-tight">
-                                No Image
-                            </span>
-                        </div>
+                        <div className="w-[4.375rem] h-[4.375rem] rounded-xl bg-black flex-shrink-0" />
                     )}
                 </div>
                 <div className="profile-learning-details">
@@ -110,32 +80,22 @@ const CourseRow = ({ course }: CourseRowProps) => {
             </div>
 
             <div className="profile-learning-actions">
-                <button
-                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                    onClick={() => {
-                        if (status === "completed") {
-                            // TODO: Implement actual download logic
-                        } else {
-                            // TODO: Implement actual preview logic
-                        }
-                    }}
-                >
-                    {status === "completed" ? (
-                        <>
+                {status === "completed" && hasCertificate(course.courseId, course.batchId, title) && (
+                    <button
+                        className={`flex items-center gap-2 transition-opacity ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
+                        disabled={isDownloading}
+                        onClick={() => downloadCertificate(course.courseId, course.batchId, title)}
+                    >
+                        {isDownloading ? (
+                            <div className="w-[1.125rem] h-[1.125rem] border-2 border-sunbird-ginger border-t-transparent rounded-full animate-spin" />
+                        ) : (
                             <FiDownload className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
-                            <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center whitespace-nowrap">
-                                Download Certificate
-                            </span>
-                        </>
-                    ) : (
-                        <>
-                            <FiEye className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
-                            <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center whitespace-nowrap">
-                                Preview Certificate
-                            </span>
-                        </>
-                    )}
-                </button>
+                        )}
+                        <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center whitespace-nowrap">
+                            {isDownloading ? "Downloading..." : "Download Certificate"}
+                        </span>
+                    </button>
+                )}
             </div>
         </div>
     );

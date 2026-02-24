@@ -9,6 +9,14 @@ vi.mock('@/hooks/useUserEnrolledCollections', () => ({
     useUserEnrolledCollections: vi.fn(),
 }));
 
+vi.mock('@/hooks/useCertificateDownload', () => ({
+    useCertificateDownload: vi.fn(() => ({
+        downloadCertificate: vi.fn(),
+        hasCertificate: vi.fn(() => true),
+        downloadingCourseId: null,
+    })),
+}));
+
 // Mock DropdownMenu to render content inline for easy testing
 vi.mock('@/components/common/DropdownMenu', () => ({
     DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
