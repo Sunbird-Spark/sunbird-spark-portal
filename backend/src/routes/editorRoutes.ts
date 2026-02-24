@@ -11,6 +11,7 @@ const editorRoutes: string[] = [
     '/collection/v1/export/*rest',
     '/collection/v1/import/*rest',
     '/data/v1/form/read',
+    '/data/v3/telemetry',
     '/framework/v1/read/*rest',
 ];
 
