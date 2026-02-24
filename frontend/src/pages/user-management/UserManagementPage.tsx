@@ -10,6 +10,7 @@ import HomeSidebar from "@/components/home/HomeSidebar";
 import Footer from "@/components/home/Footer";
 // Imports like Input, Select, PageLoader moved to RoleManagementTab
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/useToast";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import {
   userManagementService,
@@ -36,6 +37,7 @@ const UM_TABS: UMTab[] = [
 
 const UserManagementPage = () => {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [activeNav, setActiveNav] = useState("user-management");
   const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
 
@@ -46,10 +48,10 @@ const UserManagementPage = () => {
     try {
       const response = await userManagementService.getRoles();
       setAvailableRoles(response.data?.result?.roles ?? []);
-    } catch {
-      // non-blocking
+    } catch (err) {
+      toast({ title: "Failed to load roles", description: "Roles could not be loaded.", variant: "destructive" });
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { loadRoles(); }, [loadRoles]);
 

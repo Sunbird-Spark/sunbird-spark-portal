@@ -1,11 +1,8 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth, Role } from '../auth/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { UserService } from '../services/UserService';
+import { useUserRoles } from '../hooks/useUser';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
-
-const userService = new UserService();
 
 interface WithRolesOptions {
   unauthorizedTo?: string;
@@ -23,21 +20,7 @@ function useBackendRoleCheck(allowedRoles: Role[]): boolean | null {
     content_reviewer: 'CONTENT_REVIEWER',
   };
 
-  const { data: roles, isLoading } = useQuery({
-    queryKey: ['userRoles'],
-    queryFn: async (): Promise<Array<{ role: string }>> => {
-      let userId = userAuthInfoService.getUserId();
-      if (!userId) {
-        const authInfo = await userAuthInfoService.getAuthInfo();
-        userId = authInfo?.uid ?? null;
-      }
-      if (!userId) return [];
-      const response = await userService.getUserRoles(userId);
-      return response?.data?.response?.roles ?? [];
-    },
-    staleTime: 5 * 60 * 1000,
-    retry: 1,
-  });
+  const { data: roles, isLoading } = useUserRoles();
 
   if (isLoading) return null; // still loading — don't decide yet
 

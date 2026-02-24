@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { FiSearch, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 import PageLoader from "@/components/common/PageLoader";
 // ConfirmDialog moved out
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { RoleDialog, type RoleDialogState } from "./RoleDialog";
 import { DeleteRoleDialog, type DeleteDialogState } from "./DeleteRoleDialog";
+import { UserRoleTable } from "./UserRoleTable";
 import { useToast } from "@/hooks/useToast";
 import {
   userManagementService,
@@ -17,8 +18,6 @@ import "./user-management.css";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 // RoleDialogState moved to RoleDialog.tsx
-
-// DeleteDialogState moved to DeleteRoleDialog.tsx
 
 interface RoleManagementTabProps {
   availableRoles: RoleItem[];
@@ -50,10 +49,14 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTa
 
   const refreshResults = useCallback(async (query: string) => {
     if (!query.trim()) return;
-    const response = await userManagementService.searchUser(query.trim());
-    setSearchResults(response.data?.response?.content ?? []);
-    onRefreshSearch();
-  }, [onRefreshSearch]);
+    try {
+      const response = await userManagementService.searchUser(query.trim());
+      setSearchResults(response.data?.response?.content ?? []);
+      onRefreshSearch();
+    } catch {
+      toast({ title: "Refresh failed", description: "Could not refresh user search results.", variant: "destructive" });
+    }
+  }, [onRefreshSearch, toast]);
 
   const handleSearch = async () => {
     const query = searchQuery.trim();
@@ -146,10 +149,6 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTa
     }
   };
 
-  const getStatusLabel = (status: number) => (status === 1 ? "Active" : "Inactive");
-  const getUserDisplayName = (user: UserSearchResult) =>
-    [user.firstName, user.lastName].filter(Boolean).join(" ") || user.userName;
-
   return (
     <>
       {/* Search Row */}
@@ -176,68 +175,12 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTa
 
       {!isSearching && hasSearched && (
         <div className="um-results-card">
-          {searchResults.length === 0 ? (
-            <div className="um-empty-state">
-              <p className="um-empty-text">No users found for "<strong>{searchQuery}</strong>"</p>
-            </div>
-          ) : (
-            <div className="um-table-wrapper">
-              <table className="um-table">
-                <thead>
-                  <tr className="um-table-head-row">
-                    <th className="um-th um-th-narrow">#</th>
-                    <th className="um-th">Name</th>
-                    <th className="um-th">Email</th>
-                    <th className="um-th">Username</th>
-                    <th className="um-th um-th-narrow">Status</th>
-                    <th className="um-th">Current Roles</th>
-                    <th className="um-th um-th-actions">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {searchResults.map((user, idx) => (
-                    <tr key={user.userId} className="um-table-row">
-                      <td className="um-td um-td-narrow um-td-muted">{idx + 1}</td>
-                      <td className="um-td um-td-name">{getUserDisplayName(user)}</td>
-                      <td className="um-td um-td-email">{user.maskedEmail || user.email || "—"}</td>
-                      <td className="um-td">
-                        <span className="font-medium text-sunbird-obsidian">
-                          {user.userName}
-                        </span>
-                      </td>
-                      <td className="um-td um-td-narrow">
-                        <span className={`um-status-badge ${user.status === 1 ? "um-status-active" : "um-status-inactive"}`}>
-                          {getStatusLabel(user.status)}
-                        </span>
-                      </td>
-                      <td className="um-td">
-                        {user.roles && user.roles.length > 0 ? (
-                          <div className="um-roles-list">
-                            {user.roles.map((roleInfo) => (
-                              <div key={`${roleInfo.role}-${roleInfo.scope?.[0]?.organisationId}`} className="um-role-chip">
-                                <span className="um-role-label">{roleInfo.role}</span>
-                                <button className="um-role-action-btn um-role-delete-btn" title="Remove role" onClick={() => openDeleteDialog(user.userId, roleInfo)} aria-label={`Remove role ${roleInfo.role}`}>
-                                  <FiTrash2 size={12} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="um-no-roles">No roles assigned</span>
-                        )}
-                      </td>
-                      <td className="um-td um-td-actions">
-                        <Button size="sm" onClick={() => openAddRoleDialog(user.userId)} className="um-add-role-btn" title="Add a new role">
-                          <FiPlus size={14} />
-                          <span>Add Role</span>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <UserRoleTable
+            searchResults={searchResults}
+            searchQuery={searchQuery}
+            onOpenDeleteDialog={openDeleteDialog}
+            onOpenAddRoleDialog={openAddRoleDialog}
+          />
         </div>
       )}
 
@@ -261,7 +204,6 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTa
         onOrganisationIdChange={setOrganisationId}
       />
 
-      {/* ── Delete Confirmation ── */}
       {/* ── Delete Confirmation ── */}
       <DeleteRoleDialog
         dialogState={deleteDialog}

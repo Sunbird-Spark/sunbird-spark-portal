@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
@@ -42,6 +42,22 @@ export const RoleDialog = ({
   onSelectedRoleChange,
   onOrganisationIdChange,
 }: RoleDialogProps) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSavingRole) {
+        onClose();
+      }
+    };
+
+    if (dialogState.open) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dialogState.open, isSavingRole, onClose]);
+
   if (!dialogState.open) return null;
 
   return (
