@@ -64,6 +64,21 @@ describe('useCollectionDetailPlayer', () => {
     );
   });
 
+  it('calls useContentStateUpdate with skipContentStateUpdate when provided', () => {
+    renderHook(() =>
+      useCollectionDetailPlayer({
+        ...defaultParams,
+        skipContentStateUpdate: true,
+      })
+    );
+
+    expect(useContentStateUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skipContentStateUpdate: true,
+      })
+    );
+  });
+
   it('calls useContentPlayer with onTelemetryEvent and enableLogging false', () => {
     renderHook(() => useCollectionDetailPlayer(defaultParams));
 
