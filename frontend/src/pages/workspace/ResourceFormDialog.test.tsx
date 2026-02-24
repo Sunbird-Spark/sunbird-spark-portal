@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import ResourceFormDialog, { type ResourceFormData } from './ResourceFormDialog';
+import ResourceFormDialog from './ResourceFormDialog';
 
 // Hoist the mock functions to avoid initialization order issues
 const { mockFormRead, mockFrameworkRead } = vi.hoisted(() => ({
