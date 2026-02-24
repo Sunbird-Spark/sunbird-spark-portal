@@ -78,13 +78,14 @@ export const useContentSearch = (
 
 export const useContentRead = (
   contentId: string,
-  options?: { enabled?: boolean; fields?: string[] }
+  options?: { enabled?: boolean; fields?: string[]; mode?: string }
 ): UseQueryResult<ApiResponse<ContentApiResponse>, Error> => {
   const enabled = options?.enabled ?? true;
   const fields = options?.fields;
+  const mode = options?.mode;
   return useQuery({
-    queryKey: ['content-read', contentId, fields],
-    queryFn: () => contentService.contentRead(contentId, fields),
+    queryKey: ['content-read', contentId, fields, mode],
+    queryFn: () => contentService.contentRead(contentId, fields, mode),
     enabled: enabled && !!contentId,
   });
 };

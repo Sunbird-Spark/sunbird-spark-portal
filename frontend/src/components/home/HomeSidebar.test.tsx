@@ -51,7 +51,7 @@ describe('HomeSidebar', () => {
         vi.clearAllMocks();
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
         vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(true);
-        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' });
+        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
     });
 
 
@@ -66,7 +66,7 @@ describe('HomeSidebar', () => {
 
     it('returns null when on home route (/)', () => {
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
-        vi.mocked(useLocation).mockReturnValue({ pathname: '/', search: '', hash: '', state: null, key: 'default' });
+        vi.mocked(useLocation).mockReturnValue({ pathname: '/', search: '', hash: '', state: null, key: 'default' } as any);
 
         const { container } = renderSidebar();
         expect(container.firstChild).toBeNull();
@@ -74,7 +74,7 @@ describe('HomeSidebar', () => {
 
     it('renders all navigation items when authenticated and not on /', () => {
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: {} as any, login: vi.fn(), logout: vi.fn() } as any);
-        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' });
+        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
 
         renderSidebar();
 
