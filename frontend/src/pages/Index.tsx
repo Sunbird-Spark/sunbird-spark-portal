@@ -47,6 +47,7 @@ const Index = () => {
           <DynamicResourceSection
             key={section.id}
             title={section.title}
+            sectionLabel="resource.header"
             criteria={section.criteria}
           />
         );

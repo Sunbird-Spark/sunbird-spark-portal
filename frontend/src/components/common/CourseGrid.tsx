@@ -14,7 +14,7 @@ export const CourseGrid = ({ title, courses, className = "mb-12" }: CourseGridPr
     return (
         <div className={className}>
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-6 mt-6">
                 <h2 className="font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground">
                     {title}
                 </h2>

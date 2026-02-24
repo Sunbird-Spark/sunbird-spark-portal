@@ -61,8 +61,10 @@ const HomeDiscoverSections = () => {
           <DynamicResourceSection
             key={section.id}
             title={section.title}
+            sectionLabel="resource.header"
             criteria={section.criteria}
-            innerClassName="home-discover-inner"
+            sectionClassName="resource-section-home"
+            innerClassName="home-discover-resource-inner"
           />
         );
       default:
