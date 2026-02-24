@@ -1,10 +1,18 @@
 import type { ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import axios from 'axios';
 import CertificatePreviewModal, { replacePlaceholders } from './CertificatePreviewModal';
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn(),
+    isCancel: vi.fn((err: unknown) => (err as { name?: string })?.name === 'Cancel'),
+  },
 }));
 
 vi.mock('@/components/common/Button', () => ({
@@ -91,28 +99,15 @@ describe('CertificatePreviewModal', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  describe('with details and fetch', () => {
-    let originalFetch: typeof globalThis.fetch;
-
+  describe('with details and HttpService', () => {
     beforeEach(() => {
-      originalFetch = globalThis.fetch;
+      vi.mocked(axios.get).mockReset();
     });
 
-    afterEach(() => {
-      globalThis.fetch = originalFetch;
-    });
-
-    it('shows img with blob URL when fetch returns SVG with recipientName replaced', async () => {
+    it('shows img with blob URL when HttpService returns SVG with recipientName replaced', async () => {
       const svgBody =
         '<svg xmlns="http://www.w3.org/2000/svg"><text>{{credentialSubject.recipientName}}</text></svg>';
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue({
-          ok: true,
-          headers: { get: (name: string) => (name === 'Content-Type' ? 'image/svg+xml' : null) },
-          text: () => Promise.resolve(svgBody),
-        })
-      );
+      vi.mocked(axios.get).mockResolvedValue({ data: svgBody });
 
       render(
         <CertificatePreviewModal
@@ -132,11 +127,10 @@ describe('CertificatePreviewModal', () => {
       );
     });
 
-    it('keeps original previewUrl in img when fetch returns text without placeholders', async () => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve('<p>No placeholders here</p>') })
-      );
+    it('keeps original previewUrl in img when HttpService returns text without placeholders', async () => {
+      vi.mocked(axios.get).mockResolvedValue({
+        data: '<p>No placeholders here</p>',
+      });
 
       render(
         <CertificatePreviewModal
@@ -152,8 +146,8 @@ describe('CertificatePreviewModal', () => {
       });
     });
 
-    it('keeps original previewUrl in img when fetch fails', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+    it('keeps original previewUrl in img when HttpService fails', async () => {
+      vi.mocked(axios.get).mockRejectedValue(new Error('Network error'));
 
       render(
         <CertificatePreviewModal
@@ -169,8 +163,8 @@ describe('CertificatePreviewModal', () => {
       });
     });
 
-    it('keeps original previewUrl when fetch returns non-ok response', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    it('keeps original previewUrl when HttpService returns non-ok response', async () => {
+      vi.mocked(axios.get).mockRejectedValue(new Error('Request failed'));
 
       render(
         <CertificatePreviewModal

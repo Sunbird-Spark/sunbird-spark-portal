@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { FiX } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { HttpService } from "@/services/HttpService";
 
 export interface CertificatePreviewDetails {
   recipientName?: string;
@@ -61,26 +62,20 @@ export default function CertificatePreviewModal({
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
-    fetch(previewUrl, { signal: controller.signal })
-      .then((res) => {
-        if (!res.ok) return null;
-        const contentType = (res.headers.get("Content-Type") ?? "").toLowerCase();
-        return res.text().then((text) => ({ text, contentType }));
-      })
-      .then((payload) => {
+    const httpService = new HttpService();
+    httpService
+      .get<string>(previewUrl, { responseType: "text", signal: controller.signal })
+      .then((text) => {
         if (controller.signal.aborted) return;
-        if (!payload || !payload.text.includes("credentialSubject.recipientName")) {
+        if (!text || typeof text !== "string" || !text.includes("credentialSubject.recipientName")) {
           setSrc(previewUrl);
           return;
         }
-        const out = replacePlaceholders(payload.text, name);
-        const isSvgByContentType = payload.contentType.includes("image/svg+xml");
+        const out = replacePlaceholders(text, name);
         const trimmed = out.trim().toLowerCase();
-        const isSvgByBody =
+        const isSvg =
           trimmed.startsWith("<svg") || trimmed.startsWith("<?xml");
-        const isSvg = isSvgByContentType || isSvgByBody;
         if (isSvg) {
           if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
           const blob = new Blob([out], { type: "image/svg+xml" });
@@ -91,12 +86,11 @@ export default function CertificatePreviewModal({
         }
       })
       .catch((err) => {
-        if (err instanceof Error && err.name === "AbortError") return;
+        if (HttpService.isCancel(err)) return;
         setSrc(previewUrl);
       });
 
     return () => {
-      clearTimeout(timeoutId);
       controller.abort();
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current);
