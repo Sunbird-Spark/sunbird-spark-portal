@@ -8,9 +8,10 @@ import { OrganizationService } from '../../OrganizationService';
  * Handles player creation, configuration, and event management.
  * 
  * Style Loading Strategy:
- * - Video player styles are loaded dynamically when the first player is created
- * - This prevents unnecessary CSS loading if no video player is used on the page
- * - Styles are loaded globally as the web component requires them in the document scope
+ * - Video player styles are fetched once and cached in memory
+ * - Styles are injected using CSS @scope to scope them to the player wrapper
+ * - This prevents CSS bleed into the rest of the page while keeping styles
+ *   functional for the player's children
  */
 export class VideoPlayerService {
   private eventHandlers = new WeakMap<
@@ -18,7 +19,8 @@ export class VideoPlayerService {
     { player: (event: Event) => void; telemetry: (event: Event) => void }
   >();
   private orgService = new OrganizationService();
-  private static stylesLoaded = false;
+  private static cachedCss: string | null = null;
+  private static cssLoading?: Promise<string>;
   private static scriptLoaded = false;
   private static scriptLoading?: Promise<void>;
 
@@ -42,11 +44,7 @@ export class VideoPlayerService {
   }
 
   static unloadStyles(): void {
-    const styleLink = document.querySelector('[data-video-player-styles="true"]');
-    if (styleLink) {
-      styleLink.remove();
-    }
-    VideoPlayerService.stylesLoaded = false;
+    // Styles are scoped inside the wrapper and removed automatically
   }
 
   /**
@@ -72,7 +70,7 @@ export class VideoPlayerService {
     }
 
     // Get channel from org service with random fallback for testing
-    let channel = '' 
+    let channel = ''
     try {
       const orgResponse = await this.orgService.search({
         filters: {
@@ -126,40 +124,97 @@ export class VideoPlayerService {
   }
 
   /**
-   * Load video player styles dynamically (only once)
-   * Checks for existing style element to prevent race conditions
+   * Fetch and cache the Video player CSS content.
+   * The CSS is fetched once and reused across all player instances.
    */
-  private loadStyles(): void {
-    // Check if styles already exist in the DOM (prevents race conditions)
-    const existingStyles = document.querySelector('[data-video-player-styles="true"]');
-    if (existingStyles || VideoPlayerService.stylesLoaded) {
-      VideoPlayerService.stylesLoaded = true;
-      return;
+  private async fetchStyles(): Promise<string> {
+    if (VideoPlayerService.cachedCss !== null) {
+      return VideoPlayerService.cachedCss;
     }
-
-    const styleLink = document.createElement('link');
-    styleLink.rel = 'stylesheet';
-    styleLink.href = '/assets/video-player/styles.css';
-    styleLink.setAttribute('data-video-player-styles', 'true');
-    document.head.appendChild(styleLink);
-    VideoPlayerService.stylesLoaded = true;
+    if (VideoPlayerService.cssLoading) {
+      return VideoPlayerService.cssLoading;
+    }
+    VideoPlayerService.cssLoading = fetch('/assets/video-player/styles.css')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch video player styles: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(css => {
+        VideoPlayerService.cachedCss = css;
+        VideoPlayerService.cssLoading = undefined;
+        return css;
+      })
+      .catch(error => {
+        VideoPlayerService.cachedCss = '';
+        VideoPlayerService.cssLoading = undefined;
+        console.error('Failed to load video player styles:', error);
+        VideoPlayerService.cachedCss = '';
+        return '';
+      });
+    return VideoPlayerService.cssLoading;
   }
 
   /**
-   * Create video player element with configuration
-   * Styles are loaded dynamically on first use
+   * Rewrite CSS selectors so they work inside @scope.
+   * - :root → :scope (CSS variables get applied to the wrapper)
+   * - html / body → :scope (base styles target the wrapper instead)
+   * - Compound selectors like html[dir=rtl] → :scope[dir=rtl]
    */
-  createElement(config: VideoPlayerConfig): HTMLElement {
-    // Load styles if not already loaded
-    this.loadStyles();
+  private rewriteCssForScope(css: string): string {
+    // Replace :root with :scope so variable definitions apply to the scoping element
+    let rewritten = css.replace(/:root/g, ':scope');
+
+    // Replace standalone html/body selectors and compound html[...]/body[...] selectors
+    // with :scope, so base typography, colors, bg etc. apply to the wrapper.
+    // Uses negative lookbehind/lookahead to avoid replacing inside words/URLs.
+    rewritten = rewritten.replace(/(?<![a-zA-Z-])html(?=\s*[{,[:]|$)/g, ':scope');
+    rewritten = rewritten.replace(/(?<![a-zA-Z-])body(?=\s*[{,[:]|$)/g, ':scope');
+
+    return rewritten;
+  }
+
+  /**
+   * Create video player element with styles scoped via CSS @scope.
+   * Fetches the CSS content, rewrites html/body selectors for scoping,
+   * wraps it in @scope to prevent global bleed, and injects as a <style> tag.
+   */
+  async createElement(config: VideoPlayerConfig): Promise<HTMLElement> {
+    // Fetch CSS content (cached after first fetch)
+    const cssContent = await this.fetchStyles();
+
+    // Wrapper scopes the styles and keeps them alongside the player
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('data-video-player-wrapper', 'true');
+    wrapper.setAttribute('data-player-id', config.metadata.identifier);
+    wrapper.style.width = '100%';
+    wrapper.style.height = '100%';
+
+    // Inject scoped styles — rewrite global selectors and wrap in @scope
+    if (cssContent) {
+      const scopedCss = this.rewriteCssForScope(cssContent);
+      const styleEl = document.createElement('style');
+      styleEl.setAttribute('data-video-player-styles', 'true');
+      styleEl.textContent = `@scope ([data-video-player-wrapper]) {\n${scopedCss}\n}`;
+      wrapper.appendChild(styleEl);
+    }
 
     const element = document.createElement('sunbird-video-player');
     const configString = JSON.stringify(config);
 
     element.setAttribute('player-config', configString);
     element.setAttribute('data-player-id', config.metadata.identifier);
+    wrapper.appendChild(element);
 
-    return element;
+    return wrapper;
+  }
+
+  /**
+   * Get the actual sunbird-video-player element from a wrapper.
+   */
+  private getPlayerElement(element: HTMLElement): HTMLElement {
+    return (element.querySelector('sunbird-video-player') as HTMLElement) || element;
   }
 
   /**
@@ -173,13 +228,15 @@ export class VideoPlayerService {
     // Remove any existing handler first to prevent memory leaks
     this.removeEventListeners(element);
 
+    const playerEl = this.getPlayerElement(element);
+
     const playerHandler = (event: Event) => {
       const customEvent = event as CustomEvent;
       if (onPlayerEvent) {
         const videoEvent: VideoPlayerEvent = {
           type: customEvent.detail?.eid || 'unknown',
           data: customEvent.detail,
-          playerId: element.getAttribute('data-player-id') || 'video-player',
+          playerId: playerEl.getAttribute('data-player-id') || 'video-player',
           timestamp: Date.now(),
         };
         onPlayerEvent(videoEvent);
@@ -193,8 +250,8 @@ export class VideoPlayerService {
       }
     };
 
-    element.addEventListener('playerEvent', playerHandler);
-    element.addEventListener('telemetryEvent', telemetryHandler);
+    playerEl.addEventListener('playerEvent', playerHandler);
+    playerEl.addEventListener('telemetryEvent', telemetryHandler);
 
     // Store handlers for cleanup
     this.eventHandlers.set(element, { player: playerHandler, telemetry: telemetryHandler });
@@ -206,8 +263,9 @@ export class VideoPlayerService {
   removeEventListeners(element: HTMLElement): void {
     const handlers = this.eventHandlers.get(element);
     if (handlers) {
-      element.removeEventListener('playerEvent', handlers.player);
-      element.removeEventListener('telemetryEvent', handlers.telemetry);
+      const playerEl = this.getPlayerElement(element);
+      playerEl.removeEventListener('playerEvent', handlers.player);
+      playerEl.removeEventListener('telemetryEvent', handlers.telemetry);
       this.eventHandlers.delete(element);
     }
   }
