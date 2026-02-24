@@ -1,6 +1,7 @@
 import { useContentSearch } from "@/hooks/useContent";
 import { ContentSearchRequest } from "@/types/workspaceTypes";
 import ResourceCard from "@/components/content/ResourceCard";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import "./landing.css";
 
 interface DynamicResourceSectionProps {
@@ -14,11 +15,12 @@ interface DynamicResourceSectionProps {
 }
 
 const DynamicResourceSection = ({ title, sectionLabel, criteria, sectionClassName = "resource-section", innerClassName = "landing-section-inner" }: DynamicResourceSectionProps) => {
+    const { t } = useAppI18n();
     const { data, isLoading, error } = useContentSearch({
         request: criteria?.request,
         enabled: !!criteria?.request,
     });
-    const skeletonClassName = sectionClassName === "resource-section-home"
+    const skeletonClassName = sectionClassName.includes("resource-section-home")
         ? "resource-section-skeleton-home"
         : "resource-section-skeleton";
 
@@ -65,7 +67,7 @@ const DynamicResourceSection = ({ title, sectionLabel, criteria, sectionClassNam
                 {sectionLabel && (
                     <div className="resource-section-label-row">
                         <hr className="resource-section-label-line" />
-                        <span className="resource-section-label">{sectionLabel}</span>
+                        <span className="resource-section-label">{t(sectionLabel)}</span>
                         <hr className="resource-section-label-line" />
                     </div>
                 )}
