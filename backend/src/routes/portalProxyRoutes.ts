@@ -4,7 +4,6 @@ import { kongProxy } from '../proxies/kongProxy.js';
 import { validateRecaptcha } from '../middlewares/googleAuth.js';
 import { handlePassword } from '../middlewares/passwordHandler.js';
 import { keycloak } from '../auth/keycloakProvider.js';
-
 const router = express.Router();
 
 router.post('/user/v1/fuzzy/search', validateRecaptcha, userProxy);
@@ -13,17 +12,26 @@ router.post('/otp/v1/verify', kongProxy);
 router.post('/user/v2/signup', handlePassword, kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [
+    '/otp/v1/generate',
     '/user/v1/exists/email/:emailId',
     '/user/v1/exists/phone/:phoneNumber',
     '/user/v1/get/phone/*rest',
     '/user/v1/get/email/*rest',
-    '/otp/v1/generate',
 ];
 
 // These routes are defined relative to the mount path of this router.
 // When the router is mounted at '/portal', Express will serve them as
 // '/portal/user/v1/exists/email/:emailId', '/portal/user/v1/exists/phone/:phoneNumber', etc.
 router.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
+
+// Profile update: Sunbird API expects PATCH, frontend sends POST.
+// Convert the HTTP method before proxying to Kong.
+router.post('/user/v3/update',
+    keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
+    keycloak.protect(),
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => { req.method = 'PATCH'; next(); },
+    kongProxy);
+
 // The catch-all proxy route
 // When this router is mounted at '/portal', this handler will match '/portal/*rest'.
 router.all('/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),

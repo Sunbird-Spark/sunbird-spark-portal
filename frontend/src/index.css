@@ -730,6 +730,7 @@
 
   /* Responsive player heights */
   @media (max-width: 1024px) {
+
     sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
@@ -739,6 +740,7 @@
   }
 
   @media (max-width: 768px) {
+
     sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
@@ -748,6 +750,7 @@
   }
 
   @media (max-width: 640px) {
+
     sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
@@ -1043,4 +1046,8 @@
     background-attachment: fixed;
   }
 
+  /* Hide Google reCAPTCHA Badge */
+  .grecaptcha-badge {
+    visibility: hidden !important;
+  }
 }

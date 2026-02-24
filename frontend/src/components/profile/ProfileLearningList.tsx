@@ -231,7 +231,10 @@ const ProfileLearningList = () => {
                     </div>
                 ) : (
                     visibleCourses.map((course, index) => (
-                        <CourseRow key={course.courseId || index} course={course} />
+                        <CourseRow
+                            key={`${course.courseId || "course"}-${index}`}
+                            course={course}
+                        />
                     ))
                 )}
             </div>
