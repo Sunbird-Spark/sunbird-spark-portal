@@ -5,15 +5,6 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface CertificatePreviewDetails {
   recipientName?: string;
-  trainingName?: string;
-  issuanceDate?: string;
-}
-
-export function formatIssuanceDateLong(date: Date): string {
-  const day = date.getDate();
-  const d = day < 10 ? `0${day}` : String(day);
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  return `${d} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 interface CertificatePreviewModalProps {
@@ -23,16 +14,20 @@ interface CertificatePreviewModalProps {
   details?: CertificatePreviewDetails;
 }
 
-export function replacePlaceholders(
-  text: string,
-  recipientName: string,
-  trainingName: string,
-  issuanceDate: string
-): string {
-  return text
-    .replace(/\{\{\s*credentialSubject\.recipientName\s*\}\}/g, recipientName)
-    .replace(/\{\{\s*credentialSubject\.trainingName\s*\}\}/g, trainingName)
-    .replace(/\{\{\s*dateFormat\s+issuanceDate\s+["'][^"']*["']\s*\}\}/gi, issuanceDate);
+/** Escapes a string for safe use inside SVG/XML text content (prevents XSS). */
+function escapeForSvg(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Replaces only {{credentialSubject.recipientName}} with the given name (escaped for SVG). Exported for tests. */
+export function replacePlaceholders(text: string, recipientName: string): string {
+  const safe = escapeForSvg(recipientName);
+  return text.replace(/\{\{\s*credentialSubject\.recipientName\s*\}\}/g, safe);
 }
 
 export default function CertificatePreviewModal({
@@ -43,7 +38,6 @@ export default function CertificatePreviewModal({
 }: CertificatePreviewModalProps) {
   const { t } = useAppI18n();
   const [src, setSrc] = useState<string>(previewUrl);
-  const [html, setHtml] = useState<string | null>(null);
   const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -58,53 +52,58 @@ export default function CertificatePreviewModal({
   useEffect(() => {
     if (!open || !previewUrl) {
       setSrc(previewUrl);
-      setHtml(null);
       return;
     }
     const name = details?.recipientName ?? "";
-    const course = details?.trainingName ?? "";
-    const date = details?.issuanceDate ?? "";
-    if (!name && !course && !date) {
+    if (!name) {
       setSrc(previewUrl);
-      setHtml(null);
       return;
     }
 
-    fetch(previewUrl)
-      .then((res) => (res.ok ? res.text() : null))
-      .then((text) => {
-        if (!text || (!text.includes("credentialSubject") && !text.includes("dateFormat"))) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15_000);
+
+    fetch(previewUrl, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) return null;
+        const contentType = (res.headers.get("Content-Type") ?? "").toLowerCase();
+        return res.text().then((text) => ({ text, contentType }));
+      })
+      .then((payload) => {
+        if (controller.signal.aborted) return;
+        if (!payload || !payload.text.includes("credentialSubject.recipientName")) {
           setSrc(previewUrl);
-          setHtml(null);
           return;
         }
-        const out = replacePlaceholders(text, name, course, date);
-        if (out.trim().toLowerCase().includes("<svg") || out.trim().toLowerCase().startsWith("<?xml")) {
+        const out = replacePlaceholders(payload.text, name);
+        const isSvgByContentType = payload.contentType.includes("image/svg+xml");
+        const trimmed = out.trim().toLowerCase();
+        const isSvgByBody =
+          trimmed.startsWith("<svg") || trimmed.startsWith("<?xml");
+        const isSvg = isSvgByContentType || isSvgByBody;
+        if (isSvg) {
           if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
           const blob = new Blob([out], { type: "image/svg+xml" });
           blobUrlRef.current = URL.createObjectURL(blob);
           setSrc(blobUrlRef.current);
-          setHtml(null);
-        } else if (out.trim().toLowerCase().includes("<html") || out.trim().toLowerCase().includes("<body")) {
-          setHtml(out);
-          setSrc(previewUrl);
         } else {
           setSrc(previewUrl);
-          setHtml(null);
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
         setSrc(previewUrl);
-        setHtml(null);
       });
 
     return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current);
         blobUrlRef.current = null;
       }
     };
-  }, [open, previewUrl, details?.recipientName, details?.trainingName, details?.issuanceDate]);
+  }, [open, previewUrl, details?.recipientName]);
 
   if (!open) return null;
 
@@ -135,11 +134,7 @@ export default function CertificatePreviewModal({
           </Button>
         </div>
         <div className="flex-1 min-h-0 p-4 overflow-auto">
-          {html ? (
-            <iframe title={t("courseDetails.previewCertificate")} srcDoc={html} className="w-full min-h-[400px] border-0 rounded-lg bg-white" sandbox="allow-same-origin" />
-          ) : (
-            <img src={src} alt={t("courseDetails.previewCertificate")} className="w-full h-auto object-contain" />
-          )}
+          <img src={src} alt={t("courseDetails.previewCertificate")} className="w-full h-auto object-contain" />
         </div>
       </div>
     </div>

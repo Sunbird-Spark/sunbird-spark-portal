@@ -257,12 +257,11 @@ vi.mock('@/components/collection/CertificatePreviewModal', () => ({
   }: {
     open: boolean;
     onClose: () => void;
-    details?: { recipientName?: string; trainingName?: string; issuanceDate?: string };
+    details?: { recipientName?: string };
   }) => {
     lastCertificateModalDetails = details;
     return open ? <div data-testid="certificate-modal">Certificate Preview</div> : null;
   },
-  formatIssuanceDateLong: (_date: Date) => '01 January 2025',
 }));
 
 /* ── Provider wrapper ── */
@@ -628,7 +627,7 @@ describe('CollectionDetailPage', () => {
   });
 
   describe('Certificate preview details', () => {
-    it('passes recipientName (firstName + lastName), trainingName, and issuanceDate to CertificatePreviewModal', () => {
+    it('passes recipientName (firstName + lastName) to CertificatePreviewModal', () => {
       mockUserReadData = {
         data: { data: { response: { firstName: 'Jane', lastName: 'Doe' } } },
         isLoading: false,
@@ -643,11 +642,7 @@ describe('CollectionDetailPage', () => {
 
       renderWithProviders(<CollectionDetailPage />);
 
-      expect(lastCertificateModalDetails).toEqual({
-        recipientName: 'Jane Doe',
-        trainingName: 'My Course',
-        issuanceDate: '01 January 2025',
-      });
+      expect(lastCertificateModalDetails).toEqual({ recipientName: 'Jane Doe' });
     });
 
     it('passes undefined recipientName when user profile has no name', () => {
@@ -660,8 +655,6 @@ describe('CollectionDetailPage', () => {
       renderWithProviders(<CollectionDetailPage />);
 
       expect(lastCertificateModalDetails?.recipientName).toBeUndefined();
-      expect(lastCertificateModalDetails?.trainingName).toBe('Test Collection');
-      expect(lastCertificateModalDetails?.issuanceDate).toBe('01 January 2025');
     });
 
     it('passes only firstName as recipientName when lastName is missing', () => {
@@ -688,18 +681,5 @@ describe('CollectionDetailPage', () => {
       expect(lastCertificateModalDetails?.recipientName).toBe('OnlyLast');
     });
 
-    it('passes undefined trainingName when collection has no title', () => {
-      mockUseCollection.mockReturnValue({
-        data: { ...mockCollectionData, title: undefined },
-        isLoading: false,
-        isFetching: false,
-        isError: false,
-      });
-
-      renderWithProviders(<CollectionDetailPage />);
-
-      expect(lastCertificateModalDetails?.trainingName).toBeUndefined();
-      expect(lastCertificateModalDetails?.recipientName).toBe('Test User');
-    });
   });
 });
