@@ -131,7 +131,7 @@ export function useCertificateModalState(
       let fullIssuer = selectedTemplate.issuer;
       try {
         const readResp = await certificateService.readCertTemplate(selectedTemplateId);
-        const content = readResp.data?.content;
+        const content = readResp.data?.content as any;
         if (content) {
           if (Array.isArray(content.signatoryList) && content.signatoryList.length > 0) {
             fullSignatoryList = content.signatoryList.map((s: any) => ({

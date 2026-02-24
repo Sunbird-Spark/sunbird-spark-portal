@@ -1,9 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
-import {
-  certificateService,
-  CertUserSearchResponse,
-  CertUserBatch,
-} from '../services/CertificateService';
+import { certificateService } from '../services/CertificateService';
+import { CertUserSearchResponse, CertUserBatch } from '../services/CertificateTypes';
 import { ApiResponse } from '../lib/http-client';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { userService } from '../services/UserService';

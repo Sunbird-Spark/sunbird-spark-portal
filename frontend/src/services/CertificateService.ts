@@ -1,106 +1,15 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 
-// ─── Dashboard cert-search / re-issue types ───────────────────────────────────
-export interface IssuedCertificate {
-  identifier: string;
-  name: string;
-  lastIssuedOn: string;
-  templateUrl: string;
-  token?: string;
-  type?: string;
-}
-
-export interface CertUserBatch {
-  batchId: string;
-  name: string;
-  courseId: string;
-  completionPercentage: number;
-  status: number;
-  issuedCertificates: IssuedCertificate[];
-  batch?: { batchId: string; name: string; createdBy: string };
-  completedOn?: number;
-  enrolledDate?: number;
-}
-
-export interface CertUserSearchResponse {
-  response: {
-    userId: string;
-    userName: string;
-    courses: {
-      courseId: string;
-      name: string;
-      contentType: string;
-      batches: CertUserBatch[];
-    };
-  };
-}
-
-export interface CertSignatory {
-  name: string;
-  designation: string;
-  id: string;
-  /** base64 or URL — always required by the API */
-  image: string;
-}
-
-export interface CertTemplateSummary {
-  identifier: string;
-  name: string;
-  previewUrl?: string;
-  artifactUrl?: string;
-  downloadUrl?: string;
-  issuer?: { name: string; url: string };
-  signatoryList?: CertSignatory[];
-}
-
-export interface CreateAssetRequest {
-  name: string;
-  code: string;
-  mimeType: 'image/svg+xml';
-  license: string;
-  primaryCategory: 'Certificate Template';
-  mediaType: 'image';
-  certType: 'cert template';
-  channel: string;
-  issuer: { name: string; url: string };
-  signatoryList: Array<{
-    name: string;
-    designation: string;
-    id: string;
-    /** Always required — pass base64 dataURL or CDN URL; never omit */
-    image: string;
-  }>;
-}
-
-export interface AssetCreateResponse {
-  identifier: string;
-  node_id: number;
-  versionKey: string;
-}
-
-export interface AddTemplateRequest {
-  batch: {
-    courseId: string;
-    batchId: string;
-    template: {
-      identifier: string;
-      criteria: {
-        enrollment?: { status: number };
-        user?: { rootOrgId: string };
-      };
-      name: string;
-      issuer: { name: string; url: string };
-      previewUrl: string;
-      signatoryList: Array<{
-        name: string;
-        designation: string;
-        id: string;
-        /** Always required by the API — pass empty string if no image */
-        image: string;
-      }>;
-    };
-  };
-}
+import {
+  IssuedCertificate,
+  CertUserBatch,
+  CertUserSearchResponse,
+  CertSignatory,
+  CertTemplateSummary,
+  CreateAssetRequest,
+  AssetCreateResponse,
+  AddTemplateRequest,
+} from './CertificateTypes';
 
 export class CertificateService {
   /** Create the certificate asset record (SVG template) */
@@ -190,8 +99,11 @@ export class CertificateService {
       );
       
       return response;
-    } catch (error: any) {
-      throw new Error(error.message || 'Upload failed');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || 'Upload failed');
+      }
+      throw new Error('Upload failed');
     }
   }
 
@@ -214,7 +126,7 @@ export class CertificateService {
   async searchLogos(
     channel: string,
     createdBy?: string
-  ): Promise<ApiResponse<{ count: number; content: any[] }>> {
+  ): Promise<ApiResponse<{ count: number; content: unknown[] }>> {
     const filters: Record<string, unknown> = {
       mediaType: ['image'],
       contentType: ['Asset'],
@@ -225,7 +137,7 @@ export class CertificateService {
     };
     if (createdBy) filters.createdBy = createdBy;
 
-    return getClient().post<{ count: number; content: any[] }>(
+    return getClient().post<{ count: number; content: unknown[] }>(
       '/content/v1/search',
       {
         request: {
@@ -241,8 +153,8 @@ export class CertificateService {
   /** Fetch the full details of a single cert template (includes signatoryList.image) */
   async readCertTemplate(
     identifier: string
-  ): Promise<ApiResponse<{ content: any }>> {
-    return getClient().get<{ content: any }>(
+  ): Promise<ApiResponse<{ content: unknown }>> {
+    return getClient().get<{ content: unknown }>(
       `/content/v1/read/${identifier}?fields=signatoryList,issuer,artifactUrl,name,identifier`
     );
   }
@@ -316,7 +228,7 @@ export class CertificateService {
     createdBy: string;
   }): Promise<ApiResponse<unknown>> {
     return getClient().post<unknown>(
-      '/certreg/v1/cert/reissue',
+      '/course/batch/cert/v1/issue?reIssue=true',
       {
         request: {
           courseId: params.courseId,

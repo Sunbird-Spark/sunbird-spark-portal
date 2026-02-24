@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCertUserSearch, useReissueCert } from '@/hooks/useCourseDashboard';
-import type { CertUserBatch } from '@/services/CertificateService';
+import type { CertUserBatch } from '@/services/CertificateTypes';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 
