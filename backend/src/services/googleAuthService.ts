@@ -273,6 +273,28 @@ export const handleUserAuthentication = async (
             logger.error('Error creating user:', error);
             throw new Error('CREATE_USER_FAILED');
         }
+
+        // Refresh the token after user creation so Keycloak's SPI mapper
+        // can include the Sunbird userId in the token's sub claim.
+        // The initial token was issued before the user existed in Sunbird,
+        // so the SPI mapper had nothing to map at that point.
+        try {
+            const tokenUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/token`;
+            const refreshParams = new URLSearchParams();
+            refreshParams.append('client_id', envConfig.KEYCLOAK_GOOGLE_CLIENT_ID);
+            refreshParams.append('client_secret', envConfig.KEYCLOAK_GOOGLE_CLIENT_SECRET);
+            refreshParams.append('grant_type', 'refresh_token');
+            refreshParams.append('refresh_token', googleUser.tokenData.refresh_token);
+
+            const { default: axios } = await import('axios');
+            const refreshResponse = await axios.post(tokenUrl, refreshParams.toString(), {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            googleUser.tokenData = refreshResponse.data;
+        } catch (error) {
+            logger.error('Error refreshing token after user creation:', error);
+            throw new Error('TOKEN_REFRESH_FAILED');
+        }
     }
 
     try {

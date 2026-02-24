@@ -6,20 +6,27 @@ const {
     mockObtainFromClientCredentials,
     mockStoreGrant,
     mockAuthenticated,
-    mockCreateGrant
+    mockCreateGrant,
+    mockAxiosPost
 } = vi.hoisted(() => {
     const mockObtainFromClientCredentials = vi.fn();
     const mockStoreGrant = vi.fn();
     const mockAuthenticated = vi.fn();
     const mockCreateGrant = vi.fn();
+    const mockAxiosPost = vi.fn();
 
     return {
         mockObtainFromClientCredentials,
         mockStoreGrant,
         mockAuthenticated,
-        mockCreateGrant
+        mockCreateGrant,
+        mockAxiosPost
     };
 });
+
+vi.mock('axios', () => ({
+    default: { post: mockAxiosPost }
+}));
 
 vi.mock('googleapis', () => ({
     google: {
@@ -174,6 +181,7 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             mockCreateUserWithEmail.mockReset();
             mockCreateGrant.mockResolvedValue({ access_token: { token: 'test-access-token', content: { exp: 1234567890 } } });
             mockAuthenticated.mockResolvedValue(undefined);
+            mockAxiosPost.mockResolvedValue({ data: { access_token: 'refreshed-token', refresh_token: 'new-refresh-token' } });
             vi.doMock('./userService.js', () => ({ getUserByEmail: mockGetUserByEmail, createUserWithEmail: mockCreateUserWithEmail }));
             vi.doMock('../utils/sessionUtils.js', () => ({ regenerateSession: vi.fn().mockResolvedValue(undefined) }));
         });
