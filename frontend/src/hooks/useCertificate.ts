@@ -1,5 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { certificateService, CertTemplateSummary } from '../services/CertificateService';
+import { certificateService } from '../services/CertificateService';
+import { CertTemplateSummary } from '../services/CertificateTypes';
 import { userService } from '../services/UserService';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 
