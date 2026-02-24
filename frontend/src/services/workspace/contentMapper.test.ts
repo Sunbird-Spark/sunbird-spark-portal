@@ -28,6 +28,7 @@ describe('contentMapper', () => {
         author: 'Author Name',
         primaryCategory: '',
         contentType: '',
+        mimeType: '',
       });
     });
 
