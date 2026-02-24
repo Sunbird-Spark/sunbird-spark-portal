@@ -1,8 +1,10 @@
+import React from "react";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/common/Button";
 import ResourceFormField from "./ResourceFormField";
 import { useFormRead } from "../../hooks/useForm";
 import { useFramework } from "../../hooks/useFramework";
+import "./ResourceForm.css";
 
 interface FormField {
   code: string;
@@ -38,10 +40,7 @@ interface ResourceFormDialogProps {
   onFormLoadComplete?: () => void;
 }
 
-const processFormSubmission = (
-  formValues: Record<string, string | string[]>,
-  fields: FormField[]
-): ResourceFormData => {
+const processFormSubmission = ( formValues: Record<string, string | string[]>, fields: FormField[]): ResourceFormData => {
   const nameValue = ((formValues['name'] as string) || '').trim() || 'Untitled content';
   const dynamicFields: Record<string, string | string[] | number> = {};
   
@@ -75,16 +74,9 @@ const createFormDefaults = (fields: FormField[]): Record<string, string | string
   return defaults;
 };
 
-const LoadingState = () => (
-  <div className="flex flex-col items-center justify-center py-12 gap-3">
-    <div className="w-8 h-8 border-3 border-sunbird-wave/30 border-t-sunbird-wave rounded-full animate-spin" />
-    <p className="text-sm text-muted-foreground font-rubik">Loading form...</p>
-  </div>
-);
-
 const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
-  <div className="flex flex-col items-center justify-center py-12 gap-3">
-    <p className="text-sm text-red-600 font-rubik">{error}</p>
+  <div className="resource-form-error-state">
+    <p className="resource-form-error-text">{error}</p>
     <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">
       Retry
     </Button>
@@ -232,10 +224,10 @@ export default function ResourceFormDialog({
 
   if (isFetchingForm) {
     return (
-      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-          <p className="text-sm text-white font-rubik">Loading...</p>
+      <div className="resource-form-overlay">
+        <div className="resource-form-loading">
+          <div className="resource-form-spinner" />
+          <p className="resource-form-loading-text">Loading...</p>
         </div>
       </div>
     );
@@ -251,27 +243,27 @@ export default function ResourceFormDialog({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="resource-form-overlay"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
       <div
-        className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto"
+        className="resource-form-container"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold font-rubik text-foreground mb-2">{title}</h2>
-        <p className="text-sm text-muted-foreground mb-4 font-rubik">Fill in the details to create your content</p>
+        <h2 className="resource-form-title">{title}</h2>
+        <p className="resource-form-subtitle">Fill in the details to create your content</p>
         {fetchError && <ErrorState error={fetchError} onRetry={handleRetry} />}
         {!fetchError && fields.length > 0 && (
           <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
+            <div className="resource-form-fields">
               {fields.map((field) => (
                 <ResourceFormField key={field.code} field={field} value={formValues[field.code] || (field.inputType === 'multiSelect' ? [] : '')} options={getOptionsForField(field)} isLoading={isLoading} openDropdown={openDropdown} onFieldChange={handleFieldChange} onMultiSelectToggle={handleMultiSelectToggle} onDropdownToggle={setOpenDropdown} dropdownRef={dropdownRef} />
               ))}
             </div>
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="resource-form-actions">
               <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>Cancel</Button>
               <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{isLoading ? "Creating..." : "Create"}</Button>
             </div>
