@@ -168,7 +168,7 @@ const WorkspacePage = () => {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<{ type: 'delete'; contentId: string } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ type: 'delete'; contentId: string; mimeType: string } | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [retiredContentIds, setRetiredContentIds] = useState<string[]>([]);
 
@@ -358,17 +358,16 @@ const WorkspacePage = () => {
   };
 
   const handleDelete = (id: string) => {
-    setConfirmDialog({ type: 'delete', contentId: id });
+    const item = visibleContents.find((c) => c.id === id);
+    setConfirmDialog({ type: 'delete', contentId: id, mimeType: item?.mimeType ?? '' });
   };
 
   const handleConfirmAction = async () => {
     if (!confirmDialog) return;
-    const { contentId } = confirmDialog;
+    const { contentId, mimeType } = confirmDialog;
     setIsConfirming(true);
     try {
-      // Find the content item to determine if it's a questionset
-      const item = visibleContents.find((c) => c.id === contentId);
-      const isQuestionSet = item?.mimeType === 'application/vnd.sunbird.questionset';
+      const isQuestionSet = mimeType === 'application/vnd.sunbird.questionset';
       if (isQuestionSet) {
         await questionSetRetire.mutateAsync(contentId);
       } else {
