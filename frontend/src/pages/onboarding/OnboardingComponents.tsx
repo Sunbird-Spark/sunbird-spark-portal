@@ -57,6 +57,6 @@ export const OptionChip = ({ field, isSelected, onClick }: OptionChipProps) => (
         </svg>
       </div>
     )}
-    <span className="text-base font-normal">{field.label}</span>
+    <span className="text-sm font-normal text-center break-words w-full px-2 leading-snug">{field.label}</span>
   </button>
 );
