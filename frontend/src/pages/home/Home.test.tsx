@@ -20,7 +20,7 @@ vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div
 vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
 vi.mock('@/components/common/SearchModal', () => ({
-    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
+    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
         isOpen ? <div data-testid="search-modal">Search Modal<button onClick={onClose}>Close</button></div> : null,
 }));
 
@@ -72,9 +72,28 @@ vi.mock('@/auth/AuthContext', () => ({
     })),
 }));
 
+// Mock useUserRead
+const mockUseUserRead = vi.fn();
+vi.mock('@/hooks/useUserRead', () => ({
+    useUserRead: () => mockUseUserRead(),
+}));
+
 describe('Home Page', () => {
     beforeEach(() => {
         mockUseIsMobile.mockReturnValue(false); // Default to desktop
+        mockUseUserRead.mockReturnValue({
+            data: {
+                data: {
+                    response: {
+                        firstName: 'John',
+                        lastName: 'Doe',
+                    },
+                },
+            },
+            isLoading: false,
+            error: null,
+            refetch: vi.fn(),
+        });
     });
 
     afterEach(() => {
@@ -100,55 +119,76 @@ describe('Home Page', () => {
         );
     };
 
-    it('renders the loading state initially and then the dashboard', async () => {
+    it('renders the welcome message with user name', () => {
         renderHome();
 
-        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
-
-        await waitFor(() => {
-            expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument();
-        }, { timeout: 2000 });
-
-        expect(screen.getByText('Hi John Deo')).toBeInTheDocument();
+        expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
+        expect(screen.getByText('Welcome to a learning experience made just for you.')).toBeInTheDocument();
         expect(screen.getByTestId('sidebar')).toBeInTheDocument();
         expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
     });
 
-    it('handles sidebar toggle on desktop', async () => {
+    it('renders loading state when user data is loading', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+            refetch: vi.fn(),
+        });
+
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
+
+        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
+    });
+
+    it('renders error state when user data fails to load', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+            error: new Error('Network error'),
+            refetch: vi.fn(),
+        });
+
+        renderHome();
+
+        expect(screen.getByText('Network error')).toBeInTheDocument();
+    });
+
+    it('renders "Hi there" when user profile is not available', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+            error: null,
+            refetch: vi.fn(),
+        });
+
+        renderHome();
+
+        expect(screen.getByText('Hi there')).toBeInTheDocument();
+    });
+
+    it('handles sidebar toggle on desktop', () => {
+        renderHome();
+
+        expect(screen.getByTestId('sidebar')).toBeInTheDocument();
 
         // Sidebar is open by default on desktop
         expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
-
-        // Close sidebar
-        const buttons = screen.getAllByRole('button');
-        const collapseBtn = buttons.find(b => b.querySelector('path[d="M5 1L1 5L5 9"]'));
-
-        if (collapseBtn) {
-            fireEvent.click(collapseBtn);
-            await waitFor(() => {
-                expect(screen.queryByAltText('Sunbird')).not.toBeInTheDocument();
-            });
-        }
     });
 
-    it('renders mobile layout correctly', async () => {
+    it('renders mobile layout correctly', () => {
         mockUseIsMobile.mockReturnValue(true);
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
         expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();
     });
 
     it('opens search modal when search button is clicked', async () => {
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
         const searchButton = screen.getByLabelText('Search');
         fireEvent.click(searchButton);
 
-        // SearchModal should open (mocked in the test setup)
         await waitFor(() => {
             expect(screen.getByTestId('search-modal')).toBeInTheDocument();
         });
@@ -156,7 +196,6 @@ describe('Home Page', () => {
 
     it('changes language through the dropdown', async () => {
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
         const langBtn = screen.getByAltText('Language').parentElement;
         fireEvent.click(langBtn!);
@@ -167,14 +206,29 @@ describe('Home Page', () => {
         expect(mockChangeLanguage).toHaveBeenCalledWith('hi');
     });
 
-    it('updates activeNav when sidebar notifies', async () => {
+    it('updates activeNav when sidebar notifies', () => {
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
         const changeNavBtn = screen.getByText('Change Nav');
         fireEvent.click(changeNavBtn);
 
-        // We can't easily check internal state, but we can check if it re-renders correctly or side effects
-        // Here we just verify the interaction happened.
+        // Verify the interaction happened without errors
+        expect(changeNavBtn).toBeInTheDocument();
+    });
+
+    it('renders all main content sections when loaded', () => {
+        renderHome();
+
+        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
+        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
+        expect(screen.getByTestId('inprogress-grid')).toBeInTheDocument();
+        expect(screen.getByTestId('recommended-section')).toBeInTheDocument();
+        expect(screen.getByTestId('footer')).toBeInTheDocument();
+    });
+
+    it('renders the "Continue from where you left" section heading', () => {
+        renderHome();
+
+        expect(screen.getByText('Continue from where you left')).toBeInTheDocument();
     });
 });

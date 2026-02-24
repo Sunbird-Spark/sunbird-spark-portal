@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { batchService as creatorBatchService, Batch, CreateBatchRequest, UpdateBatchRequest } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
-import { userService } from '../services/UserService';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { resolveUserAndOrg } from '../utils/userUtils';
 import type {
@@ -9,6 +8,7 @@ import type {
   BatchReadResponse,
   ContentStateReadRequest,
   ContentStateReadResponse,
+  ContentStateUpdateRequest,
 } from '../types/collectionTypes';
 import type { ApiResponse } from '../lib/http-client';
 
@@ -103,6 +103,18 @@ export const useEnrol = (): UseMutationResult<ApiResponse<unknown>, Error, Enrol
   return useMutation({
     mutationFn: ({ courseId, userId, batchId }: EnrolParams) =>
       learnerBatchService.enrol(courseId, userId, batchId),
+  });
+};
+
+// ─── useContentStateUpdateMutation ────────────────────────────────────────────
+export const useContentStateUpdateMutation = (): UseMutationResult<
+  ApiResponse<unknown>,
+  Error,
+  ContentStateUpdateRequest
+> => {
+  return useMutation({
+    mutationFn: (request: ContentStateUpdateRequest) =>
+      learnerBatchService.contentStateUpdate(request),
   });
 };
 

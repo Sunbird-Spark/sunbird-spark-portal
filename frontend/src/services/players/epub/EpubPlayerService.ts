@@ -8,16 +8,19 @@ import { OrganizationService } from '../../OrganizationService';
  * Handles player creation, configuration, and event management.
  * 
  * Style Loading Strategy:
- * - EPUB player styles are loaded dynamically when the first player is created
- * - This prevents unnecessary CSS loading if no EPUB player is used on the page
- * - Styles are loaded globally as the web component requires them in the document scope
+ * - EPUB player styles are fetched once and cached in memory
+ * - Styles are injected using CSS @scope to scope them to the player wrapper
+ * - This prevents CSS bleed into the rest of the page while keeping styles
+ *   functional for the player's children
  */
 export class EpubPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
   private orgService = new OrganizationService();
-  private static stylesLoaded = false;
+
   private static scriptLoaded = false;
   private static scriptLoading?: Promise<void>;
+  private static cachedCss: string | null = null;
+  private static cssLoading?: Promise<string>;
 
   private loadScript(): Promise<void> {
     if (EpubPlayerService.scriptLoaded || customElements.get('sunbird-epub-player')) {
@@ -51,7 +54,7 @@ export class EpubPlayerService {
     // Get session and user info from auth service
     const sid = userAuthInfoService.getSessionId();
     const uid = userAuthInfoService.getUserId() || 'anonymous';
-    
+
     // Get device ID from AppCoreService (backend) with fallback
     let did = '';
     try {
@@ -59,7 +62,7 @@ export class EpubPlayerService {
     } catch (error) {
       console.warn('Failed to fetch device ID, using fallback:', error);
     }
-    
+
     // Get channel from org service with random fallback for testing
     let channel = '';
     try {
@@ -68,7 +71,7 @@ export class EpubPlayerService {
           isTenant: true
         }
       });
-      
+
       const org = orgResponse?.data?.result?.response?.content?.[0];
       if (org?.channel) {
         channel = org.channel;
@@ -116,54 +119,104 @@ export class EpubPlayerService {
   }
 
   /**
-   * Load EPUB player styles dynamically (only once)
-   * Checks for existing style element to prevent race conditions
+   * Fetch and cache the EPUB player CSS content.
+   * The CSS is fetched once and reused across all player instances.
    */
-  private loadStyles(): void {
-    // Check if styles already exist in the DOM (prevents race conditions)
-    const existingStyles = document.querySelector('[data-epub-player-styles="true"]');
-    if (existingStyles || EpubPlayerService.stylesLoaded) {
-      EpubPlayerService.stylesLoaded = true;
-      return;
+  private async fetchStyles(): Promise<string> {
+    if (EpubPlayerService.cachedCss !== null) {
+      return EpubPlayerService.cachedCss;
     }
+    if (EpubPlayerService.cssLoading) {
+      return EpubPlayerService.cssLoading;
+    }
+    EpubPlayerService.cssLoading = fetch('/assets/epub-player/styles.css')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch epub player styles: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(css => {
+        EpubPlayerService.cachedCss = css;
+        EpubPlayerService.cssLoading = undefined;
+        return css;
+      })
+      .catch(error => {
+        EpubPlayerService.cachedCss = '';
+        EpubPlayerService.cssLoading = undefined;
+        console.error('Failed to load epub player styles:', error);
+        return '';
+      });
+    return EpubPlayerService.cssLoading;
+  }
+  /**
+   * Rewrite CSS selectors so they work inside @scope.
+   * - :root → :scope (CSS variables get applied to the wrapper)
+   * - html / body → :scope (base styles target the wrapper instead)
+   * - Compound selectors like html[dir=rtl] → :scope[dir=rtl]
+   */
+  private rewriteCssForScope(css: string): string {
+    // Replace :root with :scope so variable definitions apply to the scoping element
+    let rewritten = css.replace(/:root/g, ':scope');
 
-    const styleLink = document.createElement('link');
-    styleLink.rel = 'stylesheet';
-    styleLink.href = '/assets/epub-player/styles.css';
-    styleLink.setAttribute('data-epub-player-styles', 'true');
-    document.head.appendChild(styleLink);
+    // Replace standalone html/body selectors and compound html[...]/body[...] selectors
+    // with :scope, so base typography, colors, bg etc. apply to the wrapper.
+    // Uses negative lookbehind/lookahead to avoid replacing inside words/URLs.
+    rewritten = rewritten.replace(/(?<![a-zA-Z-])html(?=\s*[{,[:]|$)/g, ':scope');
+    rewritten = rewritten.replace(/(?<![a-zA-Z-])body(?=\s*[{,[:]|$)/g, ':scope');
 
-    EpubPlayerService.stylesLoaded = true;
+    return rewritten;
   }
 
   /**
-   * Remove EPUB player styles from the document head.
-   * Called when the player component unmounts to prevent style bleed
-   * into other pages during SPA navigation.
+   * No-op: styles are scoped via CSS @scope inside the wrapper element
+   * and cleaned up automatically when the wrapper is removed from the DOM.
    */
   static unloadStyles(): void {
-    const styleLink = document.querySelector('[data-epub-player-styles="true"]');
-    if (styleLink) {
-      styleLink.remove();
-    }
-    EpubPlayerService.stylesLoaded = false;
+    // Styles are scoped inside the wrapper and removed automatically
+    // when the wrapper element is removed from the DOM.
   }
 
   /**
-   * Create EPUB player element with configuration
-   * Styles are loaded dynamically on first use
+   * Create EPUB player element with styles scoped via CSS @scope.
+   * Fetches the CSS content, rewrites :root/html/body selectors for scoping,
+   * wraps it in @scope to prevent global bleed, and injects as a <style> tag.
    */
-  createElement(config: EpubPlayerConfig): HTMLElement {
-    // Load styles if not already loaded
-    this.loadStyles();
+  async createElement(config: EpubPlayerConfig): Promise<HTMLElement> {
+    // Fetch CSS content (cached after first fetch)
+    const cssContent = await this.fetchStyles();
 
+    // Wrapper scopes the styles and keeps them alongside the player
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('data-epub-player-wrapper', 'true');
+    wrapper.setAttribute('data-player-id', config.metadata.identifier);
+    wrapper.style.width = '100%';
+    wrapper.style.height = '100%';
+
+    // Inject scoped styles — rewrite global selectors and wrap in @scope
+    if (cssContent) {
+      const scopedCss = this.rewriteCssForScope(cssContent);
+      const styleEl = document.createElement('style');
+      styleEl.setAttribute('data-epub-player-styles', 'true');
+      styleEl.textContent = `@scope ([data-epub-player-wrapper]) {\n${scopedCss}\n}`;
+      wrapper.appendChild(styleEl);
+    }
+
+    // Player element
     const element = document.createElement('sunbird-epub-player');
     const configString = JSON.stringify(config);
-    
     element.setAttribute('player-config', configString);
     element.setAttribute('data-player-id', config.metadata.identifier);
-    
-    return element;
+    wrapper.appendChild(element);
+
+    return wrapper;
+  }
+
+  /**
+   * Get the actual sunbird-epub-player element from a wrapper.
+   */
+  private getPlayerElement(element: HTMLElement): HTMLElement {
+    return (element.querySelector('sunbird-epub-player') as HTMLElement) || element;
   }
 
   /**
@@ -177,13 +230,15 @@ export class EpubPlayerService {
     // Remove any existing handler first to prevent memory leaks
     this.removeEventListeners(element);
 
+    const playerEl = this.getPlayerElement(element);
+
     const playerHandler = (event: Event) => {
       const customEvent = event as CustomEvent;
       if (onPlayerEvent) {
         const epubEvent: EpubPlayerEvent = {
           type: customEvent.detail?.eid || 'unknown',
           data: customEvent.detail,
-          playerId: element.getAttribute('data-player-id') || 'epub-player',
+          playerId: playerEl.getAttribute('data-player-id') || 'epub-player',
           timestamp: Date.now(),
         };
         onPlayerEvent(epubEvent);
@@ -197,10 +252,10 @@ export class EpubPlayerService {
       }
     };
 
-    element.addEventListener('playerEvent', playerHandler);
-    element.addEventListener('telemetryEvent', telemetryHandler);
-    
-    // Store handlers for cleanup
+    playerEl.addEventListener('playerEvent', playerHandler);
+    playerEl.addEventListener('telemetryEvent', telemetryHandler);
+
+    // Store handlers keyed by wrapper for cleanup
     this.eventHandlers.set(element, { player: playerHandler, telemetry: telemetryHandler });
   }
 
@@ -210,8 +265,9 @@ export class EpubPlayerService {
   removeEventListeners(element: HTMLElement): void {
     const handlers = this.eventHandlers.get(element);
     if (handlers) {
-      element.removeEventListener('playerEvent', handlers.player);
-      element.removeEventListener('telemetryEvent', handlers.telemetry);
+      const playerEl = this.getPlayerElement(element);
+      playerEl.removeEventListener('playerEvent', handlers.player);
+      playerEl.removeEventListener('telemetryEvent', handlers.telemetry);
       this.eventHandlers.delete(element);
     }
   }
