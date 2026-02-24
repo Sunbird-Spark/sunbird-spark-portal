@@ -8,7 +8,9 @@ vi.mock('react-router-dom', () => ({
 
 // Mock child components to verify conditional rendering
 vi.mock('@/components/collection/CollectionOverview', () => ({
-  default: () => <div data-testid="collection-overview" />
+  default: ({ contentAccessBlocked }: { contentAccessBlocked?: boolean }) => (
+    <div data-testid="collection-overview" data-content-access-blocked={String(!!contentAccessBlocked)} />
+  ),
 }));
 vi.mock('@/components/collection/CollectionSidebar', () => ({
   default: () => <div data-testid="collection-sidebar" />
@@ -172,5 +174,60 @@ describe('CollectionContentArea', () => {
       />
     );
     expect(screen.queryByTestId('view-dashboard-btn')).not.toBeInTheDocument();
+  describe('Creator viewing own collection (isCreatorViewingOwnCollection)', () => {
+    it('hides CourseProgressCard when isCreatorViewingOwnCollection is true', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          contentBlocked={false}
+          hasBatchInRoute={true}
+          isEnrolledInCurrentBatch={true}
+          isCreatorViewingOwnCollection={true}
+        />
+      );
+      expect(screen.queryByTestId('course-progress-card')).not.toBeInTheDocument();
+    });
+
+    it('hides AvailableBatchesCard and CertificateCard when isCreatorViewingOwnCollection is true', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          contentBlocked={false}
+          hasBatchInRoute={false}
+          isCreatorViewingOwnCollection={true}
+        />
+      );
+      expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
+    });
+
+    it('shows learner cards when isCreatorViewingOwnCollection is false', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          contentBlocked={false}
+          hasBatchInRoute={false}
+          isCreatorViewingOwnCollection={false}
+        />
+      );
+      expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
+      expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
+    });
+
+    it('passes contentAccessBlocked=false to CollectionOverview when creator views own collection (content access without enrollment)', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          contentBlocked={false}
+          isEnrolledInCurrentBatch={false}
+          isCreatorViewingOwnCollection={true}
+        />
+      );
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
+    });
   });
 });

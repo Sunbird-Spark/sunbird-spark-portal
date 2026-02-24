@@ -45,7 +45,7 @@ const HomeContinueLearning = () => {
     const { data, isLoading } = useUserEnrolledCollections();
 
     const lastAccessedCourse: TrackableCollection | undefined = (data?.data?.courses ?? [])
-        .filter((c: TrackableCollection) => c.completionPercentage < 100 && c.lastContentAccessTime)
+        .filter((c: TrackableCollection) => c.completionPercentage < 100)
         .sort((a: TrackableCollection, b: TrackableCollection) =>
             (b.lastContentAccessTime ?? 0) - (a.lastContentAccessTime ?? 0)
         )[0];

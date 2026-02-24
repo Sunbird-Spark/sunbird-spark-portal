@@ -159,5 +159,21 @@ describe('collectionMapper', () => {
       const result = mapToCollectionData(content);
       expect(result.units).toBe(0);
     });
+
+    it('maps createdBy from root content when present', () => {
+      const content: HierarchyContentNode = {
+        identifier: 'col-1',
+        name: 'My Course',
+        createdBy: 'user-uuid-123',
+      };
+      const result = mapToCollectionData(content);
+      expect(result.createdBy).toBe('user-uuid-123');
+    });
+
+    it('leaves createdBy undefined when not present on content', () => {
+      const content: HierarchyContentNode = { identifier: 'col-1', name: 'Course' };
+      const result = mapToCollectionData(content);
+      expect(result.createdBy).toBeUndefined();
+    });
   });
 });
