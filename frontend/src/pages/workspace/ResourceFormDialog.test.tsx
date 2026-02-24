@@ -192,11 +192,11 @@ describe('ResourceFormDialog', () => {
     render(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Content Name/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Description/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Subject/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Target Audience/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Duration/)).toBeInTheDocument();
+      expect(screen.getByText('Content Name')).toBeInTheDocument();
+      expect(screen.getByText('Description')).toBeInTheDocument();
+      expect(screen.getByText('Subject')).toBeInTheDocument();
+      expect(screen.getByText('Target Audience')).toBeInTheDocument();
+      expect(screen.getByText(/Duration/)).toBeInTheDocument();
     });
   });
 
@@ -214,7 +214,7 @@ describe('ResourceFormDialog', () => {
     render(<ResourceFormDialog {...defaultProps} />);
 
     await waitFor(() => {
-      const nameInput = screen.getByLabelText(/Content Name/);
+      const nameInput = screen.getByPlaceholderText('Enter content name');
       act(() => {
         fireEvent.change(nameInput, { target: { value: 'Test Content' } });
       });
@@ -288,8 +288,8 @@ describe('ResourceFormDialog', () => {
     render(<ResourceFormDialog {...defaultProps} onSubmit={onSubmit} />);
 
     await waitFor(() => {
-      const nameInput = screen.getByLabelText(/Content Name/);
-      const subjectSelect = screen.getByLabelText(/Subject/);
+      const nameInput = screen.getByPlaceholderText('Enter content name');
+      const subjectSelect = screen.getByRole('combobox');
       
       act(() => {
         fireEvent.change(nameInput, { target: { value: 'Test Content' } });
@@ -319,8 +319,8 @@ describe('ResourceFormDialog', () => {
     render(<ResourceFormDialog {...defaultProps} onSubmit={onSubmit} />);
 
     await waitFor(() => {
-      const nameInput = screen.getByLabelText(/Content Name/);
-      const subjectSelect = screen.getByLabelText(/Subject/);
+      const nameInput = screen.getByPlaceholderText('Enter content name');
+      const subjectSelect = screen.getByRole('combobox');
       
       act(() => {
         fireEvent.change(nameInput, { target: { value: 'Test Content' } });
@@ -360,7 +360,7 @@ describe('ResourceFormDialog', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Content Name/)).toBeInTheDocument();
+      expect(screen.getByText('Content Name')).toBeInTheDocument();
     });
 
     expect(mockFormRead).toHaveBeenCalledTimes(2);

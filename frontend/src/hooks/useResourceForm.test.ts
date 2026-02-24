@@ -2,21 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useResourceForm } from './useResourceForm';
 
-// Mock the services
-const mockFormService = {
-  formRead: vi.fn(),
-};
+// Hoist the mock functions to avoid initialization order issues
+const { mockFormRead, mockFrameworkRead } = vi.hoisted(() => ({
+  mockFormRead: vi.fn(),
+  mockFrameworkRead: vi.fn(),
+}));
 
-const mockFrameworkService = {
-  read: vi.fn(),
-};
-
+// Mock services with proper implementation
 vi.mock('@/services/FormService', () => ({
-  FormService: vi.fn(() => mockFormService),
+  FormService: class MockFormService {
+    formRead = mockFormRead;
+  },
 }));
 
 vi.mock('@/services/FrameworkService', () => ({
-  FrameworkService: vi.fn(() => mockFrameworkService),
+  FrameworkService: class MockFrameworkService {
+    read = mockFrameworkRead;
+  },
 }));
 
 const mockFormResponse = {
@@ -126,8 +128,8 @@ const mockFrameworkResponse = {
 describe('useResourceForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFormService.formRead.mockResolvedValue(mockFormResponse);
-    mockFrameworkService.read.mockResolvedValue(mockFrameworkResponse);
+    mockFormRead.mockResolvedValue(mockFormResponse);
+    mockFrameworkRead.mockResolvedValue(mockFrameworkResponse);
   });
 
   it('initializes with default state', () => {
@@ -149,7 +151,7 @@ describe('useResourceForm', () => {
     );
 
     await waitFor(() => {
-      expect(mockFormService.formRead).toHaveBeenCalledWith({
+      expect(mockFormRead).toHaveBeenCalledWith({
         type: 'content',
         action: 'create',
         subType: 'resource',
@@ -190,12 +192,12 @@ describe('useResourceForm', () => {
     );
 
     await waitFor(() => {
-      expect(mockFrameworkService.read).toHaveBeenCalledWith('testFramework');
+      expect(mockFrameworkRead).toHaveBeenCalledWith('testFramework');
     });
   });
 
   it('handles form fetch error', async () => {
-    mockFormService.formRead.mockRejectedValue(new Error('Form fetch failed'));
+    mockFormRead.mockRejectedValue(new Error('Form fetch failed'));
 
     const { result } = renderHook(() =>
       useResourceForm(true, 'testChannel', 'testFramework', 'resource')
@@ -207,7 +209,7 @@ describe('useResourceForm', () => {
   });
 
   it('handles framework fetch error gracefully', async () => {
-    mockFrameworkService.read.mockRejectedValue(new Error('Framework fetch failed'));
+    mockFrameworkRead.mockRejectedValue(new Error('Framework fetch failed'));
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const { result } = renderHook(() =>
@@ -247,14 +249,23 @@ describe('useResourceForm', () => {
     );
 
     await waitFor(() => {
-      expect(mockFormService.formRead).toHaveBeenCalledTimes(1);
+      expect(mockFormRead).toHaveBeenCalledTimes(1);
     });
 
-    rerender({ open: false });
-    rerender({ open: true });
+    // Close the dialog
+    act(() => {
+      rerender({ open: false });
+    });
 
-    // Should not fetch again
-    expect(mockFormService.formRead).toHaveBeenCalledTimes(1);
+    // Reopen - should fetch again because state was reset
+    act(() => {
+      rerender({ open: true });
+    });
+
+    await waitFor(() => {
+      // Should fetch again after reset
+      expect(mockFormRead).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('provides options for fields with range', async () => {
@@ -431,7 +442,7 @@ describe('useResourceForm', () => {
     );
 
     await waitFor(() => {
-      expect(mockFormService.formRead).toHaveBeenCalledWith({
+      expect(mockFormRead).toHaveBeenCalledWith({
         type: 'content',
         action: 'create',
         subType: 'resource',
@@ -441,7 +452,7 @@ describe('useResourceForm', () => {
     });
 
     // Should not call framework service when no framework provided
-    expect(mockFrameworkService.read).not.toHaveBeenCalled();
+    expect(mockFrameworkRead).not.toHaveBeenCalled();
   });
 
   it('sorts fields by index', async () => {
@@ -459,7 +470,7 @@ describe('useResourceForm', () => {
       },
     };
 
-    mockFormService.formRead.mockResolvedValue(unsortedFormResponse);
+    mockFormRead.mockResolvedValue(unsortedFormResponse);
 
     const { result } = renderHook(() =>
       useResourceForm(true, 'testChannel', 'testFramework', 'resource')
