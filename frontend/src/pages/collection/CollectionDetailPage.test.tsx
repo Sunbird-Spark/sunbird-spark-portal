@@ -250,6 +250,7 @@ vi.mock('@/components/collection/CertificatePreviewModal', () => ({
   default: ({ open, onClose }: { open: boolean; onClose: () => void }) => (
     open ? <div data-testid="certificate-modal">Certificate Preview</div> : null
   ),
+  formatIssuanceDateLong: (_date: Date) => '01 January 2025',
 }));
 
 /* ── Provider wrapper ── */

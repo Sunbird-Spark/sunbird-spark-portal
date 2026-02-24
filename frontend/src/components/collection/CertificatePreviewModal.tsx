@@ -31,13 +31,10 @@ export function replacePlaceholders(
   trainingName: string,
   issuanceDate: string
 ): string {
-  let out = text
+  return text
     .replace(/\{\{\s*credentialSubject\.recipientName\s*\}\}/g, recipientName)
-    .replace(/\{\{\s*credentialSubject\.trainingName\s*\}\}/g, trainingName);
-  // Match dateFormat issuanceDate "format" (any quote, optional spaces). Case-insensitive for template variants.
-  out = out.replace(/\{\{\s*dateFormat\s+issuanceDate\s+["'][^"']*["']\s*\}\}/gi, issuanceDate);
-  out = out.replace(/\{\{\s*dateFormat\s*\(\s*issuanceDate\s*,\s*["'][^"']*["']\s*\)\s*\}\}/gi, issuanceDate);
-  return out;
+    .replace(/\{\{\s*credentialSubject\.trainingName\s*\}\}/g, trainingName)
+    .replace(/\{\{\s*dateFormat\s+issuanceDate\s+["'][^"']*["']\s*\}\}/gi, issuanceDate);
 }
 
 export default function CertificatePreviewModal({

@@ -61,11 +61,6 @@ describe('replacePlaceholders', () => {
     expect(replacePlaceholders(text, '', '', '01 January 2025')).toBe('Date: 01 January 2025');
   });
 
-  it('replaces dateFormat(issuanceDate, "format") parenthesized form', () => {
-    const text = 'Issued on {{dateFormat(issuanceDate, "DD MMMM YYYY")}}';
-    expect(replacePlaceholders(text, '', '', '25 December 2024')).toBe('Issued on 25 December 2024');
-  });
-
   it('replaces all three placeholders in one string', () => {
     const text =
       '{{credentialSubject.recipientName}} completed {{credentialSubject.trainingName}} on {{dateFormat issuanceDate "DD MMMM YYYY"}}';
