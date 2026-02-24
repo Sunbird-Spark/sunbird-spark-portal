@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -189,8 +190,8 @@ describe('ResourceFormDialog', () => {
     renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
     
     expect(screen.getByText('Loading...')).toBeInTheDocument();
-    // Check for the spinner element
-    const spinner = document.querySelector('.animate-spin');
+    // Check for the spinner element with new CSS class
+    const spinner = document.querySelector('.resource-form-spinner');
     expect(spinner).toBeInTheDocument();
   });
 

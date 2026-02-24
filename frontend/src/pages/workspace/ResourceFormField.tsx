@@ -1,4 +1,5 @@
 import React from 'react';
+import './ResourceForm.css';
 
 interface FormField {
   code: string;
@@ -26,8 +27,6 @@ interface ResourceFormFieldProps {
   dropdownRef?: React.RefObject<HTMLDivElement>;
 }
 
-const inputClass = "w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave bg-white";
-
 export default function ResourceFormField({
   field,
   value,
@@ -41,17 +40,17 @@ export default function ResourceFormField({
 }: ResourceFormFieldProps) {
   if (field.inputType === 'text' || field.inputType === 'number') {
     return (
-      <div>
-        <label className="block text-sm font-medium font-rubik text-foreground mb-1">
+      <div className="resource-field-container">
+        <label className="resource-field-label">
           {field.label}
-          {field.required && <span className="text-red-500 ml-0.5">*</span>}
+          {field.required && <span className="resource-field-required">*</span>}
         </label>
         <input
           type={field.inputType === 'number' ? 'number' : 'text'}
           value={(value as string) || ''}
           onChange={(e) => onFieldChange(field.code, e.target.value)}
           placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-          className={inputClass}
+          className="resource-field-input"
           disabled={isLoading || !field.editable}
           autoFocus={field.code === 'name'}
         />
@@ -61,15 +60,15 @@ export default function ResourceFormField({
 
   if (field.inputType === 'select') {
     return (
-      <div>
-        <label className="block text-sm font-medium font-rubik text-foreground mb-1">
+      <div className="resource-field-container">
+        <label className="resource-field-label">
           {field.label}
-          {field.required && <span className="text-red-500 ml-0.5">*</span>}
+          {field.required && <span className="resource-field-required">*</span>}
         </label>
         <select
           value={(value as string) || ''}
           onChange={(e) => onFieldChange(field.code, e.target.value)}
-          className={inputClass}
+          className="resource-field-input"
           disabled={isLoading || !field.editable}
         >
           <option value="" disabled>Select {field.label.toLowerCase()}</option>
@@ -85,53 +84,53 @@ export default function ResourceFormField({
     const selected = (value as string[]) || [];
     const isDropdownOpen = openDropdown === field.code;
     return (
-      <div ref={isDropdownOpen ? dropdownRef : undefined} className="relative">
-        <label className="block text-sm font-medium font-rubik text-foreground mb-1">
+      <div ref={isDropdownOpen ? dropdownRef : undefined} className="resource-field-container">
+        <label className="resource-field-label">
           {field.label}
-          {field.required && <span className="text-red-500 ml-0.5">*</span>}
+          {field.required && <span className="resource-field-required">*</span>}
         </label>
         <button
           type="button"
           onClick={() => onDropdownToggle(isDropdownOpen ? null : field.code)}
           disabled={isLoading || !field.editable}
-          className={`${inputClass} text-left flex items-center justify-between gap-2 min-h-[2.75rem]`}
+          className="resource-field-input resource-field-multiselect-button"
         >
-          <div className="flex-1 flex flex-wrap gap-1.5">
+          <div className="resource-field-multiselect-values">
             {selected.length > 0 ? (
               selected.map((val) => (
-                <span key={val} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sunbird-wave/10 text-sunbird-ink text-xs font-rubik">
+                <span key={val} className="resource-field-multiselect-tag">
                   {val}
                   <span
                     role="button"
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onMultiSelectToggle(field.code, val); }}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onMultiSelectToggle(field.code, val); } }}
-                    className="hover:text-red-500 text-xs leading-none cursor-pointer"
+                    className="resource-field-multiselect-tag-remove"
                   >
                     &times;
                   </span>
                 </span>
               ))
             ) : (
-              <span className="text-gray-400 text-sm">Select {field.label.toLowerCase()}</span>
+              <span className="resource-field-multiselect-placeholder">Select {field.label.toLowerCase()}</span>
             )}
           </div>
-          <svg className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className={`resource-field-multiselect-icon ${isDropdownOpen ? 'open' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         {isDropdownOpen && options.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+          <div className="resource-field-dropdown">
             {options.map((opt) => (
               <button
                 key={opt.key}
                 type="button"
                 onClick={() => onMultiSelectToggle(field.code, opt.key)}
-                className={`w-full text-left px-4 py-2 text-sm font-rubik hover:bg-sunbird-wave/5 flex items-center gap-2 ${selected.includes(opt.key) ? 'bg-sunbird-wave/10 text-sunbird-ink' : 'text-foreground'}`}
+                className={`resource-field-dropdown-option ${selected.includes(opt.key) ? 'selected' : ''}`}
               >
-                <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${selected.includes(opt.key) ? 'bg-sunbird-wave border-sunbird-wave text-white' : 'border-gray-300'}`}>
+                <span className={`resource-field-checkbox ${selected.includes(opt.key) ? 'checked' : ''}`}>
                   {selected.includes(opt.key) && (
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="resource-field-checkbox-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   )}
