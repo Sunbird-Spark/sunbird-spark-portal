@@ -22,6 +22,7 @@ export interface ContentData {
   contentEncoding?: string;
   contentType: string;
   identifier: string;
+  description?: string;
   audience: string[];
   visibility: string;
   discussionForum?: {

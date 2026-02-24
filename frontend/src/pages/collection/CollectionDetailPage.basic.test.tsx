@@ -142,6 +142,9 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: {
     isUserAuthenticated: vi.fn(() => false),
     getUserId: vi.fn(() => undefined),
+    getAuthInfo: vi.fn(() =>
+      Promise.resolve({ sid: '', uid: null, isAuthenticated: false }),
+    ),
   },
 }));
 vi.mock('@/components/collection/CollectionSidebar', () => ({
