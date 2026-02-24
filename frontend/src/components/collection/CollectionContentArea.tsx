@@ -92,7 +92,7 @@ export default function CollectionContentArea({
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-[1fr_340px] gap-8">
+      <div className="grid lg:grid-cols-[1fr_340px] gap-8 lg:items-start">
         {/* Left Column */}
         <CollectionOverview
           collectionData={collectionData}
@@ -105,11 +105,10 @@ export default function CollectionContentArea({
           onTelemetryEvent={handleTelemetryEvent}
         />
 
-        {/* Right Sidebar */}
-        <div className="lg:sticky lg:top-6 flex flex-col h-fit max-h-[calc(100vh_-_120px)] pr-3 custom-scrollbar">
+        <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-3 custom-scrollbar">
           {/* Creator: Batch management card */}
           {isAuthenticated && isContentCreator && collectionId && (
-            <div className="mb-4">
+            <div className="flex-shrink-0 mb-4">
               <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
             </div>
           )}
