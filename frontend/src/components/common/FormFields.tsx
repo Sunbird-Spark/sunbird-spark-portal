@@ -1,5 +1,5 @@
 import React from 'react';
-import './ResourceForm.css';
+import './FormFields.css';
 
 interface FormField {
   code: string;
@@ -15,7 +15,7 @@ interface FormField {
   range?: { key: string; name: string }[];
 }
 
-interface ResourceFormFieldProps {
+interface FormFieldProps {
   field: FormField;
   value: string | string[];
   options: { key: string; name: string }[];
@@ -37,7 +37,7 @@ export default function ResourceFormField({
   onMultiSelectToggle,
   onDropdownToggle,
   dropdownRef,
-}: ResourceFormFieldProps) {
+}: FormFieldProps) {
   if (field.inputType === 'text' || field.inputType === 'number') {
     return (
       <div className="resource-field-container">

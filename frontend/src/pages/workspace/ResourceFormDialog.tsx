@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/common/Button";
-import ResourceFormField from "./ResourceFormField";
+import ResourceFormField from "../../components/common/FormFields";
 import { useFormRead } from "../../hooks/useForm";
 import { useFramework } from "../../hooks/useFramework";
 import "./ResourceForm.css";
@@ -224,10 +224,10 @@ export default function ResourceFormDialog({
 
   if (isFetchingForm) {
     return (
-      <div className="resource-form-overlay">
-        <div className="resource-form-loading">
-          <div className="resource-form-spinner" />
-          <p className="resource-form-loading-text">Loading...</p>
+      <div className="loading-overlay">
+        <div className="loading-container">
+          <div className="loading-spinner" />
+          <p className="loading-text">Loading...</p>
         </div>
       </div>
     );

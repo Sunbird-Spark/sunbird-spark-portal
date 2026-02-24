@@ -191,7 +191,7 @@ describe('ResourceFormDialog', () => {
     
     expect(screen.getByText('Loading...')).toBeInTheDocument();
     // Check for the spinner element with new CSS class
-    const spinner = document.querySelector('.resource-form-spinner');
+    const spinner = document.querySelector('.loading-spinner');
     expect(spinner).toBeInTheDocument();
   });
 
