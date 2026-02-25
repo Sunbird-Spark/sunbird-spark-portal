@@ -5,6 +5,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import CollectionDetailPage from './CollectionDetailPage';
+import type { CertificatePreviewDetails } from '@/components/collection/CertificatePreviewModal';
 
 /* ── Collection / content data ── */
 const mockCollectionData = {
@@ -135,12 +136,13 @@ vi.mock('@/hooks/useUser', () => ({
   useIsContentCreator: () => mockIsContentCreator,
 }));
 
+let mockUserReadData: { data?: { data?: { response?: { firstName?: string; lastName?: string } } }; isLoading?: boolean; error?: unknown } = {
+  data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
+  isLoading: false,
+  error: null,
+};
 vi.mock('@/hooks/useUserRead', () => ({
-  useUserRead: () => ({
-    data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
-    isLoading: false,
-    error: null,
-  }),
+  useUserRead: () => mockUserReadData,
 }));
 
 /* ── Child components ── */
@@ -246,10 +248,20 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
   ),
 }));
 
+let lastCertificateModalDetails: CertificatePreviewDetails | undefined;
 vi.mock('@/components/collection/CertificatePreviewModal', () => ({
-  default: ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-    open ? <div data-testid="certificate-modal">Certificate Preview</div> : null
-  ),
+  default: ({
+    open,
+    onClose: _onClose,
+    details,
+  }: {
+    open: boolean;
+    onClose: () => void;
+    details?: { recipientName?: string };
+  }) => {
+    lastCertificateModalDetails = details;
+    return open ? <div data-testid="certificate-modal">Certificate Preview</div> : null;
+  },
 }));
 
 /* ── Provider wrapper ── */
@@ -272,6 +284,12 @@ describe('CollectionDetailPage', () => {
     mockIsContentCreator = false; // default: not a content creator
     mockGetUserId.mockReturnValue(null);
     mockCollectionData.createdBy = undefined;
+    lastCertificateModalDetails = undefined;
+    mockUserReadData = {
+      data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
+      isLoading: false,
+      error: null,
+    };
 
     mockUseCollection.mockReturnValue({
       data: mockCollectionData,
@@ -606,5 +624,62 @@ describe('CollectionDetailPage', () => {
       const contentArea = screen.getByTestId('collection-content-area');
       expect(contentArea).toHaveAttribute('data-is-creator-viewing-own', 'false');
     });
+  });
+
+  describe('Certificate preview details', () => {
+    it('passes recipientName (firstName + lastName) to CertificatePreviewModal', () => {
+      mockUserReadData = {
+        data: { data: { response: { firstName: 'Jane', lastName: 'Doe' } } },
+        isLoading: false,
+        error: null,
+      };
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, title: 'My Course' },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails).toEqual({ recipientName: 'Jane Doe' });
+    });
+
+    it('passes undefined recipientName when user profile has no name', () => {
+      mockUserReadData = {
+        data: { data: { response: {} } },
+        isLoading: false,
+        error: null,
+      };
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails?.recipientName).toBeUndefined();
+    });
+
+    it('passes only firstName as recipientName when lastName is missing', () => {
+      mockUserReadData = {
+        data: { data: { response: { firstName: 'OnlyFirst' } } },
+        isLoading: false,
+        error: null,
+      };
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails?.recipientName).toBe('OnlyFirst');
+    });
+
+    it('passes only lastName as recipientName when firstName is missing', () => {
+      mockUserReadData = {
+        data: { data: { response: { lastName: 'OnlyLast' } } },
+        isLoading: false,
+        error: null,
+      };
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails?.recipientName).toBe('OnlyLast');
+    });
+
   });
 });
