@@ -43,9 +43,11 @@ export function getEnrollmentForCollection(
   );
 }
 
+import { getLeafContentIdsFromHierarchy } from './hierarchyTree';
+
 export function getLeafContentIds(collectionData: CollectionData | null): string[] {
-  if (!collectionData?.modules) return [];
-  return collectionData.modules.flatMap((m) => m.lessons.map((l) => l.id));
+  if (!collectionData?.hierarchyRoot) return [];
+  return getLeafContentIdsFromHierarchy(collectionData.hierarchyRoot);
 }
 
 export function getContentStatusMap(contentList: ContentStateItem[]): Record<string, number> {
