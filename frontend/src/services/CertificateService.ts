@@ -68,6 +68,17 @@ export interface AddTemplateRequest {
       }>;
     };
   };
+  oldTemplateId?: string;
+}
+
+export interface RemoveTemplateRequest {
+  batch: {
+    courseId: string;
+    batchId: string;
+    template: {
+      identifier: string;
+    };
+  };
 }
 
 export class CertificateService {
@@ -170,6 +181,18 @@ export class CertificateService {
   ): Promise<ApiResponse<unknown>> {
     return getClient().patch<unknown>(
       'course/batch/cert/v1/template/add',
+      { request },
+      headers
+    );
+  }
+
+  /** Remove the certificate template from the batch */
+  async removeTemplateFromBatch(
+    request: RemoveTemplateRequest,
+    headers?: Record<string, string>
+  ): Promise<ApiResponse<unknown>> {
+    return getClient().patch<unknown>(
+      'course/batch/cert/v1/template/remove',
       { request },
       headers
     );
