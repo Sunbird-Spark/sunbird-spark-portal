@@ -42,8 +42,10 @@ interface CollectionContentAreaProps {
   firstCertPreviewUrl: string | undefined;
   setCertificatePreviewUrl: (url: string) => void;
   setCertificatePreviewOpen: (open: boolean) => void;
-  /** When true (creator viewing own collection), learner cards (progress, batches, certificate) are hidden. */
+  /** When true (creator viewing own collection), BatchCard is shown. */
   isCreatorViewingOwnCollection?: boolean;
+  /** When true (content creator viewing any collection), access without batch, no progress, learner cards hidden. */
+  contentCreatorPrivilege?: boolean;
 }
 
 export default function CollectionContentArea({
@@ -79,6 +81,7 @@ export default function CollectionContentArea({
   setCertificatePreviewUrl,
   setCertificatePreviewOpen,
   isCreatorViewingOwnCollection = false,
+  contentCreatorPrivilege = false,
 }: CollectionContentAreaProps) {
   const { t } = useAppI18n();
   const navigate = useNavigate();
@@ -95,13 +98,12 @@ export default function CollectionContentArea({
         <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-[1fr_340px] gap-8">
+      <div className="grid lg:grid-cols-[1fr_380px] gap-8 lg:items-start">
         {/* Left Column */}
         <CollectionOverview
           collectionData={collectionData}
           contentId={contentId}
-          contentAccessBlocked={isTrackable && (contentBlocked || (!isEnrolledInCurrentBatch && !isCreatorViewingOwnCollection))}
+          contentAccessBlocked={contentBlocked}
           playerMetadata={playerMetadata}
           playerIsLoading={playerIsLoading}
           playerError={playerError ?? null}
@@ -110,10 +112,10 @@ export default function CollectionContentArea({
         />
 
         {/* Right Sidebar */}
-        <div className="lg:sticky lg:top-6 flex flex-col h-fit max-h-[calc(100vh_-_120px)] pr-3 custom-scrollbar">
-          {/* Creator: Batch management card & Dashboard link */}
+        <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 custom-scrollbar">
+          {/* Creator: Dashboard link & Batch management card */}
           {isAuthenticated && isContentCreator && collectionId && (
-            <div className="mb-4 flex flex-col gap-3">
+            <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
               <Button
                 variant="outline"
                 className="w-full flex items-center justify-center gap-2 font-['Rubik'] text-sunbird-brick border-sunbird-brick hover:bg-sunbird-brick/5 bg-white shadow-sm"
@@ -123,19 +125,21 @@ export default function CollectionContentArea({
                 <FiLayout className="w-4 h-4" />
                 View Course Dashboard
               </Button>
-              <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
+              {isCreatorViewingOwnCollection && (
+                <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
+              )}
             </div>
           )}
 
-          {/* Learner: Login gate */}
-          {contentBlocked && (
+          {/* Learner: Login gate — only when trackable and not authenticated */}
+          {contentBlocked && !isAuthenticated && (
             <div className="flex-shrink-0 mb-4">
               <LoginToUnlockCard />
             </div>
           )}
 
-          {/* Learner: Course progress (hidden when creator viewing own collection) */}
-          {isTrackable && !contentBlocked && !isCreatorViewingOwnCollection && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
+          {/* Learner: Course progress (hidden when content creator privilege) */}
+          {isTrackable && !contentBlocked && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
             <div className="flex-shrink-0 mb-4">
               <CourseProgressCard {...courseProgressProps} />
             </div>
@@ -146,17 +150,17 @@ export default function CollectionContentArea({
             <CollectionSidebar
               collectionId={collectionId ?? ''}
               batchId={hasBatchInRoute ? batchIdParam ?? null : null}
-              modules={collectionData.modules}
-              expandedModules={expandedModules}
-              toggleModule={toggleModule}
-              activeLessonId={contentId ?? null}
+              children={collectionData.children ?? []}
+              expandedMainUnitIds={expandedModules}
+              toggleMainUnit={toggleModule}
+              activeContentId={contentId ?? null}
               contentBlocked={contentBlocked}
-              contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch ? contentStatusMap : undefined}
+              contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentStatusMap : undefined}
             />
           </div>
 
-          {/* Learner: Batch join + Certificate (hidden when creator viewing own collection) */}
-          {isTrackable && !contentBlocked && !isCreatorViewingOwnCollection && (
+          {/* Learner: Batch join + Certificate — show when trackable and authenticated learner (so they can join); hidden for content creators */}
+          {isTrackable && isAuthenticated && !contentCreatorPrivilege && (
             <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
               {!hasBatchInRoute && (
                 <AvailableBatchesCard
