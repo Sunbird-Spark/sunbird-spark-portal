@@ -111,7 +111,7 @@ export default function ResourceFormDialog({
     enabled,
   });
 
-  const { data: frameworkData, isLoading: isFrameworkLoading, refetch: refetchFramework } = useFramework(
+  const { data: frameworkData, isLoading: isFrameworkLoading, error: frameworkError, refetch: refetchFramework } = useFramework(
     enabled && orgFramework ? orgFramework : ''
   );
 
@@ -127,7 +127,9 @@ export default function ResourceFormDialog({
   }, [frameworkData]);
 
   const isFetchingForm = isFormLoading || isFrameworkLoading;
-  const fetchError = formError ? 'Failed to load form configuration. Please try again.' : null;
+  const fetchError = formError || frameworkError 
+    ? 'Failed to load form configuration. Please try again.' 
+    : null;
 
   useEffect(() => {
     if (fields.length > 0) {
@@ -244,7 +246,7 @@ export default function ResourceFormDialog({
   return (
     <div
       className="resource-form-overlay"
-      onClick={onClose}
+      onClick={isLoading ? undefined : onClose}
       role="dialog"
       aria-modal="true"
       aria-label={title}
