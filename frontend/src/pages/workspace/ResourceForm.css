@@ -50,7 +50,7 @@
 .resource-form-container {
   background-color: white;
   border-radius: 1rem;
-  max-width: 32rem;
+  max-width: 56rem;
   width: 100%;
   padding: 1.5rem;
   max-height: 85vh;
@@ -88,9 +88,21 @@
 }
 
 .resource-form-fields {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
+}
+
+.resource-field-col-twelve {
+  grid-column: span 12;
+}
+
+.resource-field-col-six {
+  grid-column: span 6;
+}
+
+.resource-field-col-four {
+  grid-column: span 4;
 }
 
 .resource-form-actions {

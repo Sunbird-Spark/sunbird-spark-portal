@@ -24,14 +24,14 @@ vi.mock('@/components/common/Button', () => ({
   ),
 }));
 
-// Mock services with proper implementation
-vi.mock('@/services/FormService', () => ({
+// Mock services with proper implementation using relative paths that match the hooks' imports
+vi.mock('../../services/FormService', () => ({
   FormService: class MockFormService {
     formRead = mockFormRead;
   },
 }));
 
-vi.mock('@/services/FrameworkService', () => ({
+vi.mock('../../services/FrameworkService', () => ({
   FrameworkService: class MockFrameworkService {
     read = mockFrameworkRead;
   },
