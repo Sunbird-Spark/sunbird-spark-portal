@@ -49,6 +49,7 @@ const EDITOR_OPTION_LABELS: Record<string, string> = {
   'course': 'Course',
   'collection': 'Collection',
   'question-set': 'Question Set',
+  'question-editor': 'Question Set',
 };
 
 const COLLECTION_CONTENT_CONFIG: Record<string, {
