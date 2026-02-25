@@ -76,7 +76,6 @@ export function applyOptimisticBatchCertUpdate(oldBatches: any[] | undefined, ba
       return {
         ...b,
         certTemplates: {
-          ...(b.certTemplates || {}),
           [selectedTemplateId]: {
             identifier: selectedTemplateId,
             name: selectedTemplate.name,
@@ -106,55 +105,54 @@ export async function getBase64Image(url: string): Promise<string> {
 }
 
 export async function generateModifiedSvg(svgText: string, newTmpl: NewTemplateForm): Promise<string> {
-  let modifiedSvg = svgText;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgText, "image/svg+xml");
 
   if (newTmpl.certTitle) {
-    modifiedSvg = modifiedSvg.replace(
-      /(<text[^>]+id=['"]certTitle['"][^>]*>)[^<]*(<\/text>)/,
-      `$1${newTmpl.certTitle}$2`
-    );
+    const el = doc.getElementById("certTitle");
+    if (el) el.textContent = newTmpl.certTitle;
   }
 
   if (newTmpl.name) {
-    modifiedSvg = modifiedSvg.replace(
-      /(<text[^>]+id=['"]stateTitle['"][^>]*>)[^<]*(<\/text>)/,
-      `$1${newTmpl.name}$2`
-    );
+    const el = doc.getElementById("stateTitle");
+    if (el) el.textContent = newTmpl.name;
   }
 
   if (newTmpl.logo1?.preview) {
     const logo1B64 = await getBase64Image(newTmpl.logo1.preview);
-    modifiedSvg = modifiedSvg.replace(
-      /(<image[^>]+id=['"]stateLogo1['"][^>]+xlink:href=['"])([^'"]+)(['"])/,
-      `$1${logo1B64}$3`
-    );
+    const el = doc.getElementById("stateLogo1");
+    if (el) {
+      el.setAttribute("href", logo1B64);
+      el.setAttribute("xlink:href", logo1B64);
+    }
   }
 
   if (newTmpl.logo2?.preview) {
     const logo2B64 = await getBase64Image(newTmpl.logo2.preview);
-    modifiedSvg = modifiedSvg.replace(
-      /(<image[^>]+id=['"]stateLogo2['"][^>]+xlink:href=['"])([^'"]+)(['"])/,
-      `$1${logo2B64}$3`
-    );
+    const el = doc.getElementById("stateLogo2");
+    if (el) {
+      el.setAttribute("href", logo2B64);
+      el.setAttribute("xlink:href", logo2B64);
+    }
   }
 
   if (newTmpl.sig1?.preview) {
     const sig1B64 = await getBase64Image(newTmpl.sig1.preview);
-    modifiedSvg = modifiedSvg.replace(
-      /(<image[^>]+id=['"]signatureImg1['"][^>]+xlink:href=['"])([^'"]+)(['"])/,
-      `$1${sig1B64}$3`
-    );
+    const el = doc.getElementById("signatureImg1");
+    if (el) {
+      el.setAttribute("href", sig1B64);
+      el.setAttribute("xlink:href", sig1B64);
+    }
   }
 
   if (newTmpl.sig1Designation || newTmpl.name) {
     const sigNames = [newTmpl.name, newTmpl.sig1Designation].filter(Boolean).join(", ");
-    modifiedSvg = modifiedSvg.replace(
-      /(<text[^>]+id=['"]signatureTitle1['"][^>]*>)[^<]*(<\/text>)/,
-      `$1${sigNames}$2`
-    );
+    const el = doc.getElementById("signatureTitle1");
+    if (el) el.textContent = sigNames;
   }
 
-  return modifiedSvg;
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(doc);
 }
 
 export async function fetchTemplateDetails(selectedTemplateId: string, defaultPreviewUrl: string, defaultIssuer: unknown) {
@@ -166,12 +164,16 @@ export async function fetchTemplateDetails(selectedTemplateId: string, defaultPr
     const content = readResp.data?.content;
     if (content) {
       if (Array.isArray(content.signatoryList) && content.signatoryList.length > 0) {
-        fullSignatoryList = content.signatoryList.map((s: Record<string, unknown>) => ({
-          name: (s.name as string) ?? "",
-          designation: (s.designation as string) ?? "",
-          id: (s.id as string) ?? `${s.name}/${s.name}`,
-          image: (s.image as string) ?? "",
-        }));
+        fullSignatoryList = content.signatoryList.map((s: Record<string, unknown>) => {
+          const name = (s.name as string) ?? "";
+          const designation = (s.designation as string) ?? "";
+          return {
+            name,
+            designation,
+            id: (s.id as string) ?? `${name || "Unknown"}/${designation || "Unknown"}`,
+            image: (s.image as string) ?? "",
+          };
+        });
       }
       if (content.artifactUrl) fullPreviewUrl = content.artifactUrl;
       if (content.issuer) fullIssuer = content.issuer;

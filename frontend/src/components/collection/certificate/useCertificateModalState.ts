@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { CollectionService } from "@/services/collection/CollectionService";
+import { collectionService } from "@/services/collection";
 import { useQueryClient } from "@tanstack/react-query";
 import { certificateService } from "@/services/CertificateService";
 import { useCertTemplates } from "@/hooks/useCertificate";
@@ -76,7 +76,6 @@ export function useCertificateModalState(
   useEffect(() => {
     async function checkHierarchy() {
       try {
-        const collectionService = new CollectionService();
         const response = await collectionService.getHierarchy(courseId);
         const metadata = response.data?.content;
         
@@ -95,9 +94,17 @@ export function useCertificateModalState(
 
   const selectedTemplate = certTemplates.find((t) => t.identifier === selectedTemplateId);
 
+  const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
+    };
+  }, []);
+
   const handleClose = useCallback(() => {
     onOpenChange(false);
-    setTimeout(() => {
+    resetTimeoutRef.current = setTimeout(() => {
       setView("main");
       setIssueTo("all");
       setIssueToAccepted(false);
