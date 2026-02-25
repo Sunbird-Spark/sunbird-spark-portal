@@ -23,7 +23,7 @@ const getCompletionStatus = (status: number): "ongoing" | "completed" =>
 
 interface CourseRowProps {
     course: TrackableCollection;
-    downloadCertificate: (courseId: string, batchId: string, courseName: string, issuedCertificates?: any[]) => Promise<void>;
+    downloadCertificate: (courseId: string, batchId: string, courseName: string, issuedCertificates?: any[], completedOn?: number) => Promise<void>;
     hasCertificate: (courseId: string, batchId?: string, courseName?: string, issuedCertificates?: any[]) => boolean;
     downloadingCourseId: string | null;
 }
@@ -82,11 +82,11 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
             </div>
 
             <div className="profile-learning-actions">
-                {status === "completed" && hasCertificate(course.courseId, course.batchId, title, course.issuedCertificates) && (
+                {status === "completed" && hasCertificate(course.courseId, course.batchId, title, course.issuedCertificates) ? (
                     <button
                         className={`flex items-center gap-2 transition-opacity ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
                         disabled={isDownloading}
-                        onClick={() => downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates)}
+                        onClick={() => downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates, course.completedOn)}
                     >
                         {isDownloading ? (
                             <div className="w-[1.125rem] h-[1.125rem] border-2 border-sunbird-ginger border-t-transparent rounded-full animate-spin" />
@@ -97,7 +97,11 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                             {isDownloading ? "Downloading..." : "Download Certificate"}
                         </span>
                     </button>
-                )}
+                ) : status === "completed" ? (
+                    <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-gray-75 text-center whitespace-nowrap">
+                        No certificate
+                    </span>
+                ) : null}
             </div>
         </div>
     );

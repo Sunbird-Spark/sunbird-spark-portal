@@ -254,7 +254,7 @@ describe('ProfileLearningList', () => {
 
     it('renders download button only for completed courses with certificates', () => {
         mockHasCertificate.mockImplementation((courseId) => courseId === 'c2');
-        
+
         render(<ProfileLearningList />);
 
         const downloadButtons = screen.queryAllByText('Download Certificate');
@@ -263,7 +263,7 @@ describe('ProfileLearningList', () => {
 
     it('does not render download button for completed courses without certificates', () => {
         mockHasCertificate.mockReturnValue(false);
-        
+
         render(<ProfileLearningList />);
 
         const downloadButtons = screen.queryAllByText('Download Certificate');
@@ -272,13 +272,13 @@ describe('ProfileLearningList', () => {
 
     it('calls downloadCertificate with correct parameters when download button is clicked', () => {
         mockHasCertificate.mockReturnValue(true);
-        
+
         render(<ProfileLearningList />);
 
         const downloadButton = screen.getByText('Download Certificate');
         fireEvent.click(downloadButton);
 
-        expect(mockDownloadCertificate).toHaveBeenCalledWith('c2', '2', 'Completed Course', undefined);
+        expect(mockDownloadCertificate).toHaveBeenCalledWith('c2', '2', 'Completed Course', undefined, undefined);
     });
 
     it('shows downloading state when certificate is being downloaded', () => {
@@ -288,7 +288,7 @@ describe('ProfileLearningList', () => {
             hasCertificate: mockHasCertificate,
             downloadingCourseId: 'c2',
         });
-        
+
         render(<ProfileLearningList />);
 
         expect(screen.getByText('Downloading...')).toBeInTheDocument();

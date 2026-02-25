@@ -262,7 +262,7 @@ export class CertificateService {
 
   public async downloadCertificate(certificateId: string): Promise<ApiResponse<any>> {
     return getClient().get<any>(`/rc/certificate/v1/download/${certificateId}`, {
-      Accept: 'application/json'
+      Accept: 'image/svg+xml'
     });
   }
 }

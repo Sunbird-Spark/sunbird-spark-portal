@@ -10,6 +10,36 @@ export interface ConverterOptions {
     delay?: number;
 }
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const formatDate = (dateStr: string, format: string): string => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return format
+        .replace('DD', String(date.getDate()).padStart(2, '0'))
+        .replace('MMMM', MONTHS[date.getMonth()] || '')
+        .replace('YYYY', String(date.getFullYear()));
+};
+
+const resolveValue = (obj: any, path: string): any => path.split('.').reduce((curr, key) => curr?.[key], obj);
+
+export const populateSvgTemplate = (svgString: string, userName: string, courseName: string, completionDate: string): string => {
+    const data = {
+        credentialSubject: { recipientName: userName, trainingName: courseName },
+        issuanceDate: completionDate
+    };
+
+    return svgString
+        .replace(/\{\{dateFormat\s+(\S+)\s+"([^"]+)"\}\}/g, (_, field, fmt) => {
+            const value = resolveValue(data, field);
+            return value ? formatDate(String(value), fmt) : '';
+        })
+        .replace(/\{\{([a-zA-Z_][\w.]*)\}\}/g, (_, path) => {
+            const value = resolveValue(data, path);
+            return value != null ? String(value) : '';
+        });
+};
+
 const appendGhostDiv = (id: string, width: number, height: number): HTMLDivElement => {
     const divElement = document.createElement('div');
     divElement.id = id;
@@ -23,39 +53,34 @@ const appendGhostDiv = (id: string, width: number, height: number): HTMLDivEleme
     return divElement;
 };
 
-const extractFileName = (template: string): string => {
-    if (template.trim().startsWith('<')) return 'certificate';
-    try {
-        const fileName = template.split('/').pop();
-        return fileName?.includes('.svg') ? fileName.split('.svg')[0] || 'certificate' : 'certificate';
-    } catch {
-        return 'certificate';
-    }
-};
+const DEFAULT_WIDTH = 1060;
+const DEFAULT_HEIGHT = 750;
+const DEFAULT_FILENAME = 'certificate';
+const DEFAULT_FORMAT = 'pdf';
+const DEFAULT_DELAY = 500;
+const PDF_SCALE_FACTOR = 1.33;
 
 export const convertSvgToOutput = async (
     input: string | HTMLElement,
     options?: ConverterOptions
 ): Promise<void> => {
     const config = {
-        width: options?.width ?? 1060,
-        height: options?.height ?? 750,
-        fileName: options?.fileName,
-        format: options?.format ?? 'pdf',
-        delay: options?.delay ?? 500
+        width: options?.width ?? DEFAULT_WIDTH,
+        height: options?.height ?? DEFAULT_HEIGHT,
+        fileName: options?.fileName ?? DEFAULT_FILENAME,
+        format: options?.format ?? DEFAULT_FORMAT,
+        delay: options?.delay ?? DEFAULT_DELAY
     };
 
     let element: HTMLElement;
     let isGhost = false;
+    let svgContent: string | null = null;
 
     if (typeof input === 'string') {
         let template = input.startsWith('data:image/svg+xml,')
             ? decodeURIComponent(input.replace(/data:image\/svg\+xml,/, '')).replace(/<!--\s*[a-zA-Z0-9-]*\s*-->/g, '')
             : input;
 
-        if (!config.fileName) config.fileName = extractFileName(input);
-
-        // Sanitize SVG to prevent XSS attacks
         template = DOMPurify.sanitize(template, {
             USE_PROFILES: { svg: true, svgFilters: true },
             ADD_TAGS: ['svg', 'path', 'rect', 'circle', 'text', 'g', 'defs', 'image', 'use'],
@@ -63,13 +88,12 @@ export const convertSvgToOutput = async (
             FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
         });
 
+        svgContent = template;
         element = appendGhostDiv('sbCertificateDownloadAsPdfCanvas' + Date.now(), config.width, config.height);
         element.innerHTML = template;
-
         isGhost = true;
     } else {
         element = input;
-        if (!config.fileName) config.fileName = 'certificate';
     }
 
     if (config.delay > 0) await new Promise(resolve => setTimeout(resolve, config.delay));
@@ -91,14 +115,55 @@ export const convertSvgToOutput = async (
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'pt',
-                format: [config.width / 1.33, config.height / 1.33]
+                format: [config.width / PDF_SCALE_FACTOR, config.height / PDF_SCALE_FACTOR]
             });
-            pdf.addImage(dataUrl, 'PNG', 0, 0, config.width / 1.33, config.height / 1.33);
+            pdf.addImage(dataUrl, 'PNG', 0, 0, config.width / PDF_SCALE_FACTOR, config.height / PDF_SCALE_FACTOR);
             pdf.save(`${config.fileName}.pdf`);
         }
     } catch (error) {
-        console.error('Error converting SVG:', error);
-        throw error;
+        console.error('Error converting SVG with html-to-image, trying direct SVG render:', error);
+
+        if (!svgContent) throw error;
+
+        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        try {
+            const img = new Image();
+            img.width = config.width;
+            img.height = config.height;
+
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to load SVG as image'));
+                img.src = url;
+            });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = config.width;
+            canvas.height = config.height;
+            const ctx = canvas.getContext('2d')!;
+            ctx.drawImage(img, 0, 0, config.width, config.height);
+
+            const dataUrl = canvas.toDataURL('image/png');
+
+            if (config.format === 'png') {
+                const link = document.createElement('a');
+                link.download = `${config.fileName}.png`;
+                link.href = dataUrl;
+                link.click();
+            } else {
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'pt',
+                    format: [config.width / PDF_SCALE_FACTOR, config.height / PDF_SCALE_FACTOR]
+                });
+                pdf.addImage(dataUrl, 'PNG', 0, 0, config.width / PDF_SCALE_FACTOR, config.height / PDF_SCALE_FACTOR);
+                pdf.save(`${config.fileName}.pdf`);
+            }
+        } finally {
+            URL.revokeObjectURL(url);
+        }
     } finally {
         if (isGhost) element.remove();
     }
