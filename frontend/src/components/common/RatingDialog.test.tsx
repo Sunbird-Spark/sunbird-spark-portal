@@ -140,9 +140,9 @@ describe('RatingDialog', () => {
 
     // ── Telemetry feedback ───────────────────────────────────────────────────
 
-    it('fires $t.feedback with rating and content metadata on submit', () => {
-        const contentMeta = { id: 'do_123', type: 'Resource', ver: '2' };
-        renderDialog({ onSubmit, contentMeta });
+    it('fires $t.feedback with rating and contentType from player metadata on submit', () => {
+        const playerMetadata = { identifier: 'do_123', contentType: 'Resource', pkgVersion: 2 };
+        renderDialog({ onSubmit, playerMetadata });
         fireEvent.click(screen.getByRole('button', { name: 'Rate 5 stars' }));
         fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
         expect(mockFeedback).toHaveBeenCalledWith(
@@ -150,25 +150,45 @@ describe('RatingDialog', () => {
         );
     });
 
-    it('uses default type "Content" and ver "1" when not provided', () => {
-        const contentMeta = { id: 'do_456' };
-        renderDialog({ onSubmit, contentMeta });
+    it('uses contentType for object type', () => {
+        const playerMetadata = { identifier: 'do_789', contentType: 'LearningResource', pkgVersion: 1 };
+        renderDialog({ onSubmit, playerMetadata });
         fireEvent.click(screen.getByRole('button', { name: 'Rate 3 stars' }));
         fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
         expect(mockFeedback).toHaveBeenCalledWith(
-            { edata: { rating: 3 }, object: { id: 'do_456', type: 'Content', ver: '1' } }
+            { edata: { rating: 3 }, object: { id: 'do_789', type: 'LearningResource', ver: '1' } }
         );
     });
 
-    it('does not call $t.feedback when contentMeta is not provided', () => {
+    it('uses undefined type and default ver "1.0" when contentType and pkgVersion are absent', () => {
+        const playerMetadata = { identifier: 'do_456' };
+        renderDialog({ onSubmit, playerMetadata });
+        fireEvent.click(screen.getByRole('button', { name: 'Rate 3 stars' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        expect(mockFeedback).toHaveBeenCalledWith(
+            { edata: { rating: 3 }, object: { id: 'do_456', type: undefined, ver: '1.0' } }
+        );
+    });
+
+    it('uses versionKey as fallback when pkgVersion is absent', () => {
+        const playerMetadata = { identifier: 'do_999', versionKey: '1.0.1' };
+        renderDialog({ onSubmit, playerMetadata });
+        fireEvent.click(screen.getByRole('button', { name: 'Rate 2 stars' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        expect(mockFeedback).toHaveBeenCalledWith(
+            { edata: { rating: 2 }, object: { id: 'do_999', type: undefined, ver: '1.0.1' } }
+        );
+    });
+
+    it('does not call $t.feedback when playerMetadata is not provided', () => {
         renderDialog({ onSubmit });
         fireEvent.click(screen.getByRole('button', { name: 'Rate 1 star' }));
         fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
         expect(mockFeedback).not.toHaveBeenCalled();
     });
 
-    it('does not call $t.feedback when contentMeta has no id', () => {
-        renderDialog({ onSubmit, contentMeta: { id: '' } });
+    it('does not call $t.feedback when playerMetadata has no identifier', () => {
+        renderDialog({ onSubmit, playerMetadata: { identifier: '' } });
         fireEvent.click(screen.getByRole('button', { name: 'Rate 2 stars' }));
         fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
         expect(mockFeedback).not.toHaveBeenCalled();

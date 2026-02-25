@@ -3,37 +3,39 @@ import { FiX, FiStar } from "react-icons/fi";
 import { $t } from "@project-sunbird/telemetry-sdk";
 import ratingPopupCheck from "@/assets/rating-popup-check.svg";
 
-interface ContentMeta {
-    id: string;
-    type?: string;
-    ver?: string;
+export interface PlayerMetadata {
+    identifier?: string;
+    objectType?: string;
+    contentType?: string;
+    primaryCategory?: string;
+    pkgVersion?: number | string;
+    versionKey?: string;
+    [key: string]: unknown;
 }
 
 interface RatingDialogProps {
     open: boolean;
     onClose: () => void;
     onSubmit?: (rating: number) => void;
-    contentMeta?: ContentMeta;
+    playerMetadata?: PlayerMetadata;
 }
 
-const RatingDialog = ({ open, onClose, onSubmit, contentMeta }: RatingDialogProps) => {
+const RatingDialog = ({ open, onClose, onSubmit, playerMetadata }: RatingDialogProps) => {
     const [rating, setRating] = useState(0);
     const [hovered, setHovered] = useState(0);
 
     if (!open) return null;
 
     const handleSubmit = () => {
-        if (contentMeta?.id) {
-            $t.feedback(
-                {
-                    edata: { rating },
-                    object: {
-                        id: contentMeta.id,
-                        type: contentMeta.type ?? "Content",
-                        ver: contentMeta.ver ?? "1",
-                    },
-                }
-            );
+        if (playerMetadata?.identifier) {
+            $t.feedback({
+                edata: { rating },
+                object: {
+                    id: playerMetadata.identifier,
+                    type: playerMetadata.contentType,
+                    ver: playerMetadata.pkgVersion?.toString() ?? playerMetadata.versionKey ?? "1.0",
+                },
+            });
         }
         onSubmit?.(rating);
         setRating(0);
