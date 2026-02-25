@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { convertSvgToOutput, populateSvgTemplate } from '@/utils/svg-converter';
+import { convertSvgToOutput } from '@/utils/svg-converter';
+import { populateSvgTemplate } from '@/utils/svg-template-populator';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { IssuedCertificate } from '@/types/TrackableCollections';
 import { toast } from '@/hooks/useToast';
