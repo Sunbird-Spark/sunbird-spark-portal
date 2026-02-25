@@ -57,7 +57,7 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/workspace" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'COURSE_MENTOR']}>
             <WorkspacePage />
           </ProtectedRoute>
         } />

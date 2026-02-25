@@ -47,6 +47,9 @@ const HomePage: React.FC = () => {
           >
             <option value="CONTENT_CREATOR">Content Creator</option>
             <option value="CONTENT_REVIEWER">Content Reviewer</option>
+            <option value="BOOK_CREATOR">Book Creator</option>
+            <option value="BOOK_REVIEWER">Book Reviewer</option>
+            <option value="COURSE_MENTOR">Course Mentor</option>
             <option value="GUEST">Guest</option>
           </select>
         </div>

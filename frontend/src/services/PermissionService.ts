@@ -1,19 +1,10 @@
 // frontend/src/services/PermissionService.ts
 import { Role } from '../auth/AuthContext';
 
-export type Feature =
-  | 'create_content'
-  | 'edit_content'
-  | 'delete_content'
-  | 'review_content'
-  | 'view_workspace';
+export type Feature = 'view_workspace';
 
 const FEATURE_PERMISSIONS: Record<Feature, Role[]> = {
-  create_content: ['CONTENT_CREATOR'],
-  edit_content: ['CONTENT_CREATOR'],
-  delete_content: ['CONTENT_CREATOR'],
-  review_content: ['CONTENT_REVIEWER'],
-  view_workspace: ['CONTENT_CREATOR', 'CONTENT_REVIEWER'],
+  view_workspace: ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'COURSE_MENTOR'],
 };
 
 class PermissionService {
@@ -44,7 +35,7 @@ class PermissionService {
 
   normalizeRoles(backendRoles: string[]): Role[] {
     const validRoles: Role[] = [];
-    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'GUEST'];
+    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'COURSE_MENTOR', 'GUEST'];
 
     for (const role of backendRoles) {
       if (role === 'PUBLIC' || role === 'ANONYMOUS') {

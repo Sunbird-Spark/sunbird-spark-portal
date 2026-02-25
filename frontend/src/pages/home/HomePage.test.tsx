@@ -63,9 +63,12 @@ describe('HomePage', () => {
     const select = screen.getByLabelText('Select Role:');
     const options = Array.from(select.querySelectorAll('option'));
 
-    expect(options).toHaveLength(3);
+    expect(options).toHaveLength(6);
     expect(options[0]).toHaveTextContent('Content Creator');
     expect(options[1]).toHaveTextContent('Content Reviewer');
-    expect(options[2]).toHaveTextContent('Guest');
+    expect(options[2]).toHaveTextContent('Book Creator');
+    expect(options[3]).toHaveTextContent('Book Reviewer');
+    expect(options[4]).toHaveTextContent('Course Mentor');
+    expect(options[5]).toHaveTextContent('Guest');
   });
 });
