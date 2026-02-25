@@ -1,4 +1,3 @@
-import React from "react";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
