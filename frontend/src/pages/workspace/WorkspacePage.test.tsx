@@ -358,6 +358,7 @@ describe('WorkspacePage', () => {
     expect(mockToast).toHaveBeenCalledWith({
       title: 'Deleted',
       description: 'Content has been removed successfully.',
+      variant: 'success',
     });
   });
 
