@@ -54,10 +54,21 @@ export const useCertificateDownload = () => {
             }
 
             // Step 3: Download fully-populated certificate from RC service
-            const certResponse = await certificateService.downloadCertificate(certId);
-            const svgContent = certResponse.data;
+            // Use native fetch for SVG content (http-client is JSON-only by default)
+            const downloadUrl = `/portal/rc/certificate/v1/download/${certId}`;
+            const response = await fetch(downloadUrl, {
+                headers: {
+                    'Accept': 'image/svg+xml'
+                }
+            });
 
-            if (!svgContent) {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch certificate: ${response.statusText}`);
+            }
+
+            const svgContent = await response.text();
+
+            if (!svgContent || svgContent.trim().length === 0) {
                 throw new Error('Empty certificate received from server.');
             }
 
