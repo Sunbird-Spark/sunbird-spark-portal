@@ -1,4 +1,5 @@
 import { NewTemplateForm } from "./types";
+import { certificateService, AddTemplateRequest } from "@/services/CertificateService";
 
 export type Signatory = { name: string; designation: string; id: string; image: string };
 
@@ -66,7 +67,9 @@ export function buildCreateAssetRequest(newTmpl: NewTemplateForm, rootOrgId: str
   };
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function applyOptimisticBatchCertUpdate(oldBatches: any[] | undefined, batchId: string, selectedTemplateId: string, selectedTemplate: any) {
+/* eslint-enable @typescript-eslint/no-explicit-any */
   if (!oldBatches) return oldBatches;
   return oldBatches.map((b) => {
     if (b.id === batchId) {
@@ -83,4 +86,146 @@ export function applyOptimisticBatchCertUpdate(oldBatches: any[] | undefined, ba
     }
     return b;
   });
+}
+
+export async function getBase64Image(url: string): Promise<string> {
+  if (url.startsWith("data:")) return url;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return url;
+    const blob = await r.blob();
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(url);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return url;
+  }
+}
+
+export async function generateModifiedSvg(svgText: string, newTmpl: NewTemplateForm): Promise<string> {
+  let modifiedSvg = svgText;
+
+  if (newTmpl.certTitle) {
+    modifiedSvg = modifiedSvg.replace(
+      /(<text[^>]+id=['"]certTitle['"][^>]*>)[^<]*(<\/text>)/,
+      `$1${newTmpl.certTitle}$2`
+    );
+  }
+
+  if (newTmpl.name) {
+    modifiedSvg = modifiedSvg.replace(
+      /(<text[^>]+id=['"]stateTitle['"][^>]*>)[^<]*(<\/text>)/,
+      `$1${newTmpl.name}$2`
+    );
+  }
+
+  if (newTmpl.logo1?.preview) {
+    const logo1B64 = await getBase64Image(newTmpl.logo1.preview);
+    modifiedSvg = modifiedSvg.replace(
+      /(<image[^>]+id=['"]stateLogo1['"][^>]+xlink:href=['"])([^'"]+)(['"])/,
+      `$1${logo1B64}$3`
+    );
+  }
+
+  if (newTmpl.logo2?.preview) {
+    const logo2B64 = await getBase64Image(newTmpl.logo2.preview);
+    modifiedSvg = modifiedSvg.replace(
+      /(<image[^>]+id=['"]stateLogo2['"][^>]+xlink:href=['"])([^'"]+)(['"])/,
+      `$1${logo2B64}$3`
+    );
+  }
+
+  if (newTmpl.sig1?.preview) {
+    const sig1B64 = await getBase64Image(newTmpl.sig1.preview);
+    modifiedSvg = modifiedSvg.replace(
+      /(<image[^>]+id=['"]signatureImg1['"][^>]+xlink:href=['"])([^'"]+)(['"])/,
+      `$1${sig1B64}$3`
+    );
+  }
+
+  if (newTmpl.sig1Designation || newTmpl.name) {
+    const sigNames = [newTmpl.name, newTmpl.sig1Designation].filter(Boolean).join(", ");
+    modifiedSvg = modifiedSvg.replace(
+      /(<text[^>]+id=['"]signatureTitle1['"][^>]*>)[^<]*(<\/text>)/,
+      `$1${sigNames}$2`
+    );
+  }
+
+  return modifiedSvg;
+}
+
+export async function fetchTemplateDetails(selectedTemplateId: string, defaultPreviewUrl: string, defaultIssuer: unknown) {
+  let fullSignatoryList: Signatory[] | undefined;
+  let fullPreviewUrl = defaultPreviewUrl;
+  let fullIssuer = defaultIssuer;
+  try {
+    const readResp = await certificateService.readCertTemplate(selectedTemplateId);
+    const content = readResp.data?.content;
+    if (content) {
+      if (Array.isArray(content.signatoryList) && content.signatoryList.length > 0) {
+        fullSignatoryList = content.signatoryList.map((s: Record<string, unknown>) => ({
+          name: (s.name as string) ?? "",
+          designation: (s.designation as string) ?? "",
+          id: (s.id as string) ?? `${s.name}/${s.name}`,
+          image: (s.image as string) ?? "",
+        }));
+      }
+      if (content.artifactUrl) fullPreviewUrl = content.artifactUrl;
+      if (content.issuer) fullIssuer = content.issuer;
+    }
+  } catch {
+    // Fall through
+  }
+  return { fullSignatoryList, fullPreviewUrl, fullIssuer };
+}
+
+export function buildAddTemplateRequestPayload(
+  courseId: string,
+  batchId: string,
+  selectedTemplateId: string,
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  selectedTemplate: any,
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+  issueTo: string,
+  rootOrgId: string,
+  enableScoreRule: boolean,
+  scoreRuleValue: string,
+  fullSignatoryList: Signatory[] | undefined,
+  lastBuiltSignatoryList: Signatory[],
+  fullPreviewUrl: string,
+  fullIssuer: unknown
+): AddTemplateRequest {
+  const criteria: {
+    enrollment: { status: number };
+    user?: { rootOrgId: string };
+    assessment?: { score: { ">=": number } };
+  } = {
+    enrollment: { status: 2 },
+  };
+  if (issueTo === "org") {
+    criteria.user = { rootOrgId };
+  }
+  if (enableScoreRule) {
+    criteria.assessment = { score: { ">=": Number(scoreRuleValue) || 90 } };
+  }
+
+  const signatoryList = resolveSignatoryList(fullSignatoryList, lastBuiltSignatoryList);
+
+  return {
+    batch: {
+      courseId,
+      batchId,
+      template: {
+        identifier: selectedTemplateId,
+        criteria,
+        name: selectedTemplate.name,
+        issuer: (fullIssuer as { name: string; url: string; }) ?? { name: rootOrgId, url: window.location.origin },
+        previewUrl: fullPreviewUrl,
+        signatoryList,
+      },
+    },
+  };
 }
