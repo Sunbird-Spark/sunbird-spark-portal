@@ -8,6 +8,7 @@ import FAQSection from "@/components/landing/FAQSection";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
+import { useUserRead } from "@/hooks/useUserRead";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
@@ -16,7 +17,7 @@ import { useIsContentCreator } from "@/hooks/useUser";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import RelatedContentSection from "@/components/collection/RelatedContentSection";
 import CollectionContentArea from "@/components/collection/CollectionContentArea";
-import CertificatePreviewModal from "@/components/collection/CertificatePreviewModal";
+import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
 import "./collection.css";
@@ -32,6 +33,8 @@ const CollectionDetailPage = () => {
 
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const collectionData = collectionDataFromApi ?? null;
+  const { data: userReadData } = useUserRead();
+  const userProfile = userReadData?.data?.response;
   const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
   const { isEnrolledInCurrentBatch, contentStatusMap, courseProgressProps, batches, batchListLoading, batchListError,
     firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse, effectiveBatchId, isBatchEnded } = enrollment;
@@ -44,6 +47,8 @@ const CollectionDetailPage = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
+  /** Content creators get access without batch and no progress (own or others' collection); BatchCard only when viewing own. */
+  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
 
   const [, setAuthRefresh] = useState(0);
   const triedAuthRefreshRef = useRef(false);
@@ -57,10 +62,10 @@ const CollectionDetailPage = () => {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!collectionId || hasBatchInRoute || isCreatorViewingOwnCollection) return;
+    if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
     const batchId = enrollment.enrollmentForCollection?.batchId;
     if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true });
-  }, [collectionId, hasBatchInRoute, isCreatorViewingOwnCollection, enrollment.enrollmentForCollection?.batchId, navigate]);
+  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const contentBlocked = isTrackable && !isAuthenticated;
@@ -100,7 +105,7 @@ const CollectionDetailPage = () => {
     isBatchEnded,
     mimeType: playerMetadata?.mimeType,
     currentContentStatus,
-    skipContentStateUpdate: isCreatorViewingOwnCollection,
+    skipContentStateUpdate: contentCreatorPrivilege,
   });
 
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
@@ -113,14 +118,14 @@ const CollectionDetailPage = () => {
     if (!firstLesson) return;
     const mime = (firstLesson.mimeType ?? '').toLowerCase();
     if (mime === 'application/vnd.ekstep.content-collection') return;
-    if (!isTrackable || isCreatorViewingOwnCollection) {
+    if (!isTrackable || contentCreatorPrivilege) {
       navigate(`/collection/${collectionId}/content/${firstLesson.id}`, { replace: true });
       return;
     }
     if (hasBatchInRoute && batchIdParam) {
       navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstLesson.id}`, { replace: true });
     }
-  }, [contentId, collectionData, collectionId, navigate, isTrackable, isCreatorViewingOwnCollection, hasBatchInRoute, batchIdParam]);
+  }, [contentId, collectionData, collectionId, navigate, isTrackable, contentCreatorPrivilege, hasBatchInRoute, batchIdParam]);
 
   useEffect(() => {
     const firstId = collectionData?.modules?.[0]?.id;
@@ -143,6 +148,13 @@ const CollectionDetailPage = () => {
       prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
     );
   };
+
+  const certificatePreviewDetails: CertificatePreviewDetails = useMemo(() => {
+    const recipientName = userProfile
+      ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined
+      : undefined;
+    return { recipientName };
+  }, [userProfile?.firstName, userProfile?.lastName]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -214,6 +226,7 @@ const CollectionDetailPage = () => {
               setCertificatePreviewUrl={setCertificatePreviewUrl}
               setCertificatePreviewOpen={setCertificatePreviewOpen}
               isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
+              contentCreatorPrivilege={contentCreatorPrivilege}
             />
 
             {/* Related Content Section */}
@@ -236,6 +249,7 @@ const CollectionDetailPage = () => {
         open={certificatePreviewOpen}
         onClose={() => setCertificatePreviewOpen(false)}
         previewUrl={certificatePreviewUrl}
+        details={certificatePreviewDetails}
       />
       <Footer />
     </div>
