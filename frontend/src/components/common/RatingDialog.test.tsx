@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import RatingDialog from './RatingDialog';
+import React from 'react';
 
 const { mockFeedback } = vi.hoisted(() => ({ mockFeedback: vi.fn() }));
 
