@@ -33,7 +33,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
 describe('CollectionContentArea', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const defaultProps: any = {
-    collectionData: { title: 'Test Collection', lessons: 5, modules: [] },
+    collectionData: { title: 'Test Collection', lessons: 5, children: [], hierarchyRoot: { identifier: 'test', children: [] } },
     contentId: undefined,
     isTrackable: false,
     contentBlocked: false,
@@ -116,11 +116,12 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
   });
 
-  it('renders CourseProgressCard when trackable, not blocked, enrolled, and within a batch route', () => {
+  it('renders CourseProgressCard when trackable, authenticated, not blocked, enrolled, and within a batch route', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
         isTrackable={true}
+        isAuthenticated={true}
         contentBlocked={false}
         hasBatchInRoute={true}
         isEnrolledInCurrentBatch={true}
@@ -133,11 +134,12 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
   });
 
-  it('renders AvailableBatchesCard when trackable, not blocked, and NOT in batch route', () => {
+  it('renders AvailableBatchesCard when trackable, authenticated, not blocked, and NOT in batch route', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
         isTrackable={true}
+        isAuthenticated={true}
         contentBlocked={false}
         hasBatchInRoute={false}
       />
@@ -183,6 +185,7 @@ describe('CollectionContentArea', () => {
         <CollectionContentArea
           {...defaultProps}
           isTrackable={true}
+          isAuthenticated={true}
           contentBlocked={false}
           hasBatchInRoute={false}
           contentCreatorPrivilege={false}

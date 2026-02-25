@@ -8,21 +8,27 @@ const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm tex
 interface CertificateRulesPanelProps {
   issueTo: IssueTo;
   setIssueTo: (val: IssueTo) => void;
-  progressRule: string;
-  setProgressRule: (val: string) => void;
   issueToAccepted: boolean;
   setIssueToAccepted: (val: boolean) => void;
   selectedTemplate: any;
+  showScoreRuleComponent: boolean;
+  enableScoreRule: boolean;
+  setEnableScoreRule: (val: boolean) => void;
+  scoreRuleValue: string;
+  setScoreRuleValue: (val: string) => void;
 }
 
 export function CertificateRulesPanel({
   issueTo,
   setIssueTo,
-  progressRule,
-  setProgressRule,
   issueToAccepted,
   setIssueToAccepted,
   selectedTemplate,
+  showScoreRuleComponent,
+  enableScoreRule,
+  setEnableScoreRule,
+  scoreRuleValue,
+  setScoreRuleValue,
 }: CertificateRulesPanelProps) {
   return (
     <div className="flex-1 border-r border-border p-6 space-y-5 overflow-y-auto">
@@ -57,11 +63,65 @@ export function CertificateRulesPanel({
           type="number"
           min={1}
           max={100}
-          className={inputClass}
-          value={progressRule}
-          onChange={(e) => setProgressRule(e.target.value)}
+          className={`${inputClass} bg-gray-100 cursor-not-allowed text-muted-foreground`}
+          value="100"
+          disabled
+          aria-readonly="true"
         />
       </div>
+
+      {showScoreRuleComponent && !enableScoreRule && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setEnableScoreRule(true)}
+            className="flex items-center gap-1 text-sm font-medium text-sunbird-brick hover:underline font-['Rubik']"
+          >
+            + Add Score Rule Condition
+          </button>
+        </div>
+      )}
+
+      {enableScoreRule && (
+        <div className="rounded-xl border border-border bg-white overflow-hidden">
+          <div className="px-4 py-2 border-b border-border bg-gray-50 flex justify-between items-center">
+            <span className="text-xs font-semibold text-sunbird-obsidian font-['Rubik'] uppercase tracking-wide">
+              Score Rule
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setEnableScoreRule(false);
+                setScoreRuleValue("90");
+              }}
+              className="text-muted-foreground hover:text-foreground p-1 transition-colors"
+              aria-label="Remove Score Rule"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+          <div className="px-4 py-4 flex items-center gap-3">
+            <label htmlFor="scoreRuleValue" className="text-sm font-medium text-sunbird-obsidian font-['Rubik'] whitespace-nowrap">
+              Best Attempted Score
+            </label>
+            <span className="text-lg font-medium text-sunbird-obsidian font-['Rubik']">{">="}</span>
+            <div className="relative w-32">
+              <input
+                id="scoreRuleValue"
+                type="number"
+                min={1}
+                max={100}
+                className={cn(inputClass, "pr-8 text-right")}
+                value={scoreRuleValue}
+                onChange={(e) => setScoreRuleValue(e.target.value)}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-['Rubik'] pointer-events-none">
+                %
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div>
         <label className={cn(labelClass, "flex items-center gap-1")}>

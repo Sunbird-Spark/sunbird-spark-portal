@@ -1,18 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCertificateModalState } from './useCertificateModalState';
+import { CollectionService } from '@/services/collection/CollectionService';
 
-/* ── Hoist mocks so they're available in vi.mock factories ── */
-const { mockCreateAsset, mockUploadAsset, mockReadCertTemplate, mockAddTemplateToBatch } = vi.hoisted(() => ({
+const { mockCreateAsset, mockUploadAsset, mockReadCertTemplate, mockAddTemplateToBatch, mockRemoveTemplateFromBatch, mockGetHierarchy } = vi.hoisted(() => ({
   mockCreateAsset: vi.fn(),
   mockUploadAsset: vi.fn().mockResolvedValue({ data: { artifactUrl: 'https://cdn.example.com/cert.svg' }, status: 200, headers: {} }),
   mockReadCertTemplate: vi.fn(),
   mockAddTemplateToBatch: vi.fn(),
+  mockRemoveTemplateFromBatch: vi.fn(),
+  mockGetHierarchy: vi.fn(),
 }));
 
-const { mockInvalidateQueries, mockRefetchQueries } = vi.hoisted(() => ({
+const { mockInvalidateQueries, mockRefetchQueries, mockSetQueryData } = vi.hoisted(() => ({
   mockInvalidateQueries: vi.fn().mockResolvedValue(undefined),
   mockRefetchQueries: vi.fn().mockResolvedValue(undefined),
+  mockSetQueryData: vi.fn(),
+}));
+
+const { mockUseCertTemplates } = vi.hoisted(() => ({
+  mockUseCertTemplates: vi.fn().mockReturnValue({ data: [], isLoading: false }),
 }));
 
 /* ── Mock @tanstack/react-query ── */
@@ -20,13 +27,14 @@ vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
     invalidateQueries: mockInvalidateQueries,
     refetchQueries: mockRefetchQueries,
+    setQueryData: mockSetQueryData,
   }),
   useQuery: vi.fn().mockReturnValue({ data: [], isLoading: false }),
 }));
 
 /* ── Mock useCertificate ── */
 vi.mock('@/hooks/useCertificate', () => ({
-  useCertTemplates: () => ({ data: [], isLoading: false }),
+  useCertTemplates: mockUseCertTemplates,
 }));
 
 /* ── Mock certificateService ── */
@@ -36,6 +44,7 @@ vi.mock('@/services/CertificateService', () => ({
     uploadAsset: mockUploadAsset,
     readCertTemplate: mockReadCertTemplate,
     addTemplateToBatch: mockAddTemplateToBatch,
+    removeTemplateFromBatch: mockRemoveTemplateFromBatch,
   },
 }));
 
@@ -58,13 +67,16 @@ vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
   text: () => Promise.resolve('<svg/>'),
 }));
 
+
 describe('useCertificateModalState', () => {
   const onOpenChange = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
     mockInvalidateQueries.mockResolvedValue(undefined);
     mockUploadAsset.mockResolvedValue({ data: { artifactUrl: 'https://cdn.example.com/cert.svg' }, status: 200, headers: {} });
+    mockGetHierarchy.mockResolvedValue({ data: { content: {} } });
   });
 
   function renderModalState(existingCertTemplates = {}) {
@@ -79,7 +91,6 @@ describe('useCertificateModalState', () => {
     expect(result.current.view).toBe('main');
     expect(result.current.issueTo).toBe('all');
     expect(result.current.issueToAccepted).toBe(false);
-    expect(result.current.progressRule).toBe('100');
     expect(result.current.selectedTemplateId).toBeNull();
     expect(result.current.step).toBe('idle');
     expect(result.current.hasExistingCert).toBe(false);
@@ -92,6 +103,36 @@ describe('useCertificateModalState', () => {
     expect(result.current.certTab).toBe('current');
   });
 
+  it('sets initialIssueTo to org if criteria has rootOrgId', () => {
+    const { result } = renderModalState({ 'tmpl-1': { criteria: { user: { rootOrgId: 'org-id' } } } });
+    expect(result.current.issueTo).toBe('org');
+  });
+
+  it('sets initialScoreRuleValue if criteria has assessment score', () => {
+    const { result } = renderModalState({ 'tmpl-1': { criteria: { assessment: { score: { '>=': 80 } } } } });
+    expect(result.current.enableScoreRule).toBe(true);
+    expect(result.current.scoreRuleValue).toBe('80');
+  });
+
+  /* ── useEffect (checkHierarchy) ── */
+  it('sets showScoreRuleComponent to true if hierarchy has SelfAssess=1', async () => {
+    const spy = vi.spyOn(CollectionService.prototype, 'getHierarchy').mockResolvedValueOnce({
+      data: { content: { contentTypesCount: JSON.stringify({ "SelfAssess": 1 }) } }
+    } as any);
+
+    const { result } = renderModalState();
+    
+    expect(spy).toHaveBeenCalledWith('course-1');
+
+    // We need to wait for the effect to complete
+    await waitFor(() => {
+      expect(result.current.showScoreRuleComponent).toBe(true);
+    });
+    
+    spy.mockRestore();
+  });
+
+
   /* ── setters ── */
   it('setIssueTo updates issueTo state', () => {
     const { result } = renderModalState();
@@ -99,14 +140,6 @@ describe('useCertificateModalState', () => {
       result.current.setIssueTo('org');
     });
     expect(result.current.issueTo).toBe('org');
-  });
-
-  it('setProgressRule updates progressRule state', () => {
-    const { result } = renderModalState();
-    act(() => {
-      result.current.setProgressRule('80');
-    });
-    expect(result.current.progressRule).toBe('80');
   });
 
   it('setIssueToAccepted updates issueToAccepted state', () => {
@@ -217,12 +250,26 @@ describe('useCertificateModalState', () => {
   });
 
   /* ── handleClose ── */
-  it('handleClose calls onOpenChange with false', () => {
+  it('handleClose calls onOpenChange with false and resets state after timeout', () => {
+    vi.useFakeTimers();
     const { result } = renderModalState();
     act(() => {
+      result.current.setIssueTo('org');
+      result.current.setStep('error');
       result.current.handleClose();
     });
     expect(onOpenChange).toHaveBeenCalledWith(false);
+    
+    // State should not be reset immediately
+    expect(result.current.issueTo).toBe('org');
+    
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    
+    // State should be reset
+    expect(result.current.issueTo).toBe('all');
+    expect(result.current.step).toBe('idle');
   });
 
   /* ── handleRefreshTemplates ── */
@@ -264,6 +311,62 @@ describe('useCertificateModalState', () => {
     // certTemplates is empty from mock, so selectedTemplate is null → early return
     expect(result.current.step).toBe('idle');
   });
+
+  it('handleAddCertificate successfully attaches and removes old cert if present', async () => {
+    // We need an existing cert and a selected cert
+    vi.useFakeTimers();
+    mockAddTemplateToBatch.mockResolvedValue({ status: 200 });
+    mockRemoveTemplateFromBatch.mockResolvedValue({ status: 200 });
+
+    // Ensure useCertTemplates returns a template that matches our selection
+    mockUseCertTemplates.mockReturnValue({ data: [{ identifier: 'tmpl-2', name: 'New Cert' }], isLoading: false });
+
+    const { result } = renderModalState({ 'tmpl-1': { identifier: 'tmpl-1', name: 'Old Cert' } });
+    
+    act(() => {
+      result.current.setSelectedTemplateId('tmpl-2');
+    });
+
+    await act(async () => {
+      await result.current.handleAddCertificate();
+    });
+
+    expect(mockRemoveTemplateFromBatch).toHaveBeenCalledTimes(1);
+    expect(mockAddTemplateToBatch).toHaveBeenCalledTimes(1);
+    expect(mockSetQueryData).toHaveBeenCalledTimes(1);
+    expect(result.current.step).toBe('done');
+
+    // Fast-forward to index invalidation
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ["batchList", "course-1"] });
+    
+    // Revert the mock
+    mockUseCertTemplates.mockReturnValue({ data: [], isLoading: false });
+  });
+
+  it('handleAddCertificate handles failures in attaching', async () => {
+    mockAddTemplateToBatch.mockRejectedValue(new Error('Add failed'));
+
+    mockUseCertTemplates.mockReturnValue({ data: [{ identifier: 'tmpl-new', name: 'New Cert' }], isLoading: false });
+
+    const { result } = renderModalState();
+    
+    act(() => {
+      result.current.setSelectedTemplateId('tmpl-new');
+    });
+
+    await act(async () => {
+      await result.current.handleAddCertificate();
+    });
+
+    expect(result.current.step).toBe('error');
+    expect(result.current.errorMsg).toBe('Add failed');
+
+    mockUseCertTemplates.mockReturnValue({ data: [], isLoading: false });
+  });
+
 
   /* ── handleSaveNewTemplate ── */
   it('handleSaveNewTemplate calls createAsset and sets templateCreated on success', async () => {

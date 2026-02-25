@@ -86,7 +86,7 @@ const CollectionOverview = ({
                 <path d="M2 6H14" stroke="currentColor" strokeWidth="1.5" />
               </svg>
               <span className="collection-stat-value">
-                {collectionData.modules?.length ?? 0}
+                {collectionData.children?.length ?? 0}
               </span>
               {t("courseDetails.units")}
             </span>

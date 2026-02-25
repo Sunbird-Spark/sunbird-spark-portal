@@ -15,17 +15,34 @@ const mockCollectionData = {
   units: 2,
   description: 'Test description',
   audience: ['Student'],
-  modules: [
+  children: [
     {
-      id: 'mod-1',
-      title: 'Module 1',
-      subtitle: 'Subtitle',
-      lessons: [
-        { id: 'l1', title: 'Lesson 1', duration: '5:00', type: 'video' as const, mimeType: 'video/mp4' },
-        { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document' as const, mimeType: 'application/pdf' },
+      identifier: 'mod-1',
+      name: 'Module 1',
+      primaryCategory: 'Subtitle',
+      mimeType: 'application/vnd.ekstep.content-collection',
+      children: [
+        { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+        { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
       ],
     },
   ],
+  hierarchyRoot: {
+    identifier: 'col-1',
+    mimeType: 'application/vnd.ekstep.content-collection',
+    children: [
+      {
+        identifier: 'mod-1',
+        name: 'Module 1',
+        primaryCategory: 'Subtitle',
+        mimeType: 'application/vnd.ekstep.content-collection',
+        children: [
+          { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+          { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
+        ],
+      },
+    ],
+  },
 };
 
 const mockUseCollection = vi.fn();
@@ -106,28 +123,10 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 vi.mock('@/components/collection/CollectionOverview', () => ({
-  default: ({
-    collectionData,
-    contentId,
-    contentAccessBlocked,
-    playerIsLoading,
-    playerError,
-  }: {
-    collectionData: { title: string };
-    contentId?: string;
-    contentAccessBlocked?: boolean;
-    playerIsLoading?: boolean;
-    playerError?: Error | null;
+  default: ({ collectionData, contentId, contentAccessBlocked, playerIsLoading, playerError }: {
+    collectionData: { title: string }; contentId?: string; contentAccessBlocked?: boolean; playerIsLoading?: boolean; playerError?: Error | null;
   }) => (
-    <div
-      data-testid="collection-overview"
-      data-content-id={contentId ?? ''}
-      data-content-access-blocked={String(!!contentAccessBlocked)}
-      data-player-loading={String(!!playerIsLoading)}
-      data-player-error={playerError?.message ?? ''}
-    >
-      {collectionData.title}
-    </div>
+    <div data-testid="collection-overview" data-content-id={contentId ?? ''} data-content-access-blocked={String(!!contentAccessBlocked)} data-player-loading={String(!!playerIsLoading)} data-player-error={playerError?.message ?? ''}>{collectionData.title}</div>
   ),
 }));
 vi.mock('@/auth/AuthContext', () => ({
@@ -148,23 +147,8 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   },
 }));
 vi.mock('@/components/collection/CollectionSidebar', () => ({
-  default: ({
-    collectionId,
-    contentBlocked,
-    activeLessonId,
-  }: {
-    collectionId: string;
-    contentBlocked?: boolean;
-    activeLessonId?: string;
-  }) => (
-    <aside
-      data-testid="collection-sidebar"
-      data-content-blocked={String(!!contentBlocked)}
-      data-collection-id={collectionId}
-      data-active-lesson-id={activeLessonId ?? ''}
-    >
-      Sidebar
-    </aside>
+  default: ({ collectionId, contentBlocked, activeContentId }: { collectionId: string; contentBlocked?: boolean; activeContentId?: string | null }) => (
+    <aside data-testid="collection-sidebar" data-content-blocked={String(!!contentBlocked)} data-collection-id={collectionId} data-active-lesson-id={activeContentId ?? ''}>Sidebar</aside>
   ),
 }));
 vi.mock('@/components/landing/FAQSection', () => ({ default: () => <section data-testid="faq">FAQ</section> }));
@@ -243,7 +227,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-loading', 'true');
   });
 
-  it('passes collectionId and activeLessonId to CollectionSidebar', () => {
+  it('passes collectionId and activeContentId to CollectionSidebar', () => {
     renderWithProviders(<CollectionDetailPage />);
     const sidebar = screen.getByTestId('collection-sidebar');
     expect(sidebar).toHaveAttribute('data-collection-id', 'col-123');
@@ -313,78 +297,39 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       );
     });
 
-    it('does not auto-navigate when first lesson is a nested collection', () => {
+    it('does not auto-navigate when first content is a nested collection', () => {
       mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
+      const nestedRoot = { identifier: 'col-1', mimeType: 'application/vnd.ekstep.content-collection' as const, children: [{ identifier: 'mod-1', mimeType: 'application/vnd.ekstep.content-collection' as const, children: [{ identifier: 'nested-col', mimeType: 'application/vnd.ekstep.content-collection' as const }] }] };
       mockUseCollection.mockReturnValue({
-        data: {
-          ...mockCollectionData,
-          modules: [{
-            id: 'mod-1',
-            title: 'Module 1',
-            subtitle: 'Subtitle',
-            lessons: [{ id: 'nested-col', title: 'Sub Course', duration: '—', type: 'document' as const, mimeType: 'application/vnd.ekstep.content-collection' }],
-          }],
-        },
+        data: { ...mockCollectionData, children: [{ identifier: 'mod-1', name: 'Module 1', mimeType: 'application/vnd.ekstep.content-collection', children: [{ identifier: 'nested-col', name: 'Sub Course', mimeType: 'application/vnd.ekstep.content-collection' }] }], hierarchyRoot: nestedRoot },
         isLoading: false,
       });
       renderWithProviders(<CollectionDetailPage />);
-      expect(mockNavigate).not.toHaveBeenCalledWith(
-        expect.stringContaining('/content/'),
-        expect.anything()
-      );
+      expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/content/'), expect.anything());
     });
 
-    it('does not auto-navigate when collection has no modules', () => {
+    it('does not auto-navigate when collection has no children', () => {
       mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-      mockUseCollection.mockReturnValue({
-        data: {
-          ...mockCollectionData,
-          modules: [],
-        },
-        isLoading: false,
-      });
+      const emptyRoot = { identifier: 'col-1', mimeType: 'application/vnd.ekstep.content-collection' as const, children: [] };
+      mockUseCollection.mockReturnValue({ data: { ...mockCollectionData, children: [], hierarchyRoot: emptyRoot }, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
-      expect(mockNavigate).not.toHaveBeenCalledWith(
-        expect.stringContaining('/content/'),
-        expect.anything()
-      );
+      expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/content/'), expect.anything());
     });
 
-    it('does not auto-navigate when first module has no lessons', () => {
+    it('does not auto-navigate when first unit has no leaf content', () => {
       mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-      mockUseCollection.mockReturnValue({
-        data: {
-          ...mockCollectionData,
-          modules: [{
-            id: 'mod-1',
-            title: 'Module 1',
-            subtitle: 'Subtitle',
-            lessons: [],
-          }],
-        },
-        isLoading: false,
-      });
+      const unitNoLeaf = { identifier: 'mod-1', name: 'Module 1', mimeType: 'application/vnd.ekstep.content-collection' as const, children: [] };
+      const rootNoLeaf = { identifier: 'col-1', mimeType: 'application/vnd.ekstep.content-collection' as const, children: [{ ...unitNoLeaf }] };
+      mockUseCollection.mockReturnValue({ data: { ...mockCollectionData, children: [unitNoLeaf], hierarchyRoot: rootNoLeaf }, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
-      expect(mockNavigate).not.toHaveBeenCalledWith(
-        expect.stringContaining('/content/'),
-        expect.anything()
-      );
+      expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/content/'), expect.anything());
     });
 
-    it('does not auto-navigate when modules is undefined', () => {
+    it('does not auto-navigate when hierarchyRoot has no leaf content', () => {
       mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
-      mockUseCollection.mockReturnValue({
-        data: {
-          ...mockCollectionData,
-          modules: undefined,
-        },
-        isLoading: false,
-      });
+      mockUseCollection.mockReturnValue({ data: { ...mockCollectionData, children: undefined, hierarchyRoot: { identifier: 'col-1', mimeType: 'application/vnd.ekstep.content-collection' } }, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
-      expect(mockNavigate).not.toHaveBeenCalledWith(
-        expect.stringContaining('/content/'),
-        expect.anything()
-      );
+      expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/content/'), expect.anything());
     });
   });
 
@@ -412,7 +357,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       });
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.queryByTestId('login-to-unlock-card')).not.toBeInTheDocument();
-      expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'false');
+      expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
     });
 
     it('does not show LoginToUnlockCard when collection is not trackable', () => {
@@ -443,20 +388,13 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     });
 
     it('shows LoginToUnlockCard when trackable.enabled is "YES" (uppercase) and user not authenticated', () => {
-      mockUseCollection.mockReturnValue({
-        data: { ...mockCollectionData, trackable: { enabled: 'YES' as const } },
-        isLoading: false,
-      });
+      mockUseCollection.mockReturnValue({ data: { ...mockCollectionData, trackable: { enabled: 'YES' as const } }, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
       expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
     });
-
     it('shows LoginToUnlockCard when trackable.enabled is "yes" (lowercase) and user not authenticated', () => {
-      mockUseCollection.mockReturnValue({
-        data: { ...mockCollectionData, trackable: { enabled: 'yes' as const } },
-        isLoading: false,
-      });
+      mockUseCollection.mockReturnValue({ data: { ...mockCollectionData, trackable: { enabled: 'yes' as const } }, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('login-to-unlock-card')).toBeInTheDocument();
       expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');

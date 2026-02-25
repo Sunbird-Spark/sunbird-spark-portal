@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, beforeEach, it, expect, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AppRoutes from "./AppRoutes";
 
 // --------------------
@@ -27,17 +28,60 @@ vi.mock("./auth/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+// --------------------
+// Mock userAuthInfoService
+// --------------------
+vi.mock("./services/userAuthInfoService/userAuthInfoService", () => {
+  const isUserAuthenticated = vi.fn();
+  return {
+    default: {
+      isUserAuthenticated,
+      getUserId: vi.fn().mockReturnValue("test-uid"),
+      getAuthInfo: vi.fn().mockResolvedValue({ uid: "test-uid" }),
+    },
+    __isUserAuthenticated: isUserAuthenticated,
+  };
+});
+
+// --------------------
+// Mock UserService — expose getUserRoles so tests control the response
+// --------------------
+vi.mock("./services/UserService", () => {
+  const getUserRoles = vi.fn();
+  return {
+    UserService: class {
+      getUserRoles = getUserRoles;
+    },
+    __getUserRoles: getUserRoles,
+  };
+});
+
+import * as UserAuthInfoServiceModule from "./services/userAuthInfoService/userAuthInfoService";
+import * as UserServiceModule from "./services/UserService";
+
+const mockIsUserAuthenticated = (UserAuthInfoServiceModule as any).__isUserAuthenticated;
+const mockGetUserRoles = (UserServiceModule as any).__getUserRoles;
+
+
+const createQueryClient = () =>
+  new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
 function renderWithRoute(route: string) {
   return render(
-    <MemoryRouter initialEntries={[route]}>
-      <AppRoutes />
-    </MemoryRouter>
+    <QueryClientProvider client={createQueryClient()}>
+      <MemoryRouter initialEntries={[route]}>
+        <AppRoutes />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 
 describe("AppRoutes (RBAC routing tests)", () => {
   beforeEach(() => {
     mockUseAuth.mockReset();
+    mockIsUserAuthenticated.mockReturnValue(false);
+    // Default: no roles
+    mockGetUserRoles.mockResolvedValue({ data: { response: { roles: [] } }, status: 200, headers: {} });
   });
 
   it("public route: /home renders HomePage", () => {
@@ -128,7 +172,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
   });
 
-  it("protected: unauthenticated user visiting /admin redirects to /home", () => {
+  it("protected: unauthenticated user visiting /admin redirects to /home", async () => {
     mockUseAuth.mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -137,12 +181,16 @@ describe("AppRoutes (RBAC routing tests)", () => {
       logout: vi.fn(),
       refetchUser: vi.fn(),
     });
+    mockIsUserAuthenticated.mockReturnValue(false);
 
     renderWithRoute("/admin");
-    expect(screen.getByText("Home Page")).toBeInTheDocument();
+    // unauthenticated → withRoles immediately redirects to /home before query runs
+    await waitFor(() => {
+      expect(screen.getByText("Home Page")).toBeInTheDocument();
+    });
   });
 
-  it("protected: authenticated but wrong role visiting /admin redirects to /unauthorized", () => {
+  it("protected: authenticated but wrong role visiting /admin redirects to /unauthorized", async () => {
     mockUseAuth.mockReturnValue({
       user: { id: "2", name: "B", role: "content_creator" },
       isAuthenticated: true,
@@ -151,12 +199,21 @@ describe("AppRoutes (RBAC routing tests)", () => {
       logout: vi.fn(),
       refetchUser: vi.fn(),
     });
+    mockIsUserAuthenticated.mockReturnValue(true);
+    // User has CONTENT_CREATOR, not ORG_ADMIN → no admin access
+    mockGetUserRoles.mockResolvedValue({
+      data: { response: { roles: [{ role: "CONTENT_CREATOR" }] } },
+      status: 200,
+      headers: {},
+    });
 
     renderWithRoute("/admin");
-    expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
+    });
   });
 
-  it("protected: authenticated admin can access /admin", () => {
+  it("protected: authenticated admin can access /admin", async () => {
     mockUseAuth.mockReturnValue({
       user: { id: "3", name: "C", role: "admin" },
       isAuthenticated: true,
@@ -165,9 +222,18 @@ describe("AppRoutes (RBAC routing tests)", () => {
       logout: vi.fn(),
       refetchUser: vi.fn(),
     });
+    mockIsUserAuthenticated.mockReturnValue(true);
+    // User has ORG_ADMIN role → admin access granted
+    mockGetUserRoles.mockResolvedValue({
+      data: { response: { roles: [{ role: "ORG_ADMIN" }] } },
+      status: 200,
+      headers: {},
+    });
 
     renderWithRoute("/admin");
-    expect(screen.getByText("Admin Page")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Admin Page")).toBeInTheDocument();
+    });
   });
 
   it("public route: /create renders CreateContentPage for content_creator", () => {
