@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import CollectionEditorPage from './CollectionEditorPage';
 
-const { mockNavigate, mockParams, mockContentRead, mockToast } = vi.hoisted(() => ({
+const { mockNavigate, mockParams, mockContentRead, mockToast, mockRetireLock } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
   mockParams: { contentId: 'do_123' as string | undefined },
   mockContentRead: vi.fn(),
   mockToast: vi.fn(),
+  mockRetireLock: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('react-router-dom', async () => {
@@ -40,6 +42,15 @@ vi.mock('@/hooks/useUserRead', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useContentLock', () => ({
+  useContentLock: () => ({
+    lockKey: null,
+    lockError: null,
+    isLocking: false,
+    retireLock: mockRetireLock,
+  }),
+}));
+
 vi.mock('@/components/common/PageLoader', () => ({
   default: ({ message }: { message: string }) => <div data-testid="page-loader">{message}</div>,
 }));
@@ -64,6 +75,10 @@ vi.mock('@/components/editors/CollectionEditor', () => ({
   ),
 }));
 
+const renderWithRouter = (component: React.ReactElement) => {
+  return render(<MemoryRouter>{component}</MemoryRouter>);
+};
+
 describe('CollectionEditorPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -84,7 +99,7 @@ describe('CollectionEditorPage', () => {
       () => new Promise(() => undefined) as ReturnType<typeof mockContentRead>
     );
 
-    render(<CollectionEditorPage />);
+    renderWithRouter(<CollectionEditorPage />);
     expect(screen.getByTestId('page-loader')).toHaveTextContent('Loading editor...');
   });
 
@@ -99,7 +114,7 @@ describe('CollectionEditorPage', () => {
       },
     });
 
-    render(<CollectionEditorPage />);
+    renderWithRouter(<CollectionEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('collection-editor')).toBeInTheDocument();
@@ -121,7 +136,7 @@ describe('CollectionEditorPage', () => {
       },
     });
 
-    render(<CollectionEditorPage />);
+    renderWithRouter(<CollectionEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('editor-mode')).toHaveTextContent('review');
@@ -131,7 +146,7 @@ describe('CollectionEditorPage', () => {
   it('shows error toast and fallback when metadata fetch fails', async () => {
     mockContentRead.mockRejectedValue(new Error('failed'));
 
-    render(<CollectionEditorPage />);
+    renderWithRouter(<CollectionEditorPage />);
 
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(
@@ -152,7 +167,7 @@ describe('CollectionEditorPage', () => {
   it('shows missing identifier fallback when contentId is absent', async () => {
     mockParams.contentId = undefined;
 
-    render(<CollectionEditorPage />);
+    renderWithRouter(<CollectionEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Missing content identifier.')).toBeInTheDocument();
@@ -163,13 +178,18 @@ describe('CollectionEditorPage', () => {
   });
 
   it('navigates back to workspace when editor emits close event', async () => {
-    render(<CollectionEditorPage />);
+    renderWithRouter(<CollectionEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Close editor' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Close editor' }));
+    
+    await waitFor(() => {
+      expect(mockRetireLock).toHaveBeenCalled();
+    });
+    
     expect(mockNavigate).toHaveBeenCalledWith('/workspace');
   });
 });

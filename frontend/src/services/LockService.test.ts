@@ -2,10 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LockService } from './LockService';
 
 const mockPost = vi.fn();
+const mockDelete = vi.fn();
 
 vi.mock('../lib/http-client', () => ({
   getClient: () => ({
     post: mockPost,
+    delete: mockDelete,
   }),
 }));
 
@@ -15,6 +17,7 @@ describe('LockService', () => {
   beforeEach(() => {
     service = new LockService();
     mockPost.mockReset();
+    mockDelete.mockReset();
   });
 
   describe('createLock', () => {
@@ -64,21 +67,21 @@ describe('LockService', () => {
 
   describe('retireLock', () => {
     it('should call /lock/v1/retire with correct payload', async () => {
-      mockPost.mockResolvedValue({ data: undefined, status: 200, headers: {} });
+      mockDelete.mockResolvedValue({ data: undefined, status: 200, headers: {} });
 
       await service.retireLock('do_123');
 
-      expect(mockPost).toHaveBeenCalledWith('/lock/v1/retire', {
+      expect(mockDelete).toHaveBeenCalledWith('/lock/v1/retire', {
         request: { resourceId: 'do_123', resourceType: 'Content' },
       });
     });
 
     it('should support custom resourceType', async () => {
-      mockPost.mockResolvedValue({ data: undefined, status: 200, headers: {} });
+      mockDelete.mockResolvedValue({ data: undefined, status: 200, headers: {} });
 
       await service.retireLock('do_456', 'Content');
 
-      expect(mockPost).toHaveBeenCalledWith('/lock/v1/retire', {
+      expect(mockDelete).toHaveBeenCalledWith('/lock/v1/retire', {
         request: { resourceId: 'do_456', resourceType: 'Content' },
       });
     });
