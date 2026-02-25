@@ -256,6 +256,17 @@ describe('ResourceFormDialog', () => {
     });
   });
 
+  it('should handle framework fetch error', async () => {
+    mockFrameworkRead.mockRejectedValue(new Error('Framework API Error'));
+
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to load form configuration. Please try again.')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Retry/ })).toBeInTheDocument();
+    });
+  });
+
   it('should call onClose when clicking outside dialog', async () => {
     const onClose = vi.fn();
     renderWithQueryClient(<ResourceFormDialog {...defaultProps} onClose={onClose} />);
@@ -268,6 +279,20 @@ describe('ResourceFormDialog', () => {
     });
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('should not call onClose when clicking outside dialog while loading', async () => {
+    const onClose = vi.fn();
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} onClose={onClose} isLoading={true} />);
+
+    await waitFor(() => {
+      const dialog = screen.getByRole('dialog');
+      act(() => {
+        fireEvent.click(dialog);
+      });
+    });
+
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('should not call onClose when clicking inside dialog content', async () => {
@@ -391,6 +416,29 @@ describe('ResourceFormDialog', () => {
     });
 
     expect(mockFormRead).toHaveBeenCalledTimes(2);
+  });
+
+  it('should handle retry on framework fetch error', async () => {
+    mockFrameworkRead
+      .mockRejectedValueOnce(new Error('Framework API Error'))
+      .mockResolvedValueOnce(mockFrameworkResponse);
+
+    renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to load form configuration. Please try again.')).toBeInTheDocument();
+    });
+
+    const retryButton = screen.getByRole('button', { name: /Retry/ });
+    act(() => {
+      fireEvent.click(retryButton);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Content Name')).toBeInTheDocument();
+    });
+
+    expect(mockFrameworkRead).toHaveBeenCalledTimes(2);
   });
 
   it('should show loading state on submit button when isLoading is true', async () => {
