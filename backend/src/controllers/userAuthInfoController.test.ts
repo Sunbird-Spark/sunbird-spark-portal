@@ -60,7 +60,8 @@ describe('AuthController', () => {
             data: {
                 sid: 'test-session-id',
                 uid: null,
-                isAuthenticated: false
+                isAuthenticated: false,
+                roles: []
             }
         });
     });
@@ -76,7 +77,25 @@ describe('AuthController', () => {
             data: {
                 sid: 'test-session-id',
                 uid: 'user-123',
-                isAuthenticated: true
+                isAuthenticated: true,
+                roles: []
+            }
+        });
+    });
+
+    it('should return roles from session when set', async () => {
+        req.session!.userId = 'user-123';
+        req.session!.roles = ['BOOK_CREATOR', 'PUBLIC'];
+        req.kauth = { grant: {} } as any;
+
+        await getAuthInfo(req as Request, res as Response);
+
+        expect(mockResponseInstance.setResult).toHaveBeenCalledWith({
+            data: {
+                sid: 'test-session-id',
+                uid: 'user-123',
+                isAuthenticated: true,
+                roles: ['BOOK_CREATOR', 'PUBLIC']
             }
         });
     });
