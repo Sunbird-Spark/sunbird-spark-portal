@@ -99,7 +99,10 @@ const AddCertificateModal = ({
 
                   {/* ── Current Certificate panel ── */}
                   {state.hasExistingCert && state.certTab === "current" && (
-                    <CurrentCertificatePanel existingCertTemplates={existingCertTemplates} />
+                    <CurrentCertificatePanel 
+                      existingCertTemplates={existingCertTemplates} 
+                      setCertTab={state.setCertTab} 
+                    />
                   )}
 
                   {/* ── Change Certificate panel (standard picker) ── */}
@@ -108,11 +111,14 @@ const AddCertificateModal = ({
                       <CertificateRulesPanel
                         issueTo={state.issueTo}
                         setIssueTo={state.setIssueTo}
-                        progressRule={state.progressRule}
-                        setProgressRule={state.setProgressRule}
                         issueToAccepted={state.issueToAccepted}
                         setIssueToAccepted={state.setIssueToAccepted}
                         selectedTemplate={state.selectedTemplate}
+                        showScoreRuleComponent={state.showScoreRuleComponent}
+                        enableScoreRule={state.enableScoreRule}
+                        setEnableScoreRule={state.setEnableScoreRule}
+                        scoreRuleValue={state.scoreRuleValue}
+                        setScoreRuleValue={state.setScoreRuleValue}
                       />
                       <CertificateTemplatesPanel
                         handleRefreshTemplates={state.handleRefreshTemplates}

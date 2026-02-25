@@ -6,6 +6,7 @@ import type {
 } from '../../types/collectionTypes';
 import { BATCH_STATUS } from '../../types/collectionTypes';
 import type { TrackableCollection } from '../../types/TrackableCollections';
+import { getLeafContentIdsFromHierarchy } from './hierarchyTree';
 
 /** Filter to batches that are enrollable: status Ongoing/Upcoming and enrollment end date not passed (or null). Uses current time for enrollmentEndDate. */
 export function getEnrollableBatches(
@@ -43,9 +44,10 @@ export function getEnrollmentForCollection(
   );
 }
 
+
 export function getLeafContentIds(collectionData: CollectionData | null): string[] {
-  if (!collectionData?.modules) return [];
-  return collectionData.modules.flatMap((m) => m.lessons.map((l) => l.id));
+  if (!collectionData?.hierarchyRoot) return [];
+  return getLeafContentIdsFromHierarchy(collectionData.hierarchyRoot);
 }
 
 export function getContentStatusMap(contentList: ContentStateItem[]): Record<string, number> {

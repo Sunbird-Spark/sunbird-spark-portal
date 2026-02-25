@@ -153,4 +153,36 @@ describe('CreateTemplatePanel', () => {
     fireEvent.change(input, { target: { value: 'Director' } });
     expect(handleNewTmplField).toHaveBeenCalledWith('sig2Designation', 'Director');
   });
+
+  it('calls handleNewTmplField when picking Brand Logo 1', () => {
+    const handleNewTmplField = vi.fn();
+    render(<CreateTemplatePanel {...defaultProps} handleNewTmplField={handleNewTmplField} />);
+    const pickBtn = screen.getByRole('button', { name: /Pick Brand Logo 1/i });
+    fireEvent.click(pickBtn);
+    expect(handleNewTmplField).toHaveBeenCalledWith('logo1', { preview: 'https://example.com/img.png', artifactUrl: null, file: null });
+  });
+
+  it('calls handleNewTmplField when picking Brand Logo 2', () => {
+    const handleNewTmplField = vi.fn();
+    render(<CreateTemplatePanel {...defaultProps} handleNewTmplField={handleNewTmplField} />);
+    const pickBtn = screen.getByRole('button', { name: /Pick Brand Logo 2/i });
+    fireEvent.click(pickBtn);
+    expect(handleNewTmplField).toHaveBeenCalledWith('logo2', { preview: 'https://example.com/img.png', artifactUrl: null, file: null });
+  });
+
+  it('calls handleNewTmplField when picking Signature 1', () => {
+    const handleNewTmplField = vi.fn();
+    render(<CreateTemplatePanel {...defaultProps} handleNewTmplField={handleNewTmplField} />);
+    const pickBtn = screen.getByRole('button', { name: /Pick Signature 1/i });
+    fireEvent.click(pickBtn);
+    expect(handleNewTmplField).toHaveBeenCalledWith('sig1', { preview: 'https://example.com/img.png', artifactUrl: null, file: null });
+  });
+
+  it('calls handleNewTmplField when picking Signature 2', () => {
+    const handleNewTmplField = vi.fn();
+    render(<CreateTemplatePanel {...defaultProps} handleNewTmplField={handleNewTmplField} />);
+    const pickBtn = screen.getByRole('button', { name: /Pick Signature 2/i });
+    fireEvent.click(pickBtn);
+    expect(handleNewTmplField).toHaveBeenCalledWith('sig2', { preview: 'https://example.com/img.png', artifactUrl: null, file: null });
+  });
 });

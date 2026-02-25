@@ -49,10 +49,10 @@ export function CreateTemplatePanel({
           />
         </div>
 
-        {/* Name */}
+        {/* Brand Name */}
         <div>
           <label htmlFor="tmplName" className={labelClass}>
-            Name <span className="text-red-500">*</span>
+            Brand Name <span className="text-red-500">*</span>
           </label>
           <input
             id="tmplName"
