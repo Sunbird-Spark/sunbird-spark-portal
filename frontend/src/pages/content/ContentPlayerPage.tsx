@@ -131,15 +131,7 @@ const ContentPlayerPage = () => {
               <RatingDialog
                 open={ratingOpen}
                 onClose={() => setRatingOpen(false)}
-                contentMeta={
-                  playerMetadata?.identifier
-                    ? {
-                        id: playerMetadata.identifier,
-                        type: playerMetadata.contentType ?? "Content",
-                        ver: playerMetadata.pkgVersion?.toString() ?? "1.0",
-                      }
-                    : undefined
-                }
+                playerMetadata={playerMetadata}
               />
             </div>
           </div>
