@@ -8,6 +8,23 @@ import CollectionDetailPage from './CollectionDetailPage';
 import type { CertificatePreviewDetails } from '@/components/collection/CertificatePreviewModal';
 
 /* ── Collection / content data ── */
+const mockHierarchyRoot = {
+  identifier: 'col-1',
+  name: 'Test Collection',
+  children: [
+    {
+      identifier: 'mod-1',
+      name: 'Module 1',
+      primaryCategory: 'Subtitle',
+      mimeType: 'application/vnd.ekstep.content-collection',
+      children: [
+        { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+        { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
+      ],
+    },
+  ],
+};
+
 const mockCollectionData = {
   id: 'col-1',
   title: 'Test Collection',
@@ -17,17 +34,8 @@ const mockCollectionData = {
   description: 'Test description',
   audience: ['Student'],
   createdBy: undefined as string | undefined,
-  modules: [
-    {
-      id: 'mod-1',
-      title: 'Module 1',
-      subtitle: 'Subtitle',
-      lessons: [
-        { id: 'l1', title: 'Lesson 1', duration: '5:00', type: 'video' as const },
-        { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document' as const },
-      ],
-    },
-  ],
+  children: mockHierarchyRoot.children,
+  hierarchyRoot: mockHierarchyRoot,
 };
 
 /* ── Data hooks ── */
