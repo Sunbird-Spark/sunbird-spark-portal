@@ -223,27 +223,41 @@ const WorkspaceToolbar = ({
         </div>
       </div>
 
-      {/* Stats Row - Quick glance */}
+      {/* Stats Row */}
       {userRole === 'creator' && showContentFilters && (
         <div className="flex items-center gap-6 px-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.published}</span> Published
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.review}</span> In Review
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-gray-400" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.drafts}</span> Drafts
-            </span>
-          </div>
+          {/* Published / In Review / Drafts stats - only on All tab */}
+          {activeView === 'all' && (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.published}</span> Published
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.review}</span> In Review
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gray-400" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.drafts}</span> Drafts
+                </span>
+              </div>
+            </>
+          )}
+
+          {/* Section titles for secondary views */}
+          {activeView === 'uploads' && (
+            <span className="text-sm font-semibold font-rubik text-foreground">All Uploads</span>
+          )}
+          {activeView === 'collaborations' && (
+            <span className="text-sm font-semibold font-rubik text-foreground">My Collaborations</span>
+          )}
+
           {contentCount !== undefined && (
             <span className="text-sm text-muted-foreground font-rubik ml-auto">
               Showing {contentCount}{totalCount !== undefined && totalCount > contentCount ? ` of ${totalCount}` : ''} items

@@ -124,7 +124,7 @@ describe('GenericEditorService', () => {
   describe('getContentDetails', () => {
     it('should make correct API call and return content', async () => {
       mockGet.mockResolvedValue({
-        data: { result: { content: mockContentDetails } },
+        data: { content: mockContentDetails },
       });
 
       const result = await service.getContentDetails('do_123');
@@ -141,7 +141,7 @@ describe('GenericEditorService', () => {
         expiresAt: '2026-02-19T00:00:00Z',
         expiresIn: '3600',
       };
-      mockPost.mockResolvedValue({ data: { result: lockResponse } });
+      mockPost.mockResolvedValue({ data: lockResponse });
 
       const result = await service.lockContent(
         'do_123',
@@ -169,7 +169,7 @@ describe('GenericEditorService', () => {
 
     it('should use default values when framework and contentType are not provided', async () => {
       mockPost.mockResolvedValue({
-        data: { result: { lockKey: 'k', expiresAt: 'a', expiresIn: 'i' } },
+        data: { lockKey: 'k', expiresAt: 'a', expiresIn: 'i' },
       });
 
       await service.lockContent('do_456', 'user-1', 'User');

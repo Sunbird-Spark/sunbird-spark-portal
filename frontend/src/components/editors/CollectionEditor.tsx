@@ -7,6 +7,23 @@ import {
 import { useFancytreeGuard } from '../../hooks/useFancytreeGuard';
 import PageLoader from '../common/PageLoader';
 
+// Dynamically load the theme CSS after editor assets are loaded
+const loadThemeCSS = () => {
+  const linkId = 'collection-editor-theme-css';
+  if (document.getElementById(linkId)) return;
+  
+  const link = document.createElement('link');
+  link.id = linkId;
+  link.rel = 'stylesheet';
+  link.href = new URL('./CollectionEditorTheme.css', import.meta.url).href;
+  document.head.appendChild(link);
+};
+
+const removeThemeCSS = () => {
+  const link = document.getElementById('collection-editor-theme-css');
+  if (link) link.remove();
+};
+
 interface CollectionEditorProps {
   identifier: string;
   metadata: any;
@@ -50,8 +67,10 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
   // remove it on unmount so it doesn't bleed into the rest of the portal.
   useEffect(() => {
     serviceRef.current.loadAssets();
+    
     return () => {
       serviceRef.current.removeAssets();
+      removeThemeCSS();
     };
   }, []);
 
@@ -66,8 +85,12 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
           return;
         }
 
+        // Wait for FancyTree and other dependencies to be fully initialized
         await serviceRef.current.initializeDependencies();
         if (cancelled) return;
+
+        // Load theme CSS after FancyTree is initialized
+        loadThemeCSS();
 
         const service = serviceRef.current;
         const config = await service.createConfig(metadata, contextProps);
@@ -97,7 +120,11 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
 
   return (
     <div className="w-full h-full min-h-[600px] relative" id="collection-editor-wrapper">
-      {status === 'loading' && <PageLoader message="Loading..." fullPage={false} />}
+      {status === 'loading' && (
+        <div className="collection-editor-loader-wrapper">
+          <PageLoader message="Loading..." fullPage={true} />
+        </div>
+      )}
       <div ref={containerRef} className="w-full h-full" id="collection-editor-container" />
     </div>
   );

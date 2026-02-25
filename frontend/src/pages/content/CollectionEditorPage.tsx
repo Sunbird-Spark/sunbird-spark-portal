@@ -7,6 +7,7 @@ import { ContentService } from '@/services/ContentService';
 import { toast } from '@/hooks/useToast';
 import { useUserRead } from '@/hooks/useUserRead';
 import { getUserRole, getEditorMode } from '@/services/editors/editorModeService';
+import { useContentLock } from '@/hooks/useContentLock';
 
 const COLLECTION_EDITOR_READ_FIELDS = [
   'identifier',
@@ -65,6 +66,15 @@ const CollectionEditorPage = () => {
     [metadata?.status, userRole],
   );
 
+  const isEditMode = editorMode === 'edit';
+
+  const { lockError, isLocking, retireLock } = useContentLock({
+    resourceId: contentId,
+    resourceType: 'Content',
+    metadata,
+    enabled: isEditMode,
+  });
+
   const contextProps: CollectionEditorContextProps = useMemo(() => ({
     mode: editorMode,
     objectType: 'Collection',
@@ -72,17 +82,33 @@ const CollectionEditorPage = () => {
   }), [editorMode, metadata?.primaryCategory]);
 
 
-  const handleEditorEvent = useCallback((event: CollectionEditorEvent) => {
+  const handleEditorEvent = useCallback(async (event: CollectionEditorEvent) => {
     const closeEditor = (event.data as any)?.close;
     if (closeEditor) {
+      await retireLock();
       navigate('/workspace');
     }
-  }, [navigate]);
+  }, [navigate, retireLock]);
 
   const handleTelemetryEvent = useCallback((_event: any) => {}, []);
 
-  if (loading) {
-    return <PageLoader message="Loading editor..." />;
+  if (loading || isLocking) {
+    return <PageLoader message={isLocking ? "Acquiring content lock..." : "Loading editor..."} />;
+  }
+
+  if (lockError) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
+        <div className="text-red-600 font-semibold">{lockError}</div>
+        <button
+          type="button"
+          onClick={() => navigate('/workspace')}
+          className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
+        >
+          Back to workspace
+        </button>
+      </div>
+    );
   }
 
   if (loadError || !metadata) {

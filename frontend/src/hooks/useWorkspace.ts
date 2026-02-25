@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { ContentService } from '@/services/ContentService';
 import { mapContentToWorkspaceItem } from '@/services/workspace';
@@ -68,7 +68,7 @@ export function useWorkspace({
   enabled = true,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
-  const isContentTab = !['create', 'uploads', 'collaborations'].includes(activeTab);
+  const isContentTab = !['create'].includes(activeTab);
   const queryEnabled = enabled && !!userId && isContentTab;
 
   // Whether the user is operating in reviewer mode (affects counts & content filters).
@@ -114,21 +114,62 @@ export function useWorkspace({
     return { all, drafts, review, published, pendingReview: review };
   }, [countsQuery.data, isReviewerMode]);
 
+  // Invalidate counts whenever the active tab changes so badge numbers stay fresh.
+  useEffect(() => {
+    if (queryEnabled) {
+      void queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
+    }
+  }, [activeTab, queryClient, userId, queryEnabled]);
+
   // ── Content query (per tab, paginated) ────────────────────────────────
   const statusFilter = getStatusFilterForTab(activeTab);
   const primaryCategoryFilter =
     getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
+  // Special filters for uploads and collaborations tabs
+  const getFiltersForTab = () => {
+    const baseFilters: Record<string, unknown> = {
+      createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
+      ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
+      status: statusFilter,
+      primaryCategory: primaryCategoryFilter,
+    };
+
+    if (activeTab === 'uploads') {
+      return {
+        ...baseFilters,
+        createdBy: userId ?? '',
+        status: ['Draft'],
+        mimeType: [
+          'application/pdf',
+          'video/x-youtube',
+          'application/vnd.ekstep.html-archive',
+          'application/epub',
+          'application/vnd.ekstep.h5p-archive',
+          'video/mp4',
+          'video/webm',
+          'text/x-url',
+        ],
+      };
+    }
+
+    if (activeTab === 'collaborations') {
+      return {
+        status: ['Draft', 'FlagDraft', 'Review', 'Processing', 'Live', 'Unlisted', 'FlagReview'],
+        collaborators: [userId ?? ''],
+        primaryCategory: primaryCategoryFilter,
+        objectType: 'Content',
+      };
+    }
+
+    return baseFilters;
+  };
+
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
     queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
-        filters: {
-          createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
-          ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
-          status: statusFilter,
-          primaryCategory: primaryCategoryFilter,
-        },
+        filters: getFiltersForTab(),
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),
