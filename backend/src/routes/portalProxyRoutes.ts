@@ -13,8 +13,6 @@ router.post('/user/v1/fuzzy/search', validateRecaptcha, userProxy);
 router.post('/user/v1/password/reset', handlePassword, userProxy);
 router.post('/otp/v1/verify', kongProxy);
 router.post('/user/v2/signup', handlePassword, kongProxy);
-router.post('/rc/certificate/v1/search', ...keycloakAuth, kongProxy);
-router.get('/rc/certificate/v1/download/:id', ...keycloakAuth, kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [
     '/user/v1/exists/email/:emailId',
@@ -22,7 +20,6 @@ const recaptchaProtectedRoutes: string[] = [
     '/user/v1/get/phone/*rest',
     '/user/v1/get/email/*rest',
     '/otp/v1/generate',
-    '/rc/certificate/v1/search'
 ];
 
 // These routes are defined relative to the mount path of this router.

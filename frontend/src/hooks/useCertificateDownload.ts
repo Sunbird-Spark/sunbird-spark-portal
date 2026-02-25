@@ -82,22 +82,25 @@ export const useCertificateDownload = () => {
                 throw new Error('Certificate is not yet generated or available for this course.');
             }
 
-            const certId = 'osid' in matchingCert ? matchingCert.osid : matchingCert.identifier || matchingCert.token;
+            const certIdValue = 'identifier' in matchingCert ? matchingCert.identifier : matchingCert.osid || matchingCert.token;
+            const certId = certIdValue as string;
 
             if (!certId) {
-                throw new Error('Certificate ID is missing, cannot download from service.');
+                throw new Error('Certificate ID is missing.');
             }
 
             const { data } = await certificateService.downloadCertificate(certId);
-            let dataObj = data;
 
-            if (typeof dataObj === 'string' && !dataObj.includes('<svg')) {
-                try { dataObj = JSON.parse(dataObj); } catch { /* ignore */ }
+            const templateUrl = 'templateUrl' in matchingCert ? matchingCert.templateUrl : undefined;
+            if (!templateUrl) {
+                throw new Error('Certificate template URL is missing.');
             }
-            if (isArray(dataObj)) dataObj = head(dataObj) || {};
 
-            const svgString = await extractSvgString(dataObj, data, matchingCert, courseName);
-            await convertSvgToOutput(svgString, { fileName: courseName });
+            const response = await fetch(templateUrl);
+            if (!response.ok) throw new Error(`Failed to fetch certificate: ${response.statusText}`);
+
+            const svgString = await response.text();
+            await convertSvgToOutput(svgString, { fileName: courseName || 'certificate' });
 
         } catch (err: any) {
             console.error('Certificate download error:', err);
@@ -113,44 +116,6 @@ export const useCertificateDownload = () => {
         }
     };
 
-    const extractSvgString = async (dataObj: any, rawData: any, matchingCert: any, courseName: string): Promise<string> => {
-        if (typeof rawData === 'string' && rawData.includes('<svg')) return rawData;
-
-        const printUri = get(dataObj, 'result.printUri') || get(dataObj, 'printUri');
-        if (printUri) {
-            if (printUri.startsWith('http')) {
-                const response = await fetch(printUri);
-                if (!response.ok) throw new Error(`Failed to fetch SVG: ${response.statusText}`);
-                return response.text();
-            }
-            return printUri;
-        }
-
-        const templateUrl = get(dataObj, 'templateUrl') || get(matchingCert, 'templateUrl');
-        if (templateUrl && get(dataObj, '_osSignedData')) {
-            const response = await fetch(templateUrl);
-            if (!response.ok) throw new Error(`Failed to fetch template: ${response.statusText}`);
-            let template = await response.text();
-
-            try {
-                const signedData = JSON.parse(dataObj._osSignedData);
-                const subject = get(signedData, 'credentialSubject', {});
-                const issuanceDate = new Date(get(signedData, 'issuanceDate') || get(dataObj, 'osCreatedAt'));
-                const formattedDate = issuanceDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-
-                template = template
-                    .replace(/\{\{\s*credentialSubject\.recipientName\s*\}\}/g, get(subject, 'recipientName', ''))
-                    .replace(/\{\{\s*credentialSubject\.trainingName\s*\}\}/g, get(subject, 'trainingName', courseName || ''))
-                    .replace(/\{\{\s*dateFormat\s+issuanceDate[^}]*\}\}/g, formattedDate)
-                    .replace(/\{\{\s*(qrCode|minFontSize|maxFontSize)\s*\}\}/g, '');
-            } catch (e) {
-                console.error('Failed to parse credential data', e);
-            }
-            return template;
-        }
-
-        throw new Error('Failed to retrieve certificate data.');
-    };
 
     return {
         downloadCertificate,
