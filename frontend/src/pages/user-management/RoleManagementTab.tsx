@@ -111,8 +111,23 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTa
         title: roleDialog.operation === "add" ? "Role Added" : "Role Updated",
         description: `Role ${selectedRole} has been ${roleDialog.operation === "add" ? "added" : "updated"} successfully.`,
       });
+      // Optimistic update — immediately reflect the new role in the table
+      setSearchResults((prev) =>
+        prev.map((user) => {
+          const uid = user.userId || user.id;
+          if (uid !== roleDialog.userId) return user;
+          const newRole: UserRoleInfo = {
+            role: selectedRole,
+            scope: [{ organisationId: organisationId.trim() }],
+            createdDate: new Date().toISOString(),
+            updatedDate: null,
+            userId: roleDialog.userId,
+          };
+          return { ...user, roles: [...(user.roles ?? []), newRole] };
+        })
+      );
       closeRoleDialog();
-      await refreshResults(searchQuery);
+      refreshResults(searchQuery); // background sync — no await
     } catch (err) {
       toast({ title: "Operation failed", description: (err as Error).message || "Could not save role.", variant: "destructive" });
     } finally {
@@ -132,16 +147,26 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTa
   const handleConfirmDelete = async () => {
     if (!deleteDialog.roleInfo) return;
     setIsDeletingRole(true);
+    const removedRole = deleteDialog.roleInfo.role;
+    const removedUserId = deleteDialog.userId;
     try {
       await userManagementService.assignRole(
-        deleteDialog.userId,
-        deleteDialog.roleInfo.role,
+        removedUserId,
+        removedRole,
         deleteDialog.roleInfo.scope?.[0]?.organisationId ?? "",
         "remove"
       );
-      toast({ title: "Role Removed", description: `Role ${deleteDialog.roleInfo.role} has been removed.`, variant: "destructive" });
+      toast({ title: "Role Removed", description: `Role ${removedRole} has been removed.`, variant: "destructive" });
+      // Optimistic update — immediately remove the role chip from the table
+      setSearchResults((prev) =>
+        prev.map((user) => {
+          const uid = user.userId || user.id;
+          if (uid !== removedUserId) return user;
+          return { ...user, roles: (user.roles ?? []).filter((r) => r.role !== removedRole) };
+        })
+      );
       closeDeleteDialog();
-      await refreshResults(searchQuery);
+      refreshResults(searchQuery); // background sync — no await
     } catch (err) {
       toast({ title: "Delete failed", description: (err as Error).message || "Could not remove role.", variant: "destructive" });
     } finally {
