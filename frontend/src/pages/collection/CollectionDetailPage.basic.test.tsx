@@ -123,20 +123,7 @@ vi.mock('@/components/collection/CollectionOverview', () => ({
   ),
 }));
 vi.mock('@/hooks/usePermission', () => ({
-  usePermissions: vi.fn(() => ({
-    isAuthenticated: false,
-    isLoading: false,
-    roles: ['GUEST'],
-    primaryRole: 'GUEST',
-    error: null,
-    hasRole: vi.fn(),
-    hasAnyRole: vi.fn(),
-    hasAllRoles: vi.fn(),
-    canAccessRoute: vi.fn(),
-    canAccessFeature: vi.fn(),
-    getDefaultRoute: vi.fn(),
-    refetch: vi.fn(),
-  })),
+  usePermissions: vi.fn(),
 }));
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: {
@@ -180,24 +167,26 @@ function renderWithProviders(ui: React.ReactElement) {
   );
 }
 
+const makePermissions = (isAuthenticated: boolean) => ({
+  isAuthenticated,
+  isLoading: false,
+  roles: ['GUEST' as const],
+  primaryRole: 'GUEST' as const,
+  error: null,
+  hasRole: vi.fn(),
+  hasAnyRole: vi.fn(),
+  hasAllRoles: vi.fn(),
+  canAccessRoute: vi.fn(),
+  canAccessFeature: vi.fn(),
+  getDefaultRoute: vi.fn(),
+  refetch: vi.fn(),
+});
+
 describe('CollectionDetailPage - Basic Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: 'l1' });
-    vi.mocked(usePermissions).mockReturnValue({
-      isAuthenticated: false,
-      isLoading: false,
-      roles: ['GUEST'],
-      primaryRole: 'GUEST',
-      error: null,
-      hasRole: vi.fn(),
-      hasAnyRole: vi.fn(),
-      hasAllRoles: vi.fn(),
-      canAccessRoute: vi.fn(),
-      canAccessFeature: vi.fn(),
-      getDefaultRoute: vi.fn(),
-      refetch: vi.fn(),
-    });
+    vi.mocked(usePermissions).mockReturnValue(makePermissions(false));
     vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(false);
     mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
     mockUseContentSearch.mockReturnValue({ data: { data: { content: [] } }, isLoading: false });
@@ -408,20 +397,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     });
 
     it('does not show LoginToUnlockCard when user is authenticated (trackable collection)', () => {
-      vi.mocked(usePermissions).mockReturnValue({
-        isAuthenticated: true,
-        isLoading: false,
-        roles: ['GUEST'],
-        primaryRole: 'GUEST',
-        error: null,
-        hasRole: vi.fn(),
-        hasAnyRole: vi.fn(),
-        hasAllRoles: vi.fn(),
-        canAccessRoute: vi.fn(),
-        canAccessFeature: vi.fn(),
-        getDefaultRoute: vi.fn(),
-        refetch: vi.fn(),
-      });
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
       mockUseCollection.mockReturnValue({
         data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
         isLoading: false,
@@ -488,20 +464,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'true');
     });
     it('passes contentAccessBlocked=true to CollectionOverview when trackable and user not enrolled', () => {
-      vi.mocked(usePermissions).mockReturnValue({
-        isAuthenticated: true,
-        isLoading: false,
-        roles: ['GUEST'],
-        primaryRole: 'GUEST',
-        error: null,
-        hasRole: vi.fn(),
-        hasAnyRole: vi.fn(),
-        hasAllRoles: vi.fn(),
-        canAccessRoute: vi.fn(),
-        canAccessFeature: vi.fn(),
-        getDefaultRoute: vi.fn(),
-        refetch: vi.fn(),
-      });
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
       mockUseCollection.mockReturnValue({
         data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
         isLoading: false,
@@ -512,20 +475,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     });
 
     it('passes contentAccessBlocked=false when trackable and user is enrolled', () => {
-      vi.mocked(usePermissions).mockReturnValue({
-        isAuthenticated: true,
-        isLoading: false,
-        roles: ['GUEST'],
-        primaryRole: 'GUEST',
-        error: null,
-        hasRole: vi.fn(),
-        hasAnyRole: vi.fn(),
-        hasAllRoles: vi.fn(),
-        canAccessRoute: vi.fn(),
-        canAccessFeature: vi.fn(),
-        getDefaultRoute: vi.fn(),
-        refetch: vi.fn(),
-      });
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
       mockUseCollection.mockReturnValue({
         data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
         isLoading: false,
