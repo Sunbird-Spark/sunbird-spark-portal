@@ -30,8 +30,8 @@
 }
 
 .resource-field-input:focus {
-  box-shadow: 0 0 0 2px hsl(var(--sunbird-wave) / 0.5);
-  border-color: hsl(var(--sunbird-wave));
+  box-shadow: 0 0 0 2px hsl(var(--sunbird-brick) / 0.4);
+  border-color: hsl(var(--sunbird-brick));
 }
 
 .resource-field-input:disabled {
@@ -61,7 +61,7 @@
   gap: 0.25rem;
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
-  background-color: hsl(var(--sunbird-wave) / 0.1);
+  background-color: hsl(var(--sunbird-brick) / 0.1);
   color: hsl(var(--sunbird-ink));
   font-size: 0.75rem;
   font-family: 'Rubik', sans-serif;
@@ -123,11 +123,11 @@
 }
 
 .resource-field-dropdown-option:hover {
-  background-color: hsl(var(--sunbird-wave) / 0.05);
+  background-color: hsl(var(--sunbird-brick) / 0.05);
 }
 
 .resource-field-dropdown-option.selected {
-  background-color: hsl(var(--sunbird-wave) / 0.1);
+  background-color: hsl(var(--sunbird-brick) / 0.1);
   color: hsl(var(--sunbird-ink));
 }
 
@@ -143,8 +143,8 @@
 }
 
 .resource-field-checkbox.checked {
-  background-color: hsl(var(--sunbird-wave));
-  border-color: hsl(var(--sunbird-wave));
+  background-color: hsl(var(--sunbird-brick));
+  border-color: hsl(var(--sunbird-brick));
   color: white;
 }
 
