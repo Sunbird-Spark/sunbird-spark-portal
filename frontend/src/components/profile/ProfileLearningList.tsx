@@ -23,15 +23,17 @@ const getCompletionStatus = (status: number): "ongoing" | "completed" =>
 
 interface CourseRowProps {
     course: TrackableCollection;
+    downloadCertificate: (courseId: string, batchId: string, courseName: string, issuedCertificates?: any[]) => Promise<void>;
+    hasCertificate: (courseId: string, batchId?: string, courseName?: string, issuedCertificates?: any[]) => boolean;
+    downloadingCourseId: string | null;
 }
 
-const CourseRow = ({ course }: CourseRowProps) => {
+const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId }: CourseRowProps) => {
     const status = getCompletionStatus(course.status);
     const progress = course.completionPercentage ?? 0;
     const thumbnail = course.courseLogoUrl || course.content?.appIcon;
     const title = course.courseName || course.content?.name || "Untitled Course";
 
-    const { downloadCertificate, hasCertificate, downloadingCourseId } = useCertificateDownload();
     const isDownloading = downloadingCourseId === course.courseId;
 
     return (
@@ -80,11 +82,11 @@ const CourseRow = ({ course }: CourseRowProps) => {
             </div>
 
             <div className="profile-learning-actions">
-                {status === "completed" && hasCertificate(course.courseId, course.batchId, title) && (
+                {status === "completed" && hasCertificate(course.courseId, course.batchId, title, course.issuedCertificates) && (
                     <button
                         className={`flex items-center gap-2 transition-opacity ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
                         disabled={isDownloading}
-                        onClick={() => downloadCertificate(course.courseId, course.batchId, title)}
+                        onClick={() => downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates)}
                     >
                         {isDownloading ? (
                             <div className="w-[1.125rem] h-[1.125rem] border-2 border-sunbird-ginger border-t-transparent rounded-full animate-spin" />
@@ -107,6 +109,8 @@ const ProfileLearningList = () => {
 
     const { data, isLoading, isError, refetch } = useUserEnrolledCollections();
     const courses = data?.data?.courses ?? [];
+
+    const { downloadCertificate, hasCertificate, downloadingCourseId } = useCertificateDownload();
 
     const filteredCourses = courses.filter((course) => {
         if (filter === "all") return true;
@@ -194,6 +198,9 @@ const ProfileLearningList = () => {
                         <CourseRow
                             key={`${course.batchId || "course"}-${index}`}
                             course={course}
+                            downloadCertificate={downloadCertificate}
+                            hasCertificate={hasCertificate}
+                            downloadingCourseId={downloadingCourseId}
                         />
                     ))
                 )}
