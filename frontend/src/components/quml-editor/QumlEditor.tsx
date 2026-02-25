@@ -10,23 +10,6 @@ import {
 import { useFancytreeGuard } from '../../hooks/useFancytreeGuard';
 import PageLoader from '../common/PageLoader';
 
-// Dynamically load the theme CSS after editor assets are loaded
-const loadThemeCSS = () => {
-  const linkId = 'quml-editor-theme-css';
-  if (document.getElementById(linkId)) return;
-  
-  const link = document.createElement('link');
-  link.id = linkId;
-  link.rel = 'stylesheet';
-  link.href = new URL('./QumlEditorTheme.css', import.meta.url).href;
-  document.head.appendChild(link);
-};
-
-const removeThemeCSS = () => {
-  const link = document.getElementById('quml-editor-theme-css');
-  if (link) link.remove();
-};
-
 type QumlEditorProps = {
   metadata?: QuestionSetMetadata;
   mode?: QumlEditorConfig['config']['mode'];
@@ -67,10 +50,8 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
   // remove it on unmount so it does not bleed into the rest of the portal.
   useEffect(() => {
     serviceRef.current.loadAssets();
-    
     return () => {
       serviceRef.current.removeAssets();
-      removeThemeCSS();
     };
   }, []);
 
@@ -85,13 +66,9 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
           return;
         }
 
-        // Wait for FancyTree and other dependencies to be fully initialized
         await serviceRef.current.initializeDependencies();
 
         if (cancelled) return;
-
-        // Load theme CSS after FancyTree is initialized
-        loadThemeCSS();
 
         const service = serviceRef.current;
         const config = await service.createConfig(metadata, { mode, ...contextOverrides });
@@ -122,7 +99,7 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
 
   return (
     <div className={styles.qumlEditorPage}>
-      {status === 'loading' && <PageLoader message="Loading editor..." fullPage={true}/>}
+      {status === 'loading' && <PageLoader message="Loading editor..." />}
       <div className={styles.qumlEditorHost} ref={containerRef} />
     </div>
   );
