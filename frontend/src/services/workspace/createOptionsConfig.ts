@@ -82,8 +82,8 @@ export function getEditorCategories(): EditorCategory[] {
         },
         {
           id: 'story',
-          title: 'Resource',
-          description: 'Create learning resources like documents, presentations, and assessments.',
+          title: 'Story & Game',
+          description: 'Design interactive stories and gamified learning experiences.',
           icon: FiUpload,
           iconBg: 'bg-sunbird-moss/15',
           iconColor: 'text-sunbird-forest',

@@ -172,7 +172,7 @@ vi.mock('./ResourceFormDialog', () => ({
             dynamicFields: { subject: 'mathematics' }
           })}
         >
-          Create Resource
+          Create Story & Game
         </button>
         <button type="button" onClick={onClose}>Cancel</button>
       </div>
@@ -373,7 +373,7 @@ describe('WorkspacePage', () => {
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Story & Game' })).toBeInTheDocument();
       expect(screen.getByText('Form type: resource')).toBeInTheDocument();
     });
     expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
@@ -405,10 +405,10 @@ describe('WorkspacePage', () => {
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Story & Game' })).toBeInTheDocument();
     });
-    const resourceDialog = screen.getByRole('dialog', { name: 'Create Resources' });
-    const createButton = within(resourceDialog).getByRole('button', { name: 'Create Resource' });
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Story & Game' });
+    const createButton = within(resourceDialog).getByRole('button', { name: 'Create Story & Game' });
     fireEvent.click(createButton);
     await waitFor(() => {
       expect(mockContentCreate).toHaveBeenCalledWith('Test Resource', expect.objectContaining({
@@ -433,7 +433,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByRole('dialog', { name: 'Create Quiz & Assessment' })).toBeInTheDocument();
     });
     const quizDialog = screen.getByRole('dialog', { name: 'Create Quiz & Assessment' });
-    const quizCreateButton = within(quizDialog).getByRole('button', { name: 'Create Resource' });
+    const quizCreateButton = within(quizDialog).getByRole('button', { name: 'Create Story & Game' });
     fireEvent.click(quizCreateButton);
     await waitFor(() => {
       expect(mockContentCreate).toHaveBeenCalledWith('Test Resource', expect.objectContaining({
@@ -455,15 +455,15 @@ describe('WorkspacePage', () => {
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Story & Game' })).toBeInTheDocument();
     });
-    const resourceDialog = screen.getByRole('dialog', { name: 'Create Resources' });
+    const resourceDialog = screen.getByRole('dialog', { name: 'Create Story & Game' });
     
     // Test cancel functionality
     const cancelButton = within(resourceDialog).getByRole('button', { name: 'Cancel' });
     fireEvent.click(cancelButton);
     await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: 'Create Resources' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'Create Story & Game' })).not.toBeInTheDocument();
     });
 
     // Test error handling
@@ -476,10 +476,10 @@ describe('WorkspacePage', () => {
     const newResourceOption = within(newDialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(newResourceOption);
     await waitFor(() => {
-      expect(screen.getByRole('dialog', { name: 'Create Resources' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Create Story & Game' })).toBeInTheDocument();
     });
-    const newResourceDialog = screen.getByRole('dialog', { name: 'Create Resources' });
-    const createButton = within(newResourceDialog).getByRole('button', { name: 'Create Resource' });
+    const newResourceDialog = screen.getByRole('dialog', { name: 'Create Story & Game' });
+    const createButton = within(newResourceDialog).getByRole('button', { name: 'Create Story & Game' });
     fireEvent.click(createButton);
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith({

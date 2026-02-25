@@ -45,7 +45,7 @@ const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
 const EDITOR_OPTION_LABELS: Record<string, string> = {
   'quiz': 'Quiz & Assessment',
-  'story': 'Resources',
+  'story': 'Story & Game',
   'course': 'Course',
   'collection': 'Collection',
   'question-set': 'Question Set',
