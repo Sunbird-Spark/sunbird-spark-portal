@@ -34,7 +34,6 @@ const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
 const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
 const GenericEditorProtected = withRoles(['content_creator'])(GenericEditorPage);
-const CourseDashboardProtected = withRoles(['content_creator'])(CourseDashboardPage);
 
 const AppRoutes: React.FC = () => {
   return (
@@ -60,7 +59,7 @@ const AppRoutes: React.FC = () => {
           <Route path=":collectionId/batch/:batchId" element={<CollectionDetailPage />}>
             <Route path="content/:contentId" element={null} />
           </Route>
-          <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardProtected />} />
+          <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardPage />} />
         </Route>
 
         {/* Protected routes */}
