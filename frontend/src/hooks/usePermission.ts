@@ -39,8 +39,13 @@ export function usePermissions(): UsePermissionsReturn {
       if (!isMountedRef.current) return;
       console.error('Failed to fetch user roles:', err);
       setError(err as Error);
-      setRoles(['GUEST']);
-      setIsAuthenticated(false);
+      const status = (err as { response?: { status?: number }; status?: number })?.response?.status ?? (err as { status?: number })?.status;
+      if (status === 401 || status === 403) {
+        setRoles(['GUEST']);
+        setIsAuthenticated(false);
+      } else {
+        setRoles(prev => prev.length ? prev : ['GUEST']);
+      }
     } finally {
       if (isMountedRef.current) setIsLoading(false);
     }
