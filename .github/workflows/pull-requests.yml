@@ -31,8 +31,6 @@ jobs:
 
       - name: Frontend tests
         working-directory: frontend
-        env:
-          NODE_OPTIONS: --max-old-space-size=4096
         run: npm run test:coverage
 
   backend-checks:
