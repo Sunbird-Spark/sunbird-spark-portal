@@ -1,24 +1,20 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLoader from '@/components/common/PageLoader';
+import EditorErrorState from '@/components/editors/EditorErrorState';
 import QumlEditor from '@/components/quml-editor/QumlEditor';
 import type { QumlEditorEvent, QumlEditorContextOverrides } from '@/services/editors/quml-editor';
 import { QuestionSetService } from '@/services/QuestionSetService';
 import { toast } from '@/hooks/useToast';
-import { useUserRead } from '@/hooks/useUserRead';
-import { getUserRole, getEditorMode } from '@/services/editors/editorModeService';
-import { useContentLock } from '@/hooks/useContentLock';
+import { useEditorLock } from '@/hooks/useEditorLock';
 
 const questionSetService = new QuestionSetService();
 
 const QumlEditorPage = () => {
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
-  const { data: userData } = useUserRead();
   const [metadata, setMetadata] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const userRole = useMemo(() => getUserRole(userData), [userData]);
 
   useEffect(() => {
     if (!contentId) {
@@ -37,18 +33,9 @@ const QumlEditorPage = () => {
       .finally(() => setLoading(false));
   }, [contentId]);
 
-  const editorMode = useMemo(
-    () => getEditorMode(metadata?.status, userRole),
-    [metadata?.status, userRole],
-  );
-
-  const isEditMode = editorMode === 'edit';
-
-  const { lockError, isLocking, retireLock } = useContentLock({
-    resourceId: contentId,
-    resourceType: 'Content',
+  const { editorMode, lockError, isLocking, retireLock } = useEditorLock({
+    contentId,
     metadata,
-    enabled: isEditMode,
   });
 
   const contextOverrides: QumlEditorContextOverrides = useMemo(() => ({
@@ -70,42 +57,11 @@ const QumlEditorPage = () => {
   }
 
   if (lockError) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
-        <div className="text-red-600 font-semibold">{lockError}</div>
-        <button
-          type="button"
-          onClick={() => navigate('/workspace')}
-          className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
-        >
-          Back to workspace
-        </button>
-      </div>
-    );
+    return <EditorErrorState message={lockError} />;
   }
 
   if (!metadata) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
-        <div className="text-red-600 font-semibold">{'Question set not found'}</div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Retry
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/workspace')}
-            className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
-          >
-            Back to workspace
-          </button>
-        </div>
-      </div>
-    );
+    return <EditorErrorState message="Question set not found" showRetry />;
   }
 
   return (
