@@ -44,8 +44,10 @@ export const UserRoleTable = ({
           </tr>
         </thead>
         <tbody>
-          {searchResults.map((user, idx) => (
-            <tr key={user.userId} className="um-table-row">
+          {searchResults.map((user, idx) => {
+            const userId = user.userId || user.id;
+            return (
+            <tr key={userId} className="um-table-row">
               <td className="um-td um-td-narrow um-td-muted">{idx + 1}</td>
               <td className="um-td um-td-name">{getUserDisplayName(user)}</td>
               <td className="um-td um-td-email">{user.maskedEmail || user.email || "—"}</td>
@@ -65,9 +67,11 @@ export const UserRoleTable = ({
                     {user.roles.map((roleInfo) => (
                       <div key={`${roleInfo.role}-${roleInfo.scope?.[0]?.organisationId}`} className="um-role-chip">
                         <span className="um-role-label">{roleInfo.role}</span>
-                        <button className="um-role-action-btn um-role-delete-btn" title="Remove role" onClick={() => onOpenDeleteDialog(user.userId, roleInfo)} aria-label={`Remove role ${roleInfo.role}`}>
-                          <FiTrash2 size={12} />
-                        </button>
+                        {roleInfo.role !== 'PUBLIC' && (
+                          <button className="um-role-action-btn um-role-delete-btn" title="Remove role" onClick={() => onOpenDeleteDialog(userId, roleInfo)} aria-label={`Remove role ${roleInfo.role}`}>
+                            <FiTrash2 size={12} />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -76,13 +80,14 @@ export const UserRoleTable = ({
                 )}
               </td>
               <td className="um-td um-td-actions">
-                <Button size="sm" onClick={() => onOpenAddRoleDialog(user.userId)} className="um-add-role-btn" title="Add a new role">
+                <Button size="sm" onClick={() => onOpenAddRoleDialog(userId)} className="um-add-role-btn" title="Add a new role">
                   <FiPlus size={14} />
                   <span>Add Role</span>
                 </Button>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -29,7 +29,7 @@ import Onboarding from './pages/onboarding/OnboardingPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
-const UserManagementProtected = withRoles(['admin'])(UserManagementPage);
+
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
 const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
@@ -64,7 +64,7 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/admin" element={<AdminProtected />} />
-        <Route path="/user-management" element={<UserManagementProtected />} />
+        <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/workspace" element={<WorkspacePage />} />
         <Route path="/workspace/review/:contentId" element={<ContentReviewPage />} />
         <Route path="/reports" element={<ReportsProtected />} />
