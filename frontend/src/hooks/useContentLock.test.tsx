@@ -270,8 +270,9 @@ describe('useContentLock', () => {
 
     await waitFor(() => expect(mockCreateLock).toHaveBeenCalled());
 
-    const call = mockCreateLock.mock.calls[0][0];
-    const resourceInfo = JSON.parse(call.resourceInfo);
+    const call = mockCreateLock.mock.calls[0]?.[0];
+    expect(call).toBeDefined();
+    const resourceInfo = JSON.parse(call!.resourceInfo);
     expect(resourceInfo.contentType).toBe('Practice Question Set');
   });
 });

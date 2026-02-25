@@ -37,6 +37,8 @@ const mockItem: WorkspaceItem = {
   primaryCategory: 'Course',
   contentType: '',
   mimeType: '',
+  framework: '',
+  contentStatus: 'Draft',
 };
 
 vi.mock('@/components/workspace/CreateOptions', () => ({
