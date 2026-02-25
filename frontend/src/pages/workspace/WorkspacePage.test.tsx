@@ -357,8 +357,8 @@ describe('WorkspacePage', () => {
       expect(mockQuestionSetRetireMutateAsync).toHaveBeenCalledWith('do_qs_123');
     });
     expect(mockToast).toHaveBeenCalledWith({
-      title: 'Deleted',
-      description: 'Content has been removed successfully.',
+      title: 'Success',
+      description: 'Content has been deleted successfully.',
       variant: 'success',
     });
   });
