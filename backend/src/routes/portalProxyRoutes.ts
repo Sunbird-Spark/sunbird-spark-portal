@@ -7,8 +7,6 @@ import { keycloak } from '../auth/keycloakProvider.js';
 
 const router = express.Router();
 
-const keycloakAuth = [keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect()];
-
 router.post('/user/v1/fuzzy/search', validateRecaptcha, userProxy);
 router.post('/user/v1/password/reset', handlePassword, userProxy);
 router.post('/otp/v1/verify', kongProxy);
@@ -28,6 +26,8 @@ const recaptchaProtectedRoutes: string[] = [
 router.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 // The catch-all proxy route
 // When this router is mounted at '/portal', this handler will match '/portal/*rest'.
-router.all('/*rest', ...keycloakAuth, kongProxy);
+router.all('/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
+    keycloak.protect(),
+    kongProxy);
 
 export default router;
