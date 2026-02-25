@@ -281,7 +281,7 @@ describe('ContentService', () => {
       );
     });
 
-    it('should filter out empty array extraFields', async () => {
+    it('should not filter out empty array extraFields', async () => {
       await service.contentCreate('My Content', {
         createdBy: 'user-1',
         creator: 'Test User',

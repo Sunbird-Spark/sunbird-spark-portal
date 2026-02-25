@@ -249,6 +249,9 @@ const WorkspacePage = () => {
       const isQuiz = selectedOption === 'quiz';
 
       const resourceType = (formData.dynamicFields['resourceType'] as string) || 'Learn';
+      
+      // Remove resourceType from dynamicFields to avoid duplication
+      const { resourceType: _, ...extraFields } = formData.dynamicFields;
 
       const response = await contentService.contentCreate(formData.name, {
         createdBy,
@@ -261,7 +264,7 @@ const WorkspacePage = () => {
         createdFor,
         framework: orgFramework,
         resourceType,
-        extraFields: formData?.dynamicFields,
+        extraFields,
       });
       const contentId = response.data?.identifier || response.data?.content_id;
       if (!contentId) {
