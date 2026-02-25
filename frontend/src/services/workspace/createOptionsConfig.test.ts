@@ -99,7 +99,7 @@ describe('createOptionsConfig', () => {
         .flatMap(category => category.options)
         .find(option => option.id === 'story');
       
-      expect(storyOption?.description).toBe('Design interactive stories and gamified learning experiences.');
+      expect(storyOption?.description).toBe('Create learning resources like documents, presentations, and assessments.');
     });
   });
 });
