@@ -10,7 +10,7 @@ describe('createOptionsConfig', () => {
       expect(categories.length).toBeGreaterThan(0);
     });
 
-    it('should include story option with correct title "Resource"', () => {
+    it('should include story option with correct title "Story & Game"', () => {
       const categories = getEditorCategories();
       
       const storyCategory = categories.find(category => 
@@ -21,7 +21,7 @@ describe('createOptionsConfig', () => {
       
       const storyOption = storyCategory?.options.find(option => option.id === 'story');
       expect(storyOption).toBeDefined();
-      expect(storyOption?.title).toBe('Resource');
+      expect(storyOption?.title).toBe('Story & Game');
     });
 
     it('should include quiz option', () => {
@@ -99,7 +99,7 @@ describe('createOptionsConfig', () => {
         .flatMap(category => category.options)
         .find(option => option.id === 'story');
       
-      expect(storyOption?.description).toBe('Create learning resources like documents, presentations, and assessments.');
+      expect(storyOption?.description).toBe('Design interactive stories and gamified learning experiences.');
     });
   });
 });
