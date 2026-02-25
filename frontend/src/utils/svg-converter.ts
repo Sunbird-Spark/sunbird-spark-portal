@@ -55,7 +55,7 @@ export const convertSvgToOutput = async (
     let isGhost = false;
 
     if (typeof input === 'string') {
-        let template = input.startsWith('data:image/svg+xml,') 
+        let template = input.startsWith('data:image/svg+xml,')
             ? decodeURIComponent(input.replace(/data:image\/svg\+xml,/, '')).replace(/<!--\s*[a-zA-Z0-9-]*\s*-->/g, '')
             : input;
 
@@ -63,7 +63,7 @@ export const convertSvgToOutput = async (
 
         const transPx = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
         const deadDomains = /https?:\/\/(?:obj\.dev\.sunbirded\.org|via\.placeholder\.com)[^"'\s\\]*/g;
-        
+
         template = template
             .replace(/@font-face\s*{[^}]*url\(["']?https?:\/\/(?:obj\.dev\.sunbirded\.org|via\.placeholder\.com)[^)]*["']?\)[^}]*}/g, '')
             .replace(/@import\s+url\(["']?https?:\/\/(?:obj\.dev\.sunbirded\.org|via\.placeholder\.com)[^)]*["']?\)[^;]*;/g, '')
@@ -91,10 +91,10 @@ export const convertSvgToOutput = async (
     try {
         const transPx = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
         const images = element.querySelectorAll('image, img');
-        
+
         images.forEach((img) => {
             const href = img.getAttribute('href') || img.getAttribute('xlink:href') || (img as HTMLImageElement).src;
-            if (!href || href === '{{qrCode}}' || img.id === 'QrCode' || 
+            if (!href || href === '{{qrCode}}' || img.id === 'QrCode' ||
                 href.includes('via.placeholder.com') || href.includes('dev.sunbirded.org')) {
                 img.setAttribute('href', transPx);
                 img.setAttribute('xlink:href', transPx);
@@ -122,9 +122,12 @@ export const convertSvgToOutput = async (
             }
         });
 
+        // Ensure the filename is sanitized right before saving to prevent bad characters
+        const finalFileName = sanitizeFileName(config.fileName || 'certificate');
+
         if (config.format === 'png') {
             const link = document.createElement('a');
-            link.download = `${config.fileName}.png`;
+            link.download = `${finalFileName}.png`;
             link.href = dataUrl;
             link.click();
         } else {
@@ -134,7 +137,7 @@ export const convertSvgToOutput = async (
                 format: [config.width / 1.33, config.height / 1.33]
             });
             pdf.addImage(dataUrl, 'PNG', 0, 0, config.width / 1.33, config.height / 1.33);
-            pdf.save(`${config.fileName}.pdf`);
+            pdf.save(`${finalFileName}.pdf`);
         }
     } catch (error) {
         console.error('Error converting SVG:', error);
