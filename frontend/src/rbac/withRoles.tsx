@@ -40,7 +40,7 @@ export const withRoles = <P extends object>(
         : hasAnyRole(allowedRoles);
 
       if (!hasPermission) {
-        const unauthorizedPath = options?.unauthorizedTo || '/unauthorized';
+        const unauthorizedPath = options?.unauthorizedTo || '/home';
         return <Navigate to={unauthorizedPath} replace />;
       }
 

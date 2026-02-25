@@ -171,14 +171,11 @@ const makePermissions = (isAuthenticated: boolean) => ({
   isAuthenticated,
   isLoading: false,
   roles: ['GUEST' as const],
-  primaryRole: 'GUEST' as const,
   error: null,
   hasRole: vi.fn(),
   hasAnyRole: vi.fn(),
   hasAllRoles: vi.fn(),
-  canAccessRoute: vi.fn(),
   canAccessFeature: vi.fn(),
-  getDefaultRoute: vi.fn(),
   refetch: vi.fn(),
 });
 

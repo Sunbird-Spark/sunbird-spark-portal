@@ -1,21 +1,18 @@
 // frontend/src/hooks/usePermission.ts
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Role } from '../auth/AuthContext';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import permissionService, { Feature } from '../services/PermissionService';
 
 export interface UsePermissionsReturn {
   roles: Role[];
-  primaryRole: Role;
   isLoading: boolean;
   isAuthenticated: boolean;
   error: Error | null;
   hasRole: (role: Role) => boolean;
   hasAnyRole: (roles: Role[]) => boolean;
   hasAllRoles: (roles: Role[]) => boolean;
-  canAccessRoute: (route: string) => boolean;
   canAccessFeature: (feature: Feature) => boolean;
-  getDefaultRoute: () => string;
   refetch: () => Promise<void>;
 }
 
@@ -57,10 +54,6 @@ export function usePermissions(): UsePermissionsReturn {
     };
   }, [fetchRoles]);
 
-  const primaryRole = useMemo(() => {
-    return permissionService.getPrimaryRole(roles);
-  }, [roles]);
-
   const hasRole = useCallback(
     (role: Role) => permissionService.hasRole(roles, role),
     [roles]
@@ -76,33 +69,20 @@ export function usePermissions(): UsePermissionsReturn {
     [roles]
   );
 
-  const canAccessRoute = useCallback(
-    (route: string) => permissionService.canAccessRoute(roles, route),
-    [roles]
-  );
-
   const canAccessFeature = useCallback(
     (feature: Feature) => permissionService.canAccessFeature(roles, feature),
     [roles]
   );
 
-  const getDefaultRoute = useCallback(
-    () => permissionService.getDefaultRoute(roles),
-    [roles]
-  );
-
   return {
     roles,
-    primaryRole,
     isLoading,
     isAuthenticated,
     error,
     hasRole,
     hasAnyRole,
     hasAllRoles,
-    canAccessRoute,
     canAccessFeature,
-    getDefaultRoute,
     refetch: fetchRoles,
   };
 }

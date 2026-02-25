@@ -1,6 +1,5 @@
 // frontend/src/services/PermissionService.ts
 import { Role } from '../auth/AuthContext';
-import { ROLE_CONFIGS } from '../rbac/roleConfig';
 
 export type Feature =
   | 'create_content'
@@ -40,19 +39,6 @@ class PermissionService {
     return requiredRoles.every(role => userRoles.includes(role));
   }
 
-  canAccessRoute(userRoles: string[], route: string): boolean {
-    const roles = userRoles.length > 0 ? userRoles : ['GUEST'];
-    return roles.some(role => {
-      const config = ROLE_CONFIGS[role as Role];
-      return config?.allowedRoutes.includes(route) || false;
-    });
-  }
-
-  getDefaultRoute(userRoles: string[]): string {
-    const primaryRole = this.getPrimaryRole(userRoles);
-    return ROLE_CONFIGS[primaryRole]?.defaultRoute || '/home';
-  }
-
   canAccessFeature(userRoles: string[], feature: Feature): boolean {
     const allowedRoles = FEATURE_PERMISSIONS[feature];
     if (!allowedRoles) {
@@ -60,12 +46,6 @@ class PermissionService {
       return false;
     }
     return this.hasAnyRole(userRoles, allowedRoles);
-  }
-
-  getPrimaryRole(userRoles: string[]): Role {
-    if (userRoles.length === 0) return 'GUEST';
-    const roleOrder: Role[] = ['ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'GUEST'];
-    return roleOrder.find(role => userRoles.includes(role)) ?? 'GUEST';
   }
 
   normalizeRoles(backendRoles: string[]): Role[] {

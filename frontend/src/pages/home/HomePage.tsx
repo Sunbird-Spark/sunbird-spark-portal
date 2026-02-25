@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, Role, User } from '../../auth/AuthContext';
-import { getDefaultRouteForRole } from '../../rbac/roleConfig';
 import { v4 as uuidv4 } from 'uuid';
 
 const HomePage: React.FC = () => {
@@ -11,7 +10,7 @@ const HomePage: React.FC = () => {
   const location = useLocation();
 
   // Get the return path from location state, or use role's default route
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || getDefaultRouteForRole(selectedRole);
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/home';
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +19,6 @@ const HomePage: React.FC = () => {
       id: uuidv4(),
       name: `User (${selectedRole})`,
       roles: [selectedRole],
-      primaryRole: selectedRole,
     };
 
     login(user);

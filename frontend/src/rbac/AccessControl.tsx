@@ -28,7 +28,7 @@ export function withAccessControl<P extends object>(
     const hasPermission = hasAnyRole(rule.allowedRoles);
     
     if (!hasPermission) {
-      return <Navigate to="/unauthorized" replace />;
+      return <Navigate to="/home" replace />;
     }
 
     return <Component {...props} />;

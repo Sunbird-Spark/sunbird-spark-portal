@@ -17,7 +17,7 @@ export interface ProtectedRouteProps {
 export function ProtectedRoute({
   allowedRoles,
   requireAll = false,
-  unauthorizedTo = '/unauthorized',
+  unauthorizedTo = '/home',
   unauthenticatedTo = '/home',
   fallback,
   children,

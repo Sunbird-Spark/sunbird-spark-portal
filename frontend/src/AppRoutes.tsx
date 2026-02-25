@@ -6,7 +6,6 @@ import { ProtectedRoute } from './rbac/ProtectedRoute';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
-import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
 import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
@@ -41,7 +40,6 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Index />} />
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />

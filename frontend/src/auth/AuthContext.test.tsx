@@ -26,7 +26,6 @@ describe('AuthContext', () => {
       id: '123',
       name: 'Test User',
       roles: ['ADMIN'],
-      primaryRole: 'ADMIN',
     };
 
     act(() => {
@@ -44,7 +43,6 @@ describe('AuthContext', () => {
       id: '123',
       name: 'Test User',
       roles: ['CONTENT_CREATOR'],
-      primaryRole: 'CONTENT_CREATOR',
     };
 
     act(() => {
@@ -82,14 +80,12 @@ describe('AuthContext', () => {
         id: '123',
         name: `User ${role}`,
         roles: [role],
-        primaryRole: role,
       };
 
       act(() => {
         result.current.login(testUser);
       });
 
-      expect(result.current.user?.primaryRole).toBe(role);
     });
   });
 });

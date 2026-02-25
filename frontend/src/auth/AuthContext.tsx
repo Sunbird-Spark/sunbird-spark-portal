@@ -8,7 +8,6 @@ export interface User {
   id: string;
   name: string;
   roles: Role[];
-  primaryRole: Role;
 }
 
 interface AuthContextType {

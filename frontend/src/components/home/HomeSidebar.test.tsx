@@ -45,14 +45,11 @@ describe('HomeSidebar', () => {
             isAuthenticated: true,
             isLoading: false,
             roles: ['CONTENT_CREATOR'],
-            primaryRole: 'CONTENT_CREATOR',
             error: null,
             hasRole: vi.fn(),
             hasAnyRole: vi.fn(() => true),
             hasAllRoles: vi.fn(),
-            canAccessRoute: vi.fn(),
             canAccessFeature: vi.fn(),
-            getDefaultRoute: vi.fn(),
             refetch: vi.fn(),
         });
         vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
@@ -61,7 +58,7 @@ describe('HomeSidebar', () => {
 
 
     it('returns null when not authenticated', () => {
-        vi.mocked(usePermissions).mockReturnValue({ isAuthenticated: false, isLoading: false, roles: ['GUEST'], primaryRole: 'GUEST', error: null, hasRole: vi.fn(), hasAnyRole: vi.fn(), hasAllRoles: vi.fn(), canAccessRoute: vi.fn(), canAccessFeature: vi.fn(), getDefaultRoute: vi.fn(), refetch: vi.fn() });
+        vi.mocked(usePermissions).mockReturnValue({ isAuthenticated: false, isLoading: false, roles: ['GUEST'], error: null, hasRole: vi.fn(), hasAnyRole: vi.fn(), hasAllRoles: vi.fn(), canAccessFeature: vi.fn(), refetch: vi.fn() });
 
         const { container } = renderSidebar();
         expect(container.firstChild).toBeNull();

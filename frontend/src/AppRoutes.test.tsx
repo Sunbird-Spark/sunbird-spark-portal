@@ -8,7 +8,6 @@ import AppRoutes from "./AppRoutes";
 // Mock Pages
 // --------------------
 vi.mock("./pages/home/Home", () => ({ default: () => <div>Home Page</div> }));
-vi.mock("./pages/unauthorized/UnauthorizedPage", () => ({ default: () => <div>Unauthorized Page</div> }));
 vi.mock("./pages/admin/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
 vi.mock("./pages/workspace/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
 vi.mock("./pages/reports/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
@@ -47,14 +46,11 @@ describe("AppRoutes (RBAC routing tests)", () => {
       isAuthenticated: false,
       isLoading: false,
       roles: ['GUEST'],
-      primaryRole: 'GUEST',
       error: null,
       hasRole: vi.fn(),
       hasAnyRole: vi.fn(() => false),
       hasAllRoles: vi.fn(),
-      canAccessRoute: vi.fn(),
       canAccessFeature: vi.fn(),
-      getDefaultRoute: vi.fn(),
       refetch: vi.fn(),
     });
   });
@@ -101,21 +97,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     expect(screen.getByText("Onboarding Page")).toBeInTheDocument();
   });
 
-  it("public route: /unauthorized renders UnauthorizedPage", () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "1", name: "A", role: "content_creator" },
-      isAuthenticated: true,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
-    });
-
-    renderWithRoute("/unauthorized");
-    expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
-  });
-
-  it("redirect: / redirects to /home", async () => {
+  it("redirect: / redirects to /home", () => {
     mockUseAuth.mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -166,19 +148,16 @@ describe("AppRoutes (RBAC routing tests)", () => {
       isAuthenticated: true,
       isLoading: false,
       roles: ['CONTENT_CREATOR'],
-      primaryRole: 'CONTENT_CREATOR',
       error: null,
       hasRole: vi.fn(),
       hasAnyRole: vi.fn((roles: string[]) => roles.includes('CONTENT_CREATOR')),
       hasAllRoles: vi.fn(),
-      canAccessRoute: vi.fn(),
       canAccessFeature: vi.fn(),
-      getDefaultRoute: vi.fn(),
       refetch: vi.fn(),
     });
 
     renderWithRoute("/admin");
-    expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
+    expect(screen.getByText("Home Page")).toBeInTheDocument();
   });
 
   it("protected: authenticated admin can access /admin", () => {
@@ -186,14 +165,11 @@ describe("AppRoutes (RBAC routing tests)", () => {
       isAuthenticated: true,
       isLoading: false,
       roles: ['ADMIN'],
-      primaryRole: 'ADMIN',
       error: null,
       hasRole: vi.fn(),
       hasAnyRole: vi.fn((roles: string[]) => roles.includes('ADMIN')),
       hasAllRoles: vi.fn(),
-      canAccessRoute: vi.fn(),
       canAccessFeature: vi.fn(),
-      getDefaultRoute: vi.fn(),
       refetch: vi.fn(),
     });
 
