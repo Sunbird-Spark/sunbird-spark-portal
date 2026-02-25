@@ -148,7 +148,15 @@ describe('HomeContinueLearning', () => {
         });
         mockUseCollection.mockReturnValue({
             data: {
-                modules: [{ lessons: [{ id: 'lesson-1' }] }],
+                hierarchyRoot: {
+                    identifier: 'col-1',
+                    mimeType: 'application/vnd.ekstep.content-collection',
+                    children: [{
+                        identifier: 'mod-1',
+                        mimeType: 'application/vnd.ekstep.content-collection',
+                        children: [{ identifier: 'lesson-1', name: 'L1', mimeType: 'video/mp4' }],
+                    }],
+                },
             },
         });
 
@@ -183,7 +191,15 @@ describe('HomeContinueLearning', () => {
         });
         mockUseCollection.mockReturnValue({
             data: {
-                modules: [{ lessons: [{ id: 'first-lesson' }] }],
+                hierarchyRoot: {
+                    identifier: 'col-new',
+                    mimeType: 'application/vnd.ekstep.content-collection',
+                    children: [{
+                        identifier: 'mod-1',
+                        mimeType: 'application/vnd.ekstep.content-collection',
+                        children: [{ identifier: 'first-lesson', name: 'L1', mimeType: 'video/mp4' }],
+                    }],
+                },
             },
         });
 

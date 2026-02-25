@@ -1,11 +1,30 @@
+/* eslint-disable max-lines -- creator-viewing-own-collection test coverage */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import CollectionDetailPage from './CollectionDetailPage';
+import type { CertificatePreviewDetails } from '@/components/collection/CertificatePreviewModal';
 
 /* ── Collection / content data ── */
+const mockHierarchyRoot = {
+  identifier: 'col-1',
+  name: 'Test Collection',
+  children: [
+    {
+      identifier: 'mod-1',
+      name: 'Module 1',
+      primaryCategory: 'Subtitle',
+      mimeType: 'application/vnd.ekstep.content-collection',
+      children: [
+        { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+        { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
+      ],
+    },
+  ],
+};
+
 const mockCollectionData = {
   id: 'col-1',
   title: 'Test Collection',
@@ -14,17 +33,9 @@ const mockCollectionData = {
   units: 2,
   description: 'Test description',
   audience: ['Student'],
-  modules: [
-    {
-      id: 'mod-1',
-      title: 'Module 1',
-      subtitle: 'Subtitle',
-      lessons: [
-        { id: 'l1', title: 'Lesson 1', duration: '5:00', type: 'video' as const },
-        { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document' as const },
-      ],
-    },
-  ],
+  createdBy: undefined as string | undefined,
+  children: mockHierarchyRoot.children,
+  hierarchyRoot: mockHierarchyRoot,
 };
 
 /* ── Data hooks ── */
@@ -79,8 +90,15 @@ vi.mock('@/hooks/useQumlContent', () => ({
   useQumlContent: (questionSetId: string, options?: { enabled?: boolean }) => mockUseQumlContent(questionSetId, options),
 }));
 
+const mockUseCollectionDetailPlayer = vi.fn((_options: unknown) => ({
+  handlePlayerEvent: vi.fn(),
+  handleTelemetryEvent: vi.fn(),
+}));
+vi.mock('@/hooks/useCollectionDetailPlayer', () => ({
+  useCollectionDetailPlayer: (options: unknown) => mockUseCollectionDetailPlayer(options),
+}));
 vi.mock('@/hooks/useContentPlayer', () => ({
-  useContentPlayer: (options?: any) => ({
+  useContentPlayer: () => ({
     handlePlayerEvent: vi.fn(),
     handleTelemetryEvent: vi.fn(),
   }),
@@ -108,14 +126,31 @@ const mockAuthState = { isAuthenticated: false };
 vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => ({ isAuthenticated: mockAuthState.isAuthenticated }),
 }));
+const mockGetUserId = vi.fn((): string | null => null);
+const mockGetAuthInfo = vi.fn(() =>
+  Promise.resolve({ sid: '', uid: null, isAuthenticated: false })
+);
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
-  default: { isUserAuthenticated: () => false },
+  default: {
+    isUserAuthenticated: () => false,
+    getUserId: () => mockGetUserId(),
+    getAuthInfo: (...args: unknown[]) => mockGetAuthInfo(...(args as [])),
+  },
 }));
 
 /* ── useIsContentCreator (mutable) ── */
 let mockIsContentCreator = false;
 vi.mock('@/hooks/useUser', () => ({
   useIsContentCreator: () => mockIsContentCreator,
+}));
+
+let mockUserReadData: { data?: { data?: { response?: { firstName?: string; lastName?: string } } }; isLoading?: boolean; error?: unknown } = {
+  data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
+  isLoading: false,
+  error: null,
+};
+vi.mock('@/hooks/useUserRead', () => ({
+  useUserRead: () => mockUserReadData,
 }));
 
 /* ── Child components ── */
@@ -189,15 +224,24 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
     contentId,
     isContentCreator,
     collectionId,
-    isAuthenticated
+    isAuthenticated,
+    isCreatorViewingOwnCollection,
+    contentBlocked,
   }: {
     collectionData: any;
     contentId?: string;
     isContentCreator?: boolean;
     collectionId?: string;
     isAuthenticated?: boolean;
+    isCreatorViewingOwnCollection?: boolean;
+    contentBlocked?: boolean;
   }) => (
-    <div data-testid="collection-content-area" data-content-id={contentId ?? ''}>
+    <div
+      data-testid="collection-content-area"
+      data-content-id={contentId ?? ''}
+      data-is-creator-viewing-own={String(!!isCreatorViewingOwnCollection)}
+      data-content-blocked={String(!!contentBlocked)}
+    >
       <div data-testid="collection-overview">{collectionData?.title}</div>
       <div>
         {isAuthenticated && isContentCreator && (
@@ -212,10 +256,20 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
   ),
 }));
 
+let lastCertificateModalDetails: CertificatePreviewDetails | undefined;
 vi.mock('@/components/collection/CertificatePreviewModal', () => ({
-  default: ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-    open ? <div data-testid="certificate-modal">Certificate Preview</div> : null
-  ),
+  default: ({
+    open,
+    onClose: _onClose,
+    details,
+  }: {
+    open: boolean;
+    onClose: () => void;
+    details?: { recipientName?: string };
+  }) => {
+    lastCertificateModalDetails = details;
+    return open ? <div data-testid="certificate-modal">Certificate Preview</div> : null;
+  },
 }));
 
 /* ── Provider wrapper ── */
@@ -236,6 +290,14 @@ describe('CollectionDetailPage', () => {
     vi.clearAllMocks();
     mockAuthState.isAuthenticated = false; // default: unauthenticated
     mockIsContentCreator = false; // default: not a content creator
+    mockGetUserId.mockReturnValue(null);
+    mockCollectionData.createdBy = undefined;
+    lastCertificateModalDetails = undefined;
+    mockUserReadData = {
+      data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
+      isLoading: false,
+      error: null,
+    };
 
     mockUseCollection.mockReturnValue({
       data: mockCollectionData,
@@ -398,6 +460,7 @@ describe('CollectionDetailPage', () => {
     it('renders BatchCard when user IS authenticated AND useIsContentCreator returns true', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('batch-card')).toBeInTheDocument();
     });
@@ -405,6 +468,7 @@ describe('CollectionDetailPage', () => {
     it('does NOT render BatchCard when authenticated but useIsContentCreator returns false', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = false;
+      mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
     });
@@ -419,6 +483,7 @@ describe('CollectionDetailPage', () => {
     it('passes the correct collectionId to BatchCard', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('batch-card')).toHaveAttribute('data-collection-id', 'col-123');
     });
@@ -429,6 +494,7 @@ describe('CollectionDetailPage', () => {
     it('renders BatchCard BEFORE CollectionSidebar in the DOM', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
 
       const batchCard = screen.getByTestId('batch-card');
@@ -442,6 +508,7 @@ describe('CollectionDetailPage', () => {
     it('CollectionSidebar is present after BatchCard (array index check)', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
 
       const batchCard = screen.getByTestId('batch-card');
@@ -456,6 +523,7 @@ describe('CollectionDetailPage', () => {
     it('both BatchCard and CollectionSidebar share the same parent container', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
 
       const batchCard = screen.getByTestId('batch-card');
@@ -465,5 +533,161 @@ describe('CollectionDetailPage', () => {
         sidebar.parentElement
       );
     });
+  });
+
+  /* ─── Creator viewing own collection ─── */
+  describe('Creator viewing own collection (isCreatorViewingOwnCollection)', () => {
+    const creatorUserId = 'creator-1';
+
+    it('passes isCreatorViewingOwnCollection=true to CollectionContentArea when authenticated user is the collection creator', () => {
+      mockAuthState.isAuthenticated = true;
+      mockGetUserId.mockReturnValue(creatorUserId);
+      mockCollectionData.createdBy = creatorUserId;
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, createdBy: creatorUserId },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      const contentArea = screen.getByTestId('collection-content-area');
+      expect(contentArea).toHaveAttribute('data-is-creator-viewing-own', 'true');
+    });
+
+    it('passes contentBlocked=false when creator views own collection (content access without enrollment)', () => {
+      mockAuthState.isAuthenticated = true;
+      mockGetUserId.mockReturnValue(creatorUserId);
+      mockCollectionData.createdBy = creatorUserId;
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, createdBy: creatorUserId, trackable: { enabled: 'Yes' } },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      const contentArea = screen.getByTestId('collection-content-area');
+      expect(contentArea).toHaveAttribute('data-content-blocked', 'false');
+    });
+
+    it('does not navigate to batch URL when creator views own collection (skips batch redirect)', () => {
+      mockAuthState.isAuthenticated = true;
+      mockGetUserId.mockReturnValue(creatorUserId);
+      mockCollectionData.createdBy = creatorUserId;
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, createdBy: creatorUserId },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+      mockUseCollectionEnrollment.mockReturnValue({
+        ...mockEnrollment,
+        enrollmentForCollection: { batchId: 'batch-1' },
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(mockNavigate).not.toHaveBeenCalledWith(
+        '/collection/col-123/batch/batch-1',
+        expect.anything()
+      );
+    });
+
+    it('calls useCollectionDetailPlayer with skipContentStateUpdate true when creator views own collection', () => {
+      mockAuthState.isAuthenticated = true;
+      mockGetUserId.mockReturnValue(creatorUserId);
+      mockCollectionData.createdBy = creatorUserId;
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, createdBy: creatorUserId },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(mockUseCollectionDetailPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skipContentStateUpdate: true,
+        })
+      );
+    });
+
+    it('passes isCreatorViewingOwnCollection=false when user is not the creator', () => {
+      mockAuthState.isAuthenticated = true;
+      mockGetUserId.mockReturnValue('other-user-id');
+      mockCollectionData.createdBy = creatorUserId;
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, createdBy: creatorUserId },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      const contentArea = screen.getByTestId('collection-content-area');
+      expect(contentArea).toHaveAttribute('data-is-creator-viewing-own', 'false');
+    });
+  });
+
+  describe('Certificate preview details', () => {
+    it('passes recipientName (firstName + lastName) to CertificatePreviewModal', () => {
+      mockUserReadData = {
+        data: { data: { response: { firstName: 'Jane', lastName: 'Doe' } } },
+        isLoading: false,
+        error: null,
+      };
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, title: 'My Course' },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails).toEqual({ recipientName: 'Jane Doe' });
+    });
+
+    it('passes undefined recipientName when user profile has no name', () => {
+      mockUserReadData = {
+        data: { data: { response: {} } },
+        isLoading: false,
+        error: null,
+      };
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails?.recipientName).toBeUndefined();
+    });
+
+    it('passes only firstName as recipientName when lastName is missing', () => {
+      mockUserReadData = {
+        data: { data: { response: { firstName: 'OnlyFirst' } } },
+        isLoading: false,
+        error: null,
+      };
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails?.recipientName).toBe('OnlyFirst');
+    });
+
+    it('passes only lastName as recipientName when firstName is missing', () => {
+      mockUserReadData = {
+        data: { data: { response: { lastName: 'OnlyLast' } } },
+        isLoading: false,
+        error: null,
+      };
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      expect(lastCertificateModalDetails?.recipientName).toBe('OnlyLast');
+    });
+
   });
 });

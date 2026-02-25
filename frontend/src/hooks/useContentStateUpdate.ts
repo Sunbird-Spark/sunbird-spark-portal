@@ -20,6 +20,8 @@ interface UseContentStateUpdateParams {
   currentContentStatus?: number;
   /** Called once when content transitions to completed (status 2). */
   onCompletion?: () => void;
+  /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
+  skipContentStateUpdate?: boolean;
 }
 
 /** Telemetry callback receives the raw player detail (e.g. { eid, edata }), not { type, data }. */
@@ -44,6 +46,7 @@ export function useContentStateUpdate({
   mimeType,
   currentContentStatus,
   onCompletion,
+  skipContentStateUpdate = false,
 }: UseContentStateUpdateParams): (event: TelemetryEvent) => void {
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
@@ -79,6 +82,7 @@ export function useContentStateUpdate({
 
   return useCallback(
     (event: TelemetryEvent) => {
+      if (skipContentStateUpdate) return;
       if (!isEnrolledInCurrentBatch || !collectionId || !contentId || !effectiveBatchId) return;
       if (isBatchEnded) return;
       if (currentContentStatus === 2) return;
@@ -110,6 +114,7 @@ export function useContentStateUpdate({
       }
     },
     [
+      skipContentStateUpdate,
       isEnrolledInCurrentBatch,
       isBatchEnded,
       collectionId,

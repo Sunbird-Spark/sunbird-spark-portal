@@ -210,6 +210,6 @@ describe('SignUp Page', () => {
         });
 
         fireEvent.click(screen.getByTestId('proceed-btn'));
-        expect(window.location.href).toBe('/profile');
+        expect(window.location.href).toBe('/portal/login');
     });
 });

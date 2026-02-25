@@ -44,6 +44,34 @@ export class ContentService {
     return getClient().delete('/content/v1/retire', { request: { contentIds } });
   }
 
+  public async contentPublish(
+    contentId: string,
+    lastPublishedBy: string
+  ): Promise<ApiResponse<any>> {
+    return getClient().post<any>(`/content/v1/publish/${contentId}`, {
+      request: {
+        content: {
+          lastPublishedBy,
+        },
+      },
+    });
+  }
+
+  public async contentReject(
+    contentId: string,
+    rejectReasons: string[],
+    rejectComment?: string
+  ): Promise<ApiResponse<any>> {
+    return getClient().post<any>(`/content/v1/reject/${contentId}`, {
+      request: {
+        content: {
+          rejectReasons: rejectReasons.length > 0 ? rejectReasons : ['Others'],
+          rejectComment: rejectComment || '',
+        },
+      },
+    });
+  }
+
   public async contentCreate(
     name: string,
     options: {
@@ -58,6 +86,8 @@ export class ContentService {
       organisation?: string[];
       createdFor?: string[];
       targetFWIds?: string[];
+      /** Dynamic fields for framework related configs */
+      extraFields?: Record<string, string | string[] | number>;
     }
   ): Promise<ApiResponse<ContentCreateResponse>> {
     return getClient().post<ContentCreateResponse>('/content/v1/create', {
@@ -69,13 +99,14 @@ export class ContentService {
           creator: options.creator,
           mimeType: options.mimeType ?? 'application/vnd.ekstep.ecml-archive',
           contentType: options.contentType ?? 'Resource',
-          primaryCategory: options.primaryCategory ?? 'Learning Resource',
+          ...(options.primaryCategory ? { primaryCategory: options.primaryCategory } : {}),
           ...(options.framework && { framework: options.framework }),
           ...(options.description && { description: options.description }),
           ...(options.resourceType && { resourceType: options.resourceType }),
           ...(options.organisation?.length && { organisation: options.organisation }),
           ...(options.createdFor?.length && { createdFor: options.createdFor }),
           ...(options.targetFWIds?.length && { targetFWIds: options.targetFWIds }),
+          ...options.extraFields,
         },
       },
     });
