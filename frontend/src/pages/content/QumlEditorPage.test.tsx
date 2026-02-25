@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import QumlEditorPage from './QumlEditorPage';
 
-const { mockNavigate, mockParams, mockGetQuestionset, mockToast } = vi.hoisted(() => ({
+const { mockNavigate, mockParams, mockGetQuestionset, mockToast, mockRetireLock } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
   mockParams: { contentId: 'do_456' as string | undefined },
   mockGetQuestionset: vi.fn(),
   mockToast: vi.fn(),
+  mockRetireLock: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('react-router-dom', async () => {
@@ -40,6 +42,15 @@ vi.mock('@/hooks/useUserRead', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useContentLock', () => ({
+  useContentLock: () => ({
+    lockKey: null,
+    lockError: null,
+    isLocking: false,
+    retireLock: mockRetireLock,
+  }),
+}));
+
 vi.mock('@/components/common/PageLoader', () => ({
   default: ({ message }: { message: string }) => <div data-testid="page-loader">{message}</div>,
 }));
@@ -66,6 +77,10 @@ vi.mock('@/components/quml-editor/QumlEditor', () => ({
   ),
 }));
 
+const renderWithRouter = (component: React.ReactElement) => {
+  return render(<MemoryRouter>{component}</MemoryRouter>);
+};
+
 describe('QumlEditorPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -84,12 +99,12 @@ describe('QumlEditorPage', () => {
       () => new Promise(() => undefined) as ReturnType<typeof mockGetQuestionset>
     );
 
-    render(<QumlEditorPage />);
+    renderWithRouter(<QumlEditorPage />);
     expect(screen.getByTestId('page-loader')).toHaveTextContent('Loading editor...');
   });
 
   it('renders quml editor in edit mode for Draft status', async () => {
-    render(<QumlEditorPage />);
+    renderWithRouter(<QumlEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('quml-editor')).toBeInTheDocument();
@@ -109,7 +124,7 @@ describe('QumlEditorPage', () => {
       },
     });
 
-    render(<QumlEditorPage />);
+    renderWithRouter(<QumlEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('quml-editor')).toBeInTheDocument();
@@ -127,7 +142,7 @@ describe('QumlEditorPage', () => {
       },
     });
 
-    render(<QumlEditorPage />);
+    renderWithRouter(<QumlEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('editor-mode')).toHaveTextContent('review');
@@ -137,7 +152,7 @@ describe('QumlEditorPage', () => {
   it('shows error toast and fallback when metadata fetch fails', async () => {
     mockGetQuestionset.mockRejectedValue(new Error('failed'));
 
-    render(<QumlEditorPage />);
+    renderWithRouter(<QumlEditorPage />);
 
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(
@@ -158,7 +173,7 @@ describe('QumlEditorPage', () => {
   it('shows fallback when contentId is absent', async () => {
     mockParams.contentId = undefined;
 
-    render(<QumlEditorPage />);
+    renderWithRouter(<QumlEditorPage />);
 
     await waitFor(() => {
       expect(screen.queryByTestId('quml-editor')).not.toBeInTheDocument();
@@ -168,13 +183,18 @@ describe('QumlEditorPage', () => {
   });
 
   it('navigates back to workspace when editor emits close event', async () => {
-    render(<QumlEditorPage />);
+    renderWithRouter(<QumlEditorPage />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Close editor' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Close editor' }));
+    
+    await waitFor(() => {
+      expect(mockRetireLock).toHaveBeenCalled();
+    });
+    
     expect(mockNavigate).toHaveBeenCalledWith('/workspace');
   });
 });

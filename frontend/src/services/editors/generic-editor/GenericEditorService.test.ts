@@ -14,11 +14,13 @@ import {
 
 const mockGet = vi.fn();
 const mockPost = vi.fn();
+const mockDelete = vi.fn();
 
 vi.mock('../../../lib/http-client', () => ({
   getClient: () => ({
     get: mockGet,
     post: mockPost,
+    delete: mockDelete,
   }),
 }));
 
@@ -188,11 +190,11 @@ describe('GenericEditorService', () => {
 
   describe('retireLock', () => {
     it('should send correct payload to retire lock', async () => {
-      mockPost.mockResolvedValue({ data: {} });
+      mockDelete.mockResolvedValue({ data: {} });
 
       await service.retireLock('do_123');
 
-      expect(mockPost).toHaveBeenCalledWith('/lock/v1/retire', {
+      expect(mockDelete).toHaveBeenCalledWith('/lock/v1/retire', {
         request: {
           resourceId: 'do_123',
           resourceType: 'Content',
