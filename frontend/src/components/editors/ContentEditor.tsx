@@ -15,6 +15,8 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const serviceRef = useRef<ContentEditorService>(new ContentEditorService());
+  const isInitializedRef = useRef(false);
+  const currentIdentifierRef = useRef<string | null>(null);
 
   const handleEditorEvent = useCallback((event: ContentEditorEvent) => {
     onEditorEvent?.(event);
@@ -27,6 +29,11 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
+
+    // Only initialize if the content identifier has changed or it's the first load
+    if (isInitializedRef.current && currentIdentifierRef.current === metadata.identifier) {
+      return;
+    }
 
     const service = serviceRef.current;
     let cancelled = false;
@@ -101,6 +108,10 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
 
         const editorUrl = service.getEditorUrl();
         iframe.src = editorUrl;
+        
+        // Mark as initialized and store current identifier
+        isInitializedRef.current = true;
+        currentIdentifierRef.current = metadata.identifier;
       } catch (error) {
         console.error('Failed to initialize Content Editor:', error);
       }
@@ -111,23 +122,30 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
     return () => {
       cancelled = true;
       window.removeEventListener('message', messageHandler);
-      // Set iframe src first so the editor can gracefully unload
-      // while global properties still exist
-      if (iframe) {
-        iframe.onload = null;
-        iframe.src = 'about:blank';
-      }
-      // Clean up global window properties
-      delete (window as any).context;
-      delete (window as any).config;
-      // Restore previous jQuery if any, otherwise remove shim
-      if (previousJQuery) {
-        (window as any).$ = previousJQuery;
-      } else {
-        delete (window as any).$;
+      // Only clean up if we're actually unmounting (not just re-rendering)
+      // Check if the component is being unmounted by seeing if iframe still exists
+      if (!document.body.contains(iframe)) {
+        // Set iframe src first so the editor can gracefully unload
+        // while global properties still exist
+        if (iframe) {
+          iframe.onload = null;
+          iframe.src = 'about:blank';
+        }
+        // Clean up global window properties
+        delete (window as any).context;
+        delete (window as any).config;
+        // Restore previous jQuery if any, otherwise remove shim
+        if (previousJQuery) {
+          (window as any).$ = previousJQuery;
+        } else {
+          delete (window as any).$;
+        }
+        // Reset initialization flag
+        isInitializedRef.current = false;
+        currentIdentifierRef.current = null;
       }
     };
-  }, [metadata, handleEditorEvent]);
+  }, [metadata.identifier, handleEditorEvent]); // Only depend on identifier, not entire metadata object
 
   return (
     <iframe

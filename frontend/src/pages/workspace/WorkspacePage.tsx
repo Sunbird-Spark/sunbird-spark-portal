@@ -205,6 +205,12 @@ const WorkspacePage = () => {
     [contents, retiredContentIds],
   );
 
+  // Memoize content IDs to prevent unnecessary lock list API calls
+  const visibleContentIds = useMemo(
+    () => visibleContents.map((c) => c.id).sort().join(','),
+    [visibleContents],
+  );
+
   // Fetch lock list for creator role to show lock icons on content cards.
   const [lockedContentMap, setLockedContentMap] = useState<Record<string, { creatorName: string }>>(
     {},
@@ -242,7 +248,7 @@ const WorkspacePage = () => {
     return () => {
       cancelled = true;
     };
-  }, [userRole, visibleContents]);
+  }, [userRole, visibleContentIds]); // Changed from visibleContents to visibleContentIds
 
   // Reset view when role changes
   useEffect(() => {

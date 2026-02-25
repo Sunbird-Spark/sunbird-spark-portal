@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
 import PageLoader from '@/components/common/PageLoader';
 import EditorErrorState from '@/components/editors/EditorErrorState';
 import { ContentEditor } from '@/components/editors/ContentEditor';
@@ -18,14 +19,20 @@ const ContentEditorPage = () => {
     metadata: contentData ?? null,
   });
 
-  const handleEditorEvent = (event: ContentEditorEvent) => {
+  // Memoize the event handler to prevent unnecessary re-renders
+  const handleEditorEvent = useCallback((event: ContentEditorEvent) => {
     console.warn('Content editor event:', event);
-  };
+  }, []);
 
-  const handleClose = async () => {
+  // Memoize the close handler to prevent unnecessary re-renders
+  const handleClose = useCallback(async () => {
     await retireLock();
     navigate('/workspace');
-  };
+  }, [retireLock, navigate]);
+
+  // Memoize contentData to prevent unnecessary re-renders when object reference changes
+  // but actual content hasn't changed
+  const stableMetadata = useMemo(() => contentData, [contentData?.identifier]);
 
   if (isLoading || isLocking) {
     return <PageLoader message={isLocking ? "Acquiring content lock..." : "Loading editor..."} />;
@@ -39,14 +46,14 @@ const ContentEditorPage = () => {
     return <EditorErrorState message={`Error loading content: ${error.message}`} showRetry />;
   }
 
-  if (!contentData) {
+  if (!stableMetadata) {
     return <EditorErrorState message="Content not found" />;
   }
 
   return (
     <div className="w-full h-screen">
       <ContentEditor
-        metadata={contentData}
+        metadata={stableMetadata}
         onEditorEvent={handleEditorEvent}
         onClose={handleClose}
       />

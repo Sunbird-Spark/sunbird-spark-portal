@@ -38,12 +38,23 @@ export const useContentLock = ({
   const [lockError, setLockError] = useState<string | null>(null);
   const [isLocking, setIsLocking] = useState(false);
 
+  // Store metadata in a ref to avoid recreating acquireLock on every metadata change
+  const metadataRef = useRef(metadata);
+  metadataRef.current = metadata;
+
+  // Track if we've already attempted to acquire a lock for this resource
+  const attemptedLockRef = useRef<string | null>(null);
+
   const acquireLock = useCallback(async () => {
-    if (!resourceId || !metadata || !enabled) return;
+    if (!resourceId || !metadataRef.current || !enabled) return;
+
+    // Skip if we've already attempted to lock this resource
+    if (attemptedLockRef.current === resourceId) return;
 
     // If we already have a lockKey (e.g. from query params), skip acquiring.
     if (searchParams.get('lockKey')) {
       setLockKey(searchParams.get('lockKey'));
+      attemptedLockRef.current = resourceId;
       return;
     }
 
@@ -58,10 +69,11 @@ export const useContentLock = ({
       ? `${userProfile.firstName ?? ''} ${userProfile.lastName ?? ''}`.trim() || 'User'
       : 'User';
 
+    const currentMetadata = metadataRef.current;
     const resourceInfo = JSON.stringify({
-      contentType: metadata.contentType ?? metadata.primaryCategory ?? '',
+      contentType: currentMetadata.contentType ?? currentMetadata.primaryCategory ?? '',
       identifier: resourceId,
-      mimeType: metadata.mimeType ?? '',
+      mimeType: currentMetadata.mimeType ?? '',
     });
 
     const creatorInfo = JSON.stringify({
@@ -84,6 +96,7 @@ export const useContentLock = ({
 
       const result: LockCreateResponse = response.data;
       setLockKey(result.lockKey);
+      attemptedLockRef.current = resourceId;
 
       // Persist lockKey in query params so editors / downstream consumers can read it.
       setSearchParams(
@@ -103,10 +116,11 @@ export const useContentLock = ({
       } else {
         setLockError('Failed to acquire content lock.');
       }
+      attemptedLockRef.current = resourceId; // Mark as attempted even on error
     } finally {
       setIsLocking(false);
     }
-  }, [resourceId, metadata, enabled, searchParams, setSearchParams, userData]);
+  }, [resourceId, enabled, searchParams, setSearchParams, userData, resourceType]); // Removed metadata from dependencies
 
   useEffect(() => {
     acquireLock();
