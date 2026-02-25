@@ -115,10 +115,10 @@ const ContentReviewPage = () => {
         setDialogFormFields(response.data.form.data.fields);
         setDialogMode(mode);
       } else {
-        toast({ title: 'Form Load Failed', description: `Unable to load the ${action} form.`, variant: 'destructive' });
+        toast({ title: 'Error', description: `Failed to load ${action} form.`, variant: 'destructive' });;
       }
     } catch {
-      toast({ title: 'Form Load Failed', description: `Unable to load the ${action} form. Please try again.`, variant: 'destructive' });
+      toast({ title: 'Error', description: `Failed to load ${action} form. Please try again.`, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
