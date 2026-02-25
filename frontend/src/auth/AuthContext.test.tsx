@@ -25,7 +25,7 @@ describe('AuthContext', () => {
     const testUser: User = {
       id: '123',
       name: 'Test User',
-      roles: ['ADMIN'],
+      roles: ['CONTENT_CREATOR'],
     };
 
     act(() => {
@@ -73,7 +73,7 @@ describe('AuthContext', () => {
   it('should support all role types', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
-    const roles: Role[] = ['ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'GUEST'];
+    const roles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'GUEST'];
 
     roles.forEach((role) => {
       const testUser: User = {

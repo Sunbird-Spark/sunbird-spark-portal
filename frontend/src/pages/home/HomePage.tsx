@@ -45,7 +45,6 @@ const HomePage: React.FC = () => {
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value as Role)}
           >
-            <option value="ADMIN">Admin</option>
             <option value="CONTENT_CREATOR">Content Creator</option>
             <option value="CONTENT_REVIEWER">Content Reviewer</option>
             <option value="GUEST">Guest</option>

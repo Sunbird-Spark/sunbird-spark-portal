@@ -6,20 +6,14 @@ export type Feature =
   | 'edit_content'
   | 'delete_content'
   | 'review_content'
-  | 'publish_content'
-  | 'view_workspace'
-  | 'view_reports'
-  | 'manage_users';
+  | 'view_workspace';
 
 const FEATURE_PERMISSIONS: Record<Feature, Role[]> = {
-  create_content: ['ADMIN', 'CONTENT_CREATOR'],
-  edit_content: ['ADMIN', 'CONTENT_CREATOR'],
-  delete_content: ['ADMIN', 'CONTENT_CREATOR'],
-  review_content: ['ADMIN', 'CONTENT_REVIEWER'],
-  publish_content: ['ADMIN'],
-  view_workspace: ['ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER'],
-  view_reports: ['ADMIN'],
-  manage_users: ['ADMIN'],
+  create_content: ['CONTENT_CREATOR'],
+  edit_content: ['CONTENT_CREATOR'],
+  delete_content: ['CONTENT_CREATOR'],
+  review_content: ['CONTENT_REVIEWER'],
+  view_workspace: ['CONTENT_CREATOR', 'CONTENT_REVIEWER'],
 };
 
 class PermissionService {
@@ -50,7 +44,7 @@ class PermissionService {
 
   normalizeRoles(backendRoles: string[]): Role[] {
     const validRoles: Role[] = [];
-    const knownRoles: Role[] = ['ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'GUEST'];
+    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'GUEST'];
 
     for (const role of backendRoles) {
       if (role === 'PUBLIC' || role === 'ANONYMOUS') {
