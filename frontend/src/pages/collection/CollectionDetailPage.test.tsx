@@ -119,7 +119,7 @@ vi.mock('@/hooks/usePermission', () => ({
   usePermissions: () => ({
     isAuthenticated: mockAuthState.isAuthenticated,
     isLoading: false,
-    roles: mockAuthState.isAuthenticated ? ['CONTENT_CREATOR'] : ['GUEST'],
+    roles: mockAuthState.isAuthenticated ? ['CONTENT_CREATOR'] : ['PUBLIC'],
     error: null,
     hasRole: vi.fn(),
     hasAnyRole: vi.fn(),

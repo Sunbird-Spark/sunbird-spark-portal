@@ -32,7 +32,7 @@ vi.mock('@/hooks/usePermission', () => ({
   usePermissions: vi.fn(() => ({
     isAuthenticated: false,
     isLoading: false,
-    roles: ['GUEST'],
+    roles: ['PUBLIC'],
     error: null,
     hasRole: vi.fn(),
     hasAnyRole: vi.fn(),

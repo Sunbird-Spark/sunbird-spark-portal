@@ -4,7 +4,7 @@ import { Role } from '../auth/AuthContext';
 export type Feature = 'view_workspace';
 
 const FEATURE_PERMISSIONS: Record<Feature, Role[]> = {
-  view_workspace: ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'COURSE_MENTOR'],
+  view_workspace: ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER'],
 };
 
 class PermissionService {
@@ -35,14 +35,11 @@ class PermissionService {
 
   normalizeRoles(backendRoles: string[]): Role[] {
     const validRoles: Role[] = [];
-    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'COURSE_MENTOR', 'GUEST'];
+    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'PUBLIC'];
 
     for (const role of backendRoles) {
-      if (role === 'PUBLIC' || role === 'ANONYMOUS') {
-        if (!validRoles.includes('GUEST')) {
-          validRoles.push('GUEST');
-        }
-        continue;
+      if (role === 'ANONYMOUS') {
+        continue; // unauthenticated — isAuthenticated flag handles redirects
       }
 
       if (knownRoles.includes(role as Role)) {
@@ -52,7 +49,7 @@ class PermissionService {
       }
     }
 
-    return validRoles.length > 0 ? validRoles : ['GUEST'];
+    return validRoles.length > 0 ? validRoles : ['PUBLIC'];
   }
 }
 

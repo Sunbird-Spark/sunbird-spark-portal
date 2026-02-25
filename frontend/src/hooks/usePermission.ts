@@ -41,10 +41,10 @@ export function usePermissions(): UsePermissionsReturn {
       setError(err as Error);
       const status = (err as { response?: { status?: number }; status?: number })?.response?.status ?? (err as { status?: number })?.status;
       if (status === 401 || status === 403) {
-        setRoles(['GUEST']);
+        setRoles(['PUBLIC']);
         setIsAuthenticated(false);
       } else {
-        setRoles(prev => prev.length ? prev : ['GUEST']);
+        setRoles(prev => prev.length ? prev : ['PUBLIC']);
       }
     } finally {
       if (isMountedRef.current) setIsLoading(false);

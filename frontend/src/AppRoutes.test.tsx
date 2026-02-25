@@ -45,7 +45,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     mockUsePermissions.mockReturnValue({
       isAuthenticated: false,
       isLoading: false,
-      roles: ['GUEST'],
+      roles: ['PUBLIC'],
       error: null,
       hasRole: vi.fn(),
       hasAnyRole: vi.fn(() => false),

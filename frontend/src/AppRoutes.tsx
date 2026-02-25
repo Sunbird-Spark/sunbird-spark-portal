@@ -57,7 +57,7 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected routes */}
         <Route path="/workspace" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'COURSE_MENTOR']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
             <WorkspacePage />
           </ProtectedRoute>
         } />
@@ -69,6 +69,11 @@ const AppRoutes: React.FC = () => {
         <Route path="/create" element={
           <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
             <CreateContentPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-learning" element={
+          <ProtectedRoute allowedRoles={[]}>
+            <MyLearning />
           </ProtectedRoute>
         } />
         <Route path="/edit/content-editor/:contentId" element={

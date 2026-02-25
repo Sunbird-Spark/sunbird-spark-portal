@@ -170,7 +170,7 @@ function renderWithProviders(ui: React.ReactElement) {
 const makePermissions = (isAuthenticated: boolean) => ({
   isAuthenticated,
   isLoading: false,
-  roles: ['GUEST' as const],
+  roles: ['PUBLIC' as const],
   error: null,
   hasRole: vi.fn(),
   hasAnyRole: vi.fn(),
