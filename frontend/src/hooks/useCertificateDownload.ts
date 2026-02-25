@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { convertSvgToOutput } from '@/utils/svg-converter';
-import { populateSvgTemplate } from '@/utils/svg-template-populator';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { IssuedCertificate } from '@/types/TrackableCollections';
 import { toast } from '@/hooks/useToast';
 import { head } from 'lodash';
-import { UserService } from '@/services/UserService';
-
-const userService = new UserService();
+import { certificateService } from '@/services/CertificateService';
 
 export const useCertificateDownload = () => {
     const [downloadingCourseId, setDownloadingCourseId] = useState<string | null>(null);
@@ -38,34 +35,34 @@ export const useCertificateDownload = () => {
         setError(null);
 
         try {
+            // Step 1: Get certificate ID from issued certificates
             const matchingCert = getMatchingCert(courseId, batchId, courseName, issuedCertificates);
+            let certId = matchingCert?.identifier || matchingCert?.token;
 
-            if (!matchingCert) {
+            // Step 2: If no ID in enrollment data, search RC registry
+            if (!certId && userId) {
+                const searchResponse = await certificateService.searchCertificates(userId);
+                const certs = Array.isArray(searchResponse.data) ? searchResponse.data : [];
+                const rcCert = certs.find(
+                    (c: any) => c.training?.id === courseId && (!batchId || c.training?.batchId === batchId)
+                );
+                certId = rcCert?.osid ?? (rcCert as any)?.identifier;
+            }
+
+            if (!certId) {
                 throw new Error('Certificate is not yet generated or available for this course.');
             }
 
-            const certId = matchingCert.identifier || matchingCert.token;
+            // Step 3: Download fully-populated certificate from RC service
+            const certResponse = await certificateService.downloadCertificate(certId);
+            const svgContent = certResponse.data;
 
-            if (!certId) {
-                throw new Error('Certificate ID is missing.');
+            if (!svgContent) {
+                throw new Error('Empty certificate received from server.');
             }
 
-            const templateUrl = 'templateUrl' in matchingCert ? matchingCert.templateUrl : undefined;
-            if (!templateUrl) {
-                throw new Error('Certificate template URL is missing.');
-            }
-
-            const userResponse = await userService.userRead(userId);
-            const userProfile = userResponse.data.response;
-            const userName = `${userProfile.firstName} ${userProfile.lastName}`.trim();
-            const completionDate = completedOn ? new Date(completedOn).toISOString() : new Date().toISOString();
-
-            const response = await fetch(templateUrl);
-            if (!response.ok) throw new Error(`Failed to fetch certificate: ${response.statusText}`);
-
-            const svgString = await response.text();
-            const populatedSvg = populateSvgTemplate(svgString, userName, courseName, completionDate);
-            await convertSvgToOutput(populatedSvg, { fileName: courseName || 'certificate' });
+            // Step 4: Convert SVG → PDF and trigger download
+            await convertSvgToOutput(svgContent, { fileName: courseName || 'certificate' });
 
         } catch (err: any) {
             console.error('Certificate download error:', err);
