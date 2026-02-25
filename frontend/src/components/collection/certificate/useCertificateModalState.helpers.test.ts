@@ -59,7 +59,6 @@ describe('useCertificateModalState.helpers', () => {
       expect(result).toEqual([{
         id: 'b1',
         certTemplates: {
-          'old-t': { identifier: 'old-t', name: 'old' },
           't1': { identifier: 't1', name: 'New Cert' }
         }
       }]);
@@ -152,12 +151,14 @@ describe('useCertificateModalState.helpers', () => {
       };
 
       const svgText = `
-        <text id="certTitle">Old Title</text>
-        <text id="stateTitle">Old Name</text>
-        <image id="stateLogo1" xlink:href="old1"/>
-        <image id="stateLogo2" xlink:href="old2"/>
-        <image id="signatureImg1" xlink:href="oldsig"/>
-        <text id="signatureTitle1">Old Sig Name</text>
+        <svg>
+          <text id="certTitle">Old Title</text>
+          <text id="stateTitle">Old Name</text>
+          <image id="stateLogo1" xlink:href="old1"/>
+          <image id="stateLogo2" xlink:href="old2"/>
+          <image id="signatureImg1" xlink:href="oldsig"/>
+          <text id="signatureTitle1">Old Sig Name</text>
+        </svg>
       `;
 
       const result = await generateModifiedSvg(svgText, newTmpl);
@@ -184,8 +185,10 @@ describe('useCertificateModalState.helpers', () => {
       };
 
       const svgText = `
-        <image id="stateLogo1" xlink:href="old1"/>
-        <image id="stateLogo2" xlink:href="old2"/>
+        <svg>
+          <image id="stateLogo1" xlink:href="old1"/>
+          <image id="stateLogo2" xlink:href="old2"/>
+        </svg>
       `;
 
       const result = await generateModifiedSvg(svgText, newTmpl);
@@ -219,7 +222,7 @@ describe('useCertificateModalState.helpers', () => {
       const result = await fetchTemplateDetails('t1', '', {});
       expect(result.fullSignatoryList).toEqual([
         { name: 'A', designation: '', id: 'A/A', image: '' },
-        { name: '', designation: 'B', id: 'undefined/undefined', image: '' }
+        { name: '', designation: 'B', id: 'Unknown/B', image: '' }
       ]);
       expect(result.fullPreviewUrl).toBe('new-url');
       expect(result.fullIssuer).toEqual({ name: 'new-issuer' });
