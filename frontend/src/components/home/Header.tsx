@@ -29,6 +29,10 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  if (isLoading && location.pathname !== "/") {
+    return <div className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)] h-16 md:h-[4.5rem]" />;
+  }
+
   if (!isLoading && isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
     if (import.meta.env.MODE !== "production") {
       // Warn when authenticated header is rendered without a real sidebar toggle handler.

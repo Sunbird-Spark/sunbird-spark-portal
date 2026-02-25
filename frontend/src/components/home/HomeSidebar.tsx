@@ -85,8 +85,8 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                     Icon = GoHomeFill;
                 }
 
-                const button = (
-                    <li key={item.id}>
+                const listItem = (
+                    <li>
                         <button
                             onClick={() => handleNavClick(item)}
                             className={`
@@ -105,15 +105,15 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                     </li>
                 );
 
-                if (item.feature) {
-                    return (
-                        <PermissionGate key={item.id} feature={item.feature} hide>
-                            {button}
-                        </PermissionGate>
-                    );
-                }
-
-                return button;
+                return (
+                    <React.Fragment key={item.id}>
+                        {item.feature ? (
+                            <PermissionGate feature={item.feature} hide>
+                                {listItem}
+                            </PermissionGate>
+                        ) : listItem}
+                    </React.Fragment>
+                );
             })}
         </ul>
     );

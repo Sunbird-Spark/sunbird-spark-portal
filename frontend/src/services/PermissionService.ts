@@ -55,7 +55,10 @@ class PermissionService {
 
   canAccessFeature(userRoles: string[], feature: Feature): boolean {
     const allowedRoles = FEATURE_PERMISSIONS[feature];
-    if (!allowedRoles) return false;
+    if (!allowedRoles) {
+      console.warn(`Unknown feature encountered in canAccessFeature: ${feature}`);
+      return false;
+    }
     return this.hasAnyRole(userRoles, allowedRoles);
   }
 

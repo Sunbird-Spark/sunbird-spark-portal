@@ -1,5 +1,5 @@
-// frontend/src/hooks/usePermissions.ts
-import { useEffect, useState, useCallback, useMemo } from 'react';
+// frontend/src/hooks/usePermission.ts
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Role } from '../auth/AuthContext';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import permissionService, { Feature } from '../services/PermissionService';
@@ -24,6 +24,7 @@ export function usePermissions(): UsePermissionsReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const isMountedRef = useRef(true);
 
   const fetchRoles = useCallback(async () => {
     try {
@@ -31,23 +32,29 @@ export function usePermissions(): UsePermissionsReturn {
       setError(null);
 
       const authInfo = await userAuthInfoService.getAuthInfo();
+      if (!isMountedRef.current) return;
+
       const backendRoles = authInfo.roles || [];
-      
       const normalizedRoles = permissionService.normalizeRoles(backendRoles);
       setRoles(normalizedRoles);
       setIsAuthenticated(authInfo.isAuthenticated);
     } catch (err) {
+      if (!isMountedRef.current) return;
       console.error('Failed to fetch user roles:', err);
       setError(err as Error);
       setRoles(['GUEST']);
       setIsAuthenticated(false);
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
     fetchRoles();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [fetchRoles]);
 
   const primaryRole = useMemo(() => {
