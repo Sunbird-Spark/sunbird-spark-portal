@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { ContentService } from '@/services/ContentService';
 import { mapContentToWorkspaceItem } from '@/services/workspace';
@@ -113,13 +113,6 @@ export function useWorkspace({
 
     return { all, drafts, review, published, pendingReview: review };
   }, [countsQuery.data, isReviewerMode]);
-
-  // Invalidate counts whenever the active tab changes so badge numbers stay fresh.
-  useEffect(() => {
-    if (queryEnabled) {
-      void queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
-    }
-  }, [activeTab, queryClient, userId, queryEnabled]);
 
   // ── Content query (per tab, paginated) ────────────────────────────────
   const statusFilter = getStatusFilterForTab(activeTab);
