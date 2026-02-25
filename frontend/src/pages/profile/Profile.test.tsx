@@ -55,7 +55,12 @@ vi.mock('react-router-dom', async () => {
 const mockChangeLanguage = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => key,
+        t: (key: string) => {
+            if (key === 'profilePage.loading') return 'Loading...';
+            if (key === 'profilePage.errorLoading') return 'Error loading profile...';
+            if (key === 'navigationMenu') return 'Navigation Menu';
+            return key;
+        },
         languages: [
             { code: 'en', label: 'English' },
             { code: 'hi', label: 'Hindi' },

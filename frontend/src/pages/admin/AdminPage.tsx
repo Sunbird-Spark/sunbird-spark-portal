@@ -1,20 +1,22 @@
 import React from 'react';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const AdminPage: React.FC = () => {
+  const { t } = useAppI18n();
   return (
     <div>
       <div>
-        <h1>Admin Dashboard</h1>
+        <h1>{t('admin.dashboard')}</h1>
       </div>
 
       <div>
-        <h2>Admin Controls</h2>
-        <p>This page is only accessible to users with the <strong>admin</strong> role.</p>
+        <h2>{t('admin.controls')}</h2>
+        <p>{t('admin.accessRestricted')}<strong>{t('admin.roleAdmin')}</strong>{t('admin.roleSuffix')}</p>
         <ul>
-          <li>Manage users</li>
-          <li>System configuration</li>
-          <li>View all reports</li>
-          <li>Access control settings</li>
+          <li>{t('admin.manageUsers')}</li>
+          <li>{t('admin.systemConfig')}</li>
+          <li>{t('admin.viewReports')}</li>
+          <li>{t('admin.accessControl')}</li>
         </ul>
       </div>
     </div>

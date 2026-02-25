@@ -14,8 +14,8 @@ export function getTypeLabels(t: TranslateFn): Record<ContentTypeFilter, string>
   return {
     all: t('allTypes'),
     course: t('course'),
-    content: t('content'),
+    content: t('content.label'),
     quiz: t('quiz'),
-    collection: t('collection'),
+    collection: t('collection.label'),
   };
 }

@@ -3,8 +3,10 @@ import PageLoader from '@/components/common/PageLoader';
 import { ContentEditor } from '@/components/editors/ContentEditor';
 import type { ContentEditorEvent } from '@/services/editors/content-editor';
 import { useContentRead } from '@/hooks/useContent';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const ContentEditorPage = () => {
+  const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
 
@@ -20,7 +22,7 @@ const ContentEditorPage = () => {
   };
 
   if (isLoading) {
-    return <PageLoader message="Loading editor..." />;
+    return <PageLoader message={t('content.loadingEditor')} />;
   }
 
   if (error) {
@@ -28,7 +30,7 @@ const ContentEditorPage = () => {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
         <div className="text-red-600 font-semibold">
-          Error loading content: {error.message}
+          {t('content.errorLoading', { error: error.message })}
         </div>
         <div className="flex gap-2">
           <button
@@ -36,14 +38,14 @@ const ContentEditorPage = () => {
             onClick={() => window.location.reload()}
             className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
-            Retry
+            {t('retry')}
           </button>
           <button
             type="button"
             onClick={handleClose}
             className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
           >
-            Back to workspace
+            {t('content.backToWorkspace')}
           </button>
         </div>
       </div>
@@ -51,7 +53,7 @@ const ContentEditorPage = () => {
   }
 
   if (!contentData) {
-    return <div>Content not found</div>;
+    return <div>{t('content.notFound')}</div>;
   }
 
   return (

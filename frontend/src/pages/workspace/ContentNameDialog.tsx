@@ -1,5 +1,6 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/common/Button";
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const COLLECTION_TYPES = [
   { value: 'content-playlist', label: 'Content Playlist' },
@@ -24,6 +25,7 @@ export default function ContentNameDialog({
   optionTitle,
   optionId,
 }: ContentNameDialogProps) {
+  const { t } = useAppI18n();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [collectionType, setCollectionType] = useState("");
@@ -87,16 +89,16 @@ export default function ContentNameDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-bold font-rubik text-foreground mb-2">
-          Create {optionTitle || "Content"}
+          {t('create')} {optionTitle || t('content.label')}
         </h2>
         <p className="text-sm text-muted-foreground mb-4 font-rubik">
           {isCollection
-            ? "Enter details for your new collection"
-            : "Enter a name for your new content"}
+            ? t('workspace.fillDetails')
+            : t('workspace.fillDetails')}
         </p>
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium font-rubik text-foreground mb-1">
-            Name
+            {t('name')}
           </label>
           <input
             type="text"
@@ -111,19 +113,19 @@ export default function ContentNameDialog({
           {isCollection && (
             <>
               <label className="block text-sm font-medium font-rubik text-foreground mb-1">
-                Description
+                {t('description')}
               </label>
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter a description"
+                placeholder={t('workspace.enterDescription')}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4"
                 disabled={isLoading}
               />
 
               <label className="block text-sm font-medium font-rubik text-foreground mb-1">
-                Collection Type <span className="text-red-500">*</span>
+                {t('collection.label')} Type <span className="text-red-500">*</span>
               </label>
               <select
                 value={collectionType}
@@ -131,7 +133,7 @@ export default function ContentNameDialog({
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4 bg-white"
                 disabled={isLoading}
               >
-                <option value="" disabled>Select a collection type</option>
+                <option value="" disabled>{t('workspace.selectCollectionType')}</option>
                 {COLLECTION_TYPES.map((ct) => (
                   <option key={ct.value} value={ct.value}>{ct.label}</option>
                 ))}
@@ -147,7 +149,7 @@ export default function ContentNameDialog({
               onClick={handleClose}
               disabled={isLoading}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
@@ -155,7 +157,7 @@ export default function ContentNameDialog({
               disabled={!canSubmit || isLoading}
               className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
             >
-              {isLoading ? "Creating..." : "Create"}
+              {isLoading ? t('loading') : t('create')}
             </Button>
           </div>
         </form>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { useAuth, Role, User } from '../../auth/AuthContext';
 import { getDefaultRouteForRole } from '../../rbac/roleConfig';
 import { v4 as uuidv4 } from 'uuid';
 
 const HomePage: React.FC = () => {
+  const { t } = useAppI18n();
   const [selectedRole, setSelectedRole] = useState<Role>('guest');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -30,37 +32,37 @@ const HomePage: React.FC = () => {
 
   return (
     <div>
-      <h1>Welcome to Sunbird Portal</h1>
-      <h2>Available Courses</h2>
+      <h1>{t('welcome')}</h1>
+      <h2>{t('coursesAvailable')}</h2>
       <ul>
         <li>Course 1</li>
         <li>Course 2</li>
       </ul>
 
-      <h2>Login</h2>
+      <h2>{t('login')}</h2>
       <form onSubmit={handleLogin}>
         <div>
-          <label htmlFor="role">Select Role:</label>
+          <label htmlFor="role">{t('selectRole')}</label>
           <select
             id="role"
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value as Role)}
           >
-            <option value="admin">Admin</option>
-            <option value="content_creator">Content Creator</option>
-            <option value="content_reviewer">Content Reviewer</option>
-            <option value="guest">Guest</option>
+            <option value="admin">{t('roles.admin')}</option>
+            <option value="content_creator">{t('roles.content_creator')}</option>
+            <option value="content_reviewer">{t('roles.content_reviewer')}</option>
+            <option value="guest">{t('roles.guest')}</option>
           </select>
         </div>
 
         <button type="submit">
-          Login
+          {t('login')}
         </button>
       </form>
 
       {location.state?.from && (
         <p>
-          You will be redirected to: <strong>{from}</strong>
+          {t('redirectMessage')} <strong>{from}</strong>
         </p>
       )}
     </div>

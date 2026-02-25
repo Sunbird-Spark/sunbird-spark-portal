@@ -8,11 +8,13 @@ import HomeSidebar from "@/components/home/HomeSidebar";
 import HomeDashboardContent from "@/components/home/HomeDashboardContent";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 import "./home.css";
 
 const Home = () => {
     const isMobile = useIsMobile();
+    const { t } = useAppI18n();
     const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead();
     const userProfile = userReadData?.data?.response;
     const { 
@@ -34,7 +36,7 @@ const Home = () => {
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                            <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
                             <HomeSidebar
                                 activeNav={activeNav}
                                 onNavChange={(nav) => {
@@ -62,12 +64,14 @@ const Home = () => {
                         {/* Welcome Section */}
                         <div className="mb-6 md:mb-8">
                             <h2 className="home-welcome-title">
-                                Hi {[userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ') || 'there'}
+                                {[userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ')
+                                    ? t('homePage.hiUser', { name: [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ') })
+                                    : t('homePage.hiGuest')}
                             </h2>
                             <p className="home-welcome-subtitle">
                                 {enrolledCount === 0
-                                    ? "Your exciting learning journey starts here. Dive in!"
-                                    : "Welcome to a learning experience made just for you."}
+                                    ? t('homePage.journeyStart')
+                                    : t('homePage.welcomeMessage')}
                             </p>
                         </div>
 

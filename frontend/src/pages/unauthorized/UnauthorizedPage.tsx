@@ -2,8 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { getDefaultRouteForRole } from '../../rbac/roleConfig';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const UnauthorizedPage: React.FC = () => {
+  const { t } = useAppI18n();
   const navigate = useNavigate();
   const { user } = useAuth();
 

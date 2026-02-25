@@ -1,6 +1,7 @@
 import React from "react";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/common/Button";
+import { useAppI18n } from '@/hooks/useAppI18n';
 import ResourceFormField from "../../components/common/FormFields";
 import { useFormRead } from "../../hooks/useForm";
 import { useFramework } from "../../hooks/useFramework";
@@ -74,14 +75,16 @@ const createFormDefaults = (fields: FormField[]): Record<string, string | string
   return defaults;
 };
 
-const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
+const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => {
+  const { t } = useAppI18n();
+  return (
   <div className="resource-form-error-state">
     <p className="resource-form-error-text">{error}</p>
     <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">
-      Retry
+      {t('retry')}
     </Button>
   </div>
-);
+)};
 
 export default function ResourceFormDialog({
   open,
@@ -95,6 +98,7 @@ export default function ResourceFormDialog({
   onFormLoadStart,
   onFormLoadComplete,
 }: ResourceFormDialogProps) {
+  const { t } = useAppI18n();
   const [showDialog, setShowDialog] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, string | string[]>>({});
@@ -229,7 +233,7 @@ export default function ResourceFormDialog({
       <div className="loading-overlay">
         <div className="loading-container">
           <div className="loading-spinner" />
-          <p className="loading-text">Loading...</p>
+          <p className="loading-text">{t('loading')}</p>
         </div>
       </div>
     );
@@ -256,7 +260,7 @@ export default function ResourceFormDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="resource-form-title">{title}</h2>
-        <p className="resource-form-subtitle">Fill in the details to create your content</p>
+        <p className="resource-form-subtitle">{t('workspace.fillDetails')}</p>
         {fetchError && <ErrorState error={fetchError} onRetry={handleRetry} />}
         {!fetchError && fields.length > 0 && (
           <form onSubmit={handleSubmit}>
@@ -266,8 +270,8 @@ export default function ResourceFormDialog({
               ))}
             </div>
             <div className="resource-form-actions">
-              <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>Cancel</Button>
-              <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{isLoading ? "Creating..." : "Create"}</Button>
+              <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>{t('cancel')}</Button>
+              <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{isLoading ? t('loading') : t('create')}</Button>
             </div>
           </form>
         )}

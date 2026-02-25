@@ -14,6 +14,8 @@
   "confirm": "Confirm",
   "back": "Back",
   "next": "Next",
+    "yes": "Yes",
+    "no": "No",
   "changeLanguage": "Change Language",
   "home": "Home",
   "dashboard": "Dashboard",
@@ -127,9 +129,7 @@
   "collaborations": "Collaborations",
   "create": "Create",
   "course": "Course",
-  "content": "Content",
   "quiz": "Quiz",
-  "collection": "Collection",
   "courseDesc": "Design courses using collections and resources. Courses are for a duration, to achieve an objective.",
   "contentDesc": "Create different resources like story, game, activity, audio, video, using the inbuilt authoring tools.",
   "quizDesc": "Create assessments with multiple question types to evaluate learner understanding.",
@@ -268,5 +268,173 @@
     "videos": "Videos",
     "terms": "Terms and Conditions",
     "privacy": "Privacy Policy"
+  },
+  "index": {
+    "loadingSections": "Loading sections...",
+    "errorLoadingSections": "Unable to load content sections. Please try again.",
+    "noSectionsAvailable": "No content sections available at the moment."
+  },
+  "navigationMenu": "Navigation Menu",
+  "sortBy": "Sort By",
+  "sortOptions": {
+    "newest": "Newest",
+    "oldest": "Oldest"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "controls": "Admin Controls",
+    "accessRestricted": "This page is only accessible to users with the ",
+    "roleAdmin": "admin",
+    "roleSuffix": " role.",
+    "manageUsers": "Manage users",
+    "systemConfig": "System configuration",
+    "viewReports": "View all reports",
+    "accessControl": "Access control settings"
+  },
+  "content": {
+    "creationTools": "Content Creation Tools",
+    "accessRestricted": "This page is only accessible to users with the ",
+    "roleContentCreator": "content_creator",
+    "roleSuffix": " role.",
+    "createArticles": "Create new articles",
+    "uploadMedia": "Upload media",
+    "draftContent": "Draft content",
+    "loadingEditor": "Loading editor...",
+    "notFound": "Content not found",
+    "errorLoading": "Error loading content: {{error}}",
+    "missingIdentifier": "Missing content identifier.",
+    "failedToLoadMetadata": "Failed to load content metadata.",
+    "backToWorkspace": "Back to workspace",
+    "label": "Content"
+  },
+  "collection": {
+    "label": "Collection",
+    "notFound": "Collection not found."
+  },
+  "homePage": {
+    "hiUser": "Hi {{name}}",
+    "hiGuest": "Hi there",
+    "journeyStart": "Your exciting learning journey starts here. Dive in!",
+    "welcomeMessage": "Welcome to a learning experience made just for you."
+  },
+  "selectRole": "Select Role:",
+  "redirectMessage": "You will be redirected to:",
+  "roles": {
+    "admin": "Admin",
+    "content_creator": "Content Creator",
+    "content_reviewer": "Content Reviewer",
+    "guest": "Guest"
+  },
+  "continue": "Continue",
+  "forgotPasswordTitle": "Forgot Password",
+  "forgotPasswordPage": {
+    "subtitle": "Don't worry! Share your details and we will send you a code to reset your password.",
+    "emailOrMobile": "Email ID / Mobile Number",
+    "enterEmailOrMobile": "Enter Email ID / Mobile Number",
+    "emailOrMobileInstruction": "Email (e.g. user@example.com) or Mobile Number (10 digits starting with 6-9)",
+    "nameRegistered": "Name (as registered)",
+    "enterName": "Enter name",
+    "errorNotMatched": "Email / mobile number or name does not match",
+    "errorNameNotMatched": "Name does not match our records",
+    "errorCaptcha": "Captcha validation failed",
+    "errorMaxRetry": "You have exceeded maximum retry. Please try after some time",
+    "otpInstruction": "You will receive an OTP. After you validate it, you can recover your account.",
+    "enterCode": "Enter the code",
+    "otpSentInstruction": "Enter the 6 digit code sent to your email/phone number and complete the verification",
+    "deliveryPrompt": "Where would you like to receive the OTP?",
+    "getOtp": "Get OTP",
+    "errorGenerateOtp": "Generate OTP failed",
+    "errorTooManyRequests": "Too many requests. Please try again later.",
+    "otpValidity": "OTP is valid for 30 minutes",
+    "resendOtp": "Resend OTP",
+    "submitOtp": "Submit OTP",
+    "errorMaxRetryLogin": "You have exceeded maximum retry. Please login again.",
+    "errorInvalidOtpRemaining": "Invalid OTP. You have {{remaining}} attempt(s) remaining.",
+    "errorInvalidOtp": "Invalid OTP. Please try again.",
+    "errorResendMaxReached": "OTP resend maximum retry reached.",
+    "errorResendFailed": "Resend OTP failed. Please try again.",
+    "errorResetFailed": "Reset password failed"
+  },
+  "help": {
+    "reportIssue": "Report an issue with the application",
+    "reportContentIssue": "Report an issue with this help content",
+    "noCategories": "No help categories found.",
+    "failedToLoadFaq": "Failed to load FAQ data. Please try again.",
+    "categoryNotFound": "Category not found.",
+    "noFaqs": "No FAQs available for this category.",
+    "sorry": "Sorry about that!",
+    "whatMore": "What more would you like to know?",
+    "typeHere": "Type Here...",
+    "additionalFeedback": "Additional feedback about this answer",
+    "didThisHelp": "Did this answer help you?",
+    "assistPrompt": "How can we assist you today?",
+    "reportAppIssue": "Report an issue with the application",
+    "reportIssueBtn": "Report an Issue",
+    "faqCount": "{{count}} FAQs",
+    "feedbackThanks": "Thank you for your feedback!",
+    "submitFeedback": "Submit feedback"
+  },
+  "common": {
+    "notifications": "Notifications",
+    "language": "Language"
+  },
+  "myLearning": {
+    "loading": "Loading your learning...",
+    "errorLoading": "Failed to load your learning progress. Please try again later.",
+    "mainNavigation": "Main Navigation"
+  },
+  "onboarding": {
+    "altSunbird": "Sunbird",
+    "otherPreferencePlaceholder": "Please type your preference here",
+    "altImage": "Onboarding Image",
+    "goBack": "Go back"
+  },
+  "profilePage": {
+    "loading": "Loading your profile...",
+    "errorLoading": "Error loading profile..."
+  },
+  "reports": {
+    "title": "Reports",
+    "contentReports": "Content Reports",
+    "roleContentReviewer": "content_reviewer",
+    "analytics": "View content analytics",
+    "submissionStats": "Review submission statistics",
+    "qaMetrics": "Quality assurance metrics",
+    "performance": "Performance dashboards"
+  },
+  "accessDenied": "Access Denied",
+  "workspace": {
+    "loadingContentReview": "Loading content for review...",
+    "createdBy": "Created By",
+    "createdOn": "Created On",
+    "enterDescription": "Enter a description",
+    "selectCollectionType": "Select a collection type",
+    "createContent": "Create content",
+    "closeDialog": "Close dialog",
+    "fillDetails": "Fill in the details to create your content",
+    "deleteContent": "Delete Content",
+    "deleteConfirmation": "Are you sure you want to delete this content?"
+  },
+  "homeComponents": {
+    "openMenu": "Open Menu",
+    "continueLearning": "Continue from where you left",
+    "inProgress": "In Progress",
+    "noCoursesInProgress": "No courses in progress",
+    "performance": "Performance",
+    "recommendedContents": "Recommended Contents"
+  },
+  "months": {
+    "jan": "Jan",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Apr",
+    "may": "May",
+    "jun": "Jun",
+    "jul": "Jul",
+    "aug": "Aug",
+    "sep": "Sep",
+    "oct": "Oct",
+    "nov": "Nov",
+    "dec": "Dec"
   }
 }

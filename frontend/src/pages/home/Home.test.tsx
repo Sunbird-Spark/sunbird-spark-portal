@@ -52,7 +52,14 @@ vi.mock('react-router-dom', async () => {
 const mockChangeLanguage = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => key,
+        t: (key: string, options?: any) => {
+            if (key === 'homePage.hiUser') return `Hi ${options?.name}`;
+            if (key === 'homePage.hiGuest') return 'Hi there';
+            if (key === 'homePage.journeyStart') return 'Your exciting learning journey starts here. Dive in!';
+            if (key === 'homePage.welcomeMessage') return 'Welcome to a learning experience made just for you.';
+            if (key === 'navigationMenu') return 'Navigation Menu';
+            return key;
+        },
         languages: [
             { code: 'en', label: 'English' },
             { code: 'hi', label: 'Hindi' },

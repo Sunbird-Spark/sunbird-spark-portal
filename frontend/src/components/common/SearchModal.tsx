@@ -126,7 +126,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                     inputRef.current?.focus();
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-                  aria-label="Clear search"
+                  aria-label={t("clear_search")}
                 >
                   <FiX className="w-4 h-4" />
                 </button>

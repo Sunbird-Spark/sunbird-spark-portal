@@ -15,6 +15,7 @@ import { FormService } from '@/services/FormService';
 import { CheckListFormField } from '@/types/formTypes';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { useToast } from '@/hooks/useToast';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import ChecklistDialog from '@/components/workspace/ChecklistDialog';
 import './ContentReviewPage.css';
 
@@ -40,6 +41,7 @@ const ReviewPageLayout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const ContentReviewPage = () => {
+  const { t } = useAppI18n();
   const { contentId } = useParams();
   const [searchParams] = useSearchParams();
   const isReviewMode = searchParams.get('mode') === 'review';
@@ -166,15 +168,15 @@ const ContentReviewPage = () => {
     }
   };
 
-  if (playerIsLoading) return <PageLoader message="Loading content for review..." />;
-  if (playerError) return <ReviewPageLayout><p>Error loading content: {playerError.message}</p></ReviewPageLayout>;
-  if (!playerMetadata) return <ReviewPageLayout><p>Content not found</p></ReviewPageLayout>;
+  if (playerIsLoading) return <PageLoader message={t('workspace.loadingContentReview')} />;
+  if (playerError) return <ReviewPageLayout><p>{t('content.errorLoading', { error: playerError.message })}</p></ReviewPageLayout>;
+  if (!playerMetadata) return <ReviewPageLayout><p>{t('content.notFound')}</p></ReviewPageLayout>;
 
   return (
     <ReviewPageLayout>
       <div className="content-review-button-container">
         <button onClick={() => navigate('/workspace')} className="content-review-go-back">
-          <FiArrowLeft /> Back
+          <FiArrowLeft /> {t('back')}
         </button>
         {isReviewMode && (
           <div className="content-review-actions">
@@ -205,19 +207,19 @@ const ContentReviewPage = () => {
         )}
         <div className="content-review-metadata-grid">
           <div>
-            <span className="label">Created By</span>
+            <span className="label">{t('workspace.createdBy')}</span>
             <span className="value">{contentData?.creator || 'Unknown'}</span>
           </div>
           <div>
-            <span className="label">Last Updated</span>
+            <span className="label">{t('lastUpdated')}</span>
             <span className="value">{formatDate(contentData?.lastUpdatedOn)}</span>
           </div>
           <div>
-            <span className="label">Content Type</span>
+            <span className="label">{t('contentType')}</span>
             <span className="value">{contentData?.primaryCategory || contentData?.contentType || 'N/A'}</span>
           </div>
           <div>
-            <span className="label">Created On</span>
+            <span className="label">{t('workspace.createdOn')}</span>
             <span className="value">{formatDate(contentData?.createdOn)}</span>
           </div>
         </div>

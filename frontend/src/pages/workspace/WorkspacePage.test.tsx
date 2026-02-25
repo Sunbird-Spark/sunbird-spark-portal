@@ -72,7 +72,18 @@ vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => key,
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'workspace.createContent': 'Create content',
+        'workspace.closeDialog': 'Close dialog',
+        'loading': 'loading',
+        'workspace.deleteContent': 'Delete Content',
+        'workspace.deleteConfirmation': 'Are you sure you want to delete this content?',
+        'delete': 'Delete',
+        'cancel': 'Cancel'
+      };
+      return map[key] || key;
+    },
     languages: [{ code: 'en', label: 'English' }],
     currentCode: 'en',
     changeLanguage: vi.fn(),

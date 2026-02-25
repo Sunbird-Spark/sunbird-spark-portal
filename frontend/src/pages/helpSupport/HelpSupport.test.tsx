@@ -48,6 +48,18 @@ vi.mock("@/hooks/useSystemSetting", () => ({
     useSystemSetting: vi.fn(),
 }));
 
+vi.mock("@/hooks/useAppI18n", () => ({
+    useAppI18n: () => ({
+        t: (key: string, options?: any) => {
+            if (key === 'help.faqCount') return `${options?.count} FAQs`;
+            if (key === 'loading') return 'Loading...';
+            if (key === 'help.failedToLoadFaq') return 'Something went wrong';
+            if (key === 'help.assistPrompt') return 'How can we assist you today?';
+            return key;
+        },
+    }),
+}));
+
 // Mock the shared hook
 const mockUseHelpFaqData = vi.fn();
 vi.mock("@/hooks/useFaqData", () => ({

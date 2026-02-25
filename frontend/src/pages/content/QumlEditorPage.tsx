@@ -55,7 +55,7 @@ const QumlEditorPage = () => {
   const handleTelemetryEvent = useCallback((_event: any) => {}, []);
 
   if (loading) {
-    return <PageLoader message="Loading editor..." />;
+    return <PageLoader message={t('content.loadingEditor')} />;
   }
 
   if (!metadata) {
