@@ -37,14 +37,13 @@ vi.mock('@/hooks/useUserRead', () => ({
         response: {
           firstName: 'Test',
           lastName: 'User',
+          channel: 'test-channel-slug',
           roles: [{ role: 'CONTENT_CREATOR' }],
         },
       },
     },
   }),
 }));
-
-vi.mock('@/hooks/useSystemSetting', () => ({ useSystemSetting: () => ({ data: undefined }) }));
 vi.mock('@/hooks/useOrganization', () => ({ useOrganizationSearch: () => ({ mutateAsync: vi.fn() }) }));
 vi.mock('@/hooks/useQuestionSetCreate', () => ({ useQuestionSetCreate: () => ({ mutateAsync: mockQuestionSetMutateAsync }) }));
 vi.mock('@/hooks/useQuestionSetRetire', () => ({ useQuestionSetRetire: () => ({ mutateAsync: mockQuestionSetRetireMutateAsync }) }));

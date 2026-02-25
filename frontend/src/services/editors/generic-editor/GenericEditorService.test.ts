@@ -56,13 +56,11 @@ vi.mock('../../ChannelService', () => ({
   },
 }));
 
-const mockSystemSettingRead = vi.fn();
-
-vi.mock('../../SystemSettingService', () => ({
-  SystemSettingService: class {
-    read = mockSystemSettingRead;
-  },
+vi.mock('../../UserProfileService', () => ({
+  default: { getChannel: vi.fn(), clearCache: vi.fn() },
 }));
+
+import userProfileService from '../../UserProfileService';
 
 describe('GenericEditorService', () => {
   let service: GenericEditorService;
@@ -79,13 +77,7 @@ describe('GenericEditorService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockSystemSettingRead.mockResolvedValue({
-      data: {
-        response: {
-          value: 'test-slug',
-        },
-      },
-    });
+    vi.mocked(userProfileService.getChannel).mockResolvedValue('test-slug');
 
     mockOrgSearch.mockResolvedValue({
       data: {
@@ -282,7 +274,7 @@ describe('GenericEditorService', () => {
         framework: 'TPD',
       });
 
-      expect(mockSystemSettingRead).toHaveBeenCalledWith('default_channel');
+      expect(vi.mocked(userProfileService.getChannel)).toHaveBeenCalled();
       expect(mockOrgSearch).toHaveBeenCalledWith({
         filters: { slug: 'test-slug', isTenant: true },
       });
@@ -329,8 +321,8 @@ describe('GenericEditorService', () => {
       expect(context.did).toBe('');
     });
 
-    it('should use empty slug when system setting fails', async () => {
-      mockSystemSettingRead.mockRejectedValue(new Error('setting not found'));
+    it('should use empty slug when user profile channel is empty', async () => {
+      vi.mocked(userProfileService.getChannel).mockResolvedValue('');
 
       const context = await service.buildEditorContext({ contentId: 'do_1' });
 
