@@ -1,3 +1,4 @@
+import { useId } from "react";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiCheck } from "react-icons/fi";
 import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
@@ -25,6 +26,7 @@ export const TncCheckboxRow = ({
   label = "for creating this batch.",
   onTermsClick,
 }: TncCheckboxRowProps) => {
+  const id = useId();
   const { data: tncRes } = useSystemSetting(settingKey);
   const { data: globalTncRes } = useSystemSetting("tncConfig");
 
@@ -38,7 +40,7 @@ export const TncCheckboxRow = ({
     // Label activation (htmlFor → checkbox) is confined to the plain-text spans only.
     <div className="flex items-center gap-3 select-none">
       <Checkbox.Root
-        id="acceptTerms"
+        id={id}
         checked={checked}
         onCheckedChange={onCheckedChange}
         required
@@ -51,7 +53,7 @@ export const TncCheckboxRow = ({
 
       <span className="text-sm text-foreground font-['Rubik']">
         {/* Clicking "I accept the" text toggles the checkbox */}
-        <label htmlFor="acceptTerms" className="cursor-pointer">I accept the{" "}</label>
+        <label htmlFor={id} className="cursor-pointer">I accept the{" "}</label>
         {termsUrl ? (
           onTermsClick ? (
             // Plain button — NOT inside a <label>, so it cannot accidentally
@@ -80,7 +82,7 @@ export const TncCheckboxRow = ({
         )}
         {/* Clicking the trailing label text also toggles the checkbox */}
         {" "}
-        <label htmlFor="acceptTerms" className="cursor-pointer">
+        <label htmlFor={id} className="cursor-pointer">
           {label}
           <span className="text-red-500 ml-0.5">*</span>
         </label>

@@ -10,6 +10,7 @@ import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAcceptTnc } from "@/hooks/useTnc";
 import { useToast } from "@/hooks/useToast";
+import { useIsContentCreator } from "@/hooks/useUser";
 
 interface BatchCardProps {
   collectionId: string;
@@ -31,7 +32,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const [activeTab, setActiveTab]   = useState<ActiveTab>("Ongoing");
 
   /* ── Reviewer TnC state ── */
-  const isReviewer = user?.role === "content_reviewer";
+  const isContentCreator = useIsContentCreator();
+  const isReviewer = user?.role === "content_reviewer" && !isContentCreator;
   const [reviewerTncChecked, setReviewerTncChecked] = useState(false);
   const [reviewerTncAccepted, setReviewerTncAccepted] = useState(false);
 

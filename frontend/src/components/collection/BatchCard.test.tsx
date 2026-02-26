@@ -45,8 +45,10 @@ vi.mock('./AddCertificateModal', () => ({
     ) : null,
 }));
 
+const mockUseAuth = vi.fn(() => ({ user: { role: 'creator', id: 'user-1' } }));
+
 vi.mock('@/auth/AuthContext', () => ({
-  useAuth: () => ({ user: { role: 'creator', id: 'user-1' } }),
+  useAuth: () => mockUseAuth(),
 }));
 
 vi.mock('@/hooks/useToast', () => ({
@@ -62,10 +64,15 @@ vi.mock('@/hooks/useTnc', () => ({
   useGetTncUrl: () => ({ data: null }),
 }));
 
-// Mock useBatchList so we control the API response in tests
 const mockUseBatchList = vi.fn();
+const mockUseIsContentCreator = vi.fn();
+
 vi.mock('@/hooks/useBatch', () => ({
   useBatchListForCreator: (courseId: string, options?: any) => mockUseBatchList(courseId, options),
+}));
+
+vi.mock('@/hooks/useUser', () => ({
+  useIsContentCreator: () => mockUseIsContentCreator(),
 }));
 
 const mockRefetch = vi.fn();
@@ -79,6 +86,7 @@ describe('BatchCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseBatchList.mockReturnValue(defaultHookState);
+    mockUseIsContentCreator.mockReturnValue(true); // Default to creator
   });
 
   /* ── Rendering ── */
@@ -524,5 +532,21 @@ describe('BatchCard', () => {
     const refreshBtn = screen.getByRole('button', { name: /refresh batch list/i });
     const icon = refreshBtn.querySelector('svg');
     expect(icon).toHaveClass('animate-spin');
+  });
+
+  /* ── Role based TnC ── */
+
+  it('does NOT show Reviewer TnC even if user has reviewer role but is also a creator', () => {
+    mockUseAuth.mockReturnValueOnce({
+      user: { role: 'content_reviewer', id: 'user-1' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn()
+    } as any);
+    mockUseIsContentCreator.mockReturnValue(true);
+
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.queryByText(/to view batch reports/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Accept & Continue/i)).not.toBeInTheDocument();
   });
 });
