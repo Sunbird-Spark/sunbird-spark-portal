@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -32,6 +32,7 @@ const CollectionDetailPage = () => {
   const { t } = useAppI18n();
   const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
   const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
+  const [ratingOpen, setRatingOpen] = useState(false);
 
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const collectionData = collectionDataFromApi ?? null;
@@ -103,6 +104,9 @@ const CollectionDetailPage = () => {
   const playerError = isQumlContent ? qumlError : contentError;
 
   const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
+  const onContentEnd = useCallback(() => {
+    setTimeout(() => setRatingOpen(true), 5000);
+  }, []);
   const { handlePlayerEvent, handleTelemetryEvent } = useCollectionDetailPlayer({
     collectionId,
     contentId: contentId ?? undefined,
@@ -112,6 +116,7 @@ const CollectionDetailPage = () => {
     mimeType: playerMetadata?.mimeType,
     currentContentStatus,
     skipContentStateUpdate: contentCreatorPrivilege,
+    onContentEnd,
   });
 
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
@@ -231,6 +236,8 @@ const CollectionDetailPage = () => {
               setCertificatePreviewOpen={setCertificatePreviewOpen}
               isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
               contentCreatorPrivilege={contentCreatorPrivilege}
+              ratingOpen={ratingOpen}
+              onRatingClose={() => setRatingOpen(false)}
             />
 
             {/* Related Content Section */}

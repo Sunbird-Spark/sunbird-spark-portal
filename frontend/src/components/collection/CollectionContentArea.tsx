@@ -43,6 +43,8 @@ interface CollectionContentAreaProps {
   isCreatorViewingOwnCollection?: boolean;
   /** When true (content creator viewing any collection), access without batch, no progress, learner cards hidden. */
   contentCreatorPrivilege?: boolean;
+  ratingOpen?: boolean;
+  onRatingClose?: () => void;
 }
 
 export default function CollectionContentArea({
@@ -79,6 +81,8 @@ export default function CollectionContentArea({
   setCertificatePreviewOpen,
   isCreatorViewingOwnCollection = false,
   contentCreatorPrivilege = false,
+  ratingOpen,
+  onRatingClose,
 }: CollectionContentAreaProps) {
   const { t } = useAppI18n();
 
@@ -105,6 +109,8 @@ export default function CollectionContentArea({
           playerError={playerError ?? null}
           onPlayerEvent={handlePlayerEvent}
           onTelemetryEvent={handleTelemetryEvent}
+          ratingOpen={ratingOpen}
+          onRatingClose={onRatingClose}
         />
 
         <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 custom-scrollbar">
