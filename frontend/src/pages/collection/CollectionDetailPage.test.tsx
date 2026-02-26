@@ -90,7 +90,7 @@ vi.mock('@/hooks/useQumlContent', () => ({
   useQumlContent: (questionSetId: string, options?: { enabled?: boolean }) => mockUseQumlContent(questionSetId, options),
 }));
 
-const mockUseCollectionDetailPlayer = vi.fn(() => ({
+const mockUseCollectionDetailPlayer = vi.fn((_options: unknown) => ({
   handlePlayerEvent: vi.fn(),
   handleTelemetryEvent: vi.fn(),
 }));

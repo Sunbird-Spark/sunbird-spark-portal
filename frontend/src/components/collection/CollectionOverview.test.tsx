@@ -27,7 +27,6 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 
-
 const mockCollectionData: CollectionData = {
   id: 'col-1',
   title: 'Test Course Title',
@@ -241,6 +240,4 @@ describe('CollectionOverview', () => {
       expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
     });
   });
-
-
 });

@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -57,17 +57,15 @@ const ContentPlayerPage = () => {
     [relatedContentData?.data?.content, contentId]
   );
   
-  const onPlayerEvent = useCallback((event: unknown) => {
-    console.log('Content player event:', event);
-  }, []);
-
-  const onTelemetryEvent = useCallback((event: unknown) => {
-    console.log('Content telemetry event:', event);
-  }, []);
-
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
-    onPlayerEvent,
-    onTelemetryEvent,
+    onPlayerEvent: (event) => {
+      // Handle player events (play, pause, complete, etc.)
+      console.log('Content player event:', event);
+    },
+    onTelemetryEvent: (event) => {
+      // Handle telemetry events for analytics
+      console.log('Content telemetry event:', event);
+    },
   });
 
   if (playerIsLoading) {
