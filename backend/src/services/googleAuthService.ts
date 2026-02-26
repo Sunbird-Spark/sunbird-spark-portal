@@ -294,6 +294,9 @@ export const handleUserAuthentication = async (
         await regenerateSession(req);
 
         const tokenSubject = _.get(req, 'kauth.grant.access_token.content.sub');
+        console.log(" req.kauth:", req.kauth);
+        console.log(" tokenSubject:", tokenSubject);
+
         if (tokenSubject) {
             const userIdFromToken = _.last(_.split(tokenSubject, ':'));
             req.session.userId = userIdFromToken;
