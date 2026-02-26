@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -60,15 +60,19 @@ const ContentPlayerPage = () => {
   
   const [ratingOpen, setRatingOpen] = useState(false);
 
+  const onPlayerEvent = useCallback((event: unknown) => {
+    console.log('Content player event:', event);
+  }, []);
+
+  const onTelemetryEvent = useCallback((event: unknown) => {
+    console.log('Content telemetry event:', event);
+    const eid = ((event as any)?.eid ?? (event as any)?.data?.eid ?? (event as any)?.type ?? "").toUpperCase();
+    if (eid === "END") setTimeout(() => setRatingOpen(true), 5000);
+  }, []);
+
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
-    onPlayerEvent: (event) => {
-      console.log('Content player event:', event);
-    },
-    onTelemetryEvent: (event) => {
-      console.log('Content telemetry event:', event);
-      const eid = ((event as any)?.eid ?? (event as any)?.data?.eid ?? (event as any)?.type ?? "").toUpperCase();
-      if (eid === "END") setRatingOpen(true);
-    },
+    onPlayerEvent,
+    onTelemetryEvent,
   });
 
   if (playerIsLoading) {
