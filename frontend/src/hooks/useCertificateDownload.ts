@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { convertSvgToOutput } from '@/utils/svg-converter';
-import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { IssuedCertificate } from '@/types/TrackableCollections';
 import { toast } from '@/hooks/useToast';
 import { head } from 'lodash';
-import { certificateService } from '@/services/CertificateService';
 
 export const useCertificateDownload = () => {
     const [downloadingCourseId, setDownloadingCourseId] = useState<string | null>(null);
@@ -20,59 +18,46 @@ export const useCertificateDownload = () => {
     };
 
     const downloadCertificate = async (courseId: string, batchId: string, courseName: string, issuedCertificates?: IssuedCertificate[], completedOn?: number) => {
-        let userId = userAuthInfoService.getUserId();
-        if (!userId) {
-            const authInfo = await userAuthInfoService.getAuthInfo();
-            userId = authInfo?.uid ?? null;
-        }
-
-        if (!userId) {
-            setError('User not found');
-            return;
-        }
-
         setDownloadingCourseId(courseId);
         setError(null);
 
         try {
-            // Step 1: Get certificate ID from issued certificates
             const matchingCert = getMatchingCert(courseId, batchId, courseName, issuedCertificates);
-            let certId = matchingCert?.identifier || matchingCert?.token;
 
-            // Step 2: If no ID in enrollment data, search RC registry
-            if (!certId && userId) {
-                const searchResponse = await certificateService.searchCertificates(userId);
-                const certs = Array.isArray(searchResponse.data) ? searchResponse.data : [];
-                const rcCert = certs.find(
-                    (c: any) => c.training?.id === courseId && (!batchId || c.training?.batchId === batchId)
-                );
-                certId = rcCert?.osid ?? (rcCert as any)?.identifier;
-            }
-
-            if (!certId) {
+            if (!matchingCert) {
                 throw new Error('Certificate is not yet generated or available for this course.');
             }
 
-            // Step 3: Download fully-populated certificate from RC service
-            // Use native fetch for SVG content (http-client is JSON-only by default)
-            const downloadUrl = `/portal/rc/certificate/v1/download/${certId}`;
-            const response = await fetch(downloadUrl, {
-                headers: {
-                    'Accept': 'image/svg+xml'
-                }
-            });
+            const certId = matchingCert.identifier || matchingCert.token;
+            if (!certId) {
+                throw new Error('Certificate ID is missing.');
+            }
 
+            // Fetch certificate metadata using native fetch
+            const response = await fetch(`/portal/rc/certificate/v1/download/${certId}`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch certificate: ${response.statusText}`);
             }
 
-            const svgContent = await response.text();
-
-            if (!svgContent || svgContent.trim().length === 0) {
-                throw new Error('Empty certificate received from server.');
+            const certificateData = await response.json();
+            const svgUrl = certificateData?.templateUrl;
+            
+            if (!svgUrl) {
+                throw new Error('Certificate template URL not found.');
             }
 
-            // Step 4: Convert SVG → PDF and trigger download
+            // Fetch SVG from the template URL
+            const svgResponse = await fetch(svgUrl);
+            if (!svgResponse.ok) {
+                throw new Error(`Failed to fetch certificate SVG: ${svgResponse.statusText}`);
+            }
+
+            const svgContent = await svgResponse.text();
+            if (!svgContent) {
+                throw new Error('Empty certificate SVG received.');
+            }
+
+            // Convert SVG to PDF and download
             await convertSvgToOutput(svgContent, { fileName: courseName || 'certificate' });
 
         } catch (err: any) {
@@ -97,4 +82,3 @@ export const useCertificateDownload = () => {
         error
     };
 };
-

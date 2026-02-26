@@ -1,5 +1,3 @@
-export const CERT_TEMPLATE_SVG_URL = "https://downloadableartifacts.blob.core.windows.net/release600/certificate_template.svg";
-
 export interface AddCertificateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
