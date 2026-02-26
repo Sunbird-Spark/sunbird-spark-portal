@@ -3,7 +3,6 @@ import { CheckIcon } from "./CollectionIcons";
 import type { CollectionData } from "@/types/collectionTypes";
 import { ContentPlayer } from "@/components/players";
 import PageLoader from "@/components/common/PageLoader";
-import RatingDialog from "@/components/common/RatingDialog";
 
 interface CollectionOverviewProps {
   collectionData: CollectionData;
@@ -15,8 +14,6 @@ interface CollectionOverviewProps {
   playerError?: Error | null;
   onPlayerEvent?: (event: any) => void;
   onTelemetryEvent?: (event: any) => void;
-  ratingOpen?: boolean;
-  onRatingClose?: () => void;
 }
 
 const CollectionOverview = ({
@@ -28,8 +25,6 @@ const CollectionOverview = ({
   playerError,
   onPlayerEvent,
   onTelemetryEvent,
-  ratingOpen,
-  onRatingClose,
 }: CollectionOverviewProps) => {
   const { t } = useAppI18n();
 
@@ -64,13 +59,6 @@ const CollectionOverview = ({
                   metadata={playerMetadata}
                   onPlayerEvent={onPlayerEvent}
                   onTelemetryEvent={onTelemetryEvent}
-                />
-              )}
-              {ratingOpen !== undefined && onRatingClose && (
-                <RatingDialog
-                  open={ratingOpen}
-                  onClose={onRatingClose}
-                  playerMetadata={playerMetadata}
                 />
               )}
             </div>

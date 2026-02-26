@@ -14,10 +14,6 @@ interface UseCollectionDetailPlayerParams {
   currentContentStatus?: number;
   /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
   skipContentStateUpdate?: boolean;
-  /** Called when a content item emits an END telemetry event. */
-  onContentEnd?: () => void;
-  /** Called when a content item emits a START telemetry event (e.g. replay). */
-  onContentStart?: () => void;
 }
 
 export function useCollectionDetailPlayer({
@@ -29,8 +25,6 @@ export function useCollectionDetailPlayer({
   mimeType,
   currentContentStatus,
   skipContentStateUpdate,
-  onContentEnd,
-  onContentStart,
 }: UseCollectionDetailPlayerParams) {
   const handleContentStateFromTelemetry = useContentStateUpdate({
     collectionId,
@@ -46,11 +40,8 @@ export function useCollectionDetailPlayer({
   const onTelemetryEventStable = useCallback(
     (event: unknown) => {
       handleContentStateFromTelemetry(event as Parameters<typeof handleContentStateFromTelemetry>[0]);
-      const eid = (((event as any)?.eid ?? (event as any)?.data?.eid ?? (event as any)?.type) ?? "").toUpperCase();
-      if (eid === "END") onContentEnd?.();
-      if (eid === "START") onContentStart?.();
     },
-    [handleContentStateFromTelemetry, onContentEnd, onContentStart]
+    [handleContentStateFromTelemetry]
   );
 
   return useContentPlayer({

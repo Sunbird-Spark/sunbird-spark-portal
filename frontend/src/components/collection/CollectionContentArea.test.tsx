@@ -4,11 +4,10 @@ import CollectionContentArea from './CollectionContentArea';
 
 // Mock child components to verify conditional rendering
 vi.mock('@/components/collection/CollectionOverview', () => ({
-  default: ({ contentAccessBlocked, ratingOpen }: { contentAccessBlocked?: boolean; ratingOpen?: boolean }) => (
+  default: ({ contentAccessBlocked }: { contentAccessBlocked?: boolean }) => (
     <div
       data-testid="collection-overview"
       data-content-access-blocked={String(!!contentAccessBlocked)}
-      data-rating-open={String(!!ratingOpen)}
     />
   ),
 }));
@@ -153,18 +152,6 @@ describe('CollectionContentArea', () => {
     // Not in batch, so show available batches
     expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
     expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
-  });
-
-  describe('rating props passthrough', () => {
-    it('passes ratingOpen=true to CollectionOverview', () => {
-      render(<CollectionContentArea {...defaultProps} ratingOpen={true} onRatingClose={vi.fn()} />);
-      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-rating-open', 'true');
-    });
-
-    it('passes ratingOpen=false to CollectionOverview', () => {
-      render(<CollectionContentArea {...defaultProps} ratingOpen={false} onRatingClose={vi.fn()} />);
-      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-rating-open', 'false');
-    });
   });
 
   describe('Creator viewing own collection (contentCreatorPrivilege)', () => {

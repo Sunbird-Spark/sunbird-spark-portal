@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import CollectionOverview from './CollectionOverview';
 import type { CollectionData } from '@/types/collectionTypes';
 
@@ -27,14 +27,6 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 
-vi.mock('@/components/common/RatingDialog', () => ({
-  default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
-    open ? (
-      <div data-testid="rating-dialog">
-        <button onClick={onClose}>Close Rating</button>
-      </div>
-    ) : null,
-}));
 
 const mockCollectionData: CollectionData = {
   id: 'col-1',
@@ -250,57 +242,5 @@ describe('CollectionOverview', () => {
     });
   });
 
-  describe('rating dialog', () => {
-    it('does not render RatingDialog when ratingOpen/onRatingClose are not provided', () => {
-      render(
-        <CollectionOverview
-          collectionData={mockCollectionData}
-          contentId="content-1"
-          playerMetadata={mockPlayerMetadata}
-        />
-      );
-      expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-    });
 
-    it('renders RatingDialog inside the player wrapper when ratingOpen is true', () => {
-      render(
-        <CollectionOverview
-          collectionData={mockCollectionData}
-          contentId="content-1"
-          playerMetadata={mockPlayerMetadata}
-          ratingOpen={true}
-          onRatingClose={vi.fn()}
-        />
-      );
-      expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-    });
-
-    it('does not render RatingDialog when ratingOpen is false', () => {
-      render(
-        <CollectionOverview
-          collectionData={mockCollectionData}
-          contentId="content-1"
-          playerMetadata={mockPlayerMetadata}
-          ratingOpen={false}
-          onRatingClose={vi.fn()}
-        />
-      );
-      expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-    });
-
-    it('calls onRatingClose when close button is clicked', () => {
-      const onRatingClose = vi.fn();
-      render(
-        <CollectionOverview
-          collectionData={mockCollectionData}
-          contentId="content-1"
-          playerMetadata={mockPlayerMetadata}
-          ratingOpen={true}
-          onRatingClose={onRatingClose}
-        />
-      );
-      fireEvent.click(screen.getByRole('button', { name: 'Close Rating' }));
-      expect(onRatingClose).toHaveBeenCalledTimes(1);
-    });
-  });
 });

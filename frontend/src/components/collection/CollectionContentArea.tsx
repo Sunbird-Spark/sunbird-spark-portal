@@ -43,8 +43,6 @@ interface CollectionContentAreaProps {
   isCreatorViewingOwnCollection?: boolean;
   /** When true (content creator viewing any collection), access without batch, no progress, learner cards hidden. */
   contentCreatorPrivilege?: boolean;
-  ratingOpen?: boolean;
-  onRatingClose?: () => void;
 }
 
 export default function CollectionContentArea({

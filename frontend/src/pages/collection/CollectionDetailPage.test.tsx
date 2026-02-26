@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- creator-viewing-own-collection test coverage */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import CollectionDetailPage from './CollectionDetailPage';
@@ -90,16 +90,10 @@ vi.mock('@/hooks/useQumlContent', () => ({
   useQumlContent: (questionSetId: string, options?: { enabled?: boolean }) => mockUseQumlContent(questionSetId, options),
 }));
 
-let capturedOnContentEnd: (() => void) | undefined;
-let capturedOnContentStart: (() => void) | undefined;
-const mockUseCollectionDetailPlayer = vi.fn((options: any) => {
-  capturedOnContentEnd = options?.onContentEnd;
-  capturedOnContentStart = options?.onContentStart;
-  return {
-    handlePlayerEvent: vi.fn(),
-    handleTelemetryEvent: vi.fn(),
-  };
-});
+const mockUseCollectionDetailPlayer = vi.fn(() => ({
+  handlePlayerEvent: vi.fn(),
+  handleTelemetryEvent: vi.fn(),
+}));
 vi.mock('@/hooks/useCollectionDetailPlayer', () => ({
   useCollectionDetailPlayer: (options: unknown) => mockUseCollectionDetailPlayer(options),
 }));
@@ -233,8 +227,6 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
     isAuthenticated,
     isCreatorViewingOwnCollection,
     contentBlocked,
-    ratingOpen,
-    onRatingClose,
   }: {
     collectionData: any;
     contentId?: string;
@@ -243,15 +235,12 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
     isAuthenticated?: boolean;
     isCreatorViewingOwnCollection?: boolean;
     contentBlocked?: boolean;
-    ratingOpen?: boolean;
-    onRatingClose?: () => void;
   }) => (
     <div
       data-testid="collection-content-area"
       data-content-id={contentId ?? ''}
       data-is-creator-viewing-own={String(!!isCreatorViewingOwnCollection)}
       data-content-blocked={String(!!contentBlocked)}
-      data-rating-open={String(!!ratingOpen)}
     >
       <div data-testid="collection-overview">{collectionData?.title}</div>
       <div>
@@ -263,11 +252,6 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
       </div>
       <aside data-testid="collection-sidebar">Sidebar</aside>
       <div>Stats: {collectionData?.lessons} lessons</div>
-      {ratingOpen && onRatingClose && (
-        <div data-testid="rating-dialog">
-          <button onClick={onRatingClose}>Close Rating</button>
-        </div>
-      )}
     </div>
   ),
 }));
@@ -309,8 +293,6 @@ describe('CollectionDetailPage', () => {
     mockGetUserId.mockReturnValue(null);
     mockCollectionData.createdBy = undefined;
     lastCertificateModalDetails = undefined;
-    capturedOnContentEnd = undefined;
-    capturedOnContentStart = undefined;
     mockUserReadData = {
       data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
       isLoading: false,
@@ -649,71 +631,6 @@ describe('CollectionDetailPage', () => {
 
       const contentArea = screen.getByTestId('collection-content-area');
       expect(contentArea).toHaveAttribute('data-is-creator-viewing-own', 'false');
-    });
-  });
-
-  /* ─── Rating dialog ─── */
-  describe('Rating dialog', () => {
-    it('does not render RatingDialog initially', () => {
-      renderWithProviders(<CollectionDetailPage />);
-      expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-    });
-
-    it('renders RatingDialog after onContentEnd is called and 5s timer fires', () => {
-      vi.useFakeTimers();
-      renderWithProviders(<CollectionDetailPage />);
-      expect(capturedOnContentEnd).toBeDefined();
-      act(() => { capturedOnContentEnd!(); });
-      act(() => { vi.advanceTimersByTime(5000); });
-      expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-      vi.useRealTimers();
-    });
-
-    it('does not open RatingDialog before 5s timer fires', () => {
-      vi.useFakeTimers();
-      renderWithProviders(<CollectionDetailPage />);
-      act(() => { capturedOnContentEnd!(); });
-      act(() => { vi.advanceTimersByTime(4999); });
-      expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-      vi.useRealTimers();
-    });
-
-    it('closes RatingDialog when close button is clicked', () => {
-      vi.useFakeTimers();
-      renderWithProviders(<CollectionDetailPage />);
-      act(() => { capturedOnContentEnd!(); });
-      act(() => { vi.advanceTimersByTime(5000); });
-      expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: 'Close Rating' }));
-      expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-      vi.useRealTimers();
-    });
-
-    it('cancels pending popup when content is replayed before 5s timer fires', () => {
-      vi.useFakeTimers();
-      renderWithProviders(<CollectionDetailPage />);
-      act(() => { capturedOnContentEnd!(); });
-      act(() => { vi.advanceTimersByTime(2000); });
-      // User replays before popup shows
-      act(() => { capturedOnContentStart!(); });
-      act(() => { vi.advanceTimersByTime(5000); });
-      expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-      vi.useRealTimers();
-    });
-
-    it('shows popup after the next END event following a replay', () => {
-      vi.useFakeTimers();
-      renderWithProviders(<CollectionDetailPage />);
-      // First END → timer starts
-      act(() => { capturedOnContentEnd!(); });
-      act(() => { vi.advanceTimersByTime(2000); });
-      // Replay cancels the timer
-      act(() => { capturedOnContentStart!(); });
-      // Second END → new timer starts
-      act(() => { capturedOnContentEnd!(); });
-      act(() => { vi.advanceTimersByTime(5000); });
-      expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-      vi.useRealTimers();
     });
   });
 

@@ -1,11 +1,10 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
 import RelatedContent from "@/components/common/RelatedContent";
-import RatingDialog from "@/components/common/RatingDialog";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
@@ -58,16 +57,12 @@ const ContentPlayerPage = () => {
     [relatedContentData?.data?.content, contentId]
   );
   
-  const [ratingOpen, setRatingOpen] = useState(false);
-
   const onPlayerEvent = useCallback((event: unknown) => {
     console.log('Content player event:', event);
   }, []);
 
   const onTelemetryEvent = useCallback((event: unknown) => {
     console.log('Content telemetry event:', event);
-    const eid = ((event as any)?.eid ?? (event as any)?.data?.eid ?? (event as any)?.type ?? "").toUpperCase();
-    if (eid === "END") setTimeout(() => setRatingOpen(true), 5000);
   }, []);
 
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
@@ -131,11 +126,6 @@ const ContentPlayerPage = () => {
                 metadata={playerMetadata}
                 onPlayerEvent={handlePlayerEvent}
                 onTelemetryEvent={handleTelemetryEvent}
-              />
-              <RatingDialog
-                open={ratingOpen}
-                onClose={() => setRatingOpen(false)}
-                playerMetadata={playerMetadata}
               />
             </div>
           </div>
