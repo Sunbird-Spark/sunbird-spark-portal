@@ -2,7 +2,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Role } from '../auth/AuthContext';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { UserService } from '../services/UserService';
 import permissionService, { Feature } from '../services/PermissionService';
+
+const userService = new UserService();
 
 export interface UsePermissionsReturn {
   roles: Role[];
@@ -31,10 +34,21 @@ export function usePermissions(): UsePermissionsReturn {
       const authInfo = await userAuthInfoService.getAuthInfo();
       if (!isMountedRef.current) return;
 
-      const backendRoles = authInfo.roles || [];
-      const normalizedRoles = permissionService.normalizeRoles(backendRoles);
-      setRoles(normalizedRoles);
       setIsAuthenticated(authInfo.isAuthenticated);
+
+      if (authInfo.isAuthenticated && authInfo.uid) {
+        const rolesResponse = await userService.getUserRoles(authInfo.uid);
+        if (!isMountedRef.current) return;
+        const rawRoles = (rolesResponse.data.response.roles || []).map(
+          (r: { role: string } | string) => typeof r === 'string' ? r : r.role
+        );
+        console.log('[usePermissions] Raw roles from user read API:', rawRoles);
+        const normalizedRoles = permissionService.normalizeRoles(rawRoles);
+        console.log('[usePermissions] Normalized roles:', normalizedRoles);
+        setRoles(normalizedRoles);
+      } else {
+        setRoles(['PUBLIC']);
+      }
     } catch (err) {
       if (!isMountedRef.current) return;
       console.error('Failed to fetch user roles:', err);

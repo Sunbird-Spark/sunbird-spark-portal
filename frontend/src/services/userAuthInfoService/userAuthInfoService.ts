@@ -4,7 +4,6 @@ interface AuthStatusResponse {
     sid: string;
     uid: string | null;
     isAuthenticated: boolean;
-    roles?: string[];
 }
 
 class userAuthInfoService {

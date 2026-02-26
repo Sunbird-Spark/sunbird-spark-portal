@@ -36,7 +36,6 @@ export const getAuthInfo = async (req: Request, res: Response) => {
             sid: sessionId,
             uid: userId,
             isAuthenticated: isAuthenticated,
-            roles: req.session.roles || []
         };
 
         response.setResult({ data: authStatusData });
