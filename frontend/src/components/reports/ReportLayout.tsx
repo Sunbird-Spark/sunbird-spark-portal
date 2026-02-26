@@ -5,7 +5,6 @@ import Footer from "@/components/home/Footer";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
-import { useLocation } from "react-router-dom";
 import "../../pages/workspace/workspace.css";
 
 interface ReportLayoutProps {
@@ -20,7 +19,6 @@ const ReportLayout = ({ title, breadcrumbs, children, actions, activeNav = "admi
   const isMobile = useIsMobile();
   const [currentNav, setCurrentNav] = useState(activeNav);
   const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
-  const location = useLocation();
 
   return (
     <div className="workspace-container">
