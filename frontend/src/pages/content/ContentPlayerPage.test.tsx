@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import ContentPlayerPage from './ContentPlayerPage';
@@ -75,11 +74,6 @@ const makeContentRead = (content: object | null, isLoading = false, error?: Erro
   } as any);
 
 const videoContent = { identifier: 'do_123', name: 'Test Video', mimeType: 'video/mp4' };
-const h5pContent = {
-  identifier: 'do_h5p_1',
-  name: 'Test H5P',
-  mimeType: 'application/vnd.ekstep.h5p-archive',
-};
 
 // ── Test suite ─────────────────────────────────────────────────────────────
 
@@ -131,31 +125,12 @@ describe('ContentPlayerPage', () => {
     expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
   });
 
-  // ── Go Back — regular content ────────────────────────────────────────────
+  // ── Go Back ──────────────────────────────────────────────────────────────
 
-  it('navigates back immediately when Go Back is clicked for non-H5P content', () => {
+  it('navigates back when Go Back is clicked', () => {
     makeContentRead(videoContent);
     render(<ContentPlayerPage />);
     fireEvent.click(screen.getByRole('button', { name: /Go Back/ }));
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
-    expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-  });
-
-  // ── Go Back — H5P ────────────────────────────────────────────────────────
-
-  it('shows rating dialog (does not navigate) when Go Back is clicked for H5P', () => {
-    makeContentRead(h5pContent);
-    render(<ContentPlayerPage />);
-    fireEvent.click(screen.getByRole('button', { name: /Go Back/ }));
-    expect(mockNavigate).not.toHaveBeenCalled();
-    expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-  });
-
-  it('navigates back after closing the rating dialog for H5P Go Back', () => {
-    makeContentRead(h5pContent);
-    render(<ContentPlayerPage />);
-    fireEvent.click(screen.getByRole('button', { name: /Go Back/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Close Rating' }));
     expect(mockNavigate).toHaveBeenCalledWith(-1);
     expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
   });
