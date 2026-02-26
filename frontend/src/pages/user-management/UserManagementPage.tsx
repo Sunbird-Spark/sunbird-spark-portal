@@ -17,6 +17,9 @@ import {
   type RoleItem,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
+import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useGetTncUrl } from "@/hooks/useTnc";
 import "../home/home.css";
 import "./user-management.css";
 
@@ -43,6 +46,9 @@ const UserManagementPage = () => {
 
   const [activeTab, setActiveTab] = useState<string>(UM_TABS[0]?.id ?? "role-management");
   const [availableRoles, setAvailableRoles] = useState<RoleItem[]>([]);
+
+  const { data: tncConfig, isSuccess: isTncConfigSuccess } = useSystemSetting('tncConfig');
+  const { data: termsUrl } = useGetTncUrl(isTncConfigSuccess ? tncConfig : null);
 
   const loadRoles = useCallback(async () => {
     try {
@@ -83,6 +89,22 @@ const UserManagementPage = () => {
               {/* ── Page header ── */}
               <div className="um-page-header">
                 <h1 className="um-page-title">User Management</h1>
+                <p className="text-xs text-sunbird-gray-75 mt-1 font-['Rubik']">
+                  By using User Management features, you acknowledge and accept the{" "}
+                  {termsUrl ? (
+                    <TermsAndConditionsDialog termsUrl={termsUrl} title="Terms &amp; Conditions">
+                      <button
+                        type="button"
+                        className="underline text-sunbird-brick hover:opacity-80 font-medium"
+                      >
+                        Terms &amp; Conditions
+                      </button>
+                    </TermsAndConditionsDialog>
+                  ) : (
+                    <span className="font-medium text-sunbird-obsidian">Terms &amp; Conditions</span>
+                  )}
+                  .
+                </p>
               </div>
 
               {/* ── Top Tabs layout ── */}

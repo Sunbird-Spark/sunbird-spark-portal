@@ -31,6 +31,14 @@ vi.mock('@/hooks/useBatch', () => ({
   }),
 }));
 
+/* ── Mock useSystemSetting + useGetTncUrl ── */
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: { url: 'https://example.com/tnc' }, isSuccess: true }),
+}));
+vi.mock('@/hooks/useTnc', () => ({
+  useGetTncUrl: () => ({ data: 'https://example.com/tnc' }),
+}));
+
 /* ── Helpers ── */
 const defaultProps = {
   open: true,
@@ -128,8 +136,13 @@ describe('CreateBatchModal', () => {
 
     it('renders Terms & Conditions checkbox', () => {
       render(<CreateBatchModal {...defaultProps} />);
-      expect(screen.getByText(/i accept the terms & conditions/i)).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: /i accept the terms & conditions/i })).toBeInTheDocument();
+      // The label text is split across child nodes (text + button), so check
+      // the label specifically linked to the checkbox
+      const label = document.querySelector('label[for="acceptTerms"]');
+      expect(label?.textContent?.toLowerCase()).toContain('i accept the');
+      expect(label?.textContent?.toLowerCase()).toContain('terms & conditions');
+      // Checkbox input is identified by its id
+      expect(document.getElementById('acceptTerms')).toBeInTheDocument();
     });
 
     it('renders mentor search input', () => {

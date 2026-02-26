@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import * as Checkbox from "@radix-ui/react-checkbox";
-import { FiX, FiCheck, FiSearch, FiLoader } from "react-icons/fi";
+import { FiX, FiSearch, FiLoader } from "react-icons/fi";
 import { useCreateBatch, useUpdateBatch } from "@/hooks/useBatch";
 import { useMentorList, MentorUser } from "@/hooks/useMentor";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
 import { SwitchRow } from "@/components/common/Switch";
-import { CheckboxRow } from "@/components/common/CheckboxRow";
 import { MentorSection } from "@/components/collection/MentorSection";
 import { BatchFormFields, BatchFormState } from "@/components/collection/BatchFormFields";
+import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 
 /* ─── Types ─── */
 
@@ -21,7 +20,6 @@ interface CreateBatchModalProps {
   /** When provided, the modal operates in Edit mode */
   initialBatch?: Batch;
 }
-
 
 
 const makeInitialForm = (batch?: Batch): BatchFormState => ({
@@ -196,12 +194,9 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
             {/* 8. Terms & Conditions (create mode only) */}
             {!isEditMode && (
               <div className="rounded-lg bg-gray-50 border border-border p-4">
-                <CheckboxRow
-                  id="acceptTerms"
+                <TncCheckboxRow
                   checked={form.acceptTerms}
                   onCheckedChange={(v) => handleField("acceptTerms", !!v)}
-                  label="I accept the Terms & Conditions for creating this batch."
-                  required
                 />
               </div>
             )}
