@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { convertSvgToOutput } from '@/utils/svg-converter';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { IssuedCertificate } from '@/types/TrackableCollections';
-import { toast } from '@/hooks/useToast';
 import { head } from 'lodash';
 import { certificateService } from '@/services/CertificateService';
 
@@ -10,16 +9,16 @@ export const useCertificateDownload = () => {
     const [downloadingCourseId, setDownloadingCourseId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const getMatchingCert = (courseId: string, batchId?: string, courseName?: string, issuedCertificates?: IssuedCertificate[]) => {
+    const getMatchingCert = (_courseId: string, _batchId?: string, _courseName?: string, issuedCertificates?: IssuedCertificate[]) => {
         if (issuedCertificates?.length) return head(issuedCertificates);
         return undefined;
     };
 
-    const hasCertificate = (courseId: string, batchId?: string, courseName?: string, issuedCertificates?: IssuedCertificate[]) => {
-        return !!getMatchingCert(courseId, batchId, courseName, issuedCertificates);
+    const hasCertificate = (_courseId: string, _batchId?: string, _courseName?: string, issuedCertificates?: IssuedCertificate[]) => {
+        return !!getMatchingCert(_courseId, _batchId, _courseName, issuedCertificates);
     };
 
-    const downloadCertificate = async (courseId: string, batchId: string, courseName: string, issuedCertificates?: IssuedCertificate[], completedOn?: number) => {
+    const downloadCertificate = async (courseId: string, batchId: string, courseName: string, issuedCertificates?: IssuedCertificate[], _completedOn?: number) => {
         let userId = userAuthInfoService.getUserId();
         if (!userId) {
             const authInfo = await userAuthInfoService.getAuthInfo();
@@ -44,46 +43,48 @@ export const useCertificateDownload = () => {
                 const searchResponse = await certificateService.searchCertificates(userId);
                 const certs = Array.isArray(searchResponse.data) ? searchResponse.data : [];
                 const rcCert = certs.find(
-                    (c: any) => c.training?.id === courseId && (!batchId || c.training?.batchId === batchId)
+                    (c: Record<string, unknown>) => (c.training as Record<string, unknown>)?.id === courseId && (!batchId || (c.training as Record<string, unknown>)?.batchId === batchId)
                 );
-                certId = rcCert?.osid ?? (rcCert as any)?.identifier;
+                certId = rcCert?.osid ?? (rcCert as Record<string, unknown>)?.identifier;
             }
 
             if (!certId) {
                 throw new Error('Certificate is not yet generated or available for this course.');
             }
 
-            // Step 3: Download fully-populated certificate from RC service
-            // Use native fetch for SVG content (http-client is JSON-only by default)
+            // Step 3: Download certificate metadata from RC service
             const downloadUrl = `/portal/rc/certificate/v1/download/${certId}`;
-            const response = await fetch(downloadUrl, {
-                headers: {
-                    'Accept': 'image/svg+xml'
-                }
-            });
+            const response = await fetch(downloadUrl);
 
             if (!response.ok) {
                 throw new Error(`Failed to fetch certificate: ${response.statusText}`);
             }
 
-            const svgContent = await response.text();
+            const certificateData = await response.json() as Record<string, unknown>;
+            const svgUrl = certificateData?.templateUrl as string | undefined;
 
-            if (!svgContent || svgContent.trim().length === 0) {
-                throw new Error('Empty certificate received from server.');
+            if (!svgUrl) {
+                throw new Error('Certificate template URL not found.');
             }
 
-            // Step 4: Convert SVG → PDF and trigger download
+            // Step 4: Fetch SVG from template URL
+            const svgResponse = await fetch(svgUrl);
+            if (!svgResponse.ok) {
+                throw new Error(`Failed to fetch certificate SVG: ${svgResponse.statusText}`);
+            }
+
+            const svgContent = await svgResponse.text();
+            if (!svgContent || svgContent.trim().length === 0) {
+                throw new Error('Empty certificate SVG received.');
+            }
+
+            // Step 5: Convert SVG → PDF and trigger download
             await convertSvgToOutput(svgContent, { fileName: courseName || 'certificate' });
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Certificate download error:', err);
-            const errorMessage = err.message || 'Failed to download certificate';
+            const errorMessage = (err instanceof Error ? err.message : String(err)) || 'Failed to download certificate';
             setError(errorMessage);
-            toast({
-                title: 'Download Failed',
-                description: errorMessage,
-                variant: 'destructive'
-            });
         } finally {
             setDownloadingCourseId(null);
         }
@@ -97,4 +98,3 @@ export const useCertificateDownload = () => {
         error
     };
 };
-
