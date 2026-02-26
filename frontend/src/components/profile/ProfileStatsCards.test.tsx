@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import HomeStatsCards from './HomeStatsCards';
+import ProfileStatsCards from './ProfileStatsCards';
 
 // Mock useUserEnrolledCollections
 const mockUseUserEnrolledCollections = vi.fn();
@@ -14,6 +14,14 @@ vi.mock('@/hooks/useCertificate', () => ({
     useUserCertificates: () => mockUseUserCertificates(),
 }));
 
+// Mock profile icons
+vi.mock('./ProfileIcons', () => ({
+    TotalContentsIcon: () => <svg data-testid="icon-total" />,
+    InProgressIcon: () => <svg data-testid="icon-progress" />,
+    ContentsCompletedIcon: () => <svg data-testid="icon-completed" />,
+    CertificationsIcon: () => <svg data-testid="icon-certs" />,
+}));
+
 const mockCourses = [
     { courseId: 'course-1', status: 1 }, // in progress
     { courseId: 'course-2', status: 2 }, // completed
@@ -22,7 +30,7 @@ const mockCourses = [
 
 // Expected: totalCourses=3, inProgress=1, completed=2
 
-describe('HomeStatsCards', () => {
+describe('ProfileStatsCards', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockUseUserEnrolledCollections.mockReturnValue({
@@ -36,50 +44,52 @@ describe('HomeStatsCards', () => {
     });
 
     it('renders all four stats cards with correct labels and values', () => {
-        render(<HomeStatsCards />);
+        render(<ProfileStatsCards />);
 
         // Total Courses: 3 courses enrolled
-        const totalCard = screen.getByText('Total Courses').closest('.home-stat-card');
+        const totalCard = screen.getByText('Total Courses').closest('.stat-card');
         expect(totalCard).toBeInTheDocument();
-        expect(totalCard!.querySelector('.home-stat-value')!.textContent).toBe('03');
+        expect(totalCard!.querySelector('.stat-value')!.textContent).toBe('03');
 
         // Courses in Progress: status === 1 => 1
-        const progressCard = screen.getByText('In Progress').closest('.home-stat-card');
+        const progressCard = screen.getByText('In Progress').closest('.stat-card');
         expect(progressCard).toBeInTheDocument();
-        expect(progressCard!.querySelector('.home-stat-value')!.textContent).toBe('01');
+        expect(progressCard!.querySelector('.stat-value')!.textContent).toBe('01');
 
         // Courses Completed: status === 2 => 2
-        const completedCard = screen.getByText('Completed').closest('.home-stat-card');
+        const completedCard = screen.getByText('Completed').closest('.stat-card');
         expect(completedCard).toBeInTheDocument();
-        expect(completedCard!.querySelector('.home-stat-value')!.textContent).toBe('02');
+        expect(completedCard!.querySelector('.stat-value')!.textContent).toBe('02');
 
         // Certifications Earned: 2 certificates
-        const certsCard = screen.getByText('Certifications Earned').closest('.home-stat-card');
+        const certsCard = screen.getByText('Certifications Earned').closest('.stat-card');
         expect(certsCard).toBeInTheDocument();
-        expect(certsCard!.querySelector('.home-stat-value')!.textContent).toBe('02');
+        expect(certsCard!.querySelector('.stat-value')!.textContent).toBe('02');
     });
 
-    it('applies correct background classes to cards', () => {
-        render(<HomeStatsCards />);
+    it('applies correct CSS classes to each card', () => {
+        render(<ProfileStatsCards />);
 
-        const totalCard = screen.getByText('Total Courses').closest('.home-stat-card');
-        expect(totalCard).toHaveClass('bg-sunbird-blue-light');
+        const totalCard = screen.getByText('Total Courses').closest('.stat-card');
+        expect(totalCard).toHaveClass('stat-card-time-spent');
 
-        const progressCard = screen.getByText('In Progress').closest('.home-stat-card');
-        expect(progressCard).toHaveClass('bg-sunbird-ginger');
+        const progressCard = screen.getByText('In Progress').closest('.stat-card');
+        expect(progressCard).toHaveClass('stat-card-badges');
 
-        const completedCard = screen.getByText('Completed').closest('.home-stat-card');
-        expect(completedCard).toHaveClass('bg-sunbird-moss');
+        const completedCard = screen.getByText('Completed').closest('.stat-card');
+        expect(completedCard).toHaveClass('stat-card-completed');
 
-        const certsCard = screen.getByText('Certifications Earned').closest('.home-stat-card');
-        expect(certsCard).toHaveClass('bg-sunbird-lavender');
+        const certsCard = screen.getByText('Certifications Earned').closest('.stat-card');
+        expect(certsCard).toHaveClass('stat-card-certs');
     });
 
     it('renders icons for each card', () => {
-        const { container } = render(<HomeStatsCards />);
+        render(<ProfileStatsCards />);
 
-        const icons = container.querySelectorAll('svg');
-        expect(icons.length).toBe(4);
+        expect(screen.getByTestId('icon-total')).toBeInTheDocument();
+        expect(screen.getByTestId('icon-progress')).toBeInTheDocument();
+        expect(screen.getByTestId('icon-completed')).toBeInTheDocument();
+        expect(screen.getByTestId('icon-certs')).toBeInTheDocument();
     });
 
     it('handles empty courses data', () => {
@@ -92,7 +102,7 @@ describe('HomeStatsCards', () => {
             isLoading: false,
         });
 
-        render(<HomeStatsCards />);
+        render(<ProfileStatsCards />);
 
         expect(screen.getByText('Total Courses')).toBeInTheDocument();
         expect(screen.getByText('In Progress')).toBeInTheDocument();
@@ -114,7 +124,7 @@ describe('HomeStatsCards', () => {
             isLoading: false,
         });
 
-        render(<HomeStatsCards />);
+        render(<ProfileStatsCards />);
 
         const zeroValues = screen.getAllByText('0');
         expect(zeroValues.length).toBe(4);
@@ -130,14 +140,14 @@ describe('HomeStatsCards', () => {
             isLoading: true,
         });
 
-        render(<HomeStatsCards />);
+        render(<ProfileStatsCards />);
 
         // Should show loading placeholders
         const loadingValues = screen.getAllByText('--');
         expect(loadingValues.length).toBe(4);
 
         // Cards should have pulse animation
-        const cards = document.querySelectorAll('.home-stat-card');
+        const cards = document.querySelectorAll('.stat-card');
         cards.forEach(card => {
             expect(card).toHaveClass('animate-pulse');
         });
