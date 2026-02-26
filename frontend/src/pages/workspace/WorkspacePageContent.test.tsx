@@ -37,6 +37,8 @@ const mockItem: WorkspaceItem = {
   primaryCategory: 'Course',
   contentType: '',
   mimeType: '',
+  framework: '',
+  contentStatus: 'Draft',
 };
 
 vi.mock('@/components/workspace/CreateOptions', () => ({
@@ -91,25 +93,24 @@ describe('WorkspacePageContent', () => {
     rerender(<WorkspacePageContent {...defaultProps} activeView="create" showCreateModal={false} />);
     expect(screen.getByTestId('create-options')).toBeInTheDocument();
   });
-  it('calls onCreateOption when option selected in create view and when uploads action clicked', () => {
+  it('calls onCreateOption when option selected in create view', () => {
     const onCreateOption = vi.fn();
     render(<WorkspacePageContent {...defaultProps} activeView="create" onCreateOption={onCreateOption} />);
     fireEvent.click(screen.getByRole('button', { name: 'Select option' }));
     expect(onCreateOption).toHaveBeenCalledWith('course');
-    onCreateOption.mockClear();
-    render(<WorkspacePageContent {...defaultProps} activeView="uploads" onCreateOption={onCreateOption} />);
+  });
+  it('renders uploads EmptyState when activeView is uploads and no items', () => {
+    const onCreateOption = vi.fn();
+    render(<WorkspacePageContent {...defaultProps} activeView="uploads" filteredItems={[]} onCreateOption={onCreateOption} />);
+    expect(screen.getByTestId('empty-title')).toHaveTextContent('No uploads yet');
+    expect(screen.getByTestId('empty-desc')).toHaveTextContent('Upload PDF, video, or other content files to get started.');
     fireEvent.click(screen.getByRole('button', { name: 'uploadContent' }));
-    expect(onCreateOption).toHaveBeenCalledWith('upload-content');
+    expect(onCreateOption).toHaveBeenCalledWith('upload-pdf');
   });
-  it('renders uploads EmptyState when activeView is uploads', () => {
-    render(<WorkspacePageContent {...defaultProps} activeView="uploads" />);
-    expect(screen.getByTestId('empty-title')).toHaveTextContent('noUploadsYet');
-    expect(screen.getByTestId('empty-desc')).toHaveTextContent('uploadHere');
-  });
-  it('renders collaborations EmptyState when activeView is collaborations', () => {
-    render(<WorkspacePageContent {...defaultProps} activeView="collaborations" />);
-    expect(screen.getByTestId('empty-title')).toHaveTextContent('noCollaborations');
-    expect(screen.getByTestId('empty-desc')).toHaveTextContent('sharedWithYou');
+  it('renders collaborations EmptyState when activeView is collaborations and no items', () => {
+    render(<WorkspacePageContent {...defaultProps} activeView="collaborations" filteredItems={[]} />);
+    expect(screen.getByTestId('empty-title')).toHaveTextContent('No collaborations');
+    expect(screen.getByTestId('empty-desc')).toHaveTextContent('Content shared with you will appear here.');
     expect(screen.queryByRole('button', { name: 'uploadContent' })).not.toBeInTheDocument();
   });
   it('renders empty state createFirst when no items and calls onCreateClick on action', () => {

@@ -30,6 +30,8 @@ const defaultItem = {
   primaryCategory: 'Learning Resource',
   contentType: '',
   mimeType: '',
+  framework: '',
+  contentStatus: '',
 };
 
 describe('WorkspaceContentCard', () => {

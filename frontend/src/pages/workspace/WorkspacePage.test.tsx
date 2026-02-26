@@ -336,6 +336,7 @@ describe('WorkspacePage', () => {
       primaryCategory: 'Practice Question Set', mimeType: 'application/vnd.sunbird.questionset',
       status: 'draft', contentType: 'QuestionSet', createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z', author: 'Test Author',
+      framework: '', contentStatus: 'Draft',
     };
     mockUseWorkspace.mockReturnValue({
       contents: [mockQuestionSetContent], counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
@@ -356,8 +357,8 @@ describe('WorkspacePage', () => {
       expect(mockQuestionSetRetireMutateAsync).toHaveBeenCalledWith('do_qs_123');
     });
     expect(mockToast).toHaveBeenCalledWith({
-      title: 'Deleted',
-      description: 'Content has been removed successfully.',
+      title: 'Success',
+      description: 'Content has been deleted successfully.',
       variant: 'success',
     });
   });
