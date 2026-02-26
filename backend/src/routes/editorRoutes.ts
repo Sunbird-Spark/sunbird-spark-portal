@@ -5,6 +5,9 @@ import { sessionMiddleware } from '../middlewares/conditionalSession.js';
 
 const router = express.Router();
 
+// Review comment routes - proxy to Kong, which forwards back to /review/comment/v1/*
+router.all('/review/comment/v1/*rest', sessionMiddleware, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), kongProxy);
+
 const editorRoutes: string[] = [
     '/object/category/definition/*rest',
     '/user/v1/search',
