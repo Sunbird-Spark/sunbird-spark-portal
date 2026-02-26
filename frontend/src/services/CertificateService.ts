@@ -1,18 +1,24 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 import type { Certificate, CertificateSearchResponse } from '../components/collection/certificate/types';
-
-export type { Certificate, CertificateSearchResponse };
-
 import {
-  IssuedCertificate,
-  CertUserBatch,
-  CertUserSearchResponse,
   CertSignatory,
   CertTemplateSummary,
   CreateAssetRequest,
   AssetCreateResponse,
   AddTemplateRequest,
+  RemoveTemplateRequest,
 } from './CertificateTypes';
+
+export type {
+  Certificate,
+  CertificateSearchResponse,
+  CertSignatory,
+  CertTemplateSummary,
+  CreateAssetRequest,
+  AssetCreateResponse,
+  AddTemplateRequest,
+  RemoveTemplateRequest,
+};
 
 export class CertificateService {
   /** Create the certificate asset record (SVG template) */
@@ -122,6 +128,18 @@ export class CertificateService {
     );
   }
 
+  /** Remove the certificate template from the batch */
+  async removeTemplateFromBatch(
+    request: RemoveTemplateRequest,
+    headers?: Record<string, string>
+  ): Promise<ApiResponse<unknown>> {
+    return getClient().patch<unknown>(
+      'course/batch/cert/v1/template/remove',
+      { request },
+      headers
+    );
+  }
+
   /** Search for image assets (logos/signatures already uploaded) in the org.
    *  Pass `createdBy` to filter to the current user's own uploads (My Images tab).
    *  Omit it to get all org images (All Images tab).
@@ -163,7 +181,6 @@ export class CertificateService {
   }
 
   /** Search existing certificate templates in the org */
-
   async searchCertTemplates(
     channel: string
   ): Promise<ApiResponse<{ count: number; content: CertTemplateSummary[] }>> {
@@ -194,8 +211,6 @@ export class CertificateService {
       }
     );
   }
-
-  // ─── Dashboard: re-issue a certificate ───────────────────────────────────────
   /**
    * Re-issue a certificate for one or more users.
    * POST /certreg/v1/cert/reissue
@@ -230,5 +245,4 @@ export class CertificateService {
     });
   }
 }
-
 export const certificateService = new CertificateService();

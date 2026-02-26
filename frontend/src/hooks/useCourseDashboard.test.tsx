@@ -18,6 +18,7 @@ vi.mock('../services/UserService', () => ({
   userService: {
     searchUserByUserName: vi.fn(),
     getUserEnrollments: vi.fn(),
+    getPrivateUserEnrollments: vi.fn(),
   },
 }));
 
@@ -69,7 +70,7 @@ describe('useCourseDashboard hooks', () => {
             ]
         }
       };
-      (userService.getUserEnrollments as import('vitest').Mock).mockResolvedValue(mockEnrollmentRes);
+      (userService.getPrivateUserEnrollments as import('vitest').Mock).mockResolvedValue(mockEnrollmentRes);
 
       const { result } = renderHook(() => useCertUserSearch(), { wrapper: QueryProviderWrapper });
 
@@ -78,7 +79,7 @@ describe('useCourseDashboard hooks', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(userService.searchUserByUserName).toHaveBeenCalledWith('User1');
-      expect(userService.getUserEnrollments).toHaveBeenCalledWith('u1');
+      expect(userService.getPrivateUserEnrollments).toHaveBeenCalledWith('u1');
 
       // Assert the assembled response structure
       expect(result.current.data?.data?.response?.courses?.batches).toHaveLength(1);

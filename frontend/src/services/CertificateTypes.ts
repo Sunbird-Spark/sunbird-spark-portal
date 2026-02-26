@@ -93,3 +93,14 @@ export interface AddTemplateRequest {
     };
   };
 }
+
+export interface RemoveTemplateRequest {
+  batch: {
+    courseId: string;
+    batchId: string;
+    template: {
+      identifier: string;
+    };
+  };
+}
+

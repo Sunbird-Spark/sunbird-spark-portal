@@ -187,6 +187,17 @@ public async updateProfile(
         const url = `/course/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
         return getClient().get<CourseEnrollmentResponse>(url);
     }
+
+    public async getPrivateUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
+        const searchParams = new URLSearchParams({
+            orgdetails: ORG_DETAILS_FIELDS.join(','),
+            licenseDetails: LICENSE_DETAILS_FIELDS.join(','),
+            fields: ENROLLMENT_CONTENT_FIELDS.join(','),
+            batchDetails: BATCH_DETAILS_FIELDS.join(','),
+        });
+        const url = `/course/private/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
+        return getClient().get<CourseEnrollmentResponse>(url);
+    }
 }
 
 export const userService = new UserService();
