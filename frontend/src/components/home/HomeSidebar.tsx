@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers } from "react-icons/fi";
+import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers, FiBarChart2, FiPieChart } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -45,6 +45,7 @@ const mainNavItems = [
     { id: "explore", label: "Explore", icon: ExploreIcon, path: "/explore" },
     { id: "workspace", label: "Workspace", icon: FiEdit, path: "/workspace" },
     { id: "profile", label: "Profile", icon: FiUser, path: "/profile" },
+    { id: "user-report", label: "User Report", icon: FiPieChart, path: "/reports/user/me" },
 ];
 
 const bottomNavItems = [
@@ -67,7 +68,10 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const dynamicMainNavItems = [
         ...mainNavItems,
         ...(isAdmin
-            ? [{ id: "user-management", label: "User Management", icon: FiUsers, path: "/user-management" }]
+            ? [
+                { id: "user-management", label: "User Management", icon: FiUsers, path: "/user-management" },
+                { id: "admin-reports", label: "Admin Reports", icon: FiBarChart2, path: "/reports/platform" },
+              ]
             : []),
     ];
 
