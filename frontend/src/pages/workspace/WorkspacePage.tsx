@@ -207,7 +207,7 @@ const WorkspacePage = () => {
 
   // Memoize content IDs to prevent unnecessary lock list API calls
   const visibleContentIds = useMemo(
-    () => visibleContents.map((c) => c.id).sort().join(','),
+    () => JSON.stringify(visibleContents.map((c) => c.id).sort()),
     [visibleContents],
   );
 
@@ -404,9 +404,9 @@ const WorkspacePage = () => {
     if (item.mimeType === 'application/vnd.ekstep.ecml-archive') {
         return `/edit/content-editor/${id}`;
     }
-    const state = (item.contentStatus || 'Draft').toLowerCase();
+    const state = (item.status || 'Draft').toLowerCase();
     const framework = item.framework || orgFramework || '';
-    const contentStatus = item.status || 'draft';
+    const contentStatus = item.contentStatus || 'draft';
     return `/workspace/content/edit/generic/${id}/${state}/${framework}/${contentStatus}`;
   };
 
