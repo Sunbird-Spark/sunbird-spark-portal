@@ -44,10 +44,32 @@ vi.mock('@/hooks/useUserRead', () => ({
     },
   }),
 }));
-vi.mock('@/hooks/useOrganization', () => ({ useOrganizationSearch: () => ({ mutateAsync: vi.fn() }) }));
+vi.mock('@/hooks/useOrganization', () => ({ 
+  useOrganizationSearch: () => ({ 
+    mutateAsync: vi.fn().mockResolvedValue({ 
+      data: { 
+        response: { 
+          content: [{ 
+            hashTagId: 'test-org-id', 
+            identifier: 'test-org-id' 
+          }] 
+        } 
+      } 
+    }) 
+  }) 
+}));
 vi.mock('@/hooks/useQuestionSetCreate', () => ({ useQuestionSetCreate: () => ({ mutateAsync: mockQuestionSetMutateAsync }) }));
 vi.mock('@/hooks/useQuestionSetRetire', () => ({ useQuestionSetRetire: () => ({ mutateAsync: mockQuestionSetRetireMutateAsync }) }));
 vi.mock('@/hooks/useChannel', () => ({ useChannel: () => ({ data: undefined }) }));
+
+vi.mock('@/services/UserProfileService', () => ({
+  default: {
+    initialize: vi.fn().mockResolvedValue(undefined),
+    getChannelSync: vi.fn().mockReturnValue('test-channel'),
+    isReady: vi.fn().mockReturnValue(true),
+    reset: vi.fn(),
+  },
+}));
 
 vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => ({
