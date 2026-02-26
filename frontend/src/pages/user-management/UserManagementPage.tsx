@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FiShield, FiLoader } from "react-icons/fi";
+import { FiShield } from "react-icons/fi";
 import {
   Sheet,
   SheetContent,
@@ -16,10 +16,9 @@ import {
   type RoleItem,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
-import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
+import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
-import { useAcceptTnc } from "@/hooks/useTnc";
-import { cn } from "@/lib/utils";
+import { useAcceptTnc, useGetTncUrl } from "@/hooks/useTnc";
 import "../home/home.css";
 import "./user-management.css";
 
@@ -45,10 +44,19 @@ const UserManagementPage = () => {
 
   const [activeTab, setActiveTab] = useState<string>(UM_TABS[0]?.id ?? "role-management");
   const [availableRoles, setAvailableRoles] = useState<RoleItem[]>([]);
-  const [tncChecked, setTncChecked] = useState(false);
-  const [orgTncAccepted, setOrgTncAccepted] = useState(false);
+  const [tncDialogOpen, setTncDialogOpen] = useState(false);
 
+  /* ── Fetch orgAdminTnc; fall back to tncConfig if no URL is found ── */
   const { data: orgAdminTncConfig, isSuccess: isOrgTncSuccess } = useSystemSetting('orgAdminTnc');
+  const { data: fallbackTncConfig, isSuccess: isFallbackSuccess } = useSystemSetting('tncConfig');
+
+  const { data: orgAdminTncUrl } = useGetTncUrl(isOrgTncSuccess ? orgAdminTncConfig : null);
+  const { data: fallbackTncUrl } = useGetTncUrl(isFallbackSuccess ? fallbackTncConfig : null);
+
+  const termsUrl = orgAdminTncUrl || fallbackTncUrl || '';
+  const activeTncConfig = orgAdminTncUrl ? orgAdminTncConfig : fallbackTncConfig;
+  const activeTncType = orgAdminTncUrl ? 'orgAdminTnc' : undefined;
+
   const acceptTncMutation = useAcceptTnc();
 
   const loadRoles = useCallback(async () => {
@@ -64,13 +72,10 @@ const UserManagementPage = () => {
   useEffect(() => { loadRoles(); }, [loadRoles]);
 
   const handleAcceptOrgTnc = async () => {
-    if (!tncChecked || !isOrgTncSuccess || !orgAdminTncConfig) return;
+    if (!activeTncConfig) return;
     try {
-      await acceptTncMutation.mutateAsync({
-        tncConfig: orgAdminTncConfig,
-        tncType: 'orgAdminTnc',
-      });
-      setOrgTncAccepted(true);
+      await acceptTncMutation.mutateAsync({ tncConfig: activeTncConfig, tncType: activeTncType });
+      setTncDialogOpen(false);
       toast({ title: "Terms accepted", description: "You can now use User Management features." });
     } catch {
       toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
@@ -103,34 +108,29 @@ const UserManagementPage = () => {
               {/* ── Page header ── */}
               <div className="um-page-header">
                 <h1 className="um-page-title">User Management</h1>
-
-                {/* ── Org Admin TnC acceptance (shown until accepted) ── */}
-                {!orgTncAccepted && (
-                  <div className="mt-3 rounded-lg bg-gray-50 border border-border p-4 space-y-3">
-                    <TncCheckboxRow
-                      checked={tncChecked}
-                      onCheckedChange={(v) => setTncChecked(!!v)}
-                      settingKey="orgAdminTnc"
-                      label="to use User Management features."
-                    />
-                    <div className="flex justify-end">
+                <p className="text-xs text-sunbird-gray-75 mt-1 font-['Rubik']">
+                  By using User Management features, you acknowledge and accept the{" "}
+                  {termsUrl ? (
+                    <TermsAndConditionsDialog
+                      termsUrl={termsUrl}
+                      title="Terms &amp; Conditions"
+                      open={tncDialogOpen}
+                      onOpenChange={setTncDialogOpen}
+                      onAccept={handleAcceptOrgTnc}
+                      accepting={acceptTncMutation.isPending}
+                    >
                       <button
                         type="button"
-                        disabled={!tncChecked || acceptTncMutation.isPending}
-                        onClick={handleAcceptOrgTnc}
-                        className={cn(
-                          "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors",
-                          !tncChecked || acceptTncMutation.isPending
-                            ? "bg-sunbird-brick/40 cursor-not-allowed"
-                            : "bg-sunbird-brick hover:bg-opacity-90"
-                        )}
+                        className="underline text-sunbird-brick hover:opacity-80 font-medium"
                       >
-                        {acceptTncMutation.isPending && <FiLoader className="w-4 h-4 animate-spin" />}
-                        {acceptTncMutation.isPending ? "Accepting…" : "Accept & Continue"}
+                        Terms &amp; Conditions
                       </button>
-                    </div>
-                  </div>
-                )}
+                    </TermsAndConditionsDialog>
+                  ) : (
+                    <span className="font-medium text-sunbird-obsidian">Terms &amp; Conditions</span>
+                  )}
+                  .
+                </p>
               </div>
 
               {/* ── Top Tabs layout ── */}
