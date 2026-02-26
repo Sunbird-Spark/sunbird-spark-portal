@@ -10,18 +10,10 @@ const ProfileStatsCards = () => {
 
     const isLoading = enrollmentsLoading || certificatesLoading;
 
-    // Total leaf-node contents across all enrolled courses
-    const totalContents = courses.reduce((acc, course) => acc + (course.leafNodesCount || 0), 0);
-
-    // Count individual contents by status from contentStatus map (1 = in progress, 2 = completed)
-    const contentsInProgress = courses.reduce((acc, course) => {
-        const statuses = Object.values(course.contentStatus || {});
-        return acc + statuses.filter(s => s === 1).length;
-    }, 0);
-    const contentsCompleted = courses.reduce((acc, course) => {
-        const statuses = Object.values(course.contentStatus || {});
-        return acc + statuses.filter(s => s === 2).length;
-    }, 0);
+    // Course-level stats using course status (1 = in progress, 2 = completed)
+    const totalCourses = courses.length;
+    const coursesInProgress = courses.filter(course => course.status === 1).length;
+    const coursesCompleted = courses.filter(course => course.status === 2).length;
 
     // Get certificate count from the certificate search API
     // The API returns an array of certificates directly
@@ -32,25 +24,25 @@ const ProfileStatsCards = () => {
     const statsData = [
         {
             id: "total",
-            value: totalContents === 0 ? '00' : totalContents.toString().padStart(2, '0'),
-            label: "Total Contents",
+            value: totalCourses === 0 ? '0' : totalCourses.toString().padStart(2, '0'),
+            label: "Total Courses",
             icon: TotalContentsIcon,
         },
         {
             id: "progress",
-            value: contentsInProgress === 0 ? '00' : contentsInProgress.toString().padStart(2, '0'),
-            label: "Contents in Progress",
+            value: coursesInProgress === 0 ? '0' : coursesInProgress.toString().padStart(2, '0'),
+            label: "In Progress",
             icon: InProgressIcon,
         },
         {
             id: "completed",
-            value: contentsCompleted === 0 ? '00' : contentsCompleted.toString().padStart(2, '0'),
-            label: "Contents Completed",
+            value: coursesCompleted === 0 ? '0' : coursesCompleted.toString().padStart(2, '0'),
+            label: "Completed",
             icon: ContentsCompletedIcon,
         },
         {
             id: "certs",
-            value: certificatesEarned === 0 ? '00' : certificatesEarned.toString().padStart(2, '0'),
+            value: certificatesEarned === 0 ? '0' : certificatesEarned.toString().padStart(2, '0'),
             label: "Certifications Earned",
             icon: CertificationsIcon,
         },
