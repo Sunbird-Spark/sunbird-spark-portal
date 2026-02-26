@@ -2,14 +2,13 @@ import { ContentEditorConfig, ContentEditorMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
-import { SystemSettingService } from '../../SystemSettingService';
 import { ChannelService } from '../../ChannelService';
+import userProfileService from '../../UserProfileService';
 
 const CONTENT_EDITOR_URL = '/content-editor/index.html';
 
 export class ContentEditorService {
   private orgService = new OrganizationService();
-  private systemSettingService = new SystemSettingService();
   private channelService = new ChannelService();
   async buildConfig(
     metadata: ContentEditorMetadata
@@ -27,15 +26,8 @@ export class ContentEditorService {
     let channel = '';
     try {
       const filters: Record<string, any> = { isTenant: true };
-      try {
-        const settingResponse = await this.systemSettingService.read('default_channel');
-        const slugValue = (settingResponse as any)?.data?.response?.value;
-        if (slugValue) {
-          filters.slug = slugValue;
-        }
-      } catch (err) {
-        console.warn('Failed to fetch default channel system setting:', err);
-      }
+      const userChannel = await userProfileService.getChannel();
+      if (userChannel) filters.slug = userChannel;
       const orgResponse = await this.orgService.search({ filters });
       const org = orgResponse?.data?.response?.content?.[0];
       if (org) {

@@ -4,7 +4,7 @@ import { QumlEditorConfig, QumlEditorContextOverrides, QumlEditorEvent, Question
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
-import { SystemSettingService } from '../../SystemSettingService';
+import userProfileService from '../../UserProfileService';
 
 export class QumlEditorService {
   private static stylesLoaded = false;
@@ -13,7 +13,6 @@ export class QumlEditorService {
   private static dependenciesLoaded = false;
   private static dependenciesLoading?: Promise<void>;
   private static fancytreeJQueryRef: any;
-  private systemSettingService = new SystemSettingService();
 
   private orgService = new OrganizationService();
   private eventHandlers = new WeakMap<HTMLElement, {
@@ -153,15 +152,8 @@ export class QumlEditorService {
     let channel = '';
     try {
       const filters: Record<string, any> = { isTenant: true };
-      try {
-        const settingResponse = await this.systemSettingService.read('default_channel');
-        const slugValue = (settingResponse as any)?.data?.response?.value;
-        if (slugValue) {
-          filters.slug = slugValue;
-        }
-      } catch (err) {
-        console.warn('Failed to fetch default channel system setting:', err);
-      }
+      const userChannel = await userProfileService.getChannel();
+      if (userChannel) filters.slug = userChannel;
       const orgResponse = await this.orgService.search({ filters });
       const org = orgResponse?.data?.response?.content?.[0];
       if (org) {

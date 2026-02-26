@@ -16,7 +16,6 @@ import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoServ
 import { useOrganizationSearch } from "@/hooks/useOrganization";
 import { useChannel } from "@/hooks/useChannel";
 import { useUserRead } from "@/hooks/useUserRead";
-import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
@@ -25,6 +24,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
+import userProfileService from "@/services/UserProfileService";
 import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -105,8 +105,7 @@ const WorkspacePage = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { data: userData } = useUserRead();
-  const { data: defaultChannelData } = useSystemSetting('default_channel');
-  const slug = defaultChannelData?.data?.response?.value;
+  const slug = userData?.data?.response?.channel;
 
   // Pre-fetch org data using tanstack mutation when slug becomes available
   const orgSearch = useOrganizationSearch();
