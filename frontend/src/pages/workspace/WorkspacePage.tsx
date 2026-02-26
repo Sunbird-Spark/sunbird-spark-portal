@@ -24,6 +24,7 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
+import { lockService, type LockListItem } from "@/services/LockService";
 import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -175,7 +176,7 @@ const WorkspacePage = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [retiredContentIds, setRetiredContentIds] = useState<string[]>([]);
 
-  const showContent = !['create', 'uploads', 'collaborations'].includes(activeView);
+  const showContent = !['create'].includes(activeView);
   const userId = userAuthInfoService.getUserId();
 
   const {
@@ -203,6 +204,51 @@ const WorkspacePage = () => {
     () => contents.filter((content) => !retiredContentIds.includes(content.id)),
     [contents, retiredContentIds],
   );
+
+  // Memoize content IDs to prevent unnecessary lock list API calls
+  const visibleContentIds = useMemo(
+    () => JSON.stringify(visibleContents.map((c) => c.id).sort()),
+    [visibleContents],
+  );
+
+  // Fetch lock list for creator role to show lock icons on content cards.
+  const [lockedContentMap, setLockedContentMap] = useState<Record<string, { creatorName: string }>>(
+    {},
+  );
+
+  useEffect(() => {
+    if (userRole !== 'creator' || visibleContents.length === 0) {
+      setLockedContentMap({});
+      return;
+    }
+
+    const contentIds = visibleContents.map((c) => c.id);
+    let cancelled = false;
+
+    lockService
+      .listLocks(contentIds)
+      .then((res) => {
+        if (cancelled) return;
+        const lockMap: Record<string, { creatorName: string }> = {};
+        const items: LockListItem[] = res.data?.data ?? [];
+        for (const lock of items) {
+          let creatorName = 'Another user';
+          try {
+            const info = JSON.parse(lock.creatorInfo);
+            if (info?.name) creatorName = info.name;
+          } catch { /* ignore parse errors */ }
+          lockMap[lock.resourceId] = { creatorName };
+        }
+        setLockedContentMap(lockMap);
+      })
+      .catch(() => {
+        if (!cancelled) setLockedContentMap({});
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userRole, visibleContentIds]); // Changed from visibleContents to visibleContentIds
 
   // Reset view when role changes
   useEffect(() => {
@@ -355,7 +401,13 @@ const WorkspacePage = () => {
     if (item.primaryCategory === 'Practice Question Set') {
       return `/edit/quml-editor/${id}`;
     }
-    return `/edit/content-editor/${id}`;
+    if (item.mimeType === 'application/vnd.ekstep.ecml-archive') {
+        return `/edit/content-editor/${id}`;
+    }
+    const state = (item.status || 'Draft').toLowerCase();
+    const framework = item.framework || orgFramework || '';
+    const contentStatus = item.contentStatus || 'draft';
+    return `/workspace/content/edit/generic/${id}/${state}/${framework}/${contentStatus}`;
   };
 
 
@@ -405,9 +457,9 @@ const WorkspacePage = () => {
       }
 
       setConfirmDialog(null);
-      toast({ title: "Deleted", description: "Content has been removed successfully.", variant: "success" });
+      toast({ title: "Success", description: "Content has been deleted successfully.", variant: "success" });
     } catch (err) {
-      toast({ title: "Delete Failed", description: (err as Error).message || "Unable to delete content. Please try again.", variant: "destructive" });
+      toast({ title: "Failed", description: (err as Error).message || "Unable to delete content. Please try again.", variant: "destructive" });
     } finally {
       setIsConfirming(false);
     }
@@ -488,6 +540,7 @@ const WorkspacePage = () => {
                   isError={!!error}
                   error={error}
                   userRole={userRole}
+                  lockedContentMap={lockedContentMap}
                   onLoadMore={loadMore}
                   onRetry={refetchAll}
                   onCreateOption={handleCreateOption}
