@@ -5,11 +5,14 @@ import { CertificateRulesPanel } from './CertificateRulesPanel';
 const defaultProps = {
   issueTo: 'all' as const,
   setIssueTo: vi.fn(),
-  progressRule: '100',
-  setProgressRule: vi.fn(),
   issueToAccepted: false,
   setIssueToAccepted: vi.fn(),
   selectedTemplate: null,
+  showScoreRuleComponent: true,
+  enableScoreRule: false,
+  setEnableScoreRule: vi.fn(),
+  scoreRuleValue: '90',
+  setScoreRuleValue: vi.fn(),
 };
 
 describe('CertificateRulesPanel', () => {
@@ -38,18 +41,11 @@ describe('CertificateRulesPanel', () => {
     expect(setIssueTo).toHaveBeenCalledWith('org');
   });
 
-  it('renders Progress Rule input with correct value', () => {
-    render(<CertificateRulesPanel {...defaultProps} progressRule="80" />);
+  it('renders Progress Rule input as disabled with value 100', () => {
+    render(<CertificateRulesPanel {...defaultProps} />);
     const input = screen.getByRole('spinbutton', { name: /progress rule/i });
-    expect(input).toHaveValue(80);
-  });
-
-  it('calls setProgressRule when progress input changes', () => {
-    const setProgressRule = vi.fn();
-    render(<CertificateRulesPanel {...defaultProps} setProgressRule={setProgressRule} />);
-    const input = screen.getByRole('spinbutton', { name: /progress rule/i });
-    fireEvent.change(input, { target: { value: '75' } });
-    expect(setProgressRule).toHaveBeenCalledWith('75');
+    expect(input).toHaveValue(100);
+    expect(input).toBeDisabled();
   });
 
   it('renders condition checkbox unchecked by default', () => {
@@ -70,6 +66,44 @@ describe('CertificateRulesPanel', () => {
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);
     expect(setIssueToAccepted).toHaveBeenCalled();
+  });
+
+  it('shows Add Score Rule Condition button when component is enabled but rule is disabled', () => {
+    render(<CertificateRulesPanel {...defaultProps} showScoreRuleComponent={true} enableScoreRule={false} />);
+    const button = screen.getByRole('button', { name: /\+ Add Score Rule Condition/i });
+    expect(button).toBeInTheDocument();
+  });
+
+  it('calls setEnableScoreRule when Add Score Rule Condition button is clicked', () => {
+    const setEnableScoreRule = vi.fn();
+    render(<CertificateRulesPanel {...defaultProps} showScoreRuleComponent={true} enableScoreRule={false} setEnableScoreRule={setEnableScoreRule} />);
+    const button = screen.getByRole('button', { name: /\+ Add Score Rule Condition/i });
+    fireEvent.click(button);
+    expect(setEnableScoreRule).toHaveBeenCalledWith(true);
+  });
+
+  it('renders Score Rule input when rule is enabled', () => {
+    render(<CertificateRulesPanel {...defaultProps} showScoreRuleComponent={true} enableScoreRule={true} scoreRuleValue="85" />);
+    const input = screen.getByRole('spinbutton', { name: /best attempted score/i });
+    expect(input).toHaveValue(85);
+  });
+
+  it('calls setScoreRuleValue when Score Rule input changes', () => {
+    const setScoreRuleValue = vi.fn();
+    render(<CertificateRulesPanel {...defaultProps} showScoreRuleComponent={true} enableScoreRule={true} setScoreRuleValue={setScoreRuleValue} />);
+    const input = screen.getByRole('spinbutton', { name: /best attempted score/i });
+    fireEvent.change(input, { target: { value: '95' } });
+    expect(setScoreRuleValue).toHaveBeenCalledWith('95');
+  });
+
+  it('calls setEnableScoreRule and resets scoreRuleValue when remove score rule button is clicked', () => {
+    const setEnableScoreRule = vi.fn();
+    const setScoreRuleValue = vi.fn();
+    render(<CertificateRulesPanel {...defaultProps} showScoreRuleComponent={true} enableScoreRule={true} setEnableScoreRule={setEnableScoreRule} setScoreRuleValue={setScoreRuleValue} />);
+    const button = screen.getByRole('button', { name: /remove score rule/i });
+    fireEvent.click(button);
+    expect(setEnableScoreRule).toHaveBeenCalledWith(false);
+    expect(setScoreRuleValue).toHaveBeenCalledWith('90');
   });
 
   it('shows "Select a template from the right panel" when no selectedTemplate', () => {

@@ -16,7 +16,7 @@ interface RoleConfig {
 export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
   admin: {
     defaultRoute: '/reports',
-    allowedRoutes: ['/admin', '/reports'],
+    allowedRoutes: ['/admin', '/reports', '/user-management'],
     displayName: 'Admin',
   },
   content_creator: {

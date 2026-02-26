@@ -54,8 +54,8 @@ export const useCertUserSearch = (): UseMutationResult<
       const userId = targetUser.id;
       const resolvedUserName = targetUser.userName || userName;
 
-      // 2. Fetch enrollments for the user
-      const enrollRes = await userService.getUserEnrollments(userId);
+      // 2. Fetch enrollments for the user using the private endpoint
+      const enrollRes = await userService.getPrivateUserEnrollments(userId);
       const courses: TrackableCollection[] = enrollRes.data?.courses || [];
 
       // 3. Filter enrollments for the specific course and map to expected structure

@@ -3,6 +3,8 @@ import { useCertUserSearch, useReissueCert } from '@/hooks/useCourseDashboard';
 import type { CertUserBatch } from '@/services/CertificateTypes';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { FiCheckCircle, FiAward } from 'react-icons/fi';
+import { cn } from '@/lib/utils';
 
 interface CertificatesTabProps {
   collectionId: string;
@@ -140,23 +142,45 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                 </tr>
               ) : (
                 certUser?.courses.batches.map((batch: CertUserBatch, idx: number) => {
-                const criteriaMet = batch.issuedCertificates && batch.issuedCertificates.length > 0 ? 'Yes' : 'No';
-                return (
-                  <tr key={batch.batchId ?? idx} data-testid={`result-row-${idx}`}>
-                    <td className="border-b border-border p-3 text-foreground font-semibold">{batch.name ?? batch.batch?.name ?? batch.batchId}</td>
-                    <td className="border-b border-border p-3 text-foreground">{certUser.userName}</td>
-                    <td className="border-b border-border p-3 text-foreground">{batch.completionPercentage ?? 0}%</td>
-                    <td className="border-b border-border p-3 text-foreground">
-                      <span className={criteriaMet === 'Yes' ? 'text-green-600 font-medium' : 'text-gray-500'}>
-                        {criteriaMet}
-                      </span>
-                    </td>
-                    <td className="border-b border-border p-3 text-foreground">
+                  const hasCertificate = batch.issuedCertificates && batch.issuedCertificates.length > 0;
+                  const isCompleted = batch.status === 2;
+                  const criteriaMet = isCompleted ? 'Yes' : 'No';
+                  const showIndicator = hasCertificate || isCompleted;
+
+                  return (
+                    <tr key={batch.batchId ?? idx} data-testid={`result-row-${idx}`}>
+                      <td className="border-b border-border p-3 text-foreground font-semibold">
+                        <div className="flex items-center gap-2">
+                          {batch.name ?? batch.batch?.name ?? batch.batchId}
+                          {showIndicator && (
+                            <span title={hasCertificate ? "Certificate Issued" : "Course Completed"}>
+                              {hasCertificate ? (
+                                <FiAward className="w-4 h-4 text-sunbird-brick" />
+                              ) : (
+                                <FiCheckCircle className="w-4 h-4 text-green-500" />
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="border-b border-border p-3 text-foreground">{certUser.userName}</td>
+                      <td className="border-b border-border p-3 text-foreground">{batch.completionPercentage ?? 0}%</td>
+                      <td className="border-b border-border p-3 text-foreground">
+                        <span className={criteriaMet === 'Yes' ? 'text-green-600 font-medium' : 'text-gray-500'}>
+                          {criteriaMet}
+                        </span>
+                      </td>
+                      <td className="border-b border-border p-3 text-foreground">
                       <Button
                         variant="link"
                         size="sm"
-                        className="h-auto p-0 text-sunbird-brick"
+                        className={cn(
+                          "h-auto p-0 transition-colors",
+                          criteriaMet === 'Yes' ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
+                        )}
                         data-testid={`reissue-btn-${idx}`}
+                        disabled={criteriaMet === 'No'}
+                        title={criteriaMet === 'No' ? "Criteria must be met to re-issue" : "Re-issue certificate"}
                         onClick={() =>
                           setReissueTarget({
                             userId: certUser.userId,

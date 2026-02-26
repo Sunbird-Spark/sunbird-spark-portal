@@ -42,6 +42,8 @@ export interface HierarchyContentNode {
   trackable?: { enabled?: TrackableEnabled };
   /** User ID of the collection creator (from /course/v1/hierarchy API). */
   createdBy?: string;
+  /** JSON string containing counts of content types in the hierarchy. */
+  contentTypesCount?: string;
 }
 
 export interface CourseHierarchyResponse {

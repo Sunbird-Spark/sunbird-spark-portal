@@ -80,7 +80,7 @@ describe('CertificatesTab', () => {
           userName: 'User One',
           courses: {
             batches: [
-              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, issuedCertificates: [{ name: 'Cert A' }] },
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [{ name: 'Cert A' }] },
             ],
           },
         },
@@ -130,5 +130,62 @@ describe('CertificatesTab', () => {
       expect(screen.queryByTestId('reissue-modal')).not.toBeInTheDocument();
       expect(screen.getByTestId('reissue-status')).toHaveTextContent('Certificate re-issued successfully.');
     });
+  });
+
+  it('shows Criteria Met as "No" if status is not 2, even if certificates exist', () => {
+    const mockResult = {
+      data: {
+        response: {
+          userId: 'u1',
+          userName: 'User One',
+          courses: {
+            batches: [
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 1, issuedCertificates: [{ name: 'Cert A' }] },
+            ],
+          },
+        },
+      }
+    };
+
+    (useCertUserSearch as any).mockReturnValue({
+      mutate: vi.fn(),
+      data: mockResult,
+      isPending: false,
+      error: null,
+      reset: vi.fn(),
+    });
+
+    render(<CertificatesTab collectionId="col_123" />);
+    expect(screen.getByText('No')).toBeInTheDocument();
+    expect(screen.getByTestId('reissue-btn-0')).toBeDisabled();
+    expect(screen.getByTestId('reissue-btn-0')).toHaveAttribute('title', 'Criteria must be met to re-issue');
+  });
+
+  it('shows Criteria Met as "Yes" if status is 2, even if no certificates exist', () => {
+    const mockResult = {
+      data: {
+        response: {
+          userId: 'u1',
+          userName: 'User One',
+          courses: {
+            batches: [
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [] },
+            ],
+          },
+        },
+      }
+    };
+
+    (useCertUserSearch as any).mockReturnValue({
+      mutate: vi.fn(),
+      data: mockResult,
+      isPending: false,
+      error: null,
+      reset: vi.fn(),
+    });
+
+    render(<CertificatesTab collectionId="col_123" />);
+    expect(screen.getByText('Yes')).toBeInTheDocument();
+    expect(screen.getByTestId('reissue-btn-0')).not.toBeDisabled();
   });
 });
