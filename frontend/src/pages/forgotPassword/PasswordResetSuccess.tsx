@@ -3,7 +3,7 @@ import { FiCheck } from 'react-icons/fi';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
 
 const onProceedToLogin = () => {
-    window.location.href = '/home';
+    window.location.href = '/portal/login';
 }
 
 const PasswordResetSuccess: React.FC = () => {
