@@ -45,7 +45,7 @@ export const useCertificateDownload = () => {
                 const rcCert = certs.find(
                     (c: Record<string, unknown>) => (c.training as Record<string, unknown>)?.id === courseId && (!batchId || (c.training as Record<string, unknown>)?.batchId === batchId)
                 );
-                certId = rcCert?.osid ?? (rcCert as Record<string, unknown>)?.identifier;
+                certId = (rcCert as any)?.osid ?? (rcCert as any)?.identifier;
             }
 
             if (!certId) {
