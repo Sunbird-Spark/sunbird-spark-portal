@@ -23,7 +23,6 @@ export interface HeaderOperation {
 
 export interface IHttpClient {
   get<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
-  getBlob(url: string, headers?: Record<string, string>): Promise<Blob>;
   post<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   put<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   patch<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;

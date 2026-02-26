@@ -16,9 +16,11 @@ import { buildAddTemplateRequestPayload } from './certificateRequestBuilders';
 import { NewTemplateForm } from './types';
 import { certificateService } from '@/services/CertificateService';
 
-const mockGetBlob = vi.fn();
-vi.mock('@/lib/http-client', () => ({
-  getClient: () => ({ getBlob: mockGetBlob }),
+const { mockHttpGet } = vi.hoisted(() => ({ mockHttpGet: vi.fn() }));
+vi.mock('@/services/HttpService', () => ({
+  HttpService: class {
+    get = mockHttpGet;
+  },
 }));
 
 vi.mock('@/services/CertificateService', () => ({
@@ -85,14 +87,14 @@ describe('useCertificateModalState.helpers', () => {
     });
 
     it('returns original url if getBlob throws', async () => {
-      mockGetBlob.mockRejectedValue(new Error('Network error'));
+      mockHttpGet.mockRejectedValue(new Error('Network error'));
       const result = await getBase64Image('https://example.com/img');
       expect(result).toBe('https://example.com/img');
     });
 
     it('converts blob to base64 on success', async () => {
       const mockBlob = new Blob(['123'], { type: 'image/png' });
-      mockGetBlob.mockResolvedValue(mockBlob);
+      mockHttpGet.mockResolvedValue(mockBlob);
 
       class MockFileReader {
         onloadend: any = null;
@@ -111,7 +113,7 @@ describe('useCertificateModalState.helpers', () => {
     
     it('returns url on FileReader error', async () => {
       const mockBlob = new Blob(['123'], { type: 'image/png' });
-      mockGetBlob.mockResolvedValue(mockBlob);
+      mockHttpGet.mockResolvedValue(mockBlob);
 
       class MockFileReader {
         onloadend: any = null;

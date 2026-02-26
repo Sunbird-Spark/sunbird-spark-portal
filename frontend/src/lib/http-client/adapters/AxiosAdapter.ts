@@ -55,11 +55,6 @@ export class AxiosAdapter extends BaseClient {
     return this.request(() => this.client.get<T>(url, { headers }));
   }
 
-  public async getBlob(url: string, headers?: Record<string, string>): Promise<Blob> {
-    const response = await this.client.get<Blob>(url, { headers, responseType: 'blob' });
-    return response.data;
-  }
-
   protected async _post<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>> {
     return this.request(() => this.client.post<T>(url, data, { headers }));
   }
