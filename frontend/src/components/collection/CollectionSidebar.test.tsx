@@ -3,30 +3,33 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import CollectionSidebar from './CollectionSidebar';
-import type { Module } from '@/types/collectionTypes';
+import type { HierarchyContentNode } from '@/types/collectionTypes';
 
-const mockModules: Module[] = [
+const COLLECTION_MIME = 'application/vnd.ekstep.content-collection';
+
+const mockChildren: HierarchyContentNode[] = [
   {
-    id: 'mod-1',
-    title: 'Module One',
-    subtitle: 'First module subtitle',
-    lessons: [
-      { id: 'lesson-1', title: 'Video Lesson', type: 'video', mimeType: 'video/mp4' },
-      { id: 'lesson-2', title: 'Document Lesson', type: 'document', mimeType: 'application/pdf' },
+    identifier: 'mod-1',
+    name: 'Module One',
+    primaryCategory: 'First module subtitle',
+    mimeType: COLLECTION_MIME,
+    children: [
+      { identifier: 'lesson-1', name: 'Video Lesson', mimeType: 'video/mp4' },
+      { identifier: 'lesson-2', name: 'Document Lesson', mimeType: 'application/pdf' },
       {
-        id: 'lesson-col',
-        title: 'Nested Course',
-        type: 'document',
-        mimeType: 'application/vnd.ekstep.content-collection',
+        identifier: 'lesson-col',
+        name: 'Nested Course',
+        mimeType: COLLECTION_MIME,
       },
     ],
   },
   {
-    id: 'mod-2',
-    title: 'Module Two',
-    subtitle: 'Second module subtitle',
-    lessons: [
-      { id: 'lesson-3', title: 'Another Video', type: 'video' },
+    identifier: 'mod-2',
+    name: 'Module Two',
+    primaryCategory: 'Second module subtitle',
+    mimeType: COLLECTION_MIME,
+    children: [
+      { identifier: 'lesson-3', name: 'Another Video', mimeType: 'video/mp4' },
     ],
   },
 ];
@@ -34,9 +37,9 @@ const mockModules: Module[] = [
 describe('CollectionSidebar', () => {
   const defaultProps: React.ComponentProps<typeof CollectionSidebar> = {
     collectionId: 'col-123',
-    modules: mockModules,
-    expandedModules: ['mod-1'],
-    toggleModule: vi.fn(),
+    children: mockChildren,
+    expandedMainUnitIds: ['mod-1'],
+    toggleMainUnit: vi.fn(),
   };
 
   const renderSidebar = (props = defaultProps) => {
@@ -47,7 +50,7 @@ describe('CollectionSidebar', () => {
     );
   };
 
-  it('renders all module titles and subtitles', () => {
+  it('renders all main unit titles and subtitles', () => {
     renderSidebar();
 
     expect(screen.getByText('Module One')).toBeInTheDocument();
@@ -56,19 +59,19 @@ describe('CollectionSidebar', () => {
     expect(screen.getByText('Second module subtitle')).toBeInTheDocument();
   });
 
-  it('calls toggleModule when module header is clicked', () => {
-    const toggleModule = vi.fn();
-    renderSidebar({ ...defaultProps, toggleModule });
+  it('calls toggleMainUnit when main unit header is clicked', () => {
+    const toggleMainUnit = vi.fn();
+    renderSidebar({ ...defaultProps, toggleMainUnit });
 
     fireEvent.click(screen.getByText('Module One'));
-    expect(toggleModule).toHaveBeenCalledWith('mod-1');
+    expect(toggleMainUnit).toHaveBeenCalledWith('mod-1');
 
-    toggleModule.mockClear();
+    toggleMainUnit.mockClear();
     fireEvent.click(screen.getByText('Module Two'));
-    expect(toggleModule).toHaveBeenCalledWith('mod-2');
+    expect(toggleMainUnit).toHaveBeenCalledWith('mod-2');
   });
 
-  it('renders lessons when module is expanded', () => {
+  it('renders content when main unit is expanded', () => {
     renderSidebar();
 
     expect(screen.getByText('Video Lesson')).toBeInTheDocument();
@@ -76,51 +79,52 @@ describe('CollectionSidebar', () => {
     expect(screen.queryByText('Another Video')).not.toBeInTheDocument();
   });
 
-  it('renders lessons for expanded modules only', () => {
-    renderSidebar({ ...defaultProps, expandedModules: ['mod-2'] });
+  it('renders content for expanded main units only', () => {
+    renderSidebar({ ...defaultProps, expandedMainUnitIds: ['mod-2'] });
 
     expect(screen.getByText('Another Video')).toBeInTheDocument();
     expect(screen.queryByText('Video Lesson')).not.toBeInTheDocument();
     expect(screen.queryByText('Document Lesson')).not.toBeInTheDocument();
   });
 
-  it('renders video lesson link with correct collection-relative href', () => {
+  it('renders video content link with correct collection-relative href', () => {
     renderSidebar();
 
     const videoLink = screen.getByRole('link', { name: /Video Lesson/ });
     expect(videoLink).toHaveAttribute('href', '/collection/col-123/content/lesson-1');
   });
 
-  it('renders document lesson link with correct collection-relative href', () => {
+  it('renders document content link with correct collection-relative href', () => {
     renderSidebar();
 
     const documentLink = screen.getByRole('link', { name: /Document Lesson/ });
     expect(documentLink).toHaveAttribute('href', '/collection/col-123/content/lesson-2');
   });
 
-  it('renders nested collection lesson link with /collection route href', () => {
+  it('renders nested collection (sub-unit) as section label when expanded', () => {
     renderSidebar();
 
-    const collectionLink = screen.getByRole('link', { name: /Nested Course/ });
-    expect(collectionLink).toHaveAttribute('href', '/collection/lesson-col');
+    expect(screen.getByText('Nested Course')).toBeInTheDocument();
+    const nestedCourseEl = screen.getByText('Nested Course');
+    expect(nestedCourseEl.closest('a')).toBeNull();
   });
 
-  it('highlights the active lesson when activeLessonId prop matches', () => {
-    renderSidebar({ ...defaultProps, activeLessonId: 'lesson-2' });
+  it('highlights the active content when activeContentId prop matches', () => {
+    renderSidebar({ ...defaultProps, activeContentId: 'lesson-2' });
 
     const activeLink = screen.getByRole('link', { name: /Document Lesson/ });
     expect(activeLink).toHaveClass('border-sunbird-brick');
   });
 
-  it('highlights the first lesson when activeLessonId matches lesson-1', () => {
-    renderSidebar({ ...defaultProps, activeLessonId: 'lesson-1' });
+  it('highlights the first content when activeContentId matches lesson-1', () => {
+    renderSidebar({ ...defaultProps, activeContentId: 'lesson-1' });
 
     const activeLink = screen.getByRole('link', { name: /Video Lesson/ });
     expect(activeLink).toHaveClass('border-sunbird-brick');
   });
 
-  it('does not highlight any lesson when activeLessonId is null', () => {
-    renderSidebar({ ...defaultProps, activeLessonId: null });
+  it('does not highlight any content when activeContentId is null', () => {
+    renderSidebar({ ...defaultProps, activeContentId: null });
 
     const videoLink = screen.getByRole('link', { name: /Video Lesson/ });
     const documentLink = screen.getByRole('link', { name: /Document Lesson/ });
@@ -128,31 +132,24 @@ describe('CollectionSidebar', () => {
     expect(documentLink).not.toHaveClass('border-sunbird-brick');
   });
 
-  it('does not highlight any lesson when activeLessonId is not provided', () => {
-    renderSidebar(); // no activeLessonId in defaultProps
-
-    const videoLink = screen.getByRole('link', { name: /Video Lesson/ });
-    expect(videoLink).not.toHaveClass('border-sunbird-brick');
-  });
-
-  it('renders expand/collapse chevron for each module', () => {
+  it('renders expand/collapse chevron for each main unit', () => {
     renderSidebar();
 
-    const moduleButtons = screen.getAllByRole('button');
-    expect(moduleButtons.length).toBe(mockModules.length);
-    moduleButtons.forEach((btn) => {
+    const unitButtons = screen.getAllByRole('button');
+    expect(unitButtons.length).toBe(mockChildren.length);
+    unitButtons.forEach((btn) => {
       expect(btn.querySelector('svg')).toBeInTheDocument();
     });
   });
 
-  it('handles empty modules array', () => {
-    renderSidebar({ ...defaultProps, modules: [] });
+  it('handles empty children array', () => {
+    renderSidebar({ ...defaultProps, children: [] });
 
     expect(screen.queryByText('Module One')).not.toBeInTheDocument();
   });
 
   describe('when contentBlocked is true', () => {
-    it('renders lessons as non-focusable divs without links', () => {
+    it('renders content as non-focusable divs without links', () => {
       renderSidebar({ ...defaultProps, contentBlocked: true });
 
       expect(screen.queryByRole('link', { name: /Video Lesson/ })).not.toBeInTheDocument();
@@ -161,23 +158,23 @@ describe('CollectionSidebar', () => {
       expect(screen.getByText('Document Lesson')).toBeInTheDocument();
     });
 
-    it('renders lessons with aria-disabled', () => {
+    it('renders content with aria-disabled', () => {
       renderSidebar({ ...defaultProps, contentBlocked: true });
 
-      const videoLessonRow = screen.getByText('Video Lesson').closest('[aria-disabled="true"]');
-      expect(videoLessonRow).toBeInTheDocument();
+      const videoRow = screen.getByText('Video Lesson').closest('[aria-disabled="true"]');
+      expect(videoRow).toBeInTheDocument();
     });
 
-    it('does not show any lesson as active even when activeLessonId matches', () => {
-      renderSidebar({ ...defaultProps, contentBlocked: true, activeLessonId: 'lesson-1' });
+    it('does not show any content as active even when activeContentId matches', () => {
+      renderSidebar({ ...defaultProps, contentBlocked: true, activeContentId: 'lesson-1' });
 
-      const videoLessonRow = screen.getByText('Video Lesson').closest('div');
-      expect(videoLessonRow).not.toHaveClass('border-sunbird-brick');
+      const videoRow = screen.getByText('Video Lesson').closest('div');
+      expect(videoRow).not.toHaveClass('border-sunbird-brick');
     });
   });
 
   describe('when contentBlocked is false (default)', () => {
-    it('renders lessons as collection-relative links', () => {
+    it('renders content as collection-relative links', () => {
       renderSidebar();
 
       expect(screen.getByRole('link', { name: /Video Lesson/ })).toHaveAttribute(

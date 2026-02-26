@@ -21,9 +21,11 @@ export interface CollectionData {
   units: number;
   description: string;
   audience: string[];
-  modules: Module[];
+  /** Top-level units (main collapsible sections). Multi-level hierarchy preserved in each node's children. */
+  children: HierarchyContentNode[];
+  /** Full hierarchy root for tree traversal (leaf IDs, first leaf). */
+  hierarchyRoot: HierarchyContentNode;
   trackable?: { enabled?: TrackableEnabled };
-  /** User ID of the collection creator (from hierarchy API). */
   createdBy?: string;
 }
 
@@ -40,6 +42,8 @@ export interface HierarchyContentNode {
   trackable?: { enabled?: TrackableEnabled };
   /** User ID of the collection creator (from /course/v1/hierarchy API). */
   createdBy?: string;
+  /** JSON string containing counts of content types in the hierarchy. */
+  contentTypesCount?: string;
 }
 
 export interface CourseHierarchyResponse {

@@ -30,8 +30,8 @@ const CollectionOverview = ({
 
   return (
     <div className="collection-overview-container">
-      {/* Player Card */}
       <div className="collection-player-card">
+        <div className="bg-white rounded-xl shadow-[0_4px_6px_-1px_rgb(0_0_0/0.06),0_2px_4px_-2px_rgb(0_0_0/0.04)]">
           {contentAccessBlocked ? (
             <div className="collection-player-wrapper">
               <div className="collection-player-loading">
@@ -72,10 +72,10 @@ const CollectionOverview = ({
               />
             </div>
           )}
-
+        </div>
 
         {/* Course Overview Section */}
-        <div className="collection-overview-section">
+        <div className="collection-overview-section border-t border-gray-100 rounded-xl pt-6">
           <h2 className="collection-overview-title">{t("courseDetails.overview")}</h2>
 
           {/* Stats: Units & Lessons */}
@@ -86,7 +86,7 @@ const CollectionOverview = ({
                 <path d="M2 6H14" stroke="currentColor" strokeWidth="1.5" />
               </svg>
               <span className="collection-stat-value">
-                {collectionData.modules?.length ?? 0}
+                {collectionData.children?.length ?? 0}
               </span>
               {t("courseDetails.units")}
             </span>

@@ -28,6 +28,7 @@ import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
+import ResourceFormDialog, { type ResourceFormData } from "./ResourceFormDialog";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import "../home/home.css";
 import "./workspace.css";
@@ -48,6 +49,7 @@ const EDITOR_OPTION_LABELS: Record<string, string> = {
   'course': 'Course',
   'collection': 'Collection',
   'question-set': 'Question Set',
+  'question-editor': 'Question Set',
 };
 
 const COLLECTION_CONTENT_CONFIG: Record<string, {
@@ -166,6 +168,7 @@ const WorkspacePage = () => {
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
+  const [showResourceFormDialog, setShowResourceFormDialog] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{ type: 'delete'; contentId: string; mimeType: string } | null>(null);
@@ -209,7 +212,12 @@ const WorkspacePage = () => {
 
   const handleCreateOption = (optionId: string) => {
     setShowCreateModal(false);
-    if (RESOURCE_EDITOR_OPTIONS.includes(optionId) || COLLECTION_EDITOR_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
+    if (RESOURCE_EDITOR_OPTIONS.includes(optionId)) {
+      setSelectedOption(optionId);
+      setShowResourceFormDialog(true);
+      return;
+    }
+    if (COLLECTION_EDITOR_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
@@ -224,47 +232,64 @@ const WorkspacePage = () => {
     }
   };
 
-  const handleResourceCreate = async (name: string, optionId?: string) => {
+  /** Common creator metadata used across all content creation flows */
+  const getCreatorMeta = () => {
     const first = userData?.data?.response?.firstName?.trim();
     const last = userData?.data?.response?.lastName?.trim();
     const creator = first || last ? [first, last].filter(Boolean).join(" ") : "anonymous";
-
+    const createdBy = userAuthInfoService.getUserId() || '';
     const organisation: string[] = orgData?.orgName ? [orgData.orgName] : [];
     const createdFor: string[] = orgChannelId ? [orgChannelId] : [];
+    return { creator, createdBy, organisation, createdFor };
+  };
 
-    const isQuiz = optionId === 'quiz';
+  const handleResourceFormSubmit = async (formData: ResourceFormData) => {
+    setIsCreating(true);
+    try {
+      const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
+      const isQuiz = selectedOption === 'quiz';
 
-    const response = await contentService.contentCreate(name, {
-      createdBy: userAuthInfoService.getUserId() || '',
-      creator,
-      mimeType: 'application/vnd.ekstep.ecml-archive',
-      contentType: isQuiz ? 'SelfAssess' : 'Resource',
-      primaryCategory: isQuiz ? 'Course Assessment' : 'Learning Resource',
-      description: isQuiz ? `Enter description for ${name}` : undefined,
-      organisation,
-      createdFor,
-      framework: orgFramework,
-    });
-    const contentId = response.data?.identifier || response.data?.content_id;
-    if (!contentId) {
-      console.error("Content creation response missing identifier:", response);
-      throw new Error("Unexpected server response. Please try again.");
+      const resourceType = (formData.dynamicFields['resourceType'] as string) || 'Learn';
+      
+      // Remove resourceType from dynamicFields to avoid duplication
+      const { resourceType: _, ...extraFields } = formData.dynamicFields;
+
+      const response = await contentService.contentCreate(formData.name, {
+        createdBy,
+        creator,
+        mimeType: 'application/vnd.ekstep.ecml-archive',
+        contentType: isQuiz ? 'SelfAssess' : 'Resource',
+        ...(isQuiz ? { primaryCategory: 'Course Assessment' } : {}),
+        description: formData.description || 'Enter description for Resource',
+        organisation,
+        createdFor,
+        framework: orgFramework,
+        resourceType,
+        extraFields,
+      });
+      const contentId = response.data?.identifier || response.data?.content_id;
+      if (!contentId) {
+        console.error("Content creation response missing identifier:", response);
+        throw new Error("Unexpected server response. Please try again.");
+      }
+      setShowResourceFormDialog(false);
+      setSelectedOption(null);
+      navigate(`/edit/content-editor/${contentId}`);
+    } catch (error) {
+      console.error('Failed to create content:', error);
+      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
+    } finally {
+      setIsCreating(false);
     }
-    navigate(`/edit/content-editor/${contentId}`);
   };
 
   const handleCollectionCreate = async (name: string, optionId: string, description?: string) => {
-    const first = userData?.data?.response?.firstName?.trim();
-    const last = userData?.data?.response?.lastName?.trim();
-    const creator = first || last ? [first, last].filter(Boolean).join(" ") : "anonymous";
+    const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
     const config = COLLECTION_CONTENT_CONFIG[optionId];
-
-    const organisation: string[] = orgData?.orgName ? [orgData.orgName] : [];
-    const createdFor: string[] = orgChannelId ? [orgChannelId] : [];
     const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
 
     const response = await contentService.contentCreate(name, {
-      createdBy: userAuthInfoService.getUserId() || '',
+      createdBy,
       creator,
       ...config,
       ...(description ? { description } : {}),
@@ -281,11 +306,11 @@ const WorkspacePage = () => {
   };
 
   const handleQuestionSetCreate = async (name: string) => {
-    const createdFor: string[] = orgChannelId ? [orgChannelId] : [];
+    const { createdBy, createdFor } = getCreatorMeta();
 
     const response = await questionSetCreate.mutateAsync({
       name,
-      createdBy: userAuthInfoService.getUserId() || '',
+      createdBy,
       createdFor,
       framework: orgFramework || '',
     });
@@ -308,14 +333,12 @@ const WorkspacePage = () => {
         await handleCollectionCreate(name, selectedOption);
       } else if (selectedOption && QUML_EDITOR_OPTIONS.includes(selectedOption)) {
         await handleQuestionSetCreate(name);
-      } else {
-        await handleResourceCreate(name, selectedOption ?? undefined);
       }
       setShowNameDialog(false);
       setSelectedOption(null);
     } catch (error) {
       console.error('Failed to create content:', error);
-      toast({ title: "Error", description: "Failed to create content. Please try again.", variant: "destructive" });
+      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
     } finally {
       setIsCreating(false);
     }
@@ -382,9 +405,9 @@ const WorkspacePage = () => {
       }
 
       setConfirmDialog(null);
-      toast({ title: "Content Deleted", description: "The content has been removed.", variant: "destructive" });
+      toast({ title: "Deleted", description: "Content has been removed successfully.", variant: "success" });
     } catch (err) {
-      toast({ title: "Error", description: (err as Error).message || "Failed to delete content.", variant: "destructive" });
+      toast({ title: "Delete Failed", description: (err as Error).message || "Unable to delete content. Please try again.", variant: "destructive" });
     } finally {
       setIsConfirming(false);
     }
@@ -494,6 +517,16 @@ const WorkspacePage = () => {
             isLoading={isCreating}
             optionTitle={selectedOption ? EDITOR_OPTION_LABELS[selectedOption] : undefined}
             optionId={selectedOption ?? undefined}
+          />
+          <ResourceFormDialog
+            open={showResourceFormDialog}
+            onClose={() => { setShowResourceFormDialog(false); setSelectedOption(null); }}
+            onSubmit={handleResourceFormSubmit}
+            isLoading={isCreating}
+            orgChannelId={orgChannelId}
+            orgFramework={orgFramework}
+            formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
+            title={selectedOption ? `Create ${EDITOR_OPTION_LABELS[selectedOption] || 'Content'}` : 'Create Content'}
           />
         </div>
       </div>

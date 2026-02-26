@@ -65,6 +65,7 @@
     "snyk": "^1.1301.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^3.4.17",
+    "tree-model": "^1.0.7",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import AppRoutes from './AppRoutes';
 import PageLoader from '@/components/common/PageLoader';
+import { Toaster } from '@/components/common/Toaster';
 import { portalInitializer } from './utils/portalInitializer';
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ export default function App() {
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
+      <Toaster />
     </QueryClientProvider>
   );
 }

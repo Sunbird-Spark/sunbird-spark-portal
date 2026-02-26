@@ -9,8 +9,7 @@ import {
   getFirstCertPreviewUrl,
 } from './enrollmentMapper';
 import { BATCH_STATUS } from '../../types/collectionTypes';
-import type { BatchListItem } from '../../types/collectionTypes';
-import type { CertTemplate, CollectionData, ContentStateItem } from '../../types/collectionTypes';
+import type { BatchListItem, CertTemplate, CollectionData, ContentStateItem, HierarchyContentNode } from '../../types/collectionTypes';
 import type { TrackableCollection } from '../../types/TrackableCollections';
 
 describe('enrollmentMapper', () => {
@@ -226,7 +225,7 @@ describe('enrollmentMapper', () => {
       expect(getLeafContentIds(null)).toEqual([]);
     });
 
-    it('returns empty array when modules is missing', () => {
+    it('returns empty array when hierarchyRoot is missing', () => {
       expect(
         getLeafContentIds({
           id: 'c1',
@@ -236,12 +235,34 @@ describe('enrollmentMapper', () => {
           units: 0,
           description: '',
           audience: [],
-          modules: [],
+          children: [],
+          hierarchyRoot: undefined as unknown as HierarchyContentNode,
         } as CollectionData),
       ).toEqual([]);
     });
 
-    it('returns flat list of lesson ids from all modules', () => {
+    it('returns flat list of leaf content ids from hierarchy in depth-first order', () => {
+      const hierarchyRoot: HierarchyContentNode = {
+        identifier: 'root',
+        mimeType: 'application/vnd.ekstep.content-collection',
+        children: [
+          {
+            identifier: 'm1',
+            name: 'M1',
+            mimeType: 'application/vnd.ekstep.content-collection',
+            children: [
+              { identifier: 'l1', name: 'L1', mimeType: 'video/mp4' },
+              { identifier: 'l2', name: 'L2', mimeType: 'application/pdf' },
+            ],
+          },
+          {
+            identifier: 'm2',
+            name: 'M2',
+            mimeType: 'application/vnd.ekstep.content-collection',
+            children: [{ identifier: 'l3', name: 'L3', mimeType: 'video/mp4' }],
+          },
+        ],
+      };
       const collectionData: CollectionData = {
         id: 'c1',
         title: 'Course',
@@ -250,23 +271,8 @@ describe('enrollmentMapper', () => {
         units: 2,
         description: '',
         audience: [],
-        modules: [
-          {
-            id: 'm1',
-            title: 'M1',
-            subtitle: '',
-            lessons: [
-              { id: 'l1', title: 'L1', type: 'video' },
-              { id: 'l2', title: 'L2', type: 'document' },
-            ],
-          },
-          {
-            id: 'm2',
-            title: 'M2',
-            subtitle: '',
-            lessons: [{ id: 'l3', title: 'L3', type: 'video' }],
-          },
-        ],
+        children: hierarchyRoot.children!,
+        hierarchyRoot,
       };
       expect(getLeafContentIds(collectionData)).toEqual(['l1', 'l2', 'l3']);
     });
@@ -305,7 +311,8 @@ describe('enrollmentMapper', () => {
         units: 1,
         description: '',
         audience: [],
-        modules: [],
+        children: [],
+        hierarchyRoot: { identifier: 'c1', children: [] },
       } as CollectionData;
       expect(getCourseProgressProps(undefined, collectionData, 5, 2)).toBeNull();
     });
@@ -333,7 +340,8 @@ describe('enrollmentMapper', () => {
         units: 1,
         description: '',
         audience: [],
-        modules: [],
+        children: [],
+        hierarchyRoot: { identifier: 'c1', children: [] },
       } as CollectionData;
       const result = getCourseProgressProps(enrollment, collectionData, 10, 3);
       expect(result).toEqual({
@@ -353,7 +361,8 @@ describe('enrollmentMapper', () => {
         units: 1,
         description: '',
         audience: [],
-        modules: [],
+        children: [],
+        hierarchyRoot: { identifier: 'c1', children: [] },
       } as CollectionData;
       const result = getCourseProgressProps(enrollment, collectionData, 0, 0);
       expect(result?.totalContentCount).toBe(6);
@@ -373,7 +382,8 @@ describe('enrollmentMapper', () => {
         units: 1,
         description: '',
         audience: [],
-        modules: [],
+        children: [],
+        hierarchyRoot: { identifier: 'c1', children: [] },
       } as CollectionData;
       const result = getCourseProgressProps(enrollment, collectionData, 0, 0);
       expect(result?.completedContentCount).toBe(2);
@@ -393,7 +403,8 @@ describe('enrollmentMapper', () => {
         units: 1,
         description: '',
         audience: [],
-        modules: [],
+        children: [],
+        hierarchyRoot: { identifier: 'c1', children: [] },
       } as CollectionData;
       const result = getCourseProgressProps(enrollment, collectionData, 0, 0);
       expect(result?.completedContentCount).toBe(5);

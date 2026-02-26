@@ -86,6 +86,8 @@ export class ContentService {
       organisation?: string[];
       createdFor?: string[];
       targetFWIds?: string[];
+      /** Dynamic fields for framework related configs */
+      extraFields?: Record<string, string | string[] | number>;
     }
   ): Promise<ApiResponse<ContentCreateResponse>> {
     return getClient().post<ContentCreateResponse>('/content/v1/create', {
@@ -97,13 +99,14 @@ export class ContentService {
           creator: options.creator,
           mimeType: options.mimeType ?? 'application/vnd.ekstep.ecml-archive',
           contentType: options.contentType ?? 'Resource',
-          primaryCategory: options.primaryCategory ?? 'Learning Resource',
+          ...(options.primaryCategory ? { primaryCategory: options.primaryCategory } : {}),
           ...(options.framework && { framework: options.framework }),
           ...(options.description && { description: options.description }),
           ...(options.resourceType && { resourceType: options.resourceType }),
           ...(options.organisation?.length && { organisation: options.organisation }),
           ...(options.createdFor?.length && { createdFor: options.createdFor }),
           ...(options.targetFWIds?.length && { targetFWIds: options.targetFWIds }),
+          ...options.extraFields,
         },
       },
     });

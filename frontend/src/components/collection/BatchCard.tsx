@@ -98,7 +98,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
         {/* ── Tab content ── */}
         {!isLoading && !isError && (
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0" style={{ maxHeight: "26rem" }}>
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0 max-h-[18rem]">
             {currentBatches.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
                 <FiCalendar className="w-7 h-7" />
