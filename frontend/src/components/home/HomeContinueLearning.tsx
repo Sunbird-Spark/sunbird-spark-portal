@@ -58,7 +58,7 @@ const HomeContinueLearning = () => {
     if (isLoading || !lastAccessedCourse) return null;
 
     // Determine the content ID to navigate to
-    const contentId = lastAccessedCourse.lastReadContentId
+    const contentId = lastAccessedCourse?.lastReadContentId
         ?? getFirstLeafContentIdFromHierarchy(collectionData?.hierarchyRoot ?? null);
 
     if (!contentId) return null;

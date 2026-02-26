@@ -2,6 +2,19 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'forgotPasswordTitle': 'Forgot Password',
+                'forgotPasswordPage.deliveryPrompt': 'Where would you like to receive the OTP?',
+                'forgotPasswordPage.getOtp': 'Get OTP',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 
 // Mock Recaptcha

@@ -3,6 +3,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BatchFormFields, BatchFormState } from './BatchFormFields';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'batch.nameOfBatch': 'Name of Batch',
+        'batch.enterBatchName': 'Enter batch name',
+        'batch.aboutBatch': 'About Batch',
+        'batch.briefDescBatch': 'Brief description about this batch',
+        'batch.startDate': 'Start Date',
+        'batch.endDate': 'End Date',
+        'batch.enrolmentEndDate': 'Enrolment End Date',
+        'batch.mustBeAfterEnrolmentEnd': 'Must be on or after enrolment end date',
+        'batch.betweenStartDate': 'Between start date',
+        'batch.betweenStartAndEndDate': 'Between start & end date',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 describe('BatchFormFields', () => {
   let form: BatchFormState;
   let handleField: any;

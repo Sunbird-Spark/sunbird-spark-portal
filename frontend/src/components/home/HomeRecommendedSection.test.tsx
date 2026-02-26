@@ -22,7 +22,14 @@ vi.mock('@/hooks/useContent', () => ({
 // Mock useAppI18n
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string, options?: any) => options?.defaultValue || key,
+        t: (key: string, options?: any) => {
+            const translations: Record<string, string> = {
+                'home.recommendedContents': 'Recommended Contents',
+                'resource.videoBadge': 'Video',
+                'resource.pdfBadge': 'PDF',
+            };
+            return translations[key] || options?.defaultValue || key;
+        },
     }),
 }));
 
@@ -57,7 +64,7 @@ const mockRecommendedItems = [
 describe('HomeRecommendedSection', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        
+
         // Default Mock Implementation
         (useContentSearch as any).mockReturnValue({
             data: {
@@ -99,12 +106,12 @@ describe('HomeRecommendedSection', () => {
 
         // Item 1: CollectionCard renders primaryCategory
         expect(screen.getByText('Course')).toBeInTheDocument();
-        
+
         // Item 2: ResourceCard renders "Video" for video/mp4
         // The mock t function returns defaultValue. 
         // ResourceCard: t("resource.videoBadge", { defaultValue: "Video" })
         expect(screen.getAllByText('Video').length).toBeGreaterThan(0);
-        
+
         // Item 3: ResourceCard renders "PDF" for application/pdf
         // ResourceCard: t("resource.pdfBadge", { defaultValue: "PDF" })
         expect(screen.getAllByText('PDF').length).toBeGreaterThan(0);

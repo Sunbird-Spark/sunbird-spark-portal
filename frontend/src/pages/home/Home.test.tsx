@@ -53,12 +53,18 @@ const mockChangeLanguage = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
         t: (key: string, options?: any) => {
-            if (key === 'homePage.hiUser') return `Hi ${options?.name}`;
-            if (key === 'homePage.hiGuest') return 'Hi there';
-            if (key === 'homePage.journeyStart') return 'Your exciting learning journey starts here. Dive in!';
-            if (key === 'homePage.welcomeMessage') return 'Welcome to a learning experience made just for you.';
-            if (key === 'navigationMenu') return 'Navigation Menu';
-            return key;
+            const translations: Record<string, string> = {
+                'homePage.hiUser': `Hi ${options?.name}`,
+                'homePage.hiGuest': 'Hi there',
+                'homePage.journeyStart': 'Your exciting learning journey starts here. Dive in!',
+                'homePage.welcomeMessage': 'Welcome to a learning experience made just for you.',
+                'onboarding.altSunbird': 'Sunbird',
+                'header.search': 'Search',
+                'changeLanguage': 'Change Language',
+                'common.notifications': 'Notifications',
+                'navigationMenu': 'Navigation Menu',
+            };
+            return translations[key] || key;
         },
         languages: [
             { code: 'en', label: 'English' },
@@ -271,7 +277,7 @@ describe('Home Page', () => {
     it('changes language through the dropdown', async () => {
         renderHome();
 
-        const langBtn = screen.getByAltText('common.language').parentElement;
+        const langBtn = screen.getByAltText('Change Language').parentElement;
         fireEvent.click(langBtn!);
 
         const hindiOption = await screen.findByText('Hindi');
