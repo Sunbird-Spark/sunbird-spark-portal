@@ -130,4 +130,27 @@ describe('useCollectionDetailPlayer', () => {
 
     expect(onContentEnd).not.toHaveBeenCalled();
   });
+
+  it('calls onContentStart when START telemetry event is received', () => {
+    const onContentStart = vi.fn();
+    renderHook(() => useCollectionDetailPlayer({ ...defaultParams, onContentStart }));
+
+    const callArgs = (useContentPlayer as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
+    if (!callArgs) throw new Error('useContentPlayer was not called');
+    callArgs.onTelemetryEvent({ eid: 'START' });
+
+    expect(onContentStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call onContentStart for non-START events', () => {
+    const onContentStart = vi.fn();
+    renderHook(() => useCollectionDetailPlayer({ ...defaultParams, onContentStart }));
+
+    const callArgs = (useContentPlayer as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
+    if (!callArgs) throw new Error('useContentPlayer was not called');
+    callArgs.onTelemetryEvent({ eid: 'END' });
+    callArgs.onTelemetryEvent({ eid: 'INTERACT' });
+
+    expect(onContentStart).not.toHaveBeenCalled();
+  });
 });

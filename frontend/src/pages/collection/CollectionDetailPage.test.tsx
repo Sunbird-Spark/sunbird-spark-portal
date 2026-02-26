@@ -91,8 +91,10 @@ vi.mock('@/hooks/useQumlContent', () => ({
 }));
 
 let capturedOnContentEnd: (() => void) | undefined;
+let capturedOnContentStart: (() => void) | undefined;
 const mockUseCollectionDetailPlayer = vi.fn((options: any) => {
   capturedOnContentEnd = options?.onContentEnd;
+  capturedOnContentStart = options?.onContentStart;
   return {
     handlePlayerEvent: vi.fn(),
     handleTelemetryEvent: vi.fn(),
@@ -308,6 +310,7 @@ describe('CollectionDetailPage', () => {
     mockCollectionData.createdBy = undefined;
     lastCertificateModalDetails = undefined;
     capturedOnContentEnd = undefined;
+    capturedOnContentStart = undefined;
     mockUserReadData = {
       data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
       isLoading: false,
@@ -683,6 +686,33 @@ describe('CollectionDetailPage', () => {
       expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: 'Close Rating' }));
       expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
+      vi.useRealTimers();
+    });
+
+    it('cancels pending popup when content is replayed before 5s timer fires', () => {
+      vi.useFakeTimers();
+      renderWithProviders(<CollectionDetailPage />);
+      act(() => { capturedOnContentEnd!(); });
+      act(() => { vi.advanceTimersByTime(2000); });
+      // User replays before popup shows
+      act(() => { capturedOnContentStart!(); });
+      act(() => { vi.advanceTimersByTime(5000); });
+      expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
+      vi.useRealTimers();
+    });
+
+    it('shows popup after the next END event following a replay', () => {
+      vi.useFakeTimers();
+      renderWithProviders(<CollectionDetailPage />);
+      // First END → timer starts
+      act(() => { capturedOnContentEnd!(); });
+      act(() => { vi.advanceTimersByTime(2000); });
+      // Replay cancels the timer
+      act(() => { capturedOnContentStart!(); });
+      // Second END → new timer starts
+      act(() => { capturedOnContentEnd!(); });
+      act(() => { vi.advanceTimersByTime(5000); });
+      expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
       vi.useRealTimers();
     });
   });

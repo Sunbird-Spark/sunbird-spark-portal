@@ -104,8 +104,19 @@ const CollectionDetailPage = () => {
   const playerError = isQumlContent ? qumlError : contentError;
 
   const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
+  const ratingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onContentEnd = useCallback(() => {
-    setTimeout(() => setRatingOpen(true), 5000);
+    if (ratingTimerRef.current !== null) clearTimeout(ratingTimerRef.current);
+    ratingTimerRef.current = setTimeout(() => setRatingOpen(true), 5000);
+  }, []);
+  const onContentStart = useCallback(() => {
+    if (ratingTimerRef.current !== null) {
+      clearTimeout(ratingTimerRef.current);
+      ratingTimerRef.current = null;
+    }
+  }, []);
+  useEffect(() => () => {
+    if (ratingTimerRef.current !== null) clearTimeout(ratingTimerRef.current);
   }, []);
   const { handlePlayerEvent, handleTelemetryEvent } = useCollectionDetailPlayer({
     collectionId,
@@ -117,6 +128,7 @@ const CollectionDetailPage = () => {
     currentContentStatus,
     skipContentStateUpdate: contentCreatorPrivilege,
     onContentEnd,
+    onContentStart,
   });
 
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
