@@ -39,8 +39,8 @@ describe('HomePage', () => {
 
     expect(screen.getByRole('heading', { name: 'welcome' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'coursesAvailable' })).toBeInTheDocument();
-    expect(screen.getByText('Course 1')).toBeInTheDocument();
-    expect(screen.getByText('Course 2')).toBeInTheDocument();
+    expect(screen.getByText('homePageDemo.course1')).toBeInTheDocument();
+    expect(screen.getByText('homePageDemo.course2')).toBeInTheDocument();
   });
 
   it('should render login form with role selector', () => {

@@ -21,7 +21,7 @@ vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="fo
 vi.mock('@/components/common/PageLoader', () => ({ default: () => <div>Loading...</div> }));
 
 vi.mock('@/components/common/SearchModal', () => ({
-    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
+    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
         isOpen ? <div data-testid="search-modal">Search Modal<button onClick={onClose}>Close</button></div> : null,
 }));
 
@@ -56,10 +56,16 @@ const mockChangeLanguage = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
         t: (key: string) => {
-            if (key === 'profilePage.loading') return 'Loading...';
-            if (key === 'profilePage.errorLoading') return 'Error loading profile...';
-            if (key === 'navigationMenu') return 'Navigation Menu';
-            return key;
+            const translations: Record<string, string> = {
+                'profilePage.loading': 'Loading...',
+                'profilePage.errorLoading': 'Error loading profile...',
+                'navigationMenu': 'Navigation Menu',
+                'homeComponents.openMenu': 'Open Menu',
+                'header.search': 'Search',
+                'changeLanguage': 'Change Language',
+                'common.notifications': 'Notifications',
+            };
+            return translations[key] || key;
         },
         languages: [
             { code: 'en', label: 'English' },
@@ -184,7 +190,7 @@ describe('Profile Page', () => {
 
         expect(mobileSearchBtn).toBeInTheDocument();
         fireEvent.click(mobileSearchBtn);
-        
+
         // SearchModal should open instead of navigating
         expect(screen.getByTestId('search-modal')).toBeInTheDocument();
     });

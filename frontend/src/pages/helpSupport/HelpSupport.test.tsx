@@ -55,6 +55,7 @@ vi.mock("@/hooks/useAppI18n", () => ({
             if (key === 'loading') return 'Loading...';
             if (key === 'help.failedToLoadFaq') return 'Something went wrong';
             if (key === 'help.assistPrompt') return 'How can we assist you today?';
+            if (key === 'somethingWentWrong') return 'Something went wrong';
             return key;
         },
     }),

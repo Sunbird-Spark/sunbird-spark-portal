@@ -40,6 +40,28 @@ vi.mock('@/hooks/useUser', () => ({
     useIsContentCreator: vi.fn(),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'sidebar.home': 'Home',
+                'sidebar.myLearning': 'My Learning',
+                'sidebar.explore': 'Explore',
+                'sidebar.profile': 'Profile',
+                'sidebar.helpSupport': 'Help and Support',
+                'sidebar.logout': 'Logout',
+                'sidebar.collapse': 'Collapse Sidebar',
+                'sidebar.expand': 'Expand Sidebar',
+                'sidebar.userManagement': 'User Management',
+            };
+            return translations[key] || key;
+        },
+        languages: [],
+        currentCode: 'en',
+        changeLanguage: vi.fn(),
+    }),
+}));
+
 describe('HomeSidebar', () => {
     const defaultProps = {
         activeNav: 'home',

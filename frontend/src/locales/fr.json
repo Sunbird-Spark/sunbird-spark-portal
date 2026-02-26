@@ -601,5 +601,126 @@
   },
   "termsDialog": {
     "description": "Afficher et lire le document des conditions générales"
+  },
+  "workspaceCard": {
+    "locked": "Verrouillé",
+    "lockedBy": "Ce contenu est verrouillé par {{name}}",
+    "view": "Voir",
+    "edit": "Modifier",
+    "delete": "Supprimer"
+  },
+  "imagePicker": {
+    "selectImage": "Sélectionner une image",
+    "changeImage": "Changer l'image",
+    "remove": "Supprimer",
+    "selectImageTitle": "Sélectionner une image — {{label}}",
+    "myImages": "Mes images",
+    "allImages": "Toutes les images",
+    "uploadImage": "Télécharger une image",
+    "noImagesUploaded": "Aucune image téléchargée. Utilisez l'onglet \"Télécharger une image\".",
+    "noImagesFound": "Aucune image trouvée dans cette organisation.",
+    "cancel": "Annuler",
+    "uploadNew": "Télécharger nouveau"
+  },
+  "certificate": {
+    "attachedTemplate": "Modèle de certificat attaché",
+    "editCertificate": "Modifier le certificat",
+    "noPreviewAvailable": "Aucun aperçu disponible",
+    "activeTemplateDescription": "Ceci est le modèle de certificat actif pour ce lot. Cliquez sur <strong>Modifier le certificat</strong> pour apporter des modifications à sa configuration ou le remplacer.",
+    "createTemplate": "Créer un modèle de certificat",
+    "currentCertificate": "Certificat actuel",
+    "changeCertificate": "Changer le certificat",
+    "brandLogo1": "Logo de marque 1",
+    "brandLogo2": "Logo de marque 2",
+    "signature1": "Signature 1",
+    "signature2": "Signature 2",
+    "all": "Tous",
+    "refreshTemplates": "Actualiser les modèles",
+    "createNewTemplate": "Créer un nouveau modèle",
+    "certificateLocked": "Certificat verrouillé",
+    "certificateUnavailable": "Certificat indisponible",
+    "addCertificate": "Ajouter un certificat",
+    "reissue": "Réémettre",
+    "reissueCertificate": "Réémettre le certificat",
+    "reissueConfirmation": "Réémettre le certificat pour <strong>{{userName}}</strong> dans le lot <strong>{{batchName}}</strong> ?",
+    "reissuing": "Réémission en cours…",
+    "reissuedSuccessfully": "Certificat réémis avec succès.",
+    "reissueFailed": "Échec de la réémission du certificat."
+  },
+  "batchRow": {
+    "enrolmentEnds": "Inscription jusqu'au {{date}}",
+    "editBatch": "Modifier le lot",
+    "batchCannotBeEdited": "Le lot ne peut pas être modifié après le passage de la date de début",
+    "certificateCannotBeModified": "Le certificat ne peut pas être modifié après la date de fin du lot",
+    "refreshBatchList": "Actualiser la liste des lots",
+    "createBatch": "Créer un lot"
+  },
+  "batchTabs": {
+    "ongoing": "En cours",
+    "upcoming": "À venir",
+    "expired": "Expiré"
+  },
+  "collectionSidebar": {
+    "untitled": "Sans titre"
+  },
+  "certificatesTab": {
+    "searching": "Recherche en cours…",
+    "search": "Rechercher",
+    "enterSunbirdId": "Entrer l'ID Sunbird",
+    "whatIsSunbirdId": "Qu'est-ce que l'ID Sunbird ?",
+    "howToFindSunbirdId": "Comment trouver votre ID Sunbird :",
+    "clickProfileTab": "Cliquez sur l'onglet <strong>Profil</strong>",
+    "sunbirdIdDisplayed": "L'ID Sunbird est affiché sous le nom d'utilisateur",
+    "batchName": "Nom du lot",
+    "userName": "Nom d'utilisateur",
+    "courseProgress": "Progression du cours",
+    "criteriaMet": "Critères remplis",
+    "action": "Action",
+    "searchFailed": "Échec de la recherche.",
+    "noCertificateRecords": "Aucun enregistrement de certificat trouvé pour \"{{userName}}\".",
+    "certificateIssued": "Certificat émis",
+    "courseCompleted": "Cours terminé",
+    "yes": "Oui",
+    "no": "Non",
+    "criteriaMustBeMet": "Les critères doivent être remplis pour réémettre",
+    "reissueCertificate": "Réémettre le certificat"
+  },
+  "homePageDemo": {
+    "course1": "Cours 1",
+    "course2": "Cours 2"
+  },
+  "courseDashboard": {
+    "title": "Tableau de bord du cours"
+  },
+  "userManagement": {
+    "addRole": "Ajouter un rôle"
+  },
+  "formFields": {
+    "select": "Sélectionner {{field}}"
+  },
+  "exploreGrid": {
+    "noContentFound": "Aucun contenu trouvé"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "inReview": "En révision",
+    "published": "Publié",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "completed": "Terminé",
+    "ongoing": "En cours",
+    "upcoming": "À venir"
+  },
+  "tabs": {
+    "batches": "Lots",
+    "certificates": "Certificats",
+    "all": "Tous"
+  },
+  "common": {
+    "manage": "Gérer",
+    "backTo": "Retour à {{page}}",
+    "upcomingBatches": "Lots à venir",
+    "learningProgress": "Progression de l'apprentissage",
+    "downloadCertificate": "Télécharger le certificat"
   }
 }

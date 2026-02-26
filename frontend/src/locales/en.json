@@ -601,5 +601,126 @@
   },
   "termsDialog": {
     "description": "View and read the terms and conditions document"
+  },
+  "workspaceCard": {
+    "locked": "Locked",
+    "lockedBy": "This content is locked by {{name}}",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "imagePicker": {
+    "selectImage": "Select image",
+    "changeImage": "Change image",
+    "remove": "Remove",
+    "selectImageTitle": "Select Image — {{label}}",
+    "myImages": "My Images",
+    "allImages": "All Images",
+    "uploadImage": "Upload Image",
+    "noImagesUploaded": "No images uploaded yet. Use \"Upload Image\" tab.",
+    "noImagesFound": "No images found in this organisation.",
+    "cancel": "Cancel",
+    "uploadNew": "Upload New"
+  },
+  "certificate": {
+    "attachedTemplate": "Attached Certificate Template",
+    "editCertificate": "Edit Certificate",
+    "noPreviewAvailable": "No preview available",
+    "activeTemplateDescription": "This is the active certificate template for this batch. Click <strong>Edit Certificate</strong> to make changes to its configuration or replace it.",
+    "createTemplate": "Create Certificate Template",
+    "currentCertificate": "Current Certificate",
+    "changeCertificate": "Change Certificate",
+    "brandLogo1": "Brand Logo 1",
+    "brandLogo2": "Brand Logo 2",
+    "signature1": "Signature 1",
+    "signature2": "Signature 2",
+    "all": "All",
+    "refreshTemplates": "Refresh templates",
+    "createNewTemplate": "Create new template",
+    "certificateLocked": "Certificate Locked",
+    "certificateUnavailable": "Certificate Unavailable",
+    "addCertificate": "Add Certificate",
+    "reissue": "Re-issue",
+    "reissueCertificate": "Re-issue Certificate",
+    "reissueConfirmation": "Re-issue the certificate for <strong>{{userName}}</strong> in batch <strong>{{batchName}}</strong>?",
+    "reissuing": "Re-issuing…",
+    "reissuedSuccessfully": "Certificate re-issued successfully.",
+    "reissueFailed": "Failed to re-issue certificate."
+  },
+  "batchRow": {
+    "enrolmentEnds": "Enrolment ends {{date}}",
+    "editBatch": "Edit batch",
+    "batchCannotBeEdited": "Batch cannot be edited after the start date has passed",
+    "certificateCannotBeModified": "Certificate cannot be modified after the batch end date",
+    "refreshBatchList": "Refresh batch list",
+    "createBatch": "Create batch"
+  },
+  "batchTabs": {
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming",
+    "expired": "Expired"
+  },
+  "collectionSidebar": {
+    "untitled": "Untitled"
+  },
+  "certificatesTab": {
+    "searching": "Searching…",
+    "search": "Search",
+    "enterSunbirdId": "Enter Sunbird ID",
+    "whatIsSunbirdId": "What is Sunbird ID?",
+    "howToFindSunbirdId": "How to find your Sunbird ID:",
+    "clickProfileTab": "Click the <strong>Profile</strong> tab",
+    "sunbirdIdDisplayed": "The Sunbird ID is displayed below the user name",
+    "batchName": "Batch Name",
+    "userName": "User Name",
+    "courseProgress": "Course Progress",
+    "criteriaMet": "Criteria Met",
+    "action": "Action",
+    "searchFailed": "Search failed.",
+    "noCertificateRecords": "No certificate records found for \"{{userName}}\".",
+    "certificateIssued": "Certificate Issued",
+    "courseCompleted": "Course Completed",
+    "yes": "Yes",
+    "no": "No",
+    "criteriaMustBeMet": "Criteria must be met to re-issue",
+    "reissueCertificate": "Re-issue certificate"
+  },
+  "homePageDemo": {
+    "course1": "Course 1",
+    "course2": "Course 2"
+  },
+  "courseDashboard": {
+    "title": "Course Dashboard"
+  },
+  "userManagement": {
+    "addRole": "Add Role"
+  },
+  "formFields": {
+    "select": "Select {{field}}"
+  },
+  "exploreGrid": {
+    "noContentFound": "No content found"
+  },
+  "status": {
+    "draft": "Draft",
+    "inReview": "In Review",
+    "published": "Published",
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming"
+  },
+  "tabs": {
+    "batches": "Batches",
+    "certificates": "Certificates",
+    "all": "All"
+  },
+  "common": {
+    "manage": "Manage",
+    "backTo": "Back to {{page}}",
+    "upcomingBatches": "Upcoming Batches",
+    "learningProgress": "Learning Progress",
+    "downloadCertificate": "Download Certificate"
   }
 }

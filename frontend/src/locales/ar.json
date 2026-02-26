@@ -601,5 +601,126 @@
   },
   "termsDialog": {
     "description": "عرض وقراءة وثيقة الشروط والأحكام"
+  },
+  "workspaceCard": {
+    "locked": "مقفل",
+    "lockedBy": "هذا المحتوى مقفل بواسطة {{name}}",
+    "view": "عرض",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "imagePicker": {
+    "selectImage": "اختر صورة",
+    "changeImage": "تغيير الصورة",
+    "remove": "إزالة",
+    "selectImageTitle": "اختر صورة — {{label}}",
+    "myImages": "صوري",
+    "allImages": "جميع الصور",
+    "uploadImage": "رفع صورة",
+    "noImagesUploaded": "لم يتم رفع صور بعد. استخدم علامة تبويب \"رفع صورة\".",
+    "noImagesFound": "لم يتم العثور على صور في هذه المنظمة.",
+    "cancel": "إلغاء",
+    "uploadNew": "رفع جديد"
+  },
+  "certificate": {
+    "attachedTemplate": "قالب الشهادة المرفق",
+    "editCertificate": "تعديل الشهادة",
+    "noPreviewAvailable": "لا توجد معاينة متاحة",
+    "activeTemplateDescription": "هذا هو قالب الشهادة النشط لهذه الدفعة. انقر على <strong>تعديل الشهادة</strong> لإجراء تغييرات على تكوينها أو استبدالها.",
+    "createTemplate": "إنشاء قالب شهادة",
+    "currentCertificate": "الشهادة الحالية",
+    "changeCertificate": "تغيير الشهادة",
+    "brandLogo1": "شعار العلامة التجارية 1",
+    "brandLogo2": "شعار العلامة التجارية 2",
+    "signature1": "التوقيع 1",
+    "signature2": "التوقيع 2",
+    "all": "الكل",
+    "refreshTemplates": "تحديث القوالب",
+    "createNewTemplate": "إنشاء قالب جديد",
+    "certificateLocked": "الشهادة مقفلة",
+    "certificateUnavailable": "الشهادة غير متاحة",
+    "addCertificate": "إضافة شهادة",
+    "reissue": "إعادة إصدار",
+    "reissueCertificate": "إعادة إصدار الشهادة",
+    "reissueConfirmation": "إعادة إصدار الشهادة لـ <strong>{{userName}}</strong> في الدفعة <strong>{{batchName}}</strong>؟",
+    "reissuing": "جارٍ إعادة الإصدار…",
+    "reissuedSuccessfully": "تمت إعادة إصدار الشهادة بنجاح.",
+    "reissueFailed": "فشل إعادة إصدار الشهادة."
+  },
+  "batchRow": {
+    "enrolmentEnds": "ينتهي التسجيل {{date}}",
+    "editBatch": "تعديل الدفعة",
+    "batchCannotBeEdited": "لا يمكن تعديل الدفعة بعد مرور تاريخ البدء",
+    "certificateCannotBeModified": "لا يمكن تعديل الشهادة بعد تاريخ انتهاء الدفعة",
+    "refreshBatchList": "تحديث قائمة الدفعات",
+    "createBatch": "إنشاء دفعة"
+  },
+  "batchTabs": {
+    "ongoing": "جارية",
+    "upcoming": "قادمة",
+    "expired": "منتهية"
+  },
+  "collectionSidebar": {
+    "untitled": "بدون عنوان"
+  },
+  "certificatesTab": {
+    "searching": "جارٍ البحث…",
+    "search": "بحث",
+    "enterSunbirdId": "أدخل معرف Sunbird",
+    "whatIsSunbirdId": "ما هو معرف Sunbird؟",
+    "howToFindSunbirdId": "كيفية العثور على معرف Sunbird الخاص بك:",
+    "clickProfileTab": "انقر على علامة تبويب <strong>الملف الشخصي</strong>",
+    "sunbirdIdDisplayed": "يتم عرض معرف Sunbird أسفل اسم المستخدم",
+    "batchName": "اسم الدفعة",
+    "userName": "اسم المستخدم",
+    "courseProgress": "تقدم الدورة",
+    "criteriaMet": "المعايير المستوفاة",
+    "action": "الإجراء",
+    "searchFailed": "فشل البحث.",
+    "noCertificateRecords": "لم يتم العثور على سجلات شهادات لـ \"{{userName}}\".",
+    "certificateIssued": "تم إصدار الشهادة",
+    "courseCompleted": "اكتملت الدورة",
+    "yes": "نعم",
+    "no": "لا",
+    "criteriaMustBeMet": "يجب استيفاء المعايير لإعادة الإصدار",
+    "reissueCertificate": "إعادة إصدار الشهادة"
+  },
+  "homePageDemo": {
+    "course1": "الدورة 1",
+    "course2": "الدورة 2"
+  },
+  "courseDashboard": {
+    "title": "لوحة تحكم الدورة"
+  },
+  "userManagement": {
+    "addRole": "إضافة دور"
+  },
+  "formFields": {
+    "select": "اختر {{field}}"
+  },
+  "exploreGrid": {
+    "noContentFound": "لم يتم العثور على محتوى"
+  },
+  "status": {
+    "draft": "مسودة",
+    "inReview": "قيد المراجعة",
+    "published": "منشور",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "completed": "مكتمل",
+    "ongoing": "جارية",
+    "upcoming": "قادمة"
+  },
+  "tabs": {
+    "batches": "الدفعات",
+    "certificates": "الشهادات",
+    "all": "الكل"
+  },
+  "common": {
+    "manage": "إدارة",
+    "backTo": "العودة إلى {{page}}",
+    "upcomingBatches": "الدفعات القادمة",
+    "learningProgress": "تقدم التعلم",
+    "downloadCertificate": "تحميل الشهادة"
   }
 }

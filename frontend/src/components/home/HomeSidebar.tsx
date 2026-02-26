@@ -72,7 +72,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const dynamicMainNavItems = [
         ...mainNavItems,
         ...(isAdmin
-            ? [{ id: "user-management", label: "User Management", icon: FiUsers, path: "/user-management" }]
+            ? [{ id: "user-management", labelKey: "sidebar.userManagement", label: "User Management", icon: FiUsers, path: "/user-management" }]
             : []),
     ];
 

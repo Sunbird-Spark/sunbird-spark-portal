@@ -74,13 +74,16 @@ vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => {
       const map: Record<string, string> = {
-        'workspace.createContent': 'Create content',
+        'workspace.createContent': 'Create',
         'workspace.closeDialog': 'Close dialog',
         'loading': 'loading',
         'workspace.deleteContent': 'Delete Content',
         'workspace.deleteConfirmation': 'Are you sure you want to delete this content?',
         'delete': 'Delete',
-        'cancel': 'Cancel'
+        'cancel': 'Cancel',
+        'header.openMenu': 'Open menu',
+        'navigationMenu': 'Navigation Menu',
+        'Success': 'Success',
       };
       return map[key] || key;
     },
@@ -381,7 +384,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
     });
     const dialog = screen.getByRole('dialog', { name: 'Create content' });
-    
+
     // Test story option
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
@@ -390,7 +393,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByText('Form type: resource')).toBeInTheDocument();
     });
     expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
-    
+
     // Close and test quiz option
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
@@ -471,7 +474,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByRole('dialog', { name: 'Create Story & Game' })).toBeInTheDocument();
     });
     const resourceDialog = screen.getByRole('dialog', { name: 'Create Story & Game' });
-    
+
     // Test cancel functionality
     const cancelButton = within(resourceDialog).getByRole('button', { name: 'Cancel' });
     fireEvent.click(cancelButton);
