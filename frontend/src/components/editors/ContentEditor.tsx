@@ -122,8 +122,8 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
     return () => {
       cancelled = true;
       window.removeEventListener('message', messageHandler);
-      // Only clean up if we're actually unmounting (not just re-rendering)
-      // Check if the component is being unmounted by seeing if iframe still exists
+      // Set iframe src first so the editor can gracefully unload
+      // while global properties still exist
       if (iframe) {
         iframe.onload = null;
         iframe.src = 'about:blank';
