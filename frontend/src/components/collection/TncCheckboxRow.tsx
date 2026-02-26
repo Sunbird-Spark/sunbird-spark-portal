@@ -11,15 +11,19 @@ interface TncCheckboxRowProps {
   settingKey?: string;
   /** Trailing label text after "I accept the Terms & Conditions". */
   label?: string;
+  /** When provided, clicking "Terms & Conditions" calls this instead of opening its own dialog. */
+  onTermsClick?: () => void;
 }
 
 /** T&C checkbox row. Clicking "Terms & Conditions" opens the TermsAndConditionsDialog.
- *  Use `settingKey` to target a specific TnC config (e.g. 'orgAdminTnc', 'reportViewerTnc'). */
+ *  Use `settingKey` to target a specific TnC config (e.g. 'orgAdminTnc', 'reportViewerTnc').
+ *  Use `onTermsClick` to handle the dialog externally (avoids nested dialog issues). */
 export const TncCheckboxRow = ({
   checked,
   onCheckedChange,
   settingKey = "tncConfig",
   label = "for creating this batch.",
+  onTermsClick,
 }: TncCheckboxRowProps) => {
   const { data: tncRes } = useSystemSetting(settingKey);
   const { data: globalTncRes } = useSystemSetting("tncConfig");
@@ -44,16 +48,27 @@ export const TncCheckboxRow = ({
       <span className="text-sm text-foreground font-['Rubik']">
         I accept the{" "}
         {termsUrl ? (
-          <TermsAndConditionsDialog termsUrl={termsUrl} title="Terms &amp; Conditions">
+          onTermsClick ? (
             <button
               type="button"
               aria-label="Terms &amp; Conditions"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); onTermsClick(); }}
               className="underline text-sunbird-brick hover:opacity-80 font-medium"
             >
               Terms &amp; Conditions
             </button>
-          </TermsAndConditionsDialog>
+          ) : (
+            <TermsAndConditionsDialog termsUrl={termsUrl} title="Terms &amp; Conditions">
+              <button
+                type="button"
+                aria-label="Terms &amp; Conditions"
+                onClick={(e) => e.stopPropagation()}
+                className="underline text-sunbird-brick hover:opacity-80 font-medium"
+              >
+                Terms &amp; Conditions
+              </button>
+            </TermsAndConditionsDialog>
+          )
         ) : (
           <span className="font-medium">Terms &amp; Conditions</span>
         )}{" "}
