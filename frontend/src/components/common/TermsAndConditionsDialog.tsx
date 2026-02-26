@@ -35,7 +35,7 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
                 <h2 className="tnc-dialog-title">{displayTitle}</h2>
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">
-                View and read the terms and conditions document
+                {t("termsDialog.description")}
               </DialogPrimitive.Description>
               <DialogPrimitive.Close asChild>
                 <Button

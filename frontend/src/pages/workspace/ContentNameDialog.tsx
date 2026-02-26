@@ -3,9 +3,9 @@ import { Button } from "@/components/common/Button";
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 const COLLECTION_TYPES = [
-  { value: 'content-playlist', label: 'Content Playlist' },
-  { value: 'digital-textbook', label: 'Digital Textbook' },
-  { value: 'question-paper', label: 'Question Paper' },
+  { value: 'content-playlist', labelKey: 'collection.contentPlaylist' },
+  { value: 'digital-textbook', labelKey: 'collection.digitalTextbook' },
+  { value: 'question-paper', labelKey: 'collection.questionPaper' },
 ] as const;
 
 interface ContentNameDialogProps {
@@ -82,7 +82,7 @@ export default function ContentNameDialog({
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
-      aria-label={isCollection ? "Create Collection" : "Enter content name"}
+      aria-label={isCollection ? `${t('create')} ${t('collection.label')}` : t('workspace.enterContentName')}
     >
       <div
         className="bg-white rounded-2xl max-w-md w-full p-6"
@@ -135,7 +135,7 @@ export default function ContentNameDialog({
               >
                 <option value="" disabled>{t('workspace.selectCollectionType')}</option>
                 {COLLECTION_TYPES.map((ct) => (
-                  <option key={ct.value} value={ct.value}>{ct.label}</option>
+                  <option key={ct.value} value={ct.value}>{t(ct.labelKey)}</option>
                 ))}
               </select>
             </>

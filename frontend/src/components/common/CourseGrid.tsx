@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/common/Button";
 import CollectionCard from "@/components/content/CollectionCard";
 import type { ContentSearchItem } from "@/types/workspaceTypes";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface CourseGridProps {
     title: string;
@@ -11,6 +12,7 @@ interface CourseGridProps {
 }
 
 export const CourseGrid = ({ title, courses, className = "mb-12" }: CourseGridProps) => {
+    const { t } = useAppI18n();
     return (
         <div className={className}>
             {/* Header */}
@@ -22,7 +24,7 @@ export const CourseGrid = ({ title, courses, className = "mb-12" }: CourseGridPr
                     <Button
                         variant="ghost"
                         className="p-0 h-auto hover:bg-transparent text-sunbird-brick"
-                        aria-label="View all courses"
+                        aria-label={t("courseGrid.viewAll")}
                     >
                         <FiArrowRight className="w-5 h-3" />
                     </Button>

@@ -131,8 +131,8 @@ export default function ResourceFormDialog({
   }, [frameworkData]);
 
   const isFetchingForm = isFormLoading || isFrameworkLoading;
-  const fetchError = formError || frameworkError 
-    ? 'Failed to load form configuration. Please try again.' 
+  const fetchError = formError || frameworkError
+    ? t("resourceForm.failedToLoadForm")
     : null;
 
   useEffect(() => {

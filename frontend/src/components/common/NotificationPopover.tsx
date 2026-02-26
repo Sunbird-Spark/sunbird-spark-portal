@@ -99,7 +99,7 @@ export const NotificationPopover = () => {
                     <div className="notification-list">
                         {!hasNotifications ? (
                             <div className="notification-empty">
-                                No notifications
+                                {t("notifications.empty")}
                             </div>
                         ) : (
                             groupedNotifications.map((g, index) => (
@@ -108,7 +108,7 @@ export const NotificationPopover = () => {
                                         <span className="notification-group-label">{g.group}</span>
                                         {index === 0 && (
                                             <button onClick={handleDeleteAll} className="notification-delete-all-btn">
-                                                Delete All
+                                                {t("notifications.deleteAll")}
                                             </button>
                                         )}
                                     </div>

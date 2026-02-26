@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { Button } from "@/components/common/Button";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -18,10 +19,12 @@ export default function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = "Confirm",
+  confirmLabel,
   confirmVariant = "default",
   isLoading = false,
 }: ConfirmDialogProps) {
+  const { t } = useAppI18n();
+  const resolvedConfirmLabel = confirmLabel ?? t("confirm");
   const handleClose = useCallback(() => {
     if (!isLoading) onClose();
   }, [onClose, isLoading]);
@@ -70,7 +73,7 @@ export default function ConfirmDialog({
             onClick={handleClose}
             disabled={isLoading}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             type="button"
@@ -79,7 +82,7 @@ export default function ConfirmDialog({
             disabled={isLoading}
             className={confirmClassName}
           >
-            {isLoading ? "Please wait..." : confirmLabel}
+            {isLoading ? t("confirmDialog.pleaseWait") : resolvedConfirmLabel}
           </Button>
         </div>
       </div>

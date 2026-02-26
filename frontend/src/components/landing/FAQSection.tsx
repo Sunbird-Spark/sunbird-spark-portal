@@ -79,7 +79,7 @@ const FAQSection = () => {
                         <div className="w-[23.125rem] h-[28rem] overflow-hidden rounded-[1.125rem]">
                             <img
                                 src={faqImage}
-                                alt="Student learning online"
+                                alt={t("faq.studentAlt")}
                                 className="w-full h-full object-cover"
                             />
                         </div>

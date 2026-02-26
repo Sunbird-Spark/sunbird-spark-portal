@@ -76,7 +76,7 @@ const WorkspaceToolbar = ({
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Creator
+                  {t('workspace.roleCreator')}
                 </button>
               )}
               {hasCreatorRole && hasReviewerRole && (
@@ -92,7 +92,7 @@ const WorkspaceToolbar = ({
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Reviewer
+                  {t('workspace.roleReviewer')}
                 </button>
               )}
             </div>
@@ -154,7 +154,7 @@ const WorkspaceToolbar = ({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="font-rubik rounded-xl">
-                    More
+                    {t('workspace.more')}
                     <FiChevronDown className="w-4 h-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -179,7 +179,7 @@ const WorkspaceToolbar = ({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="font-rubik rounded-xl">
-                      {typeFilter === 'all' ? 'All Types' : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
+                      {typeFilter === 'all' ? t('allTypes') : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
                       <FiChevronDown className="w-4 h-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -190,7 +190,7 @@ const WorkspaceToolbar = ({
                         onClick={() => onTypeFilterChange(type)}
                         className="font-rubik"
                       >
-                        {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
+                        {type === 'all' ? t('allTypes') : type.charAt(0).toUpperCase() + type.slice(1)}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -229,24 +229,26 @@ const WorkspaceToolbar = ({
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
             <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.published}</span> Published
+              <span className="font-semibold text-foreground">{counts.published}</span> {t('published')}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
             <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.review}</span> In Review
+              <span className="font-semibold text-foreground">{counts.review}</span> {t('workspace.inReview')}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-gray-400" />
             <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.drafts}</span> Drafts
+              <span className="font-semibold text-foreground">{counts.drafts}</span> {t('drafts')}
             </span>
           </div>
           {contentCount !== undefined && (
             <span className="text-sm text-muted-foreground font-rubik ml-auto">
-              Showing {contentCount}{totalCount !== undefined && totalCount > contentCount ? ` of ${totalCount}` : ''} items
+              {totalCount !== undefined && totalCount > contentCount!
+                ? t('workspace.showingItemsOf', { count: contentCount, total: totalCount })
+                : t('workspace.showingItems', { count: contentCount })}
             </span>
           )}
         </div>

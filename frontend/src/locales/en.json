@@ -1,7 +1,9 @@
 {
   "header": {
     "search": "Search for content",
-    "login": "Log In"
+    "login": "Log In",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "loading": "Loading...",
   "error": "An error occurred",
@@ -97,6 +99,7 @@
   "results_for": "Results for \"{{query}}\"",
   "view_all_results": "View All Results",
   "no_results_found": "No results found",
+  "failed_to_search": "Search failed. Please try again.",
   "clear_search": "Clear search",
   "featuredCourses": "Featured Courses",
   "popularCourses": "Popular Courses",
@@ -118,7 +121,6 @@
   "coursesAvailable": "Courses Available",
   "expertInstructors": "Expert Instructors",
   "completionRate": "Completion Rate",
-  "workspace": "Workspace",
   "createNewContent": "Create New Content",
   "createNew": "Create New",
   "allMyContent": "All My Content",
@@ -252,14 +254,17 @@
     "videoBadge": "Video",
     "epubBadge": "EPUB",
     "htmlBadge": "HTML",
-    "pdfBadge": "PDF"
+    "pdfBadge": "PDF",
+    "ecmlBadge": "ECML",
+    "h5pBadge": "H5P"
   },
   "trending": {
     "mostViewed": "Most Viewed Content",
     "trending": "Trending Content"
   },
   "faq": {
-    "title": "Frequently asked questions"
+    "title": "Frequently asked questions",
+    "studentAlt": "Student learning online"
   },
   "footer": {
     "products": "Products",
@@ -309,7 +314,10 @@
   },
   "collection": {
     "label": "Collection",
-    "notFound": "Collection not found."
+    "notFound": "Collection not found.",
+    "contentPlaylist": "Content Playlist",
+    "digitalTextbook": "Digital Textbook",
+    "questionPaper": "Question Paper"
   },
   "homePage": {
     "hiUser": "Hi {{name}}",
@@ -413,7 +421,20 @@
     "closeDialog": "Close dialog",
     "fillDetails": "Fill in the details to create your content",
     "deleteContent": "Delete Content",
-    "deleteConfirmation": "Are you sure you want to delete this content?"
+    "deleteConfirmation": "Are you sure you want to delete this content?",
+    "noContentsToReview": "No contents to review",
+    "noContentsToReviewDesc": "There are no contents pending your review at this time.",
+    "noPublishedContents": "No published contents",
+    "noPublishedContentsDesc": "You have not published any contents yet.",
+    "roleCreator": "Creator",
+    "roleReviewer": "Reviewer",
+    "more": "More",
+    "inReview": "In Review",
+    "showingItems": "Showing {{count}} items",
+    "showingItemsOf": "Showing {{count}} of {{total}} items",
+    "startingEditor": "Starting Editor",
+    "launchingEditor": "Launching {{name}} editor...",
+    "enterContentName": "Enter content name"
   },
   "homeComponents": {
     "openMenu": "Open Menu",
@@ -422,6 +443,45 @@
     "noCoursesInProgress": "No courses in progress",
     "performance": "Performance",
     "recommendedContents": "Recommended Contents"
+  },
+  "sidebar": {
+    "home": "Home",
+    "myLearning": "My Learning",
+    "explore": "Explore",
+    "workspace": "Workspace",
+    "profile": "Profile",
+    "helpAndSupport": "Help and Support",
+    "logout": "Logout",
+    "expand": "Expand Sidebar",
+    "collapse": "Collapse Sidebar"
+  },
+  "createOptions": {
+    "title": "What would you like to create?",
+    "description": "Choose an editor type below to start creating content for your learners."
+  },
+  "reportIssueDialog": {
+    "title": "Report an Issue",
+    "selectCategory": "Select Category",
+    "selectSubcategory": "Select Subcategory",
+    "tellUsMore": "Tell us more",
+    "feedbackSuccess": "Thanks for your feedback. We may not be able to respond to every suggestion, but your feedback helps make {{appName}} better for everyone.",
+    "submitFeedback": "Submit Feedback",
+    "loadError": "Failed to load report issue options",
+    "description": "Report an issue by selecting a category and describing the problem"
+  },
+  "confirmDialog": {
+    "pleaseWait": "Please wait..."
+  },
+  "unauthorizedPage": {
+    "code": "403",
+    "title": "Access Denied",
+    "message": "You do not have the required permissions to access this page.",
+    "goHome": "Go Home",
+    "changeRole": "Change Role"
+  },
+  "notifications": {
+    "empty": "No notifications",
+    "deleteAll": "Delete All"
   },
   "months": {
     "jan": "Jan",
@@ -436,5 +496,110 @@
     "oct": "Oct",
     "nov": "Nov",
     "dec": "Dec"
+  },
+  "authLayout": {
+    "empowerTitle": "Empower your future through learning.",
+    "logoAlt": "Sunbird Logo"
+  },
+  "signUp": {
+    "welcomeTitle": "Welcome to Sunbird!",
+    "welcomeSubtitle": "Your learning journey starts here - sign up to get started.",
+    "signInWithGoogle": "Sign in with Google",
+    "or": "OR",
+    "firstName": "First Name",
+    "enterFirstName": "Enter First Name",
+    "firstNameRequired": "First name is required",
+    "emailOrMobileLabel": "Email ID / Mobile Number",
+    "enterEmailOrMobile": "Enter Email ID / Mobile Number",
+    "invalidEmailOrMobile": "Enter valid Email or 10-digit Mobile (6-9)",
+    "enterPassword": "Enter Password",
+    "passwordRequirements": "Password must be 8+ chars (upper, lower, num, special)",
+    "confirmPassword": "Confirm Password",
+    "reenterPassword": "Re-enter Password",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
+    "hideConfirmPassword": "Hide confirm password",
+    "showConfirmPassword": "Show confirm password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "iUnderstand": "I understand &",
+    "acceptTermsOfUse": "accept the SUNBIRD Terms of Use",
+    "termsTitle": "Terms of Use",
+    "creatingAccount": "Creating Account...",
+    "alreadyHaveAccount": "Already have an account?",
+    "enterCodeSubtitle": "Enter the 6 digit code sent to your Email ID and complete the verification",
+    "verifying": "Verifying...",
+    "submit": "Submit",
+    "congratulations": "Congratulations!",
+    "accountCreated": "Your account has been successfully created.",
+    "proceedToLogin": "Proceed to Login"
+  },
+  "signUpPage": {
+    "otpGenerationFailed": "OTP Generation Failed",
+    "failedToSendOtp": "Failed to send OTP. Please try again.",
+    "otpResent": "OTP Resent",
+    "otpSent": "OTP Sent",
+    "newCodeSent": "A new verification code has been sent.",
+    "checkEmailPhone": "Please check your email/phone for the verification code.",
+    "captchaFailed": "Captcha Validation Failed",
+    "resendFailed": "Resend Failed",
+    "pleaseTryAgain": "Please try again.",
+    "signupFailed": "Signup Failed",
+    "otpButFailed": "OTP verified but account creation failed. Please try again.",
+    "verificationFailed": "Verification Failed",
+    "invalidOtp": "Invalid OTP. Please try again.",
+    "verificationError": "An error occurred during verification. Please try again."
+  },
+  "personalInfo": {
+    "title": "Personal Information",
+    "fullName": "Full Name",
+    "mobileNumber": "Mobile Number",
+    "emailId": "Email ID",
+    "alternateEmailId": "Alternate Email ID"
+  },
+  "editProfile": {
+    "title": "Edit Personal Information",
+    "description": "Update your name, mobile number, email, and alternate email.",
+    "sending": "Sending...",
+    "validate": "Validate",
+    "verified": "Verified",
+    "saving": "Saving...",
+    "enterMobileNumber": "Enter Mobile Number",
+    "enterEmailId": "Enter Email ID",
+    "enterAlternateEmailId": "Enter Alternate Email ID",
+    "enterDigitCodePhone": "Enter the 6 digit code sent to your phone number and complete the verification",
+    "enterDigitCodeEmail": "Enter the 6 digit code sent to your email and complete the verification",
+    "submitting": "Submitting...",
+    "verificationError": "Verification Error",
+    "recaptchaFailed": "Failed to load reCAPTCHA. If you are on localhost, this domain might not be supported by the site key."
+  },
+  "checklistDialog": {
+    "publishContent": "Publish Content",
+    "publish": "Publish",
+    "requestForChanges": "Request for Changes",
+    "publishing": "Publishing...",
+    "submitting": "Submitting...",
+    "otherReason": "Other Reason",
+    "provideDetails": "Please provide details..."
+  },
+  "batch": {
+    "nameOfBatch": "Name of Batch",
+    "enterBatchName": "Enter batch name",
+    "aboutBatch": "About Batch",
+    "briefDescBatch": "Brief description about this batch",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "enrolmentEndDate": "Enrolment End Date",
+    "mustBeAfterEnrolmentEnd": "Must be on or after enrolment end date",
+    "betweenStartDate": "Between start date",
+    "betweenStartAndEndDate": "Between start & end date"
+  },
+  "resourceForm": {
+    "failedToLoadForm": "Failed to load form configuration. Please try again."
+  },
+  "courseGrid": {
+    "viewAll": "View all courses"
+  },
+  "termsDialog": {
+    "description": "View and read the terms and conditions document"
   }
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface BatchFormState {
   batchName: string;
@@ -29,18 +30,19 @@ export function BatchFormFields({
   labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']",
   inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']",
 }: BatchFormFieldsProps) {
+  const { t } = useAppI18n();
   return (
     <>
       {/* 1. Name of Batch */}
       <div>
         <label htmlFor="batchName" className={labelClass}>
-          Name of Batch <span className="text-red-500">*</span>
+          {t("batch.nameOfBatch")} <span className="text-red-500">*</span>
         </label>
         <input
           id="batchName"
           type="text"
           className={inputClass}
-          placeholder="Enter batch name"
+          placeholder={t("batch.enterBatchName")}
           value={form.batchName}
           onChange={(e) => handleField("batchName", e.target.value)}
           required
@@ -50,13 +52,13 @@ export function BatchFormFields({
       {/* 2. About Batch */}
       <div>
         <label htmlFor="aboutBatch" className={labelClass}>
-          About Batch
+          {t("batch.aboutBatch")}
         </label>
         <textarea
           id="aboutBatch"
           rows={3}
           className={cn(inputClass, "resize-none")}
-          placeholder="Brief description about this batch"
+          placeholder={t("batch.briefDescBatch")}
           value={form.aboutBatch}
           onChange={(e) => handleField("aboutBatch", e.target.value)}
         />
@@ -67,7 +69,7 @@ export function BatchFormFields({
         {/* Start Date (required) */}
         <div>
           <label htmlFor="startDate" className={labelClass}>
-            Start Date <span className="text-red-500">*</span>
+            {t("batch.startDate")} <span className="text-red-500">*</span>
           </label>
           <input
             id="startDate"
@@ -90,7 +92,7 @@ export function BatchFormFields({
         {/* End Date — optional; must be >= startDate AND >= enrolmentEndDate */}
         <div>
           <label htmlFor="endDate" className={labelClass}>
-            End Date
+            {t("batch.endDate")}
           </label>
           <input
             id="endDate"
@@ -106,7 +108,7 @@ export function BatchFormFields({
           />
           {form.enrolmentEndDate && !form.endDate && (
              <p className="mt-0.5 text-xs text-amber-600 font-['Rubik']">
-              Must be on or after enrolment end date
+              {t("batch.mustBeAfterEnrolmentEnd")}
             </p>
           )}
         </div>
@@ -114,7 +116,7 @@ export function BatchFormFields({
         {/* Enrolment End Date — optional; bounded between startDate and endDate */}
         <div>
           <label htmlFor="enrolmentEndDate" className={labelClass}>
-            Enrolment End Date
+            {t("batch.enrolmentEndDate")}
           </label>
           <input
             id="enrolmentEndDate"
@@ -127,7 +129,7 @@ export function BatchFormFields({
           />
           {form.startDate && (
             <p className="mt-0.5 text-xs text-muted-foreground font-['Rubik']">
-              Between start{form.endDate ? " & end date" : " date"}
+              {form.endDate ? t("batch.betweenStartAndEndDate") : t("batch.betweenStartDate")}
             </p>
           )}
         </div>

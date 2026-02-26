@@ -109,8 +109,8 @@ export default function WorkspacePageContent({
   }
 
   const pageTitleMap: Record<string, { title: string; desc: string }> = {
-    'pending-review': { title: "No contents to review", desc: "There are no contents pending your review at this time." },
-    'my-published': { title: "No published contents", desc: "You have not published any contents yet." },
+    'pending-review': { title: t('workspace.noContentsToReview'), desc: t('workspace.noContentsToReviewDesc') },
+    'my-published': { title: t('workspace.noPublishedContents'), desc: t('workspace.noPublishedContentsDesc') },
   };
 
   // Empty state

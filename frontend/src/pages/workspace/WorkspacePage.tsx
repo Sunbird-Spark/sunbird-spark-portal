@@ -225,8 +225,8 @@ const WorkspacePage = () => {
     } else {
       setShowCreateModal(false);
       toast({
-        title: "Starting Editor",
-        description: `Launching ${optionId.replace('-', ' ')} editor...`
+        title: t("workspace.startingEditor"),
+        description: t("workspace.launchingEditor", { name: optionId.replace('-', ' ') })
       });
     }
   };
@@ -525,7 +525,7 @@ const WorkspacePage = () => {
             orgChannelId={orgChannelId}
             orgFramework={orgFramework}
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
-            title={selectedOption ? `Create ${EDITOR_OPTION_LABELS[selectedOption] || 'Content'}` : 'Create Content'}
+            title={selectedOption ? `${t('workspace.createContent')} ${EDITOR_OPTION_LABELS[selectedOption] || ''}`.trim() : t('workspace.createContent')}
           />
         </div>
       </div>
