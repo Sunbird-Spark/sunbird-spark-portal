@@ -231,6 +231,7 @@ const CollectionDetailPage = () => {
               setCertificatePreviewOpen={setCertificatePreviewOpen}
               isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
               contentCreatorPrivilege={contentCreatorPrivilege}
+              userProfile={userProfile ?? undefined}
             />
 
             {/* Related Content Section */}
