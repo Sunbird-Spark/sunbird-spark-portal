@@ -24,6 +24,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
+import userProfileService from "@/services/UserProfileService";
 import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -147,6 +148,13 @@ const WorkspacePage = () => {
 
   const hasCreatorRole = userRoles.includes('CONTENT_CREATOR');
   const hasReviewerRole = userRoles.includes('CONTENT_REVIEWER');
+
+  // Initialize UserProfileService when workspace loads
+  useEffect(() => {
+    userProfileService.initialize().catch((err) => {
+      console.error('Failed to initialize UserProfileService:', err);
+    });
+  }, []);
 
   // Default to creator if available, otherwise reviewer
   const [userRole, setUserRole] = useState<UserRole>('creator');
