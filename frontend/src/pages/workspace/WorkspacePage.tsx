@@ -203,6 +203,12 @@ const WorkspacePage = () => {
     [contents, retiredContentIds],
   );
 
+  // Memoize content IDs to prevent unnecessary lock list API calls
+  const visibleContentIds = useMemo(
+    () => JSON.stringify(visibleContents.map((c) => c.id).sort()),
+    [visibleContents],
+  );
+
   // Fetch lock list for creator role to show lock icons on content cards.
   const [lockedContentMap, setLockedContentMap] = useState<Record<string, { creatorName: string }>>(
     {},
@@ -240,7 +246,7 @@ const WorkspacePage = () => {
     return () => {
       cancelled = true;
     };
-  }, [userRole, visibleContents]);
+  }, [userRole, visibleContentIds]); // Changed from visibleContents to visibleContentIds
 
   // Reset view when role changes
   useEffect(() => {
@@ -396,9 +402,9 @@ const WorkspacePage = () => {
     if (item.mimeType === 'application/vnd.ekstep.ecml-archive') {
         return `/edit/content-editor/${id}`;
     }
-    const state = (item.contentStatus || 'Draft').toLowerCase();
+    const state = (item.status || 'Draft').toLowerCase();
     const framework = item.framework || orgFramework || '';
-    const contentStatus = item.status || 'draft';
+    const contentStatus = item.contentStatus || 'draft';
     return `/workspace/content/edit/generic/${id}/${state}/${framework}/${contentStatus}`;
   };
 

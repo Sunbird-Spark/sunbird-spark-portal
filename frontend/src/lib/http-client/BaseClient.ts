@@ -27,7 +27,6 @@ export abstract class BaseClient implements IHttpClient {
   protected abstract _patch<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   protected abstract _delete<T>(url: string, data?: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
 
-
   public abstract updateHeaders(headers: HeaderOperation[]): void;
 
   // Public API methods
