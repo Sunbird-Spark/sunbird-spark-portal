@@ -15,24 +15,12 @@ vi.mock('@/hooks/useCertificate', () => ({
 }));
 
 const mockCourses = [
-    {
-        courseId: 'course-1',
-        leafNodesCount: 10,
-        contentStatus: { 'c1': 1, 'c2': 2, 'c3': 2, 'c4': 1 }, // 2 in-progress, 2 completed
-    },
-    {
-        courseId: 'course-2',
-        leafNodesCount: 5,
-        contentStatus: { 'c5': 2, 'c6': 1 }, // 1 in-progress, 1 completed
-    },
-    {
-        courseId: 'course-3',
-        leafNodesCount: 8,
-        contentStatus: {}, // no content started
-    },
+    { courseId: 'course-1', status: 1 }, // in progress
+    { courseId: 'course-2', status: 2 }, // completed
+    { courseId: 'course-3', status: 2 }, // completed
 ];
 
-// Expected: totalContents=23, inProgress=3, completed=3
+// Expected: totalCourses=3, inProgress=1, completed=2
 
 describe('HomeStatsCards', () => {
     beforeEach(() => {
@@ -50,20 +38,20 @@ describe('HomeStatsCards', () => {
     it('renders all four stats cards with correct labels and values', () => {
         render(<HomeStatsCards />);
 
-        // Total Contents: sum of leafNodesCount = 10 + 5 + 8 = 23
-        const totalCard = screen.getByText('Total Contents').closest('.home-stat-card');
+        // Total Courses: 3 courses enrolled
+        const totalCard = screen.getByText('Total Courses').closest('.home-stat-card');
         expect(totalCard).toBeInTheDocument();
-        expect(totalCard!.querySelector('.home-stat-value')!.textContent).toBe('23');
+        expect(totalCard!.querySelector('.home-stat-value')!.textContent).toBe('03');
 
-        // Contents in Progress: contentStatus values === 1 => 2 + 1 + 0 = 3
-        const progressCard = screen.getByText('Contents in Progress').closest('.home-stat-card');
+        // Courses in Progress: status === 1 => 1
+        const progressCard = screen.getByText('In Progress').closest('.home-stat-card');
         expect(progressCard).toBeInTheDocument();
-        expect(progressCard!.querySelector('.home-stat-value')!.textContent).toBe('03');
+        expect(progressCard!.querySelector('.home-stat-value')!.textContent).toBe('01');
 
-        // Contents Completed: contentStatus values === 2 => 2 + 1 + 0 = 3
-        const completedCard = screen.getByText('Contents Completed').closest('.home-stat-card');
+        // Courses Completed: status === 2 => 2
+        const completedCard = screen.getByText('Completed').closest('.home-stat-card');
         expect(completedCard).toBeInTheDocument();
-        expect(completedCard!.querySelector('.home-stat-value')!.textContent).toBe('03');
+        expect(completedCard!.querySelector('.home-stat-value')!.textContent).toBe('02');
 
         // Certifications Earned: 2 certificates
         const certsCard = screen.getByText('Certifications Earned').closest('.home-stat-card');
@@ -74,13 +62,13 @@ describe('HomeStatsCards', () => {
     it('applies correct background classes to cards', () => {
         render(<HomeStatsCards />);
 
-        const totalCard = screen.getByText('Total Contents').closest('.home-stat-card');
+        const totalCard = screen.getByText('Total Courses').closest('.home-stat-card');
         expect(totalCard).toHaveClass('bg-sunbird-blue-light');
 
-        const progressCard = screen.getByText('Contents in Progress').closest('.home-stat-card');
+        const progressCard = screen.getByText('In Progress').closest('.home-stat-card');
         expect(progressCard).toHaveClass('bg-sunbird-ginger');
 
-        const completedCard = screen.getByText('Contents Completed').closest('.home-stat-card');
+        const completedCard = screen.getByText('Completed').closest('.home-stat-card');
         expect(completedCard).toHaveClass('bg-sunbird-moss');
 
         const certsCard = screen.getByText('Certifications Earned').closest('.home-stat-card');
@@ -106,9 +94,9 @@ describe('HomeStatsCards', () => {
 
         render(<HomeStatsCards />);
 
-        expect(screen.getByText('Total Contents')).toBeInTheDocument();
-        expect(screen.getByText('Contents in Progress')).toBeInTheDocument();
-        expect(screen.getByText('Contents Completed')).toBeInTheDocument();
+        expect(screen.getByText('Total Courses')).toBeInTheDocument();
+        expect(screen.getByText('In Progress')).toBeInTheDocument();
+        expect(screen.getByText('Completed')).toBeInTheDocument();
         expect(screen.getByText('Certifications Earned')).toBeInTheDocument();
 
         // All values should be "0" (not padded when zero)
@@ -117,11 +105,11 @@ describe('HomeStatsCards', () => {
     });
 
     it('handles undefined/null data gracefully', () => {
-        mockUseUserEnrolledCollections.mockReturnValue({ 
+        mockUseUserEnrolledCollections.mockReturnValue({
             data: undefined,
             isLoading: false,
         });
-        mockUseUserCertificates.mockReturnValue({ 
+        mockUseUserCertificates.mockReturnValue({
             data: undefined,
             isLoading: false,
         });

@@ -201,6 +201,28 @@ describe('CertificateService', () => {
     });
   });
 
+  /* ── removeTemplateFromBatch ── */
+  describe('removeTemplateFromBatch', () => {
+    it('calls patch with correct endpoint and request', async () => {
+      mockPatch.mockResolvedValue({ data: {}, status: 200, headers: {} });
+      const request = {
+        batch: {
+          courseId: 'course-1',
+          batchId: 'batch-1',
+          template: {
+            identifier: 'tmpl-1',
+          },
+        },
+      };
+      await service.removeTemplateFromBatch(request, { 'X-User-ID': 'u1' });
+      expect(mockPatch).toHaveBeenCalledWith(
+        'course/batch/cert/v1/template/remove',
+        { request },
+        { 'X-User-ID': 'u1' }
+      );
+    });
+  });
+
   /* ── searchLogos ── */
   describe('searchLogos', () => {
     it('calls post with createdBy filter when provided', async () => {

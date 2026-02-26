@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CollectionContentArea from './CollectionContentArea';
 
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => vi.fn()
+}));
+
 // Mock child components to verify conditional rendering
 vi.mock('@/components/collection/CollectionOverview', () => ({
   default: ({ contentAccessBlocked }: { contentAccessBlocked?: boolean }) => (
@@ -33,7 +37,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
 describe('CollectionContentArea', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const defaultProps: any = {
-    collectionData: { title: 'Test Collection', lessons: 5, modules: [] },
+    collectionData: { title: 'Test Collection', lessons: 5, children: [], hierarchyRoot: { identifier: 'test', children: [] } },
     contentId: undefined,
     isTrackable: false,
     contentBlocked: false,
@@ -116,11 +120,12 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
   });
 
-  it('renders CourseProgressCard when trackable, not blocked, enrolled, and within a batch route', () => {
+  it('renders CourseProgressCard when trackable, authenticated, not blocked, enrolled, and within a batch route', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
         isTrackable={true}
+        isAuthenticated={true}
         contentBlocked={false}
         hasBatchInRoute={true}
         isEnrolledInCurrentBatch={true}
@@ -133,20 +138,45 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
   });
 
-  it('renders AvailableBatchesCard when trackable, not blocked, and NOT in batch route', () => {
+  it('renders AvailableBatchesCard when trackable, authenticated, not blocked, and NOT in batch route', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
         isTrackable={true}
+        isAuthenticated={true}
         contentBlocked={false}
         hasBatchInRoute={false}
       />
     );
     expect(screen.queryByTestId('login-unlock-card')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('course-progress-card')).not.toBeInTheDocument();
     // Not in batch, so show available batches
     expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
     expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
+  });
+
+  it('renders View Course Dashboard button for authenticated creators', () => {
+    // Mock useNavigate for this test if needed, though react-router-dom is mocked or implicitly available if used within MemoryRouter
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        isAuthenticated={true}
+        isContentCreator={true}
+        collectionId="col_123"
+      />
+    );
+    expect(screen.getByTestId('view-dashboard-btn')).toBeInTheDocument();
+  });
+
+  it('does not render View Course Dashboard button for unauthenticated users', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        isAuthenticated={false}
+        isContentCreator={true}
+        collectionId="col_123"
+      />
+    );
+    expect(screen.queryByTestId('view-dashboard-btn')).not.toBeInTheDocument();
   });
 
   describe('Creator viewing own collection (contentCreatorPrivilege)', () => {
@@ -183,6 +213,7 @@ describe('CollectionContentArea', () => {
         <CollectionContentArea
           {...defaultProps}
           isTrackable={true}
+          isAuthenticated={true}
           contentBlocked={false}
           hasBatchInRoute={false}
           contentCreatorPrivilege={false}

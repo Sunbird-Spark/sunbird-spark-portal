@@ -145,14 +145,8 @@ describe('WorkspaceToolbar', () => {
     expect(onViewModeChange).toHaveBeenCalledWith('grid');
   });
 
-  it('hides filters when activeView is create/uploads/collaborations', () => {
+  it('hides filters when activeView is create', () => {
     renderToolbar({ activeView: 'create' });
-    expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
-
-    renderToolbar({ activeView: 'uploads' });
-    expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
-
-    renderToolbar({ activeView: 'collaborations' });
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
   });
 

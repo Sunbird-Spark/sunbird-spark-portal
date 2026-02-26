@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, beforeEach, it, expect, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AppRoutes from "./AppRoutes";
 
 // --------------------
@@ -15,6 +16,22 @@ vi.mock("./pages/content/CreateContentPage", () => ({ default: () => <div>Create
 vi.mock("./pages/Explore", () => ({ default: () => <div>Explore Page</div> }));
 vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
 vi.mock("./pages/onboarding/OnboardingPage", () => ({ default: () => <div>Onboarding Page</div> }));
+vi.mock("./pages/user-management/UserManagementPage", () => ({ default: () => <div>User Management Page</div> }));
+vi.mock("./pages/profile/Profile", () => ({ default: () => <div>Profile Page</div> }));
+vi.mock("./pages/collection/CollectionDetailPage", () => ({ default: () => <div>Collection Detail Page</div> }));
+vi.mock("./pages/forgotPassword/ForgotPassword", () => ({ default: () => <div>Forgot Password Page</div> }));
+vi.mock("./pages/forgotPassword/PasswordResetSuccess", () => ({ default: () => <div>Password Reset Success Page</div> }));
+vi.mock("./pages/signup/SignUp", () => ({ default: () => <div>Sign Up Page</div> }));
+vi.mock("./pages/helpSupport/HelpSupport", () => ({ default: () => <div>Help Support Page</div> }));
+vi.mock("./pages/helpSupport/HelpCategoryDetail", () => ({ default: () => <div>Help Category Detail Page</div> }));
+vi.mock("./pages/content/ContentPlayerPage", () => ({ default: () => <div>Content Player Page</div> }));
+vi.mock("./pages/content/ContentEditorPage", () => ({ default: () => <div>Content Editor Page</div> }));
+vi.mock("./pages/content/CollectionEditorPage", () => ({ default: () => <div>Collection Editor Page</div> }));
+vi.mock("./pages/myLearning/MyLearning", () => ({ default: () => <div>My Learning Page</div> }));
+vi.mock("./pages/workspace/editors/GenericEditorPage", () => ({ default: () => <div>Generic Editor Page</div> }));
+vi.mock("./pages/content/QumlEditorPage", () => ({ default: () => <div>Quml Editor Page</div> }));
+vi.mock("./pages/workspace/ContentReviewPage", () => ({ default: () => <div>Content Review Page</div> }));
+vi.mock("./pages/courseDashboard/CourseDashboardPage", () => ({ default: () => <div>Course Dashboard Page</div> }));
 
 // --------------------
 // Mock AuthContext
@@ -31,11 +48,16 @@ vi.mock("./hooks/usePermission", () => ({
   usePermissions: () => mockUsePermissions(),
 }));
 
+const createQueryClient = () =>
+  new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
 function renderWithRoute(route: string) {
   return render(
-    <MemoryRouter initialEntries={[route]}>
-      <AppRoutes />
-    </MemoryRouter>
+    <QueryClientProvider client={createQueryClient()}>
+      <MemoryRouter initialEntries={[route]}>
+        <AppRoutes />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 
@@ -129,9 +151,11 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
   });
 
-  it("public: any user can access /admin", () => {
+  it("public: any user can access /admin", async () => {
     renderWithRoute("/admin");
-    expect(screen.getByText("Admin Page")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Admin Page")).toBeInTheDocument();
+    });
   });
 
   it("protected: authenticated content_creator can access /create", () => {

@@ -1,12 +1,13 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiEdit } from "react-icons/fi";
+import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PermissionGate } from "@/rbac/PermissionGate";
 import { Feature } from "@/services/PermissionService";
 import { usePermissions } from "@/hooks/usePermission";
+import { useIsAdmin } from "@/hooks/useUser";
 
 interface HomeSidebarProps {
     activeNav: string;
@@ -58,10 +59,18 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const location = useLocation();
     const isMobile = useIsMobile();
     const { isAuthenticated, isLoading } = usePermissions();
+    const isAdmin = useIsAdmin();
 
     if (isLoading || !isAuthenticated || location.pathname === "/") {
         return null;
     }
+
+    const dynamicMainNavItems = [
+        ...mainNavItems,
+        ...(isAdmin
+            ? [{ id: "user-management", label: "User Management", icon: FiUsers, path: "/user-management" }]
+            : []),
+    ];
 
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
@@ -131,7 +140,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
         >
             <nav className="flex flex-col justify-between h-full pt-[1.875rem] pb-4">
                 {/* Main Nav (Top) */}
-                {renderNavList(mainNavItems)}
+                {renderNavList(dynamicMainNavItems)}
 
                 {/* Bottom Nav (Bottom) */}
                 {renderNavList(bottomNavItems)}

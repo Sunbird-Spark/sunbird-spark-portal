@@ -2,14 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import ForgotPassword from './ForgotPassword';
 import React from 'react';
+import { useSystemSetting } from '@/hooks/useSystemSetting';
 
-// Mock react-router-dom
-vi.mock('react-router-dom', () => ({
-    useNavigate: () => vi.fn()
-}));
-
-// Mock AuthLayout
-vi.mock('@/components/AuthLayout', () => ({
+// Mock AuthLayout (correct path matches the component import)
+vi.mock('@/components/auth/AuthLayout', () => ({
     AuthLayout: ({ children }: any) => <div data-testid="auth-layout">{children}</div>
 }));
 
@@ -22,7 +18,10 @@ vi.mock('@/hooks/useUser', () => ({
 vi.mock('@/hooks/useOtp', () => ({
     useGenerateOtp: vi.fn(() => ({ mutateAsync: vi.fn() })),
     useVerifyOtp: vi.fn(() => ({ mutateAsync: vi.fn() })),
-    useResetPassword: vi.fn(() => ({ mutateAsync: vi.fn() }))
+}));
+
+vi.mock('@/hooks/useSystemSetting', () => ({
+    useSystemSetting: vi.fn(() => ({ data: undefined, isLoading: false })),
 }));
 
 // Mock child components
@@ -51,22 +50,57 @@ describe('ForgotPassword', () => {
         vi.clearAllMocks();
     });
 
-    it('transitions through steps', async () => {
+    it('renders IdentifyUser on step 1', () => {
         render(<ForgotPassword />);
 
-        // Step 1
+        expect(screen.getByTestId('auth-layout')).toBeInTheDocument();
+        expect(screen.getByTestId('identify-btn')).toBeInTheDocument();
+        expect(screen.queryByTestId('delivery-btn')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('verify-otp-comp')).not.toBeInTheDocument();
+    });
+
+    it('transitions to step 2 after IdentifyUser succeeds', async () => {
+        render(<ForgotPassword />);
+
         fireEvent.click(screen.getByTestId('identify-btn'));
 
-        // Step 2
         await waitFor(() => {
             expect(screen.getByTestId('delivery-btn')).toBeInTheDocument();
         });
 
-        fireEvent.click(screen.getByTestId('delivery-btn'));
+        expect(screen.queryByTestId('identify-btn')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('verify-otp-comp')).not.toBeInTheDocument();
+    });
 
-        // Step 3
+    it('transitions to step 3 after OTP delivery is selected', async () => {
+        render(<ForgotPassword />);
+
+        fireEvent.click(screen.getByTestId('identify-btn'));
+        await waitFor(() => expect(screen.getByTestId('delivery-btn')).toBeInTheDocument());
+
+        fireEvent.click(screen.getByTestId('delivery-btn'));
         await waitFor(() => {
             expect(screen.getByTestId('verify-otp-comp')).toBeInTheDocument();
         });
+
+        expect(screen.queryByTestId('identify-btn')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('delivery-btn')).not.toBeInTheDocument();
+    });
+
+    it('renders without error when captcha site key is unavailable', () => {
+        render(<ForgotPassword />);
+
+        expect(screen.getByTestId('identify-btn')).toBeInTheDocument();
+    });
+
+    it('renders without error when captcha site key is available', () => {
+        vi.mocked(useSystemSetting).mockReturnValue({
+            data: { data: { response: { value: 'test-site-key' } } },
+            isLoading: false,
+        } as any);
+
+        render(<ForgotPassword />);
+
+        expect(screen.getByTestId('identify-btn')).toBeInTheDocument();
     });
 });

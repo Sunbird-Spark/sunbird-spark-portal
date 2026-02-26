@@ -73,6 +73,8 @@ export interface WorkspaceItem {
   primaryCategory: string;
   contentType: string;
   mimeType: string;
+  framework: string;
+  contentStatus: string;
 }
 
 export interface FacetValue {
@@ -110,6 +112,7 @@ export interface ContentSearchItem {
   appIcon?: string;
   primaryCategory?: string;
   contentType?: string;
+  framework?: string;
 }
 
 export interface ContentSearchResponse {

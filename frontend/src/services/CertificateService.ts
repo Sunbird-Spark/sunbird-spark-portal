@@ -1,74 +1,23 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 import type { Certificate, CertificateSearchResponse } from '../components/collection/certificate/types';
+import type {
+  CertSignatory,
+  CertTemplateSummary,
+  CreateAssetRequest,
+  AssetCreateResponse,
+  AddTemplateRequest,
+  RemoveTemplateRequest,
+} from './CertificateTypes';
 
 export type { Certificate, CertificateSearchResponse };
-
-export interface CertSignatory {
-  name: string;
-  designation: string;
-  id: string;
-  /** base64 or URL — always required by the API */
-  image: string;
-}
-
-export interface CertTemplateSummary {
-  identifier: string;
-  name: string;
-  previewUrl?: string;
-  artifactUrl?: string;
-  downloadUrl?: string;
-  issuer?: { name: string; url: string };
-  signatoryList?: CertSignatory[];
-}
-
-export interface CreateAssetRequest {
-  name: string;
-  code: string;
-  mimeType: 'image/svg+xml';
-  license: string;
-  primaryCategory: 'Certificate Template';
-  mediaType: 'image';
-  certType: 'cert template';
-  channel: string;
-  issuer: { name: string; url: string };
-  signatoryList: Array<{
-    name: string;
-    designation: string;
-    id: string;
-    /** Always required — pass base64 dataURL or CDN URL; never omit */
-    image: string;
-  }>;
-}
-
-export interface AssetCreateResponse {
-  identifier: string;
-  node_id: number;
-  versionKey: string;
-}
-
-export interface AddTemplateRequest {
-  batch: {
-    courseId: string;
-    batchId: string;
-    template: {
-      identifier: string;
-      criteria: {
-        enrollment?: { status: number };
-        user?: { rootOrgId: string };
-      };
-      name: string;
-      issuer: { name: string; url: string };
-      previewUrl: string;
-      signatoryList: Array<{
-        name: string;
-        designation: string;
-        id: string;
-        /** Always required by the API — pass empty string if no image */
-        image: string;
-      }>;
-    };
-  };
-}
+export type {
+  CertSignatory,
+  CertTemplateSummary,
+  CreateAssetRequest,
+  AssetCreateResponse,
+  AddTemplateRequest,
+  RemoveTemplateRequest,
+};
 
 export class CertificateService {
   /** Create the certificate asset record (SVG template) */
@@ -156,10 +105,13 @@ export class CertificateService {
         formData,
         sanitizedHeaders
       );
-      
+
       return response;
-    } catch (error: any) {
-      throw new Error(error.message || 'Upload failed');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || 'Upload failed');
+      }
+      throw new Error('Upload failed');
     }
   }
 
@@ -175,6 +127,18 @@ export class CertificateService {
     );
   }
 
+  /** Remove the certificate template from the batch */
+  async removeTemplateFromBatch(
+    request: RemoveTemplateRequest,
+    headers?: Record<string, string>
+  ): Promise<ApiResponse<unknown>> {
+    return getClient().patch<unknown>(
+      'course/batch/cert/v1/template/remove',
+      { request },
+      headers
+    );
+  }
+
   /** Search for image assets (logos/signatures already uploaded) in the org.
    *  Pass `createdBy` to filter to the current user's own uploads (My Images tab).
    *  Omit it to get all org images (All Images tab).
@@ -182,7 +146,7 @@ export class CertificateService {
   async searchLogos(
     channel: string,
     createdBy?: string
-  ): Promise<ApiResponse<{ count: number; content: any[] }>> {
+  ): Promise<ApiResponse<{ count: number; content: unknown[] }>> {
     const filters: Record<string, unknown> = {
       mediaType: ['image'],
       contentType: ['Asset'],
@@ -193,7 +157,7 @@ export class CertificateService {
     };
     if (createdBy) filters.createdBy = createdBy;
 
-    return getClient().post<{ count: number; content: any[] }>(
+    return getClient().post<{ count: number; content: unknown[] }>(
       '/content/v1/search',
       {
         request: {
@@ -209,14 +173,13 @@ export class CertificateService {
   /** Fetch the full details of a single cert template (includes signatoryList.image) */
   async readCertTemplate(
     identifier: string
-  ): Promise<ApiResponse<{ content: any }>> {
-    return getClient().get<{ content: any }>(
+  ): Promise<ApiResponse<{ content: unknown }>> {
+    return getClient().get<{ content: unknown }>(
       `/content/v1/read/${identifier}?fields=signatoryList,issuer,artifactUrl,name,identifier`
     );
   }
 
   /** Search existing certificate templates in the org */
-
   async searchCertTemplates(
     channel: string
   ): Promise<ApiResponse<{ count: number; content: CertTemplateSummary[] }>> {
@@ -247,8 +210,29 @@ export class CertificateService {
       }
     );
   }
-
-  public async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
+  /**
+   * Re-issue a certificate for one or more users.
+   * POST /certreg/v1/cert/reissue
+   */
+  async reissueCertificate(params: {
+    courseId: string;
+    batchId: string;
+    userIds: string[];
+    createdBy: string;
+  }): Promise<ApiResponse<unknown>> {
+    return getClient().post<unknown>(
+      '/course/batch/cert/v1/issue?reIssue=true',
+      {
+        request: {
+          courseId: params.courseId,
+          batchId: params.batchId,
+          userIds: params.userIds,
+          createdBy: params.createdBy,
+        },
+      }
+    );
+  }
+  async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
     return getClient().post<CertificateSearchResponse>('/rc/certificate/v1/search', {
       filters: {
         recipient: {
@@ -259,6 +243,11 @@ export class CertificateService {
       },
     });
   }
-}
 
+  public async downloadCertificate(certificateId: string): Promise<ApiResponse<any>> {
+    return getClient().get<any>(`/rc/certificate/v1/download/${certificateId}`, {
+      Accept: 'image/svg+xml'
+    });
+  }
+}
 export const certificateService = new CertificateService();

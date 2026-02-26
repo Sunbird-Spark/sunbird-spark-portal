@@ -25,6 +25,9 @@ import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
 import ContentReviewPage from './pages/workspace/ContentReviewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
+import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
+import UserManagementPage from './pages/user-management/UserManagementPage';
+
 
 const AppRoutes: React.FC = () => {
   return (
@@ -49,6 +52,7 @@ const AppRoutes: React.FC = () => {
           <Route path=":collectionId/batch/:batchId" element={<CollectionDetailPage />}>
             <Route path="content/:contentId" element={null} />
           </Route>
+          <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardPage />} />
         </Route>
 
         {/* Public admin routes */}
@@ -56,6 +60,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/reports" element={<ReportsPage />} />
 
         {/* Protected routes */}
+        <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/workspace" element={
           <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
             <WorkspacePage />

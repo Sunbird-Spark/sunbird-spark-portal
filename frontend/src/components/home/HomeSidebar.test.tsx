@@ -4,6 +4,7 @@ import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import HomeSidebar from './HomeSidebar';
 import { useLocation } from 'react-router-dom';
 import { usePermissions } from '@/hooks/usePermission';
+import { useIsAdmin } from '@/hooks/useUser';
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -23,6 +24,12 @@ vi.mock('@/hooks/usePermission', () => ({
 // Mock useIsMobile to safely test desktop behavior
 vi.mock("@/hooks/use-mobile", () => ({
     useIsMobile: () => false,
+}));
+
+// Mock useIsAdmin — defaults to false (non-admin) so User Management link is hidden
+vi.mock('@/hooks/useUser', () => ({
+    useIsAdmin: vi.fn(),
+    useIsContentCreator: vi.fn(),
 }));
 
 describe('HomeSidebar', () => {
@@ -53,6 +60,7 @@ describe('HomeSidebar', () => {
             refetch: vi.fn(),
         });
         vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
+        vi.mocked(useIsAdmin).mockReturnValue(false);
     });
 
 
