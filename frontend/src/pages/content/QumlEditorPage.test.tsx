@@ -44,13 +44,24 @@ vi.mock('@/hooks/useUserRead', () => ({
 }));
 
 vi.mock('@/hooks/useEditorLock', () => ({
-  useEditorLock: () => ({
-    editorMode: 'edit',
-    isEditMode: true,
-    lockError: null,
-    isLocking: false,
-    retireLock: mockRetireLock,
-  }),
+  useEditorLock: ({ metadata }: { metadata: any }) => {
+    const status = metadata?.status;
+    let editorMode: 'edit' | 'read' | 'review' = 'edit';
+    
+    if (status === 'FlagReview' || status === 'FlagDraft' || status === 'Processing') {
+      editorMode = 'read';
+    } else if (status === 'Review') {
+      editorMode = 'review';
+    }
+    
+    return {
+      editorMode,
+      isEditMode: editorMode === 'edit',
+      lockError: null,
+      isLocking: false,
+      retireLock: mockRetireLock,
+    };
+  },
 }));
 
 vi.mock('@/components/common/PageLoader', () => ({
