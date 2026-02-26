@@ -7,11 +7,11 @@ const tncService = new TncService();
 export const useAcceptTnc = (): UseMutationResult<
   ApiResponse<AcceptTncResponse>,
   Error,
-  { tncConfig: any; identifier: string }
+  { tncConfig: any; identifier?: string; tncType?: string }
 > => {
   return useMutation({
-    mutationFn: ({ tncConfig, identifier }: { tncConfig: any; identifier: string }) =>
-      tncService.acceptTnc(tncConfig, identifier),
+    mutationFn: ({ tncConfig, identifier, tncType }: { tncConfig: any; identifier?: string; tncType?: string }) =>
+      tncService.acceptTnc(tncConfig, identifier, tncType),
   });
 };
 

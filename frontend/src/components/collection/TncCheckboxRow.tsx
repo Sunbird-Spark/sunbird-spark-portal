@@ -7,12 +7,21 @@ import { useGetTncUrl } from "@/hooks/useTnc";
 interface TncCheckboxRowProps {
   checked: boolean;
   onCheckedChange: (checked: boolean | "indeterminate") => void;
+  /** System setting key to fetch TnC config from. Defaults to 'tncConfig'. */
+  settingKey?: string;
+  /** Trailing label text after "I accept the Terms & Conditions". */
+  label?: string;
 }
 
-/** T&C checkbox for the Create Batch modal.
- *  Clicking "Terms & Conditions" opens the TermsAndConditionsDialog. */
-export const TncCheckboxRow = ({ checked, onCheckedChange }: TncCheckboxRowProps) => {
-  const { data: tncConfig, isSuccess } = useSystemSetting("tncConfig");
+/** T&C checkbox row. Clicking "Terms & Conditions" opens the TermsAndConditionsDialog.
+ *  Use `settingKey` to target a specific TnC config (e.g. 'orgAdminTnc', 'reportViewerTnc'). */
+export const TncCheckboxRow = ({
+  checked,
+  onCheckedChange,
+  settingKey = "tncConfig",
+  label = "for creating this batch.",
+}: TncCheckboxRowProps) => {
+  const { data: tncConfig, isSuccess } = useSystemSetting(settingKey);
   const { data: termsUrl } = useGetTncUrl(isSuccess ? tncConfig : null);
 
   return (
@@ -45,7 +54,7 @@ export const TncCheckboxRow = ({ checked, onCheckedChange }: TncCheckboxRowProps
         ) : (
           <span className="font-medium">Terms &amp; Conditions</span>
         )}{" "}
-        for creating this batch.
+        {label}
         <span className="text-red-500 ml-0.5">*</span>
       </span>
     </label>

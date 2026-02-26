@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FiShield } from "react-icons/fi";
+import { FiShield, FiLoader } from "react-icons/fi";
 import {
   Sheet,
   SheetContent,
@@ -8,7 +8,6 @@ import {
 import Header from "@/components/home/Header";
 import HomeSidebar from "@/components/home/HomeSidebar";
 import Footer from "@/components/home/Footer";
-// Imports like Input, Select, PageLoader moved to RoleManagementTab
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/useToast";
 import { useSidebarState } from "@/hooks/useSidebarState";
@@ -17,9 +16,10 @@ import {
   type RoleItem,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
-import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
-import { useGetTncUrl } from "@/hooks/useTnc";
+import { useAcceptTnc } from "@/hooks/useTnc";
+import { cn } from "@/lib/utils";
 import "../home/home.css";
 import "./user-management.css";
 
@@ -33,7 +33,6 @@ type UMTab = {
 
 const UM_TABS: UMTab[] = [
   { id: "role-management", label: "Change User Roles", icon: FiShield },
-  // Add more tabs here as needed
 ];
 
 /* ── Main Page ───────────────────────────────────────────────────────────── */
@@ -46,9 +45,11 @@ const UserManagementPage = () => {
 
   const [activeTab, setActiveTab] = useState<string>(UM_TABS[0]?.id ?? "role-management");
   const [availableRoles, setAvailableRoles] = useState<RoleItem[]>([]);
+  const [tncChecked, setTncChecked] = useState(false);
+  const [orgTncAccepted, setOrgTncAccepted] = useState(false);
 
-  const { data: tncConfig, isSuccess: isTncConfigSuccess } = useSystemSetting('tncConfig');
-  const { data: termsUrl } = useGetTncUrl(isTncConfigSuccess ? tncConfig : null);
+  const { data: orgAdminTncConfig, isSuccess: isOrgTncSuccess } = useSystemSetting('orgAdminTnc');
+  const acceptTncMutation = useAcceptTnc();
 
   const loadRoles = useCallback(async () => {
     try {
@@ -62,12 +63,25 @@ const UserManagementPage = () => {
 
   useEffect(() => { loadRoles(); }, [loadRoles]);
 
+  const handleAcceptOrgTnc = async () => {
+    if (!tncChecked || !isOrgTncSuccess || !orgAdminTncConfig) return;
+    try {
+      await acceptTncMutation.mutateAsync({
+        tncConfig: orgAdminTncConfig,
+        tncType: 'orgAdminTnc',
+      });
+      setOrgTncAccepted(true);
+      toast({ title: "Terms accepted", description: "You can now use User Management features." });
+    } catch {
+      toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="workspace-container">
       <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
 
       <div className="flex flex-1 relative transition-all">
-        {/* App navigation sidebar (Home / Workspace / etc.) */}
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
@@ -89,22 +103,34 @@ const UserManagementPage = () => {
               {/* ── Page header ── */}
               <div className="um-page-header">
                 <h1 className="um-page-title">User Management</h1>
-                <p className="text-xs text-sunbird-gray-75 mt-1 font-['Rubik']">
-                  By using User Management features, you acknowledge and accept the{" "}
-                  {termsUrl ? (
-                    <TermsAndConditionsDialog termsUrl={termsUrl} title="Terms &amp; Conditions">
+
+                {/* ── Org Admin TnC acceptance (shown until accepted) ── */}
+                {!orgTncAccepted && (
+                  <div className="mt-3 rounded-lg bg-gray-50 border border-border p-4 space-y-3">
+                    <TncCheckboxRow
+                      checked={tncChecked}
+                      onCheckedChange={(v) => setTncChecked(!!v)}
+                      settingKey="orgAdminTnc"
+                      label="to use User Management features."
+                    />
+                    <div className="flex justify-end">
                       <button
                         type="button"
-                        className="underline text-sunbird-brick hover:opacity-80 font-medium"
+                        disabled={!tncChecked || acceptTncMutation.isPending}
+                        onClick={handleAcceptOrgTnc}
+                        className={cn(
+                          "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors",
+                          !tncChecked || acceptTncMutation.isPending
+                            ? "bg-sunbird-brick/40 cursor-not-allowed"
+                            : "bg-sunbird-brick hover:bg-opacity-90"
+                        )}
                       >
-                        Terms &amp; Conditions
+                        {acceptTncMutation.isPending && <FiLoader className="w-4 h-4 animate-spin" />}
+                        {acceptTncMutation.isPending ? "Accepting…" : "Accept & Continue"}
                       </button>
-                    </TermsAndConditionsDialog>
-                  ) : (
-                    <span className="font-medium text-sunbird-obsidian">Terms &amp; Conditions</span>
-                  )}
-                  .
-                </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* ── Top Tabs layout ── */}
