@@ -105,7 +105,7 @@ export default function ContentNameDialog({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={`Enter ${optionTitle?.toLowerCase() || "content"} name`}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick mb-4"
             autoFocus
             disabled={isLoading}
           />
@@ -130,7 +130,7 @@ export default function ContentNameDialog({
               <select
                 value={collectionType}
                 onChange={(e) => setCollectionType(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4 bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick mb-4 bg-white"
                 disabled={isLoading}
               >
                 <option value="" disabled>{t('workspace.selectCollectionType')}</option>

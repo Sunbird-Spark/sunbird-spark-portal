@@ -35,17 +35,34 @@ const mockCollectionData: CollectionData = {
   units: 2,
   description: 'A comprehensive course description for testing.',
   audience: ['Student', 'Developer'],
-  modules: [
+  children: [
     {
-      id: 'mod-1',
-      title: 'Introduction Unit',
-      subtitle: 'Getting started',
-      lessons: [
-        { id: 'l1', title: 'Lesson 1', type: 'video' },
-        { id: 'l2', title: 'Lesson 2', type: 'document' },
+      identifier: 'mod-1',
+      name: 'Introduction Unit',
+      primaryCategory: 'Getting started',
+      mimeType: 'application/vnd.ekstep.content-collection',
+      children: [
+        { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+        { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
       ],
     },
   ],
+  hierarchyRoot: {
+    identifier: 'col-1',
+    mimeType: 'application/vnd.ekstep.content-collection',
+    children: [
+      {
+        identifier: 'mod-1',
+        name: 'Introduction Unit',
+        primaryCategory: 'Getting started',
+        mimeType: 'application/vnd.ekstep.content-collection',
+        children: [
+          { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+          { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
+        ],
+      },
+    ],
+  },
 };
 
 const mockPlayerMetadata = {

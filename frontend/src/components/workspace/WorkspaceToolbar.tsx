@@ -1,20 +1,10 @@
 import { FiPlus, FiGrid, FiList, FiChevronDown } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/common/DropdownMenu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/common/DropdownMenu";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import {
-  getCreatorSegments,
-  getReviewerSegments,
-  getSecondaryActions,
-  shouldShowContentFilters,
-} from "@/services/workspace";
+import { getCreatorSegments, getReviewerSegments, getSecondaryActions, shouldShowContentFilters} from "@/services/workspace";
 import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
 
 interface WorkspaceToolbarProps {
@@ -101,11 +91,7 @@ const WorkspaceToolbar = ({
 
         <div className="flex items-center gap-3 sm:ml-auto">
           {userRole === 'creator' && (
-            <Button
-              onClick={onCreateClick}
-              size="lg"
-              className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik rounded-2xl shadow-lg px-6"
-            >
+            <Button onClick={onCreateClick} size="lg" className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik rounded-2xl shadow-lg px-6">
               <FiPlus className="w-5 h-5 mr-2" />
               {t('createNew')}
             </Button>
@@ -223,27 +209,36 @@ const WorkspaceToolbar = ({
         </div>
       </div>
 
-      {/* Stats Row - Quick glance */}
+      {/* Stats Row */}
       {userRole === 'creator' && showContentFilters && (
         <div className="flex items-center gap-6 px-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.published}</span> {t('published')}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.review}</span> {t('workspace.inReview')}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-gray-400" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.drafts}</span> {t('drafts')}
-            </span>
-          </div>
+          {activeView === 'all' && (<>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.published}</span> Published
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.review}</span> In Review
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gray-400" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.drafts}</span> Drafts
+                </span>
+              </div>
+          </>)}
+          {/* Section titles for secondary views */}
+          {activeView === 'uploads' && (
+            <span className="text-sm font-semibold font-rubik text-foreground">All Uploads</span>
+          )}
+          {activeView === 'collaborations' && (
+            <span className="text-sm font-semibold font-rubik text-foreground">My Collaborations</span>
+          )}
           {contentCount !== undefined && (
             <span className="text-sm text-muted-foreground font-rubik ml-auto">
               {totalCount !== undefined && totalCount > contentCount!

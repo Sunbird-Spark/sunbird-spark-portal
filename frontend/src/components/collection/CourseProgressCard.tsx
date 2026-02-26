@@ -49,7 +49,7 @@ const CourseProgressCard = ({
 
   return (
     <div
-      className="font-rubik w-full max-w-[21.875rem] rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col gap-3"
+      className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col gap-3"
       data-testid="course-progress-card"
     >
       <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] text-sunbird-status-ongoing-text">

@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { FiLayout } from "react-icons/fi";
+import { Button } from "@/components/common/Button";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
@@ -81,6 +84,7 @@ export default function CollectionContentArea({
   contentCreatorPrivilege = false,
 }: CollectionContentAreaProps) {
   const { t } = useAppI18n();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -94,13 +98,12 @@ export default function CollectionContentArea({
         <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-[1fr_340px] gap-8 lg:items-start">
+      <div className="grid lg:grid-cols-[1fr_23.75rem] gap-8 lg:items-start">
         {/* Left Column */}
         <CollectionOverview
           collectionData={collectionData}
           contentId={contentId}
-          contentAccessBlocked={isTrackable && (contentBlocked || (!isEnrolledInCurrentBatch && !contentCreatorPrivilege))}
+          contentAccessBlocked={contentBlocked}
           playerMetadata={playerMetadata}
           playerIsLoading={playerIsLoading}
           playerError={playerError ?? null}
@@ -108,16 +111,28 @@ export default function CollectionContentArea({
           onTelemetryEvent={handleTelemetryEvent}
         />
 
-        <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-3 custom-scrollbar">
-          {/* Creator: Batch management card — only when viewing own collection */}
-          {isAuthenticated && isContentCreator && collectionId && isCreatorViewingOwnCollection && (
-            <div className="flex-shrink-0 mb-4">
-              <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
+        {/* Right Sidebar */}
+        <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 custom-scrollbar">
+          {/* Creator: Dashboard link & Batch management card */}
+          {isAuthenticated && isContentCreator && collectionId && (
+            <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 font-['Rubik'] text-sunbird-brick border-sunbird-brick hover:bg-sunbird-brick/5 bg-white shadow-sm"
+                onClick={() => navigate(`/collection/${collectionId}/dashboard/batches`)}
+                data-testid="view-dashboard-btn"
+              >
+                <FiLayout className="w-4 h-4" />
+                View Course Dashboard
+              </Button>
+              {isCreatorViewingOwnCollection && (
+                <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
+              )}
             </div>
           )}
 
-          {/* Learner: Login gate */}
-          {contentBlocked && (
+          {/* Learner: Login gate — only when trackable and not authenticated */}
+          {contentBlocked && !isAuthenticated && (
             <div className="flex-shrink-0 mb-4">
               <LoginToUnlockCard />
             </div>
@@ -135,17 +150,17 @@ export default function CollectionContentArea({
             <CollectionSidebar
               collectionId={collectionId ?? ''}
               batchId={hasBatchInRoute ? batchIdParam ?? null : null}
-              modules={collectionData.modules}
-              expandedModules={expandedModules}
-              toggleModule={toggleModule}
-              activeLessonId={contentId ?? null}
+              children={collectionData.children ?? []}
+              expandedMainUnitIds={expandedModules}
+              toggleMainUnit={toggleModule}
+              activeContentId={contentId ?? null}
               contentBlocked={contentBlocked}
               contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentStatusMap : undefined}
             />
           </div>
 
-          {/* Learner: Batch join + Certificate (hidden when content creator privilege) */}
-          {isTrackable && !contentBlocked && !contentCreatorPrivilege && (
+          {/* Learner: Batch join + Certificate — show when trackable and authenticated learner (so they can join); hidden for content creators */}
+          {isTrackable && isAuthenticated && !contentCreatorPrivilege && (
             <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
               {!hasBatchInRoute && (
                 <AvailableBatchesCard

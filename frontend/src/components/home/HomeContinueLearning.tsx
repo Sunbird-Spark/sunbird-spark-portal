@@ -3,6 +3,7 @@ import { FiArrowRight } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { useCollection } from "@/hooks/useCollection";
+import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import type { TrackableCollection } from "@/types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -58,7 +59,9 @@ const HomeContinueLearning = () => {
 
     // Determine the content ID to navigate to
     const contentId = lastAccessedCourse.lastReadContentId
-        ?? collectionData?.modules[0]?.lessons[0]?.id;
+        ?? getFirstLeafContentIdFromHierarchy(collectionData?.hierarchyRoot ?? null);
+
+    if (!contentId) return null;
 
     const continueTo = `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
 

@@ -7,6 +7,10 @@ import EmptyState from "@/components/workspace/EmptyState";
 import { Button } from "@/components/common/Button";
 import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
 
+export interface LockedContentMap {
+  [contentId: string]: { creatorName: string };
+}
+
 interface WorkspacePageContentProps {
   showCreateModal: boolean;
   activeView: string;
@@ -19,6 +23,7 @@ interface WorkspacePageContentProps {
   isError: boolean;
   error: Error | null;
   userRole: UserRole;
+  lockedContentMap?: LockedContentMap;
   onLoadMore: () => void;
   onRetry: () => void;
   onCreateOption: (optionId: string) => void;
@@ -47,34 +52,13 @@ export default function WorkspacePageContent({
   onDelete,
   onView,
   userRole,
+  lockedContentMap = {},
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
       <div className="bg-white rounded-[1.25rem] p-6 shadow-sm border border-border">
         <CreateOptions onOptionSelect={onCreateOption} />
       </div>
-    );
-  }
-  if (activeView === 'uploads') {
-    return (
-      <EmptyState
-        title={t('noUploadsYet')}
-        description={t('uploadHere')}
-        actionLabel={t('uploadContent')}
-        onAction={() => onCreateOption('upload-content')}
-        icon={FiUpload}
-        variant="uploads"
-      />
-    );
-  }
-  if (activeView === 'collaborations') {
-    return (
-      <EmptyState
-        title={t('noCollaborations')}
-        description={t('sharedWithYou')}
-        icon={FiUsers}
-        variant="collaborations"
-      />
     );
   }
 
@@ -111,17 +95,26 @@ export default function WorkspacePageContent({
   const pageTitleMap: Record<string, { title: string; desc: string }> = {
     'pending-review': { title: t('workspace.noContentsToReview'), desc: t('workspace.noContentsToReviewDesc') },
     'my-published': { title: t('workspace.noPublishedContents'), desc: t('workspace.noPublishedContentsDesc') },
+    'uploads': { title: "No uploads yet", desc: "Upload PDF, video, or other content files to get started." },
+    'collaborations': { title: "No collaborations", desc: "Content shared with you will appear here." },
   };
 
   // Empty state
   if (filteredItems.length === 0) {
-    if (userRole === 'reviewer' && pageTitleMap[activeView]) {
+    if (pageTitleMap[activeView]) {
       const { title, desc } = pageTitleMap[activeView];
       return (
         <EmptyState
           title={title}
           description={desc}
           variant="default"
+          {...(activeView === 'uploads' ? { 
+            actionLabel: t('uploadContent'),
+            onAction: () => onCreateOption('upload-pdf'),
+            icon: FiUpload
+          } : activeView === 'collaborations' ? {
+            icon: FiUsers
+          } : {})}
         />
       );
     }
@@ -145,6 +138,7 @@ export default function WorkspacePageContent({
             <WorkspaceContentCard
               key={item.id}
               item={item}
+              lockInfo={lockedContentMap[item.id]}
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
@@ -154,6 +148,7 @@ export default function WorkspacePageContent({
       ) : (
         <WorkspaceContentList
           items={filteredItems}
+          lockedContentMap={lockedContentMap}
           onEdit={onEdit}
           onDelete={onDelete}
           onView={onView}
