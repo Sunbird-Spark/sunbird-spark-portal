@@ -32,7 +32,9 @@ export const TncCheckboxRow = ({
   const { data: termsUrl } = useGetTncUrl(tncConfig || null);
 
   return (
-    <label htmlFor="acceptTerms" className="flex items-center gap-3 cursor-pointer select-none">
+    // Outer div (not a label) so the T&C button is never inside a <label>.
+    // Label activation (htmlFor → checkbox) is confined to the plain-text spans only.
+    <div className="flex items-center gap-3 select-none">
       <Checkbox.Root
         id="acceptTerms"
         checked={checked}
@@ -46,13 +48,16 @@ export const TncCheckboxRow = ({
       </Checkbox.Root>
 
       <span className="text-sm text-foreground font-['Rubik']">
-        I accept the{" "}
+        {/* Clicking "I accept the" text toggles the checkbox */}
+        <label htmlFor="acceptTerms" className="cursor-pointer">I accept the{" "}</label>
         {termsUrl ? (
           onTermsClick ? (
+            // Plain button — NOT inside a <label>, so it cannot accidentally
+            // re-dispatch to the checkbox via browser label-activation.
             <button
               type="button"
               aria-label="Terms &amp; Conditions"
-              onClick={(e) => { e.stopPropagation(); onTermsClick(); }}
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); onTermsClick(); }}
               className="underline text-sunbird-brick hover:opacity-80 font-medium"
             >
               Terms &amp; Conditions
@@ -62,7 +67,6 @@ export const TncCheckboxRow = ({
               <button
                 type="button"
                 aria-label="Terms &amp; Conditions"
-                onClick={(e) => e.stopPropagation()}
                 className="underline text-sunbird-brick hover:opacity-80 font-medium"
               >
                 Terms &amp; Conditions
@@ -71,10 +75,14 @@ export const TncCheckboxRow = ({
           )
         ) : (
           <span className="font-medium">Terms &amp; Conditions</span>
-        )}{" "}
-        {label}
-        <span className="text-red-500 ml-0.5">*</span>
+        )}
+        {/* Clicking the trailing label text also toggles the checkbox */}
+        {" "}
+        <label htmlFor="acceptTerms" className="cursor-pointer">
+          {label}
+          <span className="text-red-500 ml-0.5">*</span>
+        </label>
       </span>
-    </label>
+    </div>
   );
 };
