@@ -54,32 +54,6 @@ class UserProfileService {
         }
         return this.channel || '';
     }
-
-    /**
-     * Get the channel synchronously. Returns empty string if not initialized.
-     * Use this in editors after workspace initialization is complete.
-     */
-    getChannelSync(): string {
-        if (!this.isInitialized) {
-            console.warn('UserProfileService: getChannelSync called before initialization');
-        }
-        return this.channel || '';
-    }
-
-    /**
-     * Check if the service has been initialized
-     */
-    isReady(): boolean {
-        return this.isInitialized;
-    }
-
-    /**
-     * Reset the service state. Useful for logout or user switching.
-     */
-    reset(): void {
-        this.channel = null;
-        this.isInitialized = false;
-    }
 }
 
 export default UserProfileService.getInstance();

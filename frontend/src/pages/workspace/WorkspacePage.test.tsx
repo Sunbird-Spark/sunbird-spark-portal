@@ -65,9 +65,6 @@ vi.mock('@/hooks/useChannel', () => ({ useChannel: () => ({ data: undefined }) }
 vi.mock('@/services/UserProfileService', () => ({
   default: {
     initialize: vi.fn().mockResolvedValue(undefined),
-    getChannelSync: vi.fn().mockReturnValue('test-channel'),
-    isReady: vi.fn().mockReturnValue(true),
-    reset: vi.fn(),
   },
 }));
 

@@ -33,9 +33,11 @@ describe('UserProfileService', () => {
     vi.clearAllMocks();
     // Reset getUserId mock to default value
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
-    // Get singleton instance and reset it
+    // Get singleton instance
     service = UserProfileService.getInstance();
-    service.reset();
+    // Reset internal state by re-initializing
+    (service as any).isInitialized = false;
+    (service as any).channel = null;
   });
 
   describe('initialize', () => {
@@ -46,8 +48,6 @@ describe('UserProfileService', () => {
 
       await service.initialize();
 
-      expect(service.isReady()).toBe(true);
-      expect(service.getChannelSync()).toBe('org-channel');
       expect(mocks.userRead).toHaveBeenCalledWith('user-123');
     });
 
@@ -68,8 +68,6 @@ describe('UserProfileService', () => {
 
       await service.initialize();
 
-      expect(service.isReady()).toBe(true);
-      expect(service.getChannelSync()).toBe('');
       expect(mocks.userRead).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(
         'UserProfileService: No userId available for initialization'
@@ -81,10 +79,8 @@ describe('UserProfileService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mocks.userRead.mockRejectedValue(new Error('network error'));
 
-      // Service catches errors internally and throws them
       await expect(service.initialize()).rejects.toThrow('network error');
 
-      expect(service.isReady()).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith(
         'UserProfileService: Failed to initialize user profile:',
         expect.any(Error)
@@ -116,7 +112,6 @@ describe('UserProfileService', () => {
       const channel = await service.getChannel();
 
       expect(channel).toBe('auto-init-channel');
-      expect(service.isReady()).toBe(true);
     });
 
     it('should return empty string when channel is null', async () => {
@@ -128,105 +123,15 @@ describe('UserProfileService', () => {
 
       expect(channel).toBe('');
     });
-  });
 
-  describe('getChannelSync', () => {
-    it('should return channel synchronously after initialization', async () => {
-      mocks.userRead.mockResolvedValue({
-        data: { response: { channel: 'sync-channel' } },
-      });
-
-      await service.initialize();
-      const channel = service.getChannelSync();
-
-      expect(channel).toBe('sync-channel');
-    });
-
-    it('should return empty string before initialization', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
-      const channel = service.getChannelSync();
-
-      expect(channel).toBe('');
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'UserProfileService: getChannelSync called before initialization'
-      );
-      consoleSpy.mockRestore();
-    });
-
-    it('should return empty string when channel is null', async () => {
+    it('should return empty string when channel is undefined', async () => {
       mocks.userRead.mockResolvedValue({
         data: { response: {} },
       });
 
-      await service.initialize();
-      const channel = service.getChannelSync();
+      const channel = await service.getChannel();
 
       expect(channel).toBe('');
-    });
-  });
-
-  describe('isReady', () => {
-    it('should return false before initialization', () => {
-      expect(service.isReady()).toBe(false);
-    });
-
-    it('should return true after initialization', async () => {
-      mocks.userRead.mockResolvedValue({
-        data: { response: { channel: 'test' } },
-      });
-
-      await service.initialize();
-
-      expect(service.isReady()).toBe(true);
-    });
-
-    it('should return true even after failed initialization', async () => {
-      mocks.userRead.mockRejectedValue(new Error('fail'));
-      vi.spyOn(console, 'error').mockImplementation(() => {});
-
-      try {
-        await service.initialize();
-      } catch (e) {
-        // Expected to throw
-      }
-
-      expect(service.isReady()).toBe(true);
-    });
-  });
-
-  describe('reset', () => {
-    it('should clear channel and reset initialization state', async () => {
-      mocks.userRead.mockResolvedValue({
-        data: { response: { channel: 'first-channel' } },
-      });
-
-      await service.initialize();
-      expect(service.isReady()).toBe(true);
-      expect(service.getChannelSync()).toBe('first-channel');
-
-      service.reset();
-
-      expect(service.isReady()).toBe(false);
-      expect(service.getChannelSync()).toBe('');
-    });
-
-    it('should allow re-initialization after reset', async () => {
-      mocks.userRead.mockResolvedValue({
-        data: { response: { channel: 'first-channel' } },
-      });
-
-      await service.initialize();
-      service.reset();
-
-      mocks.userRead.mockResolvedValue({
-        data: { response: { channel: 'second-channel' } },
-      });
-
-      await service.initialize();
-
-      expect(service.getChannelSync()).toBe('second-channel');
-      expect(mocks.userRead).toHaveBeenCalledTimes(2);
     });
   });
 });
