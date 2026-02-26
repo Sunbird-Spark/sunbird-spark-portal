@@ -15,7 +15,6 @@ import { useToast } from '@/hooks/useToast';
 import ChecklistDialog from '@/components/workspace/ChecklistDialog';
 import PublishWarningDialog from '@/components/workspace/PublishWarningDialog';
 import ReviewPageHeader from '@/components/workspace/ReviewPageHeader';
-import ContentMetadata from '@/components/workspace/ContentMetadata';
 import ContentPlayerSection from '@/components/workspace/ContentPlayerSection';
 import reviewCommentService from '@/services/ReviewCommentService';
 import './ContentReviewPage.css';
@@ -31,6 +30,15 @@ const ReviewPageLayout = ({ children }: { children: React.ReactNode }) => (
     <Footer />
   </div>
 );
+
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return 'N/A';
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 
 const ContentReviewPage = () => {
   const { contentId } = useParams();
@@ -204,15 +212,29 @@ const ContentReviewPage = () => {
         isReviewMode={isReviewMode}
         contentName={contentData?.name}
       />
-       <ContentMetadata
-        name={contentData?.name}
-        description={contentData?.description}
-        creator={contentData?.creator}
-        lastUpdatedOn={contentData?.lastUpdatedOn}
-        primaryCategory={contentData?.primaryCategory}
-        contentType={contentData?.contentType}
-        createdOn={contentData?.createdOn}
-      />
+      <div className="content-review-details-section">
+        {contentData?.description && (
+          <p className="content-review-description">{contentData.description}</p>
+        )}
+        <div className="content-review-metadata-grid">
+          <div>
+            <span className="label">Created By</span>
+            <span className="value">{contentData?.creator || 'Unknown'}</span>
+          </div>
+          <div>
+            <span className="label">Last Updated</span>
+            <span className="value">{formatDate(contentData?.lastUpdatedOn)}</span>
+          </div>
+          <div>
+            <span className="label">Content Type</span>
+            <span className="value">{contentData?.primaryCategory || contentData?.contentType || 'N/A'}</span>
+          </div>
+          <div>
+            <span className="label">Created On</span>
+            <span className="value">{formatDate(contentData?.createdOn)}</span>
+          </div>
+        </div>
+      </div>
       {dialogMode && (
         <ChecklistDialog
           isOpen={true}

@@ -27,7 +27,7 @@ interface Comment {
 }
 
 export class ReviewCommentService {
-  private baseUrl = '/portal/data/review/comment/v1';
+  private baseUrl = '/review/comment/v1';
 
   async createComment(request: CreateCommentRequest) {
     const response = await getClient().post<{
