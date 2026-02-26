@@ -62,6 +62,22 @@ describe('UserProfileService', () => {
       expect(mocks.userRead).toHaveBeenCalledTimes(1);
     });
 
+    it('should handle concurrent initialization calls without duplicate API requests', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { channel: 'concurrent-channel' } },
+      });
+
+      // Simulate concurrent calls
+      const [result1, result2, result3] = await Promise.all([
+        service.initialize(),
+        service.initialize(),
+        service.initialize(),
+      ]);
+
+      // Should only call API once despite 3 concurrent calls
+      expect(mocks.userRead).toHaveBeenCalledTimes(1);
+    });
+
     it('should handle missing userId gracefully', async () => {
       vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -75,9 +91,9 @@ describe('UserProfileService', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should handle userRead failure', async () => {
+    it('should handle userRead failure and allow retry', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      mocks.userRead.mockRejectedValue(new Error('network error'));
+      mocks.userRead.mockRejectedValueOnce(new Error('network error'));
 
       await expect(service.initialize()).rejects.toThrow('network error');
 
@@ -85,6 +101,15 @@ describe('UserProfileService', () => {
         'UserProfileService: Failed to initialize user profile:',
         expect.any(Error)
       );
+      
+      // Should allow retry after failure
+      mocks.userRead.mockResolvedValue({
+        data: { response: { channel: 'retry-channel' } },
+      });
+      
+      await service.initialize();
+      expect(mocks.userRead).toHaveBeenCalledTimes(2);
+      
       consoleSpy.mockRestore();
       
       // Reset for next test

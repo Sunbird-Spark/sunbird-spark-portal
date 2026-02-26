@@ -149,13 +149,6 @@ const WorkspacePage = () => {
   const hasCreatorRole = userRoles.includes('CONTENT_CREATOR');
   const hasReviewerRole = userRoles.includes('CONTENT_REVIEWER');
 
-  // Initialize UserProfileService when workspace loads
-  useEffect(() => {
-    userProfileService.initialize().catch((err) => {
-      console.error('Failed to initialize UserProfileService:', err);
-    });
-  }, []);
-
   // Default to creator if available, otherwise reviewer
   const [userRole, setUserRole] = useState<UserRole>('creator');
 
