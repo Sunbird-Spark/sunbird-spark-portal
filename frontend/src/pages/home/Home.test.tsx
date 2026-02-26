@@ -63,6 +63,8 @@ vi.mock('@/hooks/useAppI18n', () => ({
                 'changeLanguage': 'Change Language',
                 'common.notifications': 'Notifications',
                 'navigationMenu': 'Navigation Menu',
+                'homeComponents.openMenu': 'Open Menu',
+                'homeComponents.closeMenu': 'Close Menu',
             };
             return translations[key] || key;
         },
