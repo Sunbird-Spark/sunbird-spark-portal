@@ -73,7 +73,27 @@ describe('RatingDialog', () => {
 
     it('renders the close button', () => {
         renderDialog();
-        expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Close rating dialog' })).toBeInTheDocument();
+    });
+
+    // ── Accessibility ────────────────────────────────────────────────────────
+
+    it('dialog card has role="dialog"', () => {
+        renderDialog();
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('dialog card has aria-modal="true"', () => {
+        renderDialog();
+        expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
+    });
+
+    it('dialog card has aria-labelledby pointing to the title id', () => {
+        renderDialog();
+        const dialog = screen.getByRole('dialog');
+        const titleId = dialog.getAttribute('aria-labelledby');
+        expect(titleId).toBeTruthy();
+        expect(document.getElementById(titleId!)).toHaveTextContent('We would love to hear from you');
     });
 
     // ── Submit disabled state ────────────────────────────────────────────────
@@ -109,14 +129,14 @@ describe('RatingDialog', () => {
 
     it('calls onClose when close button is clicked', () => {
         renderDialog();
-        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Close rating dialog' }));
         expect(onClose).toHaveBeenCalledTimes(1);
     });
 
     it('resets rating to 0 when close button is clicked', () => {
         renderDialog({ onClose, onSubmit });
         fireEvent.click(screen.getByRole('button', { name: 'Rate 3 stars' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Close rating dialog' }));
         // Re-open: submit should be disabled again (rating reset)
         renderDialog({ onClose, onSubmit });
         expect(screen.getAllByRole('button', { name: 'Submit' })[0]).toBeDisabled();

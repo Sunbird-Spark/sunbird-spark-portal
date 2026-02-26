@@ -49,12 +49,17 @@ const RatingDialog = ({ open, onClose, onSubmit, playerMetadata }: RatingDialogP
 
     return (
         <div className="rating-dialog-overlay">
-            <div className="rating-dialog-card">
+            <div
+                className="rating-dialog-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="rating-dialog-title"
+            >
                 {/* Close button */}
                 <button
                     onClick={handleClose}
                     className="rating-dialog-close-btn"
-                    aria-label="Close"
+                    aria-label="Close rating dialog"
                 >
                     <FiX className="rating-dialog-close-icon" />
                 </button>
@@ -67,7 +72,7 @@ const RatingDialog = ({ open, onClose, onSubmit, playerMetadata }: RatingDialogP
                 />
 
                 {/* Title */}
-                <h2 className="rating-dialog-title">
+                <h2 id="rating-dialog-title" className="rating-dialog-title">
                     We would love to hear from you
                 </h2>
 
