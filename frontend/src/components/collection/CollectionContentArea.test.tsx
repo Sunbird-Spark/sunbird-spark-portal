@@ -1,177 +1,211 @@
-import { useAppI18n } from "@/hooks/useAppI18n";
-import CollectionOverview from "@/components/collection/CollectionOverview";
-import CollectionSidebar from "@/components/collection/CollectionSidebar";
-import BatchCard from "@/components/collection/BatchCard";
-import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
-import CourseProgressCard from "@/components/collection/CourseProgressCard";
-import AvailableBatchesCard from "@/components/collection/AvailableBatchesCard";
-import CertificateCard from "@/components/collection/CertificateCard";
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import CollectionContentArea from './CollectionContentArea';
 
-interface CollectionContentAreaProps {
-  collectionData: any;
-  contentId: string | undefined;
-  isTrackable: boolean;
-  contentBlocked: boolean;
-  isEnrolledInCurrentBatch: boolean;
-  playerMetadata: any;
-  playerIsLoading: boolean;
-  playerError: any;
-  handlePlayerEvent: (event: any) => void;
-  handleTelemetryEvent: (event: any) => void;
-  isAuthenticated: boolean;
-  isContentCreator: boolean;
-  collectionId: string | undefined;
-  hasBatchInRoute: boolean;
-  courseProgressProps: any;
-  batchIdParam: string | undefined;
-  expandedModules: string[];
-  toggleModule: (moduleId: string) => void;
-  contentStatusMap: any;
-  batches: any;
-  selectedBatchId: string;
-  setSelectedBatchId: (id: string) => void;
-  handleJoinCourse: (id: string) => void;
-  batchListLoading: boolean;
-  joinLoading: boolean;
-  batchListError: any;
-  joinError: any;
-  hasCertificate: boolean;
-  firstCertPreviewUrl: string | undefined;
-  setCertificatePreviewUrl: (url: string) => void;
-  setCertificatePreviewOpen: (open: boolean) => void;
-  /** When true (creator viewing own collection), BatchCard is shown. */
-  isCreatorViewingOwnCollection?: boolean;
-  /** When true (content creator viewing any collection), access without batch, no progress, learner cards hidden. */
-  contentCreatorPrivilege?: boolean;
-}
+// Mock child components to verify conditional rendering
+vi.mock('@/components/collection/CollectionOverview', () => ({
+  default: ({ contentAccessBlocked }: { contentAccessBlocked?: boolean }) => (
+    <div data-testid="collection-overview" data-content-access-blocked={String(!!contentAccessBlocked)} />
+  ),
+}));
+vi.mock('@/components/collection/CollectionSidebar', () => ({
+  default: () => <div data-testid="collection-sidebar" />
+}));
+vi.mock('@/components/collection/BatchCard', () => ({
+  default: () => <div data-testid="batch-card" />
+}));
+vi.mock('@/components/collection/LoginToUnlockCard', () => ({
+  default: () => <div data-testid="login-unlock-card" />
+}));
+vi.mock('@/components/collection/CourseProgressCard', () => ({
+  default: () => <div data-testid="course-progress-card" />
+}));
+vi.mock('@/components/collection/AvailableBatchesCard', () => ({
+  default: () => <div data-testid="available-batches-card" />
+}));
+vi.mock('@/components/collection/CertificateCard', () => ({
+  default: () => <div data-testid="certificate-card" />
+}));
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({ t: (key: string) => key })
+}));
 
-export default function CollectionContentArea({
-  collectionData,
-  contentId,
-  isTrackable,
-  contentBlocked,
-  isEnrolledInCurrentBatch,
-  playerMetadata,
-  playerIsLoading,
-  playerError,
-  handlePlayerEvent,
-  handleTelemetryEvent,
-  isAuthenticated,
-  isContentCreator,
-  collectionId,
-  hasBatchInRoute,
-  courseProgressProps,
-  batchIdParam,
-  expandedModules,
-  toggleModule,
-  contentStatusMap,
-  batches,
-  selectedBatchId,
-  setSelectedBatchId,
-  handleJoinCourse,
-  batchListLoading,
-  joinLoading,
-  batchListError,
-  joinError,
-  hasCertificate,
-  firstCertPreviewUrl,
-  setCertificatePreviewUrl,
-  setCertificatePreviewOpen,
-  isCreatorViewingOwnCollection = false,
-  contentCreatorPrivilege = false,
-}: CollectionContentAreaProps) {
-  const { t } = useAppI18n();
+describe('CollectionContentArea', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const defaultProps: any = {
+    collectionData: { title: 'Test Collection', lessons: 5, children: [], hierarchyRoot: { identifier: 'test', children: [] } },
+    contentId: undefined,
+    isTrackable: false,
+    contentBlocked: false,
+    isEnrolledInCurrentBatch: false,
+    playerMetadata: {},
+    playerIsLoading: false,
+    playerError: null,
+    handlePlayerEvent: vi.fn(),
+    handleTelemetryEvent: vi.fn(),
+    isAuthenticated: false,
+    isContentCreator: false,
+    collectionId: 'col_123',
+    hasBatchInRoute: false,
+    courseProgressProps: { progress: 50 },
+    batchIdParam: undefined,
+    expandedModules: [],
+    toggleModule: vi.fn(),
+    contentStatusMap: {},
+    batches: [],
+    selectedBatchId: '',
+    setSelectedBatchId: vi.fn(),
+    handleJoinCourse: vi.fn(),
+    batchListLoading: false,
+    joinLoading: false,
+    batchListError: null,
+    joinError: null,
+    hasCertificate: false,
+    firstCertPreviewUrl: undefined,
+    setCertificatePreviewUrl: vi.fn(),
+    setCertificatePreviewOpen: vi.fn(),
+  };
 
-  return (
-    <>
-      {/* Title Row */}
-      <div className="flex items-start justify-between mb-2">
-        <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]">{collectionData.title}</h1>
-      </div>
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-      {/* Stats Row */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-        <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
-      </div>
+  it('renders title and CollectionOverview/CollectionSidebar by default', () => {
+    render(<CollectionContentArea {...defaultProps} />);
+    
+    expect(screen.getByText('Test Collection')).toBeInTheDocument();
+    expect(screen.getByText(/5 contentStats\.lessons/i)).toBeInTheDocument();
+    expect(screen.getByTestId('collection-overview')).toBeInTheDocument();
+    expect(screen.getByTestId('collection-sidebar')).toBeInTheDocument();
+  });
 
-      <div className="grid lg:grid-cols-[1fr_380px] gap-8 lg:items-start">
-        {/* Left Column */}
-        <CollectionOverview
-          collectionData={collectionData}
-          contentId={contentId}
-          contentAccessBlocked={contentBlocked}
-          playerMetadata={playerMetadata}
-          playerIsLoading={playerIsLoading}
-          playerError={playerError ?? null}
-          onPlayerEvent={handlePlayerEvent}
-          onTelemetryEvent={handleTelemetryEvent}
+  it('renders BatchCard when user is creator viewing own collection (isCreatorViewingOwnCollection)', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        isAuthenticated={true}
+        isContentCreator={true}
+        collectionId="col_123"
+        isCreatorViewingOwnCollection={true}
+      />
+    );
+    expect(screen.getByTestId('batch-card')).toBeInTheDocument();
+  });
+
+  it('does NOT render BatchCard when user is not a creator', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        isAuthenticated={true}
+        isContentCreator={false}
+      />
+    );
+    expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
+  });
+
+  it('renders LoginToUnlockCard when contentBlocked is true', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        contentBlocked={true}
+      />
+    );
+    expect(screen.getByTestId('login-unlock-card')).toBeInTheDocument();
+    // Cannot show courses info if blocked
+    expect(screen.queryByTestId('course-progress-card')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
+  });
+
+  it('renders CourseProgressCard when trackable, authenticated, not blocked, enrolled, and within a batch route', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        isTrackable={true}
+        isAuthenticated={true}
+        contentBlocked={false}
+        hasBatchInRoute={true}
+        isEnrolledInCurrentBatch={true}
+      />
+    );
+    expect(screen.queryByTestId('login-unlock-card')).not.toBeInTheDocument();
+    expect(screen.getByTestId('course-progress-card')).toBeInTheDocument();
+    expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
+    // No "AvailableBatchesCard" because they are in a batch route
+    expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
+  });
+
+  it('renders AvailableBatchesCard when trackable, authenticated, not blocked, and NOT in batch route', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        isTrackable={true}
+        isAuthenticated={true}
+        contentBlocked={false}
+        hasBatchInRoute={false}
+      />
+    );
+    expect(screen.queryByTestId('login-unlock-card')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('course-progress-card')).not.toBeInTheDocument();
+    // Not in batch, so show available batches
+    expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
+    expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
+  });
+
+  describe('Creator viewing own collection (contentCreatorPrivilege)', () => {
+    it('hides CourseProgressCard when contentCreatorPrivilege is true', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          contentBlocked={false}
+          hasBatchInRoute={true}
+          isEnrolledInCurrentBatch={true}
+          contentCreatorPrivilege={true}
         />
+      );
+      expect(screen.queryByTestId('course-progress-card')).not.toBeInTheDocument();
+    });
 
-        <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 custom-scrollbar">
-          {/* Creator: Batch management card — only when viewing own collection */}
-          {isAuthenticated && isContentCreator && collectionId && isCreatorViewingOwnCollection && (
-            <div className="flex-shrink-0 mb-4">
-              <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
-            </div>
-          )}
+    it('hides AvailableBatchesCard and CertificateCard when contentCreatorPrivilege is true', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          contentBlocked={false}
+          hasBatchInRoute={false}
+          contentCreatorPrivilege={true}
+        />
+      );
+      expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
+    });
 
-          {/* Learner: Login gate — only when trackable and not authenticated */}
-          {contentBlocked && !isAuthenticated && (
-            <div className="flex-shrink-0 mb-4">
-              <LoginToUnlockCard />
-            </div>
-          )}
+    it('shows learner cards when contentCreatorPrivilege is false', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          isAuthenticated={true}
+          contentBlocked={false}
+          hasBatchInRoute={false}
+          contentCreatorPrivilege={false}
+        />
+      );
+      expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
+      expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
+    });
 
-          {/* Learner: Course progress (hidden when content creator privilege) */}
-          {isTrackable && !contentBlocked && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
-            <div className="flex-shrink-0 mb-4">
-              <CourseProgressCard {...courseProgressProps} />
-            </div>
-          )}
-
-          {/* Scrollable lesson list */}
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-            <CollectionSidebar
-              collectionId={collectionId ?? ''}
-              batchId={hasBatchInRoute ? batchIdParam ?? null : null}
-              children={collectionData.children ?? []}
-              expandedMainUnitIds={expandedModules}
-              toggleMainUnit={toggleModule}
-              activeContentId={contentId ?? null}
-              contentBlocked={contentBlocked}
-              contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentStatusMap : undefined}
-            />
-          </div>
-
-          {/* Learner: Batch join + Certificate — show when trackable and authenticated learner (so they can join); hidden for content creators */}
-          {isTrackable && isAuthenticated && !contentCreatorPrivilege && (
-            <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
-              {!hasBatchInRoute && (
-                <AvailableBatchesCard
-                  batches={batches}
-                  selectedBatchId={selectedBatchId}
-                  onBatchSelect={setSelectedBatchId}
-                  onJoinCourse={() => handleJoinCourse(selectedBatchId)}
-                  isLoading={batchListLoading}
-                  joinLoading={joinLoading}
-                  error={batchListError}
-                  joinError={joinError}
-                />
-              )}
-              <CertificateCard
-                hasCertificate={hasCertificate}
-                previewUrl={firstCertPreviewUrl}
-                onPreviewClick={() => {
-                  if (firstCertPreviewUrl) {
-                    setCertificatePreviewUrl(firstCertPreviewUrl);
-                    setCertificatePreviewOpen(true);
-                  }
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
+    it('passes contentAccessBlocked=false to CollectionOverview when contentCreatorPrivilege (content access without enrollment)', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          contentBlocked={false}
+          isEnrolledInCurrentBatch={false}
+          contentCreatorPrivilege={true}
+        />
+      );
+      expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
+    });
+  });
+});

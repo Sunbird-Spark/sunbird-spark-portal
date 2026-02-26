@@ -107,5 +107,4 @@ describe('useCollectionDetailPlayer', () => {
 
     expect(mockHandleContentStateFromTelemetry).toHaveBeenCalledWith(event);
   });
-
 });
