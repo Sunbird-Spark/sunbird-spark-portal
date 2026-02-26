@@ -114,13 +114,29 @@ export default function CollectionContentArea({
   });
 
   const handleConsentAgree = async () => {
-    await updateConsent("ACTIVE");
-    toast({ title: t("success"), description: "Profile data sharing preference updated.", variant: "default" });
+    try {
+      await updateConsent("ACTIVE");
+      toast({ title: t("success"), description: "Profile data sharing preference updated.", variant: "default" });
+    } catch (err) {
+      toast({
+        title: t("error"),
+        description: (err as Error).message || "Profile data sharing preference could not be updated. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleConsentDisagree = async () => {
-    await updateConsent("REVOKED");
-    toast({ title: t("success"), description: "Profile data sharing preference updated.", variant: "default" });
+    try {
+      await updateConsent("REVOKED");
+      toast({ title: t("success"), description: "Profile data sharing preference updated.", variant: "default" });
+    } catch (err) {
+      toast({
+        title: t("error"),
+        description: (err as Error).message || "Profile data sharing preference could not be updated. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

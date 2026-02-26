@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import type { ConsentStatus } from "@/types/consentTypes";
 import ProfileDataSharingModal from "./ProfileDataSharingModal";
@@ -7,7 +7,7 @@ export interface ProfileDataSharingCardProps {
   /** ACTIVE = On, REVOKED or null = Off. */
   status: ConsentStatus | null;
   lastUpdatedOn: string | undefined;
-  /** When true, open the consent modal once on mount (first-time prompt). */
+  /** When true, user has not set consent yet (card shows Off); modal opens only on Update click. */
   noConsentYet?: boolean;
   onAgree: () => Promise<void>;
   onDisagree: () => Promise<void>;
@@ -33,7 +33,7 @@ function formatLastUpdated(isoDate: string | undefined): string {
 export default function ProfileDataSharingCard({
   status,
   lastUpdatedOn,
-  noConsentYet = false,
+  noConsentYet: _noConsentYet = false,
   onAgree,
   onDisagree,
   isUpdating,
@@ -41,14 +41,6 @@ export default function ProfileDataSharingCard({
 }: ProfileDataSharingCardProps) {
   const { t } = useAppI18n();
   const [modalOpen, setModalOpen] = useState(false);
-  const hasAutoOpenedRef = useRef(false);
-
-  useEffect(() => {
-    if (noConsentYet && !hasAutoOpenedRef.current) {
-      hasAutoOpenedRef.current = true;
-      setModalOpen(true);
-    }
-  }, [noConsentYet]);
 
   const isOn = status === "ACTIVE";
   const lastUpdatedStr = formatLastUpdated(lastUpdatedOn);

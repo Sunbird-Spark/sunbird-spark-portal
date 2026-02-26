@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { Button } from "@/components/common/Button";
 import { FiX } from "react-icons/fi";
@@ -99,9 +100,9 @@ export default function ProfileDataSharingModal({
     onClose();
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -171,6 +172,7 @@ export default function ProfileDataSharingModal({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
