@@ -3,13 +3,11 @@ import { Request, Response } from 'express';
 import { createComment, readComments, deleteComments } from './reviewCommentController.js';
 
 vi.mock('../services/reviewCommentService.js', () => ({
-    ReviewCommentService: vi.fn(function() {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const instance: any = this;
-        instance.createComment = vi.fn().mockResolvedValue({ created: 'OK', threadId: 'test-thread-id' });
-        instance.readComments = vi.fn().mockResolvedValue([]);
-        instance.deleteComments = vi.fn().mockResolvedValue({ deleted: 'OK' });
-        return instance;
+    ReviewCommentService: vi.fn(function(this: any) {
+        this.createComment = vi.fn().mockResolvedValue({ created: 'OK', threadId: 'test-thread-id' });
+        this.readComments = vi.fn().mockResolvedValue([]);
+        this.deleteComments = vi.fn().mockResolvedValue({ deleted: 'OK' });
+        return this;
     })
 }));
 
