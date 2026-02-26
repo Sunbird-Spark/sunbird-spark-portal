@@ -29,6 +29,9 @@ export const contentActionProxy = createProxyMiddleware({
     changeOrigin: true,
     secure: false,
     selfHandleResponse: true,
+    pathRewrite: {
+        '^/portal/lock': '/action/lock', // Lock apis proxy to knowledge-mw-service
+    },
     on: {
         proxyReq: (proxyReq: http.ClientRequest, req: Request): void => {
             logger.info(`[ContentProxy:action] Proxying request: ${req.method} ${req.originalUrl} to ${proxyReq.path}`);

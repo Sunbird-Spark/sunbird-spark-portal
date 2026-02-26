@@ -32,6 +32,8 @@ const defaultItems: WorkspaceItem[] = [
     primaryCategory: 'Learning Resource',
     contentType: '',
     mimeType: '',
+    framework: '',
+    contentStatus: 'Draft',
   },
 ];
 

@@ -1,4 +1,4 @@
-import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiClock } from "react-icons/fi";
+import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiClock, FiLock } from "react-icons/fi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +19,7 @@ import CardThumbnailBackground from "./CardThumbnailBackground";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
+  lockedContentMap?: Record<string, { creatorName: string }>;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
@@ -26,6 +27,7 @@ interface WorkspaceContentListProps {
 
 const WorkspaceContentList = ({
   items,
+  lockedContentMap = {},
   onEdit,
   onDelete,
   onView,
@@ -47,8 +49,10 @@ const WorkspaceContentList = ({
           const TypeIcon = getPrimaryCategoryIcon(item.primaryCategory, item.type);
           const status = STATUS_CONFIG[item.status];
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
+          const lockInfo = lockedContentMap[item.id];
 
-          const { showView, showEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
+          const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
+          const isLocked = !!lockInfo;
 
           return (
             <div
@@ -97,53 +101,64 @@ const WorkspaceContentList = ({
 
               {/* Actions */}
               <div className="col-span-3 sm:col-span-2 flex items-center justify-end gap-1">
-                {showView && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-sunbird-wave opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => onView(item.id)}
-                  >
-                    <FiEye className="w-4 h-4" />
-                  </Button>
-                )}
-                {showEdit && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-sunbird-ginger opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => onEdit(item.id)}
-                  >
-                    <FiEdit className="w-4 h-4" />
-                  </Button>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                      <FiMoreVertical className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
+                {isLocked ? (
+                  <span className="relative group/lock text-amber-600 cursor-pointer">
+                    <FiLock className="w-4 h-4" />
+                    <span className="absolute top-full right-0 mt-1.5 hidden group-hover/lock:block whitespace-nowrap rounded bg-foreground px-2 py-1 text-xs text-background shadow-md z-50">
+                      {`This content is locked by ${lockInfo.creatorName}`}
+                    </span>
+                  </span>
+                ) : (
+                  <>
                     {showView && (
-                      <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
-                        <FiEye className="w-4 h-4" /> View
-                      </DropdownMenuItem>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-sunbird-wave opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => onView(item.id)}
+                      >
+                        <FiEye className="w-4 h-4" />
+                      </Button>
                     )}
-                    {showEdit && (
-                      <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
-                        <FiEdit className="w-4 h-4" /> Edit
-                      </DropdownMenuItem>
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-sunbird-ginger opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => onEdit(item.id)}
+                      >
+                        <FiEdit className="w-4 h-4" />
+                      </Button>
                     )}
-                    {showDelete && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
-                          <FiTrash2 className="w-4 h-4" /> Delete
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                          <FiMoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
+                        {showView && (
+                          <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
+                            <FiEye className="w-4 h-4" /> View
+                          </DropdownMenuItem>
+                        )}
+                        {canEdit && (
+                          <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
+                            <FiEdit className="w-4 h-4" /> Edit
+                          </DropdownMenuItem>
+                        )}
+                        {showDelete && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
+                              <FiTrash2 className="w-4 h-4" /> Delete
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
+                )}
               </div>
             </div>
           );

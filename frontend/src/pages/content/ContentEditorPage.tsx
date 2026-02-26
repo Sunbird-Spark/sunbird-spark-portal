@@ -1,8 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
 import PageLoader from '@/components/common/PageLoader';
+import EditorErrorState from '@/components/editors/EditorErrorState';
 import { ContentEditor } from '@/components/editors/ContentEditor';
 import type { ContentEditorEvent } from '@/services/editors/content-editor';
 import { useContentRead } from '@/hooks/useContent';
+import { useEditorLock } from '@/hooks/useEditorLock';
 
 const ContentEditorPage = () => {
   const { contentId } = useParams();
@@ -11,53 +14,46 @@ const ContentEditorPage = () => {
   const { data, isLoading, error } = useContentRead(contentId || '');
   const contentData = data?.data?.content;
 
-  const handleEditorEvent = (event: ContentEditorEvent) => {
+  const { lockError, isLocking, retireLock } = useEditorLock({
+    contentId,
+    metadata: contentData ?? null,
+  });
+
+  // Memoize the event handler to prevent unnecessary re-renders
+  const handleEditorEvent = useCallback((event: ContentEditorEvent) => {
     console.warn('Content editor event:', event);
-  };
+  }, []);
 
-  const handleClose = () => {
+  // Memoize the close handler to prevent unnecessary re-renders
+  const handleClose = useCallback(async () => {
+    await retireLock();
     navigate('/workspace');
-  };
+  }, [retireLock, navigate]);
 
-  if (isLoading) {
-    return <PageLoader message="Loading editor..." />;
+  // Memoize contentData to prevent unnecessary re-renders when object reference changes
+  // but actual content hasn't changed
+  const stableMetadata = useMemo(() => contentData, [contentData?.identifier]);
+
+  if (isLoading || isLocking) {
+    return <PageLoader message={isLocking ? "Acquiring content lock..." : "Loading editor..."} />;
+  }
+
+  if (lockError) {
+    return <EditorErrorState message={lockError} />;
   }
 
   if (error) {
-    console.error('Error loading content:', error);
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
-        <div className="text-red-600 font-semibold">
-          Error loading content: {error.message}
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Retry
-          </button>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
-          >
-            Back to workspace
-          </button>
-        </div>
-      </div>
-    );
+    return <EditorErrorState message={`Error loading content: ${error.message}`} showRetry />;
   }
 
-  if (!contentData) {
-    return <div>Content not found</div>;
+  if (!stableMetadata) {
+    return <EditorErrorState message="Content not found" />;
   }
 
   return (
     <div className="w-full h-screen">
       <ContentEditor
-        metadata={contentData}
+        metadata={stableMetadata}
         onEditorEvent={handleEditorEvent}
         onClose={handleClose}
       />

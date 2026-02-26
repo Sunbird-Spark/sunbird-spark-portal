@@ -31,5 +31,7 @@ export function mapContentToWorkspaceItem(item: ContentSearchItem): WorkspaceIte
     primaryCategory: item.primaryCategory ?? '',
     contentType: item.contentType ?? '',
     mimeType: item.mimeType ?? '',
+    framework: item.framework ?? '',
+    contentStatus: item.status ?? '',
   };
 }
