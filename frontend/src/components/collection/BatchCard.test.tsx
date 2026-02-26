@@ -45,6 +45,23 @@ vi.mock('./AddCertificateModal', () => ({
     ) : null,
 }));
 
+vi.mock('@/auth/AuthContext', () => ({
+  useAuth: () => ({ user: { role: 'creator', id: 'user-1' } }),
+}));
+
+vi.mock('@/hooks/useToast', () => ({
+  useToast: () => ({ toast: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: null, isSuccess: false }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+  useAcceptTnc: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useGetTncUrl: () => ({ data: null }),
+}));
+
 // Mock useBatchList so we control the API response in tests
 const mockUseBatchList = vi.fn();
 vi.mock('@/hooks/useBatch', () => ({

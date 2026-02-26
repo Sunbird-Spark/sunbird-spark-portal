@@ -19,8 +19,8 @@ const data = [
 describe('ExportButton', () => {
   beforeEach(() => {
     // mock URL and anchor methods
-    global.URL.createObjectURL = vi.fn(() => 'blob:mock');
-    global.URL.revokeObjectURL = vi.fn();
+    URL.createObjectURL = vi.fn(() => 'blob:mock');
+    URL.revokeObjectURL = vi.fn();
     HTMLAnchorElement.prototype.click = vi.fn();
   });
 

@@ -126,7 +126,7 @@ export const adminCourseSummaries: AdminCourseSummary[] = Array.from({ length: 2
     "Advanced SQL Queries",
     "Statistical Analysis",
     "Leadership & Communication",
-  ][i],
+  ][i]!,
   totalEnrolled: Math.floor(Math.random() * 500) + 100,
   totalCompleted: Math.floor(Math.random() * 300) + 50,
   completionPercent: Math.floor(Math.random() * 60) + 30,
@@ -178,20 +178,20 @@ export const learnerProgressData: LearnerProgress[] = Array.from({ length: 30 },
     "Usha Pillai", "Varun Rao", "Yamini Desai", "Zara Khan", "Aditya Saxena",
     "Bhavna Jain", "Chirag Malhotra", "Deepika Menon", "Eshan Tiwari", "Falguni Shah",
     "Gaurav Mishra", "Hina Bose", "Ishaan Chauhan", "Jyoti Pandit", "Kunal Srinivasan",
-  ][i],
+  ][i]!,
   enrollmentDate: `2025-0${Math.floor(Math.random() * 9) + 1}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
   progressPercent: Math.floor(Math.random() * 100),
-  status: (["In Progress", "Completed", "Not Started"] as const)[Math.floor(Math.random() * 3)],
+  status: (["In Progress", "Completed", "Not Started"] as const)[Math.floor(Math.random() * 3)]!,
   lastActiveDate: `2025-10-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
   timeSpent: `${Math.floor(Math.random() * 40) + 1}h ${Math.floor(Math.random() * 59)}m`,
-  certificateStatus: (["Issued", "Pending", "N/A"] as const)[Math.floor(Math.random() * 3)],
+  certificateStatus: (["Issued", "Pending", "N/A"] as const)[Math.floor(Math.random() * 3)]!,
 }));
 
 export const assessmentRecords: AssessmentRecord[] = Array.from({ length: 20 }, (_, i) => {
   const score = Math.floor(Math.random() * 100);
   return {
     id: `assess-${i + 1}`,
-    learnerName: learnerProgressData[i % learnerProgressData.length].learnerName,
+    learnerName: learnerProgressData[i % learnerProgressData.length]!.learnerName,
     attemptNumber: Math.floor(Math.random() * 3) + 1,
     score,
     maxScore: 100,

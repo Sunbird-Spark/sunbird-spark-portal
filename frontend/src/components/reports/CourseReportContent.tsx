@@ -21,31 +21,16 @@ import {
 } from "@/data/reportsMockData";
 import type { LearnerProgress, AssessmentRecord } from "@/types/reports";
 
-const donutColors = [
-  "hsl(var(--sunbird-ginger))",
-  "hsl(var(--sunbird-moss))",
-  "hsl(var(--sunbird-ink))",
-  "hsl(var(--sunbird-lavender))",
-];
-
-const statusColor: Record<string, string> = {
-  "Completed": "default",
-  "In Progress": "secondary",
-  "Not Started": "outline",
-};
-
-const certColor: Record<string, string> = {
-  "Issued": "default",
-  "Pending": "secondary",
-  "N/A": "outline",
-};
+const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
+const statusColor: Record<string, string> = { "Completed": "default", "In Progress": "secondary", "Not Started": "outline" };
+const certColor: Record<string, string> = { "Issued": "default", "Pending": "secondary", "N/A": "outline" };
 
 interface CourseReportContentProps {
   courseId?: string;
   batchId?: string;
 }
 
-const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) => {
+const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseReportContentProps) => {
   const summary = courseReportSummary;
 
   const [learnerSearch, setLearnerSearch] = useState("");
@@ -177,7 +162,7 @@ const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) =>
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number, name: string) => [`${value} learners`, name]} />
+                <Tooltip formatter={(value, name) => [`${value} learners`, name as string]} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>

@@ -136,12 +136,12 @@ describe('CreateBatchModal', () => {
 
     it('renders Terms & Conditions checkbox', () => {
       render(<CreateBatchModal {...defaultProps} />);
-      // The label text is split across child nodes (text + button), so check
-      // the label specifically linked to the checkbox
+      // First label (htmlFor="acceptTerms") has "I accept the" text
       const label = document.querySelector('label[for="acceptTerms"]');
       expect(label?.textContent?.toLowerCase()).toContain('i accept the');
-      expect(label?.textContent?.toLowerCase()).toContain('terms & conditions');
-      // Checkbox input is identified by its id
+      // "Terms & Conditions" text lives in a separate button element
+      expect(screen.getByRole('button', { name: /terms & conditions/i })).toBeInTheDocument();
+      // Checkbox is identified by its id
       expect(document.getElementById('acceptTerms')).toBeInTheDocument();
     });
 
@@ -269,7 +269,7 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-04-01' },
       });
-      fireEvent.click(screen.getByRole('checkbox', { name: /accept the terms/i })); // T&C
+      fireEvent.click(document.getElementById('acceptTerms') as HTMLElement); // T&C
 
       expect(screen.getByRole('button', { name: /^create batch$/i })).not.toBeDisabled();
     });
@@ -286,7 +286,7 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-04-01' },
       });
-      const cb = screen.getByRole('checkbox', { name: /accept the terms/i });
+      const cb = document.getElementById('acceptTerms') as HTMLElement;
       fireEvent.click(cb); // check
       fireEvent.click(cb); // uncheck
 
@@ -411,7 +411,7 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-06-30' },
       });
-      const cb = screen.getByRole('checkbox', { name: /accept the terms/i });
+      const cb = document.getElementById('acceptTerms') as HTMLElement;
       fireEvent.click(cb);
       fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
     };
