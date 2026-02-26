@@ -54,8 +54,9 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
   const [tncDialogOpen, setTncDialogOpen] = useState(false);
 
   const { data: tncRes } = useSystemSetting("tncConfig");
-  const tncConfig = tncRes?.data?.result?.response?.value;
-  const { data: termsUrl } = useGetTncUrl(tncConfig || null);
+  // Pass the full ApiResponse so parseTncConfig can traverse data.response.value
+  // (AxiosAdapter already unwraps the `result` layer into `data`)
+  const { data: termsUrl } = useGetTncUrl(tncRes ?? null);
 
   const { data: allMentors = [], isLoading: mentorsLoading } = useMentorList();
   const createBatch = useCreateBatch();

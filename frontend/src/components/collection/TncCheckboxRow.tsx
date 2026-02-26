@@ -28,8 +28,10 @@ export const TncCheckboxRow = ({
   const { data: tncRes } = useSystemSetting(settingKey);
   const { data: globalTncRes } = useSystemSetting("tncConfig");
 
-  const tncConfig = tncRes?.data?.result?.response?.value || globalTncRes?.data?.result?.response?.value;
-  const { data: termsUrl } = useGetTncUrl(tncConfig || null);
+  // Pass the full ApiResponse to useGetTncUrl so parseTncConfig can traverse
+  // apiResponse.data.response.value (AxiosAdapter already unwraps the result layer)
+  const rawConfig = tncRes ?? globalTncRes ?? null;
+  const { data: termsUrl } = useGetTncUrl(rawConfig);
 
   return (
     // Outer div (not a label) so the T&C button is never inside a <label>.
