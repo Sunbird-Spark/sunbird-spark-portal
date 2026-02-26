@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -58,7 +58,37 @@ const ContentPlayerPage = () => {
     [relatedContentData?.data?.content, contentId]
   );
   
+  const isH5pContent = contentData?.mimeType === 'application/vnd.ekstep.h5p-archive';
+
+  // Stable ref so telemetry callback doesn't need isH5pContent in its deps
+  const isH5pContentRef = useRef(false);
+  useEffect(() => { isH5pContentRef.current = isH5pContent; }, [isH5pContent]);
+
   const [ratingOpen, setRatingOpen] = useState(false);
+
+  // Once the rating dialog has been shown and dismissed, allow navigation
+  const ratingDoneRef = useRef(false);
+  // Set when a navigation was intercepted and should proceed after the dialog closes
+  const pendingNavigateRef = useRef(false);
+
+  const handleRatingClose = useCallback(() => {
+    ratingDoneRef.current = true;
+    setRatingOpen(false);
+    if (pendingNavigateRef.current) {
+      pendingNavigateRef.current = false;
+      navigate(-1);
+    }
+  }, [navigate]);
+
+  // For H5P: show the dialog before navigating back; for all other content: navigate immediately
+  const handleGoBack = useCallback(() => {
+    if (isH5pContent && !ratingDoneRef.current) {
+      pendingNavigateRef.current = true;
+      setRatingOpen(true);
+    } else {
+      navigate(-1);
+    }
+  }, [isH5pContent, navigate]);
 
   const onPlayerEvent = useCallback((event: unknown) => {
     console.log('Content player event:', event);
@@ -94,7 +124,7 @@ const ContentPlayerPage = () => {
       <main className="content-player-container">
         {/* Go Back Link */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleGoBack}
           className="content-player-go-back"
         >
           <FiArrowLeft className="content-player-back-arrow" />
@@ -134,7 +164,7 @@ const ContentPlayerPage = () => {
               />
               <RatingDialog
                 open={ratingOpen}
-                onClose={() => setRatingOpen(false)}
+                onClose={handleRatingClose}
                 playerMetadata={playerMetadata}
               />
             </div>
