@@ -22,21 +22,9 @@ export const createSession = async (tokenData: any, req: Request, res: Response)
     let grant;
 
     try {
-        // Construct a grant object compatible with keycloak-connect
-        // using the tokens obtained from the Keycloak authorization_code exchange
-        grant = await keycloakGoogle.grantManager.createGrant({
-            access_token: tokenData.access_token,
-            refresh_token: tokenData.refresh_token,
-            id_token: tokenData.id_token,
-            expires_in: tokenData.expires_in,
-            token_type: tokenData.token_type
-        });
-
+        grant = await keycloakGoogle.grantManager.createGrant(tokenData);
     } catch (error) {
-        logger.error({
-            msg: 'googleOauthHelper:createSession failed to create grant',
-            error
-        });
+        logger.error('googleOauthHelper:createSession failed to create grant', error);
         throw error;
     }
 
@@ -102,10 +90,7 @@ class GoogleOauth {
 
             return keycloakAuthUrl.toString();
         } catch (error) {
-            logger.error({
-                msg: 'GoogleOauth:generateAuthUrl failed',
-                error
-            });
+            logger.error('GoogleOauth:generateAuthUrl failed', error);
             throw error;
         }
     }
@@ -222,17 +207,12 @@ export const markSessionAsUsed = (req: Request): void => {
 };
 
 export const validateRedirectUrl = (url: string | undefined): string => {
-    if (!url) {
+    if (!url || !envConfig.DOMAIN_URL) {
         return '/';
     }
 
     try {
         const parsedUrl = new URL(url, envConfig.DOMAIN_URL);
-
-        if (!envConfig.DOMAIN_URL) {
-            return '/';
-        }
-
         const allowedHost = new URL(envConfig.DOMAIN_URL).hostname;
 
         if (parsedUrl.hostname === allowedHost) {
