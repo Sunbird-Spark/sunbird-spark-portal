@@ -764,7 +764,7 @@
   }
 
   .collection-player-wrapper {
-    @apply p-4;
+    @apply p-4 relative;
   }
 
   .collection-player-loading {
