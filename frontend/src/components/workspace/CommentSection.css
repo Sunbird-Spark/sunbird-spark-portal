@@ -48,3 +48,7 @@
   @apply w-full px-4 py-2 rounded-lg text-sm font-medium font-rubik transition-colors
     bg-sunbird-brick text-white hover:bg-sunbird-brick/90 disabled:opacity-50 disabled:cursor-not-allowed;
 }
+
+.no-comments-message {
+  @apply text-sm text-muted-foreground font-rubik text-center py-4 italic;
+}

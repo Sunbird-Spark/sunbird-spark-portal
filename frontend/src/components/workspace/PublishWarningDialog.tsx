@@ -24,7 +24,7 @@ const PublishWarningDialog: React.FC<PublishWarningDialogProps> = ({
         </div>
         <div className="publish-warning-content">
           <p className="publish-warning-text">
-            You have given some review comments or suggestions, they will be lost if content is published.
+            You have given some review comments/suggestions, they will be lost if content is published.
           </p>
           <p className="publish-warning-question">Do you want to publish?</p>
         </div>

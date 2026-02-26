@@ -41,7 +41,7 @@ export const useReviewComment = (options: UseReviewCommentOptions) => {
         ...(stageId && { stageId }),
       };
       const response = await reviewCommentService.readComments(contextDetails);
-      return response.result.comments || [];
+      return response.comments || [];
     },
     enabled,
     staleTime: 30000, // 30 seconds

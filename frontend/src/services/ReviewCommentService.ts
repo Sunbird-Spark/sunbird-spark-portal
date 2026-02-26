@@ -31,31 +31,22 @@ export class ReviewCommentService {
 
   async createComment(request: CreateCommentRequest) {
     const response = await getClient().post<{
-      responseCode: string;
-      result: {
-        created: string;
-        threadId: string;
-      };
+      created: string;
+      threadId: string;
     }>(`${this.baseUrl}/create/comment`, { request });
     return response.data;
   }
 
   async readComments(contextDetails: ContextDetails) {
     const response = await getClient().post<{
-      responseCode: string;
-      result: {
-        comments: Comment[];
-      };
+      comments: Comment[];
     }>(`${this.baseUrl}/read/comment`, { request: { contextDetails } });
     return response.data;
   }
 
   async deleteComments(contextDetails: ContextDetails) {
     const response = await getClient().post<{
-      responseCode: string;
-      result: {
-        deleted: string;
-      };
+      deleted: string;
     }>(`${this.baseUrl}/delete/comment`, { request: { contextDetails } });
     return response.data;
   }
@@ -63,7 +54,7 @@ export class ReviewCommentService {
   async hasComments(contextDetails: ContextDetails): Promise<boolean> {
     try {
       const response = await this.readComments(contextDetails);
-      return response.responseCode === 'OK' && (response.result?.comments?.length || 0) > 0;
+      return (response.comments?.length || 0) > 0;
     } catch (error) {
       console.error('Failed to check for comments:', error);
       return false;

@@ -38,6 +38,7 @@ const ContentPlayerSection: React.FC<ContentPlayerSectionProps> = React.memo(({
     </div>
   ), [playerMetadata, handlePlayerEvent, handleTelemetryEvent]);
 
+  // Show comments only for ECML content
   if (isEcmlContent && contentId) {
     return (
       <>
@@ -63,6 +64,7 @@ const ContentPlayerSection: React.FC<ContentPlayerSectionProps> = React.memo(({
     );
   }
 
+  // For non-ECML content, show player full width
   return (
     <>
       <div className="content-player-title-row">

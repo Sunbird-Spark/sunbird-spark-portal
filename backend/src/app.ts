@@ -40,10 +40,12 @@ app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousPr
 // Portal Authentication Routes (Login, Callback, Logout)
 app.use('/portal', portalAuthRoutes);
 
+// Review comment routes
+app.use('/portal/review/comment/v1', sessionMiddleware, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), reviewCommentRoutes);
+
 // Apply anonymous session middleware to API routes (once per route tree)
 
 app.use('/data/v1/form', formRoutes);
-app.use('/review/comment/v1', reviewCommentRoutes);
 app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), authRoutes);
 app.use('/google', sessionMiddleware, googleRoutes);
 

@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import reviewCommentService from '@/services/ReviewCommentService';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { UserService } from '@/services/UserService';
+import { useReviewComment } from '@/hooks/useReviewComment';
 import './CommentSection.css';
-
-interface Comment {
-  comment: string;
-  createdBy: string;
-  createdOn: string;
-  identifier: string;
-}
 
 interface CommentSectionProps {
   contentId: string;
@@ -26,17 +19,28 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   stageId,
   isReviewMode = false
 }) => {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [userData, setUser] = useState<{userName:string, userId: string}>();
   const userService = new UserService();
 
+  // Use the review comment hook
+  const {
+    comments,
+    isLoadingComments,
+    commentsError,
+    createComment,
+    isCreatingComment,
+  } = useReviewComment({
+    contentId,
+    contentVer,
+    contentType,
+    stageId,
+    enabled: true,
+  });
+
   useEffect(() => {
-    loadComments();
     loadUserInfo();
-  }, [contentId, contentVer, contentType, stageId]);
+  }, []);
 
   const loadUserInfo = async () => {
     const userId = userAuthInfoService.getUserId();
@@ -54,29 +58,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
   };
 
-  const loadComments = async () => {
-    setIsLoading(true);
-    try {
-      const contextDetails = {
-        contentId,
-        contentVer,
-        contentType,
-        ...(stageId && { stageId })
-      };
-
-      const response = await reviewCommentService.readComments(contextDetails);
-
-      if (response?.responseCode === 'OK') {
-        const comments = response?.result?.comments || [];
-        setComments(comments);
-      }
-    } catch (error) {
-      console.error('Failed to load comments:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
 
@@ -85,30 +66,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      const response = await reviewCommentService.createComment({
-        contextDetails: {
-          contentId,
-          contentVer,
-          contentType,
-          ...(stageId && { stageId })
-        },
-        body: newComment.trim(),
-        userId: userData.userId,
-        userInfo: {
-          name: userData.userName
-        }
+      await createComment(newComment.trim(), userData.userId, {
+        name: userData.userName
       });
-
-      if (response?.responseCode === 'OK') {
-        setNewComment('');
-        await loadComments();
-      }
+      setNewComment('');
     } catch (error) {
       console.error('Failed to submit comment:', error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -122,7 +86,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     });
   };
 
-  if (isLoading) {
+  if (isLoadingComments) {
     return (
       <div className="comment-section">
         <div className="comment-section-loading">Loading comments...</div>
@@ -130,7 +94,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     );
   }
 
-  // Don't render if no comments and not in review mode
+  // Show comment section if there are comments OR if in review mode
   if (comments.length === 0 && !isReviewMode) {
     return null;
   }
@@ -139,7 +103,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     <div className="comment-section">
       <h3 className="comment-section-title">Comments</h3>
 
-      {comments.length > 0 && (
+      {comments.length > 0 ? (
         <div className="comment-list">
           {comments.map((comment) => (
             <div key={comment.identifier} className="comment-item">
@@ -151,6 +115,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             </div>
           ))}
         </div>
+      ) : (
+        isReviewMode && <p className="no-comments-message">No comments yet. Add the first comment below.</p>
       )}
 
       {isReviewMode && (
@@ -161,14 +127,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             rows={3}
-            disabled={isSubmitting}
+            disabled={isCreatingComment}
           />
           <button
             className="comment-submit-btn"
             onClick={handleSubmitComment}
-            disabled={isSubmitting || !newComment.trim()}
+            disabled={isCreatingComment || !newComment.trim()}
           >
-            {isSubmitting ? 'Submitting...' : 'Add Comment'}
+            {isCreatingComment ? 'Submitting...' : 'Add Comment'}
           </button>
         </div>
       )}

@@ -52,10 +52,7 @@ describe('useReviewComment', () => {
       ];
 
       vi.mocked(reviewCommentService.readComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          comments: mockComments,
-        },
+        comments: mockComments,
       });
 
       const { result } = renderHook(() => useReviewComment(mockOptions), { wrapper });
@@ -75,10 +72,7 @@ describe('useReviewComment', () => {
 
     it('should handle empty comments', async () => {
       vi.mocked(reviewCommentService.readComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          comments: [],
-        },
+        comments: [],
       });
 
       const { result } = renderHook(() => useReviewComment(mockOptions), { wrapper });
@@ -120,18 +114,12 @@ describe('useReviewComment', () => {
   describe('createComment', () => {
     it('should create comment successfully', async () => {
       vi.mocked(reviewCommentService.readComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          comments: [],
-        },
+        comments: [],
       });
 
       vi.mocked(reviewCommentService.createComment).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          created: 'OK',
-          threadId: 'thread-123',
-        },
+        created: 'OK',
+        threadId: 'thread-123',
       });
 
       const { result } = renderHook(() => useReviewComment(mockOptions), { wrapper });
@@ -163,10 +151,7 @@ describe('useReviewComment', () => {
 
     it('should handle create comment error', async () => {
       vi.mocked(reviewCommentService.readComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          comments: [],
-        },
+        comments: [],
       });
 
       const mockError = new Error('Create failed');
@@ -187,17 +172,11 @@ describe('useReviewComment', () => {
   describe('deleteComments', () => {
     it('should delete comments successfully', async () => {
       vi.mocked(reviewCommentService.readComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          comments: [],
-        },
+        comments: [],
       });
 
       vi.mocked(reviewCommentService.deleteComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          deleted: 'OK',
-        },
+        deleted: 'OK',
       });
 
       const { result } = renderHook(() => useReviewComment(mockOptions), { wrapper });
@@ -218,10 +197,7 @@ describe('useReviewComment', () => {
 
     it('should handle delete comments error', async () => {
       vi.mocked(reviewCommentService.readComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          comments: [],
-        },
+        comments: [],
       });
 
       const mockError = new Error('Delete failed');
@@ -246,10 +222,7 @@ describe('useReviewComment', () => {
       };
 
       vi.mocked(reviewCommentService.readComments).mockResolvedValue({
-        responseCode: 'OK',
-        result: {
-          comments: [],
-        },
+        comments: [],
       });
 
       const { result } = renderHook(() => useReviewComment(optionsWithoutStage), { wrapper });

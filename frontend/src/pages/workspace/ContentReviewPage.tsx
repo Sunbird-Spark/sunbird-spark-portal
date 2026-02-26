@@ -114,18 +114,28 @@ const ContentReviewPage = () => {
   const handlePublishClick = useCallback(async () => {
     if (!contentId || !contentData) return;
     
-    const hasComments = await reviewCommentService.hasComments({
-      contentId,
-      contentVer: contentData.versionKey || '0',
-      contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
-    });
-    
-    if (hasComments) {
-      setShowPublishWarning(true);
-    } else {
-      loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
+    // Only check for comments on ECML content
+    if (isEcmlContent) {
+      try {
+        const hasComments = await reviewCommentService.hasComments({
+          contentId,
+          contentVer: contentData.versionKey || '0',
+          contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
+        });
+        
+        if (hasComments) {
+          setShowPublishWarning(true);
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to check for comments:', error);
+        // Proceed with publish if check fails
+      }
     }
-  }, [contentId, contentData, loadFormAndShow]);
+    
+    // Proceed with publish
+    loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
+  }, [contentId, contentData, isEcmlContent, loadFormAndShow]);
 
   const handleRequestChangesClick = useCallback(() => {
     loadFormAndShow('request-changes', 'requestforchanges', setIsLoadingRequestChangesForm);
@@ -139,18 +149,21 @@ const ContentReviewPage = () => {
     try {
       await contentService.contentPublish(contentId, userAuthInfoService.getUserId() || '');
       
-      try {
-        await reviewCommentService.deleteComments({
-          contentId,
-          contentVer: contentData.versionKey || '0',
-          contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
-        });
-      } catch (error) {
-        console.error('Failed to delete comments after publish:', error);
+      // Only delete comments for ECML content
+      if (isEcmlContent) {
+        try {
+          await reviewCommentService.deleteComments({
+            contentId,
+            contentVer: contentData.versionKey || '0',
+            contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
+          });
+        } catch (error) {
+          console.error('Failed to delete comments after publish:', error);
+        }
       }
       
       closeDialog();
-      toast({ title: 'Published', description: 'Content has been published successfully.' });
+      toast({ title: 'Published', description: 'Content has been published successfully.', variant: "success" });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
@@ -159,7 +172,7 @@ const ContentReviewPage = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [contentId, contentData, closeDialog, toast, clearWorkspaceQueries, navigate]);
+  }, [contentId, contentData, isEcmlContent, closeDialog, toast, clearWorkspaceQueries, navigate]);
 
   const handleRequestChangesConfirm = useCallback(async (rejectReasons: string[], rejectComment: string) => {
     if (!contentId) return;
@@ -167,7 +180,7 @@ const ContentReviewPage = () => {
     try {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
       closeDialog();
-      toast({ title: 'Changes Requested', description: 'Request for changes has been submitted successfully.' });
+      toast({ title: 'Changes Requested', description: 'Request for changes has been submitted successfully.', "variant": "success" });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {

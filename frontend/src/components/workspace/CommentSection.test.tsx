@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import CommentSection from './CommentSection';
 import reviewCommentService from '@/services/ReviewCommentService';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
@@ -11,7 +13,15 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService');
 vi.mock('@/services/UserService');
 
 describe('CommentSection', () => {
+  let queryClient: QueryClient;
+
   beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
     vi.clearAllMocks();
     
     // Mock userAuthInfoService
@@ -31,26 +41,41 @@ describe('CommentSection', () => {
     } as any);
   });
 
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+
   it('should show loading state initially', () => {
     vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      responseCode: 'OK',
-      result: { comments: [] } 
+      comments: [] 
     });
 
-    render(<CommentSection contentId="test-content-id" />);
+    render(<CommentSection contentId="test-content-id" />, { wrapper });
     expect(screen.getByText('Loading comments...')).toBeInTheDocument();
   });
 
-  it('should not render when no comments exist', async () => {
+  it('should not render when no comments exist and not in review mode', async () => {
     vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      responseCode: 'OK',
-      result: { comments: [] } 
+      comments: [] 
     });
 
-    const { container } = render(<CommentSection contentId="test-content-id" />);
+    const { container } = render(<CommentSection contentId="test-content-id" />, { wrapper });
     
     await waitFor(() => {
       expect(container.firstChild).toBeNull();
+    });
+  });
+
+  it('should render empty state in review mode with no comments', async () => {
+    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
+      comments: [] 
+    });
+
+    render(<CommentSection contentId="test-content-id" isReviewMode={true} />, { wrapper });
+    
+    await waitFor(() => {
+      expect(screen.getByText('Comments')).toBeInTheDocument();
+      expect(screen.getByText('No comments yet. Add the first comment below.')).toBeInTheDocument();
     });
   });
 
@@ -71,11 +96,10 @@ describe('CommentSection', () => {
     ];
 
     vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      responseCode: 'OK',
-      result: { comments: mockComments } 
+      comments: mockComments 
     });
 
-    render(<CommentSection contentId="test-content-id" />);
+    render(<CommentSection contentId="test-content-id" />, { wrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Comments')).toBeInTheDocument();
@@ -96,23 +120,17 @@ describe('CommentSection', () => {
       },
     ];
 
-    vi.mocked(reviewCommentService.readComments)
-      .mockResolvedValueOnce({ 
-        responseCode: 'OK',
-        result: { comments: mockComments } 
-      })
-      .mockResolvedValueOnce({ 
-        responseCode: 'OK',
-        result: { comments: mockComments } 
-      });
+    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
+      comments: mockComments 
+    });
 
     vi.mocked(reviewCommentService.createComment).mockResolvedValue({ 
-      responseCode: 'OK',
-      result: { created: 'OK', threadId: 'thread-123' } 
+      created: 'OK', 
+      threadId: 'thread-123' 
     });
 
     const user = userEvent.setup();
-    render(<CommentSection contentId="test-content-id" isReviewMode={true} />);
+    render(<CommentSection contentId="test-content-id" isReviewMode={true} />, { wrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Comments')).toBeInTheDocument();
@@ -125,6 +143,18 @@ describe('CommentSection', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
+      expect(reviewCommentService.createComment).toHaveBeenCalledWith({
+        contextDetails: {
+          contentId: 'test-content-id',
+          contentVer: '0',
+          contentType: 'application/vnd.ekstep.ecml-archive',
+        },
+        body: 'New test comment',
+        userId: 'user-123',
+        userInfo: {
+          name: 'Test User',
+        },
+      });
       expect(textarea).toHaveValue('');
     });
   });
@@ -140,11 +170,10 @@ describe('CommentSection', () => {
     ];
 
     vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      responseCode: 'OK',
-      result: { comments: mockComments } 
+      comments: mockComments 
     });
 
-    render(<CommentSection contentId="test-content-id" isReviewMode={true} />);
+    render(<CommentSection contentId="test-content-id" isReviewMode={true} />, { wrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Comments')).toBeInTheDocument();
@@ -152,5 +181,44 @@ describe('CommentSection', () => {
 
     const submitButton = screen.getByRole('button', { name: /add comment/i });
     expect(submitButton).toBeDisabled();
+  });
+
+  it('should handle error loading comments', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    vi.mocked(reviewCommentService.readComments).mockRejectedValue(new Error('Network error'));
+
+    const { container } = render(<CommentSection contentId="test-content-id" />, { wrapper });
+
+    await waitFor(() => {
+      // The error is logged from the component, not the hook
+      expect(container.firstChild).toBeNull();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should pass stageId to the hook when provided', async () => {
+    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
+      comments: [] 
+    });
+
+    render(
+      <CommentSection 
+        contentId="test-content-id" 
+        stageId="stage-123"
+        isReviewMode={true}
+      />, 
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(reviewCommentService.readComments).toHaveBeenCalledWith({
+        contentId: 'test-content-id',
+        contentVer: '0',
+        contentType: 'application/vnd.ekstep.ecml-archive',
+        stageId: 'stage-123',
+      });
+    });
   });
 });
