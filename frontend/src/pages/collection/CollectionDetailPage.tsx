@@ -12,6 +12,7 @@ import { useUserRead } from "@/hooks/useUserRead";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
+import { useRatingTimer } from "@/hooks/useRatingTimer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import { useIsContentCreator } from "@/hooks/useUser";
@@ -104,20 +105,8 @@ const CollectionDetailPage = () => {
   const playerError = isQumlContent ? qumlError : contentError;
 
   const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
-  const ratingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onContentEnd = useCallback(() => {
-    if (ratingTimerRef.current !== null) clearTimeout(ratingTimerRef.current);
-    ratingTimerRef.current = setTimeout(() => setRatingOpen(true), 5000);
-  }, []);
-  const onContentStart = useCallback(() => {
-    if (ratingTimerRef.current !== null) {
-      clearTimeout(ratingTimerRef.current);
-      ratingTimerRef.current = null;
-    }
-  }, []);
-  useEffect(() => () => {
-    if (ratingTimerRef.current !== null) clearTimeout(ratingTimerRef.current);
-  }, []);
+  const openRating = useCallback(() => setRatingOpen(true), []);
+  const { onContentEnd, onContentStart } = useRatingTimer(openRating);
   const { handlePlayerEvent, handleTelemetryEvent } = useCollectionDetailPlayer({
     collectionId,
     contentId: contentId ?? undefined,
