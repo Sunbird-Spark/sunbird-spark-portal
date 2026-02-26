@@ -37,18 +37,36 @@ vi.mock('@/hooks/useUserRead', () => ({
         response: {
           firstName: 'Test',
           lastName: 'User',
+          channel: 'test-channel-slug',
           roles: [{ role: 'CONTENT_CREATOR' }],
         },
       },
     },
   }),
 }));
-
-vi.mock('@/hooks/useSystemSetting', () => ({ useSystemSetting: () => ({ data: undefined }) }));
-vi.mock('@/hooks/useOrganization', () => ({ useOrganizationSearch: () => ({ mutateAsync: vi.fn() }) }));
+vi.mock('@/hooks/useOrganization', () => ({ 
+  useOrganizationSearch: () => ({ 
+    mutateAsync: vi.fn().mockResolvedValue({ 
+      data: { 
+        response: { 
+          content: [{ 
+            hashTagId: 'test-org-id', 
+            identifier: 'test-org-id' 
+          }] 
+        } 
+      } 
+    }) 
+  }) 
+}));
 vi.mock('@/hooks/useQuestionSetCreate', () => ({ useQuestionSetCreate: () => ({ mutateAsync: mockQuestionSetMutateAsync }) }));
 vi.mock('@/hooks/useQuestionSetRetire', () => ({ useQuestionSetRetire: () => ({ mutateAsync: mockQuestionSetRetireMutateAsync }) }));
 vi.mock('@/hooks/useChannel', () => ({ useChannel: () => ({ data: undefined }) }));
+
+vi.mock('@/services/UserProfileService', () => ({
+  default: {
+    initialize: vi.fn().mockResolvedValue(undefined),
+  },
+}));
 
 vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => ({

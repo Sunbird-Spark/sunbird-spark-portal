@@ -11,7 +11,7 @@ import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
-import { SystemSettingService } from '../../SystemSettingService';
+import userProfileService from '../../UserProfileService';
 import {
   GENERIC_EDITOR_WINDOW_CONFIG,
   DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
@@ -42,7 +42,6 @@ declare global {
 export class GenericEditorService {
   private orgService = new OrganizationService();
   private channelService = new ChannelService();
-  private systemSettingService = new SystemSettingService();
 
   /**
    * Get the generic editor URL.
@@ -162,18 +161,11 @@ export class GenericEditorService {
       console.warn('Failed to get device ID for editor context');
     }
 
-    // Fetch default channel slug from system settings, then get org details
+    // Fetch channel slug from user profile, then get org details
     let channel = '';
     let orgName = '';
     try {
-      let slug = '';
-      try {
-        const settingResponse = await this.systemSettingService.read('default_channel');
-        slug = (settingResponse as any)?.data?.response?.value || '';
-      } catch {
-        console.warn('Failed to fetch default_channel system setting');
-      }
-
+      const slug = await userProfileService.getChannel();
       const orgResponse = await this.orgService.search({
         filters: { slug, isTenant: true },
       });

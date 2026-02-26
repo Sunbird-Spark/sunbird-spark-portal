@@ -28,13 +28,11 @@ vi.mock('../../OrganizationService', () => ({
   },
 }));
 
-const mockSystemSettingRead = vi.fn();
-
-vi.mock('../../SystemSettingService', () => ({
-  SystemSettingService: class {
-    read = mockSystemSettingRead;
-  },
+vi.mock('../../UserProfileService', () => ({
+  default: { getChannel: vi.fn(), clearCache: vi.fn() },
 }));
+
+import userProfileService from '../../UserProfileService';
 
 const mockChannelRead = vi.fn();
 
@@ -70,13 +68,7 @@ describe('ContentEditorService', () => {
       },
     });
 
-    mockSystemSettingRead.mockResolvedValue({
-      data: {
-        response: {
-          value: 'test-slug',
-        },
-      },
-    });
+    vi.mocked(userProfileService.getChannel).mockResolvedValue('test-slug');
 
     mockChannelRead.mockResolvedValue({
       data: {
