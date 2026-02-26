@@ -18,8 +18,6 @@ interface UseContentStateUpdateParams {
   mimeType: string | undefined;
   /** If 2 (completed), no API calls are made for START/END to avoid overwriting completed state. */
   currentContentStatus?: number;
-  /** Called once when content transitions to completed (status 2). */
-  onCompletion?: () => void;
   /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
   skipContentStateUpdate?: boolean;
 }
@@ -45,14 +43,11 @@ export function useContentStateUpdate({
   isBatchEnded = false,
   mimeType,
   currentContentStatus,
-  onCompletion,
   skipContentStateUpdate = false,
 }: UseContentStateUpdateParams): (event: TelemetryEvent) => void {
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
   const lastSentStatusRef = useRef<number | null>(null);
-  const onCompletionRef = useRef(onCompletion);
-  useEffect(() => { onCompletionRef.current = onCompletion; }, [onCompletion]);
 
   useEffect(() => {
     lastSentStatusRef.current = null;
@@ -110,7 +105,6 @@ export function useContentStateUpdate({
         if (status === 0 && lastSentStatusRef.current === 1) status = 1;
         lastSentStatusRef.current = null;
         void handleContentStateUpdate(status, true);
-        if (status === 2) onCompletionRef.current?.();
       }
     },
     [
