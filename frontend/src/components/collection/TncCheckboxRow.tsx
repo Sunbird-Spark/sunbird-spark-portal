@@ -21,8 +21,11 @@ export const TncCheckboxRow = ({
   settingKey = "tncConfig",
   label = "for creating this batch.",
 }: TncCheckboxRowProps) => {
-  const { data: tncConfig, isSuccess } = useSystemSetting(settingKey);
-  const { data: termsUrl } = useGetTncUrl(isSuccess ? tncConfig : null);
+  const { data: tncRes } = useSystemSetting(settingKey);
+  const { data: globalTncRes } = useSystemSetting("tncConfig");
+
+  const tncConfig = tncRes?.data?.result?.response?.value || globalTncRes?.data?.result?.response?.value;
+  const { data: termsUrl } = useGetTncUrl(tncConfig || null);
 
   return (
     <label htmlFor="acceptTerms" className="flex items-center gap-3 cursor-pointer select-none">
