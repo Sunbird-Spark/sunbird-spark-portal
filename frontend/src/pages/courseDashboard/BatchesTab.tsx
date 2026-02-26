@@ -92,7 +92,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
                      </div>
                      <span
                       className={cn(
-                        "inline-flex items-center text-[10px] font-medium rounded-full px-2 py-0.5 font-['Rubik']",
+                        "inline-flex items-center text-[0.625rem] font-medium rounded-full px-2 py-0.5 font-['Rubik']",
                         STATUS_STYLES[status]
                       )}
                     >

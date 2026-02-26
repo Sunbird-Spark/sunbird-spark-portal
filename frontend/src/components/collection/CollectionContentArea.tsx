@@ -98,7 +98,7 @@ export default function CollectionContentArea({
         <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_380px] gap-8 lg:items-start">
+      <div className="grid lg:grid-cols-[1fr_23.75rem] gap-8 lg:items-start">
         {/* Left Column */}
         <CollectionOverview
           collectionData={collectionData}

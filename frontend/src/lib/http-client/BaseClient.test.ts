@@ -28,6 +28,9 @@ class TestClient extends BaseClient {
     public updateHeaders(headers: HeaderOperation[]): void {
         this.mockUpdateHeaders(headers);
     }
+    public async getBlob(url: string, headers?: Record<string, string>): Promise<Blob> {
+        return new Blob();
+    }
 }
 
 describe('BaseClient', () => {

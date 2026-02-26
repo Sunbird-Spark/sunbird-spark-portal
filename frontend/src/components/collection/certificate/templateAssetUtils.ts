@@ -1,5 +1,6 @@
 import { NewTemplateForm } from "./types";
 import { Signatory } from "./signatoryUtils";
+import { getClient } from "@/lib/http-client";
 
 /**
  * Validates if the new template form has all required fields.
@@ -38,14 +39,12 @@ export function buildCreateAssetRequest(newTmpl: NewTemplateForm, rootOrgId: str
 }
 
 /**
- * Converts an image URL to a base64 string.
+ * Converts an image URL to a base64 string using the centralized HTTP client.
  */
 export async function getBase64Image(url: string): Promise<string> {
   if (url.startsWith("data:")) return url;
   try {
-    const r = await fetch(url);
-    if (!r.ok) return url;
-    const blob = await r.blob();
+    const blob = await getClient().getBlob(url);
     return new Promise<string>((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);

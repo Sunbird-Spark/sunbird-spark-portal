@@ -17,6 +17,7 @@ describe('FormService', () => {
       put: vi.fn(),
       patch: vi.fn(),
       delete: vi.fn(),
+      getBlob: vi.fn(),
       updateHeaders: vi.fn(),
     };
 

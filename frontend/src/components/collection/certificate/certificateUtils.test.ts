@@ -16,6 +16,11 @@ import { buildAddTemplateRequestPayload } from './certificateRequestBuilders';
 import { NewTemplateForm } from './types';
 import { certificateService } from '@/services/CertificateService';
 
+const mockGetBlob = vi.fn();
+vi.mock('@/lib/http-client', () => ({
+  getClient: () => ({ getBlob: mockGetBlob }),
+}));
+
 vi.mock('@/services/CertificateService', () => ({
   certificateService: {
     readCertTemplate: vi.fn(),
@@ -79,26 +84,15 @@ describe('useCertificateModalState.helpers', () => {
       expect(result).toBe('data:image/png;base64,123');
     });
 
-    it('returns original url if fetch throws', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+    it('returns original url if getBlob throws', async () => {
+      mockGetBlob.mockRejectedValue(new Error('Network error'));
       const result = await getBase64Image('https://example.com/img');
       expect(result).toBe('https://example.com/img');
-      vi.unstubAllGlobals();
-    });
-
-    it('returns original url if fetch is not ok', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
-      const result = await getBase64Image('https://example.com/img');
-      expect(result).toBe('https://example.com/img');
-      vi.unstubAllGlobals();
     });
 
     it('converts blob to base64 on success', async () => {
       const mockBlob = new Blob(['123'], { type: 'image/png' });
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        blob: async () => mockBlob,
-      }));
+      mockGetBlob.mockResolvedValue(mockBlob);
 
       class MockFileReader {
         onloadend: any = null;
@@ -117,10 +111,7 @@ describe('useCertificateModalState.helpers', () => {
     
     it('returns url on FileReader error', async () => {
       const mockBlob = new Blob(['123'], { type: 'image/png' });
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        blob: async () => mockBlob,
-      }));
+      mockGetBlob.mockResolvedValue(mockBlob);
 
       class MockFileReader {
         onloadend: any = null;
