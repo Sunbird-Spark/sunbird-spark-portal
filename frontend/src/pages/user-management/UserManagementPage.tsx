@@ -19,6 +19,9 @@ import RoleManagementTab from "./RoleManagementTab";
 import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAcceptTnc, useGetTncUrl } from "@/hooks/useTnc";
+import { useUserRead } from "@/hooks/useUserRead";
+import { TncService } from "@/services/TncService";
+import _ from "lodash";
 import "../home/home.css";
 import "./user-management.css";
 
@@ -55,9 +58,18 @@ const UserManagementPage = () => {
 
   const termsUrl = orgAdminTncUrl || fallbackTncUrl || '';
   const activeTncConfig = orgAdminTncUrl ? orgAdminTncConfig : fallbackTncConfig;
-  const activeTncType = orgAdminTncUrl ? 'orgAdminTnc' : undefined;
+  const activeTncType = orgAdminTncUrl ? 'orgAdminTnc' : 'tncConfig';
 
   const acceptTncMutation = useAcceptTnc();
+  const { data: userRes, refetch: refetchUser } = useUserRead();
+
+  const shouldShowTnc = (() => {
+    if (!termsUrl || !activeTncConfig || !userRes) return false;
+    const tncService = new TncService();
+    const latestVersion = tncService.getLatestVersion(activeTncConfig);
+    const acceptedVersion = _.get(userRes, ['data', 'result', 'response', 'allTncAccepted', activeTncType, 'version']);
+    return latestVersion !== acceptedVersion;
+  })();
 
   const loadRoles = useCallback(async () => {
     try {
@@ -76,6 +88,7 @@ const UserManagementPage = () => {
     try {
       await acceptTncMutation.mutateAsync({ tncConfig: activeTncConfig, tncType: activeTncType });
       setTncDialogOpen(false);
+      refetchUser();
       toast({ title: "Terms accepted", description: "You can now use User Management features." });
     } catch {
       toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
@@ -116,7 +129,7 @@ const UserManagementPage = () => {
                       title="Terms &amp; Conditions"
                       open={tncDialogOpen}
                       onOpenChange={setTncDialogOpen}
-                      onAccept={handleAcceptOrgTnc}
+                      onAccept={shouldShowTnc ? handleAcceptOrgTnc : undefined}
                       accepting={acceptTncMutation.isPending}
                     >
                       <button
