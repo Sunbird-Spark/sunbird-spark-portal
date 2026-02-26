@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { FiAward, FiCalendar, FiEdit2, FiLock } from "react-icons/fi";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 type BatchStatus = "Upcoming" | "Ongoing" | "Expired";
 
@@ -34,6 +35,7 @@ interface BatchRowProps {
 }
 
 export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowProps) => {
+  const { t } = useAppI18n();
   const status = getBatchStatus(batch.status);
   const hasCertTemplate =
     batch.certTemplates != null && Object.keys(batch.certTemplates).length > 0;
@@ -61,21 +63,21 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
               STATUS_STYLES[status]
             )}
           >
-            {status}
+            {t(`batchTabs.${status.toLowerCase()}`)}
           </span>
           {/* Edit — disabled if start date has passed */}
           {batchEditable ? (
             <button
               type="button"
               onClick={() => onEditClick(batch)}
-              title="Edit batch"
+              title={t('batchRow.editBatch')}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors"
             >
               <FiEdit2 className="w-3.5 h-3.5" />
             </button>
           ) : (
             <span
-              title="Batch cannot be edited after the start date has passed"
+              title={t('batchRow.batchCannotBeEdited')}
               className="p-1.5 rounded-lg text-muted-foreground/40 cursor-not-allowed"
             >
               <FiLock className="w-3.5 h-3.5" />
@@ -93,7 +95,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
         {batch.enrollmentEndDate && (
           <>
             <span className="text-border">·</span>
-            <span>Enrolment ends {formatDate(batch.enrollmentEndDate)}</span>
+            <span>{t('batchRow.enrolmentEnds', { date: formatDate(batch.enrollmentEndDate) })}</span>
           </>
         )}
       </div>
@@ -104,10 +106,10 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
         {certLocked ? (
           <span
             className="flex items-center gap-1 text-xs text-muted-foreground font-['Rubik'] cursor-not-allowed"
-            title="Certificate cannot be modified after the batch end date"
+            title={t('batchRow.certificateCannotBeModified')}
           >
             <FiLock className="w-3 h-3" />
-            {hasCertTemplate ? "Certificate Locked" : "Certificate Unavailable"}
+            {hasCertTemplate ? t('certificate.certificateLocked') : t('certificate.certificateUnavailable')}
           </span>
         ) : (
           <button
@@ -115,7 +117,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
             onClick={() => onCertificateClick(batch)}
             className="text-xs text-sunbird-brick font-medium font-['Rubik'] hover:underline"
           >
-            {hasCertTemplate ? "Edit Certificate" : "Add Certificate"}
+            {hasCertTemplate ? t('certificate.editCertificate') : t('certificate.addCertificate')}
           </button>
         )}
       </div>

@@ -601,5 +601,126 @@
   },
   "termsDialog": {
     "description": "Visualizar e ler o documento de termos e condições"
+  },
+  "workspaceCard": {
+    "locked": "Bloqueado",
+    "lockedBy": "Este conteúdo está bloqueado por {{name}}",
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Excluir"
+  },
+  "imagePicker": {
+    "selectImage": "Selecionar imagem",
+    "changeImage": "Alterar imagem",
+    "remove": "Remover",
+    "selectImageTitle": "Selecionar imagem — {{label}}",
+    "myImages": "Minhas imagens",
+    "allImages": "Todas as imagens",
+    "uploadImage": "Enviar imagem",
+    "noImagesUploaded": "Nenhuma imagem enviada ainda. Use a aba \"Enviar imagem\".",
+    "noImagesFound": "Nenhuma imagem encontrada nesta organização.",
+    "cancel": "Cancelar",
+    "uploadNew": "Enviar novo"
+  },
+  "certificate": {
+    "attachedTemplate": "Modelo de certificado anexado",
+    "editCertificate": "Editar certificado",
+    "noPreviewAvailable": "Nenhuma visualização disponível",
+    "activeTemplateDescription": "Este é o modelo de certificado ativo para este lote. Clique em <strong>Editar certificado</strong> para fazer alterações em sua configuração ou substituí-lo.",
+    "createTemplate": "Criar modelo de certificado",
+    "currentCertificate": "Certificado atual",
+    "changeCertificate": "Alterar certificado",
+    "brandLogo1": "Logo da marca 1",
+    "brandLogo2": "Logo da marca 2",
+    "signature1": "Assinatura 1",
+    "signature2": "Assinatura 2",
+    "all": "Todos",
+    "refreshTemplates": "Atualizar modelos",
+    "createNewTemplate": "Criar novo modelo",
+    "certificateLocked": "Certificado bloqueado",
+    "certificateUnavailable": "Certificado indisponível",
+    "addCertificate": "Adicionar certificado",
+    "reissue": "Reemitir",
+    "reissueCertificate": "Reemitir certificado",
+    "reissueConfirmation": "Reemitir o certificado para <strong>{{userName}}</strong> no lote <strong>{{batchName}}</strong>?",
+    "reissuing": "Reemitindo…",
+    "reissuedSuccessfully": "Certificado reemitido com sucesso.",
+    "reissueFailed": "Falha ao reemitir certificado."
+  },
+  "batchRow": {
+    "enrolmentEnds": "Inscrição até {{date}}",
+    "editBatch": "Editar lote",
+    "batchCannotBeEdited": "O lote não pode ser editado após a data de início ter passado",
+    "certificateCannotBeModified": "O certificado não pode ser modificado após a data de término do lote",
+    "refreshBatchList": "Atualizar lista de lotes",
+    "createBatch": "Criar lote"
+  },
+  "batchTabs": {
+    "ongoing": "Em andamento",
+    "upcoming": "Próximos",
+    "expired": "Expirados"
+  },
+  "collectionSidebar": {
+    "untitled": "Sem título"
+  },
+  "certificatesTab": {
+    "searching": "Pesquisando…",
+    "search": "Pesquisar",
+    "enterSunbirdId": "Inserir ID Sunbird",
+    "whatIsSunbirdId": "O que é o ID Sunbird?",
+    "howToFindSunbirdId": "Como encontrar seu ID Sunbird:",
+    "clickProfileTab": "Clique na aba <strong>Perfil</strong>",
+    "sunbirdIdDisplayed": "O ID Sunbird é exibido abaixo do nome do usuário",
+    "batchName": "Nome do lote",
+    "userName": "Nome do usuário",
+    "courseProgress": "Progresso do curso",
+    "criteriaMet": "Critérios atendidos",
+    "action": "Ação",
+    "searchFailed": "Falha na pesquisa.",
+    "noCertificateRecords": "Nenhum registro de certificado encontrado para \"{{userName}}\".",
+    "certificateIssued": "Certificado emitido",
+    "courseCompleted": "Curso concluído",
+    "yes": "Sim",
+    "no": "Não",
+    "criteriaMustBeMet": "Os critérios devem ser atendidos para reemitir",
+    "reissueCertificate": "Reemitir certificado"
+  },
+  "homePageDemo": {
+    "course1": "Curso 1",
+    "course2": "Curso 2"
+  },
+  "courseDashboard": {
+    "title": "Painel do curso"
+  },
+  "userManagement": {
+    "addRole": "Adicionar função"
+  },
+  "formFields": {
+    "select": "Selecionar {{field}}"
+  },
+  "exploreGrid": {
+    "noContentFound": "Nenhum conteúdo encontrado"
+  },
+  "status": {
+    "draft": "Rascunho",
+    "inReview": "Em revisão",
+    "published": "Publicado",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "completed": "Concluído",
+    "ongoing": "Em andamento",
+    "upcoming": "Próximos"
+  },
+  "tabs": {
+    "batches": "Lotes",
+    "certificates": "Certificados",
+    "all": "Todos"
+  },
+  "common": {
+    "manage": "Gerenciar",
+    "backTo": "Voltar para {{page}}",
+    "upcomingBatches": "Lotes próximos",
+    "learningProgress": "Progresso de aprendizado",
+    "downloadCertificate": "Baixar certificado"
   }
 }

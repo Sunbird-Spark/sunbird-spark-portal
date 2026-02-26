@@ -1,5 +1,7 @@
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const HomePerformanceChart = () => {
+    const { t } = useAppI18n();
     return (
         <div className="home-performance-chart h-[14.375rem] flex-1" style={{ paddingTop: '1.125rem' }}>
             <h3 className="text-lg font-bold text-sunbird-obsidian" style={{ marginBottom: '0.3125rem' }}>Performance</h3>

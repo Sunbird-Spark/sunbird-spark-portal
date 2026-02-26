@@ -8,9 +8,12 @@ import { QuestionSetService } from '@/services/QuestionSetService';
 import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
 
+import { useAppI18n } from '@/hooks/useAppI18n';
+
 const questionSetService = new QuestionSetService();
 
 const QumlEditorPage = () => {
+  const { t } = useAppI18n();
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
   const [metadata, setMetadata] = useState<any | null>(null);
@@ -50,7 +53,7 @@ const QumlEditorPage = () => {
     }
   }, [navigate, retireLock]);
 
-  const handleTelemetryEvent = useCallback((_event: any) => {}, []);
+  const handleTelemetryEvent = useCallback((_event: any) => { }, []);
 
   if (loading) {
     return <PageLoader message={t('content.loadingEditor')} />;

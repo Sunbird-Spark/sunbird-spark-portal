@@ -29,10 +29,10 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('403')).toBeInTheDocument();
-    expect(screen.getByText('Access Denied')).toBeInTheDocument();
+    expect(screen.getByText('unauthorizedPage.code')).toBeInTheDocument();
+    expect(screen.getByText('unauthorizedPage.title')).toBeInTheDocument();
     expect(
-      screen.getByText('You do not have the required permissions to access this page.')
+      screen.getByText('unauthorizedPage.message')
     ).toBeInTheDocument();
   });
 
@@ -45,8 +45,8 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Go Home')).toBeInTheDocument();
-    expect(screen.getByText('Change Role')).toBeInTheDocument();
+    expect(screen.getByText('unauthorizedPage.goHome')).toBeInTheDocument();
+    expect(screen.getByText('unauthorizedPage.changeRole')).toBeInTheDocument();
   });
 
   it('should navigate to login when Change Role button is clicked', () => {
@@ -58,7 +58,7 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    const changeRoleButton = screen.getByText('Change Role');
+    const changeRoleButton = screen.getByText('unauthorizedPage.changeRole');
     fireEvent.click(changeRoleButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/home');
@@ -73,7 +73,7 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
+    const goHomeButton = screen.getByText('unauthorizedPage.goHome');
     fireEvent.click(goHomeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/home');
@@ -96,7 +96,7 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
+    const goHomeButton = screen.getByText('unauthorizedPage.goHome');
     fireEvent.click(goHomeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/reports');
@@ -120,7 +120,7 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
+    const goHomeButton = screen.getByText('unauthorizedPage.goHome');
     fireEvent.click(goHomeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/workspace');
@@ -144,7 +144,7 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
+    const goHomeButton = screen.getByText('unauthorizedPage.goHome');
     fireEvent.click(goHomeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/workspace');
@@ -168,7 +168,7 @@ describe('UnauthorizedPage', () => {
       </MemoryRouter>
     );
 
-    const goHomeButton = screen.getByText('Go Home');
+    const goHomeButton = screen.getByText('unauthorizedPage.goHome');
     fireEvent.click(goHomeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/home');

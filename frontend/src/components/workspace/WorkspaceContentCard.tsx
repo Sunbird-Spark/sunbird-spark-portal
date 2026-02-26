@@ -11,11 +11,12 @@ import { cn, formatTimeAgo } from "@/lib/utils";
 import { type WorkspaceItem } from "@/types/workspaceTypes";
 import {
   CONTENT_TYPE_CARD_COLORS,
-  STATUS_CONFIG,
+  getStatusConfig,
   getWorkspaceItemActionVisibility,
   getPrimaryCategoryIcon,
 } from "@/services/workspace";
 import CardThumbnailBackground from "./CardThumbnailBackground";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface WorkspaceContentCardProps {
   item: WorkspaceItem;
@@ -32,9 +33,11 @@ const WorkspaceContentCard = ({
   onDelete,
   onView,
 }: WorkspaceContentCardProps) => {
+  const { t } = useAppI18n();
   const TypeIcon = getPrimaryCategoryIcon(item.primaryCategory, item.type);
   const colors = CONTENT_TYPE_CARD_COLORS[item.type];
-  const status = STATUS_CONFIG[item.status];
+  const statusConfig = getStatusConfig(t);
+  const status = statusConfig[item.status];
   const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
   const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
@@ -67,7 +70,7 @@ const WorkspaceContentCard = ({
                   className="pointer-events-auto bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
                 >
                   <FiEye className="w-4 h-4 mr-1.5" />
-                  View
+                  {t('workspaceCard.view')}
                 </Button>
               )}
               {canEdit && (
@@ -78,7 +81,7 @@ const WorkspaceContentCard = ({
                   className="pointer-events-auto bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
                 >
                   <FiEdit className="w-4 h-4 mr-1.5" />
-                  Edit
+                  {t('workspaceCard.edit')}
                 </Button>
               )}
             </div>
@@ -106,10 +109,10 @@ const WorkspaceContentCard = ({
           <div className="absolute bottom-3 left-3 z-20 group/lock cursor-pointer">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-amber-100 text-amber-700">
               <FiLock className="w-3 h-3" />
-              <span>Locked</span>
+              <span>{t('workspaceCard.locked')}</span>
             </div>
             <span className="absolute top-full left-0 mt-1.5 hidden group-hover/lock:block whitespace-nowrap rounded bg-foreground px-2 py-1 text-xs text-background shadow-md z-50">
-              {`This content is locked by ${lockInfo.creatorName}`}
+              {t('workspaceCard.lockedBy', { name: lockInfo.creatorName })}
             </span>
           </div>
         )}
@@ -131,19 +134,19 @@ const WorkspaceContentCard = ({
               <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
                 {showView && (
                   <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
-                    <FiEye className="w-4 h-4" /> View
+                    <FiEye className="w-4 h-4" /> {t('workspaceCard.view')}
                   </DropdownMenuItem>
                 )}
                 {canEdit && (
                   <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
-                    <FiEdit className="w-4 h-4" /> Edit
+                    <FiEdit className="w-4 h-4" /> {t('workspaceCard.edit')}
                   </DropdownMenuItem>
                 )}
                 {showDelete && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
-                      <FiTrash2 className="w-4 h-4" /> Delete
+                      <FiTrash2 className="w-4 h-4" /> {t('workspaceCard.delete')}
                     </DropdownMenuItem>
                   </>
                 )}

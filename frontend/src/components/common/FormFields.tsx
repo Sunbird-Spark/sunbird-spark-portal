@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import './FormFields.css';
 
 interface FormField {
@@ -49,6 +50,7 @@ export default function ResourceFormField({
   onDropdownToggle,
   dropdownRef,
 }: FormFieldProps) {
+  const { t } = useAppI18n();
   const colClass = getColumnClass(field.renderingHints?.semanticColumnWidth);
 
   if (field.inputType === 'text' || field.inputType === 'number') {
@@ -87,7 +89,7 @@ export default function ResourceFormField({
             className="resource-field-input"
             disabled={isLoading || !field.editable}
           >
-            <option value="" disabled>Select {field.label.toLowerCase()}</option>
+            <option value="" disabled>{t('formFields.select', { field: field.label.toLowerCase() })}</option>
             {options.map((opt) => (
               <option key={opt.key} value={opt.key}>{opt.name}</option>
             ))}
@@ -130,7 +132,7 @@ export default function ResourceFormField({
                   </span>
                 ))
               ) : (
-                <span className="resource-field-multiselect-placeholder">Select {field.label.toLowerCase()}</span>
+                <span className="resource-field-multiselect-placeholder">{t('formFields.select', { field: field.label.toLowerCase() })}</span>
               )}
             </div>
             <svg className={`resource-field-multiselect-icon ${isDropdownOpen ? 'open' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

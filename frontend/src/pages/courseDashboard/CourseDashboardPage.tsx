@@ -7,6 +7,7 @@ import PageLoader from '@/components/common/PageLoader';
 import { useCollection } from '@/hooks/useCollection';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import './courseDashboard.css';
 
 type DashboardTab = 'batches' | 'certificates';
@@ -14,6 +15,7 @@ type DashboardTab = 'batches' | 'certificates';
 const VALID_TABS: DashboardTab[] = ['batches', 'certificates'];
 
 const CourseDashboardPage: React.FC = () => {
+  const { t } = useAppI18n();
   const { collectionId, tab } = useParams<{ collectionId: string; tab: string }>();
   const navigate = useNavigate();
 
@@ -70,7 +72,7 @@ const CourseDashboardPage: React.FC = () => {
               </h1>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Course Dashboard</span>
+              <span>{t('courseDashboard.title')}</span>
             </div>
           </div>
         )}
@@ -96,7 +98,7 @@ const CourseDashboardPage: React.FC = () => {
               onClick={() => switchTab('batches')}
               data-testid="tab-batches"
             >
-              Batches
+              {t('tabs.batches')}
               {activeTab === 'batches' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
               )}
@@ -110,7 +112,7 @@ const CourseDashboardPage: React.FC = () => {
               onClick={() => switchTab('certificates')}
               data-testid="tab-certificates"
             >
-              Certificates
+              {t('tabs.certificates')}
               {activeTab === 'certificates' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
               )}

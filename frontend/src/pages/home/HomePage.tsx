@@ -35,8 +35,8 @@ const HomePage: React.FC = () => {
       <h1>{t('welcome')}</h1>
       <h2>{t('coursesAvailable')}</h2>
       <ul>
-        <li>Course 1</li>
-        <li>Course 2</li>
+        <li>{t('homePageDemo.course1')}</li>
+        <li>{t('homePageDemo.course2')}</li>
       </ul>
 
       <h2>{t('login')}</h2>

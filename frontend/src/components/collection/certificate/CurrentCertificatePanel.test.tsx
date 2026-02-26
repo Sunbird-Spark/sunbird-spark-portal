@@ -5,13 +5,13 @@ import { CurrentCertificatePanel } from './CurrentCertificatePanel';
 describe('CurrentCertificatePanel', () => {
   it('renders the "Attached Certificate Template" heading', () => {
     render(<CurrentCertificatePanel setCertTab={vi.fn()} existingCertTemplates={{}} />);
-    expect(screen.queryByText('Attached Certificate Template')).not.toBeInTheDocument();
+    expect(screen.queryByText('certificate.attachedTemplate')).not.toBeInTheDocument();
   });
 
   it('renders the replace guidance text', () => {
     const templates = { 'tmpl-1': { name: 'Cert' } };
     render(<CurrentCertificatePanel setCertTab={vi.fn()} existingCertTemplates={templates} />);
-    expect(screen.getByText(/This is the active certificate template/i)).toBeInTheDocument();
+    expect(screen.getByText('certificate.activeTemplateDescription')).toBeInTheDocument();
   });
 
   it('renders certificate entry with name and preview image when artifactUrl is set', () => {
@@ -38,7 +38,7 @@ describe('CurrentCertificatePanel', () => {
       'tmpl-1': { name: 'My Template' },
     };
     render(<CurrentCertificatePanel setCertTab={vi.fn()} existingCertTemplates={templates} />);
-    expect(screen.getByText('No preview available')).toBeInTheDocument();
+    expect(screen.getByText('certificate.noPreviewAvailable')).toBeInTheDocument();
   });
 
   it('uses previewUrl when artifactUrl is absent', () => {
@@ -72,7 +72,7 @@ describe('CurrentCertificatePanel', () => {
     const setCertTab = vi.fn();
     const templates = { 'tmpl-1': { name: 'Cert One' } };
     render(<CurrentCertificatePanel setCertTab={setCertTab} existingCertTemplates={templates} />);
-    const editBtn = screen.getByRole('button', { name: /Edit Certificate/i });
+    const editBtn = screen.getByRole('button', { name: 'certificate.editCertificate' });
     fireEvent.click(editBtn);
     expect(setCertTab).toHaveBeenCalledWith('change');
   });

@@ -3,6 +3,33 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import EditProfileDialog from './EditProfileDialog';
 import { FieldOtpState, OtpRequiredField, EditProfileFormData } from '@/types/profileTypes';
 import { createInitialFieldOtpState } from '@/types/profileTypes';
+import { useAppI18n } from '@/hooks/useAppI18n';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'editProfile.title': 'Edit Personal Information',
+                'personalInfo.fullName': 'Full Name',
+                'personalInfo.mobileNumber': 'Mobile Number',
+                'personalInfo.emailId': 'Email ID',
+                'personalInfo.alternateEmailId': 'Alternate Email ID',
+                'editProfile.validate': 'Validate',
+                'editProfile.sending': 'Sending...',
+                'editProfile.verified': 'Verified',
+                'save': 'Save',
+                'editProfile.saving': 'Saving...',
+                'forgotPasswordPage.enterCode': 'Enter the code',
+                'editProfile.enterDigitCodePhone': 'Enter the 6 digit code',
+                'editProfile.enterDigitCodeEmail': 'Enter the 6 digit code',
+                'signUp.submit': 'Submit',
+                'forgotPasswordPage.resendOtp': 'Resend OTP',
+                'editProfile.submitting': 'Submitting...',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
 
 const defaultForm: EditProfileFormData = {
     fullName: 'John Doe',

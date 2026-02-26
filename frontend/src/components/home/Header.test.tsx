@@ -17,7 +17,20 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => key,
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'onboarding.altSunbird': 'Sunbird',
+        'header.openMenu': 'Open menu',
+        'header.closeMenu': 'Close menu',
+        'header.search': 'Search',
+        'changeLanguage': 'Language',
+        'nav.home': 'Home',
+        'nav.explore': 'Explore',
+        'nav.about': 'About',
+        'nav.contact': 'Contact',
+      };
+      return translations[key] || key;
+    },
     languages: [
       { code: 'en', label: 'English' },
       { code: 'fr', label: 'Français' },
@@ -86,9 +99,9 @@ describe('Header', () => {
 
     it('renders the desktop navigation links', () => {
       renderHeader();
-      // The t() mock returns the key itself
-      expect(screen.getAllByText('nav.home').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('nav.explore').length).toBeGreaterThan(0);
+      // The t() mock now returns localized values
+      expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Explore').length).toBeGreaterThan(0);
     });
 
     it('renders the login button', () => {
@@ -160,14 +173,14 @@ describe('Header', () => {
       // Open mobile menu first
       fireEvent.click(screen.getByLabelText('Open menu'));
       // Click the mobile search button (shows the text label via t() key)
-      fireEvent.click(screen.getByText('header.search'));
+      fireEvent.click(screen.getByText('Search'));
       expect(screen.getByTestId('search-modal')).toBeInTheDocument();
     });
 
     it('closes the mobile menu when the mobile search button is clicked', () => {
       renderHeader();
       fireEvent.click(screen.getByLabelText('Open menu'));
-      fireEvent.click(screen.getByText('header.search'));
+      fireEvent.click(screen.getByText('Search'));
       // Mobile menu close button should no longer be visible (menu is closed)
       expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
     });

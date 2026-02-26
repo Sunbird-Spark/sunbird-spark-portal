@@ -8,6 +8,7 @@ import { ImageUploadTab } from "@/components/collection/ImageUploadTab";
 import { userService } from "@/services/UserService";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { resolveUserAndOrg } from "@/utils/userUtils";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface ImagePickerState {
   preview: string | null;
@@ -39,6 +40,7 @@ interface ImagePickerProps {
 }
 
 export function ImagePickerDialog({ label, required, value, onChange }: ImagePickerProps) {
+  const { t } = useAppI18n();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<ImageTab>("myImages");
 
@@ -141,12 +143,12 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
         {value.preview ? (
           <>
             <img src={value.preview} alt="selected" className="h-8 w-8 rounded object-cover" />
-            <span className="text-xs">Change image</span>
+            <span className="text-xs">{t('imagePicker.changeImage')}</span>
           </>
         ) : (
           <>
             <FiImage className="w-4 h-4" />
-            <span>Select image</span>
+            <span>{t('imagePicker.selectImage')}</span>
           </>
         )}
       </button>
@@ -156,7 +158,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
           onClick={() => onChange(emptyImage())}
           className="mt-1 text-xs text-red-400 hover:text-red-600 font-['Rubik']"
         >
-          Remove
+          {t('imagePicker.remove')}
         </button>
       )}
 
@@ -171,7 +173,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
               <Dialog.Title className="text-base font-semibold text-sunbird-obsidian font-['Rubik']">
-                Select Image — {label}
+                {t('imagePicker.selectImageTitle', { label })}
               </Dialog.Title>
               <Dialog.Close asChild>
                 <button
@@ -186,9 +188,9 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
             {/* Tabs */}
             {tab !== "upload" && (
               <div className="flex border-b border-border shrink-0">
-                {tabBtn("myImages", "My Images")}
-                {tabBtn("allImages", "All Images")}
-                {tabBtn("upload", "Upload Image")}
+                {tabBtn("myImages", t('imagePicker.myImages'))}
+                {tabBtn("allImages", t('imagePicker.allImages'))}
+                {tabBtn("upload", t('imagePicker.uploadImage'))}
               </div>
             )}
 
@@ -200,7 +202,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                   <ImageGallery
                     loading={loadingMy}
                     images={myImages}
-                    emptyMessage='No images uploaded yet. Use "Upload Image" tab.'
+                    emptyMessage={t('imagePicker.noImagesUploaded')}
                     selectedUrl={value.artifactUrl}
                     onSelect={handleSelectImage}
                   />
@@ -213,7 +215,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                   <ImageGallery
                     loading={loadingAll}
                     images={allImages}
-                    emptyMessage="No images found in this organisation."
+                    emptyMessage={t('imagePicker.noImagesFound')}
                     selectedUrl={value.artifactUrl}
                     onSelect={handleSelectImage}
                   />
@@ -251,7 +253,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                     type="button"
                     className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
                   >
-                    Cancel
+                    {t('imagePicker.cancel')}
                   </button>
                 </Dialog.Close>
                 <button
@@ -260,7 +262,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                   className="rounded-lg px-5 py-2 text-sm font-medium text-sunbird-brick border border-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors font-['Rubik'] inline-flex items-center gap-2"
                 >
                   <FiUpload className="w-4 h-4" />
-                  Upload New
+                  {t('imagePicker.uploadNew')}
                 </button>
               </div>
             )}

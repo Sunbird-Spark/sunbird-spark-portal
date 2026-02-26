@@ -3,6 +3,18 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import HomeContinueLearning from './HomeContinueLearning';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'homeComponents.continueLearning': 'Continue Learning',
+                'courseDetails.contentStatusCompleted': 'Completed',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
+
 // Mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {

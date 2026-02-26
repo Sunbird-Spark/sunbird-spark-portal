@@ -5,6 +5,7 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { FiCheckCircle, FiAward } from 'react-icons/fi';
 import { cn } from '@/lib/utils';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface CertificatesTabProps {
   collectionId: string;
@@ -18,6 +19,7 @@ interface ReissueTarget {
 }
 
 const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
+  const { t } = useAppI18n();
   const [uniqueId, setUniqueId] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
   const [reissueTarget, setReissueTarget] = useState<ReissueTarget | null>(null);
@@ -45,11 +47,11 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
       },
       {
         onSuccess: () => {
-          setReissueStatus({ type: 'success', message: 'Certificate re-issued successfully.' });
+          setReissueStatus({ type: 'success', message: t('certificate.reissuedSuccessfully') });
           setReissueTarget(null);
         },
         onError: (err: Error) => {
-          setReissueStatus({ type: 'error', message: err.message ?? 'Failed to re-issue certificate.' });
+          setReissueStatus({ type: 'error', message: err.message ?? t('certificate.reissueFailed') });
           setReissueTarget(null);
         },
       }
@@ -68,7 +70,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
           type="text"
           value={uniqueId}
           onChange={(e) => setUniqueId(e.target.value)}
-          placeholder="Enter Sunbird ID"
+          placeholder={t('certificatesTab.enterSunbirdId')}
           className="max-w-md"
           data-testid="unique-id-input"
         />
@@ -78,7 +80,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
           disabled={searching || !uniqueId.trim()}
           data-testid="search-btn"
         >
-          {searching ? 'Searching…' : 'Search'}
+          {searching ? t('certificatesTab.searching') : t('certificatesTab.search')}
         </Button>
       </form>
 
@@ -89,15 +91,15 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
         onClick={() => setHintOpen((o) => !o)}
         data-testid="hint-toggle"
       >
-        {hintOpen ? '▲' : '▼'} What is Sunbird ID?
+        {hintOpen ? '▲' : '▼'} {t('certificatesTab.whatIsSunbirdId')}
       </button>
 
       {hintOpen && (
         <div className="bg-accent border border-border rounded-lg p-4 mb-6 text-sm max-w-md text-foreground" data-testid="hint-box">
-          <strong>How to find your Sunbird ID:</strong>
+          <strong>{t('certificatesTab.howToFindSunbirdId')}</strong>
           <ol className="mt-1.5 ml-5 list-decimal">
-            <li>Click the <strong>Profile</strong> tab</li>
-            <li>The Sunbird ID is displayed below the user name</li>
+            <li dangerouslySetInnerHTML={{ __html: t('certificatesTab.clickProfileTab') }} />
+            <li>{t('certificatesTab.sunbirdIdDisplayed')}</li>
           </ol>
         </div>
       )}
@@ -120,31 +122,31 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
           <table className="w-full text-sm">
             <thead>
               <tr>
-                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">Batch Name</th>
-                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">User Name</th>
-                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">Course Progress</th>
-                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">Criteria Met</th>
-                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">Action</th>
+                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.batchName')}</th>
+                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.userName')}</th>
+                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.courseProgress')}</th>
+                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.criteriaMet')}</th>
+                <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.action')}</th>
               </tr>
             </thead>
             <tbody>
               {searchError ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-red-600 border-b border-border" data-testid="search-error">
-                    {(searchError as Error).message ?? 'Search failed.'}
+                    {(searchError as Error).message ?? t('certificatesTab.searchFailed')}
                   </td>
                 </tr>
               ) : !hasBatches ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-muted-foreground border-b border-border" data-testid="no-results">
-                    No certificate records found for "{certUser?.userName ?? uniqueId}".
+                    {t('certificatesTab.noCertificateRecords', { userName: certUser?.userName ?? uniqueId })}
                   </td>
                 </tr>
               ) : (
                 certUser?.courses.batches.map((batch: CertUserBatch, idx: number) => {
                   const hasCertificate = batch.issuedCertificates && batch.issuedCertificates.length > 0;
                   const isCompleted = batch.status === 2;
-                  const criteriaMet = isCompleted ? 'Yes' : 'No';
+                  const criteriaMet = isCompleted ? t('certificatesTab.yes') : t('certificatesTab.no');
                   const showIndicator = hasCertificate || isCompleted;
 
                   return (
@@ -153,7 +155,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                         <div className="flex items-center gap-2">
                           {batch.name ?? batch.batch?.name ?? batch.batchId}
                           {showIndicator && (
-                            <span title={hasCertificate ? "Certificate Issued" : "Course Completed"}>
+                            <span title={hasCertificate ? t('certificatesTab.certificateIssued') : t('certificatesTab.courseCompleted')}>
                               {hasCertificate ? (
                                 <FiAward className="w-4 h-4 text-sunbird-brick" />
                               ) : (
@@ -166,7 +168,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                       <td className="border-b border-border p-3 text-foreground">{certUser.userName}</td>
                       <td className="border-b border-border p-3 text-foreground">{batch.completionPercentage ?? 0}%</td>
                       <td className="border-b border-border p-3 text-foreground">
-                        <span className={criteriaMet === 'Yes' ? 'text-green-600 font-medium' : 'text-gray-500'}>
+                        <span className={criteriaMet === t('certificatesTab.yes') ? 'text-green-600 font-medium' : 'text-gray-500'}>
                           {criteriaMet}
                         </span>
                       </td>
@@ -176,11 +178,11 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                         size="sm"
                         className={cn(
                           "h-auto p-0 transition-colors",
-                          criteriaMet === 'Yes' ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
+                          criteriaMet === t('certificatesTab.yes') ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
                         )}
                         data-testid={`reissue-btn-${idx}`}
-                        disabled={criteriaMet === 'No'}
-                        title={criteriaMet === 'No' ? "Criteria must be met to re-issue" : "Re-issue certificate"}
+                        disabled={criteriaMet === t('certificatesTab.no')}
+                        title={criteriaMet === t('certificatesTab.no') ? t('certificatesTab.criteriaMustBeMet') : t('certificatesTab.reissueCertificate')}
                         onClick={() =>
                           setReissueTarget({
                             userId: certUser.userId,
@@ -190,7 +192,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                           })
                         }
                       >
-                        Re-issue
+                        {t('certificate.reissue')}
                       </Button>
                     </td>
                   </tr>
@@ -205,11 +207,8 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
       {reissueTarget && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[1000]" data-testid="reissue-modal">
           <div className="bg-card rounded-xl p-8 w-full max-w-md shadow-lg mx-4">
-            <h3 className="text-lg font-semibold text-foreground mb-3">Re-issue Certificate</h3>
-            <p className="text-sm text-muted-foreground mb-6">
-              Re-issue the certificate for <strong>{reissueTarget.userName}</strong> in batch{' '}
-              <strong>{reissueTarget.batchName}</strong>?
-            </p>
+            <h3 className="text-lg font-semibold text-foreground mb-3">{t('certificate.reissueCertificate')}</h3>
+            <p className="text-sm text-muted-foreground mb-6" dangerouslySetInnerHTML={{ __html: t('certificate.reissueConfirmation', { userName: reissueTarget.userName, batchName: reissueTarget.batchName }) }} />
             <div className="flex gap-3 justify-end">
               <Button
                 variant="outline"
@@ -218,7 +217,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                 data-testid="modal-no-btn"
                 disabled={reissuing}
               >
-                No
+                {t('certificatesTab.no')}
               </Button>
               <Button
                 className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-['Rubik'] transition-colors"
@@ -226,7 +225,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                 data-testid="modal-yes-btn"
                 disabled={reissuing}
               >
-                {reissuing ? 'Re-issuing…' : 'Yes'}
+                {reissuing ? t('certificate.reissuing') : t('certificatesTab.yes')}
               </Button>
             </div>
           </div>

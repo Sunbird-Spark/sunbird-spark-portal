@@ -6,6 +6,27 @@ import React from 'react';
 import Onboarding from './OnboardingPage';
 import { useFormRead } from '@/hooks/useForm';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string, options?: any) => {
+      const translations: Record<string, string> = {
+        'onboarding.failedToLoad': 'Failed to load onboarding',
+        'onboarding.skip': 'Skip',
+        'onboarding.personalizeWelcome': 'We would love to help you personalize your experience!',
+        'onboarding.saveAndProceed': 'Save and Proceed',
+        'onboarding.submit': 'Submit',
+        'onboarding.saving': 'Saving...',
+        'onboarding.skipOnboarding': 'Skip Onboarding',
+        'onboarding.otherPreferencePlaceholder': 'Please type your preference here',
+        'onboarding.altSunbird': 'Sunbird',
+        'onboarding.altImage': 'Onboarding Image',
+        'onboarding.goBack': 'Go back',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 // Mock dependencies
 vi.mock('@/hooks/useForm');
 // Mock assets
@@ -133,7 +154,7 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     expect(screen.getByText('We would love to help you personalize your experience!')).toBeInTheDocument();
     expect(screen.getByText('What is your role?')).toBeInTheDocument();
     expect(screen.getByText('Teacher')).toBeInTheDocument();
@@ -172,17 +193,17 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     let teacherButton = screen.getByText('Teacher').closest('button');
-    
+
     // Initially should have default class
     expect(teacherButton).toHaveClass('option-chip-default');
-    
+
     fireEvent.click(teacherButton!);
-    
+
     // Re-query the button after state update
     teacherButton = screen.getByText('Teacher').closest('button');
-    
+
     // After click should have selected class
     expect(teacherButton).toHaveClass('option-chip-selected');
     expect(teacherButton).not.toHaveClass('option-chip-default');
@@ -202,15 +223,15 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Select an option
     const teacherButton = screen.getByText('Teacher').closest('button');
     fireEvent.click(teacherButton!);
-    
+
     // Click Save and Proceed
     const proceedButton = screen.getByRole('button', { name: /Save and Proceed/i });
     fireEvent.click(proceedButton);
-    
+
     // Should navigate to next screen
     expect(screen.getByText('What skills are you interested in?')).toBeInTheDocument();
     expect(screen.getByText('2/3')).toBeInTheDocument();
@@ -230,17 +251,17 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate through screens to final one
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     fireEvent.click(screen.getByText('Mathematics').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // On experience screen (final), select an option
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
-    
+
     // Should show Submit button
     expect(screen.getByRole('button', { name: /Submit/i })).toBeInTheDocument();
   });
@@ -259,26 +280,26 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate to final screen
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     fireEvent.click(screen.getByText('Mathematics').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
-    
+
     // Submit
     const submitButton = screen.getByRole('button', { name: /Submit/i });
     fireEvent.click(submitButton);
-    
+
     // Should show loading state
     expect(screen.getByText('Saving...')).toBeInTheDocument();
-    
+
     // Fast-forward timers and run all pending timers
     await vi.advanceTimersByTimeAsync(1000);
-    
+
     expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 
@@ -296,10 +317,10 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
     fireEvent.click(skipButton);
-    
+
     expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 
@@ -317,17 +338,17 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate to final screen and submit
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     fireEvent.click(screen.getByText('Mathematics').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
-    
+
     // Skip button should be disabled
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
     expect(skipButton).toBeDisabled();
@@ -347,7 +368,7 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     const proceedButton = screen.getByRole('button', { name: /Save and Proceed/i });
     expect(proceedButton).toBeDisabled();
   });
@@ -382,11 +403,11 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
-    const buttons = screen.getAllByRole('button').filter(btn => 
+
+    const buttons = screen.getAllByRole('button').filter(btn =>
       ['Teacher', 'Student', 'Parent'].includes(btn.textContent || '')
     );
-    
+
     expect(buttons[0]).toHaveTextContent('Teacher');
     expect(buttons[1]).toHaveTextContent('Student');
     expect(buttons[2]).toHaveTextContent('Parent');
@@ -442,7 +463,7 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
     expect(screen.getByAltText('Onboarding Image')).toBeInTheDocument();
   });
@@ -461,7 +482,7 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     const backButton = screen.queryByLabelText('Go back');
     expect(backButton).not.toBeInTheDocument();
   });
@@ -480,11 +501,11 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate to second screen
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // Back button should now be visible
     const backButton = screen.getByLabelText('Go back');
     expect(backButton).toBeInTheDocument();
@@ -505,19 +526,19 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate to second screen
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // Should be on skills screen
     expect(screen.getByText('What skills are you interested in?')).toBeInTheDocument();
     expect(screen.getByText('2/3')).toBeInTheDocument();
-    
+
     // Click back button
     const backButton = screen.getByLabelText('Go back');
     fireEvent.click(backButton);
-    
+
     // Should be back on first screen
     expect(screen.getByText('What is your role?')).toBeInTheDocument();
     expect(screen.getByText('1/3')).toBeInTheDocument();
@@ -538,22 +559,22 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate to final screen
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     fireEvent.click(screen.getByText('Mathematics').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // Back button should be visible and enabled
     const backButton = screen.getByLabelText('Go back');
     expect(backButton).not.toBeDisabled();
-    
+
     // Select an option and submit
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
-    
+
     // Back button should now be disabled
     expect(backButton).toBeDisabled();
   });
@@ -572,28 +593,28 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Navigate forward through all screens
     expect(screen.getByText('1/3')).toBeInTheDocument();
-    
+
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
     expect(screen.getByText('2/3')).toBeInTheDocument();
-    
+
     fireEvent.click(screen.getByText('Mathematics').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
     expect(screen.getByText('3/3')).toBeInTheDocument();
-    
+
     // Navigate back
     fireEvent.click(screen.getByLabelText('Go back'));
     expect(screen.getByText('2/3')).toBeInTheDocument();
     expect(screen.getByText('What skills are you interested in?')).toBeInTheDocument();
-    
+
     // Navigate back again
     fireEvent.click(screen.getByLabelText('Go back'));
     expect(screen.getByText('1/3')).toBeInTheDocument();
     expect(screen.getByText('What is your role?')).toBeInTheDocument();
-    
+
     // Back button should not be visible on first screen
     expect(screen.queryByLabelText('Go back')).not.toBeInTheDocument();
   });
@@ -637,8 +658,8 @@ describe('Onboarding Component', () => {
   });
 
   it('handles invalid nextScreenId gracefully', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
     const dataWithInvalidNext = {
       isEnabled: true,
       initialScreenId: 'role',
@@ -667,27 +688,27 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Select an option
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
-    
+
     // Try to proceed with invalid nextScreenId
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // Should log error
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Invalid nextScreenId: "nonexistent_screen" does not exist in onboarding screens'
     );
-    
+
     // Should stay on current screen (not navigate)
     expect(screen.getByText('What is your role?')).toBeInTheDocument();
-    
+
     consoleErrorSpy.mockRestore();
   });
 
   it('handles invalid field-level nextScreenId gracefully', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
     const dataWithInvalidFieldNext = {
       isEnabled: true,
       initialScreenId: 'role',
@@ -716,27 +737,27 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Select option with invalid nextScreenId
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
-    
+
     // Try to proceed
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // Should log error
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Invalid nextScreenId: "invalid_screen" does not exist in onboarding screens'
     );
-    
+
     // Should stay on current screen
     expect(screen.getByText('What is your role?')).toBeInTheDocument();
-    
+
     consoleErrorSpy.mockRestore();
   });
 
   it('treats screen with invalid nextScreenId as terminal screen', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
     const dataWithInvalidNext = {
       isEnabled: true,
       initialScreenId: 'role',
@@ -764,24 +785,24 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    
+
     // Select option
     fireEvent.click(screen.getByText('Teacher').closest('button')!);
-    
+
     // Should still show "Save and Proceed" button (because nextScreenId exists)
     expect(screen.getByRole('button', { name: /Save and Proceed/i })).toBeInTheDocument();
-    
+
     // Click the button to trigger the error
     fireEvent.click(screen.getByRole('button', { name: /Save and Proceed/i }));
-    
+
     // Should log error and not navigate
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Invalid nextScreenId: "nonexistent" does not exist in onboarding screens'
     );
-    
+
     // Should stay on the same screen
     expect(screen.getByText('What is your role?')).toBeInTheDocument();
-    
+
     consoleErrorSpy.mockRestore();
   });
 });

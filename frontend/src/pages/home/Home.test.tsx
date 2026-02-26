@@ -271,7 +271,7 @@ describe('Home Page', () => {
     it('changes language through the dropdown', async () => {
         renderHome();
 
-        const langBtn = screen.getByAltText('Language').parentElement;
+        const langBtn = screen.getByAltText('common.language').parentElement;
         fireEvent.click(langBtn!);
 
         const hindiOption = await screen.findByText('Hindi');

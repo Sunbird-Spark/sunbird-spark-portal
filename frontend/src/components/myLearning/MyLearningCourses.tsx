@@ -3,25 +3,27 @@ import { useState, useEffect } from "react";
 import { FiChevronDown } from "react-icons/fi";
 import { TrackableCollection } from "@/types/TrackableCollections";
 import TrackableCollectionCard from "../content/TrackableCollectionCard";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 
 const COURSES_PER_PAGE = 9;
 
 type TabType = "active" | "completed" | "upcoming";
 
-const tabs: { id: TabType; label: string }[] = [
-  { id: "active", label: "Active Courses" },
-  { id: "completed", label: "Completed" },
-  { id: "upcoming", label: "Upcoming" },
-];
-
 interface MyLearningCoursesProps {
   courses?: TrackableCollection[];
 }
 
 const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
+  const { t } = useAppI18n();
   const [activeTab, setActiveTab] = useState<TabType>("active");
   const [visibleCount, setVisibleCount] = useState(COURSES_PER_PAGE);
+
+  const tabs: { id: TabType; label: string }[] = [
+    { id: "active", label: t('status.active') + ' ' + t('courses') },
+    { id: "completed", label: t('status.completed') },
+    { id: "upcoming", label: t('status.upcoming') },
+  ];
 
   const getFilteredCourses = () => {
     const today = dayjs().startOf('day');
@@ -56,7 +58,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
     <div className="bg-white rounded-2xl p-6 h-full shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit">
-        <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-['Rubik']">Courses</h3>
+        <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-['Rubik']">{t('courses')}</h3>
         <FiChevronDown className="text-sunbird-obsidian w-[1.25rem] h-[1.25rem] mt-1" />
       </div>
 

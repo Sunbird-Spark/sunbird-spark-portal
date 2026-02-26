@@ -24,10 +24,20 @@ vi.mock('react-router-dom', async () => {
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string, params?: Record<string, string>) => {
+      const translations: Record<string, string> = {
+        'search_for_content_placeholder': 'Search for content...',
+        'recommended': 'Recommended',
+        'cancel': 'Cancel',
+        'no_results_found': 'No results found',
+        'clear_search': 'Clear search',
+        'view_all_results': 'View All Results',
+        'loading': 'Loading...',
+        'failed_to_search': 'Failed to search',
+      };
       if (key === 'results_for' && params?.query) {
         return `Results for "${params.query}"`;
       }
-      return key;
+      return translations[key] || key;
     },
   }),
 }));
@@ -96,19 +106,19 @@ describe('SearchModal', () => {
   describe('visibility', () => {
     it('renders nothing when isOpen is false', () => {
       renderModal(false);
-      expect(screen.queryByPlaceholderText('search_for_content_placeholder')).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText('Search for content...')).not.toBeInTheDocument();
     });
 
     it('renders the search panel when isOpen is true', () => {
       renderModal();
-      expect(screen.getByPlaceholderText('search_for_content_placeholder')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search for content...')).toBeInTheDocument();
     });
   });
 
   describe('dismissal', () => {
     it('calls onClose when the Cancel button is clicked', () => {
       renderModal();
-      fireEvent.click(screen.getByText('cancel'));
+      fireEvent.click(screen.getByText('Cancel'));
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
@@ -150,7 +160,7 @@ describe('SearchModal', () => {
     it('shows "No results found." when the API returns an empty array', () => {
       mockUseContentSearch.mockReturnValue(emptyResponse);
       renderModal();
-      expect(screen.getByText('no_results_found')).toBeInTheDocument();
+      expect(screen.getByText('No results found')).toBeInTheDocument();
     });
 
     it('renders a card for each result returned by the API', () => {
@@ -170,12 +180,12 @@ describe('SearchModal', () => {
   describe('section title', () => {
     it('shows "Recommended" when no query has been typed', () => {
       renderModal();
-      expect(screen.getByRole('heading', { name: 'recommended' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Recommended' })).toBeInTheDocument();
     });
 
     it('shows \'Results for "..."\' when the user types a query', () => {
       renderModal();
-      fireEvent.change(screen.getByPlaceholderText('search_for_content_placeholder'), {
+      fireEvent.change(screen.getByPlaceholderText('Search for content...'), {
         target: { value: 'Eng' },
       });
       expect(screen.getByRole('heading', { name: 'Results for "Eng"' })).toBeInTheDocument();
@@ -183,10 +193,10 @@ describe('SearchModal', () => {
 
     it('reverts to "Recommended" after the query is cleared', () => {
       renderModal();
-      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      const input = screen.getByPlaceholderText('Search for content...');
       fireEvent.change(input, { target: { value: 'Eng' } });
       fireEvent.change(input, { target: { value: '' } });
-      expect(screen.getByRole('heading', { name: 'recommended' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Recommended' })).toBeInTheDocument();
     });
   });
 
@@ -198,7 +208,7 @@ describe('SearchModal', () => {
 
     it('shows the clear button when the user has typed something', () => {
       renderModal();
-      fireEvent.change(screen.getByPlaceholderText('search_for_content_placeholder'), {
+      fireEvent.change(screen.getByPlaceholderText('Search for content...'), {
         target: { value: 'test' },
       });
       expect(screen.getByLabelText('Clear search')).toBeInTheDocument();
@@ -206,7 +216,7 @@ describe('SearchModal', () => {
 
     it('clears the input value when the clear button is clicked', () => {
       renderModal();
-      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      const input = screen.getByPlaceholderText('Search for content...');
       fireEvent.change(input, { target: { value: 'test' } });
       fireEvent.click(screen.getByLabelText('Clear search'));
       expect(input).toHaveValue('');
@@ -214,7 +224,7 @@ describe('SearchModal', () => {
 
     it('hides the clear button after clearing the input', () => {
       renderModal();
-      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      const input = screen.getByPlaceholderText('Search for content...');
       fireEvent.change(input, { target: { value: 'test' } });
       fireEvent.click(screen.getByLabelText('Clear search'));
       expect(screen.queryByLabelText('Clear search')).not.toBeInTheDocument();
@@ -250,7 +260,7 @@ describe('SearchModal', () => {
 
     it('sends the typed query to useContentSearch', () => {
       renderModal();
-      fireEvent.change(screen.getByPlaceholderText('search_for_content_placeholder'), {
+      fireEvent.change(screen.getByPlaceholderText('Search for content...'), {
         target: { value: 'machine learning' },
       });
       expect(mockUseContentSearch).toHaveBeenCalledWith(
@@ -268,28 +278,28 @@ describe('SearchModal', () => {
 
     it('is visible when results are present', () => {
       renderModal();
-      expect(screen.getByText('view_all_results')).toBeInTheDocument();
+      expect(screen.getByText('View All Results')).toBeInTheDocument();
     });
 
     it('navigates to /explore with the encoded query on click', () => {
       renderModal();
-      fireEvent.change(screen.getByPlaceholderText('search_for_content_placeholder'), {
+      fireEvent.change(screen.getByPlaceholderText('Search for content...'), {
         target: { value: 'machine learning' },
       });
-      fireEvent.click(screen.getByText('view_all_results'));
+      fireEvent.click(screen.getByText('View All Results'));
       expect(mockNavigate).toHaveBeenCalledWith('/explore?q=machine%20learning');
     });
 
     it('calls onClose when "View All Results" is clicked', () => {
       renderModal();
-      fireEvent.click(screen.getByText('view_all_results'));
+      fireEvent.click(screen.getByText('View All Results'));
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
     it('is not visible when results are empty', () => {
       mockUseContentSearch.mockReturnValue(emptyResponse);
       renderModal();
-      expect(screen.queryByText('view_all_results')).not.toBeInTheDocument();
+      expect(screen.queryByText('View All Results')).not.toBeInTheDocument();
     });
   });
 
@@ -310,12 +320,12 @@ describe('SearchModal', () => {
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
       expect(dialog).toHaveAttribute('aria-modal', 'true');
-      expect(dialog).toHaveAttribute('aria-label', 'search_for_content_placeholder');
+      expect(dialog).toHaveAttribute('aria-label', 'Search for content...');
     });
 
     it('focuses the search input when modal opens', () => {
       renderModal();
-      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      const input = screen.getByPlaceholderText('Search for content...');
       expect(input).toHaveFocus();
     });
 
@@ -326,7 +336,7 @@ describe('SearchModal', () => {
       expect(button).toHaveFocus();
 
       const { rerender } = renderModal(true);
-      const input = screen.getByPlaceholderText('search_for_content_placeholder');
+      const input = screen.getByPlaceholderText('Search for content...');
       expect(input).toHaveFocus();
 
       rerender(
@@ -394,8 +404,8 @@ describe('SearchModal', () => {
 
     it('clears query when modal closes', () => {
       const { rerender } = renderModal(true);
-      const input = screen.getByPlaceholderText('search_for_content_placeholder');
-      
+      const input = screen.getByPlaceholderText('Search for content...');
+
       fireEvent.change(input, { target: { value: 'test query' } });
       expect(input).toHaveValue('test query');
 
@@ -411,7 +421,7 @@ describe('SearchModal', () => {
         </MemoryRouter>
       );
 
-      const newInput = screen.getByPlaceholderText('search_for_content_placeholder');
+      const newInput = screen.getByPlaceholderText('Search for content...');
       expect(newInput).toHaveValue('');
     });
   });
