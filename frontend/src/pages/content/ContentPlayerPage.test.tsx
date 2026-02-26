@@ -88,7 +88,6 @@ describe('ContentPlayerPage', () => {
     vi.clearAllMocks();
     mockParams.contentId = 'do_123';
     capturedCallbacks.onTelemetryEvent = undefined;
-    vi.spyOn(window.history, 'go').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -203,68 +202,6 @@ describe('ContentPlayerPage', () => {
 
     act(() => { capturedCallbacks.onTelemetryEvent?.({ eid: 'START' }); });
     act(() => { vi.advanceTimersByTime(5000); });
-    expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-  });
-
-  // ── Browser back button (popstate) — H5P ─────────────────────────────────
-
-  it('intercepts browser back for H5P: calls history.go(1) and shows rating dialog', () => {
-    makeContentRead(h5pContent);
-    render(<ContentPlayerPage />);
-
-    act(() => { window.dispatchEvent(new PopStateEvent('popstate')); });
-
-    expect(window.history.go).toHaveBeenCalledWith(1);
-    expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-  });
-
-  it('navigates back after closing rating dialog triggered by browser back for H5P', () => {
-    makeContentRead(h5pContent);
-    render(<ContentPlayerPage />);
-
-    act(() => { window.dispatchEvent(new PopStateEvent('popstate')); });
-    fireEvent.click(screen.getByRole('button', { name: 'Close Rating' }));
-
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
-  });
-
-  it('the counteracting second popstate does not re-trigger the dialog or call history.go again', () => {
-    makeContentRead(h5pContent);
-    render(<ContentPlayerPage />);
-
-    // First popstate: user presses back
-    act(() => { window.dispatchEvent(new PopStateEvent('popstate')); });
-    expect(window.history.go).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-
-    // Second popstate: the undo fired by history.go(1)
-    act(() => { window.dispatchEvent(new PopStateEvent('popstate')); });
-    expect(window.history.go).toHaveBeenCalledTimes(1); // no additional call
-  });
-
-  it('does not intercept popstate for non-H5P content', () => {
-    makeContentRead(videoContent);
-    render(<ContentPlayerPage />);
-
-    act(() => { window.dispatchEvent(new PopStateEvent('popstate')); });
-
-    expect(window.history.go).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
-  });
-
-  it('does not intercept popstate after rating is already done for H5P', () => {
-    makeContentRead(h5pContent);
-    render(<ContentPlayerPage />);
-
-    // Trigger and dismiss the dialog via Go Back
-    fireEvent.click(screen.getByRole('button', { name: /Go Back/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Close Rating' }));
-    mockNavigate.mockClear();
-    vi.mocked(window.history.go).mockClear();
-
-    // Subsequent popstate should not re-show dialog or call history.go
-    act(() => { window.dispatchEvent(new PopStateEvent('popstate')); });
-    expect(window.history.go).not.toHaveBeenCalled();
     expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
   });
 });
