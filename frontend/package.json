@@ -47,11 +47,13 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
+    "html-to-image": "^1.11.13",
     "i18next": "^25.7.4",
     "input-otp": "^1.4.2",
     "jquery": "^3.7.1",
     "jquery-ui-dist": "^1.13.3",
     "jquery.fancytree": "^2.38.3",
+    "jspdf": "^4.2.0",
     "lodash": "^4.17.23",
     "postcss": "^8.5.6",
     "react": "^19.2.1",
@@ -65,6 +67,7 @@
     "snyk": "^1.1301.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^3.4.17",
+    "tree-model": "^1.0.7",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiClock, FiUser } from "react-icons/fi";
+import { FiMoreVertical, FiEdit, FiTrash2, FiEye, FiClock, FiUser, FiLock } from "react-icons/fi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +19,7 @@ import CardThumbnailBackground from "./CardThumbnailBackground";
 
 interface WorkspaceContentCardProps {
   item: WorkspaceItem;
+  lockInfo?: { creatorName: string };
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
@@ -26,6 +27,7 @@ interface WorkspaceContentCardProps {
 
 const WorkspaceContentCard = ({
   item,
+  lockInfo,
   onEdit,
   onDelete,
   onView,
@@ -35,24 +37,56 @@ const WorkspaceContentCard = ({
   const status = STATUS_CONFIG[item.status];
   const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
-  const { showView, showEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
+  const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
+  const isLocked = !!lockInfo;
 
   return (
-    <div className="bg-card rounded-2xl shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300 border border-border">
-      {/* Thumbnail */}
-      <div className="relative aspect-video bg-muted overflow-hidden">
-        {item.thumbnail ? (
-          <img
-            src={item.thumbnail}
-            alt={item.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <CardThumbnailBackground type={item.type} primaryCategory={item.primaryCategory} />
-        )}
+    <div className="bg-card rounded-2xl shadow-sm group hover:shadow-md transition-all duration-300 border border-border">
+      {/* Thumbnail wrapper — no overflow-hidden so the lock tooltip can escape */}
+      <div className="relative aspect-video rounded-t-2xl">
+        {/* Image container — overflow-hidden here to clip the hover zoom */}
+        <div className="absolute inset-0 bg-muted overflow-hidden rounded-t-2xl">
+          {item.thumbnail ? (
+            <img
+              src={item.thumbnail}
+              alt={item.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <CardThumbnailBackground type={item.type} primaryCategory={item.primaryCategory} />
+          )}
+
+          {/* Hover Actions Overlay — hidden when locked */}
+          {!isLocked && (
+            <div className="absolute inset-0 z-10 bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 pointer-events-none">
+              {showView && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => onView(item.id)}
+                  className="pointer-events-auto bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
+                >
+                  <FiEye className="w-4 h-4 mr-1.5" />
+                  View
+                </Button>
+              )}
+              {canEdit && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => onEdit(item.id)}
+                  className="pointer-events-auto bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
+                >
+                  <FiEdit className="w-4 h-4 mr-1.5" />
+                  Edit
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Status Badge */}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 z-20">
           <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik", status.bg, status.text)}>
             {status.dot ? <span className={cn("w-1.5 h-1.5 rounded-full", status.dot)} /> : null}
             {status.label}
@@ -60,38 +94,25 @@ const WorkspaceContentCard = ({
         </div>
 
         {/* Type Badge */}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 z-20">
           <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-surface/90 backdrop-blur-sm shadow-sm", colors.text)}>
             <TypeIcon className="w-3 h-3" />
             <span>{item.primaryCategory || item.type}</span>
           </div>
         </div>
 
-        {/* Hover Actions Overlay */}
-        <div className="absolute inset-0 bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-          {showView && (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => onView(item.id)}
-              className="bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
-            >
-              <FiEye className="w-4 h-4 mr-1.5" />
-              View
-            </Button>
-          )}
-          {showEdit && (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => onEdit(item.id)}
-              className="bg-surface hover:bg-muted text-foreground rounded-lg shadow-md"
-            >
-              <FiEdit className="w-4 h-4 mr-1.5" />
-              Edit
-            </Button>
-          )}
-        </div>
+        {/* Lock Badge — outside overflow-hidden so tooltip is not clipped */}
+        {isLocked && (
+          <div className="absolute bottom-3 left-3 z-20 group/lock cursor-pointer">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-amber-100 text-amber-700">
+              <FiLock className="w-3 h-3" />
+              <span>Locked</span>
+            </div>
+            <span className="absolute top-full left-0 mt-1.5 hidden group-hover/lock:block whitespace-nowrap rounded bg-foreground px-2 py-1 text-xs text-background shadow-md z-50">
+              {`This content is locked by ${lockInfo.creatorName}`}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -100,33 +121,35 @@ const WorkspaceContentCard = ({
           <h3 className="font-semibold text-foreground text-sm font-rubik line-clamp-2 leading-snug flex-1">
             {item.title}
           </h3>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground">
-                <FiMoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
-              {showView && (
-                <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
-                  <FiEye className="w-4 h-4" /> View
-                </DropdownMenuItem>
-              )}
-              {showEdit && (
-                <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
-                  <FiEdit className="w-4 h-4" /> Edit
-                </DropdownMenuItem>
-              )}
-              {showDelete && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
-                    <FiTrash2 className="w-4 h-4" /> Delete
+          {!isLocked && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground">
+                  <FiMoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
+                {showView && (
+                  <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
+                    <FiEye className="w-4 h-4" /> View
                   </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                )}
+                {canEdit && (
+                  <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
+                    <FiEdit className="w-4 h-4" /> Edit
+                  </DropdownMenuItem>
+                )}
+                {showDelete && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
+                      <FiTrash2 className="w-4 h-4" /> Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         <p className="text-xs text-muted-foreground font-rubik line-clamp-2 mb-3 leading-relaxed">

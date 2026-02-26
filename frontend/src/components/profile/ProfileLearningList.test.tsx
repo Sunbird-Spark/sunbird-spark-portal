@@ -3,10 +3,22 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ProfileLearningList from './ProfileLearningList';
 import { useUserEnrolledCollections } from '@/hooks/useUserEnrolledCollections';
+import { useCertificateDownload } from '@/hooks/useCertificateDownload';
 
-// Mock hook
+// Mock hooks
 vi.mock('@/hooks/useUserEnrolledCollections', () => ({
     useUserEnrolledCollections: vi.fn(),
+}));
+
+const mockDownloadCertificate = vi.fn();
+const mockHasCertificate = vi.fn();
+
+vi.mock('@/hooks/useCertificateDownload', () => ({
+    useCertificateDownload: vi.fn(() => ({
+        downloadCertificate: mockDownloadCertificate,
+        hasCertificate: mockHasCertificate,
+        downloadingCourseId: null,
+    })),
 }));
 
 // Mock DropdownMenu to render content inline for easy testing
@@ -47,12 +59,13 @@ vi.mock('@/components/common/PageLoader', () => ({
 describe('ProfileLearningList', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockHasCertificate.mockReturnValue(false);
         (useUserEnrolledCollections as Mock).mockReturnValue({
             data: {
                 data: {
                     courses: [
-                        { batchId: '1', status: 1, courseName: 'Ongoing Course', completionPercentage: 50 },
-                        { batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
+                        { courseId: 'c1', batchId: '1', status: 1, courseName: 'Ongoing Course', completionPercentage: 50 },
+                        { courseId: 'c2', batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
                     ]
                 }
             },
@@ -102,7 +115,7 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
+                        { courseId: 'c2', batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
                     ]
                 }
             },
@@ -165,13 +178,13 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { batchId: '1', status: 1, courseName: 'Course 1' },
-                        { batchId: '2', status: 1, courseName: 'Course 2' },
-                        { batchId: '3', status: 1, courseName: 'Course 3' },
-                        { batchId: '4', status: 1, courseName: 'Course 4' },
-                        { batchId: '5', status: 1, courseName: 'Course 5' },
-                        { batchId: '6', status: 1, courseName: 'Course 6' },
-                        { batchId: '7', status: 1, courseName: 'Course 7' },
+                        { courseId: 'c1', batchId: '1', status: 1, courseName: 'Course 1' },
+                        { courseId: 'c2', batchId: '2', status: 1, courseName: 'Course 2' },
+                        { courseId: 'c3', batchId: '3', status: 1, courseName: 'Course 3' },
+                        { courseId: 'c4', batchId: '4', status: 1, courseName: 'Course 4' },
+                        { courseId: 'c5', batchId: '5', status: 1, courseName: 'Course 5' },
+                        { courseId: 'c6', batchId: '6', status: 1, courseName: 'Course 6' },
+                        { courseId: 'c7', batchId: '7', status: 1, courseName: 'Course 7' },
                     ]
                 }
             },
@@ -209,14 +222,14 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { batchId: '1', status: 1, courseName: 'Ongoing 1' },
-                        { batchId: '2', status: 1, courseName: 'Ongoing 2' },
-                        { batchId: '3', status: 1, courseName: 'Ongoing 3' },
-                        { batchId: '4', status: 1, courseName: 'Ongoing 4' },
-                        { batchId: '5', status: 1, courseName: 'Ongoing 5' },
-                        { batchId: '6', status: 1, courseName: 'Ongoing 6' },
-                        { batchId: '7', status: 1, courseName: 'Ongoing 7' },
-                        { batchId: '8', status: 2, courseName: 'Completed 1' },
+                        { courseId: 'c1', batchId: '1', status: 1, courseName: 'Ongoing 1' },
+                        { courseId: 'c2', batchId: '2', status: 1, courseName: 'Ongoing 2' },
+                        { courseId: 'c3', batchId: '3', status: 1, courseName: 'Ongoing 3' },
+                        { courseId: 'c4', batchId: '4', status: 1, courseName: 'Ongoing 4' },
+                        { courseId: 'c5', batchId: '5', status: 1, courseName: 'Ongoing 5' },
+                        { courseId: 'c6', batchId: '6', status: 1, courseName: 'Ongoing 6' },
+                        { courseId: 'c7', batchId: '7', status: 1, courseName: 'Ongoing 7' },
+                        { courseId: 'c8', batchId: '8', status: 2, courseName: 'Completed 1' },
                     ]
                 }
             },
@@ -237,5 +250,49 @@ describe('ProfileLearningList', () => {
         // Verification: showAll should be reset to false, meaning we only see 6 items and "View More Courses"
         expect(screen.queryByText('Ongoing 7')).not.toBeInTheDocument();
         expect(screen.getByText('View More Courses')).toBeInTheDocument();
+    });
+
+    it('renders download button only for completed courses with certificates', () => {
+        mockHasCertificate.mockImplementation((courseId) => courseId === 'c2');
+
+        render(<ProfileLearningList />);
+
+        const downloadButtons = screen.queryAllByText('Download Certificate');
+        expect(downloadButtons).toHaveLength(1);
+    });
+
+    it('does not render download button for completed courses without certificates', () => {
+        mockHasCertificate.mockReturnValue(false);
+
+        render(<ProfileLearningList />);
+
+        const downloadButtons = screen.queryAllByText('Download Certificate');
+        expect(downloadButtons).toHaveLength(0);
+    });
+
+    it('calls downloadCertificate with correct parameters when download button is clicked', () => {
+        mockHasCertificate.mockReturnValue(true);
+
+        render(<ProfileLearningList />);
+
+        const downloadButton = screen.getByText('Download Certificate');
+        fireEvent.click(downloadButton);
+
+        expect(mockDownloadCertificate).toHaveBeenCalledWith('c2', '2', 'Completed Course', undefined, undefined);
+    });
+
+    it('shows downloading state when certificate is being downloaded', () => {
+        mockHasCertificate.mockReturnValue(true);
+        (useCertificateDownload as Mock).mockReturnValue({
+            downloadCertificate: mockDownloadCertificate,
+            hasCertificate: mockHasCertificate,
+            downloadingCourseId: 'c2',
+        });
+
+        render(<ProfileLearningList />);
+
+        expect(screen.getByText('Downloading...')).toBeInTheDocument();
+        const downloadButton = screen.getByText('Downloading...').closest('button');
+        expect(downloadButton).toBeDisabled();
     });
 });

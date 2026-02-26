@@ -347,6 +347,7 @@ describe('WorkspacePage', () => {
       primaryCategory: 'Practice Question Set', mimeType: 'application/vnd.sunbird.questionset',
       status: 'draft', contentType: 'QuestionSet', createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z', author: 'Test Author',
+      framework: '', contentStatus: 'Draft',
     };
     mockUseWorkspace.mockReturnValue({
       contents: [mockQuestionSetContent], counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
@@ -367,9 +368,9 @@ describe('WorkspacePage', () => {
       expect(mockQuestionSetRetireMutateAsync).toHaveBeenCalledWith('do_qs_123');
     });
     expect(mockToast).toHaveBeenCalledWith({
-      title: 'Content Deleted',
-      description: 'The content has been removed.',
-      variant: 'destructive',
+      title: 'Success',
+      description: 'Content has been deleted successfully.',
+      variant: 'success',
     });
   });
 
@@ -495,8 +496,8 @@ describe('WorkspacePage', () => {
     fireEvent.click(createButton);
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith({
-        title: 'Error',
-        description: 'Failed to create content. Please try again.',
+        title: 'Creation Failed',
+        description: 'Unable to create content. Please try again.',
         variant: 'destructive',
       });
     });

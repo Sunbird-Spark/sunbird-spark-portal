@@ -155,11 +155,11 @@ const PersonalInformation = ({ user }: PersonalInformationProps) => {
                     onErrored={() => {
                         pendingCaptchaAction.current = null;
                         captchaRef.current?.reset();
-                        toast({
-                            title: t("editProfile.verificationError"),
-                            description: t("editProfile.recaptchaFailed"),
-                            variant: "destructive",
-                        });
+                        // toast({
+                        //     title: "Verification Error",
+                        //     description: "Failed to load reCAPTCHA. If you are on localhost, this domain might not be supported by the site key.",
+                        //     variant: "destructive",
+                        // });
                     }}
                 />
             )}

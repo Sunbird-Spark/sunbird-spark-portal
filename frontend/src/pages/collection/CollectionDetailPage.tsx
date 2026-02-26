@@ -13,6 +13,7 @@ import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
+import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import { useIsContentCreator } from "@/hooks/useUser";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import RelatedContentSection from "@/components/collection/RelatedContentSection";
@@ -69,7 +70,11 @@ const CollectionDetailPage = () => {
   }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
-  const contentBlocked = isTrackable && !isAuthenticated;
+  /** Block content when trackable and (not logged in, or logged in but not enrolled in current batch and not creator). */
+  const contentBlocked = isTrackable && (
+    !isAuthenticated
+    || (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch))
+  );
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const displayCollectionData = useMemo(
@@ -114,27 +119,25 @@ const CollectionDetailPage = () => {
 
   // Auto-navigate to first content when collection loads without a selected contentId
   useEffect(() => {
-    if (!collectionData || contentId) return;
-    const firstLesson = collectionData.modules?.[0]?.lessons?.[0];
-    if (!firstLesson) return;
-    const mime = (firstLesson.mimeType ?? '').toLowerCase();
-    if (mime === 'application/vnd.ekstep.content-collection') return;
+    if (!collectionData?.hierarchyRoot || contentId) return;
+    const firstContentId = getFirstLeafContentIdFromHierarchy(collectionData.hierarchyRoot);
+    if (!firstContentId) return;
     if (!isTrackable || contentCreatorPrivilege) {
-      navigate(`/collection/${collectionId}/content/${firstLesson.id}`, { replace: true });
+      navigate(`/collection/${collectionId}/content/${firstContentId}`, { replace: true });
       return;
     }
     if (hasBatchInRoute && batchIdParam) {
-      navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstLesson.id}`, { replace: true });
+      navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstContentId}`, { replace: true });
     }
-  }, [contentId, collectionData, collectionId, navigate, isTrackable, contentCreatorPrivilege, hasBatchInRoute, batchIdParam]);
+  }, [contentId, collectionData?.hierarchyRoot, collectionId, navigate, isTrackable, contentCreatorPrivilege, hasBatchInRoute, batchIdParam]);
 
   useEffect(() => {
-    const firstId = collectionData?.modules?.[0]?.id;
-    if (firstId && !initialExpandedSet.current) {
-      setExpandedModules([firstId]);
+    const firstMainUnitId = collectionData?.children?.[0]?.identifier;
+    if (firstMainUnitId && !initialExpandedSet.current) {
+      setExpandedModules([firstMainUnitId]);
       initialExpandedSet.current = true;
     }
-  }, [collectionData?.modules]);
+  }, [collectionData?.children]);
   useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
 
   const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;

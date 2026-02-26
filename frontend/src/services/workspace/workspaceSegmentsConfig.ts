@@ -32,5 +32,5 @@ export function getSecondaryActions(userRole: UserRole): WorkspaceSecondaryActio
 }
 
 export function shouldShowContentFilters(activeView: WorkspaceView): boolean {
-  return !['create', 'uploads', 'collaborations'].includes(activeView);
+  return !['create'].includes(activeView);
 }

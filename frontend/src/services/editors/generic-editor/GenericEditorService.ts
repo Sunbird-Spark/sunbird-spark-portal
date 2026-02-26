@@ -57,10 +57,10 @@ export class GenericEditorService {
    * Fetch content details for editing.
    */
   async getContentDetails(contentId: string): Promise<ContentDetails> {
-    const response = await getClient().get<{ result: { content: ContentDetails } }>(
+    const response = await getClient().get<{ content: ContentDetails }>(
       `/content/v1/read/${contentId}?mode=edit`
     );
-    return response.data.result.content;
+    return response.data.content;
   }
 
   /**
@@ -85,18 +85,18 @@ export class GenericEditorService {
       creatorInfo: JSON.stringify({ name: userName, id: userId }),
       createdBy: userId,
     };
-    const response = await getClient().post<{ result: LockContentResponse }>(
+    const response = await getClient().post<LockContentResponse>(
       '/lock/v1/create',
       { request: input }
     );
-    return response.data.result;
+    return response.data;
   }
 
   /**
    * Release content lock after editing.
    */
   async retireLock(contentId: string): Promise<void> {
-    await getClient().post('/lock/v1/retire', {
+    await getClient().delete('/lock/v1/retire', {
       request: {
         resourceId: contentId,
         resourceType: 'Content',

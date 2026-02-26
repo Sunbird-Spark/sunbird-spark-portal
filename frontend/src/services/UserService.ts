@@ -141,6 +141,19 @@ export class UserService {
         );
     }
 
+    public async searchUserByUserName(userName: string): Promise<ApiResponse<any>> {
+        return getClient().post(
+            '/user/v3/search',
+            {
+                request: {
+                    filters: {
+                        userName: userName.trim(),
+                    }
+                },
+            }
+        );
+    }
+
     public async searchMentors(rootOrgId: string, query: string = ''): Promise<ApiResponse<any>> {
         return getClient().post(
             '/user/v3/search',
@@ -172,6 +185,17 @@ public async updateProfile(
             batchDetails: BATCH_DETAILS_FIELDS.join(','),
         });
         const url = `/course/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
+        return getClient().get<CourseEnrollmentResponse>(url);
+    }
+
+    public async getPrivateUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
+        const searchParams = new URLSearchParams({
+            orgdetails: ORG_DETAILS_FIELDS.join(','),
+            licenseDetails: LICENSE_DETAILS_FIELDS.join(','),
+            fields: ENROLLMENT_CONTENT_FIELDS.join(','),
+            batchDetails: BATCH_DETAILS_FIELDS.join(','),
+        });
+        const url = `/course/private/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
         return getClient().get<CourseEnrollmentResponse>(url);
     }
 }

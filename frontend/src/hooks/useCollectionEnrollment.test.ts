@@ -41,6 +41,16 @@ vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
   default: { getUserId: () => 'user_1' },
 }));
 
+const minimalCollectionChildren = [
+  {
+    identifier: 'mod_1',
+    name: '',
+    primaryCategory: '',
+    mimeType: 'application/vnd.ekstep.content-collection',
+    children: [{ identifier: 'leaf_1', name: '', mimeType: 'video/mp4' }],
+  },
+];
+
 const minimalCollectionData: CollectionData = {
   id: 'col_1',
   title: '',
@@ -49,14 +59,12 @@ const minimalCollectionData: CollectionData = {
   units: 1,
   description: '',
   audience: [],
-  modules: [
-    {
-      id: 'mod_1',
-      title: '',
-      subtitle: '',
-      lessons: [{ id: 'leaf_1', title: '', type: 'video' }],
-    },
-  ],
+  children: minimalCollectionChildren,
+  hierarchyRoot: {
+    identifier: 'col_1',
+    mimeType: 'application/vnd.ekstep.content-collection',
+    children: minimalCollectionChildren,
+  },
 };
 
 describe('useCollectionEnrollment', () => {

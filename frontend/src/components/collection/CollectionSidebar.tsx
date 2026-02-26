@@ -1,22 +1,23 @@
-import { Link } from "react-router-dom";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { CiCircleCheck } from "react-icons/ci";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./collapsible";
-import { VideoIcon, DocumentIcon } from "./CollectionIcons";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import type { Lesson, Module } from "@/types/collectionTypes";
+import type { HierarchyContentNode } from "@/types/collectionTypes";
+import ContentRow from "./ContentRow";
 
-function getLessonHref(lesson: Lesson, collectionId: string, batchId?: string | null): string {
-  const mime = (lesson.mimeType ?? '').toLowerCase();
-  const isCollection = mime === 'application/vnd.ekstep.content-collection';
-  if (isCollection) return `/collection/${lesson.id}`;
-  if (batchId) return `/collection/${collectionId}/batch/${batchId}/content/${lesson.id}`;
-  return `/collection/${collectionId}/content/${lesson.id}`;
+const COLLECTION_MIME = "application/vnd.ekstep.content-collection";
+
+function isCollection(node: HierarchyContentNode): boolean {
+  return (node.mimeType ?? "").toLowerCase() === COLLECTION_MIME;
+}
+
+function getContentHref(node: HierarchyContentNode, collectionId: string, batchId?: string | null): string {
+  if (isCollection(node)) return `/collection/${node.identifier}`;
+  if (batchId) return `/collection/${collectionId}/batch/${batchId}/content/${node.identifier}`;
+  return `/collection/${collectionId}/content/${node.identifier}`;
 }
 
 /** 0 = Not started, 1 = In progress, 2 = Completed */
@@ -24,53 +25,110 @@ export type ContentStatus = 0 | 1 | 2;
 
 interface CollectionSidebarProps {
   collectionId: string;
-  /** When set (trackable + batch in route), lesson links include batch in path. */
   batchId?: string | null;
-  modules: Module[];
-  expandedModules: string[];
-  toggleModule: (moduleId: string) => void;
-  activeLessonId?: string | null;
+  /** Top-level units (main collapsible sections). */
+  children: HierarchyContentNode[];
+  expandedMainUnitIds: string[];
+  toggleMainUnit: (unitId: string) => void;
+  activeContentId?: string | null;
   contentBlocked?: boolean;
-  /** Map of content/lesson id to status (0/1/2). When provided, each lesson shows status label. */
   contentStatusMap?: Record<string, number>;
 }
 
-function getStatusLabel(status: number | undefined): string {
-  if (status === 2) return "courseDetails.contentStatusCompleted";
-  if (status === 1) return "courseDetails.contentStatusInProgress";
-  return "courseDetails.contentStatusNotViewed";
+/** Renders sub-units as labels and content as rows (no collapsibles). */
+function ExpandedUnitContent({
+  nodes,
+  collectionId,
+  batchId,
+  contentBlocked,
+  activeContentId,
+  contentStatusMap,
+  t,
+  depth = 0,
+}: {
+  nodes: HierarchyContentNode[];
+  collectionId: string;
+  batchId: string | null;
+  contentBlocked: boolean;
+  activeContentId: string | null;
+  contentStatusMap?: Record<string, number>;
+  t: (key: string) => string;
+  depth?: number;
+}) {
+  if (!nodes?.length) return null;
+
+  return (
+    <div className={`space-y-2 ${depth > 0 ? "ml-2 border-l-2 border-gray-100 pl-3" : ""}`}>
+      {nodes.map((node) => {
+        if (isCollection(node)) {
+          const childList = node.children ?? [];
+          return (
+            <div key={node.identifier} className="space-y-2">
+              <div
+                className="text-sm font-semibold text-muted-foreground py-1"
+                aria-label={`Section: ${node.name ?? "Untitled"}`}
+              >
+                {node.name ?? "Untitled"}
+              </div>
+              <ExpandedUnitContent
+                nodes={childList}
+                collectionId={collectionId}
+                batchId={batchId}
+                contentBlocked={contentBlocked}
+                activeContentId={activeContentId}
+                contentStatusMap={contentStatusMap}
+                t={t}
+                depth={depth + 1}
+              />
+            </div>
+          );
+        }
+
+        return (
+          <ContentRow
+            key={node.identifier}
+            node={node}
+            href={getContentHref(node, collectionId, batchId)}
+            contentBlocked={contentBlocked}
+            isActive={activeContentId === node.identifier}
+            contentStatusMap={contentStatusMap}
+            t={t}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 const CollectionSidebar = ({
   collectionId,
   batchId = null,
-  modules,
-  expandedModules,
-  toggleModule,
-  activeLessonId = null,
+  children: topLevelUnits,
+  expandedMainUnitIds,
+  toggleMainUnit,
+  activeContentId = null,
   contentBlocked = false,
   contentStatusMap,
 }: CollectionSidebarProps) => {
   const { t } = useAppI18n();
+
   return (
     <div
       className={`space-y-3 ${contentBlocked ? "opacity-80 select-none" : ""}`}
       aria-disabled={contentBlocked || undefined}
     >
-      {modules.map((module) => {
-        const isExpanded = expandedModules.includes(module.id);
+      {topLevelUnits.map((unit) => {
+        const isExpanded = expandedMainUnitIds.includes(unit.identifier);
 
         return (
           <Collapsible
-            key={module.id}
+            key={unit.identifier}
             open={isExpanded}
-            onOpenChange={() => toggleModule(module.id)}
+            onOpenChange={() => toggleMainUnit(unit.identifier)}
           >
             <div
               className={`rounded-xl border transition-all duration-300 overflow-hidden ${
-                contentBlocked
-                  ? "bg-gray-100 border-gray-200"
-                  : "bg-white border-gray-100"
+                contentBlocked ? "bg-gray-100 border-gray-200" : "bg-white border-gray-100"
               }`}
             >
               <CollapsibleTrigger asChild>
@@ -87,15 +145,17 @@ const CollectionSidebar = ({
                         contentBlocked ? "text-muted-foreground" : "text-foreground"
                       }`}
                     >
-                      {module.title}
+                      {unit.name ?? "Untitled"}
                     </h3>
-                    <p
-                      className={`text-sm ${
-                        contentBlocked ? "text-gray-400" : "text-muted-foreground"
-                      }`}
-                    >
-                      {module.subtitle}
-                    </p>
+                    {(unit.primaryCategory ?? unit.description) && (
+                      <p
+                        className={`text-sm ${
+                          contentBlocked ? "text-gray-400" : "text-muted-foreground"
+                        }`}
+                      >
+                        {unit.primaryCategory ?? unit.description}
+                      </p>
+                    )}
                   </div>
                   {isExpanded ? (
                     <FiChevronUp
@@ -114,75 +174,16 @@ const CollectionSidebar = ({
               </CollapsibleTrigger>
 
               <CollapsibleContent>
-                <div className="p-3 pt-0 space-y-2">
-                  {module.lessons.map((lesson) => {
-                    const isActive =
-                      !contentBlocked && activeLessonId === lesson.id;
-                    const baseClass = contentBlocked
-                      ? "flex items-center gap-3 rounded-[10px] px-4 py-3 w-full h-[70px] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-60 pointer-events-none cursor-not-allowed select-none"
-                      : `flex items-center gap-3 rounded-[10px] px-4 py-3 w-full h-[70px] ${isActive
-                        ? 'border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100'
-                        : 'border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-90'
-                        }`;
-                    const interactiveClass = contentBlocked
-                      ? ""
-                      : "hover:bg-gray-200 transition-colors cursor-pointer";
-
-                    const lessonStatus = contentStatusMap?.[lesson.id];
-                    const showStatus = contentStatusMap !== undefined;
-
-                    if (contentBlocked) {
-                      return (
-                        <div
-                          key={lesson.id}
-                          className={`${baseClass} ${interactiveClass}`}
-                          aria-disabled="true"
-                        >
-                          {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
-                          <span className="flex-1 text-base leading-snug">
-                            {lesson.title}
-                          </span>
-                          {showStatus && (
-                            <span className="font-rubik font-normal text-[10px] leading-[100%] text-muted-foreground flex-shrink-0">
-                              {t(getStatusLabel(lessonStatus))}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <Link
-                        key={lesson.id}
-                        to={getLessonHref(lesson, collectionId, batchId)}
-                        className={`${baseClass} ${interactiveClass}`}
-                      >
-                        {lesson.type === "video" ? <VideoIcon /> : <DocumentIcon />}
-                        <span className="flex-1 text-base leading-snug">
-                          {lesson.title}
-                        </span>
-                        {showStatus && (
-                          <span
-                            className={`font-rubik font-normal text-[10px] leading-[100%] flex-shrink-0 flex items-center gap-1 ${
-                              lessonStatus === 2
-                                ? "text-sunbird-status-completed-border"
-                                : lessonStatus === 1
-                                  ? "text-sunbird-status-ongoing-border"
-                                  : "text-muted-foreground"
-                            }`}
-                          >
-                            {lessonStatus === 2 && (
-                              <CiCircleCheck className="w-3.5 h-3.5 text-sunbird-status-completed-border" />
-                            )}
-                            {lessonStatus === 1 && (
-                              <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />
-                            )}
-                            {t(getStatusLabel(lessonStatus))}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
+                <div className="p-3 pt-0">
+                  <ExpandedUnitContent
+                    nodes={unit.children ?? []}
+                    collectionId={collectionId}
+                    batchId={batchId}
+                    contentBlocked={contentBlocked}
+                    activeContentId={activeContentId}
+                    contentStatusMap={contentStatusMap}
+                    t={t}
+                  />
                 </div>
               </CollapsibleContent>
             </div>

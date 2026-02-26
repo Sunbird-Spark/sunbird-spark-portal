@@ -29,6 +29,8 @@ describe('contentMapper', () => {
         primaryCategory: '',
         contentType: '',
         mimeType: '',
+        framework: '',
+        contentStatus: 'Draft',
       });
     });
 

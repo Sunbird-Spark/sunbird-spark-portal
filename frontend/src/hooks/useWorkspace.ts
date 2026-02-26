@@ -68,7 +68,7 @@ export function useWorkspace({
   enabled = true,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
-  const isContentTab = !['create', 'uploads', 'collaborations'].includes(activeTab);
+  const isContentTab = !['create'].includes(activeTab);
   const queryEnabled = enabled && !!userId && isContentTab;
 
   // Whether the user is operating in reviewer mode (affects counts & content filters).
@@ -119,16 +119,50 @@ export function useWorkspace({
   const primaryCategoryFilter =
     getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
+  // Special filters for uploads and collaborations tabs
+  const getFiltersForTab = useCallback(() => {
+    const baseFilters: Record<string, unknown> = {
+      createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
+      ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
+      status: statusFilter,
+      primaryCategory: primaryCategoryFilter,
+    };
+
+    if (activeTab === 'uploads') {
+      return {
+        ...baseFilters,
+        createdBy: userId ?? '',
+        status: ['Draft'],
+        mimeType: [
+          'application/pdf',
+          'video/x-youtube',
+          'application/vnd.ekstep.html-archive',
+          'application/epub',
+          'application/vnd.ekstep.h5p-archive',
+          'video/mp4',
+          'video/webm',
+          'text/x-url',
+        ],
+      };
+    }
+
+    if (activeTab === 'collaborations') {
+      return {
+        status: ['Draft', 'FlagDraft', 'Review', 'Processing', 'Live', 'Unlisted', 'FlagReview'],
+        collaborators: [userId ?? ''],
+        primaryCategory: primaryCategoryFilter,
+        objectType: 'Content',
+      };
+    }
+
+    return baseFilters;
+  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, activeTab]);
+
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
     queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
-        filters: {
-          createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
-          ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
-          status: statusFilter,
-          primaryCategory: primaryCategoryFilter,
-        },
+        filters: getFiltersForTab(),
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),

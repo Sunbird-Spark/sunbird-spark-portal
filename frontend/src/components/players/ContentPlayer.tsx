@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EpubPlayer } from './EpubPlayer';
 import { VideoPlayer } from './VideoPlayer';
 import { PdfPlayer } from '../content-player/pdf-player/PdfPlayer';
 import { EcmlPlayer } from './EcmlPlayer';
 import QumlPlayer from './quml/QumlPlayer';
+import RatingDialog from '@/components/common/RatingDialog';
+import { useRatingTimer } from '@/hooks/useRatingTimer';
 
 // MIME type to player component mapping
 const MIME_TYPE_PLAYERS = {
@@ -42,20 +44,36 @@ export const ContentPlayer: React.FC<ContentPlayerProps> = ({
   onPlayerEvent,
   onTelemetryEvent,
 }) => {
-  // Get the appropriate player component for the MIME type, fallback to EcmlPlayer
+  const [ratingOpen, setRatingOpen] = useState(false);
+  const openRating = useCallback(() => setRatingOpen(true), []);
+  const { onContentEnd, onContentStart } = useRatingTimer(openRating);
+
+  const handleTelemetry = useCallback((event: any) => {
+    const eid = ((event?.eid ?? event?.data?.eid ?? event?.type) ?? '').toUpperCase();
+    if (eid === 'END') onContentEnd();
+    if (eid === 'START') onContentStart();
+    onTelemetryEvent?.(event);
+  }, [onContentEnd, onContentStart, onTelemetryEvent]);
+
   const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType] || EcmlPlayer;
 
-  // Render the appropriate player component
   return (
-    <PlayerComponent
-      metadata={metadata}
-      mode={mode}
-      cdata={cdata}
-      contextRollup={contextRollup}
-      objectRollup={objectRollup}
-      onPlayerEvent={onPlayerEvent}
-      onTelemetryEvent={onTelemetryEvent}
-    />
+    <div className="relative">
+      <PlayerComponent
+        metadata={metadata}
+        mode={mode}
+        cdata={cdata}
+        contextRollup={contextRollup}
+        objectRollup={objectRollup}
+        onPlayerEvent={onPlayerEvent}
+        onTelemetryEvent={handleTelemetry}
+      />
+      <RatingDialog
+        open={ratingOpen}
+        onClose={() => setRatingOpen(false)}
+        playerMetadata={metadata}
+      />
+    </div>
   );
 };
 
