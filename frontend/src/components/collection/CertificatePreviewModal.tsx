@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { FiX } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { HttpService } from "@/services/HttpService";
 
 export interface CertificatePreviewDetails {
   recipientName?: string;
@@ -14,6 +15,22 @@ interface CertificatePreviewModalProps {
   details?: CertificatePreviewDetails;
 }
 
+/** Escapes a string for safe use inside SVG/XML text content (prevents XSS). */
+function escapeForSvg(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Replaces only {{credentialSubject.recipientName}} with the given name (escaped for SVG). Exported for tests. */
+export function replacePlaceholders(text: string, recipientName: string): string {
+  const safe = escapeForSvg(recipientName);
+  return text.replace(/\{\{\s*credentialSubject\.recipientName\s*\}\}/g, safe);
+}
+
 export default function CertificatePreviewModal({
   open,
   onClose,
@@ -22,6 +39,7 @@ export default function CertificatePreviewModal({
 }: CertificatePreviewModalProps) {
   const { t } = useAppI18n();
   const [src, setSrc] = useState<string>(previewUrl);
+  const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -33,8 +51,53 @@ export default function CertificatePreviewModal({
   }, [open, onClose]);
 
   useEffect(() => {
-    setSrc(previewUrl);
-  }, [previewUrl]);
+    if (!open || !previewUrl) {
+      setSrc(previewUrl);
+      return;
+    }
+    const name = details?.recipientName ?? "";
+    if (!name) {
+      setSrc(previewUrl);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const httpService = new HttpService();
+    httpService
+      .get<string>(previewUrl, { responseType: "text", signal: controller.signal })
+      .then((text) => {
+        if (controller.signal.aborted) return;
+        if (!text || typeof text !== "string" || !text.includes("credentialSubject.recipientName")) {
+          setSrc(previewUrl);
+          return;
+        }
+        const out = replacePlaceholders(text, name);
+        const trimmed = out.trim().toLowerCase();
+        const isSvg =
+          trimmed.startsWith("<svg") || trimmed.startsWith("<?xml");
+        if (isSvg) {
+          if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+          const blob = new Blob([out], { type: "image/svg+xml" });
+          blobUrlRef.current = URL.createObjectURL(blob);
+          setSrc(blobUrlRef.current);
+        } else {
+          setSrc(previewUrl);
+        }
+      })
+      .catch((err) => {
+        if (HttpService.isCancel(err)) return;
+        setSrc(previewUrl);
+      });
+
+    return () => {
+      controller.abort();
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, [open, previewUrl, details?.recipientName]);
 
   if (!open) return null;
 
