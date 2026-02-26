@@ -82,7 +82,7 @@ const RatingDialog = ({ open, onClose, onSubmit, playerMetadata }: RatingDialogP
                 </p>
 
                 {/* Star rating */}
-                <div className="rating-dialog-stars">
+                <div className="rating-dialog-stars" onMouseLeave={() => setHovered(0)}>
                     {[1, 2, 3, 4, 5].map((star) => (
                         <button
                             key={star}

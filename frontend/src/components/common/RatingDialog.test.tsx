@@ -125,6 +125,23 @@ describe('RatingDialog', () => {
         expect(screen.getByRole('button', { name: 'Submit' })).not.toBeDisabled();
     });
 
+    it('clears hover highlight when mouse leaves the star container', () => {
+        const { container } = renderDialog();
+        const starIcons = container.querySelectorAll('[data-testid="star-icon"]');
+        const starContainer = container.querySelector('.rating-dialog-stars')!;
+
+        // Hover over star 3 — first three icons should be highlighted
+        fireEvent.mouseEnter(screen.getByRole('button', { name: 'Rate 3 stars' }));
+        expect(starIcons[0]).toHaveClass('fill-sunbird-brick');
+        expect(starIcons[2]).toHaveClass('fill-sunbird-brick');
+        expect(starIcons[3]).not.toHaveClass('fill-sunbird-brick');
+
+        // Mouse leaves the container — all hover highlights should clear
+        fireEvent.mouseLeave(starContainer);
+        expect(starIcons[0]).not.toHaveClass('fill-sunbird-brick');
+        expect(starIcons[2]).not.toHaveClass('fill-sunbird-brick');
+    });
+
     // ── Close behaviour ──────────────────────────────────────────────────────
 
     it('calls onClose when close button is clicked', () => {
