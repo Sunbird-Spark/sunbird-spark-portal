@@ -59,7 +59,7 @@ describe('ReviewCommentService', () => {
       const result = await service.createComment(mockRequest);
 
       expect(mockPost).toHaveBeenCalledWith(
-        '/portal/data/review/comment/v1/create/comment',
+        '/review/comment/v1/create/comment',
         { request: mockRequest }
       );
       expect(result).toEqual(mockResponse.data);
@@ -84,7 +84,7 @@ describe('ReviewCommentService', () => {
 
       await expect(service.createComment(mockRequest)).rejects.toThrow('Network error');
       expect(mockPost).toHaveBeenCalledWith(
-        '/portal/data/review/comment/v1/create/comment',
+        '/review/comment/v1/create/comment',
         { request: mockRequest }
       );
     });
@@ -132,7 +132,7 @@ describe('ReviewCommentService', () => {
       const result = await service.readComments(mockRequest);
 
       expect(mockPost).toHaveBeenCalledWith(
-        '/portal/data/review/comment/v1/read/comment',
+        '/review/comment/v1/read/comment',
         { request: { contextDetails: mockRequest } }
       );
       expect(result).toEqual(mockResponse.data);
@@ -218,7 +218,7 @@ describe('ReviewCommentService', () => {
       const result = await service.deleteComments(mockRequest);
 
       expect(mockPost).toHaveBeenCalledWith(
-        '/portal/data/review/comment/v1/delete/comment',
+        '/review/comment/v1/delete/comment',
         { request: { contextDetails: mockRequest } }
       );
       expect(result).toEqual(mockResponse.data);
@@ -346,7 +346,7 @@ describe('ReviewCommentService', () => {
 
   describe('baseUrl configuration', () => {
     it('should use correct base URL for portal data routes', () => {
-      expect((service as any).baseUrl).toBe('/portal/data/review/comment/v1');
+      expect((service as any).baseUrl).toBe('/review/comment/v1');
     });
   });
 });

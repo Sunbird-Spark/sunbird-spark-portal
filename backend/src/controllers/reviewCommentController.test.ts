@@ -3,11 +3,13 @@ import { Request, Response } from 'express';
 import { createComment, readComments, deleteComments } from './reviewCommentController.js';
 
 vi.mock('../services/reviewCommentService.js', () => ({
-    ReviewCommentService: vi.fn(function(this: any) {
+    ReviewCommentService: vi.fn(function() {
+        // @ts-expect-error - Mock constructor pattern
         this.createComment = vi.fn().mockResolvedValue({ created: 'OK', threadId: 'test-thread-id' });
+        // @ts-expect-error - Mock constructor pattern
         this.readComments = vi.fn().mockResolvedValue([]);
+        // @ts-expect-error - Mock constructor pattern
         this.deleteComments = vi.fn().mockResolvedValue({ deleted: 'OK' });
-        return this;
     })
 }));
 
