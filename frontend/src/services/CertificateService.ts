@@ -7,7 +7,7 @@ import type {
   AssetCreateResponse,
   AddTemplateRequest,
   RemoveTemplateRequest,
-} from './CertificateService.types';
+} from './CertificateTypes';
 
 export type { Certificate, CertificateSearchResponse };
 export type {
@@ -107,8 +107,11 @@ export class CertificateService {
       );
 
       return response;
-    } catch (error: any) {
-      throw new Error(error.message || 'Upload failed');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || 'Upload failed');
+      }
+      throw new Error('Upload failed');
     }
   }
 
@@ -143,7 +146,7 @@ export class CertificateService {
   async searchLogos(
     channel: string,
     createdBy?: string
-  ): Promise<ApiResponse<{ count: number; content: any[] }>> {
+  ): Promise<ApiResponse<{ count: number; content: unknown[] }>> {
     const filters: Record<string, unknown> = {
       mediaType: ['image'],
       contentType: ['Asset'],
@@ -154,7 +157,7 @@ export class CertificateService {
     };
     if (createdBy) filters.createdBy = createdBy;
 
-    return getClient().post<{ count: number; content: any[] }>(
+    return getClient().post<{ count: number; content: unknown[] }>(
       '/content/v1/search',
       {
         request: {
@@ -170,14 +173,13 @@ export class CertificateService {
   /** Fetch the full details of a single cert template (includes signatoryList.image) */
   async readCertTemplate(
     identifier: string
-  ): Promise<ApiResponse<{ content: any }>> {
-    return getClient().get<{ content: any }>(
+  ): Promise<ApiResponse<{ content: unknown }>> {
+    return getClient().get<{ content: unknown }>(
       `/content/v1/read/${identifier}?fields=signatoryList,issuer,artifactUrl,name,identifier`
     );
   }
 
   /** Search existing certificate templates in the org */
-
   async searchCertTemplates(
     channel: string
   ): Promise<ApiResponse<{ count: number; content: CertTemplateSummary[] }>> {
@@ -208,8 +210,29 @@ export class CertificateService {
       }
     );
   }
-
-  public async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
+  /**
+   * Re-issue a certificate for one or more users.
+   * POST /certreg/v1/cert/reissue
+   */
+  async reissueCertificate(params: {
+    courseId: string;
+    batchId: string;
+    userIds: string[];
+    createdBy: string;
+  }): Promise<ApiResponse<unknown>> {
+    return getClient().post<unknown>(
+      '/course/batch/cert/v1/issue?reIssue=true',
+      {
+        request: {
+          courseId: params.courseId,
+          batchId: params.batchId,
+          userIds: params.userIds,
+          createdBy: params.createdBy,
+        },
+      }
+    );
+  }
+  async searchCertificates(userId: string): Promise<ApiResponse<CertificateSearchResponse>> {
     return getClient().post<CertificateSearchResponse>('/rc/certificate/v1/search', {
       filters: {
         recipient: {
@@ -227,5 +250,4 @@ export class CertificateService {
     });
   }
 }
-
 export const certificateService = new CertificateService();

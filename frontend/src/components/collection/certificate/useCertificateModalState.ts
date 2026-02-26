@@ -5,16 +5,16 @@ import { certificateService } from "@/services/CertificateService";
 import { useCertTemplates } from "@/hooks/useCertificate";
 import { IssueTo, ModalView, Step, NewTemplateForm, CERT_TEMPLATE_SVG_URL } from "./types";
 import { emptyNewTemplate, resolveUserAndOrg } from "./utils";
-import {
-  Signatory,
-  buildSignatoryListFromForm,
-  isNewTemplateValid,
-  buildCreateAssetRequest,
-  applyOptimisticBatchCertUpdate,
-  generateModifiedSvg,
-  fetchTemplateDetails,
-  buildAddTemplateRequestPayload,
-} from "./useCertificateModalState.helpers";
+import { 
+  Signatory, 
+  buildSignatoryListFromForm 
+} from "./signatoryUtils";
+import { 
+  isNewTemplateValid, 
+  buildCreateAssetRequest, 
+  generateModifiedSvg 
+} from "./templateAssetUtils";
+import { runAddCertificate } from "./certificateOperationHandlers";
 
 export function useCertificateModalState(
   courseId: string,
@@ -183,61 +183,15 @@ export function useCertificateModalState(
         "X-Channel-Id": rootOrgId,
         "X-Org-code": rootOrgId,
       };
-
-      setStepLabel("Fetching template details…");
-      const { fullSignatoryList, fullPreviewUrl, fullIssuer } = await fetchTemplateDetails(
-        selectedTemplateId,
-        selectedTemplate.previewUrl ?? selectedTemplate.artifactUrl ?? "",
-        selectedTemplate.issuer
-      );
-
-      setStepLabel("Attaching certificate to batch…");
-      const requestPayload = buildAddTemplateRequestPayload(
-        courseId,
-        batchId,
-        selectedTemplateId,
-        selectedTemplate,
-        issueTo,
-        rootOrgId,
-        enableScoreRule,
-        scoreRuleValue,
-        fullSignatoryList,
-        lastBuiltSignatoryListRef.current,
-        fullPreviewUrl,
-        fullIssuer
-      );
-
-      if (singleExistingCertId) {
-        setStepLabel("Removing old certificate...");
-        await certificateService.removeTemplateFromBatch(
-          {
-            batch: {
-              courseId,
-              batchId,
-              template: { identifier: singleExistingCertId },
-            },
-          },
-          reqHeaders
-        );
-      }
-
-      setStepLabel("Attaching new certificate to batch…");
-      await certificateService.addTemplateToBatch(
-        requestPayload,
-        reqHeaders
-      );
-
-      // Optimistically update the cache so the UI reflects instantly
-      queryClient.setQueryData<unknown[]>(["batchList", courseId, true], (old) =>
-        applyOptimisticBatchCertUpdate(old, batchId, selectedTemplateId, selectedTemplate)
-      );
-
-      // Invalidate after a delay for ES to index
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["batchList", courseId] });
-      }, 2000);
-
-      setStep("done");
+      lastBuiltSignatoryListRef.current = await runAddCertificate({
+        courseId, batchId, selectedTemplateId, selectedTemplate,
+        issueTo, rootOrgId, enableScoreRule, scoreRuleValue,
+        lastBuiltSignatoryList: lastBuiltSignatoryListRef.current,
+        singleExistingCertId,
+        reqHeaders,
+        setStepLabel, setStep, setErrorMsg,
+        queryClient,
+      });
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.");
       setStep("error");

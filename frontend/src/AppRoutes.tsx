@@ -26,6 +26,7 @@ import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
 import ContentReviewPage from './pages/workspace/ContentReviewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
+import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
@@ -60,6 +61,7 @@ const AppRoutes: React.FC = () => {
           <Route path=":collectionId/batch/:batchId" element={<CollectionDetailPage />}>
             <Route path="content/:contentId" element={null} />
           </Route>
+          <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardPage />} />
         </Route>
 
         {/* Protected routes */}

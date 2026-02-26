@@ -1,18 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  resolveSignatoryList,
-  buildSignatoryListFromForm,
-  isNewTemplateValid,
-  buildCreateAssetRequest,
-  applyOptimisticBatchCertUpdate,
-  getBase64Image,
-  generateModifiedSvg,
-  fetchTemplateDetails,
-  buildAddTemplateRequestPayload,
-  Signatory
-} from './useCertificateModalState.helpers';
+import { 
+  Signatory, 
+  resolveSignatoryList, 
+  buildSignatoryListFromForm 
+} from './signatoryUtils';
+import { 
+  isNewTemplateValid, 
+  buildCreateAssetRequest, 
+  getBase64Image, 
+  generateModifiedSvg 
+} from './templateAssetUtils';
+import { applyOptimisticBatchCertUpdate } from './certificateCacheUtils';
+import { fetchTemplateDetails } from './certificateOperationHandlers';
+import { buildAddTemplateRequestPayload } from './certificateRequestBuilders';
 import { NewTemplateForm } from './types';
 import { certificateService } from '@/services/CertificateService';
+
+const { mockHttpGet } = vi.hoisted(() => ({ mockHttpGet: vi.fn() }));
+vi.mock('@/services/HttpService', () => ({
+  HttpService: class {
+    get = mockHttpGet;
+  },
+}));
 
 vi.mock('@/services/CertificateService', () => ({
   certificateService: {
@@ -77,26 +86,15 @@ describe('useCertificateModalState.helpers', () => {
       expect(result).toBe('data:image/png;base64,123');
     });
 
-    it('returns original url if fetch throws', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+    it('returns original url if getBlob throws', async () => {
+      mockHttpGet.mockRejectedValue(new Error('Network error'));
       const result = await getBase64Image('https://example.com/img');
       expect(result).toBe('https://example.com/img');
-      vi.unstubAllGlobals();
-    });
-
-    it('returns original url if fetch is not ok', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
-      const result = await getBase64Image('https://example.com/img');
-      expect(result).toBe('https://example.com/img');
-      vi.unstubAllGlobals();
     });
 
     it('converts blob to base64 on success', async () => {
       const mockBlob = new Blob(['123'], { type: 'image/png' });
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        blob: async () => mockBlob,
-      }));
+      mockHttpGet.mockResolvedValue(mockBlob);
 
       class MockFileReader {
         onloadend: any = null;
@@ -115,10 +113,7 @@ describe('useCertificateModalState.helpers', () => {
     
     it('returns url on FileReader error', async () => {
       const mockBlob = new Blob(['123'], { type: 'image/png' });
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        blob: async () => mockBlob,
-      }));
+      mockHttpGet.mockResolvedValue(mockBlob);
 
       class MockFileReader {
         onloadend: any = null;

@@ -37,8 +37,8 @@ export default function ContentRow({
   const status = contentStatusMap?.[node.identifier];
   const showStatus = contentStatusMap !== undefined;
   const baseClass = contentBlocked
-    ? "flex items-center gap-3 rounded-[10px] px-4 py-3 w-full h-[70px] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-60 pointer-events-none cursor-not-allowed select-none"
-    : `flex items-center gap-3 rounded-[10px] px-4 py-3 w-full h-[70px] ${isActive
+    ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-60 pointer-events-none cursor-not-allowed select-none"
+    : `flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] ${isActive
       ? "border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100"
       : "border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-90"
     }`;
@@ -51,7 +51,7 @@ export default function ContentRow({
       <span className="flex-1 text-base leading-snug">{title}</span>
       {showStatus && (
         <span
-          className={`font-rubik font-normal text-[10px] leading-[100%] flex-shrink-0 flex items-center gap-1 ${
+          className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex items-center gap-1 ${
             status === 2
               ? "text-sunbird-status-completed-border"
               : status === 1
