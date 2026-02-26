@@ -1,6 +1,6 @@
 import { getClient, ApiResponse } from '../lib/http-client';
 import type { Certificate, CertificateSearchResponse } from '../components/collection/certificate/types';
-import {
+import type {
   CertSignatory,
   CertTemplateSummary,
   CreateAssetRequest,
@@ -9,9 +9,8 @@ import {
   RemoveTemplateRequest,
 } from './CertificateTypes';
 
+export type { Certificate, CertificateSearchResponse };
 export type {
-  Certificate,
-  CertificateSearchResponse,
   CertSignatory,
   CertTemplateSummary,
   CreateAssetRequest,
@@ -106,7 +105,7 @@ export class CertificateService {
         formData,
         sanitizedHeaders
       );
-      
+
       return response;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -242,6 +241,12 @@ export class CertificateService {
           },
         },
       },
+    });
+  }
+
+  public async downloadCertificate(certificateId: string): Promise<ApiResponse<any>> {
+    return getClient().get<any>(`/rc/certificate/v1/download/${certificateId}`, {
+      Accept: 'image/svg+xml'
     });
   }
 }
