@@ -10,6 +10,9 @@ import { SwitchRow } from "@/components/common/Switch";
 import { MentorSection } from "@/components/collection/MentorSection";
 import { BatchFormFields, BatchFormState } from "@/components/collection/BatchFormFields";
 import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
+import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useGetTncUrl } from "@/hooks/useTnc";
 
 /* ─── Types ─── */
 
@@ -48,6 +51,11 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
   const [form, setForm] = useState<BatchFormState>(() => makeInitialForm(initialBatch));
   const [mentorQuery, setMentorQuery] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [tncDialogOpen, setTncDialogOpen] = useState(false);
+
+  const { data: tncRes } = useSystemSetting("tncConfig");
+  const tncConfig = tncRes?.data?.result?.response?.value;
+  const { data: termsUrl } = useGetTncUrl(tncConfig || null);
 
   const { data: allMentors = [], isLoading: mentorsLoading } = useMentorList();
   const createBatch = useCreateBatch();
@@ -131,6 +139,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     isPending;
 
   return (
+    <>
     <Dialog.Root open={open} onOpenChange={handleClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
@@ -197,6 +206,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 <TncCheckboxRow
                   checked={form.acceptTerms}
                   onCheckedChange={(v) => handleField("acceptTerms", !!v)}
+                  onTermsClick={termsUrl ? () => setTncDialogOpen(true) : undefined}
                 />
               </div>
             )}
@@ -242,6 +252,19 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+
+    {/* T&C view-only popup — rendered outside the batch modal to avoid nested dialog issues */}
+    {termsUrl && (
+      <TermsAndConditionsDialog
+        termsUrl={termsUrl}
+        title="Terms &amp; Conditions"
+        open={tncDialogOpen}
+        onOpenChange={setTncDialogOpen}
+      >
+        <span className="sr-only" />
+      </TermsAndConditionsDialog>
+    )}
+    </>
   );
 };
 
