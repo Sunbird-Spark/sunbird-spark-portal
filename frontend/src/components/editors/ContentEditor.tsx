@@ -108,7 +108,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
 
         const editorUrl = service.getEditorUrl();
         iframe.src = editorUrl;
-        
+
         // Mark as initialized and store current identifier
         isInitializedRef.current = true;
         currentIdentifierRef.current = metadata.identifier;
@@ -124,28 +124,24 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
       window.removeEventListener('message', messageHandler);
       // Only clean up if we're actually unmounting (not just re-rendering)
       // Check if the component is being unmounted by seeing if iframe still exists
-      if (!document.body.contains(iframe)) {
-        // Set iframe src first so the editor can gracefully unload
-        // while global properties still exist
-        if (iframe) {
-          iframe.onload = null;
-          iframe.src = 'about:blank';
-        }
-        // Clean up global window properties
-        delete (window as any).context;
-        delete (window as any).config;
-        // Restore previous jQuery if any, otherwise remove shim
-        if (previousJQuery) {
-          (window as any).$ = previousJQuery;
-        } else {
-          delete (window as any).$;
-        }
-        // Reset initialization flag
-        isInitializedRef.current = false;
-        currentIdentifierRef.current = null;
+      if (iframe) {
+        iframe.onload = null;
+        iframe.src = 'about:blank';
       }
+      // Clean up global window properties
+      delete (window as any).context;
+      delete (window as any).config;
+      // Restore previous jQuery if any, otherwise remove shim
+      if (previousJQuery) {
+        (window as any).$ = previousJQuery;
+      } else {
+        delete (window as any).$;
+      }
+      // Reset initialization flag
+      isInitializedRef.current = false;
+      currentIdentifierRef.current = null;
     };
-  }, [metadata.identifier, handleEditorEvent]); // Only depend on identifier, not entire metadata object
+  }, [metadata, handleEditorEvent]);
 
   return (
     <iframe

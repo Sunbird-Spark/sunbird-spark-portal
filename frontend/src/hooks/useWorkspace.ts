@@ -120,7 +120,7 @@ export function useWorkspace({
     getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
   // Special filters for uploads and collaborations tabs
-  const getFiltersForTab = () => {
+  const getFiltersForTab = useCallback(() => {
     const baseFilters: Record<string, unknown> = {
       createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
       ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
@@ -156,7 +156,7 @@ export function useWorkspace({
     }
 
     return baseFilters;
-  };
+  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, activeTab]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
     queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId],

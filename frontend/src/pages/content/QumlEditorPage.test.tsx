@@ -43,9 +43,10 @@ vi.mock('@/hooks/useUserRead', () => ({
   }),
 }));
 
-vi.mock('@/hooks/useContentLock', () => ({
-  useContentLock: () => ({
-    lockKey: null,
+vi.mock('@/hooks/useEditorLock', () => ({
+  useEditorLock: () => ({
+    editorMode: 'edit',
+    isEditMode: true,
     lockError: null,
     isLocking: false,
     retireLock: mockRetireLock,

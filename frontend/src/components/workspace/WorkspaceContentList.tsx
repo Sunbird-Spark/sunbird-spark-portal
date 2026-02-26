@@ -102,8 +102,8 @@ const WorkspaceContentList = ({
               {/* Actions */}
               <div className="col-span-3 sm:col-span-2 flex items-center justify-end gap-1">
                 {isLocked ? (
-                  <span className="relative group/lock text-amber-600">
-                    <FiLock className="w-4 h-4" cursor={"pointer"}/>
+                  <span className="relative group/lock text-amber-600 cursor-pointer">
+                    <FiLock className="w-4 h-4" />
                     <span className="absolute top-full right-0 mt-1.5 hidden group-hover/lock:block whitespace-nowrap rounded bg-foreground px-2 py-1 text-xs text-background shadow-md z-50">
                       {`This content is locked by ${lockInfo.creatorName}`}
                     </span>

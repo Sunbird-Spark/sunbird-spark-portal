@@ -137,8 +137,7 @@ describe('Protected Pages', () => {
   });
 
   describe('WorkspacePage', () => {
-    it.skip('should render workspace', { timeout: 10000 }, () => {
-      // Skipping this test as it causes hangs in CI due to complex component dependencies
+    it('should render workspace', { timeout: 10000 }, () => {
       renderWithProviders(<WorkspacePage />);
       expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
     });

@@ -103,7 +103,7 @@ const WorkspaceContentCard = ({
 
         {/* Lock Badge — outside overflow-hidden so tooltip is not clipped */}
         {isLocked && (
-          <div className="absolute bottom-3 left-3 z-20 group/lock" style={{ cursor: "pointer" }}>
+          <div className="absolute bottom-3 left-3 z-20 group/lock cursor-pointer">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-amber-100 text-amber-700">
               <FiLock className="w-3 h-3" />
               <span>Locked</span>
