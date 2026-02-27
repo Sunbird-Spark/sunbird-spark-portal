@@ -19,7 +19,7 @@ const ForgotPassword: React.FC = () => {
   const [selectedIdentifier, setSelectedIdentifier] = useState<OtpIdentifier | null>(null);
 
   const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
-  const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
+  const googleCaptchaSiteKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
 
   const handleIdentifySuccess = (identifiers: OtpIdentifier[]) => {
     setValidIdentifiers(identifiers);
