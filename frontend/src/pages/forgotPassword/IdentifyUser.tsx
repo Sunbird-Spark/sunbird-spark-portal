@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { Input } from '@/components/common/Input';
 import { Header, InputLabel, PrimaryButton } from './ForgotPasswordComponents';
 import { IdentifierStatus, OtpIdentifier } from '../../types/forgotPasswordTypes';
@@ -17,6 +18,7 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
     searchUser,
     onSuccess
 }) => {
+    const { t } = useAppI18n();
     const [identifier, setIdentifier] = useState('');
     const [name, setName] = useState('');
     const [identifierStatus, setIdentifierStatus] = useState<IdentifierStatus>('');
@@ -68,7 +70,7 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
             setErrorCount(newErrorCount);
 
             if (newErrorCount >= 2) {
-                const redirected = redirectWithError('You have exceeded maximum retry. Please try after some time');
+                const redirected = redirectWithError(t('forgotPasswordPage.errorMaxRetry'));
                 if (!redirected) {
                     setLoading(false);
                 }
@@ -81,37 +83,37 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
     return (
         <>
             <Header
-                title="Forgot Password?"
-                subtitle="Don't worry! Share your details and we will send you a code to reset your password."
+                title={t('forgotPassword')}
+                subtitle={t('forgotPasswordPage.subtitle')}
             />
 
             <div className="space-y-5">
                 <div className="form-group mb-5">
-                    <InputLabel required>Email ID / Mobile Number</InputLabel>
+                    <InputLabel required>{t('forgotPasswordPage.emailOrMobile')}</InputLabel>
                     <Input
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
-                        placeholder="Enter Email ID / Mobile Number"
+                        placeholder={t('forgotPasswordPage.enterEmailOrMobile')}
                         className="login-input-field"
                     />
                     <p className="login-form-instruction">
-                        Email (e.g. user@example.com) or Mobile Number (10 digits starting with 6-9)
+                        {t('forgotPasswordPage.emailOrMobileInstruction')}
                     </p>
                 </div>
 
                 <div className="form-group mb-5">
-                    <InputLabel required>Name (as registered)</InputLabel>
+                    <InputLabel required>{t('forgotPasswordPage.nameRegistered')}</InputLabel>
                     <Input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Enter name"
+                        placeholder={t('forgotPasswordPage.enterName')}
                         className="login-input-field"
                     />
                     {identifierStatus && (
                         <p className="login-error-message">
-                            {identifierStatus === 'NOT_MATCHED' && 'Email / mobile number or name does not match'}
-                            {identifierStatus === 'MATCHED' && 'Name does not match our records'}
-                            {identifierStatus === 'VALIDATING_FAILED' && 'Captcha validation failed'}
+                            {identifierStatus === 'NOT_MATCHED' && t('forgotPasswordPage.errorNotMatched')}
+                            {identifierStatus === 'MATCHED' && t('forgotPasswordPage.errorNameNotMatched')}
+                            {identifierStatus === 'VALIDATING_FAILED' && t('forgotPasswordPage.errorCaptcha')}
                         </p>
                     )}
                 </div>
@@ -122,7 +124,7 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
                     loading={loading}
                     className="mt-8"
                 >
-                    Continue
+                    {t('continue')}
                 </PrimaryButton>
 
                 {googleCaptchaSiteKey && (

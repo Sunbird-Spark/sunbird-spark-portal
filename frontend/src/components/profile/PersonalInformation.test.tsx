@@ -130,7 +130,9 @@ describe('PersonalInformation', () => {
         };
         renderWithProviders(<PersonalInformation user={userNoMask} />);
         expect(screen.getByText('john@example.com')).toBeInTheDocument();
-        expect(screen.getAllByText('Mobile Number').length).toBeGreaterThan(0);
+        // Since mobileNumber is undefined, it should fallback to displaying the label 'personalInfo.mobileNumber'
+        // There's one in <dt> and one in <span className="personal-info-value">
+        expect(screen.getAllByText('personalInfo.mobileNumber').length).toBeGreaterThan(0);
     });
 
     it('displays placeholder if email/phone missing', () => {
@@ -144,8 +146,11 @@ describe('PersonalInformation', () => {
         // @ts-ignore
         renderWithProviders(<PersonalInformation user={userMissingInfo} />);
 
-        expect(screen.getAllByText('Email ID').length).toBeGreaterThan(0);
-        expect(screen.getAllByText('Mobile Number').length).toBeGreaterThan(0);
+        // The labels will be rendered as definition terms.
+        // The values will fallback to the translation keys.
+        // So we expect multiple occurrences.
+        expect(screen.getAllByText('personalInfo.emailId').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('personalInfo.mobileNumber').length).toBeGreaterThan(0);
     });
 
     it('displays recovery email if available', () => {
@@ -156,7 +161,8 @@ describe('PersonalInformation', () => {
     it('displays placeholder if recovery email missing', () => {
         const userNoRecovery = { ...mockUser, recoveryEmail: undefined };
         renderWithProviders(<PersonalInformation user={userNoRecovery} />);
-        expect(screen.getAllByText('Alternate Email ID').length).toBeGreaterThan(0);
+        // Expect at least label and value fallback
+        expect(screen.getAllByText('personalInfo.alternateEmailId').length).toBeGreaterThan(0);
     });
 
     it('applies gray styling for missing fields', () => {
@@ -170,7 +176,12 @@ describe('PersonalInformation', () => {
         };
         renderWithProviders(<PersonalInformation user={userMissingInfo} />);
 
-        const spans = screen.getAllByText(/Email ID|Mobile Number|Alternate Email ID/);
+        // The labels (personalInfo.emailId etc.) are rendered in <dt> and also in <span> when value is missing.
+        // We need to target the values which have the 'text-sunbird-gray-75' class.
+        // We look for elements that have the key as text content.
+        const spans = screen.getAllByText(/personalInfo.emailId|personalInfo.mobileNumber|personalInfo.alternateEmailId/);
+
+        // Filter those that have the specific class
         const graySpans = spans.filter(s => s.classList.contains('text-sunbird-gray-75'));
         expect(graySpans.length).toBeGreaterThan(0);
     });
@@ -178,7 +189,7 @@ describe('PersonalInformation', () => {
     it('calls openDialog when edit button is clicked', () => {
         renderWithProviders(<PersonalInformation user={mockUser} />);
 
-        const editButton = screen.getByRole('button', { name: /Edit/i });
+        const editButton = screen.getByRole('button', { name: /edit/i });
         fireEvent.click(editButton);
 
         expect(mockOpenDialog).toHaveBeenCalled();

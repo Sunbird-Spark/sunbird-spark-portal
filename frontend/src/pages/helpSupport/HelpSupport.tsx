@@ -10,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useHelpFaqData } from "@/hooks/useFaqData";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 import {
     buildHelpCategories,
@@ -19,6 +20,7 @@ import "../profile/profile.css";
 import ReportIssueDialog from "@/components/help/ReportIssueDialog";
 
 const HelpSupport = () => {
+    const { t } = useAppI18n();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("help");
@@ -57,7 +59,7 @@ const HelpSupport = () => {
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetContent side="left" className="w-[17.5rem] pt-[2.5rem] px-0 pb-0">
-                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                            <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
                             <HomeSidebar
                                 activeNav={activeNav}
                                 onNavChange={(nav) => {
@@ -83,29 +85,29 @@ const HelpSupport = () => {
                         {/* Header row */}
                         <div className="flex items-center justify-between mb-[2rem]">
                             <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground">
-                                How can we assist you today?
+                                {t('help.assistPrompt')}
                             </h1>
                             <button
                                 onClick={() => setIsReportIssueOpen(true)}
-                                aria-label="Report an issue with the application"
+                                aria-label={t('help.reportAppIssue')}
                                 className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
-                                Report an Issue
+                                {t('help.reportIssueBtn')}
                             </button>
                         </div>
 
                         {loading ? (
-                            <PageLoader message="Loading..." fullPage={false} />
+                            <PageLoader message={t('loading')} fullPage={false} />
                         ) : error ? (
                             <PageLoader
-                                message="Loading..."
-                                error={error?.message || "Failed to load FAQ data. Please try again."}
+                                message={t('loading')}
+                                error={error?.message || t('help.failedToLoadFaq')}
                                 onRetry={refetch}
                                 fullPage={false}
                             />
                         ) : categories.length === 0 ? (
                             <PageLoader
-                                message="Loading..."
-                                error="No help categories found."
+                                message={t('loading')}
+                                error={t('help.noCategories')}
                                 onRetry={refetch}
                                 fullPage={false}
                             />
@@ -124,7 +126,7 @@ const HelpSupport = () => {
                                                 {cat.description}
                                             </p>
                                             <div className="flex items-center justify-between mt-auto">
-                                                <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{cat.faqCount} FAQs</span>
+                                                <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{t('help.faqCount', { count: cat.faqCount })}</span>
                                                 <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
                                             </div>
                                         </div>

@@ -1,5 +1,7 @@
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const HomePerformanceChart = () => {
+    const { t } = useAppI18n();
     return (
         <div className="home-performance-chart h-[14.375rem] flex-1" style={{ paddingTop: '1.125rem' }}>
             <h3 className="text-lg font-bold text-sunbird-obsidian" style={{ marginBottom: '0.3125rem' }}>Performance</h3>
@@ -44,12 +46,12 @@ const HomePerformanceChart = () => {
 
                 {/* X-Axis Labels */}
                 <div className="flex justify-between px-2" style={{ marginTop: '0.3125rem' }}>
-                    <span className="text-xs font-medium text-sunbird-obsidian">Jan</span>
-                    <span className="text-xs font-medium text-sunbird-obsidian">Feb</span>
-                    <span className="text-xs font-medium text-sunbird-obsidian">Mar</span>
-                    <span className="text-xs font-medium text-sunbird-obsidian">Apr</span>
-                    <span className="text-xs font-medium text-sunbird-obsidian pl-1">May</span>
-                    <span className="text-xs font-medium text-sunbird-obsidian">Jun</span>
+                    <span className="text-xs font-medium text-sunbird-obsidian">{t('months.jan')}</span>
+                    <span className="text-xs font-medium text-sunbird-obsidian">{t('months.feb')}</span>
+                    <span className="text-xs font-medium text-sunbird-obsidian">{t('months.mar')}</span>
+                    <span className="text-xs font-medium text-sunbird-obsidian">{t('months.apr')}</span>
+                    <span className="text-xs font-medium text-sunbird-obsidian pl-1">{t('months.may')}</span>
+                    <span className="text-xs font-medium text-sunbird-obsidian">{t('months.jun')}</span>
                 </div>
             </div>
 

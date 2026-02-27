@@ -17,6 +17,10 @@ vi.mock('react-icons/fi', () => ({
   FiChevronDown: () => <span data-testid="chevron-down" />,
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
 const createMockCourse = (id: string, name: string, percentage: number): TrackableCollection => ({
   courseId: id,
   courseName: name,
@@ -72,10 +76,10 @@ const mockCourses: TrackableCollection[] = [
 describe('MyLearningCourses', () => {
   it('renders "Courses" title and tabs', () => {
     render(<MyLearningCourses courses={mockCourses} />);
-    expect(screen.getByText('Courses')).toBeInTheDocument();
-    expect(screen.getByText('Active Courses')).toBeInTheDocument();
-    expect(screen.getByText('Completed')).toBeInTheDocument();
-    expect(screen.getByText('Upcoming')).toBeInTheDocument();
+    expect(screen.getByText('courses')).toBeInTheDocument();
+    expect(screen.getByText('status.active courses')).toBeInTheDocument();
+    expect(screen.getByText('status.completed')).toBeInTheDocument();
+    expect(screen.getByText('status.upcoming')).toBeInTheDocument();
   });
 
   it('displays active courses by default', () => {
@@ -92,7 +96,7 @@ describe('MyLearningCourses', () => {
   it('switches to "Completed" tab and shows completed courses', () => {
     render(<MyLearningCourses courses={mockCourses} />);
     
-    const completedTab = screen.getByText('Completed');
+    const completedTab = screen.getByText('status.completed');
     fireEvent.click(completedTab);
     
     // Should show Completed Course 1

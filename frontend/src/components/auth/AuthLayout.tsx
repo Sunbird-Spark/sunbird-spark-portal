@@ -2,6 +2,7 @@ import React from 'react';
 import { FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import sunbirdLogo from '@/assets/sunbird-logo.svg';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface AuthLayoutProps {
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage }) => {
   const navigate = useNavigate();
+  const { t } = useAppI18n();
 
   const handleClose = () => {
     if (onClose) {
@@ -29,8 +31,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage })
           <div className="login-left-panel-container"></div>
           <div className="left-panel-content">
             <h2 className="left-panel-title">
-              Empower your future<br />
-              through learning.
+              {t("authLayout.empowerTitle")}
             </h2>
           </div>
         </div>
@@ -48,7 +49,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage })
                 <a href="/">
                   <img
                     src={sunbirdLogo}
-                    alt="Sunbird Logo"
+                    alt={t("authLayout.logoAlt")}
                     className={`logo-image ${isOtpPage ? '-translate-y-10' : ''}`}
                   />
                 </a>

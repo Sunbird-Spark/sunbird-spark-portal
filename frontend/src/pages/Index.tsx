@@ -3,6 +3,7 @@ import HeroWithStats from "@/components/landing/HeroWithStats";
 import FAQSection from "@/components/landing/FAQSection";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { useFormRead } from "@/hooks/useForm";
 import DynamicContentSection from "@/components/landing/DynamicContentSection";
 import DynamicCategorySection from "@/components/landing/DynamicCategorySection";
@@ -10,6 +11,7 @@ import DynamicResourceSection from "@/components/landing/DynamicResourceSection"
 import { FormSection } from "@/types/formTypes";
 
 const Index = () => {
+  const { t } = useAppI18n();
   const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {
       type: "page",
@@ -60,7 +62,7 @@ const Index = () => {
     if (isLoading) {
       return (
         <div className="container mx-auto px-4 py-16">
-          <PageLoader message="Loading sections..." fullPage={false} />
+          <PageLoader message={t("index.loadingSections")} fullPage={false} />
         </div>
       );
     }
@@ -69,7 +71,7 @@ const Index = () => {
       return (
         <div className="container mx-auto px-4 py-16">
           <PageLoader 
-            error="Unable to load content sections. Please try again." 
+            error={t("index.errorLoadingSections")}
             onRetry={() => refetch()} 
             fullPage={false} 
           />
@@ -80,7 +82,7 @@ const Index = () => {
     if (sections.length === 0) {
       return (
         <div className="container mx-auto px-4 py-16 text-center">
-          <p className="text-muted-foreground">No content sections available at the moment.</p>
+          <p className="text-muted-foreground">{t("index.noSectionsAvailable")}</p>
         </div>
       );
     }

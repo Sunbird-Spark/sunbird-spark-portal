@@ -7,6 +7,18 @@ vi.mock('@/hooks/useForm', () => ({
   useFormRead: vi.fn(),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'loadingContent': 'Loading content...',
+        'failedToLoadContent': 'Failed to load content',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 vi.mock('@/components/common/PageLoader', () => ({
   default: ({ message, error, onRetry }: { message: string; error?: string; onRetry?: () => void }) => (
     <div data-testid="page-loader">
@@ -151,7 +163,7 @@ describe('HomeDiscoverSections', () => {
 
     // Query all sections in actual DOM order
     const allSections = container.querySelectorAll('[data-testid^="dynamic-"]');
-    
+
     // All three should be rendered
     expect(allSections).toHaveLength(3);
 

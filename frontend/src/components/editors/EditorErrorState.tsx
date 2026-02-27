@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface EditorErrorStateProps {
   message: string;
@@ -11,6 +12,7 @@ interface EditorErrorStateProps {
  */
 const EditorErrorState = ({ message, showRetry = false }: EditorErrorStateProps) => {
   const navigate = useNavigate();
+  const { t } = useAppI18n();
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
@@ -22,7 +24,7 @@ const EditorErrorState = ({ message, showRetry = false }: EditorErrorStateProps)
             onClick={() => window.location.reload()}
             className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
-            Retry
+            {t('retry')}
           </button>
         )}
         <button
@@ -30,7 +32,7 @@ const EditorErrorState = ({ message, showRetry = false }: EditorErrorStateProps)
           onClick={() => navigate('/workspace')}
           className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
         >
-          Back to workspace
+          {t('content.backToWorkspace')}
         </button>
       </div>
     </div>

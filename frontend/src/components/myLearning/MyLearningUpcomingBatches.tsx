@@ -1,5 +1,6 @@
 import { TrackableCollection } from "@/types/TrackableCollections";
 import { FiBookOpen } from "react-icons/fi";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 
 interface MyLearningUpcomingBatchesProps {
@@ -7,6 +8,7 @@ interface MyLearningUpcomingBatchesProps {
 }
 
 const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingBatchesProps) => {
+  const { t } = useAppI18n();
 
   // Limit to upcoming 10 batches
   const limitedBatches = upcomingBatches.slice(0, 10);
@@ -47,7 +49,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
   if (upcomingBatchesData.length === 0) {
      return (
         <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
-            <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-['Rubik']">Upcoming Batches</h3>
+            <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-['Rubik']">{t('common.upcomingBatches')}</h3>
             <div className="text-gray-500 text-sm">No upcoming batches scheduled.</div>
         </div>
      )
@@ -56,7 +58,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
   return (
     <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
-      <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-['Rubik']">Upcoming Batches</h3>
+      <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-['Rubik']">{t('common.upcomingBatches')}</h3>
 
       {/* Batches by Date */}
       <div className="space-y-6">

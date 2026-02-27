@@ -31,6 +31,10 @@ vi.mock('@/hooks/useToast', () => ({
   toast: mockToast,
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
 vi.mock('@/hooks/useUserRead', () => ({
   useUserRead: () => ({
     data: {
@@ -113,7 +117,7 @@ describe('QumlEditorPage', () => {
     );
 
     renderWithRouter(<QumlEditorPage />);
-    expect(screen.getByTestId('page-loader')).toHaveTextContent('Loading editor...');
+    expect(screen.getByTestId('page-loader')).toHaveTextContent('content.loadingEditor');
   });
 
   it('renders quml editor in edit mode for Draft status', async () => {
@@ -179,8 +183,8 @@ describe('QumlEditorPage', () => {
 
     expect(screen.getByText('Question set not found')).toBeInTheDocument();
     expect(screen.queryByTestId('quml-editor')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Back to workspace' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'retry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'content.backToWorkspace' })).toBeInTheDocument();
   });
 
   it('shows fallback when contentId is absent', async () => {

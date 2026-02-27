@@ -3,6 +3,7 @@ import { FiCheck } from "react-icons/fi";
 import { MdOutlineClose } from "react-icons/md";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/common/Dialog";
 import VerifyOtpDialog from './VerifyOtpDialog';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import {
     OtpRequiredField,
     EditableField,
@@ -47,6 +48,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
     formatTime,
     triggerCaptcha,
 }) => {
+    const { t } = useAppI18n();
     const [activeOtpField, setActiveOtpField] = useState<OtpRequiredField | null>(null);
 
     const handleValidateClick = (field: OtpRequiredField) => {
@@ -89,7 +91,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                     />
                     {state.status === 'otp_sending' && (
                         <span className="text-[hsl(var(--sunbird-brick))] text-[14px] font-medium font-['Rubik'] whitespace-nowrap">
-                            Sending...
+                            {t("editProfile.sending")}
                         </span>
                     )}
                     {showValidateBtn && (
@@ -104,12 +106,12 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                             })()}
                             className="text-[hsl(var(--sunbird-brick))] text-[14px] font-medium font-['Rubik'] whitespace-nowrap hover:text-[hsl(var(--sunbird-brick)/0.8)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Validate
+                            {t("editProfile.validate")}
                         </button>
                     )}
                     {showVerified && (
                         <span className="text-green-600 text-[14px] font-medium font-['Rubik'] flex items-center gap-1 whitespace-nowrap">
-                            <FiCheck className="w-4 h-4" /> Verified
+                            <FiCheck className="w-4 h-4" /> {t("editProfile.verified")}
                         </span>
                     )}
                 </div>
@@ -132,10 +134,10 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8">
                         <DialogTitle className="text-[22px] font-medium text-[hsl(var(--sunbird-obsidian))] font-['Rubik']">
-                            Edit Personal Information
+                            {t("editProfile.title")}
                         </DialogTitle>
                         <DialogDescription className="sr-only">
-                            Update your name, mobile number, email, and alternate email.
+                            {t("editProfile.description")}
                         </DialogDescription>
                         <button
                             onClick={onClose}
@@ -150,7 +152,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                         {/* Row 1: Full Name and Mobile Number */}
                         <div>
                             <label className="block text-[13px] text-[hsl(var(--sunbird-gray-75))] font-['Rubik'] mb-2">
-                                Full Name
+                                {t("personalInfo.fullName")}
                             </label>
                             <input
                                 value={form.fullName}
@@ -159,11 +161,11 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                             />
                         </div>
 
-                        {renderOtpField('mobileNumber', 'Mobile Number', 'Enter Mobile Number')}
+                        {renderOtpField('mobileNumber', t("personalInfo.mobileNumber"), t("editProfile.enterMobileNumber"))}
 
                         {/* Row 2: Email ID and Alternate Email ID */}
-                        {renderOtpField('emailId', 'Email ID', 'Enter Email ID')}
-                        {renderOtpField('alternateEmail', 'Alternate Email ID', 'Enter Alternate Email ID')}
+                        {renderOtpField('emailId', t("personalInfo.emailId"), t("editProfile.enterEmailId"))}
+                        {renderOtpField('alternateEmail', t("personalInfo.alternateEmailId"), t("editProfile.enterAlternateEmailId"))}
                     </div>
 
                     {/* Save Button */}
@@ -174,7 +176,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                             disabled={!canSave || isSaving}
                             className="w-[210px] h-[46px] rounded-[10px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-['Rubik'] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isSaving ? 'Saving...' : 'Save'}
+                            {isSaving ? t("editProfile.saving") : t("save")}
                         </button>
                     </div>
                 </DialogContent>

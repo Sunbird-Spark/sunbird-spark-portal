@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { Header, PrimaryButton, OTPInput } from './ForgotPasswordComponents';
 import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
@@ -20,6 +21,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
     resetPassword,
     generateOtp
 }) => {
+    const { t } = useAppI18n();
     const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
     const [otpError, setOtpError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -81,20 +83,20 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                 return;
             }
 
-            throw new Error('Reset password failed');
+            throw new Error(t('forgotPasswordPage.errorResetFailed'));
         } catch (err: any) {
             const remaining = err?.response?.data?.result?.remainingAttempt;
 
             if (remaining === 0) {
-                const redirected = redirectWithError('You have exceeded maximum retry. Please login again.');
+                const redirected = redirectWithError(t('forgotPasswordPage.errorMaxRetryLogin'));
                 if (!redirected) {
                     setLoading(false);
                 }
             } else {
                 if (remaining) {
-                    setOtpError(`Invalid OTP. You have ${remaining} attempt(s) remaining.`);
+                    setOtpError(t('forgotPasswordPage.errorInvalidOtpRemaining', { remaining }));
                 } else {
-                    setOtpError('Invalid OTP. Please try again.');
+                    setOtpError(t('forgotPasswordPage.errorInvalidOtp'));
                 }
                 setLoading(false);
             }
@@ -105,7 +107,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
 
     const handleResendOtp = () => {
         if (resendOtpCounter >= maxResendTry) {
-            setOtpError('OTP resend maximum retry reached.');
+            setOtpError(t('forgotPasswordPage.errorResendMaxReached'));
             return;
         }
 
@@ -137,14 +139,14 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             captchaRef.current?.reset();
 
             if (error?.response?.status === 429) {
-                const redirected = redirectWithError(error?.response?.data?.params?.errmsg || 'Too many requests. Please try again later.');
+                const redirected = redirectWithError(error?.response?.data?.params?.errmsg || t('forgotPasswordPage.errorTooManyRequests'));
                 if (!redirected) {
                     setDisableResendOtp(false);
                 }
                 return;
             }
 
-            setOtpError('Resend OTP failed. Please try again.');
+            setOtpError(t('forgotPasswordPage.errorResendFailed'));
             setDisableResendOtp(false);
         }
     };
@@ -152,14 +154,14 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
     return (
         <>
             <Header
-                title="Enter the code"
-                subtitle="Enter the 6 digit code sent to your email/phone number and complete the verification"
+                title={t('forgotPasswordPage.enterCode')}
+                subtitle={t('forgotPasswordPage.otpSentInstruction')}
             />
 
             <div className="space-y-5">
                 <div className="space-y-6">
                     <p className="otp-validity-info">
-                        OTP is valid for 30 minutes
+                        {t('forgotPasswordPage.otpValidity')}
                     </p>
 
                     <OTPInput otp={otp} setOtp={setOtp} />
@@ -170,7 +172,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                             onClick={handleResendOtp}
                             className="resend-otp-btn"
                         >
-                            Resend OTP {counter > 0 && `(${counter})`}
+                            {t('forgotPasswordPage.resendOtp')} {counter > 0 && `(${counter})`}
                         </button>
                     </div>
                 </div>
@@ -180,7 +182,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                     onClick={handleVerifyOtp}
                     loading={loading}
                 >
-                    Submit OTP
+                    {t('forgotPasswordPage.submitOtp')}
                 </PrimaryButton>
 
                 {otpError && (

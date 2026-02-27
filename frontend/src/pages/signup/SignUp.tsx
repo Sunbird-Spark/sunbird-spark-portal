@@ -11,9 +11,11 @@ import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { useAcceptTnc } from '@/hooks/useTnc';
 import { SignupService } from '@/services/SignupService';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const SignUp: React.FC = () => {
     const { toast } = useToast();
+    const { t } = useAppI18n();
     const captchaRef = useRef<ReCAPTCHA>(null);
     const signupService = useMemo(() => new SignupService(), []);
 
@@ -45,17 +47,17 @@ const SignUp: React.FC = () => {
 
         if (response.status !== 200) {
             toast({
-                title: "OTP Generation Failed",
-                description: "Failed to send OTP. Please try again.",
+                title: t("signUpPage.otpGenerationFailed"),
+                description: t("signUpPage.failedToSendOtp"),
                 variant: "destructive",
             });
             return;
         }
 
-        const title = isResend ? "OTP Resent" : "OTP Sent";
+        const title = isResend ? t("signUpPage.otpResent") : t("signUpPage.otpSent");
         const description = isResend
-            ? "A new verification code has been sent."
-            : "Please check your email/phone for the verification code.";
+            ? t("signUpPage.newCodeSent")
+            : t("signUpPage.checkEmailPhone");
 
         toast({ title, description, variant: "default" });
 
@@ -70,11 +72,11 @@ const SignUp: React.FC = () => {
 
         const isCaptchaError = error?.response?.status === 418;
         const title = isCaptchaError
-            ? "Captcha Validation Failed"
-            : isResend ? "Resend Failed" : "OTP Generation Failed";
+            ? t("signUpPage.captchaFailed")
+            : isResend ? t("signUpPage.resendFailed") : t("signUpPage.otpGenerationFailed");
         const description = isCaptchaError
-            ? "Please try again."
-            : error.message || "Failed to send OTP. Please try again.";
+            ? t("signUpPage.pleaseTryAgain")
+            : error.message || t("signUpPage.failedToSendOtp");
 
         toast({ title, description, variant: "destructive" });
     };
@@ -109,8 +111,8 @@ const SignUp: React.FC = () => {
     const handleSignupSuccess = (signupResponse: any) => {
         if (signupResponse.status !== 200) {
             toast({
-                title: "Signup Failed",
-                description: "OTP verified but account creation failed. Please try again.",
+                title: t("signUpPage.signupFailed"),
+                description: t("signUpPage.otpButFailed"),
                 variant: "destructive",
             });
             return;
@@ -126,8 +128,8 @@ const SignUp: React.FC = () => {
 
     const handleSignupError = (error: any) => {
         toast({
-            title: "Signup Failed",
-            description: error.message || "OTP verified but account creation failed. Please try again.",
+            title: t("signUpPage.signupFailed"),
+            description: error.message || t("signUpPage.otpButFailed"),
             variant: "destructive",
         });
     };
@@ -135,8 +137,8 @@ const SignUp: React.FC = () => {
     const handleOtpVerificationSuccess = (response: any) => {
         if (response.status !== 200) {
             toast({
-                title: "Verification Failed",
-                description: "Invalid OTP. Please try again.",
+                title: t("signUpPage.verificationFailed"),
+                description: t("signUpPage.invalidOtp"),
                 variant: "destructive",
             });
             return;
@@ -157,8 +159,8 @@ const SignUp: React.FC = () => {
 
     const handleOtpVerificationError = (error: any) => {
         toast({
-            title: "Verification Failed",
-            description: error.message || "An error occurred during verification. Please try again.",
+            title: t("signUpPage.verificationFailed"),
+            description: error.message || t("signUpPage.verificationError"),
             variant: "destructive",
         });
     };
