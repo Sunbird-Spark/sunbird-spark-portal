@@ -12,8 +12,10 @@ import {
 import { NotificationFeed } from "@/types/notificationTypes";
 import dayjs from "dayjs";
 import React from 'react';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 export const NotificationPopover = () => {
+    const { t } = useAppI18n();
     const [isOpen, setIsOpen] = useState(false);
     const { notifications: allNotifications, refetch } = useNotificationRead();
     const { deleteNotification, deleteAll, filterDeleted } = useNotificationDelete();
@@ -75,7 +77,7 @@ export const NotificationPopover = () => {
     return (
         <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
             <Popover.Trigger asChild>
-                <button className="profile-action-btn relative" aria-label="Notifications">
+                <button className="profile-action-btn relative" aria-label={t("common.notifications")}>
                     <FiBell className="profile-action-icon" aria-hidden="true" />
                     {unreadCount > 0 && (
                         <span className="notification-badge"></span>
@@ -92,12 +94,12 @@ export const NotificationPopover = () => {
                 >
                     <Popover.Arrow className="notification-popover-arrow" width={24} height={18} />
                     <div className="notification-popover-header">
-                        <h3 className="notification-popover-title">Notifications</h3>
+                        <h3 className="notification-popover-title">{t("common.notifications")}</h3>
                     </div>
                     <div className="notification-list">
                         {!hasNotifications ? (
                             <div className="notification-empty">
-                                No notifications
+                                {t("notifications.empty")}
                             </div>
                         ) : (
                             groupedNotifications.map((g, index) => (
@@ -106,7 +108,7 @@ export const NotificationPopover = () => {
                                         <span className="notification-group-label">{g.group}</span>
                                         {index === 0 && (
                                             <button onClick={handleDeleteAll} className="notification-delete-all-btn">
-                                                Delete All
+                                                {t("notifications.deleteAll")}
                                             </button>
                                         )}
                                     </div>

@@ -33,7 +33,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                         <div className="w-full h-full flex items-center">
                             <img
                                 src={sunbirdLogo}
-                                alt="Sunbird"
+                                alt={t("onboarding.altSunbird")}
                                 className="h-[2.4375rem] w-auto"
                                 style={{ height: '2.4375rem' }}
                             />
@@ -44,7 +44,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                         <button
                             onClick={onToggleSidebar}
                             className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
-                            aria-label="Open Menu"
+                            aria-label={t("homeComponents.openMenu")}
                         >
                             <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path d="M1 1H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -60,7 +60,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                     <button
                         onClick={() => setIsSearchOpen(true)}
                         className="profile-action-btn"
-                        aria-label="Search"
+                        aria-label={t("header.search")}
                     >
                         <FiSearch className="profile-action-icon" aria-hidden="true" />
                     </button>
@@ -72,7 +72,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="profile-lang-btn">
-                                <img src={translationIcon} alt="Language" className="profile-action-icon" />
+                                <img src={translationIcon} alt={t("changeLanguage")} className="profile-action-icon" />
                                 <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                             </button>
                         </DropdownMenuTrigger>

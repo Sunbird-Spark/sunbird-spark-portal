@@ -3,6 +3,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Header, InputLabel, PrimaryButton, OTPInput } from './ForgotPasswordComponents';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
 describe('ForgotPasswordComponents', () => {
     describe('Header', () => {
         it('renders title and subtitle', () => {
@@ -41,7 +45,7 @@ describe('ForgotPasswordComponents', () => {
 
         it('shows loading text and is disabled when loading', () => {
             render(<PrimaryButton onClick={() => { }} loading>Submit</PrimaryButton>);
-            expect(screen.getByText('Please wait…')).toBeInTheDocument();
+            expect(screen.getByText('confirmDialog.pleaseWait')).toBeInTheDocument();
             expect(screen.getByRole('button')).toBeDisabled();
         });
 

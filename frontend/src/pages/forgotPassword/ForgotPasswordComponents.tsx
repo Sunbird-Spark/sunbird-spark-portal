@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/common/Button';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 export const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => (
     <div className="login-header text-center mb-8">
@@ -15,15 +16,18 @@ export const InputLabel = ({ children, htmlFor, required }: { children: React.Re
     </label>
 );
 
-export const PrimaryButton = ({ children, onClick, disabled, loading, className = "" }: { children: React.ReactNode, onClick: () => void, disabled?: boolean, loading?: boolean, className?: string }) => (
-    <Button
-        className={`login-primary-button ${className}`}
-        onClick={onClick}
-        disabled={disabled || loading}
-    >
-        {loading ? 'Please wait…' : children}
-    </Button>
-);
+export const PrimaryButton = ({ children, onClick, disabled, loading, className = "" }: { children: React.ReactNode, onClick: () => void, disabled?: boolean, loading?: boolean, className?: string }) => {
+    const { t } = useAppI18n();
+    return (
+        <Button
+            className={`login-primary-button ${className}`}
+            onClick={onClick}
+            disabled={disabled || loading}
+        >
+            {loading ? t('confirmDialog.pleaseWait') : children}
+        </Button>
+    );
+};
 
 interface OTPInputProps {
     otp: string[];

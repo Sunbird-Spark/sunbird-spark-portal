@@ -5,9 +5,11 @@ import EditorErrorState from '@/components/editors/EditorErrorState';
 import { ContentEditor } from '@/components/editors/ContentEditor';
 import type { ContentEditorEvent } from '@/services/editors/content-editor';
 import { useContentRead } from '@/hooks/useContent';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { useEditorLock } from '@/hooks/useEditorLock';
 
 const ContentEditorPage = () => {
+  const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
 

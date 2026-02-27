@@ -19,12 +19,13 @@ import {
 
 import { buildCategoryFaqsMap } from "../../services/HelpSupportService";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 import "../profile/profile.css";
 import ReportIssueDialog from "@/components/help/ReportIssueDialog";
 
 const HelpCategoryDetail = () => {
-
+    const { t } = useAppI18n();
     const { categoryId } = useParams<{ categoryId: string }>();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
@@ -87,7 +88,7 @@ const HelpCategoryDetail = () => {
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetContent side="left" className="w-[17.5rem] pt-[2.5rem] px-0 pb-0">
-                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                            <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
                             <HomeSidebar
                                 activeNav={activeNav}
                                 onNavChange={(nav) => {
@@ -118,36 +119,36 @@ const HelpCategoryDetail = () => {
                                 className="flex items-center gap-[0.5rem] text-sunbird-brick font-medium font-['Rubik'] text-sm hover:opacity-80 transition-opacity"
                             >
                                 <FaArrowLeftLong className="w-[1rem] h-[1rem]" />
-                                Go Back
+                                {t('button.goBack')}
                             </button>
                             <button
                                 onClick={() => setIsReportIssueOpen(true)}
                                 className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
-                                aria-label="Report an issue with this help content">
-                                Report an Issue
+                                aria-label={t('help.reportContentIssue')}>
+                                {t('help.reportIssueBtn')}
                             </button>
                         </div>
 
                         {loading ? (
-                            <PageLoader message="Loading..." fullPage={false} />
+                            <PageLoader message={t('loading')} fullPage={false} />
                         ) : error ? (
                             <PageLoader
-                                message="Loading..."
-                                error="Failed to load FAQ data. Please try again."
+                                message={t('loading')}
+                                error={t('help.failedToLoadFaq')}
                                 onRetry={refetch}
                                 fullPage={false}
                             />
                         ) : !category ? (
                             <PageLoader
-                                message="Loading..."
-                                error="Category not found."
+                                message={t('loading')}
+                                error={t('help.categoryNotFound')}
                                 onRetry={() => navigate("/help-support")}
                                 fullPage={false}
                             />
                         ) : sanitizedFaqs.length === 0 ? (
                             <PageLoader
-                                message="Loading..."
-                                error="No FAQs available for this category."
+                                message={t('loading')}
+                                error={t('help.noFaqs')}
                                 onRetry={() => navigate("/help-support")}
                                 fullPage={false}
                             />
@@ -177,18 +178,18 @@ const HelpCategoryDetail = () => {
                                                 <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
                                                     {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
                                                         <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">
-                                                            Thank you for your feedback!
+                                                            {t('help.feedbackThanks')}
                                                         </p>
                                                     ) : feedback[index] === "no" ? (
                                                         <div className="py-[0.5rem] space-y-[0.75rem]">
-                                                            <p className="text-sm font-semibold text-foreground font-['Rubik']">Sorry about that!</p>
-                                                            <p className="text-sm font-semibold text-foreground font-['Rubik']">What more would you like to know?</p>
+                                                            <p className="text-sm font-semibold text-foreground font-['Rubik']">{t('help.sorry')}</p>
+                                                            <p className="text-sm font-semibold text-foreground font-['Rubik']">{t('help.whatMore')}</p>
                                                             <textarea
-                                                                placeholder="Type Here..."
+                                                                placeholder={t('help.typeHere')}
                                                                 value={feedbackText[index] || ""}
                                                                 onChange={(e) => setFeedbackText((prev) => ({ ...prev, [index]: e.target.value }))}
                                                                 className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-['Rubik'] resize-none h-[5rem] focus:outline-none focus:border-sunbird-brick"
-                                                                aria-label="Additional feedback about this answer"
+                                                                aria-label={t('help.additionalFeedback')}
                                                                 aria-required="true"
                                                             />
                                                             <div className="flex justify-end">
@@ -200,24 +201,24 @@ const HelpCategoryDetail = () => {
                                                                         : "bg-sunbird-brick hover:opacity-90"
                                                                         }`}
                                                                 >
-                                                                    Submit feedback
+                                                                    {t('help.submitFeedback')}
                                                                 </button>
                                                             </div>
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-[0.75rem]">
-                                                            <span className="text-sm text-muted-foreground font-['Rubik']">Did this answer help you?</span>
+                                                            <span className="text-sm text-muted-foreground font-['Rubik']">{t('help.didThisHelp')}</span>
                                                             <button
                                                                 onClick={() => handleFeedback(index, "no")}
                                                                 className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
                                                             >
-                                                                No
+                                                                {t('no')}
                                                             </button>
                                                             <button
                                                                 onClick={() => handleFeedback(index, "yes")}
                                                                 className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
                                                             >
-                                                                Yes
+                                                                {t('yes')}
                                                             </button>
                                                         </div>
                                                     )}

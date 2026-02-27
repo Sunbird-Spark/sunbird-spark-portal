@@ -12,10 +12,12 @@ import MyLearningUpcomingBatches from "@/components/myLearning/MyLearningUpcomin
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { useSidebarState } from "@/hooks/useSidebarState";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 import "./mylearning.css";
 
 const MyLearning = () => {
+  const { t } = useAppI18n();
   const isMobile = useIsMobile();
   const [activeNav, setActiveNav] = useState("learning");
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
@@ -44,7 +46,7 @@ const MyLearning = () => {
   );
 
   if (isLoading) {
-    return <PageLoader message="Loading your learning..." />;
+    return <PageLoader message={t('myLearning.loading')} />;
   }
 
   if (error) {
@@ -54,13 +56,13 @@ const MyLearning = () => {
         <div className="flex flex-1 relative transition-all">
           <div className="flex-1 flex items-center justify-center h-[calc(100vh-5rem)]">
             <div className="text-center">
-              <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
-              <p className="text-gray-600 mb-4">Failed to load your learning progress. Please try again later.</p>
+              <h2 className="text-xl font-bold text-red-600 mb-2">{t('somethingWentWrong')}</h2>
+              <p className="text-gray-600 mb-4">{t('myLearning.errorLoading')}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-4 py-2 bg-sunbird-brick text-white rounded-md hover:opacity-90 transition-opacity"
               >
-                Retry
+                {t('retry')}
               </button>
             </div>
           </div>
@@ -80,8 +82,8 @@ const MyLearning = () => {
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 pl-0 pr-0 pb-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <SheetDescription className="sr-only">Main Navigation</SheetDescription>
+              <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
+              <SheetDescription className="sr-only">{t('myLearning.mainNavigation')}</SheetDescription>
               <HomeSidebar
                 activeNav={activeNav}
                 onNavChange={(nav) => {

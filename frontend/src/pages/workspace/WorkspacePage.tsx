@@ -271,8 +271,8 @@ const WorkspacePage = () => {
     } else {
       setShowCreateModal(false);
       toast({
-        title: "Starting Editor",
-        description: `Launching ${optionId.replace('-', ' ')} editor...`
+        title: t("workspace.startingEditor"),
+        description: t("workspace.launchingEditor", { name: optionId.replace('-', ' ') })
       });
     }
   };
@@ -500,7 +500,7 @@ const WorkspacePage = () => {
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
               <HomeSidebar
                 activeNav={activeNav}
                 onNavChange={(nav) => {
@@ -557,9 +557,9 @@ const WorkspacePage = () => {
             onClose={() => setConfirmDialog(null)}
             onConfirm={handleConfirmAction}
             isLoading={isConfirming}
-            title="Delete Content"
-            description="Are you sure you want to delete this content?"
-            confirmLabel="Delete"
+            title={t('workspace.deleteContent')}
+            description={t('workspace.deleteConfirmation')}
+            confirmLabel={t('delete')}
             confirmVariant="destructive"
           />
           <ContentNameDialog
@@ -578,7 +578,7 @@ const WorkspacePage = () => {
             orgChannelId={orgChannelId}
             orgFramework={orgFramework}
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
-            title={selectedOption ? `Create ${EDITOR_OPTION_LABELS[selectedOption] || 'Content'}` : 'Create Content'}
+            title={selectedOption ? `${t('workspace.createContent')} ${EDITOR_OPTION_LABELS[selectedOption] || ''}`.trim() : t('workspace.createContent')}
           />
         </div>
       </div>

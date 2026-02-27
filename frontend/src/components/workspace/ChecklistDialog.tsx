@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { CheckListFormField, CheckListFormFieldContent } from '@/types/formTypes';
 import './ChecklistDialog.css';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface ChecklistDialogProps {
   // Common props
@@ -27,6 +28,7 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   onPublish,
   onRequestChanges,
 }) => {
+  const { t } = useAppI18n();
   // State management
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [otherReasonChecked, setOtherReasonChecked] = useState(false);
@@ -120,10 +122,10 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   };
 
   // Mode-specific configuration
-  const dialogTitle = mode === 'publish' ? 'Publish Content' : 'Request for Changes';
-  const primaryButtonLabel = mode === 'publish' 
-    ? (isLoading ? 'Publishing...' : 'Publish')
-    : (isLoading ? 'Submitting...' : 'Request for Changes');
+  const dialogTitle = mode === 'publish' ? t('checklistDialog.publishContent') : t('checklistDialog.requestForChanges');
+  const primaryButtonLabel = mode === 'publish'
+    ? (isLoading ? t('checklistDialog.publishing') : t('checklistDialog.publish'))
+    : (isLoading ? t('checklistDialog.submitting') : t('checklistDialog.requestForChanges'));
 
   // Check if any field has otherReason for request-changes mode
   const hasOtherReasonField = mode === 'request-changes' && 
@@ -180,14 +182,14 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
                 disabled={isLoading}
                 className="review-dialog-checkbox"
               />
-              <span>Other Reason</span>
+              <span>{t('checklistDialog.otherReason')}</span>
             </label>
             {otherReasonChecked && (
               <textarea
                 value={otherReasonText}
                 onChange={(e) => setOtherReasonText(e.target.value)}
                 disabled={isLoading}
-                placeholder="Please provide details..."
+                placeholder={t('checklistDialog.provideDetails')}
                 className="review-dialog-textarea"
               />
             )}
@@ -201,7 +203,7 @@ const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
             disabled={isLoading}
             className="review-dialog-btn-cancel"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             onClick={handlePrimaryAction}

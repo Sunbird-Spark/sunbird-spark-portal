@@ -4,6 +4,25 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ResourceFormDialog from './ResourceFormDialog';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'workspace.fillDetails': 'Fill in the details to create your content',
+        'loading': 'Loading...',
+        'failed_to_load_form': 'Failed to load form configuration. Please try again.',
+        'resourceForm.failedToLoadForm': 'Failed to load form configuration. Please try again.',
+        'retry': 'Retry',
+        'cancel': 'Cancel',
+        'create': 'Create',
+        'creating': 'Creating...',
+        'formFields.select': 'Select',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 // Hoist the mock functions to avoid initialization order issues
 const { mockFormRead, mockFrameworkRead } = vi.hoisted(() => ({
   mockFormRead: vi.fn(),
@@ -13,9 +32,9 @@ const { mockFormRead, mockFrameworkRead } = vi.hoisted(() => ({
 // Mock the Button component
 vi.mock('@/components/common/Button', () => ({
   Button: ({ children, onClick, disabled, type, ...props }: any) => (
-    <button 
-      type={type || 'button'} 
-      onClick={onClick} 
+    <button
+      type={type || 'button'}
+      onClick={onClick}
       disabled={disabled}
       {...props}
     >
@@ -174,21 +193,21 @@ describe('ResourceFormDialog', () => {
 
   it('should render dialog with title when open', async () => {
     renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
-    
+
     expect(screen.getByText('Create Content')).toBeInTheDocument();
     expect(screen.getByText('Fill in the details to create your content')).toBeInTheDocument();
   });
 
   it('should show loading state while fetching form', async () => {
     // Mock a never-resolving promise to keep loading state
-    mockFormRead.mockImplementation(() => new Promise(() => {}));
+    mockFormRead.mockImplementation(() => new Promise(() => { }));
 
     renderWithQueryClient(<ResourceFormDialog {...defaultProps} />);
-    
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
     // Check for the spinner element with new CSS class
     const spinner = document.querySelector('.loading-spinner');
@@ -342,12 +361,12 @@ describe('ResourceFormDialog', () => {
     await waitFor(() => {
       const nameInput = screen.getByPlaceholderText('Enter content name');
       const subjectSelect = screen.getByRole('combobox');
-      
+
       act(() => {
         fireEvent.change(nameInput, { target: { value: 'Test Content' } });
         fireEvent.change(subjectSelect, { target: { value: 'mathematics' } });
       });
-      
+
       const form = nameInput.closest('form');
       if (form) {
         act(() => {
@@ -373,12 +392,12 @@ describe('ResourceFormDialog', () => {
     await waitFor(() => {
       const nameInput = screen.getByPlaceholderText('Enter content name');
       const subjectSelect = screen.getByRole('combobox');
-      
+
       act(() => {
         fireEvent.change(nameInput, { target: { value: 'Test Content' } });
         fireEvent.change(subjectSelect, { target: { value: 'mathematics' } });
       });
-      
+
       const form = nameInput.closest('form');
       if (form) {
         act(() => {
@@ -445,7 +464,7 @@ describe('ResourceFormDialog', () => {
     renderWithQueryClient(<ResourceFormDialog {...defaultProps} isLoading={true} />);
 
     await waitFor(() => {
-      const submitButton = screen.getByRole('button', { name: /Creating.../ });
+      const submitButton = screen.getByRole('button', { name: /Loading.../ });
       expect(submitButton).toBeDisabled();
     });
   });

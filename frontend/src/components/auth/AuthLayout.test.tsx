@@ -4,6 +4,10 @@ import { AuthLayout } from '../auth/AuthLayout';
 import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
 // Mock react-router-dom hooks
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -24,7 +28,7 @@ describe('AuthLayout', () => {
             </BrowserRouter>
         );
         expect(screen.getByTestId('child')).toBeInTheDocument();
-        expect(screen.getByAltText('Sunbird Logo')).toBeInTheDocument();
+        expect(screen.getByAltText('authLayout.logoAlt')).toBeInTheDocument();
     });
 
     it('calls onClose when provided and close button is clicked', () => {

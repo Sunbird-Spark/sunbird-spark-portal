@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { MdOutlineClose } from "react-icons/md";
 import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/common/InputOTP";
+import { useAppI18n } from '@/hooks/useAppI18n';
 import {
     OtpRequiredField,
     FieldOtpState,
@@ -27,6 +28,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
     formatTime,
     onClose,
 }) => {
+    const { t } = useAppI18n();
     const submitBtnRef = useRef<HTMLButtonElement>(null);
 
     // Effect to close when verified
@@ -52,7 +54,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
             <DialogContent hideCloseButton className="fixed left-1/2 top-1/2 z-50 w-full max-w-[720px] h-[472px] -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-white px-10 pb-10 pt-8 shadow-lg flex flex-col">
                 <div className="relative flex items-center justify-center mb-4">
                     <DialogTitle className="text-[22px] font-medium text-[hsl(var(--sunbird-obsidian))] font-['Rubik'] text-center">
-                        Enter the code
+                        {t("forgotPasswordPage.enterCode")}
                     </DialogTitle>
                     <button
                         onClick={onClose}
@@ -62,11 +64,12 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                     </button>
                 </div>
                 <p className="text-[13px] text-[hsl(var(--sunbird-gray-75))] font-['Rubik'] text-center mb-6">
-                    Enter the 6 digit code sent to your{' '}
-                    {FIELD_OTP_TYPE_MAP[field] === 'phone' ? 'phone number' : 'email'} and complete the verification
+                    {FIELD_OTP_TYPE_MAP[field] === 'phone'
+                        ? t("editProfile.enterDigitCodePhone")
+                        : t("editProfile.enterDigitCodeEmail")}
                 </p>
                 <p className="text-[13px] text-[hsl(var(--sunbird-gray-75))] font-['Rubik'] text-center mb-4">
-                    OTP is valid for 30 minutes
+                    {t("forgotPasswordPage.otpValidity")}
                 </p>
                 <div className="flex items-center justify-center gap-3 mb-4">
                     <InputOTP
@@ -105,7 +108,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                         }
                         className="text-[hsl(var(--sunbird-brick))] hover:text-[hsl(var(--sunbird-brick)/0.8)] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Resend OTP
+                        {t("forgotPasswordPage.resendOtp")}
                     </button>
                 </div>
                 <button
@@ -120,7 +123,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                     }
                     className="mt-auto w-[360px] h-[46px] mx-auto rounded-[12px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-['Rubik'] hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                    {fieldState.status === 'otp_verifying' ? 'Submitting...' : 'Submit'}
+                    {fieldState.status === 'otp_verifying' ? t("editProfile.submitting") : t("signUp.submit")}
                 </button>
             </DialogContent>
         </Dialog>

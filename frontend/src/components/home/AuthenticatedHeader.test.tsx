@@ -19,7 +19,15 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => key,
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'onboarding.altSunbird': 'Sunbird',
+                'homeComponents.openMenu': 'Open Menu',
+                'header.search': 'Search',
+                'changeLanguage': 'Language',
+            };
+            return translations[key] || key;
+        },
         languages: [
             { code: 'en', label: 'English' },
             { code: 'hi', label: 'हिंदी' },

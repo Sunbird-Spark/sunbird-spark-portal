@@ -25,7 +25,7 @@ const Footer = () => {
             <Link to="/" className="inline-block">
               <img
                 src={sunbirdLogo}
-                alt="Sunbird"
+                alt={t("onboarding.altSunbird")}
                 className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-0 lg:pr-[5rem]"
               />
             </Link>

@@ -70,7 +70,7 @@ describe('DeleteRoleDialog', () => {
         onConfirm={vi.fn()}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -97,7 +97,7 @@ describe('DeleteRoleDialog', () => {
         onConfirm={vi.fn()}
       />
     );
-    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Please wait...' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'cancel' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'confirmDialog.pleaseWait' })).toBeDisabled();
   });
 });

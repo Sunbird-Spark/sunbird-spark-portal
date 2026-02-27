@@ -18,6 +18,9 @@ export type SupportedLanguage = (typeof LANGUAGES)[number]['code'];
 
 export const DEFAULT_LANGUAGE: SupportedLanguage = 'en';
 
+/** localStorage key used to persist the user's language selection across sessions */
+export const LANGUAGE_STORAGE_KEY = 'app-language';
+
 export const SORTED_LANGUAGES = [...LANGUAGES].sort((a, b) => a.index - b.index);
 
 /**

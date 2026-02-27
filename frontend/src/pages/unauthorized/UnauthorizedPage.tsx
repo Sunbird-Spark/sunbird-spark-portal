@@ -2,8 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { getDefaultRouteForRole } from '../../rbac/roleConfig';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const UnauthorizedPage: React.FC = () => {
+  const { t } = useAppI18n();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -23,18 +25,18 @@ const UnauthorizedPage: React.FC = () => {
 
   return (
     <div>
-      <h1>403</h1>
-      <h2>Access Denied</h2>
+      <h1>{t("unauthorizedPage.code")}</h1>
+      <h2>{t("unauthorizedPage.title")}</h2>
       <p>
-        You do not have the required permissions to access this page.
+        {t("unauthorizedPage.message")}
       </p>
 
       <div>
         <button onClick={handleGoHome}>
-          Go Home
+          {t("unauthorizedPage.goHome")}
         </button>
         <button onClick={handleGoToLogin}>
-          Change Role
+          {t("unauthorizedPage.changeRole")}
         </button>
       </div>
     </div>

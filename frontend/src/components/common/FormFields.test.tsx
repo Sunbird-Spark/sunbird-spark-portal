@@ -4,6 +4,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import ResourceFormField from './FormFields';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string, options?: any) => {
+      if (key === 'formFields.select') {
+        return `Select ${options?.field}`;
+      }
+      return key;
+    },
+  }),
+}));
+
 const mockField = {
   code: 'testField',
   name: 'Test Field',
@@ -34,12 +45,12 @@ describe('ResourceFormField', () => {
 
   const TestWrapper = ({ children, needsRef = false }: { children: React.ReactNode; needsRef?: boolean }) => {
     const dropdownRef = useRef<HTMLDivElement>(null!);
-    
+
     if (needsRef && React.isValidElement(children)) {
       const childProps = children.props as any;
       return React.cloneElement(children, { ...childProps, dropdownRef });
     }
-    
+
     return <>{children}</>;
   };
 
@@ -372,7 +383,7 @@ describe('ResourceFormField', () => {
 
       const optionButtons = screen.getAllByRole('button');
       const firstOption = optionButtons.find(btn => btn.textContent?.includes('Option 1'));
-      
+
       if (firstOption) {
         fireEvent.click(firstOption);
         expect(mockOnMultiSelectToggle).toHaveBeenCalledWith('testField', 'option1');
