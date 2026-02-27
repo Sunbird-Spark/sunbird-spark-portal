@@ -278,8 +278,9 @@ describe('HomeContinueLearning', () => {
 
         const { container } = renderComponent();
 
-        // Should render the black placeholder div instead of an img
+        // Should render the CardThumbnailBackground component instead of an img
         expect(container.querySelector('img')).toBeNull();
-        expect(container.querySelector('.bg-black')).toBeInTheDocument();
+        // Check for SVG pattern which is part of CardThumbnailBackground
+        expect(container.querySelector('svg')).toBeInTheDocument();
     });
 });

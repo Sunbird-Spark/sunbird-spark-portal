@@ -859,7 +859,7 @@
   }
 
   .home-inprogress-thumbnail-placeholder {
-    @apply w-full h-full bg-black;
+    @apply w-full h-full;
   }
 
   /* Onboarding Page Styles */

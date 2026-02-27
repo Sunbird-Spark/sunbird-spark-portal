@@ -6,6 +6,7 @@ import PageLoader from "@/components/common/PageLoader";
 import { ProgressRing } from "./ProfileIcons";
 import { useCertificateDownload } from "@/hooks/useCertificateDownload";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import CardThumbnailBackground from "@/components/workspace/CardThumbnailBackground";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -50,7 +51,13 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                             className="w-[4.375rem] h-[4.375rem] rounded-xl object-cover"
                         />
                     ) : (
-                        <div className="w-[4.375rem] h-[4.375rem] rounded-xl bg-black flex-shrink-0" />
+                        <div className="w-[4.375rem] h-[4.375rem] rounded-xl flex-shrink-0 overflow-hidden">
+                            <CardThumbnailBackground 
+                                type="course" 
+                                primaryCategory={course.content?.primaryCategory}
+                                iconSize="sm"
+                            />
+                        </div>
                     )}
                 </div>
                 <div className="profile-learning-details">

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useUserEnrolledCollections } from "../../hooks/useUserEnrolledCollections";
 import type { TrackableCollection } from "../../types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
+import CardThumbnailBackground from "@/components/workspace/CardThumbnailBackground";
 
 const HomeInProgressGrid = () => {
     const { t } = useAppI18n();
@@ -77,7 +78,13 @@ const HomeInProgressGrid = () => {
                                     className="home-inprogress-thumbnail-img"
                                 />
                             ) : (
-                                <div className="home-inprogress-thumbnail-placeholder" />
+                                <div className="home-inprogress-thumbnail-placeholder">
+                                    <CardThumbnailBackground 
+                                        type="course" 
+                                        primaryCategory={course.content?.primaryCategory}
+                                        iconSize="sm"
+                                    />
+                                </div>
                             )}
                         </div>
                     </Link>

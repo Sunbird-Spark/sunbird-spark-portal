@@ -2,6 +2,7 @@ import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ContentSearchItem } from "@/types/workspaceTypes";
+import CardThumbnailBackground from "@/components/workspace/CardThumbnailBackground";
 
 interface ResourceCardProps {
   item: ContentSearchItem;
@@ -43,8 +44,16 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
               className="resource-card-image" 
             />
           ) : (
-            <div className="resource-card-image bg-black" />
+            <div className="resource-card-image">
+              <CardThumbnailBackground 
+                type="content" 
+                primaryCategory={item.primaryCategory}
+                iconSize="sm"
+              />
+            </div>
           )}
+          {/* Purple-pink gradient overlay for text visibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 via-pink-900/30 to-transparent pointer-events-none" />
         </div>
 
         {/* Top-left Badge */}

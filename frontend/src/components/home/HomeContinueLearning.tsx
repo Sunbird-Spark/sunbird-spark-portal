@@ -6,6 +6,7 @@ import { useCollection } from "@/hooks/useCollection";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import type { TrackableCollection } from "@/types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
+import CardThumbnailBackground from "@/components/workspace/CardThumbnailBackground";
 
 // Circular progress component
 const CircularProgress = ({ progress }: { progress: number }) => {
@@ -80,7 +81,13 @@ const HomeContinueLearning = () => {
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div className="w-full h-full bg-black" />
+                        <div className="w-full h-full">
+                            <CardThumbnailBackground 
+                                type="course" 
+                                primaryCategory={lastAccessedCourse.content?.primaryCategory}
+                                iconSize="lg"
+                            />
+                        </div>
                     )}
                 </div>
 
