@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ContentReviewPage from './ContentReviewPage';
+import ContentViewPage from './ContentViewPage';
 
 const mockNavigate = vi.fn();
 const mockToast = vi.fn();
@@ -153,12 +153,12 @@ const renderPage = () =>
   render(
     <QueryClientProvider client={new QueryClient()}>
       <BrowserRouter>
-        <ContentReviewPage />
+        <ContentViewPage mode="review" />
       </BrowserRouter>
     </QueryClientProvider>
   );
 
-describe('ContentReviewPage - Layout', () => {
+describe('ContentViewPage - Layout', () => {
   beforeEach(() => vi.clearAllMocks());
   afterEach(() => cleanup());
 
