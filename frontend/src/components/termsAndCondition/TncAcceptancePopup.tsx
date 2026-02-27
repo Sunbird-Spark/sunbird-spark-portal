@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { FiX, FiLoader } from "react-icons/fi";
+import * as Checkbox from "@radix-ui/react-checkbox";
+import { FiX, FiLoader, FiCheck } from "react-icons/fi";
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { Button } from "../common/Button";
 import { cn } from "@/lib/utils";
-import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 
 interface TncAcceptancePopupProps {
   open: boolean;
@@ -12,6 +12,8 @@ interface TncAcceptancePopupProps {
   termsUrl: string;
   onAccept: () => void;
   isAccepting?: boolean;
+  /** Whether to show the close (X) button. Pass false when acceptance is mandatory. */
+  showCloseButton?: boolean;
 }
 
 export const TncAcceptancePopup: React.FC<TncAcceptancePopupProps> = ({
@@ -20,9 +22,11 @@ export const TncAcceptancePopup: React.FC<TncAcceptancePopupProps> = ({
   termsUrl,
   onAccept,
   isAccepting = false,
+  showCloseButton = true,
 }) => {
   const { t } = useAppI18n();
   const [tncChecked, setTncChecked] = useState(false);
+  const checkboxId = useId();
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) setTncChecked(false);
@@ -44,16 +48,18 @@ export const TncAcceptancePopup: React.FC<TncAcceptancePopupProps> = ({
               <DialogPrimitive.Description className="sr-only">
                 {t('tncPopup.description')}
               </DialogPrimitive.Description>
-              <DialogPrimitive.Close asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="tnc-close-button"
-                  aria-label={t("close")}
-                >
-                  <FiX className="w-[0.875rem] h-[0.875rem] tnc-close-icon" />
-                </Button>
-              </DialogPrimitive.Close>
+              {showCloseButton && (
+                <DialogPrimitive.Close asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="tnc-close-button"
+                    aria-label={t("close")}
+                  >
+                    <FiX className="w-[0.875rem] h-[0.875rem] tnc-close-icon" />
+                  </Button>
+                </DialogPrimitive.Close>
+              )}
             </div>
 
             {/* Iframe Content */}
@@ -62,18 +68,27 @@ export const TncAcceptancePopup: React.FC<TncAcceptancePopupProps> = ({
                 src={termsUrl}
                 title={t('tncPopup.title')}
                 className="tnc-iframe"
-                sandbox="allow-same-origin allow-scripts"
+                sandbox="allow-same-origin"
               />
             </div>
 
             {/* Acceptance Footer */}
             <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-border bg-gray-50/60 rounded-b-[1.875rem]">
-              <TncCheckboxRow
-                checked={tncChecked}
-                onCheckedChange={(v) => setTncChecked(!!v)}
-                label=""
-                onTermsClick={() => {}}
-              />
+              <div className="flex items-center gap-3 select-none">
+                <Checkbox.Root
+                  id={checkboxId}
+                  checked={tncChecked}
+                  onCheckedChange={(v) => setTncChecked(!!v)}
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-brick data-[state=checked]:bg-sunbird-brick data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40"
+                >
+                  <Checkbox.Indicator>
+                    <FiCheck className="w-3 h-3" />
+                  </Checkbox.Indicator>
+                </Checkbox.Root>
+                <label htmlFor={checkboxId} className="text-sm text-foreground font-['Rubik'] cursor-pointer">
+                  I accept the Terms &amp; Conditions
+                </label>
+              </div>
               <button
                 type="button"
                 disabled={!tncChecked || isAccepting}
