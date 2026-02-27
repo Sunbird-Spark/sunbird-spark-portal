@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import './PublishWarningDialog.css';
 
 interface PublishWarningDialogProps {
@@ -14,19 +15,21 @@ const PublishWarningDialog: React.FC<PublishWarningDialogProps> = ({
   onConfirm,
   isLoading = false,
 }) => {
+  const { t } = useAppI18n();
+
   if (!isOpen) return null;
 
   return (
     <div className="publish-warning-overlay">
       <div className="publish-warning-dialog">
         <div className="publish-warning-header">
-          <h2 className="publish-warning-title">Confirm Publish</h2>
+          <h2 className="publish-warning-title">{t('workspace.review.confirmPublish')}</h2>
         </div>
         <div className="publish-warning-content">
           <p className="publish-warning-text">
-            You have given some review comments/suggestions, they will be lost if content is published.
+            {t('workspace.review.publishWarningText')}
           </p>
-          <p className="publish-warning-question">Do you want to publish?</p>
+          <p className="publish-warning-question">{t('workspace.review.publishWarningQuestion')}</p>
         </div>
         <div className="publish-warning-actions">
           <button
@@ -34,14 +37,14 @@ const PublishWarningDialog: React.FC<PublishWarningDialogProps> = ({
             onClick={onClose}
             disabled={isLoading}
           >
-            No
+            {t('no')}
           </button>
           <button
             className="publish-warning-btn publish-warning-btn-yes"
             onClick={onConfirm}
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : 'Yes'}
+            {isLoading ? t('workspace.review.processing') : t('yes')}
           </button>
         </div>
       </div>

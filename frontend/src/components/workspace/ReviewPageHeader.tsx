@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface ReviewPageHeaderProps {
   onBack: () => void;
@@ -21,31 +22,35 @@ const ReviewPageHeader: React.FC<ReviewPageHeaderProps> = React.memo(({
   isLoadingPublishForm,
   isLoadingRequestChangesForm,
   dialogMode,
-}) => (
-  <div className="content-review-button-container">
-    <button onClick={onBack} className="content-review-go-back">
-      <FiArrowLeft /> Back
-    </button>
-    {isReviewMode && (
-      <div className="content-review-actions">
-        <button
-          className="content-review-btn-publish"
-          onClick={onPublish}
-          disabled={isSubmitting || isLoadingPublishForm}
-        >
-          {isLoadingPublishForm ? 'Loading...' : isSubmitting && dialogMode === 'publish' ? 'Publishing...' : 'Publish'}
-        </button>
-        <button
-          className="content-review-btn-reject"
-          onClick={onRequestChanges}
-          disabled={isSubmitting || isLoadingRequestChangesForm}
-        >
-          {isLoadingRequestChangesForm ? 'Loading...' : 'Request for Changes'}
-        </button>
-      </div>
-    )}
-  </div>
-));
+}) => {
+  const { t } = useAppI18n();
+
+  return (
+    <div className="content-review-button-container">
+      <button onClick={onBack} className="content-review-go-back">
+        <FiArrowLeft /> {t('back')}
+      </button>
+      {isReviewMode && (
+        <div className="content-review-actions">
+          <button
+            className="content-review-btn-publish"
+            onClick={onPublish}
+            disabled={isSubmitting || isLoadingPublishForm}
+          >
+            {isLoadingPublishForm ? t('loading') : isSubmitting && dialogMode === 'publish' ? t('checklistDialog.publishing') : t('checklistDialog.publish')}
+          </button>
+          <button
+            className="content-review-btn-reject"
+            onClick={onRequestChanges}
+            disabled={isSubmitting || isLoadingRequestChangesForm}
+          >
+            {isLoadingRequestChangesForm ? t('loading') : t('checklistDialog.requestForChanges')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+});
 
 ReviewPageHeader.displayName = 'ReviewPageHeader';
 

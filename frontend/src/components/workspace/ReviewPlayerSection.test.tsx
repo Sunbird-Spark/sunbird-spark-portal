@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ContentPlayerSection from './ContentPlayerSection';
+import ContentPlayerSection from './ReviewPlayerSection';
 
 vi.mock('@/components/players', () => ({
   ContentPlayer: ({ metadata }: { metadata: any }) => (

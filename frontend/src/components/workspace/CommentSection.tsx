@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { UserService } from '@/services/UserService';
 import { useReviewComment } from '@/hooks/useReviewComment';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import './CommentSection.css';
 
 interface CommentSectionProps {
@@ -19,6 +20,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   stageId,
   isReviewMode = false
 }) => {
+  const { t } = useAppI18n();
   const [newComment, setNewComment] = useState('');
   const [userData, setUser] = useState<{userName:string, userId: string}>();
   const userService = new UserService();
@@ -49,7 +51,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         const response = await userService.userRead(userId);
         const first = response?.data?.response?.firstName?.trim();
         const last = response?.data?.response?.lastName?.trim();
-        const userName = first || last ? [first, last].filter(Boolean).join(" ") : "anonymous";
+        const userName = first || last ? [first, last].filter(Boolean).join(" ") : t('workspace.review.anonymous');
         setUser({userName, userId});
       } catch (error) {
         console.error('Failed to load user info:', error);
@@ -89,19 +91,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   if (isLoadingComments) {
     return (
       <div className="comment-section">
-        <div className="comment-section-loading">Loading comments...</div>
+        <div className="comment-section-loading">{t('workspace.review.loadingComments')}</div>
       </div>
     );
   }
 
-  // Show comment section if there are comments OR if in review mode
-  if (comments.length === 0 && !isReviewMode) {
-    return null;
-  }
-
   return (
     <div className="comment-section">
-      <h3 className="comment-section-title">Comments</h3>
+      <h3 className="comment-section-title">{t('workspace.review.comments')}</h3>
 
       {comments.length > 0 ? (
         <div className="comment-list">
@@ -116,14 +113,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           ))}
         </div>
       ) : (
-        isReviewMode && <p className="no-comments-message">No comments yet. Add the first comment below.</p>
+        <p className="no-comments-message">{t(isReviewMode ? 'workspace.review.noCommentsYet' : 'workspace.review.noCommentsYetViewMode')}</p>
       )}
 
       {isReviewMode && (
         <div className="comment-input-section">
           <textarea
             className="comment-input"
-            placeholder="Add a comment..."
+            placeholder={t('workspace.review.addCommentPlaceholder')}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             rows={3}
@@ -134,7 +131,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             onClick={handleSubmitComment}
             disabled={isCreatingComment || !newComment.trim()}
           >
-            {isCreatingComment ? 'Submitting...' : 'Add Comment'}
+            {isCreatingComment ? t('checklistDialog.submitting') : t('workspace.review.addComment')}
           </button>
         </div>
       )}

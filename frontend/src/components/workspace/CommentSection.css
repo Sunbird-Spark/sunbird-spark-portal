@@ -1,5 +1,7 @@
 .comment-section {
-  @apply bg-white rounded-xl border border-gray-100 p-4 h-full flex flex-col;
+  @apply bg-white rounded-xl border border-gray-100 p-4 flex flex-col;
+  max-height: 600px;
+  height: 100%;
 }
 
 .comment-section-loading {
@@ -11,8 +13,9 @@
 }
 
 .comment-list {
-  @apply flex-1 overflow-y-auto space-y-3 mb-4;
-  max-height: calc(37.5rem - 10rem);
+  @apply overflow-y-auto space-y-3 mb-4;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .comment-item {

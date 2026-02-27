@@ -12,10 +12,11 @@ import { FormService } from '@/services/FormService';
 import { CheckListFormField } from '@/types/formTypes';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { useToast } from '@/hooks/useToast';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import ChecklistDialog from '@/components/workspace/ChecklistDialog';
 import PublishWarningDialog from '@/components/workspace/PublishWarningDialog';
 import ReviewPageHeader from '@/components/workspace/ReviewPageHeader';
-import ContentPlayerSection from '@/components/workspace/ContentPlayerSection';
+import ContentPlayerSection from '@/components/workspace/ReviewPlayerSection';
 import reviewCommentService from '@/services/ReviewCommentService';
 import './ContentReviewPage.css';
 
@@ -32,7 +33,7 @@ const ReviewPageLayout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const formatDate = (dateStr?: string) => {
-  if (!dateStr) return 'N/A';
+  if (!dateStr) return null;
   return new Date(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -47,6 +48,7 @@ const ContentReviewPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useAppI18n();
   const [dialogMode, setDialogMode] = useState<'publish' | 'request-changes' | null>(null);
   const [dialogFormFields, setDialogFormFields] = useState<CheckListFormField[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,11 +76,11 @@ const ContentReviewPage = () => {
   const onPlayerEvent = useCallback((event: any) => {
     console.log('Review player event:', event);
   }, []);
-  
+
   const onTelemetryEvent = useCallback((event: any) => {
     console.log('Review telemetry event:', event);
   }, []);
-  
+
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
     onPlayerEvent,
     onTelemetryEvent,
@@ -102,18 +104,18 @@ const ContentReviewPage = () => {
         setDialogFormFields(response.data.form.data.fields);
         setDialogMode(mode);
       } else {
-        toast({ title: 'Error', description: `Failed to load ${action} form.`, variant: 'destructive' });
+        toast({ title: t('workspace.review.errorTitle'), description: t('workspace.review.failedToLoadForm', { action }), variant: 'destructive' });
       }
     } catch {
-      toast({ title: 'Error', description: `Failed to load ${action} form. Please try again.`, variant: 'destructive' });
+      toast({ title: t('workspace.review.errorTitle'), description: t('workspace.review.failedToLoadFormRetry', { action }), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   const handlePublishClick = useCallback(async () => {
     if (!contentId || !contentData) return;
-    
+
     // Only check for comments on ECML content
     if (isEcmlContent) {
       try {
@@ -122,7 +124,7 @@ const ContentReviewPage = () => {
           contentVer: contentData.versionKey || '0',
           contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
         });
-        
+
         if (hasComments) {
           setShowPublishWarning(true);
           return;
@@ -132,7 +134,7 @@ const ContentReviewPage = () => {
         // Proceed with publish if check fails
       }
     }
-    
+
     // Proceed with publish
     loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
   }, [contentId, contentData, isEcmlContent, loadFormAndShow]);
@@ -148,7 +150,7 @@ const ContentReviewPage = () => {
     setIsSubmitting(true);
     try {
       await contentService.contentPublish(contentId, userAuthInfoService.getUserId() || '');
-      
+
       // Only delete comments for ECML content
       if (isEcmlContent) {
         try {
@@ -161,18 +163,18 @@ const ContentReviewPage = () => {
           console.error('Failed to delete comments after publish:', error);
         }
       }
-      
+
       closeDialog();
-      toast({ title: 'Published', description: 'Content has been published successfully.', variant: "success" });
+      toast({ title: t('workspace.review.publishedTitle'), description: t('workspace.review.publishedDescription'), variant: 'success' });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
-      toast({ title: 'Publish Failed', description: 'Unable to publish content. Please try again.', variant: 'destructive' });
+      toast({ title: t('workspace.review.publishFailedTitle'), description: t('workspace.review.publishFailedDescription'), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
-  }, [contentId, contentData, isEcmlContent, closeDialog, toast, clearWorkspaceQueries, navigate]);
+  }, [contentId, contentData, isEcmlContent, closeDialog, toast, t, clearWorkspaceQueries, navigate]);
 
   const handleRequestChangesConfirm = useCallback(async (rejectReasons: string[], rejectComment: string) => {
     if (!contentId) return;
@@ -180,16 +182,16 @@ const ContentReviewPage = () => {
     try {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
       closeDialog();
-      toast({ title: 'Changes Requested', description: 'Request for changes has been submitted successfully.', "variant": "success" });
+      toast({ title: t('workspace.review.changesRequestedTitle'), description: t('workspace.review.changesRequestedDescription'), variant: 'success' });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
-      toast({ title: 'Request Failed', description: 'Unable to submit request for changes. Please try again.', variant: 'destructive' });
+      toast({ title: t('workspace.review.requestFailedTitle'), description: t('workspace.review.requestFailedDescription'), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
-  }, [contentId, closeDialog, toast, clearWorkspaceQueries, navigate]);
+  }, [contentId, closeDialog, toast, t, clearWorkspaceQueries, navigate]);
 
   const handleBack = useCallback(() => navigate('/workspace'), [navigate]);
 
@@ -198,9 +200,9 @@ const ContentReviewPage = () => {
     loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
   }, [loadFormAndShow]);
 
-  if (playerIsLoading) return <PageLoader message="Loading content for review..." />;
-  if (playerError) return <ReviewPageLayout><p>Error loading content: {playerError.message}</p></ReviewPageLayout>;
-  if (!playerMetadata) return <ReviewPageLayout><p>Content not found</p></ReviewPageLayout>;
+  if (playerIsLoading) return <PageLoader message={t('workspace.loadingContentReview')} />;
+  if (playerError) return <ReviewPageLayout><p>{t('workspace.review.errorLoading', { error: playerError.message })}</p></ReviewPageLayout>;
+  if (!playerMetadata) return <ReviewPageLayout><p>{t('workspace.review.contentNotFound')}</p></ReviewPageLayout>;
 
   return (
     <ReviewPageLayout>
@@ -231,20 +233,20 @@ const ContentReviewPage = () => {
         )}
         <div className="content-review-metadata-grid">
           <div>
-            <span className="label">Created By</span>
-            <span className="value">{contentData?.creator || 'Unknown'}</span>
+            <span className="label">{t('workspace.createdBy')}</span>
+            <span className="value">{contentData?.creator || t('workspace.review.notAvailable')}</span>
           </div>
           <div>
-            <span className="label">Last Updated</span>
-            <span className="value">{formatDate(contentData?.lastUpdatedOn)}</span>
+            <span className="label">{t('workspace.review.lastUpdated')}</span>
+            <span className="value">{formatDate(contentData?.lastUpdatedOn) ?? t('workspace.review.notAvailable')}</span>
           </div>
           <div>
-            <span className="label">Content Type</span>
-            <span className="value">{contentData?.primaryCategory || contentData?.contentType || 'N/A'}</span>
+            <span className="label">{t('workspace.review.contentType')}</span>
+            <span className="value">{contentData?.primaryCategory || contentData?.contentType || t('workspace.review.notAvailable')}</span>
           </div>
           <div>
-            <span className="label">Created On</span>
-            <span className="value">{formatDate(contentData?.createdOn)}</span>
+            <span className="label">{t('workspace.createdOn')}</span>
+            <span className="value">{formatDate(contentData?.createdOn) ?? t('workspace.review.notAvailable')}</span>
           </div>
         </div>
       </div>
