@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
-import { useAcceptTnc, useTncCheck, useGetTncUrl } from '@/hooks/useTnc';
+import { useAcceptTnc, useTncCheck } from '@/hooks/useTnc';
 import { useUserRead } from '@/hooks/useUserRead';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
@@ -28,15 +28,11 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
   const [showPopup, setShowPopup] = useState(false);
 
   const { data: tncConfig } = useSystemSetting('tncConfig');
-  const { data: resolvedTermsUrl } = useGetTncUrl(tncConfig);
+  const { needsTncAcceptance, termsUrl } = useTncCheck(userProfile, tncConfig);
   const acceptTncMutation = useAcceptTnc();
 
-  const finalTermsUrl = resolvedTermsUrl || userProfile?.tncLatestVersionUrl || '';
-
-  // Simple check: compare tncAcceptedVersion with tncLatestVersion
-  // Show popup if: no accepted version OR accepted version doesn't match latest
-  const needsTncAcceptance = !userProfile?.tncAcceptedVersion ||
-    userProfile?.tncAcceptedVersion !== userProfile?.tncLatestVersion;
+  // Prefer the URL resolved from tncConfig; fall back to the user profile URL if needed.
+  const finalTermsUrl = termsUrl || userProfile?.tncLatestVersionUrl || '';
 
   useEffect(() => {
     if (needsTncAcceptance && finalTermsUrl && userProfile) {
@@ -55,19 +51,35 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
   };
 
   const handleAccept = () => {
-    if (!tncConfig || !userProfile) return;
+     if (!tncConfig || !userProfile) {
+      toast({
+        title: t('tncPopup.errorTitle'),
+        description: t('tncPopup.errorDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
     const identifier = userProfile.email || userProfile.phone || userProfile.userName || '';
     acceptTncMutation.mutate(
       { tncConfig, identifier },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           setShowPopup(false);
           toast({
             title: t('tncPopup.acceptedTitle'),
             description: t('tncPopup.acceptedDescription'),
             variant: 'default',
           });
-          queryClient.invalidateQueries({ queryKey: ['userRead'] });
+          try {
+            await queryClient.invalidateQueries({ queryKey: ['userRead'] });
+          } catch (error) {
+            console.error('Failed to refresh user profile after T&C acceptance', error);
+            toast({
+              title: t('tncPopup.refreshErrorTitle'),
+              description: t('tncPopup.refreshErrorDescription'),
+              variant: 'destructive',
+            });
+          }
         },
         onError: () => {
           toast({
@@ -90,6 +102,7 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
           termsUrl={finalTermsUrl}
           onAccept={handleAccept}
           isAccepting={acceptTncMutation.isPending}
+          showCloseButton={!needsTncAcceptance}
         />
       )}
     </>
