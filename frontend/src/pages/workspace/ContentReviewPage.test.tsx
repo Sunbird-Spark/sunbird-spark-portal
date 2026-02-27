@@ -95,6 +95,50 @@ vi.mock('@/components/players', () => ({
   ContentPlayer: () => <div data-testid="content-player">Content Player</div>,
 }));
 
+vi.mock('@/services/ReviewCommentService', () => ({
+  default: {
+    hasComments: vi.fn().mockResolvedValue(false),
+    deleteComments: vi.fn().mockResolvedValue({}),
+  },
+}));
+
+vi.mock('@/components/workspace/ReviewPageHeader', () => ({
+  default: ({ onBack, onPublish, onRequestChanges, isReviewMode }: any) => (
+    <div className="content-review-button-container">
+      <button onClick={onBack} className="content-review-go-back">
+        Back
+      </button>
+      {isReviewMode && (
+        <div className="content-review-actions">
+          <button className="content-review-btn-publish" onClick={onPublish}>
+            Publish
+          </button>
+          <button className="content-review-btn-reject" onClick={onRequestChanges}>
+            Request for Changes
+          </button>
+        </div>
+      )}
+    </div>
+  ),
+}));
+
+vi.mock('@/components/workspace/ReviewPlayerSection', () => ({
+  default: () => <div data-testid="review-player-section">Player Section</div>,
+}));
+
+vi.mock('@/components/workspace/ChecklistDialog', () => ({
+  default: ({ isOpen, formFields }: any) =>
+    isOpen ? (
+      <div data-testid="checklist-dialog">
+        {formFields[0]?.title && <div>{formFields[0].title}</div>}
+      </div>
+    ) : null,
+}));
+
+vi.mock('@/components/workspace/PublishWarningDialog', () => ({
+  default: () => null,
+}));
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {

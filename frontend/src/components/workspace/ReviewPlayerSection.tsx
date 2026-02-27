@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ContentPlayer as PlayerComponent } from '@/components/players';
-import CommentSection from './CommentSection';
+import CommentSection from './ReviewCommentSection';
 
 interface ContentPlayerSectionProps {
   playerMetadata: any;

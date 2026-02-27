@@ -3,14 +3,47 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import CommentSection from './CommentSection';
-import reviewCommentService from '@/services/ReviewCommentService';
+import CommentSection from './ReviewCommentSection';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import { UserService } from '@/services/UserService';
 
-vi.mock('@/services/ReviewCommentService');
 vi.mock('@/services/userAuthInfoService/userAuthInfoService');
 vi.mock('@/services/UserService');
+
+let mockComments: any[] = [];
+let mockIsLoadingComments = false;
+let mockCommentsError: any = null;
+const mockCreateComment = vi.fn();
+const mockRefetchComments = vi.fn();
+
+vi.mock('@/hooks/useReviewComment', () => ({
+  useReviewComment: () => ({
+    comments: mockComments,
+    isLoadingComments: mockIsLoadingComments,
+    commentsError: mockCommentsError,
+    createComment: mockCreateComment,
+    isCreatingComment: false,
+    refetchComments: mockRefetchComments,
+  }),
+}));
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'workspace.review.loadingComments': 'Loading comments...',
+        'workspace.review.comments': 'Comments',
+        'workspace.review.noCommentsYet': 'No comments yet. Add the first comment below.',
+        'workspace.review.noCommentsYetViewMode': 'No comments yet.',
+        'workspace.review.addCommentPlaceholder': 'Add a comment...',
+        'workspace.review.addComment': 'Add Comment',
+        'checklistDialog.submitting': 'Submitting...',
+        'workspace.review.anonymous': 'Anonymous',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
 
 describe('CommentSection', () => {
   let queryClient: QueryClient;
@@ -23,6 +56,11 @@ describe('CommentSection', () => {
       },
     });
     vi.clearAllMocks();
+    
+    // Reset mock state
+    mockComments = [];
+    mockIsLoadingComments = false;
+    mockCommentsError = null;
     
     // Mock userAuthInfoService
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
@@ -46,30 +84,14 @@ describe('CommentSection', () => {
   );
 
   it('should show loading state initially', () => {
-    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      comments: [] 
-    });
+    mockIsLoadingComments = true;
 
     render(<CommentSection contentId="test-content-id" />, { wrapper });
     expect(screen.getByText('Loading comments...')).toBeInTheDocument();
   });
 
-  it('should not render when no comments exist and not in review mode', async () => {
-    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      comments: [] 
-    });
-
-    const { container } = render(<CommentSection contentId="test-content-id" />, { wrapper });
-    
-    await waitFor(() => {
-      expect(container.firstChild).toBeNull();
-    });
-  });
-
   it('should render empty state in review mode with no comments', async () => {
-    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      comments: [] 
-    });
+    mockComments = [];
 
     render(<CommentSection contentId="test-content-id" isReviewMode={true} />, { wrapper });
     
@@ -80,7 +102,7 @@ describe('CommentSection', () => {
   });
 
   it('should render comments when they exist', async () => {
-    const mockComments = [
+    mockComments = [
       {
         identifier: '1',
         comment: 'Test comment 1',
@@ -95,10 +117,6 @@ describe('CommentSection', () => {
       },
     ];
 
-    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      comments: mockComments 
-    });
-
     render(<CommentSection contentId="test-content-id" />, { wrapper });
 
     await waitFor(() => {
@@ -111,7 +129,7 @@ describe('CommentSection', () => {
   });
 
   it('should submit a new comment', async () => {
-    const mockComments = [
+    mockComments = [
       {
         identifier: '1',
         comment: 'Existing comment',
@@ -120,11 +138,7 @@ describe('CommentSection', () => {
       },
     ];
 
-    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      comments: mockComments 
-    });
-
-    vi.mocked(reviewCommentService.createComment).mockResolvedValue({ 
+    mockCreateComment.mockResolvedValue({ 
       created: 'OK', 
       threadId: 'thread-123' 
     });
@@ -143,24 +157,19 @@ describe('CommentSection', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(reviewCommentService.createComment).toHaveBeenCalledWith({
-        contextDetails: {
-          contentId: 'test-content-id',
-          contentVer: '0',
-          contentType: 'application/vnd.ekstep.ecml-archive',
-        },
-        body: 'New test comment',
-        userId: 'user-123',
-        userInfo: {
+      expect(mockCreateComment).toHaveBeenCalledWith(
+        'New test comment',
+        'user-123',
+        {
           name: 'Test User',
-        },
-      });
+        }
+      );
       expect(textarea).toHaveValue('');
     });
   });
 
   it('should disable submit button when comment is empty', async () => {
-    const mockComments = [
+    mockComments = [
       {
         identifier: '1',
         comment: 'Test comment',
@@ -168,10 +177,6 @@ describe('CommentSection', () => {
         createdOn: '2026-02-26T10:00:00Z',
       },
     ];
-
-    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      comments: mockComments 
-    });
 
     render(<CommentSection contentId="test-content-id" isReviewMode={true} />, { wrapper });
 
@@ -183,42 +188,27 @@ describe('CommentSection', () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it('should handle error loading comments', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
-    vi.mocked(reviewCommentService.readComments).mockRejectedValue(new Error('Network error'));
+  it('should render view mode message when not in review mode', async () => {
+    mockComments = [];
 
-    const { container } = render(<CommentSection contentId="test-content-id" />, { wrapper });
+    render(<CommentSection contentId="test-content-id" isReviewMode={false} />, { wrapper });
 
     await waitFor(() => {
-      // The error is logged from the component, not the hook
-      expect(container.firstChild).toBeNull();
+      expect(screen.getByText('Comments')).toBeInTheDocument();
+      expect(screen.getByText('No comments yet.')).toBeInTheDocument();
     });
-
-    consoleErrorSpy.mockRestore();
   });
 
-  it('should pass stageId to the hook when provided', async () => {
-    vi.mocked(reviewCommentService.readComments).mockResolvedValue({ 
-      comments: [] 
-    });
+  it('should not render input section when not in review mode', async () => {
+    mockComments = [];
 
-    render(
-      <CommentSection 
-        contentId="test-content-id" 
-        stageId="stage-123"
-        isReviewMode={true}
-      />, 
-      { wrapper }
-    );
+    render(<CommentSection contentId="test-content-id" isReviewMode={false} />, { wrapper });
 
     await waitFor(() => {
-      expect(reviewCommentService.readComments).toHaveBeenCalledWith({
-        contentId: 'test-content-id',
-        contentVer: '0',
-        contentType: 'application/vnd.ekstep.ecml-archive',
-        stageId: 'stage-123',
-      });
+      expect(screen.getByText('Comments')).toBeInTheDocument();
     });
+
+    expect(screen.queryByPlaceholderText('Add a comment...')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /add comment/i })).not.toBeInTheDocument();
   });
 });

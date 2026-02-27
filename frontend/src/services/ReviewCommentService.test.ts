@@ -36,21 +36,8 @@ describe('ReviewCommentService', () => {
 
       const mockResponse = {
         data: {
-          id: 'api.review.create.comment',
-          ver: '1.0',
-          ts: '2024-01-01T00:00:00Z',
-          params: {
-            resmsgid: 'msg-123',
-            msgid: null,
-            status: 'successful',
-            err: null,
-            errmsg: null,
-          },
-          responseCode: 'OK',
-          result: {
-            created: 'OK',
-            threadId: 'thread-123',
-          },
+          created: 'OK',
+          threadId: 'thread-123',
         },
       };
 
@@ -101,29 +88,16 @@ describe('ReviewCommentService', () => {
 
       const mockResponse = {
         data: {
-          id: 'api.review.read.comment',
-          ver: '1.0',
-          ts: '2024-01-01T00:00:00Z',
-          params: {
-            resmsgid: 'msg-123',
-            msgid: null,
-            status: 'successful',
-            err: null,
-            errmsg: null,
-          },
-          responseCode: 'OK',
-          result: {
-            comments: [
-              {
-                identifier: 'thread-123',
-                comment: 'Test comment',
-                createdBy: 'John Doe',
-                createdOn: '2024-01-01T00:00:00Z',
-                stageId: 'stage_1',
-                userId: 'user_123',
-              },
-            ],
-          },
+          comments: [
+            {
+              identifier: 'thread-123',
+              comment: 'Test comment',
+              createdBy: 'John Doe',
+              createdOn: '2024-01-01T00:00:00Z',
+              stageId: 'stage_1',
+              userId: 'user_123',
+            },
+          ],
         },
       };
 
@@ -160,20 +134,7 @@ describe('ReviewCommentService', () => {
 
       const mockResponse = {
         data: {
-          id: 'api.review.read.comment',
-          ver: '1.0',
-          ts: '2024-01-01T00:00:00Z',
-          params: {
-            resmsgid: 'msg-123',
-            msgid: null,
-            status: 'successful',
-            err: null,
-            errmsg: null,
-          },
-          responseCode: 'OK',
-          result: {
-            comments: [],
-          },
+          comments: [],
         },
       };
 
@@ -195,21 +156,7 @@ describe('ReviewCommentService', () => {
 
       const mockResponse = {
         data: {
-          id: 'api.review.delete.comment',
-          ver: '1.0',
-          ts: '2024-01-01T00:00:00Z',
-          params: {
-            resmsgid: 'msg-123',
-            msgid: null,
-            status: 'successful',
-            err: null,
-            errmsg: null,
-          },
-          responseCode: 'OK',
-          result: {
-            deleted: 'OK',
-            count: 5,
-          },
+          deleted: 'OK',
         },
       };
 
@@ -236,40 +183,6 @@ describe('ReviewCommentService', () => {
 
       await expect(service.deleteComments(mockRequest)).rejects.toThrow('Delete failed');
     });
-
-    it('should handle delete with zero count', async () => {
-      const mockRequest = {
-        contentId: 'do_123',
-        contentVer: '1.0',
-        contentType: 'Resource',
-      };
-
-      const mockResponse = {
-        data: {
-          id: 'api.review.delete.comment',
-          ver: '1.0',
-          ts: '2024-01-01T00:00:00Z',
-          params: {
-            resmsgid: 'msg-123',
-            msgid: null,
-            status: 'successful',
-            err: null,
-            errmsg: null,
-          },
-          responseCode: 'OK',
-          result: {
-            deleted: 'OK',
-            count: 0,
-          },
-        },
-      };
-
-      mockPost.mockResolvedValue(mockResponse);
-
-      const result = await service.deleteComments(mockRequest);
-
-      expect(result.deleted).toBe('OK');
-    });
   });
 
   describe('hasComments', () => {
@@ -282,17 +195,14 @@ describe('ReviewCommentService', () => {
 
       const mockResponse = {
         data: {
-          responseCode: 'OK',
-          result: {
-            comments: [
-              {
-                identifier: 'thread-123',
-                comment: 'Test comment',
-                createdBy: 'John Doe',
-                createdOn: '2024-01-01T00:00:00Z',
-              },
-            ],
-          },
+          comments: [
+            {
+              identifier: 'thread-123',
+              comment: 'Test comment',
+              createdBy: 'John Doe',
+              createdOn: '2024-01-01T00:00:00Z',
+            },
+          ],
         },
       };
 
@@ -312,10 +222,7 @@ describe('ReviewCommentService', () => {
 
       const mockResponse = {
         data: {
-          responseCode: 'OK',
-          result: {
-            comments: [],
-          },
+          comments: [],
         },
       };
 
