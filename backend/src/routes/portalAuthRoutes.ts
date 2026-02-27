@@ -29,19 +29,21 @@ router.get('/login',
         }
 
         // Redirect directly to the Keycloak OIDC authorization endpoint
-        const callbackUrl = encodeURIComponent(envConfig.SERVER_URL + '/portal/auth/callback?auth_callback=1');
-        const oidcAuthUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/auth` +
-            `?client_id=${encodeURIComponent(envConfig.PORTAL_AUTH_SERVER_CLIENT)}` +
-            `&redirect_uri=${callbackUrl}` +
-            `&response_type=code` +
-            `&scope=openid`;
+        // const callbackUrl = encodeURIComponent(envConfig.SERVER_URL + '/portal/auth/callback?auth_callback=1');
+        // const oidcAuthUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/auth` +
+        //     `?client_id=${encodeURIComponent(envConfig.PORTAL_AUTH_SERVER_CLIENT)}` +
+        //     `&redirect_uri=${callbackUrl}` +
+        //     `&response_type=code` +
+        //     `&scope=openid`;
 
-        logger.info('Redirecting to OIDC authorization endpoint');
-        res.redirect(oidcAuthUrl);
+        // logger.info('Redirecting to OIDC authorization endpoint');
+        // res.redirect(oidcAuthUrl);
+        logger.info('Redirecting to /portal/auth/callback for login');
+        res.redirect('/portal/home');
     }
 );
 
-router.get('/auth/callback',
+router.get('/home',
     sessionMiddleware,
     // Add debug logging
     (req: Request, res: Response, next: express.NextFunction) => {
