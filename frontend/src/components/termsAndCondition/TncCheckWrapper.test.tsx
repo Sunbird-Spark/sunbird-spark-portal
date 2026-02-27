@@ -140,7 +140,7 @@ describe('TncCheckWrapper', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('calls acceptTnc mutation with identifier when user accepts', async () => {
+  it('calls acceptTnc mutation without identifier when user accepts (backend uses session)', async () => {
     mockNeedsTncAcceptance = true;
     mockTermsUrl = 'https://example.com/terms';
     mockIsAuthenticated = true;
@@ -156,7 +156,7 @@ describe('TncCheckWrapper', () => {
 
     expect(mockMutate).toHaveBeenCalledTimes(1);
     expect(mockMutate).toHaveBeenCalledWith(
-      expect.objectContaining({ identifier: 'a4307b37-b832-4f55-be76-07d97196960e' }),
+      expect.not.objectContaining({ identifier: expect.anything() }),
       expect.any(Object)
     );
   });

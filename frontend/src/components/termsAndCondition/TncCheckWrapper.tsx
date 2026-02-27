@@ -65,9 +65,8 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
       });
       return;
     }
-    const identifier = userProfile.identifier;
     acceptTncMutation.mutate(
-      { tncConfig, identifier },
+      { tncConfig },
       {
         onSuccess: async () => {
           setShowPopup(false);
