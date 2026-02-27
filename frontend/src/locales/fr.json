@@ -241,6 +241,28 @@
     "contentStatusInProgress": "En cours",
     "contentStatusNotViewed": "Non consulté"
   },
+  "profileDataSharing": {
+    "cardTitle": "Partage des données de profil",
+    "statusOn": "Le partage des données de profil est activé. Vous avez accepté de partager les détails de votre profil avec l'administrateur du cours.",
+    "statusOff": "Le partage des données de profil est désactivé. Vous n'avez pas accepté de partager les détails de votre profil avec l'administrateur du cours.",
+    "lastUpdatedOn": "Dernière mise à jour le",
+    "update": "Mettre à jour",
+    "consentTitle": "Partage des données de profil",
+    "fields": {
+      "name": "Nom",
+      "state": "État",
+      "userId": "ID utilisateur",
+      "mobileNumber": "Numéro de mobile",
+      "emailId": "E-mail"
+    },
+    "canEditFromProfile": "Vous pouvez modifier ces détails depuis votre profil.",
+    "tncText": "J'accepte de partager les détails de profil ci-dessus avec l'administrateur du cours.",
+    "tncCheckboxLabel": "J'accepte de partager les détails du profil",
+    "dontShare": "Ne pas partager",
+    "share": "Partager",
+    "consentUpdateSuccess": "Préférence de partage des données de profil mise à jour.",
+    "consentUpdateError": "Impossible de mettre à jour la préférence de partage des données de profil. Veuillez réessayer."
+  },
   "resource": {
     "title": "Gardez une longueur d'avance. L'avenir commence ici.",
     "header": "Centre de Ressources",

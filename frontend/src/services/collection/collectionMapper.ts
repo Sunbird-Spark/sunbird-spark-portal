@@ -1,5 +1,4 @@
-import type { HierarchyContentNode } from '../../types/collectionTypes';
-import type { CollectionData } from '../../types/collectionTypes';
+import type { HierarchyContentNode, CollectionData } from '../../types/collectionTypes';
 
 const DEFAULT_UNITS = 0;
 
@@ -19,5 +18,7 @@ export function mapToCollectionData(content: HierarchyContentNode): CollectionDa
     hierarchyRoot: content,
     trackable: content.trackable,
     createdBy: content.createdBy,
+    channel: content.channel,
+    userConsent: content.userConsent,
   };
 }

@@ -241,6 +241,28 @@
     "contentStatusInProgress": "Em andamento",
     "contentStatusNotViewed": "Não visualizado"
   },
+  "profileDataSharing": {
+    "cardTitle": "Compartilhamento de dados do perfil",
+    "statusOn": "O compartilhamento de dados do perfil está ativado. Você concordou em compartilhar os detalhes do seu perfil com o administrador do curso.",
+    "statusOff": "O compartilhamento de dados do perfil está desativado. Você não concordou em compartilhar os detalhes do seu perfil com o administrador do curso.",
+    "lastUpdatedOn": "Última atualização em",
+    "update": "Atualizar",
+    "consentTitle": "Compartilhamento de dados do perfil",
+    "fields": {
+      "name": "Nome",
+      "state": "Estado",
+      "userId": "ID do usuário",
+      "mobileNumber": "Número de celular",
+      "emailId": "E-mail"
+    },
+    "canEditFromProfile": "Você pode editar esses detalhes no seu perfil.",
+    "tncText": "Concordo em compartilhar os detalhes do perfil acima com o administrador do curso.",
+    "tncCheckboxLabel": "Concordo em compartilhar os detalhes do perfil",
+    "dontShare": "Não compartilhar",
+    "share": "Compartilhar",
+    "consentUpdateSuccess": "Preferência de compartilhamento de dados do perfil atualizada.",
+    "consentUpdateError": "Não foi possível atualizar a preferência de compartilhamento de dados do perfil. Tente novamente."
+  },
   "resource": {
     "title": "Fique à frente. O que vem a seguir começa aqui.",
     "header": "Centro de Recursos",

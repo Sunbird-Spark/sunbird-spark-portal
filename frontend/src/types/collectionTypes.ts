@@ -21,6 +21,10 @@ export interface CollectionData {
   units: number;
   description: string;
   audience: string[];
+  /** Channel (org) of the collection — used for consent API consumerId. */
+  channel?: string;
+  /** When "Yes", show profile data sharing consent for this course. */
+  userConsent?: TrackableEnabled;
   /** Top-level units (main collapsible sections). Multi-level hierarchy preserved in each node's children. */
   children: HierarchyContentNode[];
   /** Full hierarchy root for tree traversal (leaf IDs, first leaf). */
@@ -44,6 +48,8 @@ export interface HierarchyContentNode {
   createdBy?: string;
   /** JSON string containing counts of content types in the hierarchy. */
   contentTypesCount?: string;
+  channel?: string;
+  userConsent?: TrackableEnabled;
 }
 
 export interface CourseHierarchyResponse {

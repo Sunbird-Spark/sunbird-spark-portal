@@ -30,14 +30,35 @@ vi.mock('@/components/collection/AvailableBatchesCard', () => ({
 vi.mock('@/components/collection/CertificateCard', () => ({
   default: () => <div data-testid="certificate-card" />
 }));
+vi.mock('@/components/collection/ProfileDataSharingCard', () => ({
+  default: () => <div data-testid="profile-data-sharing-card" />
+}));
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (key: string) => key })
+}));
+vi.mock('@/hooks/useToast', () => ({
+  useToast: () => ({ toast: vi.fn() })
+}));
+vi.mock('@/hooks/useConsent', () => ({
+  useConsent: vi.fn(() => ({
+    status: null,
+    lastUpdatedOn: undefined,
+    updateConsent: vi.fn().mockResolvedValue(undefined),
+    isUpdating: false,
+  })),
 }));
 
 describe('CollectionContentArea', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const defaultProps: any = {
-    collectionData: { title: 'Test Collection', lessons: 5, children: [], hierarchyRoot: { identifier: 'test', children: [] } },
+    collectionData: {
+      title: 'Test Collection',
+      lessons: 5,
+      children: [],
+      hierarchyRoot: { identifier: 'test', children: [] },
+      userConsent: 'no',
+      channel: 'test-channel',
+    },
     contentId: undefined,
     isTrackable: false,
     contentBlocked: false,
@@ -68,6 +89,16 @@ describe('CollectionContentArea', () => {
     firstCertPreviewUrl: undefined,
     setCertificatePreviewUrl: vi.fn(),
     setCertificatePreviewOpen: vi.fn(),
+  };
+
+  const learnerWithBatchProps = {
+    ...defaultProps,
+    isTrackable: true,
+    isAuthenticated: true,
+    contentBlocked: false,
+    hasBatchInRoute: true,
+    isEnrolledInCurrentBatch: true,
+    contentCreatorPrivilege: false,
   };
 
   beforeEach(() => {
@@ -234,6 +265,50 @@ describe('CollectionContentArea', () => {
         />
       );
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
+    });
+  });
+
+  describe('Profile Data Sharing card', () => {
+    it('renders ProfileDataSharingCard when trackable, authenticated learner, in batch, enrolled, and collection has userConsent yes', () => {
+      render(
+        <CollectionContentArea
+          {...learnerWithBatchProps}
+          collectionData={{ ...defaultProps.collectionData, userConsent: 'yes', channel: 'ch1' }}
+        />
+      );
+      expect(screen.getByTestId('profile-data-sharing-card')).toBeInTheDocument();
+    });
+
+    it('does not render ProfileDataSharingCard when collection userConsent is not yes', () => {
+      render(
+        <CollectionContentArea
+          {...learnerWithBatchProps}
+          collectionData={{ ...defaultProps.collectionData, userConsent: 'no', channel: 'ch1' }}
+        />
+      );
+      expect(screen.queryByTestId('profile-data-sharing-card')).not.toBeInTheDocument();
+    });
+
+    it('does not render ProfileDataSharingCard when contentCreatorPrivilege is true', () => {
+      render(
+        <CollectionContentArea
+          {...learnerWithBatchProps}
+          contentCreatorPrivilege={true}
+          collectionData={{ ...defaultProps.collectionData, userConsent: 'yes', channel: 'ch1' }}
+        />
+      );
+      expect(screen.queryByTestId('profile-data-sharing-card')).not.toBeInTheDocument();
+    });
+
+    it('does not render ProfileDataSharingCard when not authenticated', () => {
+      render(
+        <CollectionContentArea
+          {...learnerWithBatchProps}
+          isAuthenticated={false}
+          collectionData={{ ...defaultProps.collectionData, userConsent: 'yes', channel: 'ch1' }}
+        />
+      );
+      expect(screen.queryByTestId('profile-data-sharing-card')).not.toBeInTheDocument();
     });
   });
 });
