@@ -18,6 +18,20 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
+vi.mock('@/components/collection/TncCheckboxRow', () => ({
+  TncCheckboxRow: ({ checked, onCheckedChange }: any) => (
+    <div>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onCheckedChange(e.target.checked)}
+        aria-label="Terms and Conditions checkbox"
+      />
+      <label>I accept the Terms &amp; Conditions for creating this batch.</label>
+    </div>
+  ),
+}));
+
 describe('TncAcceptancePopup', () => {
   const onOpenChange = vi.fn();
   const onAccept = vi.fn();
@@ -52,7 +66,7 @@ describe('TncAcceptancePopup', () => {
 
   it('renders checkbox and accept button', () => {
     render(<TncAcceptancePopup {...defaultProps} />);
-    expect(screen.getByText('I have read and accept the Terms and Conditions')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Accept' })).toBeInTheDocument();
   });
 

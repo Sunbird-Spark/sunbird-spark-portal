@@ -12,6 +12,7 @@ const { mockUserService, mockUserAuthInfoService } = vi.hoisted(() => ({
     mockUserAuthInfoService: {
         getUserId: vi.fn(),
         getAuthInfo: vi.fn(),
+        isUserAuthenticated: vi.fn(),
     }
 }));
 
