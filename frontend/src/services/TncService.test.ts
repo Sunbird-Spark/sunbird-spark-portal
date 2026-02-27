@@ -222,6 +222,32 @@ describe('TncService', () => {
             expect(result).toEqual(mockResponse);
         });
 
+        it('calls API with correct tncType', async () => {
+            const tncConfig = {
+                data: {
+                    response: {
+                        value: {
+                            latestVersion: 'v1'
+                        }
+                    }
+                }
+            };
+            const identifier = 'user@example.com';
+            const tncType = 'orgAdminTnc';
+            const mockResponse = { data: { success: true } };
+            mockPost.mockResolvedValue(mockResponse);
+
+            await tncService.acceptTnc(tncConfig, identifier, tncType);
+
+            expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
+                request: {
+                    version: 'v1',
+                    identifier: 'user@example.com',
+                    tncType: 'orgAdminTnc',
+                },
+            });
+        });
+
         it('calls API with empty version when config is invalid', async () => {
             const tncConfig = null;
             const identifier = 'user@example.com';

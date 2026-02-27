@@ -41,19 +41,16 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
-vi.mock('@/auth/AuthContext', () => ({
-  useAuth: vi.fn(() => ({
+vi.mock('@/hooks/usePermission', () => ({
+  usePermissions: vi.fn(() => ({
     isAuthenticated: false,
-    user: null,
-    login: vi.fn(),
-    logout: vi.fn(),
+    isLoading: false,
+    roles: ['PUBLIC'],
+    error: null,
+    hasAnyRole: vi.fn(),
+    canAccessFeature: vi.fn(),
+    refetch: vi.fn(),
   })),
-}));
-
-vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
-  default: {
-    isUserAuthenticated: vi.fn(() => false),
-  },
 }));
 
 // Mock AuthenticatedHeader so Header can import it without side effects

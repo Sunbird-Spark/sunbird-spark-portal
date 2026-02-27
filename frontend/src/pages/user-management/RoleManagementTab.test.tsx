@@ -60,7 +60,7 @@ function renderComponent() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
       <MemoryRouter>
-        <RoleManagementTab availableRoles={MOCK_ROLES} onRefreshSearch={vi.fn()} />
+        <RoleManagementTab availableRoles={MOCK_ROLES} onRefreshSearch={vi.fn()} userOrganisations={[]} />
       </MemoryRouter>
     </QueryClientProvider>
   );

@@ -162,7 +162,7 @@ const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseR
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value, name) => [`${value} learners`, name as string]} />
+                <Tooltip formatter={(value: any, name: any) => [`${value} learners`, name as string]} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
@@ -176,7 +176,7 @@ const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseR
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="range" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(value) => [`${value} learners`, "Learners"]} />
+                <Tooltip formatter={(value: any) => [`${value} learners`, "Learners"]} />
                 <Bar dataKey="count" name="Learners" radius={[6, 6, 0, 0]} barSize={28}>
                   {scoreBuckets.map((_, i) => (
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />

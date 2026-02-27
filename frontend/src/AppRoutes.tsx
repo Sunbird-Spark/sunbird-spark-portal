@@ -1,11 +1,10 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
-import { withRoles } from './rbac/withRoles';
+import { ProtectedRoute } from './rbac/ProtectedRoute';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
-import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
 import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
@@ -32,12 +31,6 @@ import PlatformReports from './pages/reports/PlatformReports';
 import CourseReport from './pages/reports/CourseReport';
 import UserReport from './pages/reports/UserReport';
 
-const AdminProtected = withRoles(['admin'])(AdminPage);
-
-const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
-const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
-const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
-const GenericEditorProtected = withRoles(['content_creator'])(GenericEditorPage);
 
 const AppRoutes: React.FC = () => {
   return (
@@ -45,7 +38,6 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Index />} />
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
@@ -55,6 +47,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/explore" element={<Explore />} />
+        <Route path="/my-learning" element={<MyLearning />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
@@ -66,26 +59,67 @@ const AppRoutes: React.FC = () => {
           <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardPage />} />
         </Route>
 
-        {/* Protected routes */}
-        <Route path="/admin" element={<AdminProtected />} />
-        <Route path="/user-management" element={<UserManagementPage />} />
-        <Route path="/workspace" element={<WorkspacePage />} />
-        <Route path="/workspace/review/:contentId" element={<ContentReviewPage />} />
+        {/* Public admin routes */}
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/reports" element={<ReportsPage />} />
+
+        {/* Protected routes */}
+        <Route path="/user-management" element={<UserManagementPage />} />
+        <Route path="/workspace" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
+            <WorkspacePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/workspace/review/:contentId" element={
+          <ProtectedRoute allowedRoles={['CONTENT_REVIEWER']}>
+            <ContentReviewPage />
+          </ProtectedRoute>
+        } />
         <Route path="/reports/platform" element={<PlatformReports />} />
         <Route path="/reports/course/:courseId" element={<CourseReport />} />
         <Route path="/reports/user/:userId" element={<UserReport />} />
-        <Route path="/create" element={<CreateContentPage />} />
-        <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
-        <Route path="/my-learning" element={<MyLearning />} />
-        <Route path="/edit/collection-editor/:contentId" element={<CollectionEditorPage />} />
-        <Route path="/edit/quml-editor/:contentId" element={<QumlEditorPage />} />
+        <Route path="/create" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <CreateContentPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/edit/content-editor/:contentId" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <ContentEditorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/edit/collection-editor/:contentId" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <CollectionEditorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/edit/quml-editor/:contentId" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <QumlEditorPage />
+          </ProtectedRoute>
+        } />
 
         {/* Generic Editor routes */}
-        <Route path="/workspace/content/edit/generic" element={<GenericEditorPage />} />
-        <Route path="/workspace/content/edit/generic/:contentId/:state/:framework/:contentStatus" element={<GenericEditorPage />} />
-        <Route path="/workspace/content/edit/generic/:contentId/:state/:framework" element={<GenericEditorPage />} />
-        <Route path="/workspace/content/edit/editorforlargecontent" element={<GenericEditorPage />} />
+        <Route path="/workspace/content/edit/generic" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <GenericEditorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/workspace/content/edit/generic/:contentId/:state/:framework/:contentStatus" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <GenericEditorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/workspace/content/edit/generic/:contentId/:state/:framework" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <GenericEditorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/workspace/content/edit/editorforlargecontent" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+            <GenericEditorPage />
+          </ProtectedRoute>
+        } />
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
