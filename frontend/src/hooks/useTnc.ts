@@ -21,4 +21,23 @@ export const useGetTncUrl = (tncConfig: any) => {
       queryFn: () => tncService.getTncUrl(tncConfig),
       enabled: !!tncConfig,
     });
-}
+};
+
+export const useTncCheck = (userProfile: any, tncConfig: any): {
+  needsTncAcceptance: boolean;
+  latestVersion: string;
+  termsUrl: string;
+} => {
+  // Fallback to user profile if tncConfig is not available
+  const latestVersion = tncConfig 
+    ? tncService.getLatestVersion(tncConfig) 
+    : (userProfile?.tncLatestVersion || '');
+  const termsUrl = tncConfig 
+    ? tncService.getTncUrl(tncConfig) 
+    : (userProfile?.tncLatestVersionUrl || '');
+  const acceptedVersion = userProfile?.tncAcceptedVersion || '';
+
+  const needsTncAcceptance = !!latestVersion && acceptedVersion !== latestVersion;
+
+  return { needsTncAcceptance, latestVersion, termsUrl };
+};

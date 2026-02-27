@@ -16,7 +16,7 @@ import {
   type RoleItem,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
-import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAcceptTnc, useGetTncUrl } from "@/hooks/useTnc";
 import { useUserRead } from "@/hooks/useUserRead";

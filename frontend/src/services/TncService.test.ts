@@ -214,8 +214,10 @@ describe('TncService', () => {
             const result = await tncService.acceptTnc(tncConfig, identifier);
 
             expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
-                version: 'v1',
-                identifier: 'user@example.com',
+                request: {
+                    version: 'v1',
+                    identifier: 'user@example.com',
+                },
             });
             expect(result).toEqual(mockResponse);
         });
@@ -229,8 +231,10 @@ describe('TncService', () => {
             const result = await tncService.acceptTnc(tncConfig, identifier);
 
             expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
-                version: '',
-                identifier: 'user@example.com',
+                request: {
+                    version: '',
+                    identifier: 'user@example.com',
+                },
             });
             expect(result).toEqual(mockResponse);
         });

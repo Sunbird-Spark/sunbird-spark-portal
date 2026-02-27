@@ -40,6 +40,7 @@ export class TncService {
         const body: Record<string, string> = { version };
         if (identifier) body.identifier = identifier;
         if (tncType) body.tncType = tncType;
-        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', body);
+        const request = { request: body };
+        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', request);
     }
 }

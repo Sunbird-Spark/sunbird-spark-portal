@@ -25,6 +25,9 @@ vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
     default: mockUserAuthInfoService,
 }));
 
+// Add isUserAuthenticated to the mock
+mockUserAuthInfoService.isUserAuthenticated = vi.fn().mockReturnValue(true);
+
 // Setup QueryClient wrapper
 const createWrapper = () => {
     const queryClient = new QueryClient({
