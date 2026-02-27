@@ -76,7 +76,7 @@ describe('AuthController', () => {
             data: {
                 sid: 'test-session-id',
                 uid: 'user-123',
-                isAuthenticated: true,
+                isAuthenticated: true
             }
         });
     });
