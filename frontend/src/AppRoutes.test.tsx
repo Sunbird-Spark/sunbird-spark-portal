@@ -69,9 +69,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
       isLoading: false,
       roles: ['PUBLIC'],
       error: null,
-      hasRole: vi.fn(),
       hasAnyRole: vi.fn(() => false),
-      hasAllRoles: vi.fn(),
       canAccessFeature: vi.fn(),
       refetch: vi.fn(),
     });
@@ -164,9 +162,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
       isLoading: false,
       roles: ['CONTENT_CREATOR'],
       error: null,
-      hasRole: vi.fn(),
       hasAnyRole: vi.fn((roles: string[]) => roles.includes('CONTENT_CREATOR')),
-      hasAllRoles: vi.fn(),
       canAccessFeature: vi.fn(),
       refetch: vi.fn(),
     });
@@ -181,9 +177,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
       isLoading: false,
       roles: ['CONTENT_REVIEWER'],
       error: null,
-      hasRole: vi.fn(),
       hasAnyRole: vi.fn((roles: string[]) => roles.includes('CONTENT_REVIEWER') && !roles.includes('CONTENT_CREATOR')),
-      hasAllRoles: vi.fn(),
       canAccessFeature: vi.fn(),
       refetch: vi.fn(),
     });

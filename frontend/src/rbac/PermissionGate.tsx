@@ -6,7 +6,6 @@ import { Feature } from '../services/PermissionService';
 
 export interface PermissionGateProps {
   roles?: Role[];
-  requireAll?: boolean;
   feature?: Feature;
   children: React.ReactNode;
   fallback?: React.ReactNode;
@@ -15,7 +14,6 @@ export interface PermissionGateProps {
 
 export function PermissionGate({
   roles,
-  requireAll = false,
   feature,
   children,
   fallback = null,
@@ -23,7 +21,6 @@ export function PermissionGate({
 }: PermissionGateProps): React.ReactElement | null {
   const {
     hasAnyRole,
-    hasAllRoles,
     canAccessFeature,
     isLoading,
   } = usePermissions();
@@ -37,7 +34,7 @@ export function PermissionGate({
   if (feature) {
     hasPermission = canAccessFeature(feature);
   } else if (roles && roles.length > 0) {
-    hasPermission = requireAll ? hasAllRoles(roles) : hasAnyRole(roles);
+    hasPermission = hasAnyRole(roles);
   } else {
     hasPermission = true;
   }

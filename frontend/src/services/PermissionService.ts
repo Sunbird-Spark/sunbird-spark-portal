@@ -8,20 +8,10 @@ const FEATURE_PERMISSIONS: Record<Feature, Role[]> = {
 };
 
 class PermissionService {
-  hasRole(userRoles: string[], requiredRole: Role): boolean {
-    return userRoles.includes(requiredRole);
-  }
-
   hasAnyRole(userRoles: string[], requiredRoles: Role[]): boolean {
     if (userRoles.length === 0) return false;
     if (requiredRoles.length === 0) return true;
     return requiredRoles.some(role => userRoles.includes(role));
-  }
-
-  hasAllRoles(userRoles: string[], requiredRoles: Role[]): boolean {
-    if (userRoles.length === 0) return false;
-    if (requiredRoles.length === 0) return true;
-    return requiredRoles.every(role => userRoles.includes(role));
   }
 
   canAccessFeature(userRoles: string[], feature: Feature): boolean {
@@ -35,7 +25,7 @@ class PermissionService {
 
   normalizeRoles(backendRoles: string[]): Role[] {
     const validRoles: Role[] = [];
-    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'PUBLIC'];
+    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'PUBLIC', 'ORG_ADMIN'];
 
     for (const role of backendRoles) {
       if (role === 'ANONYMOUS') {

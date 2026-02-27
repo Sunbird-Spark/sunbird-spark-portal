@@ -156,9 +156,7 @@ const makePermissions = (isAuthenticated: boolean) => ({
   isLoading: false,
   roles: ['PUBLIC' as const],
   error: null,
-  hasRole: vi.fn(),
   hasAnyRole: vi.fn(),
-  hasAllRoles: vi.fn(),
   canAccessFeature: vi.fn(),
   refetch: vi.fn(),
 });

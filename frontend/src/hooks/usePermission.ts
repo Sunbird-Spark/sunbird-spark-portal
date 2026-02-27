@@ -12,9 +12,7 @@ export interface UsePermissionsReturn {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: Error | null;
-  hasRole: (role: Role) => boolean;
   hasAnyRole: (roles: Role[]) => boolean;
-  hasAllRoles: (roles: Role[]) => boolean;
   canAccessFeature: (feature: Feature) => boolean;
   refetch: () => Promise<void>;
 }
@@ -73,18 +71,8 @@ export function usePermissions(): UsePermissionsReturn {
     };
   }, [fetchRoles]);
 
-  const hasRole = useCallback(
-    (role: Role) => permissionService.hasRole(roles, role),
-    [roles]
-  );
-
   const hasAnyRole = useCallback(
     (requiredRoles: Role[]) => permissionService.hasAnyRole(roles, requiredRoles),
-    [roles]
-  );
-
-  const hasAllRoles = useCallback(
-    (requiredRoles: Role[]) => permissionService.hasAllRoles(roles, requiredRoles),
     [roles]
   );
 
@@ -98,9 +86,7 @@ export function usePermissions(): UsePermissionsReturn {
     isLoading,
     isAuthenticated,
     error,
-    hasRole,
     hasAnyRole,
-    hasAllRoles,
     canAccessFeature,
     refetch: fetchRoles,
   };

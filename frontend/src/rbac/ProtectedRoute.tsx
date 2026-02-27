@@ -7,7 +7,6 @@ import PageLoader from '../components/common/PageLoader';
 
 export interface ProtectedRouteProps {
   allowedRoles: Role[];
-  requireAll?: boolean;
   unauthorizedTo?: string;
   unauthenticatedTo?: string;
   fallback?: React.ReactNode;
@@ -16,7 +15,6 @@ export interface ProtectedRouteProps {
 
 export function ProtectedRoute({
   allowedRoles,
-  requireAll = false,
   unauthorizedTo = '/home',
   unauthenticatedTo = '/home',
   fallback,
@@ -26,7 +24,6 @@ export function ProtectedRoute({
     isAuthenticated,
     isLoading,
     hasAnyRole,
-    hasAllRoles,
   } = usePermissions();
   const location = useLocation();
 
@@ -38,11 +35,7 @@ export function ProtectedRoute({
     return <Navigate to={unauthenticatedTo} state={{ from: location }} replace />;
   }
 
-  const hasPermission = requireAll
-    ? hasAllRoles(allowedRoles)
-    : hasAnyRole(allowedRoles);
-
-  if (!hasPermission) {
+  if (!hasAnyRole(allowedRoles)) {
     return <Navigate to={unauthorizedTo} replace />;
   }
 

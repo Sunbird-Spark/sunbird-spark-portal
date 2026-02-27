@@ -62,9 +62,7 @@ describe('HomeSidebar', () => {
             isLoading: false,
             roles: ['CONTENT_CREATOR'],
             error: null,
-            hasRole: vi.fn(),
             hasAnyRole: vi.fn(() => true),
-            hasAllRoles: vi.fn(),
             canAccessFeature: vi.fn(),
             refetch: vi.fn(),
         });
@@ -75,7 +73,7 @@ describe('HomeSidebar', () => {
 
 
     it('returns null when not authenticated', () => {
-        vi.mocked(usePermissions).mockReturnValue({ isAuthenticated: false, isLoading: false, roles: ['PUBLIC'], error: null, hasRole: vi.fn(), hasAnyRole: vi.fn(), hasAllRoles: vi.fn(), canAccessFeature: vi.fn(), refetch: vi.fn() });
+        vi.mocked(usePermissions).mockReturnValue({ isAuthenticated: false, isLoading: false, roles: ['PUBLIC'], error: null, hasAnyRole: vi.fn(), canAccessFeature: vi.fn(), refetch: vi.fn() });
 
         const { container } = renderSidebar();
         expect(container.firstChild).toBeNull();

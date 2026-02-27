@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Use uppercase roles to match backend
-export type Role = 'CONTENT_CREATOR' | 'CONTENT_REVIEWER' | 'BOOK_CREATOR' | 'BOOK_REVIEWER' | 'PUBLIC';
+export type Role = 'CONTENT_CREATOR' | 'CONTENT_REVIEWER' | 'BOOK_CREATOR' | 'BOOK_REVIEWER' | 'PUBLIC' | 'ORG_ADMIN';
 
 export interface User {
   id: string;
