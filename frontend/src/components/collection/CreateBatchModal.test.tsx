@@ -56,6 +56,14 @@ vi.mock('@/hooks/useBatch', () => ({
   }),
 }));
 
+/* ── Mock useSystemSetting + useGetTncUrl ── */
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: { url: 'https://example.com/tnc' }, isSuccess: true }),
+}));
+vi.mock('@/hooks/useTnc', () => ({
+  useGetTncUrl: () => ({ data: 'https://example.com/tnc' }),
+}));
+
 /* ── Helpers ── */
 const defaultProps = {
   open: true,
@@ -153,8 +161,11 @@ describe('CreateBatchModal', () => {
 
     it('renders Terms & Conditions checkbox', () => {
       render(<CreateBatchModal {...defaultProps} />);
-      expect(screen.getByText(/i accept the terms & conditions/i)).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: /i accept the terms & conditions/i })).toBeInTheDocument();
+      // Look for the checkbox by its label "I accept the Terms & Conditions for creating this batch."
+      // The label text is split across elements, so we use a more flexible search
+      expect(screen.getByLabelText(/i accept the/i)).toBeInTheDocument();
+      // "Terms & Conditions" text lives in a separate button element
+      expect(screen.getByRole('button', { name: /terms & conditions/i })).toBeInTheDocument();
     });
 
     it('renders mentor search input', () => {
@@ -281,7 +292,7 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-04-01' },
       });
-      fireEvent.click(screen.getByRole('checkbox', { name: /accept the terms/i })); // T&C
+      fireEvent.click(screen.getByLabelText(/i accept the/i)); // T&C
 
       expect(screen.getByRole('button', { name: /^create batch$/i })).not.toBeDisabled();
     });
@@ -298,7 +309,7 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-04-01' },
       });
-      const cb = screen.getByRole('checkbox', { name: /accept the terms/i });
+      const cb = screen.getByLabelText(/i accept the/i);
       fireEvent.click(cb); // check
       fireEvent.click(cb); // uncheck
 
@@ -423,7 +434,7 @@ describe('CreateBatchModal', () => {
       fireEvent.change(screen.getByLabelText(/^end date/i), {
         target: { value: '2026-06-30' },
       });
-      const cb = screen.getByRole('checkbox', { name: /accept the terms/i });
+      const cb = screen.getByLabelText(/i accept the/i);
       fireEvent.click(cb);
       fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
     };

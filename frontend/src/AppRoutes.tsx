@@ -27,6 +27,9 @@ import ContentReviewPage from './pages/workspace/ContentReviewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
 import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
+import PlatformReports from './pages/reports/PlatformReports';
+import CourseReport from './pages/reports/CourseReport';
+import UserReport from './pages/reports/UserReport';
 
 
 const AppRoutes: React.FC = () => {
@@ -71,6 +74,9 @@ const AppRoutes: React.FC = () => {
             <ContentReviewPage />
           </ProtectedRoute>
         } />
+        <Route path="/reports/platform" element={<PlatformReports />} />
+        <Route path="/reports/course/:courseId" element={<CourseReport />} />
+        <Route path="/reports/user/:userId" element={<UserReport />} />
         <Route path="/create" element={
           <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
             <CreateContentPage />

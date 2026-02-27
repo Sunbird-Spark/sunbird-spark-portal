@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import * as Checkbox from "@radix-ui/react-checkbox";
-import { FiX, FiCheck, FiSearch, FiLoader } from "react-icons/fi";
+import { FiX, FiSearch, FiLoader } from "react-icons/fi";
 import { useCreateBatch, useUpdateBatch } from "@/hooks/useBatch";
 import { useMentorList, MentorUser } from "@/hooks/useMentor";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
 import { SwitchRow } from "@/components/common/Switch";
-import { CheckboxRow } from "@/components/common/CheckboxRow";
 import { MentorSection } from "@/components/collection/MentorSection";
 import { BatchFormFields, BatchFormState } from "@/components/collection/BatchFormFields";
+import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
+import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useGetTncUrl } from "@/hooks/useTnc";
 
 /* ─── Types ─── */
 
@@ -21,7 +23,6 @@ interface CreateBatchModalProps {
   /** When provided, the modal operates in Edit mode */
   initialBatch?: Batch;
 }
-
 
 
 const makeInitialForm = (batch?: Batch): BatchFormState => ({
@@ -50,6 +51,12 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
   const [form, setForm] = useState<BatchFormState>(() => makeInitialForm(initialBatch));
   const [mentorQuery, setMentorQuery] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [tncDialogOpen, setTncDialogOpen] = useState(false);
+
+  const { data: tncRes } = useSystemSetting("tncConfig");
+  // Pass the full ApiResponse so parseTncConfig can traverse data.response.value
+  // (AxiosAdapter already unwraps the `result` layer into `data`)
+  const { data: termsUrl } = useGetTncUrl(tncRes ?? null);
 
   const { data: allMentors = [], isLoading: mentorsLoading } = useMentorList();
   const createBatch = useCreateBatch();
@@ -133,10 +140,14 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     isPending;
 
   return (
+    <>
     <Dialog.Root open={open} onOpenChange={handleClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] max-h-[90vh] overflow-y-auto focus:outline-none">
+        <Dialog.Content 
+          aria-describedby={undefined}
+          className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] max-h-[90vh] overflow-y-auto focus:outline-none"
+        >
 
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-border sticky top-0 bg-white rounded-t-2xl z-10">
@@ -196,12 +207,10 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
             {/* 8. Terms & Conditions (create mode only) */}
             {!isEditMode && (
               <div className="rounded-lg bg-gray-50 border border-border p-4">
-                <CheckboxRow
-                  id="acceptTerms"
+                <TncCheckboxRow
                   checked={form.acceptTerms}
                   onCheckedChange={(v) => handleField("acceptTerms", !!v)}
-                  label="I accept the Terms & Conditions for creating this batch."
-                  required
+                  onTermsClick={termsUrl ? () => setTncDialogOpen(true) : undefined}
                 />
               </div>
             )}
@@ -247,6 +256,19 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+
+    {/* T&C view-only popup — rendered outside the batch modal to avoid nested dialog issues */}
+    {termsUrl && (
+      <TermsAndConditionsDialog
+        termsUrl={termsUrl}
+        title="Terms &amp; Conditions"
+        open={tncDialogOpen}
+        onOpenChange={setTncDialogOpen}
+      >
+        <span className="sr-only" />
+      </TermsAndConditionsDialog>
+    )}
+    </>
   );
 };
 

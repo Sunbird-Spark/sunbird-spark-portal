@@ -291,6 +291,7 @@
     "accessRestricted": "This page is only accessible to users with the ",
     "roleAdmin": "admin",
     "roleSuffix": " role.",
+    "accessInfo": "This page is only accessible to users with the <1>{{role}}</1> role.",
     "manageUsers": "Manage users",
     "systemConfig": "System configuration",
     "viewReports": "View all reports",
@@ -384,7 +385,12 @@
   },
   "common": {
     "notifications": "Notifications",
-    "language": "Language"
+    "language": "Language",
+    "manage": "Manage",
+    "backTo": "Back to {{page}}",
+    "upcomingBatches": "Upcoming Batches",
+    "learningProgress": "Learning Progress",
+    "downloadCertificate": "Download Certificate"
   },
   "myLearning": {
     "loading": "Loading your learning...",
@@ -405,6 +411,7 @@
     "title": "Reports",
     "contentReports": "Content Reports",
     "roleContentReviewer": "content_reviewer",
+    "accessInfo": "This page is only accessible to users with the <1>{{role}}</1> role.",
     "analytics": "View content analytics",
     "submissionStats": "Review submission statistics",
     "qaMetrics": "Quality assurance metrics",
@@ -434,7 +441,9 @@
     "showingItemsOf": "Showing {{count}} of {{total}} items",
     "startingEditor": "Starting Editor",
     "launchingEditor": "Launching {{name}} editor...",
-    "enterContentName": "Enter content name"
+    "enterContentName": "Enter content name",
+    "collectionType": "Collection Type",
+    "creating": "Creating..."
   },
   "homeComponents": {
     "openMenu": "Open Menu",
@@ -452,6 +461,9 @@
     "profile": "Profile",
     "helpAndSupport": "Help and Support",
     "logout": "Logout",
+    "userReport": "User Report",
+    "adminReports": "Admin Reports",
+    "userManagement": "User Management",
     "expand": "Expand Sidebar",
     "collapse": "Collapse Sidebar"
   },
@@ -680,8 +692,6 @@
     "noCertificateRecords": "No certificate records found for \"{{userName}}\".",
     "certificateIssued": "Certificate Issued",
     "courseCompleted": "Course Completed",
-    "yes": "Yes",
-    "no": "No",
     "criteriaMustBeMet": "Criteria must be met to re-issue",
     "reissueCertificate": "Re-issue certificate"
   },
@@ -715,12 +725,5 @@
     "batches": "Batches",
     "certificates": "Certificates",
     "all": "All"
-  },
-  "common": {
-    "manage": "Manage",
-    "backTo": "Back to {{page}}",
-    "upcomingBatches": "Upcoming Batches",
-    "learningProgress": "Learning Progress",
-    "downloadCertificate": "Download Certificate"
   }
 }
