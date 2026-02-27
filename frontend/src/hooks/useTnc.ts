@@ -33,13 +33,8 @@ export const useTncCheck = (userProfile: any, tncConfig: any): {
     return { needsTncAcceptance: false, latestVersion: '', termsUrl: '' };
   }
 
-  // Fallback to user profile if tncConfig is not available
-  const latestVersion = tncConfig
-    ? tncService.getLatestVersion(tncConfig)
-    : (userProfile?.tncLatestVersion || '');
-  const termsUrl = tncConfig
-    ? tncService.getTncUrl(tncConfig)
-    : (userProfile?.tncLatestVersionUrl || '');
+  const latestVersion = tncConfig ? tncService.getLatestVersion(tncConfig) : '';
+  const termsUrl = tncConfig ? tncService.getTncUrl(tncConfig) : '';
   const acceptedVersion = userProfile?.tncAcceptedVersion || '';
 
   const needsTncAcceptance = !!latestVersion && acceptedVersion !== latestVersion;
