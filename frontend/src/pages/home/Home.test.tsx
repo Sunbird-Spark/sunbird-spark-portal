@@ -52,7 +52,22 @@ vi.mock('react-router-dom', async () => {
 const mockChangeLanguage = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => key,
+        t: (key: string, options?: any) => {
+            const translations: Record<string, string> = {
+                'homePage.hiUser': `Hi ${options?.name}`,
+                'homePage.hiGuest': 'Hi there',
+                'homePage.journeyStart': 'Your exciting learning journey starts here. Dive in!',
+                'homePage.welcomeMessage': 'Welcome to a learning experience made just for you.',
+                'onboarding.altSunbird': 'Sunbird',
+                'header.search': 'Search',
+                'changeLanguage': 'Change Language',
+                'common.notifications': 'Notifications',
+                'navigationMenu': 'Navigation Menu',
+                'homeComponents.openMenu': 'Open Menu',
+                'homeComponents.closeMenu': 'Close Menu',
+            };
+            return translations[key] || key;
+        },
         languages: [
             { code: 'en', label: 'English' },
             { code: 'hi', label: 'Hindi' },
@@ -268,7 +283,7 @@ describe('Home Page', () => {
     it('changes language through the dropdown', async () => {
         renderHome();
 
-        const langBtn = screen.getByAltText('Language').parentElement;
+        const langBtn = screen.getByAltText('Change Language').parentElement;
         fireEvent.click(langBtn!);
 
         const hindiOption = await screen.findByText('Hindi');

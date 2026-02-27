@@ -5,6 +5,7 @@ import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { useCollection } from "@/hooks/useCollection";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import type { TrackableCollection } from "@/types/TrackableCollections";
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 // Circular progress component
 const CircularProgress = ({ progress }: { progress: number }) => {
@@ -42,6 +43,7 @@ const CircularProgress = ({ progress }: { progress: number }) => {
 };
 
 const HomeContinueLearning = () => {
+    const { t } = useAppI18n();
     const navigate = useNavigate();
     const { data, isLoading } = useUserEnrolledCollections();
 
@@ -56,7 +58,7 @@ const HomeContinueLearning = () => {
     if (isLoading || !lastAccessedCourse) return null;
 
     // Determine the content ID to navigate to
-    const contentId = lastAccessedCourse.lastReadContentId
+    const contentId = lastAccessedCourse?.lastReadContentId
         ?? getFirstLeafContentIdFromHierarchy(collectionData?.hierarchyRoot ?? null);
 
     if (!contentId) return null;
@@ -93,7 +95,7 @@ const HomeContinueLearning = () => {
                     <div className="home-continue-learning-progress">
                         <CircularProgress progress={lastAccessedCourse.completionPercentage} />
                         <span className="home-continue-learning-progress-label">
-                            Completed : {lastAccessedCourse.completionPercentage}%
+                            {t("courseDetails.contentStatusCompleted")} : {lastAccessedCourse.completionPercentage}%
                         </span>
                     </div>
 
@@ -103,7 +105,7 @@ const HomeContinueLearning = () => {
                             onClick={() => navigate(continueTo)}
                             className="home-continue-learning-btn group"
                         >
-                            Continue Learning
+                            {t("homeComponents.continueLearning")}
                             <FiArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                         </Button>
                     </div>

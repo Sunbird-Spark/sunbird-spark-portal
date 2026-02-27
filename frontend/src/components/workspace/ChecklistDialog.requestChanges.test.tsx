@@ -1,6 +1,23 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ChecklistDialog from './ChecklistDialog';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string, data?: any) => {
+      const translations: Record<string, string> = {
+        'checklistDialog.publish': 'Publish',
+        'checklistDialog.publishing': 'Publishing...',
+        'checklistDialog.requestForChanges': 'Request for Changes',
+        'checklistDialog.submitting': 'Submitting...',
+        'checklistDialog.publishContent': 'Publish Content',
+        'checklistDialog.otherReason': 'Others',
+        'cancel': 'Cancel',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
 import { CheckListFormField } from '@/types/formTypes';
 
 const fieldsWithOtherReason: CheckListFormField[] = [

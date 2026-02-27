@@ -10,6 +10,19 @@ vi.mock('@/hooks/useForm', () => ({
   useFormRead: vi.fn(),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'index.loadingSections': 'Loading sections...',
+        'index.errorLoadingSections': 'Unable to load content sections. Please try again.',
+        'index.noSectionsAvailable': 'No content sections available at the moment.'
+      };
+      return map[key] || key;
+    },
+  }),
+}));
+
 // Mock components
 vi.mock('@/components/home/Header', () => ({ default: () => <div data-testid="header">Header</div> }));
 vi.mock('@/components/landing/HeroWithStats', () => ({ default: () => <div data-testid="hero">Hero</div> }));

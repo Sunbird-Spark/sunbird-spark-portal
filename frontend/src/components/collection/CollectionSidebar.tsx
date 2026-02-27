@@ -66,9 +66,9 @@ function ExpandedUnitContent({
             <div key={node.identifier} className="space-y-2">
               <div
                 className="text-sm font-semibold text-muted-foreground py-1"
-                aria-label={`Section: ${node.name ?? "Untitled"}`}
+                aria-label={`Section: ${node.name ?? t('collectionSidebar.untitled')}`}
               >
-                {node.name ?? "Untitled"}
+                {node.name ?? t('collectionSidebar.untitled')}
               </div>
               <ExpandedUnitContent
                 nodes={childList}
@@ -145,7 +145,7 @@ const CollectionSidebar = ({
                         contentBlocked ? "text-muted-foreground" : "text-foreground"
                       }`}
                     >
-                      {unit.name ?? "Untitled"}
+                      {unit.name ?? t('collectionSidebar.untitled')}
                     </h3>
                     {(unit.primaryCategory ?? unit.description) && (
                       <p

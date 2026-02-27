@@ -4,11 +4,13 @@ import { Input } from "@/components/common/Input";
 import { useNavigate } from "react-router-dom";
 import sunbirdLogo from "../../../src/assets/sunbird-logo.svg";
 import onboardingImage from "../../../src/assets/onboarding-image.svg";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { useFormRead } from "@/hooks/useForm";
 import { OnboardingFormData } from '@/types/formTypes';
 import { computeTotalSteps } from './utils';
 import { ProgressIndicator, OptionChip } from './OnboardingComponents';
 const Onboarding = () => {
+  const { t } = useAppI18n();
   const navigate = useNavigate();
   const [screenHistory, setScreenHistory] = useState<string[]>([]);
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);
@@ -162,7 +164,7 @@ const Onboarding = () => {
       <div className="flex w-full max-w-7xl h-full max-h-[calc(100vh-4rem)] gap-6">
         <div className="w-full lg:w-1/2 p-8 md:p-10 lg:p-12 flex flex-col bg-white rounded-3xl overflow-y-auto">
           <div className="mb-6">
-            <img src={sunbirdLogo} alt="Sunbird" className="onboarding-logo" />
+            <img src={sunbirdLogo} alt={t('onboarding.altSunbird')} className="onboarding-logo" />
           </div>
           <div className="mb-8">
             <h1 className="onboarding-title">
@@ -197,7 +199,7 @@ const Onboarding = () => {
                   </div>
                 ) : (
                   <div className="space-y-4 max-w-md">
-                    <Input type="text"  placeholder="Please type your preference here" value={otherText}
+                    <Input type="text"  placeholder={t('onboarding.otherPreferencePlaceholder')} value={otherText}
                       onChange={e => {
                         const value = e.target.value;
                         setOtherTexts(prev => ({ ...prev, [currentScreenId]: value }));
@@ -238,7 +240,7 @@ const Onboarding = () => {
           </div>
         </div>
         <div className="hidden lg:block lg:w-1/2 relative overflow-hidden rounded-3xl">
-          <img src={onboardingImage} alt="Onboarding Image" className="onboarding-image-reduced"
+          <img src={onboardingImage} alt={t('onboarding.altImage')} className="onboarding-image-reduced"
           />
         </div>
       </div>

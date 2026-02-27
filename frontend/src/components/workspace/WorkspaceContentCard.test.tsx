@@ -3,6 +3,23 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceContentCard from './WorkspaceContentCard';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'workspaceCard.view': 'View',
+        'workspaceCard.edit': 'Edit',
+        'workspaceCard.delete': 'Delete',
+        'workspaceCard.locked': 'Locked',
+        'status.draft': 'Draft',
+        'status.published': 'Published',
+        'status.inReview': 'In Review',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 vi.mock('@/components/common/DropdownMenu', () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

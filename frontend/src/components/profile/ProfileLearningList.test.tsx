@@ -21,7 +21,14 @@ vi.mock('@/hooks/useCertificateDownload', () => ({
     })),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => key,
+    }),
+}));
+
 // Mock DropdownMenu to render content inline for easy testing
+
 vi.mock('@/components/common/DropdownMenu', () => ({
     DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="dropdown-trigger">{children}</div>,
@@ -80,17 +87,15 @@ describe('ProfileLearningList', () => {
         expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
         expect(screen.getByText('Completed Course')).toBeInTheDocument();
         // Check default filter label
-        expect(screen.getByText('all')).toBeInTheDocument(); // capitalized by CSS but text in DOM is 'all' or 'All' depending on logic.
-        expect(screen.getByTestId('filter-option-all')).toBeInTheDocument(); // capitalized by CSS but text in DOM is 'all' or 'All' depending on logic.
-        // My code: <span className="capitalize">{filter}</span> where filter is "all" 
-        // So DOM has "all"
+        expect(screen.getByText('all')).toBeInTheDocument();
+        expect(screen.getByTestId('filter-option-tabs.all')).toBeInTheDocument();
     });
 
     it('filters by Ongoing', () => {
         render(<ProfileLearningList />);
 
         // Click "Ongoing" filter option (exposed by mock)
-        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
 
         // Should show Ongoing Course
         expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
@@ -102,7 +107,7 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
 
         // Click "Completed" filter option
-        fireEvent.click(screen.getByTestId('filter-option-completed'));
+        fireEvent.click(screen.getByTestId('filter-option-status.completed'));
 
         // Should NOT show Ongoing Course
         expect(screen.queryByText('Ongoing Course')).not.toBeInTheDocument();
@@ -126,7 +131,7 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
 
         // Filter by Ongoing
-        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
 
         expect(screen.getByText('No ongoing courses found.')).toBeInTheDocument();
     });
@@ -245,7 +250,7 @@ describe('ProfileLearningList', () => {
         expect(screen.getByText('View Less')).toBeInTheDocument();
 
         // Change filter to Ongoing
-        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
 
         // Verification: showAll should be reset to false, meaning we only see 6 items and "View More Courses"
         expect(screen.queryByText('Ongoing 7')).not.toBeInTheDocument();
@@ -257,7 +262,7 @@ describe('ProfileLearningList', () => {
 
         render(<ProfileLearningList />);
 
-        const downloadButtons = screen.queryAllByText('Download Certificate');
+        const downloadButtons = screen.queryAllByText('common.downloadCertificate');
         expect(downloadButtons).toHaveLength(1);
     });
 
@@ -266,7 +271,7 @@ describe('ProfileLearningList', () => {
 
         render(<ProfileLearningList />);
 
-        const downloadButtons = screen.queryAllByText('Download Certificate');
+        const downloadButtons = screen.queryAllByText('common.downloadCertificate');
         expect(downloadButtons).toHaveLength(0);
     });
 
@@ -275,7 +280,7 @@ describe('ProfileLearningList', () => {
 
         render(<ProfileLearningList />);
 
-        const downloadButton = screen.getByText('Download Certificate');
+        const downloadButton = screen.getByText('common.downloadCertificate');
         fireEvent.click(downloadButton);
 
         expect(mockDownloadCertificate).toHaveBeenCalledWith('c2', '2', 'Completed Course', undefined, undefined);

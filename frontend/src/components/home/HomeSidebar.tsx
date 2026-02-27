@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { PermissionGate } from "@/rbac/PermissionGate";
 import { Feature } from "@/services/PermissionService";
 import { usePermissions } from "@/hooks/usePermission";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { useIsAdmin } from "@/hooks/useUser";
 
 interface HomeSidebarProps {
@@ -41,17 +42,17 @@ const MyLearningIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const mainNavItems: { id: string; label: string; icon: React.ElementType; path: string; feature?: Feature }[] = [
-    { id: "home", label: "Home", icon: FiHome, path: "/home" },
-    { id: "learning", label: "My Learning", icon: MyLearningIcon, path: "/my-learning" },
-    { id: "explore", label: "Explore", icon: ExploreIcon, path: "/explore" },
-    { id: "workspace", label: "Workspace", icon: FiEdit, path: "/workspace", feature: "view_workspace" },
-    { id: "profile", label: "Profile", icon: FiUser, path: "/profile" },
+const NAV_ITEM_DEFS: { id: string; labelKey: string; icon: React.ElementType; path: string; feature?: Feature }[] = [
+    { id: "home", labelKey: "sidebar.home", icon: FiHome, path: "/home" },
+    { id: "learning", labelKey: "sidebar.myLearning", icon: MyLearningIcon, path: "/my-learning" },
+    { id: "explore", labelKey: "sidebar.explore", icon: ExploreIcon, path: "/explore" },
+    { id: "workspace", labelKey: "sidebar.workspace", icon: FiEdit, path: "/workspace", feature: "view_workspace" },
+    { id: "profile", labelKey: "sidebar.profile", icon: FiUser, path: "/profile" },
 ];
 
-const bottomNavItems = [
-    { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help-support" },
-    { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
+const BOTTOM_NAV_DEFS = [
+    { id: "help", labelKey: "sidebar.helpAndSupport", icon: HelpSupportIcon, path: "/help-support" },
+    { id: "logout", labelKey: "sidebar.logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
 const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: HomeSidebarProps) => {
@@ -59,6 +60,10 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const location = useLocation();
     const isMobile = useIsMobile();
     const { isAuthenticated, isLoading } = usePermissions();
+    const { t } = useAppI18n();
+
+    const mainNavItems = NAV_ITEM_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
+    const bottomNavItems = BOTTOM_NAV_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
     const isAdmin = useIsAdmin();
 
     if (isLoading || !isAuthenticated || location.pathname === "/") {
@@ -68,7 +73,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const dynamicMainNavItems = [
         ...mainNavItems,
         ...(isAdmin
-            ? [{ id: "user-management", label: "User Management", icon: FiUsers, path: "/user-management" }]
+            ? [{ id: "user-management", labelKey: "sidebar.userManagement", label: "User Management", icon: FiUsers, path: "/user-management" }]
             : []),
     ];
 

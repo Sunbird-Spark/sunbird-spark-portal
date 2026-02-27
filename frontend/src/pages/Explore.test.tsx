@@ -161,7 +161,7 @@ describe('Explore Page', () => {
 
     it('renders the sort dropdown with "Newest" as the default label', () => {
       renderComponent();
-      expect(screen.getByText('Newest')).toBeInTheDocument();
+      expect(screen.getByText('sortOptions.newest')).toBeInTheDocument();
     });
   });
 
@@ -283,14 +283,14 @@ describe('Explore Page', () => {
   describe('sort options', () => {
     it('updates the grid sort when "Oldest" is selected', async () => {
       renderComponent();
-      const sortButton = screen.getByText('Newest');
+      const sortButton = screen.getByText('sortOptions.newest');
       fireEvent.pointerDown(sortButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Oldest')).toBeInTheDocument();
+        expect(screen.getByText('sortOptions.oldest')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByText('Oldest'));
+      fireEvent.click(screen.getByText('sortOptions.oldest'));
 
       await waitFor(() => {
         expect(screen.getByTestId('explore-grid')).toHaveTextContent('{"lastUpdatedOn":"asc"}');

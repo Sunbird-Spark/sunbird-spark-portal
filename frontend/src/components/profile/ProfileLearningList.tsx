@@ -5,6 +5,7 @@ import { TrackableCollection } from "@/types/TrackableCollections";
 import PageLoader from "@/components/common/PageLoader";
 import { ProgressRing } from "./ProfileIcons";
 import { useCertificateDownload } from "@/hooks/useCertificateDownload";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,9 +27,10 @@ interface CourseRowProps {
     downloadCertificate: (courseId: string, batchId: string, courseName: string, issuedCertificates?: any[], completedOn?: number) => Promise<void>;
     hasCertificate: (courseId: string, batchId?: string, courseName?: string, issuedCertificates?: any[]) => boolean;
     downloadingCourseId: string | null;
+    t: (key: string) => string;
 }
 
-const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId }: CourseRowProps) => {
+const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId, t }: CourseRowProps) => {
     const status = getCompletionStatus(course.status);
     const progress = course.completionPercentage ?? 0;
     const thumbnail = course.courseLogoUrl || course.content?.appIcon;
@@ -75,7 +77,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                             }`}
                     >
                         <span className="text-[0.875rem] font-medium leading-[1.125rem]">
-                            {status === "completed" ? "Completed" : "Ongoing"}
+                            {status === "completed" ? t('status.completed') : t('status.ongoing')}
                         </span>
                     </div>
                 </div>
@@ -94,7 +96,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                             <FiDownload className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
                         )}
                         <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center whitespace-nowrap">
-                            {isDownloading ? "Downloading..." : "Download Certificate"}
+                            {isDownloading ? "Downloading..." : t('common.downloadCertificate')}
                         </span>
                     </button>
                 ) : status === "completed" ? (
@@ -108,6 +110,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
 };
 
 const ProfileLearningList = () => {
+    const { t } = useAppI18n();
     const [filter, setFilter] = useState<FilterType>("all");
     const [showAll, setShowAll] = useState(false);
 
@@ -154,7 +157,7 @@ const ProfileLearningList = () => {
                                     setShowAll(false);
                                 }}
                             >
-                                All
+                                {t('tabs.all')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="cursor-pointer hover:bg-sunbird-ginger/10 hover:text-sunbird-ginger"
@@ -163,7 +166,7 @@ const ProfileLearningList = () => {
                                     setShowAll(false);
                                 }}
                             >
-                                Ongoing
+                                {t('status.ongoing')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="cursor-pointer hover:bg-sunbird-ginger/10 hover:text-sunbird-ginger"
@@ -172,7 +175,7 @@ const ProfileLearningList = () => {
                                     setShowAll(false);
                                 }}
                             >
-                                Completed
+                                {t('status.completed')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -205,6 +208,7 @@ const ProfileLearningList = () => {
                             downloadCertificate={downloadCertificate}
                             hasCertificate={hasCertificate}
                             downloadingCourseId={downloadingCourseId}
+                            t={t}
                         />
                     ))
                 )}

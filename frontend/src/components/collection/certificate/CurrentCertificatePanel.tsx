@@ -1,4 +1,5 @@
 import { FiAward } from "react-icons/fi";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface CurrentCertificatePanelProps {
   existingCertTemplates: Record<string, any>;
@@ -9,6 +10,7 @@ export function CurrentCertificatePanel({
   existingCertTemplates,
   setCertTab,
 }: CurrentCertificatePanelProps) {
+  const { t } = useAppI18n();
   const entries = Object.entries(existingCertTemplates);
   if (entries.length === 0) return null;
 
@@ -20,14 +22,14 @@ export function CurrentCertificatePanel({
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-sunbird-obsidian font-['Rubik'] uppercase tracking-wide">
-          Attached Certificate Template
+          {t('certificate.attachedTemplate')}
         </h3>
         <button
           type="button"
           onClick={() => setCertTab("change")}
           className="text-sm font-medium text-sunbird-brick hover:underline font-['Rubik']"
         >
-          Edit Certificate
+          {t('certificate.editCertificate')}
         </button>
       </div>
 
@@ -39,7 +41,7 @@ export function CurrentCertificatePanel({
             ) : (
               <div className="flex flex-col items-center gap-1 text-muted-foreground">
                 <FiAward className="w-8 h-8" />
-                <span className="text-xs font-['Rubik']">No preview available</span>
+                <span className="text-xs font-['Rubik']">{t('certificate.noPreviewAvailable')}</span>
               </div>
             )}
           </div>
@@ -50,9 +52,7 @@ export function CurrentCertificatePanel({
         </div>
       </div>
       
-      <p className="text-xs text-muted-foreground font-['Rubik'] italic">
-        This is the active certificate template for this batch. Click <strong>Edit Certificate</strong> to make changes to its configuration or replace it.
-      </p>
+      <p className="text-xs text-muted-foreground font-['Rubik'] italic" dangerouslySetInnerHTML={{ __html: t('certificate.activeTemplateDescription') }} />
     </div>
   );
 }

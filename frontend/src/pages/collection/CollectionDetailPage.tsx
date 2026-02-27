@@ -187,7 +187,7 @@ const CollectionDetailPage = () => {
 
         {!showLoading && !isError && collectionDataFromApi == null && (
           <PageLoader
-            error="Collection not found."
+            error={t("collection.notFound")}
             onRetry={() => refetch()}
             fullPage={false}
           />

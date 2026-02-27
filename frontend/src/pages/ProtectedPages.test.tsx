@@ -131,31 +131,31 @@ describe('Protected Pages', () => {
   describe('AdminPage', () => {
     it('should render admin dashboard', () => {
       render(<AdminPage />);
-      expect(screen.getByRole('heading', { name: 'Admin Dashboard' })).toBeInTheDocument();
-      expect(screen.getByText(/only accessible to users with the/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'admin.dashboard' })).toBeInTheDocument();
+      expect(screen.getByText(/admin.accessRestricted/i)).toBeInTheDocument();
     });
   });
 
   describe('WorkspacePage', () => {
     it('should render workspace', { timeout: 10000 }, () => {
       renderWithProviders(<WorkspacePage />);
-      expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
+      expect(screen.getByText('All')).toBeInTheDocument();
     });
   });
 
   describe('ReportsPage', () => {
     it('should render reports', () => {
       render(<ReportsPage />);
-      expect(screen.getByRole('heading', { name: 'Reports' })).toBeInTheDocument();
-      expect(screen.getByText(/only accessible to users with the/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'reports.title' })).toBeInTheDocument();
+      expect(screen.getByText(/content.accessRestricted/i)).toBeInTheDocument();
     });
   });
 
   describe('CreateContentPage', () => {
     it('should render create content page', () => {
       render(<CreateContentPage />);
-      expect(screen.getByRole('heading', { name: 'Create Content' })).toBeInTheDocument();
-      expect(screen.getByText(/only accessible to users with the/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'createContent' })).toBeInTheDocument();
+      expect(screen.getByText(/content.accessRestricted/i)).toBeInTheDocument();
     });
   });
 });
