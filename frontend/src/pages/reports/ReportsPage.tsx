@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans } from 'react-i18next';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 const ReportsPage: React.FC = () => {
@@ -11,7 +12,13 @@ const ReportsPage: React.FC = () => {
 
       <div>
         <h2>{t('reports.contentReports')}</h2>
-        <p>{t('content.accessRestricted')}<strong>{t('reports.roleContentReviewer')}</strong>{t('content.roleSuffix')}</p>
+        <p>
+          <Trans
+            i18nKey="reports.accessInfo"
+            values={{ role: t('reports.roleContentReviewer') }}
+            components={{ 1: <strong /> }}
+          />
+        </p>
         <ul>
           <li>{t('reports.analytics')}</li>
           <li>{t('reports.submissionStats')}</li>

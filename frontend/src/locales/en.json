@@ -291,6 +291,7 @@
     "accessRestricted": "This page is only accessible to users with the ",
     "roleAdmin": "admin",
     "roleSuffix": " role.",
+    "accessInfo": "This page is only accessible to users with the <1>{{role}}</1> role.",
     "manageUsers": "Manage users",
     "systemConfig": "System configuration",
     "viewReports": "View all reports",
@@ -405,6 +406,7 @@
     "title": "Reports",
     "contentReports": "Content Reports",
     "roleContentReviewer": "content_reviewer",
+    "accessInfo": "This page is only accessible to users with the <1>{{role}}</1> role.",
     "analytics": "View content analytics",
     "submissionStats": "Review submission statistics",
     "qaMetrics": "Quality assurance metrics",
@@ -463,7 +465,9 @@
       "publishWarningText": "You have given some review comments/suggestions, they will be lost if content is published.",
       "publishWarningQuestion": "Do you want to publish?",
       "processing": "Processing..."
-    }
+    },
+    "collectionType": "Collection Type",
+    "creating": "Creating..."
   },
   "homeComponents": {
     "openMenu": "Open Menu",
