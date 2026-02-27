@@ -291,6 +291,7 @@
     "accessRestricted": "Cette page n'est accessible qu'aux utilisateurs ayant le rôle ",
     "roleAdmin": "administrateur",
     "roleSuffix": ".",
+    "accessInfo": "Cette page n'est accessible qu'aux utilisateurs ayant le rôle <1>{{role}}</1>.",
     "manageUsers": "Gérer les utilisateurs",
     "systemConfig": "Configuration du système",
     "viewReports": "Voir tous les rapports",
@@ -405,6 +406,7 @@
     "title": "Rapports",
     "contentReports": "Rapports de contenu",
     "roleContentReviewer": "réviseur_de_contenu",
+    "accessInfo": "Cette page n'est accessible qu'aux utilisateurs ayant le rôle <1>{{role}}</1>.",
     "analytics": "Voir les analyses de contenu",
     "submissionStats": "Statistiques de soumission",
     "qaMetrics": "Métriques d'assurance qualité",
@@ -434,7 +436,9 @@
     "showingItemsOf": "Affichage de {{count}} sur {{total}} élément(s)",
     "startingEditor": "Démarrage de l'éditeur",
     "launchingEditor": "Lancement de l'éditeur {{name}}...",
-    "enterContentName": "Saisir le nom du contenu"
+    "enterContentName": "Saisir le nom du contenu",
+    "collectionType": "Type de collection",
+    "creating": "Création en cours..."
   },
   "homeComponents": {
     "openMenu": "Ouvrir le menu",

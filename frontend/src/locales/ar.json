@@ -291,6 +291,7 @@
     "accessRestricted": "هذه الصفحة متاحة فقط للمستخدمين الذين لديهم دور ",
     "roleAdmin": "المسؤول",
     "roleSuffix": ".",
+    "accessInfo": "هذه الصفحة متاحة فقط للمستخدمين الذين لديهم دور <1>{{role}}</1>.",
     "manageUsers": "إدارة المستخدمين",
     "systemConfig": "تكوين النظام",
     "viewReports": "عرض جميع التقارير",
@@ -405,6 +406,7 @@
     "title": "التقارير",
     "contentReports": "تقارير المحتوى",
     "roleContentReviewer": "مراجع_المحتوى",
+    "accessInfo": "هذه الصفحة متاحة فقط للمستخدمين الذين لديهم دور <1>{{role}}</1>.",
     "analytics": "عرض تحليلات المحتوى",
     "submissionStats": "مراجعة إحصاءات التقديم",
     "qaMetrics": "مقاييس ضمان الجودة",
@@ -434,7 +436,9 @@
     "showingItemsOf": "عرض {{count}} من {{total}} عنصر",
     "startingEditor": "بدء المحرر",
     "launchingEditor": "تشغيل محرر {{name}}...",
-    "enterContentName": "أدخل اسم المحتوى"
+    "enterContentName": "أدخل اسم المحتوى",
+    "collectionType": "نوع المجموعة",
+    "creating": "جارٍ الإنشاء..."
   },
   "homeComponents": {
     "openMenu": "فتح القائمة",
