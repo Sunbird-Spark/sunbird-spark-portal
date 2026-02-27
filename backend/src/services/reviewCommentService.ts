@@ -26,7 +26,7 @@ export class ReviewCommentService {
 
     constructor() {
         this.client = getReviewCommentClient();
-        this.keyspace = envConfig.REVIEW_COMMENT_DB_NAME || 'apzvp_review_comment';
+        this.keyspace = envConfig.CONTENT_REVIEW_COMMENT_DB_NAME || 'apzvp_review_comment';
     }
 
     public async createComment(data: CommentData) {

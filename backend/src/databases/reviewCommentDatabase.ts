@@ -25,9 +25,9 @@ export const getReviewCommentClient = (): cassandra.Client => {
             _reviewCommentClient = new cassandra.Client({
                 contactPoints: contactPoints,
                 localDataCenter: 'datacenter1',
-                keyspace: envConfig.REVIEW_COMMENT_DB_NAME,
+                keyspace: envConfig.CONTENT_REVIEW_COMMENT_DB_NAME,
                 protocolOptions: { port: envConfig.SUNBIRD_YUGABYTE_YCQL_PORT },
-                credentials: {
+                credentials: {  
                     username: envConfig.SUNBIRD_YUGABYTE_USER,
                     password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
                 },
