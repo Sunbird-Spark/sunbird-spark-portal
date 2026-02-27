@@ -79,7 +79,7 @@ describe('ContentPlayerSection', () => {
 
   it('should render player and comments in flex layout for ECML content', () => {
     const { container } = render(<ContentPlayerSection {...defaultProps} isEcmlContent={true} />, { wrapper });
-    const flexContainer = container.querySelector('[style*="display: flex"]');
+    const flexContainer = container.querySelector('.content-review-player-with-comments');
     expect(flexContainer).toBeInTheDocument();
   });
 

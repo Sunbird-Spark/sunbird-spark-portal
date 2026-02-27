@@ -161,7 +161,7 @@ describe('CommentSection', () => {
         'New test comment',
         'user-123',
         {
-          name: 'Test User',
+          name: 'Anonymous',
         }
       );
       expect(textarea).toHaveValue('');
