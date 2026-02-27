@@ -26,6 +26,7 @@ vi.mock('@/hooks/useContent', () => ({
           createdOn: '2024-01-01',
           primaryCategory: 'Resource',
           mimeType: 'application/pdf',
+          status: 'Review',
         },
       },
     },
