@@ -264,7 +264,9 @@
     "tncText": "Concordo em compartilhar os detalhes do perfil acima com o administrador do curso.",
     "tncCheckboxLabel": "Concordo em compartilhar os detalhes do perfil",
     "dontShare": "Não compartilhar",
-    "share": "Compartilhar"
+    "share": "Compartilhar",
+    "consentUpdateSuccess": "Preferência de compartilhamento de dados do perfil atualizada.",
+    "consentUpdateError": "Não foi possível atualizar a preferência de compartilhamento de dados do perfil. Tente novamente."
   },
   "resource": {
     "title": "Fique à frente. O que vem a seguir começa aqui.",

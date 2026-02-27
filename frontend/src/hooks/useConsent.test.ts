@@ -89,26 +89,6 @@ describe('useConsent', () => {
 
     expect(result.current.status).toBe('ACTIVE');
     expect(result.current.lastUpdatedOn).toBe('2026-02-26T10:00:00Z');
-    expect(result.current.noConsentYet).toBe(false);
-  });
-
-  it('sets noConsentYet when fetched and status is null', () => {
-    vi.mocked(useQuery).mockReturnValue({
-      data: { status: null, lastUpdatedOn: undefined },
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-      isFetched: true,
-    } as unknown as ReturnType<typeof useQuery>);
-    vi.mocked(useMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue(undefined),
-      isPending: false,
-    } as unknown as ReturnType<typeof useMutation>);
-
-    const { result } = renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
-
-    expect(result.current.noConsentYet).toBe(true);
   });
 
   it('updateConsent calls consentService.update and invalidates queries on success', async () => {

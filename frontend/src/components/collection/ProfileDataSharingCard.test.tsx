@@ -80,10 +80,8 @@ describe('ProfileDataSharingCard', () => {
     expect(screen.queryByText(/26\/02\/2026/)).not.toBeInTheDocument();
   });
 
-  it('does not open modal by default when noConsentYet is true', () => {
-    render(
-      <ProfileDataSharingCard {...defaultProps} noConsentYet={true} status={null} />
-    );
+  it('does not open modal by default', () => {
+    render(<ProfileDataSharingCard {...defaultProps} status={null} />);
     expect(screen.queryByTestId('profile-data-sharing-modal')).not.toBeInTheDocument();
   });
 

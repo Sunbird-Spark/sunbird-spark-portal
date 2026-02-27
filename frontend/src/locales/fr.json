@@ -264,7 +264,9 @@
     "tncText": "J'accepte de partager les détails de profil ci-dessus avec l'administrateur du cours.",
     "tncCheckboxLabel": "J'accepte de partager les détails du profil",
     "dontShare": "Ne pas partager",
-    "share": "Partager"
+    "share": "Partager",
+    "consentUpdateSuccess": "Préférence de partage des données de profil mise à jour.",
+    "consentUpdateError": "Impossible de mettre à jour la préférence de partage des données de profil. Veuillez réessayer."
   },
   "resource": {
     "title": "Gardez une longueur d'avance. L'avenir commence ici.",
