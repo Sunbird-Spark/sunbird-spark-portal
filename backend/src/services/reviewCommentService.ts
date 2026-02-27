@@ -30,7 +30,7 @@ export class ReviewCommentService {
     }
 
     public async createComment(data: CommentData) {
-        logger.info('ReviewCommentService.createComment - Input data:', JSON.stringify(data, null, 2));
+        logger.debug('ReviewCommentService.createComment - contentId:', data.contextDetails.contentId, 'contentVer:', data.contextDetails.contentVer);
 
         const query = `
             INSERT INTO ${this.keyspace}.context_details (content_id, content_ver, content_type, thread_id, meta_data, is_deleted, created_on)
@@ -43,11 +43,11 @@ export class ReviewCommentService {
             user_id: data.userId || '',
             user_name: data.userInfo?.name || '',
         };
-        
+
         if (data.contextDetails.stageId) {
             metaData.stage_id = data.contextDetails.stageId;
         }
-        
+
         if (data.userInfo?.logo) {
             metaData.user_logo = data.userInfo.logo;
         }
@@ -62,20 +62,18 @@ export class ReviewCommentService {
             new Date()
         ];
 
-        logger.info('ReviewCommentService.createComment - Query params:', params);
         await this.client.execute(query, params, { prepare: true });
-        logger.info('ReviewCommentService.createComment - Success!');
+        logger.info('ReviewCommentService.createComment - Success, threadId:', threadId);
 
         return { created: 'OK', threadId };
     }
 
     public async readComments(contextDetails: ContextDetails) {
-        logger.info('ReviewCommentService.readComments - Input:', JSON.stringify(contextDetails, null, 2));
+        logger.debug('ReviewCommentService.readComments - contentId:', contextDetails.contentId, 'contentVer:', contextDetails.contentVer);
 
-        let query = `
-            SELECT * FROM ${this.keyspace}.context_details 
-            WHERE content_id = ? AND content_ver = ? AND content_type = ? AND is_deleted = false
-            ALLOW FILTERING
+        const query = `
+            SELECT * FROM ${this.keyspace}.context_details
+            WHERE content_id = ? AND content_ver = ? AND content_type = ?
         `;
 
         const params: unknown[] = [
@@ -85,12 +83,12 @@ export class ReviewCommentService {
         ];
 
         const result = await this.client.execute(query, params, { prepare: true });
-        logger.info('ReviewCommentService.readComments - Found rows:', result.rowLength);
+        logger.debug('ReviewCommentService.readComments - Found rows:', result.rowLength);
 
         const comments = result.rows
-            .filter(row => !contextDetails.stageId || row.meta_data?.stage_id === contextDetails.stageId)
+            .filter(row => !row.is_deleted && (!contextDetails.stageId || row.meta_data?.stage_id === contextDetails.stageId))
             .map(row => ({
-                identifier: row.thread_id,
+                identifier: row.thread_id?.toString(),
                 comment: row.meta_data?.body || '',
                 createdBy: row.meta_data?.user_name || 'Unknown',
                 createdOn: row.created_on?.toISOString() || new Date().toISOString(),
@@ -102,7 +100,7 @@ export class ReviewCommentService {
     }
 
     public async deleteComments(contextDetails: ContextDetails) {
-        logger.info('ReviewCommentService.deleteComments - Input:', JSON.stringify(contextDetails, null, 2));
+        logger.debug('ReviewCommentService.deleteComments - contentId:', contextDetails.contentId, 'contentVer:', contextDetails.contentVer);
 
         // First, read all thread_ids for this content
         const selectQuery = `
@@ -117,7 +115,7 @@ export class ReviewCommentService {
         ];
 
         const result = await this.client.execute(selectQuery, selectParams, { prepare: true });
-        logger.info('ReviewCommentService.deleteComments - Found rows to delete:', result.rowLength);
+        logger.debug('ReviewCommentService.deleteComments - Found rows to delete:', result.rowLength);
 
         // Update each row individually with thread_id in WHERE clause
         const updateQuery = `
