@@ -104,7 +104,6 @@ export default function CollectionContentArea({
   const {
     status: consentStatus,
     lastUpdatedOn: consentLastUpdatedOn,
-    noConsentYet,
     updateConsent,
     isUpdating: consentIsUpdating,
   } = useConsent({
@@ -116,11 +115,11 @@ export default function CollectionContentArea({
   const handleConsentAgree = async () => {
     try {
       await updateConsent("ACTIVE");
-      toast({ title: t("success"), description: "Profile data sharing preference updated.", variant: "default" });
+      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
     } catch (err) {
       toast({
         title: t("error"),
-        description: (err as Error).message || "Profile data sharing preference could not be updated. Please try again.",
+        description: (err as Error).message || t("profileDataSharing.consentUpdateError"),
         variant: "destructive",
       });
     }
@@ -129,11 +128,11 @@ export default function CollectionContentArea({
   const handleConsentDisagree = async () => {
     try {
       await updateConsent("REVOKED");
-      toast({ title: t("success"), description: "Profile data sharing preference updated.", variant: "default" });
+      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
     } catch (err) {
       toast({
         title: t("error"),
-        description: (err as Error).message || "Profile data sharing preference could not be updated. Please try again.",
+        description: (err as Error).message || t("profileDataSharing.consentUpdateError"),
         variant: "destructive",
       });
     }
@@ -241,7 +240,6 @@ export default function CollectionContentArea({
                 <ProfileDataSharingCard
                   status={consentStatus}
                   lastUpdatedOn={consentLastUpdatedOn}
-                  noConsentYet={noConsentYet}
                   onAgree={handleConsentAgree}
                   onDisagree={handleConsentDisagree}
                   isUpdating={consentIsUpdating}

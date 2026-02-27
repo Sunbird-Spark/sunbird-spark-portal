@@ -7,8 +7,6 @@ export interface ProfileDataSharingCardProps {
   /** ACTIVE = On, REVOKED or null = Off. */
   status: ConsentStatus | null;
   lastUpdatedOn: string | undefined;
-  /** When true, user has not set consent yet (card shows Off); modal opens only on Update click. */
-  noConsentYet?: boolean;
   onAgree: () => Promise<void>;
   onDisagree: () => Promise<void>;
   isUpdating: boolean;
@@ -33,7 +31,6 @@ function formatLastUpdated(isoDate: string | undefined): string {
 export default function ProfileDataSharingCard({
   status,
   lastUpdatedOn,
-  noConsentYet: _noConsentYet = false,
   onAgree,
   onDisagree,
   isUpdating,

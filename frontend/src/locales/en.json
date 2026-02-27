@@ -264,7 +264,9 @@
     "tncText": "I agree to share the above profile details with the course administrator.",
     "tncCheckboxLabel": "I agree to share profile details",
     "dontShare": "Do not share",
-    "share": "Share"
+    "share": "Share",
+    "consentUpdateSuccess": "Profile data sharing preference updated.",
+    "consentUpdateError": "Profile data sharing preference could not be updated. Please try again."
   },
   "resource": {
     "title": "Stay ahead. What's next starts here.",

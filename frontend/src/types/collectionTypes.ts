@@ -49,7 +49,7 @@ export interface HierarchyContentNode {
   /** JSON string containing counts of content types in the hierarchy. */
   contentTypesCount?: string;
   channel?: string;
-  userConsent?: string;
+  userConsent?: TrackableEnabled;
 }
 
 export interface CourseHierarchyResponse {

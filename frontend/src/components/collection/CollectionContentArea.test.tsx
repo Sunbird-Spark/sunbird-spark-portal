@@ -43,7 +43,6 @@ vi.mock('@/hooks/useConsent', () => ({
   useConsent: vi.fn(() => ({
     status: null,
     lastUpdatedOn: undefined,
-    noConsentYet: false,
     updateConsent: vi.fn().mockResolvedValue(undefined),
     isUpdating: false,
   })),
