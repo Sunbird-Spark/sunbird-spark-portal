@@ -227,7 +227,7 @@ describe('Footer', () => {
       expect(btn?.textContent).toBe('Privacy Policy');
     });
 
-    it('does not open dialog when only privacyUrl is available but termsUrl is not', () => {
+    it('opens dialog with privacyUrl when only privacyUrl is available but termsUrl is not', () => {
       // Edge case: privacyPolicyConfig has a URL but tncConfig does not
       mockUseGetTncUrl
         .mockReturnValueOnce({ data: undefined })                    // tncConfig → no termsUrl
