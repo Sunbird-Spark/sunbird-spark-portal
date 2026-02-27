@@ -271,7 +271,7 @@ export default function ResourceFormDialog({
             </div>
             <div className="resource-form-actions">
               <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>{t('cancel')}</Button>
-              <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{isLoading ? t('loading') : t('create')}</Button>
+              <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{isLoading ? t('workspace.creating') : t('create')}</Button>
             </div>
           </form>
         )}

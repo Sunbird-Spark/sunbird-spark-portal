@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans } from 'react-i18next';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 const AdminPage: React.FC = () => {
@@ -11,7 +12,13 @@ const AdminPage: React.FC = () => {
 
       <div>
         <h2>{t('admin.controls')}</h2>
-        <p>{t('admin.accessRestricted')}<strong>{t('admin.roleAdmin')}</strong>{t('admin.roleSuffix')}</p>
+        <p>
+          <Trans
+            i18nKey="admin.accessInfo"
+            values={{ role: t('admin.roleAdmin') }}
+            components={{ 1: <strong /> }}
+          />
+        </p>
         <ul>
           <li>{t('admin.manageUsers')}</li>
           <li>{t('admin.systemConfig')}</li>

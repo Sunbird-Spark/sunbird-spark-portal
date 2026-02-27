@@ -125,7 +125,7 @@ export default function ContentNameDialog({
               />
 
               <label className="block text-sm font-medium font-rubik text-foreground mb-1">
-                {t('collection.label')} Type <span className="text-red-500">*</span>
+                {t('workspace.collectionType')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={collectionType}
@@ -157,7 +157,7 @@ export default function ContentNameDialog({
               disabled={!canSubmit || isLoading}
               className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
             >
-              {isLoading ? t('loading') : t('create')}
+              {isLoading ? t('workspace.creating') : t('create')}
             </Button>
           </div>
         </form>

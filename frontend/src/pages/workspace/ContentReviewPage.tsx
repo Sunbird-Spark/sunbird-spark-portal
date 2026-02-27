@@ -1,12 +1,9 @@
-import React from 'react';
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { FiArrowLeft } from 'react-icons/fi';
 import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
 import PageLoader from '@/components/common/PageLoader';
-import { ContentPlayer as PlayerComponent } from '@/components/players';
 import { useContentPlayer } from '@/hooks/useContentPlayer';
 import { useContentRead } from '@/hooks/useContent';
 import { useQumlContent } from '@/hooks/useQumlContent';
@@ -17,20 +14,15 @@ import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoServ
 import { useToast } from '@/hooks/useToast';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import ChecklistDialog from '@/components/workspace/ChecklistDialog';
+import PublishWarningDialog from '@/components/workspace/PublishWarningDialog';
+import ReviewPageHeader from '@/components/workspace/ReviewPageHeader';
+import ContentPlayerSection from '@/components/workspace/ReviewPlayerSection';
+import reviewCommentService from '@/services/ReviewCommentService';
 import './ContentReviewPage.css';
 
 const contentService = new ContentService();
 const formService = new FormService();
 const WORKSPACE_QUERY_KEYS = ['workspace-counts', 'workspace-content'];
-
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return 'N/A';
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
 
 const ReviewPageLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="content-review-background">
@@ -40,25 +32,36 @@ const ReviewPageLayout = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return null;
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
 const ContentReviewPage = () => {
-  const { t } = useAppI18n();
   const { contentId } = useParams();
   const [searchParams] = useSearchParams();
   const isReviewMode = searchParams.get('mode') === 'review';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useAppI18n();
   const [dialogMode, setDialogMode] = useState<'publish' | 'request-changes' | null>(null);
   const [dialogFormFields, setDialogFormFields] = useState<CheckListFormField[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingPublishForm, setIsLoadingPublishForm] = useState(false);
   const [isLoadingRequestChangesForm, setIsLoadingRequestChangesForm] = useState(false);
+  const [showPublishWarning, setShowPublishWarning] = useState(false);
 
   const { data, isLoading, error } = useContentRead(contentId || '', { mode: 'edit' });
   const contentData = data?.data?.content;
   const isQumlContent =
     contentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     contentData?.mimeType === 'application/vnd.sunbird.question';
+  const isEcmlContent = contentData?.mimeType === 'application/vnd.ekstep.ecml-archive';
 
   const {
     data: qumlData,
@@ -73,37 +76,21 @@ const ContentReviewPage = () => {
   const onPlayerEvent = useCallback((event: any) => {
     console.log('Review player event:', event);
   }, []);
+
   const onTelemetryEvent = useCallback((event: any) => {
     console.log('Review telemetry event:', event);
   }, []);
+
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
     onPlayerEvent,
     onTelemetryEvent,
   });
 
-  const memoizedPlayer = useMemo(() => {
-    if (!playerMetadata) return null;
-    return (
-      <div className="content-review-player-section">
-        <div className="content-review-player-wrapper">
-          <div className="content-review-player-inner">
-            <PlayerComponent
-              mimeType={playerMetadata.mimeType}
-              metadata={playerMetadata}
-              onPlayerEvent={handlePlayerEvent}
-              onTelemetryEvent={handleTelemetryEvent}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }, [playerMetadata, handlePlayerEvent, handleTelemetryEvent]);
-
-  const clearWorkspaceQueries = () => {
+  const clearWorkspaceQueries = useCallback(() => {
     WORKSPACE_QUERY_KEYS.forEach((key) => queryClient.removeQueries({ queryKey: [key] }));
-  };
+  }, [queryClient]);
 
-  const loadFormAndShow = async (
+  const loadFormAndShow = useCallback(async (
     mode: 'publish' | 'request-changes',
     action: string,
     setLoading: (loading: boolean) => void,
@@ -117,90 +104,129 @@ const ContentReviewPage = () => {
         setDialogFormFields(response.data.form.data.fields);
         setDialogMode(mode);
       } else {
-        toast({ title: 'Error', description: `Failed to load ${action} form.`, variant: 'destructive' });
+        toast({ title: t('workspace.review.errorTitle'), description: t('workspace.review.failedToLoadForm', { action }), variant: 'destructive' });
       }
     } catch {
-      toast({ title: 'Error', description: `Failed to load ${action} form. Please try again.`, variant: 'destructive' });
+      toast({ title: t('workspace.review.errorTitle'), description: t('workspace.review.failedToLoadFormRetry', { action }), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, t]);
 
-  const handlePublishClick = () =>
+  const handlePublishClick = useCallback(async () => {
+    if (!contentId || !contentData) return;
+
+    // Only check for comments on ECML content
+    if (isEcmlContent) {
+      try {
+        const hasComments = await reviewCommentService.hasComments({
+          contentId,
+          contentVer: contentData.versionKey || '0',
+          contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
+        });
+
+        if (hasComments) {
+          setShowPublishWarning(true);
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to check for comments:', error);
+        // Proceed with publish if check fails
+      }
+    }
+
+    // Proceed with publish
     loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
+  }, [contentId, contentData, isEcmlContent, loadFormAndShow]);
 
-  const handleRequestChangesClick = () =>
+  const handleRequestChangesClick = useCallback(() => {
     loadFormAndShow('request-changes', 'requestforchanges', setIsLoadingRequestChangesForm);
+  }, [loadFormAndShow]);
 
-  const closeDialog = () => setDialogMode(null);
+  const closeDialog = useCallback(() => setDialogMode(null), []);
 
-  const handlePublishConfirm = async () => {
-    if (!contentId) return;
+  const handlePublishConfirm = useCallback(async () => {
+    if (!contentId || !contentData) return;
     setIsSubmitting(true);
     try {
       await contentService.contentPublish(contentId, userAuthInfoService.getUserId() || '');
+
+      // Only delete comments for ECML content
+      if (isEcmlContent) {
+        try {
+          await reviewCommentService.deleteComments({
+            contentId,
+            contentVer: contentData.versionKey || '0',
+            contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
+          });
+        } catch (error) {
+          console.error('Failed to delete comments after publish:', error);
+        }
+      }
+
       closeDialog();
-      toast({ title: 'Published', description: 'Content has been published successfully.' });
+      toast({ title: t('workspace.review.publishedTitle'), description: t('workspace.review.publishedDescription'), variant: 'success' });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
-      toast({ title: 'Publish Failed', description: 'Unable to publish content. Please try again.', variant: 'destructive' });
+      toast({ title: t('workspace.review.publishFailedTitle'), description: t('workspace.review.publishFailedDescription'), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [contentId, contentData, isEcmlContent, closeDialog, toast, t, clearWorkspaceQueries, navigate]);
 
-  const handleRequestChangesConfirm = async (rejectReasons: string[], rejectComment: string) => {
+  const handleRequestChangesConfirm = useCallback(async (rejectReasons: string[], rejectComment: string) => {
     if (!contentId) return;
     setIsSubmitting(true);
     try {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
       closeDialog();
-      toast({ title: 'Changes Requested', description: 'Request for changes has been submitted successfully.' });
+      toast({ title: t('workspace.review.changesRequestedTitle'), description: t('workspace.review.changesRequestedDescription'), variant: 'success' });
       clearWorkspaceQueries();
       navigate('/workspace');
     } catch {
       closeDialog();
-      toast({ title: 'Request Failed', description: 'Unable to submit request for changes. Please try again.', variant: 'destructive' });
+      toast({ title: t('workspace.review.requestFailedTitle'), description: t('workspace.review.requestFailedDescription'), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [contentId, closeDialog, toast, t, clearWorkspaceQueries, navigate]);
+
+  const handleBack = useCallback(() => navigate('/workspace'), [navigate]);
+
+  const handlePublishWarningConfirm = useCallback(() => {
+    setShowPublishWarning(false);
+    loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
+  }, [loadFormAndShow]);
 
   if (playerIsLoading) return <PageLoader message={t('workspace.loadingContentReview')} />;
-  if (playerError) return <ReviewPageLayout><p>{t('content.errorLoading', { error: playerError.message })}</p></ReviewPageLayout>;
-  if (!playerMetadata) return <ReviewPageLayout><p>{t('content.notFound')}</p></ReviewPageLayout>;
+  if (playerError) return <ReviewPageLayout><p>{t('workspace.review.errorLoading', { error: playerError.message })}</p></ReviewPageLayout>;
+  if (!playerMetadata) return <ReviewPageLayout><p>{t('workspace.review.contentNotFound')}</p></ReviewPageLayout>;
 
   return (
     <ReviewPageLayout>
-      <div className="content-review-button-container">
-        <button onClick={() => navigate('/workspace')} className="content-review-go-back">
-          <FiArrowLeft /> {t('back')}
-        </button>
-        {isReviewMode && (
-          <div className="content-review-actions">
-            <button
-              className="content-review-btn-publish"
-              onClick={handlePublishClick}
-              disabled={isSubmitting || isLoadingPublishForm}
-            >
-              {isLoadingPublishForm ? 'Loading...' : isSubmitting && dialogMode === 'publish' ? 'Publishing...' : 'Publish'}
-            </button>
-            <button
-              className="content-review-btn-reject"
-              onClick={handleRequestChangesClick}
-              disabled={isSubmitting || isLoadingRequestChangesForm}
-            >
-              {isLoadingRequestChangesForm ? 'Loading...' : 'Request for Changes'}
-            </button>
-          </div>
-        )}
-      </div>
-      <div className="content-player-title-row">
-        <h1 className="content-player-title">{contentData?.name}</h1>
-      </div>
-      {memoizedPlayer}
+      <ReviewPageHeader
+        onBack={handleBack}
+        isReviewMode={isReviewMode}
+        onPublish={handlePublishClick}
+        onRequestChanges={handleRequestChangesClick}
+        isSubmitting={isSubmitting}
+        isLoadingPublishForm={isLoadingPublishForm}
+        isLoadingRequestChangesForm={isLoadingRequestChangesForm}
+        dialogMode={dialogMode}
+      />
+      <ContentPlayerSection
+        playerMetadata={playerMetadata}
+        handlePlayerEvent={handlePlayerEvent}
+        handleTelemetryEvent={handleTelemetryEvent}
+        isEcmlContent={isEcmlContent}
+        contentId={contentId}
+        contentVer={contentData?.versionKey}
+        contentType={contentData?.mimeType}
+        isReviewMode={isReviewMode}
+        contentName={contentData?.name}
+      />
       <div className="content-review-details-section">
         {contentData?.description && (
           <p className="content-review-description">{contentData.description}</p>
@@ -208,19 +234,19 @@ const ContentReviewPage = () => {
         <div className="content-review-metadata-grid">
           <div>
             <span className="label">{t('workspace.createdBy')}</span>
-            <span className="value">{contentData?.creator || 'Unknown'}</span>
+            <span className="value">{contentData?.creator || t('workspace.review.notAvailable')}</span>
           </div>
           <div>
-            <span className="label">{t('lastUpdated')}</span>
-            <span className="value">{formatDate(contentData?.lastUpdatedOn)}</span>
+            <span className="label">{t('workspace.review.lastUpdated')}</span>
+            <span className="value">{formatDate(contentData?.lastUpdatedOn) ?? t('workspace.review.notAvailable')}</span>
           </div>
           <div>
-            <span className="label">{t('contentType')}</span>
-            <span className="value">{contentData?.primaryCategory || contentData?.contentType || 'N/A'}</span>
+            <span className="label">{t('workspace.review.contentType')}</span>
+            <span className="value">{contentData?.primaryCategory || contentData?.contentType || t('workspace.review.notAvailable')}</span>
           </div>
           <div>
             <span className="label">{t('workspace.createdOn')}</span>
-            <span className="value">{formatDate(contentData?.createdOn)}</span>
+            <span className="value">{formatDate(contentData?.createdOn) ?? t('workspace.review.notAvailable')}</span>
           </div>
         </div>
       </div>
@@ -235,6 +261,12 @@ const ContentReviewPage = () => {
           mode={dialogMode}
         />
       )}
+      <PublishWarningDialog
+        isOpen={showPublishWarning}
+        onClose={() => setShowPublishWarning(false)}
+        onConfirm={handlePublishWarningConfirm}
+        isLoading={isLoadingPublishForm}
+      />
     </ReviewPageLayout>
   );
 };

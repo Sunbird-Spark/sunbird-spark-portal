@@ -8,6 +8,17 @@ import WorkspacePage from './workspace/WorkspacePage';
 import ReportsPage from './reports/ReportsPage';
 import CreateContentPage from './content/CreateContentPage';
 
+// Mock react-i18next to handle Trans component
+vi.mock('react-i18next', () => ({
+  Trans: ({ i18nKey }: { i18nKey: string }) => <span>{i18nKey}</span>,
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: {
+      changeLanguage: () => new Promise(() => {}),
+    },
+  }),
+}));
+
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: vi.fn(() => ({
     data: { data: { content: [], QuestionSet: [] } },
@@ -132,7 +143,7 @@ describe('Protected Pages', () => {
     it('should render admin dashboard', () => {
       render(<AdminPage />);
       expect(screen.getByRole('heading', { name: 'admin.dashboard' })).toBeInTheDocument();
-      expect(screen.getByText(/admin.accessRestricted/i)).toBeInTheDocument();
+      expect(screen.getByText(/admin.accessInfo/i)).toBeInTheDocument();
     });
   });
 
@@ -147,7 +158,7 @@ describe('Protected Pages', () => {
     it('should render reports', () => {
       render(<ReportsPage />);
       expect(screen.getByRole('heading', { name: 'reports.title' })).toBeInTheDocument();
-      expect(screen.getByText(/content.accessRestricted/i)).toBeInTheDocument();
+      expect(screen.getByText(/reports.accessInfo/i)).toBeInTheDocument();
     });
   });
 
@@ -155,6 +166,7 @@ describe('Protected Pages', () => {
     it('should render create content page', () => {
       render(<CreateContentPage />);
       expect(screen.getByRole('heading', { name: 'createContent' })).toBeInTheDocument();
+      // This page still uses the old key pattern presumably, or checks generic access
       expect(screen.getByText(/content.accessRestricted/i)).toBeInTheDocument();
     });
   });

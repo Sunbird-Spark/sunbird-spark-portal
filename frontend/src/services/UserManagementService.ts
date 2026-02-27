@@ -31,6 +31,11 @@ export interface RoleItem {
   actionGroups: Array<{ name: string; id: string; actions: any[] }>;
 }
 
+export interface OrganisationOption {
+  organisationId: string;
+  orgName: string;
+}
+
 export type RoleOperation = 'add' | 'update' | 'remove';
 
 export class UserManagementService {

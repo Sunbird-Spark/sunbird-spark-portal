@@ -9,6 +9,9 @@ import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import CourseProgressCard from "@/components/collection/CourseProgressCard";
 import AvailableBatchesCard from "@/components/collection/AvailableBatchesCard";
 import CertificateCard from "@/components/collection/CertificateCard";
+import ProfileDataSharingCard from "@/components/collection/ProfileDataSharingCard";
+import { useConsent } from "@/hooks/useConsent";
+import { useToast } from "@/hooks/useToast";
 
 interface CollectionContentAreaProps {
   collectionData: any;
@@ -46,6 +49,8 @@ interface CollectionContentAreaProps {
   isCreatorViewingOwnCollection?: boolean;
   /** When true (content creator viewing any collection), access without batch, no progress, learner cards hidden. */
   contentCreatorPrivilege?: boolean;
+  /** User profile for Profile Data Sharing consent modal (from useUserRead). */
+  userProfile?: Record<string, unknown> | null;
 }
 
 export default function CollectionContentArea({
@@ -82,9 +87,56 @@ export default function CollectionContentArea({
   setCertificatePreviewOpen,
   isCreatorViewingOwnCollection = false,
   contentCreatorPrivilege = false,
+  userProfile = null,
 }: CollectionContentAreaProps) {
   const { t } = useAppI18n();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const showProfileDataSharingCard =
+    isTrackable &&
+    isAuthenticated &&
+    !contentCreatorPrivilege &&
+    hasBatchInRoute &&
+    isEnrolledInCurrentBatch &&
+    (collectionData?.userConsent?.toLowerCase() ?? "") === "yes";
+
+  const {
+    status: consentStatus,
+    lastUpdatedOn: consentLastUpdatedOn,
+    updateConsent,
+    isUpdating: consentIsUpdating,
+  } = useConsent({
+    collectionId: collectionId ?? undefined,
+    channel: collectionData?.channel,
+    enabled: showProfileDataSharingCard,
+  });
+
+  const handleConsentAgree = async () => {
+    try {
+      await updateConsent("ACTIVE");
+      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
+    } catch (err) {
+      toast({
+        title: t("error"),
+        description: (err as Error).message || t("profileDataSharing.consentUpdateError"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleConsentDisagree = async () => {
+    try {
+      await updateConsent("REVOKED");
+      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
+    } catch (err) {
+      toast({
+        title: t("error"),
+        description: (err as Error).message || t("profileDataSharing.consentUpdateError"),
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <>
@@ -98,7 +150,7 @@ export default function CollectionContentArea({
         <span>{collectionData.lessons} {t("contentStats.lessons")}</span>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_23.75rem] gap-8 lg:items-start">
+      <div className="grid lg:grid-cols-[1fr_380px] gap-8 lg:items-stretch">
         {/* Left Column */}
         <CollectionOverview
           collectionData={collectionData}
@@ -112,7 +164,7 @@ export default function CollectionContentArea({
         />
 
         {/* Right Sidebar */}
-        <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 custom-scrollbar">
+        <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:min-h-[calc(100vh-5rem)] lg:max-h-[calc(100vh-5rem)] pr-1">
           {/* Creator: Dashboard link & Batch management card */}
           {isAuthenticated && isContentCreator && collectionId && (
             <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
@@ -145,7 +197,7 @@ export default function CollectionContentArea({
             </div>
           )}
 
-          {/* Scrollable lesson list */}
+          {/* Scrollable lesson list — scrollbar only here; progress and cards stay fixed */}
           <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
             <CollectionSidebar
               collectionId={collectionId ?? ''}
@@ -184,6 +236,16 @@ export default function CollectionContentArea({
                   }
                 }}
               />
+              {showProfileDataSharingCard && (
+                <ProfileDataSharingCard
+                  status={consentStatus}
+                  lastUpdatedOn={consentLastUpdatedOn}
+                  onAgree={handleConsentAgree}
+                  onDisagree={handleConsentDisagree}
+                  isUpdating={consentIsUpdating}
+                  userProfile={userProfile ?? undefined}
+                />
+              )}
             </div>
           )}
         </div>
