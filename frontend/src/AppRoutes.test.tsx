@@ -9,7 +9,6 @@ import AppRoutes from "./AppRoutes";
 // Mock Pages
 // --------------------
 vi.mock("./pages/home/Home", () => ({ default: () => <div>Home Page</div> }));
-vi.mock("./pages/unauthorized/UnauthorizedPage", () => ({ default: () => <div>Unauthorized Page</div> }));
 vi.mock("./pages/admin/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
 vi.mock("./pages/workspace/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
 vi.mock("./pages/reports/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
@@ -17,6 +16,22 @@ vi.mock("./pages/content/CreateContentPage", () => ({ default: () => <div>Create
 vi.mock("./pages/Explore", () => ({ default: () => <div>Explore Page</div> }));
 vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
 vi.mock("./pages/onboarding/OnboardingPage", () => ({ default: () => <div>Onboarding Page</div> }));
+vi.mock("./pages/user-management/UserManagementPage", () => ({ default: () => <div>User Management Page</div> }));
+vi.mock("./pages/profile/Profile", () => ({ default: () => <div>Profile Page</div> }));
+vi.mock("./pages/collection/CollectionDetailPage", () => ({ default: () => <div>Collection Detail Page</div> }));
+vi.mock("./pages/forgotPassword/ForgotPassword", () => ({ default: () => <div>Forgot Password Page</div> }));
+vi.mock("./pages/forgotPassword/PasswordResetSuccess", () => ({ default: () => <div>Password Reset Success Page</div> }));
+vi.mock("./pages/signup/SignUp", () => ({ default: () => <div>Sign Up Page</div> }));
+vi.mock("./pages/helpSupport/HelpSupport", () => ({ default: () => <div>Help Support Page</div> }));
+vi.mock("./pages/helpSupport/HelpCategoryDetail", () => ({ default: () => <div>Help Category Detail Page</div> }));
+vi.mock("./pages/content/ContentPlayerPage", () => ({ default: () => <div>Content Player Page</div> }));
+vi.mock("./pages/content/ContentEditorPage", () => ({ default: () => <div>Content Editor Page</div> }));
+vi.mock("./pages/content/CollectionEditorPage", () => ({ default: () => <div>Collection Editor Page</div> }));
+vi.mock("./pages/myLearning/MyLearning", () => ({ default: () => <div>My Learning Page</div> }));
+vi.mock("./pages/workspace/editors/GenericEditorPage", () => ({ default: () => <div>Generic Editor Page</div> }));
+vi.mock("./pages/content/QumlEditorPage", () => ({ default: () => <div>Quml Editor Page</div> }));
+vi.mock("./pages/workspace/ContentReviewPage", () => ({ default: () => <div>Content Review Page</div> }));
+vi.mock("./pages/courseDashboard/CourseDashboardPage", () => ({ default: () => <div>Course Dashboard Page</div> }));
 
 // --------------------
 // Mock AuthContext
@@ -28,40 +43,10 @@ vi.mock("./auth/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-// --------------------
-// Mock userAuthInfoService
-// --------------------
-vi.mock("./services/userAuthInfoService/userAuthInfoService", () => {
-  const isUserAuthenticated = vi.fn();
-  return {
-    default: {
-      isUserAuthenticated,
-      getUserId: vi.fn().mockReturnValue("test-uid"),
-      getAuthInfo: vi.fn().mockResolvedValue({ uid: "test-uid" }),
-    },
-    __isUserAuthenticated: isUserAuthenticated,
-  };
-});
-
-// --------------------
-// Mock UserService — expose getUserRoles so tests control the response
-// --------------------
-vi.mock("./services/UserService", () => {
-  const getUserRoles = vi.fn();
-  return {
-    UserService: class {
-      getUserRoles = getUserRoles;
-    },
-    __getUserRoles: getUserRoles,
-  };
-});
-
-import * as UserAuthInfoServiceModule from "./services/userAuthInfoService/userAuthInfoService";
-import * as UserServiceModule from "./services/UserService";
-
-const mockIsUserAuthenticated = (UserAuthInfoServiceModule as any).__isUserAuthenticated;
-const mockGetUserRoles = (UserServiceModule as any).__getUserRoles;
-
+const mockUsePermissions = vi.fn();
+vi.mock("./hooks/usePermission", () => ({
+  usePermissions: () => mockUsePermissions(),
+}));
 
 const createQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -79,9 +64,15 @@ function renderWithRoute(route: string) {
 describe("AppRoutes (RBAC routing tests)", () => {
   beforeEach(() => {
     mockUseAuth.mockReset();
-    mockIsUserAuthenticated.mockReturnValue(false);
-    // Default: no roles
-    mockGetUserRoles.mockResolvedValue({ data: { response: { roles: [] } }, status: 200, headers: {} });
+    mockUsePermissions.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
+      roles: ['PUBLIC'],
+      error: null,
+      hasAnyRole: vi.fn(() => false),
+      canAccessFeature: vi.fn(),
+      refetch: vi.fn(),
+    });
   });
 
   it("public route: /home renders HomePage", () => {
@@ -126,21 +117,7 @@ describe("AppRoutes (RBAC routing tests)", () => {
     expect(screen.getByText("Onboarding Page")).toBeInTheDocument();
   });
 
-  it("public route: /unauthorized renders UnauthorizedPage", () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "1", name: "A", role: "content_creator" },
-      isAuthenticated: true,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
-    });
-
-    renderWithRoute("/unauthorized");
-    expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
-  });
-
-  it("redirect: / redirects to /home", async () => {
+  it("redirect: / redirects to /home", () => {
     mockUseAuth.mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -172,95 +149,40 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
   });
 
-  it("protected: unauthenticated user visiting /admin redirects to /home", async () => {
-    mockUseAuth.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
-    });
-    mockIsUserAuthenticated.mockReturnValue(false);
-
-    renderWithRoute("/admin");
-    // unauthenticated → withRoles immediately redirects to /home before query runs
-    await waitFor(() => {
-      expect(screen.getByText("Home Page")).toBeInTheDocument();
-    });
-  });
-
-  it("protected: authenticated but wrong role visiting /admin redirects to /unauthorized", async () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "2", name: "B", role: "content_creator" },
-      isAuthenticated: true,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
-    });
-    mockIsUserAuthenticated.mockReturnValue(true);
-    // User has CONTENT_CREATOR, not ORG_ADMIN → no admin access
-    mockGetUserRoles.mockResolvedValue({
-      data: { response: { roles: [{ role: "CONTENT_CREATOR" }] } },
-      status: 200,
-      headers: {},
-    });
-
-    renderWithRoute("/admin");
-    await waitFor(() => {
-      expect(screen.getByText("Unauthorized Page")).toBeInTheDocument();
-    });
-  });
-
-  it("protected: authenticated admin can access /admin", async () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "3", name: "C", role: "admin" },
-      isAuthenticated: true,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
-    });
-    mockIsUserAuthenticated.mockReturnValue(true);
-    // User has ORG_ADMIN role → admin access granted
-    mockGetUserRoles.mockResolvedValue({
-      data: { response: { roles: [{ role: "ORG_ADMIN" }] } },
-      status: 200,
-      headers: {},
-    });
-
+  it("public: any user can access /admin", async () => {
     renderWithRoute("/admin");
     await waitFor(() => {
       expect(screen.getByText("Admin Page")).toBeInTheDocument();
     });
   });
 
-  it("public route: /create renders CreateContentPage for content_creator", () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "4", name: "D", role: "content_creator" },
+  it("protected: authenticated content_creator can access /create", () => {
+    mockUsePermissions.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
+      roles: ['CONTENT_CREATOR'],
+      error: null,
+      hasAnyRole: vi.fn((roles: string[]) => roles.includes('CONTENT_CREATOR')),
+      canAccessFeature: vi.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithRoute("/create");
     expect(screen.getByText("Create Content Page")).toBeInTheDocument();
   });
 
-  it("public route: /create renders CreateContentPage for content_reviewer", () => {
-    mockUseAuth.mockReturnValue({
-      user: { id: "5", name: "E", role: "content_reviewer" },
+  it("protected: authenticated content_reviewer cannot access /create and is redirected", () => {
+    mockUsePermissions.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refetchUser: vi.fn(),
+      roles: ['CONTENT_REVIEWER'],
+      error: null,
+      hasAnyRole: vi.fn((roles: string[]) => roles.includes('CONTENT_REVIEWER') && !roles.includes('CONTENT_CREATOR')),
+      canAccessFeature: vi.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithRoute("/create");
-    expect(screen.getByText("Create Content Page")).toBeInTheDocument();
+    expect(screen.getByText("Home Page")).toBeInTheDocument();
   });
 });

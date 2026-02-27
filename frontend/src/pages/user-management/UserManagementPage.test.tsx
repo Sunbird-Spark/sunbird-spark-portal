@@ -40,6 +40,22 @@ vi.mock('@/components/home/Footer', () => ({
   default: () => <footer data-testid="footer" />,
 }));
 
+vi.mock('@/hooks/useUserRead', () => ({
+  useUserRead: () => ({
+    data: { data: { response: MOCK_USER } },
+    refetch: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: {}, isSuccess: false }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+  useGetTncUrl: () => ({ data: '' }),
+  useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
+}));
+
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, onConfirm, onClose }: any) =>
     open ? (
@@ -48,6 +64,27 @@ vi.mock('@/components/common/ConfirmDialog', () => ({
         <button onClick={onClose}>Cancel</button>
       </div>
     ) : null,
+}));
+
+vi.mock("@/components/common/Select", () => ({
+  Select: ({ children, onValueChange, value }: any) => {
+    const trigger = React.Children.toArray(children).find((c: any) => c.props?.id) as any;
+    return (
+      <select 
+        id={trigger?.props?.id}
+        value={value} 
+        onChange={(e) => onValueChange?.(e.target.value)}
+      >
+        {children}
+      </select>
+    );
+  },
+  SelectTrigger: () => null,
+  SelectValue: () => null,
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ value, children }: any) => (
+    <option value={value}>{children}</option>
+  ),
 }));
 
 const mockSearchUser = vi.fn();
@@ -83,7 +120,15 @@ const MOCK_USER = {
   roles: [{ role: 'CONTENT_CREATOR', scope: [{ organisationId: 'org1' }], createdDate: '', updatedDate: null, userId: 'user1' }],
   rootOrgName: 'Test Org',
   rootOrgId: 'org1',
+  rootOrg: {
+    id: 'org1',
+    orgName: 'Root Org Name',
+  },
   channel: 'test',
+  organisations: [
+    { organisationId: 'org1', orgName: 'Test Org' },
+    { organisationId: 'org2', orgName: 'Other Org' },
+  ],
 };
 
 const createQueryClient = () =>
@@ -104,7 +149,7 @@ function renderPage() {
 describe('UserManagementPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRoles.mockResolvedValue({ data: { result: { roles: MOCK_ROLES } }, status: 200, headers: {} });
+    mockGetRoles.mockResolvedValue({ data: { result: { response: { roleList: MOCK_ROLES } } }, status: 200, headers: {} });
     mockSearchUser.mockResolvedValue({ data: { response: { content: [] } }, status: 200, headers: {} });
     mockAssignRole.mockResolvedValue({ data: {}, status: 200, headers: {} });
   });
@@ -276,6 +321,28 @@ describe('UserManagementPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
       await waitFor(() => {
         expect(screen.queryByText('Add New Role')).toBeNull();
+      });
+    });
+
+    it('successfully adds a role using the organization dropdown', async () => {
+      await openAddRoleDialog();
+
+      const roleSelect = screen.getByLabelText(/role/i, { selector: 'select' });
+      const orgSelect = screen.getByLabelText(/organisation name/i, { selector: 'select' });
+
+      fireEvent.change(roleSelect, { target: { value: 'ORG_ADMIN' } });
+      fireEvent.change(orgSelect, { target: { value: 'org1' } });
+
+      // Click Add (exact match to avoid "Add Role" button)
+      fireEvent.click(screen.getByRole('button', { name: /^Add$/ }));
+
+      await waitFor(() => {
+        expect(mockAssignRole).toHaveBeenCalledWith(
+          'user1',
+          'ORG_ADMIN',
+          'org1',
+          'add'
+        );
       });
     });
   });

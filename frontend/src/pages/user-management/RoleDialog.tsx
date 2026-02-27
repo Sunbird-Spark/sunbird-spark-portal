@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/common/Select";
-import { RoleItem, UserRoleInfo } from "@/services/UserManagementService";
+import { RoleItem, UserRoleInfo, OrganisationOption } from "@/services/UserManagementService";
 import "./user-management.css";
 
 export interface RoleDialogState {
@@ -29,6 +29,7 @@ interface RoleDialogProps {
   onSave: () => void;
   onSelectedRoleChange: (val: string) => void;
   onOrganisationIdChange: (val: string) => void;
+  userOrganisations: OrganisationOption[];
 }
 
 export const RoleDialog = ({
@@ -41,6 +42,7 @@ export const RoleDialog = ({
   onSave,
   onSelectedRoleChange,
   onOrganisationIdChange,
+  userOrganisations,
 }: RoleDialogProps) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -87,8 +89,8 @@ export const RoleDialog = ({
             <label className="um-form-label" htmlFor="um-role-select">
               Role <span className="um-required">*</span>
             </label>
-            <Select value={selectedRole} onValueChange={onSelectedRoleChange}>
-              <SelectTrigger id="um-role-select" className="um-select-trigger">
+            <Select value={selectedRole} onValueChange={onSelectedRoleChange} disabled={isSavingRole}>
+              <SelectTrigger id="um-role-select" data-testid="um-role-select" className="um-select-trigger">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
@@ -101,24 +103,39 @@ export const RoleDialog = ({
             </Select>
           </div>
           <div className="um-form-field">
-            <label className="um-form-label" htmlFor="um-org-input">
-              Organisation ID <span className="um-required">*</span>
+            <label className="um-form-label" htmlFor="um-org-select">
+              Organisation Name <span className="um-required">*</span>
             </label>
-            <Input
-              id="um-org-input"
-              type="text"
-              placeholder="Enter Organisation ID"
-              value={organisationId}
-              onChange={(e) => onOrganisationIdChange(e.target.value)}
-              disabled={isSavingRole}
-            />
+            <Select value={organisationId} onValueChange={onOrganisationIdChange} disabled={isSavingRole}>
+              <SelectTrigger id="um-org-select" data-testid="um-org-select" className="um-select-trigger">
+                <SelectValue placeholder={userOrganisations.length > 0 ? "Select an organisation" : "No organisations available"} />
+              </SelectTrigger>
+              <SelectContent>
+                {userOrganisations.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    No organisations available
+                  </SelectItem>
+                ) : (
+                  userOrganisations.map((org) => (
+                    <SelectItem key={org.organisationId} value={org.organisationId}>
+                      {org.orgName}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {userOrganisations.length === 0 && (
+              <p className="text-[0.8125rem] text-sunbird-brick mt-1.5 font-medium">
+                Please ensure the user has at least one organisation.
+              </p>
+            )}
           </div>
         </div>
         <div className="um-dialog-footer">
           <Button variant="ghost" size="sm" onClick={onClose} disabled={isSavingRole}>
             Cancel
           </Button>
-          <Button size="sm" onClick={onSave} disabled={isSavingRole} className="um-save-btn">
+          <Button size="sm" onClick={onSave} disabled={isSavingRole || userOrganisations.length === 0} className="um-save-btn">
             {isSavingRole ? "Saving..." : dialogState.operation === "add" ? "Add" : "Save"}
           </Button>
         </div>

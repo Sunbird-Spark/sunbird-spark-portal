@@ -1,10 +1,12 @@
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers, FiBarChart2, FiPieChart } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/auth/AuthContext";
-import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { PermissionGate } from "@/rbac/PermissionGate";
+import { Feature } from "@/services/PermissionService";
+import { usePermissions } from "@/hooks/usePermission";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useIsAdmin } from "@/hooks/useUser";
 
@@ -40,11 +42,11 @@ const MyLearningIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const NAV_ITEM_DEFS = [
+const NAV_ITEM_DEFS: { id: string; labelKey: string; icon: React.ElementType; path: string; feature?: Feature }[] = [
     { id: "home", labelKey: "sidebar.home", icon: FiHome, path: "/home" },
     { id: "learning", labelKey: "sidebar.myLearning", icon: MyLearningIcon, path: "/my-learning" },
     { id: "explore", labelKey: "sidebar.explore", icon: ExploreIcon, path: "/explore" },
-    { id: "workspace", labelKey: "sidebar.workspace", icon: FiEdit, path: "/workspace" },
+    { id: "workspace", labelKey: "sidebar.workspace", icon: FiEdit, path: "/workspace", feature: "view_workspace" },
     { id: "profile", labelKey: "sidebar.profile", icon: FiUser, path: "/profile" },
     { id: "user-report", labelKey: "sidebar.userReport", icon: FiPieChart, path: "/reports/user/me" },
 ];
@@ -58,15 +60,14 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
-    const { isAuthenticated: contextAuth } = useAuth();
-    const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+    const { isAuthenticated, isLoading } = usePermissions();
     const { t } = useAppI18n();
 
     const mainNavItems = NAV_ITEM_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
     const bottomNavItems = BOTTOM_NAV_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
     const isAdmin = useIsAdmin();
 
-    if (!isAuthenticated || location.pathname === "/") {
+    if (isLoading || !isAuthenticated || location.pathname === "/") {
         return null;
     }
 
@@ -102,8 +103,8 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                     Icon = GoHomeFill;
                 }
 
-                return (
-                    <li key={item.id}>
+                const listItem = (
+                    <li>
                         <button
                             onClick={() => handleNavClick(item)}
                             className={`
@@ -120,6 +121,16 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                             {!collapsed && <span className="text-[1.125rem]">{item.label}</span>}
                         </button>
                     </li>
+                );
+
+                return (
+                    <React.Fragment key={item.id}>
+                        {item.feature ? (
+                            <PermissionGate feature={item.feature} hide>
+                                {listItem}
+                            </PermissionGate>
+                        ) : listItem}
+                    </React.Fragment>
                 );
             })}
         </ul>

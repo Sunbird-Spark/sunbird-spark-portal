@@ -19,15 +19,14 @@ import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import RelatedContentSection from "@/components/collection/RelatedContentSection";
 import CollectionContentArea from "@/components/collection/CollectionContentArea";
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
-import { useAuth } from "@/auth/AuthContext";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { usePermissions } from "@/hooks/usePermission";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated: contextAuth } = useAuth();
-  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+  const { isAuthenticated } = usePermissions();
   const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
   const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
