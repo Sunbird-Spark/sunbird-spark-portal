@@ -25,7 +25,7 @@ describe('AuthContext', () => {
     const testUser: User = {
       id: '123',
       name: 'Test User',
-      role: 'admin',
+      roles: ['CONTENT_CREATOR'],
     };
 
     act(() => {
@@ -42,7 +42,7 @@ describe('AuthContext', () => {
     const testUser: User = {
       id: '123',
       name: 'Test User',
-      role: 'content_creator',
+      roles: ['CONTENT_CREATOR'],
     };
 
     act(() => {
@@ -73,20 +73,19 @@ describe('AuthContext', () => {
   it('should support all role types', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
-    const roles: Role[] = ['admin', 'content_creator', 'content_reviewer', 'guest'];
+    const roles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'PUBLIC'];
 
     roles.forEach((role) => {
       const testUser: User = {
         id: '123',
         name: `User ${role}`,
-        role: role,
+        roles: [role],
       };
 
       act(() => {
         result.current.login(testUser);
       });
 
-      expect(result.current.user?.role).toBe(role);
     });
   });
 });

@@ -14,6 +14,7 @@ import { useSidebarState } from "@/hooks/useSidebarState";
 import {
   userManagementService,
   type RoleItem,
+  type OrganisationOption,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
 import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
@@ -67,14 +68,56 @@ const UserManagementPage = () => {
     if (!termsUrl || !activeTncConfig || !userRes) return false;
     const tncService = new TncService();
     const latestVersion = tncService.getLatestVersion(activeTncConfig);
-    const acceptedVersion = _.get(userRes, ['data', 'result', 'response', 'allTncAccepted', activeTncType, 'version']);
+    const acceptedVersion = _.get(userRes?.data, ['response', 'allTncAccepted', activeTncType, 'version']);
     return latestVersion !== acceptedVersion;
   })();
+
+  const userOrganisations = React.useMemo((): OrganisationOption[] => {
+    const orgs: OrganisationOption[] = [];
+    const responseData: any = _.get(userRes, 'data.response', {});
+    
+    // 1. Check rootOrg object
+    if (responseData.rootOrg) {
+      orgs.push({
+        organisationId: responseData.rootOrg.id || responseData.rootOrg.rootOrgId || responseData.rootOrgId,
+        orgName: responseData.rootOrg.orgName || responseData.rootOrgName
+      });
+    } 
+    // 2. Fallback to top-level rootOrgId/rootOrgName if rootOrg object is missing/incomplete
+    else if (responseData.rootOrgId) {
+      orgs.push({
+        organisationId: responseData.rootOrgId,
+        orgName: responseData.rootOrgName || 'Root Organisation'
+      });
+    }
+
+    // 3. Add other organisations if any
+    if (Array.isArray(responseData.organisations)) {
+      responseData.organisations.forEach((org: any) => {
+        const orgId = org.organisationId || org.id;
+        const orgName = org.orgName || org.orgName;
+        if (orgId && !orgs.find(o => o.organisationId === orgId)) {
+          orgs.push({
+            organisationId: orgId,
+            orgName: orgName || 'Unknown Organisation'
+          });
+        }
+      });
+    }
+    
+    return orgs;
+  }, [userRes]);
 
   const loadRoles = useCallback(async () => {
     try {
       const response = await userManagementService.getRoles();
-      const roles: RoleItem[] = response.data?.roles ?? [];
+      // Service might return { data: { result: { response: { roleList } } } } 
+      // or { data: { result: { roles } } } or { data: { roles } }
+      const roles: RoleItem[] = 
+        response.data?.result?.response?.roleList ?? 
+        response.data?.result?.roles ?? 
+        response.data?.roles ?? 
+        [];
       setAvailableRoles(roles.filter((r) => r.id !== 'PUBLIC'));
     } catch (err) {
       toast({ title: "Failed to load roles", description: "Roles could not be loaded.", variant: "destructive" });
@@ -176,7 +219,11 @@ const UserManagementPage = () => {
                 {/* Content area */}
                 <div className="p-6">
                   {activeTab === "role-management" && (
-                    <RoleManagementTab availableRoles={availableRoles} onRefreshSearch={loadRoles} />
+                    <RoleManagementTab
+                      availableRoles={availableRoles}
+                      onRefreshSearch={loadRoles}
+                      userOrganisations={userOrganisations}
+                    />
                   )}
                 </div>
 

@@ -13,6 +13,7 @@ import {
   type UserSearchResult,
   type RoleItem,
   type UserRoleInfo,
+  type OrganisationOption,
 } from "@/services/UserManagementService";
 import "./user-management.css";
 
@@ -22,9 +23,10 @@ import "./user-management.css";
 interface RoleManagementTabProps {
   availableRoles: RoleItem[];
   onRefreshSearch: () => void;
+  userOrganisations: OrganisationOption[];
 }
 
-const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTabProps) => {
+const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations }: RoleManagementTabProps) => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -227,6 +229,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch }: RoleManagementTa
         onSave={handleSaveRole}
         onSelectedRoleChange={setSelectedRole}
         onOrganisationIdChange={setOrganisationId}
+        userOrganisations={userOrganisations}
       />
 
       {/* ── Delete Confirmation ── */}

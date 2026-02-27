@@ -5,12 +5,12 @@ import AddCertificateModal from "./AddCertificateModal";
 import { useBatchListForCreator } from "@/hooks/useBatch";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/auth/AuthContext";
 import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAcceptTnc } from "@/hooks/useTnc";
 import { useToast } from "@/hooks/useToast";
 import { useIsContentCreator } from "@/hooks/useUser";
+import { usePermissions } from "@/hooks/usePermission";
 
 interface BatchCardProps {
   collectionId: string;
@@ -23,7 +23,6 @@ import { TabBar, ActiveTab } from "./BatchTabBar";
 /* ── BatchCard ── */
 
 const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
-  const { user } = useAuth();
   const { toast } = useToast();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -33,7 +32,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
   /* ── Reviewer TnC state ── */
   const isContentCreator = useIsContentCreator();
-  const isReviewer = user?.role === "content_reviewer" && !isContentCreator;
+  const { hasAnyRole } = usePermissions();
+  const isReviewer = hasAnyRole(['CONTENT_REVIEWER']) && !isContentCreator;
   const [reviewerTncChecked, setReviewerTncChecked] = useState(false);
   const [reviewerTncAccepted, setReviewerTncAccepted] = useState(false);
 

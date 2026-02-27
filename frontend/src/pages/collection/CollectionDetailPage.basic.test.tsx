@@ -3,10 +3,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import { useAuth } from '@/auth/AuthContext';
+import { usePermissions } from '@/hooks/usePermission';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import CollectionDetailPage from './CollectionDetailPage';
-
 const mockCollectionData = {
   id: 'col-1',
   title: 'Test Collection',
@@ -44,16 +43,13 @@ const mockCollectionData = {
     ],
   },
 };
-
 const mockUseCollection = vi.fn();
 const mockUseContentSearch = vi.fn();
 const mockUseContentRead = vi.fn();
 const mockUseQumlContent = vi.fn();
-
 vi.mock('@/hooks/useCollection', () => ({
   useCollection: (id: string | undefined) => mockUseCollection(id),
 }));
-
 const mockEnrollment = {
   enrollmentForCollection: undefined as { batchId: string } | undefined,
   isEnrolledInCurrentBatch: false,
@@ -86,7 +82,6 @@ vi.mock('@/hooks/useContentPlayer', () => ({
     handleTelemetryEvent: vi.fn(),
   }),
 }));
-
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => key,
@@ -95,7 +90,6 @@ vi.mock('@/hooks/useAppI18n', () => ({
     changeLanguage: vi.fn(),
   }),
 }));
-
 vi.mock('@/hooks/useUserRead', () => ({
   useUserRead: () => ({
     data: { data: { response: { firstName: 'Test', lastName: 'User' } } },
@@ -103,7 +97,6 @@ vi.mock('@/hooks/useUserRead', () => ({
     error: null,
   }),
 }));
-
 const mockNavigate = vi.fn();
 const mockUseParams = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -114,7 +107,6 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => mockNavigate,
   };
 });
-
 vi.mock('@/components/home/Header', () => ({ default: () => <header data-testid="header">Header</header> }));
 vi.mock('@/components/home/Footer', () => ({ default: () => <footer data-testid="footer">Footer</footer> }));
 vi.mock('@/components/common/PageLoader', () => ({
@@ -129,13 +121,8 @@ vi.mock('@/components/collection/CollectionOverview', () => ({
     <div data-testid="collection-overview" data-content-id={contentId ?? ''} data-content-access-blocked={String(!!contentAccessBlocked)} data-player-loading={String(!!playerIsLoading)} data-player-error={playerError?.message ?? ''}>{collectionData.title}</div>
   ),
 }));
-vi.mock('@/auth/AuthContext', () => ({
-  useAuth: vi.fn(() => ({
-    isAuthenticated: false,
-    user: null,
-    login: vi.fn(),
-    logout: vi.fn(),
-  })),
+vi.mock('@/hooks/usePermission', () => ({
+  usePermissions: vi.fn(),
 }));
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: {
@@ -164,16 +151,21 @@ function renderWithProviders(ui: React.ReactElement) {
   );
 }
 
+const makePermissions = (isAuthenticated: boolean) => ({
+  isAuthenticated,
+  isLoading: false,
+  roles: ['PUBLIC' as const],
+  error: null,
+  hasAnyRole: vi.fn(),
+  canAccessFeature: vi.fn(),
+  refetch: vi.fn(),
+});
+
 describe('CollectionDetailPage - Basic Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: 'l1' });
-    vi.mocked(useAuth).mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      login: vi.fn(),
-      logout: vi.fn(),
-    });
+    vi.mocked(usePermissions).mockReturnValue(makePermissions(false));
     vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(false);
     mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
     mockUseContentSearch.mockReturnValue({ data: { data: { content: [] } }, isLoading: false });
@@ -345,12 +337,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     });
 
     it('does not show LoginToUnlockCard when user is authenticated (trackable collection)', () => {
-      vi.mocked(useAuth).mockReturnValue({
-        isAuthenticated: true,
-        user: { id: '1', name: 'User', role: 'guest' },
-        login: vi.fn(),
-        logout: vi.fn(),
-      });
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
       mockUseCollection.mockReturnValue({
         data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
         isLoading: false,
@@ -400,7 +387,6 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       expect(screen.getByTestId('collection-sidebar')).toHaveAttribute('data-content-blocked', 'true');
     });
   });
-
   describe('Content access blocked (mustJoinToAccessContent)', () => {
     it('passes contentAccessBlocked=true to CollectionOverview when trackable and user not authenticated', () => {
       mockUseCollection.mockReturnValue({
@@ -410,15 +396,8 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'true');
     });
-
     it('passes contentAccessBlocked=true to CollectionOverview when trackable and user not enrolled', () => {
-      vi.mocked(useAuth).mockReturnValue({
-        isAuthenticated: true,
-        user: { id: '1', name: 'User', role: 'guest' },
-        login: vi.fn(),
-        logout: vi.fn(),
-      });
-      vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(true);
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
       mockUseCollection.mockReturnValue({
         data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
         isLoading: false,
@@ -429,13 +408,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     });
 
     it('passes contentAccessBlocked=false when trackable and user is enrolled', () => {
-      vi.mocked(useAuth).mockReturnValue({
-        isAuthenticated: true,
-        user: { id: '1', name: 'User', role: 'guest' },
-        login: vi.fn(),
-        logout: vi.fn(),
-      });
-      vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(true);
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
       mockUseCollection.mockReturnValue({
         data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
         isLoading: false,
@@ -446,7 +419,6 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
     });
-
     it('passes contentAccessBlocked=false when collection is not trackable', () => {
       mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
