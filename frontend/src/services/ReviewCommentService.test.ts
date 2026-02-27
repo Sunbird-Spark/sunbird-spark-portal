@@ -181,7 +181,7 @@ describe('ReviewCommentService', () => {
 
       const result = await service.readComments(mockRequest);
 
-      expect(result.result.comments).toEqual([]);
+      expect(result.comments).toEqual([]);
     });
   });
 
@@ -268,7 +268,7 @@ describe('ReviewCommentService', () => {
 
       const result = await service.deleteComments(mockRequest);
 
-      expect(result.result.deleted).toBe('OK');
+      expect(result.deleted).toBe('OK');
     });
   });
 
