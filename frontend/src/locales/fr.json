@@ -252,11 +252,6 @@
       "name": "Nom",
       "state": "État",
       "userId": "ID utilisateur",
-      "externalId": "ID externe",
-      "district": "District",
-      "block": "Bloc",
-      "schoolId": "ID école",
-      "schoolName": "Nom de l'école",
       "mobileNumber": "Numéro de mobile",
       "emailId": "E-mail"
     },

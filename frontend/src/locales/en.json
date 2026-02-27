@@ -252,11 +252,6 @@
       "name": "Name",
       "state": "State",
       "userId": "User ID",
-      "externalId": "External ID",
-      "district": "District",
-      "block": "Block",
-      "schoolId": "School ID",
-      "schoolName": "School Name",
       "mobileNumber": "Mobile Number",
       "emailId": "Email"
     },

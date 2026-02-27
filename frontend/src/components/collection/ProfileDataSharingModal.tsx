@@ -57,33 +57,16 @@ export default function ProfileDataSharingModal({
     [];
 
   const state = locationList.find((loc) => loc.type === "state")?.name ?? "-";
-  const district = locationList.find((loc) => loc.type === "district")?.name ?? "-";
-  const block = locationList.find((loc) => loc.type === "block")?.name ?? "-";
-  const schoolLoc = locationList.find((loc) => loc.type === "school");
-  let schoolName = schoolLoc?.name ?? "-";
-  let schoolId = schoolLoc?.code ?? "-";
-
-  const externalId =
-    (profile.externalIds as { provider: string; id: string }[] | undefined)?.find(
-      (e: { provider: string; id: string }) => e.provider === (profile.channel as string)
-    )?.id ?? "-";
 
   if (declarationsInfo) {
     if (declarationsInfo["declared-email"]) emailId = declarationsInfo["declared-email"];
     if (declarationsInfo["declared-phone"]) phone = declarationsInfo["declared-phone"];
-    if (declarationsInfo["declared-school-udise-code"]) schoolId = declarationsInfo["declared-school-udise-code"] || schoolId;
-    if (declarationsInfo["declared-school-name"]) schoolName = declarationsInfo["declared-school-name"] || schoolName;
   }
 
   const fieldRows: { label: string; value: string }[] = [
     { label: t("profileDataSharing.fields.name"), value: name },
     { label: t("profileDataSharing.fields.state"), value: state },
     { label: t("profileDataSharing.fields.userId"), value: userId },
-    { label: t("profileDataSharing.fields.externalId"), value: externalId },
-    { label: t("profileDataSharing.fields.district"), value: district },
-    { label: t("profileDataSharing.fields.block"), value: block },
-    { label: t("profileDataSharing.fields.schoolId"), value: schoolId },
-    { label: t("profileDataSharing.fields.schoolName"), value: schoolName },
     { label: t("profileDataSharing.fields.mobileNumber"), value: phone },
     { label: t("profileDataSharing.fields.emailId"), value: emailId },
   ];
