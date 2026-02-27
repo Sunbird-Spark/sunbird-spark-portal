@@ -10,7 +10,7 @@ describe('CreateOptions', () => {
   it('renders welcome text and Collection Editor category', () => {
     const onOptionSelect = vi.fn();
     render(<CreateOptions onOptionSelect={onOptionSelect} />);
-    expect(screen.getByText('What would you like to create?')).toBeInTheDocument();
+    expect(screen.getByText('createOptions.title')).toBeInTheDocument();
     expect(screen.getByText('Collection Editor')).toBeInTheDocument();
   });
 
