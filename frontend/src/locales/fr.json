@@ -489,6 +489,7 @@
       "processing": "Traitement en cours..."
     },
     "collectionType": "Type de collection",
+    "description": "Description",
     "creating": "Création en cours..."
   },
   "homeComponents": {
