@@ -82,7 +82,7 @@ const CollectionEditorPage = () => {
   const handleTelemetryEvent = useCallback((_event: any) => {}, []);
 
   if (loading || isLocking) {
-    return <PageLoader message={isLocking ? "Acquiring content lock..." : "Loading editor..."} />;
+    return <PageLoader message={isLocking ? t('content.acquiringLock') : t('content.loadingEditor')} />;
   }
 
   if (lockError) {
@@ -90,7 +90,7 @@ const CollectionEditorPage = () => {
   }
 
   if (loadError || !metadata) {
-    return <EditorErrorState message={loadError || 'Content not found'} showRetry />;
+    return <EditorErrorState message={loadError || t('content.notFound')} showRetry />;
   }
 
   return (

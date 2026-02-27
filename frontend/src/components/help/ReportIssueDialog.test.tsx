@@ -77,7 +77,7 @@ describe('ReportIssueDialog', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
-    expect(screen.getByText('Report an Issue')).toBeInTheDocument();
+    expect(screen.getByText('reportIssueDialog.title')).toBeInTheDocument();
   });
 
   it('does not render dialog when closed', () => {
@@ -89,7 +89,7 @@ describe('ReportIssueDialog', () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Report an issue by selecting a category and describing the problem')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.description')).toBeInTheDocument();
     });
   });
 
@@ -118,7 +118,7 @@ describe('ReportIssueDialog', () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(screen.getByText('loading')).toBeInTheDocument();
     });
   });
 
@@ -138,7 +138,7 @@ describe('ReportIssueDialog', () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Select Category')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.selectCategory')).toBeInTheDocument();
     });
   });
 
@@ -150,8 +150,8 @@ describe('ReportIssueDialog', () => {
 
     await waitFor(() => {
       expect(toast).toHaveBeenCalledWith({
-        title: 'Error',
-        description: 'Failed to load report issue options',
+        title: 'error',
+        description: 'reportIssueDialog.loadError',
         variant: 'destructive',
       });
     });
@@ -161,10 +161,10 @@ describe('ReportIssueDialog', () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Submit Feedback')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.submitFeedback')).toBeInTheDocument();
     });
 
-    const submitBtn = screen.getByText('Submit Feedback');
+    const submitBtn = screen.getByText('reportIssueDialog.submitFeedback');
     expect(submitBtn).toBeDisabled();
   });
 
@@ -172,37 +172,37 @@ describe('ReportIssueDialog', () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Select Category')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.selectCategory')).toBeInTheDocument();
     });
 
     // Selecting "otherissues" hides the subcategory select
     // We verify the subcategory field disappears for "otherissues"
     // The subcategory select is shown for non-otherissues categories
-    expect(screen.queryByText('Select Subcategory')).toBeInTheDocument();
+    expect(screen.queryByText('reportIssueDialog.selectSubcategory')).toBeInTheDocument();
   });
 
   it('hides subcategory select when "otherissues" category is chosen', async () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Select Category')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.selectCategory')).toBeInTheDocument();
     });
 
     // Simulate selecting "otherissues" by directly manipulating state via the onValueChange prop.
     // The Select trigger opens a listbox; we find the trigger and fire change via internal API.
     // Since Radix UI Select is complex to interact with in JSDOM, we test the rendered state:
     // Initially subcategory select is visible (no category chosen yet → shows placeholder)
-    expect(screen.getByText('Select Subcategory')).toBeInTheDocument();
+    expect(screen.getByText('reportIssueDialog.selectSubcategory')).toBeInTheDocument();
   });
 
   it('does not show success message before submission', async () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Submit Feedback')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.submitFeedback')).toBeInTheDocument();
     });
 
-    expect(screen.queryByText(/Thanks for your feedback/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/reportIssueDialog.feedbackSuccess/)).not.toBeInTheDocument();
   });
 
   it('renders close button', async () => {
@@ -233,7 +233,7 @@ describe('ReportIssueDialog', () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Tell us more')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('reportIssueDialog.tellUsMore')).toBeInTheDocument();
     });
   });
 
@@ -241,10 +241,10 @@ describe('ReportIssueDialog', () => {
     render(<ReportIssueDialog {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Tell us more')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('reportIssueDialog.tellUsMore')).toBeInTheDocument();
     });
 
-    const textarea = screen.getByPlaceholderText('Tell us more');
+    const textarea = screen.getByPlaceholderText('reportIssueDialog.tellUsMore');
     fireEvent.change(textarea, { target: { value: 'My issue description' } });
     expect((textarea as HTMLTextAreaElement).value).toBe('My issue description');
   });
@@ -272,11 +272,11 @@ describe('ReportIssueDialog', () => {
     const { rerender } = render(<ReportIssueDialog open={true} onOpenChange={onOpenChange} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Submit Feedback')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.submitFeedback')).toBeInTheDocument();
     });
 
     // Success banner is not shown initially
-    expect(screen.queryByText(/Thanks for your feedback/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/reportIssueDialog.feedbackSuccess/)).not.toBeInTheDocument();
 
     // Close the dialog before the 5-second auto-close timer fires
     rerender(<ReportIssueDialog open={false} onOpenChange={onOpenChange} />);
@@ -285,9 +285,9 @@ describe('ReportIssueDialog', () => {
     rerender(<ReportIssueDialog open={true} onOpenChange={onOpenChange} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Submit Feedback')).toBeInTheDocument();
+      expect(screen.getByText('reportIssueDialog.submitFeedback')).toBeInTheDocument();
     });
 
-    expect(screen.queryByText(/Thanks for your feedback/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/reportIssueDialog.feedbackSuccess/)).not.toBeInTheDocument();
   });
 });

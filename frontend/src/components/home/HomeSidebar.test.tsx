@@ -42,20 +42,7 @@ vi.mock('@/hooks/useUser', () => ({
 
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => {
-            const translations: Record<string, string> = {
-                'sidebar.home': 'Home',
-                'sidebar.myLearning': 'My Learning',
-                'sidebar.explore': 'Explore',
-                'sidebar.profile': 'Profile',
-                'sidebar.helpSupport': 'Help and Support',
-                'sidebar.logout': 'Logout',
-                'sidebar.collapse': 'Collapse Sidebar',
-                'sidebar.expand': 'Expand Sidebar',
-                'sidebar.userManagement': 'User Management',
-            };
-            return translations[key] || key;
-        },
+        t: (key: string) => key,
         languages: [],
         currentCode: 'en',
         changeLanguage: vi.fn(),
@@ -109,32 +96,32 @@ describe('HomeSidebar', () => {
         renderSidebar();
 
         // Main Nav Items
-        expect(screen.getByText('Home')).toBeInTheDocument();
-        expect(screen.getByText('My Learning')).toBeInTheDocument();
-        expect(screen.getByText('Explore')).toBeInTheDocument();
-        expect(screen.getByText('Profile')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.home')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.myLearning')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.explore')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.profile')).toBeInTheDocument();
 
         // Bottom Nav Items
-        expect(screen.getByText('Help and Support')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.helpAndSupport')).toBeInTheDocument();
         // expect(screen.getByText('Account Settings')).toBeInTheDocument(); // Removed as it's not in the component
-        expect(screen.getByText('Logout')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.logout')).toBeInTheDocument();
     });
 
     it('calls onNavChange when an item is clicked', () => {
         const onNavChange = vi.fn();
         renderSidebar({ ...defaultProps, onNavChange });
 
-        fireEvent.click(screen.getByText('My Learning'));
+        fireEvent.click(screen.getByText('sidebar.myLearning'));
         expect(onNavChange).toHaveBeenCalledWith('learning');
     });
 
     it('navigates to path when a non-home item is clicked', () => {
         renderSidebar();
 
-        fireEvent.click(screen.getByText('My Learning'));
+        fireEvent.click(screen.getByText('sidebar.myLearning'));
         expect(mockNavigate).toHaveBeenCalledWith('/my-learning');
 
-        fireEvent.click(screen.getByText('Explore'));
+        fireEvent.click(screen.getByText('sidebar.explore'));
         expect(mockNavigate).toHaveBeenCalledWith('/explore');
     });
 
@@ -142,17 +129,17 @@ describe('HomeSidebar', () => {
         mockNavigate.mockClear();
         renderSidebar();
 
-        fireEvent.click(screen.getByText('Home'));
+        fireEvent.click(screen.getByText('sidebar.home'));
         expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     it('highlights the active item', () => {
         renderSidebar({ ...defaultProps, activeNav: 'learning' });
 
-        const learningButton = screen.getByText('My Learning').closest('button');
+        const learningButton = screen.getByText('sidebar.myLearning').closest('button');
         expect(learningButton).toHaveClass('text-sunbird-brick font-normal');
 
-        const homeButton = screen.getByText('Home').closest('button');
+        const homeButton = screen.getByText('sidebar.home').closest('button');
         expect(homeButton).toHaveClass('text-sunbird-obsidian font-normal');
         expect(homeButton).toHaveClass('px-6');
     });
@@ -162,7 +149,7 @@ describe('HomeSidebar', () => {
 
         // When home is active, it should use GoHomeFill (not easily testable via class but we can check if it renders)
         // Check for specific classes applied to icons
-        const homeIcon = screen.getByText('Home').previousSibling;
+        const homeIcon = screen.getByText('sidebar.home').previousSibling;
         expect(homeIcon).toHaveClass('text-sunbird-brick');
 
         rerender(
@@ -171,7 +158,7 @@ describe('HomeSidebar', () => {
             </BrowserRouter>
         );
 
-        const inactiveHomeIcon = screen.getByText('Home').previousSibling;
+        const inactiveHomeIcon = screen.getByText('sidebar.home').previousSibling;
         expect(inactiveHomeIcon).toHaveClass('text-sunbird-ginger');
     });
 
@@ -184,7 +171,7 @@ describe('HomeSidebar', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Help and Support')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.helpAndSupport')).toBeInTheDocument();
     });
 
     it('renders in collapsed state', () => {
@@ -195,12 +182,12 @@ describe('HomeSidebar', () => {
         expect(sidebar).toHaveClass('w-[5rem]');
 
         // Text labels should not be visible
-        expect(screen.queryByText('Home')).not.toBeInTheDocument();
-        expect(screen.queryByText('My Learning')).not.toBeInTheDocument();
+        expect(screen.queryByText('sidebar.home')).not.toBeInTheDocument();
+        expect(screen.queryByText('sidebar.myLearning')).not.toBeInTheDocument();
 
         // Icons should still be there
         const homeButton = screen.getAllByRole('button')[0];
-        expect(homeButton).toHaveAttribute('title', 'Home');
+        expect(homeButton).toHaveAttribute('title', 'sidebar.home');
     });
 
     it('calls onToggle when toggle button is clicked', () => {
@@ -208,7 +195,7 @@ describe('HomeSidebar', () => {
         renderSidebar({ ...defaultProps, onToggle });
 
         // Find the toggle button (it has aria-label "Collapse Sidebar" initially)
-        const toggleBtn = screen.getByRole('button', { name: /Collapse Sidebar/i });
+        const toggleBtn = screen.getByRole('button', { name: /sidebar.collapse/i });
         fireEvent.click(toggleBtn);
 
         expect(onToggle).toHaveBeenCalledTimes(1);
