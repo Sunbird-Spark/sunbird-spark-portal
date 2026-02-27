@@ -33,7 +33,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
   /* ── Reviewer TnC state ── */
   const isContentCreator = useIsContentCreator();
-  const isReviewer = user?.role === "content_reviewer" && !isContentCreator;
+  const isReviewer = user?.roles?.includes('CONTENT_REVIEWER') && !isContentCreator;
   const [reviewerTncChecked, setReviewerTncChecked] = useState(false);
   const [reviewerTncAccepted, setReviewerTncAccepted] = useState(false);
 
