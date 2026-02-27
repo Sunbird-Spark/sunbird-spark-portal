@@ -5,9 +5,7 @@
 }
 
 .content-review-container {
-  @apply w-full mx-auto py-6;
-  padding-left: 7rem;
-  padding-right: 7rem;
+  @apply w-full mx-auto py-6 px-4 sm:px-6 lg:px-28;
 }
 
 .content-review-button-container {
@@ -21,6 +19,18 @@
 .content-review-player-section {
   width: 100%;
   margin-bottom: 2rem;
+}
+
+.content-review-player-with-comments {
+  @apply flex flex-col gap-4 lg:flex-row;
+}
+
+.content-review-player-main {
+  @apply w-full lg:w-3/4;
+}
+
+.content-review-player-sidebar {
+  @apply w-full lg:w-1/4;
 }
 
 .content-review-player-wrapper {

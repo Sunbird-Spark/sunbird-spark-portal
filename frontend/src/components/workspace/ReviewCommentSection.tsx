@@ -5,6 +5,8 @@ import { useReviewComment } from '@/hooks/useReviewComment';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import './ReviewCommentSection.css';
 
+const userService = new UserService();
+
 interface CommentSectionProps {
   contentId: string;
   contentVer?: string;
@@ -23,13 +25,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const { t } = useAppI18n();
   const [newComment, setNewComment] = useState('');
   const [userData, setUser] = useState<{userName:string, userId: string}>();
-  const userService = new UserService();
 
   // Use the review comment hook
   const {
     comments,
     isLoadingComments,
-    commentsError,
     createComment,
     isCreatingComment,
   } = useReviewComment({
@@ -55,7 +55,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         setUser({userName, userId});
       } catch (error) {
         console.error('Failed to load user info:', error);
-        setUser({userName: "", userId:""});
+        setUser({userName: t('workspace.review.anonymous'), userId});
       }
     }
   };

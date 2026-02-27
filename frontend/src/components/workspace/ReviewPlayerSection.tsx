@@ -46,12 +46,12 @@ const ContentPlayerSection: React.FC<ContentPlayerSectionProps> = React.memo(({
           <h1 className="content-player-title">{contentName}</h1>
         </div>
         <div className="content-review-player-section">
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <div style={{ flex: '0 0 75%' }}>
+          <div className="content-review-player-with-comments">
+            <div className="content-review-player-main">
               {playerContent}
             </div>
-            <div style={{ flex: '0 0 calc(25% - 1rem)' }}>
-              <CommentSection 
+            <div className="content-review-player-sidebar">
+              <CommentSection
                 contentId={contentId}
                 contentVer={contentVer || '0'}
                 contentType={contentType || 'application/vnd.ekstep.ecml-archive'}
