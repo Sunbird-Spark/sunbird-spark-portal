@@ -1,0 +1,57 @@
+.comment-section {
+  @apply bg-white rounded-xl border border-gray-100 p-4 flex flex-col;
+  max-height: 600px;
+  height: 100%;
+}
+
+.comment-section-loading {
+  @apply text-sm text-muted-foreground font-rubik text-center py-4;
+}
+
+.comment-section-title {
+  @apply font-rubik font-semibold text-base text-foreground mb-4;
+}
+
+.comment-list {
+  @apply overflow-y-auto space-y-3 mb-4;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.comment-item {
+  @apply border-b border-gray-100 pb-3 last:border-b-0;
+}
+
+.comment-header {
+  @apply flex justify-between items-center mb-2;
+}
+
+.comment-author {
+  @apply text-xs font-medium text-foreground font-rubik;
+}
+
+.comment-date {
+  @apply text-xs text-muted-foreground font-rubik;
+}
+
+.comment-text {
+  @apply text-sm text-foreground font-rubik whitespace-pre-wrap;
+}
+
+.comment-input-section {
+  @apply mt-auto pt-4 border-t border-gray-100;
+}
+
+.comment-input {
+  @apply w-full border border-gray-200 rounded-lg p-3 text-sm font-rubik resize-none
+    focus:outline-none focus:ring-2 focus:ring-sunbird-brick/30 focus:border-sunbird-brick mb-2;
+}
+
+.comment-submit-btn {
+  @apply w-full px-4 py-2 rounded-lg text-sm font-medium font-rubik transition-colors
+    bg-sunbird-brick text-white hover:bg-sunbird-brick/90 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.no-comments-message {
+  @apply text-sm text-muted-foreground font-rubik text-center py-4 italic;
+}
