@@ -113,7 +113,7 @@ describe('CollectionEditorPage', () => {
     );
 
     renderWithRouter(<CollectionEditorPage />);
-    expect(screen.getByTestId('page-loader')).toHaveTextContent('Loading editor...');
+    expect(screen.getByTestId('page-loader')).toHaveTextContent('content.loadingEditor');
   });
 
   it('renders collection editor in read mode for FlagReview status', async () => {
@@ -164,17 +164,17 @@ describe('CollectionEditorPage', () => {
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Error',
-          description: 'Failed to load content metadata.',
+          title: 'error',
+          description: 'content.failedToLoadMetadata',
           variant: 'destructive',
         })
       );
     });
 
-    expect(screen.getByText('Failed to load content metadata.')).toBeInTheDocument();
+    expect(screen.getByText('content.failedToLoadMetadata')).toBeInTheDocument();
     expect(screen.queryByTestId('collection-editor')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Back to workspace' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'retry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'content.backToWorkspace' })).toBeInTheDocument();
   });
 
   it('shows missing identifier fallback when contentId is absent', async () => {
@@ -183,7 +183,7 @@ describe('CollectionEditorPage', () => {
     renderWithRouter(<CollectionEditorPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Missing content identifier.')).toBeInTheDocument();
+      expect(screen.getByText('content.missingIdentifier')).toBeInTheDocument();
     });
 
     expect(mockContentRead).not.toHaveBeenCalled();

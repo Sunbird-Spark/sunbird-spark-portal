@@ -11,6 +11,20 @@ vi.mock('react-router-dom', async () => {
     return { ...actual, useNavigate: () => mockNavigate };
 });
 
+// Mock i18n
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'common.notifications': 'Notifications',
+        'notifications.empty': 'No notifications',
+        'notifications.deleteAll': 'Delete All',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 // ── Mock all useNotification hooks ────────────────────────────────────────────
 vi.mock('@/hooks/useNotification', () => ({
     useNotificationRead: vi.fn(),
@@ -212,7 +226,7 @@ describe('NotificationPopover', () => {
         const deleteAllButton = screen.getByText('Delete All');
 
         // act(async) flushes Promise microtasks so the async handler runs to completion
-        // (deleteAll resolves → setIsOpen(false) → setTimeout scheduled) without
+        // (deleteAll resolves -> setIsOpen(false) -> setTimeout scheduled) without
         // relying on setTimeout-based polling like waitFor does.
         await act(async () => {
             fireEvent.click(deleteAllButton);
@@ -233,7 +247,7 @@ describe('NotificationPopover', () => {
     it('calls deleteNotification with the full notification item when trash button is clicked', async () => {
         renderPopover();
         openPopover();
-        
+
         const trashButtons = document.querySelectorAll('.notification-item-delete-btn');
         fireEvent.click(trashButtons[0]!);
         await waitFor(() => expect(mockDeleteNotification).toHaveBeenCalledWith(feed1));
@@ -242,7 +256,7 @@ describe('NotificationPopover', () => {
     it('does not trigger notification click when trash button is clicked', async () => {
         renderPopover();
         openPopover();
-        
+
         const trashButtons = document.querySelectorAll('.notification-item-delete-btn');
         fireEvent.click(trashButtons[0]!);
         await waitFor(() => expect(mockDeleteNotification).toHaveBeenCalled());
@@ -254,7 +268,7 @@ describe('NotificationPopover', () => {
     it('calls updateNotification when an unread notification is clicked', async () => {
         renderPopover();
         openPopover();
-        
+
         const items = document.querySelectorAll('.notification-item');
         fireEvent.click(items[0]!);
         await waitFor(() =>
@@ -289,7 +303,7 @@ describe('NotificationPopover', () => {
 
         renderPopover();
         openPopover();
-        
+
         const items = document.querySelectorAll('.notification-item');
         fireEvent.click(items[0]!);
         await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
@@ -323,9 +337,9 @@ describe('NotificationPopover', () => {
 
         renderPopover();
         openPopover();
-        
+
         await waitFor(() => expect(document.querySelector('.notification-item')).toBeInTheDocument());
-        
+
         const items = document.querySelectorAll('.notification-item');
         fireEvent.click(items[0]!);
         await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/profile'));
@@ -357,9 +371,9 @@ describe('NotificationPopover', () => {
 
         renderPopover();
         openPopover();
-        
+
         await waitFor(() => expect(document.querySelector('.notification-item')).toBeInTheDocument());
-        
+
         const items = document.querySelectorAll('.notification-item');
         fireEvent.click(items[0]!);
         await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/course/123'));
@@ -391,9 +405,9 @@ describe('NotificationPopover', () => {
 
         renderPopover();
         openPopover();
-        
+
         await waitFor(() => expect(document.querySelector('.notification-item')).toBeInTheDocument());
-        
+
         const items = document.querySelectorAll('.notification-item');
         fireEvent.click(items[0]!);
         await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/deep/link/path'));
@@ -425,9 +439,9 @@ describe('NotificationPopover', () => {
 
         renderPopover();
         openPopover();
-        
+
         await waitFor(() => expect(document.querySelector('.notification-item')).toBeInTheDocument());
-        
+
         const items = document.querySelectorAll('.notification-item');
         fireEvent.click(items[0]!);
         await waitFor(() => expect(mockMutateAsync).toHaveBeenCalled());

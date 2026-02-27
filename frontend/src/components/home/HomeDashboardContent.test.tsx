@@ -2,6 +2,19 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import HomeDashboardContent from './HomeDashboardContent';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'myLearning.loading': 'Loading your dashboard...',
+                'myLearning.errorLoading': 'Error loading your dashboard',
+                'homeComponents.continueLearning': 'Continue from where you left',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
+
 vi.mock('@/components/common/PageLoader', () => ({
     default: ({ message, error, onRetry }: { message: string; error?: string; onRetry?: () => void }) => (
         <div data-testid="page-loader">

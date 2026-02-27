@@ -4,13 +4,20 @@ import { BrowserRouter } from 'react-router-dom';
 import MyLearning from './MyLearning';
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { TrackableCollection } from '@/types/TrackableCollections';
-import { useIsMobile } from '@/hooks/use-mobile'; // Fixed import path - removed .ts
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 // Mock Hooks
-vi.mock('@/hooks/useUserEnrolledCollections');
-vi.mock('@/hooks/use-mobile'); // Fixed mock path
+vi.mock('@/hooks/useUserEnrolledCollections', () => ({
+  useUserEnrolledCollections: vi.fn(),
+}));
+vi.mock('@/hooks/use-mobile', () => ({
+  useIsMobile: vi.fn(),
+}));
 vi.mock('@/hooks/useAppI18n'); // Mock i18n
+vi.mock('@/hooks/useSidebarState', () => ({
+  useSidebarState: () => ({ isOpen: false, toggleSidebar: vi.fn(), setSidebarOpen: vi.fn() }),
+}));
 
 // Mock Child Components to test integration without deep rendering
 vi.mock('@/components/home/Header', () => ({
@@ -34,6 +41,13 @@ vi.mock('@/components/home/HomeSidebar', () => ({
 
 vi.mock('@/components/home/HomeRecommendedSection', () => ({
   default: () => <div data-testid="home-recommended">Recommended Section</div>,
+}));
+
+vi.mock('@/components/home/Sheet', () => ({
+  Sheet: ({ children }: any) => <div>{children}</div>,
+  SheetContent: ({ children }: any) => <div>{children}</div>,
+  SheetTitle: ({ children }: any) => <div>{children}</div>,
+  SheetDescription: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock('@/components/myLearning/MyLearningCourses', () => ({
@@ -125,7 +139,10 @@ describe('MyLearning Page', () => {
     (useIsMobile as any).mockReturnValue(false); // Default Desktop
 
     (useAppI18n as any).mockReturnValue({
-      t: (key: string) => key,
+      t: (key: string) => {
+        if (key === 'myLearning.loading') return 'Loading your learning...';
+        return key;
+      },
       languages: [{ code: 'en', label: 'English' }],
       currentCode: 'en',
       changeLanguage: vi.fn(),

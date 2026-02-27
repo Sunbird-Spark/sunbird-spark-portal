@@ -3,6 +3,19 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'confirm': 'Confirm',
+        'cancel': 'Cancel',
+        'confirmDialog.pleaseWait': 'Please wait...',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 describe('ConfirmDialog', () => {
   const onClose = vi.fn();
   const onConfirm = vi.fn();

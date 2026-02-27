@@ -1,4 +1,5 @@
 import { OnboardingField } from '@/types/formTypes';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface ProgressIndicatorProps {
   totalSteps: number;
@@ -8,7 +9,9 @@ interface ProgressIndicatorProps {
   isSubmitting: boolean;
 }
 
-export const ProgressIndicator = ({ totalSteps, currentStep, isFirstScreen, onBack, isSubmitting }: ProgressIndicatorProps) => (
+export const ProgressIndicator = ({ totalSteps, currentStep, isFirstScreen, onBack, isSubmitting }: ProgressIndicatorProps) => {
+  const { t } = useAppI18n();
+  return (
   <div className="flex items-center gap-2 mb-4">
     {!isFirstScreen && (
       <button
@@ -16,7 +19,7 @@ export const ProgressIndicator = ({ totalSteps, currentStep, isFirstScreen, onBa
         onClick={onBack}
         disabled={isSubmitting}
         className="flex items-center justify-center w-7 h-7 text-primary hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-        aria-label="Go back"
+        aria-label={t('onboarding.goBack')}
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -36,6 +39,7 @@ export const ProgressIndicator = ({ totalSteps, currentStep, isFirstScreen, onBa
     </span>
   </div>
 );
+}
 
 interface OptionChipProps {
   field: OnboardingField;

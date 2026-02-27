@@ -61,6 +61,10 @@ vi.mock("@/hooks/useSystemSetting", () => ({
     useSystemSetting: vi.fn(),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
@@ -139,7 +143,7 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getByText('Go Back'));
+        fireEvent.click(screen.getByText('button.goBack'));
         expect(mockNavigate).toHaveBeenCalledWith('/help-support');
     });
 
@@ -169,10 +173,10 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getAllByText('Yes')[0]!);
+        fireEvent.click(screen.getAllByText('yes')[0]!);
 
         await waitFor(() => {
-            expect(screen.getAllByText('Thank you for your feedback!')[0]!).toBeInTheDocument();
+            expect(screen.getAllByText('help.feedbackThanks')[0]!).toBeInTheDocument();
         });
     });
 
@@ -183,17 +187,17 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getAllByText('No')[0]!);
+        fireEvent.click(screen.getAllByText('no')[0]!);
 
         fireEvent.change(
-            screen.getByPlaceholderText('Type Here...'),
+            screen.getByPlaceholderText('help.typeHere'),
             { target: { value: 'Needs more details' } }
         );
 
-        fireEvent.click(screen.getByText('Submit feedback'));
+        fireEvent.click(screen.getByText('help.submitFeedback'));
 
         await waitFor(() => {
-            expect(screen.getAllByText('Thank you for your feedback!')[0]!).toBeInTheDocument();
+            expect(screen.getAllByText('help.feedbackThanks')[0]!).toBeInTheDocument();
         });
     });
 
@@ -204,15 +208,15 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getAllByText('No')[0]!);
-        expect(screen.getByText('Submit feedback')).toBeDisabled();
+        fireEvent.click(screen.getAllByText('no')[0]!);
+        expect(screen.getByText('help.submitFeedback')).toBeDisabled();
 
         fireEvent.change(
-            screen.getByPlaceholderText('Type Here...'),
+            screen.getByPlaceholderText('help.typeHere'),
             { target: { value: 'Some feedback' } }
         );
 
-        expect(screen.getByText('Submit feedback')).not.toBeDisabled();
+        expect(screen.getByText('help.submitFeedback')).not.toBeDisabled();
     });
 
     it('shows loading state', () => {
@@ -228,7 +232,7 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        expect(screen.getByText('loading')).toBeInTheDocument();
     });
 
     it('shows error state when fetch fails', () => {
@@ -244,7 +248,7 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+        expect(screen.getByText('somethingWentWrong')).toBeInTheDocument();
     });
 
     it('shows error when category is not found', () => {
@@ -256,6 +260,6 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Category not found.')).toBeInTheDocument();
+        expect(screen.getByText('help.categoryNotFound')).toBeInTheDocument();
     });
 });

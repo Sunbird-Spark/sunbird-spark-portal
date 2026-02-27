@@ -3,6 +3,19 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import HomeInProgressGrid from './HomeInProgressGrid';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'homeComponents.inProgress': 'In Progress',
+                'loading': 'Loading...',
+                'homeComponents.noCoursesInProgress': 'No courses in progress',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
+
 // Mock useUserEnrolledCollections
 const mockUseUserEnrolledCollections = vi.fn();
 vi.mock('../../hooks/useUserEnrolledCollections', () => ({

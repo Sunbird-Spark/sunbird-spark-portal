@@ -5,6 +5,33 @@ import dayjs from 'dayjs';
 import { BatchRow, getBatchStatus } from './BatchRow';
 import { Batch } from '@/services/BatchService';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string, data?: Record<string, unknown>) => {
+      const translations: Record<string, string> = {
+        'batchTabs.ongoing': 'Ongoing',
+        'batchTabs.upcoming': 'Upcoming',
+        'batchTabs.expired': 'Expired',
+        'batchRow.editBatch': 'Edit batch',
+        'batchRow.batchCannotBeEdited': 'Batch cannot be edited after the start date has passed',
+        'batchRow.certificateCannotBeModified': 'Certificate cannot be modified after the batch end date',
+        'batchRow.enrolmentEnds': 'Enrolment ends {{date}}',
+        'certificate.certificateLocked': 'Certificate Locked',
+        'certificate.certificateUnavailable': 'Certificate Unavailable',
+        'certificate.editCertificate': 'Edit Certificate',
+        'certificate.addCertificate': 'Add Certificate',
+      };
+      let result = translations[key] || key;
+      if (data) {
+        Object.entries(data).forEach(([k, v]) => {
+          result = result.replace(`{{${k}}}`, String(v));
+        });
+      }
+      return result;
+    },
+  }),
+}));
+
 vi.mock('dayjs', async () => {
   const actual = await vi.importActual('dayjs');
   return actual;

@@ -2,10 +2,12 @@ import PageLoader from "@/components/common/PageLoader";
 import DynamicContentSection from "@/components/landing/DynamicContentSection";
 import DynamicCategorySection from "@/components/landing/DynamicCategorySection";
 import DynamicResourceSection from "@/components/landing/DynamicResourceSection";
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { useFormRead } from "@/hooks/useForm";
 import { FormSection } from "@/types/formTypes";
 
 const HomeDiscoverSections = () => {
+  const { t } = useAppI18n();
   const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {
       type: "page",
@@ -18,13 +20,13 @@ const HomeDiscoverSections = () => {
   });
 
   if (isLoading) {
-    return <PageLoader message="Loading content..." fullPage={false} />;
+    return <PageLoader message={t('loadingContent')} fullPage={false} />;
   }
 
   if (error) {
     return (
       <PageLoader
-        message="Failed to load content."
+        message={t('failedToLoadContent')}
         fullPage={false}
         error={error.message}
         onRetry={refetch}

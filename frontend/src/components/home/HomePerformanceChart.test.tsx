@@ -1,6 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import HomePerformanceChart from './HomePerformanceChart';
+import { vi } from 'vitest';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'months.jan': 'Jan',
+                'months.feb': 'Feb',
+                'months.mar': 'Mar',
+                'months.apr': 'Apr',
+                'months.may': 'May',
+                'months.jun': 'Jun',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
 
 describe('HomePerformanceChart', () => {
     it('renders the chart title', () => {

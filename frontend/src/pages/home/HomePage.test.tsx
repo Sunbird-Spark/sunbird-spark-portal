@@ -13,6 +13,12 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   },
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 describe('HomePage', () => {
   beforeEach(() => {
     // Default mock implementation
@@ -31,10 +37,10 @@ describe('HomePage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('heading', { name: 'Welcome to Sunbird Portal' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Available Courses' })).toBeInTheDocument();
-    expect(screen.getByText('Course 1')).toBeInTheDocument();
-    expect(screen.getByText('Course 2')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'welcome' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'coursesAvailable' })).toBeInTheDocument();
+    expect(screen.getByText('homePageDemo.course1')).toBeInTheDocument();
+    expect(screen.getByText('homePageDemo.course2')).toBeInTheDocument();
   });
 
   it('should render login form with role selector', () => {
@@ -46,9 +52,9 @@ describe('HomePage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Select Role:')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'login' })).toBeInTheDocument();
+    expect(screen.getByLabelText('selectRole')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'login' })).toBeInTheDocument();
   });
 
   it('should display all role options', () => {
@@ -60,13 +66,13 @@ describe('HomePage', () => {
       </MemoryRouter>
     );
 
-    const select = screen.getByLabelText('Select Role:');
+    const select = screen.getByLabelText('selectRole');
     const options = Array.from(select.querySelectorAll('option'));
 
     expect(options).toHaveLength(4);
-    expect(options[0]).toHaveTextContent('Admin');
-    expect(options[1]).toHaveTextContent('Content Creator');
-    expect(options[2]).toHaveTextContent('Content Reviewer');
-    expect(options[3]).toHaveTextContent('Guest');
+    expect(options[0]).toHaveTextContent('roles.admin');
+    expect(options[1]).toHaveTextContent('roles.content_creator');
+    expect(options[2]).toHaveTextContent('roles.content_reviewer');
+    expect(options[3]).toHaveTextContent('roles.guest');
   });
 });

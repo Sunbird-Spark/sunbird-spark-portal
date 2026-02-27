@@ -3,6 +3,23 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import VerifyOtpDialog from './VerifyOtpDialog';
 import { OtpRequiredField, FieldOtpState, createInitialFieldOtpState } from '@/types/profileTypes';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'forgotPasswordPage.enterCode': 'Enter the code',
+                'editProfile.enterDigitCodePhone': 'Enter the 6-digit code sent to your phone number',
+                'editProfile.enterDigitCodeEmail': 'Enter the 6-digit code sent to your email',
+                'forgotPasswordPage.otpValidity': 'The OTP is valid for 10 minutes',
+                'forgotPasswordPage.resendOtp': 'Resend OTP',
+                'signUp.submit': 'Submit',
+                'editProfile.submitting': 'Submitting...',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
+
 // Mock the common components
 vi.mock('@/components/common/Dialog', () => ({
     Dialog: ({ children, open, onOpenChange }: any) =>
