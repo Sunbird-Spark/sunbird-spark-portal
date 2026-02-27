@@ -1,11 +1,16 @@
 import { useState } from "react";
-import { FiPlus, FiRefreshCw, FiLoader, FiAward, FiCalendar, FiEdit2, FiLock } from "react-icons/fi";
-import dayjs from "dayjs";
+import { FiPlus, FiRefreshCw, FiLoader, FiCalendar } from "react-icons/fi";
 import CreateBatchModal from "./CreateBatchModal";
 import AddCertificateModal from "./AddCertificateModal";
 import { useBatchListForCreator } from "@/hooks/useBatch";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/auth/AuthContext";
+import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useAcceptTnc } from "@/hooks/useTnc";
+import { useToast } from "@/hooks/useToast";
+import { useIsContentCreator } from "@/hooks/useUser";
 
 interface BatchCardProps {
   collectionId: string;
@@ -18,10 +23,37 @@ import { TabBar, ActiveTab } from "./BatchTabBar";
 /* ── BatchCard ── */
 
 const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editBatch, setEditBatch]   = useState<Batch | null>(null);
   const [certBatch, setCertBatch]   = useState<Batch | null>(null);
   const [activeTab, setActiveTab]   = useState<ActiveTab>("Ongoing");
+
+  /* ── Reviewer TnC state ── */
+  const isContentCreator = useIsContentCreator();
+  const isReviewer = user?.role === "content_reviewer" && !isContentCreator;
+  const [reviewerTncChecked, setReviewerTncChecked] = useState(false);
+  const [reviewerTncAccepted, setReviewerTncAccepted] = useState(false);
+
+  const { data: reportViewerTncConfig, isSuccess: isReviewerTncSuccess } =
+    useSystemSetting(isReviewer ? "reportViewerTnc" : "");
+  const acceptTncMutation = useAcceptTnc();
+
+  const handleAcceptReviewerTnc = async () => {
+    if (!reviewerTncChecked || !isReviewerTncSuccess || !reportViewerTncConfig) return;
+    try {
+      await acceptTncMutation.mutateAsync({
+        tncConfig: reportViewerTncConfig,
+        tncType: "reportViewerTnc",
+      });
+      setReviewerTncAccepted(true);
+      toast({ title: "Terms accepted", description: "You can now view batch reports." });
+    } catch {
+      toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
+    }
+  };
 
   const { data: batches, isLoading, isError, refetch, isFetching } = useBatchListForCreator(collectionId);
 
@@ -76,6 +108,36 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
             </button>
           </div>
         </div>
+
+        {/* ── Reviewer TnC acceptance (shown until accepted) ── */}
+        {isReviewer && !reviewerTncAccepted && (
+          <div className="px-4 pt-4 pb-0">
+            <div className="rounded-lg bg-gray-50 border border-border p-4 space-y-3">
+              <TncCheckboxRow
+                checked={reviewerTncChecked}
+                onCheckedChange={(v) => setReviewerTncChecked(!!v)}
+                settingKey="reportViewerTnc"
+                label="to view batch reports."
+              />
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  disabled={!reviewerTncChecked || acceptTncMutation.isPending}
+                  onClick={handleAcceptReviewerTnc}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors",
+                    !reviewerTncChecked || acceptTncMutation.isPending
+                      ? "bg-sunbird-brick/40 cursor-not-allowed"
+                      : "bg-sunbird-brick hover:bg-opacity-90"
+                  )}
+                >
+                  {acceptTncMutation.isPending && <FiLoader className="w-4 h-4 animate-spin" />}
+                  {acceptTncMutation.isPending ? "Accepting…" : "Accept & Continue"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Tabs ── */}
         {!isLoading && !isError && (

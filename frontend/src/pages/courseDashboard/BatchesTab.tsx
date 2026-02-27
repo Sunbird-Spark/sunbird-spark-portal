@@ -3,7 +3,15 @@ import PageLoader from '@/components/common/PageLoader';
 import { useBatchListForCreator } from '@/hooks/useBatch';
 import type { Batch } from '@/services/BatchService';
 import { getBatchStatus } from '@/components/collection/BatchRow';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/common/Select';
 import { cn } from '@/lib/utils';
+import CourseReportContent from '@/components/reports/CourseReportContent';
 
 const STATUS_STYLES: Record<string, string> = {
   Upcoming: "bg-yellow-100 text-yellow-700",
@@ -16,8 +24,8 @@ interface BatchesTabProps {
 }
 
 const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
-  const { data: batches, isLoading, isError, error } = useBatchListForCreator(collectionId);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
+  const { data: batches, isLoading, isError, error } = useBatchListForCreator(collectionId);
 
   if (isLoading) {
     return (
@@ -40,87 +48,68 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   }
 
   const batchList: Batch[] = batches ?? [];
-  const selectedBatch = batchList.find((b) => b.id === selectedBatchId) ?? null;
+
+  const handleBatchSelect = (batchId: string) => {
+    setSelectedBatchId(batchId);
+  };
 
   return (
-    <div className="flex flex-1 overflow-hidden min-h-0 bg-gray-50/50 p-6 gap-6" data-testid="batches-tab">
-      
-      {/* Left sidebar — styled as BatchCard */}
-      <aside className="w-80 min-w-[20rem] flex flex-col bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-white z-10">
-          <p className="text-sm font-semibold text-foreground font-['Rubik']">
-            Batches
-          </p>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto w-full p-4 flex flex-col gap-3">
-          {batchList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
-              <p className="text-xs font-['Rubik']">
-                No batches found.
-              </p>
-            </div>
-          ) : (
-            batchList.map((batch) => {
-              const status = getBatchStatus(batch.status);
-              const isSelected = selectedBatchId === batch.id;
-              
-              return (
-                <button
-                  key={batch.id}
-                  data-testid={`batch-item-${batch.id}`}
-                  className={cn(
-                    "flex flex-col w-full text-left p-4 rounded-xl border transition-all duration-200",
-                    isSelected
-                      ? "bg-white border-sunbird-brick shadow-[0_0_0_1px_rgba(179,80,0,1)]"
-                      : "bg-white border-border hover:shadow-sm hover:border-sunbird-brick/50"
-                  )}
-                  onClick={() => setSelectedBatchId(batch.id)}
-                >
-                  <div className="flex items-start justify-between gap-2 w-full mb-2">
-                    <span className={cn(
-                      "text-sm font-semibold font-['Rubik'] leading-snug break-words",
-                      isSelected ? "text-sunbird-brick" : "text-foreground"
-                    )}>
-                      {batch.name}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between w-full mt-auto">
-                     <div className="text-xs text-muted-foreground font-['Rubik']">
-                       ID: <span className="font-mono">{batch.id.slice(-6)}</span>
-                     </div>
-                     <span
-                      className={cn(
-                        "inline-flex items-center text-[0.625rem] font-medium rounded-full px-2 py-0.5 font-['Rubik']",
-                        STATUS_STYLES[status]
-                      )}
-                    >
-                      {status}
-                    </span>
-                  </div>
-                </button>
-              );
-            })
-          )}
-        </div>
-      </aside>
+    <div className="flex flex-col bg-gray-50/50 p-6 gap-6" data-testid="batches-tab">
 
-      {/* Main panel */}
-      <main className="flex-1 bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border p-8 overflow-y-auto">
-        {selectedBatch ? (
-          <div data-testid="selected-batch-panel">
-            <h2 className="text-xl font-semibold mb-2 text-foreground font-['Rubik']">
-              {selectedBatch.name}
-            </h2>
-            <p className="text-sm text-muted-foreground font-['Rubik']">
-              Batch ID: {selectedBatch.id}
-            </p>
+      {/* Batch Selector Dropdown */}
+      <div className="flex items-center gap-4">
+        <label className="text-sm font-semibold text-foreground font-['Rubik'] shrink-0">
+          Select Batch
+        </label>
+        {batchList.length === 0 ? (
+          <p className="text-sm text-muted-foreground font-['Rubik']">No batches found.</p>
+        ) : (
+          <Select onValueChange={handleBatchSelect}>
+            <SelectTrigger
+              className="w-full max-w-md bg-white border-border focus:ring-sunbird-brick"
+              data-testid="batch-select-trigger"
+            >
+              <SelectValue placeholder="Choose a batch to view its report…" />
+            </SelectTrigger>
+            <SelectContent>
+              {batchList.map((batch) => {
+                const status = getBatchStatus(batch.status);
+                return (
+                  <SelectItem key={batch.id} value={batch.id}>
+                    <span className="flex items-center gap-2">
+                      <span className="font-medium">{batch.name}</span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center text-[0.625rem] font-medium rounded-full px-2 py-0.5",
+                          STATUS_STYLES[status]
+                        )}
+                      >
+                        {status}
+                      </span>
+                    </span>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {/* Report panel */}
+      <main
+        className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border"
+        data-testid="batches-main-panel"
+      >
+        {selectedBatchId ? (
+          <div className="p-6">
+            <CourseReportContent courseId={collectionId} batchId={selectedBatchId} />
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm font-['Rubik']" data-testid="no-batch-selected">
-            Select a batch from the list to view details.
-          </p>
+          <div className="flex items-center justify-center py-16 px-8">
+            <p className="text-muted-foreground text-sm font-['Rubik']" data-testid="no-batch-selected">
+              Select a batch from the dropdown above to view its course report.
+            </p>
+          </div>
         )}
       </main>
     </div>

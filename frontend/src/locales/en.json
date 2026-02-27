@@ -385,7 +385,12 @@
   },
   "common": {
     "notifications": "Notifications",
-    "language": "Language"
+    "language": "Language",
+    "manage": "Manage",
+    "backTo": "Back to {{page}}",
+    "upcomingBatches": "Upcoming Batches",
+    "learningProgress": "Learning Progress",
+    "downloadCertificate": "Download Certificate"
   },
   "myLearning": {
     "loading": "Loading your learning...",
@@ -456,6 +461,9 @@
     "profile": "Profile",
     "helpAndSupport": "Help and Support",
     "logout": "Logout",
+    "userReport": "User Report",
+    "adminReports": "Admin Reports",
+    "userManagement": "User Management",
     "expand": "Expand Sidebar",
     "collapse": "Collapse Sidebar"
   },
@@ -684,8 +692,6 @@
     "noCertificateRecords": "No certificate records found for \"{{userName}}\".",
     "certificateIssued": "Certificate Issued",
     "courseCompleted": "Course Completed",
-    "yes": "Yes",
-    "no": "No",
     "criteriaMustBeMet": "Criteria must be met to re-issue",
     "reissueCertificate": "Re-issue certificate"
   },
@@ -719,12 +725,5 @@
     "batches": "Batches",
     "certificates": "Certificates",
     "all": "All"
-  },
-  "common": {
-    "manage": "Manage",
-    "backTo": "Back to {{page}}",
-    "upcomingBatches": "Upcoming Batches",
-    "learningProgress": "Learning Progress",
-    "downloadCertificate": "Download Certificate"
   }
 }
