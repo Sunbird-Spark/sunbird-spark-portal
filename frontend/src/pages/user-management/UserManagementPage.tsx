@@ -67,7 +67,7 @@ const UserManagementPage = () => {
     if (!termsUrl || !activeTncConfig || !userRes) return false;
     const tncService = new TncService();
     const latestVersion = tncService.getLatestVersion(activeTncConfig);
-    const acceptedVersion = _.get(userRes, ['data', 'result', 'response', 'allTncAccepted', activeTncType, 'version']);
+    const acceptedVersion = _.get(userRes?.data, ['response', 'allTncAccepted', activeTncType, 'version']);
     return latestVersion !== acceptedVersion;
   })();
 
