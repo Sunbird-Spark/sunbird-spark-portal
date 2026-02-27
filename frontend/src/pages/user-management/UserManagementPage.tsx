@@ -67,9 +67,37 @@ const UserManagementPage = () => {
     if (!termsUrl || !activeTncConfig || !userRes) return false;
     const tncService = new TncService();
     const latestVersion = tncService.getLatestVersion(activeTncConfig);
-    const acceptedVersion = _.get(userRes, ['data', 'result', 'response', 'allTncAccepted', activeTncType, 'version']);
+    const acceptedVersion = _.get(userRes, ['data', 'response', 'allTncAccepted', activeTncType, 'version']);
     return latestVersion !== acceptedVersion;
   })();
+
+  const userOrganisations = React.useMemo(() => {
+    const orgs: any[] = [];
+    const responseData: any = _.get(userRes, 'data.response', {});
+    
+    // Add rootOrg if present
+    if (responseData.rootOrg) {
+      orgs.push({
+        organisationId: responseData.rootOrg.id || responseData.rootOrg.rootOrgId,
+        orgName: responseData.rootOrg.orgName
+      });
+    }
+
+    // Add other organisations if any
+    if (Array.isArray(responseData.organisations)) {
+      responseData.organisations.forEach((org: any) => {
+        // Only add if not already added (e.g. if rootOrg is also in organisations list)
+        if (!orgs.find(o => o.organisationId === org.organisationId)) {
+          orgs.push({
+            organisationId: org.organisationId,
+            orgName: org.orgName
+          });
+        }
+      });
+    }
+    
+    return orgs;
+  }, [userRes]);
 
   const loadRoles = useCallback(async () => {
     try {
@@ -176,7 +204,11 @@ const UserManagementPage = () => {
                 {/* Content area */}
                 <div className="p-6">
                   {activeTab === "role-management" && (
-                    <RoleManagementTab availableRoles={availableRoles} onRefreshSearch={loadRoles} />
+                    <RoleManagementTab
+                      availableRoles={availableRoles}
+                      onRefreshSearch={loadRoles}
+                      userOrganisations={userOrganisations}
+                    />
                   )}
                 </div>
 
