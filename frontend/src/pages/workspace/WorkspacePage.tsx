@@ -16,7 +16,6 @@ import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoServ
 import { useOrganizationSearch } from "@/hooks/useOrganization";
 import { useChannel } from "@/hooks/useChannel";
 import { useUserRead } from "@/hooks/useUserRead";
-import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useToast } from "@/hooks/useToast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
@@ -25,6 +24,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
+import userProfileService from "@/services/UserProfileService";
 import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
@@ -105,8 +105,7 @@ const WorkspacePage = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { data: userData } = useUserRead();
-  const { data: defaultChannelData } = useSystemSetting('default_channel');
-  const slug = defaultChannelData?.data?.response?.value;
+  const slug = userData?.data?.response?.channel;
 
   // Pre-fetch org data using tanstack mutation when slug becomes available
   const orgSearch = useOrganizationSearch();
@@ -272,8 +271,8 @@ const WorkspacePage = () => {
     } else {
       setShowCreateModal(false);
       toast({
-        title: "Starting Editor",
-        description: `Launching ${optionId.replace('-', ' ')} editor...`
+        title: t("workspace.startingEditor"),
+        description: t("workspace.launchingEditor", { name: optionId.replace('-', ' ') })
       });
     }
   };
@@ -501,7 +500,7 @@ const WorkspacePage = () => {
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
               <HomeSidebar
                 activeNav={activeNav}
                 onNavChange={(nav) => {
@@ -558,9 +557,9 @@ const WorkspacePage = () => {
             onClose={() => setConfirmDialog(null)}
             onConfirm={handleConfirmAction}
             isLoading={isConfirming}
-            title="Delete Content"
-            description="Are you sure you want to delete this content?"
-            confirmLabel="Delete"
+            title={t('workspace.deleteContent')}
+            description={t('workspace.deleteConfirmation')}
+            confirmLabel={t('delete')}
             confirmVariant="destructive"
           />
           <ContentNameDialog
@@ -579,7 +578,7 @@ const WorkspacePage = () => {
             orgChannelId={orgChannelId}
             orgFramework={orgFramework}
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
-            title={selectedOption ? `Create ${EDITOR_OPTION_LABELS[selectedOption] || 'Content'}` : 'Create Content'}
+            title={selectedOption ? `${t('workspace.createContent')} ${EDITOR_OPTION_LABELS[selectedOption] || ''}`.trim() : t('workspace.createContent')}
           />
         </div>
       </div>

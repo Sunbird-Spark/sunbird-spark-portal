@@ -1,15 +1,17 @@
 import { Link } from "react-router-dom";
 import { useUserEnrolledCollections } from "../../hooks/useUserEnrolledCollections";
 import type { TrackableCollection } from "../../types/TrackableCollections";
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const HomeInProgressGrid = () => {
+    const { t } = useAppI18n();
     const { data, isLoading } = useUserEnrolledCollections();
 
     if (isLoading) {
         return (
             <section className="mb-8">
-                <h3 className="home-section-title-large mb-4">In Progress</h3>
-                <div className="text-center py-8 text-sunbird-gray-77">Loading...</div>
+                <h3 className="home-section-title-large mb-4">{t('homeComponents.inProgress')}</h3>
+                <div className="text-center py-8 text-sunbird-gray-77">{t('loading')}</div>
             </section>
         );
     }
@@ -20,15 +22,15 @@ const HomeInProgressGrid = () => {
     if (inProgressCourses.length === 0) {
         return (
             <section className="mb-8">
-                <h3 className="home-section-title-large mb-4">In Progress</h3>
-                <div className="text-center py-8 text-sunbird-gray-77">No courses in progress</div>
+                <h3 className="home-section-title-large mb-4">{t('homeComponents.inProgress')}</h3>
+                <div className="text-center py-8 text-sunbird-gray-77">{t('homeComponents.noCoursesInProgress')}</div>
             </section>
         );
     }
 
     return (
         <section className="mb-8">
-            <h3 className="home-section-title-large mb-4">In Progress</h3>
+            <h3 className="home-section-title-large mb-4">{t('homeComponents.inProgress')}</h3>
 
             <div className="home-inprogress-grid">
                 {inProgressCourses.map((course: TrackableCollection) => (

@@ -2,6 +2,29 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import ContentNameDialog from './ContentNameDialog';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'create': 'Create',
+        'content.label': 'Content',
+        'workspace.enterContentName': 'Enter Content Name',
+        'name': 'Name',
+        'description': 'Description',
+        'workspace.enterDescription': 'Enter a description',
+        'collection.label': 'Collection',
+        'workspace.selectCollectionType': 'Select a collection type',
+        'cancel': 'Cancel',
+        'loading': 'Creating...',
+        'collection.contentPlaylist': 'Content Playlist',
+        'collection.digitalTextbook': 'Digital Textbook',
+        'collection.questionPaper': 'Question Paper',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 describe('ContentNameDialog', () => {
   const defaultProps = {
     open: true,

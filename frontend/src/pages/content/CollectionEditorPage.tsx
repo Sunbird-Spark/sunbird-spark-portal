@@ -5,6 +5,7 @@ import EditorErrorState from '@/components/editors/EditorErrorState';
 import CollectionEditor from '@/components/editors/CollectionEditor';
 import type { CollectionEditorEvent, CollectionEditorContextProps } from '@/services/editors/collection-editor';
 import { ContentService } from '@/services/ContentService';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
 
@@ -28,6 +29,7 @@ const COLLECTION_EDITOR_READ_FIELDS = [
 const contentService = new ContentService();
 
 const CollectionEditorPage = () => {
+  const { t } = useAppI18n();
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
   const [metadata, setMetadata] = useState<any | null>(null);
@@ -38,7 +40,7 @@ const CollectionEditorPage = () => {
     setLoadError(null);
 
     if (!contentId) {
-      setLoadError('Missing content identifier.');
+      setLoadError(t('content.missingIdentifier'));
       setLoading(false);
       return;
     }
@@ -47,12 +49,12 @@ const CollectionEditorPage = () => {
       .contentRead(contentId, COLLECTION_EDITOR_READ_FIELDS, 'edit')
       .then((res) => {
         const content = res.data?.content;
-        if (!content) throw new Error('No content found');
+        if (!content) throw new Error(t('content.notFound'));
         setMetadata(content);
       })
       .catch(() => {
-        setLoadError('Failed to load content metadata.');
-        toast({ title: 'Error', description: 'Failed to load content metadata.', variant: 'destructive' });
+        setLoadError(t('content.failedToLoadMetadata'));
+        toast({ title: t('error'), description: t('content.failedToLoadMetadata'), variant: 'destructive' });
       })
       .finally(() => setLoading(false));
   }, [contentId]);
@@ -80,7 +82,7 @@ const CollectionEditorPage = () => {
   const handleTelemetryEvent = useCallback((_event: any) => {}, []);
 
   if (loading || isLocking) {
-    return <PageLoader message={isLocking ? "Acquiring content lock..." : "Loading editor..."} />;
+    return <PageLoader message={isLocking ? t('content.acquiringLock') : t('content.loadingEditor')} />;
   }
 
   if (lockError) {
@@ -88,7 +90,7 @@ const CollectionEditorPage = () => {
   }
 
   if (loadError || !metadata) {
-    return <EditorErrorState message={loadError || 'Content not found'} showRetry />;
+    return <EditorErrorState message={loadError || t('content.notFound')} showRetry />;
   }
 
   return (

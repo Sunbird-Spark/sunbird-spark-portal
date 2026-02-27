@@ -2,6 +2,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiX, FiCheck, FiLoader } from "react-icons/fi";
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { Button } from "./Button";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +21,16 @@ interface TermsAndConditionsDialogProps {
 export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> = ({
   children,
   termsUrl,
-  title = "Terms and Conditions",
+  title,
   open,
   onOpenChange,
   onAccept,
   accepting = false,
 }) => {
+  const { t } = useAppI18n();
   const [tncChecked, setTncChecked] = React.useState(false);
+
+  const displayTitle = title || t("footer.terms");
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) setTncChecked(false);
@@ -44,17 +48,17 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
             {/* Header */}
             <div className="tnc-dialog-header">
               <DialogPrimitive.Title asChild>
-                <h2 className="tnc-dialog-title">{title}</h2>
+                <h2 className="tnc-dialog-title">{displayTitle}</h2>
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">
-                View and read the terms and conditions document
+                {t("termsDialog.description")}
               </DialogPrimitive.Description>
               <DialogPrimitive.Close asChild>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="tnc-close-button"
-                  aria-label="Close"
+                  aria-label={t("close")}
                 >
                   <FiX className="w-[0.875rem] h-[0.875rem] tnc-close-icon" />
                 </Button>
@@ -65,7 +69,7 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
             <div className="tnc-iframe-container">
               <iframe
                 src={termsUrl}
-                title={title}
+                title={displayTitle}
                 className="tnc-iframe"
                 sandbox="allow-same-origin allow-scripts"
               />

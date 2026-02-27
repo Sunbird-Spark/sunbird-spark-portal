@@ -1,20 +1,22 @@
 import React from 'react';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const CreateContentPage: React.FC = () => {
+  const { t } = useAppI18n();
   return (
     <div>
       <div>
-        <h1>Create Content</h1>
+        <h1>{t('createContent')}</h1>
       </div>
 
       <div>
-        <h2>Content Creation Tools</h2>
-        <p>This page is only accessible to users with the <strong>content_creator</strong> role.</p>
+        <h2>{t('content.creationTools')}</h2>
+        <p>{t('content.accessRestricted')}<strong>{t('content.roleContentCreator')}</strong>{t('content.roleSuffix')}</p>
         <ul>
-          <li>Create new articles</li>
-          <li>Upload media</li>
-          <li>Draft content</li>
-          <li>Submit for review</li>
+          <li>{t('content.createArticles')}</li>
+          <li>{t('content.uploadMedia')}</li>
+          <li>{t('content.draftContent')}</li>
+          <li>{t('submitForReview')}</li>
         </ul>
       </div>
     </div>

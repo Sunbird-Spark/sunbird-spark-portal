@@ -3,6 +3,31 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CreateBatchModal from './CreateBatchModal';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'batch.nameOfBatch': 'Name of Batch',
+        'batch.enterBatchName': 'Enter batch name',
+        'batch.aboutBatch': 'About Batch',
+        'batch.briefDescBatch': 'Brief description about this batch',
+        'batch.startDate': 'Start Date',
+        'batch.endDate': 'End Date',
+        'batch.enrolmentEndDate': 'Enrolment End Date',
+        'batch.mustBeAfterEnrolmentEnd': 'Must be on or after enrolment end date',
+        'batch.betweenStartDate': 'Between start date',
+        'batch.betweenStartAndEndDate': 'Between start & end date',
+        'cancel': 'Cancel',
+        'save': 'Save',
+        'footer.terms': 'Terms and Conditions',
+        'termsDialog.description': 'View and read the terms and conditions document',
+        'close': 'Close',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 /* ── Mock useMentorList ── */
 const mockAllMentors = [
   { identifier: 'u1', firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com' },

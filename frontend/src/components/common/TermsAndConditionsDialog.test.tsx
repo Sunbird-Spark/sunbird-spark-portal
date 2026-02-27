@@ -7,6 +7,10 @@ vi.mock('react-icons/fi', () => ({
     FiX: () => <div data-testid="x-icon" />
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
 describe('TermsAndConditionsDialog', () => {
     const defaultProps = {
         children: <button>Open Terms</button>,
@@ -35,7 +39,7 @@ describe('TermsAndConditionsDialog', () => {
         fireEvent.click(screen.getByText('Open Terms'));
 
         await waitFor(() => {
-            expect(screen.getByText('Terms and Conditions')).toBeInTheDocument();
+            expect(screen.getByText('footer.terms')).toBeInTheDocument();
         });
     });
 
@@ -60,7 +64,7 @@ describe('TermsAndConditionsDialog', () => {
         fireEvent.click(screen.getByText('Open Terms'));
 
         await waitFor(() => {
-            const iframe = screen.getByTitle('Terms and Conditions');
+            const iframe = screen.getByTitle('footer.terms');
             expect(iframe).toBeInTheDocument();
             expect(iframe).toHaveAttribute('src', 'https://example.com/terms');
         });
@@ -72,7 +76,7 @@ describe('TermsAndConditionsDialog', () => {
         fireEvent.click(screen.getByText('Open Terms'));
 
         await waitFor(() => {
-            const iframe = screen.getByTitle('Terms and Conditions');
+            const iframe = screen.getByTitle('footer.terms');
             expect(iframe).toHaveAttribute('sandbox', 'allow-same-origin allow-scripts');
         });
     });
@@ -86,7 +90,7 @@ describe('TermsAndConditionsDialog', () => {
             expect(screen.getByRole('dialog')).toBeInTheDocument();
         });
 
-        const closeButton = screen.getByLabelText('Close');
+        const closeButton = screen.getByLabelText('close');
         fireEvent.click(closeButton);
 
         await waitFor(() => {
@@ -148,7 +152,7 @@ describe('TermsAndConditionsDialog', () => {
         fireEvent.click(screen.getByText('Open Terms'));
 
         await waitFor(() => {
-            expect(screen.getByText('View and read the terms and conditions document')).toBeInTheDocument();
+            expect(screen.getByText('termsDialog.description')).toBeInTheDocument();
         });
     });
 });

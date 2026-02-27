@@ -44,7 +44,7 @@ const Explore = () => {
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
-  const [sortLabel, setSortLabel] = useState('Newest');
+  const [sortLabelKey, setSortLabelKey] = useState('newest');
   const [activeNav, setActiveNav] = useState("explore");
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
 
@@ -89,7 +89,7 @@ const Explore = () => {
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetTitle className="sr-only">{t("navigationMenu")}</SheetTitle>
               <HomeSidebar
                 activeNav={activeNav}
                 onNavChange={(nav) => {
@@ -130,7 +130,7 @@ const Explore = () => {
                       <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         type="text"
-                        placeholder={t('searchPlaceholder') || 'Search for courses, lessons...'}
+                        placeholder={t('searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-10 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[1rem] placeholder:text-[#999999] w-full"
@@ -154,12 +154,12 @@ const Explore = () => {
                           <line x1="3" y1="12" x2="3.01" y2="12"></line>
                           <line x1="3" y1="18" x2="3.01" y2="18"></line>
                         </svg>
-                        <span className="text-sm font-medium">Sort By</span>
+                        <span className="text-sm font-medium">{t("sortBy")}</span>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm font-normal text-foreground hover:bg-gray-50 transition-colors min-w-[120px] justify-between">
-                            {sortLabel}
+                            {t(`sortOptions.${sortLabelKey}`)}
                             <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                           </button>
                         </DropdownMenuTrigger>
@@ -168,19 +168,19 @@ const Explore = () => {
                             className="cursor-pointer hover:bg-gray-50"
                             onClick={() => {
                               setSortBy({ lastUpdatedOn: 'desc' });
-                              setSortLabel('Newest');
+                              setSortLabelKey('newest');
                             }}
                           >
-                            Newest
+                            {t("sortOptions.newest")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="cursor-pointer hover:bg-gray-50"
                             onClick={() => {
                               setSortBy({ lastUpdatedOn: 'asc' });
-                              setSortLabel('Oldest');
+                              setSortLabelKey('oldest');
                             }}
                           >
-                            Oldest
+                            {t("sortOptions.oldest")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

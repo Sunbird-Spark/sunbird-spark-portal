@@ -37,18 +37,36 @@ vi.mock('@/hooks/useUserRead', () => ({
         response: {
           firstName: 'Test',
           lastName: 'User',
+          channel: 'test-channel-slug',
           roles: [{ role: 'CONTENT_CREATOR' }],
         },
       },
     },
   }),
 }));
-
-vi.mock('@/hooks/useSystemSetting', () => ({ useSystemSetting: () => ({ data: undefined }) }));
-vi.mock('@/hooks/useOrganization', () => ({ useOrganizationSearch: () => ({ mutateAsync: vi.fn() }) }));
+vi.mock('@/hooks/useOrganization', () => ({ 
+  useOrganizationSearch: () => ({ 
+    mutateAsync: vi.fn().mockResolvedValue({ 
+      data: { 
+        response: { 
+          content: [{ 
+            hashTagId: 'test-org-id', 
+            identifier: 'test-org-id' 
+          }] 
+        } 
+      } 
+    }) 
+  }) 
+}));
 vi.mock('@/hooks/useQuestionSetCreate', () => ({ useQuestionSetCreate: () => ({ mutateAsync: mockQuestionSetMutateAsync }) }));
 vi.mock('@/hooks/useQuestionSetRetire', () => ({ useQuestionSetRetire: () => ({ mutateAsync: mockQuestionSetRetireMutateAsync }) }));
 vi.mock('@/hooks/useChannel', () => ({ useChannel: () => ({ data: undefined }) }));
+
+vi.mock('@/services/UserProfileService', () => ({
+  default: {
+    initialize: vi.fn().mockResolvedValue(undefined),
+  },
+}));
 
 vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => ({
@@ -72,7 +90,21 @@ vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => key,
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'workspace.createContent': 'Create',
+        'workspace.closeDialog': 'Close dialog',
+        'loading': 'loading',
+        'workspace.deleteContent': 'Delete Content',
+        'workspace.deleteConfirmation': 'Are you sure you want to delete this content?',
+        'delete': 'Delete',
+        'cancel': 'Cancel',
+        'header.openMenu': 'Open menu',
+        'navigationMenu': 'Navigation Menu',
+        'Success': 'Success',
+      };
+      return map[key] || key;
+    },
     languages: [{ code: 'en', label: 'English' }],
     currentCode: 'en',
     changeLanguage: vi.fn(),
@@ -370,7 +402,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
     });
     const dialog = screen.getByRole('dialog', { name: 'Create content' });
-    
+
     // Test story option
     const resourceOption = within(dialog).getByRole('button', { name: /Resource/ });
     fireEvent.click(resourceOption);
@@ -379,7 +411,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByText('Form type: resource')).toBeInTheDocument();
     });
     expect(screen.queryByRole('dialog', { name: 'Create content' })).not.toBeInTheDocument();
-    
+
     // Close and test quiz option
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
@@ -460,7 +492,7 @@ describe('WorkspacePage', () => {
       expect(screen.getByRole('dialog', { name: 'Create Story & Game' })).toBeInTheDocument();
     });
     const resourceDialog = screen.getByRole('dialog', { name: 'Create Story & Game' });
-    
+
     // Test cancel functionality
     const cancelButton = within(resourceDialog).getByRole('button', { name: 'Cancel' });
     fireEvent.click(cancelButton);

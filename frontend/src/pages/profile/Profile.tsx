@@ -11,9 +11,11 @@ import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useUserRead } from "@/hooks/useUserRead";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import "./profile.css";
 
 const Profile = () => {
+    const { t } = useAppI18n();
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("profile");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
@@ -31,7 +33,7 @@ const Profile = () => {
                 {isMobile ? (
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                            <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
                             <HomeSidebar
                                 activeNav={activeNav}
                                 onNavChange={(nav) => {
@@ -56,9 +58,9 @@ const Profile = () => {
                 {/* Main Content Area */}
                 <main className="profile-main-content">
                     {isLoading ? (
-                        <PageLoader message="Loading your profile..." fullPage={false} />
+                        <PageLoader message={t('profilePage.loading')} fullPage={false} />
                     ) : isError || !userData ? (
-                        <PageLoader message="Error loading profile..." fullPage={false} />
+                        <PageLoader message={t('profilePage.errorLoading')} fullPage={false} />
                     ) : (
                         <div className="profile-content-wrapper">
                             {/* Top Section: Profile Card + Personal Information */}

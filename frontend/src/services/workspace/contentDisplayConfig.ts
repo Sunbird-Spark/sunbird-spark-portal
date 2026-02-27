@@ -52,6 +52,31 @@ export const CONTENT_TYPE_COLORS: Record<WorkspaceItem['type'], string> =
 
 /* ─── Status badge config ─── */
 
+export const getStatusConfig = (t: (key: string) => string): Record<
+  WorkspaceItem['status'],
+  { label: string; bg: string; text: string; dot?: string }
+> => ({
+  draft: {
+    label: t('status.draft'),
+    bg: 'bg-muted',
+    text: 'text-muted-foreground',
+    dot: 'bg-muted-foreground',
+  },
+  review: {
+    label: t('status.inReview'),
+    bg: 'bg-sunbird-sunflower/20',
+    text: 'text-sunbird-brick',
+    dot: 'bg-sunbird-ginger',
+  },
+  published: {
+    label: t('status.published'),
+    bg: 'bg-sunbird-moss/15',
+    text: 'text-sunbird-forest',
+    dot: 'bg-sunbird-moss',
+  },
+});
+
+// Legacy export for backward compatibility
 export const STATUS_CONFIG: Record<
   WorkspaceItem['status'],
   { label: string; bg: string; text: string; dot?: string }
