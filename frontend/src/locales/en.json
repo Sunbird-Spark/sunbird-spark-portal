@@ -241,6 +241,28 @@
     "contentStatusInProgress": "In Progress",
     "contentStatusNotViewed": "Not viewed"
   },
+  "profileDataSharing": {
+    "cardTitle": "Profile Data Sharing",
+    "statusOn": "Profile data sharing is On. You have agreed to share your profile details with the course administrator.",
+    "statusOff": "Profile data sharing is Off. You have not agreed to share your profile details with the course administrator.",
+    "lastUpdatedOn": "Last updated on",
+    "update": "Update",
+    "consentTitle": "Profile Data Sharing",
+    "fields": {
+      "name": "Name",
+      "state": "State",
+      "userId": "User ID",
+      "mobileNumber": "Mobile Number",
+      "emailId": "Email"
+    },
+    "canEditFromProfile": "You can edit these details from your profile.",
+    "tncText": "I agree to share the above profile details with the course administrator.",
+    "tncCheckboxLabel": "I agree to share profile details",
+    "dontShare": "Do not share",
+    "share": "Share",
+    "consentUpdateSuccess": "Profile data sharing preference updated.",
+    "consentUpdateError": "Profile data sharing preference could not be updated. Please try again."
+  },
   "resource": {
     "title": "Stay ahead. What's next starts here.",
     "header": "Resource Center",
