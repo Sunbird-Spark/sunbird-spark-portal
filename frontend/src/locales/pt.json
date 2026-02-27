@@ -291,6 +291,7 @@
     "accessRestricted": "Esta página só é acessível a usuários com a função ",
     "roleAdmin": "admin",
     "roleSuffix": ".",
+    "accessInfo": "Esta página só é acessível a usuários com a função <1>{{role}}</1>.",
     "manageUsers": "Gerenciar usuários",
     "systemConfig": "Configuração do sistema",
     "viewReports": "Ver todos os relatórios",
@@ -405,6 +406,7 @@
     "title": "Relatórios",
     "contentReports": "Relatórios de conteúdo",
     "roleContentReviewer": "revisor_de_conteúdo",
+    "accessInfo": "Esta página só é acessível a usuários com a função <1>{{role}}</1>.",
     "analytics": "Ver análises de conteúdo",
     "submissionStats": "Estatísticas de envio",
     "qaMetrics": "Métricas de garantia de qualidade",
@@ -434,7 +436,9 @@
     "showingItemsOf": "Exibindo {{count}} de {{total}} item(ns)",
     "startingEditor": "Iniciando editor",
     "launchingEditor": "Abrindo editor {{name}}...",
-    "enterContentName": "Inserir nome do conteúdo"
+    "enterContentName": "Inserir nome do conteúdo",
+    "collectionType": "Tipo de coleção",
+    "creating": "Criando..."
   },
   "homeComponents": {
     "openMenu": "Abrir menu",

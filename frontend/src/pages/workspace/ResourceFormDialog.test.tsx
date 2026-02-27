@@ -15,7 +15,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'retry': 'Retry',
         'cancel': 'Cancel',
         'create': 'Create',
-        'creating': 'Creating...',
+        'workspace.creating': 'Creating...',
         'formFields.select': 'Select',
       };
       return translations[key] || key;
@@ -464,7 +464,7 @@ describe('ResourceFormDialog', () => {
     renderWithQueryClient(<ResourceFormDialog {...defaultProps} isLoading={true} />);
 
     await waitFor(() => {
-      const submitButton = screen.getByRole('button', { name: /Loading.../ });
+      const submitButton = screen.getByRole('button', { name: /Creating.../ });
       expect(submitButton).toBeDisabled();
     });
   });
