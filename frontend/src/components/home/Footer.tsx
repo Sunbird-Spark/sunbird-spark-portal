@@ -100,7 +100,7 @@ const Footer = () => {
               <span className="text-sunbird-brick">{t("footer.terms")}</span>
             )}
             {(privacyUrl || termsUrl) ? (
-              <TermsAndConditionsDialog termsUrl={privacyUrl || termsUrl} title={t("footer.privacy")}>
+              <TermsAndConditionsDialog termsUrl={(privacyUrl || termsUrl)!} title={t("footer.privacy")}>
                 <button
                   type="button"
                   className="hover:opacity-80 transition-opacity text-sunbird-brick"
