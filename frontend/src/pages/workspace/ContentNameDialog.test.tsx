@@ -10,7 +10,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'content.label': 'Content',
         'workspace.enterContentName': 'Enter Content Name',
         'name': 'Name',
-        'description': 'Description',
+        'workspace.description': 'Description',
         'workspace.enterDescription': 'Enter a description',
         'collection.label': 'Collection',
         'workspace.selectCollectionType': 'Select a collection type',
