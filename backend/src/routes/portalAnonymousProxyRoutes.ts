@@ -2,7 +2,6 @@ import express from 'express';
 import { kongProxy } from '../proxies/kongProxy.js';
 import { read } from '../controllers/formsController.js';
 import { validateReadAPI } from '../middlewares/formsValidator.js';
-import { keycloak } from '../auth/keycloakProvider.js';
 
 
 const router = express.Router();
@@ -13,7 +12,6 @@ router.post('/org/v2/search', kongProxy);
 router.get('/data/v1/system/settings/get/*rest', kongProxy);
 router.post('/composite/v1/search', kongProxy);
 router.post('/data/v1/form/read', validateReadAPI, read);
-router.post('/user/v1/tnc/accept', keycloak.middleware(), kongProxy);
 router.get('/questionset/v2/hierarchy/*rest', kongProxy);
 router.post('/question/v2/list', kongProxy);
 
