@@ -3,7 +3,7 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 
 // Mocks
-const mockKongProxy = vi.fn((req: Request, res: Response, next: NextFunction) => res.status(200).send('OK'));
+const mockKongProxy = vi.fn((req: Request, res: Response) => res.status(200).send('OK'));
 const mockRead = vi.fn((req: Request, res: Response) => res.status(200).send('OK'));
 const mockValidateReadAPI = vi.fn((req: Request, res: Response, next: NextFunction) => next());
 
