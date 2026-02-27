@@ -126,18 +126,19 @@ describe('RoleDialog', () => {
 
   it('calls onSave when Save/Add is clicked', () => {
     const onSave = vi.fn();
+    const mockOrgs = [{ organisationId: 'org123', orgName: 'Test Org' }];
     render(
       <RoleDialog
         dialogState={mockStateAdd}
         availableRoles={MOCK_ROLES}
-        selectedRole=""
-        organisationId=""
+        selectedRole="ROLE_1"
+        organisationId="org123"
         isSavingRole={false}
         onClose={vi.fn()}
         onSave={onSave}
         onSelectedRoleChange={vi.fn()}
         onOrganisationIdChange={vi.fn()}
-        userOrganisations={[]}
+        userOrganisations={mockOrgs}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
@@ -185,5 +186,25 @@ describe('RoleDialog', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeDisabled();
     expect(screen.getByTestId('um-org-select')).toBeDisabled();
     expect(screen.getByTestId('um-role-select')).toBeDisabled();
+  });
+
+  it('disables Save button when userOrganisations is empty', () => {
+    render(
+      <RoleDialog
+        dialogState={mockStateAdd}
+        availableRoles={MOCK_ROLES}
+        selectedRole="ROLE_1"
+        organisationId=""
+        isSavingRole={false}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        onSelectedRoleChange={vi.fn()}
+        onOrganisationIdChange={vi.fn()}
+        userOrganisations={[]}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+    expect(screen.getAllByText('No organisations available').length).toBeGreaterThan(0);
+    expect(screen.getByText('Please ensure the user has at least one organisation.')).toBeInTheDocument();
   });
 });

@@ -13,6 +13,7 @@ import {
   type UserSearchResult,
   type RoleItem,
   type UserRoleInfo,
+  type OrganisationOption,
 } from "@/services/UserManagementService";
 import "./user-management.css";
 
@@ -22,7 +23,7 @@ import "./user-management.css";
 interface RoleManagementTabProps {
   availableRoles: RoleItem[];
   onRefreshSearch: () => void;
-  userOrganisations: any[];
+  userOrganisations: OrganisationOption[];
 }
 
 const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations }: RoleManagementTabProps) => {

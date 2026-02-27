@@ -14,6 +14,7 @@ import { useSidebarState } from "@/hooks/useSidebarState";
 import {
   userManagementService,
   type RoleItem,
+  type OrganisationOption,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
 import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
@@ -71,26 +72,34 @@ const UserManagementPage = () => {
     return latestVersion !== acceptedVersion;
   })();
 
-  const userOrganisations = React.useMemo(() => {
-    const orgs: any[] = [];
+  const userOrganisations = React.useMemo((): OrganisationOption[] => {
+    const orgs: OrganisationOption[] = [];
     const responseData: any = _.get(userRes, 'data.response', {});
     
-    // Add rootOrg if present
+    // 1. Check rootOrg object
     if (responseData.rootOrg) {
       orgs.push({
-        organisationId: responseData.rootOrg.id || responseData.rootOrg.rootOrgId,
-        orgName: responseData.rootOrg.orgName
+        organisationId: responseData.rootOrg.id || responseData.rootOrg.rootOrgId || responseData.rootOrgId,
+        orgName: responseData.rootOrg.orgName || responseData.rootOrgName
+      });
+    } 
+    // 2. Fallback to top-level rootOrgId/rootOrgName if rootOrg object is missing/incomplete
+    else if (responseData.rootOrgId) {
+      orgs.push({
+        organisationId: responseData.rootOrgId,
+        orgName: responseData.rootOrgName || 'Root Organisation'
       });
     }
 
-    // Add other organisations if any
+    // 3. Add other organisations if any
     if (Array.isArray(responseData.organisations)) {
       responseData.organisations.forEach((org: any) => {
-        // Only add if not already added (e.g. if rootOrg is also in organisations list)
-        if (!orgs.find(o => o.organisationId === org.organisationId)) {
+        const orgId = org.organisationId || org.id;
+        const orgName = org.orgName || org.orgName;
+        if (orgId && !orgs.find(o => o.organisationId === orgId)) {
           orgs.push({
-            organisationId: org.organisationId,
-            orgName: org.orgName
+            organisationId: orgId,
+            orgName: orgName || 'Unknown Organisation'
           });
         }
       });
@@ -102,7 +111,8 @@ const UserManagementPage = () => {
   const loadRoles = useCallback(async () => {
     try {
       const response = await userManagementService.getRoles();
-      const roles: RoleItem[] = response.data?.roles ?? [];
+      // Service returns { data: { result: { roles } } }
+      const roles: RoleItem[] = response.data?.result?.roles ?? [];
       setAvailableRoles(roles.filter((r) => r.id !== 'PUBLIC'));
     } catch (err) {
       toast({ title: "Failed to load roles", description: "Roles could not be loaded.", variant: "destructive" });
