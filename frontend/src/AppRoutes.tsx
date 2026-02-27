@@ -89,12 +89,12 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         <Route path="/edit/collection-editor/:contentId" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR','CONTENT_REVIEWER']}>
             <CollectionEditorPage />
           </ProtectedRoute>
         } />
         <Route path="/edit/quml-editor/:contentId" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR','CONTENT_REVIEWER']}>
             <QumlEditorPage />
           </ProtectedRoute>
         } />
