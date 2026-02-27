@@ -76,7 +76,7 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         <Route path="/workspace/view/:contentId" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
             <ContentViewPage mode="view" />
           </ProtectedRoute>
         } />
