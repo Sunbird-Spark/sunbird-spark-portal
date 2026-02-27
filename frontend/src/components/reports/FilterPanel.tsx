@@ -35,7 +35,7 @@ const FilterPanel = ({ filters, values, onChange, searchValue, onSearchChange, s
       )}
       {filters.map((f) => (
         <Select key={f.key} value={values[f.key] ?? "all"} onValueChange={(v) => onChange(f.key, v)}>
-          <SelectTrigger className="w-[180px] h-10 bg-surface border-border rounded-lg" aria-label={f.label}>
+          <SelectTrigger className="w-[11.25rem] h-10 bg-surface border-border rounded-lg" aria-label={f.label}>
             <SelectValue placeholder={f.label} />
           </SelectTrigger>
           <SelectContent>

@@ -64,7 +64,7 @@ const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseR
       header: "Progress",
       sortable: true,
       render: (row) => (
-        <div className="flex items-center gap-2 min-w-[120px]">
+        <div className="flex items-center gap-2 min-w-[7.5rem]">
           <Progress value={row.progressPercent} className="h-2 flex-1" />
           <span className="text-xs font-medium w-8 text-right">{row.progressPercent}%</span>
         </div>

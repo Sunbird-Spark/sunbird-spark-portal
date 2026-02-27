@@ -111,7 +111,7 @@ const PlatformReports = () => {
             title="Content by Grouping"
             actions={
               <Select value={contentGrouping} onValueChange={setContentGrouping}>
-                <SelectTrigger className="w-[140px] h-8 text-xs border-border"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-[8.75rem] h-8 text-xs border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="taxonomy">Taxonomy</SelectItem>
                   <SelectItem value="skills">Skills</SelectItem>
