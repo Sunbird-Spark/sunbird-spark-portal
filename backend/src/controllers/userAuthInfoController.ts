@@ -35,7 +35,7 @@ export const getAuthInfo = async (req: Request, res: Response) => {
         const authStatusData = {
             sid: sessionId,
             uid: userId,
-            isAuthenticated: isAuthenticated,
+            isAuthenticated: isAuthenticated
         };
 
         response.setResult({ data: authStatusData });

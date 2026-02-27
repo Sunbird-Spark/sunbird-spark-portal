@@ -60,7 +60,7 @@ describe('AuthController', () => {
             data: {
                 sid: 'test-session-id',
                 uid: null,
-                isAuthenticated: false,
+                isAuthenticated: false
             }
         });
     });
