@@ -34,8 +34,7 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
   const { needsTncAcceptance, termsUrl } = useTncCheck(userProfile, tncConfig);
   const acceptTncMutation = useAcceptTnc();
 
-  // Prefer the URL resolved from tncConfig; fall back to the user profile URL if needed.
-  const finalTermsUrl = termsUrl || userProfile?.tncLatestVersionUrl || '';
+  const finalTermsUrl = termsUrl;
 
   // Wait for both data sources to settle before deciding whether to show the popup,
   // preventing a flash if userProfile loads before tncConfig.
