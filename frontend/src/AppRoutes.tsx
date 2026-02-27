@@ -47,6 +47,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/explore" element={<Explore />} />
+        <Route path="/my-learning" element={<MyLearning />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
@@ -80,11 +81,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/create" element={
           <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
             <CreateContentPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/my-learning" element={
-          <ProtectedRoute allowedRoles={[]}>
-            <MyLearning />
           </ProtectedRoute>
         } />
         <Route path="/edit/content-editor/:contentId" element={
