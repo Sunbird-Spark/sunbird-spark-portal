@@ -149,7 +149,7 @@ function renderPage() {
 describe('UserManagementPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRoles.mockResolvedValue({ data: { result: { roles: MOCK_ROLES } }, status: 200, headers: {} });
+    mockGetRoles.mockResolvedValue({ data: { result: { response: { roleList: MOCK_ROLES } } }, status: 200, headers: {} });
     mockSearchUser.mockResolvedValue({ data: { response: { content: [] } }, status: 200, headers: {} });
     mockAssignRole.mockResolvedValue({ data: {}, status: 200, headers: {} });
   });

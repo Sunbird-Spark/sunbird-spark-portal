@@ -7,6 +7,10 @@ export interface AcceptTncRequest {
     tncType?: string;
 }
 
+export interface AcceptTncPayload {
+    request: AcceptTncRequest;
+}
+
 export interface AcceptTncResponse {
     success: boolean;
 }
@@ -37,9 +41,10 @@ export class TncService {
 
     async acceptTnc(tncConfig: unknown, identifier?: string, tncType?: string): Promise<ApiResponse<AcceptTncResponse>> {
         const version = this.getLatestVersion(tncConfig);
-        const body: Record<string, string> = { version };
+        const body: AcceptTncRequest = { version };
         if (identifier) body.identifier = identifier;
         if (tncType) body.tncType = tncType;
-        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', body);
+        const payload: AcceptTncPayload = { request: body };
+        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', payload);
     }
 }
