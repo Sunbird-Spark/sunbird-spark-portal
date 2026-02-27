@@ -65,7 +65,7 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
       });
       return;
     }
-    const identifier = userProfile.email || userProfile.phone || userProfile.userName || '';
+    const identifier = userProfile.identifier;
     acceptTncMutation.mutate(
       { tncConfig, identifier },
       {

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { TncCheckWrapper } from './TncCheckWrapper';
 
 const mockMutate = vi.fn();
@@ -141,11 +140,11 @@ describe('TncCheckWrapper', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('calls acceptTnc mutation when user accepts', async () => {
+  it('calls acceptTnc mutation with identifier when user accepts', async () => {
     mockNeedsTncAcceptance = true;
     mockTermsUrl = 'https://example.com/terms';
     mockIsAuthenticated = true;
-    renderWrapper({ email: 'user@example.com', tncLatestVersion: 'v1' });
+    renderWrapper({ identifier: 'a4307b37-b832-4f55-be76-07d97196960e', tncLatestVersion: 'v1' });
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -156,6 +155,19 @@ describe('TncCheckWrapper', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
 
     expect(mockMutate).toHaveBeenCalledTimes(1);
+    expect(mockMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ identifier: 'a4307b37-b832-4f55-be76-07d97196960e' }),
+      expect.any(Object)
+    );
+  });
+
+  it('does not show popup when tncConfig is not present (null)', () => {
+    mockNeedsTncAcceptance = false;
+    mockTermsUrl = '';
+    mockIsAuthenticated = true;
+    renderWrapper({ identifier: 'a4307b37-b832-4f55-be76-07d97196960e' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('always renders children regardless of T&C state', async () => {
