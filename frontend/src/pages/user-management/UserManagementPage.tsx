@@ -111,8 +111,13 @@ const UserManagementPage = () => {
   const loadRoles = useCallback(async () => {
     try {
       const response = await userManagementService.getRoles();
-      // Service returns { data: { result: { roles } } }
-      const roles: RoleItem[] = response.data?.result?.roles ?? [];
+      // Service might return { data: { result: { response: { roleList } } } } 
+      // or { data: { result: { roles } } } or { data: { roles } }
+      const roles: RoleItem[] = 
+        response.data?.result?.response?.roleList ?? 
+        response.data?.result?.roles ?? 
+        response.data?.roles ?? 
+        [];
       setAvailableRoles(roles.filter((r) => r.id !== 'PUBLIC'));
     } catch (err) {
       toast({ title: "Failed to load roles", description: "Roles could not be loaded.", variant: "destructive" });
