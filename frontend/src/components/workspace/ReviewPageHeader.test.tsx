@@ -2,6 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ReviewPageHeader from './ReviewPageHeader';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'back': 'Back',
+        'loading': 'Loading',
+        'checklistDialog.publishing': 'Publishing...',
+        'checklistDialog.publish': 'Publish',
+        'checklistDialog.requestForChanges': 'Request for Changes',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 describe('ReviewPageHeader', () => {
   const mockOnBack = vi.fn();
   const mockOnPublish = vi.fn();

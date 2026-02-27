@@ -3,7 +3,7 @@ import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoServ
 import { UserService } from '@/services/UserService';
 import { useReviewComment } from '@/hooks/useReviewComment';
 import { useAppI18n } from '@/hooks/useAppI18n';
-import './CommentSection.css';
+import './ReviewCommentSection.css';
 
 interface CommentSectionProps {
   contentId: string;
