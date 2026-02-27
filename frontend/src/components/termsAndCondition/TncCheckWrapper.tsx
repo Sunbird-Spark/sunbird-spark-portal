@@ -22,30 +22,37 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
   const queryClient = useQueryClient();
   const isAuthenticated = userAuthInfoService.isUserAuthenticated();
 
-  const { data: userReadData } = useUserRead();
+  const { data: userReadData, isLoading: isUserLoading } = useUserRead();
   const userProfile = userProfileProp || userReadData?.data?.response;
 
   const [showPopup, setShowPopup] = useState(false);
+  // Tracks whether the user dismissed the popup this session without accepting.
+  // The popup will reappear on the next login since the backend TNC state is unchanged.
+  const [dismissedForSession, setDismissedForSession] = useState(false);
 
-  const { data: tncConfig } = useSystemSetting('tncConfig');
+  const { data: tncConfig, isLoading: isTncLoading } = useSystemSetting('tncConfig');
   const { needsTncAcceptance, termsUrl } = useTncCheck(userProfile, tncConfig);
   const acceptTncMutation = useAcceptTnc();
 
   // Prefer the URL resolved from tncConfig; fall back to the user profile URL if needed.
   const finalTermsUrl = termsUrl || userProfile?.tncLatestVersionUrl || '';
 
+  // Wait for both data sources to settle before deciding whether to show the popup,
+  // preventing a flash if userProfile loads before tncConfig.
+  const isDataLoading = isUserLoading || isTncLoading;
+
   useEffect(() => {
-    if (needsTncAcceptance && finalTermsUrl && userProfile) {
+    if (!isDataLoading && needsTncAcceptance && finalTermsUrl && userProfile && !dismissedForSession) {
       setShowPopup(true);
     } else {
       setShowPopup(false);
     }
-  }, [needsTncAcceptance, finalTermsUrl, userProfile]);
+  }, [isDataLoading, needsTncAcceptance, finalTermsUrl, userProfile, dismissedForSession]);
 
   const handleOpenChange = (open: boolean) => {
-    // Prevent closing if TNC still needs acceptance
-    if (!open && needsTncAcceptance) {
-      return;
+    if (!open) {
+      // User closed without accepting — suppress for this session only.
+      setDismissedForSession(true);
     }
     setShowPopup(open);
   };
@@ -65,6 +72,7 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
       {
         onSuccess: async () => {
           setShowPopup(false);
+          setDismissedForSession(false);
           toast({
             title: t('tncPopup.acceptedTitle'),
             description: t('tncPopup.acceptedDescription'),
@@ -102,7 +110,7 @@ export const TncCheckWrapper: React.FC<TncCheckWrapperProps> = ({
           termsUrl={finalTermsUrl}
           onAccept={handleAccept}
           isAccepting={acceptTncMutation.isPending}
-          showCloseButton={!needsTncAcceptance}
+          showCloseButton={true}
         />
       )}
     </>

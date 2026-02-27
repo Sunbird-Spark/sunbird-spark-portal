@@ -304,7 +304,7 @@ describe('useTnc hooks', () => {
 
             const { result } = renderHook(() => useTncCheck(null, tncConfig), { wrapper });
 
-            expect(result.current.needsTncAcceptance).toBe(true);
+            expect(result.current.needsTncAcceptance).toBe(false);
         });
     });
 });

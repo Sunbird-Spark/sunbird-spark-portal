@@ -28,12 +28,17 @@ export const useTncCheck = (userProfile: any, tncConfig: any): {
   latestVersion: string;
   termsUrl: string;
 } => {
+  // If the user profile is not yet loaded, acceptance cannot be evaluated.
+  if (!userProfile) {
+    return { needsTncAcceptance: false, latestVersion: '', termsUrl: '' };
+  }
+
   // Fallback to user profile if tncConfig is not available
-  const latestVersion = tncConfig 
-    ? tncService.getLatestVersion(tncConfig) 
+  const latestVersion = tncConfig
+    ? tncService.getLatestVersion(tncConfig)
     : (userProfile?.tncLatestVersion || '');
-  const termsUrl = tncConfig 
-    ? tncService.getTncUrl(tncConfig) 
+  const termsUrl = tncConfig
+    ? tncService.getTncUrl(tncConfig)
     : (userProfile?.tncLatestVersionUrl || '');
   const acceptedVersion = userProfile?.tncAcceptedVersion || '';
 
