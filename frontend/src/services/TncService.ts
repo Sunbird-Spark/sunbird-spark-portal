@@ -3,7 +3,8 @@ import { getClient, ApiResponse } from '../lib/http-client';
 
 export interface AcceptTncRequest {
     version: string;
-    identifier: string;
+    identifier?: string;
+    tncType?: string;
 }
 
 export interface AcceptTncResponse {
@@ -34,12 +35,11 @@ export class TncService {
         return _.get(this.parseTncConfig(tncConfig), 'latestVersion', '');
     }
 
-    async acceptTnc(tncConfig: unknown, identifier: string): Promise<ApiResponse<AcceptTncResponse>> {
+    async acceptTnc(tncConfig: unknown, identifier?: string, tncType?: string): Promise<ApiResponse<AcceptTncResponse>> {
         const version = this.getLatestVersion(tncConfig);
-
-        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', {
-            version,
-            identifier,
-        });
+        const body: Record<string, string> = { version };
+        if (identifier) body.identifier = identifier;
+        if (tncType) body.tncType = tncType;
+        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', body);
     }
 }

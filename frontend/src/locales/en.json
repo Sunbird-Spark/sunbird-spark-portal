@@ -241,6 +241,28 @@
     "contentStatusInProgress": "In Progress",
     "contentStatusNotViewed": "Not viewed"
   },
+  "profileDataSharing": {
+    "cardTitle": "Profile Data Sharing",
+    "statusOn": "Profile data sharing is On. You have agreed to share your profile details with the course administrator.",
+    "statusOff": "Profile data sharing is Off. You have not agreed to share your profile details with the course administrator.",
+    "lastUpdatedOn": "Last updated on",
+    "update": "Update",
+    "consentTitle": "Profile Data Sharing",
+    "fields": {
+      "name": "Name",
+      "state": "State",
+      "userId": "User ID",
+      "mobileNumber": "Mobile Number",
+      "emailId": "Email"
+    },
+    "canEditFromProfile": "You can edit these details from your profile.",
+    "tncText": "I agree to share the above profile details with the course administrator.",
+    "tncCheckboxLabel": "I agree to share profile details",
+    "dontShare": "Do not share",
+    "share": "Share",
+    "consentUpdateSuccess": "Profile data sharing preference updated.",
+    "consentUpdateError": "Profile data sharing preference could not be updated. Please try again."
+  },
   "resource": {
     "title": "Stay ahead. What's next starts here.",
     "header": "Resource Center",
@@ -385,7 +407,12 @@
   },
   "common": {
     "notifications": "Notifications",
-    "language": "Language"
+    "language": "Language",
+    "manage": "Manage",
+    "backTo": "Back to {{page}}",
+    "upcomingBatches": "Upcoming Batches",
+    "learningProgress": "Learning Progress",
+    "downloadCertificate": "Download Certificate"
   },
   "myLearning": {
     "loading": "Loading your learning...",
@@ -437,6 +464,35 @@
     "startingEditor": "Starting Editor",
     "launchingEditor": "Launching {{name}} editor...",
     "enterContentName": "Enter content name",
+    "review": {
+      "errorTitle": "Error",
+      "failedToLoadForm": "Failed to load {{action}} form.",
+      "failedToLoadFormRetry": "Failed to load {{action}} form. Please try again.",
+      "publishedTitle": "Published",
+      "publishedDescription": "Content has been published successfully.",
+      "publishFailedTitle": "Publish Failed",
+      "publishFailedDescription": "Unable to publish content. Please try again.",
+      "changesRequestedTitle": "Changes Requested",
+      "changesRequestedDescription": "Request for changes has been submitted successfully.",
+      "requestFailedTitle": "Request Failed",
+      "requestFailedDescription": "Unable to submit request for changes. Please try again.",
+      "notAvailable": "N/A",
+      "lastUpdated": "Last Updated",
+      "contentType": "Content Type",
+      "errorLoading": "Error loading content: {{error}}",
+      "contentNotFound": "Content not found",
+      "loadingComments": "Loading comments...",
+      "comments": "Comments",
+      "noCommentsYet": "No comments yet. Add the first comment below.",
+      "noCommentsYetViewMode": "No comments yet.",
+      "addCommentPlaceholder": "Add a comment...",
+      "addComment": "Add Comment",
+      "anonymous": "anonymous",
+      "confirmPublish": "Confirm Publish",
+      "publishWarningText": "You have given some review comments/suggestions, they will be lost if content is published.",
+      "publishWarningQuestion": "Do you want to publish?",
+      "processing": "Processing..."
+    },
     "collectionType": "Collection Type",
     "creating": "Creating..."
   },
@@ -456,6 +512,9 @@
     "profile": "Profile",
     "helpAndSupport": "Help and Support",
     "logout": "Logout",
+    "userReport": "User Report",
+    "adminReports": "Admin Reports",
+    "userManagement": "User Management",
     "expand": "Expand Sidebar",
     "collapse": "Collapse Sidebar"
   },
@@ -684,8 +743,6 @@
     "noCertificateRecords": "No certificate records found for \"{{userName}}\".",
     "certificateIssued": "Certificate Issued",
     "courseCompleted": "Course Completed",
-    "yes": "Yes",
-    "no": "No",
     "criteriaMustBeMet": "Criteria must be met to re-issue",
     "reissueCertificate": "Re-issue certificate"
   },
@@ -719,12 +776,5 @@
     "batches": "Batches",
     "certificates": "Certificates",
     "all": "All"
-  },
-  "common": {
-    "manage": "Manage",
-    "backTo": "Back to {{page}}",
-    "upcomingBatches": "Upcoming Batches",
-    "learningProgress": "Learning Progress",
-    "downloadCertificate": "Download Certificate"
   }
 }

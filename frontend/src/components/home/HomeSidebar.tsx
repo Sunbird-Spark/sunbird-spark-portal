@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers } from "react-icons/fi";
+import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers, FiBarChart2, FiPieChart } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -46,6 +46,7 @@ const NAV_ITEM_DEFS = [
     { id: "explore", labelKey: "sidebar.explore", icon: ExploreIcon, path: "/explore" },
     { id: "workspace", labelKey: "sidebar.workspace", icon: FiEdit, path: "/workspace" },
     { id: "profile", labelKey: "sidebar.profile", icon: FiUser, path: "/profile" },
+    { id: "user-report", labelKey: "sidebar.userReport", icon: FiPieChart, path: "/reports/user/me" },
 ];
 
 const BOTTOM_NAV_DEFS = [
@@ -72,7 +73,10 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const dynamicMainNavItems = [
         ...mainNavItems,
         ...(isAdmin
-            ? [{ id: "user-management", labelKey: "sidebar.userManagement", label: "User Management", icon: FiUsers, path: "/user-management" }]
+            ? [
+                { id: "user-management", labelKey: "sidebar.userManagement", label: t("sidebar.userManagement"), icon: FiUsers, path: "/user-management" },
+                { id: "admin-reports", labelKey: "sidebar.adminReports", label: t("sidebar.adminReports"), icon: FiBarChart2, path: "/reports/platform" },
+              ]
             : []),
     ];
 

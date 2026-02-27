@@ -28,11 +28,13 @@ import ContentReviewPage from './pages/workspace/ContentReviewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
 import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
+import PlatformReports from './pages/reports/PlatformReports';
+import CourseReport from './pages/reports/CourseReport';
+import UserReport from './pages/reports/UserReport';
 
 const AdminProtected = withRoles(['admin'])(AdminPage);
 
 const WorkspaceProtected = withRoles(['content_creator', 'content_reviewer'])(WorkspacePage);
-const ReportsProtected = withRoles(['admin'])(ReportsPage);
 const CreateContentProtected = withRoles(['content_creator'])(CreateContentPage);
 const ContentEditorProtected = withRoles(['content_creator'])(ContentEditorPage);
 const GenericEditorProtected = withRoles(['content_creator'])(GenericEditorPage);
@@ -69,7 +71,10 @@ const AppRoutes: React.FC = () => {
         <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/workspace" element={<WorkspacePage />} />
         <Route path="/workspace/review/:contentId" element={<ContentReviewPage />} />
-        <Route path="/reports" element={<ReportsProtected />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/reports/platform" element={<PlatformReports />} />
+        <Route path="/reports/course/:courseId" element={<CourseReport />} />
+        <Route path="/reports/user/:userId" element={<UserReport />} />
         <Route path="/create" element={<CreateContentPage />} />
         <Route path="/edit/content-editor/:contentId" element={<ContentEditorPage />} />
         <Route path="/my-learning" element={<MyLearning />} />

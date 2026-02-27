@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import BatchesTab from './BatchesTab';
 import { useBatchListForCreator } from '@/hooks/useBatch';
@@ -16,6 +16,22 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 
+vi.mock('@/components/collection/BatchRow', () => ({
+  getBatchStatus: (status: string) => {
+    if (status === '0') return 'Upcoming';
+    if (status === '1') return 'Ongoing';
+    return 'Expired';
+  },
+}));
+
+vi.mock('@/components/reports/CourseReportContent', () => ({
+  default: ({ courseId, batchId }: { courseId?: string; batchId?: string }) => (
+    <div data-testid="course-report-content">
+      Report for course {courseId} batch {batchId}
+    </div>
+  ),
+}));
+
 describe('BatchesTab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -27,7 +43,6 @@ describe('BatchesTab', () => {
       isLoading: true,
       isError: false,
     });
-
     render(<BatchesTab collectionId="col_123" />);
     expect(screen.getByTestId('batches-loading')).toBeInTheDocument();
   });
@@ -39,7 +54,6 @@ describe('BatchesTab', () => {
       isError: true,
       error: new Error('Failed to load'),
     });
-
     render(<BatchesTab collectionId="col_123" />);
     expect(screen.getByTestId('batches-error')).toBeInTheDocument();
     expect(screen.getByText('Failed to load')).toBeInTheDocument();
@@ -51,32 +65,68 @@ describe('BatchesTab', () => {
       isLoading: false,
       isError: false,
     });
-
     render(<BatchesTab collectionId="col_123" />);
     expect(screen.getByText('No batches found.')).toBeInTheDocument();
   });
 
-  it('renders list of batches and selects one', () => {
-    const mockBatches = [
-      { id: 'b1', name: 'Batch 1' },
-      { id: 'b2', name: 'Batch 2' },
-    ];
+  it('renders batch select dropdown when batches exist', () => {
     (useBatchListForCreator as any).mockReturnValue({
-      data: mockBatches,
+      data: [{ id: 'b1', name: 'Batch 1', status: '1' }],
       isLoading: false,
       isError: false,
     });
-
     render(<BatchesTab collectionId="col_123" />);
+    expect(screen.getByTestId('batch-select-trigger')).toBeInTheDocument();
+  });
 
-    expect(screen.getByTestId('batch-item-b1')).toBeInTheDocument();
-    expect(screen.getByTestId('batch-item-b2')).toBeInTheDocument();
+  it('shows placeholder text before a batch is selected', () => {
+    (useBatchListForCreator as any).mockReturnValue({
+      data: [{ id: 'b1', name: 'Batch 1', status: '1' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchesTab collectionId="col_123" />);
     expect(screen.getByTestId('no-batch-selected')).toBeInTheDocument();
+    expect(screen.getByText(/select a batch from the dropdown/i)).toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByTestId('batch-item-b2'));
+  it('renders main panel', () => {
+    (useBatchListForCreator as any).mockReturnValue({
+      data: [{ id: 'b1', name: 'Batch 1', status: '1' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchesTab collectionId="col_123" />);
+    expect(screen.getByTestId('batches-main-panel')).toBeInTheDocument();
+  });
 
-    expect(screen.getByTestId('selected-batch-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('selected-batch-panel')).toHaveTextContent('Batch 2');
-    expect(screen.getByTestId('selected-batch-panel')).toHaveTextContent('Batch ID: b2');
+  it('renders Select Batch label', () => {
+    (useBatchListForCreator as any).mockReturnValue({
+      data: [{ id: 'b1', name: 'Batch 1', status: '1' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchesTab collectionId="col_123" />);
+    expect(screen.getByText('Select Batch')).toBeInTheDocument();
+  });
+
+  it('handles undefined data as empty list', () => {
+    (useBatchListForCreator as any).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchesTab collectionId="col_123" />);
+    expect(screen.getByText('No batches found.')).toBeInTheDocument();
+  });
+
+  it('does not show course report content before batch selection', () => {
+    (useBatchListForCreator as any).mockReturnValue({
+      data: [{ id: 'b1', name: 'Batch 1', status: '1' }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<BatchesTab collectionId="col_123" />);
+    expect(screen.queryByTestId('course-report-content')).not.toBeInTheDocument();
   });
 });

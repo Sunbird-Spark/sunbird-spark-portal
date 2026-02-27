@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { keycloak } from './auth/keycloakProvider.js';
 import formRoutes from './routes/formsRoutes.js';
+import reviewCommentRoutes from './routes/reviewCommentRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
 import portalProxyRoutes from './routes/portalProxyRoutes.js';
@@ -38,6 +39,9 @@ app.get('/portal/app/v1/info', getAppInfo);
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousProxyRoutes)
 // Portal Authentication Routes (Login, Callback, Logout)
 app.use('/portal', portalAuthRoutes);
+
+// Review comment routes
+app.use('/portal/review/comment/v1', sessionMiddleware, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), reviewCommentRoutes);
 
 // Apply anonymous session middleware to API routes (once per route tree)
 

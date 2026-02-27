@@ -75,7 +75,7 @@ describe('useTnc hooks', () => {
                 expect(result.current.isSuccess).toBe(true);
             });
 
-            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, identifier);
+            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, identifier, undefined);
             expect(result.current.data).toEqual({ data: { success: true } });
         });
 
@@ -128,6 +128,7 @@ describe('useTnc hooks', () => {
             });
 
             expect(result.current.isPending).toBe(false);
+            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, identifier, undefined);
         });
     });
 
