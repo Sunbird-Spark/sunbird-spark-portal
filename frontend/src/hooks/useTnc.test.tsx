@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAcceptTnc, useGetTncUrl } from './useTnc';
+import { useAcceptTnc, useGetTncUrl, useTncCheck } from './useTnc';
 import React from 'react';
 
 // Mock the TncService with methods defined in the factory
@@ -241,6 +241,70 @@ describe('useTnc hooks', () => {
             });
 
             expect(result.current.data).toBe('');
+        });
+    });
+
+    describe('useTncCheck', () => {
+        it('returns needsTncAcceptance true when user has never accepted', () => {
+            mockGetLatestVersion.mockReturnValue('v1');
+            mockGetTncUrl.mockReturnValue('https://example.com/terms');
+
+            const userProfile = {};
+            const tncConfig = { data: { response: { value: { latestVersion: 'v1' } } } };
+
+            const { result } = renderHook(() => useTncCheck(userProfile, tncConfig), { wrapper });
+
+            expect(result.current.needsTncAcceptance).toBe(true);
+            expect(result.current.latestVersion).toBe('v1');
+            expect(result.current.termsUrl).toBe('https://example.com/terms');
+        });
+
+        it('returns needsTncAcceptance true when version is outdated', () => {
+            mockGetLatestVersion.mockReturnValue('v2');
+            mockGetTncUrl.mockReturnValue('https://example.com/terms-v2');
+
+            const userProfile = { tncAcceptedVersion: 'v1' };
+            const tncConfig = { data: { response: { value: { latestVersion: 'v2' } } } };
+
+            const { result } = renderHook(() => useTncCheck(userProfile, tncConfig), { wrapper });
+
+            expect(result.current.needsTncAcceptance).toBe(true);
+        });
+
+        it('returns needsTncAcceptance false when version matches', () => {
+            mockGetLatestVersion.mockReturnValue('v1');
+            mockGetTncUrl.mockReturnValue('https://example.com/terms');
+
+            const userProfile = { tncAcceptedVersion: 'v1' };
+            const tncConfig = { data: { response: { value: { latestVersion: 'v1' } } } };
+
+            const { result } = renderHook(() => useTncCheck(userProfile, tncConfig), { wrapper });
+
+            expect(result.current.needsTncAcceptance).toBe(false);
+        });
+
+        it('returns needsTncAcceptance false when tncConfig is null', () => {
+            mockGetLatestVersion.mockReturnValue('');
+            mockGetTncUrl.mockReturnValue('');
+
+            const userProfile = {};
+
+            const { result } = renderHook(() => useTncCheck(userProfile, null), { wrapper });
+
+            expect(result.current.needsTncAcceptance).toBe(false);
+            expect(result.current.latestVersion).toBe('');
+            expect(result.current.termsUrl).toBe('');
+        });
+
+        it('returns needsTncAcceptance false when userProfile is null', () => {
+            mockGetLatestVersion.mockReturnValue('v1');
+            mockGetTncUrl.mockReturnValue('https://example.com/terms');
+
+            const tncConfig = { data: { response: { value: { latestVersion: 'v1' } } } };
+
+            const { result } = renderHook(() => useTncCheck(null, tncConfig), { wrapper });
+
+            expect(result.current.needsTncAcceptance).toBe(false);
         });
     });
 });

@@ -665,6 +665,17 @@
   "termsDialog": {
     "description": "View and read the terms and conditions document"
   },
+  "tncPopup": {
+    "title": "Terms and Conditions Updated",
+    "description": "Please review and accept the updated terms and conditions",
+    "checkboxLabel": "I have read and accept the Terms and Conditions",
+    "accept": "Accept",
+    "accepting": "Accepting...",
+    "acceptedTitle": "Terms Accepted",
+    "acceptedDescription": "Thank you for accepting the updated terms and conditions.",
+    "errorTitle": "Acceptance Failed",
+    "errorDescription": "Failed to accept terms and conditions. Please try again."
+  },
   "workspaceCard": {
     "locked": "Locked",
     "lockedBy": "This content is locked by {{name}}",

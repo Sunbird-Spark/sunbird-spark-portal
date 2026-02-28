@@ -1,7 +1,7 @@
 import { useId } from "react";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiCheck } from "react-icons/fi";
-import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
 

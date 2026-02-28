@@ -12,6 +12,7 @@ const { mockUserService, mockUserAuthInfoService } = vi.hoisted(() => ({
     mockUserAuthInfoService: {
         getUserId: vi.fn(),
         getAuthInfo: vi.fn(),
+        isUserAuthenticated: vi.fn(),
     }
 }));
 
@@ -24,6 +25,9 @@ vi.mock('../services/UserService', () => ({
 vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
     default: mockUserAuthInfoService,
 }));
+
+// Add isUserAuthenticated to the mock
+mockUserAuthInfoService.isUserAuthenticated = vi.fn().mockReturnValue(true);
 
 // Setup QueryClient wrapper
 const createWrapper = () => {
