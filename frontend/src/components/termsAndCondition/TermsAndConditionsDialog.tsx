@@ -3,7 +3,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiX, FiCheck, FiLoader } from "react-icons/fi";
 import { useAppI18n } from '@/hooks/useAppI18n';
-import { Button } from "./Button";
+import { Button } from "../common/Button";
 import { cn } from "@/lib/utils";
 
 interface TermsAndConditionsDialogProps {

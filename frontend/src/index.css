@@ -685,9 +685,9 @@
   .tnc-dialog-content {
     @apply fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2;
     @apply rounded-[1.875rem] border bg-white shadow-lg outline-none;
-    @apply w-[90vw] h-[80vh] max-w-[72.875rem] max-h-[41.25rem];
-    @apply md:w-[85vw] md:h-[75vh];
-    @apply lg:w-[72.875rem] lg:h-[41.25rem];
+    @apply w-[90vw] h-[85vh] max-w-[50rem] max-h-[35rem];
+    @apply md:w-[80vw] md:h-[80vh];
+    @apply lg:w-[50rem] lg:h-[35rem];
     @apply data-[state=open]:animate-in data-[state=closed]:animate-out;
     @apply data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
     @apply data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95;

@@ -21,4 +21,23 @@ export const useGetTncUrl = (tncConfig: any) => {
       queryFn: () => tncService.getTncUrl(tncConfig),
       enabled: !!tncConfig,
     });
-}
+};
+
+export const useTncCheck = (userProfile: any, tncConfig: any): {
+  needsTncAcceptance: boolean;
+  latestVersion: string;
+  termsUrl: string;
+} => {
+  // If the user profile is not yet loaded, acceptance cannot be evaluated.
+  if (!userProfile) {
+    return { needsTncAcceptance: false, latestVersion: '', termsUrl: '' };
+  }
+
+  const latestVersion = tncConfig ? tncService.getLatestVersion(tncConfig) : '';
+  const termsUrl = tncConfig ? tncService.getTncUrl(tncConfig) : '';
+  const acceptedVersion = userProfile?.tncAcceptedVersion || '';
+
+  const needsTncAcceptance = !!latestVersion && acceptedVersion !== latestVersion;
+
+  return { needsTncAcceptance, latestVersion, termsUrl };
+};

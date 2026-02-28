@@ -6,6 +6,7 @@ import AppRoutes from './AppRoutes';
 import PageLoader from '@/components/common/PageLoader';
 import { Toaster } from '@/components/common/Toaster';
 import { portalInitializer } from './utils/portalInitializer';
+import { TncCheckWrapper } from '@/components/termsAndCondition/TncCheckWrapper';
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <TncCheckWrapper />
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>

@@ -6,7 +6,7 @@ import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/Fo
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
-import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
 import { useAppI18n } from "@/hooks/useAppI18n";

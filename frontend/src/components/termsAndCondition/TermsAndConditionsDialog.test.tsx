@@ -4,7 +4,9 @@ import { TermsAndConditionsDialog } from './TermsAndConditionsDialog';
 
 // Mock react-icons
 vi.mock('react-icons/fi', () => ({
-    FiX: () => <div data-testid="x-icon" />
+    FiX: () => <div data-testid="x-icon" />,
+    FiCheck: () => <div data-testid="check-icon" />,
+    FiLoader: () => <div data-testid="loader-icon" />,
 }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -154,5 +156,148 @@ describe('TermsAndConditionsDialog', () => {
         await waitFor(() => {
             expect(screen.getByText('termsDialog.description')).toBeInTheDocument();
         });
+    });
+
+    it('does not render checkbox and accept button when onAccept is not provided', async () => {
+        render(<TermsAndConditionsDialog {...defaultProps} />);
+        
+        fireEvent.click(screen.getByText('Open Terms'));
+
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /continue/i })).not.toBeInTheDocument();
+    });
+
+    it('renders checkbox and accept button when onAccept is provided', async () => {
+        const onAccept = vi.fn();
+        render(
+            <TermsAndConditionsDialog 
+                {...defaultProps} 
+                onAccept={onAccept}
+            />
+        );
+        
+        fireEvent.click(screen.getByText('Open Terms'));
+
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        expect(screen.getByRole('checkbox')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
+    });
+
+    it('has accept button disabled when checkbox is unchecked', async () => {
+        const onAccept = vi.fn();
+        render(
+            <TermsAndConditionsDialog 
+                {...defaultProps} 
+                onAccept={onAccept}
+            />
+        );
+        
+        fireEvent.click(screen.getByText('Open Terms'));
+
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        const continueButton = screen.getByRole('button', { name: /continue/i });
+        expect(continueButton).toBeDisabled();
+    });
+
+    it('enables accept button when checkbox is checked', async () => {
+        const onAccept = vi.fn();
+        render(
+            <TermsAndConditionsDialog 
+                {...defaultProps} 
+                onAccept={onAccept}
+            />
+        );
+        
+        fireEvent.click(screen.getByText('Open Terms'));
+
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        const checkbox = screen.getByRole('checkbox');
+        fireEvent.click(checkbox);
+
+        const continueButton = screen.getByRole('button', { name: /continue/i });
+        expect(continueButton).not.toBeDisabled();
+    });
+
+    it('calls onAccept when accept button is clicked with checkbox checked', async () => {
+        const onAccept = vi.fn();
+        render(
+            <TermsAndConditionsDialog 
+                {...defaultProps} 
+                onAccept={onAccept}
+            />
+        );
+        
+        fireEvent.click(screen.getByText('Open Terms'));
+
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        const checkbox = screen.getByRole('checkbox');
+        fireEvent.click(checkbox);
+
+        const continueButton = screen.getByRole('button', { name: /continue/i });
+        fireEvent.click(continueButton);
+
+        expect(onAccept).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call onAccept when accept button is clicked without checkbox', async () => {
+        const onAccept = vi.fn();
+        render(
+            <TermsAndConditionsDialog 
+                {...defaultProps} 
+                onAccept={onAccept}
+            />
+        );
+        
+        fireEvent.click(screen.getByText('Open Terms'));
+
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        const continueButton = screen.getByRole('button', { name: /continue/i });
+        expect(continueButton).toBeDisabled();
+        
+        // Try to click disabled button
+        fireEvent.click(continueButton);
+        expect(onAccept).not.toHaveBeenCalled();
+    });
+
+    it('shows loading state when isAccepting is true', async () => {
+        const onAccept = vi.fn();
+        render(
+            <TermsAndConditionsDialog 
+                {...defaultProps} 
+                onAccept={onAccept}
+                accepting={true}
+            />
+        );
+        
+        fireEvent.click(screen.getByText('Open Terms'));
+
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
+        expect(screen.getByText('Accepting…')).toBeInTheDocument();
+        
+        const continueButton = screen.getByRole('button', { name: /accepting/i });
+        expect(continueButton).toBeDisabled();
     });
 });

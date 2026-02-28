@@ -10,7 +10,7 @@ import { SwitchRow } from "@/components/common/Switch";
 import { MentorSection } from "@/components/collection/MentorSection";
 import { BatchFormFields, BatchFormState } from "@/components/collection/BatchFormFields";
 import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
-import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
 
