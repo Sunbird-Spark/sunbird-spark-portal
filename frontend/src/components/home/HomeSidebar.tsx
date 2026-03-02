@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/usePermission";
 import type { Feature } from "@/services/PermissionService";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { clearForceSyncUsed } from "@/services/forceSyncStorage";
 interface HomeSidebarProps {
     activeNav: string;
     onNavChange: (nav: string) => void;
@@ -81,6 +82,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
         if (item.id === "logout") {
+            clearForceSyncUsed();
             window.location.href = item.path;
             return;
         }

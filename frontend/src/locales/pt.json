@@ -242,7 +242,9 @@
     "contentStatusNotViewed": "Não visualizado",
     "selfAssessMaxAttempt": "Você atingiu o número máximo de tentativas para esta avaliação.",
     "selfAssessLastAttempt": "Esta é sua última tentativa para esta avaliação.",
-    "attemptsLabel": "Tentativa {{current}} de {{max}}"
+    "attemptsLabel": "Tentativa {{current}} de {{max}}",
+    "forceSync": "Sincronizar progresso agora",
+    "forceSyncSuccess": "Você pode ver o progresso atualizado do curso em até 24 horas"
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",

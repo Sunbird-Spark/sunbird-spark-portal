@@ -62,4 +62,18 @@ export class BatchService {
       request: body,
     });
   }
+
+  public forceSyncActivityAgg(request: {
+    userId: string;
+    courseId: string;
+    batchId: string;
+  }): Promise<ApiResponse<unknown>> {
+    return getClient().post<unknown>('/user/v1/activity/agg', {
+      request: {
+        userId: request.userId,
+        courseId: request.courseId,
+        batchId: request.batchId,
+      },
+    });
+  }
 }
