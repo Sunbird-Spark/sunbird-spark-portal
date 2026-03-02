@@ -108,7 +108,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 
   return (
-    <div className={styles.qumlPlayerContainer} ref={containerRef} />
+    <div className={`content-player-embed ${styles.qumlPlayerContainer}`} ref={containerRef} />
   );
 };
 
