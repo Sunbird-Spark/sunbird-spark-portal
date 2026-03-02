@@ -410,7 +410,12 @@
   },
   "common": {
     "notifications": "Notifications",
-    "language": "Langue"
+    "language": "Langue",
+    "manage": "Gérer",
+    "backTo": "Retour à {{page}}",
+    "upcomingBatches": "Lots à venir",
+    "learningProgress": "Progression de l'apprentissage",
+    "downloadCertificate": "Télécharger le certificat"
   },
   "myLearning": {
     "loading": "Chargement de votre apprentissage...",
@@ -775,11 +780,12 @@
     "certificates": "Certificats",
     "all": "Tous"
   },
-  "common": {
-    "manage": "Gérer",
-    "backTo": "Retour à {{page}}",
-    "upcomingBatches": "Lots à venir",
-    "learningProgress": "Progression de l'apprentissage",
-    "downloadCertificate": "Télécharger le certificat"
+  "editors": {
+    "errorTitle": "Erreur de l'éditeur",
+    "goBack": "Retour",
+    "loading": "Chargement de l'éditeur...",
+    "preparing": "Préparation de l'environnement de l'éditeur...",
+    "genericEditor": "Éditeur générique",
+    "contentEditor": "Éditeur de contenu"
   }
 }

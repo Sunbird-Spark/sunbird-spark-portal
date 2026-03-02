@@ -211,7 +211,7 @@ describe('ExploreGrid', () => {
             expect.objectContaining({
                 request: expect.objectContaining({
                     filters: expect.objectContaining({
-                        objectType: 'Content',
+                        objectType: ['Content', 'QuestionSet'],
                         primaryCategory: ['Collection1'],
                         mimeType: ['video/mp4', 'video/webm'],
                     })
@@ -239,7 +239,7 @@ describe('ExploreGrid', () => {
         expect(useContentSearch).toHaveBeenCalledWith(
             expect.objectContaining({
                 request: expect.objectContaining({
-                    filters: { objectType: 'Content' }
+                    filters: { objectType: ['Content', 'QuestionSet'] }
                 })
             })
         );

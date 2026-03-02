@@ -781,5 +781,13 @@
     "upcomingBatches": "الدفعات القادمة",
     "learningProgress": "تقدم التعلم",
     "downloadCertificate": "تحميل الشهادة"
+  },
+  "editors": {
+    "errorTitle": "خطأ في المحرر",
+    "goBack": "رجوع",
+    "loading": "جارٍ تحميل المحرر...",
+    "preparing": "جارٍ تجهيز بيئة المحرر...",
+    "genericEditor": "المحرر العام",
+    "contentEditor": "محرر المحتوى"
   }
 }
