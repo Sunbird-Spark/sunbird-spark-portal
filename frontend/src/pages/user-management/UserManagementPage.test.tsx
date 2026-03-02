@@ -48,6 +48,19 @@ vi.mock('@/components/common/ConfirmDialog', () => ({
     ) : null,
 }));
 
+// Radix Select used by FilterPanel inside UserConsentTab
+vi.mock('@/components/ui/select', () => ({
+  Select: ({ children, onValueChange, value }: any) => (
+    <select value={value} onChange={(e: any) => onValueChange?.(e.target.value)}>
+      {children}
+    </select>
+  ),
+  SelectTrigger: () => null,
+  SelectValue: () => null,
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ value, children }: any) => <option value={value}>{children}</option>,
+}));
+
 vi.mock("@/components/common/Select", () => ({
   Select: ({ children, onValueChange, value }: any) => {
     const trigger = React.Children.toArray(children).find((c: any) => c.props?.id) as any;
@@ -377,5 +390,72 @@ describe('UserManagementPage', () => {
     renderPage();
     const tab = screen.getByText('Change User Roles');
     expect(tab.closest('button')).toHaveClass('border-sunbird-brick', 'text-sunbird-brick');
+  });
+
+  /* ── User Consent tab ── */
+  describe('User Consent tab', () => {
+    it('renders the "User Consent" tab button', () => {
+      renderPage();
+      expect(screen.getByRole('button', { name: /user consent/i })).toBeInTheDocument();
+    });
+
+    it('clicking "User Consent" makes it the active tab', () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+      expect(
+        screen.getByRole('button', { name: /user consent/i })
+      ).toHaveClass('border-sunbird-brick', 'text-sunbird-brick');
+    });
+
+    it('"Change User Roles" tab becomes inactive when "User Consent" is clicked', () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+      expect(
+        screen.getByRole('button', { name: /change user roles/i })
+      ).not.toHaveClass('border-sunbird-brick');
+    });
+
+    it('clicking "User Consent" renders the consent summary cards', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Total Users')).toBeInTheDocument();
+        expect(screen.getByText('Consent Granted')).toBeInTheDocument();
+        expect(screen.getByText('Consent Pending')).toBeInTheDocument();
+        expect(screen.getByText('Consent Revoked')).toBeInTheDocument();
+      });
+    });
+
+    it('clicking "User Consent" renders the search input', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Search by name or email…')).toBeInTheDocument();
+      });
+    });
+
+    it('clicking "User Consent" renders the Export CSV button', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument();
+      });
+    });
+
+    it('switching back to "Change User Roles" hides the consent content', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+      await waitFor(() => screen.getByText('Total Users'));
+
+      fireEvent.click(screen.getByRole('button', { name: /change user roles/i }));
+
+      await waitFor(() => {
+        expect(screen.queryByText('Total Users')).not.toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Search User by Sunbird ID')).toBeInTheDocument();
+      });
+    });
   });
 });
