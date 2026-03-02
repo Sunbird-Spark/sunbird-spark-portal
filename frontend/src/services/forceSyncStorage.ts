@@ -1,5 +1,5 @@
 const STORAGE_KEY = "course_batch_force_sync";
-export const COOLDOWN_MS = 1000;
+export const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function getStorage(): Record<string, number> {
   if (typeof window === "undefined" || !window.localStorage) return {};
