@@ -3,6 +3,7 @@ import { CheckIcon } from "./CollectionIcons";
 import type { CollectionData } from "@/types/collectionTypes";
 import { ContentPlayer } from "@/components/players";
 import PageLoader from "@/components/common/PageLoader";
+import { Toaster } from "@/components/common/Toaster";
 
 interface CollectionOverviewProps {
   collectionData: CollectionData;
@@ -34,7 +35,8 @@ const CollectionOverview = ({
 
   return (
     <div className="collection-overview-container">
-      <div className="collection-player-card">
+      <div className="collection-player-card relative">
+        <Toaster viewport="player" viewportClassName="!fixed !top-4 !left-1/2 !-translate-x-1/2 !right-auto !bottom-auto !max-w-[420px] z-[100]" />
         <div className="bg-white rounded-xl shadow-[0_4px_6px_-1px_rgb(0_0_0/0.06),0_2px_4px_-2px_rgb(0_0_0/0.04)]">
           {contentAccessBlocked ? (
             <div className="collection-player-wrapper">
