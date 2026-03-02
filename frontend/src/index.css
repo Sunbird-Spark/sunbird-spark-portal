@@ -1152,4 +1152,9 @@
   .grecaptcha-badge {
     visibility: hidden !important;
   }
+
+  /* Hide Video.js Big Play Button */
+  .vjs-big-play-button {
+    display: none !important;
+  }
 }
