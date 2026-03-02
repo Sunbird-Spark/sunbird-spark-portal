@@ -242,7 +242,9 @@
     "contentStatusNotViewed": "Not viewed",
     "selfAssessMaxAttempt": "You have reached the maximum number of attempts for this assessment.",
     "selfAssessLastAttempt": "This is your last attempt for this assessment.",
-    "attemptsLabel": "Attempt {{current}} of {{max}}"
+    "attemptsLabel": "Attempt {{current}} of {{max}}",
+    "forceSync": "Sync progress now",
+    "forceSyncSuccess": "You can view your updated course progress within 24 hours"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
