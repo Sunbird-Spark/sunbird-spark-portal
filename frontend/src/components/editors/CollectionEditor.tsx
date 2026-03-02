@@ -6,6 +6,8 @@ import {
 } from '../../services/editors/collection-editor';
 import { useFancytreeGuard } from '../../hooks/useFancytreeGuard';
 import PageLoader from '../common/PageLoader';
+import { useAppI18n } from "@/hooks/useAppI18n";
+import './CollectionEditor.css';
 
 interface CollectionEditorProps {
   identifier: string;
@@ -22,6 +24,7 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
   onEditorEvent,
   onTelemetryEvent,
 }) => {
+  const { t } = useAppI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const serviceRef = useRef<CollectionEditorService>(new CollectionEditorService());
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -97,7 +100,11 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
 
   return (
     <div className="w-full h-full min-h-[600px] relative" id="collection-editor-wrapper">
-      {status === 'loading' && <PageLoader message="Loading..." fullPage={false} />}
+      {status === 'loading' && (
+        <div className="collection-editor-loader-wrapper">
+          <PageLoader message={t('loading')} fullPage={true} />
+        </div>
+      )}
       <div ref={containerRef} className="w-full h-full" id="collection-editor-container" />
     </div>
   );

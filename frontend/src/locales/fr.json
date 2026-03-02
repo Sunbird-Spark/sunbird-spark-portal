@@ -239,7 +239,10 @@
     "batchStartedOn": "Lot commencé le",
     "contentStatusCompleted": "Terminé",
     "contentStatusInProgress": "En cours",
-    "contentStatusNotViewed": "Non consulté"
+    "contentStatusNotViewed": "Non consulté",
+    "selfAssessMaxAttempt": "Vous avez atteint le nombre maximum de tentatives pour cette évaluation.",
+    "selfAssessLastAttempt": "Ceci est votre dernière tentative pour cette évaluation.",
+    "attemptsLabel": "Tentative {{current}} sur {{max}}"
   },
   "profileDataSharing": {
     "cardTitle": "Partage des données de profil",
@@ -407,7 +410,12 @@
   },
   "common": {
     "notifications": "Notifications",
-    "language": "Langue"
+    "language": "Langue",
+    "manage": "Gérer",
+    "backTo": "Retour à {{page}}",
+    "upcomingBatches": "Lots à venir",
+    "learningProgress": "Progression de l'apprentissage",
+    "downloadCertificate": "Télécharger le certificat"
   },
   "myLearning": {
     "loading": "Chargement de votre apprentissage...",
@@ -871,5 +879,12 @@
     "max": "Max",
     "result": "Résultat",
     "date": "Date"
+  "editors": {
+    "errorTitle": "Erreur de l'éditeur",
+    "goBack": "Retour",
+    "loading": "Chargement de l'éditeur...",
+    "preparing": "Préparation de l'environnement de l'éditeur...",
+    "genericEditor": "Éditeur générique",
+    "contentEditor": "Éditeur de contenu"
   }
 }

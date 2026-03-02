@@ -239,7 +239,10 @@
     "batchStartedOn": "Batch Started on",
     "contentStatusCompleted": "Completed",
     "contentStatusInProgress": "In Progress",
-    "contentStatusNotViewed": "Not viewed"
+    "contentStatusNotViewed": "Not viewed",
+    "selfAssessMaxAttempt": "You have reached the maximum number of attempts for this assessment.",
+    "selfAssessLastAttempt": "This is your last attempt for this assessment.",
+    "attemptsLabel": "Attempt {{current}} of {{max}}"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
@@ -879,5 +882,12 @@
     "max": "Max",
     "result": "Result",
     "date": "Date"
+  "editors": {
+    "errorTitle": "Editor Error",
+    "goBack": "Go Back",
+    "loading": "Loading Editor...",
+    "preparing": "Preparing the editor environment...",
+    "genericEditor": "Generic Editor",
+    "contentEditor": "Content Editor"
   }
 }

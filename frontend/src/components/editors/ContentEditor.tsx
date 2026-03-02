@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { ContentEditorService } from '../../services/editors/content-editor';
 import type { ContentEditorEvent, ContentEditorMetadata } from '../../services/editors/content-editor';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface ContentEditorProps {
   metadata: ContentEditorMetadata;
@@ -17,6 +18,8 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
   const serviceRef = useRef<ContentEditorService>(new ContentEditorService());
   const isInitializedRef = useRef(false);
   const currentIdentifierRef = useRef<string | null>(null);
+
+  const { t } = useAppI18n();
 
   const handleEditorEvent = useCallback((event: ContentEditorEvent) => {
     onEditorEvent?.(event);
@@ -149,8 +152,8 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
       id="contentEditor"
       name="contentEditor"
       className="w-full h-full border-0 min-h-screen"
-      title="Content Editor"
-      aria-label="Content Editor"
+      title={t('editors.contentEditor')}
+      aria-label={t('editors.contentEditor')}
     />
   );
 };

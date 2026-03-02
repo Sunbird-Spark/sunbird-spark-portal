@@ -239,7 +239,10 @@
     "batchStartedOn": "بدأت الدفعة في",
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
-    "contentStatusNotViewed": "لم تتم المشاهدة"
+    "contentStatusNotViewed": "لم تتم المشاهدة",
+    "selfAssessMaxAttempt": "لقد وصلت إلى الحد الأقصى لعدد المحاولات لهذا التقييم.",
+    "selfAssessLastAttempt": "هذه هي محاولتك الأخيرة لهذا التقييم.",
+    "attemptsLabel": "المحاولة {{current}} من {{max}}"
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",
@@ -826,48 +829,11 @@
     "certificates": "الشهادات",
     "all": "الكل"
   },
-  "profileLearning": {
-    "loadingCourses": "جارٍ تحميل دوراتك...",
-    "failedToLoadCourses": "فشل تحميل الدورات. يرجى المحاولة مرة أخرى.",
-    "viewLess": "عرض أقل",
-    "viewMoreCourses": "عرض المزيد من الدورات",
-    "noCertificate": "لا توجد شهادة",
-    "noCoursesEnrolled": "لم يتم التسجيل في أي دورات بعد.",
-    "noFilteredCourses": "لم يتم العثور على دورات {{filter}}.",
-    "downloading": "جارٍ التحميل...",
-    "myLearning": "تعلمي",
-    "filter": "تصفية"
-  },
-  "tncPopup": {
-    "checkboxLabel": "لقد قرأت وأوافق على الشروط والأحكام",
-    "accepting": "جارٍ القبول...",
-    "continue": "متابعة",
-    "acceptAndContinue": "قبول ومتابعة"
-  },
-  "trackableCollection": {
-    "completed": "مكتمل"
-  },
-  "userReport": {
-    "title": "تقرير المستخدم",
-    "courseProgress": "تقدم الدورة",
-    "certificates": "الشهادات",
-    "assessmentHistory": "سجل التقييمات",
-    "coursesCompleted": "الدورات المكتملة",
-    "coursesPending": "الدورات المعلقة",
-    "certificatesIssued": "الشهادات الصادرة",
-    "contentCompleted": "المحتوى المكتمل",
-    "assessmentsCompleted": "التقييمات المنجزة",
-    "course": "الدورة",
-    "progress": "التقدم",
-    "status": "الحالة",
-    "enrolled": "مسجل",
-    "lastAccessed": "آخر وصول",
-    "certificateId": "معرف الشهادة",
-    "issuedDate": "تاريخ الإصدار",
-    "assessment": "التقييم",
-    "score": "النتيجة",
-    "max": "الحد الأقصى",
-    "result": "النتيجة",
-    "date": "التاريخ"
+  "common": {
+    "manage": "إدارة",
+    "backTo": "العودة إلى {{page}}",
+    "upcomingBatches": "الدفعات القادمة",
+    "learningProgress": "تقدم التعلم",
+    "downloadCertificate": "تحميل الشهادة"
   }
 }
