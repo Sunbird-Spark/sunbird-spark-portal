@@ -498,49 +498,24 @@
     @apply text-gray-300;
   }
 
-  .content-player-wrapper {
-    @apply relative w-full h-full;
-  }
-
-  .content-player-embed {
-    @apply w-full h-full relative;
-    min-height: 41.3125rem;
-    height: 100%;
-  }
-
-  @media (max-width: 1024px) {
-    .content-player-embed {
-      min-height: 28rem;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .content-player-embed {
-      min-height: 22rem;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .content-player-embed {
-      min-height: 18rem;
-    }
-  }
-
   .content-player-video-container {
+    position: relative;
     width: 100%;
     max-width: 74.125rem;
-    height: auto;
     aspect-ratio: 1186 / 701;
     border-radius: 1.25rem;
     background-color: #FFFFFF;
     overflow: hidden;
-    padding: 1.25rem;
   }
 
-  .content-player-video-relative {
-    width: 100%;
-    height: 100%;
-    position: relative;
+  .content-player-wrapper {
+    position: absolute;
+    inset: 1.25rem;
+    overflow: hidden;
+  }
+
+  .content-player-embed {
+    @apply w-full h-full relative;
   }
 
   .content-player-video-thumbnail {
@@ -1156,5 +1131,8 @@
   /* Hide Video.js Big Play Button */
   .vjs-big-play-button {
     display: none !important;
+  }
+  .sunbird-video-player-container {
+    border-radius: 1.25rem;
   }
 }
