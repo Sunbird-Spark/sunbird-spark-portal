@@ -216,28 +216,28 @@ const WorkspaceToolbar = ({
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
                 <span className="text-sm font-rubik text-muted-foreground">
-                  <span className="font-semibold text-foreground">{counts.published}</span> Published
+                  <span className="font-semibold text-foreground">{counts.published}</span> {t('workspace.stats.published')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
                 <span className="text-sm font-rubik text-muted-foreground">
-                  <span className="font-semibold text-foreground">{counts.review}</span> In Review
+                  <span className="font-semibold text-foreground">{counts.review}</span> {t('workspace.stats.inReview')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-gray-400" />
                 <span className="text-sm font-rubik text-muted-foreground">
-                  <span className="font-semibold text-foreground">{counts.drafts}</span> Drafts
+                  <span className="font-semibold text-foreground">{counts.drafts}</span> {t('workspace.stats.drafts')}
                 </span>
               </div>
           </>)}
           {/* Section titles for secondary views */}
           {activeView === 'uploads' && (
-            <span className="text-sm font-semibold font-rubik text-foreground">All Uploads</span>
+            <span className="text-sm font-semibold font-rubik text-foreground">{t('workspace.stats.allUploads')}</span>
           )}
           {activeView === 'collaborations' && (
-            <span className="text-sm font-semibold font-rubik text-foreground">My Collaborations</span>
+            <span className="text-sm font-semibold font-rubik text-foreground">{t('workspace.stats.myCollaborations')}</span>
           )}
           {contentCount !== undefined && (
             <span className="text-sm text-muted-foreground font-rubik ml-auto">

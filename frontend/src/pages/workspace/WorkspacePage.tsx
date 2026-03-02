@@ -45,12 +45,12 @@ const COLLECTION_EDITOR_OPTIONS = ['course', 'collection'];
 const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
 const EDITOR_OPTION_LABELS: Record<string, string> = {
-  'quiz': 'Quiz & Assessment',
-  'story': 'Story & Game',
-  'course': 'Course',
-  'collection': 'Collection',
-  'question-set': 'Question Set',
-  'question-editor': 'Question Set',
+  'quiz': 'workspace.editorOptions.quiz',
+  'story': 'workspace.editorOptions.story',
+  'course': 'workspace.editorOptions.course',
+  'collection': 'workspace.editorOptions.collection',
+  'question-set': 'workspace.editorOptions.questionSet',
+  'question-editor': 'workspace.editorOptions.questionSet',
 };
 
 const COLLECTION_CONTENT_CONFIG: Record<string, {
@@ -58,35 +58,35 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
   contentType: string;
   primaryCategory: string;
   resourceType: string;
-  description: string;
+  descriptionKey: string;
 }> = {
   course: {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Course',
     primaryCategory: 'Course',
     resourceType: 'Course',
-    description: 'Enter description for Course',
+    descriptionKey: 'workspace.collectionDescriptions.course',
   },
   'content-playlist': {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Collection',
     primaryCategory: 'Content Playlist',
     resourceType: 'Collection',
-    description: 'Enter description for Collection'
+    descriptionKey: 'workspace.collectionDescriptions.contentPlaylist'
   },
   'digital-textbook': {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'TextBook',
     primaryCategory: 'Digital Textbook',
     resourceType: 'Collection',
-    description: 'Enter description for Digital Textbook'
+    descriptionKey: 'workspace.collectionDescriptions.digitalTextbook'
   },
   'question-paper': {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Collection',
     primaryCategory: 'Question paper',
     resourceType: 'Collection',
-    description: 'Enter description for Question Paper'
+    descriptionKey: 'workspace.collectionDescriptions.questionPaper'
   },
 };
 
@@ -315,14 +315,14 @@ const WorkspacePage = () => {
       const contentId = response.data?.identifier || response.data?.content_id;
       if (!contentId) {
         console.error("Content creation response missing identifier:", response);
-        throw new Error("Unexpected server response. Please try again.");
+        throw new Error(t("workspace.errors.unexpectedResponse"));
       }
       setShowResourceFormDialog(false);
       setSelectedOption(null);
       navigate(`/edit/content-editor/${contentId}`);
     } catch (error) {
       console.error('Failed to create content:', error);
-      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
+      toast({ title: t("workspace.errors.creationFailed"), description: t("workspace.errors.unableToCreate"), variant: "destructive" });
     } finally {
       setIsCreating(false);
     }
@@ -337,7 +337,7 @@ const WorkspacePage = () => {
       createdBy,
       creator,
       ...config,
-      ...(description ? { description } : {}),
+      ...(description ? { description } : { description: t(config.descriptionKey) }),
       organisation,
       createdFor,
       targetFWIds,
@@ -345,7 +345,7 @@ const WorkspacePage = () => {
     const contentId = response.data?.identifier || response.data?.content_id;
     if (!contentId) {
       console.error("Collection creation response missing identifier:", response);
-      throw new Error("Unexpected server response. Please try again.");
+      throw new Error(t("workspace.errors.unexpectedResponse"));
     }
     navigate(`/edit/collection-editor/${contentId}`);
   };
@@ -363,7 +363,7 @@ const WorkspacePage = () => {
     const contentId = response?.identifier;
     if (!contentId) {
       console.error("Question set creation response missing identifier:", response);
-      throw new Error("Unexpected server response. Please try again.");
+      throw new Error(t("workspace.errors.unexpectedResponse"));
     }
 
     navigate(`/edit/quml-editor/${contentId}`);
@@ -383,7 +383,7 @@ const WorkspacePage = () => {
       setSelectedOption(null);
     } catch (error) {
       console.error('Failed to create content:', error);
-      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
+      toast({ title: t("workspace.errors.creationFailed"), description: t("workspace.errors.unableToCreate"), variant: "destructive" });
     } finally {
       setIsCreating(false);
     }
@@ -566,7 +566,7 @@ const WorkspacePage = () => {
             onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
             onSubmit={handleContentNameSubmit}
             isLoading={isCreating}
-            optionTitle={selectedOption ? EDITOR_OPTION_LABELS[selectedOption] : undefined}
+            optionTitle={selectedOption ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
             optionId={selectedOption ?? undefined}
           />
           <ResourceFormDialog
@@ -577,7 +577,7 @@ const WorkspacePage = () => {
             orgChannelId={orgChannelId}
             orgFramework={orgFramework}
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
-            title={selectedOption ? `${t('workspace.createContent')} ${EDITOR_OPTION_LABELS[selectedOption] || ''}`.trim() : t('workspace.createContent')}
+            title={selectedOption ? `${t('workspace.createContent')} ${t(EDITOR_OPTION_LABELS[selectedOption]) || ''}`.trim() : t('workspace.createContent')}
           />
         </div>
       </div>
