@@ -16,6 +16,8 @@ vi.mock("./pages/Explore", () => ({ default: () => <div>Explore Page</div> }));
 vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
 vi.mock("./pages/onboarding/OnboardingPage", () => ({ default: () => <div>Onboarding Page</div> }));
 vi.mock("./pages/user-management/UserManagementPage", () => ({ default: () => <div>User Management Page</div> }));
+vi.mock("./pages/reports/PlatformReports", () => ({ default: () => <div>Platform Reports Page</div> }));
+vi.mock("./pages/reports/CourseReport", () => ({ default: () => <div>Course Report Page</div> }));
 vi.mock("./pages/profile/Profile", () => ({ default: () => <div>Profile Page</div> }));
 vi.mock("./pages/collection/CollectionDetailPage", () => ({ default: () => <div>Collection Detail Page</div> }));
 vi.mock("./pages/forgotPassword/ForgotPassword", () => ({ default: () => <div>Forgot Password Page</div> }));
@@ -177,5 +179,65 @@ describe("AppRoutes (RBAC routing tests)", () => {
 
     renderWithRoute("/create");
     expect(screen.getByText("Home Page")).toBeInTheDocument();
+  });
+
+  // ── ORG_ADMIN protected routes ─────────────────────────────────────────────
+
+  describe("ORG_ADMIN protected routes", () => {
+    const orgAdminPermissions = {
+      isAuthenticated: true,
+      isLoading: false,
+      roles: ['ORG_ADMIN'],
+      error: null,
+      hasAnyRole: vi.fn((roles: string[]) => roles.includes('ORG_ADMIN')),
+      canAccessFeature: vi.fn(),
+      refetch: vi.fn(),
+    };
+
+    const nonAdminPermissions = {
+      isAuthenticated: true,
+      isLoading: false,
+      roles: ['CONTENT_CREATOR'],
+      error: null,
+      hasAnyRole: vi.fn((roles: string[]) => !roles.includes('ORG_ADMIN')),
+      canAccessFeature: vi.fn(),
+      refetch: vi.fn(),
+    };
+
+    it("ORG_ADMIN can access /reports/platform", () => {
+      mockUsePermissions.mockReturnValue(orgAdminPermissions);
+      renderWithRoute("/reports/platform");
+      expect(screen.getByText("Platform Reports Page")).toBeInTheDocument();
+    });
+
+    it("non-admin authenticated user is redirected from /reports/platform", () => {
+      mockUsePermissions.mockReturnValue(nonAdminPermissions);
+      renderWithRoute("/reports/platform");
+      expect(screen.getByText("Home Page")).toBeInTheDocument();
+    });
+
+    it("ORG_ADMIN can access /reports/course/:courseId", () => {
+      mockUsePermissions.mockReturnValue(orgAdminPermissions);
+      renderWithRoute("/reports/course/course-123");
+      expect(screen.getByText("Course Report Page")).toBeInTheDocument();
+    });
+
+    it("non-admin authenticated user is redirected from /reports/course/:courseId", () => {
+      mockUsePermissions.mockReturnValue(nonAdminPermissions);
+      renderWithRoute("/reports/course/course-123");
+      expect(screen.getByText("Home Page")).toBeInTheDocument();
+    });
+
+    it("ORG_ADMIN can access /user-management", () => {
+      mockUsePermissions.mockReturnValue(orgAdminPermissions);
+      renderWithRoute("/user-management");
+      expect(screen.getByText("User Management Page")).toBeInTheDocument();
+    });
+
+    it("non-admin authenticated user is redirected from /user-management", () => {
+      mockUsePermissions.mockReturnValue(nonAdminPermissions);
+      renderWithRoute("/user-management");
+      expect(screen.getByText("Home Page")).toBeInTheDocument();
+    });
   });
 });
