@@ -82,7 +82,6 @@ const PlatformReports = () => {
   return (
     <ReportLayout
       title="Platform Reports"
-      breadcrumbs={[{ label: "Home", href: "/home" }, { label: "Admin Reports" }, { label: "Platform" }]}
     >
       {/* ── Section 1: Content Overview ── */}
       <section className="mb-10" aria-label="Content Overview">

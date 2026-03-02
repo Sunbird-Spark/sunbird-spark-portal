@@ -16,6 +16,7 @@ import type {
   UserCourseProgress,
   UserCertificate,
   UserAssessmentHistory,
+  UserConsentRecord,
 } from "@/types/reports";
 
 /* ── MODULE 1 – Platform ── */
@@ -235,3 +236,48 @@ export const userAssessmentHistory: UserAssessmentHistory[] = [
   { id: "4", courseName: "Python Programming", assessmentName: "Quiz 1", score: 35, maxScore: 100, percentage: 35, passFail: "Fail", attemptDate: "2025-07-15" },
   { id: "5", courseName: "Python Programming", assessmentName: "Quiz 1 (Retake)", score: 68, maxScore: 100, percentage: 68, passFail: "Pass", attemptDate: "2025-07-22" },
 ];
+
+/* ── MODULE 4 – User Consent Management ── */
+
+const CONSENT_USER_NAMES = [
+  "Aarav Mehta", "Priya Sharma", "Rohan Gupta", "Sneha Reddy", "Vikram Joshi",
+  "Ananya Iyer", "Arjun Patel", "Divya Nair", "Karan Singh", "Meera Kapoor",
+  "Nikhil Das", "Pooja Verma", "Rahul Kumar", "Sanya Aggarwal", "Tarun Bhatt",
+  "Usha Pillai", "Varun Rao", "Yamini Desai", "Zara Khan", "Aditya Saxena",
+  "Bhavna Jain", "Chirag Malhotra", "Deepika Menon", "Eshan Tiwari", "Falguni Shah",
+  "Gaurav Mishra", "Hina Bose", "Ishaan Chauhan", "Jyoti Pandit", "Kunal Srinivasan",
+];
+
+const CONSUMER_ORGS = [
+  "Diksha Platform",
+  "NCERT Portal",
+  "State Ed Board - MH",
+  "State Ed Board - KA",
+  "NIC Data Hub",
+];
+
+const CONSENT_STATUSES: UserConsentRecord["consentStatus"][] = ["Granted", "Granted", "Granted", "Pending", "Revoked"];
+
+export const userConsentData: UserConsentRecord[] = Array.from({ length: 40 }, (_, i) => {
+  const status = CONSENT_STATUSES[i % CONSENT_STATUSES.length]!;
+  const orgCount = (i % 3) + 1;
+  const consumerOrgs =
+    status === "Granted"
+      ? CONSUMER_ORGS.slice(0, orgCount)
+      : status === "Pending" && i % 2 === 0
+      ? [CONSUMER_ORGS[0]!]
+      : [];
+  const month = String((i % 12) + 1).padStart(2, "0");
+  const day = String((i % 28) + 1).padStart(2, "0");
+  const consentGivenOn = status !== "Pending" ? `2025-${month}-${day}` : null;
+  return {
+    id: `consent-${i + 1}`,
+    userId: `user-${i + 1}`,
+    userName: CONSENT_USER_NAMES[i % CONSENT_USER_NAMES.length]!,
+    email: `user${i + 1}@example.org`,
+    consentStatus: status,
+    consumerOrgs,
+    consentGivenOn,
+    lastUpdated: `2025-${month}-${day}`,
+  };
+});
