@@ -90,6 +90,7 @@ describe("useForceSync", () => {
       title: "success",
       description: "courseDetails.forceSyncSuccess",
       variant: "default",
+      viewport: "center",
     });
   });
 
