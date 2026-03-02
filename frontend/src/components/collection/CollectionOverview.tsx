@@ -9,6 +9,8 @@ interface CollectionOverviewProps {
   contentId?: string;
   /** When true (trackable + not logged in or not enrolled), show join message instead of player/error. */
   contentAccessBlocked?: boolean;
+  showMaxAttemptsExceeded?: boolean;
+  onGoBack?: () => void;
   playerMetadata?: any;
   playerIsLoading?: boolean;
   playerError?: Error | null;
@@ -20,6 +22,8 @@ const CollectionOverview = ({
   collectionData,
   contentId,
   contentAccessBlocked = false,
+  showMaxAttemptsExceeded = false,
+  onGoBack,
   playerMetadata,
   playerIsLoading,
   playerError,
@@ -38,6 +42,23 @@ const CollectionOverview = ({
                 <p className="text-center text-muted-foreground text-sm px-4">
                   {t("courseDetails.mustJoinToAccessContent")}
                 </p>
+              </div>
+            </div>
+          ) : showMaxAttemptsExceeded ? (
+            <div className="collection-player-wrapper">
+              <div className="collection-player-loading flex flex-col items-center justify-center gap-4 py-8 px-4">
+                <p className="text-center text-muted-foreground text-sm">
+                  {t("courseDetails.selfAssessMaxAttempt")}
+                </p>
+                {onGoBack && (
+                  <button
+                    type="button"
+                    onClick={onGoBack}
+                    className="rounded-lg px-4 py-2 text-sm font-medium bg-sunbird-brick text-white hover:opacity-90"
+                  >
+                    {t("close")}
+                  </button>
+                )}
               </div>
             </div>
           ) : contentId ? (

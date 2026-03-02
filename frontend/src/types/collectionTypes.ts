@@ -50,6 +50,8 @@ export interface HierarchyContentNode {
   contentTypesCount?: string;
   channel?: string;
   userConsent?: TrackableEnabled;
+  contentType?: string;
+  maxAttempts?: number;
 }
 
 export interface CourseHierarchyResponse {
@@ -115,6 +117,7 @@ export interface ContentStateItem {
   contentId: string;
   status?: number;
   lastAccessTime?: number;
+  score?: unknown[];
   [key: string]: unknown;
 }
 
@@ -127,11 +130,13 @@ export interface ContentStateReadRequest {
   courseId: string;
   batchId: string;
   contentIds: string[];
+  fields?: string[];
 }
 
 export interface ContentStateUpdateContent {
   contentId: string;
   status: number;
+  lastAccessTime?: string;
 }
 
 export interface ContentStateUpdateRequest {
@@ -139,8 +144,18 @@ export interface ContentStateUpdateRequest {
   courseId: string;
   batchId: string;
   contents: ContentStateUpdateContent[];
+  assessments?: ContentStateAssessmentItem[];
 }
 
+export interface ContentStateAssessmentItem {
+  assessmentTs: number;
+  batchId: string;
+  courseId: string;
+  userId: string;
+  attemptId: string;
+  contentId: string;
+  events: unknown[];
+}
 import type { ContentSearchItem } from './workspaceTypes';
 
 export type RelatedContentItem = ContentSearchItem & { cardType?: 'collection' | 'resource' };
