@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FiShield } from "react-icons/fi";
+import { FiShield, FiLock } from "react-icons/fi";
 import {
   Sheet,
   SheetContent,
@@ -17,6 +17,7 @@ import {
   type OrganisationOption,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
+import UserConsentTab from "./UserConsentTab";
 import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAcceptTnc, useGetTncUrl } from "@/hooks/useTnc";
@@ -36,6 +37,7 @@ type UMTab = {
 
 const UM_TABS: UMTab[] = [
   { id: "role-management", label: "Change User Roles", icon: FiShield },
+  { id: "user-consent", label: "User Consent", icon: FiLock },
 ];
 
 /* ── Main Page ───────────────────────────────────────────────────────────── */
@@ -225,6 +227,7 @@ const UserManagementPage = () => {
                       userOrganisations={userOrganisations}
                     />
                   )}
+                  {activeTab === "user-consent" && <UserConsentTab />}
                 </div>
 
               </div>
