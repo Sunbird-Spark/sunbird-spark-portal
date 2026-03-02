@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, waitFor, screen } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../configs/i18n';
 import CollectionEditor from './CollectionEditor';
+
+// Test wrapper that provides i18n context
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <I18nextProvider i18n={i18n}>
+    {children}
+  </I18nextProvider>
+);
 
 const mockInitializeDependencies = vi.fn().mockResolvedValue(undefined);
 const mockCreateConfig = vi.fn().mockResolvedValue({ 
@@ -47,11 +56,13 @@ describe('CollectionEditor - Basic Rendering', () => {
 
   it('initializes editor with metadata and contextProps', async () => {
     const { container } = render(
-      <CollectionEditor 
-        identifier="do_123" 
-        metadata={{ identifier: 'do_123', name: 'Test Collection' }} 
-        contextProps={{ mode: 'edit' }}
-      />
+      <TestWrapper>
+        <CollectionEditor 
+          identifier="do_123" 
+          metadata={{ identifier: 'do_123', name: 'Test Collection' }} 
+          contextProps={{ mode: 'edit' }}
+        />
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -71,11 +82,13 @@ describe('CollectionEditor - Basic Rendering', () => {
 
   it('displays loading state initially', () => {
     render(
-      <CollectionEditor 
-        identifier="do_123" 
-        metadata={{ identifier: 'do_123' }} 
-        contextProps={{ mode: 'edit' }}
-      />
+      <TestWrapper>
+        <CollectionEditor 
+          identifier="do_123" 
+          metadata={{ identifier: 'do_123' }} 
+          contextProps={{ mode: 'edit' }}
+        />
+      </TestWrapper>
     );
 
     expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -86,11 +99,13 @@ describe('CollectionEditor - Basic Rendering', () => {
     mockInitializeDependencies.mockRejectedValue(new Error('Failed to load dependencies'));
 
     render(
-      <CollectionEditor 
-        identifier="do_123" 
-        metadata={{ identifier: 'do_123' }} 
-        contextProps={{ mode: 'edit' }}
-      />
+      <TestWrapper>
+        <CollectionEditor 
+          identifier="do_123" 
+          metadata={{ identifier: 'do_123' }} 
+          contextProps={{ mode: 'edit' }}
+        />
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -108,11 +123,13 @@ describe('CollectionEditor - Basic Rendering', () => {
     mockCreateConfig.mockRejectedValue(new Error('Config creation failed'));
 
     render(
-      <CollectionEditor 
-        identifier="do_123" 
-        metadata={{ identifier: 'do_123' }} 
-        contextProps={{ mode: 'edit' }}
-      />
+      <TestWrapper>
+        <CollectionEditor 
+          identifier="do_123" 
+          metadata={{ identifier: 'do_123' }} 
+          contextProps={{ mode: 'edit' }}
+        />
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -127,11 +144,13 @@ describe('CollectionEditor - Basic Rendering', () => {
 
   it('cleans up event listeners on unmount', async () => {
     const { unmount } = render(
-      <CollectionEditor 
-        identifier="do_123" 
-        metadata={{ identifier: 'do_123' }} 
-        contextProps={{ mode: 'edit' }}
-      />
+      <TestWrapper>
+        <CollectionEditor 
+          identifier="do_123" 
+          metadata={{ identifier: 'do_123' }} 
+          contextProps={{ mode: 'edit' }}
+        />
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -148,11 +167,13 @@ describe('CollectionEditor - Basic Rendering', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     
     render(
-      <CollectionEditor 
-        identifier="do_123" 
-        metadata={null as any} 
-        contextProps={{ mode: 'edit' }}
-      />
+      <TestWrapper>
+        <CollectionEditor 
+          identifier="do_123" 
+          metadata={null as any} 
+          contextProps={{ mode: 'edit' }}
+        />
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -164,4 +185,3 @@ describe('CollectionEditor - Basic Rendering', () => {
     consoleSpy.mockRestore();
   });
 });
-

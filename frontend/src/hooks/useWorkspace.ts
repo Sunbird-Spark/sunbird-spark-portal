@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { ContentService } from '@/services/ContentService';
 import { mapContentToWorkspaceItem } from '@/services/workspace';
@@ -190,6 +190,32 @@ export function useWorkspace({
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = contentQuery;
 
+  // Track which tab the last completed (non-paginating) fetch belongs to.
+  // This prevents stale cached data from a previous tab visit being shown
+  // while fresh data is loading — the root cause of the "wrong content on
+  // tab switch" bug. We only show the content once the API has responded for
+  // the current tab.
+  const lastFetchedTabRef = useRef<WorkspaceView | null>(null);
+
+  useEffect(() => {
+    if (!contentQuery.isFetching && contentQuery.isSuccess) {
+      lastFetchedTabRef.current = activeTab;
+    }
+  }, [contentQuery.isFetching, contentQuery.isSuccess, activeTab]);
+
+  // True when:
+  //   1. Initial load — no data in cache yet
+  //   2. Tab changed — a background refetch is in progress and we haven't
+  //      received a fresh response for the current tab yet (prevents stale
+  //      cached data from a different tab visit being rendered)
+  // NOT true for:
+  //   - Infinite-scroll "load more" (isFetchingNextPage guards it out)
+  //   - Same-tab background refreshes after delete/create
+  //     (lastFetchedTabRef already equals activeTab → condition is false)
+  const isLoadingCurrentTab =
+    contentQuery.isLoading ||
+    (contentQuery.isFetching && !isFetchingNextPage && lastFetchedTabRef.current !== activeTab);
+
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();
@@ -216,7 +242,7 @@ export function useWorkspace({
     contents,
     counts,
     totalCount,
-    isLoading: contentQuery.isLoading,
+    isLoading: isLoadingCurrentTab,
     isLoadingMore: isFetchingNextPage,
     isCountsLoading: countsQuery.isLoading,
     isRefreshing: contentQuery.isRefetching && !contentQuery.isLoading && !isFetchingNextPage,
