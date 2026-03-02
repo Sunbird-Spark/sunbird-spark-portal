@@ -15,6 +15,7 @@ import {
   getWorkspaceItemActionVisibility,
   getPrimaryCategoryIcon,
 } from "@/services/workspace";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import CardThumbnailBackground from "./CardThumbnailBackground";
 
 interface WorkspaceContentListProps {

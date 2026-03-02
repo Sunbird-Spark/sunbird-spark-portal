@@ -23,7 +23,31 @@ vi.mock('@/hooks/useCertificateDownload', () => ({
 
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => key,
+        t: (key: string, params?: Record<string, string>) => {
+            const translations: Record<string, string> = {
+                'tabs.all': 'all',
+                'status.ongoing': 'ongoing',
+                'status.completed': 'completed',
+                'profileLearning.myLearning': 'My Learning',
+                'profileLearning.filter': 'Filter',
+                'profileLearning.loadingCourses': 'Loading your courses...',
+                'profileLearning.failedToLoadCourses': 'Failed to load courses. Please try again.',
+                'profileLearning.noCoursesEnrolled': 'No courses enrolled yet.',
+                'profileLearning.noFilteredCourses': 'No {{filter}} courses found.',
+                'profileLearning.viewMoreCourses': 'View More Courses',
+                'profileLearning.viewLess': 'View Less',
+                'profileLearning.downloading': 'Downloading...',
+                'profileLearning.noCertificate': 'No certificate',
+                'common.downloadCertificate': 'common.downloadCertificate',
+            };
+            let result = translations[key] ?? key;
+            if (params) {
+                Object.entries(params).forEach(([k, v]) => {
+                    result = result.replace(`{{${k}}}`, String(v));
+                });
+            }
+            return result;
+        },
     }),
 }));
 

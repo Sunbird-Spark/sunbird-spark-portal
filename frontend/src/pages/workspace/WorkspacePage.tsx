@@ -318,6 +318,9 @@ const WorkspacePage = () => {
   const handleCollectionCreate = async (name: string, optionId: string, description?: string) => {
     const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
     const config = COLLECTION_CONTENT_CONFIG[optionId];
+    if (!config) {
+      throw new Error(t("workspace.errors.invalidContentType"));
+    }
     const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
 
     const response = await contentService.contentCreate(name, {
@@ -523,7 +526,7 @@ const WorkspacePage = () => {
             onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
             onSubmit={handleContentNameSubmit}
             isLoading={isCreating}
-            optionTitle={selectedOption ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
+            optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
             optionId={selectedOption ?? undefined}
           />
           <ResourceFormDialog
@@ -534,7 +537,7 @@ const WorkspacePage = () => {
             orgChannelId={orgChannelId}
             orgFramework={orgFramework}
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
-            title={selectedOption ? `${t('workspace.createContent')} ${t(EDITOR_OPTION_LABELS[selectedOption]) || ''}`.trim() : t('workspace.createContent')}
+            title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('workspace.createContent')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
           />
     </div>
   );
