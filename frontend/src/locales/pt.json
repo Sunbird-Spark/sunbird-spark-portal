@@ -781,5 +781,13 @@
     "upcomingBatches": "Lotes próximos",
     "learningProgress": "Progresso de aprendizado",
     "downloadCertificate": "Baixar certificado"
+  },
+  "editors": {
+    "errorTitle": "Erro do Editor",
+    "goBack": "Voltar",
+    "loading": "Carregando Editor...",
+    "preparing": "Preparando o ambiente do editor...",
+    "genericEditor": "Editor Genérico",
+    "contentEditor": "Editor de Conteúdo"
   }
 }

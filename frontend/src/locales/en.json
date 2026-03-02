@@ -792,5 +792,13 @@
     "batches": "Batches",
     "certificates": "Certificates",
     "all": "All"
+  },
+  "editors": {
+    "errorTitle": "Editor Error",
+    "goBack": "Go Back",
+    "loading": "Loading Editor...",
+    "preparing": "Preparing the editor environment...",
+    "genericEditor": "Generic Editor",
+    "contentEditor": "Content Editor"
   }
 }

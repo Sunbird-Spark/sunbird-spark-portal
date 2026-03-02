@@ -8,7 +8,7 @@ import {
 } from "@/components/common/DropdownMenu";
 import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
 import {
   CONTENT_TYPE_COLORS,
   STATUS_CONFIG,
@@ -19,6 +19,7 @@ import CardThumbnailBackground from "./CardThumbnailBackground";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
+  userRole?: UserRole;
   lockedContentMap?: Record<string, { creatorName: string }>;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
@@ -27,6 +28,7 @@ interface WorkspaceContentListProps {
 
 const WorkspaceContentList = ({
   items,
+  userRole,
   lockedContentMap = {},
   onEdit,
   onDelete,
@@ -51,7 +53,7 @@ const WorkspaceContentList = ({
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
           const lockInfo = lockedContentMap[item.id];
 
-          const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
+          const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
           const isLocked = !!lockInfo;
 
           return (

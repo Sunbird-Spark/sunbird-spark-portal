@@ -34,4 +34,26 @@ describe('workspaceItemActions', () => {
       showDelete: false,
     });
   });
+
+  it('shows both view and edit for creator role on published content', () => {
+    expect(getWorkspaceItemActionVisibility('published', 'creator')).toEqual({
+      isDraft: false,
+      isPublished: true,
+      isReview: false,
+      showView: true,
+      showEdit: true,
+      showDelete: false,
+    });
+  });
+
+  it('does not show edit for reviewer role on published content', () => {
+    expect(getWorkspaceItemActionVisibility('published', 'reviewer')).toEqual({
+      isDraft: false,
+      isPublished: true,
+      isReview: false,
+      showView: true,
+      showEdit: false,
+      showDelete: false,
+    });
+  });
 });
