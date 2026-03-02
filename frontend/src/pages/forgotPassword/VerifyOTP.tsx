@@ -32,6 +32,10 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
     const maxResendTry = 4;
     const captchaRef = React.useRef<ReCAPTCHA>(null);
 
+    const handleOtpChange = (value: string) => {
+        setOtp(value.replace(/[^0-9]/g, ''));
+    };
+
     const isOtpValid = OTP_REGEX.test(otp);
 
     useEffect(() => {
@@ -168,7 +172,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                     <div className="input-otp-container">
                         <InputOTP
                             value={otp}
-                            onChange={setOtp}
+                            onChange={handleOtpChange}
                             maxLength={6}
                             inputMode="numeric"
                             pattern="^[0-9]*$"

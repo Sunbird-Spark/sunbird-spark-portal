@@ -18,6 +18,10 @@ export const SignUpOtpVerification = ({ otp, setOtp, isOtpValid, handleVerifyOtp
     const [counter, setCounter] = useState(20);
     const [resendOtpCounter, setResendOtpCounter] = useState(1);
 
+    const handleOtpChange = (value: string) => {
+        setOtp(value.replace(/[^0-9]/g, ''));
+    };
+
     useEffect(() => {
         setDisableResendOtp(true);
         setCounter(20);
@@ -56,7 +60,7 @@ export const SignUpOtpVerification = ({ otp, setOtp, isOtpValid, handleVerifyOtp
 
                     <InputOTP
                         value={otp}
-                        onChange={setOtp}
+                        onChange={handleOtpChange}
                         maxLength={6}
                         inputMode="numeric"
                         pattern="^[0-9]*$"
