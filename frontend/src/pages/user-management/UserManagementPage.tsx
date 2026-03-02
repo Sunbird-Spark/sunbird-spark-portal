@@ -1,16 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FiShield } from "react-icons/fi";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/home/Sheet";
-import Header from "@/components/home/Header";
-import HomeSidebar from "@/components/home/HomeSidebar";
-import Footer from "@/components/home/Footer";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/useToast";
-import { useSidebarState } from "@/hooks/useSidebarState";
 import {
   userManagementService,
   type RoleItem,
@@ -41,10 +31,7 @@ const UM_TABS: UMTab[] = [
 /* ── Main Page ───────────────────────────────────────────────────────────── */
 
 const UserManagementPage = () => {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
-  const [activeNav, setActiveNav] = useState("user-management");
-  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
 
   const [activeTab, setActiveTab] = useState<string>(UM_TABS[0]?.id ?? "role-management");
   const [availableRoles, setAvailableRoles] = useState<RoleItem[]>([]);
@@ -139,27 +126,9 @@ const UserManagementPage = () => {
   };
 
   return (
-    <div className="workspace-container">
-      <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
-
-      <div className="flex flex-1 relative transition-all">
-        {isMobile ? (
-          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-            <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <HomeSidebar activeNav={activeNav} onNavChange={(nav) => { setActiveNav(nav); setIsSidebarOpen(false); }} />
-            </SheetContent>
-          </Sheet>
-        ) : (
-          <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
-            <HomeSidebar activeNav={activeNav} onNavChange={setActiveNav} collapsed={!isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-          </div>
-        )}
-
-        {/* Page content */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <main className="workspace-main-content">
-            <div className="workspace-content-wrapper">
+    <div className="flex-1 flex flex-col min-w-0">
+      <main className="workspace-main-content">
+        <div className="workspace-content-wrapper">
 
               {/* ── Page header ── */}
               <div className="um-page-header">
@@ -229,10 +198,7 @@ const UserManagementPage = () => {
 
               </div>
             </div>
-          </main>
-          <Footer />
-        </div>
-      </div>
+        </main>
     </div>
   );
 };

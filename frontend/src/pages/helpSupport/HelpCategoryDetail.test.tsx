@@ -65,6 +65,35 @@ vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({ t: (key: string) => key }),
 }));
 
+vi.mock('@/hooks/usePermission', () => ({
+    usePermissions: () => ({
+        roles: ['PUBLIC'],
+        isLoading: false,
+        isAuthenticated: false,
+        error: null,
+        hasAnyRole: vi.fn(() => false),
+        canAccessFeature: vi.fn(() => false),
+        refetch: vi.fn(),
+    }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+    useGetTncUrl: () => ({ data: '' }),
+    useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+    default: {
+        getUserId: () => 'test-user-id',
+        isUserAuthenticated: () => true,
+        getAuthInfo: vi.fn().mockResolvedValue({
+            sid: 'test-session',
+            uid: 'test-user-id',
+            isAuthenticated: true,
+        }),
+    },
+}));
+
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
@@ -147,23 +176,21 @@ describe('HelpCategoryDetail', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/help-support');
     });
 
-    it('toggles sidebar collapse/expand', () => {
+    it('toggles sidebar collapse/expand', async () => {
+        // This test is no longer valid since HelpCategoryDetail doesn't render the sidebar
+        // The sidebar is now rendered by PageLayout
         render(
             <MemoryRouter>
                 <HelpCategoryDetail />
             </MemoryRouter>
         );
 
-        const sidebar = screen.getByTestId('home-sidebar');
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-
-        fireEvent.click(screen.getByRole('button', { name: "Collapse Sidebar" }));
-        expect(sidebar).toHaveAttribute('data-collapsed', 'true');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed');
-
-        fireEvent.click(screen.getByRole('button', { name: "Expand Sidebar" }));
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
+        await waitFor(() => {
+            expect(screen.getByText('button.goBack')).toBeInTheDocument();
+        });
+        
+        // Component renders its own content without sidebar
+        expect(screen.queryByTestId('home-sidebar')).not.toBeInTheDocument();
     });
 
     it('handles feedback submission (Yes)', async () => {

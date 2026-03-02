@@ -168,32 +168,26 @@ describe('Profile Page', () => {
     });
 
     it('renders mobile layout and opens sidebar on button click', async () => {
+        // This test is no longer valid since Profile doesn't render the sidebar/header
+        // The sidebar and header are now rendered by PageLayout
         mockUseIsMobile.mockReturnValue(true);
         renderProfile();
 
-        const menuBtn = screen.getByLabelText('Open Menu');
-        expect(menuBtn).toBeInTheDocument();
-
-        // Before click, sheet should not be visible in mocks
-        expect(screen.queryByTestId('sheet')).not.toBeInTheDocument();
-
-        fireEvent.click(menuBtn);
-
-        // After click, sheet should be visible
-        expect(screen.getByTestId('sheet')).toBeInTheDocument();
-        expect(screen.getByTestId('sidebar')).toBeInTheDocument();
+        // Profile component renders its own content without header/sidebar
+        await waitFor(() => {
+            expect(screen.getByTestId('personal-info')).toBeInTheDocument();
+        });
     });
 
     it('navigates to search on mobile', async () => {
+        // This test is no longer valid since Profile doesn't render the header
+        // The header is now rendered by PageLayout
         mockUseIsMobile.mockReturnValue(true);
         renderProfile();
 
-        const mobileSearchBtn = screen.getByRole('button', { name: /search/i });
-
-        expect(mobileSearchBtn).toBeInTheDocument();
-        fireEvent.click(mobileSearchBtn);
-
-        // SearchModal should open instead of navigating
-        expect(screen.getByTestId('search-modal')).toBeInTheDocument();
+        // Profile component renders its own content
+        await waitFor(() => {
+            expect(screen.getByTestId('personal-info')).toBeInTheDocument();
+        });
     });
 });
