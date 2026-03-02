@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import PageLayout from './PageLayout';
 
@@ -253,6 +253,58 @@ describe('PageLayout', () => {
       // Navigating inside the sidebar should close the sheet
       fireEvent.click(screen.getByRole('button', { name: 'Navigate' }));
       expect(screen.queryByTestId('mobile-sheet')).not.toBeInTheDocument();
+    });
+  });
+
+  // ── Viewport change sync ───────────────────────────────────────────────────
+
+  describe('viewport change sync', () => {
+    it('closes the sidebar when switching from desktop to mobile', () => {
+      // Start on desktop (sidebar open)
+      mockUseIsMobile.mockReturnValue(false);
+      const { rerender } = renderLayout();
+      expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'false');
+
+      // Simulate viewport resize to mobile
+      mockUseIsMobile.mockReturnValue(true);
+      act(() => {
+        rerender(
+          <MemoryRouter initialEntries={['/home']}>
+            <Routes>
+              <Route element={<PageLayout />}>
+                <Route path="*" element={<div data-testid="page-content">Page Content</div>} />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        );
+      });
+
+      // Sheet should be closed (isSidebarOpen reset to false for mobile)
+      expect(screen.queryByTestId('mobile-sheet')).not.toBeInTheDocument();
+    });
+
+    it('opens the sidebar when switching from mobile to desktop', () => {
+      // Start on mobile (sidebar closed)
+      mockUseIsMobile.mockReturnValue(true);
+      const { rerender } = renderLayout();
+      expect(screen.queryByTestId('mobile-sheet')).not.toBeInTheDocument();
+
+      // Simulate viewport resize to desktop
+      mockUseIsMobile.mockReturnValue(false);
+      act(() => {
+        rerender(
+          <MemoryRouter initialEntries={['/home']}>
+            <Routes>
+              <Route element={<PageLayout />}>
+                <Route path="*" element={<div data-testid="page-content">Page Content</div>} />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        );
+      });
+
+      // Desktop sidebar should now be expanded
+      expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'false');
     });
   });
 
