@@ -23,7 +23,7 @@ import Explore from './pages/Explore';
 import MyLearning from './pages/myLearning/MyLearning';
 import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
-import ContentReviewPage from './pages/workspace/ContentReviewPage';
+import ContentViewPage from './pages/workspace/ContentViewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
 import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
@@ -72,7 +72,12 @@ const AppRoutes: React.FC = () => {
         } />
         <Route path="/workspace/review/:contentId" element={
           <ProtectedRoute allowedRoles={['CONTENT_REVIEWER']}>
-            <ContentReviewPage />
+            <ContentViewPage mode="review" />
+          </ProtectedRoute>
+        } />
+        <Route path="/workspace/view/:contentId" element={
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
+            <ContentViewPage mode="view" />
           </ProtectedRoute>
         } />
         <Route path="/reports/platform" element={<PlatformReports />} />

@@ -418,8 +418,7 @@ const WorkspacePage = () => {
 
     if (!isCollection) {
       const isReviewMode = userRole === 'reviewer' && item.status === 'review';
-      const mode = isReviewMode ? 'review' : 'view';
-      navigate(`/workspace/review/${id}?mode=${mode}`);
+      navigate(isReviewMode ? `/workspace/review/${id}` : `/workspace/view/${id}`);
       return;
     }
     const route = getEditorRoute(id);

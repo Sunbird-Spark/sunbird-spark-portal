@@ -113,7 +113,7 @@ export default function ContentNameDialog({
           {isCollection && (
             <>
               <label className="block text-sm font-medium font-rubik text-foreground mb-1">
-                {t('description')}
+                {t('workspace.description')}
               </label>
               <input
                 type="text"
