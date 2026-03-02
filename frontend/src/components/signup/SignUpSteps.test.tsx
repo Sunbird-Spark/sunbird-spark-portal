@@ -82,23 +82,23 @@ vi.mock('../../pages/forgotPassword/ForgotPasswordComponents', () => ({
         <button data-testid="primary-button" onClick={onClick} disabled={disabled}>
             {children}
         </button>
-    ),
-    OTPInput: ({ otp, setOtp }: any) => (
-        <div data-testid="otp-input">
-            {otp.map((digit: string, i: number) => (
-                <input
-                    key={i}
-                    data-testid={`otp-${i}`}
-                    value={digit}
-                    onChange={(e) => {
-                        const newOtp = [...otp];
-                        newOtp[i] = e.target.value;
-                        setOtp(newOtp);
-                    }}
-                />
-            ))}
-        </div>
     )
+}));
+
+// Mock InputOTP components
+vi.mock('@/components/common/InputOTP', () => ({
+    InputOTP: ({ value, onChange, children }: any) => (
+        <div data-testid="otp-input">
+            <input
+                data-testid="otp-input-field"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            {children}
+        </div>
+    ),
+    InputOTPGroup: ({ children }: any) => <div>{children}</div>,
+    InputOTPSlot: ({ index }: any) => <div data-testid={`otp-slot-${index}`} />
 }));
 
 // Mock icons
@@ -222,7 +222,7 @@ describe('SignUpForm', () => {
 
 describe('SignUpOtpVerification', () => {
     const defaultProps = {
-        otp: ['', '', '', '', '', ''],
+        otp: '',
         setOtp: vi.fn(),
         isOtpValid: false,
         handleVerifyOtp: vi.fn(),
@@ -237,9 +237,9 @@ describe('SignUpOtpVerification', () => {
 
     it('handles OTP input change', () => {
         render(<SignUpOtpVerification {...defaultProps} />);
-        const firstDigit = screen.getByTestId('otp-0');
-        fireEvent.change(firstDigit, { target: { value: '1' } });
-        expect(defaultProps.setOtp).toHaveBeenCalled();
+        const otpInput = screen.getByTestId('otp-input-field');
+        fireEvent.change(otpInput, { target: { value: '123456' } });
+        expect(defaultProps.setOtp).toHaveBeenCalledWith('123456');
     });
 
     it('calls handleVerifyOtp when OTP is valid and button is clicked', () => {

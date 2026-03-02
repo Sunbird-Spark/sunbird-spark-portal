@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Header, PrimaryButton, OTPInput } from "../../pages/forgotPassword/ForgotPasswordComponents";
+import { Header, PrimaryButton } from "../../pages/forgotPassword/ForgotPasswordComponents";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/common/InputOTP";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface Step2Props {
-    otp: string[];
-    setOtp: (val: string[]) => void;
+    otp: string;
+    setOtp: (val: string) => void;
     isOtpValid: boolean;
     handleVerifyOtp: () => void;
     handleResendOtp: () => void;
@@ -16,6 +17,10 @@ export const SignUpOtpVerification = ({ otp, setOtp, isOtpValid, handleVerifyOtp
     const [disableResendOtp, setDisableResendOtp] = useState(false);
     const [counter, setCounter] = useState(20);
     const [resendOtpCounter, setResendOtpCounter] = useState(1);
+
+    const handleOtpChange = (value: string) => {
+        setOtp(value.replace(/[^0-9]/g, ''));
+    };
 
     useEffect(() => {
         setDisableResendOtp(true);
@@ -53,7 +58,20 @@ export const SignUpOtpVerification = ({ otp, setOtp, isOtpValid, handleVerifyOtp
                         {t("forgotPasswordPage.otpValidity")}
                     </p>
 
-                    <OTPInput otp={otp} setOtp={setOtp} />
+                    <InputOTP
+                        value={otp}
+                        onChange={handleOtpChange}
+                        maxLength={6}
+                        inputMode="numeric"
+                        pattern="^[0-9]*$"
+                        containerClassName="otp-input-container"
+                    >
+                        <InputOTPGroup className="gap-3">
+                            {[0, 1, 2, 3, 4, 5].map((i) => (
+                                <InputOTPSlot key={i} index={i} className="otp-input" />
+                            ))}
+                        </InputOTPGroup>
+                    </InputOTP>
 
                     <div className="text-center text-[0.75rem] font-medium mt-8">
                         <button

@@ -46,10 +46,23 @@ vi.mock('./ForgotPasswordComponents', () => ({
         <button data-testid="submit-btn" onClick={onClick} disabled={disabled || loading}>
             {loading ? 'Loading' : children}
         </button>
-    ),
-    OTPInput: ({ _otp, setOtp }: { _otp: string[], setOtp: (otp: string[]) => void }) => (
-        <button data-testid="fill-otp" onClick={() => setOtp(['1', '2', '3', '4', '5', '6'])}>Fill OTP</button>
     )
+}));
+
+vi.mock('@/components/common/InputOTP', () => ({
+    InputOTP: ({ value, onChange, children }: { value: string, onChange: (val: string) => void, children: React.ReactNode }) => (
+        <div>
+            <input
+                data-testid="otp-input"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            <button data-testid="fill-otp" onClick={() => onChange('123456')}>Fill OTP</button>
+            {children}
+        </div>
+    ),
+    InputOTPGroup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    InputOTPSlot: ({ index }: { index: number }) => <div data-testid={`otp-slot-${index}`} />
 }));
 
 describe('VerifyOTP', () => {
