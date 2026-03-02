@@ -91,8 +91,9 @@ export const useContentState = (
 ): UseQueryResult<ApiResponse<ContentStateReadResponse>, Error> => {
   const enabled = options?.enabled ?? true;
   const contentIdsKey = request?.contentIds?.length ? request.contentIds.join(',') : '';
+  const fieldsKey = request?.fields?.join(',') ?? '';
   return useQuery({
-    queryKey: ['contentState', request?.userId, request?.courseId, request?.batchId, contentIdsKey],
+    queryKey: ['contentState', request?.userId, request?.courseId, request?.batchId, contentIdsKey, fieldsKey],
     queryFn: () => learnerBatchService.contentStateRead(request!),
     enabled: enabled && !!request && request.contentIds.length > 0,
   });

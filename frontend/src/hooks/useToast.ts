@@ -10,6 +10,8 @@ type ToasterToast = ToastProps & {
     title?: React.ReactNode;
     description?: React.ReactNode;
     action?: ToastActionElement;
+    /** When "center", toast is shown in a center-positioned toaster (e.g. above player). Use with a Toaster that has viewport="center". */
+    viewport?: "default" | "center";
 };
 
 const actionTypes = {
@@ -134,7 +136,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">;
 
-function toast({ ...props }: Toast) {
+function toast({ viewport, ...rest }: Toast) {
     const id = genId();
 
     const update = (props: ToasterToast) =>
@@ -147,7 +149,8 @@ function toast({ ...props }: Toast) {
     dispatch({
         type: "ADD_TOAST",
         toast: {
-            ...props,
+            ...rest,
+            viewport: viewport ?? "default",
             id,
             open: true,
             onOpenChange: (open) => {

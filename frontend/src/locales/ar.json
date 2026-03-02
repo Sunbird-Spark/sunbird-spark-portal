@@ -239,7 +239,10 @@
     "batchStartedOn": "بدأت الدفعة في",
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
-    "contentStatusNotViewed": "لم تتم المشاهدة"
+    "contentStatusNotViewed": "لم تتم المشاهدة",
+    "selfAssessMaxAttempt": "لقد وصلت إلى الحد الأقصى لعدد المحاولات لهذا التقييم.",
+    "selfAssessLastAttempt": "هذه هي محاولتك الأخيرة لهذا التقييم.",
+    "attemptsLabel": "المحاولة {{current}} من {{max}}"
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",

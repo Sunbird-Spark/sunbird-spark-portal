@@ -97,7 +97,7 @@ describe('useBatch hooks test', () => {
       const queryParams = useContentState(req);
       
       expect(useQuery).toHaveBeenCalled();
-      expect((queryParams as any).queryKey).toEqual(['contentState', 'u1', 'c1', 'b1', 'doc1']);
+      expect((queryParams as any).queryKey).toEqual(['contentState', 'u1', 'c1', 'b1', 'doc1', '']);
       expect((queryParams as any).enabled).toBe(true);
     });
 

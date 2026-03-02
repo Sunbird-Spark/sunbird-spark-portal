@@ -15,6 +15,7 @@ import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import { useIsContentCreator } from "@/hooks/useUser";
+import { useCollectionDetailSelfAssess } from "@/hooks/useCollectionDetailSelfAssess";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import RelatedContentSection from "@/components/collection/RelatedContentSection";
 import CollectionContentArea from "@/components/collection/CollectionContentArea";
@@ -37,7 +38,7 @@ const CollectionDetailPage = () => {
   const { data: userReadData } = useUserRead();
   const userProfile = userReadData?.data?.response;
   const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
-  const { isEnrolledInCurrentBatch, contentStatusMap, courseProgressProps, batches, batchListLoading, batchListError,
+  const { isEnrolledInCurrentBatch, contentStatusMap, contentAttemptInfoMap, courseProgressProps, batches, batchListLoading, batchListError,
     firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse, effectiveBatchId, isBatchEnded } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
@@ -97,8 +98,25 @@ const CollectionDetailPage = () => {
   const isQumlContent = selectedContentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
-  const playerMetadata = isQumlContent ? qumlData : selectedContentData;
-  const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading ) : false;
+  const rawPlayerMetadata = isQumlContent ? qumlData : selectedContentData;
+
+  const {
+    maxAttemptsExceeded,
+    playerMetadata,
+    currentContentNode,
+  } = useCollectionDetailSelfAssess({
+    contentId,
+    collectionData,
+    hasBatchInRoute,
+    isEnrolledInCurrentBatch,
+    contentCreatorPrivilege,
+    contentAttemptInfoMap: contentAttemptInfoMap ?? {},
+    rawPlayerMetadata,
+    playerIsLoading: contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading) : false,
+    t,
+  });
+
+  const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading) : false;
   const playerError = isQumlContent ? qumlError : contentError;
 
   const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
@@ -108,9 +126,10 @@ const CollectionDetailPage = () => {
     effectiveBatchId,
     isEnrolledInCurrentBatch,
     isBatchEnded,
-    mimeType: playerMetadata?.mimeType,
+    mimeType: (playerMetadata as { mimeType?: string } | undefined)?.mimeType,
     currentContentStatus,
     skipContentStateUpdate: contentCreatorPrivilege,
+    contentType: currentContentNode?.contentType,
   });
 
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
@@ -140,24 +159,16 @@ const CollectionDetailPage = () => {
   useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
 
   const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
-
   const relatedContentItems = useMemo(
     () => (hasSearchResults ? mapSearchContentToRelatedContentItems(searchData?.data?.content, collectionData?.id ?? undefined, 3) : []),
     [hasSearchResults, searchData?.data?.content, collectionData?.id]
   );
-
   const toggleModule = (moduleId: string) => {
-    setExpandedModules((prev) =>
-      prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
-    );
+    setExpandedModules((prev) => (prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]));
   };
-
-  const certificatePreviewDetails: CertificatePreviewDetails = useMemo(() => {
-    const recipientName = userProfile
-      ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined
-      : undefined;
-    return { recipientName };
-  }, [userProfile?.firstName, userProfile?.lastName]);
+  const certificatePreviewDetails: CertificatePreviewDetails = useMemo(() => ({
+    recipientName: userProfile ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined : undefined,
+  }), [userProfile?.firstName, userProfile?.lastName]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -207,6 +218,7 @@ const CollectionDetailPage = () => {
               playerError={playerError}
               handlePlayerEvent={handlePlayerEvent}
               handleTelemetryEvent={handleTelemetryEvent}
+              showMaxAttemptsExceeded={maxAttemptsExceeded}
               isAuthenticated={isAuthenticated}
               isContentCreator={isContentCreator}
               collectionId={collectionId}
@@ -216,6 +228,7 @@ const CollectionDetailPage = () => {
               expandedModules={expandedModules}
               toggleModule={toggleModule}
               contentStatusMap={contentStatusMap}
+              contentAttemptInfoMap={contentAttemptInfoMap}
               batches={batches}
               selectedBatchId={selectedBatchId}
               setSelectedBatchId={setSelectedBatchId}
