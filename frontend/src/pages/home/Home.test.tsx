@@ -1,18 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 
-// Mock child components to keep tests focused
-vi.mock('@/components/home/HomeSidebar', () => ({
-    default: ({ onNavChange }: { onNavChange: (n: string) => void }) => (
-        <div data-testid="sidebar">
-            <button onClick={() => onNavChange('profile')}>Change Nav</button>
-        </div>
-    )
-}));
 vi.mock('@/components/home/HomeDashboardContent', () => ({
     default: ({ loading, error, enrolledCount }: { loading: boolean; error?: string; enrolledCount: number; onRetry: () => void }) => (
         <div data-testid="dashboard-content"
@@ -22,34 +13,7 @@ vi.mock('@/components/home/HomeDashboardContent', () => ({
         />
     ),
 }));
-vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
 
-vi.mock('@/components/common/SearchModal', () => ({
-    default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
-        isOpen ? <div data-testid="search-modal">Search Modal<button onClick={onClose}>Close</button></div> : null,
-}));
-
-// Mock DropdownMenu to render content inline
-vi.mock('@/components/common/DropdownMenu', () => ({
-    DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    DropdownMenuItem: ({ children, onSelect }: { children: React.ReactNode, onSelect?: () => void }) => (
-        <div onClick={onSelect}>{children}</div>
-    ),
-}));
-
-// Mock hooks
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom');
-    return {
-        ...actual,
-        useNavigate: () => mockNavigate,
-    };
-});
-
-const mockChangeLanguage = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
         t: (key: string, options?: any) => {
@@ -58,28 +22,10 @@ vi.mock('@/hooks/useAppI18n', () => ({
                 'homePage.hiGuest': 'Hi there',
                 'homePage.journeyStart': 'Your exciting learning journey starts here. Dive in!',
                 'homePage.welcomeMessage': 'Welcome to a learning experience made just for you.',
-                'onboarding.altSunbird': 'Sunbird',
-                'header.search': 'Search',
-                'changeLanguage': 'Change Language',
-                'common.notifications': 'Notifications',
-                'navigationMenu': 'Navigation Menu',
-                'homeComponents.openMenu': 'Open Menu',
-                'homeComponents.closeMenu': 'Close Menu',
             };
             return translations[key] || key;
         },
-        languages: [
-            { code: 'en', label: 'English' },
-            { code: 'hi', label: 'Hindi' },
-        ],
-        currentCode: 'en',
-        changeLanguage: mockChangeLanguage,
     }),
-}));
-
-const mockUseIsMobile = vi.fn();
-vi.mock('@/hooks/use-mobile', () => ({
-    useIsMobile: () => mockUseIsMobile(),
 }));
 
 vi.mock('@/hooks/usePermission', () => ({
@@ -115,13 +61,11 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
     },
 }));
 
-// Mock useUserRead
 const mockUseUserRead = vi.fn();
 vi.mock('@/hooks/useUserRead', () => ({
     useUserRead: () => mockUseUserRead(),
 }));
 
-// Mock useUserEnrolledCollections
 const mockUseUserEnrolledCollections = vi.fn();
 vi.mock('@/hooks/useUserEnrolledCollections', () => ({
     useUserEnrolledCollections: () => mockUseUserEnrolledCollections(),
@@ -129,7 +73,6 @@ vi.mock('@/hooks/useUserEnrolledCollections', () => ({
 
 describe('Home Page', () => {
     beforeEach(() => {
-        mockUseIsMobile.mockReturnValue(false); // Default to desktop
         mockUseUserRead.mockReturnValue({
             data: {
                 data: {
@@ -143,7 +86,6 @@ describe('Home Page', () => {
             error: null,
             refetch: vi.fn(),
         });
-        // Default to 2 enrollments so the full dashboard path is exercised
         mockUseUserEnrolledCollections.mockReturnValue({
             data: {
                 data: {
@@ -160,11 +102,7 @@ describe('Home Page', () => {
     });
 
     const createTestQueryClient = () => new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-            },
-        },
+        defaultOptions: { queries: { retry: false } },
     });
 
     const renderHome = () => {
@@ -267,66 +205,5 @@ describe('Home Page', () => {
         renderHome();
 
         expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-enrolled', '2');
-    });
-
-    it('renders footer', async () => {
-        // This test is no longer valid since Home doesn't render the footer
-        // The footer is now rendered by PageLayout
-        renderHome();
-
-        await waitFor(() => {
-            expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
-        });
-    });
-
-    it('handles sidebar toggle on desktop', async () => {
-        // This test is no longer valid since Home doesn't render the sidebar
-        // The sidebar is now rendered by PageLayout
-        renderHome();
-
-        await waitFor(() => {
-            expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
-        });
-    });
-
-    it('renders mobile layout correctly', async () => {
-        // This test is no longer valid since Home doesn't render the header
-        // The header is now rendered by PageLayout
-        mockUseIsMobile.mockReturnValue(true);
-        renderHome();
-
-        await waitFor(() => {
-            expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
-        });
-    });
-
-    it('opens search modal when search button is clicked', async () => {
-        // This test is no longer valid since Home doesn't render the search button
-        // The search button is now rendered by PageLayout/Header
-        renderHome();
-
-        await waitFor(() => {
-            expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
-        });
-    });
-
-    it('changes language through the dropdown', async () => {
-        // This test is no longer valid since Home doesn't render the language dropdown
-        // The language dropdown is now rendered by PageLayout/Header
-        renderHome();
-
-        await waitFor(() => {
-            expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
-        });
-    });
-
-    it('updates activeNav when sidebar notifies', async () => {
-        // This test is no longer valid since Home doesn't render the sidebar
-        // The sidebar is now rendered by PageLayout
-        renderHome();
-
-        await waitFor(() => {
-            expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
-        });
     });
 });
