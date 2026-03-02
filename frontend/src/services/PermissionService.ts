@@ -25,7 +25,7 @@ class PermissionService {
 
   normalizeRoles(backendRoles: string[]): Role[] {
     const validRoles: Role[] = [];
-    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'PUBLIC', 'ORG_ADMIN'];
+    const knownRoles: Role[] = ['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER', 'PUBLIC', 'ORG_ADMIN', 'COURSE_MENTOR'];
 
     for (const role of backendRoles) {
       if (role === 'ANONYMOUS') {

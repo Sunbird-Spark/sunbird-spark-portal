@@ -18,6 +18,7 @@ vi.mock("./pages/onboarding/OnboardingPage", () => ({ default: () => <div>Onboar
 vi.mock("./pages/user-management/UserManagementPage", () => ({ default: () => <div>User Management Page</div> }));
 vi.mock("./pages/reports/PlatformReports", () => ({ default: () => <div>Platform Reports Page</div> }));
 vi.mock("./pages/reports/CourseReport", () => ({ default: () => <div>Course Report Page</div> }));
+vi.mock("./pages/reports/UserReport", () => ({ default: () => <div>User Report Page</div> }));
 vi.mock("./pages/profile/Profile", () => ({ default: () => <div>Profile Page</div> }));
 vi.mock("./pages/collection/CollectionDetailPage", () => ({ default: () => <div>Collection Detail Page</div> }));
 vi.mock("./pages/forgotPassword/ForgotPassword", () => ({ default: () => <div>Forgot Password Page</div> }));
@@ -184,58 +185,66 @@ describe("AppRoutes (RBAC routing tests)", () => {
   // ── ORG_ADMIN protected routes ─────────────────────────────────────────────
 
   describe("ORG_ADMIN protected routes", () => {
-    const orgAdminPermissions = {
-      isAuthenticated: true,
-      isLoading: false,
-      roles: ['ORG_ADMIN'],
-      error: null,
-      hasAnyRole: vi.fn((roles: string[]) => roles.includes('ORG_ADMIN')),
-      canAccessFeature: vi.fn(),
-      refetch: vi.fn(),
-    };
-
-    const nonAdminPermissions = {
-      isAuthenticated: true,
-      isLoading: false,
-      roles: ['CONTENT_CREATOR'],
-      error: null,
-      hasAnyRole: vi.fn((roles: string[]) => !roles.includes('ORG_ADMIN')),
-      canAccessFeature: vi.fn(),
-      refetch: vi.fn(),
-    };
-
     it("ORG_ADMIN can access /reports/platform", () => {
-      mockUsePermissions.mockReturnValue(orgAdminPermissions);
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['ORG_ADMIN'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
       renderWithRoute("/reports/platform");
       expect(screen.getByText("Platform Reports Page")).toBeInTheDocument();
     });
 
     it("non-admin authenticated user is redirected from /reports/platform", () => {
-      mockUsePermissions.mockReturnValue(nonAdminPermissions);
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['CONTENT_CREATOR'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => !roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
       renderWithRoute("/reports/platform");
       expect(screen.getByText("Home Page")).toBeInTheDocument();
     });
 
-    it("ORG_ADMIN can access /reports/course/:courseId", () => {
-      mockUsePermissions.mockReturnValue(orgAdminPermissions);
+    it("CONTENT_CREATOR can access /reports/course/:courseId", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['CONTENT_CREATOR'], error: null,
+        hasAnyRole: vi.fn((allowedRoles: string[]) => 
+          allowedRoles.some(role => ['CONTENT_CREATOR'].includes(role))
+        ),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
       renderWithRoute("/reports/course/course-123");
       expect(screen.getByText("Course Report Page")).toBeInTheDocument();
     });
 
-    it("non-admin authenticated user is redirected from /reports/course/:courseId", () => {
-      mockUsePermissions.mockReturnValue(nonAdminPermissions);
+    it("user without CONTENT_CREATOR or COURSE_MENTOR is redirected from /reports/course/:courseId", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['PUBLIC'], error: null,
+        hasAnyRole: vi.fn((allowedRoles: string[]) => 
+          allowedRoles.some(role => ['PUBLIC'].includes(role))
+        ),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
       renderWithRoute("/reports/course/course-123");
       expect(screen.getByText("Home Page")).toBeInTheDocument();
     });
 
     it("ORG_ADMIN can access /user-management", () => {
-      mockUsePermissions.mockReturnValue(orgAdminPermissions);
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['ORG_ADMIN'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
       renderWithRoute("/user-management");
       expect(screen.getByText("User Management Page")).toBeInTheDocument();
     });
 
     it("non-admin authenticated user is redirected from /user-management", () => {
-      mockUsePermissions.mockReturnValue(nonAdminPermissions);
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['CONTENT_CREATOR'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => !roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
       renderWithRoute("/user-management");
       expect(screen.getByText("Home Page")).toBeInTheDocument();
     });

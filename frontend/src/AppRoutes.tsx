@@ -122,7 +122,7 @@ const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           } />
           <Route path="/reports/course/:courseId" element={
-            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+            <ProtectedRoute allowedRoles={['COURSE_MENTOR', 'CONTENT_CREATOR']}>
               <CourseReport />
             </ProtectedRoute>
           } />
