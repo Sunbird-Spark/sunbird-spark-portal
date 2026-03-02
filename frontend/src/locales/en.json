@@ -239,7 +239,10 @@
     "batchStartedOn": "Batch Started on",
     "contentStatusCompleted": "Completed",
     "contentStatusInProgress": "In Progress",
-    "contentStatusNotViewed": "Not viewed"
+    "contentStatusNotViewed": "Not viewed",
+    "selfAssessMaxAttempt": "You have reached the maximum number of attempts for this assessment.",
+    "selfAssessLastAttempt": "This is your last attempt for this assessment.",
+    "attemptsLabel": "Attempt {{current}} of {{max}}"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
@@ -516,6 +519,7 @@
     "userReport": "User Report",
     "adminReports": "Admin Reports",
     "userManagement": "User Management",
+    "userConsent": "User Consent",
     "expand": "Expand Sidebar",
     "collapse": "Collapse Sidebar"
   },

@@ -31,10 +31,6 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: { isUserAuthenticated: vi.fn(() => false) },
 }));
 
-vi.mock('../components/home/HomeSidebar', () => ({
-  default: () => <div data-testid="sidebar">Sidebar</div>,
-}));
-
 vi.mock('../components/explore/ExploreGrid', () => ({
   default: ({ query, sortBy, filters }: any) => (
     <div data-testid="explore-grid">
@@ -53,30 +49,31 @@ vi.mock('../components/explore/ExploreFilters', () => ({
   ),
 }));
 
-vi.mock('../components/home/Header', () => ({
-  default: () => <div data-testid="header">Header</div>,
-}));
-
-vi.mock('../components/home/Footer', () => ({
-  default: () => <div data-testid="footer">Footer</div>,
-}));
-
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => key,
   }),
 }));
 
-vi.mock('@/hooks/use-mobile', () => ({
-  useIsMobile: vi.fn(() => false),
+vi.mock('@/hooks/usePermission', () => ({
+  usePermissions: () => ({
+    roles: ['PUBLIC'],
+    isLoading: false,
+    isAuthenticated: false,
+    error: null,
+    hasAnyRole: vi.fn(() => false),
+    canAccessFeature: vi.fn(() => false),
+    refetch: vi.fn(),
+  }),
 }));
 
-vi.mock('@/hooks/useSidebarState', () => ({
-  useSidebarState: () => ({
-    isOpen: false,
-    toggleSidebar: vi.fn(),
-    setSidebarOpen: vi.fn(),
-  }),
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: {}, isSuccess: false }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+  useGetTncUrl: () => ({ data: '' }),
+  useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
 }));
 
 vi.mock('@/hooks/useDebounce', () => ({
@@ -146,10 +143,8 @@ describe('Explore Page', () => {
   });
 
   describe('static rendering', () => {
-    it('renders the header, footer, filters, and grid', () => {
+    it('renders the filters and grid', () => {
       renderComponent();
-      expect(screen.getByTestId('header')).toBeInTheDocument();
-      expect(screen.getByTestId('footer')).toBeInTheDocument();
       expect(screen.getByTestId('explore-filters')).toBeInTheDocument();
       expect(screen.getByTestId('explore-grid')).toBeInTheDocument();
     });

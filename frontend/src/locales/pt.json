@@ -239,7 +239,10 @@
     "batchStartedOn": "Turma iniciada em",
     "contentStatusCompleted": "Concluído",
     "contentStatusInProgress": "Em andamento",
-    "contentStatusNotViewed": "Não visualizado"
+    "contentStatusNotViewed": "Não visualizado",
+    "selfAssessMaxAttempt": "Você atingiu o número máximo de tentativas para esta avaliação.",
+    "selfAssessLastAttempt": "Esta é sua última tentativa para esta avaliação.",
+    "attemptsLabel": "Tentativa {{current}} de {{max}}"
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",

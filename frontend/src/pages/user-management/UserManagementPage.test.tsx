@@ -16,28 +16,10 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: { isUserAuthenticated: () => true, getUserId: () => 'uid1', getAuthInfo: vi.fn() },
 }));
 
-vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }));
-
-vi.mock('@/hooks/useSidebarState', () => ({
-  useSidebarState: () => ({ isOpen: true, setSidebarOpen: vi.fn(), toggleSidebar: vi.fn() }),
-}));
-
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (k: string) => k }),
-}));
-
-vi.mock('@/components/home/Header', () => ({
-  default: () => <header data-testid="header" />,
-}));
-
-vi.mock('@/components/home/HomeSidebar', () => ({
-  default: () => <nav data-testid="home-sidebar" />,
-}));
-
-vi.mock('@/components/home/Footer', () => ({
-  default: () => <footer data-testid="footer" />,
 }));
 
 vi.mock('@/hooks/useUserRead', () => ({
@@ -64,6 +46,19 @@ vi.mock('@/components/common/ConfirmDialog', () => ({
         <button onClick={onClose}>Cancel</button>
       </div>
     ) : null,
+}));
+
+// Radix Select used by FilterPanel inside UserConsentTab
+vi.mock('@/components/ui/select', () => ({
+  Select: ({ children, onValueChange, value }: any) => (
+    <select value={value} onChange={(e: any) => onValueChange?.(e.target.value)}>
+      {children}
+    </select>
+  ),
+  SelectTrigger: () => null,
+  SelectValue: () => null,
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ value, children }: any) => <option value={value}>{children}</option>,
 }));
 
 vi.mock("@/components/common/Select", () => ({
@@ -156,25 +151,18 @@ describe('UserManagementPage', () => {
 
   /* ── Layout ── */
   describe('layout', () => {
-    it('renders the page title "User Management"', () => {
+    it('renders the page title "User Management"', async () => {
       renderPage();
-      expect(screen.getByText('User Management')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('User Management')).toBeInTheDocument();
+      });
     });
 
-    it('renders the Header and Footer', () => {
+    it('renders the "Change User Roles" sidebar tab', async () => {
       renderPage();
-      expect(screen.getByTestId('header')).toBeInTheDocument();
-      expect(screen.getByTestId('footer')).toBeInTheDocument();
-    });
-
-    it('renders the app navigation sidebar', () => {
-      renderPage();
-      expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
-    });
-
-    it('renders the "Change User Roles" sidebar tab', () => {
-      renderPage();
-      expect(screen.getByText('Change User Roles')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Change User Roles')).toBeInTheDocument();
+      });
     });
   });
 
@@ -402,5 +390,72 @@ describe('UserManagementPage', () => {
     renderPage();
     const tab = screen.getByText('Change User Roles');
     expect(tab.closest('button')).toHaveClass('border-sunbird-brick', 'text-sunbird-brick');
+  });
+
+  /* ── User Consent tab ── */
+  describe('User Consent tab', () => {
+    it('renders the "User Consent" tab button', () => {
+      renderPage();
+      expect(screen.getByRole('button', { name: /user consent/i })).toBeInTheDocument();
+    });
+
+    it('clicking "User Consent" makes it the active tab', () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+      expect(
+        screen.getByRole('button', { name: /user consent/i })
+      ).toHaveClass('border-sunbird-brick', 'text-sunbird-brick');
+    });
+
+    it('"Change User Roles" tab becomes inactive when "User Consent" is clicked', () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+      expect(
+        screen.getByRole('button', { name: /change user roles/i })
+      ).not.toHaveClass('border-sunbird-brick');
+    });
+
+    it('clicking "User Consent" renders the consent summary cards', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Total Users')).toBeInTheDocument();
+        expect(screen.getByText('Consent Granted')).toBeInTheDocument();
+        expect(screen.getByText('Consent Pending')).toBeInTheDocument();
+        expect(screen.getByText('Consent Revoked')).toBeInTheDocument();
+      });
+    });
+
+    it('clicking "User Consent" renders the search input', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Search by name or email…')).toBeInTheDocument();
+      });
+    });
+
+    it('clicking "User Consent" renders the Export CSV button', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument();
+      });
+    });
+
+    it('switching back to "Change User Roles" hides the consent content', async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
+      await waitFor(() => screen.getByText('Total Users'));
+
+      fireEvent.click(screen.getByRole('button', { name: /change user roles/i }));
+
+      await waitFor(() => {
+        expect(screen.queryByText('Total Users')).not.toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Search User by Sunbird ID')).toBeInTheDocument();
+      });
+    });
   });
 });

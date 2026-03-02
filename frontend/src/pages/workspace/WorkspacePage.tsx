@@ -1,14 +1,7 @@
 /* eslint-disable max-lines */
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
-import Footer from "@/components/home/Footer";
-import HomeSidebar from "@/components/home/HomeSidebar";
 import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
 import WorkspaceToolbar from "@/components/workspace/WorkspaceToolbar";
 import { ContentService } from "@/services/ContentService";
@@ -17,15 +10,12 @@ import { useOrganizationSearch } from "@/hooks/useOrganization";
 import { useChannel } from "@/hooks/useChannel";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
 import userProfileService from "@/services/UserProfileService";
-import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
@@ -102,7 +92,6 @@ const contentService = new ContentService();
 const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video'];
 
 const WorkspacePage = () => {
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { data: userData } = useUserRead();
   const slug = userData?.data?.response?.channel;
@@ -134,8 +123,6 @@ const WorkspacePage = () => {
 
   const { toast } = useToast();
   const { t } = useAppI18n();
-  const [activeNav, setActiveNav] = useState("workspace");
-  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
 
   // Derive available roles from user profile
   const userRoles: string[] = useMemo(() => {
@@ -489,38 +476,8 @@ const WorkspacePage = () => {
   };
 
   return (
-    <div className="workspace-container">
-      <Header
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={() => setIsSidebarOpen(true)}
-      />
-
-      <div className="flex flex-1 relative transition-all">
-        {isMobile ? (
-          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-            <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-              <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
-              <HomeSidebar
-                activeNav={activeNav}
-                onNavChange={(nav) => {
-                  setActiveNav(nav);
-                  setIsSidebarOpen(false);
-                }}
-              />
-            </SheetContent>
-          </Sheet>
-        ) : (
-          <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
-            <HomeSidebar
-              activeNav={activeNav}
-              onNavChange={setActiveNav}
-              collapsed={!isSidebarOpen}
-              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-            />
-          </div>
-        )}
-        <div className="flex-1 flex flex-col min-w-0">
-          <main className="workspace-main-content">
+    <div className="flex-1 flex flex-col min-w-0">
+      <main className="workspace-main-content">
             {showContent && isCountsLoading && isLoading ? (
               <PageLoader message={t('loading')} fullPage={false} />
             ) : (
@@ -579,9 +536,6 @@ const WorkspacePage = () => {
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
             title={selectedOption ? `${t('workspace.createContent')} ${EDITOR_OPTION_LABELS[selectedOption] || ''}`.trim() : t('workspace.createContent')}
           />
-        </div>
-      </div>
-      <Footer />
     </div>
   );
 };

@@ -1,90 +1,43 @@
-import { useState } from "react";
-import Header from "@/components/home/Header";
-import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
-import Footer from "@/components/home/Footer";
-import HomeSidebar from "@/components/home/HomeSidebar";
 import ProfileCard from "@/components/profile/ProfileCard";
 import PersonalInformation from "@/components/profile/PersonalInformation";
 import ProfileLearningList from "@/components/profile/ProfileLearningList";
 import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useSidebarState } from "@/hooks/useSidebarState";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import "./profile.css";
 
 const Profile = () => {
     const { t } = useAppI18n();
-    const isMobile = useIsMobile();
-    const [activeNav, setActiveNav] = useState("profile");
-    const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
 
     const { data: userResponse, isLoading, isError } = useUserRead();
     const userData = userResponse?.data?.response;
 
     return (
-        <div className="profile-container">
-            {/* Top Header */}
-            <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(true)} />
+        <main className="profile-main-content">
+            {isLoading ? (
+                <PageLoader message={t('profilePage.loading')} fullPage={false} />
+            ) : isError || !userData ? (
+                <PageLoader message={t('profilePage.errorLoading')} fullPage={false} />
+            ) : (
+                <div className="profile-content-wrapper">
+                    {/* Top Section: Profile Card + Personal Information */}
+                    <div className="grid grid-cols-1 lg:grid-cols-[19rem_1fr] gap-6 mb-8">
+                        {/* Left: Profile Card */}
+                        <ProfileCard user={userData} />
 
-            <div className="flex flex-1 relative transition-all">
-                {/* Sidebar - Mobile */}
-                {isMobile ? (
-                    <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                        <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-                            <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
-                            <HomeSidebar
-                                activeNav={activeNav}
-                                onNavChange={(nav) => {
-                                    setActiveNav(nav);
-                                    setIsSidebarOpen(false);
-                                }}
-                            />
-                        </SheetContent>
-                    </Sheet>
-                ) : (
-                    /* Sidebar - Desktop */
-                    <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
-                        <HomeSidebar
-                            activeNav={activeNav}
-                            onNavChange={setActiveNav}
-                            collapsed={!isSidebarOpen}
-                            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-                        />
+                        {/* Right: Personal Information */}
+                        <PersonalInformation user={userData} />
                     </div>
-                )}
 
-                {/* Main Content Area */}
-                <main className="profile-main-content">
-                    {isLoading ? (
-                        <PageLoader message={t('profilePage.loading')} fullPage={false} />
-                    ) : isError || !userData ? (
-                        <PageLoader message={t('profilePage.errorLoading')} fullPage={false} />
-                    ) : (
-                        <div className="profile-content-wrapper">
-                            {/* Top Section: Profile Card + Personal Information */}
-                            <div className="grid grid-cols-1 lg:grid-cols-[19rem_1fr] gap-6 mb-8">
-                                {/* Left: Profile Card */}
-                                <ProfileCard user={userData} />
+                    {/* Stats Cards Section */}
+                    <ProfileStatsCards />
 
-                                {/* Right: Personal Information */}
-                                <PersonalInformation user={userData} />
-                            </div>
-
-                            {/* Stats Cards Section */}
-                            <ProfileStatsCards />
-
-                            {/* My Learning Section */}
-                            <ProfileLearningList />
-                        </div>
-                    )}
-                </main>
-            </div>
-
-            {/* Footer */}
-            <Footer />
-        </div>
+                    {/* My Learning Section */}
+                    <ProfileLearningList />
+                </div>
+            )}
+        </main>
     );
 };
 

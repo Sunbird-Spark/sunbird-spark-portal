@@ -14,6 +14,7 @@ interface UseCollectionDetailPlayerParams {
   currentContentStatus?: number;
   /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
   skipContentStateUpdate?: boolean;
+  contentType?: string;
 }
 
 export function useCollectionDetailPlayer({
@@ -25,6 +26,7 @@ export function useCollectionDetailPlayer({
   mimeType,
   currentContentStatus,
   skipContentStateUpdate,
+  contentType,
 }: UseCollectionDetailPlayerParams) {
   const handleContentStateFromTelemetry = useContentStateUpdate({
     collectionId,
@@ -35,6 +37,7 @@ export function useCollectionDetailPlayer({
     mimeType,
     currentContentStatus,
     skipContentStateUpdate,
+    contentType,
   });
 
   const onTelemetryEventStable = useCallback(
