@@ -110,16 +110,16 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
         expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
         expect(screen.getByText('Completed Course')).toBeInTheDocument();
-        // Check default filter label
-        expect(screen.getByText('all')).toBeInTheDocument();
-        expect(screen.getByTestId('filter-option-tabs.all')).toBeInTheDocument();
+        // Check default filter label (appears in trigger + dropdown item)
+        expect(screen.getAllByText('all').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByTestId('filter-option-all')).toBeInTheDocument();
     });
 
     it('filters by Ongoing', () => {
         render(<ProfileLearningList />);
 
         // Click "Ongoing" filter option (exposed by mock)
-        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
         // Should show Ongoing Course
         expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
 
         // Click "Completed" filter option
-        fireEvent.click(screen.getByTestId('filter-option-status.completed'));
+        fireEvent.click(screen.getByTestId('filter-option-completed'));
 
         // Should NOT show Ongoing Course
         expect(screen.queryByText('Ongoing Course')).not.toBeInTheDocument();
@@ -155,7 +155,7 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
 
         // Filter by Ongoing
-        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
         expect(screen.getByText('No ongoing courses found.')).toBeInTheDocument();
     });
@@ -274,7 +274,7 @@ describe('ProfileLearningList', () => {
         expect(screen.getByText('View Less')).toBeInTheDocument();
 
         // Change filter to Ongoing
-        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
         // Verification: showAll should be reset to false, meaning we only see 6 items and "View More Courses"
         expect(screen.queryByText('Ongoing 7')).not.toBeInTheDocument();
