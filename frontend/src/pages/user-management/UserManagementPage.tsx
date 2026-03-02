@@ -108,7 +108,7 @@ const UserManagementPage = () => {
         response.data?.roles ?? 
         [];
       setAvailableRoles(roles.filter((r) => r.id !== 'PUBLIC'));
-    } catch (err) {
+    } catch {
       toast({ title: "Failed to load roles", description: "Roles could not be loaded.", variant: "destructive" });
     }
   }, [toast]);
