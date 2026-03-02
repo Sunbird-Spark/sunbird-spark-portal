@@ -498,9 +498,32 @@
     @apply text-gray-300;
   }
 
+  .content-player-host {
+    @apply relative w-full h-full;
+  }
+
   .content-player-embed {
     @apply w-full h-full relative;
     min-height: 41.3125rem;
+    height: 100%;
+  }
+
+  @media (max-width: 1024px) {
+    .content-player-embed {
+      min-height: 28rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .content-player-embed {
+      min-height: 22rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .content-player-embed {
+      min-height: 18rem;
+    }
   }
 
   .content-player-video-container {
@@ -514,17 +537,10 @@
     padding: 1.25rem;
   }
 
-  .content-player-video-wrapper {
-    @apply overflow-hidden;
-    width: 100%;
-    height: 100%;
-  }
-
   .content-player-video-relative {
     width: 100%;
     height: 100%;
     position: relative;
-    border-radius: 1.25rem;
   }
 
   .content-player-video-thumbnail {
@@ -571,7 +587,7 @@
 
   .related-resource-card-container {
     @apply bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[24.5rem] flex flex-col;
-    box-shadow: 0.125rem 0.125rem 1.25rem 0rem rgba(0, 0, 0, 0.09);
+    box-shadow: 0.125rem 0.125rem 1.25rem 0rem #00000017;
   }
 
   .related-resource-card-image-wrapper {
@@ -736,7 +752,7 @@
   sunbird-epub-player,
   sunbird-quml-player {
     @apply block;
-    height: 37.5rem;
+    height: 41.3125rem;
   }
 
   /* Responsive player heights */

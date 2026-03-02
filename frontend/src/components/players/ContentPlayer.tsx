@@ -58,7 +58,7 @@ export const ContentPlayer: React.FC<ContentPlayerProps> = ({
   const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType] || EcmlPlayer;
 
   return (
-    <div className="relative">
+    <div className="content-player-host">
       <PlayerComponent
         metadata={metadata}
         mode={mode}
