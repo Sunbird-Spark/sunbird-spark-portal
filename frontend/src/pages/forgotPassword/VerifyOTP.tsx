@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useAppI18n } from '@/hooks/useAppI18n';
-import { Header, PrimaryButton, OTPInput } from './ForgotPasswordComponents';
+import { Header, PrimaryButton } from './ForgotPasswordComponents';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/common/InputOTP';
 import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { redirectWithError } from '../../utils/forgotPasswordUtils';
@@ -22,7 +23,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
     generateOtp
 }) => {
     const { t } = useAppI18n();
-    const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
+    const [otp, setOtp] = useState('');
     const [otpError, setOtpError] = useState('');
     const [loading, setLoading] = useState(false);
     const [disableResendOtp, setDisableResendOtp] = useState(false);
@@ -31,7 +32,11 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
     const maxResendTry = 4;
     const captchaRef = React.useRef<ReCAPTCHA>(null);
 
-    const isOtpValid = OTP_REGEX.test(otp.join(''));
+    const handleOtpChange = (value: string) => {
+        setOtp(value.replace(/[^0-9]/g, ''));
+    };
+
+    const isOtpValid = OTP_REGEX.test(otp);
 
     useEffect(() => {
         setDisableResendOtp(true);
@@ -61,7 +66,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                     request: {
                         type: selectedIdentifier.type,
                         key: selectedIdentifier.value,
-                        otp: otp.join(''),
+                        otp: otp,
                         userId: selectedIdentifier.id
                     }
                 }
@@ -101,7 +106,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                 setLoading(false);
             }
 
-            setOtp(new Array(6).fill(''));
+            setOtp('');
         }
     };
 
@@ -164,7 +169,22 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                         {t('forgotPasswordPage.otpValidity')}
                     </p>
 
-                    <OTPInput otp={otp} setOtp={setOtp} />
+                    <div className="input-otp-container">
+                        <InputOTP
+                            value={otp}
+                            onChange={handleOtpChange}
+                            maxLength={6}
+                            inputMode="numeric"
+                            pattern="^[0-9]*$"
+                            containerClassName="otp-input-container"
+                        >
+                            <InputOTPGroup className="gap-3">
+                                {[0, 1, 2, 3, 4, 5].map((i) => (
+                                    <InputOTPSlot key={i} index={i} className="otp-input" />
+                                ))}
+                            </InputOTPGroup>
+                        </InputOTP>
+                    </div>
 
                     <div className="resend-otp-container text-center text-[0.875rem] font-medium text-[#4A5568] mt-6">
                         <button
