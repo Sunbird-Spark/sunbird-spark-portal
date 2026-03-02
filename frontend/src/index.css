@@ -498,7 +498,7 @@
     @apply text-gray-300;
   }
 
-  .content-player-host {
+  .content-player-wrapper {
     @apply relative w-full h-full;
   }
 
