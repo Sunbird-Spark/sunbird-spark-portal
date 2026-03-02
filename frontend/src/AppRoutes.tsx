@@ -6,7 +6,6 @@ import PageLayout from './components/layout/PageLayout';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
-import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';

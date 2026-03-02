@@ -3,7 +3,6 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import AdminPage from './admin/AdminPage';
 import WorkspacePage from './workspace/WorkspacePage';
 import ReportsPage from './reports/ReportsPage';
 import CreateContentPage from './content/CreateContentPage';
@@ -137,14 +136,6 @@ describe('Protected Pages', () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
-  });
-
-  describe('AdminPage', () => {
-    it('should render admin dashboard', () => {
-      render(<AdminPage />);
-      expect(screen.getByRole('heading', { name: 'admin.dashboard' })).toBeInTheDocument();
-      expect(screen.getByText(/admin.accessInfo/i)).toBeInTheDocument();
-    });
   });
 
   describe('WorkspacePage', () => {
