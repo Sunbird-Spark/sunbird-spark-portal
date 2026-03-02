@@ -159,5 +159,16 @@ describe('ContentRow', () => {
       });
       expect(screen.getByRole('link', { name: /Quiz/i })).toBeInTheDocument();
     });
+
+    it('shows current/max attempt count (e.g. 3/4) after title for SelfAssess when maxAttempts and contentAttemptInfoMap are set', () => {
+      renderContentRow({
+        ...defaultProps,
+        node: { ...selfAssessNode, maxAttempts: 4 },
+        href: '/collection/col-1/content/quiz-1',
+        contentAttemptInfoMap: { 'quiz-1': { attemptCount: 3 } },
+      });
+      expect(screen.getByText('3/4')).toBeInTheDocument();
+      expect(screen.getByText('Quiz')).toBeInTheDocument();
+    });
   });
 });

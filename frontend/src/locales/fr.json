@@ -241,7 +241,8 @@
     "contentStatusInProgress": "En cours",
     "contentStatusNotViewed": "Non consulté",
     "selfAssessMaxAttempt": "Vous avez atteint le nombre maximum de tentatives pour cette évaluation.",
-    "selfAssessLastAttempt": "Ceci est votre dernière tentative pour cette évaluation."
+    "selfAssessLastAttempt": "Ceci est votre dernière tentative pour cette évaluation.",
+    "attemptsLabel": "Tentative {{current}} sur {{max}}"
   },
   "profileDataSharing": {
     "cardTitle": "Partage des données de profil",

@@ -26,7 +26,7 @@ export interface ContentRowProps {
   isActive: boolean;
   contentStatusMap?: Record<string, number>;
   contentAttemptInfoMap?: Record<string, ContentAttemptInfo>;
-  t: (key: string) => string;
+  t: (key: string, data?: Record<string, unknown>) => string;
 }
 
 export default function ContentRow({
@@ -71,10 +71,30 @@ export default function ContentRow({
   const interactiveClass = contentBlocked ? "" : (isDisabledByAttempts ? "" : "hover:bg-gray-200 transition-colors cursor-pointer");
 
   const title = node.name ?? "Untitled";
+  const showAttempts =
+    isSelfAssess &&
+    maxAttempts != null &&
+    typeof maxAttempts === "number" &&
+    contentAttemptInfoMap !== undefined;
   const content = (
     <>
       {type === "video" ? <VideoIcon /> : <DocumentIcon />}
-      <span className="flex-1 text-base leading-snug">{title}</span>
+      <span className="flex-1 text-base leading-snug flex items-center gap-2 min-w-0">
+        <span className="truncate">{title}</span>
+        {showAttempts && (
+          <span className="group/attempt relative flex-shrink-0">
+            <span className="text-xs font-medium text-muted-foreground cursor-default">
+              {attemptCount}/{maxAttempts}
+            </span>
+            <span
+              role="tooltip"
+              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 text-xs font-normal text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover/attempt:opacity-100 transition-opacity duration-0 pointer-events-none z-10"
+            >
+              {t("courseDetails.attemptsLabel", { current: attemptCount, max: maxAttempts })}
+            </span>
+          </span>
+        )}
+      </span>
       {showStatus && (
         <span
           className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex items-center gap-1 ${
