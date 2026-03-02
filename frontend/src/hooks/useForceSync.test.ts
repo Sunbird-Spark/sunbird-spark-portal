@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useForceSync } from "./useForceSync";
 
 const mockToast = vi.fn();
@@ -94,6 +94,25 @@ describe("useForceSync", () => {
     });
   });
 
+  it("does not call API and toasts cooldown when canUseForceSync is false at click time", async () => {
+    mockCanUseForceSync.mockReturnValue(false);
+    const { result } = renderHook(() =>
+      useForceSync("u1", "c1", "b1", courseProgressProps100)
+    );
+
+    await act(async () => {
+      await result.current.handleForceSync();
+    });
+
+    expect(mockForceSyncActivityAgg).not.toHaveBeenCalled();
+    expect(mockMarkForceSyncUsed).not.toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith({
+      title: "error",
+      description: "courseDetails.forceSyncCooldown",
+      variant: "destructive",
+    });
+  });
+
   it("does not call API when userId is missing", async () => {
     const { result } = renderHook(() =>
       useForceSync(undefined, "c1", "b1", courseProgressProps100)
@@ -147,6 +166,8 @@ describe("useForceSync", () => {
       resolvePromise!();
     });
 
-    expect(result.current.isForceSyncing).toBe(false);
+    await waitFor(() => {
+      expect(result.current.isForceSyncing).toBe(false);
+    });
   });
 });

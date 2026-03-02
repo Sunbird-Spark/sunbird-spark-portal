@@ -244,7 +244,8 @@
     "selfAssessLastAttempt": "This is your last attempt for this assessment.",
     "attemptsLabel": "Attempt {{current}} of {{max}}",
     "forceSync": "Sync progress now",
-    "forceSyncSuccess": "You can view your updated course progress within 24 hours"
+    "forceSyncSuccess": "You can view your updated course progress within 24 hours",
+    "forceSyncCooldown": "Please wait before syncing again."
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",

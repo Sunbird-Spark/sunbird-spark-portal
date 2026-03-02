@@ -244,7 +244,8 @@
     "selfAssessLastAttempt": "Esta é sua última tentativa para esta avaliação.",
     "attemptsLabel": "Tentativa {{current}} de {{max}}",
     "forceSync": "Sincronizar progresso agora",
-    "forceSyncSuccess": "Você pode ver o progresso atualizado do curso em até 24 horas"
+    "forceSyncSuccess": "Você pode ver o progresso atualizado do curso em até 24 horas",
+    "forceSyncCooldown": "Aguarde antes de sincronizar novamente."
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",

@@ -6,6 +6,20 @@ import { useConsent } from "@/hooks/useConsent";
 import { useToast } from "@/hooks/useToast";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
+function toErrorMessage(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (value instanceof Error) return value.message;
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "message" in value &&
+    typeof (value as { message: unknown }).message === "string"
+  ) {
+    return (value as { message: string }).message;
+  }
+  return String(value);
+}
+
 interface LearnerBottomCardsProps {
   hasBatchInRoute: boolean;
   batches: unknown;
@@ -79,8 +93,8 @@ export function LearnerBottomCards({
           onJoinCourse={() => onJoinCourse(selectedBatchId)}
           isLoading={batchListLoading}
           joinLoading={joinLoading}
-          error={batchListError != null ? String(batchListError) : undefined}
-          joinError={joinError != null ? String(joinError) : undefined}
+          error={toErrorMessage(batchListError)}
+          joinError={toErrorMessage(joinError)}
         />
       )}
       <CertificateCard

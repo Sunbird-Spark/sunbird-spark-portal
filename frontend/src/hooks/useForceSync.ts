@@ -35,6 +35,14 @@ export function useForceSync(
 
   const handleForceSync = useCallback(async () => {
     if (!userId || !collectionId || !batchIdParam) return;
+    if (!canUseForceSync(userId, collectionId, batchIdParam)) {
+      toast({
+        title: t("error"),
+        description: t("courseDetails.forceSyncCooldown"),
+        variant: "destructive",
+      });
+      return;
+    }
     setIsForceSyncing(true);
     try {
       await batchService.forceSyncActivityAgg({
@@ -52,9 +60,10 @@ export function useForceSync(
       // Trigger re-render so showForceSyncButton is recalculated and the sync button hides (canUseForceSync now returns false).
       setForceSyncRefresh((r) => r + 1);
     } catch (err) {
+      const message = (err as Error).message;
       toast({
         title: t("error"),
-        description: (err as Error).message ?? t("error"),
+        description: message && message.trim() ? message : t("error"),
         variant: "destructive",
       });
     } finally {
