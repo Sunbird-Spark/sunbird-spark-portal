@@ -8,6 +8,7 @@
   "loading": "Chargement...",
   "error": "Une erreur s'est produite",
   "success": "Succès",
+  "name": "Nom",
   "cancel": "Annuler",
   "save": "Enregistrer",
   "delete": "Supprimer",
@@ -773,7 +774,8 @@
     "inactive": "Inactif",
     "completed": "Terminé",
     "ongoing": "En cours",
-    "upcoming": "À venir"
+    "upcoming": "À venir",
+    "processing": "En cours de traitement"
   },
   "tabs": {
     "batches": "Lots",

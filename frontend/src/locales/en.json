@@ -6,6 +6,7 @@
     "closeMenu": "Close menu"
   },
   "loading": "Loading...",
+  "name": "Name",
   "error": "An error occurred",
   "success": "Success",
   "cancel": "Cancel",
@@ -786,7 +787,8 @@
     "inactive": "Inactive",
     "completed": "Completed",
     "ongoing": "Ongoing",
-    "upcoming": "Upcoming"
+    "upcoming": "Upcoming",
+    "processing": "Processing"
   },
   "tabs": {
     "batches": "Batches",

@@ -6,6 +6,7 @@
     "closeMenu": "Fechar menu"
   },
   "loading": "Carregando...",
+  "name": "Nome",
   "error": "Ocorreu um erro",
   "success": "Sucesso",
   "cancel": "Cancelar",
@@ -768,7 +769,8 @@
     "inactive": "Inativo",
     "completed": "Concluído",
     "ongoing": "Em andamento",
-    "upcoming": "Próximos"
+    "upcoming": "Próximos",
+    "processing": "Em processamento"
   },
   "tabs": {
     "batches": "Lotes",

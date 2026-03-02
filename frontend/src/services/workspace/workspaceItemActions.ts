@@ -16,7 +16,13 @@ export interface WorkspaceItemActionVisibility {
 export function getWorkspaceItemActionVisibility(
   status: WorkspaceItem['status'],
   userRole?: UserRole,
+  contentStatus?: string,
 ): WorkspaceItemActionVisibility {
+  // Content being processed server-side cannot be acted upon.
+  if (contentStatus === 'Processing') {
+    return { isDraft: false, isPublished: false, isReview: false, showView: false, showEdit: false, showDelete: false };
+  }
+
   const isDraft = status === 'draft';
   const isPublished = status === 'published';
   const isReview = status === 'review';

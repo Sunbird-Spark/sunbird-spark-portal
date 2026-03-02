@@ -8,6 +8,7 @@
   "loading": "جارٍ التحميل...",
   "error": "حدث خطأ",
   "success": "نجاح",
+  "name": "الاسم",
   "cancel": "إلغاء",
   "save": "حفظ",
   "delete": "حذف",
@@ -768,7 +769,8 @@
     "inactive": "غير نشط",
     "completed": "مكتمل",
     "ongoing": "جارية",
-    "upcoming": "قادمة"
+    "upcoming": "قادمة",
+    "processing": "قيد المعالجة"
   },
   "tabs": {
     "batches": "الدفعات",
