@@ -494,6 +494,7 @@
       "processing": "Processing..."
     },
     "collectionType": "Collection Type",
+    "description": "Description",
     "creating": "Creating..."
   },
   "homeComponents": {

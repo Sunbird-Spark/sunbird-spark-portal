@@ -489,6 +489,7 @@
       "processing": "جارٍ المعالجة..."
     },
     "collectionType": "نوع المجموعة",
+    "description": "الوصف",
     "creating": "جارٍ الإنشاء..."
   },
   "homeComponents": {

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
@@ -18,7 +18,7 @@ import PublishWarningDialog from '@/components/workspace/PublishWarningDialog';
 import ReviewPageHeader from '@/components/workspace/ReviewPageHeader';
 import ContentPlayerSection from '@/components/workspace/ReviewPlayerSection';
 import reviewCommentService from '@/services/ReviewCommentService';
-import './ContentReviewPage.css';
+import './ContentViewPage.css';
 
 const contentService = new ContentService();
 const formService = new FormService();
@@ -41,10 +41,13 @@ const formatDate = (dateStr?: string) => {
   });
 };
 
-const ContentReviewPage = () => {
+interface ContentViewPageProps {
+  mode: 'view' | 'review';
+}
+
+const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
   const { contentId } = useParams();
-  const [searchParams] = useSearchParams();
-  const isReviewMode = searchParams.get('mode') === 'review';
+  const isReviewMode = mode === 'review';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -203,6 +206,10 @@ const ContentReviewPage = () => {
   if (playerIsLoading) return <PageLoader message={t('workspace.loadingContentReview')} />;
   if (playerError) return <ReviewPageLayout><p>{t('workspace.review.errorLoading', { error: playerError.message })}</p></ReviewPageLayout>;
   if (!playerMetadata) return <ReviewPageLayout><p>{t('workspace.review.contentNotFound')}</p></ReviewPageLayout>;
+  if (isReviewMode && contentData?.status !== 'Review') {
+    navigate('/workspace', { replace: true });
+    return null;
+  }
 
   return (
     <ReviewPageLayout>
