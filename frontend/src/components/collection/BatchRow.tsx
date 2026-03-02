@@ -71,6 +71,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
               type="button"
               onClick={() => onEditClick(batch)}
               title={t('batchRow.editBatch')}
+              aria-label={t('batchRow.editBatch')}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors"
             >
               <FiEdit2 className="w-3.5 h-3.5" />
