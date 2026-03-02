@@ -7,6 +7,7 @@ import {
   getEnrollmentForCollection,
   getLeafContentIds,
   getContentStatusMap,
+  getContentAttemptInfoMap,
   getCourseProgressProps,
   getFirstCertPreviewUrl,
   getEnrollableBatches,
@@ -46,6 +47,7 @@ export function useCollectionEnrollment(
       courseId: collectionId,
       batchId: effectiveBatchId,
       contentIds: leafContentIds,
+      fields: ['progress', 'score', 'status'],
     };
   }, [collectionId, effectiveBatchId, leafContentIds]);
 
@@ -54,6 +56,7 @@ export function useCollectionEnrollment(
   });
   const contentList = contentStateResponse?.data?.contentList ?? [];
   const contentStatusMap = useMemo(() => getContentStatusMap(contentList), [contentList]);
+  const contentAttemptInfoMap = useMemo(() => getContentAttemptInfoMap(contentList), [contentList]);
   const completedFromState = contentList.filter((c) => c.status === 2).length;
   const stateIsAuthoritative = contentStateResponse !== undefined;
   const totalFromState = stateIsAuthoritative ? leafContentIds.length : 0;
@@ -123,6 +126,7 @@ export function useCollectionEnrollment(
     effectiveBatchId,
     isBatchEnded,
     contentStatusMap,
+    contentAttemptInfoMap,
     courseProgressProps,
     batches,
     batchListLoading,

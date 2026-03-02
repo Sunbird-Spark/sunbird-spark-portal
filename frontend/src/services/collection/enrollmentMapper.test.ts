@@ -7,6 +7,8 @@ import {
   getContentStatusMap,
   getCourseProgressProps,
   getFirstCertPreviewUrl,
+  isSelfAssess,
+  getContentAttemptInfoMap,
 } from './enrollmentMapper';
 import { BATCH_STATUS } from '../../types/collectionTypes';
 import type { BatchListItem, CertTemplate, CollectionData, ContentStateItem, HierarchyContentNode } from '../../types/collectionTypes';
@@ -298,6 +300,63 @@ describe('enrollmentMapper', () => {
         { contentId: 'c3' },
       ] as ContentStateItem[];
       expect(getContentStatusMap(list)).toEqual({ c1: 1 });
+    });
+  });
+
+  describe('isSelfAssess', () => {
+    it('returns true when node contentType is SelfAssess', () => {
+      const node: HierarchyContentNode = { identifier: 'q1', name: 'Quiz', mimeType: 'application/vnd.ekstep.quiz', contentType: 'SelfAssess' };
+      expect(isSelfAssess(node)).toBe(true);
+    });
+
+    it('returns false when node contentType is not SelfAssess', () => {
+      const node: HierarchyContentNode = { identifier: 'v1', name: 'Video', mimeType: 'video/mp4', contentType: 'Resource' };
+      expect(isSelfAssess(node)).toBe(false);
+    });
+
+    it('returns false when node is null or undefined', () => {
+      expect(isSelfAssess(null)).toBe(false);
+      expect(isSelfAssess(undefined)).toBe(false);
+    });
+
+    it('returns false when contentType is missing or empty', () => {
+      const node: HierarchyContentNode = { identifier: 'c1', mimeType: 'video/mp4' };
+      expect(isSelfAssess(node)).toBe(false);
+      expect(isSelfAssess({ ...node, contentType: '' })).toBe(false);
+    });
+  });
+
+  describe('getContentAttemptInfoMap', () => {
+    it('returns empty object for empty contentList', () => {
+      expect(getContentAttemptInfoMap([])).toEqual({});
+    });
+
+    it('maps contentId to attemptCount from score array length', () => {
+      const list: ContentStateItem[] = [
+        { contentId: 'c1', score: [] },
+        { contentId: 'c2', score: [{ ts: 1 }, { ts: 2 }] },
+        { contentId: 'c3' },
+      ];
+      expect(getContentAttemptInfoMap(list)).toEqual({
+        c1: { attemptCount: 0 },
+        c2: { attemptCount: 2 },
+        c3: { attemptCount: 0 },
+      });
+    });
+
+    it('skips items with null contentId', () => {
+      const list = [
+        { contentId: 'c1', score: [1] },
+        { contentId: null, score: [1, 2] },
+      ] as ContentStateItem[];
+      expect(getContentAttemptInfoMap(list)).toEqual({ c1: { attemptCount: 1 } });
+    });
+
+    it('treats non-array score as zero attempts', () => {
+      const list = [
+        { contentId: 'c1', score: 'not-array' as unknown as unknown[] },
+      ];
+      expect(getContentAttemptInfoMap(list)).toEqual({ c1: { attemptCount: 0 } });
     });
   });
 
