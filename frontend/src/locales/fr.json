@@ -879,6 +879,7 @@
     "max": "Max",
     "result": "Résultat",
     "date": "Date"
+  },
   "editors": {
     "errorTitle": "Erreur de l'éditeur",
     "goBack": "Retour",
