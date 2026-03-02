@@ -161,3 +161,18 @@ export interface UserAssessmentHistory {
   passFail: "Pass" | "Fail";
   attemptDate: string;
 }
+
+/* ---------- MODULE 4 – User Consent Management ---------- */
+
+export interface UserConsentRecord {
+  id: string;
+  userId: string;
+  userName: string;
+  email: string;
+  consentStatus: "Granted" | "Pending" | "Revoked";
+  /** Org names where PII consent is currently active */
+  consumerOrgs: string[];
+  /** null when consent has never been given (Pending users) */
+  consentGivenOn: string | null;
+  lastUpdated: string;
+}
