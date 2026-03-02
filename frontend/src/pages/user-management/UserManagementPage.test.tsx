@@ -16,28 +16,10 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: { isUserAuthenticated: () => true, getUserId: () => 'uid1', getAuthInfo: vi.fn() },
 }));
 
-vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }));
-
-vi.mock('@/hooks/useSidebarState', () => ({
-  useSidebarState: () => ({ isOpen: true, setSidebarOpen: vi.fn(), toggleSidebar: vi.fn() }),
-}));
-
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (k: string) => k }),
-}));
-
-vi.mock('@/components/home/Header', () => ({
-  default: () => <header data-testid="header" />,
-}));
-
-vi.mock('@/components/home/HomeSidebar', () => ({
-  default: () => <nav data-testid="home-sidebar" />,
-}));
-
-vi.mock('@/components/home/Footer', () => ({
-  default: () => <footer data-testid="footer" />,
 }));
 
 vi.mock('@/hooks/useUserRead', () => ({
@@ -157,24 +139,6 @@ describe('UserManagementPage', () => {
   /* ── Layout ── */
   describe('layout', () => {
     it('renders the page title "User Management"', async () => {
-      renderPage();
-      await waitFor(() => {
-        expect(screen.getByText('User Management')).toBeInTheDocument();
-      });
-    });
-
-    it('renders the Header and Footer', async () => {
-      // This test is no longer valid since UserManagementPage doesn't render Header/Footer
-      // These are now rendered by PageLayout
-      renderPage();
-      await waitFor(() => {
-        expect(screen.getByText('User Management')).toBeInTheDocument();
-      });
-    });
-
-    it('renders the app navigation sidebar', async () => {
-      // This test is no longer valid since UserManagementPage doesn't render the sidebar
-      // The sidebar is now rendered by PageLayout
       renderPage();
       await waitFor(() => {
         expect(screen.getByText('User Management')).toBeInTheDocument();

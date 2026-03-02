@@ -4,30 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import HelpSupport from './HelpSupport';
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
-// Mock sub-components
-vi.mock("@/components/home/Header", () => ({
-    default: ({ isSidebarOpen, onToggleSidebar }: any) => (
-        <header data-testid="mock-header">
-            <button onClick={onToggleSidebar} aria-label="Toggle Sidebar">Toggle</button>
-            <div data-testid="sidebar-status">{isSidebarOpen ? "Sidebar Open" : "Sidebar Closed"}</div>
-        </header>
-    ),
-}));
-
-vi.mock("@/components/home/Footer", () => ({
-    default: () => <footer data-testid="mock-footer" />,
-}));
-
-vi.mock("@/components/home/HomeSidebar", () => ({
-    default: ({ activeNav, onNavChange, collapsed, onToggle }: any) => (
-        <div data-testid="home-sidebar" data-collapsed={collapsed}>
-            <span data-testid="active-nav">{activeNav}</span>
-            <button onClick={() => onNavChange('home')}>Change Nav</button>
-            {onToggle && <button onClick={onToggle} aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}>Toggle Sidebar</button>}
-        </div>
-    ),
-}));
-
 vi.mock("@/components/landing/Accordion", () => ({
     Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
     AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
@@ -35,15 +11,10 @@ vi.mock("@/components/landing/Accordion", () => ({
     AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
 }));
 
-vi.mock("@/hooks/use-mobile", () => ({
-    useIsMobile: vi.fn(() => false),
-}));
-
 vi.mock("@/utils/sanitizeHtml", () => ({
     sanitizeHtml: (html: string) => html,
 }));
 
-// Mock useSystemSetting hook
 vi.mock("@/hooks/useSystemSetting", () => ({
     useSystemSetting: vi.fn(),
 }));
@@ -61,7 +32,6 @@ vi.mock("@/hooks/useAppI18n", () => ({
     }),
 }));
 
-// Mock the shared hook
 const mockUseHelpFaqData = vi.fn();
 vi.mock("@/hooks/useFaqData", () => ({
     useHelpFaqData: (...args: any[]) => mockUseHelpFaqData(...args),
@@ -173,20 +143,6 @@ describe('HelpSupport', () => {
         );
 
         expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    });
-
-    it('toggles sidebar state', () => {
-        // This test is no longer valid since HelpSupport doesn't render the sidebar
-        // The sidebar is now rendered by PageLayout
-        render(
-            <MemoryRouter initialEntries={['/help-support']}>
-                <HelpSupport />
-            </MemoryRouter>
-        );
-
-        // Component renders its own content without sidebar
-        expect(screen.queryByTestId('home-sidebar')).not.toBeInTheDocument();
-        expect(screen.getByText('How can we assist you today?')).toBeInTheDocument();
     });
 
     it('handles api error gracefully', () => {

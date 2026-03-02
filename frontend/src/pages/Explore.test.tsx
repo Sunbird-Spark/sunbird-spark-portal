@@ -31,10 +31,6 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: { isUserAuthenticated: vi.fn(() => false) },
 }));
 
-vi.mock('../components/home/HomeSidebar', () => ({
-  default: () => <div data-testid="sidebar">Sidebar</div>,
-}));
-
 vi.mock('../components/explore/ExploreGrid', () => ({
   default: ({ query, sortBy, filters }: any) => (
     <div data-testid="explore-grid">
@@ -53,29 +49,9 @@ vi.mock('../components/explore/ExploreFilters', () => ({
   ),
 }));
 
-vi.mock('../components/home/Header', () => ({
-  default: () => <div data-testid="header">Header</div>,
-}));
-
-vi.mock('../components/home/Footer', () => ({
-  default: () => <div data-testid="footer">Footer</div>,
-}));
-
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => key,
-  }),
-}));
-
-vi.mock('@/hooks/use-mobile', () => ({
-  useIsMobile: vi.fn(() => false),
-}));
-
-vi.mock('@/hooks/useSidebarState', () => ({
-  useSidebarState: () => ({
-    isOpen: false,
-    toggleSidebar: vi.fn(),
-    setSidebarOpen: vi.fn(),
   }),
 }));
 
@@ -167,14 +143,10 @@ describe('Explore Page', () => {
   });
 
   describe('static rendering', () => {
-    it('renders the header, footer, filters, and grid', async () => {
-      // This test is no longer valid since Explore doesn't render header/footer
-      // These are now rendered by PageLayout
+    it('renders the filters and grid', () => {
       renderComponent();
-      await waitFor(() => {
-        expect(screen.getByTestId('explore-grid')).toBeInTheDocument();
-      });
       expect(screen.getByTestId('explore-filters')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-grid')).toBeInTheDocument();
     });
 
     it('renders the search input', () => {

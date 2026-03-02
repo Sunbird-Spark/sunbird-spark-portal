@@ -123,18 +123,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
-const mockUseIsMobile = vi.fn();
-vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }));
 
-vi.mock('@/components/home/HomeSidebar', () => ({
-  default: ({ onNavChange }: { onNavChange: (n: string) => void }) => (
-    <div data-testid="sidebar">
-      <button type="button" onClick={() => onNavChange('workspace')}>Workspace</button>
-    </div>
-  ),
-}));
-
-vi.mock('@/components/home/Footer', () => ({ default: () => <footer data-testid="footer">Footer</footer> }));
 vi.mock('@/components/common/PageLoader', () => ({ default: ({ message }: { message: string }) => <div>{message}</div> }));
 
 vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
@@ -148,13 +137,6 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
       <button type="button" onClick={() => onViewChange('create')}>Create view</button>
     </div>
   ),
-}));
-
-vi.mock('@/components/home/Sheet', () => ({
-  Sheet: ({ children, open }: { children: React.ReactNode; open: boolean }) =>
-    open ? <div data-testid="sheet">{children}</div> : null,
-  SheetContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SheetTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('./WorkspacePageContent', () => ({
@@ -252,7 +234,6 @@ describe('WorkspacePage', () => {
     mockNavigate.mockReset();
     mockContentCreate.mockReset();
     mockContentCreate.mockResolvedValue({ data: { identifier: 'do_qs_123' } });
-    mockUseIsMobile.mockReturnValue(false);
     mockUseWorkspace.mockReturnValue({
       contents: [],
       counts: { all: 0, drafts: 0, review: 0, published: 0, pendingReview: 0 },
@@ -269,15 +250,6 @@ describe('WorkspacePage', () => {
     });
   });
   afterEach(() => { vi.clearAllMocks(); });
-
-  it('renders workspace with header, sidebar, and segment control', async () => {
-    // This test is no longer valid since WorkspacePage doesn't render header/sidebar
-    // These are now rendered by PageLayout
-    renderWithProviders(<WorkspacePage />);
-    await waitFor(() => {
-      expect(screen.getByTestId('segmented-control')).toBeInTheDocument();
-    });
-  });
 
   it('shows loading state when isLoading and isCountsLoading are true', () => {
     mockUseWorkspace.mockReturnValue({
@@ -311,16 +283,6 @@ describe('WorkspacePage', () => {
     renderWithProviders(<WorkspacePage />);
     expect(screen.getByTestId('segmented-control')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
-  });
-
-  it('renders mobile layout with sheet when isMobile is true', async () => {
-    // This test is no longer valid since WorkspacePage doesn't render the mobile sheet
-    // The mobile sheet is now rendered by PageLayout
-    mockUseIsMobile.mockReturnValue(true);
-    renderWithProviders(<WorkspacePage />);
-    await waitFor(() => {
-      expect(screen.getByTestId('segmented-control')).toBeInTheDocument();
-    });
   });
 
   it('closes create modal when close button is clicked', async () => {
