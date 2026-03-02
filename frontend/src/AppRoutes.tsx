@@ -44,7 +44,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/admin" element={<AdminPage />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
             <Route path="content/:contentId" element={null} />
@@ -118,10 +117,22 @@ const AppRoutes: React.FC = () => {
           <Route path="/help-support" element={<HelpSupport />} />
           <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
           <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/reports/platform" element={<PlatformReports />} />
-          <Route path="/reports/course/:courseId" element={<CourseReport />} />
+          <Route path="/reports/platform" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <PlatformReports />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports/course/:courseId" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <CourseReport />
+            </ProtectedRoute>
+          } />
           <Route path="/reports/user/:userId" element={<UserReport />} />
-          <Route path="/user-management" element={<UserManagementPage />} />
+          <Route path="/user-management" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <UserManagementPage />
+            </ProtectedRoute>
+          } />
           <Route path="/workspace" element={
             <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
               <WorkspacePage />

@@ -9,7 +9,6 @@ import AppRoutes from "./AppRoutes";
 // Mock Pages
 // --------------------
 vi.mock("./pages/home/Home", () => ({ default: () => <div>Home Page</div> }));
-vi.mock("./pages/admin/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
 vi.mock("./pages/workspace/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
 vi.mock("./pages/reports/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
 vi.mock("./pages/content/CreateContentPage", () => ({ default: () => <div>Create Content Page</div> }));
@@ -149,12 +148,6 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
   });
 
-  it("public: any user can access /admin", async () => {
-    renderWithRoute("/admin");
-    await waitFor(() => {
-      expect(screen.getByText("Admin Page")).toBeInTheDocument();
-    });
-  });
 
   it("protected: authenticated content_creator can access /create", () => {
     mockUsePermissions.mockReturnValue({
