@@ -417,7 +417,10 @@
   "myLearning": {
     "loading": "جارٍ تحميل تعلمك...",
     "errorLoading": "فشل تحميل تقدم تعلمك. يرجى المحاولة مرة أخرى لاحقاً.",
-    "mainNavigation": "التنقل الرئيسي"
+    "mainNavigation": "التنقل الرئيسي",
+    "learningProgress": "تقدم التعلم",
+    "lessonVisited": "الدروس المزارة",
+    "contentsCompleted": "المحتويات المكتملة"
   },
   "onboarding": {
     "altSunbird": "صن بيرد",

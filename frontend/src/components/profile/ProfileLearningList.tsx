@@ -145,7 +145,9 @@ const ProfileLearningList = () => {
                             <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm font-normal text-foreground hover:bg-gray-50 transition-colors min-w-[8rem] justify-between"
                                 aria-label="Filter courses by status"
                             >
-                                <span className="capitalize">{filter}</span>
+                                <span className="capitalize">
+                                    {filter === 'all' ? t('tabs.all') : filter === 'ongoing' ? t('status.ongoing') : t('status.completed')}
+                                </span>
                                 <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                             </button>
                         </DropdownMenuTrigger>

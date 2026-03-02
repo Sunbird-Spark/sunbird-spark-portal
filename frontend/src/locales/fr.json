@@ -412,7 +412,10 @@
   "myLearning": {
     "loading": "Chargement de votre apprentissage...",
     "errorLoading": "Échec du chargement de votre progression d'apprentissage. Veuillez réessayer plus tard.",
-    "mainNavigation": "Navigation principale"
+    "mainNavigation": "Navigation principale",
+    "learningProgress": "Progression de l'apprentissage",
+    "lessonVisited": "Leçon visitée",
+    "contentsCompleted": "Contenus terminés"
   },
   "onboarding": {
     "altSunbird": "Sunbird",

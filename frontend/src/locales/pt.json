@@ -412,7 +412,10 @@
   "myLearning": {
     "loading": "Carregando seu aprendizado...",
     "errorLoading": "Falha ao carregar seu progresso de aprendizado. Tente novamente mais tarde.",
-    "mainNavigation": "Navegação principal"
+    "mainNavigation": "Navegação principal",
+    "learningProgress": "Progresso de aprendizado",
+    "lessonVisited": "Lição visitada",
+    "contentsCompleted": "Conteúdos concluídos"
   },
   "onboarding": {
     "altSunbird": "Sunbird",

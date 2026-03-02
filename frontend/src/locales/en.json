@@ -417,7 +417,10 @@
   "myLearning": {
     "loading": "Loading your learning...",
     "errorLoading": "Failed to load your learning progress. Please try again later.",
-    "mainNavigation": "Main Navigation"
+    "mainNavigation": "Main Navigation",
+    "learningProgress": "Learning Progress",
+    "lessonVisited": "Lesson visited",
+    "contentsCompleted": "Contents completed"
   },
   "onboarding": {
     "altSunbird": "Sunbird",
