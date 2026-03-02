@@ -119,6 +119,8 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.editorOptions.course': 'Course',
         'workspace.editorOptions.collection': 'Collection',
         'workspace.editorOptions.questionSet': 'Question Set',
+        'workspace.errors.creationFailed': 'Creation Failed',
+        'workspace.errors.unableToCreate': 'Unable to create content. Please try again.',
       };
       return map[key] || key;
     },
