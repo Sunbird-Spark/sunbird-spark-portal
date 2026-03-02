@@ -57,14 +57,14 @@ export function useContentStateUpdate({
   const lastSentStatusRef = useRef<number | null>(null);
 
   const assessmentTsRef = useRef<number | null>(null);
-  const assessUserIdRef = useRef<string | null>(null);
   const assessEventsRef = useRef<unknown[]>([]);
+  const sendingAssessmentRef = useRef(false);
 
   useEffect(() => {
     lastSentStatusRef.current = null;
     assessmentTsRef.current = null;
-    assessUserIdRef.current = null;
     assessEventsRef.current = [];
+    sendingAssessmentRef.current = false;
   }, [contentId]);
 
   const handleContentStateUpdate = useCallback(
@@ -124,8 +124,8 @@ export function useContentStateUpdate({
       console.error("Assessment state update failed:", err);
     } finally {
       assessmentTsRef.current = null;
-      assessUserIdRef.current = null;
       assessEventsRef.current = [];
+      sendingAssessmentRef.current = false;
     }
   }, [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]);
 
@@ -143,9 +143,7 @@ export function useContentStateUpdate({
       if (eidUpper === "START") {
         const rawEvent = event?.data ?? event;
         const ets = rawEvent?.ets ?? event?.ets;
-        const actorId = rawEvent?.actor?.id ?? event?.actor?.id;
         if (ets != null) assessmentTsRef.current = ets;
-        if (actorId) assessUserIdRef.current = actorId;
         assessEventsRef.current = [];
         if (currentContentStatus !== 2 && lastSentStatusRef.current !== 1) {
           lastSentStatusRef.current = 1;
@@ -161,7 +159,8 @@ export function useContentStateUpdate({
       }
 
       if (eidUpper === "END") {
-        if (isSelfAssess && assessmentTsRef.current != null) {
+        if (isSelfAssess && assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+          sendingAssessmentRef.current = true;
           void sendAssessmentAndInvalidate();
           lastSentStatusRef.current = null;
           return;

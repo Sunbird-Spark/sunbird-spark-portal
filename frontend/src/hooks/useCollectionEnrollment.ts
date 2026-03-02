@@ -47,7 +47,7 @@ export function useCollectionEnrollment(
       courseId: collectionId,
       batchId: effectiveBatchId,
       contentIds: leafContentIds,
-      fields: ['progress', 'score'],
+      fields: ['progress', 'score', 'status'],
     };
   }, [collectionId, effectiveBatchId, leafContentIds]);
 
