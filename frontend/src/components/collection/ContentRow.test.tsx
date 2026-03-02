@@ -112,7 +112,7 @@ describe('ContentRow', () => {
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
-    it('renders as button and shows last-attempt toast and navigates on click when last attempt', () => {
+    it('renders as button and navigates on click when last attempt (toast shown on player load only)', () => {
       renderContentRow({
         ...defaultProps,
         node: selfAssessNode,
@@ -121,11 +121,8 @@ describe('ContentRow', () => {
       });
       const btn = screen.getByRole('button', { name: /Quiz/i });
       fireEvent.click(btn);
-      expect(mockToast).toHaveBeenCalledWith({
-        title: 'courseDetails.selfAssessLastAttempt',
-        variant: 'default',
-      });
       expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/content/quiz-1');
+      expect(mockToast).not.toHaveBeenCalled();
     });
 
     it('renders as link when SelfAssess but attempts not exceeded and not last attempt', () => {

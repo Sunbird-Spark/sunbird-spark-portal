@@ -1,4 +1,4 @@
-import type { MouseEvent } from "react";
+import type { SyntheticEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { CiCircleCheck } from "react-icons/ci";
@@ -113,16 +113,14 @@ export default function ContentRow({
     </>
   );
 
-  const handleClick = (e: MouseEvent) => {
+  const handleClick = (e: SyntheticEvent) => {
     if (contentBlocked) return;
+    e.preventDefault();
     if (isDisabledByAttempts) {
-      e.preventDefault();
       toast({ title: t("courseDetails.selfAssessMaxAttempt"), variant: "destructive" });
       return;
     }
     if (isLastAttempt) {
-      e.preventDefault();
-      toast({ title: t("courseDetails.selfAssessLastAttempt"), variant: "default" });
       navigate(href);
     }
   };
@@ -135,7 +133,7 @@ export default function ContentRow({
         onClick={isDisabledByAttempts ? handleClick : undefined}
         onKeyDown={
           isDisabledByAttempts
-            ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(e as unknown as MouseEvent); } }
+            ? (e) => { if (e.key === "Enter" || e.key === " ") { handleClick(e); } }
             : undefined
         }
         role={isDisabledByAttempts ? "button" : undefined}
