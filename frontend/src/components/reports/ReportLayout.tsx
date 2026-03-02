@@ -6,7 +6,6 @@ interface ReportLayoutProps {
   breadcrumbs?: { label: string; href?: string }[];
   children: ReactNode;
   actions?: ReactNode;
-  activeNav?: string;
 }
 
 const ReportLayout = ({ title, breadcrumbs, children, actions }: ReportLayoutProps) => {
