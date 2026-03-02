@@ -1015,6 +1015,31 @@
     }
   }
 
+  .input-otp-container {
+    @apply flex justify-center items-center gap-2 md:gap-3;
+  }
+
+  .otp-input {
+    @apply !w-[2.5rem] !h-[2.5rem] md:!w-[3.125rem] md:!h-[3.125rem] text-center text-base md:text-lg font-semibold !border !border-sunbird-brick !rounded-[0.25rem] focus:border-sunbird-brick focus:ring-1 focus:ring-sunbird-brick outline-none transition-all;
+  }
+
+  @media (max-width: 320px) {
+    .otp-input {
+      width: 2rem !important;
+      height: 2rem !important;
+      font-size: 0.875rem !important;
+    }
+    
+    .input-otp-container {
+      gap: 0.375rem !important;
+    }
+  }
+
+  .otp-input:focus {
+    @apply !border-2 !border-sunbird-brick !bg-white rounded-xxs text-center text-base md:text-[1rem] focus:outline-none;
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
 }
 
 @layer base {

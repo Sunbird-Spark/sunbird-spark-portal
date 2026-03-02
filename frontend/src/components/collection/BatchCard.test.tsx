@@ -102,6 +102,18 @@ vi.mock('@/hooks/useUser', () => ({
   useIsContentCreator: () => mockUseIsContentCreator(),
 }));
 
+vi.mock('@/hooks/usePermission', () => ({
+  usePermissions: () => ({
+    roles: ['PUBLIC'],
+    isLoading: false,
+    isAuthenticated: false,
+    error: null,
+    hasAnyRole: vi.fn(() => false),
+    canAccessFeature: vi.fn(() => false),
+    refetch: vi.fn(),
+  }),
+}));
+
 const mockRefetch = vi.fn();
 
 /** Default hook state — no batches, not loading */

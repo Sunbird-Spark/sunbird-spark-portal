@@ -4,46 +4,11 @@ import { MemoryRouter, useParams } from 'react-router-dom';
 import HelpCategoryDetail from './HelpCategoryDetail';
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
-// Mock sub-components
-vi.mock("@/components/home/Header", () => ({
-    default: ({ isSidebarOpen, onToggleSidebar }: any) => (
-        <header data-testid="mock-header">
-            <button onClick={onToggleSidebar} aria-label="Toggle Sidebar">Toggle</button>
-            <div data-testid="sidebar-status">{isSidebarOpen ? "Sidebar Open" : "Sidebar Closed"}</div>
-        </header>
-    ),
-}));
-
-vi.mock("@/components/home/Footer", () => ({
-    default: () => <footer data-testid="mock-footer" />,
-}));
-
-vi.mock("@/components/home/HomeSidebar", () => ({
-    default: ({ activeNav, onNavChange, collapsed, onToggle }: any) => (
-        <div data-testid="home-sidebar" data-collapsed={collapsed}>
-            <span data-testid="active-nav">{activeNav}</span>
-            <button onClick={() => onNavChange('home')}>Change Nav</button>
-            {onToggle && (
-                <button
-                    onClick={onToggle}
-                    aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-                >
-                    Toggle Sidebar
-                </button>
-            )}
-        </div>
-    ),
-}));
-
 vi.mock("@/components/landing/Accordion", () => ({
     Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
     AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
     AccordionTrigger: ({ children }: any) => <button>{children}</button>,
     AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
-}));
-
-vi.mock("@/hooks/use-mobile", () => ({
-    useIsMobile: vi.fn(() => false),
 }));
 
 vi.mock("@/utils/sanitizeHtml", () => ({
@@ -63,6 +28,35 @@ vi.mock("@/hooks/useSystemSetting", () => ({
 
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock('@/hooks/usePermission', () => ({
+    usePermissions: () => ({
+        roles: ['PUBLIC'],
+        isLoading: false,
+        isAuthenticated: false,
+        error: null,
+        hasAnyRole: vi.fn(() => false),
+        canAccessFeature: vi.fn(() => false),
+        refetch: vi.fn(),
+    }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+    useGetTncUrl: () => ({ data: '' }),
+    useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+    default: {
+        getUserId: () => 'test-user-id',
+        isUserAuthenticated: () => true,
+        getAuthInfo: vi.fn().mockResolvedValue({
+            sid: 'test-session',
+            uid: 'test-user-id',
+            isAuthenticated: true,
+        }),
+    },
 }));
 
 const mockNavigate = vi.fn();
@@ -145,25 +139,6 @@ describe('HelpCategoryDetail', () => {
 
         fireEvent.click(screen.getByText('button.goBack'));
         expect(mockNavigate).toHaveBeenCalledWith('/help-support');
-    });
-
-    it('toggles sidebar collapse/expand', () => {
-        render(
-            <MemoryRouter>
-                <HelpCategoryDetail />
-            </MemoryRouter>
-        );
-
-        const sidebar = screen.getByTestId('home-sidebar');
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-
-        fireEvent.click(screen.getByRole('button', { name: "Collapse Sidebar" }));
-        expect(sidebar).toHaveAttribute('data-collapsed', 'true');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed');
-
-        fireEvent.click(screen.getByRole('button', { name: "Expand Sidebar" }));
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
     });
 
     it('handles feedback submission (Yes)', async () => {

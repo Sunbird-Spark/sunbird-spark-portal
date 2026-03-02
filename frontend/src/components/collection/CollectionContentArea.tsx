@@ -19,6 +19,7 @@ interface CollectionContentAreaProps {
   isTrackable: boolean;
   contentBlocked: boolean;
   isEnrolledInCurrentBatch: boolean;
+  showMaxAttemptsExceeded?: boolean;
   playerMetadata: any;
   playerIsLoading: boolean;
   playerError: any;
@@ -33,6 +34,7 @@ interface CollectionContentAreaProps {
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
   contentStatusMap: any;
+  contentAttemptInfoMap?: Record<string, { attemptCount: number }>;
   batches: any;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
@@ -64,6 +66,7 @@ export default function CollectionContentArea({
   playerError,
   handlePlayerEvent,
   handleTelemetryEvent,
+  showMaxAttemptsExceeded = false,
   isAuthenticated,
   isContentCreator,
   collectionId,
@@ -73,6 +76,7 @@ export default function CollectionContentArea({
   expandedModules,
   toggleModule,
   contentStatusMap,
+  contentAttemptInfoMap,
   batches,
   selectedBatchId,
   setSelectedBatchId,
@@ -161,6 +165,7 @@ export default function CollectionContentArea({
           playerError={playerError ?? null}
           onPlayerEvent={handlePlayerEvent}
           onTelemetryEvent={handleTelemetryEvent}
+          showMaxAttemptsExceeded={showMaxAttemptsExceeded}
         />
 
         {/* Right Sidebar */}
@@ -208,6 +213,7 @@ export default function CollectionContentArea({
               activeContentId={contentId ?? null}
               contentBlocked={contentBlocked}
               contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentStatusMap : undefined}
+              contentAttemptInfoMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentAttemptInfoMap : undefined}
             />
           </div>
 

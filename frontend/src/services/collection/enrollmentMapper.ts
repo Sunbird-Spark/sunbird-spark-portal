@@ -3,6 +3,7 @@ import type {
   ContentStateItem,
   CertTemplate,
   BatchListItem,
+  HierarchyContentNode,
 } from '../../types/collectionTypes';
 import { BATCH_STATUS } from '../../types/collectionTypes';
 import type { TrackableCollection } from '../../types/TrackableCollections';
@@ -54,6 +55,27 @@ export function getContentStatusMap(contentList: ContentStateItem[]): Record<str
   const map: Record<string, number> = {};
   contentList.forEach((item) => {
     if (item.contentId != null && item.status !== undefined) map[item.contentId] = item.status;
+  });
+  return map;
+}
+
+/** Whether the hierarchy node is SelfAssess (quiz) — attempt limits apply only to these. */
+export function isSelfAssess(node: HierarchyContentNode | null | undefined): boolean {
+  return (node?.contentType ?? '') === 'SelfAssess';
+}
+
+export interface ContentAttemptInfo {
+  attemptCount: number;
+}
+
+/** Map contentId -> { attemptCount } from content state (score.length = currentAttempts). */
+export function getContentAttemptInfoMap(contentList: ContentStateItem[]): Record<string, ContentAttemptInfo> {
+  const map: Record<string, ContentAttemptInfo> = {};
+  contentList.forEach((item) => {
+    if (item.contentId == null) return;
+    const score = item.score;
+    const attemptCount = Array.isArray(score) ? score.length : 0;
+    map[item.contentId] = { attemptCount };
   });
   return map;
 }
