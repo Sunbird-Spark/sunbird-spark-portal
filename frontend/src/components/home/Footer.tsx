@@ -1,7 +1,7 @@
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
 

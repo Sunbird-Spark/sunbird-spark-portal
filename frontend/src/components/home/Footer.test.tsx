@@ -40,7 +40,7 @@ vi.mock('@/hooks/useTnc', () => ({
   useGetTncUrl: (...args: unknown[]) => mockUseGetTncUrl(...args),
 }));
 
-vi.mock('@/components/common/TermsAndConditionsDialog', () => ({
+vi.mock('@/components/termsAndCondition/TermsAndConditionsDialog', () => ({
   TermsAndConditionsDialog: ({
     children,
     termsUrl,
