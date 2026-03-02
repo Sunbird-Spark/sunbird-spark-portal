@@ -10,8 +10,8 @@ type ToasterToast = ToastProps & {
     title?: React.ReactNode;
     description?: React.ReactNode;
     action?: ToastActionElement;
-    /** When "player", toast is shown in the collection player area instead of the default page toaster. */
-    viewport?: "default" | "player";
+    /** When "center", toast is shown in a center-positioned toaster (e.g. above player). Use with a Toaster that has viewport="center". */
+    viewport?: "default" | "center";
 };
 
 const actionTypes = {

@@ -75,7 +75,7 @@ export function useCollectionDetailSelfAssess({
     if (!contentId || !isLastAttemptForPlayer || !playerMetadata || playerIsLoading) return;
     if (lastAttemptToastShownRef.current) return;
     lastAttemptToastShownRef.current = true;
-    toast({ title: t("courseDetails.selfAssessLastAttempt"), variant: "default", viewport: "player" });
+    toast({ title: t("courseDetails.selfAssessLastAttempt"), variant: "default", viewport: "center" });
   }, [contentId, isLastAttemptForPlayer, playerMetadata, playerIsLoading, toast, t]);
   useEffect(() => {
     lastAttemptToastShownRef.current = false;

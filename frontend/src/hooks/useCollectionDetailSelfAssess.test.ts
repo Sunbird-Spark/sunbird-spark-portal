@@ -180,7 +180,7 @@ describe('useCollectionDetailSelfAssess', () => {
     expect(mockToast).toHaveBeenCalledWith({
       title: 'courseDetails.selfAssessLastAttempt',
       variant: 'default',
-      viewport: 'player',
+      viewport: 'center',
     });
   });
 

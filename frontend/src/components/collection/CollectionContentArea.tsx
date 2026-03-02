@@ -20,7 +20,6 @@ interface CollectionContentAreaProps {
   contentBlocked: boolean;
   isEnrolledInCurrentBatch: boolean;
   showMaxAttemptsExceeded?: boolean;
-  onGoBack?: () => void;
   playerMetadata: any;
   playerIsLoading: boolean;
   playerError: any;
@@ -68,7 +67,6 @@ export default function CollectionContentArea({
   handlePlayerEvent,
   handleTelemetryEvent,
   showMaxAttemptsExceeded = false,
-  onGoBack,
   isAuthenticated,
   isContentCreator,
   collectionId,
@@ -168,7 +166,6 @@ export default function CollectionContentArea({
           onPlayerEvent={handlePlayerEvent}
           onTelemetryEvent={handleTelemetryEvent}
           showMaxAttemptsExceeded={showMaxAttemptsExceeded}
-          onGoBack={onGoBack}
         />
 
         {/* Right Sidebar */}

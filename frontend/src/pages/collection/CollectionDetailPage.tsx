@@ -103,7 +103,6 @@ const CollectionDetailPage = () => {
   const {
     maxAttemptsExceeded,
     playerMetadata,
-    handleGoBack,
     currentContentNode,
   } = useCollectionDetailSelfAssess({
     contentId,
@@ -220,7 +219,6 @@ const CollectionDetailPage = () => {
               handlePlayerEvent={handlePlayerEvent}
               handleTelemetryEvent={handleTelemetryEvent}
               showMaxAttemptsExceeded={maxAttemptsExceeded}
-              onGoBack={handleGoBack}
               isAuthenticated={isAuthenticated}
               isContentCreator={isContentCreator}
               collectionId={collectionId}
