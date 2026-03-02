@@ -10,7 +10,6 @@ const CourseReport = () => {
   return (
     <ReportLayout
       title={summary.courseName}
-      breadcrumbs={[{ label: "Home", href: "/home" }, { label: "Admin Reports", href: "/reports/platform" }, { label: "Course Report" }]}
     >
       <CourseReportContent courseId={courseId} />
     </ReportLayout>
