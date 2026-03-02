@@ -138,6 +138,7 @@ export default function WorkspacePageContent({
             <WorkspaceContentCard
               key={item.id}
               item={item}
+              userRole={userRole}
               lockInfo={lockedContentMap[item.id]}
               onEdit={onEdit}
               onDelete={onDelete}
@@ -148,6 +149,7 @@ export default function WorkspacePageContent({
       ) : (
         <WorkspaceContentList
           items={filteredItems}
+          userRole={userRole}
           lockedContentMap={lockedContentMap}
           onEdit={onEdit}
           onDelete={onDelete}

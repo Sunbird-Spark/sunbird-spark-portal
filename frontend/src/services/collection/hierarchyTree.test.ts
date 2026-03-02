@@ -3,6 +3,7 @@ import {
   parseHierarchy,
   getLeafContentIdsFromHierarchy,
   getFirstLeafContentIdFromHierarchy,
+  findNodeById,
 } from './hierarchyTree';
 import type { HierarchyContentNode } from '../../types/collectionTypes';
 
@@ -112,6 +113,67 @@ describe('hierarchyTree', () => {
     it('returns root identifier when root is non-collection', () => {
       const root: HierarchyContentNode = { identifier: 'single-doc', mimeType: 'application/pdf' };
       expect(getFirstLeafContentIdFromHierarchy(root)).toBe('single-doc');
+    });
+  });
+
+  describe('findNodeById', () => {
+    it('returns undefined when root is null or undefined', () => {
+      expect(findNodeById(null, 'id')).toBeUndefined();
+      expect(findNodeById(undefined, 'id')).toBeUndefined();
+    });
+
+    it('returns undefined when id is empty', () => {
+      const root: HierarchyContentNode = { identifier: 'root', mimeType: 'video/mp4' };
+      expect(findNodeById(root, '')).toBeUndefined();
+    });
+
+    it('returns root when root.identifier matches id', () => {
+      const root: HierarchyContentNode = { identifier: 'target', name: 'Target', mimeType: 'video/mp4' };
+      expect(findNodeById(root, 'target')).toBe(root);
+    });
+
+    it('returns undefined when root does not match and has no children', () => {
+      const root: HierarchyContentNode = { identifier: 'root', mimeType: 'video/mp4' };
+      expect(findNodeById(root, 'other')).toBeUndefined();
+    });
+
+    it('finds node in direct children', () => {
+      const child: HierarchyContentNode = { identifier: 'child', name: 'Child', mimeType: 'application/pdf' };
+      const root: HierarchyContentNode = {
+        identifier: 'root',
+        mimeType: 'application/vnd.ekstep.content-collection',
+        children: [child],
+      };
+      expect(findNodeById(root, 'child')).toBe(child);
+    });
+
+    it('finds node in nested hierarchy', () => {
+      const deep: HierarchyContentNode = { identifier: 'deep', name: 'Deep', mimeType: 'video/mp4' };
+      const root: HierarchyContentNode = {
+        identifier: 'root',
+        mimeType: 'application/vnd.ekstep.content-collection',
+        children: [
+          {
+            identifier: 'unit',
+            mimeType: 'application/vnd.ekstep.content-collection',
+            children: [deep],
+          },
+        ],
+      };
+      expect(findNodeById(root, 'deep')).toBe(deep);
+    });
+
+    it('returns first match in depth-first order when multiple nodes share same id', () => {
+      const first: HierarchyContentNode = { identifier: 'x', name: 'First', mimeType: 'video/mp4' };
+      const root: HierarchyContentNode = {
+        identifier: 'root',
+        mimeType: 'application/vnd.ekstep.content-collection',
+        children: [
+          first,
+          { identifier: 'unit', mimeType: 'application/vnd.ekstep.content-collection', children: [{ identifier: 'x', mimeType: 'video/mp4' }] },
+        ],
+      };
+      expect(findNodeById(root, 'x')).toBe(first);
     });
   });
 });

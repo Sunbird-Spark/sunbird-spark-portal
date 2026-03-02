@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { useContentStateUpdateMutation } from "./useBatch";
 import {
   calculateContentProgress,
@@ -16,20 +17,25 @@ interface UseContentStateUpdateParams {
   /** When true, no state update API calls are made (batch end date has passed; content is view-only). */
   isBatchEnded?: boolean;
   mimeType: string | undefined;
-  /** If 2 (completed), no API calls are made for START/END to avoid overwriting completed state. */
+  /** If 2 (completed), no API calls for progress; SelfAssess still sends assessment PATCH to record attempts. */
   currentContentStatus?: number;
   /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
   skipContentStateUpdate?: boolean;
+  contentType?: string;
 }
 
 /** Telemetry callback receives the raw player detail (e.g. { eid, edata }), not { type, data }. */
 type TelemetryEvent = {
   eid?: string;
   type?: string;
+  actor?: { id?: string };
+  ets?: number;
   edata?: { summary?: ConsumptionSummary[] };
   summary?: ConsumptionSummary | ConsumptionSummary[];
   data?: {
     eid?: string;
+    actor?: { id?: string };
+    ets?: number;
     edata?: { summary?: ConsumptionSummary[] };
     summary?: ConsumptionSummary | ConsumptionSummary[];
   };
@@ -44,13 +50,21 @@ export function useContentStateUpdate({
   mimeType,
   currentContentStatus,
   skipContentStateUpdate = false,
+  contentType,
 }: UseContentStateUpdateParams): (event: TelemetryEvent) => void {
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
   const lastSentStatusRef = useRef<number | null>(null);
 
+  const assessmentTsRef = useRef<number | null>(null);
+  const assessEventsRef = useRef<unknown[]>([]);
+  const sendingAssessmentRef = useRef(false);
+
   useEffect(() => {
     lastSentStatusRef.current = null;
+    assessmentTsRef.current = null;
+    assessEventsRef.current = [];
+    sendingAssessmentRef.current = false;
   }, [contentId]);
 
   const handleContentStateUpdate = useCallback(
@@ -75,25 +89,82 @@ export function useContentStateUpdate({
     [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]
   );
 
+  const sendAssessmentAndInvalidate = useCallback(async () => {
+    if (!collectionId || !contentId || !effectiveBatchId) return;
+    const userId = userAuthInfoService.getUserId();
+    if (!userId) return;
+    const ts = assessmentTsRef.current;
+    if (ts == null) return;
+    const events = assessEventsRef.current;
+    const attemptId = typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${collectionId}-${effectiveBatchId}-${contentId}-${userId}-${Date.now()}`;
+    try {
+      await contentStateUpdate({
+        userId,
+        courseId: collectionId,
+        batchId: effectiveBatchId,
+        contents: [{
+          contentId,
+          status: 2,
+          lastAccessTime: dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss:SSSZZ"),
+        }],
+        assessments: [{
+          assessmentTs: ts,
+          batchId: effectiveBatchId,
+          courseId: collectionId,
+          userId,
+          attemptId,
+          contentId,
+          events: Array.isArray(events) ? events : [],
+        }],
+      });
+      await queryClient.invalidateQueries({ queryKey: ["contentState"] });
+    } catch (err) {
+      console.error("Assessment state update failed:", err);
+    } finally {
+      assessmentTsRef.current = null;
+      assessEventsRef.current = [];
+      sendingAssessmentRef.current = false;
+    }
+  }, [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]);
+
   return useCallback(
     (event: TelemetryEvent) => {
       if (skipContentStateUpdate) return;
       if (!isEnrolledInCurrentBatch || !collectionId || !contentId || !effectiveBatchId) return;
       if (isBatchEnded) return;
-      if (currentContentStatus === 2) return;
+      const isSelfAssess = (contentType ?? "").toLowerCase() === "selfassess";
+      if (!isSelfAssess && currentContentStatus === 2) return;
 
       const eid = (event?.eid ?? event?.data?.eid ?? event?.type ?? "") as string;
       const eidUpper = eid.toUpperCase();
 
       if (eidUpper === "START") {
-        if (lastSentStatusRef.current !== 1) {
+        const rawEvent = event?.data ?? event;
+        const ets = rawEvent?.ets ?? event?.ets;
+        if (ets != null) assessmentTsRef.current = ets;
+        assessEventsRef.current = [];
+        if (currentContentStatus !== 2 && lastSentStatusRef.current !== 1) {
           lastSentStatusRef.current = 1;
           void handleContentStateUpdate(1, false);
         }
         return;
       }
 
+      if (eidUpper === "ASSESS") {
+        const rawEvent = event?.data ?? event;
+        assessEventsRef.current = [...assessEventsRef.current, rawEvent ?? event];
+        return;
+      }
+
       if (eidUpper === "END") {
+        if (isSelfAssess && assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+          sendingAssessmentRef.current = true;
+          void sendAssessmentAndInvalidate();
+          lastSentStatusRef.current = null;
+          return;
+        }
         const rawSummary =
           event?.edata?.summary ??
           event?.data?.edata?.summary ??
@@ -116,7 +187,9 @@ export function useContentStateUpdate({
       effectiveBatchId,
       mimeType,
       currentContentStatus,
+      contentType,
       handleContentStateUpdate,
+      sendAssessmentAndInvalidate,
     ]
   );
 }

@@ -211,7 +211,7 @@ describe('ExploreGrid', () => {
             expect.objectContaining({
                 request: expect.objectContaining({
                     filters: expect.objectContaining({
-                        objectType: 'Content',
+                        objectType: ['Content', 'QuestionSet'],
                         primaryCategory: ['Collection1'],
                         mimeType: ['video/mp4', 'video/webm'],
                     })
@@ -239,7 +239,7 @@ describe('ExploreGrid', () => {
         expect(useContentSearch).toHaveBeenCalledWith(
             expect.objectContaining({
                 request: expect.objectContaining({
-                    filters: { objectType: 'Content' }
+                    filters: { objectType: ['Content', 'QuestionSet'] }
                 })
             })
         );
@@ -301,6 +301,45 @@ describe('ExploreGrid', () => {
          expect(useContentSearch).toHaveBeenLastCalledWith(expect.objectContaining({ 
              request: expect.objectContaining({ offset: 9 }) 
          }));
+    });
+  });
+
+  it('attaches IntersectionObserver after initial load completes (direct navigation fix)', async () => {
+    // Simulates the "direct URL visit" scenario: component mounts while the query
+    // is in-flight, shows PageLoader (sentinel div absent), then data arrives.
+    // The old useEffect([], []) approach would never attach the observer because
+    // observerTarget.current was null during the one-time effect run.
+    // The callback-ref approach attaches it as soon as the sentinel div mounts.
+
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        error: null,
+    } as any);
+
+    observerCallback = null;
+    const { rerender } = renderComponent();
+
+    // While loading, the PageLoader early-return means the sentinel div is absent
+    // → the callback ref has not fired → observer not attached yet.
+    expect(observerCallback).toBeNull();
+
+    // Data arrives — switch to loaded state with content.
+    vi.mocked(useContentSearch).mockReturnValue({
+        data: { data: { content: mockContent } },
+        isLoading: false,
+        error: null,
+    } as any);
+    rerender(
+        <BrowserRouter>
+            <ExploreGrid {...defaultProps} />
+        </BrowserRouter>
+    );
+
+    // The sentinel div now mounts → callback ref fires → observer is attached.
+    await waitFor(() => {
+        expect(observerCallback).not.toBeNull();
+        expect(observeSpy).toHaveBeenCalled();
     });
   });
 

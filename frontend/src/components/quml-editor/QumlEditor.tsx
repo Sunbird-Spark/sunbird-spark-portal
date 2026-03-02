@@ -9,6 +9,7 @@ import {
 } from '../../services/editors/quml-editor';
 import { useFancytreeGuard } from '../../hooks/useFancytreeGuard';
 import PageLoader from '../common/PageLoader';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 type QumlEditorProps = {
   metadata?: QuestionSetMetadata;
@@ -28,6 +29,7 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const serviceRef = useRef<QumlEditorService>(new QumlEditorService());
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const { t } = useAppI18n();
 
   // Use the fancytree guard hook to maintain jQuery with FancyTree
   useFancytreeGuard(status === 'ready');
@@ -36,16 +38,16 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
     (event: QumlEditorEvent) => {
       onEditorEvent?.(event);
     },
-    [onEditorEvent]
+    [onEditorEvent],
   );
 
   const handleTelemetryEvent = useCallback(
     (event: any) => {
       onTelemetryEvent?.(event);
     },
-    [onTelemetryEvent]
+    [onTelemetryEvent],
   );
-  
+
   // CSS lifecycle: add quml-editor stylesheet on mount,
   // remove it on unmount so it does not bleed into the rest of the portal.
   useEffect(() => {
@@ -99,7 +101,11 @@ const QumlEditor: React.FC<QumlEditorProps> = ({
 
   return (
     <div className={styles.qumlEditorPage}>
-      {status === 'loading' && <PageLoader message="Loading editor..." />}
+      {status === 'loading' && (
+        <div className="quml-editor-loader-wrapper">
+          <PageLoader message={t('editors.loading')} fullPage={true} />
+        </div>
+      )}
       <div className={styles.qumlEditorHost} ref={containerRef} />
     </div>
   );
