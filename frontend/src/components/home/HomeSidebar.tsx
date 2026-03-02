@@ -4,12 +4,9 @@ import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers, FiBarChart2, FiPieChart } fr
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { PermissionGate } from "@/rbac/PermissionGate";
-import { Feature } from "@/services/PermissionService";
 import { usePermissions } from "@/hooks/usePermission";
+import type { Feature } from "@/services/PermissionService";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { useIsAdmin } from "@/hooks/useUser";
-
 interface HomeSidebarProps {
     activeNav: string;
     onNavChange: (nav: string) => void;
@@ -60,12 +57,12 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
-    const { isAuthenticated, isLoading } = usePermissions();
+    const { isAuthenticated, isLoading, hasAnyRole, canAccessFeature } = usePermissions();
     const { t } = useAppI18n();
 
     const mainNavItems = NAV_ITEM_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
     const bottomNavItems = BOTTOM_NAV_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
-    const isAdmin = useIsAdmin();
+    const isAdmin = hasAnyRole(['ORG_ADMIN']);
 
     if (isLoading || !isAuthenticated || location.pathname === "/") {
         return null;
@@ -123,13 +120,11 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                     </li>
                 );
 
+                if (item.feature && !canAccessFeature(item.feature)) return null;
+
                 return (
                     <React.Fragment key={item.id}>
-                        {item.feature ? (
-                            <PermissionGate feature={item.feature} hide>
-                                {listItem}
-                            </PermissionGate>
-                        ) : listItem}
+                        {listItem}
                     </React.Fragment>
                 );
             })}

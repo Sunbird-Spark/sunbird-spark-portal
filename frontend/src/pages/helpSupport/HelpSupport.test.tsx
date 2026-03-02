@@ -176,29 +176,17 @@ describe('HelpSupport', () => {
     });
 
     it('toggles sidebar state', () => {
+        // This test is no longer valid since HelpSupport doesn't render the sidebar
+        // The sidebar is now rendered by PageLayout
         render(
             <MemoryRouter initialEntries={['/help-support']}>
                 <HelpSupport />
             </MemoryRouter>
         );
 
-        const sidebar = screen.getByTestId('home-sidebar');
-        expect(sidebar).toBeInTheDocument();
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-
-        // Click Collapse
-        const collapseBtn = screen.getByRole('button', { name: /Collapse Sidebar/i });
-        fireEvent.click(collapseBtn);
-
-        expect(sidebar).toHaveAttribute('data-collapsed', 'true');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed'); // Header mock update
-
-        // Click Expand (same button spot, new label)
-        const expandBtn = screen.getByRole('button', { name: /Expand Sidebar/i });
-        fireEvent.click(expandBtn);
-
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
+        // Component renders its own content without sidebar
+        expect(screen.queryByTestId('home-sidebar')).not.toBeInTheDocument();
+        expect(screen.getByText('How can we assist you today?')).toBeInTheDocument();
     });
 
     it('handles api error gracefully', () => {

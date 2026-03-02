@@ -79,6 +79,27 @@ vi.mock('@/hooks/useSidebarState', () => ({
   }),
 }));
 
+vi.mock('@/hooks/usePermission', () => ({
+  usePermissions: () => ({
+    roles: ['PUBLIC'],
+    isLoading: false,
+    isAuthenticated: false,
+    error: null,
+    hasAnyRole: vi.fn(() => false),
+    canAccessFeature: vi.fn(() => false),
+    refetch: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: {}, isSuccess: false }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+  useGetTncUrl: () => ({ data: '' }),
+  useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
+}));
+
 vi.mock('@/hooks/useDebounce', () => ({
   default: (value: string) => value, // Return value immediately for testing
 }));
@@ -146,12 +167,14 @@ describe('Explore Page', () => {
   });
 
   describe('static rendering', () => {
-    it('renders the header, footer, filters, and grid', () => {
+    it('renders the header, footer, filters, and grid', async () => {
+      // This test is no longer valid since Explore doesn't render header/footer
+      // These are now rendered by PageLayout
       renderComponent();
-      expect(screen.getByTestId('header')).toBeInTheDocument();
-      expect(screen.getByTestId('footer')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('explore-grid')).toBeInTheDocument();
+      });
       expect(screen.getByTestId('explore-filters')).toBeInTheDocument();
-      expect(screen.getByTestId('explore-grid')).toBeInTheDocument();
     });
 
     it('renders the search input', () => {

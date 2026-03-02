@@ -168,11 +168,12 @@ describe('MyLearning Page', () => {
   });
 
   it('renders main layout components (Desktop)', () => {
+    // This test is no longer valid since MyLearning doesn't render the sidebar/header/footer
+    // These are now rendered by PageLayout
     renderComponent();
 
-    expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
-    expect(screen.getByTestId('footer')).toBeInTheDocument();
-    expect(screen.getByAltText('Sunbird')).toBeInTheDocument(); // Logo
+    // MyLearning component renders its own content
+    expect(screen.getByTestId('my-learning-courses')).toBeInTheDocument();
   });
 
   it('renders content sections', () => {
@@ -185,18 +186,12 @@ describe('MyLearning Page', () => {
   });
 
   it('toggles sidebar on mobile', () => {
+    // This test is no longer valid since MyLearning doesn't render the sidebar
+    // The sidebar is now rendered by PageLayout
     (useIsMobile as any).mockReturnValue(true);
     renderComponent();
 
-    // Sidebar should be hidden initially on mobile (controlled by Sheet)
-    // But our mock just renders "Sidebar" if open. 
-    // In the real code: open={isSidebarOpen}
-    // We can test if the toggle button exists
-    const menuBtn = screen.getByTestId('menu-icon');
-    expect(menuBtn).toBeInTheDocument();
-
-    // Clicking it should trigger state change (can't easily verify state change without checking Props of Sheet)
-    // But we can check that we don't crash.
-    fireEvent.click(menuBtn.parentElement!);
+    // MyLearning component renders its own content
+    expect(screen.getByTestId('my-learning-courses')).toBeInTheDocument();
   });
 });

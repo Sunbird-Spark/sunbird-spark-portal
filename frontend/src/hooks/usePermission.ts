@@ -40,9 +40,7 @@ export function usePermissions(): UsePermissionsReturn {
         const rawRoles = (rolesResponse.data.response.roles || []).map(
           (r: { role: string } | string) => typeof r === 'string' ? r : r.role
         );
-        console.log('[usePermissions] Raw roles from user read API:', rawRoles);
         const normalizedRoles = permissionService.normalizeRoles(rawRoles);
-        console.log('[usePermissions] Normalized roles:', normalizedRoles);
         setRoles(normalizedRoles);
       } else {
         setRoles(['PUBLIC']);
