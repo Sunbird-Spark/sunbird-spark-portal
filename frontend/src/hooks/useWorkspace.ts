@@ -190,11 +190,11 @@ export function useWorkspace({
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = contentQuery;
 
-  // Track which tab the last completed (non-paginating) fetch belongs to.
+  // Track which tab the last completed fetch (initial or paginating) belongs to.
   // This prevents stale cached data from a previous tab visit being shown
-  // while fresh data is loading — the root cause of the "wrong content on
-  // tab switch" bug. We only show the content once the API has responded for
-  // the current tab.
+  // while fresh data is loading — which will prevent tabs caching issue. We only show the content once the API has responded for
+  // the current tab; infinite-scroll "load more" is excluded by the
+  // isLoadingCurrentTab guard (which checks !isFetchingNextPage).
   const lastFetchedTabRef = useRef<WorkspaceView | null>(null);
 
   useEffect(() => {
