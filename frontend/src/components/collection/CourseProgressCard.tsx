@@ -94,7 +94,7 @@ const CourseProgressCard = ({
                 <FiMoreVertical className="w-5 h-5" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[10rem] bg-white border border-sunbird-gray-f3 rounded-xl shadow-lg z-50">
+            <DropdownMenuContent align="end" className="w-max min-w-[8rem] bg-white border border-sunbird-gray-f3 rounded-xl shadow-lg z-50 py-1">
               <DropdownMenuItem
                 onClick={showUnenrollOption ? onUnenroll : onForceSync}
                 disabled={isLoading}
