@@ -164,7 +164,7 @@ describe('oidcMiddleware', () => {
             const middleware = requireAuth();
             middleware(mockReq as Request, mockRes as Response, mockNext);
 
-            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login');
+            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login?prompt=none');
             expect(mockNext).not.toHaveBeenCalled();
         });
 
@@ -172,7 +172,7 @@ describe('oidcMiddleware', () => {
             const middleware = requireAuth();
             middleware(mockReq as Request, mockRes as Response, mockNext);
 
-            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login');
+            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login?prompt=none');
         });
     });
 });
