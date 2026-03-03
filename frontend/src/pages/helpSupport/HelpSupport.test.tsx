@@ -4,30 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import HelpSupport from './HelpSupport';
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
-// Mock sub-components
-vi.mock("@/components/home/Header", () => ({
-    default: ({ isSidebarOpen, onToggleSidebar }: any) => (
-        <header data-testid="mock-header">
-            <button onClick={onToggleSidebar} aria-label="Toggle Sidebar">Toggle</button>
-            <div data-testid="sidebar-status">{isSidebarOpen ? "Sidebar Open" : "Sidebar Closed"}</div>
-        </header>
-    ),
-}));
-
-vi.mock("@/components/home/Footer", () => ({
-    default: () => <footer data-testid="mock-footer" />,
-}));
-
-vi.mock("@/components/home/HomeSidebar", () => ({
-    default: ({ activeNav, onNavChange, collapsed, onToggle }: any) => (
-        <div data-testid="home-sidebar" data-collapsed={collapsed}>
-            <span data-testid="active-nav">{activeNav}</span>
-            <button onClick={() => onNavChange('home')}>Change Nav</button>
-            {onToggle && <button onClick={onToggle} aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}>Toggle Sidebar</button>}
-        </div>
-    ),
-}));
-
 vi.mock("@/components/landing/Accordion", () => ({
     Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
     AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
@@ -35,20 +11,27 @@ vi.mock("@/components/landing/Accordion", () => ({
     AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
 }));
 
-vi.mock("@/hooks/use-mobile", () => ({
-    useIsMobile: vi.fn(() => false),
-}));
-
 vi.mock("@/utils/sanitizeHtml", () => ({
     sanitizeHtml: (html: string) => html,
 }));
 
-// Mock useSystemSetting hook
 vi.mock("@/hooks/useSystemSetting", () => ({
     useSystemSetting: vi.fn(),
 }));
 
-// Mock the shared hook
+vi.mock("@/hooks/useAppI18n", () => ({
+    useAppI18n: () => ({
+        t: (key: string, options?: any) => {
+            if (key === 'help.faqCount') return `${options?.count} FAQs`;
+            if (key === 'loading') return 'Loading...';
+            if (key === 'help.failedToLoadFaq') return 'Something went wrong';
+            if (key === 'help.assistPrompt') return 'How can we assist you today?';
+            if (key === 'somethingWentWrong') return 'Something went wrong';
+            return key;
+        },
+    }),
+}));
+
 const mockUseHelpFaqData = vi.fn();
 vi.mock("@/hooks/useFaqData", () => ({
     useHelpFaqData: (...args: any[]) => mockUseHelpFaqData(...args),
@@ -160,32 +143,6 @@ describe('HelpSupport', () => {
         );
 
         expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    });
-
-    it('toggles sidebar state', () => {
-        render(
-            <MemoryRouter initialEntries={['/help-support']}>
-                <HelpSupport />
-            </MemoryRouter>
-        );
-
-        const sidebar = screen.getByTestId('home-sidebar');
-        expect(sidebar).toBeInTheDocument();
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-
-        // Click Collapse
-        const collapseBtn = screen.getByRole('button', { name: /Collapse Sidebar/i });
-        fireEvent.click(collapseBtn);
-
-        expect(sidebar).toHaveAttribute('data-collapsed', 'true');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed'); // Header mock update
-
-        // Click Expand (same button spot, new label)
-        const expandBtn = screen.getByRole('button', { name: /Expand Sidebar/i });
-        fireEvent.click(expandBtn);
-
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
     });
 
     it('handles api error gracefully', () => {

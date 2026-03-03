@@ -2,8 +2,7 @@ import { useState } from "react";
 import { FiMenu, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import AuthenticatedHeader from "./AuthenticatedHeader";
-import { useAuth } from "@/auth/AuthContext";
-import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { usePermissions } from "@/hooks/usePermission";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +11,9 @@ import {
 } from "@/components/common/DropdownMenu";
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import SearchModal from "@/components/common/SearchModal";
 
 interface HeaderProps {
   isSidebarOpen?: boolean;
@@ -23,14 +23,17 @@ interface HeaderProps {
 const defaultToggleSidebar = () => { };
 
 const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar }: HeaderProps) => {
-  const { isAuthenticated: contextAuth } = useAuth();
-  const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+  const { isAuthenticated, isLoading } = usePermissions();
   const location = useLocation();
-  const navigate = useNavigate();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  if (isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
+  if (isLoading && location.pathname !== "/") {
+    return <div className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)] h-16 md:h-[4.5rem]" />;
+  }
+
+  if (!isLoading && isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
     if (import.meta.env.MODE !== "production") {
       // Warn when authenticated header is rendered without a real sidebar toggle handler.
       console.warn(
@@ -39,7 +42,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
     }
   }
 
-  if (isAuthenticated && location.pathname !== "/") {
+  if (!isLoading && isAuthenticated && location.pathname !== "/") {
     return <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />;
   }
 
@@ -59,6 +62,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
 
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)]">
       <div className="container mx-auto px-0">
         <div className="flex items-center justify-between h-16 md:h-[4.5rem] px-4 lg:pl-[3.75rem] lg:pr-[7.9375rem]">
@@ -95,8 +99,12 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
           <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-1">
               {/* Search */}
-              <button className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors" onClick={() => { navigate("/search") }}>
-                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" />
+              <button
+                className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setIsSearchOpen(true)}
+                aria-label={t("header.search")}
+              >
+                <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" aria-hidden="true" />
               </button>
 
 
@@ -127,7 +135,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
             {/* Login Button */}
             <Button
               onClick={() => window.location.href = "/portal/login"}
-              className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal w-[4.5rem] h-[1.875rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center p-0"
+              className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal min-w-[4.5rem] h-[1.875rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center px-4 py-0"
             >
               {t("login")}
             </Button>
@@ -137,7 +145,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
           <button
             className="md:hidden p-2 text-sunbird-brick"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={isMenuOpen ? t("header.closeMenu") : t("header.openMenu")}
           >
             {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -165,7 +173,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
               <button
                 className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-sunbird-brick"
                 onClick={() => {
-                  navigate("/search");
+                  setIsSearchOpen(true);
                   setIsMenuOpen(false);
                 }}
               >
@@ -204,6 +212,8 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
         </div>
       )}
     </header>
+    <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 };
 

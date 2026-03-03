@@ -1,5 +1,6 @@
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import { FiRefreshCw } from "react-icons/fi";
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface PageLoaderProps {
   message?: string;
@@ -8,10 +9,13 @@ interface PageLoaderProps {
   fullPage?: boolean;
 }
 
-const PageLoader = ({ message = "Loading...", error = null, onRetry, fullPage = true }: PageLoaderProps) => {
+const PageLoader = ({ message, error = null, onRetry, fullPage = true }: PageLoaderProps) => {
+  const { t } = useAppI18n();
+  const displayMessage = message || t("loading");
+
   const wrapperClass = fullPage
     ? "fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-background to-home-ivory/50 backdrop-blur-sm"
-    : "flex flex-1 min-h-[280px] items-center justify-center bg-white rounded-[1.25rem] border border-border shadow-sm";
+    : "flex flex-1 h-full w-full items-center justify-center bg-white rounded-[1.25rem] border border-border shadow-sm p-8";
   return (
     <div className={wrapperClass}>
       <div className="flex flex-col items-center gap-6">
@@ -26,7 +30,7 @@ const PageLoader = ({ message = "Loading...", error = null, onRetry, fullPage = 
               <div className="absolute inset-4 bg-gradient-to-br from-sunbird-brick to-sunbird-ginger rounded-full flex items-center justify-center shadow-xl">
                 <img
                   src={sunbirdLogo}
-                  alt="Error"
+                  alt={t("error")}
                   className="h-12 w-12 object-contain brightness-0 invert"
                 />
               </div>
@@ -41,7 +45,7 @@ const PageLoader = ({ message = "Loading...", error = null, onRetry, fullPage = 
               <div className="absolute inset-4 bg-gradient-to-br from-sunbird-brick to-sunbird-ginger rounded-full flex items-center justify-center shadow-xl">
                 <img
                   src={sunbirdLogo}
-                  alt="Loading"
+                  alt={t("loading")}
                   className="h-12 w-12 object-contain brightness-0 invert"
                 />
               </div>
@@ -53,7 +57,7 @@ const PageLoader = ({ message = "Loading...", error = null, onRetry, fullPage = 
         <div className="flex flex-col items-center gap-3">
           {error ? (
             <>
-              <p className="text-sunbird-brick font-semibold text-lg">Something went wrong</p>
+              <p className="text-sunbird-brick font-semibold text-lg">{t("somethingWentWrong")}</p>
               <p className="text-sunbird-ink text-sm text-center max-w-xs">{error}</p>
               {onRetry && (
                 <button
@@ -61,13 +65,13 @@ const PageLoader = ({ message = "Loading...", error = null, onRetry, fullPage = 
                   className="mt-2 flex items-center gap-2 px-6 py-2.5 bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all"
                 >
                   <FiRefreshCw className="w-4 h-4" />
-                  Retry
+                  {t("retry")}
                 </button>
               )}
             </>
           ) : (
             <>
-              <p className="text-sunbird-ink font-semibold text-lg">{message}</p>
+              <p className="text-sunbird-ink font-semibold text-lg">{displayMessage}</p>
               <div className="flex gap-1">
                 <div className="w-2 h-2 rounded-full bg-sunbird-brick animate-bounce" style={{ animationDelay: "0ms" }} />
                 <div className="w-2 h-2 rounded-full bg-sunbird-ginger animate-bounce" style={{ animationDelay: "150ms" }} />

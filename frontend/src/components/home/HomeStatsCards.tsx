@@ -1,3 +1,6 @@
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
+import { useUserCertificates } from "@/hooks/useCertificate";
+
 // Custom icons matching the design
 const TotalContentsIcon = () => (
     <svg width="25" height="28" viewBox="0 0 25 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -36,42 +39,81 @@ const CertificationsIcon = () => (
     </svg>
 );
 
-const statsData = [
-    {
-        id: "total",
-        value: "30",
-        label: "Total Contents",
-        bgColor: "bg-sunbird-blue-light",
-        iconBg: "hsl(var(--sunbird-blue-medium))",
-        icon: TotalContentsIcon,
-    },
-    {
-        id: "progress",
-        value: "05",
-        label: "Contents in Progress",
-        bgColor: "bg-sunbird-ginger",
-        iconBg: "hsl(var(--sunbird-brown-dark))",
-        icon: InProgressIcon,
-    },
-    {
-        id: "completed",
-        value: "13",
-        label: "Contents Completed",
-        bgColor: "bg-sunbird-moss",
-        iconBg: "hsl(var(--sunbird-green-dark))",
-        icon: CompletedIcon,
-    },
-    {
-        id: "certs",
-        value: "06",
-        label: "Certifications Earned",
-        bgColor: "bg-sunbird-lavender",
-        iconBg: "hsl(var(--sunbird-purple-dark))",
-        icon: CertificationsIcon,
-    },
-];
-
 const HomeStatsCards = () => {
+    const { data: enrolledCollections, isLoading: enrollmentsLoading } = useUserEnrolledCollections();
+    const { data: certificatesData, isLoading: certificatesLoading } = useUserCertificates();
+    const courses = enrolledCollections?.data?.courses || [];
+    
+    const isLoading = enrollmentsLoading || certificatesLoading;
+
+    // Course-level stats using course status (1 = in progress, 2 = completed)
+    const totalCourses = courses.length;
+    const coursesInProgress = courses.filter(course => course.status === 1).length;
+    const coursesCompleted = courses.filter(course => course.status === 2).length;
+
+    // Get certificate count from the certificate search API
+    // The API returns an array of certificates directly
+    const certificatesEarned = Array.isArray(certificatesData?.data)
+        ? certificatesData.data.length
+        : 0;
+
+    const statsData = [
+        {
+            id: "total",
+            value: totalCourses === 0 ? '0' : totalCourses.toString().padStart(2, '0'),
+            label: "Total Courses",
+            bgColor: "bg-sunbird-blue-light",
+            iconBg: "hsl(var(--sunbird-blue-medium))",
+            icon: TotalContentsIcon,
+        },
+        {
+            id: "progress",
+            value: coursesInProgress === 0 ? '0' : coursesInProgress.toString().padStart(2, '0'),
+            label: "In Progress",
+            bgColor: "bg-sunbird-ginger",
+            iconBg: "hsl(var(--sunbird-brown-dark))",
+            icon: InProgressIcon,
+        },
+        {
+            id: "completed",
+            value: coursesCompleted === 0 ? '0' : coursesCompleted.toString().padStart(2, '0'),
+            label: "Completed",
+            bgColor: "bg-sunbird-moss",
+            iconBg: "hsl(var(--sunbird-green-dark))",
+            icon: CompletedIcon,
+        },
+        {
+            id: "certs",
+            value: certificatesEarned === 0 ? '0' : certificatesEarned.toString().padStart(2, '0'),
+            label: "Certifications Earned",
+            bgColor: "bg-sunbird-lavender",
+            iconBg: "hsl(var(--sunbird-purple-dark))",
+            icon: CertificationsIcon,
+        },
+    ];
+
+    if (isLoading) {
+        return (
+            <div className="home-stats-grid">
+                {statsData.map((stat) => (
+                    <div
+                        key={stat.id}
+                        className={`home-stat-card ${stat.bgColor} animate-pulse`}
+                    >
+                        <div
+                            className="home-stat-icon-wrapper"
+                            style={{ backgroundColor: stat.iconBg }}
+                        >
+                            <stat.icon />
+                        </div>
+                        <div className="home-stat-value opacity-50">--</div>
+                        <div className="home-stat-label">{stat.label}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
     return (
         <div className="home-stats-grid">
             {statsData.map((stat) => {

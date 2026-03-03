@@ -10,8 +10,10 @@ import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const ContentPlayerPage = () => {
+  const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
   
@@ -69,15 +71,15 @@ const ContentPlayerPage = () => {
   });
 
   if (playerIsLoading) {
-    return <PageLoader message="Loading content..." />;
+    return <PageLoader message={t('loadingContent')} />;
   }
 
   if (playerError) {
-    return <div>Error loading content: {playerError.message}</div>;
+    return <div>{t('content.errorLoading', { error: playerError.message })}</div>;
   }
 
   if (!playerMetadata) {
-    return <div>Content not found</div>;
+    return <div>{t('content.notFound')}</div>;
   }
 
   return (
@@ -91,7 +93,7 @@ const ContentPlayerPage = () => {
           className="content-player-go-back"
         >
           <FiArrowLeft className="content-player-back-arrow" />
-          Go Back
+          {t('button.goBack')}
         </button>
 
         {/* Title Row */}

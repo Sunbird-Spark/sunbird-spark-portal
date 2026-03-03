@@ -13,6 +13,9 @@ vi.mock('../../../services/players/quml/QumlPlayerService', () => ({
     attachEventListeners: vi.fn(),
     removeEventListeners: vi.fn(),
   },
+  QumlPlayerService: class {
+    static unloadStyles = vi.fn();
+  },
 }));
 
 const mockMetadata = {

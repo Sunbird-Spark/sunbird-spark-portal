@@ -1,120 +1,141 @@
-import { FiBell, FiX, FiTrash2 } from "react-icons/fi";
-import { Button } from "@/components/common/Button";
+import * as Popover from "@radix-ui/react-popover";
+import { FiBell, FiTrash2 } from "react-icons/fi";
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/common/Popover";
+    useNotificationRead,
+    useNotificationDelete,
+    useNotificationGrouping,
+    useNotificationMessage,
+    useNotificationUpdate
+} from "@/hooks/useNotification";
+import { NotificationFeed } from "@/types/notificationTypes";
+import dayjs from "dayjs";
+import React from 'react';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
-interface Notification {
-  id: string;
-  message: string;
-  date: string;
-}
+export const NotificationPopover = () => {
+    const { t } = useAppI18n();
+    const [isOpen, setIsOpen] = useState(false);
+    const { notifications: allNotifications, refetch } = useNotificationRead();
+    const { deleteNotification, deleteAll, filterDeleted } = useNotificationDelete();
+    const { getMessage } = useNotificationMessage();
+    const { mutateAsync: updateNotification } = useNotificationUpdate();
+    const navigate = useNavigate();
 
-interface NotificationPopoverProps {
-  notifications: Notification[];
-  onDelete: (id: string) => void;
-  isOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  isMobile?: boolean;
-}
+    const notifications = filterDeleted(allNotifications);
+    const { groupedNotifications, unreadCount } = useNotificationGrouping(notifications);
+    const hasNotifications = groupedNotifications.length > 0;
 
-export const NotificationPopover = ({
-  notifications,
-  onDelete,
-  isOpen,
-  onOpenChange,
-  isMobile = false,
-}: NotificationPopoverProps) => {
-  return (
-    <Popover open={isOpen} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <FiBell className="w-5 h-5" />
-          {notifications.length > 0 && (
-            <span
-              className={`absolute -top-1 -right-1 ${isMobile ? "w-4 h-4 text-[0.625rem]" : "w-5 h-5 text-xs"
-                } bg-destructive text-destructive-foreground rounded-full flex items-center justify-center`}
-            >
-              {notifications.length}
-            </span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        className={`${isMobile ? "w-80 p-0" : "w-96 p-0"
-          } bg-muted/95 border-border shadow-lg`}
-      >
-        <div className={isMobile ? "p-3" : "p-4"}>
-          {!isMobile && (
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-foreground">
-                {notifications.length} New Notification(s)
-              </h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => onOpenChange?.(false)}
-              >
-                <FiX className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-          {isMobile && (
-            <h3 className="font-semibold text-foreground text-sm mb-3">
-              {notifications.length} New Notification(s)
-            </h3>
-          )}
-          <div
-            className={`space-y-${isMobile ? "2" : "3"} max-h-${isMobile ? "64" : "80"
-              } overflow-y-auto`}
-          >
-            {notifications.length === 0 ? (
-              <p
-                className={`text-muted-foreground ${isMobile ? "text-xs py-3" : "text-sm py-4"
-                  } text-center`}
-              >
-                No new notifications
-              </p>
-            ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`bg-card ${isMobile ? "p-3" : "p-4"
-                    } rounded-lg border border-border`}
+    const formatTimestamp = (timestamp: string) => {
+        return dayjs(timestamp).format('ddd, DD MMMM, hh:mm a');
+    };
+
+    // ── Notification click ──────────────────────────────────────────────────
+    const handleNotificationClick = useCallback(async (item: NotificationFeed) => {
+        if (item.status === 'unread') {
+            try {
+                await updateNotification({ ids: [item.id], userId: item.userId });
+                // onSuccess in useNotificationUpdate already refetches the list
+            } catch (err) {
+                console.error('Failed to mark notification as read:', err);
+                // skip update, proceed to navigate
+            }
+        }
+
+        setIsOpen(false);
+
+        if (item.action.type === 'certificateUpdate') {
+            navigate('/profile');
+        } else {
+            const url = item.action.additionalInfo.contentURL ?? item.action.additionalInfo.deepLink;
+            if (url) navigate(url);
+        }
+    }, [updateNotification, navigate]);
+
+    // ── Single delete ───────────────────────────────────────────────────────
+    const handleDeleteClick = useCallback(async (e: React.MouseEvent, item: NotificationFeed) => {
+        e.stopPropagation();
+        try {
+            await deleteNotification(item);
+        } catch (err) {
+            console.error('Failed to delete notification:', err);
+        }
+    }, [deleteNotification]);
+
+    // ── Clear all ───────────────────────────────────────────────────────────
+    const handleDeleteAll = useCallback(async () => {
+        try {
+            await deleteAll(notifications);
+        } catch (err) {
+            console.error('Failed to delete all notifications:', err);
+        }
+        setIsOpen(false);
+        setTimeout(() => refetch(), 1000);
+    }, [deleteAll, notifications, refetch]);
+
+    return (
+        <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
+            <Popover.Trigger asChild>
+                <button className="profile-action-btn relative" aria-label={t("common.notifications")}>
+                    <FiBell className="profile-action-icon" aria-hidden="true" />
+                    {unreadCount > 0 && (
+                        <span className="notification-badge"></span>
+                    )}
+                </button>
+            </Popover.Trigger>
+            <Popover.Portal>
+                <Popover.Content
+                    side="bottom"
+                    align="end"
+                    sideOffset={8}
+                    collisionPadding={8}
+                    className="notification-popover-content"
                 >
-                  <p
-                    className={`${isMobile ? "text-xs" : "text-xs"
-                      } text-muted-foreground mb-1`}
-                  >
-                    {notification.date}
-                  </p>
-                  <p
-                    className={`${isMobile ? "text-xs" : "text-sm"
-                      } text-foreground`}
-                  >
-                    {notification.message}
-                  </p>
-                  <div className={`flex justify-end ${isMobile ? "mt-1" : "mt-2"}`}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={`${isMobile ? "h-6 w-6" : "h-8 w-8"
-                        } text-destructive hover:text-destructive hover:bg-destructive/10`}
-                      onClick={() => onDelete(notification.id)}
-                    >
-                      <FiTrash2 className={isMobile ? "w-3 h-3" : "w-4 h-4"} />
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+                    <Popover.Arrow className="notification-popover-arrow" width={24} height={18} />
+                    <div className="notification-popover-header">
+                        <h3 className="notification-popover-title">{t("common.notifications")}</h3>
+                    </div>
+                    <div className="notification-list">
+                        {!hasNotifications ? (
+                            <div className="notification-empty">
+                                {t("notifications.empty")}
+                            </div>
+                        ) : (
+                            groupedNotifications.map((g, index) => (
+                                <div key={g.group}>
+                                    <div className="notification-group-label-wrapper">
+                                        <span className="notification-group-label">{g.group}</span>
+                                        {index === 0 && (
+                                            <button onClick={handleDeleteAll} className="notification-delete-all-btn">
+                                                {t("notifications.deleteAll")}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {g.items.map(item => (
+                                        <div
+                                            key={item.id}
+                                            className="notification-item cursor-pointer"
+                                            onClick={() => handleNotificationClick(item)}
+                                        >
+                                            <div className="notification-item-body">
+                                                <p className="notification-item-message">{getMessage(item)}</p>
+                                                <p className="notification-item-timestamp">{formatTimestamp(item.createdOn)}</p>
+                                            </div>
+                                            <button
+                                                onClick={(e) => handleDeleteClick(e, item)}
+                                                className="notification-item-delete-btn"
+                                            >
+                                                <FiTrash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </Popover.Content>
+            </Popover.Portal>
+        </Popover.Root>
+    );
 };

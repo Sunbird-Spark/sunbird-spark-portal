@@ -5,7 +5,11 @@ import WorkspaceContentCard from "@/components/workspace/WorkspaceContentCard";
 import WorkspaceContentList from "@/components/workspace/WorkspaceContentList";
 import EmptyState from "@/components/workspace/EmptyState";
 import { Button } from "@/components/common/Button";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
+
+export interface LockedContentMap {
+  [contentId: string]: { creatorName: string };
+}
 
 interface WorkspacePageContentProps {
   showCreateModal: boolean;
@@ -18,6 +22,8 @@ interface WorkspacePageContentProps {
   hasMore: boolean;
   isError: boolean;
   error: Error | null;
+  userRole: UserRole;
+  lockedContentMap?: LockedContentMap;
   onLoadMore: () => void;
   onRetry: () => void;
   onCreateOption: (optionId: string) => void;
@@ -25,7 +31,6 @@ interface WorkspacePageContentProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
-  onSubmitReview: (id: string) => void;
 }
 
 export default function WorkspacePageContent({
@@ -46,35 +51,14 @@ export default function WorkspacePageContent({
   onEdit,
   onDelete,
   onView,
-  onSubmitReview,
+  userRole,
+  lockedContentMap = {},
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
       <div className="bg-white rounded-[1.25rem] p-6 shadow-sm border border-border">
         <CreateOptions onOptionSelect={onCreateOption} />
       </div>
-    );
-  }
-  if (activeView === 'uploads') {
-    return (
-      <EmptyState
-        title={t('noUploadsYet')}
-        description={t('uploadHere')}
-        actionLabel={t('uploadContent')}
-        onAction={() => onCreateOption('upload-content')}
-        icon={FiUpload}
-        variant="uploads"
-      />
-    );
-  }
-  if (activeView === 'collaborations') {
-    return (
-      <EmptyState
-        title={t('noCollaborations')}
-        description={t('sharedWithYou')}
-        icon={FiUsers}
-        variant="collaborations"
-      />
     );
   }
 
@@ -108,8 +92,32 @@ export default function WorkspacePageContent({
     );
   }
 
+  const pageTitleMap: Record<string, { title: string; desc: string }> = {
+    'pending-review': { title: t('workspace.noContentsToReview'), desc: t('workspace.noContentsToReviewDesc') },
+    'my-published': { title: t('workspace.noPublishedContents'), desc: t('workspace.noPublishedContentsDesc') },
+    'uploads': { title: t('workspace.emptyStates.noUploadsTitle'), desc: t('workspace.emptyStates.noUploadsDesc') },
+    'collaborations': { title: t('workspace.emptyStates.noCollaborationsTitle'), desc: t('workspace.emptyStates.noCollaborationsDesc') },
+  };
+
   // Empty state
   if (filteredItems.length === 0) {
+    if (pageTitleMap[activeView]) {
+      const { title, desc } = pageTitleMap[activeView];
+      return (
+        <EmptyState
+          title={title}
+          description={desc}
+          variant="default"
+          {...(activeView === 'uploads' ? { 
+            actionLabel: t('uploadContent'),
+            onAction: () => onCreateOption('upload-pdf'),
+            icon: FiUpload
+          } : activeView === 'collaborations' ? {
+            icon: FiUsers
+          } : {})}
+        />
+      );
+    }
     return (
       <EmptyState
         title={t('createFirst')}
@@ -130,20 +138,22 @@ export default function WorkspacePageContent({
             <WorkspaceContentCard
               key={item.id}
               item={item}
+              userRole={userRole}
+              lockInfo={lockedContentMap[item.id]}
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
-              onSubmitReview={onSubmitReview}
             />
           ))}
         </div>
       ) : (
         <WorkspaceContentList
           items={filteredItems}
+          userRole={userRole}
+          lockedContentMap={lockedContentMap}
           onEdit={onEdit}
           onDelete={onDelete}
           onView={onView}
-          onSubmitReview={onSubmitReview}
         />
       )}
 

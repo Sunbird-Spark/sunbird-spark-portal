@@ -1,7 +1,11 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Header, InputLabel, PrimaryButton, OTPInput } from './ForgotPasswordComponents';
+import { Header, InputLabel, PrimaryButton } from './ForgotPasswordComponents';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({ t: (key: string) => key }),
+}));
 
 describe('ForgotPasswordComponents', () => {
     describe('Header', () => {
@@ -41,43 +45,13 @@ describe('ForgotPasswordComponents', () => {
 
         it('shows loading text and is disabled when loading', () => {
             render(<PrimaryButton onClick={() => { }} loading>Submit</PrimaryButton>);
-            expect(screen.getByText('Please wait…')).toBeInTheDocument();
+            expect(screen.getByText('confirmDialog.pleaseWait')).toBeInTheDocument();
             expect(screen.getByRole('button')).toBeDisabled();
         });
 
         it('is disabled when disabled prop is true', () => {
             render(<PrimaryButton onClick={() => { }} disabled>Submit</PrimaryButton>);
             expect(screen.getByRole('button')).toBeDisabled();
-        });
-    });
-
-    describe('OTPInput', () => {
-        it('renders 6 inputs', () => {
-            const otp = new Array(6).fill('');
-            render(<OTPInput otp={otp} setOtp={() => { }} />);
-            const inputs = screen.getAllByRole('textbox');
-            expect(inputs).toHaveLength(6);
-        });
-
-        it('calls setOtp on change', () => {
-            const otp = new Array(6).fill('');
-            const setOtp = vi.fn();
-            render(<OTPInput otp={otp} setOtp={setOtp} />);
-            const inputs = screen.getAllByRole('textbox');
-
-            fireEvent.change(inputs[0]!, { target: { value: '1' } });
-            expect(setOtp).toHaveBeenCalled();
-        });
-
-        it('filters non-numeric values', () => {
-            const otp = new Array(6).fill('');
-            const setOtp = vi.fn();
-            render(<OTPInput otp={otp} setOtp={setOtp} />);
-            const inputs = screen.getAllByRole('textbox');
-
-            fireEvent.change(inputs[0]!, { target: { value: 'a' } });
-            // The component calls setOtp even if empty after replace but with correct value
-            expect(setOtp).not.toHaveBeenCalledWith(expect.arrayContaining(['a']));
         });
     });
 });

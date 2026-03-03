@@ -6,9 +6,10 @@ import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/Fo
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
-import { TermsAndConditionsDialog } from "@/components/common/TermsAndConditionsDialog";
+import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface Step1Props {
     firstName: string;
@@ -42,14 +43,15 @@ export const SignUpForm = ({
     isStep1Valid,
     isLoading = false
 }: Step1Props) => {
+    const { t } = useAppI18n();
     const { data: tncConfig, isSuccess: isTncConfigSuccess } = useSystemSetting('tncConfig');
     const { data: termsUrl } = useGetTncUrl(isTncConfigSuccess ? tncConfig : null);
 
     return (
     <>
         <Header
-            title="Welcome to Sunbird!"
-            subtitle="Your learning journey starts here - sign up to get started."
+            title={t("signUp.welcomeTitle")}
+            subtitle={t("signUp.welcomeSubtitle")}
         />
 
         <div className="space-y-3">
@@ -59,61 +61,61 @@ export const SignUpForm = ({
                 onClick={() => { window.location.href = "/google/auth" }}
             >
                 <FcGoogle className="w-5 h-5" />
-                Sign in with Google
+                {t("signUp.signInWithGoogle")}
             </Button>
 
             <div className="form-divider-container">
                 <div className="form-divider-line"></div>
-                <span className="form-divider-text">OR</span>
+                <span className="form-divider-text">{t("signUp.or")}</span>
                 <div className="form-divider-line"></div>
             </div>
 
             <div className="space-y-3">
                 <div className="form-group relative pb-4">
-                    <InputLabel htmlFor="firstName" required>First Name</InputLabel>
+                    <InputLabel htmlFor="firstName" required>{t("signUp.firstName")}</InputLabel>
                     <Input
                         id="firstName"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Enter First Name"
+                        placeholder={t("signUp.enterFirstName")}
                         className="login-input-field h-10 px-3"
                     />
                     {firstName && firstName.trim().length === 0 && (
                         <p className="form-error-absolute form-error-offset-8">
-                            First name is required
+                            {t("signUp.firstNameRequired")}
                         </p>
                     )}
                 </div>
 
                 <div className="form-group relative pb-4">
-                    <InputLabel htmlFor="emailOrMobile" required>Email ID / Mobile Number</InputLabel>
+                    <InputLabel htmlFor="emailOrMobile" required>{t("signUp.emailOrMobileLabel")}</InputLabel>
                     <Input
                         id="emailOrMobile"
                         value={emailOrMobile}
                         onChange={(e) => setEmailOrMobile(e.target.value)}
-                        placeholder="Enter Email ID / Mobile Number"
+                        placeholder={t("signUp.enterEmailOrMobile")}
                         className="login-input-field h-10 px-3"
                     />
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
                         <p className="form-error-absolute form-error-offset-8">
-                            Enter valid Email or 10-digit Mobile (6-9)
+                            {t("signUp.invalidEmailOrMobile")}
                         </p>
                     )}
                 </div>
 
                 <div className="form-group relative pb-4">
-                    <InputLabel htmlFor="password" required>Password</InputLabel>
+                    <InputLabel htmlFor="password" required>{t("password")}</InputLabel>
                     <div className="relative">
                         <Input
                             id="password"
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter Password"
+                            placeholder={t("signUp.enterPassword")}
                             className="login-input-field h-10 pr-10 px-3"
                         />
                         <button
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={showPassword ? t("signUp.hidePassword") : t("signUp.showPassword")}
                             type="button"
                             onClick={() => setShowPassword((v) => !v)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
@@ -127,24 +129,24 @@ export const SignUpForm = ({
                     </div>
                     {password && !PASSWORD_REGEX.test(password) && (
                         <p className="form-error-absolute form-error-offset-4">
-                            Password must be 8+ chars (upper, lower, num, special)
+                            {t("signUp.passwordRequirements")}
                         </p>
                     )}
                 </div>
 
                 <div className="form-group relative pb-4">
-                    <InputLabel htmlFor="confirmPassword" required>Confirm Password</InputLabel>
+                    <InputLabel htmlFor="confirmPassword" required>{t("signUp.confirmPassword")}</InputLabel>
                     <div className="relative">
                         <Input
                             id="confirmPassword"
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="Re-enter Password"
+                            placeholder={t("signUp.reenterPassword")}
                             className="login-input-field h-10 pr-10 px-3"
                         />
                         <button
-                            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                            aria-label={showConfirmPassword ? t("signUp.hideConfirmPassword") : t("signUp.showConfirmPassword")}
                             type="button"
                             onClick={() => setShowConfirmPassword((v) => !v)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
@@ -158,7 +160,7 @@ export const SignUpForm = ({
                     </div>
                     {confirmPassword && password !== confirmPassword && (
                         <p className="form-error-absolute form-error-offset-2">
-                            Passwords do not match
+                            {t("signUp.passwordsDoNotMatch")}
                         </p>
                     )}
                 </div>
@@ -172,23 +174,23 @@ export const SignUpForm = ({
                     />
                     <div className="text-[0.75rem] font-medium leading-none text-sunbird-charcoal">
                         <label htmlFor="terms" className="cursor-pointer">
-                            I understand &amp; {' '}
+                            {t("signUp.iUnderstand")}{' '}
                         </label>
                         {termsUrl ? (
-                            <TermsAndConditionsDialog 
+                            <TermsAndConditionsDialog
                                 termsUrl={termsUrl}
-                                title="Terms of Use"
+                                title={t("signUp.termsTitle")}
                             >
-                                <button 
+                                <button
                                     type="button"
                                     className="themed-link inline"
                                 >
-                                   accept the SUNBIRD Terms of Use
+                                   {t("signUp.acceptTermsOfUse")}
                                 </button>
                             </TermsAndConditionsDialog>
                         ) : (
                             <span className="themed-link inline">
-                                accept the SUNBIRD Terms of Use
+                                {t("signUp.acceptTermsOfUse")}
                             </span>
                         )}.
                     </div>
@@ -199,11 +201,11 @@ export const SignUpForm = ({
                     onClick={handleContinue}
                     className="mt-4 h-[3rem]"
                 >
-                    {isLoading ? 'Creating Account...' : 'Continue'}
+                    {isLoading ? t("signUp.creatingAccount") : t("continue")}
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
-                    Already have an account? <a href="/login" className="themed-link no-underline hover:underline">Login</a>
+                    {t("signUp.alreadyHaveAccount")} <a href="/login" className="themed-link no-underline hover:underline">{t("login")}</a>
                 </div>
             </div>
         </div>

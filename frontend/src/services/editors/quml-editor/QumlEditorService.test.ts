@@ -2,8 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QumlEditorService, type QuestionSetMetadata } from './';
 import appCoreService from '../../AppCoreService';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
+import userProfileService from '../../UserProfileService';
 
 vi.mock('../../userAuthInfoService/userAuthInfoService');
+vi.mock('../../UserProfileService', () => ({
+  default: { getChannel: vi.fn(), clearCache: vi.fn() },
+}));
 
 describe('QumlEditorService', () => {
   beforeEach(() => {
@@ -32,13 +36,14 @@ describe('QumlEditorService', () => {
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
     vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-123');
     vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' });
+    vi.mocked(userProfileService.getChannel).mockResolvedValue('default-channel');
     // Match the structure expected by QumlEditorService: data.response.content
-    vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({ 
-      data: { 
-        response: { 
-          content: [{ channel: 'channel-from-metadata' }] 
-        } 
-      } 
+    vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({
+      data: {
+        response: {
+          content: [{ hashTagId: 'channel-from-metadata' }]
+        }
+      }
     });
     const config = await service.createConfig(metadata);
 

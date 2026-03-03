@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { DEFAULT_LANGUAGE, LANGUAGE_MAP, SORTED_LANGUAGES } from '../configs/languages.ts';
+import { DEFAULT_LANGUAGE, LANGUAGE_MAP, LANGUAGE_STORAGE_KEY, SORTED_LANGUAGES } from '../configs/languages.ts';
 
 export type LanguageCode = keyof typeof LANGUAGE_MAP;
 
@@ -14,6 +14,11 @@ export function useAppI18n() {
   const changeLanguage = async (code: LanguageCode) => {
     if (!LANGUAGE_MAP[code]) return;
     await i18n.changeLanguage(code);
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, code);
+    } catch {
+      // localStorage unavailable
+    }
   };
 
   return {

@@ -1,17 +1,19 @@
 import React from "react";
 import { FiCheck } from "react-icons/fi";
 import { Header, PrimaryButton } from "../../pages/forgotPassword/ForgotPasswordComponents";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface Step3Props {
     handleProceed: () => void;
 }
 
 export const SignUpSuccess = ({ handleProceed }: Step3Props) => {
+    const { t } = useAppI18n();
     return (
         <div className="flex flex-col items-center">
             <Header
-                title="Congratulations!"
-                subtitle="Your account has been successfully created."
+                title={t("signUp.congratulations")}
+                subtitle={t("signUp.accountCreated")}
             />
 
             <div className="flex justify-center mb-10">
@@ -21,7 +23,7 @@ export const SignUpSuccess = ({ handleProceed }: Step3Props) => {
             </div>
 
             <PrimaryButton onClick={handleProceed}>
-                Proceed to Login
+                {t("signUp.proceedToLogin")}
             </PrimaryButton>
         </div>
     );

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EpubPlayer } from './EpubPlayer';
 import { VideoPlayer } from './VideoPlayer';
 import { PdfPlayer } from '../content-player/pdf-player/PdfPlayer';
 import { EcmlPlayer } from './EcmlPlayer';
 import QumlPlayer from './quml/QumlPlayer';
+import RatingDialog from '@/components/common/RatingDialog';
+import { useRatingTimer } from '@/hooks/useRatingTimer';
 
 // MIME type to player component mapping
 const MIME_TYPE_PLAYERS = {
@@ -12,9 +14,11 @@ const MIME_TYPE_PLAYERS = {
   'video/webm': VideoPlayer,
   'video/mp4': VideoPlayer,
   'application/pdf': PdfPlayer,
+  'application/vnd.ekstep.h5p-archive': EcmlPlayer,
   'application/vnd.ekstep.ecml-archive': EcmlPlayer,
   'application/vnd.sunbird.questionset': QumlPlayer,
   'application/vnd.sunbird.question': QumlPlayer,
+  'application/vnd.ekstep.html-archive': EcmlPlayer
 } as const;
 
 type SupportedMimeType = keyof typeof MIME_TYPE_PLAYERS;
@@ -40,36 +44,36 @@ export const ContentPlayer: React.FC<ContentPlayerProps> = ({
   onPlayerEvent,
   onTelemetryEvent,
 }) => {
-    // Get the appropriate player component for the MIME type
-  const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType];
+  const [ratingOpen, setRatingOpen] = useState(false);
+  const openRating = useCallback(() => setRatingOpen(true), []);
+  const { onContentEnd, onContentStart } = useRatingTimer(openRating);
 
-  // If no player is found for the MIME type, show unsupported content message
-  if (!PlayerComponent) {
-    return (
-      <div className="w-full h-full min-h-[600px] relative flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="text-4xl mb-4">❌</div>
-          <h3 className="text-lg font-semibold mb-2">Unsupported Content Type</h3>
-          <p className="text-gray-600">
-            No player available for MIME type: <code className="bg-gray-200 px-2 py-1 rounded">{mimeType}</code>
-          </p>
-          <p className="text-sm text-gray-500 mt-2">Content: {metadata?.name || 'Unknown'}</p>
-        </div>
-      </div>
-    );
-  }
+  const handleTelemetry = useCallback((event: any) => {
+    const eid = ((event?.eid ?? event?.data?.eid ?? event?.type) ?? '').toUpperCase();
+    if (eid === 'END') onContentEnd();
+    if (eid === 'START') onContentStart();
+    onTelemetryEvent?.(event);
+  }, [onContentEnd, onContentStart, onTelemetryEvent]);
 
-  // Render the appropriate player component
+  const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType] || EcmlPlayer;
+
   return (
-    <PlayerComponent
-      metadata={metadata}
-      mode={mode}
-      cdata={cdata}
-      contextRollup={contextRollup}
-      objectRollup={objectRollup}
-      onPlayerEvent={onPlayerEvent}
-      onTelemetryEvent={onTelemetryEvent}
-    />
+    <div className="relative">
+      <PlayerComponent
+        metadata={metadata}
+        mode={mode}
+        cdata={cdata}
+        contextRollup={contextRollup}
+        objectRollup={objectRollup}
+        onPlayerEvent={onPlayerEvent}
+        onTelemetryEvent={handleTelemetry}
+      />
+      <RatingDialog
+        open={ratingOpen}
+        onClose={() => setRatingOpen(false)}
+        playerMetadata={metadata}
+      />
+    </div>
   );
 };
 

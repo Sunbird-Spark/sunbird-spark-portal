@@ -57,7 +57,7 @@ describe('Simple Internationalization (i18n)', () => {
     
     // Should have a select dropdown (combobox role)
     expect(screen.getByRole('combobox')).toBeInTheDocument();
-    expect(screen.getByLabelText('Change language')).toBeInTheDocument();
+    expect(screen.getByLabelText('Change Language')).toBeInTheDocument();
   });
 
   it('should toggle language when SimpleLanguageSwitcher is changed', async () => {

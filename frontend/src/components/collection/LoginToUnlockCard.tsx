@@ -9,7 +9,7 @@ const LoginToUnlockCard = () => {
 
   return (
     <div
-      className="font-rubik w-full max-w-[21.875rem] min-h-[8.75rem] rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col"
+      className="font-rubik w-full min-h-[8.75rem] rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col"
       data-testid="login-to-unlock-card"
     >
       <div className="flex flex-col gap-3">

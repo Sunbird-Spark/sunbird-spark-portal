@@ -3,6 +3,7 @@ import { FiArrowRight } from "react-icons/fi";
 import CollectionCard from "../content/CollectionCard";
 import ResourceCard from "../content/ResourceCard";
 import { useContentSearch } from "@/hooks/useContent";
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface HomeRecommendedSectionProps {
     creatorIds?: string[];
@@ -10,6 +11,7 @@ interface HomeRecommendedSectionProps {
 }
 
 const HomeRecommendedSection = ({ creatorIds = [], enrolledCourseIds = [] }: HomeRecommendedSectionProps) => {
+    const { t } = useAppI18n();
     const { data, isLoading } = useContentSearch({
         request: {
             filters: {
@@ -34,10 +36,10 @@ const HomeRecommendedSection = ({ creatorIds = [], enrolledCourseIds = [] }: Hom
         return (
             <section className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
-                    <h3 className="home-section-title-large">Recommended Contents</h3>
+                    <h3 className="home-section-title-large">{t('homeComponents.recommendedContents')}</h3>
                 </div>
                 <div className="text-gray-500 text-sm py-4">
-                    No recommendations available based on your current courses.
+                    {t('noContentFound')}
                 </div>
             </section>
         );
@@ -46,7 +48,7 @@ const HomeRecommendedSection = ({ creatorIds = [], enrolledCourseIds = [] }: Hom
     return (
         <section className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-                <h3 className="home-section-title-large">Recommended Contents</h3>
+                <h3 className="home-section-title-large">{t('homeComponents.recommendedContents')}</h3>
                 <Link to="/explore" className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors">
                     <FiArrowRight className="w-5 h-5 stroke-[0.1875rem]" />
                 </Link>

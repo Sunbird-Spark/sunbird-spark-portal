@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { SignupRequest, SignupResponse } from '../types/signupTypes'
 import { UserReadResponse } from '../types/userTypes';
 import { CourseEnrollmentResponse } from '../types/TrackableCollections';
+import { UpdateProfileRequest, UpdateProfileResponse } from '../types/profileTypes';
 
 const ORG_DETAILS_FIELDS = ['orgName', 'email'] as const;
 const LICENSE_DETAILS_FIELDS = ['name', 'description', 'url'] as const;
@@ -129,11 +130,54 @@ export class UserService {
     public async userRead(
         id: string
     ): Promise<ApiResponse<UserReadResponse>> {
+        const fields = 'organisations,roles,locations,declarations,externalIds';
         return getClient().get<UserReadResponse>(
-            `/user/v5/read/${id}`
+            `/user/v5/read/${id}?fields=${encodeURIComponent(fields)}`
         );
     }
 
+    public async getUserRoles(userId: string): Promise<ApiResponse<UserReadResponse>> {
+        return getClient().get<UserReadResponse>(
+            `/user/v5/read/${userId}?fields=roles`
+        );
+    }
+
+    public async searchUserByUserName(userName: string): Promise<ApiResponse<any>> {
+        return getClient().post(
+            '/user/v3/search',
+            {
+                request: {
+                    filters: {
+                        userName: userName.trim(),
+                    }
+                },
+            }
+        );
+    }
+
+    public async searchMentors(rootOrgId: string, query: string = ''): Promise<ApiResponse<any>> {
+        return getClient().post(
+            '/user/v3/search',
+            {
+                request: {
+                    filters: {
+                        status: '1',
+                        rootOrgId,
+                        'organisations.roles': ['COURSE_MENTOR'],
+                    },
+                    query,
+                },
+            }
+        );
+    }
+public async updateProfile(
+        request: UpdateProfileRequest
+    ): Promise<ApiResponse<UpdateProfileResponse>> {
+        return getClient().patch<UpdateProfileResponse>(
+            '/user/v3/update',
+            request
+        );
+    }
     public async getUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
         const searchParams = new URLSearchParams({
             orgdetails: ORG_DETAILS_FIELDS.join(','),
@@ -142,6 +186,17 @@ export class UserService {
             batchDetails: BATCH_DETAILS_FIELDS.join(','),
         });
         const url = `/course/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
+        return getClient().get<CourseEnrollmentResponse>(url);
+    }
+
+    public async getPrivateUserEnrollments(userId: string): Promise<ApiResponse<CourseEnrollmentResponse>> {
+        const searchParams = new URLSearchParams({
+            orgdetails: ORG_DETAILS_FIELDS.join(','),
+            licenseDetails: LICENSE_DETAILS_FIELDS.join(','),
+            fields: ENROLLMENT_CONTENT_FIELDS.join(','),
+            batchDetails: BATCH_DETAILS_FIELDS.join(','),
+        });
+        const url = `/course/private/v1/user/enrollment/list/${userId}?${searchParams.toString()}`;
         return getClient().get<CourseEnrollmentResponse>(url);
     }
 }

@@ -24,7 +24,8 @@ export abstract class BaseClient implements IHttpClient {
   protected abstract _get<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   protected abstract _post<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   protected abstract _put<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
-  protected abstract _delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
+  protected abstract _patch<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>>;
+  protected abstract _delete<T>(url: string, data?: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
 
   public abstract updateHeaders(headers: HeaderOperation[]): void;
 
@@ -47,8 +48,14 @@ export abstract class BaseClient implements IHttpClient {
     return response;
   }
 
-  public async delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
-    const response = await this._delete<T>(url, headers);
+  public async patch<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+    const response = await this._patch<T>(url, data, headers);
+    this.onResponse(response);
+    return response;
+  }
+
+  public async delete<T>(url: string, data?: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+    const response = await this._delete<T>(url, data, headers);
     this.onResponse(response);
     return response;
   }

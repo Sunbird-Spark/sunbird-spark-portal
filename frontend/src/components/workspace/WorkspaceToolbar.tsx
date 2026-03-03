@@ -1,20 +1,10 @@
 import { FiPlus, FiGrid, FiList, FiChevronDown } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/common/DropdownMenu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/common/DropdownMenu";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import {
-  getCreatorSegments,
-  getReviewerSegments,
-  getSecondaryActions,
-  shouldShowContentFilters,
-} from "@/services/workspace";
+import { getCreatorSegments, getReviewerSegments, getSecondaryActions, shouldShowContentFilters} from "@/services/workspace";
 import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
 
 interface WorkspaceToolbarProps {
@@ -22,6 +12,8 @@ interface WorkspaceToolbarProps {
   onViewChange: (view: WorkspaceView) => void;
   userRole: UserRole;
   onRoleChange: (role: UserRole) => void;
+  hasCreatorRole?: boolean;
+  hasReviewerRole?: boolean;
   counts: { drafts: number; review: number; published: number; all: number; pendingReview?: number };
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
@@ -37,6 +29,8 @@ const WorkspaceToolbar = ({
   onViewChange,
   userRole,
   onRoleChange,
+  hasCreatorRole = false,
+  hasReviewerRole = false,
   counts,
   viewMode,
   onViewModeChange,
@@ -52,6 +46,7 @@ const WorkspaceToolbar = ({
     userRole === 'creator' ? getCreatorSegments(counts) : getReviewerSegments(counts);
   const showContentFilters = shouldShowContentFilters(activeView);
   const secondaryActions = getSecondaryActions(userRole);
+  const showRoleSwitcher = hasCreatorRole || hasReviewerRole;
 
   return (
     <div className="space-y-4 mb-6">
@@ -59,40 +54,44 @@ const WorkspaceToolbar = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {/* Role Switcher - Minimal */}
-          <div className="flex items-center gap-1 text-sm font-rubik">
-            <button
-              onClick={() => onRoleChange('creator')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg transition-all",
-                userRole === 'creator'
-                  ? "text-sunbird-brick font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
+          {showRoleSwitcher && (
+            <div className="flex items-center gap-1 text-sm font-rubik">
+              {hasCreatorRole && (
+                <button
+                  onClick={() => onRoleChange('creator')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg transition-all",
+                    userRole === 'creator'
+                      ? "text-sunbird-brick font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {t('workspace.roleCreator')}
+                </button>
               )}
-            >
-              Creator
-            </button>
-            <span className="text-muted-foreground">|</span>
-            <button
-              onClick={() => onRoleChange('reviewer')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg transition-all",
-                userRole === 'reviewer'
-                  ? "text-sunbird-brick font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
+              {hasCreatorRole && hasReviewerRole && (
+                <span className="text-muted-foreground">|</span>
               )}
-            >
-              Reviewer
-            </button>
-          </div>
+              {hasReviewerRole && (
+                <button
+                  onClick={() => onRoleChange('reviewer')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg transition-all",
+                    userRole === 'reviewer'
+                      ? "text-sunbird-brick font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {t('workspace.roleReviewer')}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3 sm:ml-auto">
           {userRole === 'creator' && (
-            <Button
-              onClick={onCreateClick}
-              size="lg"
-              className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik rounded-2xl shadow-lg px-6"
-            >
+            <Button onClick={onCreateClick} size="lg" className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik rounded-2xl shadow-lg px-6">
               <FiPlus className="w-5 h-5 mr-2" />
               {t('createNew')}
             </Button>
@@ -141,7 +140,7 @@ const WorkspaceToolbar = ({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="font-rubik rounded-xl">
-                    More
+                    {t('workspace.more')}
                     <FiChevronDown className="w-4 h-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -166,7 +165,7 @@ const WorkspaceToolbar = ({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="font-rubik rounded-xl">
-                      {typeFilter === 'all' ? 'All Types' : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
+                      {typeFilter === 'all' ? t('allTypes') : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
                       <FiChevronDown className="w-4 h-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -177,7 +176,7 @@ const WorkspaceToolbar = ({
                         onClick={() => onTypeFilterChange(type)}
                         className="font-rubik"
                       >
-                        {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
+                        {type === 'all' ? t('allTypes') : type.charAt(0).toUpperCase() + type.slice(1)}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -210,30 +209,41 @@ const WorkspaceToolbar = ({
         </div>
       </div>
 
-      {/* Stats Row - Quick glance */}
+      {/* Stats Row */}
       {userRole === 'creator' && showContentFilters && (
         <div className="flex items-center gap-6 px-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.published}</span> Published
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.review}</span> In Review
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-gray-400" />
-            <span className="text-sm font-rubik text-muted-foreground">
-              <span className="font-semibold text-foreground">{counts.drafts}</span> Drafts
-            </span>
-          </div>
+          {activeView === 'all' && (<>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.published}</span> {t('workspace.stats.published')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.review}</span> {t('workspace.stats.inReview')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gray-400" />
+                <span className="text-sm font-rubik text-muted-foreground">
+                  <span className="font-semibold text-foreground">{counts.drafts}</span> {t('workspace.stats.drafts')}
+                </span>
+              </div>
+          </>)}
+          {/* Section titles for secondary views */}
+          {activeView === 'uploads' && (
+            <span className="text-sm font-semibold font-rubik text-foreground">{t('workspace.stats.allUploads')}</span>
+          )}
+          {activeView === 'collaborations' && (
+            <span className="text-sm font-semibold font-rubik text-foreground">{t('workspace.stats.myCollaborations')}</span>
+          )}
           {contentCount !== undefined && (
             <span className="text-sm text-muted-foreground font-rubik ml-auto">
-              Showing {contentCount}{totalCount !== undefined && totalCount > contentCount ? ` of ${totalCount}` : ''} items
+              {totalCount !== undefined && totalCount > contentCount!
+                ? t('workspace.showingItemsOf', { count: contentCount, total: totalCount })
+                : t('workspace.showingItems', { count: contentCount })}
             </span>
           )}
         </div>

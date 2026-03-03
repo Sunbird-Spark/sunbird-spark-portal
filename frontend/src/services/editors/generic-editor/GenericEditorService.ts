@@ -11,7 +11,7 @@ import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
-import { SystemSettingService } from '../../SystemSettingService';
+import userProfileService from '../../UserProfileService';
 import {
   GENERIC_EDITOR_WINDOW_CONFIG,
   DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
@@ -42,7 +42,6 @@ declare global {
 export class GenericEditorService {
   private orgService = new OrganizationService();
   private channelService = new ChannelService();
-  private systemSettingService = new SystemSettingService();
 
   /**
    * Get the generic editor URL.
@@ -57,10 +56,10 @@ export class GenericEditorService {
    * Fetch content details for editing.
    */
   async getContentDetails(contentId: string): Promise<ContentDetails> {
-    const response = await getClient().get<{ result: { content: ContentDetails } }>(
+    const response = await getClient().get<{ content: ContentDetails }>(
       `/content/v1/read/${contentId}?mode=edit`
     );
-    return response.data.result.content;
+    return response.data.content;
   }
 
   /**
@@ -85,18 +84,18 @@ export class GenericEditorService {
       creatorInfo: JSON.stringify({ name: userName, id: userId }),
       createdBy: userId,
     };
-    const response = await getClient().post<{ result: LockContentResponse }>(
+    const response = await getClient().post<LockContentResponse>(
       '/lock/v1/create',
       { request: input }
     );
-    return response.data.result;
+    return response.data;
   }
 
   /**
    * Release content lock after editing.
    */
   async retireLock(contentId: string): Promise<void> {
-    await getClient().post('/lock/v1/retire', {
+    await getClient().delete('/lock/v1/retire', {
       request: {
         resourceId: contentId,
         resourceType: 'Content',
@@ -162,17 +161,11 @@ export class GenericEditorService {
       console.warn('Failed to get device ID for editor context');
     }
 
-    // Fetch default channel slug from system settings, then get org details
+    // Fetch channel slug from user profile, then get org details
     let channel = '';
+    let orgName = '';
     try {
-      let slug = '';
-      try {
-        const settingResponse = await this.systemSettingService.read('default_channel');
-        slug = settingResponse?.data?.response?.value || '';
-      } catch {
-        console.warn('Failed to fetch default_channel system setting');
-      }
-
+      const slug = await userProfileService.getChannel();
       const orgResponse = await this.orgService.search({
         filters: { slug, isTenant: true },
       });
@@ -180,6 +173,7 @@ export class GenericEditorService {
       if (org?.channel) {
         channel = org.hashTagId;
       }
+      orgName = org?.orgName || '';
     } catch {
       console.warn('Failed to get channel from org service');
     }
@@ -189,7 +183,7 @@ export class GenericEditorService {
     if (!framework && channel) {
       try {
         const channelResponse = await this.channelService.read(channel);
-        const defaultFramework = channelResponse?.data?.channel?.defaultFramework;
+        const defaultFramework = (channelResponse as any)?.data?.channel?.defaultFramework;
         console.warn('Fetched default framework from channel:', defaultFramework);
         if (defaultFramework) {
           framework = defaultFramework;
@@ -213,7 +207,7 @@ export class GenericEditorService {
         id: uid,
         name: 'User',
         orgIds: [],
-        organisations: {},
+        organisations: channel ? { [channel]: orgName } : {},
       },
       did,
       sid,

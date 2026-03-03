@@ -6,7 +6,19 @@ import fr from '../locales/fr.json';
 import pt from '../locales/pt.json';
 import ar from '../locales/ar.json';
 
-import { DEFAULT_LANGUAGE } from './languages';
+import { DEFAULT_LANGUAGE, LANGUAGE_MAP, LANGUAGE_STORAGE_KEY, SupportedLanguage } from './languages';
+
+function getInitialLanguage(): SupportedLanguage {
+  try {
+    const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (saved && LANGUAGE_MAP[saved as SupportedLanguage]) {
+      return saved as SupportedLanguage;
+    }
+  } catch {
+    // localStorage unavailable (e.g. SSR or private-browsing restrictions)
+  }
+  return DEFAULT_LANGUAGE;
+}
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -15,7 +27,7 @@ i18n.use(initReactI18next).init({
     pt: { translation: pt },
     ar: { translation: ar },
   },
-  lng: DEFAULT_LANGUAGE,
+  lng: getInitialLanguage(),
   fallbackLng: DEFAULT_LANGUAGE,
   interpolation: { escapeValue: false },
   react: { useSuspense: false },

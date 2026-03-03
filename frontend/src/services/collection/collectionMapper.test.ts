@@ -22,7 +22,8 @@ describe('collectionMapper', () => {
       expect(result.image).toBe('https://icon.png');
       expect(result.lessons).toBe(5);
       expect(result.audience).toEqual(['Student', 'Teacher']);
-      expect(result.modules).toEqual([]);
+      expect(result.children).toEqual([]);
+      expect(result.hierarchyRoot).toBe(content);
     });
 
     it('uses fallback "Untitled" when name is missing', () => {
@@ -58,7 +59,7 @@ describe('collectionMapper', () => {
       expect(mapToCollectionData(content).audience).toEqual([]);
     });
 
-    it('maps children to modules with lessons', () => {
+    it('maps children to tree and sets hierarchyRoot', () => {
       const content: HierarchyContentNode = {
         identifier: 'col-1',
         name: 'Course',
@@ -78,20 +79,15 @@ describe('collectionMapper', () => {
 
       const result = mapToCollectionData(content);
 
-      expect(result.modules).toHaveLength(1);
-      expect(result.modules[0]!).toEqual({
-        id: 'unit-1',
-        title: 'Unit 1',
-        subtitle: 'Course Unit',
-        lessons: [
-          { id: 'l1', title: 'Lesson 1', duration: '—', type: 'video', mimeType: 'video/mp4' },
-          { id: 'l2', title: 'Lesson 2', duration: '—', type: 'document', mimeType: 'application/pdf' },
-        ],
-      });
+      expect(result.children).toHaveLength(1);
+      expect(result.children[0]!.identifier).toBe('unit-1');
+      expect(result.children[0]!.name).toBe('Unit 1');
+      expect(result.children[0]!.children).toHaveLength(2);
       expect(result.units).toBe(1);
+      expect(result.hierarchyRoot).toBe(content);
     });
 
-    it('maps mimeType video/* to lesson type video', () => {
+    it('maps mimeType video/* to content in tree', () => {
       const content: HierarchyContentNode = {
         identifier: 'a',
         children: [
@@ -103,10 +99,10 @@ describe('collectionMapper', () => {
         ],
       };
       const result = mapToCollectionData(content);
-      expect(result.modules[0]!.lessons[0]!.type).toBe('video');
+      expect(result.children[0]!.children![0]!.mimeType).toBe('video/mp4');
     });
 
-    it('maps mimeType pdf/epub etc to lesson type document', () => {
+    it('preserves nested tree for document and other mimeTypes', () => {
       const content: HierarchyContentNode = {
         identifier: 'a',
         children: [
@@ -122,12 +118,10 @@ describe('collectionMapper', () => {
         ],
       };
       const result = mapToCollectionData(content);
-      expect(result.modules[0]!.lessons[0]!.type).toBe('document');
-      expect(result.modules[0]!.lessons[1]!.type).toBe('document');
-      expect(result.modules[0]!.lessons[2]!.type).toBe('document');
+      expect(result.children[0]!.children).toHaveLength(3);
     });
 
-    it('uses primaryCategory for module subtitle, fallback to description', () => {
+    it('uses primaryCategory and description on child nodes', () => {
       const content: HierarchyContentNode = {
         identifier: 'a',
         children: [
@@ -137,12 +131,11 @@ describe('collectionMapper', () => {
         ],
       };
       const result = mapToCollectionData(content);
-      expect(result.modules[0]!.subtitle).toBe('Unit');
-      expect(result.modules[1]!.subtitle).toBe('Desc only');
-      expect(result.modules[2]!.subtitle).toBe('');
+      expect(result.children[0]!.primaryCategory).toBe('Unit');
+      expect(result.children[1]!.description).toBe('Desc only');
     });
 
-    it('sets units from modules length when present', () => {
+    it('sets units from top-level children length', () => {
       const content: HierarchyContentNode = {
         identifier: 'a',
         children: [
@@ -154,10 +147,26 @@ describe('collectionMapper', () => {
       expect(result.units).toBe(2);
     });
 
-    it('uses units 0 when no modules', () => {
+    it('uses units 0 when no children', () => {
       const content: HierarchyContentNode = { identifier: 'a' };
       const result = mapToCollectionData(content);
       expect(result.units).toBe(0);
+    });
+
+    it('maps createdBy from root content when present', () => {
+      const content: HierarchyContentNode = {
+        identifier: 'col-1',
+        name: 'My Course',
+        createdBy: 'user-uuid-123',
+      };
+      const result = mapToCollectionData(content);
+      expect(result.createdBy).toBe('user-uuid-123');
+    });
+
+    it('leaves createdBy undefined when not present on content', () => {
+      const content: HierarchyContentNode = { identifier: 'col-1', name: 'Course' };
+      const result = mapToCollectionData(content);
+      expect(result.createdBy).toBeUndefined();
     });
   });
 });

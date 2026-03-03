@@ -1,7 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import MyLearningUpcomingBatches from './MyLearningUpcomingBatches';
 import { TrackableCollection, Batch } from '@/types/TrackableCollections';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({ t: (key: string) => key }),
+}));
 
 // Mock Course Data
 const createMockUpcomingBatch = (id: string, name: string, startDate: string, leafNodesCount: number = 5): TrackableCollection => ({
@@ -59,7 +63,7 @@ const mockBatches: TrackableCollection[] = [
 describe('MyLearningUpcomingBatches', () => {
   it('renders the title correctly', () => {
     render(<MyLearningUpcomingBatches upcomingBatches={[]} />);
-    expect(screen.getByText('Upcoming Batches')).toBeInTheDocument();
+    expect(screen.getByText('common.upcomingBatches')).toBeInTheDocument();
   });
 
   it('renders "No upcoming batches" message when list is empty', () => {

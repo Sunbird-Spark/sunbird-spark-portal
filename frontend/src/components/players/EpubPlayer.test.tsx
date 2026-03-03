@@ -11,12 +11,14 @@ const mockRemoveEventListeners = vi.fn();
 
 // Mock the EpubPlayerService
 vi.mock('../../services/players/epub', () => {
-  const MockEpubPlayerService = vi.fn(function(this: any) {
+  const MockEpubPlayerService: any = vi.fn(function(this: any) {
     this.createConfig = mockCreateConfig;
     this.createElement = mockCreateElement;
     this.attachEventListeners = mockAttachEventListeners;
     this.removeEventListeners = mockRemoveEventListeners;
   });
+  
+  MockEpubPlayerService.unloadStyles = vi.fn();
   
   return {
     EpubPlayerService: MockEpubPlayerService,

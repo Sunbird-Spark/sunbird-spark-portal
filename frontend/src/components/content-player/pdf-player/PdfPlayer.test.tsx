@@ -11,13 +11,17 @@ const mockRemoveEventListeners = vi.fn();
 
 // Mock the PdfPlayerService module
 vi.mock('../../../services/players/pdf/PdfPlayerService', () => {
+  const MockPdfPlayerService: any = vi.fn(function(this: any) {
+    this.createConfig = mockCreateConfig;
+    this.createElement = mockCreateElement;
+    this.attachEventListeners = mockAttachEventListeners;
+    this.removeEventListeners = mockRemoveEventListeners;
+  });
+  
+  MockPdfPlayerService.unloadStyles = vi.fn();
+  
   return {
-    PdfPlayerService: class {
-      createConfig = mockCreateConfig;
-      createElement = mockCreateElement;
-      attachEventListeners = mockAttachEventListeners;
-      removeEventListeners = mockRemoveEventListeners;
-    },
+    PdfPlayerService: MockPdfPlayerService,
   };
 });
 

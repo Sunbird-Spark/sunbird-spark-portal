@@ -4,46 +4,11 @@ import { MemoryRouter, useParams } from 'react-router-dom';
 import HelpCategoryDetail from './HelpCategoryDetail';
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 
-// Mock sub-components
-vi.mock("@/components/home/Header", () => ({
-    default: ({ isSidebarOpen, onToggleSidebar }: any) => (
-        <header data-testid="mock-header">
-            <button onClick={onToggleSidebar} aria-label="Toggle Sidebar">Toggle</button>
-            <div data-testid="sidebar-status">{isSidebarOpen ? "Sidebar Open" : "Sidebar Closed"}</div>
-        </header>
-    ),
-}));
-
-vi.mock("@/components/home/Footer", () => ({
-    default: () => <footer data-testid="mock-footer" />,
-}));
-
-vi.mock("@/components/home/HomeSidebar", () => ({
-    default: ({ activeNav, onNavChange, collapsed, onToggle }: any) => (
-        <div data-testid="home-sidebar" data-collapsed={collapsed}>
-            <span data-testid="active-nav">{activeNav}</span>
-            <button onClick={() => onNavChange('home')}>Change Nav</button>
-            {onToggle && (
-                <button
-                    onClick={onToggle}
-                    aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-                >
-                    Toggle Sidebar
-                </button>
-            )}
-        </div>
-    ),
-}));
-
 vi.mock("@/components/landing/Accordion", () => ({
     Accordion: ({ children }: any) => <div data-testid="accordion">{children}</div>,
     AccordionItem: ({ children }: any) => <div data-testid="accordion-item">{children}</div>,
     AccordionTrigger: ({ children }: any) => <button>{children}</button>,
     AccordionContent: ({ children }: any) => <div data-testid="accordion-content">{children}</div>,
-}));
-
-vi.mock("@/hooks/use-mobile", () => ({
-    useIsMobile: vi.fn(() => false),
 }));
 
 vi.mock("@/utils/sanitizeHtml", () => ({
@@ -59,6 +24,39 @@ vi.mock("@/hooks/useFaqData", () => ({
 // Mock system setting
 vi.mock("@/hooks/useSystemSetting", () => ({
     useSystemSetting: vi.fn(),
+}));
+
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock('@/hooks/usePermission', () => ({
+    usePermissions: () => ({
+        roles: ['PUBLIC'],
+        isLoading: false,
+        isAuthenticated: false,
+        error: null,
+        hasAnyRole: vi.fn(() => false),
+        canAccessFeature: vi.fn(() => false),
+        refetch: vi.fn(),
+    }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+    useGetTncUrl: () => ({ data: '' }),
+    useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+    default: {
+        getUserId: () => 'test-user-id',
+        isUserAuthenticated: () => true,
+        getAuthInfo: vi.fn().mockResolvedValue({
+            sid: 'test-session',
+            uid: 'test-user-id',
+            isAuthenticated: true,
+        }),
+    },
 }));
 
 const mockNavigate = vi.fn();
@@ -139,27 +137,8 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getByText('Go Back'));
+        fireEvent.click(screen.getByText('button.goBack'));
         expect(mockNavigate).toHaveBeenCalledWith('/help-support');
-    });
-
-    it('toggles sidebar collapse/expand', () => {
-        render(
-            <MemoryRouter>
-                <HelpCategoryDetail />
-            </MemoryRouter>
-        );
-
-        const sidebar = screen.getByTestId('home-sidebar');
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-
-        fireEvent.click(screen.getByRole('button', { name: "Collapse Sidebar" }));
-        expect(sidebar).toHaveAttribute('data-collapsed', 'true');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Closed');
-
-        fireEvent.click(screen.getByRole('button', { name: "Expand Sidebar" }));
-        expect(sidebar).toHaveAttribute('data-collapsed', 'false');
-        expect(screen.getByTestId('sidebar-status')).toHaveTextContent('Sidebar Open');
     });
 
     it('handles feedback submission (Yes)', async () => {
@@ -169,10 +148,10 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getAllByText('Yes')[0]!);
+        fireEvent.click(screen.getAllByText('yes')[0]!);
 
         await waitFor(() => {
-            expect(screen.getAllByText('Thank you for your feedback!')[0]!).toBeInTheDocument();
+            expect(screen.getAllByText('help.feedbackThanks')[0]!).toBeInTheDocument();
         });
     });
 
@@ -183,17 +162,17 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getAllByText('No')[0]!);
+        fireEvent.click(screen.getAllByText('no')[0]!);
 
         fireEvent.change(
-            screen.getByPlaceholderText('Type Here...'),
+            screen.getByPlaceholderText('help.typeHere'),
             { target: { value: 'Needs more details' } }
         );
 
-        fireEvent.click(screen.getByText('Submit feedback'));
+        fireEvent.click(screen.getByText('help.submitFeedback'));
 
         await waitFor(() => {
-            expect(screen.getAllByText('Thank you for your feedback!')[0]!).toBeInTheDocument();
+            expect(screen.getAllByText('help.feedbackThanks')[0]!).toBeInTheDocument();
         });
     });
 
@@ -204,15 +183,15 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        fireEvent.click(screen.getAllByText('No')[0]!);
-        expect(screen.getByText('Submit feedback')).toBeDisabled();
+        fireEvent.click(screen.getAllByText('no')[0]!);
+        expect(screen.getByText('help.submitFeedback')).toBeDisabled();
 
         fireEvent.change(
-            screen.getByPlaceholderText('Type Here...'),
+            screen.getByPlaceholderText('help.typeHere'),
             { target: { value: 'Some feedback' } }
         );
 
-        expect(screen.getByText('Submit feedback')).not.toBeDisabled();
+        expect(screen.getByText('help.submitFeedback')).not.toBeDisabled();
     });
 
     it('shows loading state', () => {
@@ -228,7 +207,7 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        expect(screen.getByText('loading')).toBeInTheDocument();
     });
 
     it('shows error state when fetch fails', () => {
@@ -244,7 +223,7 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+        expect(screen.getByText('somethingWentWrong')).toBeInTheDocument();
     });
 
     it('shows error when category is not found', () => {
@@ -256,6 +235,6 @@ describe('HelpCategoryDetail', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Category not found.')).toBeInTheDocument();
+        expect(screen.getByText('help.categoryNotFound')).toBeInTheDocument();
     });
 });

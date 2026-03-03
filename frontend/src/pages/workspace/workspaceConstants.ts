@@ -47,6 +47,10 @@ export function getStatusFilterForTab(tab: WorkspaceView): string[] {
     case 'published':
     case 'my-published':
       return ['Live', 'Unlisted'];
+    case 'uploads':
+      return ['Draft'];
+    case 'collaborations':
+      return ['Draft', 'FlagDraft', 'Review', 'Processing', 'Live', 'Unlisted', 'FlagReview'];
     case 'all':
     default:
       return [...WORKSPACE_STATUS_FILTER];

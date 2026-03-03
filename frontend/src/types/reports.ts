@@ -1,0 +1,178 @@
+// ============================================================
+// Report Module – TypeScript Interfaces & API Contracts
+// ============================================================
+
+/* ---------- Generic / Shared ---------- */
+
+export interface PaginationParams {
+  page: number;
+  pageSize: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface FilterOption {
+  label: string;
+  value: string;
+}
+
+export type SortDirection = "asc" | "desc";
+
+export interface SortConfig {
+  field: string;
+  direction: SortDirection;
+}
+
+/* ---------- MODULE 1 – Platform Reports ---------- */
+
+export interface ContentStatusCount {
+  status: "Live" | "Draft" | "Retired";
+  count: number;
+}
+
+export interface ContentByGroup {
+  group: string;
+  count: number;
+}
+
+export interface TopCreator {
+  name: string;
+  count: number;
+}
+
+export interface PopularContent {
+  id: string;
+  title: string;
+  enrollments: number;
+  views: number;
+  type: string;
+}
+
+export interface UserGrowthPoint {
+  date: string;
+  users: number;
+}
+
+export interface UserDemographic {
+  label: string;
+  count: number;
+}
+
+export interface AdminCourseSummary {
+  id: string;
+  courseName: string;
+  totalEnrolled: number;
+  totalCompleted: number;
+  completionPercent: number;
+  certificatesIssued: number;
+  lastUpdated: string;
+}
+
+/* ---------- MODULE 2 – Course Report ---------- */
+
+export interface EnrollmentCompletion {
+  label: string;
+  enrolled: number;
+  completed: number;
+}
+
+export interface ProgressBucket {
+  bucket: string;
+  count: number;
+}
+
+export interface ScoreBucket {
+  range: string;
+  count: number;
+}
+
+export interface LearnerProgress {
+  id: string;
+  learnerName: string;
+  enrollmentDate: string;
+  progressPercent: number;
+  status: "In Progress" | "Completed" | "Not Started";
+  lastActiveDate: string;
+  timeSpent: string;
+  certificateStatus: "Issued" | "Pending" | "N/A";
+}
+
+export interface AssessmentRecord {
+  id: string;
+  learnerName: string;
+  attemptNumber: number;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  passFail: "Pass" | "Fail";
+  attemptDate: string;
+}
+
+export interface CourseReportSummary {
+  courseId: string;
+  courseName: string;
+  totalEnrolled: number;
+  totalCompleted: number;
+  certificatesIssued: number;
+  avgScore: number;
+}
+
+/* ---------- MODULE 3 – User Profile Report ---------- */
+
+export interface UserReportSummary {
+  userId: string;
+  userName: string;
+  coursesCompleted: number;
+  coursesPending: number;
+  certificatesIssued: number;
+  contentCompleted: number;
+  assessmentsCompleted: number;
+}
+
+export interface UserCourseProgress {
+  id: string;
+  courseName: string;
+  progressPercent: number;
+  status: "In Progress" | "Completed" | "Not Started";
+  enrollmentDate: string;
+  lastAccessed: string;
+}
+
+export interface UserCertificate {
+  id: string;
+  courseName: string;
+  issuedDate: string;
+  certificateId: string;
+}
+
+export interface UserAssessmentHistory {
+  id: string;
+  courseName: string;
+  assessmentName: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  passFail: "Pass" | "Fail";
+  attemptDate: string;
+}
+
+/* ---------- MODULE 4 – User Consent Management ---------- */
+
+export interface UserConsentRecord {
+  id: string;
+  userId: string;
+  userName: string;
+  email: string;
+  consentStatus: "Granted" | "Pending" | "Revoked";
+  /** Org names where PII consent is currently active */
+  consumerOrgs: string[];
+  /** null when consent has never been given (Pending users) */
+  consentGivenOn: string | null;
+  lastUpdated: string;
+}

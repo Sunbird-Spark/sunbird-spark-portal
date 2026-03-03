@@ -25,6 +25,8 @@ export interface IHttpClient {
   get<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   post<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
   put<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
-  delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>>;
+  patch<T>(url: string, data: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
+  delete<T>(url: string, data?: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>>;
+
   updateHeaders(headers: HeaderOperation[]): void;
 }

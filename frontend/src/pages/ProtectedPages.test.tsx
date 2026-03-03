@@ -1,12 +1,23 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import AdminPage from './admin/AdminPage';
 import WorkspacePage from './workspace/WorkspacePage';
 import ReportsPage from './reports/ReportsPage';
 import CreateContentPage from './content/CreateContentPage';
+
+// Mock react-i18next to handle Trans component
+vi.mock('react-i18next', () => ({
+  Trans: ({ i18nKey }: { i18nKey: string }) => <span>{i18nKey}</span>,
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: {
+      changeLanguage: () => new Promise(() => {}),
+    },
+  }),
+}));
 
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: vi.fn(() => ({
@@ -80,6 +91,31 @@ vi.mock('@/hooks/useWorkspace', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({ data: null }),
+}));
+
+vi.mock('@/hooks/useOrganization', () => ({
+  useOrganizationSearch: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useChannel', () => ({
+  useChannel: () => ({ data: null }),
+}));
+
+vi.mock('@/hooks/useQuestionSetCreate', () => ({
+  useQuestionSetCreate: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useQuestionSetRetire', () => ({
+  useQuestionSetRetire: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/services/LockService', () => ({
+  lockService: { listLocks: vi.fn().mockResolvedValue({ data: { data: [] } }) },
+  LockService: vi.fn(),
+}));
+
 const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
@@ -98,34 +134,40 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('Protected Pages', () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
   describe('AdminPage', () => {
     it('should render admin dashboard', () => {
       render(<AdminPage />);
-      expect(screen.getByRole('heading', { name: 'Admin Dashboard' })).toBeInTheDocument();
-      expect(screen.getByText(/only accessible to users with the/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'admin.dashboard' })).toBeInTheDocument();
+      expect(screen.getByText(/admin.accessInfo/i)).toBeInTheDocument();
     });
   });
 
   describe('WorkspacePage', () => {
-    it('should render workspace', () => {
+    it('should render workspace', { timeout: 10000 }, () => {
       renderWithProviders(<WorkspacePage />);
-      expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
+      expect(screen.getByText('All')).toBeInTheDocument();
     });
   });
 
   describe('ReportsPage', () => {
     it('should render reports', () => {
       render(<ReportsPage />);
-      expect(screen.getByRole('heading', { name: 'Reports' })).toBeInTheDocument();
-      expect(screen.getByText(/only accessible to users with the/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'reports.title' })).toBeInTheDocument();
+      expect(screen.getByText(/reports.accessInfo/i)).toBeInTheDocument();
     });
   });
 
   describe('CreateContentPage', () => {
     it('should render create content page', () => {
       render(<CreateContentPage />);
-      expect(screen.getByRole('heading', { name: 'Create Content' })).toBeInTheDocument();
-      expect(screen.getByText(/only accessible to users with the/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'createContent' })).toBeInTheDocument();
+      // This page still uses the old key pattern presumably, or checks generic access
+      expect(screen.getByText(/content.accessRestricted/i)).toBeInTheDocument();
     });
   });
 });

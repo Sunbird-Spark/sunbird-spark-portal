@@ -18,6 +18,9 @@ describe('CollectionEditorService - Dependencies', () => {
     (CollectionEditorService as any).dependenciesLoaded = false;
     (CollectionEditorService as any).dependenciesLoading = undefined;
     (CollectionEditorService as any).stylesLoaded = false;
+    (CollectionEditorService as any).scriptLoaded = false;
+    (CollectionEditorService as any).scriptLoading = undefined;
+    (CollectionEditorService as any).fancytreeJQueryRef = undefined;
     
     // Setup mock jQuery
     const mockJQuery: any = vi.fn();
@@ -25,11 +28,24 @@ describe('CollectionEditorService - Dependencies', () => {
     mockJQuery.each = vi.fn();
     (globalThis as any).$ = mockJQuery;
     (globalThis as any).jQuery = mockJQuery;
+
+    // Prevent happy-dom from trying to fetch the actual script file during tests.
+    vi.spyOn(document.body, 'appendChild').mockImplementation(((node: Node) => {
+      if (node instanceof HTMLScriptElement && node.src.includes('sunbird-collection-editor.js')) {
+        node.onload?.(new Event('load'));
+      }
+      return node;
+    }) as typeof document.body.appendChild);
+
+    // Prevent happy-dom from attempting network fetch for stylesheet links.
+    vi.spyOn(document.head, 'appendChild').mockImplementation(((node: Node) => node) as typeof document.head.appendChild);
   });
 
   afterEach(() => {
     document.querySelectorAll('[data-collection-editor-styles]').forEach(el => el.remove());
     document.querySelectorAll('link[href*="collection-editor"]').forEach(el => el.remove());
+    document.querySelectorAll('script[data-collection-editor-script]').forEach(el => el.remove());
+    vi.restoreAllMocks();
     vi.clearAllMocks();
   });
 
@@ -53,6 +69,7 @@ describe('CollectionEditorService - Dependencies', () => {
     it('throws error if FancyTree fails to attach to jQuery', async () => {
       // FancyTree modules load but don't attach to jQuery
       (globalThis as any).$.fn.fancytree = undefined;
+      (globalThis as any).jQuery.fn.fancytree = undefined;
 
       await expect(service.initializeDependencies()).rejects.toThrow('FancyTree failed to attach to jQuery');
     });

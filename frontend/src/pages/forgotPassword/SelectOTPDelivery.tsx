@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useAppI18n } from '@/hooks/useAppI18n';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { maskIdentifier } from '@/utils/ValidationUtils';
@@ -18,6 +19,7 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
     generateOtp,
     onSuccess
 }) => {
+    const { t } = useAppI18n();
     const [selectedIdentifier, setSelectedIdentifier] = useState<OtpIdentifier | null>(null);
     const [loading, setLoading] = useState(false);
     const [errorCount, setErrorCount] = useState(0);
@@ -58,7 +60,7 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
             captchaRef.current?.reset();
 
             if (error?.response?.status === 429) {
-                const redirected = redirectWithError(error?.response?.data?.params?.errmsg || 'Too many requests. Please try again later.');
+                const redirected = redirectWithError(error?.response?.data?.params?.errmsg || t('forgotPasswordPage.errorTooManyRequests'));
                 if (!redirected) {
                     setLoading(false);
                 }
@@ -69,7 +71,7 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
             setErrorCount(newErrorCount);
 
             if (newErrorCount >= 2) {
-                const redirected = redirectWithError('Generate OTP failed. Please try again later');
+                const redirected = redirectWithError(t('forgotPasswordPage.errorGenerateOtp'));
                 if (!redirected) {
                     setLoading(false);
                 }
@@ -82,13 +84,13 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
     return (
         <>
             <Header
-                title="Forgot Password"
-                subtitle="You will receive an OTP. After you validate it, you can recover your account."
+                title={t('forgotPasswordTitle')}
+                subtitle={t('forgotPasswordPage.otpInstruction')}
             />
 
             <div className="space-y-5">
                 <p className="delivery-prompt">
-                    Where would you like to receive the OTP?
+                    {t('forgotPasswordPage.deliveryPrompt')}
                 </p>
                 {validIdentifiers.map(identifier => (
                     <div
@@ -111,7 +113,7 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
                     onClick={handleSubmit}
                     loading={loading}
                 >
-                    Get OTP
+                    {t('forgotPasswordPage.getOtp')}
                 </PrimaryButton>
 
                 {googleCaptchaSiteKey && (

@@ -3,7 +3,12 @@ import { getClient, ApiResponse } from '../lib/http-client';
 
 export interface AcceptTncRequest {
     version: string;
-    identifier: string;
+    identifier?: string;
+    tncType?: string;
+}
+
+export interface AcceptTncPayload {
+    request: AcceptTncRequest;
 }
 
 export interface AcceptTncResponse {
@@ -11,7 +16,7 @@ export interface AcceptTncResponse {
 }
 
 export class TncService {
-    private parseTncConfig(tncConfig: any): any {
+    private parseTncConfig(tncConfig: unknown): unknown {
         const value = _.get(tncConfig, 'data.response.value');
         if (!value) return null;
         if (!_.isString(value)) return value;
@@ -23,22 +28,23 @@ export class TncService {
         }
     }
 
-    getTncUrl(tncConfig: any): string {
+    getTncUrl(tncConfig: unknown): string {
         const parsed = this.parseTncConfig(tncConfig);
-        const latestVersion = _.get(parsed, 'latestVersion');
+        const latestVersion = _.get(parsed, 'latestVersion') as unknown as string;
+        if (!latestVersion) return '';
         return _.get(parsed, [latestVersion, 'url'], '');
     }
 
-    getLatestVersion(tncConfig: any): string {
+    getLatestVersion(tncConfig: unknown): string {
         return _.get(this.parseTncConfig(tncConfig), 'latestVersion', '');
     }
 
-    async acceptTnc(tncConfig: any, identifier: string): Promise<ApiResponse<AcceptTncResponse>> {
+    async acceptTnc(tncConfig: unknown, identifier?: string, tncType?: string): Promise<ApiResponse<AcceptTncResponse>> {
         const version = this.getLatestVersion(tncConfig);
-
-        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', {
-            version,
-            identifier,
-        });
+        const body: AcceptTncRequest = { version };
+        if (identifier) body.identifier = identifier;
+        if (tncType) body.tncType = tncType;
+        const payload: AcceptTncPayload = { request: body };
+        return getClient().post<AcceptTncResponse>('/user/v1/tnc/accept', payload);
     }
 }

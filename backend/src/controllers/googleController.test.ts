@@ -35,16 +35,6 @@ vi.mock('../services/googleAuthService.js', () => ({
     validateRedirectUrl: vi.fn((url) => url || '/')
 }));
 
-vi.mock('@/services/googleAuthService.js', () => ({
-    default: mockGoogleAuthService,
-    createSession: mockCreateSession,
-    validateOAuthSession: vi.fn(),
-    validateOAuthCallback: vi.fn(),
-    markSessionAsUsed: vi.fn(),
-    handleUserAuthentication: mockHandleUserAuthentication,
-    validateRedirectUrl: vi.fn((url) => url || '/')
-}));
-
 vi.mock('../services/userService.js', () => mockUserService);
 
 vi.mock('../services/kongAuthService.js', () => ({

@@ -28,6 +28,20 @@ vi.mock('../../OrganizationService', () => ({
   },
 }));
 
+vi.mock('../../UserProfileService', () => ({
+  default: { getChannel: vi.fn(), clearCache: vi.fn() },
+}));
+
+import userProfileService from '../../UserProfileService';
+
+const mockChannelRead = vi.fn();
+
+vi.mock('../../ChannelService', () => ({
+  ChannelService: class {
+    read = mockChannelRead;
+  },
+}));
+
 describe('ContentEditorService', () => {
   let service: ContentEditorService;
 
@@ -42,16 +56,24 @@ describe('ContentEditorService', () => {
 
     mockOrgSearch.mockResolvedValue({
       data: {
-        result: {
-          response: {
-            content: [
-              {
-                channel: 'test-channel-456',
-                hashTagId: 'hash-tag-123',
-                identifier: 'org-123',
-              },
-            ],
-          },
+        response: {
+          content: [
+            {
+              channel: 'test-channel-456',
+              hashTagId: 'hash-tag-123',
+              identifier: 'org-123',
+            },
+          ],
+        },
+      },
+    });
+
+    vi.mocked(userProfileService.getChannel).mockResolvedValue('test-slug');
+
+    mockChannelRead.mockResolvedValue({
+      data: {
+        channel: {
+          frameworks: [{ identifier: 'NCF' }],
         },
       },
     });
@@ -69,7 +91,7 @@ describe('ContentEditorService', () => {
       expect(result.context.sid).toBe('session-789');
       expect(result.context.uid).toBe('user-456');
       expect(result.context.did).toBe('device-123');
-      expect(result.context.channel).toBe('test-channel-456');
+      expect(result.context.channel).toBe('hash-tag-123');
       expect(result.context.contentId).toBe('do_content_123');
     });
 
@@ -103,7 +125,7 @@ describe('ContentEditorService', () => {
 
     it('should use empty fallback when channel is not found', async () => {
       mockOrgSearch.mockResolvedValue({
-        data: { result: { response: { content: [] } } },
+        data: { response: { content: [] } },
       });
 
       const result = await service.buildConfig(mockMetadata);
@@ -115,45 +137,52 @@ describe('ContentEditorService', () => {
       expect(result.context.tags).toEqual(['hash-tag-123']);
     });
 
-    it('should use channel for tags when hashTagId is not available', async () => {
+    it('should use identifier for tags when hashTagId is not available', async () => {
       mockOrgSearch.mockResolvedValue({
         data: {
-          result: {
-            response: {
-              content: [{ channel: 'my-channel', identifier: 'org-1' }],
-            },
+          response: {
+            content: [{ identifier: 'org-1' }],
           },
         },
       });
 
       const result = await service.buildConfig(mockMetadata);
-      expect(result.context.tags).toEqual(['my-channel']);
+      expect(result.context.tags).toEqual(['org-1']);
     });
 
     it('should use empty tags when no channel or hashTagId', async () => {
       mockOrgSearch.mockResolvedValue({
-        data: { result: { response: { content: [] } } },
+        data: { response: { content: [] } },
       });
 
       const result = await service.buildConfig(mockMetadata);
       expect(result.context.tags).toEqual([]);
     });
 
-    it('should use metadata framework when provided', async () => {
-      const metadataWithFramework = { ...mockMetadata, framework: 'TPD' };
-      const result = await service.buildConfig(metadataWithFramework);
+    it('should use framework from channel service', async () => {
+      mockChannelRead.mockResolvedValue({
+        data: {
+          channel: {
+            frameworks: [{ identifier: 'TPD' }],
+          },
+        },
+      });
+
+      const result = await service.buildConfig(mockMetadata);
       expect(result.context.framework).toBe('TPD');
     });
 
-    it('should default to NCF framework when not provided', async () => {
+    it('should default to empty framework when channel service fails', async () => {
+      mockChannelRead.mockRejectedValue(new Error('fail'));
+
       const result = await service.buildConfig(mockMetadata);
-      expect(result.context.framework).toBe('NCF');
+      expect(result.context.framework).toBe('');
     });
 
     it('should include editor-specific config fields', async () => {
       const result = await service.buildConfig(mockMetadata);
 
-      expect(result.config.apislug).toBe('/portal');
+      expect(result.config.apislug).toBe('/action');
       expect(result.config.pluginRepo).toBe('/content-plugins');
       expect(result.config.plugins).toHaveLength(5);
       expect(result.config.corePluginsPackaged).toBe(true);
@@ -178,7 +207,7 @@ describe('ContentEditorService', () => {
 
     it('should set contextRollup l1 to channel', async () => {
       const result = await service.buildConfig(mockMetadata);
-      expect(result.context.contextRollup).toEqual({ l1: 'test-channel-456' });
+      expect(result.context.contextRollup).toEqual({ l1: 'hash-tag-123' });
     });
 
     it('should set defaultLicense to CC BY 4.0', async () => {

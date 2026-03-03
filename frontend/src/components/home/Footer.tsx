@@ -1,9 +1,18 @@
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useGetTncUrl } from "@/hooks/useTnc";
 
 const Footer = () => {
   const { t } = useAppI18n();
+
+  const { data: tncConfigRes } = useSystemSetting("tncConfig");
+  const { data: privacyConfigRes } = useSystemSetting("privacyPolicyConfig");
+
+  const { data: termsUrl } = useGetTncUrl(tncConfigRes ?? null);
+  const { data: privacyUrl } = useGetTncUrl(privacyConfigRes ?? null);
 
   const productLinks = [
     { label: t("courses"), href: "/explore" },
@@ -25,7 +34,7 @@ const Footer = () => {
             <Link to="/" className="inline-block">
               <img
                 src={sunbirdLogo}
-                alt="Sunbird"
+                alt={t("onboarding.altSunbird")}
                 className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-0 lg:pr-[5rem]"
               />
             </Link>
@@ -78,18 +87,30 @@ const Footer = () => {
       <div className="bg-black">
         <div className="w-full py-4 px-6 md:px-12 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
           <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-4 md:gap-6 text-[0.8125rem] lg:pr-[6.5rem]">
-            <a
-              href="#"
-              className="hover:opacity-80 transition-opacity text-sunbird-brick"
-            >
-              {t("footer.terms")}
-            </a>
-            <a
-              href="#"
-              className="hover:opacity-80 transition-opacity text-sunbird-brick"
-            >
-              {t("footer.privacy")}
-            </a>
+            {termsUrl ? (
+              <TermsAndConditionsDialog termsUrl={termsUrl} title={t("footer.terms")}>
+                <button
+                  type="button"
+                  className="hover:opacity-80 transition-opacity text-sunbird-brick"
+                >
+                  {t("footer.terms")}
+                </button>
+              </TermsAndConditionsDialog>
+            ) : (
+              <span className="text-sunbird-brick">{t("footer.terms")}</span>
+            )}
+            {(privacyUrl || termsUrl) ? (
+              <TermsAndConditionsDialog termsUrl={(privacyUrl || termsUrl)!} title={t("footer.privacy")}>
+                <button
+                  type="button"
+                  className="hover:opacity-80 transition-opacity text-sunbird-brick"
+                >
+                  {t("footer.privacy")}
+                </button>
+              </TermsAndConditionsDialog>
+            ) : (
+              <span className="text-sunbird-brick">{t("footer.privacy")}</span>
+            )}
           </div>
         </div>
       </div>

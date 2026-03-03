@@ -1,4 +1,3 @@
-
 import 'express-session';
 
 /**
@@ -6,7 +5,7 @@ import 'express-session';
  * This allows TypeScript to recognize custom properties stored in req.session.
  */
 declare module 'express-session' {
-     
+
     interface SessionData {
         userId?: number | string;
         username?: string;

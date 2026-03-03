@@ -3,6 +3,18 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import CreateContentModal from './CreateContentModal';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'workspace.createContent': 'Create content',
+        'workspace.closeDialog': 'Close dialog',
+      };
+      return map[key] || key;
+    },
+  }),
+}));
+
 vi.mock('@/components/common/Button', () => ({
   Button: ({ children, onClick, ...props }: React.ComponentProps<'button'>) => (
     <button type="button" onClick={onClick} {...props}>
@@ -33,10 +45,10 @@ describe('CreateContentModal', () => {
     render(
       <CreateContentModal open onClose={vi.fn()} onOptionSelect={vi.fn()} />
     );
-    expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Create Content' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Create content/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Create content/i })).toBeInTheDocument();
     expect(screen.getByTestId('create-options')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Close dialog' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Close dialog/i })).toBeInTheDocument();
   });
 
   it('calls onClose when close button is clicked', () => {

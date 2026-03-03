@@ -41,7 +41,7 @@ describe('ContentEditor', () => {
     },
     config: {
       baseURL: '',
-      apislug: '/portal',
+      apislug: '/action',
       build_number: '1.0',
       pluginRepo: '/content-plugins',
       plugins: [],
@@ -68,7 +68,7 @@ describe('ContentEditor', () => {
     expect(iframe).toBeInTheDocument();
     expect(iframe?.id).toBe('contentEditor');
     expect(iframe?.name).toBe('contentEditor');
-    expect(iframe?.title).toBe('Content Editor');
+    expect(iframe?.title).toBe('editors.contentEditor');
   });
 
   it('should call buildConfig with metadata', async () => {

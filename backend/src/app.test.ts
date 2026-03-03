@@ -153,6 +153,55 @@ describe('Express App', () => {
     expect(response.text).toBe('mock-knowlg-response');
   });
 
+  it('should handle /action/object/category/definition/* via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .get('/action/object/category/definition/v1/read')
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /action/user/v1/search via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/action/user/v1/search')
+      .send({ request: {} })
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /action/collection/v1/export/:id via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/action/collection/v1/export/do_123')
+      .send({ request: {} })
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /action/collection/v1/import/:id via kongProxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/action/collection/v1/import/do_123')
+      .send({ request: {} })
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
+  it('should handle /action/data/v3/telemetry via kong proxy', async () => {
+    const { app } = await import('./app.js');
+    const response = await request(app)
+      .post('/action/data/v3/telemetry')
+      .send({ events: [] })
+      .expect(200);
+
+    expect(response.text).toBe('mock-kong-response');
+  });
+
   it('should handle POST requests to /action/* routes', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
