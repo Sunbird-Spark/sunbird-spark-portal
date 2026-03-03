@@ -246,7 +246,13 @@
     "attemptsLabel": "Tentativa {{current}} de {{max}}",
     "forceSync": "Sincronizar progresso agora",
     "forceSyncSuccess": "Você pode ver o progresso atualizado do curso em até 24 horas",
-    "forceSyncCooldown": "Aguarde antes de sincronizar novamente."
+    "forceSyncCooldown": "Aguarde antes de sincronizar novamente.",
+    "leaveCourse": "Sair do curso",
+    "leaveCourseTitle": "Cancelamento de inscrição na turma",
+    "leaveCourseDescription": "Deseja cancelar sua inscrição nesta turma?",
+    "leaveCourseError": "Não foi possível sair do curso. Tente novamente.",
+    "enrolSuccess": "Inscrição no curso para esta turma realizada com sucesso",
+    "unenrolSuccess": "Cancelamento de inscrição da turma realizado com sucesso"
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",

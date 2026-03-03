@@ -246,7 +246,13 @@
     "attemptsLabel": "Attempt {{current}} of {{max}}",
     "forceSync": "Sync progress now",
     "forceSyncSuccess": "You can view your updated course progress within 24 hours",
-    "forceSyncCooldown": "Please wait before syncing again."
+    "forceSyncCooldown": "Please wait before syncing again.",
+    "leaveCourse": "Leave course",
+    "leaveCourseTitle": "Batch Unenrolment",
+    "leaveCourseDescription": "Do you want to unenrol from this batch?",
+    "leaveCourseError": "Unable to leave the course. Please try again.",
+    "enrolSuccess": "Course enroled for this batch successfully",
+    "unenrolSuccess": "User unenroled from the batch successfully"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
