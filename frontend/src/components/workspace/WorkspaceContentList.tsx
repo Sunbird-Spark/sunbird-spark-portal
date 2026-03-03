@@ -53,7 +53,7 @@ const WorkspaceContentList = ({
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
           const lockInfo = lockedContentMap[item.id];
 
-          const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole, item.contentStatus);
+          const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
           const isLocked = !!lockInfo;
           const hasActions = showView || canEdit || showDelete;
 

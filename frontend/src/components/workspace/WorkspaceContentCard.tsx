@@ -42,7 +42,7 @@ const WorkspaceContentCard = ({
   const status = statusConfig[item.status];
   const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
 
-  const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole, item.contentStatus);
+  const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
   const isLocked = !!lockInfo;
   const hasActions = showView || canEdit || showDelete;
 

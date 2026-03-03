@@ -79,7 +79,7 @@ export const getStatusConfig = (t: (key: string) => string): Record<
     bg: 'bg-sunbird-sunflower/20',
     text: 'text-sunbird-brick',
     dot: 'bg-sunbird-ginger',
-  }
+  },
 });
 
 // Legacy export for backward compatibility
