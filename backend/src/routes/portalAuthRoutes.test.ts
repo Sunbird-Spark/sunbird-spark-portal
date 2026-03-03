@@ -117,7 +117,7 @@ describe('PortalAuthRoutes Integration', () => {
             const app = await setupApp();
             const res = await request(app).get('/portal/auth/callback');
             expect(res.status).toBe(302);
-            expect(res.header.location).toBe('/portal/login');
+            expect(res.header.location).toBe('/portal/login?prompt=none');
         });
 
         it('should exchange code and redirect to home on success', async () => {
