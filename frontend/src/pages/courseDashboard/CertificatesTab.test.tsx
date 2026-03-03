@@ -33,14 +33,14 @@ describe('CertificatesTab', () => {
   });
 
   it('renders search form and hint toggle', () => {
-    render(<CertificatesTab collectionId="col_123" />);
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
     expect(screen.getByTestId('unique-id-input')).toBeInTheDocument();
     expect(screen.getByTestId('search-btn')).toBeDisabled();
     expect(screen.getByTestId('hint-toggle')).toBeInTheDocument();
   });
 
   it('toggles hint window', () => {
-    render(<CertificatesTab collectionId="col_123" />);
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
     expect(screen.queryByTestId('hint-box')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('hint-toggle'));
@@ -51,7 +51,7 @@ describe('CertificatesTab', () => {
   });
 
   it('calls search endpoint on valid submit', () => {
-    render(<CertificatesTab collectionId="col_123" />);
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
     const input = screen.getByTestId('unique-id-input');
     const form = screen.getByTestId('cert-search-form');
 
@@ -72,7 +72,7 @@ describe('CertificatesTab', () => {
       reset: mockResetSearch,
     });
 
-    render(<CertificatesTab collectionId="col_123" />);
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
     expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 
@@ -99,7 +99,7 @@ describe('CertificatesTab', () => {
       reset: mockResetSearch,
     });
 
-    render(<CertificatesTab collectionId="col_123" />);
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
     
     expect(screen.getByTestId('results-table-wrapper')).toBeInTheDocument();
     expect(screen.getByText('User One')).toBeInTheDocument();
@@ -166,7 +166,7 @@ describe('CertificatesTab', () => {
       reset: vi.fn(),
     });
 
-    render(<CertificatesTab collectionId="col_123" />);
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
     expect(screen.getByText('certificatesTab.no')).toBeInTheDocument();
     expect(screen.getByTestId('reissue-btn-0')).toBeDisabled();
     expect(screen.getByTestId('reissue-btn-0')).toHaveAttribute('title', 'certificatesTab.criteriaMustBeMet');
@@ -195,8 +195,64 @@ describe('CertificatesTab', () => {
       reset: vi.fn(),
     });
 
-    render(<CertificatesTab collectionId="col_123" />);
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
     expect(screen.getByText('certificatesTab.yes')).toBeInTheDocument();
     expect(screen.getByTestId('reissue-btn-0')).not.toBeDisabled();
+  });
+
+  it('hides reissue button and shows view-only text when isOwner is false', () => {
+    const mockResult = {
+      data: {
+        response: {
+          userId: 'u1',
+          userName: 'User One',
+          courses: {
+            batches: [
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [{ name: 'Cert A' }] },
+            ],
+          },
+        },
+      }
+    };
+
+    (useCertUserSearch as any).mockReturnValue({
+      mutate: mockSearchUser,
+      data: mockResult,
+      isPending: false,
+      error: null,
+      reset: mockResetSearch,
+    });
+
+    render(<CertificatesTab collectionId="col_123" isOwner={false} />);
+    expect(screen.queryByTestId('reissue-btn-0')).not.toBeInTheDocument();
+    expect(screen.getByTestId('reissue-view-only-0')).toBeInTheDocument();
+  });
+
+  it('shows reissue button when isOwner is true and criteria is met', () => {
+    const mockResult = {
+      data: {
+        response: {
+          userId: 'u1',
+          userName: 'User One',
+          courses: {
+            batches: [
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [{ name: 'Cert A' }] },
+            ],
+          },
+        },
+      }
+    };
+
+    (useCertUserSearch as any).mockReturnValue({
+      mutate: mockSearchUser,
+      data: mockResult,
+      isPending: false,
+      error: null,
+      reset: mockResetSearch,
+    });
+
+    render(<CertificatesTab collectionId="col_123" isOwner={true} />);
+    expect(screen.getByTestId('reissue-btn-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('reissue-view-only-0')).not.toBeInTheDocument();
   });
 });
