@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, Mock, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
@@ -27,8 +27,18 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
+const { mockMutateAsync } = vi.hoisted(() => ({
+  mockMutateAsync: vi.fn().mockResolvedValue({}),
+}));
+
 // Mock dependencies
 vi.mock('@/hooks/useForm');
+vi.mock('@/hooks/useUpdateProfile', () => ({
+  useUpdateProfile: () => ({ mutateAsync: mockMutateAsync, isPending: false }),
+}));
+vi.mock('@/hooks/useUser', () => ({
+  useCurrentUserId: () => ({ data: 'mock-user-id' }),
+}));
 // Mock assets
 vi.mock('../../../src/assets/sunbird-logo.svg', () => ({
   default: 'sunbird-logo.svg',
@@ -88,12 +98,6 @@ const renderWithRouter = (component: React.ReactElement) => {
 describe('Onboarding Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.runOnlyPendingTimers();
-    vi.useRealTimers();
   });
 
   it('renders loading spinner while fetching data', () => {
@@ -297,13 +301,10 @@ describe('Onboarding Component', () => {
     // Should show loading state
     expect(screen.getByText('Saving...')).toBeInTheDocument();
 
-    // Fast-forward timers and run all pending timers
-    await vi.advanceTimersByTimeAsync(1000);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/home');
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home'));
   });
 
-  it('allows skipping onboarding', () => {
+  it('allows skipping onboarding', async () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -321,7 +322,7 @@ describe('Onboarding Component', () => {
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
     fireEvent.click(skipButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/home');
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home'));
   });
 
   it('disables skip button while submitting', () => {
