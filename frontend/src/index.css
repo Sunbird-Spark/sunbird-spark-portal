@@ -1201,4 +1201,17 @@
     width: 100% !important;
     height: auto !important;
   }
+
+  /* Ensure control bar is always visible and interactive when video is paused */
+  [data-video-player-wrapper] .vjs-control-bar {
+    z-index: 3 !important;
+    pointer-events: auto !important;
+  }
+
+  [data-video-player-wrapper] .vjs-paused .vjs-control-bar,
+  [data-video-player-wrapper] .vjs-paused.vjs-user-inactive .vjs-control-bar {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
 }
