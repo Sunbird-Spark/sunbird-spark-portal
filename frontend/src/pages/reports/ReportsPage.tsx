@@ -1,9 +1,13 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import useImpression from '@/hooks/useImpression';
 
 const ReportsPage: React.FC = () => {
   const { t } = useAppI18n();
+
+  useImpression({ type: 'view', pageid: 'reports' });
+
   return (
     <div>
       <div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from './useBatch';
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
+import { useTelemetry } from './useTelemetry';
 import {
   getEnrollmentForCollection,
   getLeafContentIds,
@@ -22,6 +23,7 @@ export function useCollectionEnrollment(
 ) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const telemetry = useTelemetry();
   const { data: enrollmentsResponse, refetch: refetchEnrollments } = useUserEnrolledCollections({
     enabled: isAuthenticated,
   });
@@ -110,6 +112,14 @@ export function useCollectionEnrollment(
       await enrol({ courseId: collectionId, userId: uid, batchId: selectedBatchId });
       await queryClient.invalidateQueries({ queryKey: ['userEnrollments'] });
       refetchEnrollments();
+      telemetry.audit({
+        edata: {
+          props: ['enrollment'],
+          prevstate: 'NotEnrolled',
+          state: 'Enrolled',
+        },
+        object: { id: collectionId, type: 'Collection' },
+      });
       navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
     } catch {
       // Error is exposed via joinErrorMutation

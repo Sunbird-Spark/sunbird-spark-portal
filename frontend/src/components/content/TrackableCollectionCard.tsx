@@ -13,6 +13,9 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
     <Link
       to={`/collection/${course.collectionId}`}
       className="block"
+      data-edataid="trackable-collection-card-click"
+      data-objectid={course.collectionId}
+      data-objecttype="Collection"
     >
       <div
         className="flex gap-6 p-6 bg-white rounded-2xl border border-sunbird-gray-f3 hover:shadow-md transition-shadow"

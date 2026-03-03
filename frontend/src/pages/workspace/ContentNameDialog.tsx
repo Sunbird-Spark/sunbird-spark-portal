@@ -15,6 +15,7 @@ interface ContentNameDialogProps {
   isLoading?: boolean;
   optionTitle?: string;
   optionId?: string;
+  submitButtonProps?: Record<string, any>;
 }
 
 export default function ContentNameDialog({
@@ -24,6 +25,7 @@ export default function ContentNameDialog({
   isLoading = false,
   optionTitle,
   optionId,
+  submitButtonProps,
 }: ContentNameDialogProps) {
   const { t } = useAppI18n();
   const [name, setName] = useState("");
@@ -156,6 +158,8 @@ export default function ContentNameDialog({
               size="sm"
               disabled={!canSubmit || isLoading}
               className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
+              {...submitButtonProps}
+              data-cdata={submitButtonProps?.['data-cdata'] ? JSON.stringify([...JSON.parse(submitButtonProps['data-cdata']), { id: name, type: 'ContentName' }]) : JSON.stringify([{ id: name, type: 'ContentName' }])}
             >
               {isLoading ? t('workspace.creating') : t('create')}
             </Button>

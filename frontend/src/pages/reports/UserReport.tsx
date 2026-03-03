@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import ReportLayout from "@/components/reports/ReportLayout";
+import useImpression from "@/hooks/useImpression";
 import SummaryCard from "@/components/reports/SummaryCard";
 import DataTableWrapper, { type Column } from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
@@ -21,6 +22,7 @@ const statusColor: Record<string, string> = {
 
 const UserReport = () => {
   const { userId } = useParams();
+  useImpression({ type: 'view', pageid: 'user-report', object: { id: userId || '', type: 'User' } });
   const summary = userReportSummary;
 
   const courseColumns: Column<UserCourseProgress>[] = [

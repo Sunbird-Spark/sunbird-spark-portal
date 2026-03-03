@@ -12,6 +12,7 @@ import {
 } from '@/components/common/Select';
 import { cn } from '@/lib/utils';
 import CourseReportContent from '@/components/reports/CourseReportContent';
+import useInteract from '@/hooks/useInteract';
 
 const STATUS_STYLES: Record<string, string> = {
   Upcoming: "bg-yellow-100 text-yellow-700",
@@ -26,6 +27,7 @@ interface BatchesTabProps {
 const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const { data: batches, isLoading, isError, error } = useBatchListForCreator(collectionId);
+  const { interact } = useInteract();
 
   if (isLoading) {
     return (
@@ -50,6 +52,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   const batchList: Batch[] = batches ?? [];
 
   const handleBatchSelect = (batchId: string) => {
+    interact({ id: 'course-dashboard-batch-select', type: 'CLICK', pageid: 'course-dashboard', cdata: [{ id: batchId, type: 'Batch' }] });
     setSelectedBatchId(batchId);
   };
 

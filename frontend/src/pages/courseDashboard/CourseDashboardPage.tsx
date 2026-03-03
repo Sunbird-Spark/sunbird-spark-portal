@@ -8,6 +8,8 @@ import { useCollection } from '@/hooks/useCollection';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import useImpression from '@/hooks/useImpression';
+import useInteract from '@/hooks/useInteract';
 import './courseDashboard.css';
 
 type DashboardTab = 'batches' | 'certificates';
@@ -21,6 +23,9 @@ const CourseDashboardPage: React.FC = () => {
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
 
+  useImpression({ type: 'view', pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
+  const { interact } = useInteract();
+
   // Redirect to default tab if the tab param is invalid
   useEffect(() => {
     if (tab && !VALID_TABS.includes(tab as DashboardTab)) {
@@ -33,6 +38,7 @@ const CourseDashboardPage: React.FC = () => {
     : 'batches';
 
   const switchTab = (t: DashboardTab) => {
+    interact({ id: 'course-dashboard-tab-switch', type: 'CLICK', pageid: 'course-dashboard', cdata: [{ id: t, type: 'Tab' }] });
     navigate(`/collection/${collectionId}/dashboard/${t}`);
   };
 

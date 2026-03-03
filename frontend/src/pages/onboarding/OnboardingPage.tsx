@@ -9,15 +9,22 @@ import { useFormRead } from "@/hooks/useForm";
 import { OnboardingFormData } from '@/types/formTypes';
 import { computeTotalSteps } from './utils';
 import { ProgressIndicator, OptionChip } from './OnboardingComponents';
+import useImpression from '@/hooks/useImpression';
+import { useTelemetry } from '@/hooks/useTelemetry';
+
 const Onboarding = () => {
   const { t } = useAppI18n();
   const navigate = useNavigate();
+  const telemetry = useTelemetry();
   const [screenHistory, setScreenHistory] = useState<string[]>([]);
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  useImpression({ type: 'view', pageid: 'onboarding' });
+
   const { data: formApiData, isLoading, isError } = useFormRead({
     request: {
       type: "user",subType: "onboarding",action: "workflow",component: "portal",
@@ -93,12 +100,27 @@ const Onboarding = () => {
       };
     });
     console.log('[Onboarding] Formatted selections:', formattedSelections);
+    telemetry.audit({
+      edata: {
+        props: ['onboardingSelections'],
+        state: 'Submitted',
+      },
+    });
+    telemetry.log({
+      edata: {
+        type: 'api',
+        level: 'INFO',
+        message: 'Onboarding selections saved',
+        pageid: 'onboarding',
+      },
+    });
     timeoutRef.current = setTimeout(() => {setIsSubmitting(false);
       navigate("/home");
     }, 1000);
   };
   const handleSelect = (fieldId: string) => {
     if (!currentScreenId) return;
+
     setSelections(prev => ({ ...prev, [currentScreenId]: fieldId }));
     setOtherTexts(prev => ({ ...prev, [currentScreenId]: "" }));
     // TODO: Remove this temporary logging once backend storage is configured
@@ -194,6 +216,9 @@ const Onboarding = () => {
                       <OptionChip
                         key={field.id} field={field} isSelected={selectedFieldId === field.id}
                         onClick={() => handleSelect(field.id)}
+                        data-edataid={`onboarding-select-${field.id}`}
+                        data-pageid="onboarding"
+                        data-cdata={JSON.stringify([{ id: currentScreenId || '', type: 'ScreenId' }])}
                       />
                     ))}
                   </div>

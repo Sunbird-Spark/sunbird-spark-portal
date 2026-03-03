@@ -9,6 +9,7 @@ import HomeDashboardContent from "@/components/home/HomeDashboardContent";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
 
 import "./home.css";
 
@@ -25,6 +26,8 @@ const Home = () => {
     const enrolledCount = enrolledCollections?.data?.courses?.length ?? 0;
     const [activeNav, setActiveNav] = useState("home");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen, toggleSidebar } = useSidebarState(!isMobile);
+
+    useImpression({ type: 'view', pageid: 'home' });
 
     return (
         <div className="home-container">

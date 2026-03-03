@@ -20,6 +20,8 @@ import { useSearchParams } from 'react-router-dom';
 import "./home/home.css";
 import { useSidebarState } from '../hooks/useSidebarState';
 import { useFormRead } from '../hooks/useForm';
+import useImpression from '../hooks/useImpression';
+import useInteract from '../hooks/useInteract';
 
 // Keys are the API `code` field (e.g. "primaryCategory", "mimeType"), values are selected option values
 export type FilterState = Record<string, string[]>;
@@ -28,6 +30,7 @@ const Explore = () => {
   const { t } = useAppI18n();
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { interact } = useInteract();
 
   // Initialize filters from URL on mount — every param except 'q' is treated as a filter code.
   // e.g. ?primaryCategory=Course&primaryCategory=Content+Playlist&mimeType=video%2Fmp4
@@ -48,6 +51,13 @@ const Explore = () => {
   const [activeNav, setActiveNav] = useState("explore");
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
 
+  const handleFilterChange: React.Dispatch<React.SetStateAction<FilterState>> = (value) => {
+    const resolved = typeof value === 'function' ? value(filters) : value;
+    interact({ id: 'explore-filter-change', type: 'CLICK', pageid: 'explore-page',
+      cdata: Object.keys(resolved).map((k) => ({ id: k, type: 'Filter' })) });
+    setFilters(value);
+  };
+
   // Same query key as ExploreFilters — React Query returns cached data, no extra API call.
   // Used here only to control whether the aside is rendered (scenario 3: hide layout when empty/errored).
   const { data: formData, isLoading: isFiltersLoading, isError: isFiltersError } = useFormRead({
@@ -60,6 +70,8 @@ const Explore = () => {
     // For Explore page, we always want it closed by default when mounting
     setIsSidebarOpen(false);
   }, [setIsSidebarOpen]);
+
+  useImpression({ type: 'view', pageid: 'explore-page' });
 
   // Sync search state when navigating here from the search modal
   useEffect(() => {
@@ -74,7 +86,15 @@ const Explore = () => {
       return;
     }
     const next = new URLSearchParams();
-    if (debouncedSearchQuery) next.set('q', debouncedSearchQuery);
+    if (debouncedSearchQuery) {
+      next.set('q', debouncedSearchQuery);
+      interact({
+        id: 'explore-search',
+        type: 'search',
+        pageid: 'explore-page',
+        cdata: [{ type: 'Query', id: debouncedSearchQuery }],
+      });
+    }
     Object.entries(filters).forEach(([code, values]) => {
       values.forEach((value) => next.append(code, value));
     });
@@ -118,7 +138,7 @@ const Explore = () => {
               {/* Filters Sidebar — hidden if form API errored or returned no groups (scenario 3) */}
               {showFilters && (
                 <aside className="w-full md:w-[21.875rem] shrink-0">
-                  <ExploreFilters filters={filters} setFilters={setFilters} />
+                  <ExploreFilters filters={filters} setFilters={handleFilterChange} />
                 </aside>
               )}
 
@@ -166,6 +186,8 @@ const Explore = () => {
                         <DropdownMenuContent align="end" className="w-[8.75rem] bg-white z-50">
                           <DropdownMenuItem
                             className="cursor-pointer hover:bg-gray-50"
+                            data-edataid="sort-by-newest"
+                            data-pageid="explore-page"
                             onClick={() => {
                               setSortBy({ lastUpdatedOn: 'desc' });
                               setSortLabelKey('newest');
@@ -175,6 +197,8 @@ const Explore = () => {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="cursor-pointer hover:bg-gray-50"
+                            data-edataid="sort-by-oldest"
+                            data-pageid="explore-page"
                             onClick={() => {
                               setSortBy({ lastUpdatedOn: 'asc' });
                               setSortLabelKey('oldest');

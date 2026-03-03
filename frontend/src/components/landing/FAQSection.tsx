@@ -65,7 +65,12 @@ const FAQSection = () => {
                                 value={`item-${index}`}
                                 className="rounded-[1rem] py-[1.1875rem] px-[1.25rem] border border-border/50 bg-white shadow-sm w-full"
                             >
-                                <AccordionTrigger className="py-0 text-left font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-foreground hover:no-underline">
+                                <AccordionTrigger
+                                    className="py-0 text-left font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-foreground hover:no-underline"
+                                    data-edataid="faq-expand"
+                                    data-pageid="faq"
+                                    data-cdata={JSON.stringify([{ id: faq.title, type: 'FAQ' }])}
+                                >
                                     {faq.title}
                                 </AccordionTrigger>
                                 <AccordionContent className="!pb-0 pt-5 font-rubik font-normal text-[1rem] leading-[1.625rem] tracking-normal text-[#757575]">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FiPlus, FiRefreshCw, FiLoader, FiCalendar } from "react-icons/fi";
+import useInteract from "@/hooks/useInteract";
 import CreateBatchModal from "./CreateBatchModal";
 import AddCertificateModal from "./AddCertificateModal";
 import { useBatchListForCreator } from "@/hooks/useBatch";
@@ -24,6 +25,7 @@ import { TabBar, ActiveTab } from "./BatchTabBar";
 
 const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const { toast } = useToast();
+  const { interact } = useInteract();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editBatch, setEditBatch]   = useState<Batch | null>(null);
@@ -95,6 +97,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
               disabled={isFetching}
               title="Refresh batch list"
               className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              data-edataid="batch-refresh"
+              data-pageid="collection-detail"
             >
               <FiRefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
             </button>
@@ -103,6 +107,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
               onClick={() => setIsCreateModalOpen(true)}
               title="Create batch"
               className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors"
+              data-edataid="batch-create-open"
+              data-pageid="collection-detail"
             >
               <FiPlus className="w-4 h-4" />
             </button>
@@ -130,6 +136,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                       ? "bg-sunbird-brick/40 cursor-not-allowed"
                       : "bg-sunbird-brick hover:bg-opacity-90"
                   )}
+                  data-edataid="batch-reviewer-tnc-accept"
+                  data-pageid="collection-detail"
                 >
                   {acceptTncMutation.isPending && <FiLoader className="w-4 h-4 animate-spin" />}
                   {acceptTncMutation.isPending ? "Accepting…" : "Accept & Continue"}
@@ -141,7 +149,10 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
         {/* ── Tabs ── */}
         {!isLoading && !isError && (
-          <TabBar activeTab={activeTab} counts={counts} onChange={setActiveTab} />
+          <TabBar activeTab={activeTab} counts={counts} onChange={(tab) => {
+            interact({ id: 'batch-tab-switch', type: 'CLICK', pageid: 'collection-detail', cdata: [{ id: tab, type: 'BatchTab' }] });
+            setActiveTab(tab);
+          }} />
         )}
 
         {/* ── Loading ── */}

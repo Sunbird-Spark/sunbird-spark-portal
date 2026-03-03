@@ -8,6 +8,8 @@ import { ContentService } from '@/services/ContentService';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
+import useImpression from '@/hooks/useImpression';
+import useInteract from '@/hooks/useInteract';
 
 const COLLECTION_EDITOR_READ_FIELDS = [
   'identifier',
@@ -32,9 +34,12 @@ const CollectionEditorPage = () => {
   const { t } = useAppI18n();
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
+  const { interact } = useInteract();
   const [metadata, setMetadata] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  useImpression({ type: 'view', pageid: 'collection-editor', object: { id: contentId || '', type: 'Content' } });
 
   useEffect(() => {
     setLoadError(null);
@@ -72,14 +77,23 @@ const CollectionEditorPage = () => {
 
 
   const handleEditorEvent = useCallback(async (event: CollectionEditorEvent) => {
+    interact({
+      id: 'collection-editor-event',
+      type: 'OTHER',
+      pageid: 'collection-editor',
+      cdata: [{ id: contentId || '', type: 'ContentId' }],
+    });
+
     const closeEditor = (event.data as any)?.close;
     if (closeEditor) {
       await retireLock();
       navigate('/workspace');
     }
-  }, [navigate, retireLock]);
+  }, [navigate, retireLock, interact, contentId]);
 
-  const handleTelemetryEvent = useCallback((_event: any) => {}, []);
+  const handleTelemetryEvent = useCallback((_event: any) => {
+      // Direct raw telemetry feed from iframe (optional mapping)
+  }, []);
 
   if (loading || isLocking) {
     return <PageLoader message={isLocking ? t('content.acquiringLock') : t('content.loadingEditor')} />;

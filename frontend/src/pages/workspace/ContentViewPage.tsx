@@ -1,5 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import useImpression from '@/hooks/useImpression';
+import { useTelemetry } from '@/hooks/useTelemetry';
 import { useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
@@ -52,6 +54,8 @@ const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t } = useAppI18n();
+  useImpression({ type: 'view', pageid: isReviewMode ? 'workspace-content-review' : 'workspace-content-view', object: { id: contentId || '', type: 'Content' } });
+  const telemetry = useTelemetry();
   const [dialogMode, setDialogMode] = useState<'publish' | 'request-changes' | null>(null);
   const [dialogFormFields, setDialogFormFields] = useState<CheckListFormField[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -168,6 +172,10 @@ const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
       }
 
       closeDialog();
+      telemetry.audit({
+        edata: { props: ['status'], prevstate: 'Review', state: 'Live' },
+        object: { id: contentId || '', type: 'Content' },
+      });
       toast({ title: t('workspace.review.publishedTitle'), description: t('workspace.review.publishedDescription'), variant: 'success' });
       clearWorkspaceQueries();
       navigate('/workspace');
@@ -185,6 +193,10 @@ const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
     try {
       await contentService.contentReject(contentId, rejectReasons, rejectComment);
       closeDialog();
+      telemetry.audit({
+        edata: { props: ['status'], prevstate: 'Review', state: 'Draft' },
+        object: { id: contentId || '', type: 'Content' },
+      });
       toast({ title: t('workspace.review.changesRequestedTitle'), description: t('workspace.review.changesRequestedDescription'), variant: 'success' });
       clearWorkspaceQueries();
       navigate('/workspace');

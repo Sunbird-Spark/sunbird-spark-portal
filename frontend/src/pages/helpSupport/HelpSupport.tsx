@@ -11,11 +11,8 @@ import { useSidebarState } from "@/hooks/useSidebarState";
 import { useHelpFaqData } from "@/hooks/useFaqData";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAppI18n } from "@/hooks/useAppI18n";
-
-import {
-    buildHelpCategories,
-} from "../../services/HelpSupportService";
-
+import useImpression from "@/hooks/useImpression";
+import { buildHelpCategories } from "../../services/HelpSupportService";
 import "../profile/profile.css";
 import ReportIssueDialog from "@/components/help/ReportIssueDialog";
 
@@ -23,6 +20,9 @@ const HelpSupport = () => {
     const { t } = useAppI18n();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
+
+    useImpression({ type: 'view', pageid: 'help-support' });
+
     const [activeNav, setActiveNav] = useState("help");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
     const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
@@ -90,6 +90,8 @@ const HelpSupport = () => {
                             <button
                                 onClick={() => setIsReportIssueOpen(true)}
                                 aria-label={t('help.reportAppIssue')}
+                                data-edataid="help-report-issue-open"
+                                data-pageid="help-support"
                                 className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
                                 {t('help.reportIssueBtn')}
                             </button>
@@ -118,6 +120,10 @@ const HelpSupport = () => {
                                         key={cat.slug}
                                         onClick={() => navigate(`/help-support/${cat.slug}`)}
                                         className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-[0.125rem_0.125rem_1.25rem_rgba(0,0,0,0.09)] hover:shadow-md transition-shadow cursor-pointer"
+                                        data-edataid="help-category-click"
+                                        data-pageid="help-support"
+                                        data-objectid={cat.slug}
+                                        data-objecttype="HelpCategory"
                                     >
                                         <div className="w-[2rem] h-[0.75rem] bg-sunbird-ginger ml-[1.875rem]" />
                                         <div className="px-[1.25rem] pb-[1.25rem] pt-[1.5rem] flex flex-col flex-1">

@@ -9,9 +9,12 @@ import DynamicContentSection from "@/components/landing/DynamicContentSection";
 import DynamicCategorySection from "@/components/landing/DynamicCategorySection";
 import DynamicResourceSection from "@/components/landing/DynamicResourceSection";
 import { FormSection } from "@/types/formTypes";
+import useImpression from "@/hooks/useImpression";
 
 const Index = () => {
   const { t } = useAppI18n();
+  useImpression({ type: 'view', pageid: 'landing' });
+
   const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {
       type: "page",

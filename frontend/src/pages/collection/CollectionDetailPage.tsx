@@ -21,6 +21,9 @@ import CollectionContentArea from "@/components/collection/CollectionContentArea
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
+import { useTelemetry } from "@/hooks/useTelemetry";
+import useImpression from "@/hooks/useImpression";
+import useInteract from "@/hooks/useInteract";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
@@ -29,8 +32,21 @@ const CollectionDetailPage = () => {
   const { isAuthenticated } = usePermissions();
   const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
+  const telemetry = useTelemetry();
+  const { interact } = useInteract();
   const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
   const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
+
+  useEffect(() => {
+    telemetry.impression({
+      edata: {
+        type: 'view',
+        pageid: 'collection-detail',
+        uri: window.location.pathname,
+      },
+      context: { cdata: [{ id: collectionId || '', type: 'CollectionId' }] }
+    });
+  }, [telemetry, collectionId]);
 
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const collectionData = collectionDataFromApi ?? null;
@@ -147,6 +163,7 @@ const CollectionDetailPage = () => {
   );
 
   const toggleModule = (moduleId: string) => {
+    interact({ id: 'collection-module-toggle', type: 'CLICK', pageid: 'collection-detail', cdata: [{ id: moduleId, type: 'CollectionUnit' }] });
     setExpandedModules((prev) =>
       prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
     );
@@ -168,6 +185,8 @@ const CollectionDetailPage = () => {
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
+          data-edataid="collection-go-back"
+          data-pageid="collection-detail"
         >
           <FiArrowLeft className="w-4 h-4" />
           {t("button.goBack")}

@@ -85,15 +85,22 @@ function ExpandedUnitContent({
         }
 
         return (
-          <ContentRow
+          <div
             key={node.identifier}
-            node={node}
-            href={getContentHref(node, collectionId, batchId)}
-            contentBlocked={contentBlocked}
-            isActive={activeContentId === node.identifier}
-            contentStatusMap={contentStatusMap}
-            t={t}
-          />
+            data-edataid="collection-sidebar-content-click"
+            data-pageid="collection-detail"
+            data-objectid={node.identifier}
+            data-objecttype="Content"
+          >
+            <ContentRow
+              node={node}
+              href={getContentHref(node, collectionId, batchId)}
+              contentBlocked={contentBlocked}
+              isActive={activeContentId === node.identifier}
+              contentStatusMap={contentStatusMap}
+              t={t}
+            />
+          </div>
         );
       })}
     </div>

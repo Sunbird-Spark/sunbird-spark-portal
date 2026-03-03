@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useImpression from "@/hooks/useImpression";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
 import Footer from "@/components/home/Footer";
@@ -33,6 +35,9 @@ const HelpCategoryDetail = () => {
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
     const [feedback, setFeedback] = useState<Record<number, "yes" | "no" | "submitted" | null>>({});
     const [feedbackText, setFeedbackText] = useState<Record<number, string>>({});
+
+    useImpression({ type: 'view', pageid: 'help-category-detail', object: { id: categoryId || '', type: 'HelpCategory' } });
+    const telemetry = useTelemetry();
     const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
@@ -71,11 +76,29 @@ const HelpCategoryDetail = () => {
 
     const handleFeedback = (index: number, value: "yes" | "no") => {
         setFeedback((prev) => ({ ...prev, [index]: value }));
+        const faqQuestion = sanitizedFaqs[index]?.question || String(index);
+        telemetry.feedback({
+            edata: {
+                contentid: faqQuestion,
+                rating: value === 'yes' ? 1 : 0,
+                comments: '',
+            },
+        });
     };
 
     const handleSubmitFeedback = async (index: number) => {
         const text = feedbackText[index] ?? "";
-
+        const faqQuestion = sanitizedFaqs[index]?.question || String(index);
+        telemetry.feedback({
+            edata: {
+                contentid: faqQuestion,
+                rating: feedback[index] === 'yes' ? 1 : 0,
+                comments: text,
+            },
+        });
+        telemetry.log({
+            edata: { type: 'api', level: 'INFO', message: 'FAQ feedback submitted', pageid: 'help-category-detail' },
+        });
         setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
         setFeedbackText((prev) => ({ ...prev, [index]: "" }));
     };
@@ -117,6 +140,8 @@ const HelpCategoryDetail = () => {
                             <button
                                 onClick={() => navigate("/help-support")}
                                 className="flex items-center gap-[0.5rem] text-sunbird-brick font-medium font-['Rubik'] text-sm hover:opacity-80 transition-opacity"
+                                data-edataid="help-category-go-back"
+                                data-pageid="help-category-detail"
                             >
                                 <FaArrowLeftLong className="w-[1rem] h-[1rem]" />
                                 {t('button.goBack')}
@@ -124,7 +149,9 @@ const HelpCategoryDetail = () => {
                             <button
                                 onClick={() => setIsReportIssueOpen(true)}
                                 className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
-                                aria-label={t('help.reportContentIssue')}>
+                                aria-label={t('help.reportContentIssue')}
+                                data-edataid="help-report-issue-open"
+                                data-pageid="help-category-detail">
                                 {t('help.reportIssueBtn')}
                             </button>
                         </div>
@@ -167,7 +194,12 @@ const HelpCategoryDetail = () => {
                                             value={`item-${index}`}
                                             className="rounded-[0.625rem] bg-sunbird-base-white border-b-0"
                                         >
-                                            <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick">
+                                            <AccordionTrigger
+                                                className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick"
+                                                data-edataid="help-faq-expand"
+                                                data-pageid="help-category-detail"
+                                                data-cdata={JSON.stringify([{ id: categoryId || '', type: 'HelpCategory' }, { id: String(index), type: 'FAQIndex' }])}
+                                            >
                                                 {faq.question}
                                             </AccordionTrigger>
                                             <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
@@ -196,6 +228,8 @@ const HelpCategoryDetail = () => {
                                                                 <button
                                                                     onClick={() => handleSubmitFeedback(index)}
                                                                     disabled={!feedbackText[index]?.trim()}
+                                                                    data-edataid="faq-feedback-submit"
+                                                                    data-pageid="help-category-detail"
                                                                     className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
                                                                         ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
                                                                         : "bg-sunbird-brick hover:opacity-90"
@@ -211,12 +245,18 @@ const HelpCategoryDetail = () => {
                                                             <button
                                                                 onClick={() => handleFeedback(index, "no")}
                                                                 className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                                data-edataid="faq-feedback-no"
+                                                                data-pageid="help-category-detail"
+                                                                data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
                                                             >
                                                                 {t('no')}
                                                             </button>
                                                             <button
                                                                 onClick={() => handleFeedback(index, "yes")}
                                                                 className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                                data-edataid="faq-feedback-yes"
+                                                                data-pageid="help-category-detail"
+                                                                data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
                                                             >
                                                                 {t('yes')}
                                                             </button>

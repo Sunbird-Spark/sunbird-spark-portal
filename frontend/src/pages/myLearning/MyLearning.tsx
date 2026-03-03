@@ -13,6 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
 
 import "./mylearning.css";
 
@@ -21,6 +22,8 @@ const MyLearning = () => {
   const isMobile = useIsMobile();
   const [activeNav, setActiveNav] = useState("learning");
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
+
+  useImpression({ type: 'view', pageid: 'my-learning' });
 
   const { data, isLoading, error } = useUserEnrolledCollections();
   const courses = data?.data?.courses || [];

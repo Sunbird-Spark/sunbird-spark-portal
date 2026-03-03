@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -11,12 +11,17 @@ import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 const ContentPlayerPage = () => {
   const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
-  
+
+  useImpression({ type: 'view', pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
+  const telemetry = useTelemetry();
+
   const { data, isLoading, error } = useContentRead(contentId || '');
   const contentData = data?.data?.content;
   
@@ -67,6 +72,15 @@ const ContentPlayerPage = () => {
     onTelemetryEvent: (event) => {
       // Handle telemetry events for analytics
       console.log('Content telemetry event:', event);
+      if (event?.eid === 'ASSESS') {
+        telemetry.audit({
+          edata: {
+            props: ['score'],
+            state: event?.edata?.pass ? 'Passed' : 'Failed',
+          },
+          object: { id: contentId || '', type: 'Content' },
+        });
+      }
     },
   });
 

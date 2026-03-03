@@ -12,6 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
 import "./profile.css";
 
 const Profile = () => {
@@ -19,6 +20,8 @@ const Profile = () => {
     const isMobile = useIsMobile();
     const [activeNav, setActiveNav] = useState("profile");
     const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
+
+    useImpression({ type: 'view', pageid: 'profile' });
 
     const { data: userResponse, isLoading, isError } = useUserRead();
     const userData = userResponse?.data?.response;

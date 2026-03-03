@@ -32,7 +32,13 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
   };
 
   return (
-    <Link to={`/content/${item.identifier}`} className="group resource-card-link">
+    <Link
+      to={`/content/${item.identifier}`}
+      className="group resource-card-link"
+      data-edataid="resource-card-click"
+      data-objectid={item.identifier}
+      data-objecttype="Content"
+    >
       <div className="resource-card-container">
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">

@@ -9,7 +9,13 @@ interface ContentCardProps {
 
 const CollectionCard = ({ item }: ContentCardProps) => {
   return (
-    <Link to={`/collection/${item.identifier}`} className="related-resource-card-link">
+    <Link
+      to={`/collection/${item.identifier}`}
+      className="related-resource-card-link"
+      data-edataid="collection-card-click"
+      data-objectid={item.identifier}
+      data-objecttype="Collection"
+    >
       <div className="group related-resource-card-container">
         {/* Image with padding */}
         <div className="related-resource-card-image-wrapper">
