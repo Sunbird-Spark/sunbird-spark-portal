@@ -89,14 +89,14 @@ router.get('/auth/callback',
         // Validate required session parameters and authorization code
         if (!req.query.code) {
             logger.warn('Callback received without authorization code. Restarting login flow.');
-            return res.redirect('/portal/login');
+            return res.redirect('/portal/login?prompt=none');
         }
 
         if (!req.session.oidcCodeVerifier || !req.session.oidcState) {
-            logger.warn('Callback received without PKCE verifier or state in session. Restarting login flow.');
+            logger.warn('Callback received without PKCE verifier or state in session. Attempting silent re-auth.');
             delete req.session.oidcCodeVerifier;
             delete req.session.oidcState;
-            return res.redirect('/portal/login');
+            return res.redirect('/portal/login?prompt=none');
         }
 
         try {
