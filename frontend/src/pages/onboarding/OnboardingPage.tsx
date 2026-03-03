@@ -50,12 +50,7 @@ const Onboarding = () => {
     setIsSubmitting(true);
     try {
       await updateProfile.mutateAsync({
-        request: {
-          userId,
-          framework: {
-            onboardingDetails: ['skipped']
-          }
-        }
+        request: { userId, framework: { onboardingDetails: ['skipped'] } }
       });
     } finally {
       setIsSubmitting(false);
