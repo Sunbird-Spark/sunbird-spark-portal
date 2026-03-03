@@ -6,6 +6,7 @@ import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
+import { getClient } from '../../../lib/http-client';
 
 export class CollectionEditorService {
     private eventHandlers = new WeakMap<HTMLElement, { editor: (event: Event) => void; telemetry?: (event: Event) => void }>();
@@ -156,16 +157,25 @@ export class CollectionEditorService {
         }
 
         let framework = '';
+        let channelData: any = {};
         if (channel) {
             try {
                 const channelResponse = await this.channelService.read(channel);
-                const frameworks = (channelResponse as any)?.data?.channel?.frameworks;
+                channelData = (channelResponse as any)?.data?.channel || {};
+                const frameworks = channelData?.frameworks;
                 if (Array.isArray(frameworks) && frameworks.length > 0) {
                     framework = frameworks[0]?.identifier || '';
                 }
             } catch (error) {
                 console.warn('Failed to fetch channel framework:', error);
             }
+        }
+
+        let hierarchyConfig: Record<string, any> = {};
+        try {
+            hierarchyConfig = await this.fetchHierarchyConfig(metadata, channel, channelData);
+        } catch (error) {
+            console.warn('Failed to fetch hierarchy config:', error);
         }
 
         const pdata = await appCoreService.getPData();
@@ -197,9 +207,72 @@ export class CollectionEditorService {
                 mode: contextProps?.mode || 'edit',
                 objectType: contextProps?.objectType || 'Collection',
                 primaryCategory: contextProps?.primaryCategory || 'Content Playlist',
+                ...hierarchyConfig,
             },
             metadata,
         };
+    }
+
+    private async fetchHierarchyConfig(
+        metadata: any,
+        channel: string,
+        channelData: any
+    ): Promise<Record<string, any>> {
+        const objectType = metadata.mimeType === 'application/vnd.sunbird.questionset' ? 'QuestionSet' : 'Collection';
+        const primaryCategory = metadata.primaryCategory || '';
+
+        if (!channel || !primaryCategory) {
+            return {};
+        }
+
+        const categoryResponse = await getClient().get('/object/category/definition/v1/read/obj-cat:course_collection_all?fields=objectMetadata,forms');
+
+        const config = (categoryResponse as any)?.data?.objectCategoryDefinition?.objectMetadata?.config;
+        if (!config) {
+            return {};
+        }
+
+        const hierarchyConfig: Record<string, any> = { ...(config?.sourcingSettings?.collection || {}) };
+
+        if (hierarchyConfig.children && Object.keys(hierarchyConfig.children).length > 0) {
+            hierarchyConfig.children = this.getPrimaryCategoryData(hierarchyConfig.children, channelData);
+        }
+
+        if (hierarchyConfig.hierarchy && Object.keys(hierarchyConfig.hierarchy).length > 0) {
+            Object.values(hierarchyConfig.hierarchy as Record<string, any>).forEach((hierarchyValue: any) => {
+                if (hierarchyValue?.children) {
+                    hierarchyValue.children = this.getPrimaryCategoryData(hierarchyValue.children, channelData);
+                }
+            });
+        }
+
+        return hierarchyConfig;
+    }
+
+    private getPrimaryCategoryData(
+        childrenData: Record<string, any>,
+        channelData: any
+    ): Record<string, any> {
+        const result = { ...childrenData };
+        Object.keys(result).forEach((key) => {
+            if (!result[key] || (Array.isArray(result[key]) && result[key].length === 0)) {
+                switch (key) {
+                    case 'Question':
+                        result[key] = channelData.questionPrimaryCategories || [];
+                        break;
+                    case 'Content':
+                        result[key] = channelData.contentPrimaryCategories || [];
+                        break;
+                    case 'Collection':
+                        result[key] = channelData.collectionPrimaryCategories || [];
+                        break;
+                    case 'QuestionSet':
+                        result[key] = channelData.questionsetPrimaryCategories || [];
+                        break;
+                }
+            }
+        });
+        return result;
     }
 
     loadAssets(): void {
