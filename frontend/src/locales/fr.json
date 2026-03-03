@@ -853,8 +853,17 @@
     "filter": "Filtre"
   },
   "tncPopup": {
+    "title": "Termes et Conditions Mis à Jour",
+    "description": "Veuillez consulter et accepter les termes et conditions mis à jour",
     "checkboxLabel": "J'ai lu et j'accepte les Termes et Conditions",
+    "accept": "Accepter",
     "accepting": "Acceptation...",
+    "acceptedTitle": "Termes Acceptés",
+    "acceptedDescription": "Merci d'avoir accepté les termes et conditions mis à jour.",
+    "errorTitle": "Échec de l'Acceptation",
+    "errorDescription": "Échec de l'acceptation des termes et conditions. Veuillez réessayer.",
+    "refreshErrorTitle": "Échec de l'Actualisation",
+    "refreshErrorDescription": "Échec de l'actualisation du profil utilisateur. Veuillez réessayer.",
     "continue": "Continuer",
     "acceptAndContinue": "Accepter et Continuer"
   },

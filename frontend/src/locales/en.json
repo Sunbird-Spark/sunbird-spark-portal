@@ -729,7 +729,11 @@
     "acceptedTitle": "Terms Accepted",
     "acceptedDescription": "Thank you for accepting the updated terms and conditions.",
     "errorTitle": "Acceptance Failed",
-    "errorDescription": "Failed to accept terms and conditions. Please try again."
+    "errorDescription": "Failed to accept terms and conditions. Please try again.",
+    "refreshErrorTitle": "Refresh Failed",
+    "refreshErrorDescription": "Failed to refresh user profile. Please try again.",
+    "continue": "Continue",
+    "acceptAndContinue": "Accept & Continue"
   },
   "workspaceCard": {
     "locked": "Locked",
@@ -857,12 +861,7 @@
     "myLearning": "My Learning",
     "filter": "Filter"
   },
-  "tncPopup": {
-    "checkboxLabel": "I have read and accept the Terms and Conditions",
-    "accepting": "Accepting...",
-    "continue": "Continue",
-    "acceptAndContinue": "Accept & Continue"
-  },
+
   "trackableCollection": {
     "completed": "Completed"
   },

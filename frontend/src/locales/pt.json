@@ -848,8 +848,17 @@
     "filter": "Filtro"
   },
   "tncPopup": {
+    "title": "Termos e Condições Atualizados",
+    "description": "Por favor, revise e aceite os termos e condições atualizados",
     "checkboxLabel": "Li e aceito os Termos e Condições",
+    "accept": "Aceitar",
     "accepting": "Aceitando...",
+    "acceptedTitle": "Termos Aceitos",
+    "acceptedDescription": "Obrigado por aceitar os termos e condições atualizados.",
+    "errorTitle": "Falha na Aceitação",
+    "errorDescription": "Falha ao aceitar os termos e condições. Por favor, tente novamente.",
+    "refreshErrorTitle": "Falha na Atualização",
+    "refreshErrorDescription": "Falha ao atualizar o perfil do usuário. Por favor, tente novamente.",
     "continue": "Continuar",
     "acceptAndContinue": "Aceitar e Continuar"
   },
