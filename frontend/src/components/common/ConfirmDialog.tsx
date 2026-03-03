@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/common/Button";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
@@ -44,13 +45,13 @@ export default function ConfirmDialog({
 
   if (!open) return null;
 
-  const confirmClassName =
+  const confirmButtonClass =
     confirmVariant === "destructive"
-      ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-      : "bg-sunbird-brick hover:bg-sunbird-brick/90 text-white";
+      ? "bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik"
+      : "bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik";
 
-  return (
-    <div
+      return createPortal(
+        <div
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={handleClose}
       role="dialog"
@@ -58,10 +59,10 @@ export default function ConfirmDialog({
       aria-label={title}
     >
       <div
-        className="bg-white rounded-2xl max-w-md w-full p-6"
+        className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-sunbird-gray-f3"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold font-rubik text-foreground mb-2">
+        <h2 className="text-xl font-semibold font-rubik text-sunbird-obsidian mb-2">
           {title}
         </h2>
         <p className="text-sm text-muted-foreground mb-6 font-rubik">
@@ -70,10 +71,11 @@ export default function ConfirmDialog({
         <div className="flex justify-end gap-3">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={handleClose}
             disabled={isLoading}
+            className="font-rubik border-sunbird-gray-d0 text-sunbird-obsidian hover:bg-sunbird-gray-f3 hover:text-sunbird-obsidian"
             data-edataid="confirm-dialog-cancel"
           >
             {t("cancel")}
@@ -83,13 +85,14 @@ export default function ConfirmDialog({
             size="sm"
             onClick={onConfirm}
             disabled={isLoading}
-            className={confirmClassName}
+            className={confirmButtonClass}
             {...confirmButtonProps}
           >
             {isLoading ? t("confirmDialog.pleaseWait") : resolvedConfirmLabel}
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

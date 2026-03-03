@@ -17,6 +17,7 @@ const learnerBatchService = new LearnerBatchService();
 
 // ─── Params ──────────────────────────────────────────────────────────────────
 export type EnrolParams = { courseId: string; userId: string; batchId: string };
+export type UnenrolParams = EnrolParams;
 
 // ─── useBatchListForCreator ─────────────────────────────────────────────────────
 /**
@@ -104,6 +105,14 @@ export const useEnrol = (): UseMutationResult<ApiResponse<unknown>, Error, Enrol
   return useMutation({
     mutationFn: ({ courseId, userId, batchId }: EnrolParams) =>
       learnerBatchService.enrol(courseId, userId, batchId),
+  });
+};
+
+// ─── useUnenrol ───────────────────────────────────────────────────────────────
+export const useUnenrol = (): UseMutationResult<ApiResponse<unknown>, Error, UnenrolParams> => {
+  return useMutation({
+    mutationFn: ({ courseId, userId, batchId }: UnenrolParams) =>
+      learnerBatchService.unenrol(courseId, userId, batchId),
   });
 };
 

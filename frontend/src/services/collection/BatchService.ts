@@ -24,6 +24,12 @@ export class BatchService {
     });
   }
 
+  public unenrol(courseId: string, userId: string, batchId: string): Promise<ApiResponse<unknown>> {
+    return getClient().post('/course/v1/unenrol', {
+      request: { courseId, userId, batchId },
+    });
+  }
+
   public contentStateRead(
     request: ContentStateReadRequest
   ): Promise<ApiResponse<ContentStateReadResponse>> {

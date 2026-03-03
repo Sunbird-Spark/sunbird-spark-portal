@@ -24,6 +24,9 @@ vi.mock('@/components/collection/LoginToUnlockCard', () => ({
 vi.mock('@/components/collection/CourseProgressCard', () => ({
   default: () => <div data-testid="course-progress-card" />
 }));
+vi.mock('@/components/collection/CourseProgressSection', () => ({
+  default: () => <div data-testid="course-progress-card" />
+}));
 vi.mock('@/components/collection/AvailableBatchesCard', () => ({
   default: () => <div data-testid="available-batches-card" />
 }));

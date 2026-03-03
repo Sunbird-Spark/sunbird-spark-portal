@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from './useBatch';
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
+import { useAppI18n } from './useAppI18n';
+import { useToast } from './useToast';
 import { useTelemetry } from './useTelemetry';
 import {
   getEnrollmentForCollection,
@@ -24,6 +26,8 @@ export function useCollectionEnrollment(
 ) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useAppI18n();
+  const { toast } = useToast();
   const telemetry = useTelemetry();
   const { data: enrollmentsResponse, refetch: refetchEnrollments } = useUserEnrolledCollections({
     enabled: isAuthenticated,
@@ -92,6 +96,7 @@ export function useCollectionEnrollment(
     isEnrolledInCurrentBatch ? effectiveBatchId : undefined,
     { enabled: isEnrolledInCurrentBatch && !!effectiveBatchId },
   );
+  const batchEnrollmentType = batchReadResponse?.data?.response?.enrollmentType;
   const firstCertPreviewUrl = useMemo(
     () => getFirstCertPreviewUrl(batchReadResponse?.data?.response?.cert_templates),
     [batchReadResponse?.data?.response?.cert_templates],
@@ -115,6 +120,11 @@ export function useCollectionEnrollment(
       await enrol({ courseId: collectionId, userId: uid, batchId: selectedBatchId });
       await queryClient.invalidateQueries({ queryKey: ['userEnrollments'] });
       refetchEnrollments();
+      toast({
+        title: t('success'),
+        description: t('courseDetails.enrolSuccess'),
+        variant: 'default',
+      });
       telemetry.audit({
         edata: {
           props: ['enrollment'],
@@ -146,5 +156,6 @@ export function useCollectionEnrollment(
     joinLoading,
     joinError,
     handleJoinCourse,
+    batchEnrollmentType,
   };
 }
