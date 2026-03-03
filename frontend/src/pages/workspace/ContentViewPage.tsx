@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -26,28 +26,18 @@ const contentService = new ContentService();
 const formService = new FormService();
 const WORKSPACE_QUERY_KEYS = ['workspace-counts', 'workspace-content'];
 
-const ReviewPageLayout = ({ children }: { children: React.ReactNode }) => (
+const ReviewPageLayout = ({ children }: { children: ReactNode }) => (
   <div className="content-review-background">
-    <Header />
-    <main className="content-review-container">{children}</main>
-    <Footer />
+    <Header /><main className="content-review-container">{children}</main><Footer />
   </div>
 );
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return null;
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-interface ContentViewPageProps {
-  mode: 'view' | 'review';
-}
-
-const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
+const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
   const { contentId } = useParams();
   const isReviewMode = mode === 'review';
   const navigate = useNavigate();
@@ -70,32 +60,12 @@ const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
     contentData?.mimeType === 'application/vnd.sunbird.question';
   const isEcmlContent = contentData?.mimeType === 'application/vnd.ekstep.ecml-archive';
 
-  const {
-    data: qumlData,
-    isLoading: isQumlLoading,
-    error: qumlError,
-  } = useQumlContent(contentId || '', { enabled: isQumlContent });
-
+  const { data: qumlData, isLoading: isQumlLoading, error: qumlError } = useQumlContent(contentId || '', { enabled: isQumlContent });
   const playerMetadata = isQumlContent ? qumlData : contentData;
   const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
   const playerError = isQumlContent ? qumlError : error;
-
-  const onPlayerEvent = useCallback((event: any) => {
-    console.log('Review player event:', event);
-  }, []);
-
-  const onTelemetryEvent = useCallback((event: any) => {
-    console.log('Review telemetry event:', event);
-  }, []);
-
-  const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
-    onPlayerEvent,
-    onTelemetryEvent,
-  });
-
-  const clearWorkspaceQueries = useCallback(() => {
-    WORKSPACE_QUERY_KEYS.forEach((key) => queryClient.removeQueries({ queryKey: [key] }));
-  }, [queryClient]);
+  const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({});
+  const clearWorkspaceQueries = useCallback(() => WORKSPACE_QUERY_KEYS.forEach((key) => queryClient.removeQueries({ queryKey: [key] })), [queryClient]);
 
   const loadFormAndShow = useCallback(async (
     mode: 'publish' | 'request-changes',
@@ -126,29 +96,14 @@ const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
     // Only check for comments on ECML content
     if (isEcmlContent) {
       try {
-        const hasComments = await reviewCommentService.hasComments({
-          contentId,
-          contentVer: contentData.versionKey || '0',
-          contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
-        });
-
-        if (hasComments) {
-          setShowPublishWarning(true);
-          return;
-        }
-      } catch (error) {
-        console.error('Failed to check for comments:', error);
-        // Proceed with publish if check fails
-      }
+        const hasComments = await reviewCommentService.hasComments({ contentId, contentVer: contentData.versionKey || '0', contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive' });
+        if (hasComments) { setShowPublishWarning(true); return; }
+      } catch (e) { console.error('Failed to check for comments:', e); }
     }
-
-    // Proceed with publish
     loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
   }, [contentId, contentData, isEcmlContent, loadFormAndShow]);
 
-  const handleRequestChangesClick = useCallback(() => {
-    loadFormAndShow('request-changes', 'requestforchanges', setIsLoadingRequestChangesForm);
-  }, [loadFormAndShow]);
+  const handleRequestChangesClick = useCallback(() => loadFormAndShow('request-changes', 'requestforchanges', setIsLoadingRequestChangesForm), [loadFormAndShow]);
 
   const closeDialog = useCallback(() => setDialogMode(null), []);
 
@@ -158,17 +113,9 @@ const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
     try {
       await contentService.contentPublish(contentId, userAuthInfoService.getUserId() || '');
 
-      // Only delete comments for ECML content
       if (isEcmlContent) {
-        try {
-          await reviewCommentService.deleteComments({
-            contentId,
-            contentVer: contentData.versionKey || '0',
-            contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive',
-          });
-        } catch (error) {
-          console.error('Failed to delete comments after publish:', error);
-        }
+        try { await reviewCommentService.deleteComments({ contentId, contentVer: contentData.versionKey || '0', contentType: contentData.mimeType || 'application/vnd.ekstep.ecml-archive' }); }
+        catch (e) { console.error('Failed to delete comments after publish:', e); }
       }
 
       closeDialog();
@@ -210,10 +157,7 @@ const ContentReviewPage = ({ mode }: ContentViewPageProps) => {
 
   const handleBack = useCallback(() => navigate('/workspace'), [navigate]);
 
-  const handlePublishWarningConfirm = useCallback(() => {
-    setShowPublishWarning(false);
-    loadFormAndShow('publish', 'publish', setIsLoadingPublishForm);
-  }, [loadFormAndShow]);
+  const handlePublishWarningConfirm = useCallback(() => { setShowPublishWarning(false); loadFormAndShow('publish', 'publish', setIsLoadingPublishForm); }, [loadFormAndShow]);
 
   if (playerIsLoading) return <PageLoader message={t('workspace.loadingContentReview')} />;
   if (playerError) return <ReviewPageLayout><p>{t('workspace.review.errorLoading', { error: playerError.message })}</p></ReviewPageLayout>;

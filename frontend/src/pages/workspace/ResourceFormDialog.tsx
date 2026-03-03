@@ -39,7 +39,7 @@ interface ResourceFormDialogProps {
   title?: string;
   onFormLoadStart?: () => void;
   onFormLoadComplete?: () => void;
-  submitButtonProps?: Record<string, any>;
+  submitButtonProps?: Record<string, string | boolean | number>;
 }
 
 const processFormSubmission = ( formValues: Record<string, string | string[]>, fields: FormField[]): ResourceFormData => {
@@ -68,24 +68,18 @@ const processFormSubmission = ( formValues: Record<string, string | string[]>, f
   };
 };
 
-const createFormDefaults = (fields: FormField[]): Record<string, string | string[]> => {
-  const defaults: Record<string, string | string[]> = {};
-  for (const field of fields) {
-    defaults[field.code] = field.inputType === 'multiSelect' ? [] : '';
-  }
-  return defaults;
-};
+const createFormDefaults = (fields: FormField[]): Record<string, string | string[]> =>
+  fields.reduce((acc, f) => ({ ...acc, [f.code]: f.inputType === 'multiSelect' ? [] : '' }), {} as Record<string, string | string[]>);
 
 const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => {
   const { t } = useAppI18n();
   return (
-  <div className="resource-form-error-state">
-    <p className="resource-form-error-text">{error}</p>
-    <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">
-      {t('retry')}
-    </Button>
-  </div>
-)};
+    <div className="resource-form-error-state">
+      <p className="resource-form-error-text">{error}</p>
+      <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{t('retry')}</Button>
+    </div>
+  );
+};
 
 export default function ResourceFormDialog({
   open,
@@ -120,12 +114,9 @@ export default function ResourceFormDialog({
   const { data: frameworkData, isLoading: isFrameworkLoading, error: frameworkError, refetch: refetchFramework } = useFramework(
     enabled && orgFramework ? orgFramework : ''
   );
-
   const fields = useMemo(() => {
     const formFields: FormField[] = formData?.data?.form?.data?.fields ?? [];
-    return [...formFields]
-      .filter((f) => f.visible && f.inputType !== 'Concept')
-      .sort((a, b) => a.index - b.index);
+    return [...formFields].filter((f) => f.visible && f.inputType !== 'Concept').sort((a, b) => a.index - b.index);
   }, [formData]);
 
   const frameworkCategories = useMemo(() => {
@@ -137,11 +128,7 @@ export default function ResourceFormDialog({
     ? t("resourceForm.failedToLoadForm")
     : null;
 
-  useEffect(() => {
-    if (fields.length > 0) {
-      setFormValues(createFormDefaults(fields));
-    }
-  }, [fields]);
+  useEffect(() => { if (fields.length > 0) setFormValues(createFormDefaults(fields)); }, [fields]);
 
   const getOptionsForField = useCallback((field: FormField): { key: string; name: string }[] => {
     if (field.range && field.range.length > 0) return field.range;
@@ -152,42 +139,20 @@ export default function ResourceFormDialog({
     return [];
   }, [frameworkCategories]);
 
-  const handleFieldChange = useCallback((code: string, value: string | string[]) => {
-    setFormValues((prev) => ({ ...prev, [code]: value }));
-  }, []);
-
+  const handleFieldChange = useCallback((code: string, value: string | string[]) => { setFormValues((prev) => ({ ...prev, [code]: value })); }, []);
   const handleMultiSelectToggle = useCallback((code: string, optionKey: string) => {
     setFormValues((prev) => {
       const current = (prev[code] as string[]) || [];
-      const next = current.includes(optionKey)
-        ? current.filter((v) => v !== optionKey)
-        : [...current, optionKey];
-      return { ...prev, [code]: next };
+      return { ...prev, [code]: current.includes(optionKey) ? current.filter((v) => v !== optionKey) : [...current, optionKey] };
     });
   }, []);
-
-  const canSubmit = useMemo(() => {
-    return fields.every((field) => {
-      if (!field.required) return true;
-      const val = formValues[field.code];
-      if (Array.isArray(val)) return val.length > 0;
-      return typeof val === 'string' && val.trim().length > 0;
-    });
-  }, [fields, formValues]);
-
-  const resetState = useCallback(() => {
-    setFormValues({});
-    setOpenDropdown(null);
-    setEnabled(false);
-  }, []);
-
-  const handleRetry = useCallback(() => {
-    refetchForm();
-    if (orgFramework) {
-      refetchFramework();
-    }
-  }, [refetchForm, refetchFramework, orgFramework]);
-
+  const canSubmit = useMemo(() => fields.every((field) => {
+    if (!field.required) return true;
+    const val = formValues[field.code];
+    return Array.isArray(val) ? val.length > 0 : typeof val === 'string' && val.trim().length > 0;
+  }), [fields, formValues]);
+  const resetState = useCallback(() => { setFormValues({}); setOpenDropdown(null); setEnabled(false); }, []);
+  const handleRetry = useCallback(() => { refetchForm(); if (orgFramework) refetchFramework(); }, [refetchForm, refetchFramework, orgFramework]);
   const dropdownRef = useRef<HTMLDivElement>(null!);
 
   useEffect(() => {

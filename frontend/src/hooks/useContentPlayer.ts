@@ -8,7 +8,9 @@ interface PlayerEvent {
 
 interface TelemetryEvent {
   type: string;
-  data?: any;
+  eid?: string;
+  edata?: Record<string, unknown>;
+  data?: Record<string, unknown>;
   timestamp?: number;
 }
 

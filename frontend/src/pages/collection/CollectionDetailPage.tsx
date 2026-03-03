@@ -34,19 +34,9 @@ const CollectionDetailPage = () => {
   const { t } = useAppI18n();
   const telemetry = useTelemetry();
   const { interact } = useInteract();
+  useImpression({ type: 'view', pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
   const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
   const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
-
-  useEffect(() => {
-    telemetry.impression({
-      edata: {
-        type: 'view',
-        pageid: 'collection-detail',
-        uri: window.location.pathname,
-      },
-      context: { cdata: [{ id: collectionId || '', type: 'CollectionId' }] }
-    });
-  }, [telemetry, collectionId]);
 
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const collectionData = collectionDataFromApi ?? null;
@@ -72,10 +62,7 @@ const CollectionDetailPage = () => {
   useEffect(() => {
     if (!isAuthenticated || userAuthInfoService.getUserId() || triedAuthRefreshRef.current) return;
     triedAuthRefreshRef.current = true;
-    userAuthInfoService
-      .getAuthInfo()
-      .then(() => setAuthRefresh((n) => n + 1))
-      .catch(() => {});
+    userAuthInfoService.getAuthInfo().then(() => setAuthRefresh((n) => n + 1)).catch(() => {});
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -96,43 +83,25 @@ const CollectionDetailPage = () => {
     () => (collectionData ? { ...collectionData, image: collectionData.image || defaultCollectionImage } : null),
     [collectionData]
   );
-
-  const {
-    data: searchData,
-    isError: searchError,
-    error: searchErrorObj,
-    refetch: searchRefetch,
-    isFetching: searchFetching,
-  } = useContentSearch({
-    request: { limit: 20, offset: 0 },
-    enabled: hierarchySuccess,
+  const { data: searchData, isError: searchError, error: searchErrorObj, refetch: searchRefetch, isFetching: searchFetching } = useContentSearch({
+    request: { limit: 20, offset: 0 }, enabled: hierarchySuccess,
   });
-  // Fetch selected content when contentId is in the URL
   const { data: contentReadData, isLoading: contentIsLoading, error: contentError } = useContentRead(contentId ?? '');
   const selectedContentData = contentReadData?.data?.content;
   const isQumlContent = selectedContentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
   const playerMetadata = isQumlContent ? qumlData : selectedContentData;
-  const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading ) : false;
+  const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading) : false;
   const playerError = isQumlContent ? qumlError : contentError;
-
   const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
   const { handlePlayerEvent, handleTelemetryEvent } = useCollectionDetailPlayer({
-    collectionId,
-    contentId: contentId ?? undefined,
-    effectiveBatchId,
-    isEnrolledInCurrentBatch,
-    isBatchEnded,
-    mimeType: playerMetadata?.mimeType,
-    currentContentStatus,
-    skipContentStateUpdate: contentCreatorPrivilege,
+    collectionId, contentId: contentId ?? undefined, effectiveBatchId, isEnrolledInCurrentBatch,
+    isBatchEnded, mimeType: playerMetadata?.mimeType, currentContentStatus, skipContentStateUpdate: contentCreatorPrivilege,
   });
-
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
 
-  // Auto-navigate to first content when collection loads without a selected contentId
   useEffect(() => {
     if (!collectionData?.hierarchyRoot || contentId) return;
     const firstContentId = getFirstLeafContentIdFromHierarchy(collectionData.hierarchyRoot);
@@ -156,17 +125,13 @@ const CollectionDetailPage = () => {
   useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
 
   const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
-
   const relatedContentItems = useMemo(
     () => (hasSearchResults ? mapSearchContentToRelatedContentItems(searchData?.data?.content, collectionData?.id ?? undefined, 3) : []),
     [hasSearchResults, searchData?.data?.content, collectionData?.id]
   );
-
   const toggleModule = (moduleId: string) => {
     interact({ id: 'collection-module-toggle', type: 'CLICK', pageid: 'collection-detail', cdata: [{ id: moduleId, type: 'CollectionUnit' }] });
-    setExpandedModules((prev) =>
-      prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
-    );
+    setExpandedModules((prev) => prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]);
   };
 
   const certificatePreviewDetails: CertificatePreviewDetails = useMemo(() => {

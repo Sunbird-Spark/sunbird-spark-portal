@@ -8,6 +8,7 @@ import CourseDashboardPage from './CourseDashboardPage';
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: vi.fn(() => ({ pathname: '/collection/col_123/dashboard/batches' })),
   useParams: vi.fn(() => ({ collectionId: 'col_123', tab: 'batches' })),
   Link: ({ children, to }: { children: React.ReactNode, to: string }) => <a href={to}>{children}</a>,
 }));

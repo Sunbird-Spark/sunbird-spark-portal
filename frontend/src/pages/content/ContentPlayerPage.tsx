@@ -65,13 +65,7 @@ const ContentPlayerPage = () => {
   );
   
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
-    onPlayerEvent: (event) => {
-      // Handle player events (play, pause, complete, etc.)
-      console.log('Content player event:', event);
-    },
     onTelemetryEvent: (event) => {
-      // Handle telemetry events for analytics
-      console.log('Content telemetry event:', event);
       if (event?.eid === 'ASSESS') {
         telemetry.audit({
           edata: {

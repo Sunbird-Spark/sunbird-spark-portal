@@ -77,28 +77,14 @@ const HelpCategoryDetail = () => {
     const handleFeedback = (index: number, value: "yes" | "no") => {
         setFeedback((prev) => ({ ...prev, [index]: value }));
         const faqQuestion = sanitizedFaqs[index]?.question || String(index);
-        telemetry.feedback({
-            edata: {
-                contentid: faqQuestion,
-                rating: value === 'yes' ? 1 : 0,
-                comments: '',
-            },
-        });
+        telemetry.feedback({ edata: { contentid: faqQuestion, rating: value === 'yes' ? 1 : 0, comments: '' } });
     };
 
     const handleSubmitFeedback = async (index: number) => {
         const text = feedbackText[index] ?? "";
         const faqQuestion = sanitizedFaqs[index]?.question || String(index);
-        telemetry.feedback({
-            edata: {
-                contentid: faqQuestion,
-                rating: feedback[index] === 'yes' ? 1 : 0,
-                comments: text,
-            },
-        });
-        telemetry.log({
-            edata: { type: 'api', level: 'INFO', message: 'FAQ feedback submitted', pageid: 'help-category-detail' },
-        });
+        telemetry.feedback({ edata: { contentid: faqQuestion, rating: feedback[index] === 'yes' ? 1 : 0, comments: text } });
+        telemetry.log({ edata: { type: 'api', level: 'INFO', message: 'FAQ feedback submitted', pageid: 'help-category-detail' } });
         setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
         setFeedbackText((prev) => ({ ...prev, [index]: "" }));
     };
@@ -122,7 +108,6 @@ const HelpCategoryDetail = () => {
                         </SheetContent>
                     </Sheet>
                 ) : (
-
                     <div className="relative shrink-0 sticky top-[4.5rem] self-start z-[20]">
                         <HomeSidebar
                             activeNav={activeNav}
@@ -146,12 +131,9 @@ const HelpCategoryDetail = () => {
                                 <FaArrowLeftLong className="w-[1rem] h-[1rem]" />
                                 {t('button.goBack')}
                             </button>
-                            <button
-                                onClick={() => setIsReportIssueOpen(true)}
+                            <button onClick={() => setIsReportIssueOpen(true)}
                                 className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
-                                aria-label={t('help.reportContentIssue')}
-                                data-edataid="help-report-issue-open"
-                                data-pageid="help-category-detail">
+                                aria-label={t('help.reportContentIssue')} data-edataid="help-report-issue-open" data-pageid="help-category-detail">
                                 {t('help.reportIssueBtn')}
                             </button>
                         </div>
@@ -196,10 +178,8 @@ const HelpCategoryDetail = () => {
                                         >
                                             <AccordionTrigger
                                                 className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick"
-                                                data-edataid="help-faq-expand"
-                                                data-pageid="help-category-detail"
-                                                data-cdata={JSON.stringify([{ id: categoryId || '', type: 'HelpCategory' }, { id: String(index), type: 'FAQIndex' }])}
-                                            >
+                                                data-edataid="help-faq-expand" data-pageid="help-category-detail"
+                                                data-cdata={JSON.stringify([{ id: categoryId || '', type: 'HelpCategory' }, { id: String(index), type: 'FAQIndex' }])}>
                                                 {faq.question}
                                             </AccordionTrigger>
                                             <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
@@ -209,9 +189,7 @@ const HelpCategoryDetail = () => {
                                                 />
                                                 <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
                                                     {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
-                                                        <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">
-                                                            {t('help.feedbackThanks')}
-                                                        </p>
+                                                        <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">{t('help.feedbackThanks')}</p>
                                                     ) : feedback[index] === "no" ? (
                                                         <div className="py-[0.5rem] space-y-[0.75rem]">
                                                             <p className="text-sm font-semibold text-foreground font-['Rubik']">{t('help.sorry')}</p>
@@ -225,41 +203,26 @@ const HelpCategoryDetail = () => {
                                                                 aria-required="true"
                                                             />
                                                             <div className="flex justify-end">
-                                                                <button
-                                                                    onClick={() => handleSubmitFeedback(index)}
+                                                                <button onClick={() => handleSubmitFeedback(index)}
                                                                     disabled={!feedbackText[index]?.trim()}
-                                                                    data-edataid="faq-feedback-submit"
-                                                                    data-pageid="help-category-detail"
-                                                                    className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
-                                                                        ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
-                                                                        : "bg-sunbird-brick hover:opacity-90"
-                                                                        }`}
-                                                                >
-                                                                    {t('help.submitFeedback')}
-                                                                </button>
+                                                                    data-edataid="faq-feedback-submit" data-pageid="help-category-detail"
+                                                                    className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim() ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed" : "bg-sunbird-brick hover:opacity-90"}`}
+                                                                >{t('help.submitFeedback')}</button>
                                                             </div>
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-[0.75rem]">
                                                             <span className="text-sm text-muted-foreground font-['Rubik']">{t('help.didThisHelp')}</span>
-                                                            <button
-                                                                onClick={() => handleFeedback(index, "no")}
+                                                            <button onClick={() => handleFeedback(index, "no")}
                                                                 className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
-                                                                data-edataid="faq-feedback-no"
-                                                                data-pageid="help-category-detail"
+                                                                data-edataid="faq-feedback-no" data-pageid="help-category-detail"
                                                                 data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
-                                                            >
-                                                                {t('no')}
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleFeedback(index, "yes")}
+                                                            >{t('no')}</button>
+                                                            <button onClick={() => handleFeedback(index, "yes")}
                                                                 className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
-                                                                data-edataid="faq-feedback-yes"
-                                                                data-pageid="help-category-detail"
+                                                                data-edataid="faq-feedback-yes" data-pageid="help-category-detail"
                                                                 data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
-                                                            >
-                                                                {t('yes')}
-                                                            </button>
+                                                            >{t('yes')}</button>
                                                         </div>
                                                     )}
                                                 </div>

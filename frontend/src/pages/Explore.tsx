@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
 import ExploreFilters from '../components/explore/ExploreFilters';
@@ -46,12 +46,12 @@ const Explore = () => {
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
-  const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
+  const [sortBy, setSortBy] = useState<Record<string, string>>({ lastUpdatedOn: 'desc' });
   const [sortLabelKey, setSortLabelKey] = useState('newest');
   const [activeNav, setActiveNav] = useState("explore");
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen: setIsSidebarOpen } = useSidebarState(false);
 
-  const handleFilterChange: React.Dispatch<React.SetStateAction<FilterState>> = (value) => {
+  const handleFilterChange: Dispatch<SetStateAction<FilterState>> = (value) => {
     const resolved = typeof value === 'function' ? value(filters) : value;
     interact({ id: 'explore-filter-change', type: 'CLICK', pageid: 'explore-page',
       cdata: Object.keys(resolved).map((k) => ({ id: k, type: 'Filter' })) });
@@ -63,7 +63,7 @@ const Explore = () => {
   const { data: formData, isLoading: isFiltersLoading, isError: isFiltersError } = useFormRead({
     request: { type: 'portal', subType: 'explorepage', action: 'filters', component: 'portal' },
   });
-  const rawGroups = (formData?.data as any)?.form?.data?.filters;
+  const rawGroups = (formData?.data as { form?: { data?: { filters?: unknown[] } } } | undefined)?.form?.data?.filters;
   const showFilters = isFiltersLoading || (!isFiltersError && Array.isArray(rawGroups) && rawGroups.length > 0);
 
   useEffect(() => {

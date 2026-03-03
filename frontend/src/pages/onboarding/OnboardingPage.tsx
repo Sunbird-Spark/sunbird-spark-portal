@@ -55,10 +55,6 @@ const Onboarding = () => {
     setCurrentScreenId(newHistory[newHistory.length - 1] ?? null);
   };
   const handleSkip = () => {
-    // TODO: Remove this temporary logging once backend storage is configured
-    console.log('[Onboarding] User skipped onboarding at screen:', {
-      currentScreenId,currentStep: screenHistory.length,partialSelections: selections,
-    });
     if (!isSubmitting) navigate("/home");
   };
   const handleNext = () => {
@@ -80,26 +76,6 @@ const Onboarding = () => {
   };
   const handleSubmit = () => {
     setIsSubmitting(true);
-    // TODO: Remove this temporary logging once backend storage is configured
-    console.log('[Onboarding] Final submission data:', {
-      selections,
-      otherText: otherTexts[currentScreenId ?? ''] || null,
-      screenHistory,
-      timestamp: new Date().toISOString(),
-    });
-    // Format selections with labels for better readability
-    const formattedSelections = Object.entries(selections).map(([screenId, fieldId]) => {
-      const screen = onboardingData?.screens[screenId];
-      const field = screen?.fields.find(f => f.id === fieldId);
-      return {
-        screenId,
-        screenTitle: screen?.title,
-        fieldId,
-        fieldLabel: field?.label,
-        otherText: field?.requiresTextInput ? otherTexts[screenId] ?? null : null,
-      };
-    });
-    console.log('[Onboarding] Formatted selections:', formattedSelections);
     telemetry.audit({
       edata: {
         props: ['onboardingSelections'],
@@ -123,11 +99,6 @@ const Onboarding = () => {
 
     setSelections(prev => ({ ...prev, [currentScreenId]: fieldId }));
     setOtherTexts(prev => ({ ...prev, [currentScreenId]: "" }));
-    // TODO: Remove this temporary logging once backend storage is configured
-    console.log('[Onboarding] User selection:', {
-      screenId: currentScreenId, fieldId,screenTitle: onboardingData?.screens[currentScreenId]?.title,
-      fieldLabel: onboardingData?.screens[currentScreenId]?.fields.find(f => f.id === fieldId)?.label,
-    });
   };
   if (isLoading || (onboardingData && !currentScreenId)) {
     return (
@@ -228,9 +199,6 @@ const Onboarding = () => {
                       onChange={e => {
                         const value = e.target.value;
                         setOtherTexts(prev => ({ ...prev, [currentScreenId]: value }));
-                        // TODO: Remove this temporary logging once backend storage is configured
-                        console.log('[Onboarding] Other text input:', {screenId: currentScreenId, text: value,
-                        });
                       }}
                       className="onboarding-input"
                     />
