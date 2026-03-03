@@ -2,8 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { QumlEditorService, type QuestionSetMetadata } from './';
 import appCoreService from '../../AppCoreService';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
+import editorConfigService from '../EditorConfigService';
 
 vi.mock('../../userAuthInfoService/userAuthInfoService');
+vi.mock('../../UserProfileService', () => ({
+  default: { getChannel: vi.fn().mockResolvedValue(''), clearCache: vi.fn() },
+}));
 
 // Mock all FancyTree modules
 vi.mock('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps', () => ({}));
@@ -186,7 +190,7 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
       vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-1');
       vi.spyOn(appCoreService, 'getDeviceId').mockRejectedValue(new Error('Device error'));
       vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'portal' });
-      vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({
+      vi.spyOn<any, any>((editorConfigService as any)['orgService'], 'search').mockResolvedValue({
         data: { response: { content: [{ channel: 'test' }] } },
       });
 
@@ -207,7 +211,7 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
       vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-1');
       vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-1');
       vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'portal' });
-      vi.spyOn<any, any>(service['orgService'], 'search').mockRejectedValue(new Error('Org error'));
+      vi.spyOn<any, any>((editorConfigService as any)['orgService'], 'search').mockRejectedValue(new Error('Org error'));
 
       const metadata = { identifier: 'do_123', primaryCategory: 'QuestionSet', objectType: 'QuestionSet' } as QuestionSetMetadata;
       const config = await service.createConfig(metadata);

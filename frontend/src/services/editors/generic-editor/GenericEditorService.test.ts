@@ -40,7 +40,8 @@ vi.mock('../../AppCoreService', () => ({
   },
 }));
 
-const mockOrgSearch = vi.fn();
+const mockOrgSearch = vi.hoisted(() => vi.fn());
+const mockChannelRead = vi.hoisted(() => vi.fn());
 
 vi.mock('../../OrganizationService', () => ({
   OrganizationService: class {
@@ -48,7 +49,6 @@ vi.mock('../../OrganizationService', () => ({
   },
 }));
 
-const mockChannelRead = vi.fn();
 
 vi.mock('../../ChannelService', () => ({
   ChannelService: class {
