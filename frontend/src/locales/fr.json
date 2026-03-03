@@ -8,6 +8,7 @@
   "loading": "Chargement...",
   "error": "Une erreur s'est produite",
   "success": "Succès",
+  "name": "Nom",
   "cancel": "Annuler",
   "save": "Enregistrer",
   "delete": "Supprimer",
@@ -804,7 +805,8 @@
     "yes": "Oui",
     "no": "Non",
     "criteriaMustBeMet": "Les critères doivent être remplis pour réémettre",
-    "reissueCertificate": "Réémettre le certificat"
+    "reissueCertificate": "Réémettre le certificat",
+    "viewOnly": "Lecture seule"
   },
   "homePageDemo": {
     "course1": "Cours 1",
@@ -830,7 +832,8 @@
     "inactive": "Inactif",
     "completed": "Terminé",
     "ongoing": "En cours",
-    "upcoming": "À venir"
+    "upcoming": "À venir",
+    "processing": "En cours de traitement"
   },
   "tabs": {
     "batches": "Lots",

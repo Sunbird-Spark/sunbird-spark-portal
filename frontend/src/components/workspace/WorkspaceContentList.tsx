@@ -58,6 +58,7 @@ const WorkspaceContentList = ({
 
           const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
           const isLocked = !!lockInfo;
+          const hasActions = showView || canEdit || showDelete;
 
           return (
             <div
@@ -113,7 +114,7 @@ const WorkspaceContentList = ({
                       {t('workspaceCard.lockedBy', { name: lockInfo.creatorName })}
                     </span>
                   </span>
-                ) : (
+                ) : hasActions ? (
                   <>
                     {showView && (
                       <Button
@@ -163,7 +164,7 @@ const WorkspaceContentList = ({
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </>
-                )}
+                ) : null}
               </div>
             </div>
           );

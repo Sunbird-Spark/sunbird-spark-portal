@@ -8,6 +8,7 @@
   "loading": "جارٍ التحميل...",
   "error": "حدث خطأ",
   "success": "نجاح",
+  "name": "الاسم",
   "cancel": "إلغاء",
   "save": "حفظ",
   "delete": "حذف",
@@ -804,7 +805,8 @@
     "yes": "نعم",
     "no": "لا",
     "criteriaMustBeMet": "يجب استيفاء المعايير لإعادة الإصدار",
-    "reissueCertificate": "إعادة إصدار الشهادة"
+    "reissueCertificate": "إعادة إصدار الشهادة",
+    "viewOnly": "عرض فقط"
   },
   "homePageDemo": {
     "course1": "الدورة 1",
@@ -830,7 +832,8 @@
     "inactive": "غير نشط",
     "completed": "مكتمل",
     "ongoing": "جارية",
-    "upcoming": "قادمة"
+    "upcoming": "قادمة",
+    "processing": "قيد المعالجة"
   },
   "tabs": {
     "batches": "الدفعات",
