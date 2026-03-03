@@ -781,7 +781,6 @@
 
   .collection-player-wrapper {
     @apply p-4 relative;
-    min-height: calc(41.3125rem + 2rem);
   }
 
   .collection-player-loading {
