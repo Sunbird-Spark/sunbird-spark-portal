@@ -155,17 +155,6 @@ vi.mock('@/auth/AuthContext', () => ({
     logout: vi.fn(),
   })),
 }));
-vi.mock('@/hooks/usePermission', () => ({
-  usePermissions: vi.fn(() => ({
-    isAuthenticated: false,
-    roles: ['PUBLIC'],
-    isLoading: false,
-    error: null,
-    hasAnyRole: vi.fn(() => false),
-    canAccessFeature: vi.fn(() => false),
-    refetch: vi.fn(),
-  })),
-}));
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: {
     isUserAuthenticated: vi.fn(() => false),

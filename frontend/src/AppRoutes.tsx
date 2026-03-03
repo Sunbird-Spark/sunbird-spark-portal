@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { ProtectedRoute } from './rbac/ProtectedRoute';
-import { PermissionsProvider } from './rbac/PermissionsContext';
 import PageLayout from './components/layout/PageLayout';
 
 import Home from './pages/home/Home';
@@ -37,7 +36,6 @@ import UserReport from './pages/reports/UserReport';
 const AppRoutes: React.FC = () => {
   return (
     <AuthProvider>
-      <PermissionsProvider>
       <Routes>
         {/* Standalone public routes (no shared sidebar layout) */}
         <Route path="/" element={<Index />} />
@@ -134,7 +132,6 @@ const AppRoutes: React.FC = () => {
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      </PermissionsProvider>
     </AuthProvider>
   );
 };
