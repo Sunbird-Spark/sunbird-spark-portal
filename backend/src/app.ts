@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import { oidcSession, requireAuth } from './auth/oidcMiddleware.js';
 import formRoutes from './routes/formsRoutes.js';
-import reviewCommentRoutes from './routes/reviewCommentRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
 import portalProxyRoutes from './routes/portalProxyRoutes.js';
@@ -41,9 +40,6 @@ app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousPr
 // Portal Authentication Routes (Login, Callback, Logout)
 app.use('/portal', portalAuthRoutes);
 
-// Review comment routes
-app.use('/portal/review/comment/v1', sessionMiddleware, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), reviewCommentRoutes);
-
 // Apply anonymous session middleware to API routes (once per route tree)
 
 app.use('/data/v1/form', formRoutes);
@@ -55,7 +51,7 @@ app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 app.use("/action", editorRoutes);
 
 // All remaining /action/* routes proxy to knowledge-mw-service.
-// keycloak.middleware() deserializes the session grant into req.kauth so that
+// oidcSession() deserializes the OIDC tokens from the session so that
 // decorateRequestHeaders can read the user's access token for upstream auth.
 app.use('/', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), knowlgMwProxyRoutes);
 

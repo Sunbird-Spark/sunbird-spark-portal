@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
-import { generateKongToken, refreshSessionTTL, isSessionNearExpiry } from '../services/kongAuthService.js';
+import { generateKongToken, refreshSessionTTL } from '../services/kongAuthService.js';
 import { saveSession } from '../utils/sessionUtils.js';
 
 export const registerDeviceWithKong = () => {
