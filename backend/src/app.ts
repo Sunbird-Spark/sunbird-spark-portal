@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { oidcSession, requireAuth } from './auth/oidcMiddleware.js';
+import { oidcSession } from './auth/oidcMiddleware.js';
 import formRoutes from './routes/formsRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
@@ -18,7 +18,7 @@ import { sessionMiddleware, anonymousMiddlewares } from './middlewares/condition
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
-import { kongProxy } from './proxies/kongProxy.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,16 +55,8 @@ app.use("/action", editorRoutes);
 // decorateRequestHeaders can read the user's access token for upstream auth.
 app.use('/', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), knowlgMwProxyRoutes);
 
-// Apply anonymous session middleware to portal routes (once per route tree)
-app.use('/portal', sessionMiddleware, ...anonymousMiddlewares);
-
 // Portal Proxy Routes (authenticated — oidcSession populates req.oidc for requireAuth)
 app.use('/portal', oidcSession(), portalProxyRoutes);
-
-app.use('/action', sessionMiddleware);
-
-// Portal Proxy Routes (authenticated only)
-app.all('/action/*rest', oidcSession(), requireAuth(), kongProxy);
 
 app.get('/:tenantName', redirectTenant);
 

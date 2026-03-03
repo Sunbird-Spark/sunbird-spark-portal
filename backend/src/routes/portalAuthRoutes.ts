@@ -15,15 +15,6 @@ const router = express.Router();
 router.get('/login',
     sessionMiddleware,
     async (req: Request, res: Response) => {
-        logger.info('DEBUG: /portal/login hit ' + JSON.stringify({
-            url: req.url,
-            query: req.query,
-            sessionID: req.sessionID ? '[REDACTED]' : undefined,
-            cookie: req.headers.cookie ? '[REDACTED]' : undefined,
-            hasSession: !!req.session,
-            hasOidc: !!req.oidc?.isAuthenticated
-        }));
-
         // If already authenticated, go home
         if (req.session?.['oidc-tokens']?.access_token) {
             logger.info('User already authenticated, redirecting to home');
@@ -44,8 +35,6 @@ router.get('/login',
             req.session.oidcCodeVerifier = codeVerifier;
             req.session.oidcState = state;
             await saveSession(req);
-
-            logger.info(`PKCE_DEBUG: /login saved PKCE to session | sessionID=${req.sessionID} | state=${state} | hasVerifier=${!!codeVerifier}`);
 
             // Build authorization URL using OIDC Discovery endpoints
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
@@ -72,7 +61,6 @@ router.get('/auth/callback',
     sessionMiddleware,
     async (req: Request, res: Response) => {
         logger.info('Entered /portal/auth/callback handler');
-        logger.info(`PKCE_DEBUG: /callback check | sessionID=${req.sessionID} | hasVerifier=${!!req.session?.oidcCodeVerifier} | hasState=${!!req.session?.oidcState} | queryState=${req.query.state} | sessionState=${req.session?.oidcState} | hasCode=${!!req.query.code} | hasError=${!!req.query.error}`);
 
         // Handle error responses from the OIDC provider (e.g. prompt=none with no SSO session)
         if (req.query.error) {
@@ -91,7 +79,7 @@ router.get('/auth/callback',
 
         // Validate required session parameters and authorization code
         if (!req.query.code) {
-            logger.warn('Callback received without authorization code. Restarting login flow.');
+            logger.warn('Callback received without authorization code. Attempting silent re-auth.');
             return res.redirect('/portal/login?prompt=none');
         }
 
@@ -109,7 +97,6 @@ router.get('/auth/callback',
             const currentUrl = new URL(
                 `${req.protocol}://${req.get('host')}${req.originalUrl}`
             );
-            logger.info(`CALLBACK_DEBUG: currentUrl=${currentUrl.origin}${currentUrl.pathname} | callbackUrl=${envConfig.DOMAIN_URL}/portal/auth/callback`);
 
             // Exchange the authorization code for tokens
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
@@ -118,8 +105,6 @@ router.get('/auth/callback',
                 expectedState: req.session.oidcState,
                 idTokenExpected: true,
             }, { redirect_uri: callbackUrl });
-
-            logger.info(`CALLBACK_DEBUG: token exchange SUCCESS | hasAccessToken=${!!tokens.access_token} | hasRefreshToken=${!!tokens.refresh_token} | hasIdToken=${!!tokens.id_token}`);
 
             // Clean up PKCE/state from session
             delete req.session.oidcCodeVerifier;
@@ -150,11 +135,8 @@ router.get('/auth/callback',
             logger.info('OIDC authenticated successfully');
 
             if (req.session) {
-                // Regenerate session (this persists the tokens)
-                const oldSessionID = req.sessionID;
+                // Regenerate session to prevent session fixation attacks
                 await regenerateSession(req);
-                logger.info(`CALLBACK_DEBUG: session regenerated | old=${oldSessionID} | new=${req.sessionID}`);
-
                 setSessionTTLFromToken(req);
 
                 // Initialize user session from token subject
@@ -162,27 +144,24 @@ router.get('/auth/callback',
                 if (tokenSubject) {
                     const userIdFromToken = _.last(_.split(tokenSubject, ':'));
                     req.session.userId = userIdFromToken;
-                    logger.info(`CALLBACK_DEBUG: userId=${userIdFromToken}`);
 
                     if (userIdFromToken) {
                         const userProfileResponse = await fetchUserById(userIdFromToken, req);
                         await setUserSession(req, userProfileResponse);
-                        logger.info(`CALLBACK_DEBUG: user profile fetched and set`);
                     }
                 }
 
                 // Explicitly save session before redirect to ensure all data is persisted
                 await saveSession(req);
 
-                const redirectUrl = envConfig.DEVELOPMENT_REACT_APP_URL + '/home';
-                logger.info(`CALLBACK_DEBUG: redirecting to ${redirectUrl} | sessionID=${req.sessionID} | hasTokens=${!!req.session['oidc-tokens']?.access_token} | userId=${req.session.userId}`);
-                res.redirect(redirectUrl);
+                logger.info('Session setup complete, redirecting to /home');
+                res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL + '/home');
             } else {
                 logger.error('No session found after OIDC callback');
                 res.redirect('/');
             }
         } catch (err) {
-            logger.error('CALLBACK_DEBUG: Error in OIDC callback', err);
+            logger.error('Error in OIDC callback', err);
             // Clean up PKCE/state from session on failure
             delete req.session?.oidcCodeVerifier;
             delete req.session?.oidcState;
