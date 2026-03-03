@@ -739,7 +739,8 @@
     "yes": "نعم",
     "no": "لا",
     "criteriaMustBeMet": "يجب استيفاء المعايير لإعادة الإصدار",
-    "reissueCertificate": "إعادة إصدار الشهادة"
+    "reissueCertificate": "إعادة إصدار الشهادة",
+    "viewOnly": "عرض فقط"
   },
   "homePageDemo": {
     "course1": "الدورة 1",
