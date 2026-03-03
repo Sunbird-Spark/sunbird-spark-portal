@@ -32,11 +32,18 @@ const PageLayout = () => {
   const { t } = useAppI18n();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     setIsSidebarOpen(!isMobile);
   }, [isMobile]);
+
+  // Always close sidebar when navigating to Explore page
+  useEffect(() => {
+    if (location.pathname.startsWith('/explore')) {
+      setIsSidebarOpen(false);
+    }
+  }, [location.pathname]);
 
   const activeNav = getActiveNav(location.pathname);
 
