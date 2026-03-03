@@ -78,19 +78,24 @@ export function useWorkspace({
   // Reviewer tabs (pending-review, my-published) show other people's content.
   const isReviewerTab = isReviewerMode && ['pending-review', 'my-published'].includes(activeTab);
 
-  // ── Counts query (runs once per role, shared across tabs) ──────────────
+  // Derive primaryCategory filter from typeFilter (shared by both counts and content queries).
+  const primaryCategoryFilter =
+    getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
+
+  // ── Counts query (per role + typeFilter, shared across tabs) ───────────
   // Both modes use facets (limit=1) for lightweight counting.
   // Creator mode: scoped to the user's own content.
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
+  // typeFilter is included so tab badges and stats update when a type is selected.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
           createdBy: isReviewerMode ? { '!=': userId ?? '' } : (userId ?? ''),
           ...(isReviewerMode && orgId ? { createdFor: [orgId] } : {}),
           status: [...WORKSPACE_STATUS_FILTER],
-          primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
+          primaryCategory: primaryCategoryFilter,
         },
         facets: ['status'],
         limit: 1,
@@ -116,8 +121,6 @@ export function useWorkspace({
 
   // ── Content query (per tab, paginated) ────────────────────────────────
   const statusFilter = getStatusFilterForTab(activeTab);
-  const primaryCategoryFilter =
-    getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
   // Special filters for uploads and collaborations tabs
   const getFiltersForTab = useCallback(() => {
