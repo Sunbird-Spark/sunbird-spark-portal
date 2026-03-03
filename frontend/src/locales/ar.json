@@ -242,7 +242,10 @@
     "contentStatusNotViewed": "لم تتم المشاهدة",
     "selfAssessMaxAttempt": "لقد وصلت إلى الحد الأقصى لعدد المحاولات لهذا التقييم.",
     "selfAssessLastAttempt": "هذه هي محاولتك الأخيرة لهذا التقييم.",
-    "attemptsLabel": "المحاولة {{current}} من {{max}}"
+    "attemptsLabel": "المحاولة {{current}} من {{max}}",
+    "forceSync": "مزامنة التقدم الآن",
+    "forceSyncSuccess": "يمكنك عرض تحديث تقدم الدورة خلال 24 ساعة",
+    "forceSyncCooldown": "يرجى الانتظار قبل المزامنة مرة أخرى."
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",
