@@ -1202,6 +1202,10 @@
     height: auto !important;
   }
 
+  [data-video-player-wrapper] .video-js {
+    background-color: transparent !important;
+  }
+
   /* Ensure control bar is always visible and interactive when video is paused */
   [data-video-player-wrapper] .vjs-control-bar {
     z-index: 3 !important;
