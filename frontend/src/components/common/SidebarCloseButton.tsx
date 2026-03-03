@@ -12,7 +12,7 @@ interface SidebarCloseButtonProps {
 const SidebarCloseButton = ({ onClick, collapsed = false }: SidebarCloseButtonProps) => {
     const { t } = useAppI18n();
     return (
-        <div className={`absolute -right-[0.75rem] top-[0.5rem] z-[20] transition-all duration-300`}>
+        <div className={`absolute top-[0.5rem] z-[20] transition-all duration-300 ltr:-right-[0.75rem] rtl:-left-[0.75rem]`}>
             <button
                 onClick={onClick}
                 aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
@@ -25,7 +25,7 @@ const SidebarCloseButton = ({ onClick, collapsed = false }: SidebarCloseButtonPr
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true"
-                    className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+                    className={`transition-transform duration-300 ${collapsed ? '[dir="ltr"]:rotate-180 [dir="rtl"]:rotate-0' : '[dir="ltr"]:rotate-0 [dir="rtl"]:rotate-180'}`}
                 >
                     <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>

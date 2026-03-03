@@ -39,7 +39,7 @@ const HeroWithStats = () => {
                         {/* Content - Left Side (becomes Right in RTL grid) */}
                         <div className="max-w-[700px] pt-8">
                             <h1
-                                className="font-rubik font-semibold text-4xl lg:text-[3.75rem] leading-tight lg:leading-[4.375rem] tracking-normal mb-6 text-sunbird-obsidian"
+                                className="font-rubik font-semibold text-4xl lg:text-[3.75rem] leading-tight lg:leading-[4.375rem] tracking-normal mb-6 text-sunbird-obsidian max-w-[46.875rem] w-[46.875rem]"
                             >
                                 {t("hero.title", "Knowledge that moves you forward.").split(/(\n)/).map((line, i) =>
                                     line === "\n" ? <br key={i} /> : line
@@ -47,7 +47,7 @@ const HeroWithStats = () => {
                             </h1>
 
                             <p
-                                className="font-rubik font-normal text-lg lg:text-[1.125rem] leading-[1.625rem] tracking-normal mb-8 lg:mb-[2.8125rem] max-w-[34.375rem] text-sunbird-gray-75"
+                                className="font-rubik font-normal text-lg lg:text-[1.125rem] leading-[1.625rem] tracking-normal mb-8 lg:mb-[2.8125rem] text-sunbird-gray-75 max-w-[37.5rem]"
                             >
                                 {t("hero.subtitle")}
                             </p>

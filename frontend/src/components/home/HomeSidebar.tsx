@@ -114,8 +114,8 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                             `}
                             title={collapsed ? item.label : undefined}
                         >
-                            <Icon className={`w-5 h-5 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
-                            {!collapsed && <span className="text-[1.125rem]">{item.label}</span>}
+                            <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
+                            {!collapsed && <span className="text-[1.125rem] whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>}
                         </button>
                     </li>
                 );

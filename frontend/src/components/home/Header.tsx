@@ -135,7 +135,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
             {/* Login Button */}
             <Button
               onClick={() => window.location.href = "/portal/login"}
-              className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal w-[4.5rem] h-[1.875rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center p-0"
+              className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal min-w-[4.5rem] h-[1.875rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center px-4 py-0"
             >
               {t("login")}
             </Button>

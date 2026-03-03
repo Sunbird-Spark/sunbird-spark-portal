@@ -18,7 +18,14 @@ vi.mock('react-icons/fi', () => ({
 }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
-  useAppI18n: () => ({ t: (key: string) => key }),
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'profileLearning.viewMoreCourses': 'View More Courses',
+      };
+      return translations[key] ?? key;
+    },
+  }),
 }));
 
 const createMockCourse = (id: string, name: string, percentage: number): TrackableCollection => ({
@@ -111,7 +118,7 @@ describe('MyLearningCourses', () => {
     expect(screen.getByText('No courses found in this category.')).toBeInTheDocument();
   });
   
-  it('shows "View more courses" button when there are many courses', () => {
+  it('shows "View More Courses" button when there are many courses', () => {
     // Create 12 active courses
     const manyCourses = Array.from({ length: 12 }, (_, i): TrackableCollection => ({
       ...mockCourses[0]!,
@@ -135,20 +142,20 @@ describe('MyLearningCourses', () => {
     render(<MyLearningCourses courses={manyCourses} />);
     
     // Should show the button
-    expect(screen.getByText('View more courses')).toBeInTheDocument();
+    expect(screen.getByText('View More Courses')).toBeInTheDocument();
     
     // Only 9 should be visible initially
     const cards = screen.getAllByTestId('course-card');
     expect(cards.length).toBe(9);
     
     // Click view more
-    fireEvent.click(screen.getByText('View more courses'));
+    fireEvent.click(screen.getByText('View More Courses'));
     
     // Now all 12 should be visible
     const allCards = screen.getAllByTestId('course-card');
     expect(allCards.length).toBe(12);
     
     // Button should disappear if no more courses
-    expect(screen.queryByText('View more courses')).not.toBeInTheDocument();
+    expect(screen.queryByText('View More Courses')).not.toBeInTheDocument();
   });
 });
