@@ -510,6 +510,10 @@
     @apply w-full;
   }
 
+  div.content-player-embed:empty {
+    min-height: 41.3125rem;
+  }
+
   iframe.content-player-embed {
     height: 41.3125rem;
   }
@@ -810,6 +814,27 @@
 
   .collection-player-error-text {
     @apply text-sm text-red-500;
+  }
+
+  @media (max-width: 1024px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 28rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 22rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 18rem;
+    }
   }
 
   .collection-overview-section {
@@ -1156,8 +1181,8 @@
     visibility: hidden !important;
   }
 
-  /* Hide Video.js Big Play Button */
-  .vjs-big-play-button {
+  /* Hide Video.js Big Play Button only within the Sunbird video player wrapper */
+  [data-video-player-wrapper] .vjs-big-play-button {
     display: none !important;
   }
   .sunbird-video-player-container {
