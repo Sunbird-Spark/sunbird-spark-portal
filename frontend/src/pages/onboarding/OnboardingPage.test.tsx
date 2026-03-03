@@ -325,7 +325,7 @@ describe('Onboarding Component', () => {
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home'));
   });
 
-  it('disables skip button while submitting', () => {
+  it('disables skip button while submitting', async () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -350,9 +350,12 @@ describe('Onboarding Component', () => {
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
-    // Skip button should be disabled
+    // Skip button should be disabled while submitting
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
     expect(skipButton).toBeDisabled();
+
+    // Wait for async to settle to avoid act() warning
+    await waitFor(() => expect(skipButton).not.toBeDisabled());
   });
 
   it('disables Save and Proceed button when no option is selected', () => {
@@ -546,7 +549,7 @@ describe('Onboarding Component', () => {
     expect(screen.queryByLabelText('Go back')).not.toBeInTheDocument();
   });
 
-  it('disables back button during submission', () => {
+  it('disables back button during submission', async () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -576,8 +579,11 @@ describe('Onboarding Component', () => {
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
-    // Back button should now be disabled
+    // Back button should now be disabled while submitting
     expect(backButton).toBeDisabled();
+
+    // Wait for async to settle to avoid act() warning
+    await waitFor(() => expect(backButton).not.toBeDisabled());
   });
 
   it('maintains navigation history correctly through multiple screens', () => {

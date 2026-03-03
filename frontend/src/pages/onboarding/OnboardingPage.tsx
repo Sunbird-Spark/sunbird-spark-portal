@@ -53,9 +53,7 @@ const Onboarding = () => {
         request: {
           userId,
           framework: {
-            onboardingDetails: [
-              { screenId: 'skipped', screenTitle: null, fieldId: 'skipped', fieldLabel: null, otherText: null }
-            ]
+            onboardingDetails: ['skipped']
           }
         }
       });

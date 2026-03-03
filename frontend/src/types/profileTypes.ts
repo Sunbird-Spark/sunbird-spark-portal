@@ -46,7 +46,7 @@ export interface UpdateProfileRequest {
     emailVerified?: boolean;
     recoveryEmail?: string;
     framework?: {
-      onboardingDetails?: OnboardingDetail[];
+      onboardingDetails?: OnboardingDetail[] | string[];
     };
   };
 }
