@@ -250,7 +250,9 @@
     "leaveCourse": "مغادرة الدورة",
     "leaveCourseTitle": "إلغاء التسجيل من الدفعة",
     "leaveCourseDescription": "هل تريد إلغاء تسجيلك من هذه الدفعة؟",
-    "leaveCourseError": "تعذر مغادرة الدورة. يرجى المحاولة مرة أخرى."
+    "leaveCourseError": "تعذر مغادرة الدورة. يرجى المحاولة مرة أخرى.",
+    "enrolSuccess": "تم تسجيلك في الدورة لهذه الدفعة بنجاح",
+    "unenrolSuccess": "تم إلغاء تسجيل المستخدم من الدفعة بنجاح"
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",

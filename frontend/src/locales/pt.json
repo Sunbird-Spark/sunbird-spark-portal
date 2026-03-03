@@ -250,7 +250,9 @@
     "leaveCourse": "Sair do curso",
     "leaveCourseTitle": "Cancelamento de inscrição na turma",
     "leaveCourseDescription": "Deseja cancelar sua inscrição nesta turma?",
-    "leaveCourseError": "Não foi possível sair do curso. Tente novamente."
+    "leaveCourseError": "Não foi possível sair do curso. Tente novamente.",
+    "enrolSuccess": "Inscrição no curso para esta turma realizada com sucesso",
+    "unenrolSuccess": "Cancelamento de inscrição da turma realizado com sucesso"
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",

@@ -74,6 +74,11 @@ export default function CourseProgressSection({
       await queryClient.invalidateQueries({ queryKey: ["userEnrollments"] });
       await queryClient.invalidateQueries({ queryKey: ["contentState"] });
       setShowUnenrolDialog(false);
+      toast({
+        title: t("success"),
+        description: t("courseDetails.unenrolSuccess"),
+        variant: "default",
+      });
       navigate(`/collection/${collectionId}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : undefined;

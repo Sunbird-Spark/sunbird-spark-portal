@@ -250,7 +250,9 @@
     "leaveCourse": "Leave course",
     "leaveCourseTitle": "Batch Unenrolment",
     "leaveCourseDescription": "Do you want to unenrol from this batch?",
-    "leaveCourseError": "Unable to leave the course. Please try again."
+    "leaveCourseError": "Unable to leave the course. Please try again.",
+    "enrolSuccess": "Course enroled for this batch successfully",
+    "unenrolSuccess": "User unenroled from the batch successfully"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",

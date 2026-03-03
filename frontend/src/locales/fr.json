@@ -250,7 +250,9 @@
     "leaveCourse": "Quitter le cours",
     "leaveCourseTitle": "Désinscription du lot",
     "leaveCourseDescription": "Voulez-vous vous désinscrire de ce lot ?",
-    "leaveCourseError": "Impossible de quitter le cours. Veuillez réessayer."
+    "leaveCourseError": "Impossible de quitter le cours. Veuillez réessayer.",
+    "enrolSuccess": "Inscription au cours pour ce lot réussie",
+    "unenrolSuccess": "Désinscription du lot réussie"
   },
   "profileDataSharing": {
     "cardTitle": "Partage des données de profil",
