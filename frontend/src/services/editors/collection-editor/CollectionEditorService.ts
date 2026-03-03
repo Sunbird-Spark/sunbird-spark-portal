@@ -184,8 +184,10 @@ export class CollectionEditorService {
             return {};
         }
 
-        const categoryResponse = await getClient().get('/object/category/definition/v1/read/obj-cat:course_collection_all?fields=objectMetadata,forms');
-
+        const categoryResponse = await getClient().post('/object/category/definition/v1/read?fields=objectMetadata,forms,name,label', {
+            request: { objectCategoryDefinition:{ objectType, name: primaryCategory, channel  } }
+        });
+        
         const config = (categoryResponse as any)?.data?.objectCategoryDefinition?.objectMetadata?.config;
         if (!config) {
             return {};
