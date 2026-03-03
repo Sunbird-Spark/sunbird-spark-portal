@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
-import { generateKongToken, refreshSessionTTL } from '../services/kongAuthService.js';
+import { generateKongToken, refreshSessionTTL, isSessionNearExpiry } from '../services/kongAuthService.js';
 import { saveSession } from '../utils/sessionUtils.js';
 
 export const registerDeviceWithKong = () => {
@@ -9,10 +9,9 @@ export const registerDeviceWithKong = () => {
         logger.info(`registerDeviceWithKong :: ${req.method} ${req.originalUrl}`);
         // Reuse existing token — only refresh if session is near expiry
         if (req.session.kongToken) {
-            const isAuthenticated = req.session.userId && req.oidc?.isAuthenticated;
             const isAnonymous = !req.session.userId;
 
-            if (isAuthenticated || isAnonymous) {
+            if (!isSessionNearExpiry(req)) {
                 if (isAnonymous) {
                     logger.info('ANONYMOUS_KONG_TOKEN :: session still valid, skipping refresh');
                 }
