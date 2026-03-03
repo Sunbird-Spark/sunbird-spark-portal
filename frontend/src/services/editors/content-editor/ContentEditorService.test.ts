@@ -196,8 +196,9 @@ describe('ContentEditorService', () => {
 
       expect(result.config.previewConfig).toBeDefined();
       expect(result.config.previewConfig.repos).toEqual(['/content-plugins/renderer']);
-      expect(result.config.previewConfig.plugins).toHaveLength(2);
+      expect(result.config.previewConfig.plugins).toHaveLength(1);
       expect(result.config.previewConfig.showEndPage).toBe(false);
+      expect(result.config.previewConfig.showStartPage).toBe(true);
     });
 
     it('should set user orgIds from tags', async () => {

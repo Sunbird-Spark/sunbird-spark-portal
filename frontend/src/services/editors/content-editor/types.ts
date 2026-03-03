@@ -57,6 +57,7 @@ export interface ContentEditorWindowConfig {
       webLink: string;
     };
     showEndPage: boolean;
+    showStartPage?: boolean;
   };
   enableTelemetryValidation: boolean;
   cloudStorage: {
