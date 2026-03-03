@@ -53,20 +53,14 @@ export const useCertificateDownload = () => {
                 throw new Error('Certificate is not yet generated or available for this course.');
             }
 
-            console.log('Downloading certificate:', { certId, templateUrl });
-
             // Step 3: Download processed certificate SVG from API
             // Pass template URL in header (required by RC service)
             const response = await certificateService.downloadCertificate(certId, templateUrl);
             const svgContent = response.data;
 
-            console.log('Processed certificate SVG received, length:', svgContent?.length);
-
             if (!svgContent || typeof svgContent !== 'string' || svgContent.trim().length === 0) {
                 throw new Error('No certificate SVG received from server.');
             }
-
-            console.log('SVG preview:', svgContent.substring(0, 500));
 
             // Step 4: Convert SVG → PDF and trigger download
             await convertSvgToOutput(svgContent, { fileName: courseName || 'certificate' });
