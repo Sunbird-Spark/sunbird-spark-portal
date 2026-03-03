@@ -5,6 +5,7 @@ import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
 import PageLoader from '@/components/common/PageLoader';
 import { useCollection } from '@/hooks/useCollection';
+import { useCurrentUserId } from '@/hooks/useUser';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
@@ -22,6 +23,11 @@ const CourseDashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
+  const { data: currentUserId } = useCurrentUserId();
+  const isOwner =
+    !!collectionData?.createdBy &&
+    !!currentUserId &&
+    collectionData.createdBy === currentUserId;
 
   useImpression({ type: 'view', pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
   const { interact } = useInteract();
@@ -131,7 +137,7 @@ const CourseDashboardPage: React.FC = () => {
               <BatchesTab collectionId={collectionId} />
             )}
             {collectionId && activeTab === 'certificates' && (
-              <CertificatesTab collectionId={collectionId} />
+              <CertificatesTab collectionId={collectionId} isOwner={isOwner} />
             )}
           </div>
         </div>

@@ -32,7 +32,7 @@ const SignUp: React.FC = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
-    const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
+    const [otp, setOtp] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -47,7 +47,7 @@ const SignUp: React.FC = () => {
 
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
     const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword && isTermsAccepted);
-    const isOtpValid = OTP_REGEX.test(otp.join(''));
+    const isOtpValid = OTP_REGEX.test(otp);
 
     const handleOtpSuccess = (response: any, isResend = false) => {
         captchaRef.current?.reset();
@@ -199,8 +199,8 @@ const SignUp: React.FC = () => {
         });
     };
 
-    const handleVerifyOtp = () => {        
-        const request = signupService.createOtpVerificationRequest(emailOrMobile, otp.join(''));
+    const handleVerifyOtp = () => {
+        const request = signupService.createOtpVerificationRequest(emailOrMobile, otp);
 
         verifyOtpMutation.mutate(
             { request },

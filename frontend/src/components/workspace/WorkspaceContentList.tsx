@@ -8,17 +8,19 @@ import {
 } from "@/components/common/DropdownMenu";
 import { Button } from "@/components/common/Button";
 import { cn, formatTimeAgo } from "@/lib/utils";
-import { type WorkspaceItem } from "@/types/workspaceTypes";
+import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
 import {
   CONTENT_TYPE_COLORS,
   STATUS_CONFIG,
   getWorkspaceItemActionVisibility,
   getPrimaryCategoryIcon,
 } from "@/services/workspace";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import CardThumbnailBackground from "./CardThumbnailBackground";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
+  userRole?: UserRole;
   lockedContentMap?: Record<string, { creatorName: string }>;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
@@ -27,20 +29,23 @@ interface WorkspaceContentListProps {
 
 const WorkspaceContentList = ({
   items,
+  userRole,
   lockedContentMap = {},
   onEdit,
   onDelete,
   onView,
 }: WorkspaceContentListProps) => {
+  const { t } = useAppI18n();
+  
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border">
       {/* Table Header */}
       <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-muted/50 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide font-rubik">
-        <div className="col-span-5 sm:col-span-4">Title</div>
-        <div className="col-span-2 hidden sm:block">Type</div>
-        <div className="col-span-2">Status</div>
-        <div className="col-span-2 hidden md:block">Modified</div>
-        <div className="col-span-3 sm:col-span-2 text-right">Actions</div>
+        <div className="col-span-5 sm:col-span-4">{t('workspace.tableHeaders.title')}</div>
+        <div className="col-span-2 hidden sm:block">{t('workspace.tableHeaders.type')}</div>
+        <div className="col-span-2">{t('workspace.tableHeaders.status')}</div>
+        <div className="col-span-2 hidden md:block">{t('workspace.tableHeaders.modified')}</div>
+        <div className="col-span-3 sm:col-span-2 text-right">{t('workspace.tableHeaders.actions')}</div>
       </div>
 
       {/* Table Body */}
@@ -51,8 +56,9 @@ const WorkspaceContentList = ({
           const timeAgo = item.updatedAt ? formatTimeAgo(new Date(item.updatedAt)) : '—';
           const lockInfo = lockedContentMap[item.id];
 
-          const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status);
+          const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
           const isLocked = !!lockInfo;
+          const hasActions = showView || canEdit || showDelete;
 
           return (
             <div
@@ -105,10 +111,10 @@ const WorkspaceContentList = ({
                   <span className="relative group/lock text-amber-600 cursor-pointer">
                     <FiLock className="w-4 h-4" />
                     <span className="absolute top-full right-0 mt-1.5 hidden group-hover/lock:block whitespace-nowrap rounded bg-foreground px-2 py-1 text-xs text-background shadow-md z-50">
-                      {`This content is locked by ${lockInfo.creatorName}`}
+                      {t('workspaceCard.lockedBy', { name: lockInfo.creatorName })}
                     </span>
                   </span>
-                ) : (
+                ) : hasActions ? (
                   <>
                     {showView && (
                       <Button
@@ -139,26 +145,26 @@ const WorkspaceContentList = ({
                       <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
                         {showView && (
                           <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
-                            <FiEye className="w-4 h-4" /> View
+                            <FiEye className="w-4 h-4" /> {t('workspaceCard.view')}
                           </DropdownMenuItem>
                         )}
                         {canEdit && (
                           <DropdownMenuItem onClick={() => onEdit(item.id)} className="font-rubik cursor-pointer gap-2">
-                            <FiEdit className="w-4 h-4" /> Edit
+                            <FiEdit className="w-4 h-4" /> {t('workspaceCard.edit')}
                           </DropdownMenuItem>
                         )}
                         {showDelete && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onDelete(item.id)} className="font-rubik cursor-pointer gap-2 text-destructive focus:text-destructive">
-                              <FiTrash2 className="w-4 h-4" /> Delete
+                              <FiTrash2 className="w-4 h-4" /> {t('workspaceCard.delete')}
                             </DropdownMenuItem>
                           </>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </>
-                )}
+                ) : null}
               </div>
             </div>
           );

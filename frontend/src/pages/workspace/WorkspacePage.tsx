@@ -1,14 +1,7 @@
 /* eslint-disable max-lines */
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/home/Sheet";
 import PageLoader from "@/components/common/PageLoader";
-import Footer from "@/components/home/Footer";
-import HomeSidebar from "@/components/home/HomeSidebar";
 import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
 import WorkspaceToolbar from "@/components/workspace/WorkspaceToolbar";
 import { ContentService } from "@/services/ContentService";
@@ -17,15 +10,12 @@ import { useOrganizationSearch } from "@/hooks/useOrganization";
 import { useChannel } from "@/hooks/useChannel";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useSidebarState } from "@/hooks/useSidebarState";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
 import userProfileService from "@/services/UserProfileService";
-import Header from "@/components/home/Header";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
@@ -48,12 +38,12 @@ const COLLECTION_EDITOR_OPTIONS = ['course', 'collection'];
 const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
 const EDITOR_OPTION_LABELS: Record<string, string> = {
-  'quiz': 'Quiz & Assessment',
-  'story': 'Story & Game',
-  'course': 'Course',
-  'collection': 'Collection',
-  'question-set': 'Question Set',
-  'question-editor': 'Question Set',
+  'quiz': 'workspace.editorOptions.quiz',
+  'story': 'workspace.editorOptions.story',
+  'course': 'workspace.editorOptions.course',
+  'collection': 'workspace.editorOptions.collection',
+  'question-set': 'workspace.editorOptions.questionSet',
+  'question-editor': 'workspace.editorOptions.questionSet',
 };
 
 const COLLECTION_CONTENT_CONFIG: Record<string, {
@@ -61,35 +51,35 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
   contentType: string;
   primaryCategory: string;
   resourceType: string;
-  description: string;
+  descriptionKey: string;
 }> = {
   course: {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Course',
     primaryCategory: 'Course',
     resourceType: 'Course',
-    description: 'Enter description for Course',
+    descriptionKey: 'workspace.collectionDescriptions.course',
   },
   'content-playlist': {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Collection',
     primaryCategory: 'Content Playlist',
     resourceType: 'Collection',
-    description: 'Enter description for Collection'
+    descriptionKey: 'workspace.collectionDescriptions.contentPlaylist'
   },
   'digital-textbook': {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'TextBook',
     primaryCategory: 'Digital Textbook',
     resourceType: 'Collection',
-    description: 'Enter description for Digital Textbook'
+    descriptionKey: 'workspace.collectionDescriptions.digitalTextbook'
   },
   'question-paper': {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'Collection',
     primaryCategory: 'Question paper',
     resourceType: 'Collection',
-    description: 'Enter description for Question Paper'
+    descriptionKey: 'workspace.collectionDescriptions.questionPaper'
   },
 };
 
@@ -102,10 +92,9 @@ const COLLECTION_MIMETYPES = [
 
 const contentService = new ContentService();
 /** Option IDs that should open the generic (upload) editor */
-const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video'];
+const GENERIC_EDITOR_OPTIONS = ['upload-content', 'upload-large-content'];
 
 const WorkspacePage = () => {
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { data: userData } = useUserRead();
   const slug = userData?.data?.response?.channel;
@@ -141,8 +130,6 @@ const WorkspacePage = () => {
 
   const { toast } = useToast();
   const { t } = useAppI18n();
-  const [activeNav, setActiveNav] = useState("workspace");
-  const { isOpen: isSidebarOpen, setSidebarOpen: setIsSidebarOpen } = useSidebarState(!isMobile);
 
   // Derive available roles from user profile
   const userRoles: string[] = useMemo(() => {
@@ -273,7 +260,7 @@ const WorkspacePage = () => {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
-      navigate('/workspace/content/edit/generic');
+      navigate(optionId === 'upload-content' ? '/workspace/content/edit/generic' : '/workspace/content/edit/editorforlargecontent');
       return;
     } else {
       setShowCreateModal(false);
@@ -322,14 +309,14 @@ const WorkspacePage = () => {
       const contentId = response.data?.identifier || response.data?.content_id;
       if (!contentId) {
         console.error("Content creation response missing identifier:", response);
-        throw new Error("Unexpected server response. Please try again.");
+        throw new Error(t("workspace.errors.unexpectedResponse"));
       }
       setShowResourceFormDialog(false);
       setSelectedOption(null);
       navigate(`/edit/content-editor/${contentId}`);
     } catch (error) {
       console.error('Failed to create content:', error);
-      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
+      toast({ title: t("workspace.errors.creationFailed"), description: t("workspace.errors.unableToCreate"), variant: "destructive" });
     } finally {
       setIsCreating(false);
     }
@@ -338,13 +325,19 @@ const WorkspacePage = () => {
   const handleCollectionCreate = async (name: string, optionId: string, description?: string) => {
     const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
     const config = COLLECTION_CONTENT_CONFIG[optionId];
+    if (!config) {
+      throw new Error(t("workspace.errors.invalidContentType"));
+    }
     const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
+
+    // Destructure to exclude descriptionKey from being sent to API
+    const { descriptionKey, ...apiConfig } = config;
 
     const response = await contentService.contentCreate(name, {
       createdBy,
       creator,
-      ...config,
-      ...(description ? { description } : {}),
+      ...apiConfig,
+      ...(description ? { description } : { description: t(descriptionKey) }),
       organisation,
       createdFor,
       targetFWIds,
@@ -352,7 +345,7 @@ const WorkspacePage = () => {
     const contentId = response.data?.identifier || response.data?.content_id;
     if (!contentId) {
       console.error("Collection creation response missing identifier:", response);
-      throw new Error("Unexpected server response. Please try again.");
+      throw new Error(t("workspace.errors.unexpectedResponse"));
     }
     navigate(`/edit/collection-editor/${contentId}`);
   };
@@ -370,7 +363,7 @@ const WorkspacePage = () => {
     const contentId = response?.identifier;
     if (!contentId) {
       console.error("Question set creation response missing identifier:", response);
-      throw new Error("Unexpected server response. Please try again.");
+      throw new Error(t("workspace.errors.unexpectedResponse"));
     }
 
     navigate(`/edit/quml-editor/${contentId}`);
@@ -390,7 +383,7 @@ const WorkspacePage = () => {
       setSelectedOption(null);
     } catch (error) {
       console.error('Failed to create content:', error);
-      toast({ title: "Creation Failed", description: "Unable to create content. Please try again.", variant: "destructive" });
+      toast({ title: t("workspace.errors.creationFailed"), description: t("workspace.errors.unableToCreate"), variant: "destructive" });
     } finally {
       setIsCreating(false);
     }
@@ -508,38 +501,8 @@ const WorkspacePage = () => {
   };
 
   return (
-    <div className="workspace-container">
-      <Header
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={() => setIsSidebarOpen(true)}
-      />
-
-      <div className="flex flex-1 relative transition-all">
-        {isMobile ? (
-          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-            <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
-              <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
-              <HomeSidebar
-                activeNav={activeNav}
-                onNavChange={(nav) => {
-                  setActiveNav(nav);
-                  setIsSidebarOpen(false);
-                }}
-              />
-            </SheetContent>
-          </Sheet>
-        ) : (
-          <div className="relative shrink-0 sticky top-[4.5rem] self-start z-20">
-            <HomeSidebar
-              activeNav={activeNav}
-              onNavChange={setActiveNav}
-              collapsed={!isSidebarOpen}
-              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-            />
-          </div>
-        )}
-        <div className="flex-1 flex flex-col min-w-0">
-          <main className="workspace-main-content">
+    <div className="flex-1 flex flex-col min-w-0">
+      <main className="workspace-main-content">
             {showContent && isCountsLoading && isLoading ? (
               <PageLoader message={t('loading')} fullPage={false} />
             ) : (
@@ -590,7 +553,7 @@ const WorkspacePage = () => {
             onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
             onSubmit={handleContentNameSubmit}
             isLoading={isCreating}
-            optionTitle={selectedOption ? EDITOR_OPTION_LABELS[selectedOption] : undefined}
+            optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
             optionId={selectedOption ?? undefined}
             submitButtonProps={{
               'data-edataid': 'workspace-create-collection-btn',
@@ -606,16 +569,13 @@ const WorkspacePage = () => {
             orgChannelId={orgChannelId}
             orgFramework={orgFramework}
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
-            title={selectedOption ? `${t('workspace.createContent')} ${EDITOR_OPTION_LABELS[selectedOption] || ''}`.trim() : t('workspace.createContent')}
+            title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('workspace.createContent')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
             submitButtonProps={{
                'data-edataid': 'workspace-create-resource-btn',
                'data-pageid': 'workspace',
                'data-cdata': JSON.stringify([{ id: selectedOption || 'unknown', type: 'EditorType' }])
             }}
           />
-        </div>
-      </div>
-      <Footer />
     </div>
   );
 };

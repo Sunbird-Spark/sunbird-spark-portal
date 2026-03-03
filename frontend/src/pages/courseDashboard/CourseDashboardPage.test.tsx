@@ -3,6 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { useParams } from 'react-router-dom';
 import CourseDashboardPage from './CourseDashboardPage';
+import { useCollection } from '@/hooks/useCollection';
+import { useCurrentUserId } from '@/hooks/useUser';
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
@@ -16,10 +18,14 @@ vi.mock('react-router-dom', () => ({
 // Mock hooks and components
 vi.mock('@/hooks/useCollection', () => ({
   useCollection: vi.fn(() => ({
-    data: { title: 'Test Course Name' },
+    data: { title: 'Test Course Name', createdBy: 'user-abc' },
     isLoading: false,
     isError: false,
   })),
+}));
+
+vi.mock('@/hooks/useUser', () => ({
+  useCurrentUserId: vi.fn(() => ({ data: 'user-abc' })),
 }));
 
 vi.mock('@/components/home/Header', () => ({
@@ -33,7 +39,9 @@ vi.mock('./BatchesTab', () => ({
   default: () => <div data-testid="batches-tab-mock" />,
 }));
 vi.mock('./CertificatesTab', () => ({
-  default: () => <div data-testid="certificates-tab-mock" />,
+  default: ({ isOwner }: { isOwner: boolean }) => (
+    <div data-testid="certificates-tab-mock" data-is-owner={String(isOwner)} />
+  ),
 }));
 
 describe('CourseDashboardPage', () => {
@@ -82,5 +90,39 @@ describe('CourseDashboardPage', () => {
     render(<CourseDashboardPage />);
     expect(screen.getByTestId('certificates-tab-mock')).toBeInTheDocument();
     expect(screen.queryByTestId('batches-tab-mock')).not.toBeInTheDocument();
+  });
+
+  it('passes isOwner=true to CertificatesTab when uid matches createdBy', () => {
+    (useParams as Mock).mockReturnValue({ collectionId: 'col_123', tab: 'certificates' });
+    (useCollection as Mock).mockReturnValue({
+      data: { title: 'Test Course', createdBy: 'user-abc' },
+      isLoading: false,
+      isError: false,
+    });
+    (useCurrentUserId as Mock).mockReturnValue({ data: 'user-abc' });
+
+    render(<CourseDashboardPage />);
+    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-is-owner', 'true');
+  });
+
+  it('passes isOwner=false to CertificatesTab when uid does not match createdBy', () => {
+    (useParams as Mock).mockReturnValue({ collectionId: 'col_123', tab: 'certificates' });
+    (useCollection as Mock).mockReturnValue({
+      data: { title: 'Test Course', createdBy: 'user-abc' },
+      isLoading: false,
+      isError: false,
+    });
+    (useCurrentUserId as Mock).mockReturnValue({ data: 'user-xyz' });
+
+    render(<CourseDashboardPage />);
+    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-is-owner', 'false');
+  });
+
+  it('passes isOwner=false to CertificatesTab when uid is not yet loaded', () => {
+    (useParams as Mock).mockReturnValue({ collectionId: 'col_123', tab: 'certificates' });
+    (useCurrentUserId as Mock).mockReturnValue({ data: undefined });
+
+    render(<CourseDashboardPage />);
+    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-is-owner', 'false');
   });
 });

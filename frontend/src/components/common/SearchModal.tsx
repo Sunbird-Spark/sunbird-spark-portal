@@ -29,12 +29,15 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
     request: {
       limit: 3,
       query: debouncedQuery || "", // Empty string to fetch default results
-      filters: { objectType: "Content" },
+      filters: { objectType: ["Content", "QuestionSet"] },
     },
     enabled: isOpen,
   });
 
-  const results: ContentSearchItem[] = data?.data?.content ?? [];
+  const results: ContentSearchItem[] = [
+    ...(data?.data?.content ?? []),
+    ...(data?.data?.QuestionSet ?? []),
+  ];
 
   // Store the previously focused element and restore focus on close
   useEffect(() => {

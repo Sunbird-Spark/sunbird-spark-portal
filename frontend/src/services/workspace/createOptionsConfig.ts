@@ -1,6 +1,5 @@
 import {
   FiBook,
-  FiFileText,
   FiVideo,
   FiHelpCircle,
   FiGrid,
@@ -47,17 +46,17 @@ export function getEditorCategories(): EditorCategory[] {
       headerStyle: { background: 'var(--category-gradient-2)' },
       options: [
         {
-          id: 'upload-pdf',
-          title: 'PDF Document',
-          description: 'Upload PDF files, presentations, and documents for learners.',
-          icon: FiFileText,
+          id: 'upload-content',
+          title: 'Upload Content',
+          description: 'Upload PDFs, videos, presentations, and documents for learners.',
+          icon: FiUpload,
           iconBg: 'bg-sunbird-ginger/15',
           iconColor: 'text-sunbird-brick',
         },
         {
-          id: 'upload-video',
-          title: 'Video Content',
-          description: 'Upload video content from a local device (MP4, etc.) or via a YouTube link.',
+          id: 'upload-large-content',
+          title: 'Upload Large Content',
+          description: 'Upload large video files from your local device (MP4, etc.)',
           icon: FiVideo,
           iconBg: 'bg-sunbird-ginger/15',
           iconColor: 'text-sunbird-brick',

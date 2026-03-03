@@ -100,13 +100,13 @@ export default function ContentNameDialog({
         </p>
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium font-rubik text-foreground mb-1">
-            {t('name')}
+            {t('workspace.name')}
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={`Enter ${optionTitle?.toLowerCase() || "content"} name`}
+            placeholder={t('workspace.enterName', { type: optionTitle?.toLowerCase() || "content" })}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick mb-4"
             autoFocus
             disabled={isLoading}

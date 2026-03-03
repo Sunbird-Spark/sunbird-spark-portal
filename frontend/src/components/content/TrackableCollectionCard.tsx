@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { TrackableCollection } from "@/types/TrackableCollections";
 import { FiBookOpen } from "react-icons/fi";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 
 interface TrackableCollectionCardProps {
@@ -9,6 +10,8 @@ interface TrackableCollectionCardProps {
 }
 
 const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps) => {
+  const { t } = useAppI18n();
+  
   return (
     <Link
       to={`/collection/${course.collectionId}`}
@@ -37,7 +40,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
             {course.courseName}
           </h4>
           <p className="text-[1rem] font-normal text-sunbird-obsidian mb-3 font-['Rubik']">
-            Completed : <span className="font-medium">{course.completionPercentage}%</span>
+            {t('trackableCollection.completed')} : <span className="font-medium">{course.completionPercentage}%</span>
           </p>
           {/* Progress Bar */}
           <div 

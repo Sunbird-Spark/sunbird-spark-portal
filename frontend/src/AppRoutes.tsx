@@ -2,10 +2,10 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { ProtectedRoute } from './rbac/ProtectedRoute';
+import PageLayout from './components/layout/PageLayout';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
-import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';
@@ -36,18 +36,12 @@ const AppRoutes: React.FC = () => {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public routes */}
+        {/* Standalone public routes (no shared sidebar layout) */}
         <Route path="/" element={<Index />} />
-        <Route path="/home" element={<Home />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/help-support" element={<HelpSupport />} />
-        <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/my-learning" element={<MyLearning />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
@@ -59,17 +53,7 @@ const AppRoutes: React.FC = () => {
           <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardPage />} />
         </Route>
 
-        {/* Public admin routes */}
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
-
-        {/* Protected routes */}
-        <Route path="/user-management" element={<UserManagementPage />} />
-        <Route path="/workspace" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
-            <WorkspacePage />
-          </ProtectedRoute>
-        } />
+        {/* Full-screen routes (own layout, no shared sidebar) */}
         <Route path="/workspace/review/:contentId" element={
           <ProtectedRoute allowedRoles={['CONTENT_REVIEWER']}>
             <ContentViewPage mode="review" />
@@ -80,9 +64,8 @@ const AppRoutes: React.FC = () => {
             <ContentViewPage mode="view" />
           </ProtectedRoute>
         } />
-        <Route path="/reports/platform" element={<PlatformReports />} />
-        <Route path="/reports/course/:courseId" element={<CourseReport />} />
-        <Route path="/reports/user/:userId" element={<UserReport />} />
+
+        {/* Editor routes (full-screen, no sidebar layout) */}
         <Route path="/create" element={
           <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
             <CreateContentPage />
@@ -94,17 +77,15 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         <Route path="/edit/collection-editor/:contentId" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR','CONTENT_REVIEWER']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
             <CollectionEditorPage />
           </ProtectedRoute>
         } />
         <Route path="/edit/quml-editor/:contentId" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR','CONTENT_REVIEWER']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
             <QumlEditorPage />
           </ProtectedRoute>
         } />
-
-        {/* Generic Editor routes */}
         <Route path="/workspace/content/edit/generic" element={
           <ProtectedRoute allowedRoles={['CONTENT_CREATOR']}>
             <GenericEditorPage />
@@ -125,6 +106,38 @@ const AppRoutes: React.FC = () => {
             <GenericEditorPage />
           </ProtectedRoute>
         } />
+
+        {/* Layout routes — share Header, Sidebar, Footer via PageLayout */}
+        <Route element={<PageLayout />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/my-learning" element={<MyLearning />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/help-support" element={<HelpSupport />} />
+          <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/reports/platform" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <PlatformReports />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports/course/:courseId" element={
+            <ProtectedRoute allowedRoles={['COURSE_MENTOR', 'CONTENT_CREATOR']}>
+              <CourseReport />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports/user/:userId" element={<UserReport />} />
+          <Route path="/user-management" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <UserManagementPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/workspace" element={
+            <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
+              <WorkspacePage />
+            </ProtectedRoute>
+          } />
+        </Route>
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

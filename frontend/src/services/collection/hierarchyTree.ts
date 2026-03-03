@@ -45,3 +45,20 @@ export function getFirstLeafContentIdFromHierarchy(root: HierarchyContentNode | 
   const first = tree.first((node) => !isCollection(node.model));
   return first?.model?.identifier;
 }
+
+/**
+ * Finds a content node by identifier in the hierarchy (any depth). Returns the node or undefined.
+ */
+export function findNodeById(
+  root: HierarchyContentNode | null | undefined,
+  id: string
+): HierarchyContentNode | undefined {
+  if (!root || !id) return undefined;
+  if (root.identifier === id) return root;
+  const children = root.children ?? [];
+  for (let i = 0; i < children.length; i++) {
+    const found = findNodeById(children[i], id);
+    if (found) return found;
+  }
+  return undefined;
+}

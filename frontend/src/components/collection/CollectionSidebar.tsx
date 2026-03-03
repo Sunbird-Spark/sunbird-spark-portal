@@ -6,6 +6,7 @@ import {
 } from "./collapsible";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import type { HierarchyContentNode } from "@/types/collectionTypes";
+import type { ContentAttemptInfo } from "@/services/collection/enrollmentMapper";
 import ContentRow from "./ContentRow";
 
 const COLLECTION_MIME = "application/vnd.ekstep.content-collection";
@@ -33,6 +34,7 @@ interface CollectionSidebarProps {
   activeContentId?: string | null;
   contentBlocked?: boolean;
   contentStatusMap?: Record<string, number>;
+  contentAttemptInfoMap?: Record<string, ContentAttemptInfo>;
 }
 
 /** Renders sub-units as labels and content as rows (no collapsibles). */
@@ -43,6 +45,7 @@ function ExpandedUnitContent({
   contentBlocked,
   activeContentId,
   contentStatusMap,
+  contentAttemptInfoMap,
   t,
   depth = 0,
 }: {
@@ -52,6 +55,7 @@ function ExpandedUnitContent({
   contentBlocked: boolean;
   activeContentId: string | null;
   contentStatusMap?: Record<string, number>;
+  contentAttemptInfoMap?: Record<string, ContentAttemptInfo>;
   t: (key: string) => string;
   depth?: number;
 }) {
@@ -77,6 +81,7 @@ function ExpandedUnitContent({
                 contentBlocked={contentBlocked}
                 activeContentId={activeContentId}
                 contentStatusMap={contentStatusMap}
+                contentAttemptInfoMap={contentAttemptInfoMap}
                 t={t}
                 depth={depth + 1}
               />
@@ -87,10 +92,12 @@ function ExpandedUnitContent({
         return (
           <div
             key={node.identifier}
-            data-edataid="collection-sidebar-content-click"
-            data-pageid="collection-detail"
-            data-objectid={node.identifier}
-            data-objecttype="Content"
+            data-edataid="collection-content-click"
+            data-pageid={batchId ? 'course-consumption' : 'collection-detail'}
+            data-objid={node.identifier}
+            data-objtype={node.contentType || 'Content'}
+            data-objver={(node as any).pkgVersion || '1.0'}
+            data-cdata={JSON.stringify([{ id: collectionId, type: 'Collection' }])}
           >
             <ContentRow
               node={node}
@@ -98,6 +105,7 @@ function ExpandedUnitContent({
               contentBlocked={contentBlocked}
               isActive={activeContentId === node.identifier}
               contentStatusMap={contentStatusMap}
+              contentAttemptInfoMap={contentAttemptInfoMap}
               t={t}
             />
           </div>
@@ -116,6 +124,7 @@ const CollectionSidebar = ({
   activeContentId = null,
   contentBlocked = false,
   contentStatusMap,
+  contentAttemptInfoMap,
 }: CollectionSidebarProps) => {
   const { t } = useAppI18n();
 
@@ -189,6 +198,7 @@ const CollectionSidebar = ({
                     contentBlocked={contentBlocked}
                     activeContentId={activeContentId}
                     contentStatusMap={contentStatusMap}
+                    contentAttemptInfoMap={contentAttemptInfoMap}
                     t={t}
                   />
                 </div>

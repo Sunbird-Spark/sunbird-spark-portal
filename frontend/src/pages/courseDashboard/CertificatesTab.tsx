@@ -3,13 +3,14 @@ import { useCertUserSearch, useReissueCert } from '@/hooks/useCourseDashboard';
 import type { CertUserBatch } from '@/services/CertificateTypes';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { useTelemetry } from '@/hooks/useTelemetry';
 import { FiCheckCircle, FiAward } from 'react-icons/fi';
 import { cn } from '@/lib/utils';
 import { useAppI18n } from '@/hooks/useAppI18n';
-import { useTelemetry } from '@/hooks/useTelemetry';
 
 interface CertificatesTabProps {
   collectionId: string;
+  isOwner: boolean;
 }
 
 interface ReissueTarget {
@@ -19,7 +20,7 @@ interface ReissueTarget {
   batchName: string;
 }
 
-const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
+const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner }) => {
   const { t } = useAppI18n();
   const telemetry = useTelemetry();
   const [uniqueId, setUniqueId] = useState('');
@@ -49,12 +50,20 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
       },
       {
         onSuccess: () => {
-          telemetry.audit({
-            edata: { props: ['certificate'], state: 'Reissued' },
-            object: { id: reissueTarget.userId, type: 'User' },
-          });
           setReissueStatus({ type: 'success', message: t('certificate.reissuedSuccessfully') });
           setReissueTarget(null);
+          telemetry.audit({
+            edata: {
+              type: 'certificate-reissue',
+              props: ['courseId', 'batchId', 'userIds'],
+              state: 'SUCCESS',
+            },
+            object: {
+              id: collectionId,
+              type: 'Course',
+              version: '1.0',
+            },
+          });
         },
         onError: (err: Error) => {
           setReissueStatus({ type: 'error', message: err.message ?? t('certificate.reissueFailed') });
@@ -85,8 +94,8 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
           className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-['Rubik'] transition-colors"
           disabled={searching || !uniqueId.trim()}
           data-testid="search-btn"
-          data-edataid="cert-search-submit"
-          data-pageid="course-dashboard"
+          data-edataid="certificate-user-search"
+          data-pageid="course-dashboard-certificates"
         >
           {searching ? t('certificatesTab.searching') : t('certificatesTab.search')}
         </Button>
@@ -181,32 +190,41 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                         </span>
                       </td>
                       <td className="border-b border-border p-3 text-foreground">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className={cn(
-                          "h-auto p-0 transition-colors",
-                          criteriaMet === t('certificatesTab.yes') ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
+                        {isOwner ? (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className={cn(
+                              "h-auto p-0 transition-colors",
+                              criteriaMet === t('certificatesTab.yes') ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
+                            )}
+                            data-testid={`reissue-btn-${idx}`}
+                            data-edataid="certificate-reissue-open"
+                            data-pageid="course-dashboard-certificates"
+                            data-objid={certUser.userId}
+                            data-objtype="User"
+                            disabled={criteriaMet === t('certificatesTab.no')}
+                            title={criteriaMet === t('certificatesTab.no') ? t('certificatesTab.criteriaMustBeMet') : t('certificatesTab.reissueCertificate')}
+                            onClick={() =>
+                              setReissueTarget({
+                                userId: certUser.userId,
+                                userName: certUser.userName,
+                                batchId: batch.batchId,
+                                batchName: batch.name ?? batch.batchId,
+                              })
+                            }
+                          >
+                            {t('certificate.reissue')}
+                          </Button>
+                        ) : (
+                          <span
+                            className="text-xs text-muted-foreground font-['Rubik']"
+                            data-testid={`reissue-view-only-${idx}`}
+                          >
+                            {t('certificatesTab.viewOnly')}
+                          </span>
                         )}
-                        data-testid={`reissue-btn-${idx}`}
-                        data-edataid="cert-reissue-open"
-                        data-pageid="course-dashboard"
-                        data-objectid={certUser.userId}
-                        data-objecttype="User"
-                        disabled={criteriaMet === t('certificatesTab.no')}
-                        title={criteriaMet === t('certificatesTab.no') ? t('certificatesTab.criteriaMustBeMet') : t('certificatesTab.reissueCertificate')}
-                        onClick={() =>
-                          setReissueTarget({
-                            userId: certUser.userId,
-                            userName: certUser.userName,
-                            batchId: batch.batchId,
-                            batchName: batch.name ?? batch.batchId,
-                          })
-                        }
-                      >
-                        {t('certificate.reissue')}
-                      </Button>
-                    </td>
+                      </td>
                   </tr>
                 );
               }))}
@@ -235,8 +253,8 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                 className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-['Rubik'] transition-colors"
                 onClick={handleReissueConfirm}
                 data-testid="modal-yes-btn"
-                data-edataid="cert-reissue-confirm"
-                data-pageid="course-dashboard"
+                data-edataid="certificate-reissue-confirm"
+                data-pageid="course-dashboard-certificates"
                 disabled={reissuing}
               >
                 {reissuing ? t('certificate.reissuing') : t('certificatesTab.yes')}

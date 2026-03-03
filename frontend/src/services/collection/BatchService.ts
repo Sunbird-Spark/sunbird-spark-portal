@@ -27,13 +27,17 @@ export class BatchService {
   public contentStateRead(
     request: ContentStateReadRequest
   ): Promise<ApiResponse<ContentStateReadResponse>> {
+    const body: Record<string, unknown> = {
+      userId: request.userId,
+      courseId: request.courseId,
+      batchId: request.batchId,
+      contentIds: request.contentIds,
+    };
+    if (request.fields?.length) {
+      body.fields = request.fields;
+    }
     return getClient().post<ContentStateReadResponse>('/course/v1/content/state/read', {
-      request: {
-        userId: request.userId,
-        courseId: request.courseId,
-        batchId: request.batchId,
-        contentIds: request.contentIds,
-      },
+      request: body,
     });
   }
 
@@ -45,11 +49,30 @@ export class BatchService {
       status: item.status,
       courseId: request.courseId,
       batchId: request.batchId,
+      ...(item.lastAccessTime != null && { lastAccessTime: item.lastAccessTime }),
     }));
+    const body: Record<string, unknown> = {
+      userId: request.userId,
+      contents,
+    };
+    if (request.assessments?.length) {
+      body.assessments = request.assessments;
+    }
     return getClient().patch<unknown>('/course/v1/content/state/update', {
+      request: body,
+    });
+  }
+
+  public forceSyncActivityAgg(request: {
+    userId: string;
+    courseId: string;
+    batchId: string;
+  }): Promise<ApiResponse<unknown>> {
+    return getClient().post<unknown>('/user/v1/activity/agg', {
       request: {
         userId: request.userId,
-        contents,
+        courseId: request.courseId,
+        batchId: request.batchId,
       },
     });
   }

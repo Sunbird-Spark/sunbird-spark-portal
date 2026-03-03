@@ -32,7 +32,7 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
     // Build active filters — memoized to prevent infinite re-renders
     const activeFilters = useMemo(() => {
         return {
-            objectType: 'Content',
+            objectType: ['Content', 'QuestionSet'],
             ...Object.fromEntries(
                 Object.entries(filters).filter(([, values]) => values.length > 0)
             ),
@@ -67,8 +67,11 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
 
     // Update display items when data arrives
     useEffect(() => {
-        if (data?.data?.content) {
-            const newContent = data.data.content;
+        if (data?.data?.content || data?.data?.QuestionSet) {
+            const newContent = [
+                ...(data.data?.content ?? []),
+                ...(data.data?.QuestionSet ?? []),
+            ];
             if (newContent.length < limit) {
                 setHasMore(false);
             }

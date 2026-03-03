@@ -4,12 +4,10 @@ import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers, FiBarChart2, FiPieChart } fr
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { PermissionGate } from "@/rbac/PermissionGate";
-import { Feature } from "@/services/PermissionService";
 import { usePermissions } from "@/hooks/usePermission";
+import type { Feature } from "@/services/PermissionService";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { useIsAdmin } from "@/hooks/useUser";
-
+import { clearForceSyncUsed } from "@/services/forceSyncStorage";
 interface HomeSidebarProps {
     activeNav: string;
     onNavChange: (nav: string) => void;
@@ -60,12 +58,12 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
-    const { isAuthenticated, isLoading } = usePermissions();
+    const { isAuthenticated, isLoading, hasAnyRole, canAccessFeature } = usePermissions();
     const { t } = useAppI18n();
 
     const mainNavItems = NAV_ITEM_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
     const bottomNavItems = BOTTOM_NAV_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
-    const isAdmin = useIsAdmin();
+    const isAdmin = hasAnyRole(['ORG_ADMIN']);
 
     if (isLoading || !isAuthenticated || location.pathname === "/") {
         return null;
@@ -84,6 +82,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
         if (item.id === "logout") {
+            clearForceSyncUsed();
             window.location.href = item.path;
             return;
         }
@@ -119,19 +118,17 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                             data-edataid={`nav-${item.id}`}
                             data-pageid="sidebar"
                         >
-                            <Icon className={`w-5 h-5 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
-                            {!collapsed && <span className="text-[1.125rem]">{item.label}</span>}
+                            <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
+                            {!collapsed && <span className="text-[1.125rem] whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>}
                         </button>
                     </li>
                 );
 
+                if (item.feature && !canAccessFeature(item.feature)) return null;
+
                 return (
                     <React.Fragment key={item.id}>
-                        {item.feature ? (
-                            <PermissionGate feature={item.feature} hide>
-                                {listItem}
-                            </PermissionGate>
-                        ) : listItem}
+                        {listItem}
                     </React.Fragment>
                 );
             })}

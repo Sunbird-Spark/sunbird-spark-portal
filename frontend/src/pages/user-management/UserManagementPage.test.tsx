@@ -16,28 +16,10 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: { isUserAuthenticated: () => true, getUserId: () => 'uid1', getAuthInfo: vi.fn() },
 }));
 
-vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }));
-
-vi.mock('@/hooks/useSidebarState', () => ({
-  useSidebarState: () => ({ isOpen: true, setSidebarOpen: vi.fn(), toggleSidebar: vi.fn() }),
-}));
-
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (k: string) => k }),
-}));
-
-vi.mock('@/components/home/Header', () => ({
-  default: () => <header data-testid="header" />,
-}));
-
-vi.mock('@/components/home/HomeSidebar', () => ({
-  default: () => <nav data-testid="home-sidebar" />,
-}));
-
-vi.mock('@/components/home/Footer', () => ({
-  default: () => <footer data-testid="footer" />,
 }));
 
 vi.mock('@/hooks/useUserRead', () => ({
@@ -169,25 +151,18 @@ describe('UserManagementPage', () => {
 
   /* ── Layout ── */
   describe('layout', () => {
-    it('renders the page title "User Management"', () => {
+    it('renders the page title "User Management"', async () => {
       renderPage();
-      expect(screen.getByText('User Management')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('User Management')).toBeInTheDocument();
+      });
     });
 
-    it('renders the Header and Footer', () => {
+    it('renders the "Change User Roles" sidebar tab', async () => {
       renderPage();
-      expect(screen.getByTestId('header')).toBeInTheDocument();
-      expect(screen.getByTestId('footer')).toBeInTheDocument();
-    });
-
-    it('renders the app navigation sidebar', () => {
-      renderPage();
-      expect(screen.getByTestId('home-sidebar')).toBeInTheDocument();
-    });
-
-    it('renders the "Change User Roles" sidebar tab', () => {
-      renderPage();
-      expect(screen.getByText('Change User Roles')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Change User Roles')).toBeInTheDocument();
+      });
     });
   });
 

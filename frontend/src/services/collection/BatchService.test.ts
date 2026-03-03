@@ -203,4 +203,38 @@ describe('BatchService', () => {
     expect(result.data).toEqual(mockData);
     expect(result.status).toBe(200);
   });
+
+  it('should call client.post with correct url and payload for forceSyncActivityAgg', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+
+    const service = new BatchService();
+    await service.forceSyncActivityAgg({
+      userId: 'user_1',
+      courseId: 'course_1',
+      batchId: 'batch_1',
+    });
+
+    expect(mockClient.post).toHaveBeenCalledWith('/user/v1/activity/agg', {
+      request: {
+        userId: 'user_1',
+        courseId: 'course_1',
+        batchId: 'batch_1',
+      },
+    });
+  });
+
+  it('should return forceSyncActivityAgg response', async () => {
+    const mockData = { result: 'ok' };
+    mockClient.post = vi.fn().mockResolvedValue({ data: mockData, status: 200, headers: {} });
+
+    const service = new BatchService();
+    const result = await service.forceSyncActivityAgg({
+      userId: 'u1',
+      courseId: 'c1',
+      batchId: 'b1',
+    });
+
+    expect(result.data).toEqual(mockData);
+    expect(result.status).toBe(200);
+  });
 });

@@ -10,6 +10,7 @@ export const GENERIC_EDITOR_WINDOW_CONFIG = {
   dispatcher: 'local',
   apislug: '/action',
   alertOnUnload: true,
+  localDispatcherEndpoint: '/portal/data/v1/telemetry',
   loadingImage: '',
   cloudStorage: {
     provider: 'azure',

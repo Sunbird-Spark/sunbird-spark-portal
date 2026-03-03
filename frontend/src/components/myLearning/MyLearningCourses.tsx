@@ -96,9 +96,9 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
               <div className="flex justify-center py-6 mt-4">
                 <button
                   onClick={() => setVisibleCount(prev => prev + COURSES_PER_PAGE)}
-                  className="bg-white border border-sunbird-brick text-sunbird-brick pl-8 pr-8 py-2.5 rounded-full text-[0.875rem] font-medium hover:bg-sunbird-brick hover:text-white transition-all shadow-sm font-['Rubik']"
+                  className="bg-white border border-sunbird-brick text-sunbird-brick pl-8 pr-8 py-2.5 rounded-full text-[0.875rem] font-medium hover:bg-sunbird-brick hover:text-white transition-all shadow-sm font-['Rubik'] min-w-fit"
                 >
-                  View more courses
+                  {t('profileLearning.viewMoreCourses')}
                 </button>
               </div>
             )}

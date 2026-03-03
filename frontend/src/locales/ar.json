@@ -8,6 +8,7 @@
   "loading": "جارٍ التحميل...",
   "error": "حدث خطأ",
   "success": "نجاح",
+  "name": "الاسم",
   "cancel": "إلغاء",
   "save": "حفظ",
   "delete": "حذف",
@@ -239,7 +240,13 @@
     "batchStartedOn": "بدأت الدفعة في",
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
-    "contentStatusNotViewed": "لم تتم المشاهدة"
+    "contentStatusNotViewed": "لم تتم المشاهدة",
+    "selfAssessMaxAttempt": "لقد وصلت إلى الحد الأقصى لعدد المحاولات لهذا التقييم.",
+    "selfAssessLastAttempt": "هذه هي محاولتك الأخيرة لهذا التقييم.",
+    "attemptsLabel": "المحاولة {{current}} من {{max}}",
+    "forceSync": "مزامنة التقدم الآن",
+    "forceSyncSuccess": "يمكنك عرض تحديث تقدم الدورة خلال 24 ساعة",
+    "forceSyncCooldown": "يرجى الانتظار قبل المزامنة مرة أخرى."
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",
@@ -407,12 +414,25 @@
   },
   "common": {
     "notifications": "الإشعارات",
-    "language": "اللغة"
+    "language": "اللغة",
+    "manage": "إدارة",
+    "backTo": "العودة إلى {{page}}",
+    "upcomingBatches": "الدفعات القادمة",
+    "learningProgress": "تقدم التعلم",
+    "downloadCertificate": "تحميل الشهادة",
+    "manage": "إدارة",
+    "backTo": "العودة إلى {{page}}",
+    "upcomingBatches": "الدفعات القادمة",
+    "learningProgress": "تقدم التعلم",
+    "downloadCertificate": "تحميل الشهادة"
   },
   "myLearning": {
     "loading": "جارٍ تحميل تعلمك...",
     "errorLoading": "فشل تحميل تقدم تعلمك. يرجى المحاولة مرة أخرى لاحقاً.",
-    "mainNavigation": "التنقل الرئيسي"
+    "mainNavigation": "التنقل الرئيسي",
+    "learningProgress": "تقدم التعلم",
+    "lessonVisited": "الدروس المزارة",
+    "contentsCompleted": "المحتويات المكتملة"
   },
   "onboarding": {
     "altSunbird": "صن بيرد",
@@ -459,6 +479,49 @@
     "startingEditor": "بدء المحرر",
     "launchingEditor": "تشغيل محرر {{name}}...",
     "enterContentName": "أدخل اسم المحتوى",
+    "editorOptions": {
+      "quiz": "اختبار وتقييم",
+      "story": "قصة ولعبة",
+      "course": "دورة",
+      "collection": "مجموعة",
+      "questionSet": "مجموعة أسئلة"
+    },
+    "collectionDescriptions": {
+      "course": "أدخل وصفاً للدورة",
+      "contentPlaylist": "أدخل وصفاً للمجموعة",
+      "digitalTextbook": "أدخل وصفاً للكتاب الرقمي",
+      "questionPaper": "أدخل وصفاً لورقة الأسئلة"
+    },
+    "errors": {
+      "unexpectedResponse": "استجابة غير متوقعة من الخادم. يرجى المحاولة مرة أخرى.",
+      "creationFailed": "فشل الإنشاء",
+      "unableToCreate": "تعذر إنشاء المحتوى. يرجى المحاولة مرة أخرى."
+    },
+    "stats": {
+      "published": "منشور",
+      "inReview": "قيد المراجعة",
+      "drafts": "مسودات",
+      "allUploads": "جميع التحميلات",
+      "myCollaborations": "تعاوناتي"
+    },
+    "tableHeaders": {
+      "title": "العنوان",
+      "type": "النوع",
+      "status": "الحالة",
+      "modified": "معدل",
+      "actions": "الإجراءات"
+    },
+    "emptyStates": {
+      "noUploadsTitle": "لا توجد تحميلات بعد",
+      "noUploadsDesc": "قم بتحميل ملفات PDF أو فيديو أو محتوى آخر للبدء.",
+      "noCollaborationsTitle": "لا توجد تعاونات",
+      "noCollaborationsDesc": "سيظهر المحتوى المشترك معك هنا."
+    },
+    "name": "الاسم",
+    "enterName": "أدخل اسم {{type}}",
+    "description": "الوصف",
+    "collectionType": "نوع المجموعة",
+    "creating": "جارٍ الإنشاء...",
     "review": {
       "errorTitle": "خطأ",
       "failedToLoadForm": "فشل تحميل نموذج {{action}}.",
@@ -508,6 +571,9 @@
     "profile": "الملف الشخصي",
     "helpAndSupport": "المساعدة والدعم",
     "logout": "تسجيل الخروج",
+    "userReport": "تقرير المستخدم",
+    "adminReports": "تقارير المسؤول",
+    "userManagement": "إدارة المستخدمين",
     "expand": "توسيع الشريط الجانبي",
     "collapse": "طي الشريط الجانبي"
   },
@@ -739,7 +805,8 @@
     "yes": "نعم",
     "no": "لا",
     "criteriaMustBeMet": "يجب استيفاء المعايير لإعادة الإصدار",
-    "reissueCertificate": "إعادة إصدار الشهادة"
+    "reissueCertificate": "إعادة إصدار الشهادة",
+    "viewOnly": "عرض فقط"
   },
   "homePageDemo": {
     "course1": "الدورة 1",
@@ -765,18 +832,64 @@
     "inactive": "غير نشط",
     "completed": "مكتمل",
     "ongoing": "جارية",
-    "upcoming": "قادمة"
+    "upcoming": "قادمة",
+    "processing": "قيد المعالجة"
   },
   "tabs": {
     "batches": "الدفعات",
     "certificates": "الشهادات",
     "all": "الكل"
   },
-  "common": {
-    "manage": "إدارة",
-    "backTo": "العودة إلى {{page}}",
-    "upcomingBatches": "الدفعات القادمة",
-    "learningProgress": "تقدم التعلم",
-    "downloadCertificate": "تحميل الشهادة"
+  "profileLearning": {
+    "loadingCourses": "جارٍ تحميل دوراتك...",
+    "failedToLoadCourses": "فشل تحميل الدورات. يرجى المحاولة مرة أخرى.",
+    "viewLess": "عرض أقل",
+    "viewMoreCourses": "عرض المزيد من الدورات",
+    "noCertificate": "لا توجد شهادة",
+    "noCoursesEnrolled": "لم يتم التسجيل في أي دورات بعد.",
+    "noFilteredCourses": "لم يتم العثور على دورات {{filter}}.",
+    "downloading": "جارٍ التنزيل...",
+    "myLearning": "تعلّمي",
+    "filter": "تصفية"
+  },
+  "tncPopup": {
+    "checkboxLabel": "لقد قرأت ووافقت على الشروط والأحكام",
+    "accepting": "جارٍ القبول...",
+    "continue": "متابعة",
+    "acceptAndContinue": "قبول ومتابعة"
+  },
+  "trackableCollection": {
+    "completed": "مكتمل"
+  },
+  "userReport": {
+    "title": "تقرير المستخدم",
+    "courseProgress": "تقدم الدورة",
+    "certificates": "الشهادات",
+    "assessmentHistory": "سجل التقييمات",
+    "coursesCompleted": "الدورات المكتملة",
+    "coursesPending": "الدورات المعلقة",
+    "certificatesIssued": "الشهادات الصادرة",
+    "contentCompleted": "المحتوى المكتمل",
+    "assessmentsCompleted": "التقييمات المكتملة",
+    "course": "دورة",
+    "progress": "التقدم",
+    "status": "الحالة",
+    "enrolled": "مسجل",
+    "lastAccessed": "آخر وصول",
+    "certificateId": "معرف الشهادة",
+    "issuedDate": "تاريخ الإصدار",
+    "assessment": "تقييم",
+    "score": "النتيجة",
+    "max": "الحد الأقصى",
+    "result": "النتيجة",
+    "date": "التاريخ"
+  },
+  "editors": {
+    "errorTitle": "خطأ في المحرر",
+    "goBack": "رجوع",
+    "loading": "جارٍ تحميل المحرر...",
+    "preparing": "جارٍ تجهيز بيئة المحرر...",
+    "genericEditor": "المحرر العام",
+    "contentEditor": "محرر المحتوى"
   }
 }

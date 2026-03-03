@@ -5,6 +5,11 @@ import HomeSidebar from './HomeSidebar';
 import { useLocation } from 'react-router-dom';
 import { usePermissions } from '@/hooks/usePermission';
 import { useIsAdmin } from '@/hooks/useUser';
+import { clearForceSyncUsed } from '@/services/forceSyncStorage';
+
+vi.mock('@/services/forceSyncStorage', () => ({
+  clearForceSyncUsed: vi.fn(),
+}));
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -195,5 +200,27 @@ describe('HomeSidebar', () => {
         fireEvent.click(toggleBtn);
 
         expect(onToggle).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls clearForceSyncUsed and redirects when logout is clicked', () => {
+        const originalLocation = window.location;
+        const locationMock = { ...originalLocation, href: '' };
+        Object.defineProperty(window, 'location', {
+            value: locationMock,
+            configurable: true,
+            writable: true,
+        });
+
+        renderSidebar();
+        fireEvent.click(screen.getByText('sidebar.logout'));
+
+        expect(clearForceSyncUsed).toHaveBeenCalledTimes(1);
+        expect(locationMock.href).toBe('/portal/logout');
+
+        Object.defineProperty(window, 'location', {
+            value: originalLocation,
+            configurable: true,
+            writable: true,
+        });
     });
 });

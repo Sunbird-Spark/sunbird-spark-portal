@@ -6,6 +6,7 @@
     "closeMenu": "Fechar menu"
   },
   "loading": "Carregando...",
+  "name": "Nome",
   "error": "Ocorreu um erro",
   "success": "Sucesso",
   "cancel": "Cancelar",
@@ -239,7 +240,13 @@
     "batchStartedOn": "Turma iniciada em",
     "contentStatusCompleted": "Concluído",
     "contentStatusInProgress": "Em andamento",
-    "contentStatusNotViewed": "Não visualizado"
+    "contentStatusNotViewed": "Não visualizado",
+    "selfAssessMaxAttempt": "Você atingiu o número máximo de tentativas para esta avaliação.",
+    "selfAssessLastAttempt": "Esta é sua última tentativa para esta avaliação.",
+    "attemptsLabel": "Tentativa {{current}} de {{max}}",
+    "forceSync": "Sincronizar progresso agora",
+    "forceSyncSuccess": "Você pode ver o progresso atualizado do curso em até 24 horas",
+    "forceSyncCooldown": "Aguarde antes de sincronizar novamente."
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",
@@ -407,12 +414,20 @@
   },
   "common": {
     "notifications": "Notificações",
-    "language": "Idioma"
+    "language": "Idioma",
+    "manage": "Gerenciar",
+    "backTo": "Voltar para {{page}}",
+    "upcomingBatches": "Lotes próximos",
+    "learningProgress": "Progresso de aprendizado",
+    "downloadCertificate": "Baixar certificado"
   },
   "myLearning": {
     "loading": "Carregando seu aprendizado...",
     "errorLoading": "Falha ao carregar seu progresso de aprendizado. Tente novamente mais tarde.",
-    "mainNavigation": "Navegação principal"
+    "mainNavigation": "Navegação principal",
+    "learningProgress": "Progresso de aprendizado",
+    "lessonVisited": "Lição visitada",
+    "contentsCompleted": "Conteúdos concluídos"
   },
   "onboarding": {
     "altSunbird": "Sunbird",
@@ -459,6 +474,49 @@
     "startingEditor": "Iniciando editor",
     "launchingEditor": "Abrindo editor {{name}}...",
     "enterContentName": "Inserir nome do conteúdo",
+    "editorOptions": {
+      "quiz": "Quiz e avaliação",
+      "story": "História e jogo",
+      "course": "Curso",
+      "collection": "Coleção",
+      "questionSet": "Conjunto de perguntas"
+    },
+    "collectionDescriptions": {
+      "course": "Digite uma descrição para o curso",
+      "contentPlaylist": "Digite uma descrição para a coleção",
+      "digitalTextbook": "Digite uma descrição para o livro digital",
+      "questionPaper": "Digite uma descrição para o questionário"
+    },
+    "errors": {
+      "unexpectedResponse": "Resposta inesperada do servidor. Por favor, tente novamente.",
+      "creationFailed": "Falha na criação",
+      "unableToCreate": "Não foi possível criar o conteúdo. Por favor, tente novamente."
+    },
+    "stats": {
+      "published": "Publicado",
+      "inReview": "Em revisão",
+      "drafts": "Rascunhos",
+      "allUploads": "Todos os uploads",
+      "myCollaborations": "Minhas colaborações"
+    },
+    "tableHeaders": {
+      "title": "Título",
+      "type": "Tipo",
+      "status": "Status",
+      "modified": "Modificado",
+      "actions": "Ações"
+    },
+    "emptyStates": {
+      "noUploadsTitle": "Nenhum upload ainda",
+      "noUploadsDesc": "Faça upload de arquivos PDF, vídeo ou outro conteúdo para começar.",
+      "noCollaborationsTitle": "Nenhuma colaboração",
+      "noCollaborationsDesc": "O conteúdo compartilhado com você aparecerá aqui."
+    },
+    "name": "Nome",
+    "enterName": "Digite o nome de {{type}}",
+    "description": "Descrição",
+    "collectionType": "Tipo de coleção",
+    "creating": "Criando...",
     "review": {
       "errorTitle": "Erro",
       "failedToLoadForm": "Falha ao carregar formulário {{action}}.",
@@ -508,6 +566,9 @@
     "profile": "Perfil",
     "helpAndSupport": "Ajuda e suporte",
     "logout": "Sair",
+    "userReport": "Relatório do usuário",
+    "adminReports": "Relatórios administrativos",
+    "userManagement": "Gerenciamento de usuários",
     "expand": "Expandir painel lateral",
     "collapse": "Recolher painel lateral"
   },
@@ -739,7 +800,8 @@
     "yes": "Sim",
     "no": "Não",
     "criteriaMustBeMet": "Os critérios devem ser atendidos para reemitir",
-    "reissueCertificate": "Reemitir certificado"
+    "reissueCertificate": "Reemitir certificado",
+    "viewOnly": "Somente visualização"
   },
   "homePageDemo": {
     "course1": "Curso 1",
@@ -765,18 +827,64 @@
     "inactive": "Inativo",
     "completed": "Concluído",
     "ongoing": "Em andamento",
-    "upcoming": "Próximos"
+    "upcoming": "Próximos",
+    "processing": "Em processamento"
   },
   "tabs": {
     "batches": "Lotes",
     "certificates": "Certificados",
     "all": "Todos"
   },
-  "common": {
-    "manage": "Gerenciar",
-    "backTo": "Voltar para {{page}}",
-    "upcomingBatches": "Lotes próximos",
-    "learningProgress": "Progresso de aprendizado",
-    "downloadCertificate": "Baixar certificado"
+  "profileLearning": {
+    "loadingCourses": "Carregando seus cursos...",
+    "failedToLoadCourses": "Falha ao carregar cursos. Por favor, tente novamente.",
+    "viewLess": "Ver Menos",
+    "viewMoreCourses": "Ver Mais Cursos",
+    "noCertificate": "Sem certificado",
+    "noCoursesEnrolled": "Nenhum curso inscrito ainda.",
+    "noFilteredCourses": "Nenhum curso {{filter}} encontrado.",
+    "downloading": "Baixando...",
+    "myLearning": "Meu aprendizado",
+    "filter": "Filtro"
+  },
+  "tncPopup": {
+    "checkboxLabel": "Li e aceito os Termos e Condições",
+    "accepting": "Aceitando...",
+    "continue": "Continuar",
+    "acceptAndContinue": "Aceitar e Continuar"
+  },
+  "trackableCollection": {
+    "completed": "Concluído"
+  },
+  "userReport": {
+    "title": "Relatório do usuário",
+    "courseProgress": "Progresso do curso",
+    "certificates": "Certificados",
+    "assessmentHistory": "Histórico de avaliações",
+    "coursesCompleted": "Cursos concluídos",
+    "coursesPending": "Cursos pendentes",
+    "certificatesIssued": "Certificados emitidos",
+    "contentCompleted": "Conteúdo concluído",
+    "assessmentsCompleted": "Avaliações realizadas",
+    "course": "Curso",
+    "progress": "Progresso",
+    "status": "Status",
+    "enrolled": "Inscrito",
+    "lastAccessed": "Último acesso",
+    "certificateId": "ID do certificado",
+    "issuedDate": "Data de emissão",
+    "assessment": "Avaliação",
+    "score": "Pontuação",
+    "max": "Máx",
+    "result": "Resultado",
+    "date": "Data"
+  },
+  "editors": {
+    "errorTitle": "Erro do Editor",
+    "goBack": "Voltar",
+    "loading": "Carregando Editor...",
+    "preparing": "Preparando o ambiente do editor...",
+    "genericEditor": "Editor Genérico",
+    "contentEditor": "Editor de Conteúdo"
   }
 }
