@@ -14,7 +14,7 @@ vi.mock('@/components/common/DropdownMenu', () => ({
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="dropdown-trigger">{children}</div>,
   DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div data-testid="dropdown-content">{children}</div>,
   DropdownMenuItem: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
-    <button type="button" data-testid="dropdown-item-sync" onClick={onClick} disabled={disabled}>{children}</button>
+    <button type="button" data-testid="dropdown-item" onClick={onClick} disabled={disabled}>{children}</button>
   ),
 }));
 
@@ -126,7 +126,7 @@ describe('CourseProgressCard', () => {
     );
     expect(screen.getByTestId('dropdown-menu')).toBeInTheDocument();
     expect(screen.getByTestId('dropdown-trigger')).toBeInTheDocument();
-    expect(screen.getByTestId('dropdown-item-sync')).toHaveTextContent('courseDetails.forceSync');
+    expect(screen.getByTestId('dropdown-item')).toHaveTextContent('courseDetails.forceSync');
   });
 
   it('calls onForceSync when sync menu item is clicked', () => {
@@ -139,7 +139,7 @@ describe('CourseProgressCard', () => {
         onForceSync={onForceSync}
       />
     );
-    fireEvent.click(screen.getByTestId('dropdown-item-sync'));
+    fireEvent.click(screen.getByTestId('dropdown-item'));
     expect(onForceSync).toHaveBeenCalledTimes(1);
   });
 
@@ -153,8 +153,35 @@ describe('CourseProgressCard', () => {
         isForceSyncing
       />
     );
-    const syncItem = screen.getByTestId('dropdown-item-sync');
+    const syncItem = screen.getByTestId('dropdown-item');
     expect(syncItem).toBeDisabled();
     expect(syncItem).toHaveTextContent('loading');
+  });
+
+  it('renders leave course option when showUnenrollOption is true', () => {
+    render(
+      <CourseProgressCard
+        totalContentCount={10}
+        completedContentCount={5}
+        showUnenrollOption
+        onUnenroll={() => {}}
+      />
+    );
+    expect(screen.getByTestId('dropdown-menu')).toBeInTheDocument();
+    expect(screen.getByTestId('dropdown-item')).toHaveTextContent('courseDetails.leaveCourse');
+  });
+
+  it('calls onUnenroll when leave course item is clicked', () => {
+    const onUnenroll = vi.fn();
+    render(
+      <CourseProgressCard
+        totalContentCount={10}
+        completedContentCount={5}
+        showUnenrollOption
+        onUnenroll={onUnenroll}
+      />
+    );
+    fireEvent.click(screen.getByTestId('dropdown-item'));
+    expect(onUnenroll).toHaveBeenCalledTimes(1);
   });
 });

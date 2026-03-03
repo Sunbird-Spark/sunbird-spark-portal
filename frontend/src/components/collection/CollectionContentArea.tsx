@@ -6,9 +6,10 @@ import CollectionOverview from "@/components/collection/CollectionOverview";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
 import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
-import CourseProgressCard from "@/components/collection/CourseProgressCard";
 import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
 import { useForceSync } from "@/hooks/useForceSync";
+import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
+import CourseProgressSection from "@/components/collection/CourseProgressSection";
 
 interface CollectionContentAreaProps {
   collectionData: any;
@@ -97,7 +98,7 @@ export default function CollectionContentArea({
     userId,
     collectionId,
     batchIdParam,
-    courseProgressProps
+    courseProgressProps as CourseProgressCardProps | null | undefined
   );
 
   const showProfileDataSharingCard =
@@ -162,8 +163,16 @@ export default function CollectionContentArea({
           {/* Learner: Course progress (hidden when content creator privilege) */}
           {isTrackable && !contentBlocked && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
             <div className="flex-shrink-0 mb-4">
-              <CourseProgressCard
-                {...courseProgressProps}
+              <CourseProgressSection
+                collectionId={collectionId}
+                batchIdParam={batchIdParam}
+                userId={userId}
+                isTrackable={isTrackable}
+                contentBlocked={contentBlocked}
+                contentCreatorPrivilege={contentCreatorPrivilege}
+                hasBatchInRoute={hasBatchInRoute}
+                isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
+                courseProgressProps={courseProgressProps as CourseProgressCardProps}
                 showForceSyncButton={showForceSyncButton}
                 onForceSync={handleForceSync}
                 isForceSyncing={isForceSyncing}

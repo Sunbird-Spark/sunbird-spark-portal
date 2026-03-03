@@ -45,6 +45,7 @@ export interface GenericEditorWindowConfig {
   dispatcher: string;
   apislug: string;
   alertOnUnload: boolean;
+  localDispatcherEndpoint?: string;
   headerLogo: string;
   loadingImage: string;
   build_number: string;
