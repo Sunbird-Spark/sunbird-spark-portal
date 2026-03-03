@@ -102,11 +102,11 @@ describe('ContentEditorService', () => {
       expect(result.context.uid).toBe('anonymous');
     });
 
-    it('should use null sid when session ID is not available', async () => {
+    it('should use empty string sid when session ID is not available', async () => {
       vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
 
       const result = await service.buildConfig(mockMetadata);
-      expect(result.context.sid).toBeNull();
+      expect(result.context.sid).toBe('');
     });
 
     it('should use empty fallback when device ID fails', async () => {

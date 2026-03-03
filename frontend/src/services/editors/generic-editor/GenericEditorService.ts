@@ -7,11 +7,7 @@
  */
 
 import { getClient } from '../../../lib/http-client';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
-import { ChannelService } from '../../ChannelService';
-import userProfileService from '../../UserProfileService';
+import editorConfigService from '../EditorConfigService';
 import {
   GENERIC_EDITOR_WINDOW_CONFIG,
   DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
@@ -40,9 +36,6 @@ declare global {
 }
 
 export class GenericEditorService {
-  private orgService = new OrganizationService();
-  private channelService = new ChannelService();
-
   /**
    * Get the generic editor URL.
    * Reads from a hidden input element (same pattern as Angular portal),
@@ -151,55 +144,15 @@ export class GenericEditorService {
     contentDetails?: ContentDetails,
     isLargeFileUpload?: boolean
   ): Promise<GenericEditorContext> {
-    const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
-    const uid = userAuthInfoService.getUserId() || 'anonymous';
-
-    let did = '';
-    try {
-      did = await appCoreService.getDeviceId();
-    } catch {
-      console.warn('Failed to get device ID for editor context');
-    }
-
-    // Fetch channel slug from user profile, then get org details
-    let channel = '';
-    let orgName = '';
-    try {
-      const slug = await userProfileService.getChannel();
-      const orgResponse = await this.orgService.search({
-        filters: { slug, isTenant: true },
-      });
-      const org = orgResponse?.data?.response?.content?.[0];
-      if (org?.channel) {
-        channel = org.hashTagId;
-      }
-      orgName = org?.orgName || '';
-    } catch {
-      console.warn('Failed to get channel from org service');
-    }
+    const { sid: baseSid, uid, did, channel, pdata: basePdata } = await editorConfigService.fetchBaseContext();
+    const sid = baseSid || `session-${Date.now()}`;
+    const pdata = { id: 'sunbird.portal', ver: '1.0', ...basePdata, pid: 'sunbird-portal' };
 
     // Fetch default framework from channel if not provided via route params
     let framework = params.framework || '';
     if (!framework && channel) {
-      try {
-        const channelResponse = await this.channelService.read(channel);
-        const defaultFramework = (channelResponse as any)?.data?.channel?.defaultFramework;
-        console.warn('Fetched default framework from channel:', defaultFramework);
-        if (defaultFramework) {
-          framework = defaultFramework;
-        }
-      } catch {
-        console.warn('Failed to fetch default framework from channel');
-      }
-    }
-
-    // Build pdata (producer data for telemetry)
-    let pdata = { id: 'sunbird.portal', ver: '1.0', pid: 'sunbird-portal' };
-    try {
-      const pdataResult = await appCoreService.getPData();
-      pdata = { ...pdataResult, pid: 'sunbird-portal' };
-    } catch {
-      // use default pdata
+      const { channelData } = await editorConfigService.fetchChannelData(channel);
+      framework = channelData?.defaultFramework || '';
     }
 
     const context: GenericEditorContext = {
@@ -207,7 +160,7 @@ export class GenericEditorService {
         id: uid,
         name: 'User',
         orgIds: [],
-        organisations: channel ? { [channel]: orgName } : {},
+        organisations: channel ? { [channel]: '' } : {},
       },
       did,
       sid,

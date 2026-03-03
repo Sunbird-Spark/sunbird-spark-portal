@@ -327,7 +327,7 @@ describe('GenericEditorService', () => {
       const context = await service.buildEditorContext({ contentId: 'do_1' });
 
       expect(mockOrgSearch).toHaveBeenCalledWith({
-        filters: { slug: '', isTenant: true },
+        filters: { isTenant: true },
       });
       expect(context.channel).toBe('test-channel');
     });

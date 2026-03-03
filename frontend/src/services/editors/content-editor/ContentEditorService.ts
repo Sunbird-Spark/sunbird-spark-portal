@@ -1,56 +1,17 @@
 import { ContentEditorConfig, ContentEditorMetadata } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
-import { ChannelService } from '../../ChannelService';
-import userProfileService from '../../UserProfileService';
+import editorConfigService from '../EditorConfigService';
 
 const CONTENT_EDITOR_URL = '/content-editor/index.html';
 
 export class ContentEditorService {
-  private orgService = new OrganizationService();
-  private channelService = new ChannelService();
   async buildConfig(
     metadata: ContentEditorMetadata
   ): Promise<ContentEditorConfig> {
-    const sid = userAuthInfoService.getSessionId();
-    const uid = userAuthInfoService.getUserId() || 'anonymous';
-
-    let did = '';
-    try {
-      did = await appCoreService.getDeviceId();
-    } catch (error) {
-      console.warn('Failed to fetch device ID, using fallback:', error);
-    }
-
-    let channel = '';
-    try {
-      const filters: Record<string, any> = { isTenant: true };
-      const userChannel = await userProfileService.getChannel();
-      if (userChannel) filters.slug = userChannel;
-      const orgResponse = await this.orgService.search({ filters });
-      const org = orgResponse?.data?.response?.content?.[0];
-      if (org) {
-        channel = org.hashTagId || org.identifier;
-      }
-    } catch (error) {
-      console.warn('Failed to fetch channel info:', error);
-    }
+    const { sid, uid, did, channel, pdata } = await editorConfigService.fetchBaseContext();
+    const { framework } = channel
+      ? await editorConfigService.fetchChannelData(channel)
+      : { framework: '' };
     const tags = channel ? [channel] : [];
-
-    let framework = '';
-    if (channel) {
-      try {
-        const channelResponse = await this.channelService.read(channel);
-        const frameworks = (channelResponse as any)?.data?.channel?.frameworks;
-        if (Array.isArray(frameworks) && frameworks.length > 0) {
-          framework = frameworks[0]?.identifier || '';
-        }
-      } catch (error) {
-        console.warn('Failed to fetch channel framework:', error);
-      }
-    }
-    const pdata = await appCoreService.getPData();
 
     const context = {
       user: {

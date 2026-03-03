@@ -1,10 +1,7 @@
 import jQuery from '../jquery-setup'; // Must be first - sets up jQuery globally
 import 'jquery-ui-dist/jquery-ui';
 import { QumlEditorConfig, QumlEditorContextOverrides, QumlEditorEvent, QuestionSetMetadata } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
-import userProfileService from '../../UserProfileService';
+import editorConfigService from '../EditorConfigService';
 
 export class QumlEditorService {
   private static stylesLoaded = false;
@@ -14,7 +11,6 @@ export class QumlEditorService {
   private static dependenciesLoading?: Promise<void>;
   private static fancytreeJQueryRef: any;
 
-  private orgService = new OrganizationService();
   private eventHandlers = new WeakMap<HTMLElement, {
     editor: (event: Event) => void;
     telemetry?: (event: Event) => void;
@@ -139,31 +135,7 @@ export class QumlEditorService {
     metadata: QuestionSetMetadata,
     contextOverrides?: QumlEditorContextOverrides
   ): Promise<QumlEditorConfig> {
-    const sid = userAuthInfoService.getSessionId() || '';
-    const uid = userAuthInfoService.getUserId() || 'anonymous';
-
-    let did = '';
-    try {
-      did = await appCoreService.getDeviceId();
-    } catch (error) {
-      console.warn('Failed to fetch device ID:', error);
-    }
-
-    let channel = '';
-    try {
-      const filters: Record<string, any> = { isTenant: true };
-      const userChannel = await userProfileService.getChannel();
-      if (userChannel) filters.slug = userChannel;
-      const orgResponse = await this.orgService.search({ filters });
-      const org = orgResponse?.data?.response?.content?.[0];
-      if (org) {
-        channel = org.hashTagId || org.identifier;
-      }
-    } catch (error) {
-      console.warn('Failed to fetch channel info:', error);
-    }
-
-    const pdata = await appCoreService.getPData();
+    const { sid, uid, did, channel, pdata } = await editorConfigService.fetchBaseContext();
     const mode = contextOverrides?.mode || 'edit';
 
     const context = {

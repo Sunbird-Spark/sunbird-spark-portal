@@ -1,17 +1,11 @@
 import jQuery from '../jquery-setup'; // Must be first - sets up jQuery globally
 import 'jquery-ui-dist/jquery-ui';
 import { CollectionEditorConfig, CollectionEditorContextProps, CollectionEditorEvent } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
-import { ChannelService } from '../../ChannelService';
-import userProfileService from '../../UserProfileService';
+import editorConfigService from '../EditorConfigService';
 import { getClient } from '../../../lib/http-client';
 
 export class CollectionEditorService {
     private eventHandlers = new WeakMap<HTMLElement, { editor: (event: Event) => void; telemetry?: (event: Event) => void }>();
-    private orgService = new OrganizationService();
-    private channelService = new ChannelService();
     private static stylesLoaded = false;
     private static scriptLoaded = false;
     private static scriptLoading?: Promise<void>;
@@ -133,43 +127,10 @@ export class CollectionEditorService {
         metadata: any,
         contextProps: CollectionEditorContextProps
     ): Promise<CollectionEditorConfig> {
-        const sid = userAuthInfoService.getSessionId() || '';
-        const uid = userAuthInfoService.getUserId() || 'anonymous';
-        let did = '';
-        try {
-            did = await appCoreService.getDeviceId();
-        } catch (error) {
-            console.warn('Failed to fetch device ID:', error);
-        }
-
-        let channel = '';
-        try {
-            const filters: Record<string, any> = { isTenant: true };
-            const userChannel = await userProfileService.getChannel();
-            if (userChannel) filters.slug = userChannel;
-            const orgResponse = await this.orgService.search({ filters });
-            const org = orgResponse?.data?.response?.content?.[0];
-            if (org) {
-                channel = org.hashTagId || org.identifier;
-            }
-        } catch (error) {
-            console.warn('Failed to fetch channel info:', error);
-        }
-
-        let framework = '';
-        let channelData: any = {};
-        if (channel) {
-            try {
-                const channelResponse = await this.channelService.read(channel);
-                channelData = (channelResponse as any)?.data?.channel || {};
-                const frameworks = channelData?.frameworks;
-                if (Array.isArray(frameworks) && frameworks.length > 0) {
-                    framework = frameworks[0]?.identifier || '';
-                }
-            } catch (error) {
-                console.warn('Failed to fetch channel framework:', error);
-            }
-        }
+        const { sid, uid, did, channel, pdata } = await editorConfigService.fetchBaseContext();
+        const { channelData, framework } = channel
+            ? await editorConfigService.fetchChannelData(channel)
+            : { channelData: {}, framework: '' };
 
         let hierarchyConfig: Record<string, any> = {};
         try {
@@ -177,8 +138,6 @@ export class CollectionEditorService {
         } catch (error) {
             console.warn('Failed to fetch hierarchy config:', error);
         }
-
-        const pdata = await appCoreService.getPData();
         const context = {
             identifier: metadata.identifier,
             mode: contextProps?.mode || 'edit',

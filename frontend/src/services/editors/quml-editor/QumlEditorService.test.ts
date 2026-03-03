@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QumlEditorService, type QuestionSetMetadata } from './';
-import appCoreService from '../../AppCoreService';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import userProfileService from '../../UserProfileService';
+import editorConfigService from '../EditorConfigService';
 
-vi.mock('../../userAuthInfoService/userAuthInfoService');
-vi.mock('../../UserProfileService', () => ({
-  default: { getChannel: vi.fn(), clearCache: vi.fn() },
+vi.mock('../EditorConfigService', () => ({
+  default: {
+    fetchBaseContext: vi.fn(),
+    fetchChannelData: vi.fn(),
+  },
+  editorConfigService: {
+    fetchBaseContext: vi.fn(),
+    fetchChannelData: vi.fn(),
+  },
 }));
 
 describe('QumlEditorService', () => {
@@ -32,19 +36,14 @@ describe('QumlEditorService', () => {
     } as QuestionSetMetadata;
 
     const service = new QumlEditorService();
-    vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('');
-    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
-    vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-123');
-    vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' });
-    vi.mocked(userProfileService.getChannel).mockResolvedValue('default-channel');
-    // Match the structure expected by QumlEditorService: data.response.content
-    vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({
-      data: {
-        response: {
-          content: [{ hashTagId: 'channel-from-metadata' }]
-        }
-      }
+    vi.mocked(editorConfigService.fetchBaseContext).mockResolvedValue({
+      sid: '',
+      uid: 'user-123',
+      did: 'device-123',
+      channel: 'channel-from-metadata',
+      pdata: { id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' },
     });
+
     const config = await service.createConfig(metadata);
 
     expect(config.context.identifier).toBe(metadata.identifier);
