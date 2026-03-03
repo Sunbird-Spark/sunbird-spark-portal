@@ -1,0 +1,126 @@
+/* Content Review Page Styles */
+
+.content-review-background {
+  @apply min-h-screen bg-gray-100;
+}
+
+.content-review-container {
+  @apply w-full mx-auto py-6 px-4 sm:px-6 lg:px-28;
+}
+
+.content-review-button-container {
+  @apply flex justify-between items-center mb-6;
+}
+
+.content-review-go-back {
+  @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity font-rubik;
+}
+
+.content-review-player-section {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.content-review-player-with-comments {
+  @apply flex flex-col gap-4 lg:flex-row;
+}
+
+.content-review-player-main {
+  @apply w-full lg:w-3/4;
+}
+
+.content-review-player-sidebar {
+  @apply w-full lg:w-1/4;
+}
+
+.content-review-player-wrapper {
+  @apply bg-white rounded-xl overflow-hidden border border-gray-100;
+}
+
+.content-review-player-inner {
+  @apply relative;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  position: relative;
+}
+
+.content-review-player-inner > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.content-review-details-section {
+  @apply bg-white rounded-xl border border-gray-100 p-6 mb-6;
+}
+
+.content-player-title-row {
+  margin-bottom: 1.5rem;
+}
+
+.content-player-title {
+  @apply font-rubik font-semibold text-[1.625rem] leading-[2.375rem] tracking-normal text-foreground;
+}
+
+.content-review-description {
+  @apply text-sm text-muted-foreground font-rubik mb-6;
+}
+
+.content-review-metadata-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+}
+
+.content-review-metadata-grid > div {
+  @apply flex flex-col gap-1;
+}
+
+.content-review-metadata-grid .label {
+  @apply text-xs text-muted-foreground font-rubik uppercase tracking-wide;
+}
+
+.content-review-metadata-grid .value {
+  @apply text-sm text-foreground font-rubik font-medium;
+}
+
+.content-review-actions {
+  @apply flex items-center gap-4;
+}
+
+.content-review-btn-publish {
+  @apply px-6 py-2.5 rounded-lg text-sm font-medium font-rubik transition-colors
+    bg-sunbird-brick text-white hover:bg-sunbird-brick/90 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.content-review-btn-reject {
+  @apply px-6 py-2.5 rounded-lg text-sm font-medium font-rubik transition-colors
+    bg-white text-sunbird-brick border border-sunbird-brick hover:bg-sunbird-brick/5 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Reject Dialog Overlay */
+.content-review-reject-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50;
+}
+
+.content-review-reject-dialog {
+  @apply bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-xl;
+}
+
+.content-review-reject-dialog h3 {
+  @apply font-rubik font-semibold text-lg text-foreground mb-4;
+}
+
+.content-review-reject-dialog textarea {
+  @apply w-full border border-gray-200 rounded-lg p-3 text-sm font-rubik resize-none
+    focus:outline-none focus:ring-2 focus:ring-sunbird-brick/30 focus:border-sunbird-brick;
+}
+
+.content-review-reject-dialog-actions {
+  @apply flex items-center justify-end gap-3 mt-4;
+}
+
+.content-review-reject-dialog-actions button:first-child {
+  @apply px-4 py-2 rounded-lg text-sm font-medium font-rubik text-muted-foreground
+    hover:bg-gray-100 transition-colors;
+}

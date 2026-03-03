@@ -1,12 +1,10 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { CollectionService, mapToCollectionData } from '../services/collection';
+import { collectionService, mapToCollectionData } from '../services/collection';
 import type { CollectionData } from '../types/collectionTypes';
 
-const collectionService = new CollectionService();
-
-export function useCollection(
+export const useCollection = (
   collectionId: string | undefined
-): UseQueryResult<CollectionData | null, Error> {
+): UseQueryResult<CollectionData | null, Error> => {
   return useQuery({
     queryKey: ['collection-hierarchy', collectionId],
     queryFn: async (): Promise<CollectionData | null> => {
@@ -18,4 +16,4 @@ export function useCollection(
     },
     enabled: !!collectionId,
   });
-}
+};

@@ -14,11 +14,13 @@ import {
 
 const mockGet = vi.fn();
 const mockPost = vi.fn();
+const mockDelete = vi.fn();
 
 vi.mock('../../../lib/http-client', () => ({
   getClient: () => ({
     get: mockGet,
     post: mockPost,
+    delete: mockDelete,
   }),
 }));
 
@@ -54,13 +56,11 @@ vi.mock('../../ChannelService', () => ({
   },
 }));
 
-const mockSystemSettingRead = vi.fn();
-
-vi.mock('../../SystemSettingService', () => ({
-  SystemSettingService: class {
-    read = mockSystemSettingRead;
-  },
+vi.mock('../../UserProfileService', () => ({
+  default: { getChannel: vi.fn(), clearCache: vi.fn() },
 }));
+
+import userProfileService from '../../UserProfileService';
 
 describe('GenericEditorService', () => {
   let service: GenericEditorService;
@@ -77,13 +77,7 @@ describe('GenericEditorService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockSystemSettingRead.mockResolvedValue({
-      data: {
-        response: {
-          value: 'test-slug',
-        },
-      },
-    });
+    vi.mocked(userProfileService.getChannel).mockResolvedValue('test-slug');
 
     mockOrgSearch.mockResolvedValue({
       data: {
@@ -124,7 +118,7 @@ describe('GenericEditorService', () => {
   describe('getContentDetails', () => {
     it('should make correct API call and return content', async () => {
       mockGet.mockResolvedValue({
-        data: { result: { content: mockContentDetails } },
+        data: { content: mockContentDetails },
       });
 
       const result = await service.getContentDetails('do_123');
@@ -141,7 +135,7 @@ describe('GenericEditorService', () => {
         expiresAt: '2026-02-19T00:00:00Z',
         expiresIn: '3600',
       };
-      mockPost.mockResolvedValue({ data: { result: lockResponse } });
+      mockPost.mockResolvedValue({ data: lockResponse });
 
       const result = await service.lockContent(
         'do_123',
@@ -169,7 +163,7 @@ describe('GenericEditorService', () => {
 
     it('should use default values when framework and contentType are not provided', async () => {
       mockPost.mockResolvedValue({
-        data: { result: { lockKey: 'k', expiresAt: 'a', expiresIn: 'i' } },
+        data: { lockKey: 'k', expiresAt: 'a', expiresIn: 'i' },
       });
 
       await service.lockContent('do_456', 'user-1', 'User');
@@ -188,11 +182,11 @@ describe('GenericEditorService', () => {
 
   describe('retireLock', () => {
     it('should send correct payload to retire lock', async () => {
-      mockPost.mockResolvedValue({ data: {} });
+      mockDelete.mockResolvedValue({ data: {} });
 
       await service.retireLock('do_123');
 
-      expect(mockPost).toHaveBeenCalledWith('/lock/v1/retire', {
+      expect(mockDelete).toHaveBeenCalledWith('/lock/v1/retire', {
         request: {
           resourceId: 'do_123',
           resourceType: 'Content',
@@ -280,7 +274,7 @@ describe('GenericEditorService', () => {
         framework: 'TPD',
       });
 
-      expect(mockSystemSettingRead).toHaveBeenCalledWith('default_channel');
+      expect(vi.mocked(userProfileService.getChannel)).toHaveBeenCalled();
       expect(mockOrgSearch).toHaveBeenCalledWith({
         filters: { slug: 'test-slug', isTenant: true },
       });
@@ -327,8 +321,8 @@ describe('GenericEditorService', () => {
       expect(context.did).toBe('');
     });
 
-    it('should use empty slug when system setting fails', async () => {
-      mockSystemSettingRead.mockRejectedValue(new Error('setting not found'));
+    it('should use empty slug when user profile channel is empty', async () => {
+      vi.mocked(userProfileService.getChannel).mockResolvedValue('');
 
       const context = await service.buildEditorContext({ contentId: 'do_1' });
 

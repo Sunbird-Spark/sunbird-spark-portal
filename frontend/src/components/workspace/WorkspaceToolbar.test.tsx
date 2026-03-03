@@ -4,10 +4,27 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceToolbar from '@/components/workspace/WorkspaceToolbar';
 import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from '@/types/workspaceTypes';
 
-const mockT = (key: string) => key;
-
 vi.mock('@/hooks/useAppI18n', () => ({
-  useAppI18n: () => ({ t: mockT }),
+  useAppI18n: () => ({
+    t: (key: string, data?: any) => {
+      const translations: Record<string, string> = {
+        'createNew': 'createNew',
+        'workspace.roleReviewer': 'Reviewer',
+        'workspace.roleCreator': 'Creator',
+        'sidebar.drafts': 'Drafts',
+        'sidebar.published': 'Published',
+        'sidebar.pendingReview': 'Pending',
+        'workspace.more': 'More',
+        'workspaceCard.uploads': 'Uploads',
+        'workspaceCard.collaborations': 'Collaborations',
+        'allTypes': 'All Types',
+        'course': 'Course',
+        'workspace.showingItems': `Showing ${data?.count} items`,
+        'workspace.showingItemsOf': `Showing ${data?.count} items of ${data?.total}`,
+      };
+      return translations[key] || key;
+    },
+  }),
 }));
 
 vi.mock('@/components/common/Button', () => ({
@@ -52,6 +69,8 @@ const renderToolbar = (overrides?: Partial<{
   typeFilter: ContentTypeFilter;
   contentCount?: number;
   counts: typeof baseCounts;
+  hasCreatorRole: boolean;
+  hasReviewerRole: boolean;
 }>) => {
   const onViewChange = vi.fn();
   const onRoleChange = vi.fn();
@@ -66,6 +85,8 @@ const renderToolbar = (overrides?: Partial<{
     viewMode: 'grid' as ViewMode,
     typeFilter: 'all' as ContentTypeFilter,
     contentCount: 5,
+    hasCreatorRole: true,
+    hasReviewerRole: true,
     onViewChange,
     onRoleChange,
     onViewModeChange,
@@ -141,14 +162,8 @@ describe('WorkspaceToolbar', () => {
     expect(onViewModeChange).toHaveBeenCalledWith('grid');
   });
 
-  it('hides filters when activeView is create/uploads/collaborations', () => {
+  it('hides filters when activeView is create', () => {
     renderToolbar({ activeView: 'create' });
-    expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
-
-    renderToolbar({ activeView: 'uploads' });
-    expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
-
-    renderToolbar({ activeView: 'collaborations' });
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
   });
 

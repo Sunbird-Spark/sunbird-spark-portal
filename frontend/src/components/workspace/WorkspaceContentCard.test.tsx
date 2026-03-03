@@ -3,6 +3,23 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceContentCard from './WorkspaceContentCard';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'workspaceCard.view': 'View',
+        'workspaceCard.edit': 'Edit',
+        'workspaceCard.delete': 'Delete',
+        'workspaceCard.locked': 'Locked',
+        'status.draft': 'Draft',
+        'status.published': 'Published',
+        'status.inReview': 'In Review',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 vi.mock('@/components/common/DropdownMenu', () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -26,7 +43,12 @@ const defaultItem = {
   thumbnail: '',
   createdAt: '2024-01-01',
   updatedAt: '2024-01-02',
-  author: 'Author',
+  author: 'user-1',
+  primaryCategory: 'Learning Resource',
+  contentType: '',
+  mimeType: '',
+  framework: '',
+  contentStatus: '',
 };
 
 describe('WorkspaceContentCard', () => {
@@ -34,32 +56,30 @@ describe('WorkspaceContentCard', () => {
     const onEdit = vi.fn();
     const onDelete = vi.fn();
     const onView = vi.fn();
-    const onSubmitReview = vi.fn();
     render(
       <WorkspaceContentCard
         item={defaultItem}
         onEdit={onEdit}
         onDelete={onDelete}
         onView={onView}
-        onSubmitReview={onSubmitReview}
       />
     );
     expect(screen.getByText('Test Content')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
   });
 
-  it('calls onView when Preview is clicked', () => {
+  it('calls onView when View action is clicked for published content', () => {
     const onView = vi.fn();
+    const publishedItem = { ...defaultItem, status: 'published' as const };
     render(
       <WorkspaceContentCard
-        item={defaultItem}
+        item={publishedItem}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={onView}
-        onSubmitReview={vi.fn()}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'View' })[0]!);
     expect(onView).toHaveBeenCalledWith('item-1');
   });
 
@@ -71,7 +91,6 @@ describe('WorkspaceContentCard', () => {
         onEdit={onEdit}
         onDelete={vi.fn()}
         onView={vi.fn()}
-        onSubmitReview={vi.fn()}
       />
     );
     const editButtons = screen.getAllByRole('button', { name: 'Edit' });
@@ -81,16 +100,16 @@ describe('WorkspaceContentCard', () => {
 
   it('calls onView when View menu item is clicked', () => {
     const onView = vi.fn();
+    const publishedItem = { ...defaultItem, status: 'published' as const };
     render(
       <WorkspaceContentCard
-        item={defaultItem}
+        item={publishedItem}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={onView}
-        onSubmitReview={vi.fn()}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'View' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'View' })[0]!);
     expect(onView).toHaveBeenCalledWith('item-1');
   });
 
@@ -102,25 +121,9 @@ describe('WorkspaceContentCard', () => {
         onEdit={vi.fn()}
         onDelete={onDelete}
         onView={vi.fn()}
-        onSubmitReview={vi.fn()}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(onDelete).toHaveBeenCalledWith('item-1');
-  });
-
-  it('calls onSubmitReview when Submit for Review is clicked for draft', () => {
-    const onSubmitReview = vi.fn();
-    render(
-      <WorkspaceContentCard
-        item={defaultItem}
-        onEdit={vi.fn()}
-        onDelete={vi.fn()}
-        onView={vi.fn()}
-        onSubmitReview={onSubmitReview}
-      />
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Submit for Review' }));
-    expect(onSubmitReview).toHaveBeenCalledWith('item-1');
   });
 });

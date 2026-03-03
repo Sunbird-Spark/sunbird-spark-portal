@@ -3,6 +3,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IdentifyUser } from './IdentifyUser';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'forgotPassword': 'Forgot Password?',
+                'forgotPasswordPage.subtitle': 'Enter your registered Email ID or Mobile number and name to reset your password',
+                'forgotPasswordPage.emailOrMobile': 'Email ID / Mobile Number',
+                'forgotPasswordPage.enterEmailOrMobile': 'Enter Email ID / Mobile Number',
+                'forgotPasswordPage.emailOrMobileInstruction': 'Select the identifier to receive the OTP',
+                'forgotPasswordPage.nameRegistered': 'Name registered in the portal',
+                'forgotPasswordPage.enterName': 'Enter name',
+                'continue': 'continue',
+                'forgotPasswordPage.errorNotMatched': 'Email / mobile number or name does not match',
+                'forgotPasswordPage.errorCaptcha': 'Captcha validation failed',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
+
 // Mock Recaptcha
 vi.mock('react-google-recaptcha', () => {
     return {

@@ -17,6 +17,17 @@ vi.mock('react-icons/fi', () => ({
   FiChevronDown: () => <span data-testid="chevron-down" />,
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'profileLearning.viewMoreCourses': 'View More Courses',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 const createMockCourse = (id: string, name: string, percentage: number): TrackableCollection => ({
   courseId: id,
   courseName: name,
@@ -72,10 +83,10 @@ const mockCourses: TrackableCollection[] = [
 describe('MyLearningCourses', () => {
   it('renders "Courses" title and tabs', () => {
     render(<MyLearningCourses courses={mockCourses} />);
-    expect(screen.getByText('Courses')).toBeInTheDocument();
-    expect(screen.getByText('Active Courses')).toBeInTheDocument();
-    expect(screen.getByText('Completed')).toBeInTheDocument();
-    expect(screen.getByText('Upcoming')).toBeInTheDocument();
+    expect(screen.getByText('courses')).toBeInTheDocument();
+    expect(screen.getByText('status.active courses')).toBeInTheDocument();
+    expect(screen.getByText('status.completed')).toBeInTheDocument();
+    expect(screen.getByText('status.upcoming')).toBeInTheDocument();
   });
 
   it('displays active courses by default', () => {
@@ -92,7 +103,7 @@ describe('MyLearningCourses', () => {
   it('switches to "Completed" tab and shows completed courses', () => {
     render(<MyLearningCourses courses={mockCourses} />);
     
-    const completedTab = screen.getByText('Completed');
+    const completedTab = screen.getByText('status.completed');
     fireEvent.click(completedTab);
     
     // Should show Completed Course 1
@@ -107,7 +118,7 @@ describe('MyLearningCourses', () => {
     expect(screen.getByText('No courses found in this category.')).toBeInTheDocument();
   });
   
-  it('shows "View more courses" button when there are many courses', () => {
+  it('shows "View More Courses" button when there are many courses', () => {
     // Create 12 active courses
     const manyCourses = Array.from({ length: 12 }, (_, i): TrackableCollection => ({
       ...mockCourses[0]!,
@@ -131,20 +142,20 @@ describe('MyLearningCourses', () => {
     render(<MyLearningCourses courses={manyCourses} />);
     
     // Should show the button
-    expect(screen.getByText('View more courses')).toBeInTheDocument();
+    expect(screen.getByText('View More Courses')).toBeInTheDocument();
     
     // Only 9 should be visible initially
     const cards = screen.getAllByTestId('course-card');
     expect(cards.length).toBe(9);
     
     // Click view more
-    fireEvent.click(screen.getByText('View more courses'));
+    fireEvent.click(screen.getByText('View More Courses'));
     
     // Now all 12 should be visible
     const allCards = screen.getAllByTestId('course-card');
     expect(allCards.length).toBe(12);
     
     // Button should disappear if no more courses
-    expect(screen.queryByText('View more courses')).not.toBeInTheDocument();
+    expect(screen.queryByText('View More Courses')).not.toBeInTheDocument();
   });
 });

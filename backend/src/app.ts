@@ -2,9 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import { oidcSession, requireAuth } from './auth/oidcMiddleware.js';
 import formRoutes from './routes/formsRoutes.js';
+import reviewCommentRoutes from './routes/reviewCommentRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
 import portalProxyRoutes from './routes/portalProxyRoutes.js';
+import editorRoutes from './routes/editorRoutes.js';
 import { redirectTenant } from './controllers/tenantController.js';
 import { loadTenants } from './services/tenantService.js';
 import path from 'path';
@@ -16,8 +18,8 @@ import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
-import { kongProxy } from './proxies/kongProxy.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
+import { kongProxy } from './proxies/kongProxy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,6 +41,9 @@ app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousPr
 // Portal Authentication Routes (Login, Callback, Logout)
 app.use('/portal', portalAuthRoutes);
 
+// Review comment routes
+app.use('/portal/review/comment/v1', sessionMiddleware, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), reviewCommentRoutes);
+
 // Apply anonymous session middleware to API routes (once per route tree)
 
 app.use('/data/v1/form', formRoutes);
@@ -46,9 +51,11 @@ app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, oidc
 app.use('/google', googleRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+// Specific /action endpoints must always proxy to kong.
+app.use("/action", editorRoutes);
 
-// Content Editor Proxy Routes (serves /action/*, /content-plugins/*, /plugins/*, etc.)
-// oidcSession() deserializes the session tokens into req.oidc so that
+// All remaining /action/* routes proxy to knowledge-mw-service.
+// keycloak.middleware() deserializes the session grant into req.kauth so that
 // decorateRequestHeaders can read the user's access token for upstream auth.
 app.use('/', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), knowlgMwProxyRoutes);
 

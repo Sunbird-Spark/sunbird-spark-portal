@@ -2,6 +2,26 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceContentList from './WorkspaceContentList';
+import type { WorkspaceItem } from '@/types/workspaceTypes';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'workspace.tableHeaders.title': 'Title',
+        'workspace.tableHeaders.type': 'Type',
+        'workspace.tableHeaders.status': 'Status',
+        'workspace.tableHeaders.modified': 'Modified',
+        'workspace.tableHeaders.actions': 'Actions',
+        'workspaceCard.view': 'View',
+        'workspaceCard.edit': 'Edit',
+        'workspaceCard.delete': 'Delete',
+        'workspaceCard.lockedBy': 'Locked by {{name}}',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
 
 vi.mock('@/components/common/DropdownMenu', () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -17,7 +37,7 @@ vi.mock('@/components/common/DropdownMenu', () => ({
   DropdownMenuSeparator: () => <hr />,
 }));
 
-const defaultItems = [
+const defaultItems: WorkspaceItem[] = [
   {
     id: 'item-1',
     title: 'First Item',
@@ -27,7 +47,12 @@ const defaultItems = [
     thumbnail: '',
     createdAt: '2024-01-01',
     updatedAt: '2024-01-02',
-    author: 'Author',
+    author: 'user-1',
+    primaryCategory: 'Learning Resource',
+    contentType: '',
+    mimeType: '',
+    framework: '',
+    contentStatus: 'Draft',
   },
 ];
 
@@ -39,7 +64,6 @@ describe('WorkspaceContentList', () => {
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={vi.fn()}
-        onSubmitReview={vi.fn()}
       />
     );
     expect(screen.getByText('Title')).toBeInTheDocument();
@@ -48,13 +72,13 @@ describe('WorkspaceContentList', () => {
 
   it('calls onView when View action is clicked', () => {
     const onView = vi.fn();
+    const publishedItems: WorkspaceItem[] = [{ ...defaultItems[0]!, status: 'published' }];
     render(
       <WorkspaceContentList
-        items={defaultItems}
+        items={publishedItems}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={onView}
-        onSubmitReview={vi.fn()}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'View' }));
@@ -69,7 +93,6 @@ describe('WorkspaceContentList', () => {
         onEdit={onEdit}
         onDelete={vi.fn()}
         onView={vi.fn()}
-        onSubmitReview={vi.fn()}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
@@ -84,25 +107,9 @@ describe('WorkspaceContentList', () => {
         onEdit={vi.fn()}
         onDelete={onDelete}
         onView={vi.fn()}
-        onSubmitReview={vi.fn()}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(onDelete).toHaveBeenCalledWith('item-1');
-  });
-
-  it('calls onSubmitReview when Submit for Review is clicked for draft item', () => {
-    const onSubmitReview = vi.fn();
-    render(
-      <WorkspaceContentList
-        items={defaultItems}
-        onEdit={vi.fn()}
-        onDelete={vi.fn()}
-        onView={vi.fn()}
-        onSubmitReview={onSubmitReview}
-      />
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Submit for Review' }));
-    expect(onSubmitReview).toHaveBeenCalledWith('item-1');
   });
 });

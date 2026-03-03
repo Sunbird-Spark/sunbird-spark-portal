@@ -22,6 +22,15 @@ export const refreshSessionTTL = (req: Request) => {
     }
 };
 
+export const isSessionNearExpiry = (req: Request): boolean => {
+    const expiresAt = req.session?.cookie?.expires;
+    if (!expiresAt || !(expiresAt instanceof Date)) return true;
+    const remaining = expiresAt.getTime() - Date.now();
+    const maxAge = req.session?.cookie?.maxAge ?? SUNBIRD_ANONYMOUS_SESSION_TTL;
+    const threshold = maxAge / 2;
+    return remaining <= threshold;
+};
+
 export const generateKongToken = async (req: Request): Promise<string> => {
     const apiEndpoint = `${KONG_URL}/api-manager/v2/consumer/portal_anonymous/credential/register`;
 

@@ -4,6 +4,10 @@ import {
   CollectionEditorService,
   type CollectionEditorContextProps,
 } from '../../services/editors/collection-editor';
+import { useFancytreeGuard } from '../../hooks/useFancytreeGuard';
+import PageLoader from '../common/PageLoader';
+import { useAppI18n } from "@/hooks/useAppI18n";
+import './CollectionEditor.css';
 
 interface CollectionEditorProps {
   identifier: string;
@@ -20,11 +24,12 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
   onEditorEvent,
   onTelemetryEvent,
 }) => {
+  const { t } = useAppI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const serviceRef = useRef<CollectionEditorService>(new CollectionEditorService());
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
-  // Memoize event handler to maintain referential equality
+  // Memoize event handlers to maintain referential equality across renders.
   const handleEditorEvent = useCallback(
     (event: CollectionEditorEvent) => {
       onEditorEvent?.(event);
@@ -39,6 +44,20 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
     [onTelemetryEvent],
   );
 
+  // Guard: keep the FancyTree-capable jQuery alive on globalThis.
+  // Starts only after the editor is fully mounted (status === 'ready').
+  // All scheduling state is managed inside the hook via refs — no re-renders.
+  useFancytreeGuard(status === 'ready');
+
+  // CSS lifecycle: inject the collection-editor stylesheet on mount,
+  // remove it on unmount so it doesn't bleed into the rest of the portal.
+  useEffect(() => {
+    serviceRef.current.loadAssets();
+    return () => {
+      serviceRef.current.removeAssets();
+    };
+  }, []);
+
   useEffect(() => {
     let editorElement: HTMLElement | null = null;
     let cancelled = false;
@@ -49,13 +68,12 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
           console.warn('[CollectionEditor] Container or metadata not available');
           return;
         }
-        await serviceRef.current.initializeDependencies();
 
+        await serviceRef.current.initializeDependencies();
         if (cancelled) return;
 
         const service = serviceRef.current;
         const config = await service.createConfig(metadata, contextProps);
-
         if (cancelled) return;
 
         editorElement = service.createElement(config);
@@ -82,7 +100,11 @@ const CollectionEditor: React.FC<CollectionEditorProps> = ({
 
   return (
     <div className="w-full h-full min-h-[600px] relative" id="collection-editor-wrapper">
-      {status === 'loading' && <div className="p-4">Loading Editor...</div>}
+      {status === 'loading' && (
+        <div className="collection-editor-loader-wrapper">
+          <PageLoader message={t('loading')} fullPage={true} />
+        </div>
+      )}
       <div ref={containerRef} className="w-full h-full" id="collection-editor-container" />
     </div>
   );

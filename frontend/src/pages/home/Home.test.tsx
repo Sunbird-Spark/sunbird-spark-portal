@@ -1,75 +1,100 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 
-// Mock child components to keep tests focused
-vi.mock('@/components/home/HomeSidebar', () => ({
-    default: ({ onNavChange }: { onNavChange: (n: string) => void }) => (
-        <div data-testid="sidebar">
-            <button onClick={() => onNavChange('profile')}>Change Nav</button>
-        </div>
-    )
-}));
-vi.mock('@/components/home/HomeStatsCards', () => ({ default: () => <div data-testid="stats-cards" /> }));
-vi.mock('@/components/home/HomeContinueLearning', () => ({ default: () => <div data-testid="continue-learning" /> }));
-vi.mock('@/components/home/HomeInProgressGrid', () => ({ default: () => <div data-testid="inprogress-grid" /> }));
-vi.mock('@/components/home/HomeRecommendedSection', () => ({ default: () => <div data-testid="recommended-section" /> }));
-vi.mock('@/components/home/Footer', () => ({ default: () => <div data-testid="footer" /> }));
-
-// Mock DropdownMenu to render content inline
-vi.mock('@/components/common/DropdownMenu', () => ({
-    DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    DropdownMenuItem: ({ children, onSelect }: { children: React.ReactNode, onSelect?: () => void }) => (
-        <div onClick={onSelect}>{children}</div>
+vi.mock('@/components/home/HomeDashboardContent', () => ({
+    default: ({ loading, error, enrolledCount }: { loading: boolean; error?: string; enrolledCount: number; onRetry: () => void }) => (
+        <div data-testid="dashboard-content"
+            data-loading={String(loading)}
+            data-error={error ?? ''}
+            data-enrolled={enrolledCount}
+        />
     ),
 }));
 
-// Mock hooks
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom');
-    return {
-        ...actual,
-        useNavigate: () => mockNavigate,
-    };
-});
-
-const mockChangeLanguage = vi.fn();
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => key,
-        languages: [
-            { code: 'en', label: 'English' },
-            { code: 'hi', label: 'Hindi' },
-        ],
-        currentCode: 'en',
-        changeLanguage: mockChangeLanguage,
+        t: (key: string, options?: any) => {
+            const translations: Record<string, string> = {
+                'homePage.hiUser': `Hi ${options?.name}`,
+                'homePage.hiGuest': 'Hi there',
+                'homePage.journeyStart': 'Your exciting learning journey starts here. Dive in!',
+                'homePage.welcomeMessage': 'Welcome to a learning experience made just for you.',
+            };
+            return translations[key] || key;
+        },
     }),
 }));
 
-const mockUseIsMobile = vi.fn();
-vi.mock('@/hooks/use-mobile', () => ({
-    useIsMobile: () => mockUseIsMobile(),
+vi.mock('@/hooks/usePermission', () => ({
+    usePermissions: vi.fn(() => ({
+        isAuthenticated: true,
+        isLoading: false,
+        roles: ['CONTENT_CREATOR'],
+        error: null,
+        hasAnyRole: vi.fn(() => true),
+        canAccessFeature: vi.fn(),
+        refetch: vi.fn(),
+    })),
 }));
 
-// Mock useAuth for Header
-vi.mock('@/auth/AuthContext', () => ({
-    useAuth: vi.fn(() => ({
-        isAuthenticated: true,
-        user: { id: '123', name: 'John Doe', role: 'content_creator' },
-        login: vi.fn(),
-        logout: vi.fn(),
-    })),
+vi.mock('@/hooks/useSystemSetting', () => ({
+    useSystemSetting: () => ({ data: {}, isSuccess: false }),
+}));
+
+vi.mock('@/hooks/useTnc', () => ({
+    useGetTncUrl: () => ({ data: '' }),
+    useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+    default: {
+        getUserId: () => 'test-user-id',
+        isUserAuthenticated: () => true,
+        getAuthInfo: vi.fn().mockResolvedValue({
+            sid: 'test-session',
+            uid: 'test-user-id',
+            isAuthenticated: true,
+        }),
+    },
+}));
+
+const mockUseUserRead = vi.fn();
+vi.mock('@/hooks/useUserRead', () => ({
+    useUserRead: () => mockUseUserRead(),
+}));
+
+const mockUseUserEnrolledCollections = vi.fn();
+vi.mock('@/hooks/useUserEnrolledCollections', () => ({
+    useUserEnrolledCollections: () => mockUseUserEnrolledCollections(),
 }));
 
 describe('Home Page', () => {
     beforeEach(() => {
-        mockUseIsMobile.mockReturnValue(false); // Default to desktop
+        mockUseUserRead.mockReturnValue({
+            data: {
+                data: {
+                    response: {
+                        firstName: 'John',
+                        lastName: 'Doe',
+                    },
+                },
+            },
+            isLoading: false,
+            error: null,
+            refetch: vi.fn(),
+        });
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [{ courseId: 'c1' }, { courseId: 'c2' }],
+                },
+            },
+            isLoading: false,
+            error: null,
+        });
     });
 
     afterEach(() => {
@@ -77,11 +102,7 @@ describe('Home Page', () => {
     });
 
     const createTestQueryClient = () => new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-            },
-        },
+        defaultOptions: { queries: { retry: false } },
     });
 
     const renderHome = () => {
@@ -95,78 +116,94 @@ describe('Home Page', () => {
         );
     };
 
-    it('renders the loading state initially and then the dashboard', async () => {
+    it('renders the welcome message with user name', async () => {
         renderHome();
-
-        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
 
         await waitFor(() => {
-            expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument();
-        }, { timeout: 2000 });
-
-        expect(screen.getByText('Hi John Deo')).toBeInTheDocument();
-        expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-        expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
+            expect(screen.getByText('Hi John Doe')).toBeInTheDocument();
+        });
+        expect(screen.getByText('Welcome to a learning experience made just for you.')).toBeInTheDocument();
     });
 
-    it('handles sidebar toggle on desktop', async () => {
+    it('shows the onboarding subtitle when user has no enrollments', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [] } },
+            isLoading: false,
+            error: null,
+        });
+
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        // Sidebar is open by default on desktop
-        expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
-
-        // Close sidebar
-        const buttons = screen.getAllByRole('button');
-        const collapseBtn = buttons.find(b => b.querySelector('path[d="M5 1L1 5L5 9"]'));
-
-        if (collapseBtn) {
-            fireEvent.click(collapseBtn);
-            await waitFor(() => {
-                expect(screen.queryByAltText('Sunbird')).not.toBeInTheDocument();
-            });
-        }
+        expect(screen.getByText('Your exciting learning journey starts here. Dive in!')).toBeInTheDocument();
+        expect(screen.queryByText('Welcome to a learning experience made just for you.')).not.toBeInTheDocument();
     });
 
-    it('renders mobile layout correctly', async () => {
-        mockUseIsMobile.mockReturnValue(true);
+    it('shows the returning-user subtitle when user has enrollments', () => {
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();
+        expect(screen.getByText('Welcome to a learning experience made just for you.')).toBeInTheDocument();
+        expect(screen.queryByText('Your exciting learning journey starts here. Dive in!')).not.toBeInTheDocument();
     });
 
-    it('navigates to search when search bar is clicked', async () => {
+    it('renders "Hi there" when user profile is not available', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+            error: null,
+            refetch: vi.fn(),
+        });
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: { courses: [] } },
+            isLoading: false,
+            error: null,
+        });
+
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        const searchInput = screen.getByPlaceholderText('header.search');
-        fireEvent.click(searchInput.parentElement!);
-
-        expect(mockNavigate).toHaveBeenCalledWith('/search');
+        expect(screen.getByText('Hi there')).toBeInTheDocument();
     });
 
-    it('changes language through the dropdown', async () => {
+    it('passes loading=true to HomeDashboardContent when user data is loading', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+            refetch: vi.fn(),
+        });
+
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        const langBtn = screen.getByAltText('Language').parentElement;
-        fireEvent.click(langBtn!);
-
-        const hindiOption = await screen.findByText('Hindi');
-        fireEvent.click(hindiOption);
-
-        expect(mockChangeLanguage).toHaveBeenCalledWith('hi');
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-loading', 'true');
     });
 
-    it('updates activeNav when sidebar notifies', async () => {
+    it('passes loading=true to HomeDashboardContent when enrollments are loading', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            error: null,
+        });
+
         renderHome();
-        await waitFor(() => expect(screen.queryByText('Loading your dashboard...')).not.toBeInTheDocument(), { timeout: 2000 });
 
-        const changeNavBtn = screen.getByText('Change Nav');
-        fireEvent.click(changeNavBtn);
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-loading', 'true');
+    });
 
-        // We can't easily check internal state, but we can check if it re-renders correctly or side effects
-        // Here we just verify the interaction happened.
+    it('passes error message to HomeDashboardContent when user data fails', () => {
+        mockUseUserRead.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+            error: new Error('Network error'),
+            refetch: vi.fn(),
+        });
+
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-error', 'Network error');
+    });
+
+    it('passes enrolledCount to HomeDashboardContent', () => {
+        renderHome();
+
+        expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-enrolled', '2');
     });
 });

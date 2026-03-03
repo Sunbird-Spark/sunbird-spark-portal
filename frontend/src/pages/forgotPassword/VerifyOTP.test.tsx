@@ -2,6 +2,24 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { VerifyOTP } from './VerifyOTP';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string, data?: any) => {
+            const translations: Record<string, string> = {
+                'forgotPasswordTitle': 'Forgot Password',
+                'forgotPasswordPage.enterCode': 'Enter the code',
+                'forgotPasswordPage.otpSentInstruction': 'Enter the 6 digit code sent to your email/phone number and complete the verification',
+                'forgotPasswordPage.otpValidity': 'OTP is valid for 30 minutes',
+                'forgotPasswordPage.resendOtp': 'Resend OTP',
+                'forgotPasswordPage.submitOtp': 'Submit OTP',
+                'forgotPasswordPage.errorInvalidOtpRemaining': `Invalid OTP. You have ${data?.remaining || data?.remainingAttempt} attempt(s) remaining.`,
+                'forgotPasswordPage.errorInvalidOtp': 'Invalid OTP. Please try again.',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 
 // Mock all external dependencies
@@ -28,10 +46,23 @@ vi.mock('./ForgotPasswordComponents', () => ({
         <button data-testid="submit-btn" onClick={onClick} disabled={disabled || loading}>
             {loading ? 'Loading' : children}
         </button>
-    ),
-    OTPInput: ({ _otp, setOtp }: { _otp: string[], setOtp: (otp: string[]) => void }) => (
-        <button data-testid="fill-otp" onClick={() => setOtp(['1', '2', '3', '4', '5', '6'])}>Fill OTP</button>
     )
+}));
+
+vi.mock('@/components/common/InputOTP', () => ({
+    InputOTP: ({ value, onChange, children }: { value: string, onChange: (val: string) => void, children: React.ReactNode }) => (
+        <div>
+            <input
+                data-testid="otp-input"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            <button data-testid="fill-otp" onClick={() => onChange('123456')}>Fill OTP</button>
+            {children}
+        </div>
+    ),
+    InputOTPGroup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    InputOTPSlot: ({ index }: { index: number }) => <div data-testid={`otp-slot-${index}`} />
 }));
 
 describe('VerifyOTP', () => {

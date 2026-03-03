@@ -1,7 +1,9 @@
 {
   "header": {
     "search": "Search for content",
-    "login": "Log In"
+    "login": "Log In",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "loading": "Loading...",
   "error": "An error occurred",
@@ -14,6 +16,8 @@
   "confirm": "Confirm",
   "back": "Back",
   "next": "Next",
+    "yes": "Yes",
+    "no": "No",
   "changeLanguage": "Change Language",
   "home": "Home",
   "dashboard": "Dashboard",
@@ -90,6 +94,13 @@
   "contact": "Contact",
   "signup": "Sign Up",
   "searchPlaceholder": "Search courses...",
+  "search_for_content_placeholder": "Search for content...",
+  "recommended": "Recommended",
+  "results_for": "Results for \"{{query}}\"",
+  "view_all_results": "View All Results",
+  "no_results_found": "No results found",
+  "failed_to_search": "Search failed. Please try again.",
+  "clear_search": "Clear search",
   "featuredCourses": "Featured Courses",
   "popularCourses": "Popular Courses",
   "browseCategories": "Browse Through Categories",
@@ -110,7 +121,6 @@
   "coursesAvailable": "Courses Available",
   "expertInstructors": "Expert Instructors",
   "completionRate": "Completion Rate",
-  "workspace": "Workspace",
   "createNewContent": "Create New Content",
   "createNew": "Create New",
   "allMyContent": "All My Content",
@@ -121,9 +131,7 @@
   "collaborations": "Collaborations",
   "create": "Create",
   "course": "Course",
-  "content": "Content",
   "quiz": "Quiz",
-  "collection": "Collection",
   "courseDesc": "Design courses using collections and resources. Courses are for a duration, to achieve an objective.",
   "contentDesc": "Create different resources like story, game, activity, audio, video, using the inbuilt authoring tools.",
   "quizDesc": "Create assessments with multiple question types to evaluate learner understanding.",
@@ -210,7 +218,56 @@
     "suitedFor": "Best Suited For",
     "relatedContent": "Related Content",
     "unlockLearningTitle": "Unlock your learning.",
-    "unlockLearningDescription": "Log in to begin your learning journey with us."
+    "unlockLearningDescription": "Log in to begin your learning journey with us.",
+    "upcomingBatches": "Upcoming Batches",
+    "availableBatches": "Available Batches",
+    "selectBatchToStart": "Select a batch to start learning.",
+    "selectBatch": "Select a Batch",
+    "noBatchesAvailable": "No batches available for enrollment at the moment.",
+    "batchStart": "Start",
+    "batchEnd": "End",
+    "noEndDate": "No end date",
+    "timeline": "Timeline",
+    "enrollmentEndsBy": "Enrollment ends by",
+    "joinTheCourse": "Join The Course",
+    "mustJoinToAccessContent": "You must join the course to get complete access to content",
+    "certificate": "Certificate",
+    "certificateEarnDescription": "Earn a certificate on completion of the course. Verify the details before completing the course.",
+    "certificateNotAvailable": "Currently, this course does not have a certificate. The course creator may attach a certificate later.",
+    "previewCertificate": "Preview Certificate",
+    "courseProgress": "Course Progress",
+    "batchStartedOn": "Batch Started on",
+    "contentStatusCompleted": "Completed",
+    "contentStatusInProgress": "In Progress",
+    "contentStatusNotViewed": "Not viewed",
+    "selfAssessMaxAttempt": "You have reached the maximum number of attempts for this assessment.",
+    "selfAssessLastAttempt": "This is your last attempt for this assessment.",
+    "attemptsLabel": "Attempt {{current}} of {{max}}",
+    "forceSync": "Sync progress now",
+    "forceSyncSuccess": "You can view your updated course progress within 24 hours",
+    "forceSyncCooldown": "Please wait before syncing again."
+  },
+  "profileDataSharing": {
+    "cardTitle": "Profile Data Sharing",
+    "statusOn": "Profile data sharing is On. You have agreed to share your profile details with the course administrator.",
+    "statusOff": "Profile data sharing is Off. You have not agreed to share your profile details with the course administrator.",
+    "lastUpdatedOn": "Last updated on",
+    "update": "Update",
+    "consentTitle": "Profile Data Sharing",
+    "fields": {
+      "name": "Name",
+      "state": "State",
+      "userId": "User ID",
+      "mobileNumber": "Mobile Number",
+      "emailId": "Email"
+    },
+    "canEditFromProfile": "You can edit these details from your profile.",
+    "tncText": "I agree to share the above profile details with the course administrator.",
+    "tncCheckboxLabel": "I agree to share profile details",
+    "dontShare": "Do not share",
+    "share": "Share",
+    "consentUpdateSuccess": "Profile data sharing preference updated.",
+    "consentUpdateError": "Profile data sharing preference could not be updated. Please try again."
   },
   "resource": {
     "title": "Stay ahead. What's next starts here.",
@@ -225,14 +282,17 @@
     "videoBadge": "Video",
     "epubBadge": "EPUB",
     "htmlBadge": "HTML",
-    "pdfBadge": "PDF"
+    "pdfBadge": "PDF",
+    "ecmlBadge": "ECML",
+    "h5pBadge": "H5P"
   },
   "trending": {
     "mostViewed": "Most Viewed Content",
     "trending": "Trending Content"
   },
   "faq": {
-    "title": "Frequently asked questions"
+    "title": "Frequently asked questions",
+    "studentAlt": "Student learning online"
   },
   "footer": {
     "products": "Products",
@@ -241,5 +301,597 @@
     "videos": "Videos",
     "terms": "Terms and Conditions",
     "privacy": "Privacy Policy"
+  },
+  "index": {
+    "loadingSections": "Loading sections...",
+    "errorLoadingSections": "Unable to load content sections. Please try again.",
+    "noSectionsAvailable": "No content sections available at the moment."
+  },
+  "navigationMenu": "Navigation Menu",
+  "sortBy": "Sort By",
+  "sortOptions": {
+    "newest": "Newest",
+    "oldest": "Oldest"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "controls": "Admin Controls",
+    "accessRestricted": "This page is only accessible to users with the ",
+    "roleAdmin": "admin",
+    "roleSuffix": " role.",
+    "accessInfo": "This page is only accessible to users with the <1>{{role}}</1> role.",
+    "manageUsers": "Manage users",
+    "systemConfig": "System configuration",
+    "viewReports": "View all reports",
+    "accessControl": "Access control settings"
+  },
+  "content": {
+    "creationTools": "Content Creation Tools",
+    "accessRestricted": "This page is only accessible to users with the ",
+    "roleContentCreator": "content_creator",
+    "roleSuffix": " role.",
+    "createArticles": "Create new articles",
+    "uploadMedia": "Upload media",
+    "draftContent": "Draft content",
+    "loadingEditor": "Loading editor...",
+    "notFound": "Content not found",
+    "errorLoading": "Error loading content: {{error}}",
+    "missingIdentifier": "Missing content identifier.",
+    "failedToLoadMetadata": "Failed to load content metadata.",
+    "backToWorkspace": "Back to workspace",
+    "label": "Content"
+  },
+  "collection": {
+    "label": "Collection",
+    "notFound": "Collection not found.",
+    "contentPlaylist": "Content Playlist",
+    "digitalTextbook": "Digital Textbook",
+    "questionPaper": "Question Paper"
+  },
+  "homePage": {
+    "hiUser": "Hi {{name}}",
+    "hiGuest": "Hi there",
+    "journeyStart": "Your exciting learning journey starts here. Dive in!",
+    "welcomeMessage": "Welcome to a learning experience made just for you."
+  },
+  "selectRole": "Select Role:",
+  "redirectMessage": "You will be redirected to:",
+  "roles": {
+    "admin": "Admin",
+    "content_creator": "Content Creator",
+    "content_reviewer": "Content Reviewer",
+    "guest": "Guest"
+  },
+  "continue": "Continue",
+  "forgotPasswordTitle": "Forgot Password",
+  "forgotPasswordPage": {
+    "subtitle": "Don't worry! Share your details and we will send you a code to reset your password.",
+    "emailOrMobile": "Email ID / Mobile Number",
+    "enterEmailOrMobile": "Enter Email ID / Mobile Number",
+    "emailOrMobileInstruction": "Email (e.g. user@example.com) or Mobile Number (10 digits starting with 6-9)",
+    "nameRegistered": "Name (as registered)",
+    "enterName": "Enter name",
+    "errorNotMatched": "Email / mobile number or name does not match",
+    "errorNameNotMatched": "Name does not match our records",
+    "errorCaptcha": "Captcha validation failed",
+    "errorMaxRetry": "You have exceeded maximum retry. Please try after some time",
+    "otpInstruction": "You will receive an OTP. After you validate it, you can recover your account.",
+    "enterCode": "Enter the code",
+    "otpSentInstruction": "Enter the 6 digit code sent to your email/phone number and complete the verification",
+    "deliveryPrompt": "Where would you like to receive the OTP?",
+    "getOtp": "Get OTP",
+    "errorGenerateOtp": "Generate OTP failed",
+    "errorTooManyRequests": "Too many requests. Please try again later.",
+    "otpValidity": "OTP is valid for 30 minutes",
+    "resendOtp": "Resend OTP",
+    "submitOtp": "Submit OTP",
+    "errorMaxRetryLogin": "You have exceeded maximum retry. Please login again.",
+    "errorInvalidOtpRemaining": "Invalid OTP. You have {{remaining}} attempt(s) remaining.",
+    "errorInvalidOtp": "Invalid OTP. Please try again.",
+    "errorResendMaxReached": "OTP resend maximum retry reached.",
+    "errorResendFailed": "Resend OTP failed. Please try again.",
+    "errorResetFailed": "Reset password failed"
+  },
+  "help": {
+    "reportIssue": "Report an issue with the application",
+    "reportContentIssue": "Report an issue with this help content",
+    "noCategories": "No help categories found.",
+    "failedToLoadFaq": "Failed to load FAQ data. Please try again.",
+    "categoryNotFound": "Category not found.",
+    "noFaqs": "No FAQs available for this category.",
+    "sorry": "Sorry about that!",
+    "whatMore": "What more would you like to know?",
+    "typeHere": "Type Here...",
+    "additionalFeedback": "Additional feedback about this answer",
+    "didThisHelp": "Did this answer help you?",
+    "assistPrompt": "How can we assist you today?",
+    "reportAppIssue": "Report an issue with the application",
+    "reportIssueBtn": "Report an Issue",
+    "faqCount": "{{count}} FAQs",
+    "feedbackThanks": "Thank you for your feedback!",
+    "submitFeedback": "Submit feedback"
+  },
+  "common": {
+    "notifications": "Notifications",
+    "language": "Language",
+    "manage": "Manage",
+    "backTo": "Back to {{page}}",
+    "upcomingBatches": "Upcoming Batches",
+    "learningProgress": "Learning Progress",
+    "downloadCertificate": "Download Certificate"
+  },
+  "myLearning": {
+    "loading": "Loading your learning...",
+    "errorLoading": "Failed to load your learning progress. Please try again later.",
+    "mainNavigation": "Main Navigation",
+    "learningProgress": "Learning Progress",
+    "lessonVisited": "Lesson visited",
+    "contentsCompleted": "Contents completed"
+  },
+  "onboarding": {
+    "altSunbird": "Sunbird",
+    "otherPreferencePlaceholder": "Please type your preference here",
+    "altImage": "Onboarding Image",
+    "goBack": "Go back"
+  },
+  "profilePage": {
+    "loading": "Loading your profile...",
+    "errorLoading": "Error loading profile..."
+  },
+  "reports": {
+    "title": "Reports",
+    "contentReports": "Content Reports",
+    "roleContentReviewer": "content_reviewer",
+    "accessInfo": "This page is only accessible to users with the <1>{{role}}</1> role.",
+    "analytics": "View content analytics",
+    "submissionStats": "Review submission statistics",
+    "qaMetrics": "Quality assurance metrics",
+    "performance": "Performance dashboards"
+  },
+  "accessDenied": "Access Denied",
+  "workspace": {
+    "loadingContentReview": "Loading content for review...",
+    "createdBy": "Created By",
+    "createdOn": "Created On",
+    "enterDescription": "Enter a description",
+    "selectCollectionType": "Select a collection type",
+    "createContent": "Create content",
+    "closeDialog": "Close dialog",
+    "fillDetails": "Fill in the details to create your content",
+    "deleteContent": "Delete Content",
+    "deleteConfirmation": "Are you sure you want to delete this content?",
+    "noContentsToReview": "No contents to review",
+    "noContentsToReviewDesc": "There are no contents pending your review at this time.",
+    "noPublishedContents": "No published contents",
+    "noPublishedContentsDesc": "You have not published any contents yet.",
+    "roleCreator": "Creator",
+    "roleReviewer": "Reviewer",
+    "more": "More",
+    "inReview": "In Review",
+    "showingItems": "Showing {{count}} items",
+    "showingItemsOf": "Showing {{count}} of {{total}} items",
+    "startingEditor": "Starting Editor",
+    "launchingEditor": "Launching {{name}} editor...",
+    "enterContentName": "Enter content name",
+    "editorOptions": {
+      "quiz": "Quiz & Assessment",
+      "story": "Story & Game",
+      "course": "Course",
+      "collection": "Collection",
+      "questionSet": "Question Set"
+    },
+    "collectionDescriptions": {
+      "course": "Enter description for Course",
+      "contentPlaylist": "Enter description for Collection",
+      "digitalTextbook": "Enter description for Digital Textbook",
+      "questionPaper": "Enter description for Question Paper"
+    },
+    "errors": {
+      "unexpectedResponse": "Unexpected server response. Please try again.",
+      "creationFailed": "Creation Failed",
+      "unableToCreate": "Unable to create content. Please try again."
+    },
+    "stats": {
+      "published": "Published",
+      "inReview": "In Review",
+      "drafts": "Drafts",
+      "allUploads": "All Uploads",
+      "myCollaborations": "My Collaborations"
+    },
+    "tableHeaders": {
+      "title": "Title",
+      "type": "Type",
+      "status": "Status",
+      "modified": "Modified",
+      "actions": "Actions"
+    },
+    "emptyStates": {
+      "noUploadsTitle": "No uploads yet",
+      "noUploadsDesc": "Upload PDF, video, or other content files to get started.",
+      "noCollaborationsTitle": "No collaborations",
+      "noCollaborationsDesc": "Content shared with you will appear here."
+    },
+    "name": "Name",
+    "enterName": "Enter {{type}} name",
+    "description": "Description",
+    "collectionType": "Collection Type",
+    "creating": "Creating...",
+    "review": {
+      "errorTitle": "Error",
+      "failedToLoadForm": "Failed to load {{action}} form.",
+      "failedToLoadFormRetry": "Failed to load {{action}} form. Please try again.",
+      "publishedTitle": "Published",
+      "publishedDescription": "Content has been published successfully.",
+      "publishFailedTitle": "Publish Failed",
+      "publishFailedDescription": "Unable to publish content. Please try again.",
+      "changesRequestedTitle": "Changes Requested",
+      "changesRequestedDescription": "Request for changes has been submitted successfully.",
+      "requestFailedTitle": "Request Failed",
+      "requestFailedDescription": "Unable to submit request for changes. Please try again.",
+      "notAvailable": "N/A",
+      "lastUpdated": "Last Updated",
+      "contentType": "Content Type",
+      "errorLoading": "Error loading content: {{error}}",
+      "contentNotFound": "Content not found",
+      "loadingComments": "Loading comments...",
+      "comments": "Comments",
+      "noCommentsYet": "No comments yet. Add the first comment below.",
+      "noCommentsYetViewMode": "No comments yet.",
+      "addCommentPlaceholder": "Add a comment...",
+      "addComment": "Add Comment",
+      "anonymous": "anonymous",
+      "confirmPublish": "Confirm Publish",
+      "publishWarningText": "You have given some review comments/suggestions, they will be lost if content is published.",
+      "publishWarningQuestion": "Do you want to publish?",
+      "processing": "Processing..."
+    },
+    "collectionType": "Collection Type",
+    "description": "Description",
+    "creating": "Creating..."
+  },
+  "homeComponents": {
+    "openMenu": "Open Menu",
+    "continueLearning": "Continue from where you left",
+    "inProgress": "In Progress",
+    "noCoursesInProgress": "No courses in progress",
+    "performance": "Performance",
+    "recommendedContents": "Recommended Contents"
+  },
+  "sidebar": {
+    "home": "Home",
+    "myLearning": "My Learning",
+    "explore": "Explore",
+    "workspace": "Workspace",
+    "profile": "Profile",
+    "helpAndSupport": "Help and Support",
+    "logout": "Logout",
+    "userReport": "User Report",
+    "adminReports": "Admin Reports",
+    "userManagement": "User Management",
+    "userConsent": "User Consent",
+    "expand": "Expand Sidebar",
+    "collapse": "Collapse Sidebar"
+  },
+  "createOptions": {
+    "title": "What would you like to create?",
+    "description": "Choose an editor type below to start creating content for your learners."
+  },
+  "reportIssueDialog": {
+    "title": "Report an Issue",
+    "selectCategory": "Select Category",
+    "selectSubcategory": "Select Subcategory",
+    "tellUsMore": "Tell us more",
+    "feedbackSuccess": "Thanks for your feedback. We may not be able to respond to every suggestion, but your feedback helps make {{appName}} better for everyone.",
+    "submitFeedback": "Submit Feedback",
+    "loadError": "Failed to load report issue options",
+    "description": "Report an issue by selecting a category and describing the problem"
+  },
+  "confirmDialog": {
+    "pleaseWait": "Please wait..."
+  },
+  "unauthorizedPage": {
+    "code": "403",
+    "title": "Access Denied",
+    "message": "You do not have the required permissions to access this page.",
+    "goHome": "Go Home",
+    "changeRole": "Change Role"
+  },
+  "notifications": {
+    "empty": "No notifications",
+    "deleteAll": "Delete All"
+  },
+  "months": {
+    "jan": "Jan",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Apr",
+    "may": "May",
+    "jun": "Jun",
+    "jul": "Jul",
+    "aug": "Aug",
+    "sep": "Sep",
+    "oct": "Oct",
+    "nov": "Nov",
+    "dec": "Dec"
+  },
+  "authLayout": {
+    "empowerTitle": "Empower your future through learning.",
+    "logoAlt": "Sunbird Logo"
+  },
+  "signUp": {
+    "welcomeTitle": "Welcome to Sunbird!",
+    "welcomeSubtitle": "Your learning journey starts here - sign up to get started.",
+    "signInWithGoogle": "Sign in with Google",
+    "or": "OR",
+    "firstName": "First Name",
+    "enterFirstName": "Enter First Name",
+    "firstNameRequired": "First name is required",
+    "emailOrMobileLabel": "Email ID / Mobile Number",
+    "enterEmailOrMobile": "Enter Email ID / Mobile Number",
+    "invalidEmailOrMobile": "Enter valid Email or 10-digit Mobile (6-9)",
+    "enterPassword": "Enter Password",
+    "passwordRequirements": "Password must be 8+ chars (upper, lower, num, special)",
+    "confirmPassword": "Confirm Password",
+    "reenterPassword": "Re-enter Password",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
+    "hideConfirmPassword": "Hide confirm password",
+    "showConfirmPassword": "Show confirm password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "iUnderstand": "I understand &",
+    "acceptTermsOfUse": "accept the SUNBIRD Terms of Use",
+    "termsTitle": "Terms of Use",
+    "creatingAccount": "Creating Account...",
+    "alreadyHaveAccount": "Already have an account?",
+    "enterCodeSubtitle": "Enter the 6 digit code sent to your Email ID and complete the verification",
+    "verifying": "Verifying...",
+    "submit": "Submit",
+    "congratulations": "Congratulations!",
+    "accountCreated": "Your account has been successfully created.",
+    "proceedToLogin": "Proceed to Login"
+  },
+  "signUpPage": {
+    "otpGenerationFailed": "OTP Generation Failed",
+    "failedToSendOtp": "Failed to send OTP. Please try again.",
+    "otpResent": "OTP Resent",
+    "otpSent": "OTP Sent",
+    "newCodeSent": "A new verification code has been sent.",
+    "checkEmailPhone": "Please check your email/phone for the verification code.",
+    "captchaFailed": "Captcha Validation Failed",
+    "resendFailed": "Resend Failed",
+    "pleaseTryAgain": "Please try again.",
+    "signupFailed": "Signup Failed",
+    "otpButFailed": "OTP verified but account creation failed. Please try again.",
+    "verificationFailed": "Verification Failed",
+    "invalidOtp": "Invalid OTP. Please try again.",
+    "verificationError": "An error occurred during verification. Please try again."
+  },
+  "personalInfo": {
+    "title": "Personal Information",
+    "fullName": "Full Name",
+    "mobileNumber": "Mobile Number",
+    "emailId": "Email ID",
+    "alternateEmailId": "Alternate Email ID"
+  },
+  "editProfile": {
+    "title": "Edit Personal Information",
+    "description": "Update your name, mobile number, email, and alternate email.",
+    "sending": "Sending...",
+    "validate": "Validate",
+    "verified": "Verified",
+    "saving": "Saving...",
+    "enterMobileNumber": "Enter Mobile Number",
+    "enterEmailId": "Enter Email ID",
+    "enterAlternateEmailId": "Enter Alternate Email ID",
+    "enterDigitCodePhone": "Enter the 6 digit code sent to your phone number and complete the verification",
+    "enterDigitCodeEmail": "Enter the 6 digit code sent to your email and complete the verification",
+    "submitting": "Submitting...",
+    "verificationError": "Verification Error",
+    "recaptchaFailed": "Failed to load reCAPTCHA. If you are on localhost, this domain might not be supported by the site key."
+  },
+  "checklistDialog": {
+    "publishContent": "Publish Content",
+    "publish": "Publish",
+    "requestForChanges": "Request for Changes",
+    "publishing": "Publishing...",
+    "submitting": "Submitting...",
+    "otherReason": "Other Reason",
+    "provideDetails": "Please provide details..."
+  },
+  "batch": {
+    "nameOfBatch": "Name of Batch",
+    "enterBatchName": "Enter batch name",
+    "aboutBatch": "About Batch",
+    "briefDescBatch": "Brief description about this batch",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "enrolmentEndDate": "Enrolment End Date",
+    "mustBeAfterEnrolmentEnd": "Must be on or after enrolment end date",
+    "betweenStartDate": "Between start date",
+    "betweenStartAndEndDate": "Between start & end date"
+  },
+  "resourceForm": {
+    "failedToLoadForm": "Failed to load form configuration. Please try again."
+  },
+  "courseGrid": {
+    "viewAll": "View all courses"
+  },
+  "termsDialog": {
+    "description": "View and read the terms and conditions document"
+  },
+  "tncPopup": {
+    "title": "Terms and Conditions Updated",
+    "description": "Please review and accept the updated terms and conditions",
+    "checkboxLabel": "I have read and accept the Terms and Conditions",
+    "accept": "Accept",
+    "accepting": "Accepting...",
+    "acceptedTitle": "Terms Accepted",
+    "acceptedDescription": "Thank you for accepting the updated terms and conditions.",
+    "errorTitle": "Acceptance Failed",
+    "errorDescription": "Failed to accept terms and conditions. Please try again."
+  },
+  "workspaceCard": {
+    "locked": "Locked",
+    "lockedBy": "This content is locked by {{name}}",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "imagePicker": {
+    "selectImage": "Select image",
+    "changeImage": "Change image",
+    "remove": "Remove",
+    "selectImageTitle": "Select Image — {{label}}",
+    "myImages": "My Images",
+    "allImages": "All Images",
+    "uploadImage": "Upload Image",
+    "noImagesUploaded": "No images uploaded yet. Use \"Upload Image\" tab.",
+    "noImagesFound": "No images found in this organisation.",
+    "cancel": "Cancel",
+    "uploadNew": "Upload New"
+  },
+  "certificate": {
+    "attachedTemplate": "Attached Certificate Template",
+    "editCertificate": "Edit Certificate",
+    "noPreviewAvailable": "No preview available",
+    "activeTemplateDescription": "This is the active certificate template for this batch. Click <strong>Edit Certificate</strong> to make changes to its configuration or replace it.",
+    "createTemplate": "Create Certificate Template",
+    "currentCertificate": "Current Certificate",
+    "changeCertificate": "Change Certificate",
+    "brandLogo1": "Brand Logo 1",
+    "brandLogo2": "Brand Logo 2",
+    "signature1": "Signature 1",
+    "signature2": "Signature 2",
+    "all": "All",
+    "refreshTemplates": "Refresh templates",
+    "createNewTemplate": "Create new template",
+    "certificateLocked": "Certificate Locked",
+    "certificateUnavailable": "Certificate Unavailable",
+    "addCertificate": "Add Certificate",
+    "reissue": "Re-issue",
+    "reissueCertificate": "Re-issue Certificate",
+    "reissueConfirmation": "Re-issue the certificate for <strong>{{userName}}</strong> in batch <strong>{{batchName}}</strong>?",
+    "reissuing": "Re-issuing…",
+    "reissuedSuccessfully": "Certificate re-issued successfully.",
+    "reissueFailed": "Failed to re-issue certificate."
+  },
+  "batchRow": {
+    "enrolmentEnds": "Enrolment ends {{date}}",
+    "editBatch": "Edit batch",
+    "batchCannotBeEdited": "Batch cannot be edited after the start date has passed",
+    "certificateCannotBeModified": "Certificate cannot be modified after the batch end date",
+    "refreshBatchList": "Refresh batch list",
+    "createBatch": "Create batch"
+  },
+  "batchTabs": {
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming",
+    "expired": "Expired"
+  },
+  "collectionSidebar": {
+    "untitled": "Untitled"
+  },
+  "certificatesTab": {
+    "searching": "Searching…",
+    "search": "Search",
+    "enterSunbirdId": "Enter Sunbird ID",
+    "whatIsSunbirdId": "What is Sunbird ID?",
+    "howToFindSunbirdId": "How to find your Sunbird ID:",
+    "clickProfileTab": "Click the <strong>Profile</strong> tab",
+    "sunbirdIdDisplayed": "The Sunbird ID is displayed below the user name",
+    "batchName": "Batch Name",
+    "userName": "User Name",
+    "courseProgress": "Course Progress",
+    "criteriaMet": "Criteria Met",
+    "action": "Action",
+    "searchFailed": "Search failed.",
+    "noCertificateRecords": "No certificate records found for \"{{userName}}\".",
+    "certificateIssued": "Certificate Issued",
+    "courseCompleted": "Course Completed",
+    "criteriaMustBeMet": "Criteria must be met to re-issue",
+    "reissueCertificate": "Re-issue certificate"
+  },
+  "homePageDemo": {
+    "course1": "Course 1",
+    "course2": "Course 2"
+  },
+  "courseDashboard": {
+    "title": "Course Dashboard"
+  },
+  "userManagement": {
+    "addRole": "Add Role"
+  },
+  "formFields": {
+    "select": "Select {{field}}"
+  },
+  "exploreGrid": {
+    "noContentFound": "No content found"
+  },
+  "status": {
+    "draft": "Draft",
+    "inReview": "In Review",
+    "published": "Published",
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming"
+  },
+  "tabs": {
+    "batches": "Batches",
+    "certificates": "Certificates",
+    "all": "All"
+  },
+  "profileLearning": {
+    "loadingCourses": "Loading your courses...",
+    "failedToLoadCourses": "Failed to load courses. Please try again.",
+    "viewLess": "View Less",
+    "viewMoreCourses": "View More Courses",
+    "noCertificate": "No certificate",
+    "noCoursesEnrolled": "No courses enrolled yet.",
+    "noFilteredCourses": "No {{filter}} courses found.",
+    "downloading": "Downloading...",
+    "myLearning": "My Learning",
+    "filter": "Filter"
+  },
+  "tncPopup": {
+    "checkboxLabel": "I have read and accept the Terms and Conditions",
+    "accepting": "Accepting...",
+    "continue": "Continue",
+    "acceptAndContinue": "Accept & Continue"
+  },
+  "trackableCollection": {
+    "completed": "Completed"
+  },
+  "userReport": {
+    "title": "User Report",
+    "courseProgress": "Course Progress",
+    "certificates": "Certificates",
+    "assessmentHistory": "Assessment History",
+    "coursesCompleted": "Courses Completed",
+    "coursesPending": "Courses Pending",
+    "certificatesIssued": "Certificates Issued",
+    "contentCompleted": "Content Completed",
+    "assessmentsCompleted": "Assessments Done",
+    "course": "Course",
+    "progress": "Progress",
+    "status": "Status",
+    "enrolled": "Enrolled",
+    "lastAccessed": "Last Accessed",
+    "certificateId": "Certificate ID",
+    "issuedDate": "Issued Date",
+    "assessment": "Assessment",
+    "score": "Score",
+    "max": "Max",
+    "result": "Result",
+    "date": "Date"
+  },
+  "editors": {
+    "errorTitle": "Editor Error",
+    "goBack": "Go Back",
+    "loading": "Loading Editor...",
+    "preparing": "Preparing the editor environment...",
+    "genericEditor": "Generic Editor",
+    "contentEditor": "Content Editor"
   }
 }

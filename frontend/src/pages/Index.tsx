@@ -3,6 +3,7 @@ import HeroWithStats from "@/components/landing/HeroWithStats";
 import FAQSection from "@/components/landing/FAQSection";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/common/PageLoader";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { useFormRead } from "@/hooks/useForm";
 import DynamicContentSection from "@/components/landing/DynamicContentSection";
 import DynamicCategorySection from "@/components/landing/DynamicCategorySection";
@@ -10,7 +11,8 @@ import DynamicResourceSection from "@/components/landing/DynamicResourceSection"
 import { FormSection } from "@/types/formTypes";
 
 const Index = () => {
-  const { data: formData, isLoading, error } = useFormRead({
+  const { t } = useAppI18n();
+  const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {
       type: "page",
       subType: "landing",
@@ -21,12 +23,7 @@ const Index = () => {
     }
   });
 
-  if (isLoading) {
-    return <PageLoader message="Loading Sunbird..." />;
-  }
-
   const sections = formData?.data?.form?.data?.sections || [];
-  
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
 
   const renderSection = (section: FormSection) => {
@@ -52,6 +49,7 @@ const Index = () => {
           <DynamicResourceSection
             key={section.id}
             title={section.title}
+            sectionLabel="resource.header"
             criteria={section.criteria}
           />
         );
@@ -60,12 +58,44 @@ const Index = () => {
     }
   };
 
+  const renderDynamicSections = () => {
+    if (isLoading) {
+      return (
+        <div className="container mx-auto px-4 py-16">
+          <PageLoader message={t("index.loadingSections")} fullPage={false} />
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="container mx-auto px-4 py-16">
+          <PageLoader 
+            error={t("index.errorLoadingSections")}
+            onRetry={() => refetch()} 
+            fullPage={false} 
+          />
+        </div>
+      );
+    }
+
+    if (sections.length === 0) {
+      return (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-muted-foreground">{t("index.noSectionsAvailable")}</p>
+        </div>
+      );
+    }
+
+    return sortedSections.map(renderSection);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main>
         <HeroWithStats />
-        {sortedSections.map(renderSection)}
+        {renderDynamicSections()}
         <FAQSection />
       </main>
       <Footer />

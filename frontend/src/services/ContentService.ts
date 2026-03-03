@@ -31,10 +31,45 @@ export class ContentService {
     });
   }
 
-  public async contentRead(contentId: string, fields?: string[]): Promise<ApiResponse<ContentApiResponse>> {
+  public async contentRead(contentId: string, fields?: string[], mode?: string): Promise<ApiResponse<ContentApiResponse>> {
     const resolvedFields = fields ?? DEFAULT_CONTENT_FIELDS;
-    const queryString = resolvedFields.length ? `?fields=${resolvedFields.join(',')}` : '';
+    const params = new URLSearchParams();
+    if (resolvedFields.length) params.set('fields', resolvedFields.join(','));
+    if (mode) params.set('mode', mode);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
     return getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}${queryString}`);
+  }
+
+  public async contentRetire(contentIds: string[]): Promise<ApiResponse<any>> {
+    return getClient().delete('/content/v1/retire', { request: { contentIds } });
+  }
+
+  public async contentPublish(
+    contentId: string,
+    lastPublishedBy: string
+  ): Promise<ApiResponse<any>> {
+    return getClient().post<any>(`/content/v1/publish/${contentId}`, {
+      request: {
+        content: {
+          lastPublishedBy,
+        },
+      },
+    });
+  }
+
+  public async contentReject(
+    contentId: string,
+    rejectReasons: string[],
+    rejectComment?: string
+  ): Promise<ApiResponse<any>> {
+    return getClient().post<any>(`/content/v1/reject/${contentId}`, {
+      request: {
+        content: {
+          rejectReasons: rejectReasons.length > 0 ? rejectReasons : ['Others'],
+          rejectComment: rejectComment || '',
+        },
+      },
+    });
   }
 
   public async contentCreate(
@@ -46,6 +81,13 @@ export class ContentService {
       contentType?: string;
       primaryCategory?: string;
       framework?: string;
+      description?: string;
+      resourceType?: string;
+      organisation?: string[];
+      createdFor?: string[];
+      targetFWIds?: string[];
+      /** Dynamic fields for framework related configs */
+      extraFields?: Record<string, string | string[] | number>;
     }
   ): Promise<ApiResponse<ContentCreateResponse>> {
     return getClient().post<ContentCreateResponse>('/content/v1/create', {
@@ -57,8 +99,14 @@ export class ContentService {
           creator: options.creator,
           mimeType: options.mimeType ?? 'application/vnd.ekstep.ecml-archive',
           contentType: options.contentType ?? 'Resource',
-          primaryCategory: options.primaryCategory ?? 'Learning Resource',
+          ...(options.primaryCategory ? { primaryCategory: options.primaryCategory } : {}),
           ...(options.framework && { framework: options.framework }),
+          ...(options.description && { description: options.description }),
+          ...(options.resourceType && { resourceType: options.resourceType }),
+          ...(options.organisation?.length && { organisation: options.organisation }),
+          ...(options.createdFor?.length && { createdFor: options.createdFor }),
+          ...(options.targetFWIds?.length && { targetFWIds: options.targetFWIds }),
+          ...options.extraFields,
         },
       },
     });

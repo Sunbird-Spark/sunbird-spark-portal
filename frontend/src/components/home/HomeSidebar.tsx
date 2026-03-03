@@ -1,11 +1,13 @@
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiEdit } from "react-icons/fi";
+import { FiHome, FiUser, FiLogOut, FiEdit, FiUsers, FiBarChart2, FiPieChart } from "react-icons/fi";
 import { GoHomeFill } from "react-icons/go";
 import SidebarCloseButton from "@/components/common/SidebarCloseButton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/auth/AuthContext";
-import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
-
+import { usePermissions } from "@/hooks/usePermission";
+import type { Feature } from "@/services/PermissionService";
+import { useAppI18n } from "@/hooks/useAppI18n";
+import { clearForceSyncUsed } from "@/services/forceSyncStorage";
 interface HomeSidebarProps {
     activeNav: string;
     onNavChange: (nav: string) => void;
@@ -38,33 +40,49 @@ const MyLearningIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const mainNavItems = [
-    { id: "home", label: "Home", icon: FiHome, path: "/home" },
-    { id: "learning", label: "My Learning", icon: MyLearningIcon, path: "/my-learning" },
-    { id: "explore", label: "Explore", icon: ExploreIcon, path: "/explore" },
-    { id: "workspace", label: "Workspace", icon: FiEdit, path: "/workspace" },
-    { id: "profile", label: "Profile", icon: FiUser, path: "/profile" },
+const NAV_ITEM_DEFS: { id: string; labelKey: string; icon: React.ElementType; path: string; feature?: Feature }[] = [
+    { id: "home", labelKey: "sidebar.home", icon: FiHome, path: "/home" },
+    { id: "learning", labelKey: "sidebar.myLearning", icon: MyLearningIcon, path: "/my-learning" },
+    { id: "explore", labelKey: "sidebar.explore", icon: ExploreIcon, path: "/explore" },
+    { id: "workspace", labelKey: "sidebar.workspace", icon: FiEdit, path: "/workspace", feature: "view_workspace" },
+    { id: "profile", labelKey: "sidebar.profile", icon: FiUser, path: "/profile" },
+    { id: "user-report", labelKey: "sidebar.userReport", icon: FiPieChart, path: "/reports/user/me" },
 ];
 
-const bottomNavItems = [
-    { id: "help", label: "Help and Support", icon: HelpSupportIcon, path: "/help-support" },
-    { id: "logout", label: "Logout", icon: FiLogOut, path: "/portal/logout" },
+const BOTTOM_NAV_DEFS = [
+    { id: "help", labelKey: "sidebar.helpAndSupport", icon: HelpSupportIcon, path: "/help-support" },
+    { id: "logout", labelKey: "sidebar.logout", icon: FiLogOut, path: "/portal/logout" },
 ];
 
 const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: HomeSidebarProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
-    const { isAuthenticated: contextAuth } = useAuth();
-    const isAuthenticated = contextAuth || userAuthInfoService.isUserAuthenticated();
+    const { isAuthenticated, isLoading, hasAnyRole, canAccessFeature } = usePermissions();
+    const { t } = useAppI18n();
 
-    if (!isAuthenticated || location.pathname === "/") {
+    const mainNavItems = NAV_ITEM_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
+    const bottomNavItems = BOTTOM_NAV_DEFS.map(item => ({ ...item, label: t(item.labelKey) }));
+    const isAdmin = hasAnyRole(['ORG_ADMIN']);
+
+    if (isLoading || !isAuthenticated || location.pathname === "/") {
         return null;
     }
+
+    const dynamicMainNavItems = [
+        ...mainNavItems,
+        ...(isAdmin
+            ? [
+                { id: "user-management", labelKey: "sidebar.userManagement", label: t("sidebar.userManagement"), icon: FiUsers, path: "/user-management" },
+                { id: "admin-reports", labelKey: "sidebar.adminReports", label: t("sidebar.adminReports"), icon: FiBarChart2, path: "/reports/platform" },
+              ]
+            : []),
+    ];
 
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
         if (item.id === "logout") {
+            clearForceSyncUsed();
             window.location.href = item.path;
             return;
         }
@@ -84,8 +102,8 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                     Icon = GoHomeFill;
                 }
 
-                return (
-                    <li key={item.id}>
+                const listItem = (
+                    <li>
                         <button
                             onClick={() => handleNavClick(item)}
                             className={`
@@ -98,10 +116,18 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                             `}
                             title={collapsed ? item.label : undefined}
                         >
-                            <Icon className={`w-5 h-5 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
-                            {!collapsed && <span className="text-[1.125rem]">{item.label}</span>}
+                            <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
+                            {!collapsed && <span className="text-[1.125rem] whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>}
                         </button>
                     </li>
+                );
+
+                if (item.feature && !canAccessFeature(item.feature)) return null;
+
+                return (
+                    <React.Fragment key={item.id}>
+                        {listItem}
+                    </React.Fragment>
                 );
             })}
         </ul>
@@ -120,7 +146,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
         >
             <nav className="flex flex-col justify-between h-full pt-[1.875rem] pb-4">
                 {/* Main Nav (Top) */}
-                {renderNavList(mainNavItems)}
+                {renderNavList(dynamicMainNavItems)}
 
                 {/* Bottom Nav (Bottom) */}
                 {renderNavList(bottomNavItems)}

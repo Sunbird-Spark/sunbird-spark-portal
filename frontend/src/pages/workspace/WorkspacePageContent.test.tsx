@@ -4,7 +4,18 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspacePageContent from './WorkspacePageContent';
 import type { WorkspaceItem } from '@/types/workspaceTypes';
 
-const mockT = (key: string) => key;
+const mockT = (key: string) => {
+  const translations: Record<string, string> = {
+    'workspace.emptyStates.noUploadsTitle': 'No uploads yet',
+    'workspace.emptyStates.noUploadsDesc': 'Upload PDF, video, or other content files to get started.',
+    'workspace.emptyStates.noCollaborationsTitle': 'No collaborations',
+    'workspace.emptyStates.noCollaborationsDesc': 'Content shared with you will appear here.',
+    'uploadContent': 'uploadContent',
+    'createFirst': 'createFirst',
+    'createContent': 'createContent',
+  };
+  return translations[key] ?? key;
+};
 const defaultProps = {
   showCreateModal: false,
   activeView: 'all',
@@ -23,7 +34,7 @@ const defaultProps = {
   onEdit: vi.fn(),
   onDelete: vi.fn(),
   onView: vi.fn(),
-  onSubmitReview: vi.fn(),
+  userRole: 'creator' as const,
 };
 const mockItem: WorkspaceItem = {
   id: 'item-1',
@@ -33,7 +44,12 @@ const mockItem: WorkspaceItem = {
   status: 'draft',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-02T00:00:00Z',
-  author: 'Author',
+  author: 'user-1',
+  primaryCategory: 'Course',
+  contentType: '',
+  mimeType: '',
+  framework: '',
+  contentStatus: 'Draft',
 };
 
 vi.mock('@/components/workspace/CreateOptions', () => ({
@@ -55,19 +71,17 @@ vi.mock('@/components/workspace/EmptyState', () => ({
   ),
 }));
 vi.mock('@/components/workspace/WorkspaceContentCard', () => ({
-  default: ({ item, onEdit, onDelete, onView, onSubmitReview }: {
+  default: ({ item, onEdit, onDelete, onView }: {
     item: WorkspaceItem;
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onView: (id: string) => void;
-    onSubmitReview: (id: string) => void;
   }) => (
     <div data-testid="content-card">
       <span>{item.title}</span>
       <button type="button" onClick={() => onEdit(item.id)}>Edit</button>
       <button type="button" onClick={() => onDelete(item.id)}>Delete</button>
       <button type="button" onClick={() => onView(item.id)}>View</button>
-      <button type="button" onClick={() => onSubmitReview(item.id)}>Submit Review</button>
     </div>
   ),
 }));
@@ -90,25 +104,24 @@ describe('WorkspacePageContent', () => {
     rerender(<WorkspacePageContent {...defaultProps} activeView="create" showCreateModal={false} />);
     expect(screen.getByTestId('create-options')).toBeInTheDocument();
   });
-  it('calls onCreateOption when option selected in create view and when uploads action clicked', () => {
+  it('calls onCreateOption when option selected in create view', () => {
     const onCreateOption = vi.fn();
     render(<WorkspacePageContent {...defaultProps} activeView="create" onCreateOption={onCreateOption} />);
     fireEvent.click(screen.getByRole('button', { name: 'Select option' }));
     expect(onCreateOption).toHaveBeenCalledWith('course');
-    onCreateOption.mockClear();
-    render(<WorkspacePageContent {...defaultProps} activeView="uploads" onCreateOption={onCreateOption} />);
+  });
+  it('renders uploads EmptyState when activeView is uploads and no items', () => {
+    const onCreateOption = vi.fn();
+    render(<WorkspacePageContent {...defaultProps} activeView="uploads" filteredItems={[]} onCreateOption={onCreateOption} />);
+    expect(screen.getByTestId('empty-title')).toHaveTextContent('No uploads yet');
+    expect(screen.getByTestId('empty-desc')).toHaveTextContent('Upload PDF, video, or other content files to get started.');
     fireEvent.click(screen.getByRole('button', { name: 'uploadContent' }));
-    expect(onCreateOption).toHaveBeenCalledWith('upload-content');
+    expect(onCreateOption).toHaveBeenCalledWith('upload-pdf');
   });
-  it('renders uploads EmptyState when activeView is uploads', () => {
-    render(<WorkspacePageContent {...defaultProps} activeView="uploads" />);
-    expect(screen.getByTestId('empty-title')).toHaveTextContent('noUploadsYet');
-    expect(screen.getByTestId('empty-desc')).toHaveTextContent('uploadHere');
-  });
-  it('renders collaborations EmptyState when activeView is collaborations', () => {
-    render(<WorkspacePageContent {...defaultProps} activeView="collaborations" />);
-    expect(screen.getByTestId('empty-title')).toHaveTextContent('noCollaborations');
-    expect(screen.getByTestId('empty-desc')).toHaveTextContent('sharedWithYou');
+  it('renders collaborations EmptyState when activeView is collaborations and no items', () => {
+    render(<WorkspacePageContent {...defaultProps} activeView="collaborations" filteredItems={[]} />);
+    expect(screen.getByTestId('empty-title')).toHaveTextContent('No collaborations');
+    expect(screen.getByTestId('empty-desc')).toHaveTextContent('Content shared with you will appear here.');
     expect(screen.queryByRole('button', { name: 'uploadContent' })).not.toBeInTheDocument();
   });
   it('renders empty state createFirst when no items and calls onCreateClick on action', () => {
@@ -128,8 +141,8 @@ describe('WorkspacePageContent', () => {
     expect(screen.getByTestId('content-list')).toBeInTheDocument();
     expect(screen.queryByTestId('content-card')).not.toBeInTheDocument();
   });
-  it('invokes onEdit, onDelete, onView, onSubmitReview when grid card actions clicked', () => {
-    const onEdit = vi.fn(), onDelete = vi.fn(), onView = vi.fn(), onSubmitReview = vi.fn();
+  it('invokes onEdit, onDelete, onView when grid card actions clicked', () => {
+    const onEdit = vi.fn(), onDelete = vi.fn(), onView = vi.fn();
     render(
       <WorkspacePageContent
         {...defaultProps}
@@ -139,7 +152,6 @@ describe('WorkspacePageContent', () => {
         onEdit={onEdit}
         onDelete={onDelete}
         onView={onView}
-        onSubmitReview={onSubmitReview}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
@@ -148,8 +160,6 @@ describe('WorkspacePageContent', () => {
     expect(onDelete).toHaveBeenCalledWith('item-1');
     fireEvent.click(screen.getByRole('button', { name: 'View' }));
     expect(onView).toHaveBeenCalledWith('item-1');
-    fireEvent.click(screen.getByRole('button', { name: 'Submit Review' }));
-    expect(onSubmitReview).toHaveBeenCalledWith('item-1');
   });
   it('invokes onEdit when list row Edit clicked', () => {
     const onEdit = vi.fn();

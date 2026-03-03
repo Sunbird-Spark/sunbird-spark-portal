@@ -6,7 +6,7 @@ interface CreateOptionsProps {
 }
 
 const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
-  useAppI18n();
+  const { t } = useAppI18n();
 
   const editorCategories = getEditorCategories();
 
@@ -15,22 +15,22 @@ const CreateOptions = ({ onOptionSelect }: CreateOptionsProps) => {
       {/* Welcome Banner */}
       <div className="bg-gradient-to-br from-sunbird-ginger/10 via-sunbird-wave/10 to-sunbird-moss/10 rounded-[1.25rem] p-6 md:p-8 border border-sunbird-ginger/20">
         <h2 className="text-xl md:text-2xl font-semibold text-foreground font-rubik mb-2">
-          What would you like to create?
+          {t("createOptions.title")}
         </h2>
         <p className="text-muted-foreground text-sm md:text-base font-rubik">
-          Choose an editor type below to start creating content for your learners.
+          {t("createOptions.description")}
         </p>
       </div>
 
       {/* Editor Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {editorCategories.map((category) => (
           <div
             key={category.id}
             className={`bg-white rounded-[1.25rem] border-2 ${category.borderColor} shadow-md overflow-hidden`}
           >
             {/* Category Header */}
-            <div className={`${category.accentColor} px-5 py-4`}>
+            <div className={`${category.accentColor} px-5 py-4`} style={category.headerStyle}>
               <h3 className="text-lg font-semibold text-white font-rubik">
                 {category.title}
               </h3>

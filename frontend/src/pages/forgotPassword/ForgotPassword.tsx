@@ -6,7 +6,7 @@ import { Step, OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
-import { SystemSettingService } from '@/services/SystemSettingService';
+import { useSystemSetting } from '@/hooks/useSystemSetting';
 
 const ForgotPassword: React.FC = () => {
   const { mutateAsync: searchUser } = useLearnerFuzzySearch();
@@ -17,18 +17,9 @@ const ForgotPassword: React.FC = () => {
   const [step, setStep] = useState<Step>(1);
   const [validIdentifiers, setValidIdentifiers] = useState<OtpIdentifier[]>([]);
   const [selectedIdentifier, setSelectedIdentifier] = useState<OtpIdentifier | null>(null);
-  const [googleCaptchaSiteKey, setGoogleCaptchaSiteKey] = useState('');
 
-  React.useEffect(() => {
-    const systemSettingService = new SystemSettingService();
-    systemSettingService.read('portal_google_recaptcha_site_key')
-      .then(res => {
-        if (res.data?.result?.value) {
-          setGoogleCaptchaSiteKey(res.data?.result?.value);
-        }
-      })
-      .catch(err => console.error('Error fetching captcha site key:', err));
-  }, []);
+  const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
+  const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
 
   const handleIdentifySuccess = (identifiers: OtpIdentifier[]) => {
     setValidIdentifiers(identifiers);
@@ -41,7 +32,7 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <AuthLayout onClose={() => window.location.href = '/home'} isOtpPage={step === 3}>
+    <AuthLayout onClose={() => window.location.href = '/portal/login'} isOtpPage={step === 3}>
       <div className="w-full font-rubik">
         {step === 1 && (
           <IdentifyUser

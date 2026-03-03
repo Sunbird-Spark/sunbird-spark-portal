@@ -63,8 +63,12 @@ export class AxiosAdapter extends BaseClient {
     return this.request(() => this.client.put<T>(url, data, { headers }));
   }
 
-  protected async _delete<T>(url: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
-    return this.request(() => this.client.delete<T>(url, { headers }));
+  protected async _patch<T>(url: string, data: any, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+    return this.request(() => this.client.patch<T>(url, data, { headers }));
+  }
+
+  protected async _delete<T>(url: string, data?: unknown, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+    return this.request(() => this.client.delete<T>(url, { headers, data }));
   }
 
   public updateHeaders(headers: HeaderOperation[]): void {

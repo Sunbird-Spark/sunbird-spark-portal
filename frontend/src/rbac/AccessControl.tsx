@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth, Role } from '../auth/AuthContext';
+import { Role } from '../auth/AuthContext';
+import { usePermissions } from '../hooks/usePermission';
 
 /**
  * Access control rule for protecting components
@@ -15,17 +16,19 @@ export function withAccessControl<P extends object>(
   rule: AccessControlRule
 ) {
   return function Wrapped(props: P) {
-    const { user, isAuthenticated } = useAuth();
+    const { isAuthenticated, hasAnyRole } = usePermissions();
     const location = useLocation();
 
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated) {
       const next = encodeURIComponent(location.pathname + location.search);
       return <Navigate to={`/home?next=${next}`} replace />;
     }
 
-    // Check if user's role is allowed
-    if (!rule.allowedRoles.includes(user.role)) {
-      return <Navigate to="/unauthorized" replace />;
+    // Check if user has any of the allowed roles
+    const hasPermission = hasAnyRole(rule.allowedRoles);
+    
+    if (!hasPermission) {
+      return <Navigate to="/home" replace />;
     }
 
     return <Component {...props} />;

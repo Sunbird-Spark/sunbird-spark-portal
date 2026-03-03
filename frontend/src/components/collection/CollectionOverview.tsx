@@ -1,84 +1,126 @@
-import { FiPlay } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { CheckIcon } from "./CollectionIcons";
 import type { CollectionData } from "@/types/collectionTypes";
+import { ContentPlayer } from "@/components/players";
+import PageLoader from "@/components/common/PageLoader";
+import { Toaster } from "@/components/common/Toaster";
 
 interface CollectionOverviewProps {
   collectionData: CollectionData;
+  contentId?: string;
+  /** When true (trackable + not logged in or not enrolled), show join message instead of player/error. */
+  contentAccessBlocked?: boolean;
+  showMaxAttemptsExceeded?: boolean;
+  playerMetadata?: any;
+  playerIsLoading?: boolean;
+  playerError?: Error | null;
+  onPlayerEvent?: (event: any) => void;
+  onTelemetryEvent?: (event: any) => void;
 }
 
-const CollectionOverview = ({ collectionData }: CollectionOverviewProps) => {
+const CollectionOverview = ({
+  collectionData,
+  contentId,
+  contentAccessBlocked = false,
+  showMaxAttemptsExceeded = false,
+  playerMetadata,
+  playerIsLoading,
+  playerError,
+  onPlayerEvent,
+  onTelemetryEvent,
+}: CollectionOverviewProps) => {
   const { t } = useAppI18n();
 
   return (
-    <div className="space-y-6">
-      {/* Video Player Card */}
-      <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
-        <div className="relative">
-          {/* Video Thumbnail Container */}
-          <div className="aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative ">
-            <img
-              src={collectionData.image}
-              alt={collectionData.title}
-              className="w-full h-full object-cover"
-            />
-
-            {/* Unit label - first module or none */}
-            {collectionData.modules?.[0] && (
-              <div className="absolute top-4 left-4 z-10">
-                <span className="text-white text-base font-medium px-4 py-2 rounded-md">
-                  {collectionData.modules[0].title}
-                </span>
+    <div className="collection-overview-container">
+      <div className="collection-player-card relative">
+        <Toaster viewport="center" viewportClassName="!fixed !top-4 !left-1/2 !-translate-x-1/2 !right-auto !bottom-auto !max-w-[420px] z-[100]" />
+        <div className="bg-white rounded-xl shadow-[0_4px_6px_-1px_rgb(0_0_0/0.06),0_2px_4px_-2px_rgb(0_0_0/0.04)]">
+          {contentAccessBlocked ? (
+            <div className="collection-player-wrapper">
+              <div className="collection-player-loading">
+                <p className="text-center text-muted-foreground text-sm px-4">
+                  {t("courseDetails.mustJoinToAccessContent")}
+                </p>
               </div>
-            )}
-
-            {/* Play Button */}
-            <button
-              type="button"
-              aria-label={t("button.playVideo")}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg z-20"
-            >
-              <FiPlay className="w-6 h-6 text-sunbird-brick ml-1" fill="currentColor" />
-            </button>
-          </div>
+            </div>
+          ) : showMaxAttemptsExceeded ? (
+            <div className="collection-player-wrapper">
+              <div className="collection-player-loading flex flex-col items-center justify-center py-8 px-4">
+                <p className="text-center text-muted-foreground text-sm">
+                  {t("courseDetails.selfAssessMaxAttempt")}
+                </p>
+              </div>
+            </div>
+          ) : contentId ? (
+            /* Content Player */
+            <div className="collection-player-wrapper">
+              {playerIsLoading && (
+                <div className="collection-player-loading">
+                  <PageLoader message={t("loading")} fullPage={false} />
+                </div>
+              )}
+              {!playerIsLoading && playerError && (
+                <div className="collection-player-error">
+                  <p className="collection-player-error-text">{playerError.message}</p>
+                </div>
+              )}
+              {!playerIsLoading && !playerError && playerMetadata && (
+                <ContentPlayer
+                  mimeType={playerMetadata.mimeType}
+                  metadata={playerMetadata}
+                  onPlayerEvent={onPlayerEvent}
+                  onTelemetryEvent={onTelemetryEvent}
+                />
+              )}
+            </div>
+          ) : (
+            /* No Content Error */
+            <div className="collection-player-error">
+              <PageLoader 
+                error={t("noContentFound")} 
+                onRetry={() => window.location.reload()} 
+                fullPage={false} 
+              />
+            </div>
+          )}
         </div>
 
-
         {/* Course Overview Section */}
-        <div className="px-6 pb-6 pt-0">
-          <h2 className="text-xl font-bold text-foreground mb-4">{t("courseDetails.overview")}</h2>
+        <div className="collection-overview-section border-t border-gray-100 rounded-xl pt-6">
+          <h2 className="collection-overview-title">{t("courseDetails.overview")}</h2>
 
           {/* Stats: Units & Lessons */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-            <span className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-sunbird-brick">
+          <div className="collection-stats-container">
+            <span className="collection-stat-item">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="collection-stat-icon">
                 <rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M2 6H14" stroke="currentColor" strokeWidth="1.5" />
               </svg>
-              <span className="text-black font-bold">
-                {collectionData.modules?.length ?? 0}
+              <span className="collection-stat-value">
+                {collectionData.children?.length ?? 0}
               </span>
               {t("courseDetails.units")}
             </span>
-            <span className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-sunbird-brick">
+            <span className="collection-stat-item">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="collection-stat-icon">
                 <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M5 8H11M5 11H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
-              <span className="text-black font-bold">{collectionData.lessons}</span> {t("contentStats.lessons")}
+              <span className="collection-stat-value">{collectionData.lessons}</span> {t("contentStats.lessons")}
             </span>
           </div>
 
-          <p className="text-base text-[#222222] leading-relaxed mb-6">
+          <p className="collection-description">
             {collectionData.description}
           </p>
 
           {/* Best Suited For */}
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-3">{t("courseDetails.suitedFor")}</h3>
-            <ul className="space-y-3">
+            <h3 className="collection-suited-title">{t("courseDetails.suitedFor")}</h3>
+            <ul className="collection-audience-list">
               {collectionData.audience.map((role, index) => (
-                <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
+                <li key={index} className="collection-audience-item">
                   <CheckIcon />
                   <span>{role}</span>
                 </li>

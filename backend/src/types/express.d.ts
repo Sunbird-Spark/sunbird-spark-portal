@@ -1,4 +1,3 @@
-
 import 'express';
 
 interface OIDCTokenClaims {
@@ -33,7 +32,7 @@ interface OIDCAuth {
 }
 
 declare module 'express' {
-     
+
     interface Request {
         oidc?: OIDCAuth;
     }

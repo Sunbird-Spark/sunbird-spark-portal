@@ -7,6 +7,8 @@ import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoSer
 const userService = new UserService();
 
 export const useUserRead = (): UseQueryResult<ApiResponse<UserReadResponse>, Error> => {
+    const isAuthenticated = userAuthInfoService.isUserAuthenticated();
+
     return useQuery({
         queryKey: ['userRead'],
         queryFn: async () => {
@@ -19,6 +21,7 @@ export const useUserRead = (): UseQueryResult<ApiResponse<UserReadResponse>, Err
 
             return userService.userRead(id);
         },
+        enabled: isAuthenticated,
         retry: 1,
     });
 };

@@ -114,6 +114,8 @@ export default {
           "status-ongoing-border": "hsl(var(--sunbird-status-ongoing-border))",
           "status-ongoing-text": "hsl(var(--sunbird-status-ongoing-text))",
           "gray-ef": "hsl(var(--sunbird-gray-ef))",
+          "success-message": "hsl(var(--sunbird-success-message))",
+          "success-message-bg": "hsl(var(--sunbird-success-message-bg))",
         },
       },
       borderRadius: {

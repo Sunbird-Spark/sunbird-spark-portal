@@ -67,7 +67,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         if (cancelled) return;
 
-        playerElement = service.createElement(config);
+        playerElement = await service.createElement(config);
+
+        if (cancelled) return;
         service.attachEventListeners(playerElement, handlePlayerEvent, handleTelemetryEvent);
 
         if (containerRef.current) {

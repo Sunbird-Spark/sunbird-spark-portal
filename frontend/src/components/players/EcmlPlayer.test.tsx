@@ -154,6 +154,126 @@ describe('EcmlPlayer', () => {
     removeEventListenerSpy.mockRestore();
   });
 
+  it('should cleanup renderer:telemetry:event listener on unmount', async () => {
+    const { container, unmount } = render(<EcmlPlayer metadata={mockMetadata} />);
+    const iframe = container.querySelector('iframe')!;
+    const removeEventListenerSpy = vi.spyOn(iframe, 'removeEventListener');
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalled();
+    });
+
+    unmount();
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'renderer:telemetry:event',
+      expect.any(Function)
+    );
+    removeEventListenerSpy.mockRestore();
+  });
+
+  it('should handle renderer:telemetry:event CustomEvent on iframe', async () => {
+    const onPlayerEvent = vi.fn();
+    const onTelemetryEvent = vi.fn();
+
+    const { container } = render(
+      <EcmlPlayer
+        metadata={mockMetadata}
+        onPlayerEvent={onPlayerEvent}
+        onTelemetryEvent={onTelemetryEvent}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalled();
+    });
+
+    const iframe = container.querySelector('iframe')!;
+    iframe.dispatchEvent(
+      new CustomEvent('renderer:telemetry:event', {
+        detail: { telemetryData: { eid: 'START', edata: { type: 'content' } } },
+      })
+    );
+
+    expect(onPlayerEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'START',
+        playerId: 'test-ecml-123',
+      })
+    );
+    expect(onTelemetryEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ eid: 'START' })
+    );
+  });
+
+  it('should handle renderer:telemetry:event without telemetryData wrapper', async () => {
+    const onPlayerEvent = vi.fn();
+    const onTelemetryEvent = vi.fn();
+
+    const { container } = render(
+      <EcmlPlayer
+        metadata={mockMetadata}
+        onPlayerEvent={onPlayerEvent}
+        onTelemetryEvent={onTelemetryEvent}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalled();
+    });
+
+    const iframe = container.querySelector('iframe')!;
+    iframe.dispatchEvent(
+      new CustomEvent('renderer:telemetry:event', {
+        detail: { eid: 'INTERACT', edata: { type: 'TOUCH' } },
+      })
+    );
+
+    expect(onPlayerEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'INTERACT',
+        playerId: 'test-ecml-123',
+      })
+    );
+    expect(onTelemetryEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ eid: 'INTERACT' })
+    );
+  });
+
+  it('should ignore renderer:telemetry:event with empty detail', async () => {
+    const onPlayerEvent = vi.fn();
+
+    const { container } = render(
+      <EcmlPlayer metadata={mockMetadata} onPlayerEvent={onPlayerEvent} />
+    );
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalled();
+    });
+
+    const iframe = container.querySelector('iframe')!;
+    iframe.dispatchEvent(
+      new CustomEvent('renderer:telemetry:event', { detail: null })
+    );
+
+    expect(onPlayerEvent).not.toHaveBeenCalled();
+  });
+
+  it('should register renderer:telemetry:event listener before initializePreview', async () => {
+    const addEventListenerSpy = vi.spyOn(HTMLIFrameElement.prototype, 'addEventListener');
+    
+    render(<EcmlPlayer metadata={mockMetadata} />);
+
+    // The listener should be registered synchronously during the effect,
+    // before the async initPlayer resolves
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      'renderer:telemetry:event',
+      expect.any(Function)
+    );
+
+    addEventListenerSpy.mockRestore();
+  });
+
   it('should handle postMessage events from iframe', async () => {
     const onPlayerEvent = vi.fn();
     const onTelemetryEvent = vi.fn();

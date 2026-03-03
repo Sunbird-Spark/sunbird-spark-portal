@@ -10,7 +10,7 @@ describe('CreateOptions', () => {
   it('renders welcome text and Collection Editor category', () => {
     const onOptionSelect = vi.fn();
     render(<CreateOptions onOptionSelect={onOptionSelect} />);
-    expect(screen.getByText('What would you like to create?')).toBeInTheDocument();
+    expect(screen.getByText('createOptions.title')).toBeInTheDocument();
     expect(screen.getByText('Collection Editor')).toBeInTheDocument();
   });
 
@@ -25,7 +25,7 @@ describe('CreateOptions', () => {
   it('calls onOptionSelect when another option is clicked', () => {
     const onOptionSelect = vi.fn();
     render(<CreateOptions onOptionSelect={onOptionSelect} />);
-    fireEvent.click(screen.getByRole('button', { name: /Textbook/ }));
-    expect(onOptionSelect).toHaveBeenCalledWith('textbook');
+    fireEvent.click(screen.getByRole('button', { name: /Collection/ }));
+    expect(onOptionSelect).toHaveBeenCalledWith('collection');
   });
 });

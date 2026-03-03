@@ -5,6 +5,47 @@ import { SignUpOtpVerification } from './SignUpOtpVerification';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'signUp.welcomeTitle': 'Welcome to Sunbird!',
+                'signUp.welcomeSubtitle': 'Your learning journey starts here - sign up to get started.',
+                'signUp.signInWithGoogle': 'Sign in with Google',
+                'signUp.or': 'OR',
+                'signUp.firstName': 'First Name',
+                'signUp.enterFirstName': 'Enter First Name',
+                'signUp.emailOrMobileLabel': 'Email ID / Mobile Number',
+                'signUp.enterEmailOrMobile': 'Enter Email ID / Mobile Number',
+                'password': 'Password',
+                'signUp.enterPassword': 'Enter Password',
+                'signUp.showPassword': 'Show password',
+                'signUp.hidePassword': 'Hide password',
+                'signUp.confirmPassword': 'Confirm Password',
+                'signUp.reenterPassword': 'Re-enter Password',
+                'signUp.showConfirmPassword': 'Show confirm password',
+                'signUp.hideConfirmPassword': 'Hide confirm password',
+                'signUp.invalidEmailOrMobile': 'Enter valid Email or 10-digit Mobile (6-9)',
+                'signUp.passwordRequirements': 'Password must be 8+ chars (upper, lower, num, special)',
+                'signUp.passwordsDoNotMatch': 'Passwords do not match',
+                'signUp.iUnderstand': 'I understand &',
+                'signUp.acceptTermsOfUse': 'accept the SUNBIRD Terms of Use',
+                'signUp.creatingAccount': 'Creating Account...',
+                'continue': 'Continue',
+                'signUp.alreadyHaveAccount': 'Already have an account?',
+                'login': 'Login',
+                'forgotPasswordPage.enterCode': 'Enter the code',
+                'signUp.enterCodeSubtitle': 'Enter the 6 digit code sent to your Email ID and complete the verification',
+                'forgotPasswordPage.otpValidity': 'OTP is valid for 30 minutes',
+                'forgotPasswordPage.resendOtp': 'Resend OTP',
+                'signUp.verifying': 'Verifying...',
+                'signUp.submit': 'Submit',
+            };
+            return translations[key] || key;
+        },
+    }),
+}));
+
 // Mock useSystemSetting hook
 vi.mock('@/hooks/useSystemSetting', () => ({
     useSystemSetting: vi.fn(() => ({
@@ -41,23 +82,23 @@ vi.mock('../../pages/forgotPassword/ForgotPasswordComponents', () => ({
         <button data-testid="primary-button" onClick={onClick} disabled={disabled}>
             {children}
         </button>
-    ),
-    OTPInput: ({ otp, setOtp }: any) => (
-        <div data-testid="otp-input">
-            {otp.map((digit: string, i: number) => (
-                <input
-                    key={i}
-                    data-testid={`otp-${i}`}
-                    value={digit}
-                    onChange={(e) => {
-                        const newOtp = [...otp];
-                        newOtp[i] = e.target.value;
-                        setOtp(newOtp);
-                    }}
-                />
-            ))}
-        </div>
     )
+}));
+
+// Mock InputOTP components
+vi.mock('@/components/common/InputOTP', () => ({
+    InputOTP: ({ value, onChange, children }: any) => (
+        <div data-testid="otp-input">
+            <input
+                data-testid="otp-input-field"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            {children}
+        </div>
+    ),
+    InputOTPGroup: ({ children }: any) => <div>{children}</div>,
+    InputOTPSlot: ({ index }: any) => <div data-testid={`otp-slot-${index}`} />
 }));
 
 // Mock icons
@@ -181,7 +222,7 @@ describe('SignUpForm', () => {
 
 describe('SignUpOtpVerification', () => {
     const defaultProps = {
-        otp: ['', '', '', '', '', ''],
+        otp: '',
         setOtp: vi.fn(),
         isOtpValid: false,
         handleVerifyOtp: vi.fn(),
@@ -196,9 +237,9 @@ describe('SignUpOtpVerification', () => {
 
     it('handles OTP input change', () => {
         render(<SignUpOtpVerification {...defaultProps} />);
-        const firstDigit = screen.getByTestId('otp-0');
-        fireEvent.change(firstDigit, { target: { value: '1' } });
-        expect(defaultProps.setOtp).toHaveBeenCalled();
+        const otpInput = screen.getByTestId('otp-input-field');
+        fireEvent.change(otpInput, { target: { value: '123456' } });
+        expect(defaultProps.setOtp).toHaveBeenCalledWith('123456');
     });
 
     it('calls handleVerifyOtp when OTP is valid and button is clicked', () => {
@@ -211,19 +252,19 @@ describe('SignUpOtpVerification', () => {
     it('calls handleResendOtp when resend button is clicked', async () => {
         vi.useFakeTimers();
         const { rerender } = render(<SignUpOtpVerification {...defaultProps} />);
-        
+
         // Wait for the initial timer to complete (20 seconds)
         await vi.advanceTimersByTimeAsync(20000);
-        
+
         // Force a re-render to update the button state
         rerender(<SignUpOtpVerification {...defaultProps} />);
-        
+
         const resendButton = screen.getByText(/Resend OTP/);
         expect(resendButton).not.toBeDisabled();
-        
+
         fireEvent.click(resendButton);
         expect(defaultProps.handleResendOtp).toHaveBeenCalled();
-        
+
         vi.useRealTimers();
     });
 });

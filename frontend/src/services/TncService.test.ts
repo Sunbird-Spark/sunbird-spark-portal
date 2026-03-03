@@ -15,7 +15,7 @@ describe('TncService', () => {
         mockPost = vi.fn();
         vi.mocked(getClient).mockReturnValue({
             post: mockPost,
-        } as any);
+        } as unknown as import('../lib/http-client').IHttpClient);
     });
 
     describe('getTncUrl', () => {
@@ -214,10 +214,38 @@ describe('TncService', () => {
             const result = await tncService.acceptTnc(tncConfig, identifier);
 
             expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
-                version: 'v1',
-                identifier: 'user@example.com',
+                request: {
+                    version: 'v1',
+                    identifier: 'user@example.com',
+                },
             });
             expect(result).toEqual(mockResponse);
+        });
+
+        it('calls API with correct tncType', async () => {
+            const tncConfig = {
+                data: {
+                    response: {
+                        value: {
+                            latestVersion: 'v1'
+                        }
+                    }
+                }
+            };
+            const identifier = 'user@example.com';
+            const tncType = 'orgAdminTnc';
+            const mockResponse = { data: { success: true } };
+            mockPost.mockResolvedValue(mockResponse);
+
+            await tncService.acceptTnc(tncConfig, identifier, tncType);
+
+            expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
+                request: {
+                    version: 'v1',
+                    identifier: 'user@example.com',
+                    tncType: 'orgAdminTnc',
+                },
+            });
         });
 
         it('calls API with empty version when config is invalid', async () => {
@@ -229,8 +257,10 @@ describe('TncService', () => {
             const result = await tncService.acceptTnc(tncConfig, identifier);
 
             expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
-                version: '',
-                identifier: 'user@example.com',
+                request: {
+                    version: '',
+                    identifier: 'user@example.com',
+                },
             });
             expect(result).toEqual(mockResponse);
         });

@@ -12,7 +12,7 @@ describe('userAuthInfoService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         userAuthInfoService.clearAuth();
-        (httpClient.getClient as any).mockReturnValue({
+        (httpClient.getClient as import('vitest').Mock).mockReturnValue({
             get: mockGet
         });
     });
@@ -118,7 +118,7 @@ describe('userAuthInfoService', () => {
 
             try {
                 await userAuthInfoService.getAuthInfo();
-            } catch (e) {
+            } catch {
                 // Expected error
             }
 

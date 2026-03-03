@@ -31,7 +31,7 @@ export const PdfPlayer: React.FC<PdfPlayerProps> = ({
     if (mode === undefined && cdata === undefined && contextRollup === undefined && objectRollup === undefined) {
       return undefined;
     }
-    
+
     return {
       ...(mode !== undefined && { mode }),
       ...(cdata !== undefined && { cdata }),
@@ -68,7 +68,9 @@ export const PdfPlayer: React.FC<PdfPlayerProps> = ({
 
         if (cancelled) return;
 
-        playerElement = service.createElement(config);
+        playerElement = await service.createElement(config);
+
+        if (cancelled) return;
         service.attachEventListeners(playerElement, handlePlayerEvent, handleTelemetryEvent);
 
         if (containerRef.current) {

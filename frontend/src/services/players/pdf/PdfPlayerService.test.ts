@@ -38,7 +38,7 @@ describe('PdfPlayerService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Set default mock behavior for org service
     mockOrgSearch.mockResolvedValue({
       data: {
@@ -54,6 +54,11 @@ describe('PdfPlayerService', () => {
         },
       },
     });
+
+    // Mock the custom element to prevent script loading
+    if (!customElements.get('sunbird-pdf-player')) {
+      customElements.define('sunbird-pdf-player', class extends HTMLElement { });
+    }
 
     service = new PdfPlayerService();
   });
@@ -112,7 +117,7 @@ describe('PdfPlayerService', () => {
       // Create a new service instance to ensure fresh org service
       const newService = new PdfPlayerService();
       const config = await newService.createConfig(mockMetadata);
-      
+
       // Should use random fallback channel
       expect(config.context.channel).toMatch('');
     });
@@ -131,7 +136,7 @@ describe('PdfPlayerService', () => {
       // Create a new service instance to ensure fresh org service
       const newService = new PdfPlayerService();
       const config = await newService.createConfig(mockMetadata);
-      
+
       // Should use random fallback channel
       expect(config.context.channel).toMatch('');
     });
@@ -142,7 +147,7 @@ describe('PdfPlayerService', () => {
       // Create a new service instance to ensure fresh org service
       const newService = new PdfPlayerService();
       const config = await newService.createConfig(mockMetadata);
-      
+
       // Should use random fallback channel
       expect(config.context.channel).toMatch('');
     });
@@ -151,7 +156,7 @@ describe('PdfPlayerService', () => {
       vi.mocked(appCoreService.getDeviceId).mockRejectedValue(new Error('Device ID error'));
 
       const config = await service.createConfig(mockMetadata);
-      
+
       // Should use fallback device ID
       expect(config.context.did).toMatch('');
     });
@@ -250,98 +255,82 @@ describe('PdfPlayerService', () => {
   describe('createElement', () => {
     it('should create sunbird-pdf-player element', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
-      expect(element.tagName.toLowerCase()).toBe('sunbird-pdf-player');
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      expect(playerEl?.tagName.toLowerCase()).toBe('sunbird-pdf-player');
     });
 
     it('should set player-config attribute with JSON config', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
-      const configAttr = element.getAttribute('player-config');
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      const configAttr = playerEl?.getAttribute('player-config');
       expect(configAttr).toBeTruthy();
-      
+
       const parsedConfig = JSON.parse(configAttr!);
       expect(parsedConfig.metadata.identifier).toBe('content-123');
     });
 
     it('should set data-player-id attribute from metadata identifier', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
-      expect(element.getAttribute('data-player-id')).toBe('content-123');
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      expect(playerEl?.getAttribute('data-player-id')).toBe('content-123');
     });
 
-    it('should load styles on first createElement call', async () => {
-      // Clear any existing styles and reset static flag
-      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
-      (PdfPlayerService as any).stylesLoaded = false;
+    it('should inject scoped styles on createElement call', async () => {
+      // Mock fetch to simulate CSS loading
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('.test { color: red; }'),
+      } as any);
+      (PdfPlayerService as any).cachedCss = null;
 
       const config = await service.createConfig(mockMetadata);
-      service.createElement(config);
+      const element = await service.createElement(config);
 
-      const styleLink = document.querySelector('[data-pdf-player-styles="true"]');
-      expect(styleLink).toBeTruthy();
-      expect(styleLink?.getAttribute('href')).toBe('/assets/pdf-player/styles.css');
-      expect(styleLink?.getAttribute('rel')).toBe('stylesheet');
+      const styleEl = element.querySelector('style[data-pdf-player-styles="true"]');
+      expect(styleEl).toBeTruthy();
+      expect(styleEl?.textContent).toContain('.test { color: red; }');
+      expect(styleEl?.textContent).toContain('@scope ([data-pdf-player-wrapper])');
     });
 
-    it('should not load styles multiple times', async () => {
-      // Clear any existing styles and reset static flag
-      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
-      (PdfPlayerService as any).stylesLoaded = false;
+    it('should not fetch styles multiple times (caching behavior)', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('.test { color: red; }'),
+      } as any);
+      (PdfPlayerService as any).cachedCss = null;
 
       const config = await service.createConfig(mockMetadata);
-      
+
       // Create multiple elements
-      service.createElement(config);
-      service.createElement(config);
-      service.createElement(config);
+      await service.createElement(config);
+      await service.createElement(config);
+      await service.createElement(config);
 
-      const styleLinks = document.querySelectorAll('[data-pdf-player-styles="true"]');
-      expect(styleLinks.length).toBe(1);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     });
 
-    it('should not load styles if already present in DOM', async () => {
-      // Clear any existing styles and reset static flag
-      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
-      (PdfPlayerService as any).stylesLoaded = false;
-
-      // Manually add a style element to simulate existing styles
-      const existingStyle = document.createElement('link');
-      existingStyle.setAttribute('data-pdf-player-styles', 'true');
-      existingStyle.rel = 'stylesheet';
-      existingStyle.href = '/assets/pdf-player/styles.css';
-      document.head.appendChild(existingStyle);
+    it('should not create style tag if fetch fails', async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+      (PdfPlayerService as any).cachedCss = null;
 
       const config = await service.createConfig(mockMetadata);
-      service.createElement(config);
+      const element = await service.createElement(config);
 
-      // Should still only have one style element
-      const styleLinks = document.querySelectorAll('[data-pdf-player-styles="true"]');
-      expect(styleLinks.length).toBe(1);
-      expect((PdfPlayerService as any).stylesLoaded).toBe(true);
-    });
-
-    it('should not load styles if stylesLoaded flag is already true', async () => {
-      // Clear any existing styles but keep static flag as true
-      document.querySelectorAll('[data-pdf-player-styles]').forEach(el => el.remove());
-      (PdfPlayerService as any).stylesLoaded = true;
-
-      const config = await service.createConfig(mockMetadata);
-      service.createElement(config);
-
-      // Should not create any new style elements
-      const styleLinks = document.querySelectorAll('[data-pdf-player-styles="true"]');
-      expect(styleLinks.length).toBe(0);
+      const styleEl = element.querySelector('style[data-pdf-player-styles="true"]');
+      expect(styleEl).toBeNull();
     });
   });
 
   describe('attachEventListeners', () => {
     it('should attach playerEvent listener', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -349,7 +338,8 @@ describe('PdfPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'START', data: {} },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback).toHaveBeenCalled();
       expect(callback.mock.calls[0]?.[0].type).toBe('START');
@@ -357,7 +347,7 @@ describe('PdfPlayerService', () => {
 
     it('should attach telemetryEvent listener', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const telemetryCallback = vi.fn();
 
       service.attachEventListeners(element, undefined, telemetryCallback);
@@ -365,14 +355,15 @@ describe('PdfPlayerService', () => {
       const event = new CustomEvent('telemetryEvent', {
         detail: { event: 'IMPRESSION' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      playerEl?.dispatchEvent(event);
 
       expect(telemetryCallback).toHaveBeenCalledWith({ event: 'IMPRESSION' });
     });
 
     it('should include playerId and timestamp in player event', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -380,7 +371,8 @@ describe('PdfPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'LOADED' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      playerEl?.dispatchEvent(event);
 
       const eventData = callback.mock.calls[0]?.[0];
       expect(eventData?.playerId).toBe('content-123');
@@ -389,7 +381,7 @@ describe('PdfPlayerService', () => {
 
     it('should handle events without eid', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -397,14 +389,15 @@ describe('PdfPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { data: {} },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback.mock.calls[0]?.[0].type).toBe('unknown');
     });
 
     it('should be idempotent - calling multiple times should not create duplicate listeners', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -414,7 +407,8 @@ describe('PdfPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'START' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback).toHaveBeenCalledTimes(1);
     });
@@ -423,7 +417,7 @@ describe('PdfPlayerService', () => {
   describe('removeEventListeners', () => {
     it('should remove event listeners', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
       const callback = vi.fn();
 
       service.attachEventListeners(element, callback);
@@ -432,14 +426,15 @@ describe('PdfPlayerService', () => {
       const event = new CustomEvent('playerEvent', {
         detail: { eid: 'START' },
       });
-      element.dispatchEvent(event);
+      const playerEl = element.querySelector('sunbird-pdf-player');
+      playerEl?.dispatchEvent(event);
 
       expect(callback).not.toHaveBeenCalled();
     });
 
     it('should not throw error when removing listeners from element without listeners', async () => {
       const config = await service.createConfig(mockMetadata);
-      const element = service.createElement(config);
+      const element = await service.createElement(config);
 
       expect(() => service.removeEventListeners(element)).not.toThrow();
     });
