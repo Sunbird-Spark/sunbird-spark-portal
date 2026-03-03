@@ -185,9 +185,9 @@ export class CollectionEditorService {
         }
 
         const categoryResponse = await getClient().post('/object/category/definition/v1/read?fields=objectMetadata,forms,name,label', {
-            request: { objectCategoryDefinition:{ objectType, name: primaryCategory, channel  } }
+            request: { objectCategoryDefinition: { objectType, name: primaryCategory, channel } }
         });
-        
+
         const config = (categoryResponse as any)?.data?.objectCategoryDefinition?.objectMetadata?.config;
         if (!config) {
             return {};
@@ -210,10 +210,7 @@ export class CollectionEditorService {
         return hierarchyConfig;
     }
 
-    private getPrimaryCategoryData(
-        childrenData: Record<string, any>,
-        channelData: any
-    ): Record<string, any> {
+    private getPrimaryCategoryData(childrenData: Record<string, any>, channelData: any): Record<string, any> {
         const result = { ...childrenData };
         Object.keys(result).forEach((key) => {
             if (!result[key] || (Array.isArray(result[key]) && result[key].length === 0)) {
