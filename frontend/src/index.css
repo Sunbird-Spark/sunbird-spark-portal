@@ -499,20 +499,11 @@
   }
 
   .content-player-video-container {
-    width: 100%;
-    max-width: 74.125rem;
-    padding: 1.25rem;
-    border-radius: 1.25rem;
-    background-color: #FFFFFF;
-    overflow: hidden;
+    @apply w-full max-w-[74.125rem] p-5 rounded-[1.25rem] bg-white overflow-hidden;
   }
 
   .content-player-wrapper {
-    width: 100%;
-    overflow: hidden;
-    border-radius: 1.25rem;
-    position: relative;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+    @apply w-full overflow-hidden rounded-[1.25rem] relative shadow-sm;
   }
 
   .content-player-embed {
@@ -1166,15 +1157,6 @@
     width: 100% !important;
     height: auto !important;
   }
-
-  /* PDF/EPUB/QUML internal tags: fill their fixed-height parents */
-  /* sunbird-pdf-player pdf-player,
-  sunbird-epub-player epub-player,
-  sunbird-quml-player quml-player {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-  } */
 
   /* Override VideoPlayerService inline height: 100% on its wrapper div */
   [data-video-player-wrapper] {
