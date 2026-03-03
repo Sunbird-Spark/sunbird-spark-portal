@@ -296,7 +296,7 @@
 
   /* Buttons */
   .login-primary-button {
-    @apply w-full h-13 bg-sunbird-brick !bg-sunbird-brick text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all;
+    @apply w-full h-13 bg-sunbird-brick !bg-sunbird-brick text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all px-4 py-2;
   }
 
   /* Global Signup/Auth Styles */

@@ -244,6 +244,7 @@ const CollectionDetailPage = () => {
               isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
               contentCreatorPrivilege={contentCreatorPrivilege}
               userProfile={userProfile ?? undefined}
+              userId={currentUserId ?? undefined}
             />
 
             {/* Related Content Section */}

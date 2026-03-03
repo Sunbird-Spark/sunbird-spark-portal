@@ -11,6 +11,7 @@ import { useAcceptTnc } from "@/hooks/useTnc";
 import { useToast } from "@/hooks/useToast";
 import { useIsContentCreator } from "@/hooks/useUser";
 import { usePermissions } from "@/hooks/usePermission";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface BatchCardProps {
   collectionId: string;
@@ -24,6 +25,7 @@ import { TabBar, ActiveTab } from "./BatchTabBar";
 
 const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const { toast } = useToast();
+  const { t } = useAppI18n();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editBatch, setEditBatch]   = useState<Batch | null>(null);
@@ -132,7 +134,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                   )}
                 >
                   {acceptTncMutation.isPending && <FiLoader className="w-4 h-4 animate-spin" />}
-                  {acceptTncMutation.isPending ? "Accepting…" : "Accept & Continue"}
+                  {acceptTncMutation.isPending ? t('tncPopup.accepting') : t('tncPopup.acceptAndContinue')}
                 </button>
               </div>
             </div>

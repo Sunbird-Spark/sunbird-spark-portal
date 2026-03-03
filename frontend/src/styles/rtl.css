@@ -1,0 +1,406 @@
+/**
+ * RTL-specific styles and overrides
+ * This file contains CSS rules that adapt the UI for right-to-left languages
+ */
+
+/* RTL Direction Support */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+}
+
+/* Text Alignment */
+[dir="rtl"] .text-start {
+  text-align: right;
+}
+
+[dir="ltr"] .text-start {
+  text-align: left;
+}
+
+[dir="rtl"] .text-end {
+  text-align: left;
+}
+
+[dir="ltr"] .text-end {
+  text-align: right;
+}
+
+/* Flexbox Direction */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* Transform for RTL */
+[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+/* Margin and Padding Logical Properties */
+[dir="rtl"] .ms-auto {
+  margin-right: auto;
+  margin-left: unset;
+}
+
+[dir="ltr"] .ms-auto {
+  margin-left: auto;
+  margin-right: unset;
+}
+
+[dir="rtl"] .me-auto {
+  margin-left: auto;
+  margin-right: unset;
+}
+
+[dir="ltr"] .me-auto {
+  margin-right: auto;
+  margin-left: unset;
+}
+
+/* Border Radius for RTL */
+[dir="rtl"] .rounded-s {
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+[dir="ltr"] .rounded-s {
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+[dir="rtl"] .rounded-e {
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+[dir="ltr"] .rounded-e {
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Dropdown and Select Positioning */
+[dir="rtl"] .dropdown-content {
+  left: auto;
+  right: 0;
+}
+
+[dir="ltr"] .dropdown-content {
+  right: auto;
+  left: 0;
+}
+
+/* Icon Rotation for RTL */
+[dir="rtl"] .icon-arrow-right {
+  transform: rotate(180deg);
+}
+
+/* Ensure buttons have flexible width for different text lengths - scoped to specific contexts */
+[dir="rtl"] button:not(.no-rtl-override),
+[dir="ltr"] button:not(.no-rtl-override) {
+  min-width: fit-content;
+}
+
+/* Preserve button padding in all directions */
+button[type="submit"],
+button[type="button"],
+input[type="submit"],
+input[type="button"] {
+  width: auto;
+  min-width: max-content;
+}
+
+/* Fix for absolute positioned elements in RTL */
+[dir="rtl"] .absolute.right-0 {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .absolute.left-0 {
+  left: auto;
+  right: 0;
+}
+
+/* Sidebar positioning for RTL */
+[dir="rtl"] .sidebar {
+  left: auto;
+  right: 0;
+}
+
+[dir="ltr"] .sidebar {
+  right: auto;
+  left: 0;
+}
+
+/* Sidebar shadow for RTL - flip the shadow direction */
+[dir="rtl"] aside[data-testid="home-sidebar"] {
+  box-shadow: -0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09) !important;
+}
+
+[dir="ltr"] aside[data-testid="home-sidebar"] {
+  box-shadow: 0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09) !important;
+}
+
+/* Toast/Notification positioning */
+[dir="rtl"] .toast-container {
+  left: auto;
+  right: 1rem;
+}
+
+[dir="ltr"] .toast-container {
+  right: auto;
+  left: 1rem;
+}
+
+/* Chevron icons in RTL */
+[dir="rtl"] .chevron-right {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .chevron-left {
+  transform: rotate(180deg);
+}
+
+/* Progress bars maintain LTR direction */
+[dir="rtl"] .progress-bar,
+[dir="rtl"] [role="progressbar"] {
+  direction: ltr;
+}
+
+/* Ensure numeric content stays LTR */
+[dir="rtl"] .numeric-content {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Card layouts in RTL */
+[dir="rtl"] .card-grid {
+  direction: rtl;
+}
+
+/* Tailwind space-x utilities already handle RTL correctly, no override needed */
+
+/* Fix for modal close buttons */
+[dir="rtl"] .modal-close {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="ltr"] .modal-close {
+  left: auto;
+  right: 1rem;
+}
+
+/* Ensure proper text overflow for RTL */
+[dir="rtl"] .truncate {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="ltr"] .truncate {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Badge positioning */
+[dir="rtl"] .badge-end {
+  left: 0;
+  right: auto;
+}
+
+[dir="ltr"] .badge-end {
+  right: 0;
+  left: auto;
+}
+
+/* Ensure proper alignment for form labels */
+[dir="rtl"] label {
+  text-align: right;
+}
+
+[dir="ltr"] label {
+  text-align: left;
+}
+
+/* Fix for decorative elements */
+[dir="rtl"] .decorative-element {
+  transform: scaleX(-1);
+}
+
+/* Profile Header RTL Support */
+[dir="rtl"] .profile-header {
+  padding-right: 1rem;
+  padding-left: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  [dir="rtl"] .profile-header {
+    padding-left: 6.25rem;
+    padding-right: 1.5rem;
+  }
+}
+
+[dir="rtl"] .profile-content-wrapper {
+  padding-right: 1.625rem;
+  padding-left: 6.25rem;
+}
+
+[dir="ltr"] .profile-content-wrapper {
+  padding-left: 1.625rem;
+  padding-right: 6.25rem;
+}
+
+/* Notification Badge RTL */
+[dir="rtl"] .notification-badge {
+  right: auto;
+  left: -0.125rem;
+}
+
+[dir="ltr"] .notification-badge {
+  left: auto;
+  right: -0.125rem;
+}
+
+/* Notification Popover RTL */
+[dir="rtl"] .notification-popover-content {
+  right: auto !important;
+  left: -10rem !important;
+}
+
+[dir="ltr"] .notification-popover-content {
+  left: auto !important;
+  right: -10rem !important;
+}
+
+[dir="rtl"] .notification-popover-arrow {
+  right: auto !important;
+  left: 3.25rem !important;
+}
+
+[dir="ltr"] .notification-popover-arrow {
+  left: auto !important;
+  right: 3.25rem !important;
+}
+
+/* Notification Item Indicator RTL */
+[dir="rtl"] .notification-item::before {
+  left: auto;
+  right: -4px;
+}
+
+[dir="ltr"] .notification-item::before {
+  right: auto;
+  left: -4px;
+}
+
+/* Profile Info Accent RTL */
+[dir="rtl"] .personal-info-accent {
+  left: auto;
+  right: -1rem;
+}
+
+[dir="ltr"] .personal-info-accent {
+  right: auto;
+  left: -1rem;
+}
+
+[dir="rtl"] .learning-title-accent {
+  left: auto;
+  right: -1.5rem;
+}
+
+[dir="ltr"] .learning-title-accent {
+  right: auto;
+  left: -1.5rem;
+}
+
+/* Stat Icon Container RTL */
+[dir="rtl"] .stat-icon-container {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="ltr"] .stat-icon-container {
+  left: auto;
+  right: 1rem;
+}
+
+/* Stat Card Padding RTL */
+[dir="rtl"] .stat-card {
+  padding-left: 1.25rem;
+  padding-right: 1.875rem;
+}
+
+[dir="ltr"] .stat-card {
+  padding-right: 1.25rem;
+  padding-left: 1.875rem;
+}
+
+/* Home Page Content Wrapper RTL */
+@media (min-width: 1024px) {
+  [dir="rtl"] .home-content-wrapper {
+    --hcw-pl: 6.25rem;
+    --hcw-pr: 1.625rem;
+  }
+
+  [dir="ltr"] .home-content-wrapper {
+    --hcw-pl: 1.625rem;
+    --hcw-pr: 6.25rem;
+  }
+}
+
+/* Home Stat Card RTL */
+[dir="rtl"] .home-stat-card {
+  padding-left: 1.25rem;
+  padding-right: 1.5625rem;
+}
+
+[dir="ltr"] .home-stat-card {
+  padding-right: 1.25rem;
+  padding-left: 1.5625rem;
+}
+
+[dir="rtl"] .home-stat-icon-wrapper {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="ltr"] .home-stat-icon-wrapper {
+  left: auto;
+  right: 1rem;
+}
+
+/* Home Header RTL */
+@media (min-width: 1024px) {
+  [dir="rtl"] .home-header {
+    padding-left: 6.25rem;
+    padding-right: 1.5rem;
+  }
+
+  [dir="ltr"] .home-header {
+    padding-right: 6.25rem;
+    padding-left: 1.5rem;
+  }
+}
+
+/* Footer RTL */
+[dir="rtl"] .sunbird-footer {
+  padding-right: 1rem !important;
+  padding-left: 3.75rem !important;
+}
+
+[dir="ltr"] .sunbird-footer {
+  padding-left: 1rem !important;
+  padding-right: 3.75rem !important;
+}
+

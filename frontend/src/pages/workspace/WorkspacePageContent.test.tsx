@@ -4,7 +4,18 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspacePageContent from './WorkspacePageContent';
 import type { WorkspaceItem } from '@/types/workspaceTypes';
 
-const mockT = (key: string) => key;
+const mockT = (key: string) => {
+  const translations: Record<string, string> = {
+    'workspace.emptyStates.noUploadsTitle': 'No uploads yet',
+    'workspace.emptyStates.noUploadsDesc': 'Upload PDF, video, or other content files to get started.',
+    'workspace.emptyStates.noCollaborationsTitle': 'No collaborations',
+    'workspace.emptyStates.noCollaborationsDesc': 'Content shared with you will appear here.',
+    'uploadContent': 'uploadContent',
+    'createFirst': 'createFirst',
+    'createContent': 'createContent',
+  };
+  return translations[key] ?? key;
+};
 const defaultProps = {
   showCreateModal: false,
   activeView: 'all',
