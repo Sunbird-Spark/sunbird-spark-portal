@@ -89,7 +89,7 @@ const COLLECTION_MIMETYPES = [
 
 const contentService = new ContentService();
 /** Option IDs that should open the generic (upload) editor */
-const GENERIC_EDITOR_OPTIONS = ['upload-pdf', 'upload-video'];
+const GENERIC_EDITOR_OPTIONS = ['upload-content', 'upload-large-content'];
 
 const WorkspacePage = () => {
   const navigate = useNavigate();
@@ -253,7 +253,7 @@ const WorkspacePage = () => {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
-      navigate('/workspace/content/edit/generic');
+      navigate(optionId === 'upload-content' ? '/workspace/content/edit/generic' : '/workspace/content/edit/editorforlargecontent');
       return;
     } else {
       setShowCreateModal(false);
