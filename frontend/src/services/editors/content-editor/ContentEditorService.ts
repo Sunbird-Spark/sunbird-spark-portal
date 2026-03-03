@@ -98,6 +98,7 @@ export class ContentEditorService {
           { id: 'org.sunbird.iframeEvent', ver: '1.0', type: 'plugin' },
           { id: 'org.sunbird.player.endpage', ver: '1.1', type: 'plugin' },
         ],
+        showStartPage: true,
         splash: {
           text: '',
           icon: '',
