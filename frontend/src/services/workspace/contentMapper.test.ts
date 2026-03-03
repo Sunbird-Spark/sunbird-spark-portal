@@ -59,10 +59,13 @@ describe('contentMapper', () => {
       expect(mapContentToWorkspaceItem({ identifier: 'a', status: 'FlagDraft' }).status).toBe('draft');
     });
 
-    it('maps status Review, Processing, FlagReview to review', () => {
+    it('maps status Review and FlagReview to review', () => {
       expect(mapContentToWorkspaceItem({ identifier: 'a', status: 'Review' }).status).toBe('review');
-      expect(mapContentToWorkspaceItem({ identifier: 'a', status: 'Processing' }).status).toBe('review');
       expect(mapContentToWorkspaceItem({ identifier: 'a', status: 'FlagReview' }).status).toBe('review');
+    });
+
+    it('maps status Processing to processing', () => {
+      expect(mapContentToWorkspaceItem({ identifier: 'a', status: 'Processing' }).status).toBe('processing');
     });
 
     it('maps status Live and Unlisted to published', () => {

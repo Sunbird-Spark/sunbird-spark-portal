@@ -44,6 +44,7 @@ const WorkspaceContentCard = ({
 
   const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
   const isLocked = !!lockInfo;
+  const hasActions = showView || canEdit || showDelete;
 
   return (
     <div className="bg-card rounded-2xl shadow-sm group hover:shadow-md transition-all duration-300 border border-border">
@@ -61,8 +62,8 @@ const WorkspaceContentCard = ({
             <CardThumbnailBackground type={item.type} primaryCategory={item.primaryCategory} />
           )}
 
-          {/* Hover Actions Overlay — hidden when locked */}
-          {!isLocked && (
+          {/* Hover Actions Overlay — hidden when locked or no actions available */}
+          {!isLocked && hasActions && (
             <div className="absolute inset-0 z-10 bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 pointer-events-none">
               {showView && (
                 <Button
@@ -126,7 +127,7 @@ const WorkspaceContentCard = ({
           <h3 className="font-semibold text-foreground text-sm font-rubik line-clamp-2 leading-snug flex-1">
             {item.title}
           </h3>
-          {!isLocked && (
+          {!isLocked && hasActions && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground">
