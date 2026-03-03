@@ -86,7 +86,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
             <div className="profile-learning-actions">
                 {status === "completed" && hasCertificate(course.courseId, course.batchId, title, course.issuedCertificates) ? (
                     <button
-                        className={`flex items-center gap-2 transition-opacity ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
+                        className={`flex items-center gap-2 transition-opacity min-w-fit ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
                         disabled={isDownloading}
                         onClick={() => downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates, course.completedOn)}
                     >
@@ -96,12 +96,12 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                             <FiDownload className="w-[1.125rem] h-[1.125rem] text-sunbird-ginger" />
                         )}
                         <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-brick text-center whitespace-nowrap">
-                            {isDownloading ? "Downloading..." : t('common.downloadCertificate')}
+                            {isDownloading ? t('profileLearning.downloading') : t('common.downloadCertificate')}
                         </span>
                     </button>
                 ) : status === "completed" ? (
                     <span className="font-rubik font-medium text-[0.875rem] leading-none tracking-normal text-sunbird-gray-75 text-center whitespace-nowrap">
-                        No certificate
+                        {t('profileLearning.noCertificate')}
                     </span>
                 ) : null}
             </div>
@@ -135,17 +135,19 @@ const ProfileLearningList = () => {
             <div className="learning-header">
                 <div className="learning-title-wrapper">
                     <div className="learning-title-accent" />
-                    <h2 className="learning-title">My Learning</h2>
+                    <h2 className="learning-title">{t('profileLearning.myLearning')}</h2>
                 </div>
 
                 <div className="learning-filter-container">
-                    <span className="learning-filter-label">Filter :</span>
+                    <span className="learning-filter-label">{t('profileLearning.filter')} :</span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm font-normal text-foreground hover:bg-gray-50 transition-colors min-w-[8rem] justify-between"
                                 aria-label="Filter courses by status"
                             >
-                                <span className="capitalize">{filter}</span>
+                                <span className="capitalize">
+                                    {filter === 'all' ? t('tabs.all') : filter === 'ongoing' ? t('status.ongoing') : t('status.completed')}
+                                </span>
                                 <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                             </button>
                         </DropdownMenuTrigger>
@@ -185,10 +187,10 @@ const ProfileLearningList = () => {
             {/* Course List */}
             <div className="learning-list-container">
                 {isLoading ? (
-                    <PageLoader message="Loading your courses..." fullPage={false} />
+                    <PageLoader message={t('profileLearning.loadingCourses')} fullPage={false} />
                 ) : isError ? (
                     <PageLoader
-                        error="Failed to load courses. Please try again."
+                        error={t('profileLearning.failedToLoadCourses')}
                         onRetry={() => refetch()}
                         fullPage={false}
                     />
@@ -196,8 +198,8 @@ const ProfileLearningList = () => {
                     <div className="flex flex-1 min-h-[200px] items-center justify-center">
                         <p className="text-sunbird-gray-75 text-sm">
                             {filter === "all"
-                                ? "No courses enrolled yet."
-                                : `No ${filter} courses found.`}
+                                ? t('profileLearning.noCoursesEnrolled')
+                                : t('profileLearning.noFilteredCourses', { filter })}
                         </p>
                     </div>
                 ) : (
@@ -221,7 +223,7 @@ const ProfileLearningList = () => {
                         onClick={() => setShowAll((prev) => !prev)}
                         className="learning-view-more-link"
                     >
-                        {showAll ? "View Less" : "View More Courses"}
+                        {showAll ? t('profileLearning.viewLess') : t('profileLearning.viewMoreCourses')}
                     </button>
                 </div>
             )}

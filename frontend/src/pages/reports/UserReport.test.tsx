@@ -17,6 +17,38 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'userReport.title': 'User Report',
+        'userReport.courseProgress': 'Course Progress',
+        'userReport.certificates': 'Certificates',
+        'userReport.assessmentHistory': 'Assessment History',
+        'userReport.coursesCompleted': 'Courses Completed',
+        'userReport.coursesPending': 'Courses Pending',
+        'userReport.certificatesIssued': 'Certificates Issued',
+        'userReport.contentCompleted': 'Content Completed',
+        'userReport.assessmentsCompleted': 'Assessments Done',
+        'userReport.course': 'Course',
+        'userReport.progress': 'Progress',
+        'userReport.status': 'Status',
+        'userReport.enrolled': 'Enrolled',
+        'userReport.lastAccessed': 'Last Accessed',
+        'userReport.certificateId': 'Certificate ID',
+        'userReport.issuedDate': 'Issued Date',
+        'userReport.assessment': 'Assessment',
+        'userReport.score': 'Score',
+        'userReport.max': 'Max',
+        'userReport.result': 'Result',
+        'userReport.date': 'Date',
+        'home': 'Home',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 const renderWithRoute = (userId = 'me') =>
   render(
     <MemoryRouter initialEntries={[`/reports/user/${userId}`]}>

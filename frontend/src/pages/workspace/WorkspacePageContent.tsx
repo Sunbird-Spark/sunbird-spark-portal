@@ -95,8 +95,8 @@ export default function WorkspacePageContent({
   const pageTitleMap: Record<string, { title: string; desc: string }> = {
     'pending-review': { title: t('workspace.noContentsToReview'), desc: t('workspace.noContentsToReviewDesc') },
     'my-published': { title: t('workspace.noPublishedContents'), desc: t('workspace.noPublishedContentsDesc') },
-    'uploads': { title: "No uploads yet", desc: "Upload PDF, video, or other content files to get started." },
-    'collaborations': { title: "No collaborations", desc: "Content shared with you will appear here." },
+    'uploads': { title: t('workspace.emptyStates.noUploadsTitle'), desc: t('workspace.emptyStates.noUploadsDesc') },
+    'collaborations': { title: t('workspace.emptyStates.noCollaborationsTitle'), desc: t('workspace.emptyStates.noCollaborationsDesc') },
   };
 
   // Empty state

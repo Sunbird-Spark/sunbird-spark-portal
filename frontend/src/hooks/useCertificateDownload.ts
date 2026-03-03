@@ -34,9 +34,10 @@ export const useCertificateDownload = () => {
         setError(null);
 
         try {
-            // Step 1: Get certificate ID from issued certificates
+            // Step 1: Get certificate ID and template URL from issued certificates
             const matchingCert = getMatchingCert(courseId, batchId, courseName, issuedCertificates);
             let certId = matchingCert?.identifier || matchingCert?.token;
+            let templateUrl = matchingCert?.templateUrl;
 
             // Step 2: If no ID in enrollment data, search RC registry
             if (!certId && userId) {
@@ -52,33 +53,16 @@ export const useCertificateDownload = () => {
                 throw new Error('Certificate is not yet generated or available for this course.');
             }
 
-            // Step 3: Download certificate metadata from RC service
-            const downloadUrl = `/portal/rc/certificate/v1/download/${certId}`;
-            const response = await fetch(downloadUrl);
+            // Step 3: Download processed certificate SVG from API
+            // Pass template URL in header (required by RC service)
+            const response = await certificateService.downloadCertificate(certId, templateUrl);
+            const svgContent = response.data;
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch certificate: ${response.statusText}`);
+            if (!svgContent || typeof svgContent !== 'string' || svgContent.trim().length === 0) {
+                throw new Error('No certificate SVG received from server.');
             }
 
-            const certificateData = await response.json() as Record<string, unknown>;
-            const svgUrl = certificateData?.templateUrl as string | undefined;
-
-            if (!svgUrl) {
-                throw new Error('Certificate template URL not found.');
-            }
-
-            // Step 4: Fetch SVG from template URL
-            const svgResponse = await fetch(svgUrl);
-            if (!svgResponse.ok) {
-                throw new Error(`Failed to fetch certificate SVG: ${svgResponse.statusText}`);
-            }
-
-            const svgContent = await svgResponse.text();
-            if (!svgContent || svgContent.trim().length === 0) {
-                throw new Error('Empty certificate SVG received.');
-            }
-
-            // Step 5: Convert SVG → PDF and trigger download
+            // Step 4: Convert SVG → PDF and trigger download
             await convertSvgToOutput(svgContent, { fileName: courseName || 'certificate' });
 
         } catch (err: unknown) {

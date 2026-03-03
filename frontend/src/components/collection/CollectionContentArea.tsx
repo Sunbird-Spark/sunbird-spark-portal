@@ -7,11 +7,8 @@ import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
 import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import CourseProgressCard from "@/components/collection/CourseProgressCard";
-import AvailableBatchesCard from "@/components/collection/AvailableBatchesCard";
-import CertificateCard from "@/components/collection/CertificateCard";
-import ProfileDataSharingCard from "@/components/collection/ProfileDataSharingCard";
-import { useConsent } from "@/hooks/useConsent";
-import { useToast } from "@/hooks/useToast";
+import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
+import { useForceSync } from "@/hooks/useForceSync";
 
 interface CollectionContentAreaProps {
   collectionData: any;
@@ -53,6 +50,8 @@ interface CollectionContentAreaProps {
   contentCreatorPrivilege?: boolean;
   /** User profile for Profile Data Sharing consent modal (from useUserRead). */
   userProfile?: Record<string, unknown> | null;
+  /** Current user id for force sync (learner). */
+  userId?: string | null;
 }
 
 export default function CollectionContentArea({
@@ -92,10 +91,16 @@ export default function CollectionContentArea({
   isCreatorViewingOwnCollection = false,
   contentCreatorPrivilege = false,
   userProfile = null,
+  userId = null,
 }: CollectionContentAreaProps) {
   const { t } = useAppI18n();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { showForceSyncButton, handleForceSync, isForceSyncing } = useForceSync(
+    userId,
+    collectionId,
+    batchIdParam,
+    courseProgressProps
+  );
 
   const showProfileDataSharingCard =
     isTrackable &&
@@ -104,43 +109,6 @@ export default function CollectionContentArea({
     hasBatchInRoute &&
     isEnrolledInCurrentBatch &&
     (collectionData?.userConsent?.toLowerCase() ?? "") === "yes";
-
-  const {
-    status: consentStatus,
-    lastUpdatedOn: consentLastUpdatedOn,
-    updateConsent,
-    isUpdating: consentIsUpdating,
-  } = useConsent({
-    collectionId: collectionId ?? undefined,
-    channel: collectionData?.channel,
-    enabled: showProfileDataSharingCard,
-  });
-
-  const handleConsentAgree = async () => {
-    try {
-      await updateConsent("ACTIVE");
-      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
-    } catch (err) {
-      toast({
-        title: t("error"),
-        description: (err as Error).message || t("profileDataSharing.consentUpdateError"),
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleConsentDisagree = async () => {
-    try {
-      await updateConsent("REVOKED");
-      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
-    } catch (err) {
-      toast({
-        title: t("error"),
-        description: (err as Error).message || t("profileDataSharing.consentUpdateError"),
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <>
@@ -198,7 +166,12 @@ export default function CollectionContentArea({
           {/* Learner: Course progress (hidden when content creator privilege) */}
           {isTrackable && !contentBlocked && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
             <div className="flex-shrink-0 mb-4">
-              <CourseProgressCard {...courseProgressProps} />
+              <CourseProgressCard
+                {...courseProgressProps}
+                showForceSyncButton={showForceSyncButton}
+                onForceSync={handleForceSync}
+                isForceSyncing={isForceSyncing}
+              />
             </div>
           )}
 
@@ -219,40 +192,29 @@ export default function CollectionContentArea({
 
           {/* Learner: Batch join + Certificate — show when trackable and authenticated learner (so they can join); hidden for content creators */}
           {isTrackable && isAuthenticated && !contentCreatorPrivilege && (
-            <div className="flex-shrink-0 flex flex-col gap-4 mt-4">
-              {!hasBatchInRoute && (
-                <AvailableBatchesCard
-                  batches={batches}
-                  selectedBatchId={selectedBatchId}
-                  onBatchSelect={setSelectedBatchId}
-                  onJoinCourse={() => handleJoinCourse(selectedBatchId)}
-                  isLoading={batchListLoading}
-                  joinLoading={joinLoading}
-                  error={batchListError}
-                  joinError={joinError}
-                />
-              )}
-              <CertificateCard
-                hasCertificate={hasCertificate}
-                previewUrl={firstCertPreviewUrl}
-                onPreviewClick={() => {
-                  if (firstCertPreviewUrl) {
-                    setCertificatePreviewUrl(firstCertPreviewUrl);
-                    setCertificatePreviewOpen(true);
-                  }
-                }}
-              />
-              {showProfileDataSharingCard && (
-                <ProfileDataSharingCard
-                  status={consentStatus}
-                  lastUpdatedOn={consentLastUpdatedOn}
-                  onAgree={handleConsentAgree}
-                  onDisagree={handleConsentDisagree}
-                  isUpdating={consentIsUpdating}
-                  userProfile={userProfile ?? undefined}
-                />
-              )}
-            </div>
+            <LearnerBottomCards
+              hasBatchInRoute={hasBatchInRoute}
+              batches={batches}
+              selectedBatchId={selectedBatchId}
+              setSelectedBatchId={setSelectedBatchId}
+              onJoinCourse={handleJoinCourse}
+              batchListLoading={batchListLoading}
+              joinLoading={joinLoading}
+              batchListError={batchListError}
+              joinError={joinError}
+              hasCertificate={hasCertificate}
+              firstCertPreviewUrl={firstCertPreviewUrl}
+              onCertificatePreviewClick={() => {
+                if (firstCertPreviewUrl) {
+                  setCertificatePreviewUrl(firstCertPreviewUrl);
+                  setCertificatePreviewOpen(true);
+                }
+              }}
+              showProfileDataSharingCard={showProfileDataSharingCard}
+              collectionId={collectionId}
+              channel={collectionData?.channel}
+              userProfile={userProfile ?? undefined}
+            />
           )}
         </div>
       </div>
