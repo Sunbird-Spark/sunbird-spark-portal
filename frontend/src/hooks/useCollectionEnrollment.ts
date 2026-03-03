@@ -90,6 +90,7 @@ export function useCollectionEnrollment(
     isEnrolledInCurrentBatch ? effectiveBatchId : undefined,
     { enabled: isEnrolledInCurrentBatch && !!effectiveBatchId },
   );
+  const batchEnrollmentType = batchReadResponse?.data?.response?.enrollmentType;
   const firstCertPreviewUrl = useMemo(
     () => getFirstCertPreviewUrl(batchReadResponse?.data?.response?.cert_templates),
     [batchReadResponse?.data?.response?.cert_templates],
@@ -136,5 +137,6 @@ export function useCollectionEnrollment(
     joinLoading,
     joinError,
     handleJoinCourse,
+    batchEnrollmentType,
   };
 }
