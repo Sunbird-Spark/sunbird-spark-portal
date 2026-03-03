@@ -45,6 +45,8 @@ router.get('/login',
             req.session.oidcState = state;
             await saveSession(req);
 
+            logger.info(`PKCE_DEBUG: /login saved PKCE to session | sessionID=${req.sessionID} | state=${state} | hasVerifier=${!!codeVerifier}`);
+
             // Build authorization URL using OIDC Discovery endpoints
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
             const promptParam = req.query.prompt as string | undefined;
@@ -70,6 +72,7 @@ router.get('/auth/callback',
     sessionMiddleware,
     async (req: Request, res: Response) => {
         logger.info('Entered /portal/auth/callback handler');
+        logger.info(`PKCE_DEBUG: /callback check | sessionID=${req.sessionID} | hasVerifier=${!!req.session?.oidcCodeVerifier} | hasState=${!!req.session?.oidcState} | queryState=${req.query.state} | sessionState=${req.session?.oidcState} | hasCode=${!!req.query.code} | hasError=${!!req.query.error}`);
 
         // Handle error responses from the OIDC provider (e.g. prompt=none with no SSO session)
         if (req.query.error) {
