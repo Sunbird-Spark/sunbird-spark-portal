@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import type { WorkspaceItem, UserRole } from '../../types/workspaceTypes';
 
 export interface WorkspaceItemActionVisibility {
@@ -19,7 +20,7 @@ export function getWorkspaceItemActionVisibility(
   contentStatus?: string,
 ): WorkspaceItemActionVisibility {
   // Content being processed server-side cannot be acted upon.
-  if (contentStatus === 'Processing') {
+  if (_.toLower(contentStatus) === 'processing') {
     return { isDraft: false, isPublished: false, isReview: false, showView: false, showEdit: false, showDelete: false };
   }
 
