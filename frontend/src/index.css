@@ -458,7 +458,7 @@
   }
 
   .content-player-go-back {
-    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity font-rubik;
+    @apply flex items-center gap-1.5 font-rubik font-medium text-[1rem] leading-[1.625rem] tracking-normal text-sunbird-brick mb-6 hover:opacity-80 transition-opacity;
   }
 
   .content-player-back-arrow {
@@ -467,7 +467,7 @@
   }
 
   .content-player-title-row {
-    @apply flex items-start justify-between mb-2;
+    @apply flex items-start justify-between mb-4;
   }
 
   .content-player-title {
@@ -531,11 +531,11 @@
   }
 
   .content-player-related-header {
-    @apply flex items-center gap-3 mb-6 mt-12;
+    @apply flex items-center gap-3 mb-4 mt-12;
   }
 
   .content-player-related-title {
-    @apply text-xl font-semibold text-foreground font-rubik my-2;
+    @apply font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground my-2;
   }
 
   .content-player-related-arrow {
@@ -543,7 +543,21 @@
   }
 
   .content-player-related-grid {
-    @apply grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr;
+    @apply grid grid-cols-1 gap-5 auto-rows-fr;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .content-player-related-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .content-player-related-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.375rem;
+    }
   }
 
 
