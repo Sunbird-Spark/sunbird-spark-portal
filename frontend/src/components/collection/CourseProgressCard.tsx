@@ -35,6 +35,9 @@ export interface CourseProgressCardProps {
   showForceSyncButton?: boolean;
   onForceSync?: () => void;
   isForceSyncing?: boolean;
+  showUnenrollOption?: boolean;
+  onUnenroll?: () => void;
+  isUnenrolling?: boolean;
 }
 
 const CourseProgressCard = ({
@@ -46,6 +49,9 @@ const CourseProgressCard = ({
   showForceSyncButton = false,
   onForceSync,
   isForceSyncing = false,
+  showUnenrollOption = false,
+  onUnenroll,
+  isUnenrolling = false,
 }: CourseProgressCardProps) => {
   const { t } = useAppI18n();
 
@@ -60,6 +66,9 @@ const CourseProgressCard = ({
 
   const displayDate = batchStartDate ? formatBatchDisplayDate(batchStartDate) : null;
 
+  const showMenu = (showForceSyncButton && !!onForceSync) || (showUnenrollOption && !!onUnenroll);
+  const isLoading = showUnenrollOption ? isUnenrolling : isForceSyncing;
+
   return (
     <div
       className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col gap-3"
@@ -69,25 +78,33 @@ const CourseProgressCard = ({
         <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] text-sunbird-status-ongoing-text">
           {t("courseDetails.courseProgress")}
         </h3>
-        {showForceSyncButton && onForceSync && (
+        {showMenu && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
                 className="p-1 rounded hover:bg-white/50 text-sunbird-status-ongoing-text focus:outline-none focus:ring-2 focus:ring-sunbird-brick/50"
-                aria-label={t("courseDetails.forceSync")}
-                disabled={isForceSyncing}
+                aria-label={
+                  showUnenrollOption
+                    ? t("courseDetails.leaveCourse")
+                    : t("courseDetails.forceSync")
+                }
+                disabled={isLoading}
               >
                 <FiMoreVertical className="w-5 h-5" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[10rem] bg-white border border-sunbird-gray-f3 rounded-xl shadow-lg z-50">
+            <DropdownMenuContent align="end" className="w-max min-w-[8rem] bg-white border border-sunbird-gray-f3 rounded-xl shadow-lg z-50 py-1">
               <DropdownMenuItem
-                onClick={onForceSync}
-                disabled={isForceSyncing}
+                onClick={showUnenrollOption ? onUnenroll : onForceSync}
+                disabled={isLoading}
                 className="font-rubik cursor-pointer text-sunbird-obsidian focus:bg-sunbird-brick/10 focus:text-sunbird-brick"
               >
-                {isForceSyncing ? t("loading") : t("courseDetails.forceSync")}
+                {isLoading
+                  ? t("loading")
+                  : showUnenrollOption
+                    ? t("courseDetails.leaveCourse")
+                    : t("courseDetails.forceSync")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

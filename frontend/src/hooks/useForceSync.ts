@@ -8,7 +8,7 @@ export function useForceSync(
   userId: string | null | undefined,
   collectionId: string | undefined,
   batchIdParam: string | undefined,
-  courseProgressProps: { totalContentCount: number; completedContentCount: number } | null | undefined
+  courseProgressProps: { totalContentCount: number; completedContentCount?: number } | null | undefined
 ) {
   const { toast } = useToast();
   const { t } = useAppI18n();
@@ -20,7 +20,7 @@ export function useForceSync(
       ? Math.min(
           100,
           Math.ceil(
-            (courseProgressProps.completedContentCount / courseProgressProps.totalContentCount) * 100
+            ((courseProgressProps.completedContentCount ?? 0) / courseProgressProps.totalContentCount) * 100
           )
         )
       : 0;
