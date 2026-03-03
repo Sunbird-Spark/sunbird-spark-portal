@@ -1,7 +1,12 @@
 /**
  * RTL-specific styles and overrides
  * This file contains CSS rules that adapt the UI for right-to-left languages
- * IMPORTANT: Only apply RTL-specific overrides to [dir="rtl"], never override LTR defaults
+ * IMPORTANT: Prefer RTL-specific overrides using [dir="rtl"]; use [dir="ltr"] rules only when necessary
+ * to avoid changing LTR defaults unless explicitly required for visual consistency.
+ * 
+ * NOTE: Some [dir="ltr"] rules are included to explicitly define LTR behavior for components
+ * that have corresponding RTL rules, ensuring visual consistency and preventing unintended
+ * style inheritance in mixed-direction contexts.
  */
 
 /* RTL Direction Support */
@@ -327,22 +332,16 @@
   padding-right: 3.75rem !important;
 }
 
-/* Accordion RTL - Proper flex direction for trigger button only */
-[dir="rtl"] [role="button"][data-radix-accordion-trigger] {
-  flex-direction: row-reverse;
-}
+/* Accordion RTL - Chevron on left side, text on right side */
+/* Handled via Tailwind arbitrary selector in Accordion component */
 
 /* Accordion content region RTL */
-[dir="rtl"] [role="region"][data-radix-accordion-content] {
+[dir="rtl"] div[role="region"][data-state] {
   direction: rtl;
 }
 
 /* Text alignment for RTL */
 [dir="rtl"] .text-left {
   text-align: right;
-}
-
-[dir="ltr"] .text-left {
-  text-align: left;
 }
 
