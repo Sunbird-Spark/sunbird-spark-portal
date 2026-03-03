@@ -105,10 +105,10 @@
   transform: rotate(180deg);
 }
 
-/* Ensure buttons have flexible width for different text lengths */
-button {
+/* Ensure buttons have flexible width for different text lengths - scoped to specific contexts */
+[dir="rtl"] button:not(.no-rtl-override),
+[dir="ltr"] button:not(.no-rtl-override) {
   min-width: fit-content;
-  white-space: nowrap;
 }
 
 /* Preserve button padding in all directions */
@@ -188,11 +188,7 @@ input[type="button"] {
   direction: rtl;
 }
 
-/* Ensure proper spacing for RTL */
-[dir="rtl"] .space-x-reverse > * + * {
-  margin-right: var(--space-x-reverse);
-  margin-left: 0;
-}
+/* Tailwind space-x utilities already handle RTL correctly, no override needed */
 
 /* Fix for modal close buttons */
 [dir="rtl"] .modal-close {

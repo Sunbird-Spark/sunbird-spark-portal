@@ -415,6 +415,11 @@
     "backTo": "العودة إلى {{page}}",
     "upcomingBatches": "الدفعات القادمة",
     "learningProgress": "تقدم التعلم",
+    "downloadCertificate": "تحميل الشهادة",
+    "manage": "إدارة",
+    "backTo": "العودة إلى {{page}}",
+    "upcomingBatches": "الدفعات القادمة",
+    "learningProgress": "تقدم التعلم",
     "downloadCertificate": "تحميل الشهادة"
   },
   "myLearning": {
@@ -829,11 +834,56 @@
     "certificates": "الشهادات",
     "all": "الكل"
   },
-  "common": {
-    "manage": "إدارة",
-    "backTo": "العودة إلى {{page}}",
-    "upcomingBatches": "الدفعات القادمة",
-    "learningProgress": "تقدم التعلم",
-    "downloadCertificate": "تحميل الشهادة"
+  "profileLearning": {
+    "loadingCourses": "جارٍ تحميل دوراتك...",
+    "failedToLoadCourses": "فشل تحميل الدورات. يرجى المحاولة مرة أخرى.",
+    "viewLess": "عرض أقل",
+    "viewMoreCourses": "عرض المزيد من الدورات",
+    "noCertificate": "لا توجد شهادة",
+    "noCoursesEnrolled": "لم يتم التسجيل في أي دورات بعد.",
+    "noFilteredCourses": "لم يتم العثور على دورات {{filter}}.",
+    "downloading": "جارٍ التنزيل...",
+    "myLearning": "تعلّمي",
+    "filter": "تصفية"
+  },
+  "tncPopup": {
+    "checkboxLabel": "لقد قرأت ووافقت على الشروط والأحكام",
+    "accepting": "جارٍ القبول...",
+    "continue": "متابعة",
+    "acceptAndContinue": "قبول ومتابعة"
+  },
+  "trackableCollection": {
+    "completed": "مكتمل"
+  },
+  "userReport": {
+    "title": "تقرير المستخدم",
+    "courseProgress": "تقدم الدورة",
+    "certificates": "الشهادات",
+    "assessmentHistory": "سجل التقييمات",
+    "coursesCompleted": "الدورات المكتملة",
+    "coursesPending": "الدورات المعلقة",
+    "certificatesIssued": "الشهادات الصادرة",
+    "contentCompleted": "المحتوى المكتمل",
+    "assessmentsCompleted": "التقييمات المكتملة",
+    "course": "دورة",
+    "progress": "التقدم",
+    "status": "الحالة",
+    "enrolled": "مسجل",
+    "lastAccessed": "آخر وصول",
+    "certificateId": "معرف الشهادة",
+    "issuedDate": "تاريخ الإصدار",
+    "assessment": "تقييم",
+    "score": "النتيجة",
+    "max": "الحد الأقصى",
+    "result": "النتيجة",
+    "date": "التاريخ"
+  },
+  "editors": {
+    "errorTitle": "خطأ في المحرر",
+    "goBack": "رجوع",
+    "loading": "جارٍ تحميل المحرر...",
+    "preparing": "جارٍ تجهيز بيئة المحرر...",
+    "genericEditor": "المحرر العام",
+    "contentEditor": "محرر المحتوى"
   }
 }

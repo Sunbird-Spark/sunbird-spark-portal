@@ -25,7 +25,7 @@ const SidebarCloseButton = ({ onClick, collapsed = false }: SidebarCloseButtonPr
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true"
-                    className={`transition-transform duration-300 ${collapsed ? 'ltr:rotate-180 rtl:rotate-0' : 'ltr:rotate-0 rtl:rotate-180'}`}
+                    className={`transition-transform duration-300 ${collapsed ? '[dir="ltr"]:rotate-180 [dir="rtl"]:rotate-0' : '[dir="ltr"]:rotate-0 [dir="rtl"]:rotate-180'}`}
                 >
                     <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
