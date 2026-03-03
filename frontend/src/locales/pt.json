@@ -739,7 +739,8 @@
     "yes": "Sim",
     "no": "Não",
     "criteriaMustBeMet": "Os critérios devem ser atendidos para reemitir",
-    "reissueCertificate": "Reemitir certificado"
+    "reissueCertificate": "Reemitir certificado",
+    "viewOnly": "Somente visualização"
   },
   "homePageDemo": {
     "course1": "Curso 1",

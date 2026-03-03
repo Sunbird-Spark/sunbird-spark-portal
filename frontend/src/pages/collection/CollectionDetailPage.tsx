@@ -208,7 +208,6 @@ const CollectionDetailPage = () => {
               handlePlayerEvent={handlePlayerEvent}
               handleTelemetryEvent={handleTelemetryEvent}
               isAuthenticated={isAuthenticated}
-              isContentCreator={isContentCreator}
               collectionId={collectionId}
               hasBatchInRoute={hasBatchInRoute}
               courseProgressProps={courseProgressProps}

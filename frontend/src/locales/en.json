@@ -757,7 +757,8 @@
     "certificateIssued": "Certificate Issued",
     "courseCompleted": "Course Completed",
     "criteriaMustBeMet": "Criteria must be met to re-issue",
-    "reissueCertificate": "Re-issue certificate"
+    "reissueCertificate": "Re-issue certificate",
+    "viewOnly": "View only"
   },
   "homePageDemo": {
     "course1": "Course 1",
