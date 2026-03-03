@@ -9,6 +9,7 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface CertificatesTabProps {
   collectionId: string;
+  isOwner: boolean;
 }
 
 interface ReissueTarget {
@@ -18,7 +19,7 @@ interface ReissueTarget {
   batchName: string;
 }
 
-const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
+const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner }) => {
   const { t } = useAppI18n();
   const [uniqueId, setUniqueId] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
@@ -173,28 +174,37 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId }) => {
                         </span>
                       </td>
                       <td className="border-b border-border p-3 text-foreground">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className={cn(
-                          "h-auto p-0 transition-colors",
-                          criteriaMet === t('certificatesTab.yes') ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
+                        {isOwner ? (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className={cn(
+                              "h-auto p-0 transition-colors",
+                              criteriaMet === t('certificatesTab.yes') ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
+                            )}
+                            data-testid={`reissue-btn-${idx}`}
+                            disabled={criteriaMet === t('certificatesTab.no')}
+                            title={criteriaMet === t('certificatesTab.no') ? t('certificatesTab.criteriaMustBeMet') : t('certificatesTab.reissueCertificate')}
+                            onClick={() =>
+                              setReissueTarget({
+                                userId: certUser.userId,
+                                userName: certUser.userName,
+                                batchId: batch.batchId,
+                                batchName: batch.name ?? batch.batchId,
+                              })
+                            }
+                          >
+                            {t('certificate.reissue')}
+                          </Button>
+                        ) : (
+                          <span
+                            className="text-xs text-muted-foreground font-['Rubik']"
+                            data-testid={`reissue-view-only-${idx}`}
+                          >
+                            {t('certificatesTab.viewOnly')}
+                          </span>
                         )}
-                        data-testid={`reissue-btn-${idx}`}
-                        disabled={criteriaMet === t('certificatesTab.no')}
-                        title={criteriaMet === t('certificatesTab.no') ? t('certificatesTab.criteriaMustBeMet') : t('certificatesTab.reissueCertificate')}
-                        onClick={() =>
-                          setReissueTarget({
-                            userId: certUser.userId,
-                            userName: certUser.userName,
-                            batchId: batch.batchId,
-                            batchName: batch.name ?? batch.batchId,
-                          })
-                        }
-                      >
-                        {t('certificate.reissue')}
-                      </Button>
-                    </td>
+                      </td>
                   </tr>
                 );
               }))}

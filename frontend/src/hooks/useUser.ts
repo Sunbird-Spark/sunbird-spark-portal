@@ -60,6 +60,27 @@ export const useUserRoles = () => {
 };
 
 /**
+ * Returns the currently logged-in user's uid, backed by React Query so it
+ * is cached and reactive. Tries the synchronous cache first; falls back to
+ * fetching /user/v1/auth/info when the cache is empty.
+ */
+export const useCurrentUserId = () => {
+  return useQuery({
+    queryKey: ['currentUserId'],
+    queryFn: async (): Promise<string | null> => {
+      let userId = userAuthInfoService.getUserId();
+      if (!userId) {
+        const authInfo = await userAuthInfoService.getAuthInfo();
+        userId = authInfo?.uid ?? null;
+      }
+      return userId;
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+/**
  * Returns true when the currently logged-in user has the CONTENT_CREATOR
  * role in their Sunbird profile (fetched from /user/v5/read).
  * Returns false while the request is in-flight or if the user has no

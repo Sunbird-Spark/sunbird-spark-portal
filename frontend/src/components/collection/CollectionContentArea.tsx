@@ -23,7 +23,6 @@ interface CollectionContentAreaProps {
   handlePlayerEvent: (event: any) => void;
   handleTelemetryEvent: (event: any) => void;
   isAuthenticated: boolean;
-  isContentCreator: boolean;
   collectionId: string | undefined;
   hasBatchInRoute: boolean;
   courseProgressProps: any;
@@ -67,7 +66,6 @@ export default function CollectionContentArea({
   handleTelemetryEvent,
   showMaxAttemptsExceeded = false,
   isAuthenticated,
-  isContentCreator,
   collectionId,
   hasBatchInRoute,
   courseProgressProps,
@@ -138,8 +136,8 @@ export default function CollectionContentArea({
 
         {/* Right Sidebar */}
         <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:min-h-[calc(100vh-5rem)] lg:max-h-[calc(100vh-5rem)] pr-1">
-          {/* Creator: Dashboard link & Batch management card */}
-          {isAuthenticated && isContentCreator && collectionId && (
+          {/* Creator: Dashboard link & Batch management card — only for the course owner */}
+          {isAuthenticated && isCreatorViewingOwnCollection && collectionId && (
             <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
               <Button
                 variant="outline"
@@ -150,9 +148,7 @@ export default function CollectionContentArea({
                 <FiLayout className="w-4 h-4" />
                 View Course Dashboard
               </Button>
-              {isCreatorViewingOwnCollection && (
-                <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
-              )}
+              <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
             </div>
           )}
 

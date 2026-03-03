@@ -69,7 +69,6 @@ describe('CollectionContentArea', () => {
     handlePlayerEvent: vi.fn(),
     handleTelemetryEvent: vi.fn(),
     isAuthenticated: false,
-    isContentCreator: false,
     collectionId: 'col_123',
     hasBatchInRoute: false,
     courseProgressProps: { progress: 50 },
@@ -119,7 +118,6 @@ describe('CollectionContentArea', () => {
       <CollectionContentArea
         {...defaultProps}
         isAuthenticated={true}
-        isContentCreator={true}
         collectionId="col_123"
         isCreatorViewingOwnCollection={true}
       />
@@ -127,12 +125,12 @@ describe('CollectionContentArea', () => {
     expect(screen.getByTestId('batch-card')).toBeInTheDocument();
   });
 
-  it('does NOT render BatchCard when user is not a creator', () => {
+  it('does NOT render BatchCard when isCreatorViewingOwnCollection is false', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
         isAuthenticated={true}
-        isContentCreator={false}
+        isCreatorViewingOwnCollection={false}
       />
     );
     expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
@@ -185,17 +183,28 @@ describe('CollectionContentArea', () => {
     expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
   });
 
-  it('renders View Course Dashboard button for authenticated creators', () => {
-    // Mock useNavigate for this test if needed, though react-router-dom is mocked or implicitly available if used within MemoryRouter
+  it('renders View Course Dashboard button when user is the course owner', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
         isAuthenticated={true}
-        isContentCreator={true}
+        isCreatorViewingOwnCollection={true}
         collectionId="col_123"
       />
     );
     expect(screen.getByTestId('view-dashboard-btn')).toBeInTheDocument();
+  });
+
+  it('does not render View Course Dashboard button for non-owner content creators', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        isAuthenticated={true}
+        isCreatorViewingOwnCollection={false}
+        collectionId="col_123"
+      />
+    );
+    expect(screen.queryByTestId('view-dashboard-btn')).not.toBeInTheDocument();
   });
 
   it('does not render View Course Dashboard button for unauthenticated users', () => {
@@ -203,7 +212,7 @@ describe('CollectionContentArea', () => {
       <CollectionContentArea
         {...defaultProps}
         isAuthenticated={false}
-        isContentCreator={true}
+        isCreatorViewingOwnCollection={true}
         collectionId="col_123"
       />
     );

@@ -220,7 +220,6 @@ const CollectionDetailPage = () => {
               handleTelemetryEvent={handleTelemetryEvent}
               showMaxAttemptsExceeded={maxAttemptsExceeded}
               isAuthenticated={isAuthenticated}
-              isContentCreator={isContentCreator}
               collectionId={collectionId}
               hasBatchInRoute={hasBatchInRoute}
               courseProgressProps={courseProgressProps}

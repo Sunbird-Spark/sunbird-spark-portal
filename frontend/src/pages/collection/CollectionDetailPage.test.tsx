@@ -230,17 +230,13 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
   default: ({
     collectionData,
     contentId,
-    isContentCreator,
     collectionId,
-    isAuthenticated,
     isCreatorViewingOwnCollection,
     contentBlocked,
   }: {
     collectionData: any;
     contentId?: string;
-    isContentCreator?: boolean;
     collectionId?: string;
-    isAuthenticated?: boolean;
     isCreatorViewingOwnCollection?: boolean;
     contentBlocked?: boolean;
   }) => (
@@ -252,7 +248,7 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
     >
       <div data-testid="collection-overview">{collectionData?.title}</div>
       <div>
-        {isAuthenticated && isContentCreator && (
+        {isCreatorViewingOwnCollection && (
           <div data-testid="batch-card" data-collection-id={collectionId}>
             Batch Card
           </div>
@@ -465,9 +461,10 @@ describe('CollectionDetailPage', () => {
       expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
     });
 
-    it('renders BatchCard when user IS authenticated AND useIsContentCreator returns true', () => {
+    it('renders BatchCard when user is authenticated AND is the course owner', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockCollectionData.createdBy = 'user-1';
       mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('batch-card')).toBeInTheDocument();
@@ -491,6 +488,7 @@ describe('CollectionDetailPage', () => {
     it('passes the correct collectionId to BatchCard', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockCollectionData.createdBy = 'user-1';
       mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('batch-card')).toHaveAttribute('data-collection-id', 'col-123');
@@ -502,6 +500,7 @@ describe('CollectionDetailPage', () => {
     it('renders BatchCard BEFORE CollectionSidebar in the DOM', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockCollectionData.createdBy = 'user-1';
       mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
 
@@ -516,6 +515,7 @@ describe('CollectionDetailPage', () => {
     it('CollectionSidebar is present after BatchCard (array index check)', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockCollectionData.createdBy = 'user-1';
       mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
 
@@ -531,6 +531,7 @@ describe('CollectionDetailPage', () => {
     it('both BatchCard and CollectionSidebar share the same parent container', () => {
       mockAuthState.isAuthenticated = true;
       mockIsContentCreator = true;
+      mockCollectionData.createdBy = 'user-1';
       mockGetUserId.mockReturnValue('user-1');
       renderWithProviders(<CollectionDetailPage />);
 
