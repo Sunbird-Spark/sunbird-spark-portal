@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/common/Button";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
@@ -47,8 +48,8 @@ export default function ConfirmDialog({
       ? "bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik"
       : "bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik";
 
-  return (
-    <div
+      return createPortal(
+        <div
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={handleClose}
       role="dialog"
@@ -87,6 +88,7 @@ export default function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

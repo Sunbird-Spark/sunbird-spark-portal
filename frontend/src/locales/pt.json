@@ -249,7 +249,8 @@
     "forceSyncCooldown": "Aguarde antes de sincronizar novamente.",
     "leaveCourse": "Sair do curso",
     "leaveCourseTitle": "Cancelamento de inscrição na turma",
-    "leaveCourseDescription": "Deseja cancelar sua inscrição nesta turma?"
+    "leaveCourseDescription": "Deseja cancelar sua inscrição nesta turma?",
+    "leaveCourseError": "Não foi possível sair do curso. Tente novamente."
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",

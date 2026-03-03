@@ -249,7 +249,8 @@
     "forceSyncCooldown": "يرجى الانتظار قبل المزامنة مرة أخرى.",
     "leaveCourse": "مغادرة الدورة",
     "leaveCourseTitle": "إلغاء التسجيل من الدفعة",
-    "leaveCourseDescription": "هل تريد إلغاء تسجيلك من هذه الدفعة؟"
+    "leaveCourseDescription": "هل تريد إلغاء تسجيلك من هذه الدفعة؟",
+    "leaveCourseError": "تعذر مغادرة الدورة. يرجى المحاولة مرة أخرى."
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",

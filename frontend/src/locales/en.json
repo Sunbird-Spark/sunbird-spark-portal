@@ -249,7 +249,8 @@
     "forceSyncCooldown": "Please wait before syncing again.",
     "leaveCourse": "Leave course",
     "leaveCourseTitle": "Batch Unenrolment",
-    "leaveCourseDescription": "Do you want to unenrol from this batch?"
+    "leaveCourseDescription": "Do you want to unenrol from this batch?",
+    "leaveCourseError": "Unable to leave the course. Please try again."
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",

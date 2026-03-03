@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { useToast } from "@/hooks/useToast";
 import { useUnenrol } from "@/hooks/useBatch";
 import CourseProgressCard, { type CourseProgressCardProps } from "./CourseProgressCard";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
@@ -36,10 +37,11 @@ export default function CourseProgressSection({
   isForceSyncing,
 }: CourseProgressSectionProps) {
   const { t } = useAppI18n();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const unenrolMutation = useUnenrol();
-  const [showUnenrollDialog, setShowUnenrollDialog] = useState(false);
+  const [showUnenrolDialog, setShowUnenrolDialog] = useState(false);
 
   const { totalContentCount, completedContentCount = 0 } = courseProgressProps;
 
@@ -50,7 +52,7 @@ export default function CourseProgressSection({
     return Math.min(100, Math.ceil((completedContentCount / totalContentCount) * 100));
   }, [totalContentCount, completedContentCount]);
 
-  const canShowUnenroll =
+  const canShowUnenrol =
     isTrackable &&
     !contentBlocked &&
     !contentCreatorPrivilege &&
@@ -59,9 +61,9 @@ export default function CourseProgressSection({
     Boolean(collectionId && batchIdParam && userId) &&
     progressPercentage < 100;
 
-  const showUnenrollOption = canShowUnenroll && showForceSyncButton === false;
+  const showUnenrolOption = canShowUnenrol && showForceSyncButton === false;
 
-  const handleConfirmUnenroll = async () => {
+  const handleConfirmUnenrol = async () => {
     if (!collectionId || !userId || !batchIdParam) return;
     try {
       await unenrolMutation.mutateAsync({
@@ -71,10 +73,16 @@ export default function CourseProgressSection({
       });
       await queryClient.invalidateQueries({ queryKey: ["userEnrollments"] });
       await queryClient.invalidateQueries({ queryKey: ["contentState"] });
-      setShowUnenrollDialog(false);
+      setShowUnenrolDialog(false);
       navigate(`/collection/${collectionId}`);
-    } catch {
-      // Error handling is surfaced via API layer / toasts if configured.
+    } catch (err) {
+      const message = err instanceof Error ? err.message : undefined;
+      toast({
+        title: t("error"),
+        description: message || t("courseDetails.leaveCourseError"),
+        variant: "destructive",
+      });
+      // Dialog stays open so the user can retry or cancel.
     }
   };
 
@@ -82,21 +90,21 @@ export default function CourseProgressSection({
     <>
       <CourseProgressCard
         {...courseProgressProps}
-        showForceSyncButton={showForceSyncButton && !showUnenrollOption}
+        showForceSyncButton={showForceSyncButton && !showUnenrolOption}
         onForceSync={onForceSync}
         isForceSyncing={isForceSyncing}
-        showUnenrollOption={showUnenrollOption}
-        onUnenroll={() => setShowUnenrollDialog(true)}
+        showUnenrollOption={showUnenrolOption}
+        onUnenroll={() => setShowUnenrolDialog(true)}
         isUnenrolling={unenrolMutation.isPending}
       />
       <ConfirmDialog
-        open={showUnenrollDialog}
+        open={showUnenrolDialog}
         onClose={() => {
           if (!unenrolMutation.isPending) {
-            setShowUnenrollDialog(false);
+            setShowUnenrolDialog(false);
           }
         }}
-        onConfirm={handleConfirmUnenroll}
+        onConfirm={handleConfirmUnenrol}
         title={t("courseDetails.leaveCourseTitle")}
         description={t("courseDetails.leaveCourseDescription")}
         confirmLabel={t("courseDetails.leaveCourse")}

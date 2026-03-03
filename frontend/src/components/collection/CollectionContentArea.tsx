@@ -8,7 +8,7 @@ import BatchCard from "@/components/collection/BatchCard";
 import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
 import { useForceSync } from "@/hooks/useForceSync";
-import { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
+import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
 import CourseProgressSection from "@/components/collection/CourseProgressSection";
 
 interface CollectionContentAreaProps {
