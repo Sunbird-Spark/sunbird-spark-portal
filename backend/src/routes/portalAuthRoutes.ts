@@ -47,12 +47,14 @@ router.get('/login',
 
             // Build authorization URL using OIDC Discovery endpoints
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
+            const promptParam = req.query.prompt as string | undefined;
             const redirectTo = oidcClient.buildAuthorizationUrl(config, {
                 redirect_uri: callbackUrl,
                 scope: 'openid',
                 code_challenge: codeChallenge,
                 code_challenge_method: 'S256',
                 state: state,
+                ...(promptParam ? { prompt: promptParam } : {}),
             });
 
             logger.info('Redirecting to OIDC provider for login');
@@ -68,6 +70,21 @@ router.get('/auth/callback',
     sessionMiddleware,
     async (req: Request, res: Response) => {
         logger.info('Entered /portal/auth/callback handler');
+
+        // Handle error responses from the OIDC provider (e.g. prompt=none with no SSO session)
+        if (req.query.error) {
+            const error = req.query.error as string;
+            logger.warn(`OIDC callback received error: ${error}`);
+
+            // login_required / interaction_required means prompt=none was used
+            // but the user has no active SSO session — fall back to interactive login
+            if (error === 'login_required' || error === 'interaction_required') {
+                return res.redirect('/portal/login');
+            }
+
+            // For other errors, redirect to home
+            return res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
+        }
 
         // Validate required session parameters and authorization code
         if (!req.query.code) {

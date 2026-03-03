@@ -91,6 +91,6 @@ export function requireAuth() {
         if (req.oidc?.isAuthenticated) {
             return next();
         }
-        res.redirect('/portal/login');
+        res.redirect('/portal/login?prompt=none');
     };
 }
