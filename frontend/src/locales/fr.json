@@ -415,6 +415,11 @@
     "backTo": "Retour à {{page}}",
     "upcomingBatches": "Lots à venir",
     "learningProgress": "Progression de l'apprentissage",
+    "downloadCertificate": "Télécharger le certificat",
+    "manage": "Gérer",
+    "backTo": "Retour à {{page}}",
+    "upcomingBatches": "Lots à venir",
+    "learningProgress": "Progression de l'apprentissage",
     "downloadCertificate": "Télécharger le certificat"
   },
   "myLearning": {
@@ -828,13 +833,6 @@
     "batches": "Lots",
     "certificates": "Certificats",
     "all": "Tous"
-  },
-  "common": {
-    "manage": "Gérer",
-    "backTo": "Retour à {{page}}",
-    "upcomingBatches": "Lots à venir",
-    "learningProgress": "Progression de l'apprentissage",
-    "downloadCertificate": "Télécharger le certificat"
   },
   "profileLearning": {
     "loadingCourses": "Chargement de vos cours...",

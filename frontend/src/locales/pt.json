@@ -410,7 +410,12 @@
   },
   "common": {
     "notifications": "Notificações",
-    "language": "Idioma"
+    "language": "Idioma",
+    "manage": "Gerenciar",
+    "backTo": "Voltar para {{page}}",
+    "upcomingBatches": "Lotes próximos",
+    "learningProgress": "Progresso de aprendizado",
+    "downloadCertificate": "Baixar certificado"
   },
   "myLearning": {
     "loading": "Carregando seu aprendizado...",
@@ -823,13 +828,6 @@
     "batches": "Lotes",
     "certificates": "Certificados",
     "all": "Todos"
-  },
-  "common": {
-    "manage": "Gerenciar",
-    "backTo": "Voltar para {{page}}",
-    "upcomingBatches": "Lotes próximos",
-    "learningProgress": "Progresso de aprendizado",
-    "downloadCertificate": "Baixar certificado"
   },
   "profileLearning": {
     "loadingCourses": "Carregando seus cursos...",

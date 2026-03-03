@@ -323,11 +323,14 @@ const WorkspacePage = () => {
     }
     const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
 
+    // Destructure to exclude descriptionKey from being sent to API
+    const { descriptionKey, ...apiConfig } = config;
+
     const response = await contentService.contentCreate(name, {
       createdBy,
       creator,
-      ...config,
-      ...(description ? { description } : { description: t(config.descriptionKey) }),
+      ...apiConfig,
+      ...(description ? { description } : { description: t(descriptionKey) }),
       organisation,
       createdFor,
       targetFWIds,
