@@ -499,23 +499,28 @@
   }
 
   .content-player-video-container {
-    position: relative;
     width: 100%;
     max-width: 74.125rem;
-    aspect-ratio: 1186 / 701;
+    padding: 1.25rem;
     border-radius: 1.25rem;
     background-color: #FFFFFF;
     overflow: hidden;
   }
 
   .content-player-wrapper {
-    position: absolute;
-    inset: 1.25rem;
+    width: 100%;
     overflow: hidden;
+    border-radius: 1.25rem;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
   }
 
   .content-player-embed {
-    @apply w-full h-full relative;
+    @apply w-full;
+  }
+
+  iframe.content-player-embed {
+    height: 41.3125rem;
   }
 
   .content-player-video-thumbnail {
@@ -721,39 +726,55 @@
     @apply w-full h-full border-0 rounded;
   }
 
-  /* Sunbird Player Styles - Video, PDF, EPUB & QUML */
-  sunbird-video-player,
+  /* Sunbird Player Styles */
+
+  /* Video player: height is managed by Video.js based on actual video dimensions */
+  sunbird-video-player {
+    display: block;
+    width: 100%;
+  }
+
+  /* PDF, EPUB, QUML: no intrinsic video dimensions, use fixed responsive heights */
   sunbird-pdf-player,
   sunbird-epub-player,
   sunbird-quml-player {
-    @apply block;
+    display: block;
+    width: 100%;
     height: 41.3125rem;
   }
 
-  /* Responsive player heights */
   @media (max-width: 1024px) {
-    sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
     sunbird-quml-player {
       height: 28rem;
     }
+
+    iframe.content-player-embed {
+      height: 28rem;
+    }
   }
 
   @media (max-width: 768px) {
-    sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
     sunbird-quml-player {
       height: 22rem;
     }
+
+    iframe.content-player-embed {
+      height: 22rem;
+    }
   }
 
   @media (max-width: 640px) {
-    sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
     sunbird-quml-player {
+      height: 18rem;
+    }
+
+    iframe.content-player-embed {
       height: 18rem;
     }
   }
@@ -768,16 +789,19 @@
   }
 
   .collection-player-wrapper {
-    @apply p-4;
+    @apply p-4 relative;
+    min-height: calc(41.3125rem + 2rem);
   }
 
   .collection-player-loading {
-    @apply aspect-video flex items-center justify-center bg-gray-100;
+    @apply flex items-center justify-center bg-gray-100;
+    min-height: 41.3125rem;
     border-radius: 1.125rem;
   }
 
   .collection-player-error {
-    @apply aspect-video flex items-center justify-center bg-gray-100;
+    @apply flex items-center justify-center bg-gray-100;
+    min-height: 41.3125rem;
   }
 
   .collection-player-error-text {
@@ -1134,5 +1158,27 @@
   }
   .sunbird-video-player-container {
     border-radius: 1.25rem;
+  }
+
+  /* Video player internal tag: auto height so Video.js drives dimensions */
+  sunbird-video-player video-player {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* PDF/EPUB/QUML internal tags: fill their fixed-height parents */
+  /* sunbird-pdf-player pdf-player,
+  sunbird-epub-player epub-player,
+  sunbird-quml-player quml-player {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  } */
+
+  /* Override VideoPlayerService inline height: 100% on its wrapper div */
+  [data-video-player-wrapper] {
+    width: 100% !important;
+    height: auto !important;
   }
 }
