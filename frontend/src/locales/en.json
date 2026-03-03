@@ -575,7 +575,6 @@
     "userReport": "User Report",
     "adminReports": "Admin Reports",
     "userManagement": "User Management",
-    "userConsent": "User Consent",
     "expand": "Expand Sidebar",
     "collapse": "Collapse Sidebar"
   },
@@ -735,7 +734,11 @@
     "acceptedTitle": "Terms Accepted",
     "acceptedDescription": "Thank you for accepting the updated terms and conditions.",
     "errorTitle": "Acceptance Failed",
-    "errorDescription": "Failed to accept terms and conditions. Please try again."
+    "errorDescription": "Failed to accept terms and conditions. Please try again.",
+    "refreshErrorTitle": "Refresh Failed",
+    "refreshErrorDescription": "Failed to refresh user profile. Please try again.",
+    "continue": "Continue",
+    "acceptAndContinue": "Accept & Continue"
   },
   "workspaceCard": {
     "locked": "Locked",
@@ -815,6 +818,8 @@
     "noCertificateRecords": "No certificate records found for \"{{userName}}\".",
     "certificateIssued": "Certificate Issued",
     "courseCompleted": "Course Completed",
+    "yes": "Yes",
+    "no": "No",
     "criteriaMustBeMet": "Criteria must be met to re-issue",
     "reissueCertificate": "Re-issue certificate",
     "viewOnly": "View only"
@@ -863,12 +868,7 @@
     "myLearning": "My Learning",
     "filter": "Filter"
   },
-  "tncPopup": {
-    "checkboxLabel": "I have read and accept the Terms and Conditions",
-    "accepting": "Accepting...",
-    "continue": "Continue",
-    "acceptAndContinue": "Accept & Continue"
-  },
+
   "trackableCollection": {
     "completed": "Completed"
   },

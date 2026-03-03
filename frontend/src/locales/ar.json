@@ -859,8 +859,17 @@
     "filter": "تصفية"
   },
   "tncPopup": {
+    "title": "تحديث الشروط والأحكام",
+    "description": "يرجى مراجعة وقبول الشروط والأحكام المحدثة",
     "checkboxLabel": "لقد قرأت ووافقت على الشروط والأحكام",
+    "accept": "قبول",
     "accepting": "جارٍ القبول...",
+    "acceptedTitle": "تم قبول الشروط",
+    "acceptedDescription": "شكراً لقبولك الشروط والأحكام المحدثة.",
+    "errorTitle": "فشل القبول",
+    "errorDescription": "فشل قبول الشروط والأحكام. يرجى المحاولة مرة أخرى.",
+    "refreshErrorTitle": "فشل التحديث",
+    "refreshErrorDescription": "فشل تحديث ملف تعريف المستخدم. يرجى المحاولة مرة أخرى.",
     "continue": "متابعة",
     "acceptAndContinue": "قبول ومتابعة"
   },
