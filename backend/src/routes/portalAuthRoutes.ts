@@ -109,6 +109,7 @@ router.get('/auth/callback',
             const currentUrl = new URL(
                 `${req.protocol}://${req.get('host')}${req.originalUrl}`
             );
+            logger.info(`CALLBACK_DEBUG: currentUrl=${currentUrl.origin}${currentUrl.pathname} | callbackUrl=${envConfig.DOMAIN_URL}/portal/auth/callback`);
 
             // Exchange the authorization code for tokens
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
@@ -117,6 +118,8 @@ router.get('/auth/callback',
                 expectedState: req.session.oidcState,
                 idTokenExpected: true,
             }, { redirect_uri: callbackUrl });
+
+            logger.info(`CALLBACK_DEBUG: token exchange SUCCESS | hasAccessToken=${!!tokens.access_token} | hasRefreshToken=${!!tokens.refresh_token} | hasIdToken=${!!tokens.id_token}`);
 
             // Clean up PKCE/state from session
             delete req.session.oidcCodeVerifier;
@@ -148,7 +151,10 @@ router.get('/auth/callback',
 
             if (req.session) {
                 // Regenerate session (this persists the tokens)
+                const oldSessionID = req.sessionID;
                 await regenerateSession(req);
+                logger.info(`CALLBACK_DEBUG: session regenerated | old=${oldSessionID} | new=${req.sessionID}`);
+
                 setSessionTTLFromToken(req);
 
                 // Initialize user session from token subject
@@ -156,21 +162,27 @@ router.get('/auth/callback',
                 if (tokenSubject) {
                     const userIdFromToken = _.last(_.split(tokenSubject, ':'));
                     req.session.userId = userIdFromToken;
+                    logger.info(`CALLBACK_DEBUG: userId=${userIdFromToken}`);
 
                     if (userIdFromToken) {
                         const userProfileResponse = await fetchUserById(userIdFromToken, req);
                         await setUserSession(req, userProfileResponse);
+                        logger.info(`CALLBACK_DEBUG: user profile fetched and set`);
                     }
                 }
 
-                logger.info('Session setup complete, redirecting to /home');
-                res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL + '/home');
+                // Explicitly save session before redirect to ensure all data is persisted
+                await saveSession(req);
+
+                const redirectUrl = envConfig.DEVELOPMENT_REACT_APP_URL + '/home';
+                logger.info(`CALLBACK_DEBUG: redirecting to ${redirectUrl} | sessionID=${req.sessionID} | hasTokens=${!!req.session['oidc-tokens']?.access_token} | userId=${req.session.userId}`);
+                res.redirect(redirectUrl);
             } else {
                 logger.error('No session found after OIDC callback');
                 res.redirect('/');
             }
         } catch (err) {
-            logger.error('Error in OIDC callback', err);
+            logger.error('CALLBACK_DEBUG: Error in OIDC callback', err);
             // Clean up PKCE/state from session on failure
             delete req.session?.oidcCodeVerifier;
             delete req.session?.oidcState;
