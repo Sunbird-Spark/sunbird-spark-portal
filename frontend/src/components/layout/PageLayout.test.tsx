@@ -4,6 +4,14 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import PageLayout from './PageLayout';
 
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
+
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
 vi.mock('@/components/home/Header', () => ({

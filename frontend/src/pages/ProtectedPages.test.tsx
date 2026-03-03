@@ -147,7 +147,11 @@ describe('Protected Pages', () => {
 
   describe('ReportsPage', () => {
     it('should render reports', () => {
-      render(<ReportsPage />);
+      render(
+        <MemoryRouter>
+          <ReportsPage />
+        </MemoryRouter>
+      );
       expect(screen.getByRole('heading', { name: 'reports.title' })).toBeInTheDocument();
       expect(screen.getByText(/reports.accessInfo/i)).toBeInTheDocument();
     });
@@ -155,7 +159,11 @@ describe('Protected Pages', () => {
 
   describe('CreateContentPage', () => {
     it('should render create content page', () => {
-      render(<CreateContentPage />);
+      render(
+        <MemoryRouter>
+          <CreateContentPage />
+        </MemoryRouter>
+      );
       expect(screen.getByRole('heading', { name: 'createContent' })).toBeInTheDocument();
       // This page still uses the old key pattern presumably, or checks generic access
       expect(screen.getByText(/content.accessRestricted/i)).toBeInTheDocument();
