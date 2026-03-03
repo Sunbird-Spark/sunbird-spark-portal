@@ -1,6 +1,12 @@
 /**
  * RTL-specific styles and overrides
  * This file contains CSS rules that adapt the UI for right-to-left languages
+ * IMPORTANT: Prefer RTL-specific overrides using [dir="rtl"]; use [dir="ltr"] rules only when necessary
+ * to avoid changing LTR defaults unless explicitly required for visual consistency.
+ * 
+ * NOTE: Some [dir="ltr"] rules are included to explicitly define LTR behavior for components
+ * that have corresponding RTL rules, ensuring visual consistency and preventing unintended
+ * style inheritance in mixed-direction contexts.
  */
 
 /* RTL Direction Support */
@@ -12,26 +18,13 @@
   direction: ltr;
 }
 
-/* Text Alignment */
+/* Text Alignment - Only override for RTL */
 [dir="rtl"] .text-start {
   text-align: right;
 }
 
-[dir="ltr"] .text-start {
-  text-align: left;
-}
-
 [dir="rtl"] .text-end {
   text-align: left;
-}
-
-[dir="ltr"] .text-end {
-  text-align: right;
-}
-
-/* Flexbox Direction */
-[dir="rtl"] .flex-row {
-  flex-direction: row-reverse;
 }
 
 /* Transform for RTL */
@@ -39,15 +32,10 @@
   transform: scaleX(-1);
 }
 
-/* Margin and Padding Logical Properties */
+/* Margin and Padding Logical Properties - Only override for RTL */
 [dir="rtl"] .ms-auto {
   margin-right: auto;
   margin-left: unset;
-}
-
-[dir="ltr"] .ms-auto {
-  margin-left: auto;
-  margin-right: unset;
 }
 
 [dir="rtl"] .me-auto {
@@ -55,24 +43,12 @@
   margin-right: unset;
 }
 
-[dir="ltr"] .me-auto {
-  margin-right: auto;
-  margin-left: unset;
-}
-
-/* Border Radius for RTL */
+/* Border Radius for RTL - Only override for RTL */
 [dir="rtl"] .rounded-s {
   border-top-right-radius: var(--radius);
   border-bottom-right-radius: var(--radius);
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-}
-
-[dir="ltr"] .rounded-s {
-  border-top-left-radius: var(--radius);
-  border-bottom-left-radius: var(--radius);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
 }
 
 [dir="rtl"] .rounded-e {
@@ -82,42 +58,15 @@
   border-bottom-right-radius: 0;
 }
 
-[dir="ltr"] .rounded-e {
-  border-top-right-radius: var(--radius);
-  border-bottom-right-radius: var(--radius);
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-/* Dropdown and Select Positioning */
+/* Dropdown and Select Positioning - Only override for RTL */
 [dir="rtl"] .dropdown-content {
   left: auto;
   right: 0;
 }
 
-[dir="ltr"] .dropdown-content {
-  right: auto;
-  left: 0;
-}
-
 /* Icon Rotation for RTL */
 [dir="rtl"] .icon-arrow-right {
   transform: rotate(180deg);
-}
-
-/* Ensure buttons have flexible width for different text lengths - scoped to specific contexts */
-[dir="rtl"] button:not(.no-rtl-override),
-[dir="ltr"] button:not(.no-rtl-override) {
-  min-width: fit-content;
-}
-
-/* Preserve button padding in all directions */
-button[type="submit"],
-button[type="button"],
-input[type="submit"],
-input[type="button"] {
-  width: auto;
-  min-width: max-content;
 }
 
 /* Fix for absolute positioned elements in RTL */
@@ -135,11 +84,6 @@ input[type="button"] {
 [dir="rtl"] .sidebar {
   left: auto;
   right: 0;
-}
-
-[dir="ltr"] .sidebar {
-  right: auto;
-  left: 0;
 }
 
 /* Sidebar shadow for RTL - flip the shadow direction */
@@ -188,8 +132,6 @@ input[type="button"] {
   direction: rtl;
 }
 
-/* Tailwind space-x utilities already handle RTL correctly, no override needed */
-
 /* Fix for modal close buttons */
 [dir="rtl"] .modal-close {
   right: auto;
@@ -207,11 +149,6 @@ input[type="button"] {
   text-align: right;
 }
 
-[dir="ltr"] .truncate {
-  direction: ltr;
-  text-align: left;
-}
-
 /* Badge positioning */
 [dir="rtl"] .badge-end {
   left: 0;
@@ -221,15 +158,6 @@ input[type="button"] {
 [dir="ltr"] .badge-end {
   right: 0;
   left: auto;
-}
-
-/* Ensure proper alignment for form labels */
-[dir="rtl"] label {
-  text-align: right;
-}
-
-[dir="ltr"] label {
-  text-align: left;
 }
 
 /* Fix for decorative elements */
@@ -402,5 +330,18 @@ input[type="button"] {
 [dir="ltr"] .sunbird-footer {
   padding-left: 1rem !important;
   padding-right: 3.75rem !important;
+}
+
+/* Accordion RTL - Chevron on left side, text on right side */
+/* Handled via Tailwind arbitrary selector in Accordion component */
+
+/* Accordion content region RTL */
+[dir="rtl"] div[role="region"][data-state] {
+  direction: rtl;
+}
+
+/* Text alignment for RTL */
+[dir="rtl"] .text-left {
+  text-align: right;
 }
 
