@@ -67,15 +67,13 @@ const Explore = () => {
   }, [filters, debouncedSearchQuery, setSearchParams]);
 
   return (
-    <main className="flex-1 bg-white relative h-[calc(100vh-4.5rem)] overflow-hidden">
+    <main className="flex-1 bg-white relative md:h-[calc(100vh-4.5rem)] overflow-hidden">
       <div className="w-full h-full px-[1.875rem] py-6 md:py-8 flex flex-col">
         <div className="flex flex-col md:flex-row gap-6 md:gap-8 flex-1 overflow-hidden">
           {/* Filters Sidebar — sticky and separate */}
           {showFilters && (
             <aside className="w-full md:w-auto md:min-w-[18rem] shrink-0 overflow-y-auto">
-              <div className="md:sticky md:top-0">
-                <ExploreFilters filters={filters} setFilters={setFilters} />
-              </div>
+              <ExploreFilters filters={filters} setFilters={setFilters} />
             </aside>
           )}
 
