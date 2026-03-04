@@ -27,8 +27,10 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
-const { mockMutateAsync } = vi.hoisted(() => ({
+const { mockMutateAsync, mockToast, mockUseCurrentUserId } = vi.hoisted(() => ({
   mockMutateAsync: vi.fn().mockResolvedValue({}),
+  mockToast: vi.fn(),
+  mockUseCurrentUserId: vi.fn().mockReturnValue({ data: 'mock-user-id' }),
 }));
 
 // Mock dependencies
@@ -37,8 +39,9 @@ vi.mock('@/hooks/useUpdateProfile', () => ({
   useUpdateProfile: () => ({ mutateAsync: mockMutateAsync, isPending: false }),
 }));
 vi.mock('@/hooks/useUser', () => ({
-  useCurrentUserId: () => ({ data: 'mock-user-id' }),
+  useCurrentUserId: () => mockUseCurrentUserId(),
 }));
+vi.mock('@/hooks/useToast', () => ({ toast: mockToast }));
 // Mock assets
 vi.mock('../../../src/assets/sunbird-logo.svg', () => ({
   default: 'sunbird-logo.svg',
@@ -98,6 +101,8 @@ const renderWithRouter = (component: React.ReactElement) => {
 describe('Onboarding Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseCurrentUserId.mockReturnValue({ data: 'mock-user-id' });
+    mockMutateAsync.mockResolvedValue({});
   });
 
   it('renders loading spinner while fetching data', () => {
@@ -351,6 +356,38 @@ describe('Onboarding Component', () => {
       );
       expect(mockNavigate).toHaveBeenCalledWith('/home');
     });
+  });
+
+  it('shows toast and does not navigate when skip API call fails', async () => {
+    mockMutateAsync.mockRejectedValueOnce(new Error('Network error'));
+    (useFormRead as Mock).mockReturnValue({
+      data: { data: { form: { data: mockOnboardingData } } },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    fireEvent.click(screen.getByRole('button', { name: /Skip Onboarding/i }));
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({ variant: 'destructive' })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
+
+  it('disables skip button when userId is not yet loaded', () => {
+    mockUseCurrentUserId.mockReturnValue({ data: null });
+    (useFormRead as Mock).mockReturnValue({
+      data: { data: { form: { data: mockOnboardingData } } },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
+    expect(skipButton).toBeDisabled();
   });
 
   it('disables skip button while submitting', async () => {

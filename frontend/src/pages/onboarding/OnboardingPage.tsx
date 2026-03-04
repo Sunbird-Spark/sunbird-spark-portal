@@ -11,6 +11,7 @@ import { computeTotalSteps } from './utils';
 import { ProgressIndicator, OptionChip } from './OnboardingComponents';
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useCurrentUserId } from "@/hooks/useUser";
+import { toast } from "@/hooks/useToast";
 const Onboarding = () => {
   const { t } = useAppI18n();
   const navigate = useNavigate();
@@ -52,9 +53,11 @@ const Onboarding = () => {
       await updateProfile.mutateAsync({
         request: { userId, framework: { onboardingDetails: ['skipped'] } }
       });
+      navigate("/home");
+    } catch {
+      toast({ variant: 'destructive', title: 'Failed to skip onboarding', description: 'Please try again.' });
     } finally {
       setIsSubmitting(false);
-      navigate("/home");
     }
   };
   const handleNext = () => {
@@ -75,7 +78,7 @@ const Onboarding = () => {
     }
   };
   const handleSubmit = async () => {
-    if (!userId) return;
+    if (isSubmitting || !userId) return;
     setIsSubmitting(true);
     const formattedSelections = Object.entries(selections).map(([screenId, fieldId]) => {
       const screen = onboardingData?.screens[screenId];
@@ -98,6 +101,8 @@ const Onboarding = () => {
         }
       });
       navigate("/home");
+    } catch {
+      toast({ variant: 'destructive', title: 'Failed to save onboarding', description: 'Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -158,7 +163,7 @@ const Onboarding = () => {
   const showOtherInput = !!selectedField?.requiresTextInput;
   const sortedFields = [...currentScreen.fields].sort((a, b) => a.index - b.index);
   const otherText = otherTexts[currentScreenId] ?? "";
-  const isSubmitDisabled = isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
+  const isSubmitDisabled = isSubmitting || !userId || !selectedFieldId || (showOtherInput && !otherText.trim());
   return (
     <div className="h-screen flex items-center justify-center bg-white p-4 md:p-6 lg:p-8">
       <div className="flex w-full max-w-7xl h-full max-h-[calc(100vh-4rem)] gap-6">
@@ -229,7 +234,7 @@ const Onboarding = () => {
             </div>
           </div>
           <div className="mt-6">
-            <button type="button" onClick={handleSkip} disabled={isSubmitting} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            <button type="button" onClick={handleSkip} disabled={isSubmitting || !userId} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Skip Onboarding
             </button>
