@@ -35,6 +35,7 @@ vi.mock('../utils/logger.js', () => ({
 vi.mock('../utils/sessionUtils.js', () => ({
     regenerateSession: vi.fn(),
     regenerateAnonymousSession: vi.fn(),
+    destroySession: vi.fn(),
     saveSession: vi.fn()
 }));
 
@@ -182,10 +183,10 @@ describe('PortalAuthRoutes Integration', () => {
     });
 
     describe('ALL /portal/logout', () => {
-        it('should regenerate anonymous session and redirect to OIDC logout', async () => {
+        it('should destroy session and redirect to OIDC logout', async () => {
             const app = await setupApp();
             const sessionUtils = await import('../utils/sessionUtils.js');
-            vi.mocked(sessionUtils.regenerateAnonymousSession).mockResolvedValue(undefined);
+            vi.mocked(sessionUtils.destroySession).mockResolvedValue(undefined);
 
             const res = await request(app).get('/portal/logout');
 
