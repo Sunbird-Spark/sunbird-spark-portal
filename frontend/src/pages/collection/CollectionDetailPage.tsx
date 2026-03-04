@@ -13,7 +13,6 @@ import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
-import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import { useIsContentCreator } from "@/hooks/useUser";
 import { useCollectionDetailSelfAssess } from "@/hooks/useCollectionDetailSelfAssess";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
@@ -23,6 +22,7 @@ import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/compo
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
 import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
+import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
@@ -136,19 +136,17 @@ const CollectionDetailPage = () => {
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
 
-  // Auto-navigate to first content when collection loads without a selected contentId
-  useEffect(() => {
-    if (!collectionData?.hierarchyRoot || contentId) return;
-    const firstContentId = getFirstLeafContentIdFromHierarchy(collectionData.hierarchyRoot);
-    if (!firstContentId) return;
-    if (!isTrackable || contentCreatorPrivilege) {
-      navigate(`/collection/${collectionId}/content/${firstContentId}`, { replace: true });
-      return;
-    }
-    if (hasBatchInRoute && batchIdParam) {
-      navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstContentId}`, { replace: true });
-    }
-  }, [contentId, collectionData?.hierarchyRoot, collectionId, navigate, isTrackable, contentCreatorPrivilege, hasBatchInRoute, batchIdParam]);
+  useInitialCollectionContentNavigation({
+    collectionData,
+    contentId,
+    isTrackable,
+    contentCreatorPrivilege,
+    collectionId,
+    hasBatchInRoute,
+    batchIdParam,
+    isEnrolledInCurrentBatch,
+    contentStatusMap,
+  });
 
   useEffect(() => {
     const firstMainUnitId = collectionData?.children?.[0]?.identifier;
