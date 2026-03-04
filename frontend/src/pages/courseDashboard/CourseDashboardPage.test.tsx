@@ -67,7 +67,7 @@ describe('CourseDashboardPage', () => {
   it('navigates back to course page on back button click', () => {
     render(<CourseDashboardPage />);
     fireEvent.click(screen.getByTestId('back-to-course-btn'));
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
+    expect(mockNavigate).toHaveBeenCalledWith("/collection/col_123");
   });
 
   it('navigates to specific tab when clicked', () => {

@@ -230,7 +230,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     renderWithProviders(<CollectionDetailPage />);
     const goBackBtn = screen.getByRole('button', { name: /button\.goBack/i });
     fireEvent.click(goBackBtn);
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
+    expect(mockNavigate).toHaveBeenCalledWith("/my-learning");
   });
 
   it('shows stats row with lessons count', () => {
