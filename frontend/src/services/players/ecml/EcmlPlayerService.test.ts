@@ -26,6 +26,12 @@ vi.mock('../../OrganizationService', () => ({
   },
 }));
 
+vi.mock('../../UserProfileService', () => ({
+  default: {
+    getUserData: vi.fn(() => Promise.resolve({ firstName: '', lastName: '' })),
+  },
+}));
+
 describe('EcmlPlayerService', () => {
   let service: EcmlPlayerService;
 
