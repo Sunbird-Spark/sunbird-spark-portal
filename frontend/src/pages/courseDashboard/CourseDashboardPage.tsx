@@ -50,7 +50,7 @@ const CourseDashboardPage: React.FC = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/collection/${collectionId}`)}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
           data-testid="back-to-course-btn"
         >

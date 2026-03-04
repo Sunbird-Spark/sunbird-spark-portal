@@ -177,7 +177,7 @@ const CollectionDetailPage = () => {
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Go Back Link - always visible */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/my-learning")}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
         >
           <FiArrowLeft className="w-4 h-4" />
