@@ -51,8 +51,9 @@ describe('UserService', () => {
     it('fetches user by ID with kong token', async () => {
       mockRequest.session.userId = 'test-user-id';
       mockRequest.session.kongToken = 'test-kong-token';
-      mockRequest.kauth = {
-        grant: { access_token: { token: 'test-auth-token' } },
+      mockRequest.oidc = {
+        isAuthenticated: true,
+        accessToken: 'test-auth-token',
       };
 
       const mockUserData = {

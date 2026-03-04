@@ -28,7 +28,7 @@ export const getAuthInfo = async (req: Request, res: Response) => {
 
         const sessionId = req.sessionID;
         const userId = req.session.userId || null;
-        const isAuthenticated = !!(req.session.userId && req.kauth);
+        const isAuthenticated = !!(req.session.userId && req.oidc?.isAuthenticated);
 
         logger.info(`AUTH_STATUS :: Session ID: ${sessionId}, User ID: ${userId}, Authenticated: ${isAuthenticated}, Device ID: ${req.session.deviceId || 'not set'}`);
 

@@ -4,12 +4,12 @@ import logger from './logger.js';
 
 export const extractTokenExpiration = (request: Request): number | null => {
     try {
-        const refreshTokenExp = _.get(request, 'kauth.grant.refresh_token.content.exp');
+        const refreshTokenExp = request.oidc?.refreshTokenClaims?.exp;
         if (refreshTokenExp && _.isNumber(refreshTokenExp)) {
             return refreshTokenExp;
         }
 
-        const exp = _.get(request, 'kauth.grant.access_token.content.exp');
+        const exp = request.oidc?.tokenClaims?.exp;
         if (_.isFinite(exp)) {
             return exp as number;
         }
@@ -43,5 +43,5 @@ export const setSessionTTLFromToken = (request: Request): void => {
     request.session.cookie.expires = new Date(Date.now() + ttl);
 
     const expirationDate = new Date(exp * 1000);
-    logger.info(`Session TTL set from Keycloak token: ${ttl}ms (expires at ${expirationDate.toISOString()})`);
+    logger.info(`Session TTL set from OIDC token: ${ttl}ms (expires at ${expirationDate.toISOString()})`);
 };
