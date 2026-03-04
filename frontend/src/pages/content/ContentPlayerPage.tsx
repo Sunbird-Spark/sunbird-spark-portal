@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
@@ -12,6 +12,7 @@ import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import useImpression from "@/hooks/useImpression";
+import usePageSession from "@/hooks/usePageSession";
 import { useTelemetry } from "@/hooks/useTelemetry";
 
 const ContentPlayerPage = () => {
@@ -20,6 +21,7 @@ const ContentPlayerPage = () => {
   const navigate = useNavigate();
 
   useImpression({ type: 'view', pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
+  usePageSession({ pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
   const telemetry = useTelemetry();
 
   const { data, isLoading, error } = useContentRead(contentId || '');

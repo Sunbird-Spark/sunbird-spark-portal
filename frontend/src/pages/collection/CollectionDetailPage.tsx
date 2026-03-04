@@ -25,14 +25,17 @@ import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/compo
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
 import useImpression from "@/hooks/useImpression";
-import useInteract from "@/hooks/useInteract";
-import { useTelemetry } from "@/hooks/useTelemetry";
+import usePageSession from "@/hooks/usePageSession";
 import { useCollectionAutoNavigate } from "@/hooks/useCollectionAutoNavigate";
 import { useCollectionPageUIState } from "@/hooks/useCollectionPageUIState";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
+
+  useImpression({ type: 'view', pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
+  usePageSession({ pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
+
   const {
     isAuthenticated, collectionDataFromApi, collectionData, userProfile, enrollment,
     currentUserId, isCreatorViewingOwnCollection, contentCreatorPrivilege,

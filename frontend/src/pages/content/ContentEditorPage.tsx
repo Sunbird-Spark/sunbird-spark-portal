@@ -8,6 +8,7 @@ import { useContentRead } from '@/hooks/useContent';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
+import usePageSession from '@/hooks/usePageSession';
 import useInteract from '@/hooks/useInteract';
 
 const ContentEditorPage = () => {
@@ -17,6 +18,7 @@ const ContentEditorPage = () => {
   const { interact } = useInteract();
 
   useImpression({ type: 'view', pageid: 'content-editor', object: { id: contentId || '', type: 'Content' } });
+  usePageSession({ pageid: 'content-editor', object: { id: contentId || '', type: 'Content' } });
 
   const { data, isLoading, error } = useContentRead(contentId || '');
   const contentData = data?.data?.content;

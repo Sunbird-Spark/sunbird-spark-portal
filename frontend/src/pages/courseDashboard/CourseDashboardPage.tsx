@@ -10,6 +10,7 @@ import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import useImpression from '@/hooks/useImpression';
+import usePageSession from '@/hooks/usePageSession';
 import useInteract from '@/hooks/useInteract';
 import './courseDashboard.css';
 
@@ -30,6 +31,7 @@ const CourseDashboardPage: React.FC = () => {
     collectionData.createdBy === currentUserId;
 
   useImpression({ type: 'view', pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
+  usePageSession({ pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
   const { interact } = useInteract();
 
   // Redirect to default tab if the tab param is invalid

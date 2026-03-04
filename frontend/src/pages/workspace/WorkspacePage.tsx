@@ -26,6 +26,7 @@ import "./workspace.css";
 import { QumlEditor } from "@/components/quml-editor";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import useImpression from "@/hooks/useImpression";
+import usePageSession from "@/hooks/usePageSession";
 import useInteract from "@/hooks/useInteract";
 
 // Resource editor option IDs that should trigger the content editor
@@ -109,6 +110,7 @@ const WorkspacePage = () => {
   const { interact } = useInteract();
 
   useImpression({ type: 'view', pageid: 'workspace' });
+  usePageSession({ pageid: 'workspace' });
 
   useEffect(() => {
     if (slug && !orgFetchAttempted.current) {
