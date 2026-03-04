@@ -61,6 +61,8 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                         onClick={() => setIsSearchOpen(true)}
                         className="profile-action-btn"
                         aria-label={t("header.search")}
+                        data-edataid="search-btn"
+                        data-edatatype="CLICK"
                     >
                         <FiSearch className="profile-action-icon" aria-hidden="true" />
                     </button>
@@ -71,7 +73,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                     {/* Language Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="profile-lang-btn">
+                            <button className="profile-lang-btn" data-edataid="language-dropdown-btn" data-edatatype="CLICK">
                                 <img src={translationIcon} alt={t("changeLanguage")} className="profile-action-icon" />
                                 <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                             </button>
@@ -82,6 +84,8 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                                     key={lng.code}
                                     className={`profile-dropdown-item ${currentCode === lng.code ? 'active' : ''}`}
                                     onSelect={() => changeLanguage(lng.code as LanguageCode)}
+                                    data-edataid={`lang-select-${lng.code}`}
+                                    data-edatatype="CLICK"
                                 >
                                     <span>{lng.label}</span>
                                     {currentCode === lng.code && (
