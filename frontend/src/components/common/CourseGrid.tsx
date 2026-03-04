@@ -2,8 +2,11 @@ import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/common/Button";
 import CollectionCard from "@/components/content/CollectionCard";
+import ResourceCard from "@/components/content/ResourceCard";
 import type { ContentSearchItem } from "@/types/workspaceTypes";
 import { useAppI18n } from "@/hooks/useAppI18n";
+
+const COLLECTION_MIME_TYPE = "application/vnd.ekstep.content-collection";
 
 interface CourseGridProps {
     title: string;
@@ -34,7 +37,9 @@ export const CourseGrid = ({ title, courses, className = "mb-12" }: CourseGridPr
             {/* Course Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {courses.map((course) => (
-                    <CollectionCard key={course.identifier} item={course} />
+                    course.mimeType !== COLLECTION_MIME_TYPE
+                        ? <ResourceCard key={course.identifier} item={course} />
+                        : <CollectionCard key={course.identifier} item={course} />
                 ))}
             </div>
         </div>
