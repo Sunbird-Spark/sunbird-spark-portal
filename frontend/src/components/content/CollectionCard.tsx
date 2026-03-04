@@ -14,9 +14,9 @@ const CollectionCard = ({ item }: ContentCardProps) => {
         {/* Image with padding */}
         <div className="related-resource-card-image-wrapper">
           <div className="related-resource-card-image-inner">
-            {item.appIcon ? (
+            {(item.posterImage || item.appIcon) ? (
               <img
-                src={item.appIcon}
+                src={item.posterImage || item.appIcon}
                 alt={item.name}
                 className="resource-card-image"
               />
