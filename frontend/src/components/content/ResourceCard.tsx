@@ -36,9 +36,9 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
       <div className="resource-card-container">
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">
-          {item.appIcon ? (
+          {(item.posterImage || item.appIcon) ? (
             <img 
-              src={item.appIcon} 
+              src={item.posterImage || item.appIcon} 
               alt={item.name || 'Resource'} 
               className="resource-card-image" 
             />

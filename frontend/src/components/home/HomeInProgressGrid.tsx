@@ -70,9 +70,9 @@ const HomeInProgressGrid = () => {
                         </div>
                         {/* Thumbnail */}
                         <div className="home-inprogress-thumbnail">
-                            {course.courseLogoUrl || course.content?.appIcon ? (
+                            {course.courseLogoUrl || course.content?.posterImage || course.content?.appIcon ? (
                                 <img
-                                    src={course.courseLogoUrl || course.content?.appIcon}
+                                    src={course.courseLogoUrl || course.content?.posterImage || course.content?.appIcon}
                                     alt={course.courseName || "Untitled Course"}
                                     className="home-inprogress-thumbnail-img"
                                 />
