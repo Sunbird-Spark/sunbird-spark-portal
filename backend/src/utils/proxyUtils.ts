@@ -6,7 +6,7 @@ const fallbackToken = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
 const appId = envConfig.APPID;
 
 export const getUserToken = (req: any): string => {
-    return req.kauth?.grant?.access_token?.token;
+    return req.oidc?.accessToken;
 };
 
 export const getBearerToken = (req: Request): string => {

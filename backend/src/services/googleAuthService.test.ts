@@ -1,23 +1,25 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 
 // Use vi.hoisted to create mocks that can be used in vi.mock factories
 const {
     mockGenerateAuthUrl,
     mockGetToken,
     mockVerifyIdToken,
-    mockObtainFromClientCredentials,
-    mockStoreGrant,
-    mockAuthenticated,
+    mockClientCredentialsGrant,
+    mockGetGoogleOIDCConfig,
+    mockDecodeJwtPayload,
+    mockSaveSession,
     mockOAuth2Constructor,
     mockOAuth2ClientConstructor
 } = vi.hoisted(() => {
     const mockGenerateAuthUrl = vi.fn();
     const mockGetToken = vi.fn();
     const mockVerifyIdToken = vi.fn();
-    const mockObtainFromClientCredentials = vi.fn();
-    const mockStoreGrant = vi.fn();
-    const mockAuthenticated = vi.fn();
+    const mockClientCredentialsGrant = vi.fn();
+    const mockGetGoogleOIDCConfig = vi.fn().mockResolvedValue({});
+    const mockDecodeJwtPayload = vi.fn().mockReturnValue({ exp: 1234567890 });
+    const mockSaveSession = vi.fn().mockResolvedValue(undefined);
     const mockOAuth2Constructor = vi.fn(function () {
         return {
             generateAuthUrl: mockGenerateAuthUrl,
@@ -34,9 +36,10 @@ const {
         mockGenerateAuthUrl,
         mockGetToken,
         mockVerifyIdToken,
-        mockObtainFromClientCredentials,
-        mockStoreGrant,
-        mockAuthenticated,
+        mockClientCredentialsGrant,
+        mockGetGoogleOIDCConfig,
+        mockDecodeJwtPayload,
+        mockSaveSession,
         mockOAuth2Constructor,
         mockOAuth2ClientConstructor
     };
@@ -55,14 +58,17 @@ vi.mock('google-auth-library', () => ({
     OAuth2Client: mockOAuth2ClientConstructor
 }));
 
-vi.mock('../auth/keycloakManager.js', () => ({
-    getKeycloakClient: vi.fn(() => ({
-        grantManager: {
-            obtainFromClientCredentials: mockObtainFromClientCredentials
-        },
-        storeGrant: mockStoreGrant,
-        authenticated: mockAuthenticated
-    }))
+vi.mock('../auth/oidcProvider.js', () => ({
+    getGoogleOIDCConfig: mockGetGoogleOIDCConfig,
+    decodeJwtPayload: mockDecodeJwtPayload
+}));
+
+vi.mock('openid-client', () => ({
+    clientCredentialsGrant: mockClientCredentialsGrant
+}));
+
+vi.mock('../utils/sessionUtils.js', () => ({
+    saveSession: mockSaveSession
 }));
 
 vi.mock('../utils/sessionStore.js', () => ({
@@ -92,7 +98,7 @@ import logger from '../utils/logger.js';
 
 describe('GoogleAuthService - Core OAuth', () => {
     let mockRequest: Partial<Request>;
-    let mockResponse: Partial<Response>;
+
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -101,9 +107,10 @@ describe('GoogleAuthService - Core OAuth', () => {
         mockGenerateAuthUrl.mockReset();
         mockGetToken.mockReset();
         mockVerifyIdToken.mockReset();
-        mockObtainFromClientCredentials.mockReset();
-        mockStoreGrant.mockReset();
-        mockAuthenticated.mockReset();
+        mockClientCredentialsGrant.mockReset();
+        mockGetGoogleOIDCConfig.mockResolvedValue({});
+        mockDecodeJwtPayload.mockReturnValue({ exp: 1234567890 });
+        mockSaveSession.mockResolvedValue(undefined);
 
         mockRequest = {
             get: vi.fn((header: string) => {
@@ -111,13 +118,10 @@ describe('GoogleAuthService - Core OAuth', () => {
                 return undefined;
             }) as any,
             session: {} as any,
-            kauth: undefined
+            oidc: undefined
         };
 
-        mockResponse = {
-            cookie: vi.fn(),
-            clearCookie: vi.fn()
-        };
+
     });
 
     describe('createClient', () => {
@@ -221,34 +225,40 @@ describe('GoogleAuthService - Core OAuth', () => {
     });
 
     describe('createSession', () => {
-        const mockGrant = {
-            access_token: { token: 'test-access-token', content: { exp: 1234567890 } }
+        const mockTokens = {
+            access_token: 'test-access-token',
+            refresh_token: 'test-refresh-token',
+            id_token: 'test-id-token'
         };
 
         beforeEach(() => {
-            mockObtainFromClientCredentials.mockResolvedValue(mockGrant);
-            mockAuthenticated.mockResolvedValue(undefined);
+            mockClientCredentialsGrant.mockResolvedValue(mockTokens);
         });
 
         it('should create session successfully', async () => {
-            const result = await createSession('test@example.com', mockRequest as Request, mockResponse as Response);
+            const result = await createSession('test@example.com', mockRequest as Request);
 
             expect(result).toEqual({ access_token: 'test-access-token', expires_at: 1234567890 });
-            expect(mockObtainFromClientCredentials).toHaveBeenCalled();
-            expect(mockStoreGrant).toHaveBeenCalledWith(mockGrant, mockRequest, mockResponse);
-            expect(mockRequest.kauth).toEqual({ grant: mockGrant });
+            expect(mockClientCredentialsGrant).toHaveBeenCalled();
+            expect(mockRequest.oidc?.isAuthenticated).toBe(true);
+            expect((mockRequest.session as any)['oidc-tokens']).toEqual({
+                access_token: 'test-access-token',
+                refresh_token: 'test-refresh-token',
+                id_token: 'test-id-token'
+            });
         });
 
         it('should throw error when session creation fails', async () => {
-            mockObtainFromClientCredentials.mockRejectedValue(new Error('Grant failed'));
-            await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
+            mockClientCredentialsGrant.mockRejectedValue(new Error('Grant failed'));
+            await expect(createSession('test@example.com', mockRequest as Request))
                 .rejects.toThrow('Grant failed');
             expect(logger.error).toHaveBeenCalled();
         });
 
         it('should throw error when grant token is invalid', async () => {
-            mockObtainFromClientCredentials.mockResolvedValue({ access_token: null });
-            await expect(createSession('test@example.com', mockRequest as Request, mockResponse as Response))
+            mockClientCredentialsGrant.mockResolvedValue({ access_token: null });
+            mockDecodeJwtPayload.mockReturnValue(null);
+            await expect(createSession('test@example.com', mockRequest as Request))
                 .rejects.toThrow('INVALID_GRANT_TOKEN');
         });
     });

@@ -34,7 +34,7 @@ describe('AuthController', () => {
                 id: 'test-session-id',
             } as any,
             sessionID: 'test-session-id',
-            kauth: undefined
+            oidc: undefined
         };
 
         // Mock Response
@@ -67,7 +67,7 @@ describe('AuthController', () => {
 
     it('should return auth status for authenticated user', async () => {
         req.session!.userId = 'user-123';
-        req.kauth = { grant: {} } as any; // Simulate authenticated state logic
+        req.oidc = { isAuthenticated: true } as any; // Simulate authenticated state logic
 
         await getAuthInfo(req as Request, res as Response);
 
