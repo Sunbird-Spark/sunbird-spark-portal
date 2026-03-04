@@ -38,6 +38,8 @@ describe('UserProfileService', () => {
     // Reset internal state by re-initializing
     (service as any).isInitialized = false;
     (service as any).channel = null;
+    (service as any).firstName = null;
+    (service as any).lastName = null;
   });
 
   describe('initialize', () => {
@@ -157,6 +159,108 @@ describe('UserProfileService', () => {
       const channel = await service.getChannel();
 
       expect(channel).toBe('');
+    });
+  });
+
+  describe('getUserData', () => {
+    it('should return firstName and lastName after initialization', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { firstName: 'Alice', lastName: 'Smith' } },
+      });
+
+      const userData = await service.getUserData();
+
+      expect(userData.firstName).toBe('Alice');
+      expect(userData.lastName).toBe('Smith');
+    });
+
+    it('should trim whitespace from firstName and lastName', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { firstName: '  Bob  ', lastName: '  Jones  ' } },
+      });
+
+      const userData = await service.getUserData();
+
+      expect(userData.firstName).toBe('Bob');
+      expect(userData.lastName).toBe('Jones');
+    });
+
+    it('should initialize if not already initialized', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { firstName: 'Carol', lastName: 'White' } },
+      });
+
+      const userData = await service.getUserData();
+
+      expect(mocks.userRead).toHaveBeenCalledTimes(1);
+      expect(userData.firstName).toBe('Carol');
+      expect(userData.lastName).toBe('White');
+    });
+
+    it('should return empty strings when firstName is null', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { firstName: null, lastName: 'Doe' } },
+      });
+
+      const userData = await service.getUserData();
+
+      expect(userData.firstName).toBe('');
+      expect(userData.lastName).toBe('Doe');
+    });
+
+    it('should return empty strings when lastName is null', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { firstName: 'Jane', lastName: null } },
+      });
+
+      const userData = await service.getUserData();
+
+      expect(userData.firstName).toBe('Jane');
+      expect(userData.lastName).toBe('');
+    });
+
+    it('should return empty strings when both names are missing from response', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: {} },
+      });
+
+      const userData = await service.getUserData();
+
+      expect(userData.firstName).toBe('');
+      expect(userData.lastName).toBe('');
+    });
+
+    it('should return empty strings when firstName/lastName are whitespace-only', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { firstName: '   ', lastName: '   ' } },
+      });
+
+      const userData = await service.getUserData();
+
+      expect(userData.firstName).toBe('');
+      expect(userData.lastName).toBe('');
+    });
+
+    it('should propagate error when initialize() fails', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      mocks.userRead.mockRejectedValue(new Error('network error'));
+
+      await expect(service.getUserData()).rejects.toThrow('network error');
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should not call API again when already initialized', async () => {
+      mocks.userRead.mockResolvedValue({
+        data: { response: { firstName: 'Dave', lastName: 'Brown' } },
+      });
+
+      await service.initialize();
+      const first = await service.getUserData();
+      const second = await service.getUserData();
+
+      expect(mocks.userRead).toHaveBeenCalledTimes(1);
+      expect(first).toEqual(second);
     });
   });
 });

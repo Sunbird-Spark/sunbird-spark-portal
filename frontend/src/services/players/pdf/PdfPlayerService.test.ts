@@ -27,6 +27,12 @@ vi.mock('../../OrganizationService', () => ({
   },
 }));
 
+vi.mock('../../UserProfileService', () => ({
+  default: {
+    getUserData: vi.fn(() => Promise.resolve({ firstName: '', lastName: '' })),
+  },
+}));
+
 describe('PdfPlayerService', () => {
   let service: PdfPlayerService;
 
