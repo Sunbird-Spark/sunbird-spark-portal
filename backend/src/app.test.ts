@@ -1,58 +1,78 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
 
-describe('Express App', () => {
-  beforeEach(() => {
-    vi.doMock('./auth/keycloakProvider.js', () => ({
-      keycloak: {
-        middleware: () => (req: any, res: any, next: any) => next(),
-        protect: () => (req: any, res: any, next: any) => next()
-      }
-    }));
-    vi.doMock('./config/env.js', () => ({
-      envConfig: {
-        ENVIRONMENT: 'local',
-        SUNBIRD_SESSION_SECRET: 'test',
-        SUNBIRD_ANONYMOUS_SESSION_TTL: 1000,
-        KONG_URL: 'http://localhost:8000',
-        PORTAL_REALM: 'sunbird',
-        DOMAIN_URL: 'http://localhost:3000',
-        PORTAL_AUTH_SERVER_CLIENT: 'portal',
-        LEARN_BASE_URL: 'http://localhost:9000'
-      }
-    }));
-    vi.doMock('./utils/sessionStore.js', () => {
-      const session = require('express-session');
-      return {
-        sessionStore: new session.MemoryStore()
-      };
-    });
-    vi.doMock('./proxies/kongProxy.js', () => ({
-      kongProxy: (req: any, res: any) => {
-        res.status(200).send('mock-kong-response');
-      }
-    }));
-    vi.doMock('./proxies/knowlgMwProxy.js', () => ({
-      contentActionProxy: (req: any, res: any) => {
-        res.status(200).send('mock-knowlg-response');
-      }
-    }));
-    vi.doMock('./middlewares/formsValidator.js', () => ({
-      validateCreateAPI: (req: any, res: any, next: any) => next(),
-      validateReadAPI: (req: any, res: any, next: any) => next(),
-      validateUpdateAPI: (req: any, res: any, next: any) => next(),
-      validateListAPI: (req: any, res: any, next: any) => next()
-    }));
-    vi.doMock('./controllers/formsController.js', () => ({
-      create: (req: any, res: any) => res.status(200).send({}),
-      read: (req: any, res: any) => {
-        res.status(200).send({ result: 'mock-read-response' });
-      },
-      update: (req: any, res: any) => res.status(200).send({}),
-      listAll: (req: any, res: any) => res.status(200).send({})
-    }));
-  });
+vi.mock('./auth/oidcMiddleware.js', () => ({
+  oidcSession: () => (_req: any, _res: any, next: any) => next(),
+  requireAuth: () => (_req: any, _res: any, next: any) => next()
+}));
 
+vi.mock('openid-client', () => ({
+  discovery: vi.fn().mockResolvedValue({}),
+  clientCredentialsGrant: vi.fn().mockResolvedValue({ access_token: 'mock-token' }),
+  refreshTokenGrant: vi.fn().mockResolvedValue({ access_token: 'mock-token' }),
+  authorizationCodeGrant: vi.fn().mockResolvedValue({ access_token: 'mock-token' }),
+  randomState: vi.fn().mockReturnValue('mock-state'),
+  randomNonce: vi.fn().mockReturnValue('mock-nonce'),
+  buildAuthorizationUrl: vi.fn().mockReturnValue(new URL('http://example.com/auth')),
+  buildEndSessionUrl: vi.fn().mockReturnValue(new URL('http://example.com/logout')),
+}));
+
+vi.mock('googleapis', () => ({
+  google: { auth: { OAuth2: vi.fn() } }
+}));
+
+vi.mock('google-auth-library', () => ({
+  OAuth2Client: vi.fn()
+}));
+
+vi.mock('./config/env.js', () => ({
+  envConfig: {
+    ENVIRONMENT: 'local',
+    SUNBIRD_SESSION_SECRET: 'test',
+    SUNBIRD_ANONYMOUS_SESSION_TTL: 1000,
+    KONG_URL: 'http://localhost:8000',
+    PORTAL_REALM: 'sunbird',
+    DOMAIN_URL: 'http://localhost:3000',
+    PORTAL_AUTH_SERVER_CLIENT: 'portal',
+    LEARN_BASE_URL: 'http://localhost:9000',
+    OIDC_ISSUER_URL: ''
+  }
+}));
+
+vi.mock('./middlewares/conditionalSession.js', () => ({
+  sessionMiddleware: (_req: any, _res: any, next: any) => next(),
+  anonymousMiddlewares: [(_req: any, _res: any, next: any) => next()]
+}));
+
+vi.mock('./proxies/kongProxy.js', () => ({
+  kongProxy: (_req: any, res: any) => {
+    res.status(200).send('mock-kong-response');
+  }
+}));
+
+vi.mock('./proxies/knowlgMwProxy.js', () => ({
+  contentActionProxy: (_req: any, res: any) => {
+    res.status(200).send('mock-knowlg-response');
+  }
+}));
+
+vi.mock('./middlewares/formsValidator.js', () => ({
+  validateCreateAPI: (_req: any, _res: any, next: any) => next(),
+  validateReadAPI: (_req: any, _res: any, next: any) => next(),
+  validateUpdateAPI: (_req: any, _res: any, next: any) => next(),
+  validateListAPI: (_req: any, _res: any, next: any) => next()
+}));
+
+vi.mock('./controllers/formsController.js', () => ({
+  create: (_req: any, res: any) => res.status(200).send({}),
+  read: (_req: any, res: any) => {
+    res.status(200).send({ result: 'mock-read-response' });
+  },
+  update: (_req: any, res: any) => res.status(200).send({}),
+  listAll: (_req: any, res: any) => res.status(200).send({})
+}));
+
+describe('Express App', () => {
   it('should create an Express application', async () => {
     const { app } = await import('./app.js');
     expect(app).toBeDefined();

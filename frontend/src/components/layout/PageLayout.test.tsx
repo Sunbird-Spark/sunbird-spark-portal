@@ -315,6 +315,50 @@ describe('PageLayout', () => {
       // Desktop sidebar should now be expanded
       expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'false');
     });
+
+    it('keeps the sidebar closed when switching from mobile to desktop on /explore page', () => {
+      // Start on mobile at /explore (sidebar closed)
+      mockUseIsMobile.mockReturnValue(true);
+      const { rerender } = renderLayout('/explore');
+      expect(screen.queryByTestId('mobile-sheet')).not.toBeInTheDocument();
+
+      // Simulate viewport resize to desktop while still on /explore
+      mockUseIsMobile.mockReturnValue(false);
+      act(() => {
+        rerender(
+          <MemoryRouter initialEntries={['/explore']}>
+            <Routes>
+              <Route element={<PageLayout />}>
+                <Route path="*" element={<div data-testid="page-content">Page Content</div>} />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        );
+      });
+
+      // Desktop sidebar should remain closed on /explore
+      expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'true');
+    });
+  });
+
+  // ── Explore page sidebar behavior ──────────────────────────────────────────
+
+  describe('explore page sidebar behavior', () => {
+    it('sidebar is closed by default when starting on /explore page', () => {
+      mockUseIsMobile.mockReturnValue(false);
+      renderLayout('/explore');
+
+      // Sidebar should be closed on explore page
+      expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'true');
+    });
+
+    it('sidebar is open by default when starting on non-explore page', () => {
+      mockUseIsMobile.mockReturnValue(false);
+      renderLayout('/home');
+
+      // Sidebar should be open on home page
+      expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'false');
+    });
   });
 
   // ── Active nav derivation ──────────────────────────────────────────────────

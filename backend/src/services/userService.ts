@@ -14,8 +14,8 @@ const {
     KONG_ANONYMOUS_FALLBACK_TOKEN
 } = envConfig;
 
-const getKeycloakAccessToken = (req: Request): string | undefined =>
-    (req.kauth?.grant?.access_token as any)?.token;
+const getOidcAccessToken = (req: Request): string | undefined =>
+    req.oidc?.accessToken;
 
 const resolveKongBearerToken = (req: Request): string => {
     const kongDeviceToken = _.get(req, 'session.kongToken');
@@ -81,7 +81,7 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
         'Content-Type': 'application/json',
         accept: 'application/json',
         Authorization: `Bearer ${resolveKongBearerToken(req)}`,
-        'x-authenticated-user-token': getKeycloakAccessToken(req)
+        'x-authenticated-user-token': getOidcAccessToken(req)
     };
 
     const response = await axios.get(url, { headers });

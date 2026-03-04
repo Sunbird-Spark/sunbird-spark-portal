@@ -43,7 +43,7 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <AuthLayout onClose={() => window.location.href = '/portal/login'} isOtpPage={step === 3}>
+    <AuthLayout onClose={() => window.location.href = '/portal/login?prompt=none'} isOtpPage={step === 3}>
       <div className="w-full font-rubik">
         {step === 1 && (
           <IdentifyUser

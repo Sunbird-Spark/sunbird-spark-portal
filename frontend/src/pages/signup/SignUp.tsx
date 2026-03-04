@@ -216,7 +216,7 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        window.location.href = '/portal/login';
+        window.location.href = '/portal/login?prompt=none';
     };
 
     return (
