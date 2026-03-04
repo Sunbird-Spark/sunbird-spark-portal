@@ -34,7 +34,6 @@ vi.mock('../utils/logger.js', () => ({
 
 vi.mock('../utils/sessionUtils.js', () => ({
     regenerateSession: vi.fn(),
-    regenerateAnonymousSession: vi.fn(),
     destroySession: vi.fn(),
     saveSession: vi.fn()
 }));
@@ -63,7 +62,8 @@ vi.mock('../config/env.js', () => ({
         DEVELOPMENT_REACT_APP_URL: 'http://localhost:3000',
         DOMAIN_URL: 'http://domain.com',
         PORTAL_REALM: 'realm',
-        SERVER_URL: 'http://server.com'
+        SERVER_URL: 'http://server.com',
+        ENVIRONMENT: 'local',
     }
 }));
 
@@ -104,21 +104,51 @@ describe('PortalAuthRoutes Integration', () => {
             expect(res.header.location).toBe('http://localhost:3000/home');
         });
 
-        it('should redirect to OIDC provider if not authenticated', async () => {
+        it('should redirect to OIDC provider with prompt=login by default', async () => {
             const app = await setupApp();
+            const { buildAuthorizationUrl } = await import('openid-client');
 
             const res = await request(app).get('/portal/login');
             expect(res.status).toBe(302);
             expect(res.header.location).toContain('oidc-provider.example.com');
+            expect(vi.mocked(buildAuthorizationUrl)).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ prompt: 'login' })
+            );
+        });
+
+        it('should pass prompt=none when explicitly requested (for silent re-auth)', async () => {
+            const app = await setupApp();
+            const { buildAuthorizationUrl } = await import('openid-client');
+
+            await request(app).get('/portal/login?prompt=none');
+            expect(vi.mocked(buildAuthorizationUrl)).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ prompt: 'none' })
+            );
         });
     });
 
     describe('GET /portal/auth/callback', () => {
-        it('should restart login flow if no code is present', async () => {
+        it('should restart login flow with prompt=none if no code is present', async () => {
             const app = await setupApp();
             const res = await request(app).get('/portal/auth/callback');
             expect(res.status).toBe(302);
             expect(res.header.location).toBe('/portal/login?prompt=none');
+        });
+
+        it('should redirect to prompt=login when Keycloak returns login_required', async () => {
+            const app = await setupApp();
+            const res = await request(app).get('/portal/auth/callback?error=login_required');
+            expect(res.status).toBe(302);
+            expect(res.header.location).toBe('/portal/login?prompt=login');
+        });
+
+        it('should redirect to prompt=login when Keycloak returns interaction_required', async () => {
+            const app = await setupApp();
+            const res = await request(app).get('/portal/auth/callback?error=interaction_required');
+            expect(res.status).toBe(302);
+            expect(res.header.location).toBe('/portal/login?prompt=login');
         });
 
         it('should exchange code and redirect to home on success', async () => {
@@ -130,7 +160,7 @@ describe('PortalAuthRoutes Integration', () => {
 
             const res = await request(app).get('/portal/auth/callback?code=123&state=test-state');
 
-            // Callback now sends an HTML redirect (200) instead of 302 to break the
+            // Callback sends an HTML redirect (200) instead of 302 to break the
             // POST redirect chain that caused browser cancellation.
             expect(res.status).toBe(200);
             expect(res.header['content-type']).toContain('text/html');
@@ -155,7 +185,23 @@ describe('PortalAuthRoutes Integration', () => {
             expect(userService.setUserSession).toHaveBeenCalled();
         });
 
-        it('should redirect to root on error', async () => {
+        it('should still redirect to home if fetchUserById fails (partial session)', async () => {
+            const app = await setupApp();
+
+            const sessionUtils = await import('../utils/sessionUtils.js');
+            const userService = await import('../services/userService.js');
+
+            vi.mocked(sessionUtils.regenerateSession).mockResolvedValue(undefined);
+            vi.mocked(sessionUtils.saveSession).mockResolvedValue(undefined);
+            vi.mocked(userService.fetchUserById).mockRejectedValue(new Error('Kong unavailable'));
+
+            const res = await request(app).get('/portal/auth/callback?code=123&state=test-state');
+
+            expect(res.status).toBe(200);
+            expect(res.text).toContain('http://localhost:3000/home');
+        });
+
+        it('should redirect to home on outer error (e.g. session regeneration failure)', async () => {
             const app = await setupApp();
             const sessionUtils = await import('../utils/sessionUtils.js');
             vi.mocked(sessionUtils.regenerateSession).mockRejectedValue(new Error('Session error'));
@@ -167,7 +213,7 @@ describe('PortalAuthRoutes Integration', () => {
             expect(res.header.location).toBe('http://localhost:3000/home');
         });
 
-        it('should redirect to root if no session exists', async () => {
+        it('should redirect on error when no session exists', async () => {
             const app = await setupApp((req: Request, res, next) => {
                 // @ts-ignore
                 req.session = null;
@@ -183,7 +229,7 @@ describe('PortalAuthRoutes Integration', () => {
     });
 
     describe('ALL /portal/logout', () => {
-        it('should destroy session and redirect to OIDC logout', async () => {
+        it('should destroy session, clear cookie, and redirect to OIDC logout', async () => {
             const app = await setupApp();
             const sessionUtils = await import('../utils/sessionUtils.js');
             vi.mocked(sessionUtils.destroySession).mockResolvedValue(undefined);
@@ -195,12 +241,27 @@ describe('PortalAuthRoutes Integration', () => {
             expect(res.header.location).toContain('oidc-provider.example.com/logout');
         });
 
-        it('should redirect to root on error', async () => {
+        it('should clear the session cookie on logout', async () => {
+            const app = await setupApp();
+            const sessionUtils = await import('../utils/sessionUtils.js');
+            vi.mocked(sessionUtils.destroySession).mockResolvedValue(undefined);
+
+            const res = await request(app).get('/portal/logout');
+
+            const setCookieHeader = res.header['set-cookie'] as string[] | string | undefined;
+            const cookieStr = Array.isArray(setCookieHeader)
+                ? setCookieHeader.join('; ')
+                : (setCookieHeader || '');
+            expect(cookieStr).toContain('connect.sid=');
+            expect(cookieStr).toMatch(/expires=Thu, 01 Jan 1970/i);
+        });
+
+        it('should use fallback logout URL when OIDC discovery fails', async () => {
             const app = await setupApp();
             const sessionUtils = await import('../utils/sessionUtils.js');
             const { buildEndSessionUrl } = await import('openid-client');
 
-            vi.mocked(sessionUtils.regenerateAnonymousSession).mockRejectedValue(new Error('Logout error'));
+            vi.mocked(sessionUtils.destroySession).mockRejectedValue(new Error('Session destroy error'));
             vi.mocked(buildEndSessionUrl).mockImplementation(() => {
                 throw new Error('Discovery failed');
             });
