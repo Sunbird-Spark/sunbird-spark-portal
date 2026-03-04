@@ -557,7 +557,7 @@
   }
 
   .related-resource-card-container {
-    @apply bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[24.5rem] flex flex-col;
+    @apply bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[22.5rem] flex flex-col;
     box-shadow: 0.125rem 0.125rem 1.25rem 0rem rgba(0, 0, 0, 0.09);
   }
 
@@ -617,7 +617,7 @@
   }
 
   .resource-card-container {
-    @apply relative w-full h-[24.5rem] rounded-[1.25rem] overflow-hidden;
+    @apply relative w-full h-[22.5rem] rounded-[1.25rem] overflow-hidden;
   }
 
   .resource-card-image-wrapper {

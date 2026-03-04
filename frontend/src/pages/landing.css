@@ -1,0 +1,10 @@
+/* Anonymous Home Page (Index) specific card styles */
+/* On the landing page, resource and collection cards have different heights */
+
+.landing-page .related-resource-card-container {
+  @apply h-[22.375rem]; /* 390px - collection cards */
+}
+
+.landing-page .resource-card-container {
+  @apply h-[24.6875rem]; /* 459px - resource cards with full background images */
+}
