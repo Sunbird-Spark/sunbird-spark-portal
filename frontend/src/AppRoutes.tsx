@@ -6,7 +6,6 @@ import PageLayout from './components/layout/PageLayout';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
-import AdminPage from './pages/admin/AdminPage';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';
@@ -26,6 +25,7 @@ import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
 import ContentViewPage from './pages/workspace/ContentViewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
+import OnboardingGuard from './rbac/OnboardingGuard';
 import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
 import PlatformReports from './pages/reports/PlatformReports';
@@ -44,7 +44,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/admin" element={<AdminPage />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
             <Route path="content/:contentId" element={null} />
@@ -110,7 +109,7 @@ const AppRoutes: React.FC = () => {
         } />
 
         {/* Layout routes — share Header, Sidebar, Footer via PageLayout */}
-        <Route element={<PageLayout />}>
+        <Route element={<OnboardingGuard><PageLayout /></OnboardingGuard>}>
           <Route path="/home" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/my-learning" element={<MyLearning />} />
@@ -118,10 +117,22 @@ const AppRoutes: React.FC = () => {
           <Route path="/help-support" element={<HelpSupport />} />
           <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
           <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/reports/platform" element={<PlatformReports />} />
-          <Route path="/reports/course/:courseId" element={<CourseReport />} />
+          <Route path="/reports/platform" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <PlatformReports />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports/course/:courseId" element={
+            <ProtectedRoute allowedRoles={['COURSE_MENTOR', 'CONTENT_CREATOR']}>
+              <CourseReport />
+            </ProtectedRoute>
+          } />
           <Route path="/reports/user/:userId" element={<UserReport />} />
-          <Route path="/user-management" element={<UserManagementPage />} />
+          <Route path="/user-management" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <UserManagementPage />
+            </ProtectedRoute>
+          } />
           <Route path="/workspace" element={
             <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
               <WorkspacePage />

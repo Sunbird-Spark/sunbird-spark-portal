@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/usePermission";
 import type { Feature } from "@/services/PermissionService";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { clearForceSyncUsed } from "@/services/forceSyncStorage";
 interface HomeSidebarProps {
     activeNav: string;
     onNavChange: (nav: string) => void;
@@ -81,6 +82,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
     const handleNavClick = (item: typeof mainNavItems[0]) => {
         onNavChange(item.id);
         if (item.id === "logout") {
+            clearForceSyncUsed();
             window.location.href = item.path;
             return;
         }
@@ -114,8 +116,8 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                             `}
                             title={collapsed ? item.label : undefined}
                         >
-                            <Icon className={`w-5 h-5 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
-                            {!collapsed && <span className="text-[1.125rem]">{item.label}</span>}
+                            <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
+                            {!collapsed && <span className="text-[1.125rem] whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>}
                         </button>
                     </li>
                 );

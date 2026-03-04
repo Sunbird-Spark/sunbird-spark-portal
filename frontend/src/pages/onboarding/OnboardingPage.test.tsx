@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, Mock, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
@@ -27,8 +27,21 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
+const { mockMutateAsync, mockToast, mockUseCurrentUserId } = vi.hoisted(() => ({
+  mockMutateAsync: vi.fn().mockResolvedValue({}),
+  mockToast: vi.fn(),
+  mockUseCurrentUserId: vi.fn().mockReturnValue({ data: 'mock-user-id' }),
+}));
+
 // Mock dependencies
 vi.mock('@/hooks/useForm');
+vi.mock('@/hooks/useUpdateProfile', () => ({
+  useUpdateProfile: () => ({ mutateAsync: mockMutateAsync, isPending: false }),
+}));
+vi.mock('@/hooks/useUser', () => ({
+  useCurrentUserId: () => mockUseCurrentUserId(),
+}));
+vi.mock('@/hooks/useToast', () => ({ toast: mockToast }));
 // Mock assets
 vi.mock('../../../src/assets/sunbird-logo.svg', () => ({
   default: 'sunbird-logo.svg',
@@ -88,12 +101,8 @@ const renderWithRouter = (component: React.ReactElement) => {
 describe('Onboarding Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.runOnlyPendingTimers();
-    vi.useRealTimers();
+    mockUseCurrentUserId.mockReturnValue({ data: 'mock-user-id' });
+    mockMutateAsync.mockResolvedValue({});
   });
 
   it('renders loading spinner while fetching data', () => {
@@ -297,13 +306,30 @@ describe('Onboarding Component', () => {
     // Should show loading state
     expect(screen.getByText('Saving...')).toBeInTheDocument();
 
-    // Fast-forward timers and run all pending timers
-    await vi.advanceTimersByTimeAsync(1000);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/home');
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({
+            userId: 'mock-user-id',
+            framework: expect.objectContaining({
+              onboardingDetails: expect.objectContaining({
+                isSkipped: false,
+                data: expect.objectContaining({
+                  role: { values: ['teacher'] },
+                  skills_teacher: { values: ['math'] },
+                  experience: { values: ['beginner'] },
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+      expect(mockNavigate).toHaveBeenCalledWith('/home');
+    });
   });
 
-  it('allows skipping onboarding', () => {
+  it('allows skipping onboarding', async () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -321,10 +347,53 @@ describe('Onboarding Component', () => {
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
     fireEvent.click(skipButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/home');
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({
+            userId: 'mock-user-id',
+            framework: { onboardingDetails: { isSkipped: true, data: {} } },
+          }),
+        })
+      );
+      expect(mockNavigate).toHaveBeenCalledWith('/home');
+    });
   });
 
-  it('disables skip button while submitting', () => {
+  it('shows toast and does not navigate when skip API call fails', async () => {
+    mockMutateAsync.mockRejectedValueOnce(new Error('Network error'));
+    (useFormRead as Mock).mockReturnValue({
+      data: { data: { form: { data: mockOnboardingData } } },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    fireEvent.click(screen.getByRole('button', { name: /Skip Onboarding/i }));
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({ variant: 'destructive' })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
+
+  it('disables skip button when userId is not yet loaded', () => {
+    mockUseCurrentUserId.mockReturnValue({ data: null });
+    (useFormRead as Mock).mockReturnValue({
+      data: { data: { form: { data: mockOnboardingData } } },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
+    expect(skipButton).toBeDisabled();
+  });
+
+  it('disables skip button while submitting', async () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -349,9 +418,12 @@ describe('Onboarding Component', () => {
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
-    // Skip button should be disabled
+    // Skip button should be disabled while submitting
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
     expect(skipButton).toBeDisabled();
+
+    // Wait for async to settle to avoid act() warning
+    await waitFor(() => expect(skipButton).not.toBeDisabled());
   });
 
   it('disables Save and Proceed button when no option is selected', () => {
@@ -545,7 +617,7 @@ describe('Onboarding Component', () => {
     expect(screen.queryByLabelText('Go back')).not.toBeInTheDocument();
   });
 
-  it('disables back button during submission', () => {
+  it('disables back button during submission', async () => {
     (useFormRead as Mock).mockReturnValue({
       data: {
         data: {
@@ -575,8 +647,11 @@ describe('Onboarding Component', () => {
     fireEvent.click(screen.getByText('Beginner').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
-    // Back button should now be disabled
+    // Back button should now be disabled while submitting
     expect(backButton).toBeDisabled();
+
+    // Wait for async to settle to avoid act() warning
+    await waitFor(() => expect(backButton).not.toBeDisabled());
   });
 
   it('maintains navigation history correctly through multiple screens', () => {

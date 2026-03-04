@@ -238,7 +238,7 @@ describe('SearchModal', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             limit: 3,
-            filters: { objectType: 'Content' },
+            filters: { objectType: ['Content', 'QuestionSet'] },
           }),
         })
       );

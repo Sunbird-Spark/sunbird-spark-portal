@@ -1,30 +1,19 @@
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import { envConfig } from '../config/env.js';
-import { Request, Response } from 'express';
-import { getKeycloakClient } from '../auth/keycloakManager.js';
-import { sessionStore } from '../utils/sessionStore.js';
+import { Request } from 'express';
+import * as oidcClient from 'openid-client';
+import { getGoogleOIDCConfig, decodeJwtPayload } from '../auth/oidcProvider.js';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
+import { saveSession } from '../utils/sessionUtils.js';
 
-const keycloakGoogleConfig = {
-    realm: envConfig?.PORTAL_REALM,
-    'auth-server-url': envConfig?.DOMAIN_URL + '/auth',
-    resource: envConfig?.KEYCLOAK_GOOGLE_CLIENT_ID,
-    'confidential-port': 0,
-    'ssl-required': 'external' as const,
-    credentials: {
-        secret: envConfig?.KEYCLOAK_GOOGLE_CLIENT_SECRET
-    }
-};
-
-const keycloakGoogle = getKeycloakClient(keycloakGoogleConfig, sessionStore);
-
-export const createSession = async (emailId: string, req: Request, res: Response): Promise<{ access_token: string; expires_at: number }> => {
-    let grant;
+export const createSession = async (emailId: string, req: Request): Promise<{ access_token: string; expires_at: number }> => {
+    let tokens;
 
     try {
-        grant = await keycloakGoogle.grantManager.obtainFromClientCredentials();
+        const config = await getGoogleOIDCConfig();
+        tokens = await oidcClient.clientCredentialsGrant(config);
     } catch (error) {
         logger.error({
             msg: 'googleOauthHelper:createSession failed',
@@ -33,23 +22,39 @@ export const createSession = async (emailId: string, req: Request, res: Response
         throw error;
     }
 
-    keycloakGoogle.storeGrant(grant, req, res);
-    req.kauth = { grant };
+    // Store tokens in session
+    req.session['oidc-tokens'] = {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        id_token: tokens.id_token,
+    };
+
+    // Decode access token claims
+    const tokenClaims = decodeJwtPayload(tokens.access_token);
+
+    // Attach to req.oidc for downstream use
+    req.oidc = {
+        isAuthenticated: true,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        idToken: tokens.id_token,
+        tokenClaims: tokenClaims || undefined,
+    };
 
     try {
         const originalGoogleOAuth = req.session?.googleOAuth;
-        await keycloakGoogle.authenticated(req);
+        await saveSession(req);
         if (req.session && originalGoogleOAuth && !req.session.googleOAuth) {
             req.session.googleOAuth = originalGoogleOAuth;
         }
 
-        if (!grant.access_token?.token || !grant.access_token?.content?.exp) {
+        if (!tokens.access_token || !tokenClaims?.exp) {
             throw new Error('INVALID_GRANT_TOKEN');
         }
 
         return {
-            access_token: grant.access_token.token,
-            expires_at: grant.access_token.content.exp
+            access_token: tokens.access_token,
+            expires_at: tokenClaims.exp
         };
     } catch (error) {
         logger.error({
@@ -71,13 +76,13 @@ class GoogleOauth {
                 logger.error('GOOGLE_OAUTH_DOMAIN_URL_MISSING');
                 throw new Error('GOOGLE_OAUTH_DOMAIN_URL_MISSING');
             }
-            
+
             const domainHost = new URL(envConfig.DOMAIN_URL).host;
             if (host !== domainHost) {
                 logger.error(`HOST_MISMATCH: Request host ${host} does not match domain URL host ${domainHost}`);
                 throw new Error('HOST_MISMATCH');
             }
-            
+
             const redirect = `${envConfig.DOMAIN_URL}/google/auth/callback`;
 
             if (!_.isString(envConfig.GOOGLE_OAUTH_CLIENT_ID) || _.isEmpty(envConfig.GOOGLE_OAUTH_CLIENT_ID.trim()) ||
@@ -255,8 +260,7 @@ export const validateRedirectUrl = (url: string | undefined): string => {
 export const handleUserAuthentication = async (
     googleUser: { emailId?: string; name?: string },
     client_id: string,
-    req: Request,
-    res: Response
+    req: Request
 ): Promise<boolean> => {
     if (!googleUser.emailId) {
         throw new Error('GOOGLE_EMAIL_NOT_FOUND');
@@ -282,7 +286,7 @@ export const handleUserAuthentication = async (
     }
 
     try {
-        await createSession(googleUser.emailId, req, res);
+        await createSession(googleUser.emailId, req);
     } catch (error) {
         logger.error('Error creating session:', error);
         throw new Error('SESSION_CREATION_FAILED');

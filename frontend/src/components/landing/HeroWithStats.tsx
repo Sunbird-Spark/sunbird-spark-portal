@@ -40,14 +40,16 @@ const HeroWithStats = () => {
                         <div className="max-w-[700px] pt-8">
                             <h1
                                 className="font-rubik font-semibold text-4xl lg:text-[3.75rem] leading-tight lg:leading-[4.375rem] tracking-normal mb-6 text-sunbird-obsidian"
+                                style={{ width: '750px' }}
                             >
                                 {t("hero.title", "Knowledge that moves you forward.").split(/(\n)/).map((line, i) =>
                                     line === "\n" ? <br key={i} /> : line
                                 )}
-                            </h1>
+                        </h1>
 
                             <p
-                                className="font-rubik font-normal text-lg lg:text-[1.125rem] leading-[1.625rem] tracking-normal mb-8 lg:mb-[2.8125rem] max-w-[34.375rem] text-sunbird-gray-75"
+                                className="font-rubik font-normal text-lg lg:text-[1.125rem] leading-[1.625rem] tracking-normal mb-8 lg:mb-[2.8125rem] max-w-[36.375rem] text-sunbird-gray-75"
+                                style={{ width: '600px' }}
                             >
                                 {t("hero.subtitle")}
                             </p>
@@ -55,7 +57,7 @@ const HeroWithStats = () => {
                             <Link to="/explore">
                                 <Button
                                     size="lg"
-                                    className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-white w-full lg:w-[20rem] h-[3.75rem] px-0 rounded-[0.75rem] shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-brick"
+                                    className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-white w-auto lg:w-auto h-[3.75rem] px-6 rounded-[0.75rem] shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-brick"
                                 >
                                     {t("hero.cta")}
                                     {isRTL ? (
@@ -69,7 +71,7 @@ const HeroWithStats = () => {
 
                         {/* Hero Image with teal shape - Right Side (becomes Left in RTL grid) */}
                         <div className="hidden lg:flex justify-end items-end relative h-[28rem] -mb-16 ">
-                            <div className="absolute bottom-[0.9375rem] right-[0.9375rem] w-[26.25rem]">
+                            <div className="absolute right-[0.9375rem] w-[26.25rem]">
                                 <img
                                     src={tealShape}
                                     alt=""
@@ -81,7 +83,7 @@ const HeroWithStats = () => {
                                 <img
                                     src={heroWoman}
                                     alt="Professional learning"
-                                    className="w-[55.5rem] h-[44.875rem] object-contain pb-[0.0625rem] pt-[9.975rem]"
+                                    className="w-[55.5rem] h-[42.875rem] object-contain pb-[0.0625rem] pt-[9.975rem]"
                                 />
                             </div>
                         </div>

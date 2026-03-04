@@ -32,11 +32,15 @@ const PageLayout = () => {
   const { t } = useAppI18n();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    setIsSidebarOpen(!isMobile);
-  }, [isMobile]);
+    if (location.pathname.startsWith('/explore')) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(!isMobile);
+    }
+  }, [isMobile, location.pathname]);
 
   const activeNav = getActiveNav(location.pathname);
 

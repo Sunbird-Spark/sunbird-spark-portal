@@ -8,6 +8,7 @@
   "loading": "Chargement...",
   "error": "Une erreur s'est produite",
   "success": "Succès",
+  "name": "Nom",
   "cancel": "Annuler",
   "save": "Enregistrer",
   "delete": "Supprimer",
@@ -242,7 +243,16 @@
     "contentStatusNotViewed": "Non consulté",
     "selfAssessMaxAttempt": "Vous avez atteint le nombre maximum de tentatives pour cette évaluation.",
     "selfAssessLastAttempt": "Ceci est votre dernière tentative pour cette évaluation.",
-    "attemptsLabel": "Tentative {{current}} sur {{max}}"
+    "attemptsLabel": "Tentative {{current}} sur {{max}}",
+    "forceSync": "Synchroniser la progression maintenant",
+    "forceSyncSuccess": "Vous pouvez consulter la progression mise à jour du cours sous 24 heures",
+    "forceSyncCooldown": "Veuillez patienter avant de resynchroniser.",
+    "leaveCourse": "Quitter le cours",
+    "leaveCourseTitle": "Désinscription du lot",
+    "leaveCourseDescription": "Voulez-vous vous désinscrire de ce lot ?",
+    "leaveCourseError": "Impossible de quitter le cours. Veuillez réessayer.",
+    "enrolSuccess": "Inscription au cours pour ce lot réussie",
+    "unenrolSuccess": "Désinscription du lot réussie"
   },
   "profileDataSharing": {
     "cardTitle": "Partage des données de profil",
@@ -410,12 +420,25 @@
   },
   "common": {
     "notifications": "Notifications",
-    "language": "Langue"
+    "language": "Langue",
+    "manage": "Gérer",
+    "backTo": "Retour à {{page}}",
+    "upcomingBatches": "Lots à venir",
+    "learningProgress": "Progression de l'apprentissage",
+    "downloadCertificate": "Télécharger le certificat",
+    "manage": "Gérer",
+    "backTo": "Retour à {{page}}",
+    "upcomingBatches": "Lots à venir",
+    "learningProgress": "Progression de l'apprentissage",
+    "downloadCertificate": "Télécharger le certificat"
   },
   "myLearning": {
     "loading": "Chargement de votre apprentissage...",
     "errorLoading": "Échec du chargement de votre progression d'apprentissage. Veuillez réessayer plus tard.",
-    "mainNavigation": "Navigation principale"
+    "mainNavigation": "Navigation principale",
+    "learningProgress": "Progression de l'apprentissage",
+    "lessonVisited": "Leçon visitée",
+    "contentsCompleted": "Contenus terminés"
   },
   "onboarding": {
     "altSunbird": "Sunbird",
@@ -462,6 +485,49 @@
     "startingEditor": "Démarrage de l'éditeur",
     "launchingEditor": "Lancement de l'éditeur {{name}}...",
     "enterContentName": "Saisir le nom du contenu",
+    "editorOptions": {
+      "quiz": "Quiz et évaluation",
+      "story": "Histoire et jeu",
+      "course": "Cours",
+      "collection": "Collection",
+      "questionSet": "Ensemble de questions"
+    },
+    "collectionDescriptions": {
+      "course": "Entrez une description pour le cours",
+      "contentPlaylist": "Entrez une description pour la collection",
+      "digitalTextbook": "Entrez une description pour le manuel numérique",
+      "questionPaper": "Entrez une description pour le questionnaire"
+    },
+    "errors": {
+      "unexpectedResponse": "Réponse inattendue du serveur. Veuillez réessayer.",
+      "creationFailed": "Échec de la création",
+      "unableToCreate": "Impossible de créer le contenu. Veuillez réessayer."
+    },
+    "stats": {
+      "published": "Publié",
+      "inReview": "En révision",
+      "drafts": "Brouillons",
+      "allUploads": "Tous les téléchargements",
+      "myCollaborations": "Mes collaborations"
+    },
+    "tableHeaders": {
+      "title": "Titre",
+      "type": "Type",
+      "status": "Statut",
+      "modified": "Modifié",
+      "actions": "Actions"
+    },
+    "emptyStates": {
+      "noUploadsTitle": "Aucun téléchargement",
+      "noUploadsDesc": "Téléchargez des fichiers PDF, vidéo ou autre contenu pour commencer.",
+      "noCollaborationsTitle": "Aucune collaboration",
+      "noCollaborationsDesc": "Le contenu partagé avec vous apparaîtra ici."
+    },
+    "name": "Nom",
+    "enterName": "Entrez le nom de {{type}}",
+    "description": "Description",
+    "collectionType": "Type de collection",
+    "creating": "Création...",
     "review": {
       "errorTitle": "Erreur",
       "failedToLoadForm": "Impossible de charger le formulaire {{action}}.",
@@ -511,6 +577,9 @@
     "profile": "Profil",
     "helpAndSupport": "Aide et support",
     "logout": "Déconnexion",
+    "userReport": "Rapport utilisateur",
+    "adminReports": "Rapports administrateur",
+    "userManagement": "Gestion des utilisateurs",
     "expand": "Développer le panneau",
     "collapse": "Réduire le panneau"
   },
@@ -742,7 +811,8 @@
     "yes": "Oui",
     "no": "Non",
     "criteriaMustBeMet": "Les critères doivent être remplis pour réémettre",
-    "reissueCertificate": "Réémettre le certificat"
+    "reissueCertificate": "Réémettre le certificat",
+    "viewOnly": "Lecture seule"
   },
   "homePageDemo": {
     "course1": "Cours 1",
@@ -768,18 +838,73 @@
     "inactive": "Inactif",
     "completed": "Terminé",
     "ongoing": "En cours",
-    "upcoming": "À venir"
+    "upcoming": "À venir",
+    "processing": "En cours de traitement"
   },
   "tabs": {
     "batches": "Lots",
     "certificates": "Certificats",
     "all": "Tous"
   },
-  "common": {
-    "manage": "Gérer",
-    "backTo": "Retour à {{page}}",
-    "upcomingBatches": "Lots à venir",
-    "learningProgress": "Progression de l'apprentissage",
-    "downloadCertificate": "Télécharger le certificat"
+  "profileLearning": {
+    "loadingCourses": "Chargement de vos cours...",
+    "failedToLoadCourses": "Échec du chargement des cours. Veuillez réessayer.",
+    "viewLess": "Voir Moins",
+    "viewMoreCourses": "Voir Plus de Cours",
+    "noCertificate": "Pas de certificat",
+    "noCoursesEnrolled": "Aucun cours inscrit pour le moment.",
+    "noFilteredCourses": "Aucun cours {{filter}} trouvé.",
+    "downloading": "Téléchargement...",
+    "myLearning": "Mon apprentissage",
+    "filter": "Filtre"
+  },
+  "tncPopup": {
+    "title": "Termes et Conditions Mis à Jour",
+    "description": "Veuillez consulter et accepter les termes et conditions mis à jour",
+    "checkboxLabel": "J'ai lu et j'accepte les Termes et Conditions",
+    "accept": "Accepter",
+    "accepting": "Acceptation...",
+    "acceptedTitle": "Termes Acceptés",
+    "acceptedDescription": "Merci d'avoir accepté les termes et conditions mis à jour.",
+    "errorTitle": "Échec de l'Acceptation",
+    "errorDescription": "Échec de l'acceptation des termes et conditions. Veuillez réessayer.",
+    "refreshErrorTitle": "Échec de l'Actualisation",
+    "refreshErrorDescription": "Échec de l'actualisation du profil utilisateur. Veuillez réessayer.",
+    "continue": "Continuer",
+    "acceptAndContinue": "Accepter et Continuer"
+  },
+  "trackableCollection": {
+    "completed": "Terminé"
+  },
+  "userReport": {
+    "title": "Rapport utilisateur",
+    "courseProgress": "Progression du cours",
+    "certificates": "Certificats",
+    "assessmentHistory": "Historique des évaluations",
+    "coursesCompleted": "Cours terminés",
+    "coursesPending": "Cours en attente",
+    "certificatesIssued": "Certificats délivrés",
+    "contentCompleted": "Contenu terminé",
+    "assessmentsCompleted": "Évaluations effectuées",
+    "course": "Cours",
+    "progress": "Progression",
+    "status": "Statut",
+    "enrolled": "Inscrit",
+    "lastAccessed": "Dernier accès",
+    "certificateId": "ID du certificat",
+    "issuedDate": "Date de délivrance",
+    "assessment": "Évaluation",
+    "score": "Score",
+    "max": "Max",
+    "result": "Résultat",
+    "date": "Date"
+  },
+  "editors": {
+    "errorTitle": "Erreur de l'éditeur",
+    "goBack": "Retour",
+    "loading": "Chargement de l'éditeur...",
+    "preparing": "Préparation de l'environnement de l'éditeur...",
+    "genericEditor": "Éditeur générique",
+    "contentEditor": "Éditeur de contenu"
   }
 }

@@ -4,14 +4,15 @@ import ContentNameDialog from './ContentNameDialog';
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => {
+    t: (key: string, params?: Record<string, string>) => {
       const translations: Record<string, string> = {
         'create': 'Create',
         'content.label': 'Content',
-        'workspace.enterContentName': 'Enter Content Name',
-        'name': 'Name',
+        'workspace.enterName': 'Enter {{type}} name',
+        'workspace.name': 'Name',
         'workspace.description': 'Description',
         'workspace.enterDescription': 'Enter a description',
+        'workspace.fillDetails': 'Fill in the details to create your content',
         'collection.label': 'Collection',
         'workspace.selectCollectionType': 'Select a collection type',
         'cancel': 'Cancel',
@@ -21,7 +22,13 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'collection.digitalTextbook': 'Digital Textbook',
         'collection.questionPaper': 'Question Paper',
       };
-      return translations[key] || key;
+      let result = translations[key] ?? key;
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+          result = result.replace(`{{${k}}}`, String(v));
+        });
+      }
+      return result;
     },
   }),
 }));

@@ -6,6 +6,7 @@
     "closeMenu": "Close menu"
   },
   "loading": "Loading...",
+  "name": "Name",
   "error": "An error occurred",
   "success": "Success",
   "cancel": "Cancel",
@@ -242,7 +243,16 @@
     "contentStatusNotViewed": "Not viewed",
     "selfAssessMaxAttempt": "You have reached the maximum number of attempts for this assessment.",
     "selfAssessLastAttempt": "This is your last attempt for this assessment.",
-    "attemptsLabel": "Attempt {{current}} of {{max}}"
+    "attemptsLabel": "Attempt {{current}} of {{max}}",
+    "forceSync": "Sync progress now",
+    "forceSyncSuccess": "You can view your updated course progress within 24 hours",
+    "forceSyncCooldown": "Please wait before syncing again.",
+    "leaveCourse": "Leave course",
+    "leaveCourseTitle": "Batch Unenrolment",
+    "leaveCourseDescription": "Do you want to unenrol from this batch?",
+    "leaveCourseError": "Unable to leave the course. Please try again.",
+    "enrolSuccess": "Course enroled for this batch successfully",
+    "unenrolSuccess": "User unenroled from the batch successfully"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
@@ -420,7 +430,10 @@
   "myLearning": {
     "loading": "Loading your learning...",
     "errorLoading": "Failed to load your learning progress. Please try again later.",
-    "mainNavigation": "Main Navigation"
+    "mainNavigation": "Main Navigation",
+    "learningProgress": "Learning Progress",
+    "lessonVisited": "Lesson visited",
+    "contentsCompleted": "Contents completed"
   },
   "onboarding": {
     "altSunbird": "Sunbird",
@@ -467,6 +480,49 @@
     "startingEditor": "Starting Editor",
     "launchingEditor": "Launching {{name}} editor...",
     "enterContentName": "Enter content name",
+    "editorOptions": {
+      "quiz": "Quiz & Assessment",
+      "story": "Story & Game",
+      "course": "Course",
+      "collection": "Collection",
+      "questionSet": "Question Set"
+    },
+    "collectionDescriptions": {
+      "course": "Enter description for Course",
+      "contentPlaylist": "Enter description for Collection",
+      "digitalTextbook": "Enter description for Digital Textbook",
+      "questionPaper": "Enter description for Question Paper"
+    },
+    "errors": {
+      "unexpectedResponse": "Unexpected server response. Please try again.",
+      "creationFailed": "Creation Failed",
+      "unableToCreate": "Unable to create content. Please try again."
+    },
+    "stats": {
+      "published": "Published",
+      "inReview": "In Review",
+      "drafts": "Drafts",
+      "allUploads": "All Uploads",
+      "myCollaborations": "My Collaborations"
+    },
+    "tableHeaders": {
+      "title": "Title",
+      "type": "Type",
+      "status": "Status",
+      "modified": "Modified",
+      "actions": "Actions"
+    },
+    "emptyStates": {
+      "noUploadsTitle": "No uploads yet",
+      "noUploadsDesc": "Upload PDF, video, or other content files to get started.",
+      "noCollaborationsTitle": "No collaborations",
+      "noCollaborationsDesc": "Content shared with you will appear here."
+    },
+    "name": "Name",
+    "enterName": "Enter {{type}} name",
+    "description": "Description",
+    "collectionType": "Collection Type",
+    "creating": "Creating...",
     "review": {
       "errorTitle": "Error",
       "failedToLoadForm": "Failed to load {{action}} form.",
@@ -519,7 +575,6 @@
     "userReport": "User Report",
     "adminReports": "Admin Reports",
     "userManagement": "User Management",
-    "userConsent": "User Consent",
     "expand": "Expand Sidebar",
     "collapse": "Collapse Sidebar"
   },
@@ -679,7 +734,11 @@
     "acceptedTitle": "Terms Accepted",
     "acceptedDescription": "Thank you for accepting the updated terms and conditions.",
     "errorTitle": "Acceptance Failed",
-    "errorDescription": "Failed to accept terms and conditions. Please try again."
+    "errorDescription": "Failed to accept terms and conditions. Please try again.",
+    "refreshErrorTitle": "Refresh Failed",
+    "refreshErrorDescription": "Failed to refresh user profile. Please try again.",
+    "continue": "Continue",
+    "acceptAndContinue": "Accept & Continue"
   },
   "workspaceCard": {
     "locked": "Locked",
@@ -759,8 +818,11 @@
     "noCertificateRecords": "No certificate records found for \"{{userName}}\".",
     "certificateIssued": "Certificate Issued",
     "courseCompleted": "Course Completed",
+    "yes": "Yes",
+    "no": "No",
     "criteriaMustBeMet": "Criteria must be met to re-issue",
-    "reissueCertificate": "Re-issue certificate"
+    "reissueCertificate": "Re-issue certificate",
+    "viewOnly": "View only"
   },
   "homePageDemo": {
     "course1": "Course 1",
@@ -786,11 +848,59 @@
     "inactive": "Inactive",
     "completed": "Completed",
     "ongoing": "Ongoing",
-    "upcoming": "Upcoming"
+    "upcoming": "Upcoming",
+    "processing": "Processing"
   },
   "tabs": {
     "batches": "Batches",
     "certificates": "Certificates",
     "all": "All"
+  },
+  "profileLearning": {
+    "loadingCourses": "Loading your courses...",
+    "failedToLoadCourses": "Failed to load courses. Please try again.",
+    "viewLess": "View Less",
+    "viewMoreCourses": "View More Courses",
+    "noCertificate": "No certificate",
+    "noCoursesEnrolled": "No courses enrolled yet.",
+    "noFilteredCourses": "No {{filter}} courses found.",
+    "downloading": "Downloading...",
+    "myLearning": "My Learning",
+    "filter": "Filter"
+  },
+
+  "trackableCollection": {
+    "completed": "Completed"
+  },
+  "userReport": {
+    "title": "User Report",
+    "courseProgress": "Course Progress",
+    "certificates": "Certificates",
+    "assessmentHistory": "Assessment History",
+    "coursesCompleted": "Courses Completed",
+    "coursesPending": "Courses Pending",
+    "certificatesIssued": "Certificates Issued",
+    "contentCompleted": "Content Completed",
+    "assessmentsCompleted": "Assessments Done",
+    "course": "Course",
+    "progress": "Progress",
+    "status": "Status",
+    "enrolled": "Enrolled",
+    "lastAccessed": "Last Accessed",
+    "certificateId": "Certificate ID",
+    "issuedDate": "Issued Date",
+    "assessment": "Assessment",
+    "score": "Score",
+    "max": "Max",
+    "result": "Result",
+    "date": "Date"
+  },
+  "editors": {
+    "errorTitle": "Editor Error",
+    "goBack": "Go Back",
+    "loading": "Loading Editor...",
+    "preparing": "Preparing the editor environment...",
+    "genericEditor": "Generic Editor",
+    "contentEditor": "Content Editor"
   }
 }

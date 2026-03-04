@@ -1,6 +1,6 @@
 import express from 'express';
 import { kongProxy } from '../proxies/kongProxy.js';
-import { keycloak } from '../auth/keycloakProvider.js';
+import { oidcSession, requireAuth } from '../auth/oidcMiddleware.js';
 import { sessionMiddleware } from '../middlewares/conditionalSession.js';
 import reviewCommentRoutes from './reviewCommentRoutes.js';
 
@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Review comment routes - handle directly in portal backend (not proxied to Kong)
 // Called by external editor as /action/review/comment/v1/*
-router.use('/review/comment/v1', sessionMiddleware, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), reviewCommentRoutes);
+router.use('/review/comment/v1', sessionMiddleware, oidcSession(), requireAuth(), reviewCommentRoutes);
 
 const editorRoutes: string[] = [
     '/object/category/definition/*rest',
@@ -20,6 +20,6 @@ const editorRoutes: string[] = [
     '/framework/v1/read/*rest',
 ];
 
-router.all(editorRoutes, sessionMiddleware, keycloak.middleware({ admin: '/home', logout: '/portal/logout' }), keycloak.protect(), kongProxy);
+router.all(editorRoutes, sessionMiddleware, oidcSession(), requireAuth(), kongProxy);
 
 export default router;

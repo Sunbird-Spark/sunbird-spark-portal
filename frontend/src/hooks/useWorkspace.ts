@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { ContentService } from '@/services/ContentService';
 import { mapContentToWorkspaceItem } from '@/services/workspace';
@@ -78,19 +78,24 @@ export function useWorkspace({
   // Reviewer tabs (pending-review, my-published) show other people's content.
   const isReviewerTab = isReviewerMode && ['pending-review', 'my-published'].includes(activeTab);
 
-  // ── Counts query (runs once per role, shared across tabs) ──────────────
+  // Derive primaryCategory filter from typeFilter (shared by both counts and content queries).
+  const primaryCategoryFilter =
+    getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
+
+  // ── Counts query (per role + typeFilter, shared across tabs) ───────────
   // Both modes use facets (limit=1) for lightweight counting.
   // Creator mode: scoped to the user's own content.
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
+  // typeFilter is included so tab badges and stats update when a type is selected.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
           createdBy: isReviewerMode ? { '!=': userId ?? '' } : (userId ?? ''),
           ...(isReviewerMode && orgId ? { createdFor: [orgId] } : {}),
           status: [...WORKSPACE_STATUS_FILTER],
-          primaryCategory: [...WORKSPACE_PRIMARY_CATEGORY_FILTER],
+          primaryCategory: primaryCategoryFilter,
         },
         facets: ['status'],
         limit: 1,
@@ -116,8 +121,6 @@ export function useWorkspace({
 
   // ── Content query (per tab, paginated) ────────────────────────────────
   const statusFilter = getStatusFilterForTab(activeTab);
-  const primaryCategoryFilter =
-    getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
   // Special filters for uploads and collaborations tabs
   const getFiltersForTab = useCallback(() => {
@@ -190,6 +193,32 @@ export function useWorkspace({
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = contentQuery;
 
+  // Track which tab the last completed fetch (initial or paginating) belongs to.
+  // This prevents stale cached data from a previous tab visit being shown
+  // while fresh data is loading — which will prevent tabs caching issue. We only show the content once the API has responded for
+  // the current tab; infinite-scroll "load more" is excluded by the
+  // isLoadingCurrentTab guard (which checks !isFetchingNextPage).
+  const lastFetchedTabRef = useRef<WorkspaceView | null>(null);
+
+  useEffect(() => {
+    if (!contentQuery.isFetching && contentQuery.isSuccess) {
+      lastFetchedTabRef.current = activeTab;
+    }
+  }, [contentQuery.isFetching, contentQuery.isSuccess, activeTab]);
+
+  // True when:
+  //   1. Initial load — no data in cache yet
+  //   2. Tab changed — a background refetch is in progress and we haven't
+  //      received a fresh response for the current tab yet (prevents stale
+  //      cached data from a different tab visit being rendered)
+  // NOT true for:
+  //   - Infinite-scroll "load more" (isFetchingNextPage guards it out)
+  //   - Same-tab background refreshes after delete/create
+  //     (lastFetchedTabRef already equals activeTab → condition is false)
+  const isLoadingCurrentTab =
+    contentQuery.isLoading ||
+    (contentQuery.isFetching && !isFetchingNextPage && lastFetchedTabRef.current !== activeTab);
+
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();
@@ -216,7 +245,7 @@ export function useWorkspace({
     contents,
     counts,
     totalCount,
-    isLoading: contentQuery.isLoading,
+    isLoading: isLoadingCurrentTab,
     isLoadingMore: isFetchingNextPage,
     isCountsLoading: countsQuery.isLoading,
     isRefreshing: contentQuery.isRefetching && !contentQuery.isLoading && !isFetchingNextPage,

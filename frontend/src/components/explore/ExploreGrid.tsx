@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import { FilterState } from "../../pages/Explore";
 import { useContentSearch } from "../../hooks/useContent";
@@ -26,13 +26,13 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
     const [hasMore, setHasMore] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
-    const observerTarget = useRef<HTMLDivElement>(null);
+    const observerInstanceRef = useRef<IntersectionObserver | null>(null);
     const limit = 9;
 
     // Build active filters — memoized to prevent infinite re-renders
     const activeFilters = useMemo(() => {
         return {
-            objectType: 'Content',
+            objectType: ['Content', 'QuestionSet'],
             ...Object.fromEntries(
                 Object.entries(filters).filter(([, values]) => values.length > 0)
             ),
@@ -67,8 +67,11 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
 
     // Update display items when data arrives
     useEffect(() => {
-        if (data?.data?.content) {
-            const newContent = data.data.content;
+        if (data?.data?.content || data?.data?.QuestionSet) {
+            const newContent = [
+                ...(data.data?.content ?? []),
+                ...(data.data?.QuestionSet ?? []),
+            ];
             if (newContent.length < limit) {
                 setHasMore(false);
             }
@@ -96,30 +99,34 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
         }
     }, [queryError]);
 
-    // Infinite scroll observer — created once on mount.
-    // State is read via refs so the observer never needs to be torn down and
-    // re-registered (which would cause an immediate re-fire if the target is
-    // already in the viewport, leading to infinite fetches).
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            entries => {
-                if (
-                    entries?.[0]?.isIntersecting &&
-                    hasMoreRef.current &&
-                    !isQueryLoadingRef.current &&
-                    displayItemsLengthRef.current > 0
-                ) {
-                    setOffset(prev => prev + limit);
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        if (observerTarget.current) {
-            observer.observe(observerTarget.current);
+    // Callback ref for the scroll sentinel. Using a callback ref (instead of
+    // useRef + useEffect[]) ensures the observer is attached as soon as the
+    // element actually mounts — which only happens after the initial load
+    // completes (the PageLoader early-return means the sentinel div is absent
+    // from the DOM during the first render, so a one-time useEffect would
+    // never observe it).
+    const observerTarget = useCallback((node: HTMLDivElement | null) => {
+        if (observerInstanceRef.current) {
+            observerInstanceRef.current.disconnect();
+            observerInstanceRef.current = null;
         }
-
-        return () => observer.disconnect();
+        if (node) {
+            const observer = new IntersectionObserver(
+                entries => {
+                    if (
+                        entries?.[0]?.isIntersecting &&
+                        hasMoreRef.current &&
+                        !isQueryLoadingRef.current &&
+                        displayItemsLengthRef.current > 0
+                    ) {
+                        setOffset(prev => prev + limit);
+                    }
+                },
+                { threshold: 0.1 }
+            );
+            observer.observe(node);
+            observerInstanceRef.current = observer;
+        }
     }, []);
 
     const isLoading = isQueryLoading && offset === 0;
