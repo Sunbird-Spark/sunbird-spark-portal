@@ -38,7 +38,10 @@ router.get('/login',
 
             // Build authorization URL using OIDC Discovery endpoints
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
-            const promptParam = req.query.prompt as string | undefined;
+            const rawPrompt = req.query.prompt as string | undefined;
+            const allowedPrompts = ['none', 'login', 'consent', 'select_account'];
+            const promptParam = allowedPrompts.includes(rawPrompt as string) ? rawPrompt : undefined;
+
             const redirectTo = oidcClient.buildAuthorizationUrl(config, {
                 redirect_uri: callbackUrl,
                 scope: 'openid',
