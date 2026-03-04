@@ -145,6 +145,8 @@ export default function CollectionContentArea({
                 className="w-full flex items-center justify-center gap-2 font-['Rubik'] text-sunbird-brick border-sunbird-brick hover:bg-sunbird-brick/5 bg-white shadow-sm"
                 onClick={() => navigate(`/collection/${collectionId}/dashboard/batches`)}
                 data-testid="view-dashboard-btn"
+                data-edataid="view-course-dashboard"
+                data-pageid="collection-detail"
               >
                 <FiLayout className="w-4 h-4" />
                 View Course Dashboard

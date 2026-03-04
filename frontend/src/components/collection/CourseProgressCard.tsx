@@ -90,6 +90,8 @@ const CourseProgressCard = ({
                     : t("courseDetails.forceSync")
                 }
                 disabled={isLoading}
+                data-edataid="course-progress-menu-toggle"
+                data-pageid="collection-detail"
               >
                 <FiMoreVertical className="w-5 h-5" />
               </button>
@@ -99,6 +101,8 @@ const CourseProgressCard = ({
                 onClick={showUnenrollOption ? onUnenroll : onForceSync}
                 disabled={isLoading}
                 className="font-rubik cursor-pointer text-sunbird-obsidian focus:bg-sunbird-brick/10 focus:text-sunbird-brick"
+                data-edataid={showUnenrollOption ? "course-unenroll" : "course-force-sync"}
+                data-pageid="collection-detail"
               >
                 {isLoading
                   ? t("loading")

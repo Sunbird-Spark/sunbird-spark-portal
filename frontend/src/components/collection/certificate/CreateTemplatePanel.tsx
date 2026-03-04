@@ -151,6 +151,8 @@ export function CreateTemplatePanel({
           type="button"
           onClick={() => { setView("main"); setErrorMsg(""); }}
           className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+          data-edataid="create-template-back"
+          data-pageid="course-consumption"
         >
           Cancel
         </button>
@@ -158,6 +160,9 @@ export function CreateTemplatePanel({
           type="button"
           disabled={!isNewTmplValid || createLoading}
           onClick={handleSaveNewTemplate}
+          data-edataid="create-template-save"
+          data-edatatype="SUBMIT"
+          data-pageid="course-consumption"
           className={cn(
             "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
             !isNewTmplValid || createLoading

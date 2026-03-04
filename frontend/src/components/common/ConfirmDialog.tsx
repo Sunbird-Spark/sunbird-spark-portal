@@ -86,6 +86,7 @@ export default function ConfirmDialog({
             onClick={onConfirm}
             disabled={isLoading}
             className={confirmButtonClass}
+            data-edataid="confirm-dialog-confirm"
             {...confirmButtonProps}
           >
             {isLoading ? t("confirmDialog.pleaseWait") : resolvedConfirmLabel}
