@@ -7,10 +7,10 @@ import { saveSession } from '../utils/sessionUtils.js';
 export const registerDeviceWithKong = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
         logger.info(`registerDeviceWithKong :: ${req.method} ${req.originalUrl}`);
-        const isAnonymous = !req.session.userId;
-
         // Reuse existing token — only refresh if session is near expiry
         if (req.session.kongToken) {
+            const isAnonymous = !req.session.userId;
+
             if (!isSessionNearExpiry(req)) {
                 if (isAnonymous) {
                     logger.info('ANONYMOUS_KONG_TOKEN :: session still valid, skipping refresh');

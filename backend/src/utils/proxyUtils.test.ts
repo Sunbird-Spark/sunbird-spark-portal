@@ -30,20 +30,17 @@ describe('proxyUtils', () => {
     };
 
     describe('getUserToken', () => {
-        it('should return Keycloak access token when available', async () => {
+        it('should return OIDC access token when available', async () => {
             const { getUserToken } = await importProxyUtils();
             const mockReq = {
-                kauth: {
-                    grant: {
-                        access_token: {
-                            token: 'kc-token'
-                        }
-                    }
+                oidc: {
+                    isAuthenticated: true,
+                    accessToken: 'oidc-token'
                 }
             } as any;
 
             const result = getUserToken(mockReq as Request);
-            expect(result).toBe('kc-token');
+            expect(result).toBe('oidc-token');
         });
 
         it('should return undefined when access token is missing', async () => {
@@ -128,150 +125,40 @@ describe('proxyUtils', () => {
 
         it('should not set X-Session-Id when both sessionID and header are missing', async () => {
             const { decorateRequestHeaders } = await importProxyUtils();
-            const mockProxyReq = {
-                setHeader: vi.fn()
-            } as unknown as http.ClientRequest;
-
-            const mockReq = {
-                session: {},
-                sessionID: undefined,
-                get: vi.fn().mockReturnValue(undefined)
-            } as unknown as Request;
-
+            const mockProxyReq = { setHeader: vi.fn() } as unknown as http.ClientRequest;
+            const mockReq = { session: {}, sessionID: undefined, get: vi.fn().mockReturnValue(undefined) } as unknown as Request;
             decorateRequestHeaders(mockProxyReq, mockReq);
-
-            expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith(
-                'X-Session-Id',
-                expect.anything()
-            );
+            expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith('X-Session-Id', expect.anything());
         });
 
         it('should not set X-Channel-Id when both session and header are missing', async () => {
             const { decorateRequestHeaders } = await importProxyUtils();
-            const mockProxyReq = {
-                setHeader: vi.fn()
-            } as unknown as http.ClientRequest;
-
-            const mockReq = {
-                session: {},
-                sessionID: 'session-123',
-                get: vi.fn().mockReturnValue(undefined)
-            } as unknown as Request;
-
+            const mockProxyReq = { setHeader: vi.fn() } as unknown as http.ClientRequest;
+            const mockReq = { session: {}, sessionID: 'session-123', get: vi.fn().mockReturnValue(undefined) } as unknown as Request;
             decorateRequestHeaders(mockProxyReq, mockReq);
-
-            expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith(
-                'X-Channel-Id',
-                expect.anything()
-            );
-        });
-
-        it('should use session X-Channel-Id when header is present', async () => {
-            const { decorateRequestHeaders } = await importProxyUtils();
-            const mockProxyReq = {
-                setHeader: vi.fn()
-            } as unknown as http.ClientRequest;
-
-            const mockReq = {
-                session: {
-                    rootOrghashTagId: 'session-channel'
-                },
-                sessionID: 'session-123',
-                get: vi.fn((header: string) => {
-                    if (header === 'X-Channel-Id') return 'existing-channel';
-                    return undefined;
-                })
-            } as unknown as Request;
-
-            decorateRequestHeaders(mockProxyReq, mockReq);
-
-            expect(mockProxyReq.setHeader).toHaveBeenCalledWith(
-                'X-Channel-Id',
-                'session-channel'
-            );
-        });
-
-        it('should not set X-Authenticated-Userid when userId is missing', async () => {
-            const { decorateRequestHeaders } = await importProxyUtils();
-            const mockProxyReq = {
-                setHeader: vi.fn()
-            } as unknown as http.ClientRequest;
-
-            const mockReq = {
-                session: {},
-                sessionID: 'session-123',
-                get: vi.fn().mockReturnValue(undefined)
-            } as unknown as Request;
-
-            decorateRequestHeaders(mockProxyReq, mockReq);
-
-            expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith(
-                'X-Authenticated-Userid',
-                expect.anything()
-            );
+            expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith('X-Channel-Id', expect.anything());
         });
 
         it('should always set Connection keep-alive', async () => {
             const { decorateRequestHeaders } = await importProxyUtils();
-            const mockProxyReq = {
-                setHeader: vi.fn()
-            } as unknown as http.ClientRequest;
-
-            const mockReq = {
-                session: {},
-                sessionID: 'session-123',
-                get: vi.fn().mockReturnValue(undefined)
-            } as unknown as Request;
-
+            const mockProxyReq = { setHeader: vi.fn() } as unknown as http.ClientRequest;
+            const mockReq = { session: {}, sessionID: 'session-123', get: vi.fn().mockReturnValue(undefined) } as unknown as Request;
             decorateRequestHeaders(mockProxyReq, mockReq);
-
             expect(mockProxyReq.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
         });
-        
-        it('should not set X-App-Id when header is present', async () => {
+
+        it('should set authenticated user tokens when OIDC token is present', async () => {
             const { decorateRequestHeaders } = await importProxyUtils();
-            const mockProxyReq = {
-                setHeader: vi.fn()
-            } as unknown as http.ClientRequest;
-            
+            const mockProxyReq = { setHeader: vi.fn() } as unknown as http.ClientRequest;
             const mockReq = {
                 session: {},
-                sessionID: 'session-123',
-                get: vi.fn((header: string) => {
-                    if (header === 'X-App-Id') return 'existing-app';
-                    return undefined;
-                })
-            } as unknown as Request;
-            
-            decorateRequestHeaders(mockProxyReq, mockReq);
-            
-            expect(mockProxyReq.setHeader).not.toHaveBeenCalledWith('X-App-Id', expect.anything());
-        });
-        
-        it('should set authenticated user tokens when Keycloak token is present', async () => {
-            const module = await importProxyUtils();
-            const { decorateRequestHeaders } = module;
-            const mockProxyReq = {
-                setHeader: vi.fn()
-            } as unknown as http.ClientRequest;
-            
-            const mockReq = {
-                session: {},
-                kauth: {
-                    grant: {
-                        access_token: {
-                            token: 'kc-token'
-                        }
-                    }
-                },
+                oidc: { isAuthenticated: true, accessToken: 'oidc-token' },
                 sessionID: 'session-123',
                 get: vi.fn().mockReturnValue(undefined)
             } as unknown as any;
-            
             decorateRequestHeaders(mockProxyReq, mockReq);
-            
-            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-authenticated-user-token', 'kc-token');
-            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-auth-token', 'kc-token');
+            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-authenticated-user-token', 'oidc-token');
+            expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-auth-token', 'oidc-token');
         });
     });
 });

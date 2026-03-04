@@ -25,7 +25,7 @@ import logger from './logger.js';
 import { generateLoggedInKongToken, generateKongToken } from '../services/kongAuthService.js';
 
 describe('sessionUtils', () => {
-    let mockReq: Request; // Correct type annotation
+    let mockReq: Request;
     let mockSession: any;
 
     beforeEach(() => {
@@ -35,8 +35,7 @@ describe('sessionUtils', () => {
             id: 'old-session-id',
             save: vi.fn((cb) => cb && cb(null)),
             regenerate: vi.fn((cb) => {
-                mockSession.id = 'new-session-id'; // Simulate ID change
-                // Also update the sessionID property on the request object, which is what is logged
+                mockSession.id = 'new-session-id';
                 (mockReq as any).sessionID = 'new-session-id';
                 cb && cb(null);
             }),
@@ -44,7 +43,6 @@ describe('sessionUtils', () => {
             cookie: {},
         };
 
-        // Correctly casting to partial Request then Request
         mockReq = {
             session: mockSession,
             sessionID: 'old-session-id',
@@ -62,7 +60,6 @@ describe('sessionUtils', () => {
         });
 
         it('should save the session successfully', async () => {
-            // Ensure mockSession is set
             await expect(saveSession(mockReq)).resolves.toBeUndefined();
             expect(mockSession.save).toHaveBeenCalled();
         });
@@ -81,21 +78,17 @@ describe('sessionUtils', () => {
         });
 
         it('should regenerate session and update tokens successfully', async () => {
-            // Setup initial state
-            mockSession['keycloak-token'] = 'old-keycloak-token';
+            mockSession['oidc-tokens'] = { access_token: 'old-access-token' };
             mockSession.auth_redirect_uri = '/dashboard';
 
-            // Mock dependencies
             (generateLoggedInKongToken as Mock).mockResolvedValue('new-kong-token');
 
             await regenerateSession(mockReq);
 
             expect(mockSession.regenerate).toHaveBeenCalled();
-            // Using logger directly
             expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Session regenerated old-session-id->new-session-id'));
 
-            // Verify session data restoration
-            expect(mockSession['keycloak-token']).toBe('old-keycloak-token');
+            expect(mockSession['oidc-tokens']).toEqual({ access_token: 'old-access-token' });
             expect(mockSession.auth_redirect_uri).toBe('/dashboard');
             expect(mockSession.kongToken).toBe('new-kong-token');
 
@@ -111,11 +104,6 @@ describe('sessionUtils', () => {
 
         it('should reject if generateLoggedInKongToken fails', async () => {
             (generateLoggedInKongToken as Mock).mockRejectedValue(new Error('Token generation failed'));
-
-            // regenerate calls the callback with error or success.
-            // But here regenerate implementation calls the callback, which initiates async operations.
-            // The promise returned by regenerateSession wraps this.
-
             await expect(regenerateSession(mockReq)).rejects.toThrow('Token generation failed');
             expect(logger.error).toHaveBeenCalledWith('Error generating new Kong token:', expect.any(Error));
         });
@@ -123,10 +111,8 @@ describe('sessionUtils', () => {
         it('should reject if session.save after regenerate fails', async () => {
             (generateLoggedInKongToken as Mock).mockResolvedValue('new-kong-token');
             const error = new Error('Save after regenerate failed');
-            // We need to allow regenerate to succeed, then fail on save
             mockSession.regenerate.mockImplementation((cb: Function) => cb(null));
             mockSession.save.mockImplementation((cb: Function) => cb(error));
-
             await expect(regenerateSession(mockReq)).rejects.toThrow('Save after regenerate failed');
             expect(logger.error).toHaveBeenCalledWith('Error saving regenerated session:', error);
         });
@@ -140,9 +126,7 @@ describe('sessionUtils', () => {
 
         it('should regenerate anonymous session with generated token', async () => {
             (generateKongToken as Mock).mockResolvedValue('generated-anon-token');
-
             await regenerateAnonymousSession(mockReq);
-
             expect(mockSession.regenerate).toHaveBeenCalled();
             expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Anonymous Session regenerated'));
             expect(mockSession.kongToken).toBe('generated-anon-token');
@@ -152,9 +136,7 @@ describe('sessionUtils', () => {
 
         it('should use fallback token if generateKongToken returns null', async () => {
             (generateKongToken as Mock).mockResolvedValue(null);
-
             await regenerateAnonymousSession(mockReq);
-
             expect(mockSession.kongToken).toBe('mock-fallback-token');
         });
 
@@ -175,7 +157,6 @@ describe('sessionUtils', () => {
             const error = new Error('Save failed');
             mockSession.regenerate.mockImplementation((cb: Function) => cb(null));
             mockSession.save.mockImplementation((cb: Function) => cb(error));
-
             await expect(regenerateAnonymousSession(mockReq)).rejects.toThrow('Save failed');
             expect(logger.error).toHaveBeenCalledWith('Error saving regenerated anonymous session:', error);
         });

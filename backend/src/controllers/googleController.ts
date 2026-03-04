@@ -70,7 +70,7 @@ export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
             req
         });
 
-        const userExists = await handleUserAuthentication(googleUser, client_id, req, res);
+        const userExists = await handleUserAuthentication(googleUser, client_id, req);
 
         redirectUrl = userExists ? '/home' : '/onboarding';
         return res.redirect(redirectUrl);

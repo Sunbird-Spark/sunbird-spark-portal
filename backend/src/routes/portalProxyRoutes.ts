@@ -3,7 +3,7 @@ import { userProxy } from '../proxies/userProxy.js';
 import { kongProxy } from '../proxies/kongProxy.js';
 import { validateRecaptcha } from '../middlewares/googleAuth.js';
 import { handlePassword } from '../middlewares/passwordHandler.js';
-import { keycloak } from '../auth/keycloakProvider.js';
+import { requireAuth } from '../auth/oidcMiddleware.js';
 
 const router = express.Router();
 
@@ -26,8 +26,6 @@ const recaptchaProtectedRoutes: string[] = [
 router.all(recaptchaProtectedRoutes, validateRecaptcha, kongProxy);
 // The catch-all proxy route
 // When this router is mounted at '/portal', this handler will match '/portal/*rest'.
-router.all('/*rest', keycloak.middleware({ admin: '/home', logout: '/portal/logout' }),
-    keycloak.protect(),
-    kongProxy);
+router.all('/*rest', requireAuth(), kongProxy);
 
 export default router;
