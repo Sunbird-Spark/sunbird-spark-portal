@@ -65,14 +65,19 @@ const CollectionOverview = ({
                   <p className="collection-player-error-text">{playerError.message}</p>
                 </div>
               )}
-              {!playerIsLoading && !playerError && playerMetadata && (
-                <ContentPlayer
-                  mimeType={playerMetadata.mimeType}
-                  metadata={playerMetadata}
-                  onPlayerEvent={onPlayerEvent}
-                  onTelemetryEvent={onTelemetryEvent}
-                />
-              )}
+              {!playerIsLoading && !playerError && playerMetadata && (() => {
+                const isVideoMime = ['video/x-youtube', 'video/webm', 'video/mp4'].includes(playerMetadata.mimeType);
+                return (
+                  <div className={isVideoMime ? undefined : 'collection-player-content'}>
+                    <ContentPlayer
+                      mimeType={playerMetadata.mimeType}
+                      metadata={playerMetadata}
+                      onPlayerEvent={onPlayerEvent}
+                      onTelemetryEvent={onTelemetryEvent}
+                    />
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             /* No Content Error */
