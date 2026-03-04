@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,9 @@ import { ProgressIndicator, OptionChip } from './OnboardingComponents';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
 
+import { useUpdateProfile } from "@/hooks/useUpdateProfile";
+import { useCurrentUserId } from "@/hooks/useUser";
+import { toast } from "@/hooks/useToast";
 const Onboarding = () => {
   const { t } = useAppI18n();
   const navigate = useNavigate();
@@ -25,6 +28,8 @@ const Onboarding = () => {
   
   useImpression({ type: 'view', pageid: 'onboarding' });
 
+  const { data: userId } = useCurrentUserId();
+  const updateProfile = useUpdateProfile();
   const { data: formApiData, isLoading, isError } = useFormRead({
     request: {
       type: "user",subType: "onboarding",action: "workflow",component: "portal",
@@ -43,19 +48,25 @@ const Onboarding = () => {
     }
   }, [onboardingData, currentScreenId, navigate]);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
   const handleBack = () => {
     if (screenHistory.length <= 1) return;
     const newHistory = screenHistory.slice(0, -1);
     setScreenHistory(newHistory);
     setCurrentScreenId(newHistory[newHistory.length - 1] ?? null);
   };
-  const handleSkip = () => {
-    if (!isSubmitting) navigate("/home");
+  const handleSkip = async () => {
+    if (isSubmitting || !userId) return;
+    setIsSubmitting(true);
+    try {
+      await updateProfile.mutateAsync({
+        request: { userId, framework: { onboardingDetails: { isSkipped: true, data: {} } } }
+      });
+      navigate("/home");
+    } catch {
+      toast({ variant: 'destructive', title: 'Failed to skip onboarding', description: 'Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const handleNext = () => {
     if (!onboardingData || !currentScreenId) return;
@@ -74,7 +85,8 @@ const Onboarding = () => {
       }
     }
   };
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (isSubmitting || !userId) return;
     setIsSubmitting(true);
     telemetry.audit({
       edata: {
@@ -91,8 +103,26 @@ const Onboarding = () => {
       },
     });
     timeoutRef.current = setTimeout(() => {setIsSubmitting(false);
+    const formattedData: Record<string, { values: string[] }> = {};
+    Object.entries(selections).forEach(([screenId, fieldId]) => {
+      const screen = onboardingData?.screens[screenId];
+      const field = screen?.fields.find(f => f.id === fieldId);
+      const value = field?.requiresTextInput && otherTexts[screenId] ? otherTexts[screenId] : fieldId;
+      formattedData[screenId] = { values: [value] };
+    });
+    try {
+      await updateProfile.mutateAsync({
+        request: {
+          userId,
+          framework: { onboardingDetails: { isSkipped: false, data: formattedData } }
+        }
+      });
       navigate("/home");
-    }, 1000);
+    } catch {
+      toast({ variant: 'destructive', title: 'Failed to save onboarding', description: 'Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const handleSelect = (fieldId: string) => {
     if (!currentScreenId) return;
@@ -151,7 +181,7 @@ const Onboarding = () => {
   const showOtherInput = !!selectedField?.requiresTextInput;
   const sortedFields = [...currentScreen.fields].sort((a, b) => a.index - b.index);
   const otherText = otherTexts[currentScreenId] ?? "";
-  const isSubmitDisabled = isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
+  const isSubmitDisabled = isSubmitting || !userId || !selectedFieldId || (showOtherInput && !otherText.trim());
   return (
     <div className="h-screen flex items-center justify-center bg-white p-4 md:p-6 lg:p-8">
       <div className="flex w-full max-w-7xl h-full max-h-[calc(100vh-4rem)] gap-6">
@@ -198,7 +228,7 @@ const Onboarding = () => {
                     <Input type="text"  placeholder={t('onboarding.otherPreferencePlaceholder')} value={otherText}
                       onChange={e => {
                         const value = e.target.value;
-                        setOtherTexts(prev => ({ ...prev, [currentScreenId]: value }));
+                        setOtherTexts(prev => ({ ...prev, [currentScreenId]: e.target.value }));
                       }}
                       className="onboarding-input"
                     />
@@ -226,7 +256,7 @@ const Onboarding = () => {
             </div>
           </div>
           <div className="mt-6">
-            <button type="button" onClick={handleSkip} disabled={isSubmitting} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            <button type="button" onClick={handleSkip} disabled={isSubmitting || !userId} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Skip Onboarding
             </button>
