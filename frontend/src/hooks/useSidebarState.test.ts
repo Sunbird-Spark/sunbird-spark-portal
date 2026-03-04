@@ -72,7 +72,7 @@ describe('useSidebarState', () => {
     });
 
     expect(result.current.isOpen).toBe(false);
-    expect(localStorage.getItem(SIDEBAR_STATE_KEY)).toBe('false');
+    expect(localStorage.getItem(SIDEBAR_STATE_KEY)).toBeNull();
     expect(localStorage.getItem(SIDEBAR_USER_TOGGLED_KEY)).toBeNull();
   });
 
@@ -117,5 +117,43 @@ describe('useSidebarState', () => {
       result.current.toggleSidebar();
     });
     expect(result.current.isOpen).toBe(true);
+  });
+
+  it('should update isOpen when defaultState changes and user has not toggled', () => {
+    // Ensure no prior user toggle state is stored
+    expect(localStorage.getItem(SIDEBAR_USER_TOGGLED_KEY)).toBeNull();
+    expect(localStorage.getItem(SIDEBAR_STATE_KEY)).toBeNull();
+
+    const { result, rerender } = renderHook(
+      ({ defaultState }: { defaultState: boolean }) => useSidebarState(defaultState),
+      { initialProps: { defaultState: true } }
+    );
+
+    // Initially follows the provided defaultState
+    expect(result.current.isOpen).toBe(true);
+
+    // Change defaultState after mount; since user has not toggled, the hook
+    // should follow the updated defaultState value.
+    rerender({ defaultState: false });
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should not update isOpen when defaultState changes if user has toggled', () => {
+    // User has previously toggled the sidebar
+    localStorage.setItem(SIDEBAR_USER_TOGGLED_KEY, 'true');
+    localStorage.setItem(SIDEBAR_STATE_KEY, 'true');
+
+    const { result, rerender } = renderHook(
+      ({ defaultState }: { defaultState: boolean }) => useSidebarState(defaultState),
+      { initialProps: { defaultState: true } }
+    );
+
+    // Initially uses the user's saved preference
+    expect(result.current.isOpen).toBe(true);
+
+    // Change defaultState after mount; since user has toggled before,
+    // the hook should ignore the new defaultState
+    rerender({ defaultState: false });
+    expect(result.current.isOpen).toBe(true); // Still true, ignores defaultState
   });
 });
