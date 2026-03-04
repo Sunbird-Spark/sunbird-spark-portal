@@ -47,7 +47,8 @@ const Onboarding = () => {
     setCurrentScreenId(newHistory[newHistory.length - 1] ?? null);
   };
   const handleSkip = async () => {
-    if (isSubmitting || !userId) return;
+    if (isSubmitting) return;
+    if (!userId) { navigate("/home"); return; }
     setIsSubmitting(true);
     try {
       await updateProfile.mutateAsync({
@@ -228,7 +229,7 @@ const Onboarding = () => {
             </div>
           </div>
           <div className="mt-6">
-            <button type="button" onClick={handleSkip} disabled={isSubmitting || !userId} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            <button type="button" onClick={handleSkip} disabled={isSubmitting} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Skip Onboarding
             </button>
