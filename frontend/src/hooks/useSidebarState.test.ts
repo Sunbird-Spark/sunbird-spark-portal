@@ -1,4 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useSidebarState } from './useSidebarState';
 
 const SIDEBAR_STATE_KEY = 'sunbird_sidebar_open';
