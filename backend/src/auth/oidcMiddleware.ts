@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as client from 'openid-client';
 import { getPortalOIDCConfig, decodeJwtPayload } from './oidcProvider.js';
 import logger from '../utils/logger.js';
+import { saveSession } from '../utils/sessionUtils.js';
 
 /**
  * Middleware that deserializes OIDC tokens from the session and attaches them to `req.oidc`.
@@ -33,9 +34,7 @@ export function oidcSession() {
                     req.session['oidc-tokens'] = tokens;
 
                     // Explicitly persist refreshed tokens so they survive request failures
-                    req.session.save((err) => {
-                        if (err) logger.error('Failed to persist refreshed tokens to session', err);
-                    });
+                    await saveSession(req);
 
                     const newClaims = decodeJwtPayload(tokens.access_token);
                     const refreshClaims = tokens.refresh_token
