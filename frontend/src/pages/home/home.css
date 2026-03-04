@@ -196,12 +196,12 @@
 }
 
 .home-recommended-card-video {
-    @apply relative rounded-[1.25rem] overflow-hidden cursor-pointer h-[24.5rem];
+    @apply relative rounded-[1.25rem] overflow-hidden cursor-pointer h-[22.5rem];
     box-shadow: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
 }
 
 .home-recommended-card-standard {
-    @apply bg-white rounded-[1.25rem] overflow-hidden border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[24.5rem] flex flex-col;
+    @apply bg-white rounded-[1.25rem] overflow-hidden border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[22.5rem] flex flex-col;
     box-shadow: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
 }
 

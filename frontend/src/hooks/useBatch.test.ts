@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useBatchListForCreator, useBatchListForLearner, useBatchRead, useContentState, useEnrol, useCreateBatch, useUpdateBatch } from './useBatch';
+import { useBatchListForCreator, useBatchListForLearner, useBatchRead, useContentState, useEnrol, useUnenrol, useCreateBatch, useUpdateBatch } from './useBatch';
 import { batchService as creatorBatchService } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
 import { userService } from '../services/UserService';
@@ -23,12 +23,19 @@ vi.mock('../services/BatchService', () => ({
   }
 }));
 
+const learnerBatchServiceMethods = vi.hoisted(() => ({
+  batchList: vi.fn(),
+  batchRead: vi.fn(),
+  contentStateRead: vi.fn(),
+  enrol: vi.fn(),
+  unenrol: vi.fn(),
+}));
+
 vi.mock('../services/collection/BatchService', () => ({
   BatchService: class {
-    batchList = vi.fn();
-    batchRead = vi.fn();
-    contentStateRead = vi.fn();
-    enrol = vi.fn();
+    constructor() {
+      Object.assign(this, learnerBatchServiceMethods);
+    }
   }
 }));
 
@@ -114,9 +121,29 @@ describe('useBatch hooks test', () => {
     it('sets up enrol mutation', () => {
       (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
       const mutationParams = useEnrol();
-      
+
       expect(useMutation).toHaveBeenCalled();
       expect(typeof (mutationParams as any).mutationFn).toBe('function');
+    });
+  });
+
+  describe('useUnenrol', () => {
+    it('sets up unenrol mutation', () => {
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useUnenrol();
+
+      expect(useMutation).toHaveBeenCalled();
+      expect(typeof (mutationParams as any).mutationFn).toBe('function');
+    });
+
+    it('wires mutationFn to learnerBatchService.unenrol with courseId, userId, batchId', async () => {
+      learnerBatchServiceMethods.unenrol.mockResolvedValue({ data: {}, status: 200, headers: {} });
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+
+      const mutationParams = useUnenrol();
+      await (mutationParams as any).mutationFn({ courseId: 'c1', userId: 'u1', batchId: 'b1' });
+
+      expect(learnerBatchServiceMethods.unenrol).toHaveBeenCalledWith('c1', 'u1', 'b1');
     });
   });
 

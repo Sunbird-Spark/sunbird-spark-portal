@@ -31,10 +31,10 @@ describe("LoginToUnlockCard", () => {
     expect(screen.getByTestId("login-to-unlock-card")).toBeInTheDocument();
   });
 
-  it("navigates to /portal/login when Login button is clicked", () => {
+  it("navigates to /portal/login?prompt=none when Login button is clicked", () => {
     render(<LoginToUnlockCard />);
     const loginButton = screen.getByRole("button", { name: "login" });
     fireEvent.click(loginButton);
-    expect(window.location.href).toBe("/portal/login");
+    expect(window.location.href).toBe("/portal/login?prompt=none");
   });
 });

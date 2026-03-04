@@ -1,3 +1,5 @@
+import { useAppI18n } from "@/hooks/useAppI18n";
+
 interface MyLearningProgressProps {
   lessonsVisited: number;
   totalLessons: number;
@@ -11,6 +13,7 @@ const MyLearningProgress = ({
   contentsCompleted = 0, 
   totalContents = 0 
 }: MyLearningProgressProps) => {
+  const { t } = useAppI18n();
   // Using lessonsVisited as the main "stats" number for now since we don't have duration.
   // Or we could pass strict "hours" if available.
   const totalHours = lessonsVisited; 
@@ -36,7 +39,7 @@ const MyLearningProgress = ({
   return (
     <div className="mylearning-donut-container">
       {/* Header */}
-      <h3 className="text-[1.25rem] font-semibold text-sunbird-obsidian mb-6 font-['Rubik']">Learning Progress</h3>
+      <h3 className="text-[1.25rem] font-semibold text-sunbird-obsidian mb-6 font-['Rubik']">{t('myLearning.learningProgress')}</h3>
 
       <div className="flex items-center gap-8">
         {/* Double Donut Chart */}
@@ -103,7 +106,7 @@ const MyLearningProgress = ({
               {lessonsVisited}/{totalLessons}
             </div>
             <div className="text-[0.875rem] text-gray-500 font-['Rubik']">
-              Lesson visited
+              {t('myLearning.lessonVisited')}
             </div>
           </div>
 
@@ -115,7 +118,7 @@ const MyLearningProgress = ({
               {contentsCompleted}/{totalContents}
             </div>
             <div className="text-[0.875rem] text-gray-500 font-['Rubik']">
-              Contents completed
+              {t('myLearning.contentsCompleted')}
             </div>
           </div>
         </div>

@@ -130,7 +130,7 @@ export class UserService {
     public async userRead(
         id: string
     ): Promise<ApiResponse<UserReadResponse>> {
-        const fields = 'organisations,roles,locations,declarations,externalIds';
+        const fields = 'organisations,roles,locations,declarations,externalIds,framework';
         return getClient().get<UserReadResponse>(
             `/user/v5/read/${id}?fields=${encodeURIComponent(fields)}`
         );

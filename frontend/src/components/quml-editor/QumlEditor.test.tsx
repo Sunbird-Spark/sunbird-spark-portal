@@ -2,8 +2,17 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../configs/i18n';
 import QumlEditor from './QumlEditor';
 import { QumlEditorService } from '../../services/editors/quml-editor';
+
+// Test wrapper that provides i18n context
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <I18nextProvider i18n={i18n}>
+    {children}
+  </I18nextProvider>
+);
 
 vi.mock('../../services/editors/quml-editor', () => ({
   QumlEditorService: vi.fn(),
@@ -63,7 +72,13 @@ describe('QumlEditor', () => {
   });
 
   it('initializes dependencies on mount', async () => {
-    render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+    render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     expect(mockLoadAssets).toHaveBeenCalledTimes(1);
 
@@ -74,12 +89,15 @@ describe('QumlEditor', () => {
 
   it('creates config with provided metadata and options', async () => {
     render(
-      <QumlEditor
-        metadata={mockMetadata}
-        mode="review"
-        contextOverrides={{ mode: 'review' }}
-      />,
-      { wrapper: createWrapper() }
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor
+            metadata={mockMetadata}
+            mode="review"
+            contextOverrides={{ mode: 'review' }}
+          />
+        </BrowserRouter>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -91,7 +109,13 @@ describe('QumlEditor', () => {
   });
 
   it('creates and appends editor element', async () => {
-    const { container } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+    const { container } = render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     await waitFor(() => {
       expect(mockServiceInstance.createElement).toHaveBeenCalledWith(mockConfig);
@@ -104,12 +128,15 @@ describe('QumlEditor', () => {
     const onTelemetryEvent = vi.fn();
 
     render(
-      <QumlEditor
-        metadata={mockMetadata}
-        onEditorEvent={onEditorEvent}
-        onTelemetryEvent={onTelemetryEvent}
-      />,
-      { wrapper: createWrapper() }
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor
+            metadata={mockMetadata}
+            onEditorEvent={onEditorEvent}
+            onTelemetryEvent={onTelemetryEvent}
+          />
+        </BrowserRouter>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -129,7 +156,13 @@ describe('QumlEditor', () => {
       capturedHandler = handler;
     });
 
-    render(<QumlEditor metadata={mockMetadata} onEditorEvent={onEditorEvent} />, { wrapper: createWrapper() });
+    render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} onEditorEvent={onEditorEvent} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     await waitFor(() => expect(capturedHandler).toBeDefined());
 
@@ -147,7 +180,13 @@ describe('QumlEditor', () => {
       capturedTelemetryHandler = telemetry;
     });
 
-    render(<QumlEditor metadata={mockMetadata} onTelemetryEvent={onTelemetryEvent} />, { wrapper: createWrapper() });
+    render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} onTelemetryEvent={onTelemetryEvent} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     await waitFor(() => expect(capturedTelemetryHandler).toBeDefined());
 
@@ -158,12 +197,24 @@ describe('QumlEditor', () => {
   });
 
   it('shows loading state initially', () => {
-    const { container } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
-    expect(container.textContent).toContain('Loading editor...');
+    const { container } = render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
+    expect(container.textContent).toContain('Loading Editor...');
   });
 
   it('does not initialize without metadata', async () => {
-    render(<QumlEditor />, { wrapper: createWrapper() });
+    render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -174,7 +225,13 @@ describe('QumlEditor', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockServiceInstance.initializeDependencies.mockRejectedValue(new Error('Init failed'));
 
-    render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+    render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     await waitFor(() => {
       expect(consoleError).toHaveBeenCalledWith(
@@ -187,7 +244,13 @@ describe('QumlEditor', () => {
   });
 
   it('cleans up listeners and element on unmount', async () => {
-    const { unmount } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+    const { unmount } = render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     await waitFor(() => expect(mockServiceInstance.createElement).toHaveBeenCalled());
 
@@ -200,7 +263,13 @@ describe('QumlEditor', () => {
   it('clears FancyTree guard interval on unmount', async () => {
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
-    const { unmount } = render(<QumlEditor metadata={mockMetadata} />, { wrapper: createWrapper() });
+    const { unmount } = render(
+      <TestWrapper>
+        <BrowserRouter>
+          <QumlEditor metadata={mockMetadata} />
+        </BrowserRouter>
+      </TestWrapper>
+    );
 
     await waitFor(() => expect(mockServiceInstance.createElement).toHaveBeenCalled());
 

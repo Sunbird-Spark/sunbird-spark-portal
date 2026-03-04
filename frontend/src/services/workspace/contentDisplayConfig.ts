@@ -74,6 +74,12 @@ export const getStatusConfig = (t: (key: string) => string): Record<
     text: 'text-sunbird-forest',
     dot: 'bg-sunbird-moss',
   },
+  processing: {
+    label: t('status.processing'),
+    bg: 'bg-sunbird-sunflower/20',
+    text: 'text-sunbird-brick',
+    dot: 'bg-sunbird-ginger',
+  },
 });
 
 // Legacy export for backward compatibility
@@ -98,6 +104,12 @@ export const STATUS_CONFIG: Record<
     bg: 'bg-sunbird-moss/15',
     text: 'text-sunbird-forest',
     dot: 'bg-sunbird-moss',
+  },
+   processing: {
+    label: "Processing",
+    bg: 'bg-sunbird-sunflower/20',
+    text: 'text-sunbird-brick',
+    dot: 'bg-sunbird-ginger',
   },
 };
 

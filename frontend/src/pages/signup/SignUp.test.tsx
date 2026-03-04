@@ -176,7 +176,7 @@ describe('SignUp Page', () => {
         fireEvent.click(screen.getByTestId('terms-check'));
 
         fireEvent.click(screen.getByTestId('continue-btn'));
-        
+
         // Wait for async state update
         await screen.findByTestId('verify-btn');
         expect(screen.getByTestId('verify-btn')).toBeInTheDocument();
@@ -210,6 +210,6 @@ describe('SignUp Page', () => {
         });
 
         fireEvent.click(screen.getByTestId('proceed-btn'));
-        expect(window.location.href).toBe('/portal/login');
+        expect(window.location.href).toBe('/portal/login?prompt=none');
     });
 });

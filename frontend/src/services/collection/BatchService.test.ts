@@ -92,6 +92,28 @@ describe('BatchService', () => {
     expect(result.status).toBe(200);
   });
 
+  it('should call client.post with correct url and payload for unenrol', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+
+    const service = new BatchService();
+    await service.unenrol('course_1', 'user_1', 'batch_1');
+
+    expect(mockClient.post).toHaveBeenCalledWith('/course/v1/unenrol', {
+      request: { courseId: 'course_1', userId: 'user_1', batchId: 'batch_1' },
+    });
+  });
+
+  it('should return unenrol response', async () => {
+    const mockData = { result: 'unenrolled' };
+    mockClient.post = vi.fn().mockResolvedValue({ data: mockData, status: 200, headers: {} });
+
+    const service = new BatchService();
+    const result = await service.unenrol('course_1', 'user_1', 'batch_1');
+
+    expect(result.data).toEqual(mockData);
+    expect(result.status).toBe(200);
+  });
+
   it('should call client.post with correct url and payload for contentStateRead', async () => {
     mockClient.post = vi.fn().mockResolvedValue({ data: { response: {} }, status: 200, headers: {} });
 
@@ -198,6 +220,40 @@ describe('BatchService', () => {
       courseId: 'course_1',
       batchId: 'batch_1',
       contents: [{ contentId: 'content_a', status: 2 }],
+    });
+
+    expect(result.data).toEqual(mockData);
+    expect(result.status).toBe(200);
+  });
+
+  it('should call client.post with correct url and payload for forceSyncActivityAgg', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+
+    const service = new BatchService();
+    await service.forceSyncActivityAgg({
+      userId: 'user_1',
+      courseId: 'course_1',
+      batchId: 'batch_1',
+    });
+
+    expect(mockClient.post).toHaveBeenCalledWith('/user/v1/activity/agg', {
+      request: {
+        userId: 'user_1',
+        courseId: 'course_1',
+        batchId: 'batch_1',
+      },
+    });
+  });
+
+  it('should return forceSyncActivityAgg response', async () => {
+    const mockData = { result: 'ok' };
+    mockClient.post = vi.fn().mockResolvedValue({ data: mockData, status: 200, headers: {} });
+
+    const service = new BatchService();
+    const result = await service.forceSyncActivityAgg({
+      userId: 'u1',
+      courseId: 'c1',
+      batchId: 'b1',
     });
 
     expect(result.data).toEqual(mockData);

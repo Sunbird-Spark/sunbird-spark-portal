@@ -9,7 +9,6 @@ import AppRoutes from "./AppRoutes";
 // Mock Pages
 // --------------------
 vi.mock("./pages/home/Home", () => ({ default: () => <div>Home Page</div> }));
-vi.mock("./pages/admin/AdminPage", () => ({ default: () => <div>Admin Page</div> }));
 vi.mock("./pages/workspace/WorkspacePage", () => ({ default: () => <div>Workspace Page</div> }));
 vi.mock("./pages/reports/ReportsPage", () => ({ default: () => <div>Reports Page</div> }));
 vi.mock("./pages/content/CreateContentPage", () => ({ default: () => <div>Create Content Page</div> }));
@@ -17,6 +16,9 @@ vi.mock("./pages/Explore", () => ({ default: () => <div>Explore Page</div> }));
 vi.mock("./pages/Index", () => ({ default: () => <div>Index Page</div> }));
 vi.mock("./pages/onboarding/OnboardingPage", () => ({ default: () => <div>Onboarding Page</div> }));
 vi.mock("./pages/user-management/UserManagementPage", () => ({ default: () => <div>User Management Page</div> }));
+vi.mock("./pages/reports/PlatformReports", () => ({ default: () => <div>Platform Reports Page</div> }));
+vi.mock("./pages/reports/CourseReport", () => ({ default: () => <div>Course Report Page</div> }));
+vi.mock("./pages/reports/UserReport", () => ({ default: () => <div>User Report Page</div> }));
 vi.mock("./pages/profile/Profile", () => ({ default: () => <div>Profile Page</div> }));
 vi.mock("./pages/collection/CollectionDetailPage", () => ({ default: () => <div>Collection Detail Page</div> }));
 vi.mock("./pages/forgotPassword/ForgotPassword", () => ({ default: () => <div>Forgot Password Page</div> }));
@@ -32,6 +34,9 @@ vi.mock("./pages/workspace/editors/GenericEditorPage", () => ({ default: () => <
 vi.mock("./pages/content/QumlEditorPage", () => ({ default: () => <div>Quml Editor Page</div> }));
 vi.mock("./pages/workspace/ContentReviewPage", () => ({ default: () => <div>Content Review Page</div> }));
 vi.mock("./pages/courseDashboard/CourseDashboardPage", () => ({ default: () => <div>Course Dashboard Page</div> }));
+vi.mock("./rbac/OnboardingGuard", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 // --------------------
 // Mock AuthContext
@@ -149,12 +154,6 @@ describe("AppRoutes (RBAC routing tests)", () => {
     });
   });
 
-  it("public: any user can access /admin", async () => {
-    renderWithRoute("/admin");
-    await waitFor(() => {
-      expect(screen.getByText("Admin Page")).toBeInTheDocument();
-    });
-  });
 
   it("protected: authenticated content_creator can access /create", () => {
     mockUsePermissions.mockReturnValue({
@@ -184,5 +183,73 @@ describe("AppRoutes (RBAC routing tests)", () => {
 
     renderWithRoute("/create");
     expect(screen.getByText("Home Page")).toBeInTheDocument();
+  });
+
+  // ── ORG_ADMIN protected routes ─────────────────────────────────────────────
+
+  describe("ORG_ADMIN protected routes", () => {
+    it("ORG_ADMIN can access /reports/platform", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['ORG_ADMIN'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
+      renderWithRoute("/reports/platform");
+      expect(screen.getByText("Platform Reports Page")).toBeInTheDocument();
+    });
+
+    it("non-admin authenticated user is redirected from /reports/platform", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['CONTENT_CREATOR'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => !roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
+      renderWithRoute("/reports/platform");
+      expect(screen.getByText("Home Page")).toBeInTheDocument();
+    });
+
+    it("CONTENT_CREATOR can access /reports/course/:courseId", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['CONTENT_CREATOR'], error: null,
+        hasAnyRole: vi.fn((allowedRoles: string[]) => 
+          allowedRoles.some(role => ['CONTENT_CREATOR'].includes(role))
+        ),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
+      renderWithRoute("/reports/course/course-123");
+      expect(screen.getByText("Course Report Page")).toBeInTheDocument();
+    });
+
+    it("user without CONTENT_CREATOR or COURSE_MENTOR is redirected from /reports/course/:courseId", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['PUBLIC'], error: null,
+        hasAnyRole: vi.fn((allowedRoles: string[]) => 
+          allowedRoles.some(role => ['PUBLIC'].includes(role))
+        ),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
+      renderWithRoute("/reports/course/course-123");
+      expect(screen.getByText("Home Page")).toBeInTheDocument();
+    });
+
+    it("ORG_ADMIN can access /user-management", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['ORG_ADMIN'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
+      renderWithRoute("/user-management");
+      expect(screen.getByText("User Management Page")).toBeInTheDocument();
+    });
+
+    it("non-admin authenticated user is redirected from /user-management", () => {
+      mockUsePermissions.mockReturnValue({
+        isAuthenticated: true, isLoading: false, roles: ['CONTENT_CREATOR'], error: null,
+        hasAnyRole: vi.fn((roles: string[]) => !roles.includes('ORG_ADMIN')),
+        canAccessFeature: vi.fn(), refetch: vi.fn(),
+      });
+      renderWithRoute("/user-management");
+      expect(screen.getByText("Home Page")).toBeInTheDocument();
+    });
   });
 });

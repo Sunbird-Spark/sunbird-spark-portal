@@ -24,6 +24,12 @@ export class BatchService {
     });
   }
 
+  public unenrol(courseId: string, userId: string, batchId: string): Promise<ApiResponse<unknown>> {
+    return getClient().post('/course/v1/unenrol', {
+      request: { courseId, userId, batchId },
+    });
+  }
+
   public contentStateRead(
     request: ContentStateReadRequest
   ): Promise<ApiResponse<ContentStateReadResponse>> {
@@ -60,6 +66,20 @@ export class BatchService {
     }
     return getClient().patch<unknown>('/course/v1/content/state/update', {
       request: body,
+    });
+  }
+
+  public forceSyncActivityAgg(request: {
+    userId: string;
+    courseId: string;
+    batchId: string;
+  }): Promise<ApiResponse<unknown>> {
+    return getClient().post<unknown>('/user/v1/activity/agg', {
+      request: {
+        userId: request.userId,
+        courseId: request.courseId,
+        batchId: request.batchId,
+      },
     });
   }
 }

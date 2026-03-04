@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,9 @@ import { useFormRead } from "@/hooks/useForm";
 import { OnboardingFormData } from '@/types/formTypes';
 import { computeTotalSteps } from './utils';
 import { ProgressIndicator, OptionChip } from './OnboardingComponents';
+import { useUpdateProfile } from "@/hooks/useUpdateProfile";
+import { useCurrentUserId } from "@/hooks/useUser";
+import { toast } from "@/hooks/useToast";
 const Onboarding = () => {
   const { t } = useAppI18n();
   const navigate = useNavigate();
@@ -17,7 +20,8 @@ const Onboarding = () => {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { data: userId } = useCurrentUserId();
+  const updateProfile = useUpdateProfile();
   const { data: formApiData, isLoading, isError } = useFormRead({
     request: {
       type: "user",subType: "onboarding",action: "workflow",component: "portal",
@@ -36,23 +40,25 @@ const Onboarding = () => {
     }
   }, [onboardingData, currentScreenId, navigate]);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
   const handleBack = () => {
     if (screenHistory.length <= 1) return;
     const newHistory = screenHistory.slice(0, -1);
     setScreenHistory(newHistory);
     setCurrentScreenId(newHistory[newHistory.length - 1] ?? null);
   };
-  const handleSkip = () => {
-    // TODO: Remove this temporary logging once backend storage is configured
-    console.log('[Onboarding] User skipped onboarding at screen:', {
-      currentScreenId,currentStep: screenHistory.length,partialSelections: selections,
-    });
-    if (!isSubmitting) navigate("/home");
+  const handleSkip = async () => {
+    if (isSubmitting || !userId) return;
+    setIsSubmitting(true);
+    try {
+      await updateProfile.mutateAsync({
+        request: { userId, framework: { onboardingDetails: { isSkipped: true, data: {} } } }
+      });
+      navigate("/home");
+    } catch {
+      toast({ variant: 'destructive', title: 'Failed to skip onboarding', description: 'Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const handleNext = () => {
     if (!onboardingData || !currentScreenId) return;
@@ -71,41 +77,34 @@ const Onboarding = () => {
       }
     }
   };
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (isSubmitting || !userId) return;
     setIsSubmitting(true);
-    // TODO: Remove this temporary logging once backend storage is configured
-    console.log('[Onboarding] Final submission data:', {
-      selections,
-      otherText: otherTexts[currentScreenId ?? ''] || null,
-      screenHistory,
-      timestamp: new Date().toISOString(),
-    });
-    // Format selections with labels for better readability
-    const formattedSelections = Object.entries(selections).map(([screenId, fieldId]) => {
+    const formattedData: Record<string, { values: string[] }> = {};
+    Object.entries(selections).forEach(([screenId, fieldId]) => {
       const screen = onboardingData?.screens[screenId];
       const field = screen?.fields.find(f => f.id === fieldId);
-      return {
-        screenId,
-        screenTitle: screen?.title,
-        fieldId,
-        fieldLabel: field?.label,
-        otherText: field?.requiresTextInput ? otherTexts[screenId] ?? null : null,
-      };
+      const value = field?.requiresTextInput && otherTexts[screenId] ? otherTexts[screenId] : fieldId;
+      formattedData[screenId] = { values: [value] };
     });
-    console.log('[Onboarding] Formatted selections:', formattedSelections);
-    timeoutRef.current = setTimeout(() => {setIsSubmitting(false);
+    try {
+      await updateProfile.mutateAsync({
+        request: {
+          userId,
+          framework: { onboardingDetails: { isSkipped: false, data: formattedData } }
+        }
+      });
       navigate("/home");
-    }, 1000);
+    } catch {
+      toast({ variant: 'destructive', title: 'Failed to save onboarding', description: 'Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const handleSelect = (fieldId: string) => {
     if (!currentScreenId) return;
     setSelections(prev => ({ ...prev, [currentScreenId]: fieldId }));
     setOtherTexts(prev => ({ ...prev, [currentScreenId]: "" }));
-    // TODO: Remove this temporary logging once backend storage is configured
-    console.log('[Onboarding] User selection:', {
-      screenId: currentScreenId, fieldId,screenTitle: onboardingData?.screens[currentScreenId]?.title,
-      fieldLabel: onboardingData?.screens[currentScreenId]?.fields.find(f => f.id === fieldId)?.label,
-    });
   };
   if (isLoading || (onboardingData && !currentScreenId)) {
     return (
@@ -158,7 +157,7 @@ const Onboarding = () => {
   const showOtherInput = !!selectedField?.requiresTextInput;
   const sortedFields = [...currentScreen.fields].sort((a, b) => a.index - b.index);
   const otherText = otherTexts[currentScreenId] ?? "";
-  const isSubmitDisabled = isSubmitting || !selectedFieldId || (showOtherInput && !otherText.trim());
+  const isSubmitDisabled = isSubmitting || !userId || !selectedFieldId || (showOtherInput && !otherText.trim());
   return (
     <div className="h-screen flex items-center justify-center bg-white p-4 md:p-6 lg:p-8">
       <div className="flex w-full max-w-7xl h-full max-h-[calc(100vh-4rem)] gap-6">
@@ -201,11 +200,7 @@ const Onboarding = () => {
                   <div className="space-y-4 max-w-md">
                     <Input type="text"  placeholder={t('onboarding.otherPreferencePlaceholder')} value={otherText}
                       onChange={e => {
-                        const value = e.target.value;
-                        setOtherTexts(prev => ({ ...prev, [currentScreenId]: value }));
-                        // TODO: Remove this temporary logging once backend storage is configured
-                        console.log('[Onboarding] Other text input:', {screenId: currentScreenId, text: value,
-                        });
+                        setOtherTexts(prev => ({ ...prev, [currentScreenId]: e.target.value }));
                       }}
                       className="onboarding-input"
                     />
@@ -233,7 +228,7 @@ const Onboarding = () => {
             </div>
           </div>
           <div className="mt-6">
-            <button type="button" onClick={handleSkip} disabled={isSubmitting} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            <button type="button" onClick={handleSkip} disabled={isSubmitting || !userId} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Skip Onboarding
             </button>

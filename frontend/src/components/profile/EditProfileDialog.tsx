@@ -174,7 +174,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                             type="button"
                             onClick={handleSave}
                             disabled={!canSave || isSaving}
-                            className="w-[210px] h-[46px] rounded-[10px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-['Rubik'] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="min-w-[210px] h-[46px] rounded-[10px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-['Rubik'] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed px-6 py-1"
                         >
                             {isSaving ? t("editProfile.saving") : t("save")}
                         </button>

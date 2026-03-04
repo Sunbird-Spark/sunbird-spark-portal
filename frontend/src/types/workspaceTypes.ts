@@ -65,7 +65,7 @@ export interface WorkspaceItem {
   title: string;
   description: string;
   type: 'course' | 'content' | 'quiz' | 'collection';
-  status: 'draft' | 'review' | 'published';
+  status: 'draft' | 'review' | 'published' | 'processing';
   thumbnail?: string;
   createdAt: string | null;
   updatedAt: string | null;

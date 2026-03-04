@@ -220,7 +220,6 @@ const CollectionDetailPage = () => {
               handleTelemetryEvent={handleTelemetryEvent}
               showMaxAttemptsExceeded={maxAttemptsExceeded}
               isAuthenticated={isAuthenticated}
-              isContentCreator={isContentCreator}
               collectionId={collectionId}
               hasBatchInRoute={hasBatchInRoute}
               courseProgressProps={courseProgressProps}
@@ -244,6 +243,7 @@ const CollectionDetailPage = () => {
               isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
               contentCreatorPrivilege={contentCreatorPrivilege}
               userProfile={userProfile ?? undefined}
+              userId={currentUserId ?? undefined}
             />
 
             {/* Related Content Section */}

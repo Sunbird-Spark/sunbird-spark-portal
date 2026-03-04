@@ -244,10 +244,23 @@ export class CertificateService {
     });
   }
 
-  public async downloadCertificate(certificateId: string): Promise<ApiResponse<any>> {
-    return getClient().get<any>(`/rc/certificate/v1/download/${certificateId}`, {
-      Accept: 'image/svg+xml'
-    });
+  public async downloadCertificate(
+    certificateId: string,
+    templateUrl?: string
+  ): Promise<ApiResponse<string>> {
+    const headers: Record<string, string> = {
+      'Accept': 'image/svg+xml',
+    };
+    
+    // Add template URL to header if provided (required by RC service)
+    if (templateUrl) {
+      headers['template'] = templateUrl;
+    }
+    
+    return getClient().get<string>(
+      `/rc/certificate/v1/download/${certificateId}`,
+      headers
+    );
   }
 }
 export const certificateService = new CertificateService();

@@ -10,7 +10,16 @@ vi.mock('react-icons/fi', () => ({
 }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
-    useAppI18n: () => ({ t: (key: string) => key }),
+    useAppI18n: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'tncPopup.accepting': 'Accepting…',
+                'tncPopup.continue': 'Continue',
+                'close': 'close',
+            };
+            return translations[key] ?? key;
+        },
+    }),
 }));
 
 describe('TermsAndConditionsDialog', () => {

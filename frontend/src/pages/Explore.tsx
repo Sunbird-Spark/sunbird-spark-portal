@@ -67,20 +67,21 @@ const Explore = () => {
   }, [filters, debouncedSearchQuery, setSearchParams]);
 
   return (
-    <main className="flex-1 bg-white relative">
-      <div className="w-full px-[1.875rem] py-6 md:py-8 transition-all">
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-          {/* Filters Sidebar — hidden if form API errored or returned no groups (scenario 3) */}
+    <main className="flex-1 bg-white relative md:h-[calc(100vh-4.5rem)] overflow-hidden">
+      <div className="w-full h-full px-[1.875rem] py-6 md:py-8 flex flex-col">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8 flex-1 overflow-hidden">
+          {/* Filters Sidebar — sticky and separate */}
           {showFilters && (
-            <aside className="w-full md:w-[21.875rem] shrink-0">
+            <aside className="w-full md:w-auto md:min-w-[18rem] shrink-0 overflow-y-auto">
               <ExploreFilters filters={filters} setFilters={setFilters} />
             </aside>
           )}
 
           {/* Content Grid */}
-          <div className="flex-1">
-            <div>
-              <div className="bg-white rounded-[0.75rem] px-4 mb-6 flex flex-row justify-between items-center shadow-sm border border-border h-[3.75rem]">
+          <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+            {/* Search Bar Container */}
+            <div className="shrink-0 mb-6">
+              <div className="bg-white rounded-[0.75rem] px-4 flex flex-row justify-between items-center shadow-sm border border-border h-[3.75rem]">
                 <div className="flex-1 max-w-2xl relative">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
@@ -143,7 +144,8 @@ const Explore = () => {
               </div>
             </div>
 
-            <div>
+            {/* Scrollable Cards Container */}
+            <div className="flex-1 overflow-y-auto">
               <ExploreGrid filters={filters} query={debouncedSearchQuery} sortBy={sortBy} />
             </div>
           </div>

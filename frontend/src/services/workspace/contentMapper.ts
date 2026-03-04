@@ -4,7 +4,7 @@ const STATUS_MAP: Record<string, WorkspaceItem['status']> = {
   Draft: 'draft',
   FlagDraft: 'draft',
   Review: 'review',
-  Processing: 'review',
+  Processing: 'processing',
   FlagReview: 'review',
   Live: 'published',
   Unlisted: 'published',

@@ -24,7 +24,8 @@ export const regenerateSession = (req: Request): Promise<void> => {
             return resolve();
         }
         const oldSessionID = req.sessionID;
-        const keycloakToken = req.session['keycloak-token'];
+        // oidc-tokens is persisted by the OIDC callback into req.session
+        const oidcTokens = req.session['oidc-tokens'];
         const auth_redirect_uri = req.session.auth_redirect_uri;
 
         req.session.regenerate(async (err) => {
@@ -34,9 +35,9 @@ export const regenerateSession = (req: Request): Promise<void> => {
                 try {
                     logger.info(`Session regenerated ${oldSessionID}->${req.sessionID}`)
 
-                    if (keycloakToken) {
-                        req.session['keycloak-token'] = keycloakToken;
-                        logger.info(`req.session['keycloak-token'], ${req.session['keycloak-token']}`)
+                    if (oidcTokens) {
+                        req.session['oidc-tokens'] = oidcTokens;
+                        logger.info(`req.session['oidc-tokens'] restored`)
                     }
                     if (auth_redirect_uri) {
                         req.session.auth_redirect_uri = auth_redirect_uri;

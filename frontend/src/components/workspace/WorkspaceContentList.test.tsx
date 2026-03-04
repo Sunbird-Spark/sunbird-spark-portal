@@ -4,6 +4,25 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceContentList from './WorkspaceContentList';
 import type { WorkspaceItem } from '@/types/workspaceTypes';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'workspace.tableHeaders.title': 'Title',
+        'workspace.tableHeaders.type': 'Type',
+        'workspace.tableHeaders.status': 'Status',
+        'workspace.tableHeaders.modified': 'Modified',
+        'workspace.tableHeaders.actions': 'Actions',
+        'workspaceCard.view': 'View',
+        'workspaceCard.edit': 'Edit',
+        'workspaceCard.delete': 'Delete',
+        'workspaceCard.lockedBy': 'Locked by {{name}}',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 vi.mock('@/components/common/DropdownMenu', () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

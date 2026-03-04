@@ -23,7 +23,31 @@ vi.mock('@/hooks/useCertificateDownload', () => ({
 
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => key,
+        t: (key: string, params?: Record<string, string>) => {
+            const translations: Record<string, string> = {
+                'tabs.all': 'all',
+                'status.ongoing': 'ongoing',
+                'status.completed': 'completed',
+                'profileLearning.myLearning': 'My Learning',
+                'profileLearning.filter': 'Filter',
+                'profileLearning.loadingCourses': 'Loading your courses...',
+                'profileLearning.failedToLoadCourses': 'Failed to load courses. Please try again.',
+                'profileLearning.noCoursesEnrolled': 'No courses enrolled yet.',
+                'profileLearning.noFilteredCourses': 'No {{filter}} courses found.',
+                'profileLearning.viewMoreCourses': 'View More Courses',
+                'profileLearning.viewLess': 'View Less',
+                'profileLearning.downloading': 'Downloading...',
+                'profileLearning.noCertificate': 'No certificate',
+                'common.downloadCertificate': 'common.downloadCertificate',
+            };
+            let result = translations[key] ?? key;
+            if (params) {
+                Object.entries(params).forEach(([k, v]) => {
+                    result = result.replace(`{{${k}}}`, String(v));
+                });
+            }
+            return result;
+        },
     }),
 }));
 
@@ -86,16 +110,16 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
         expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
         expect(screen.getByText('Completed Course')).toBeInTheDocument();
-        // Check default filter label
-        expect(screen.getByText('all')).toBeInTheDocument();
-        expect(screen.getByTestId('filter-option-tabs.all')).toBeInTheDocument();
+        // Check default filter label (appears in trigger + dropdown item)
+        expect(screen.getAllByText('all').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByTestId('filter-option-all')).toBeInTheDocument();
     });
 
     it('filters by Ongoing', () => {
         render(<ProfileLearningList />);
 
         // Click "Ongoing" filter option (exposed by mock)
-        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
         // Should show Ongoing Course
         expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
@@ -107,7 +131,7 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
 
         // Click "Completed" filter option
-        fireEvent.click(screen.getByTestId('filter-option-status.completed'));
+        fireEvent.click(screen.getByTestId('filter-option-completed'));
 
         // Should NOT show Ongoing Course
         expect(screen.queryByText('Ongoing Course')).not.toBeInTheDocument();
@@ -131,7 +155,7 @@ describe('ProfileLearningList', () => {
         render(<ProfileLearningList />);
 
         // Filter by Ongoing
-        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
         expect(screen.getByText('No ongoing courses found.')).toBeInTheDocument();
     });
@@ -250,7 +274,7 @@ describe('ProfileLearningList', () => {
         expect(screen.getByText('View Less')).toBeInTheDocument();
 
         // Change filter to Ongoing
-        fireEvent.click(screen.getByTestId('filter-option-status.ongoing'));
+        fireEvent.click(screen.getByTestId('filter-option-ongoing'));
 
         // Verification: showAll should be reset to false, meaning we only see 6 items and "View More Courses"
         expect(screen.queryByText('Ongoing 7')).not.toBeInTheDocument();

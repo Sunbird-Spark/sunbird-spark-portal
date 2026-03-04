@@ -93,7 +93,7 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
                     </Checkbox.Indicator>
                   </Checkbox.Root>
                   <span className="text-sm text-foreground font-['Rubik']">
-                    I have read and accept the Terms &amp; Conditions
+                    {t('tncPopup.checkboxLabel')}
                   </span>
                 </label>
 
@@ -102,14 +102,14 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
                   disabled={!tncChecked || accepting}
                   onClick={onAccept}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors shrink-0",
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors shrink-0 min-w-[120px]",
                     !tncChecked || accepting
                       ? "bg-sunbird-brick/40 cursor-not-allowed"
                       : "bg-sunbird-brick hover:bg-opacity-90"
                   )}
                 >
                   {accepting && <FiLoader className="w-4 h-4 animate-spin" />}
-                  {accepting ? "Accepting…" : "Continue"}
+                  {accepting ? t('tncPopup.accepting') : t('tncPopup.continue')}
                 </button>
               </div>
             )}

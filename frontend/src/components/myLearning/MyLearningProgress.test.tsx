@@ -1,6 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import MyLearningProgress from './MyLearningProgress';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'myLearning.learningProgress': 'Learning Progress',
+        'myLearning.lessonVisited': 'Lesson visited',
+        'myLearning.contentsCompleted': 'Contents completed',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
 
 describe('MyLearningProgress', () => {
   const defaultProps = {

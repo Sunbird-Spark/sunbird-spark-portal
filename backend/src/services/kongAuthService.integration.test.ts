@@ -67,7 +67,7 @@ describe('Kong Auth Service', () => {
     describe('refreshSessionTTL', () => {
         it('should call setSessionTTLFromToken for logged-in users', () => {
             mockRequest.session!.userId = 'test-user-id';
-            mockRequest.kauth = { grant: { access_token: { content: { exp: 1234567890 } } } } as any;
+            mockRequest.oidc = { isAuthenticated: true } as any;
             refreshSessionTTL(mockRequest as Request);
 
             expect(setSessionTTLFromToken).toHaveBeenCalledWith(mockRequest);
@@ -188,7 +188,7 @@ describe('Kong Auth Service', () => {
     describe('saveKongTokenToSession', () => {
         it('should save token to session and refresh TTL', async () => {
             mockRequest.session!.userId = 'test-user-id'; // Add userId to trigger setSessionTTLFromToken
-            mockRequest.kauth = { grant: { access_token: { content: { exp: 1234567890 } } } } as any;
+            mockRequest.oidc = { isAuthenticated: true } as any;
             const token = 'test-token';
             await saveKongTokenToSession(mockRequest as Request, token);
 
