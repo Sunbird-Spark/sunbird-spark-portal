@@ -7,6 +7,7 @@ import OnboardingGuard from './OnboardingGuard';
 
 const mockUseFormRead = vi.fn();
 const mockUseUserRead = vi.fn();
+const mockIsUserAuthenticated = vi.fn();
 
 vi.mock('@/hooks/useForm', () => ({
   useFormRead: () => mockUseFormRead(),
@@ -14,6 +15,10 @@ vi.mock('@/hooks/useForm', () => ({
 
 vi.mock('@/hooks/useUserRead', () => ({
   useUserRead: () => mockUseUserRead(),
+}));
+
+vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
+  default: { isUserAuthenticated: () => mockIsUserAuthenticated() },
 }));
 
 const createQueryClient = () =>
@@ -42,22 +47,38 @@ const userWithOnboarding = (onboardingDetails: any) => ({
   data: { data: { response: { framework: { onboardingDetails } } } },
   isLoading: false,
   isFetching: false,
+  isError: false,
 });
 
 const userWithoutOnboarding = {
   data: { data: { response: { framework: {} } } },
   isLoading: false,
   isFetching: false,
+  isError: false,
 };
 
 describe('OnboardingGuard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsUserAuthenticated.mockReturnValue(true);
+    mockUseFormRead.mockReturnValue(formEnabled);
+    mockUseUserRead.mockReturnValue(userWithoutOnboarding);
   });
+
+  // ── Authentication ────────────────────────────────────────────────────────
+
+  it('renders children immediately for unauthenticated users without any checks', () => {
+    mockIsUserAuthenticated.mockReturnValue(false);
+
+    renderGuard();
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+  });
+
+  // ── Loading states ────────────────────────────────────────────────────────
 
   it('shows spinner while form data is loading', () => {
     mockUseFormRead.mockReturnValue({ data: null, isLoading: true });
-    mockUseUserRead.mockReturnValue({ data: null, isLoading: false, isFetching: false });
+    mockUseUserRead.mockReturnValue({ data: null, isLoading: false, isFetching: false, isError: false });
 
     const { container } = renderGuard();
     expect(container.querySelector('.onboarding-spinner')).toBeInTheDocument();
@@ -65,8 +86,7 @@ describe('OnboardingGuard', () => {
   });
 
   it('shows spinner while user data is loading', () => {
-    mockUseFormRead.mockReturnValue(formEnabled);
-    mockUseUserRead.mockReturnValue({ data: null, isLoading: true, isFetching: true });
+    mockUseUserRead.mockReturnValue({ data: null, isLoading: true, isFetching: true, isError: false });
 
     const { container } = renderGuard();
     expect(container.querySelector('.onboarding-spinner')).toBeInTheDocument();
@@ -74,7 +94,6 @@ describe('OnboardingGuard', () => {
   });
 
   it('shows spinner while refetching when user has not yet completed onboarding', () => {
-    mockUseFormRead.mockReturnValue(formEnabled);
     mockUseUserRead.mockReturnValue({ ...userWithoutOnboarding, isFetching: true });
 
     const { container } = renderGuard();
@@ -82,32 +101,42 @@ describe('OnboardingGuard', () => {
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
-  it('redirects to /onboarding when enabled and onboardingDetails is missing', () => {
-    mockUseFormRead.mockReturnValue(formEnabled);
-    mockUseUserRead.mockReturnValue(userWithoutOnboarding);
+  // ── Redirect behaviour ────────────────────────────────────────────────────
 
+  it('redirects to /onboarding when enabled and onboardingDetails is missing', () => {
     renderGuard();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
   it('redirects to /onboarding when enabled and onboardingDetails is an empty array', () => {
-    mockUseFormRead.mockReturnValue(formEnabled);
     mockUseUserRead.mockReturnValue(userWithOnboarding([]));
 
     renderGuard();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
+  // ── Let-through behaviour ─────────────────────────────────────────────────
+
+  it('lets through when userRead API fails (fail open)', () => {
+    mockUseUserRead.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+    });
+
+    renderGuard();
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+  });
+
   it('renders children when onboarding is disabled (isEnabled: false)', () => {
     mockUseFormRead.mockReturnValue(formDisabled);
-    mockUseUserRead.mockReturnValue(userWithoutOnboarding);
 
     renderGuard();
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
   });
 
   it('renders children when user has completed onboarding', () => {
-    mockUseFormRead.mockReturnValue(formEnabled);
     mockUseUserRead.mockReturnValue(
       userWithOnboarding(['{"isSkipped":false,"data":{"role":{"values":["teacher"]}}}'])
     );
@@ -117,7 +146,6 @@ describe('OnboardingGuard', () => {
   });
 
   it('renders children when user has skipped onboarding', () => {
-    mockUseFormRead.mockReturnValue(formEnabled);
     mockUseUserRead.mockReturnValue(
       userWithOnboarding(['{"isSkipped":true,"data":{}}'])
     );
@@ -127,7 +155,6 @@ describe('OnboardingGuard', () => {
   });
 
   it('does not block rendering during background refetch when onboarding is already complete', () => {
-    mockUseFormRead.mockReturnValue(formEnabled);
     mockUseUserRead.mockReturnValue({
       ...userWithOnboarding(['{"isSkipped":true,"data":{}}']),
       isFetching: true,
@@ -140,10 +167,8 @@ describe('OnboardingGuard', () => {
 
   it('renders children when form API returns no data (fail open)', () => {
     mockUseFormRead.mockReturnValue({ data: null, isLoading: false });
-    mockUseUserRead.mockReturnValue(userWithoutOnboarding);
 
     renderGuard();
-    // isEnabled defaults to false when form data is absent → let through
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
   });
 });
