@@ -25,6 +25,7 @@ import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
 import ContentViewPage from './pages/workspace/ContentViewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
+import OnboardingGuard from './rbac/OnboardingGuard';
 import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
 import PlatformReports from './pages/reports/PlatformReports';
@@ -108,7 +109,7 @@ const AppRoutes: React.FC = () => {
         } />
 
         {/* Layout routes — share Header, Sidebar, Footer via PageLayout */}
-        <Route element={<PageLayout />}>
+        <Route element={<OnboardingGuard><PageLayout /></OnboardingGuard>}>
           <Route path="/home" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/my-learning" element={<MyLearning />} />

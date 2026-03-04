@@ -34,6 +34,9 @@ vi.mock("./pages/workspace/editors/GenericEditorPage", () => ({ default: () => <
 vi.mock("./pages/content/QumlEditorPage", () => ({ default: () => <div>Quml Editor Page</div> }));
 vi.mock("./pages/workspace/ContentReviewPage", () => ({ default: () => <div>Content Review Page</div> }));
 vi.mock("./pages/courseDashboard/CourseDashboardPage", () => ({ default: () => <div>Course Dashboard Page</div> }));
+vi.mock("./rbac/OnboardingGuard", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 // --------------------
 // Mock AuthContext
