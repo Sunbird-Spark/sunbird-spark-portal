@@ -33,9 +33,8 @@ export const setSessionTTLFromToken = (request: Request): void => {
     const exp = extractTokenExpiration(request);
 
     if (!exp) {
-        const error = new Error('Token expiration not available - cannot set session TTL');
-        logger.error('Failed to set session TTL from token', error);
-        throw error;
+        logger.warn('Token expiration not available - session TTL will use default');
+        return;
     }
 
     const ttl = calculateSessionTTL(exp);

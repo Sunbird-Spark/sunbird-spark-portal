@@ -10,7 +10,7 @@ export function mapToCollectionData(content: HierarchyContentNode): CollectionDa
     id: content.identifier,
     title: content.name ?? 'Untitled',
     lessons: content.leafNodesCount ?? 0,
-    image: content.appIcon ?? '',
+    image: content.posterImage ?? content.appIcon ?? '',
     units,
     description: content.description ?? '',
     audience: Array.isArray(content.audience) ? content.audience : [],

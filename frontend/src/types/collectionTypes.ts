@@ -37,6 +37,7 @@ export interface HierarchyContentNode {
   identifier: string;
   name?: string;
   description?: string;
+  posterImage?: string;
   appIcon?: string;
   primaryCategory?: string;
   mimeType?: string;
