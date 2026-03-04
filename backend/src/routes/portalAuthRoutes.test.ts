@@ -163,7 +163,7 @@ describe('PortalAuthRoutes Integration', () => {
             const res = await request(app).get('/portal/auth/callback?code=123&state=test-state');
 
             expect(res.status).toBe(302);
-            expect(res.header.location).toBe('http://localhost:3000');
+            expect(res.header.location).toBe('http://localhost:3000/home');
         });
 
         it('should redirect to root if no session exists', async () => {
@@ -189,7 +189,7 @@ describe('PortalAuthRoutes Integration', () => {
 
             const res = await request(app).get('/portal/logout');
 
-            expect(sessionUtils.regenerateAnonymousSession).toHaveBeenCalled();
+            expect(sessionUtils.destroySession).toHaveBeenCalled();
             expect(res.status).toBe(302);
             expect(res.header.location).toContain('oidc-provider.example.com/logout');
         });
