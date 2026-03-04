@@ -27,6 +27,11 @@ export interface EditProfileFormData {
   alternateEmail: string;
 }
 
+export interface OnboardingPayload {
+  isSkipped: boolean;
+  data: Record<string, { values: string[] }>;
+}
+
 export interface UpdateProfileRequest {
   request: {
     userId: string;
@@ -37,6 +42,9 @@ export interface UpdateProfileRequest {
     email?: string;
     emailVerified?: boolean;
     recoveryEmail?: string;
+    framework?: {
+      onboardingDetails?: OnboardingPayload;
+    };
   };
 }
 
