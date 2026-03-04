@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
@@ -40,12 +40,23 @@ const PageLayout = () => {
   
   const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen } = useSidebarState(defaultState);
 
-  // Always close sidebar when navigating to Explore page
+  // Close sidebar only when first navigating TO Explore page (not while already on it)
+  const prevPathRef = useRef(location.pathname);
   useEffect(() => {
-    if (isExplorePage) {
+    const prevPath = prevPathRef.current;
+    const currentPath = location.pathname;
+    
+    // Check if we just navigated TO explore from another page
+    const justNavigatedToExplore = 
+      currentPath.startsWith('/explore') && 
+      !prevPath.startsWith('/explore');
+    
+    if (justNavigatedToExplore) {
       setSidebarOpen(false, false);
     }
-  }, [isExplorePage, setSidebarOpen]);
+    
+    prevPathRef.current = currentPath;
+  }, [location.pathname, setSidebarOpen]);
 
   // Handle mobile state changes
   useEffect(() => {
