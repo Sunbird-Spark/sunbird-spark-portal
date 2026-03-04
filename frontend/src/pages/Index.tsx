@@ -10,6 +10,7 @@ import DynamicCategorySection from "@/components/landing/DynamicCategorySection"
 import DynamicResourceSection from "@/components/landing/DynamicResourceSection";
 import { FormSection } from "@/types/formTypes";
 import useImpression from "@/hooks/useImpression";
+import "./landing.css";
 
 const Index = () => {
   const { t } = useAppI18n();
@@ -94,7 +95,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="landing-page min-h-screen bg-background">
       <Header />
       <main>
         <HeroWithStats />
