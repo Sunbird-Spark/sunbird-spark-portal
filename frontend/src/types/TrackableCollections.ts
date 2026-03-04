@@ -50,6 +50,7 @@ export interface TrackableCollection {
     identifier: string;
     name: string;
     description: string;
+    posterImage?: string;
     appIcon: string;
     mimeType: string;
     primaryCategory: string;
