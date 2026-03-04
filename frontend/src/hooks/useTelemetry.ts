@@ -16,7 +16,6 @@ export const useTelemetry = () => {
       end: (eventInput: TelemetryEventInput) => {},
       error: (eventInput: TelemetryEventInput) => {},
       audit: (eventInput: TelemetryEventInput) => {},
-      share: (eventInput: TelemetryEventInput) => {},
       log: (eventInput: TelemetryEventInput) => {},
       exData: (eventInput: TelemetryEventInput) => {},
       feedback: (eventInput: TelemetryEventInput) => {},
