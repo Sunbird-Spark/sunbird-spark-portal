@@ -313,11 +313,14 @@ describe('Onboarding Component', () => {
           request: expect.objectContaining({
             userId: 'mock-user-id',
             framework: expect.objectContaining({
-              onboardingDetails: expect.arrayContaining([
-                expect.objectContaining({ screenId: 'role', fieldId: 'teacher' }),
-                expect.objectContaining({ screenId: 'skills_teacher', fieldId: 'math' }),
-                expect.objectContaining({ screenId: 'experience', fieldId: 'beginner' }),
-              ]),
+              onboardingDetails: expect.objectContaining({
+                isSkipped: false,
+                data: expect.objectContaining({
+                  role: { values: ['teacher'] },
+                  skills_teacher: { values: ['math'] },
+                  experience: { values: ['beginner'] },
+                }),
+              }),
             }),
           }),
         })
@@ -350,7 +353,7 @@ describe('Onboarding Component', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             userId: 'mock-user-id',
-            framework: { onboardingDetails: ['skipped'] },
+            framework: { onboardingDetails: { isSkipped: true, data: {} } },
           }),
         })
       );

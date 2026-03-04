@@ -27,12 +27,9 @@ export interface EditProfileFormData {
   alternateEmail: string;
 }
 
-export interface OnboardingDetail {
-  screenId: string;
-  screenTitle: string | null;
-  fieldId: string;
-  fieldLabel: string | null;
-  otherText: string | null;
+export interface OnboardingPayload {
+  isSkipped: boolean;
+  data: Record<string, { values: string[] }>;
 }
 
 export interface UpdateProfileRequest {
@@ -46,7 +43,7 @@ export interface UpdateProfileRequest {
     emailVerified?: boolean;
     recoveryEmail?: string;
     framework?: {
-      onboardingDetails?: OnboardingDetail[] | string[];
+      onboardingDetails?: OnboardingPayload;
     };
   };
 }

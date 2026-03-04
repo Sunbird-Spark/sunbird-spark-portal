@@ -51,7 +51,7 @@ const Onboarding = () => {
     setIsSubmitting(true);
     try {
       await updateProfile.mutateAsync({
-        request: { userId, framework: { onboardingDetails: ['skipped'] } }
+        request: { userId, framework: { onboardingDetails: { isSkipped: true, data: {} } } }
       });
       navigate("/home");
     } catch {
@@ -80,24 +80,18 @@ const Onboarding = () => {
   const handleSubmit = async () => {
     if (isSubmitting || !userId) return;
     setIsSubmitting(true);
-    const formattedSelections = Object.entries(selections).map(([screenId, fieldId]) => {
+    const formattedData: Record<string, { values: string[] }> = {};
+    Object.entries(selections).forEach(([screenId, fieldId]) => {
       const screen = onboardingData?.screens[screenId];
       const field = screen?.fields.find(f => f.id === fieldId);
-      return {
-        screenId,
-        screenTitle: screen?.title ?? null,
-        fieldId,
-        fieldLabel: field?.label ?? null,
-        otherText: field?.requiresTextInput ? otherTexts[screenId] ?? null : null,
-      };
+      const value = field?.requiresTextInput && otherTexts[screenId] ? otherTexts[screenId] : fieldId;
+      formattedData[screenId] = { values: [value] };
     });
     try {
       await updateProfile.mutateAsync({
         request: {
           userId,
-          framework: {
-            onboardingDetails: formattedSelections
-          }
+          framework: { onboardingDetails: { isSkipped: false, data: formattedData } }
         }
       });
       navigate("/home");
