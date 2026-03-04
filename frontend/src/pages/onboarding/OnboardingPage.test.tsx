@@ -407,7 +407,7 @@ describe('Onboarding Component', () => {
 
     await waitFor(() => {
       expect(mockMutateAsync).not.toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith('/home');
+      expect(mockNavigate).toHaveBeenCalledWith('/');
     });
   });
 

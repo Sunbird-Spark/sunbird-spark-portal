@@ -48,7 +48,7 @@ const Onboarding = () => {
   };
   const handleSkip = async () => {
     if (isSubmitting || userId === undefined) return;
-    if (userId === null) { navigate("/home"); return; }
+    if (userId === null) { navigate("/"); return; }
     setIsSubmitting(true);
     try {
       await updateProfile.mutateAsync({
