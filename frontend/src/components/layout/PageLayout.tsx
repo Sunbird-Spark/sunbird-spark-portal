@@ -58,11 +58,18 @@ const PageLayout = () => {
     prevPathRef.current = currentPath;
   }, [location.pathname, setSidebarOpen]);
 
-  // Handle mobile state changes
+  // Handle mobile state changes - only close when transitioning TO mobile
+  const prevIsMobileRef = useRef(isMobile);
   useEffect(() => {
-    if (isMobile) {
+    const wasDesktop = !prevIsMobileRef.current;
+    const isNowMobile = isMobile;
+    
+    // Only close sidebar when transitioning from desktop to mobile
+    if (wasDesktop && isNowMobile) {
       setSidebarOpen(false, false);
     }
+    
+    prevIsMobileRef.current = isMobile;
   }, [isMobile, setSidebarOpen]);
 
   const activeNav = getActiveNav(location.pathname);
