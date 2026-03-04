@@ -380,7 +380,19 @@ describe('Onboarding Component', () => {
     });
   });
 
-  it('disables skip button when userId is not yet loaded', () => {
+  it('disables skip button while userId is still loading (undefined)', () => {
+    mockUseCurrentUserId.mockReturnValue({ data: undefined });
+    (useFormRead as Mock).mockReturnValue({
+      data: { data: { form: { data: mockOnboardingData } } },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(<Onboarding />);
+    expect(screen.getByRole('button', { name: /Skip Onboarding/i })).toBeDisabled();
+  });
+
+  it('navigates to home without API call when userId is confirmed null (no user)', async () => {
     mockUseCurrentUserId.mockReturnValue({ data: null });
     (useFormRead as Mock).mockReturnValue({
       data: { data: { form: { data: mockOnboardingData } } },
@@ -390,7 +402,13 @@ describe('Onboarding Component', () => {
 
     renderWithRouter(<Onboarding />);
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
-    expect(skipButton).toBeDisabled();
+    expect(skipButton).not.toBeDisabled();
+    fireEvent.click(skipButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith('/');
+    });
   });
 
   it('disables skip button while submitting', async () => {

@@ -35,6 +35,7 @@ vi.mock('../utils/logger.js', () => ({
 vi.mock('../utils/sessionUtils.js', () => ({
     regenerateSession: vi.fn(),
     regenerateAnonymousSession: vi.fn(),
+    destroySession: vi.fn(),
     saveSession: vi.fn()
 }));
 
@@ -129,8 +130,11 @@ describe('PortalAuthRoutes Integration', () => {
 
             const res = await request(app).get('/portal/auth/callback?code=123&state=test-state');
 
-            expect(res.status).toBe(302);
-            expect(res.header.location).toBe('http://localhost:3000/home');
+            // Callback now sends an HTML redirect (200) instead of 302 to break the
+            // POST redirect chain that caused browser cancellation.
+            expect(res.status).toBe(200);
+            expect(res.header['content-type']).toContain('text/html');
+            expect(res.text).toContain('http://localhost:3000/home');
             expect(sessionUtils.regenerateSession).toHaveBeenCalled();
         });
 
@@ -160,7 +164,7 @@ describe('PortalAuthRoutes Integration', () => {
             const res = await request(app).get('/portal/auth/callback?code=123&state=test-state');
 
             expect(res.status).toBe(302);
-            expect(res.header.location).toBe('http://localhost:3000');
+            expect(res.header.location).toBe('http://localhost:3000/home');
         });
 
         it('should redirect to root if no session exists', async () => {
@@ -179,14 +183,14 @@ describe('PortalAuthRoutes Integration', () => {
     });
 
     describe('ALL /portal/logout', () => {
-        it('should regenerate anonymous session and redirect to OIDC logout', async () => {
+        it('should destroy session and redirect to OIDC logout', async () => {
             const app = await setupApp();
             const sessionUtils = await import('../utils/sessionUtils.js');
-            vi.mocked(sessionUtils.regenerateAnonymousSession).mockResolvedValue(undefined);
+            vi.mocked(sessionUtils.destroySession).mockResolvedValue(undefined);
 
             const res = await request(app).get('/portal/logout');
 
-            expect(sessionUtils.regenerateAnonymousSession).toHaveBeenCalled();
+            expect(sessionUtils.destroySession).toHaveBeenCalled();
             expect(res.status).toBe(302);
             expect(res.header.location).toContain('oidc-provider.example.com/logout');
         });

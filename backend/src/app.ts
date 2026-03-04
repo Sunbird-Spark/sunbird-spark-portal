@@ -35,10 +35,10 @@ app.get('/health', checkHealth);
 app.get('/portal/app/v1/info', getAppInfo);
 
 
+// Portal Authentication Routes (Login, Callback, Logout) — registered first to bypass anonymous middleware
+app.use('/portal', portalAuthRoutes);
 // Portal Anonymous Routes
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousProxyRoutes)
-// Portal Authentication Routes (Login, Callback, Logout)
-app.use('/portal', portalAuthRoutes);
 
 // Apply anonymous session middleware to API routes (once per route tree)
 
@@ -63,7 +63,7 @@ app.get('/:tenantName', redirectTenant);
 app.get(/.*/, sessionMiddleware, ...anonymousMiddlewares, (req, res) => {
     const isLocal = envConfig.ENVIRONMENT == 'local'
     if (isLocal) {
-        res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
+        return res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
     }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

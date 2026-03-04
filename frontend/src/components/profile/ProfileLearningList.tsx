@@ -33,7 +33,7 @@ interface CourseRowProps {
 const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId, t }: CourseRowProps) => {
     const status = getCompletionStatus(course.status);
     const progress = course.completionPercentage ?? 0;
-    const thumbnail = course.courseLogoUrl || course.content?.appIcon;
+    const thumbnail = course.content?.posterImage || course.courseLogoUrl || course.content?.appIcon;
     const title = course.courseName || course.content?.name || "Untitled Course";
 
     const isDownloading = downloadingCourseId === course.courseId;
