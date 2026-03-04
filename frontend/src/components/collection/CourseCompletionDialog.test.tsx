@@ -145,4 +145,81 @@ describe("CourseCompletionDialog", () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it("does not open dialog when navigating to a different collection already at 100%", () => {
+    const { rerender } = renderWithQuery(
+      <CourseCompletionDialog
+        courseProgressProps={baseProgress}
+        isEnrolledInCurrentBatch
+        collectionId="col-A"
+        hasCertificate={false}
+      />,
+    );
+    expect(screen.queryByText("congratulations")).toBeNull();
+
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <CourseCompletionDialog
+          courseProgressProps={{ ...baseProgress, completedContentCount: 10 }}
+          isEnrolledInCurrentBatch
+          collectionId="col-B"
+          hasCertificate={false}
+        />
+      </QueryClientProvider>,
+    );
+    expect(screen.queryByText("congratulations")).toBeNull();
+  });
+
+  it("opens dialog only once per collection when progress fluctuates 90→100→90→100", () => {
+    const { rerender } = renderWithQuery(
+      <CourseCompletionDialog
+        courseProgressProps={{ ...baseProgress, completedContentCount: 9 }}
+        isEnrolledInCurrentBatch
+        collectionId="col-1"
+        hasCertificate={false}
+      />,
+    );
+    const completed: CourseProgressCardProps = {
+      ...baseProgress,
+      completedContentCount: 10,
+    };
+    const ninety: CourseProgressCardProps = {
+      ...baseProgress,
+      completedContentCount: 9,
+    };
+
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <CourseCompletionDialog
+          courseProgressProps={completed}
+          isEnrolledInCurrentBatch
+          collectionId="col-1"
+          hasCertificate={false}
+        />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByText("congratulations")).toBeInTheDocument();
+
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <CourseCompletionDialog
+          courseProgressProps={ninety}
+          isEnrolledInCurrentBatch
+          collectionId="col-1"
+          hasCertificate={false}
+        />
+      </QueryClientProvider>,
+    );
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <CourseCompletionDialog
+          courseProgressProps={completed}
+          isEnrolledInCurrentBatch
+          collectionId="col-1"
+          hasCertificate={false}
+        />
+      </QueryClientProvider>,
+    );
+    expect(screen.queryAllByText("congratulations")).toHaveLength(1);
+  });
 });

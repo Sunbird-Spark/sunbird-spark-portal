@@ -27,15 +27,28 @@ export default function CourseCompletionDialog({
   const { t } = useAppI18n();
   const [open, setOpen] = useState(false);
   const previousProgressRef = useRef<number | null>(null);
+  const lastCollectionIdRef = useRef<string | undefined>(undefined);
+  const completionShownForCollectionIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!collectionId) {
+      previousProgressRef.current = null;
+      lastCollectionIdRef.current = undefined;
+      return;
+    }
+    if (collectionId !== lastCollectionIdRef.current) {
+      lastCollectionIdRef.current = collectionId;
+      previousProgressRef.current = null;
+      setOpen(false);
+    }
+  }, [collectionId]);
 
   useEffect(() => {
     if (!courseProgressProps || !isEnrolledInCurrentBatch || !collectionId) {
-      previousProgressRef.current = null;
       return;
     }
     const { totalContentCount, completedContentCount = 0 } = courseProgressProps;
     if (!totalContentCount || totalContentCount <= 0) {
-      previousProgressRef.current = null;
       return;
     }
     const currentPercent = Math.min(
@@ -47,7 +60,10 @@ export default function CourseCompletionDialog({
       return;
     }
     if (previousProgressRef.current < 100 && currentPercent === 100) {
-      setOpen(true);
+      if (!completionShownForCollectionIdsRef.current.has(collectionId)) {
+        completionShownForCollectionIdsRef.current.add(collectionId);
+        setOpen(true);
+      }
       previousProgressRef.current = 100;
       return;
     }
