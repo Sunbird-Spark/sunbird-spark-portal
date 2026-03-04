@@ -22,6 +22,7 @@ import CollectionContentArea from "@/components/collection/CollectionContentArea
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
+import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
@@ -173,7 +174,6 @@ const CollectionDetailPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
-
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Go Back Link - always visible */}
         <button
@@ -184,10 +184,7 @@ const CollectionDetailPage = () => {
           {t("button.goBack")}
         </button>
 
-        {showLoading && (
-          <PageLoader message={t("loading")} fullPage={false} />
-        )}
-
+        {showLoading && <PageLoader message={t("loading")} fullPage={false} />}
         {!showLoading && isError && error && (
           <PageLoader
             error={error.message}
@@ -203,7 +200,6 @@ const CollectionDetailPage = () => {
             fullPage={false}
           />
         )}
-
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
           <>
             {/* Main Content Area */}
@@ -246,7 +242,6 @@ const CollectionDetailPage = () => {
               userId={currentUserId ?? undefined}
             />
 
-            {/* Related Content Section */}
             <RelatedContentSection
               searchError={searchError}
               searchErrorObj={searchErrorObj}
@@ -254,23 +249,24 @@ const CollectionDetailPage = () => {
               relatedContentItems={relatedContentItems}
               searchRefetch={searchRefetch}
             />
-
-            <div className="mt-16">
-              <FAQSection />
-            </div>
+            <div className="mt-16"><FAQSection /></div>
           </>
         )}
       </main>
-
       <CertificatePreviewModal
         open={certificatePreviewOpen}
         onClose={() => setCertificatePreviewOpen(false)}
         previewUrl={certificatePreviewUrl}
         details={certificatePreviewDetails}
       />
+      <CourseCompletionDialog
+        courseProgressProps={courseProgressProps}
+        isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
+        collectionId={collectionId}
+        hasCertificate={hasCertificate}
+      />
       <Footer />
     </div>
   );
 };
-
 export default CollectionDetailPage;

@@ -252,7 +252,10 @@
     "leaveCourseDescription": "Voulez-vous vous désinscrire de ce lot ?",
     "leaveCourseError": "Impossible de quitter le cours. Veuillez réessayer.",
     "enrolSuccess": "Inscription au cours pour ce lot réussie",
-    "unenrolSuccess": "Désinscription du lot réussie"
+    "unenrolSuccess": "Désinscription du lot réussie",
+    "courseCompletionMessage": "Vous avez terminé le cours avec succès",
+    "courseCompletionNoCertificateNote": "Remarque : ce cours n'a pas de certificat",
+    "courseCompletionCertificateNote": "Vous pouvez télécharger votre certificat de cours depuis votre page de profil une fois qu'il est généré"
   },
   "profileDataSharing": {
     "cardTitle": "Partage des données de profil",
