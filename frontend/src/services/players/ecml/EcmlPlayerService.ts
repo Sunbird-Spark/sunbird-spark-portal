@@ -2,6 +2,7 @@ import { EcmlPlayerContextProps, EcmlPlayerMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import userProfileService from '../../UserProfileService';
 
 const PREVIEW_URL = '/content/preview/preview.html?webview=true';
 
@@ -43,6 +44,8 @@ export class EcmlPlayerService {
 
     const pdata = await appCoreService.getPData();
 
+    const userdata = await userProfileService.getUserData();
+
     const context = {
       mode: contextProps?.mode || 'play',
       partner: [],
@@ -61,10 +64,7 @@ export class EcmlPlayerService {
       endpoint: '/portal/data/v1/telemetry',
       dims: tags,
       app: [channel],
-      userData: {
-        firstName: 'anonymous',
-        lastName: '',
-      },
+      userData: userdata
     };
 
     const config = {

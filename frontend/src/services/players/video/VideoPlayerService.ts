@@ -2,6 +2,7 @@ import { VideoPlayerConfig, VideoPlayerEvent, VideoPlayerContextProps, VideoPlay
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import userProfileService from '../../UserProfileService';
 
 /**
  * Service for initializing and managing the Video Player.
@@ -88,6 +89,8 @@ export class VideoPlayerService {
       console.warn('Failed to fetch channel from org service, using random fallback:', channel);
     }
 
+    const userdata = await userProfileService.getUserData();
+
     // Build context with defaults and overrides
     const context = {
       mode: contextProps?.mode || 'play',
@@ -108,10 +111,7 @@ export class VideoPlayerService {
       objectRollup: contextProps?.objectRollup || {},
       host: '',
       endpoint: '',
-      userData: {
-        firstName: 'Guest',
-        lastName: '',
-      }
+      userData: userdata
     };
 
     const finalConfig = {

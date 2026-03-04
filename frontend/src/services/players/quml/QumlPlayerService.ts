@@ -2,6 +2,7 @@ import type { QumlPlayerConfig, QumlPlayerEvent, QumlPlayerContextProps, QumlPla
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import userProfileService from '../../UserProfileService';
 
 export class QumlPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
@@ -74,6 +75,7 @@ export class QumlPlayerService {
     const pdata = await appCoreService.getPData();
 
     // Build context with defaults and overrides
+    const userdata = await userProfileService.getUserData();
     const context = {
       mode: contextProps?.mode || 'play',
       sid,
@@ -89,10 +91,7 @@ export class QumlPlayerService {
       objectRollup: contextProps?.objectRollup || {},
       host: '',
       endpoint: '',
-      userData: {
-        firstName: 'Guest',
-        lastName: '',
-      }
+      userData: userdata
     };
 
     const finalConfig = {

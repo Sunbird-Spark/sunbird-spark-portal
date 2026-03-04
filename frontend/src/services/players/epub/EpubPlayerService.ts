@@ -2,6 +2,7 @@ import { EpubPlayerConfig, EpubPlayerEvent, EpubPlayerContextProps, EpubPlayerMe
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
+import userProfileService from '../../UserProfileService';
 
 /**
  * Service for initializing and managing the EPUB Player.
@@ -83,6 +84,7 @@ export class EpubPlayerService {
       console.warn('Failed to fetch channel from org service, using random fallback:', channel);
     }
 
+    const userdata = await userProfileService.getUserData();
     // Build context with defaults and overrides
     const context = {
       mode: contextProps?.mode || 'play',
@@ -103,10 +105,7 @@ export class EpubPlayerService {
       objectRollup: contextProps?.objectRollup || {},
       host: '',
       endpoint: '',
-      userData: {
-        firstName: 'Guest',
-        lastName: '',
-      }
+      userData: userdata
     };
 
     const finalConfig = {
