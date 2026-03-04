@@ -199,6 +199,7 @@ export default function CollectionContentArea({
           {isTrackable && isAuthenticated && !contentCreatorPrivilege && (
             <LearnerBottomCards
               hasBatchInRoute={hasBatchInRoute}
+              showCertificateCard={hasBatchInRoute && isEnrolledInCurrentBatch}
               batches={batches}
               selectedBatchId={selectedBatchId}
               setSelectedBatchId={setSelectedBatchId}
