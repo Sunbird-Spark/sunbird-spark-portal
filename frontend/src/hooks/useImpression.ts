@@ -56,7 +56,7 @@ const useImpression = ({ type = "view", subtype, pageid, object = {} }: Impressi
         // Reset pageStartTime after firing so the NEXT page's impression captures
         // how long the user spent on this page (mirrors NavigationStart recording in reference)
         navigationHelperService.pageStartTime = Date.now();
-    }, [effectivePageId, pathname, telemetry]);
+    }, [effectivePageId, pathname, location.key, telemetry]);
 
 };
 

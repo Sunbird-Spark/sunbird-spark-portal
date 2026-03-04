@@ -33,18 +33,24 @@ export class TelemetryService {
 
     const pageId = eventInput.edata?.pageid;
     // Debounce to prevent spam from duplicate/refresh events
+    // Only debounce if the current pageId is EXACTLY the same as the immediately preceding pageId within the time window
     if (pageId) {
-      const cacheKey = `last_impression_${pageId}`;
-      const lastImpression = sessionStorage.getItem(cacheKey);
+      const lastPageIdKey = 'telemetry_last_pageid';
+      const lastTimeKey = 'telemetry_last_impression_time';
 
-      if (lastImpression) {
-        const timeDiff = Date.now() - parseInt(lastImpression, 10);
+      const lastPageId = sessionStorage.getItem(lastPageIdKey);
+      const lastTime = sessionStorage.getItem(lastTimeKey);
+
+      if (lastPageId === pageId && lastTime) {
+        const timeDiff = Date.now() - parseInt(lastTime, 10);
         if (timeDiff < 5000) {
           // Drop event
           return;
         }
       }
-      sessionStorage.setItem(cacheKey, Date.now().toString());
+
+      sessionStorage.setItem(lastPageIdKey, pageId);
+      sessionStorage.setItem(lastTimeKey, Date.now().toString());
     }
 
     $t.impression(eventInput.edata, eventInput.options);
