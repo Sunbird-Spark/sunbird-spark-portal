@@ -149,8 +149,12 @@ router.get('/auth/callback',
                     req.session.userId = userIdFromToken;
 
                     if (userIdFromToken) {
-                        const userProfileResponse = await fetchUserById(userIdFromToken, req);
-                        await setUserSession(req, userProfileResponse);
+                        try {
+                            const userProfileResponse = await fetchUserById(userIdFromToken, req);
+                            await setUserSession(req, userProfileResponse);
+                        } catch (userErr) {
+                            logger.error('Failed to fetch user profile during callback — proceeding with partial session', userErr);
+                        }
                     }
                 }
 
@@ -158,7 +162,13 @@ router.get('/auth/callback',
                 await saveSession(req);
 
                 logger.info('Session setup complete, redirecting to /home');
-                res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL + '/home');
+                // Use HTML redirect instead of 302 to break the POST redirect chain.
+                // When Keycloak redirects back via POST, a 302 keeps the chain alive
+                // and the browser may cancel the navigation. An HTML page forces a
+                // fresh GET navigation, preventing the cancellation.
+                const homeUrl = envConfig.DEVELOPMENT_REACT_APP_URL + '/home';
+                res.setHeader('Content-Type', 'text/html');
+                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${homeUrl}"></head><body><script>window.location.replace("${homeUrl}");</script></body></html>`);
             } else {
                 logger.error('No session found after OIDC callback');
                 res.redirect('/');
@@ -168,7 +178,7 @@ router.get('/auth/callback',
             // Clean up PKCE/state from session on failure
             delete req.session?.oidcCodeVerifier;
             delete req.session?.oidcState;
-            res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
+            res.redirect((envConfig.DEVELOPMENT_REACT_APP_URL || '') + '/home');
         }
     }
 );

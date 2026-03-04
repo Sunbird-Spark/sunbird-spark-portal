@@ -129,8 +129,11 @@ describe('PortalAuthRoutes Integration', () => {
 
             const res = await request(app).get('/portal/auth/callback?code=123&state=test-state');
 
-            expect(res.status).toBe(302);
-            expect(res.header.location).toBe('http://localhost:3000/home');
+            // Callback now sends an HTML redirect (200) instead of 302 to break the
+            // POST redirect chain that caused browser cancellation.
+            expect(res.status).toBe(200);
+            expect(res.header['content-type']).toContain('text/html');
+            expect(res.text).toContain('http://localhost:3000/home');
             expect(sessionUtils.regenerateSession).toHaveBeenCalled();
         });
 
