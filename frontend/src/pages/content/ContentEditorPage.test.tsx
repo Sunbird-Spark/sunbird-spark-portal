@@ -21,6 +21,23 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+// ── Telemetry (suppress "must be used within TelemetryProvider" warnings) ─────
+vi.mock('@/hooks/useTelemetry', () => ({
+  useTelemetry: () => ({
+    start: vi.fn(),
+    end: vi.fn(),
+    impression: vi.fn(),
+    interact: vi.fn(),
+    audit: vi.fn(),
+    error: vi.fn(),
+    share: vi.fn(),
+    log: vi.fn(),
+    exData: vi.fn(),
+    feedback: vi.fn(),
+    isInitialized: true,
+  }),
+}));
+
 // ── Data / hooks ──────────────────────────────────────────────────────────────
 const mockUseContentRead = vi.fn();
 const mockUseEditorLock = vi.fn();
