@@ -301,7 +301,24 @@ describe('Onboarding Component', () => {
     // Should show loading state
     expect(screen.getByText('Saving...')).toBeInTheDocument();
 
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home'));
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({
+            userId: 'mock-user-id',
+            framework: expect.objectContaining({
+              onboardingDetails: expect.arrayContaining([
+                expect.objectContaining({ screenId: 'role', fieldId: 'teacher' }),
+                expect.objectContaining({ screenId: 'skills_teacher', fieldId: 'math' }),
+                expect.objectContaining({ screenId: 'experience', fieldId: 'beginner' }),
+              ]),
+            }),
+          }),
+        })
+      );
+      expect(mockNavigate).toHaveBeenCalledWith('/home');
+    });
   });
 
   it('allows skipping onboarding', async () => {
@@ -322,7 +339,18 @@ describe('Onboarding Component', () => {
     const skipButton = screen.getByRole('button', { name: /Skip Onboarding/i });
     fireEvent.click(skipButton);
 
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home'));
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({
+            userId: 'mock-user-id',
+            framework: { onboardingDetails: ['skipped'] },
+          }),
+        })
+      );
+      expect(mockNavigate).toHaveBeenCalledWith('/home');
+    });
   });
 
   it('disables skip button while submitting', async () => {
