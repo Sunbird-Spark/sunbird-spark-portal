@@ -89,7 +89,12 @@ export class VideoPlayerService {
       console.warn('Failed to fetch channel from org service, using random fallback:', channel);
     }
 
-    const userdata = await userProfileService.getUserData();
+    let userdata = { firstName: '', lastName: '' };
+    try {
+      userdata = await userProfileService.getUserData();
+    } catch (error) {
+      console.warn('Failed to fetch user data from UserProfileService:', error);
+    }
 
     // Build context with defaults and overrides
     const context = {

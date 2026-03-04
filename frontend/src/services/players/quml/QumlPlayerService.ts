@@ -75,7 +75,13 @@ export class QumlPlayerService {
     const pdata = await appCoreService.getPData();
 
     // Build context with defaults and overrides
-    const userdata = await userProfileService.getUserData();
+    let userdata = { firstName: '', lastName: '' };
+    try {
+      userdata = await userProfileService.getUserData();
+    } catch (error) {
+      console.warn('Failed to fetch user data from UserProfileService:', error);
+    }
+    
     const context = {
       mode: contextProps?.mode || 'play',
       sid,
