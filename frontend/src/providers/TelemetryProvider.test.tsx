@@ -226,7 +226,7 @@ describe('TelemetryProvider', () => {
 
       expect(telemetryService.interact).not.toHaveBeenCalled();
     });
-    
+
     it('removes event listener on unmount', () => {
       const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
@@ -245,6 +245,45 @@ describe('TelemetryProvider', () => {
       
       addEventListenerSpy.mockRestore();
       removeEventListenerSpy.mockRestore();
+    });
+  });
+
+  describe('Telemetry Config', () => {
+    it('passes tags containing the channel', () => {
+      render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      const config = (telemetryService.initialize as any).mock.calls[0][0];
+      expect(Array.isArray(config.tags)).toBe(true);
+      expect(config.tags).toContain(config.channel);
+    });
+
+    it('passes cdata with UserSession entry containing the session id', () => {
+      sessionStorage.setItem('sid', 'my-session-123');
+      render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      const config = (telemetryService.initialize as any).mock.calls[0][0];
+      const userSessionEntry = config.cdata.find((c: any) => c.type === 'UserSession');
+      expect(userSessionEntry).toBeDefined();
+      expect(userSessionEntry.id).toBe('my-session-123');
+    });
+
+    it('passes cdata with Device entry (Desktop or Mobile)', () => {
+      render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      const config = (telemetryService.initialize as any).mock.calls[0][0];
+      const deviceEntry = config.cdata.find((c: any) => c.type === 'Device');
+      expect(deviceEntry).toBeDefined();
+      expect(['Desktop', 'Mobile']).toContain(deviceEntry.id);
+    });
+
+    it('passes rollup with l1 equal to the channel', () => {
+      render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      const config = (telemetryService.initialize as any).mock.calls[0][0];
+      expect(config.rollup).toBeDefined();
+      expect(config.rollup.l1).toBe(config.channel);
+    });
+
+    it('passes enableValidation as a boolean', () => {
+      render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      const config = (telemetryService.initialize as any).mock.calls[0][0];
+      expect(typeof config.enableValidation).toBe('boolean');
     });
   });
 });

@@ -13,10 +13,14 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
     const defaultDid = localStorage.getItem('deviceId') || 'anonymous-device';
     const defaultUid = userAuthInfoService.getUserId() || 'anonymous';
     const defaultSid = sessionStorage.getItem('sid') || `session-${Date.now()}`;
-    
+    const channel = import.meta.env.VITE_APP_CHANNEL || 'default';
+
     if (!sessionStorage.getItem('sid')) {
         sessionStorage.setItem('sid', defaultSid);
     }
+
+    // Detect device type to match context.cdata "Device" entry in Sunbird telemetry spec
+    const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
 
     return {
       pdata: {
@@ -25,7 +29,7 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
         pid: 'sunbird-portal'
       },
       env: import.meta.env.VITE_APP_ENV || 'production',
-      channel: import.meta.env.VITE_APP_CHANNEL || 'default',
+      channel,
       did: defaultDid,
       authtoken: '',
       uid: defaultUid,
@@ -33,8 +37,18 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
       batchsize: 1, // Set to higher in prod, kept 1 for debugging
       host: window.location.origin,
       endpoint: '/action/data/v3/telemetry',
-      tags: [],
-      cdata: []
+      // tags: [channel] matches the sample IMPRESSION structure
+      tags: [channel],
+      // cdata: UserSession + Device entries match the sample context.cdata
+      cdata: [
+        { id: defaultSid, type: 'UserSession' },
+        { id: deviceType, type: 'Device' }
+      ],
+      // rollup.l1 = channel matches the sample context.rollup
+      rollup: { l1: channel },
+      // The @project-sunbird/telemetry-sdk validates every event against standard schemas when true.
+      // Controlled via .env.development (true) / .env.production (false).
+      enableValidation: import.meta.env.VITE_ENABLE_TELEMETRY_VALIDATION === 'true'
     };
   }, []); 
   // do not fire telemetry events before the service is initialized.
