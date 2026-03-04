@@ -34,7 +34,7 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
       authtoken: '',
       uid: defaultUid,
       sid: defaultSid,
-      batchsize: 1, // Set to higher in prod, kept 1 for debugging
+      batchsize: 20, // Set to higher in prod, kept 1 for debugging
       host: window.location.origin,
       endpoint: '/action/data/v3/telemetry',
       // tags: [channel] matches the sample IMPRESSION structure
