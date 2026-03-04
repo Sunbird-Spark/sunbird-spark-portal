@@ -4,7 +4,7 @@ const LoginToUnlockCard = () => {
   const { t } = useAppI18n();
 
   const handleLogin = () => {
-    window.location.href = "/portal/login?prompt=none";
+    window.location.href = "/portal/login?prompt=login";
   };
 
   return (

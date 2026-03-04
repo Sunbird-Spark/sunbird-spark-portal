@@ -4,12 +4,12 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
 
 const onProceedToLogin = () => {
-    window.location.href = '/portal/login?prompt=none';
+    window.location.href = '/portal/login?prompt=login';
 }
 
 const PasswordResetSuccess: React.FC = () => {
     return (
-        <AuthLayout onClose={() => window.location.href = '/portal/login?prompt=none'}>
+        <AuthLayout onClose={() => window.location.href = '/portal/login?prompt=login'}>
             <div className="flex flex-col items-center">
                 <Header
                     title="Congratulations!"

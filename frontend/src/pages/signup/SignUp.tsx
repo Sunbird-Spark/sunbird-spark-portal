@@ -182,7 +182,7 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        window.location.href = '/portal/login?prompt=none';
+        window.location.href = '/portal/login?prompt=login';
     };
 
     return (

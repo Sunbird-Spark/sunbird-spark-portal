@@ -40,10 +40,11 @@ router.get('/login',
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
             const rawPrompt = req.query.prompt as string | undefined;
             const allowedPrompts = ['none', 'login', 'consent', 'select_account'];
-            // Default to prompt=none for silent re-auth when Keycloak SSO session is active.
-            // If no SSO session exists, Keycloak returns login_required which the callback
-            // handler redirects to /portal/login?prompt=login for interactive login.
-            const promptParam = allowedPrompts.includes(rawPrompt as string) ? rawPrompt : 'none';
+            // Default to prompt=login for user-initiated logins so Keycloak always shows
+            // the login form. This prevents the "You are already logged in" page which
+            // appears when no prompt is set and the user has an active Keycloak SSO session.
+            // Silent re-auth (prompt=none) is only used by requireAuth() middleware redirects.
+            const promptParam = allowedPrompts.includes(rawPrompt as string) ? rawPrompt : 'login';
 
             const redirectTo = oidcClient.buildAuthorizationUrl(config, {
                 redirect_uri: callbackUrl,
