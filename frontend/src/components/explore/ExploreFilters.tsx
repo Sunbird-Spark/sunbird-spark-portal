@@ -105,7 +105,7 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
                         value={group.id}
                         className="bg-white rounded-xl border-none px-4 shadow-sm"
                     >
-                        <AccordionTrigger className="hover:no-underline py-4 [&>svg]:text-sunbird-brick">
+                        <AccordionTrigger className="hover:no-underline py-4">
                             <span className="text-sm font-semibold text-foreground">
                                 {group.label}
                             </span>
