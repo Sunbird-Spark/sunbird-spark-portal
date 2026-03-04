@@ -102,9 +102,9 @@ describe('sessionTTLUtil', () => {
             expect(mockRequest.session.cookie.expires).toBeInstanceOf(Date);
         });
 
-        it('should throw error when token is not available', () => {
+        it('should exit silently when token is not available', () => {
             mockRequest.oidc = undefined;
-            expect(() => setSessionTTLFromToken(mockRequest)).toThrow('Token expiration not available - cannot set session TTL');
+            expect(setSessionTTLFromToken(mockRequest)).toBeUndefined();
         });
 
         it('should set cookie expires to match maxAge', () => {

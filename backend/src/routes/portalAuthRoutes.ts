@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import * as oidcClient from 'openid-client';
 import { getPortalOIDCConfig, decodeJwtPayload } from '../auth/oidcProvider.js';
 import logger from '../utils/logger.js';
-import { regenerateSession, regenerateAnonymousSession, saveSession } from '../utils/sessionUtils.js';
+import { regenerateSession, destroySession, saveSession } from '../utils/sessionUtils.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
 import { envConfig } from '../config/env.js';
@@ -40,7 +40,10 @@ router.get('/login',
             const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
             const rawPrompt = req.query.prompt as string | undefined;
             const allowedPrompts = ['none', 'login', 'consent', 'select_account'];
-            const promptParam = allowedPrompts.includes(rawPrompt as string) ? rawPrompt : undefined;
+            // Default to prompt=none for silent re-auth when Keycloak SSO session is active.
+            // If no SSO session exists, Keycloak returns login_required which the callback
+            // handler redirects to /portal/login?prompt=login for interactive login.
+            const promptParam = allowedPrompts.includes(rawPrompt as string) ? rawPrompt : 'none';
 
             const redirectTo = oidcClient.buildAuthorizationUrl(config, {
                 redirect_uri: callbackUrl,
@@ -73,7 +76,7 @@ router.get('/auth/callback',
             // login_required / interaction_required means prompt=none was used
             // but the user has no active SSO session — fall back to interactive login
             if (error === 'login_required' || error === 'interaction_required') {
-                return res.redirect('/portal/login');
+                return res.redirect('/portal/login?prompt=login');
             }
 
             // For other errors, redirect to home
@@ -149,8 +152,12 @@ router.get('/auth/callback',
                     req.session.userId = userIdFromToken;
 
                     if (userIdFromToken) {
-                        const userProfileResponse = await fetchUserById(userIdFromToken, req);
-                        await setUserSession(req, userProfileResponse);
+                        try {
+                            const userProfileResponse = await fetchUserById(userIdFromToken, req);
+                            await setUserSession(req, userProfileResponse);
+                        } catch (userErr) {
+                            logger.error('Failed to fetch user profile during callback — proceeding with partial session', userErr);
+                        }
                     }
                 }
 
@@ -158,7 +165,13 @@ router.get('/auth/callback',
                 await saveSession(req);
 
                 logger.info('Session setup complete, redirecting to /home');
-                res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL + '/home');
+                // Use HTML redirect instead of 302 to break the POST redirect chain.
+                // When Keycloak redirects back via POST, a 302 keeps the chain alive
+                // and the browser may cancel the navigation. An HTML page forces a
+                // fresh GET navigation, preventing the cancellation.
+                const homeUrl = envConfig.DEVELOPMENT_REACT_APP_URL + '/home';
+                res.setHeader('Content-Type', 'text/html');
+                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${homeUrl}"></head><body><script>window.location.replace("${homeUrl}");</script></body></html>`);
             } else {
                 logger.error('No session found after OIDC callback');
                 res.redirect('/');
@@ -168,7 +181,7 @@ router.get('/auth/callback',
             // Clean up PKCE/state from session on failure
             delete req.session?.oidcCodeVerifier;
             delete req.session?.oidcState;
-            res.redirect(envConfig.DEVELOPMENT_REACT_APP_URL || '/');
+            res.redirect((envConfig.DEVELOPMENT_REACT_APP_URL || '') + '/home');
         }
     }
 );
@@ -178,12 +191,23 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
     const idToken = req.session?.['oidc-tokens']?.id_token;
     const redirectUri = envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/';
 
+    // Destroy the session in the store and clear the cookie so the browser starts
+    // completely fresh on the next login (no stale session data or ID).
+    // The anonymous session will be created naturally by registerDeviceWithKong on
+    // the next request — no need to pre-create it here.
     try {
-        await regenerateAnonymousSession(req);
+        await destroySession(req);
     } catch (err) {
-        logger.error('Error regenerating session on logout', err);
-        // Continue with provider logout even if local session clear failed
+        logger.error('Error destroying session on logout', err);
+        // Continue with provider logout even if local session destroy failed
     }
+    const isLocal = envConfig.ENVIRONMENT === 'local';
+    res.clearCookie('connect.sid', {
+        path: '/',
+        httpOnly: true,
+        secure: !isLocal,
+        sameSite: isLocal ? 'lax' : 'none',
+    });
 
     // Redirect to OIDC provider logout
     try {
