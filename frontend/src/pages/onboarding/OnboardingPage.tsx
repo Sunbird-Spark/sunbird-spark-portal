@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
-import { useNavigate } from "react-router-dom";
 import sunbirdLogo from "../../../src/assets/sunbird-logo.svg";
 import onboardingImage from "../../../src/assets/onboarding-image.svg";
 import { useAppI18n } from "@/hooks/useAppI18n";
@@ -11,14 +11,11 @@ import { computeTotalSteps } from './utils';
 import { ProgressIndicator, OptionChip } from './OnboardingComponents';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
-
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useCurrentUserId } from "@/hooks/useUser";
 import { toast } from "@/hooks/useToast";
 const Onboarding = () => {
-  const { t } = useAppI18n();
-  const navigate = useNavigate();
-  const telemetry = useTelemetry();
+  const { t } = useAppI18n(); const navigate = useNavigate(); const telemetry = useTelemetry();
   const [screenHistory, setScreenHistory] = useState<string[]>([]);
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);
   const [selections, setSelections] = useState<Record<string, string>>({});
@@ -88,21 +85,9 @@ const Onboarding = () => {
   const handleSubmit = async () => {
     if (isSubmitting || !userId) return;
     setIsSubmitting(true);
-    telemetry.audit({
-      edata: {
-        props: ['onboardingSelections'],
-        state: 'Submitted',
-      },
-    });
-    telemetry.log({
-      edata: {
-        type: 'api',
-        level: 'INFO',
-        message: 'Onboarding selections saved',
-        pageid: 'onboarding',
-      },
-    });
-    timeoutRef.current = setTimeout(() => {setIsSubmitting(false);
+    telemetry.audit({ edata: { props: ['onboardingSelections'], state: 'Submitted' } });
+    telemetry.log({ edata: { type: 'api', level: 'INFO', message: 'Onboarding selections saved', pageid: 'onboarding' } });
+    timeoutRef.current = setTimeout(async () => {setIsSubmitting(false);
     const formattedData: Record<string, { values: string[] }> = {};
     Object.entries(selections).forEach(([screenId, fieldId]) => {
       const screen = onboardingData?.screens[screenId];
@@ -123,10 +108,10 @@ const Onboarding = () => {
     } finally {
       setIsSubmitting(false);
     }
+    }, 0);
   };
   const handleSelect = (fieldId: string) => {
     if (!currentScreenId) return;
-
     setSelections(prev => ({ ...prev, [currentScreenId]: fieldId }));
     setOtherTexts(prev => ({ ...prev, [currentScreenId]: "" }));
   };
@@ -226,10 +211,7 @@ const Onboarding = () => {
                 ) : (
                   <div className="space-y-4 max-w-md">
                     <Input type="text"  placeholder={t('onboarding.otherPreferencePlaceholder')} value={otherText}
-                      onChange={e => {
-                        const value = e.target.value;
-                        setOtherTexts(prev => ({ ...prev, [currentScreenId]: e.target.value }));
-                      }}
+                      onChange={e => setOtherTexts(prev => ({ ...prev, [currentScreenId]: e.target.value }))}
                       className="onboarding-input"
                     />
                   </div>
@@ -263,8 +245,7 @@ const Onboarding = () => {
           </div>
         </div>
         <div className="hidden lg:block lg:w-1/2 relative overflow-hidden rounded-3xl">
-          <img src={onboardingImage} alt={t('onboarding.altImage')} className="onboarding-image-reduced"
-          />
+          <img src={onboardingImage} alt={t('onboarding.altImage')} className="onboarding-image-reduced" />
         </div>
       </div>
     </div>
