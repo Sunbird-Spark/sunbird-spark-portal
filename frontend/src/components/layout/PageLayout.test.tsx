@@ -64,14 +64,19 @@ vi.mock('@/components/home/Sheet', () => ({
     open: boolean;
     onOpenChange: (v: boolean) => void;
     children: React.ReactNode;
-  }) => (open ? <div data-testid="mobile-sheet" onClick={() => onOpenChange(false)}>{children}</div> : null),
+  }) => (open ? (
+    <div data-testid="mobile-sheet">
+      <div data-testid="sheet-backdrop" onClick={() => onOpenChange(false)} />
+      {children}
+    </div>
+  ) : null),
   SheetContent: ({
     children,
   }: {
     children: React.ReactNode;
     side?: string;
     className?: string;
-  }) => <div>{children}</div>,
+  }) => <div onClick={(e) => e.stopPropagation()}>{children}</div>,
   SheetTitle: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
@@ -318,6 +323,7 @@ describe('PageLayout', () => {
       // Note: The sidebar state is managed by useSidebarState which reads from localStorage
       // Since localStorage is cleared in beforeEach, it will use the defaultState which is !isMobile = true
       expect(screen.getByTestId('sidebar')).toBeInTheDocument();
+      expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'false');
     });
 
     it('keeps the sidebar closed when switching from mobile to desktop on /explore page', () => {
