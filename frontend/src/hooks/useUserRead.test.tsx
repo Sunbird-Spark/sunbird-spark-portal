@@ -119,4 +119,16 @@ describe('useUserRead hook', () => {
         expect(result.current.error).toBe(mockError);
         expect(mockUserService.userRead).toHaveBeenCalledWith(mockUserId);
     });
+    it('accepts refetchOnMount option and still fetches data correctly', async () => {
+        const mockUserId = 'user-123';
+        const mockResponse = { data: { response: { firstName: 'Test', lastName: 'User' } } };
+        mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
+        mockUserAuthInfoService.getUserId.mockReturnValue(mockUserId);
+        mockUserService.userRead.mockResolvedValue(mockResponse);
+
+        const { result } = renderHook(() => useUserRead({ refetchOnMount: 'always' }), { wrapper: createWrapper() });
+
+        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        expect(result.current.data).toEqual(mockResponse);
+    });
 });
