@@ -252,7 +252,10 @@
     "leaveCourseDescription": "Do you want to unenrol from this batch?",
     "leaveCourseError": "Unable to leave the course. Please try again.",
     "enrolSuccess": "Course enroled for this batch successfully",
-    "unenrolSuccess": "User unenroled from the batch successfully"
+    "unenrolSuccess": "User unenroled from the batch successfully",
+    "courseCompletionMessage": "You have successfully completed the course",
+    "courseCompletionNoCertificateNote": "Note: This course does not have a certificate",
+    "courseCompletionCertificateNote": "You can download your course certificate from your Profile page once it is generated"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
@@ -551,10 +554,7 @@
       "publishWarningText": "You have given some review comments/suggestions, they will be lost if content is published.",
       "publishWarningQuestion": "Do you want to publish?",
       "processing": "Processing..."
-    },
-    "collectionType": "Collection Type",
-    "description": "Description",
-    "creating": "Creating..."
+    }
   },
   "homeComponents": {
     "openMenu": "Open Menu",
