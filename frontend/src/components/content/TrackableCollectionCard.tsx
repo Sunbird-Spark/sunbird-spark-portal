@@ -15,6 +15,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
   return (
     <Link
       to={`/collection/${course.collectionId}`}
+      state={{ from: '/home' }}
       className="block"
     >
       <div

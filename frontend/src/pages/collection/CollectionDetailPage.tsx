@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
@@ -27,6 +27,18 @@ import "./collection.css";
 const CollectionDetailPage = () => {
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Capture the entry-point path once per collectionId so sidebar navigation
+  // (which clears location.state) doesn't lose the back destination.
+  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/home');
+  const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
+  if (capturedCollectionIdRef.current !== collectionId) {
+    capturedCollectionIdRef.current = collectionId;
+    backToRef.current = (location.state as { from?: string } | null)?.from ?? '/home';
+  }
+  const backTo = backToRef.current;
+  const linkState = { from: backTo };
   const { isAuthenticated } = usePermissions();
   const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
@@ -177,7 +189,7 @@ const CollectionDetailPage = () => {
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Go Back Link - always visible */}
         <button
-          onClick={() => navigate("/my-learning")}
+          onClick={() => navigate(backTo)}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
         >
           <FiArrowLeft className="w-4 h-4" />
@@ -244,6 +256,7 @@ const CollectionDetailPage = () => {
               contentCreatorPrivilege={contentCreatorPrivilege}
               userProfile={userProfile ?? undefined}
               userId={currentUserId ?? undefined}
+              backTo={backTo}
             />
 
             {/* Related Content Section */}
@@ -253,6 +266,7 @@ const CollectionDetailPage = () => {
               searchFetching={searchFetching}
               relatedContentItems={relatedContentItems}
               searchRefetch={searchRefetch}
+              linkState={linkState}
             />
 
             <div className="mt-16">

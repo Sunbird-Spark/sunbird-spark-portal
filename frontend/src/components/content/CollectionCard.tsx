@@ -1,15 +1,18 @@
 import { FiStar } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 
 interface ContentCardProps {
   item: ContentSearchItem;
+  linkState?: Record<string, unknown>;
 }
 
-const CollectionCard = ({ item }: ContentCardProps) => {
+const CollectionCard = ({ item, linkState }: ContentCardProps) => {
+  const location = useLocation();
+  const state = linkState ?? { from: location.pathname };
   return (
-    <Link to={`/collection/${item.identifier}`} className="related-resource-card-link">
+    <Link to={`/collection/${item.identifier}`} state={state} className="related-resource-card-link">
       <div className="group related-resource-card-container">
         {/* Image with padding */}
         <div className="related-resource-card-image-wrapper">

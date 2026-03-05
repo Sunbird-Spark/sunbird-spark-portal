@@ -41,6 +41,7 @@ const HomeInProgressGrid = () => {
                                 ? `/collection/${course.collectionId}/batch/${course.batchId}/content/${course.lastReadContentId}`
                                 : `/collection/${course.collectionId}/batch/${course.batchId}`
                         }
+                        state={{ from: '/home' }}
                         className="home-inprogress-card no-underline"
                     >
                         {/* Content */}
