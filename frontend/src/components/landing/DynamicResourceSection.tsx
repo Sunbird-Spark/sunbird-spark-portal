@@ -12,9 +12,10 @@ interface DynamicResourceSectionProps {
     };
     sectionClassName?: string;
     innerClassName?: string;
+    useCustomHeights?: boolean; // Flag to enable custom heights for landing page resource center
 }
 
-const DynamicResourceSection = ({ title, sectionLabel, criteria, sectionClassName = "resource-section", innerClassName = "landing-section-inner" }: DynamicResourceSectionProps) => {
+const DynamicResourceSection = ({ title, sectionLabel, criteria, sectionClassName = "resource-section", innerClassName = "landing-section-inner", useCustomHeights = false }: DynamicResourceSectionProps) => {
     const { t } = useAppI18n();
     const { data, isLoading, error } = useContentSearch({
         request: criteria?.request,
@@ -45,10 +46,11 @@ const DynamicResourceSection = ({ title, sectionLabel, criteria, sectionClassNam
     const contents = data.data.content || [];
 
     // Layout configuration matching ResourceCenter.tsx, but adaptive to content length
+    // Only use custom heights when useCustomHeights is true (for landing page resource center)
     const baseHeights = [
         ["h-[28.6875rem]", "h-[18.5rem]"],
         ["h-[18.5rem]", "h-[28.6875rem]"],
-        ["h-[26.875rem]", "h-[18.5rem]"],
+        ["h-[28.875rem]", "h-[18.5rem]"],
     ];
     
     const columns = baseHeights
@@ -78,12 +80,15 @@ const DynamicResourceSection = ({ title, sectionLabel, criteria, sectionClassNam
                 <div className="resource-section-grid">
                     {columns.map((col, colIdx) => (
                         <div key={colIdx} className="resource-section-column">
-                            {col.items.map((item) => {
+                            {col.items.map((item, itemIdx) => {
                                 if (!item) return null;
+                                // Only pass custom height if useCustomHeights is true
+                                const heightClass = useCustomHeights ? col.heights[itemIdx] : undefined;
                                 return (
                                     <ResourceCard
                                         key={item.identifier}
                                         item={item}
+                                        heightClass={heightClass}
                                     />
                                 );
                             })}

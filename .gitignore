@@ -95,3 +95,4 @@ frontend/public/assets/video-player/
 .vscode/settings.json
 
 frontend/public/assets/*
+.claude/settings.local.json
