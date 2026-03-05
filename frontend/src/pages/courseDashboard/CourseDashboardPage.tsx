@@ -126,7 +126,7 @@ const CourseDashboardPage: React.FC = () => {
           </div>
 
           {/* ─── Tab content ─── */}
-          <div className="flex flex-col bg-white">
+          <div className="flex flex-col bg-white rounded-2xl">
             {collectionId && activeTab === 'batches' && (
               <BatchesTab collectionId={collectionId} />
             )}
