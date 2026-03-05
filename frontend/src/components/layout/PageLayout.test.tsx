@@ -322,7 +322,6 @@ describe('PageLayout', () => {
       // Desktop sidebar should now be expanded (since we're on /home, not /explore)
       // Note: The sidebar state is managed by useSidebarState which reads from localStorage
       // Since localStorage is cleared in beforeEach, it will use the defaultState which is !isMobile = true
-      expect(screen.getByTestId('sidebar')).toBeInTheDocument();
       expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'false');
     });
 
