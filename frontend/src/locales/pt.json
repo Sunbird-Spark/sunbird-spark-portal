@@ -252,7 +252,10 @@
     "leaveCourseDescription": "Deseja cancelar sua inscrição nesta turma?",
     "leaveCourseError": "Não foi possível sair do curso. Tente novamente.",
     "enrolSuccess": "Inscrição no curso para esta turma realizada com sucesso",
-    "unenrolSuccess": "Cancelamento de inscrição da turma realizado com sucesso"
+    "unenrolSuccess": "Cancelamento de inscrição da turma realizado com sucesso",
+    "courseCompletionMessage": "Você concluiu o curso com sucesso",
+    "courseCompletionNoCertificateNote": "Observação: este curso não possui certificado",
+    "courseCompletionCertificateNote": "Você pode baixar o certificado do curso na sua página de perfil após ele ser gerado"
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",
@@ -520,9 +523,6 @@
     },
     "name": "Nome",
     "enterName": "Digite o nome de {{type}}",
-    "description": "Descrição",
-    "collectionType": "Tipo de coleção",
-    "creating": "Criando...",
     "review": {
       "errorTitle": "Erro",
       "failedToLoadForm": "Falha ao carregar formulário {{action}}.",
@@ -838,7 +838,7 @@
   },
   "tabs": {
     "batches": "Lotes",
-    "certificates": "Certificados",
+    "reissueCertificate": "Certificado de Reemissão",
     "all": "Todos"
   },
   "profileLearning": {
