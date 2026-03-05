@@ -39,7 +39,7 @@ const CollectionDetailPage = () => {
   const { data: userReadData } = useUserRead();
   const userProfile = userReadData?.data?.response;
   const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
-  const { isEnrolledInCurrentBatch, contentStatusMap, contentAttemptInfoMap, courseProgressProps, batches, batchListLoading, batchListError,
+  const { isEnrolledInCurrentBatch, contentStatusMap, contentStateFetched, contentAttemptInfoMap, courseProgressProps, batches, batchListLoading, batchListError,
     firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse, effectiveBatchId, isBatchEnded } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
@@ -146,6 +146,7 @@ const CollectionDetailPage = () => {
     batchIdParam,
     isEnrolledInCurrentBatch,
     contentStatusMap,
+    contentStateFetched,
   });
 
   useEffect(() => {
