@@ -16,6 +16,7 @@ interface CollectionContentAreaProps {
   contentId: string | undefined;
   isTrackable: boolean;
   contentBlocked: boolean;
+  upcomingBatchBlocked: boolean;
   isEnrolledInCurrentBatch: boolean;
   showMaxAttemptsExceeded?: boolean;
   playerMetadata: any;
@@ -59,6 +60,7 @@ export default function CollectionContentArea({
   contentId,
   isTrackable,
   contentBlocked,
+  upcomingBatchBlocked,
   isEnrolledInCurrentBatch,
   playerMetadata,
   playerIsLoading,
@@ -126,7 +128,9 @@ export default function CollectionContentArea({
         <CollectionOverview
           collectionData={collectionData}
           contentId={contentId}
-          contentAccessBlocked={contentBlocked}
+          contentAccessBlocked={contentBlocked && !upcomingBatchBlocked}
+          upcomingBatchBlocked={upcomingBatchBlocked}
+          batchStartDate={courseProgressProps?.batchStartDate}
           playerMetadata={playerMetadata}
           playerIsLoading={playerIsLoading}
           playerError={playerError ?? null}

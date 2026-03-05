@@ -122,4 +122,55 @@ describe('useCollectionEnrollment', () => {
       expect(result.current.isBatchEnded).toBe(false);
     });
   });
+
+  describe('isBatchUpcoming', () => {
+    it('is false when batch read response has no startDate', () => {
+      mockUseBatchRead.mockReturnValue({ data: { data: { response: {} } } });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchUpcoming).toBe(false);
+    });
+
+    it('is false when batch read response is undefined', () => {
+      mockUseBatchRead.mockReturnValue({ data: undefined });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchUpcoming).toBe(false);
+    });
+
+    it('is true when batch startDate is in the future (date-only string)', () => {
+      const futureDate = '2099-01-01';
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { startDate: futureDate } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchUpcoming).toBe(true);
+    });
+
+    it('is true when batch startDate is in the future (UTC datetime)', () => {
+      const futureDate = '2099-01-01T00:00:00.000Z';
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { startDate: futureDate } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchUpcoming).toBe(true);
+    });
+
+    it('is false when batch startDate is today or in the past', () => {
+      const today = new Date().toISOString().slice(0, 10);
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { startDate: today } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchUpcoming).toBe(false);
+    });
+  });
 });
