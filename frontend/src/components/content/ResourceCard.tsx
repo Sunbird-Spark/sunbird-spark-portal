@@ -34,7 +34,7 @@ const ResourceCard = ({ item, heightClass }: ResourceCardProps) => {
 
   return (
     <Link to={`/content/${item.identifier}`} className="group resource-card-link">
-      <div className={heightClass ? `relative w-full rounded-[1.25rem] overflow-hidden ${heightClass}` : "resource-card-container"}>
+      <div className={`resource-card-container${heightClass ? ` ${heightClass}` : ""}`}>
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">
           {(item.posterImage || item.appIcon) ? (
