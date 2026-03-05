@@ -6,7 +6,6 @@ import devIcon from "@/assets/dev-icon.svg"
 import marketingIcon from "@/assets/marketing-icon.svg";
 import entrepreneurIcon from "@/assets/entrepreneur-icon.svg";
 import "./landing.css";
-import "./landing.css";
 
 interface DynamicCategorySectionProps {
   title: string;

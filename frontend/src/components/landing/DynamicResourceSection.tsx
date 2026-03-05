@@ -3,7 +3,6 @@ import { ContentSearchRequest } from "@/types/workspaceTypes";
 import ResourceCard from "@/components/content/ResourceCard";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import "./landing.css";
-import "./landing.css";
 
 interface DynamicResourceSectionProps {
     title: string;
