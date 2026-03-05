@@ -94,7 +94,7 @@ describe('GoogleAuthService - Keycloak OIDC flow', () => {
                 {},
                 expect.objectContaining({
                     redirect_uri: 'https://example.com/google/auth/callback',
-                    scope: 'openid email profile',
+                    scope: 'openid',
                     code_challenge: 'test-challenge',
                     code_challenge_method: 'S256',
                     state: 'test-state',
