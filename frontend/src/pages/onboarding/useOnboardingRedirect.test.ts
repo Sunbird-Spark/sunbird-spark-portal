@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useOnboardingRedirect } from './useOnboardingRedirect';
 
 const mockNavigate = vi.fn();
@@ -7,9 +7,13 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+const capturedOptions = { current: null as any };
 const mockUseUserRead = vi.fn();
 vi.mock('@/hooks/useUserRead', () => ({
-  useUserRead: () => mockUseUserRead(),
+  useUserRead: (options?: any) => {
+    capturedOptions.current = options;
+    return mockUseUserRead();
+  },
 }));
 
 const renderRedirectHook = () => renderHook(() => useOnboardingRedirect());
@@ -44,28 +48,28 @@ describe('useOnboardingRedirect', () => {
   });
 
   describe('redirects to /home', () => {
-    it('redirects when onboardingDetails is an object (completed)', () => {
+    it('redirects when onboardingDetails is an object (completed)', async () => {
       mockUseUserRead.mockReturnValue({
         data: { data: { response: { framework: { onboardingDetails: { isSkipped: false, data: {} } } } } },
       });
       renderRedirectHook();
-      expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true }));
     });
 
-    it('redirects when onboardingDetails is an object (skipped)', () => {
+    it('redirects when onboardingDetails is an object (skipped)', async () => {
       mockUseUserRead.mockReturnValue({
         data: { data: { response: { framework: { onboardingDetails: { isSkipped: true, data: {} } } } } },
       });
       renderRedirectHook();
-      expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true }));
     });
 
-    it('redirects when onboardingDetails is a non-empty array', () => {
+    it('redirects when onboardingDetails is a non-empty array', async () => {
       mockUseUserRead.mockReturnValue({
         data: { data: { response: { framework: { onboardingDetails: ['entry'] } } } },
       });
       renderRedirectHook();
-      expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true }));
     });
   });
 
@@ -73,7 +77,7 @@ describe('useOnboardingRedirect', () => {
     it('calls useUserRead with refetchOnMount: always', () => {
       mockUseUserRead.mockReturnValue({ data: null });
       renderRedirectHook();
-      expect(mockUseUserRead).toHaveBeenCalled();
+      expect(capturedOptions.current).toEqual({ refetchOnMount: 'always' });
     });
   });
 });
