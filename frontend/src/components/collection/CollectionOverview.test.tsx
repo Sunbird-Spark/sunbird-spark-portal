@@ -111,7 +111,7 @@ describe('CollectionOverview', () => {
           playerMetadata={mockPlayerMetadata}
         />
       );
-      expect(screen.getByText('courseDetails.batchNotStartedYet')).toBeInTheDocument();
+      expect(screen.getByText('courseDetails.batchNotStartedYetNoDate')).toBeInTheDocument();
       expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
       expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
     });

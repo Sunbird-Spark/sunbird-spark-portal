@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useCollectionEnrollment } from './useCollectionEnrollment';
 import type { CollectionData } from '../types/collectionTypes';
+import dayjs from 'dayjs';
 
 const mockNavigate = vi.fn();
 const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
@@ -124,6 +125,17 @@ describe('useCollectionEnrollment', () => {
   });
 
   describe('isBatchUpcoming', () => {
+    const FIXED_NOW = new Date('2025-06-15T12:00:00');
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(FIXED_NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('is false when batch read response has no startDate', () => {
       mockUseBatchRead.mockReturnValue({ data: { data: { response: {} } } });
       const { result } = renderHook(() =>
@@ -163,7 +175,7 @@ describe('useCollectionEnrollment', () => {
     });
 
     it('is false when batch startDate is today or in the past', () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = dayjs().format('YYYY-MM-DD');
       mockUseBatchRead.mockReturnValue({
         data: { data: { response: { startDate: today } } },
       });

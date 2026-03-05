@@ -8,8 +8,7 @@ import CollectionContentArea from "@/components/collection/CollectionContentArea
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
-import type { CollectionData } from "@/types/collectionTypes";
-import type { TrackableCollection } from "@/types/TrackableCollections";
+import type { CollectionData, BatchListItem } from "@/types/collectionTypes";
 import type { PlayerEvent, TelemetryEvent } from "@/hooks/useContentPlayer";
 
 interface CollectionDetailLayoutProps {
@@ -36,6 +35,8 @@ interface CollectionDetailLayoutProps {
   isEnrolledInCurrentBatch: boolean;
   contentBlocked: boolean;
   upcomingBatchBlocked: boolean;
+  /** Batch start date for "batch not started" message (from batch read or enrollment). */
+  batchStartDateForOverview?: string;
 
   // Routing identifiers
   collectionId: string | undefined;
@@ -54,7 +55,7 @@ interface CollectionDetailLayoutProps {
   courseProgressProps: CourseProgressCardProps | null | undefined;
   contentStatusMap: Record<string, number> | undefined;
   contentAttemptInfoMap: Record<string, { attemptCount: number }> | undefined;
-  batches: TrackableCollection[] | undefined;
+  batches: BatchListItem[] | undefined;
   batchListLoading: boolean;
   batchListError: string | undefined;
   joinLoading: boolean;
@@ -107,6 +108,7 @@ const CollectionDetailLayout = ({
   isEnrolledInCurrentBatch,
   contentBlocked,
   upcomingBatchBlocked,
+  batchStartDateForOverview,
   collectionId,
   batchIdParam,
   contentId,
@@ -184,6 +186,7 @@ const CollectionDetailLayout = ({
               isTrackable={isTrackable}
               contentBlocked={contentBlocked}
               upcomingBatchBlocked={upcomingBatchBlocked}
+              batchStartDateForOverview={batchStartDateForOverview}
               isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
               playerMetadata={playerMetadata}
               playerIsLoading={playerIsLoading}

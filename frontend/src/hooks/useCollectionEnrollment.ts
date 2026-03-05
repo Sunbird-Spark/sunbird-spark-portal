@@ -119,6 +119,8 @@ export function useCollectionEnrollment(
     return batchStartStr > todayStr;
   }, [batchReadResponse?.data?.response?.startDate]);
 
+  const batchStartDateFromRead = batchReadResponse?.data?.response?.startDate;
+
   const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
   const handleJoinCourse = async (selectedBatchId: string) => {
     if (!collectionId || !selectedBatchId) return;
@@ -160,5 +162,6 @@ export function useCollectionEnrollment(
     joinError,
     handleJoinCourse,
     batchEnrollmentType,
+    batchStartDateFromRead,
   };
 }

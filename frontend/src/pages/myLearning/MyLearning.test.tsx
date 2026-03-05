@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import dayjs from 'dayjs';
 import { BrowserRouter } from 'react-router-dom';
 import MyLearning from './MyLearning';
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
@@ -132,8 +133,19 @@ describe('MyLearning Page', () => {
   });
 
   describe('upcomingBatches filter passed to MyLearningUpcomingBatches', () => {
+    const FIXED_NOW = new Date('2025-06-15T12:00:00');
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(FIXED_NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('passes only 0% progress courses with future startDate as upcoming batches', () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = dayjs().format('YYYY-MM-DD');
       const futureDateStr = '2099-12-31';
       const courses = [
         createMockCourse('1', 'Future Not Started', 0, futureDateStr),
@@ -179,7 +191,7 @@ describe('MyLearning Page', () => {
     });
 
     it('excludes courses starting today from upcoming batches', () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = dayjs().format('YYYY-MM-DD');
       const courses = [createMockCourse('1', 'Today Batch', 0, today)];
 
       (useUserEnrolledCollections as any).mockReturnValue({
@@ -197,7 +209,8 @@ describe('MyLearning Page', () => {
     });
 
     it('handles UTC midnight startDate for today without timezone bug', () => {
-      const todayUTCMidnight = new Date().toISOString().slice(0, 10) + 'T00:00:00.000Z';
+      const today = dayjs().format('YYYY-MM-DD');
+      const todayUTCMidnight = `${today}T00:00:00.000Z`;
       const courses = [createMockCourse('1', 'UTC Today Batch', 0, todayUTCMidnight)];
 
       (useUserEnrolledCollections as any).mockReturnValue({

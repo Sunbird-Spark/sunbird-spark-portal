@@ -14,7 +14,6 @@ import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
-import type { TrackableCollection } from "@/types/TrackableCollections";
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import "./collection.css";
 
@@ -49,6 +48,7 @@ const CollectionDetailPage = () => {
     effectiveBatchId,
     isBatchEnded,
     isBatchUpcoming,
+    batchStartDateFromRead,
   } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
@@ -194,6 +194,9 @@ const CollectionDetailPage = () => {
     recipientName: userProfile ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined : undefined,
   }), [userProfile?.firstName, userProfile?.lastName]);
 
+  const batchStartDateForOverview =
+    courseProgressProps?.batchStartDate ?? batchStartDateFromRead ?? undefined;
+
   return (
     <CollectionDetailLayout
       onGoBack={() => navigate(-1)}
@@ -212,6 +215,7 @@ const CollectionDetailPage = () => {
       isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
       contentBlocked={contentBlocked}
       upcomingBatchBlocked={upcomingBatchBlocked}
+      batchStartDateForOverview={batchStartDateForOverview}
       collectionId={collectionId}
       batchIdParam={batchIdParam}
       contentId={contentId}
@@ -224,7 +228,7 @@ const CollectionDetailPage = () => {
       courseProgressProps={courseProgressProps}
       contentStatusMap={contentStatusMap}
       contentAttemptInfoMap={contentAttemptInfoMap}
-      batches={batches as unknown as TrackableCollection[] | undefined}
+      batches={batches}
       batchListLoading={batchListLoading}
       batchListError={batchListError}
       joinLoading={joinLoading}

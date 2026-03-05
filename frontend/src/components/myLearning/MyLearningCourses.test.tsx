@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import dayjs from 'dayjs';
 import MyLearningCourses from './MyLearningCourses';
 import { TrackableCollection } from '@/types/TrackableCollections';
 
@@ -124,6 +125,15 @@ describe('MyLearningCourses', () => {
   });
   
   describe('Upcoming tab categorization', () => {
+    const FIXED_DATE = new Date('2025-06-15T12:00:00');
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(FIXED_DATE);
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('shows a course in Upcoming when startDate is in the future and progress is 0%', () => {
       const courses = [createMockCourse('u1', 'Future Course', 0, '2099-12-31')];
       render(<MyLearningCourses courses={courses} />);
@@ -132,7 +142,7 @@ describe('MyLearningCourses', () => {
     });
 
     it('does not show a course in Upcoming when startDate is today', () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = dayjs().format('YYYY-MM-DD');
       const courses = [createMockCourse('u2', 'Today Course', 0, today)];
       render(<MyLearningCourses courses={courses} />);
       fireEvent.click(screen.getByText('status.upcoming'));
@@ -140,7 +150,7 @@ describe('MyLearningCourses', () => {
     });
 
     it('shows a course starting today in Active tab instead of Upcoming', () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = dayjs().format('YYYY-MM-DD');
       const courses = [createMockCourse('u3', 'Today Active Course', 0, today)];
       render(<MyLearningCourses courses={courses} />);
       expect(screen.getByText(/Today Active Course/)).toBeInTheDocument();
@@ -167,7 +177,8 @@ describe('MyLearningCourses', () => {
     });
 
     it('correctly handles UTC datetime startDate for today without timezone bug', () => {
-      const todayUTCMidnight = new Date().toISOString().slice(0, 10) + 'T00:00:00.000Z';
+      const today = dayjs().format('YYYY-MM-DD');
+      const todayUTCMidnight = today + 'T00:00:00.000Z';
       const courses = [createMockCourse('u7', 'UTC Today Course', 0, todayUTCMidnight)];
       render(<MyLearningCourses courses={courses} />);
       fireEvent.click(screen.getByText('status.upcoming'));

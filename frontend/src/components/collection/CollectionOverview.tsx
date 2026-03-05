@@ -58,7 +58,7 @@ const CollectionOverview = ({
                     ? t("courseDetails.batchNotStartedYet", {
                         date: dayjs(batchStartDate).format("DD MMM YYYY"),
                       })
-                    : t("courseDetails.batchNotStartedYet")}
+                    : t("courseDetails.batchNotStartedYetNoDate")}
                 </p>
               </div>
             </div>

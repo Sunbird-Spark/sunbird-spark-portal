@@ -9,6 +9,7 @@ import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
 import { useForceSync } from "@/hooks/useForceSync";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
+import type { BatchListItem } from "@/types/collectionTypes";
 import CourseProgressSection from "@/components/collection/CourseProgressSection";
 
 interface CollectionContentAreaProps {
@@ -17,6 +18,7 @@ interface CollectionContentAreaProps {
   isTrackable: boolean;
   contentBlocked: boolean;
   upcomingBatchBlocked: boolean;
+  batchStartDateForOverview?: string;
   isEnrolledInCurrentBatch: boolean;
   showMaxAttemptsExceeded?: boolean;
   playerMetadata: any;
@@ -33,7 +35,7 @@ interface CollectionContentAreaProps {
   toggleModule: (moduleId: string) => void;
   contentStatusMap: any;
   contentAttemptInfoMap?: Record<string, { attemptCount: number }>;
-  batches: any;
+  batches: BatchListItem[] | undefined;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
   handleJoinCourse: (id: string) => void;
@@ -61,6 +63,7 @@ export default function CollectionContentArea({
   isTrackable,
   contentBlocked,
   upcomingBatchBlocked,
+  batchStartDateForOverview,
   isEnrolledInCurrentBatch,
   playerMetadata,
   playerIsLoading,
@@ -130,7 +133,7 @@ export default function CollectionContentArea({
           contentId={contentId}
           contentAccessBlocked={contentBlocked && !upcomingBatchBlocked}
           upcomingBatchBlocked={upcomingBatchBlocked}
-          batchStartDate={courseProgressProps?.batchStartDate}
+          batchStartDate={batchStartDateForOverview ?? courseProgressProps?.batchStartDate}
           playerMetadata={playerMetadata}
           playerIsLoading={playerIsLoading}
           playerError={playerError ?? null}
