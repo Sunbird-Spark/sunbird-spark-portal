@@ -88,7 +88,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
       {/* Hint */}
       <button
         type="button"
-        className="text-xs text-muted-foreground underline decoration-dotted mb-5 hover:opacity-80"
+        className="text-xs text-muted-foreground underline decoration-dotted mb-2 hover:opacity-80"
         onClick={() => setHintOpen((o) => !o)}
         data-testid="hint-toggle"
       >
@@ -96,7 +96,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
       </button>
 
       {hintOpen && (
-        <div className="bg-accent border border-border rounded-lg p-4 mb-6 text-sm max-w-md text-foreground" data-testid="hint-box">
+        <div className="bg-accent border border-border rounded-lg p-4 text-sm max-w-md text-foreground" data-testid="hint-box">
           <strong>{t('certificatesTab.howToFindSunbirdId')}</strong>
           <ol className="mt-1.5 ml-5 list-decimal">
             <li dangerouslySetInnerHTML={{ __html: t('certificatesTab.clickProfileTab') }} />
@@ -119,7 +119,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
 
       {/* Results table */}
       {(certUser || searchError) && !searching && (
-        <div className="overflow-x-auto border border-border rounded-lg" data-testid="results-table-wrapper">
+        <div className="overflow-x-auto border border-border rounded-lg mt-6" data-testid="results-table-wrapper">
           <table className="w-full text-sm">
             <thead>
               <tr>

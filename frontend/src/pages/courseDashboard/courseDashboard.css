@@ -1,4 +1,14 @@
 /* ─── Course Dashboard Page ──────────────────────────────────────────────────── */
+.dashboard-box {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 0.125rem 0.75rem rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-height: 372px;
+}
+
 .dashboard-tab {
   padding: 0.875rem 2rem;
   font-size: 0.9375rem;
