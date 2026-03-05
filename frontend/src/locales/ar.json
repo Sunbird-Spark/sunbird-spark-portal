@@ -843,7 +843,7 @@
   },
   "tabs": {
     "batches": "الدفعات",
-    "certificates": "الشهادات",
+    "reIssueCertificate": "إعادة إصدار الشهادة",
     "all": "الكل"
   },
   "profileLearning": {

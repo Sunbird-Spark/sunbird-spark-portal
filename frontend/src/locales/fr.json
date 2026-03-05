@@ -843,7 +843,7 @@
   },
   "tabs": {
     "batches": "Lots",
-    "certificates": "Certificats",
+    "reIssueCertificate": "Réémission du certificat",
     "all": "Tous"
   },
   "profileLearning": {

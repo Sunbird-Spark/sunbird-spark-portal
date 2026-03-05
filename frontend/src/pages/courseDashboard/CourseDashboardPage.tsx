@@ -118,7 +118,7 @@ const CourseDashboardPage: React.FC = () => {
               onClick={() => switchTab('certificates')}
               data-testid="tab-certificates"
             >
-              {t('tabs.certificates')}
+              {t('tabs.reIssueCertificate')}
               {activeTab === 'certificates' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
               )}
