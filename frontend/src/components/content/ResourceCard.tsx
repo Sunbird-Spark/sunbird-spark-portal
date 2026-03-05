@@ -5,9 +5,10 @@ import { ContentSearchItem } from "@/types/workspaceTypes";
 
 interface ResourceCardProps {
   item: ContentSearchItem;
+  heightClass?: string; // Optional custom height class
 }
 
-const ResourceCard = ({ item }: ResourceCardProps) => {
+const ResourceCard = ({ item, heightClass }: ResourceCardProps) => {
   const { t } = useAppI18n();
 
   const getViewLabel = (mimeType?: string) => {
@@ -33,7 +34,7 @@ const ResourceCard = ({ item }: ResourceCardProps) => {
 
   return (
     <Link to={`/content/${item.identifier}`} className="group resource-card-link">
-      <div className="resource-card-container">
+      <div className={`resource-card-container${heightClass ? ` ${heightClass}` : ""}`}>
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">
           {(item.posterImage || item.appIcon) ? (

@@ -853,7 +853,7 @@
   },
   "tabs": {
     "batches": "Batches",
-    "certificates": "Certificates",
+    "reissueCertificate": "Reissue Certificate",
     "all": "All"
   },
   "profileLearning": {

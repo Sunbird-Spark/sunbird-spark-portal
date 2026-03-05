@@ -20,7 +20,7 @@ export const buildKeycloakGoogleAuthUrl = async (
 
     const redirectUrl = oidcClient.buildAuthorizationUrl(config, {
         redirect_uri: callbackUrl,
-        scope: 'openid email profile',
+        scope: 'openid',
         code_challenge: codeChallenge,
         code_challenge_method: 'S256',
         state,

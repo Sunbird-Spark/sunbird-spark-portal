@@ -846,7 +846,7 @@
   },
   "tabs": {
     "batches": "Lots",
-    "certificates": "Certificats",
+    "reissueCertificate": "Réémission du certificat",
     "all": "Tous"
   },
   "profileLearning": {
