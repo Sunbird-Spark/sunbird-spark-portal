@@ -13,6 +13,7 @@ const ENROLLMENT_CONTENT_FIELDS = [
   'name',
   'channel',
   'mimeType',
+  'posterImage',
   'appIcon',
   'resourceType',
   'identifier',

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FiSearch, FiChevronDown } from "react-icons/fi";
 import {
     DropdownMenu,
@@ -31,12 +32,14 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                 <div className={`profile-logo-container ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'} transition-all duration-300`}>
                     {!isMobile && (
                         <div className="w-full h-full flex items-center">
-                            <img
-                                src={sunbirdLogo}
-                                alt={t("onboarding.altSunbird")}
-                                className="h-[2.4375rem] w-auto"
-                                style={{ height: '2.4375rem' }}
-                            />
+                            <Link to="/home">
+                                <img
+                                    src={sunbirdLogo}
+                                    alt={t("onboarding.altSunbird")}
+                                    className="h-[2.4375rem] w-auto"
+                                    style={{ height: '2.4375rem' }}
+                                />
+                            </Link>
                         </div>
                     )}
                     {/* Sidebar Toggle - Mobile */}

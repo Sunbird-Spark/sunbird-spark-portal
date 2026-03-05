@@ -68,10 +68,8 @@ describe('AuthenticatedHeader', () => {
             );
 
             expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
-
         });
 
-        // Desktop no longer has a toggle button in the header.
         it('renders logo on desktop', () => {
             render(
                 <MemoryRouter>
@@ -79,6 +77,17 @@ describe('AuthenticatedHeader', () => {
                 </MemoryRouter>
             );
             expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
+        });
+
+        it('logo links to /home for logged-in users', () => {
+            render(
+                <MemoryRouter>
+                    <AuthenticatedHeader isSidebarOpen={true} onToggleSidebar={mockOnToggleSidebar} />
+                </MemoryRouter>
+            );
+
+            const logoLink = screen.getByAltText('Sunbird').closest('a');
+            expect(logoLink).toHaveAttribute('href', '/home');
         });
 
         it('renders search button on desktop', () => {

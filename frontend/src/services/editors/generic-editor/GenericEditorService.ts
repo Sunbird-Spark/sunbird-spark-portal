@@ -12,7 +12,6 @@ import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
-import { UserService } from '../../UserService';
 import {
   GENERIC_EDITOR_WINDOW_CONFIG,
   DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
@@ -43,7 +42,6 @@ declare global {
 export class GenericEditorService {
   private orgService = new OrganizationService();
   private channelService = new ChannelService();
-  private userService = new UserService();
 
   /**
    * Get the generic editor URL.
@@ -158,9 +156,7 @@ export class GenericEditorService {
 
     let creatorName = '';
     try {
-      const userData = await this.userService.userRead(uid);
-      const first = userData?.data?.response?.firstName?.trim();
-      const last = userData?.data?.response?.lastName?.trim();
+      const { firstName: first, lastName: last } = await userProfileService.getUserData();
       creatorName = first || last ? [first, last].filter(Boolean).join(' ') : 'anonymous';
     } catch {
       console.warn('Failed to get user name for editor context');

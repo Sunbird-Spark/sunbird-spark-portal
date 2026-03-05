@@ -66,6 +66,34 @@ function renderWithRoute(route: string) {
   );
 }
 
+describe("AppRoutes - ScrollToTop", () => {
+  beforeEach(() => {
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    Object.defineProperty(window.history, 'scrollRestoration', {
+      writable: true,
+      value: 'auto',
+    });
+    mockUseAuth.mockReturnValue({
+      user: null, isAuthenticated: false, isLoading: false,
+      login: vi.fn(), logout: vi.fn(), refetchUser: vi.fn(),
+    });
+    mockUsePermissions.mockReturnValue({
+      isAuthenticated: false, isLoading: false, roles: ['PUBLIC'], error: null,
+      hasAnyRole: vi.fn(() => false), canAccessFeature: vi.fn(), refetch: vi.fn(),
+    });
+  });
+
+  it("scrolls to top on initial route render", () => {
+    renderWithRoute("/");
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' });
+  });
+
+  it("sets scrollRestoration to manual on mount", () => {
+    renderWithRoute("/");
+    expect(window.history.scrollRestoration).toBe('manual');
+  });
+});
+
 describe("AppRoutes (RBAC routing tests)", () => {
   beforeEach(() => {
     mockUseAuth.mockReset();

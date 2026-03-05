@@ -1,5 +1,21 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+};
 import { AuthProvider } from './auth/AuthContext';
 import { ProtectedRoute } from './rbac/ProtectedRoute';
 import PageLayout from './components/layout/PageLayout';
@@ -36,6 +52,7 @@ import UserReport from './pages/reports/UserReport';
 const AppRoutes: React.FC = () => {
   return (
     <AuthProvider>
+      <ScrollToTop />
       <Routes>
         {/* Standalone public routes (no shared sidebar layout) */}
         <Route path="/" element={<Index />} />

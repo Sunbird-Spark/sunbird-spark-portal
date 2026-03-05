@@ -18,6 +18,8 @@ const editorRoutes: string[] = [
     '/data/v1/form/read',
     '/data/v3/telemetry',
     '/framework/v1/read/*rest',
+    '/asset/v1/create',
+    '/asset/v1/upload/*rest',
 ];
 
 router.all(editorRoutes, sessionMiddleware, oidcSession(), requireAuth(), kongProxy);
