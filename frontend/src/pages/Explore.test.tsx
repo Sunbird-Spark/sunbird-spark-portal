@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Explore from './Explore';
 import { useFormRead } from '../hooks/useForm';
 
@@ -13,8 +13,8 @@ vi.mock('react-router-dom', async () => {
   return {
     ...actual,
     useLocation: () => ({ pathname: '/explore' }),
-    useNavigate: () => vi.fn(),
-    // useSearchParams uses the actual implementation, driven by MemoryRouter's URL
+    // useNavigate and useSearchParams use the actual implementation,
+    // driven by MemoryRouter's URL, so navigation in tests works correctly.
   };
 });
 
@@ -301,6 +301,88 @@ describe('Explore Page', () => {
       expect(screen.getByTestId('explore-grid')).toHaveTextContent(
         'Filters: {"collections":["TestCollection"]}'
       );
+    });
+  });
+
+  describe('external navigation (regression: setSearchParams instability)', () => {
+    /**
+     * Regression test for the bug where React Router recreates `setSearchParams`
+     * whenever `searchParams` changes (it closes over `searchParams` in its useCallback deps).
+     *
+     * Previously, `setSearchParams` was listed as a dep of the URL-sync effect.
+     * This caused the effect to fire immediately after any navigation — before
+     * `debouncedSearchQuery` had a chance to update — resetting the URL's `q` param.
+     *
+     * The fix: use a ref to access the latest `setSearchParams` and remove it from
+     * the effect's dep array, so the effect only fires when `debouncedSearchQuery`
+     * or `filters` actually changes.
+     */
+    it('preserves the q param when navigating to /explore?q=<term> from another route', async () => {
+      // A helper component that lives at "/" and navigates to Explore with a query.
+      const NavDriver = () => {
+        const navigate = useNavigate();
+        return (
+          <button data-testid="go" onClick={() => navigate('/explore?q=cats')}>
+            Go
+          </button>
+        );
+      };
+
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<NavDriver />} />
+            <Route path="/explore" element={<Explore />} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Trigger external navigation to /explore?q=cats
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('go'));
+      });
+
+      // The search input must show the term from the URL — confirming the first
+      // effect correctly read it and the second effect did NOT overwrite it.
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('searchPlaceholder')).toHaveValue('cats');
+      });
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: cats');
+    });
+
+    it('preserves the q param when navigating to /explore?q=<term> while already on Explore', async () => {
+      const NavDriver = () => {
+        const navigate = useNavigate();
+        return (
+          <>
+            <Explore />
+            <button data-testid="go" onClick={() => navigate('/explore?q=dogs')}>
+              Go
+            </button>
+          </>
+        );
+      };
+
+      render(
+        <MemoryRouter initialEntries={['/explore']}>
+          <Routes>
+            <Route path="/explore" element={<NavDriver />} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Verify initial empty state
+      expect(screen.getByPlaceholderText('searchPlaceholder')).toHaveValue('');
+
+      // Navigate to the same route with a new q param (simulates "View All Results")
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('go'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('searchPlaceholder')).toHaveValue('dogs');
+      });
+      expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: dogs');
     });
   });
 });
