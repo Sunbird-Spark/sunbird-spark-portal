@@ -34,18 +34,14 @@ const PageLayout = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   
-  // Determine initial default state based on page and mobile status.
-  // This should only be computed once, since useSidebarState only applies
-  // its defaultState on initial mount.
-  const initialDefaultStateRef = useRef<boolean | undefined>(undefined);
-  if (initialDefaultStateRef.current === undefined) {
-    const isExplorePageInitial = location.pathname.startsWith('/explore');
-    initialDefaultStateRef.current = isExplorePageInitial ? false : !isMobile;
-  }
+  // Determine default state based on page and mobile status.
+  // useSidebarState has a useEffect that syncs with defaultState changes
+  // when the user hasn't manually toggled the sidebar, so computing this
+  // on every render is intentional and allows responsive behavior.
+  const isExplorePage = location.pathname.startsWith('/explore');
+  const defaultState = isExplorePage ? false : !isMobile;
   
-  const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen } = useSidebarState(
-    initialDefaultStateRef.current as boolean,
-  );
+  const { isOpen: isSidebarOpen, toggleSidebar, setSidebarOpen } = useSidebarState(defaultState);
 
   // Close sidebar only when first navigating TO Explore page (not while already on it)
   const prevPathRef = useRef(location.pathname);
