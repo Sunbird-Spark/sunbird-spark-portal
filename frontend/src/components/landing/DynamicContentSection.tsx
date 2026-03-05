@@ -2,6 +2,7 @@ import { useContentSearch } from "@/hooks/useContent";
 import { CourseGrid } from "@/components/common/CourseGrid";
 import { ContentSearchRequest } from "@/types/workspaceTypes";
 import "./landing.css";
+import "./landing.css";
 
 interface DynamicContentSectionProps {
   title: string;
