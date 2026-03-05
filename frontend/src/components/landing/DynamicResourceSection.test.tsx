@@ -198,8 +198,8 @@ describe('DynamicResourceSection', () => {
     );
 
     const cards = screen.getAllByTestId('resource-card');
-    expect(cards[0]).toHaveAttribute('data-height-class', '');
-    expect(cards[1]).toHaveAttribute('data-height-class', '');
+    expect(cards[0]).not.toHaveAttribute('data-height-class');
+    expect(cards[1]).not.toHaveAttribute('data-height-class');
   });
 
   it('passes alternating heightClass when useCustomHeights is true', () => {
