@@ -56,6 +56,7 @@ const mockEnrollment = {
   effectiveBatchId: undefined as string | undefined,
   isBatchEnded: false,
   contentStatusMap: undefined as Record<string, number> | undefined,
+  contentStateFetched: false,
   courseProgressProps: undefined as object | undefined,
   batches: [],
   batchListLoading: false,
@@ -363,6 +364,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       mockEnrollment.enrollmentForCollection = { batchId: 'batch-1' } as { batchId: string };
       mockEnrollment.isEnrolledInCurrentBatch = true;
       mockEnrollment.contentStatusMap = { l1: 2, l2: 2 };
+      mockEnrollment.contentStateFetched = true;
       renderWithProviders(<CollectionDetailPage />);
       expect(mockNavigate).toHaveBeenCalledWith(
         '/collection/col-123/batch/batch-1/content/l3',

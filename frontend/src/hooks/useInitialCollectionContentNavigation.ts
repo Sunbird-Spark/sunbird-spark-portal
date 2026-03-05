@@ -13,6 +13,8 @@ interface UseInitialCollectionContentNavigationParams {
   batchIdParam: string | undefined;
   isEnrolledInCurrentBatch: boolean;
   contentStatusMap: Record<string, number> | undefined;
+  /** When false, wait before running learner "first unconsumed" navigation (content state not yet loaded). */
+  contentStateFetched: boolean;
 }
 
 export function useInitialCollectionContentNavigation({
@@ -25,6 +27,7 @@ export function useInitialCollectionContentNavigation({
   batchIdParam,
   isEnrolledInCurrentBatch,
   contentStatusMap,
+  contentStateFetched,
 }: UseInitialCollectionContentNavigationParams): void {
   const navigate = useNavigate();
 
@@ -41,7 +44,8 @@ export function useInitialCollectionContentNavigation({
 
     // Learner view: navigate to the first unconsumed content in the whole course (all units),
     // i.e. first leaf in depth-first order with status !== 2. If all are completed, land on first leaf.
-    if (!hasBatchInRoute || !batchIdParam || !isEnrolledInCurrentBatch || !contentStatusMap || !collectionId) {
+    // Wait for content state to be fetched so we don't navigate to first leaf when map is still empty on first load.
+    if (!hasBatchInRoute || !batchIdParam || !isEnrolledInCurrentBatch || !contentStatusMap || !collectionId || !contentStateFetched) {
       return;
     }
     const leafIds = getLeafContentIdsFromHierarchy(collectionData.hierarchyRoot);
@@ -59,6 +63,7 @@ export function useInitialCollectionContentNavigation({
     batchIdParam,
     isEnrolledInCurrentBatch,
     contentStatusMap,
+    contentStateFetched,
     collectionId,
     navigate,
   ]);

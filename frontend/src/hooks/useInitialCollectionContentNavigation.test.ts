@@ -74,6 +74,7 @@ const defaultParams = {
   batchIdParam: 'batch-1',
   isEnrolledInCurrentBatch: true,
   contentStatusMap: { l1: 0, l2: 0 } as Record<string, number>,
+  contentStateFetched: true,
 };
 
 describe('useInitialCollectionContentNavigation', () => {
@@ -170,6 +171,16 @@ describe('useInitialCollectionContentNavigation', () => {
         useInitialCollectionContentNavigation({
           ...defaultParams,
           contentStatusMap: undefined,
+        }),
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('does not navigate when contentStateFetched is false (wait for content state before first-unconsumed)', () => {
+      renderHook(() =>
+        useInitialCollectionContentNavigation({
+          ...defaultParams,
+          contentStateFetched: false,
         }),
       );
       expect(mockNavigate).not.toHaveBeenCalled();
