@@ -29,8 +29,6 @@ const CollectionDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Capture the entry-point path once per collectionId so sidebar navigation
-  // (which clears location.state) doesn't lose the back destination.
   const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/home');
   const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
   if (capturedCollectionIdRef.current !== collectionId) {
@@ -61,7 +59,6 @@ const CollectionDetailPage = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
-  /** Content creators get access without batch and no progress (own or others' collection); BatchCard only when viewing own. */
   const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
 
   const [, setAuthRefresh] = useState(0);
@@ -82,11 +79,7 @@ const CollectionDetailPage = () => {
   }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
-  /** Block content when trackable and (not logged in, or logged in but not enrolled in current batch and not creator). */
-  const contentBlocked = isTrackable && (
-    !isAuthenticated
-    || (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch))
-  );
+  const contentBlocked = isTrackable && ( !isAuthenticated || (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch)));
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const displayCollectionData = useMemo(
@@ -201,19 +194,11 @@ const CollectionDetailPage = () => {
         )}
 
         {!showLoading && isError && error && (
-          <PageLoader
-            error={error.message}
-            onRetry={() => refetch()}
-            fullPage={false}
-          />
+          <PageLoader error={error.message} onRetry={() => refetch()} fullPage={false} />
         )}
 
         {!showLoading && !isError && collectionDataFromApi == null && (
-          <PageLoader
-            error={t("collection.notFound")}
-            onRetry={() => refetch()}
-            fullPage={false}
-          />
+          <PageLoader error={t("collection.notFound")} onRetry={() => refetch()} fullPage={false} />
         )}
 
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
