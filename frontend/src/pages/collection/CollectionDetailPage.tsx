@@ -13,7 +13,6 @@ import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
-import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import { useIsContentCreator } from "@/hooks/useUser";
 import { useCollectionDetailSelfAssess } from "@/hooks/useCollectionDetailSelfAssess";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
@@ -22,6 +21,8 @@ import CollectionContentArea from "@/components/collection/CollectionContentArea
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
+import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
+import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
@@ -38,7 +39,7 @@ const CollectionDetailPage = () => {
   const { data: userReadData } = useUserRead();
   const userProfile = userReadData?.data?.response;
   const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
-  const { isEnrolledInCurrentBatch, contentStatusMap, contentAttemptInfoMap, courseProgressProps, batches, batchListLoading, batchListError,
+  const { isEnrolledInCurrentBatch, contentStatusMap, contentStateFetched, contentAttemptInfoMap, courseProgressProps, batches, batchListLoading, batchListError,
     firstCertPreviewUrl, hasCertificate, joinLoading, joinError, handleJoinCourse, effectiveBatchId, isBatchEnded } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
@@ -135,19 +136,18 @@ const CollectionDetailPage = () => {
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
 
-  // Auto-navigate to first content when collection loads without a selected contentId
-  useEffect(() => {
-    if (!collectionData?.hierarchyRoot || contentId) return;
-    const firstContentId = getFirstLeafContentIdFromHierarchy(collectionData.hierarchyRoot);
-    if (!firstContentId) return;
-    if (!isTrackable || contentCreatorPrivilege) {
-      navigate(`/collection/${collectionId}/content/${firstContentId}`, { replace: true });
-      return;
-    }
-    if (hasBatchInRoute && batchIdParam) {
-      navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstContentId}`, { replace: true });
-    }
-  }, [contentId, collectionData?.hierarchyRoot, collectionId, navigate, isTrackable, contentCreatorPrivilege, hasBatchInRoute, batchIdParam]);
+  useInitialCollectionContentNavigation({
+    collectionData,
+    contentId,
+    isTrackable,
+    contentCreatorPrivilege,
+    collectionId,
+    hasBatchInRoute,
+    batchIdParam,
+    isEnrolledInCurrentBatch,
+    contentStatusMap,
+    contentStateFetched,
+  });
 
   useEffect(() => {
     const firstMainUnitId = collectionData?.children?.[0]?.identifier;
@@ -173,7 +173,6 @@ const CollectionDetailPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
-
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Go Back Link - always visible */}
         <button
@@ -184,10 +183,7 @@ const CollectionDetailPage = () => {
           {t("button.goBack")}
         </button>
 
-        {showLoading && (
-          <PageLoader message={t("loading")} fullPage={false} />
-        )}
-
+        {showLoading && <PageLoader message={t("loading")} fullPage={false} />}
         {!showLoading && isError && error && (
           <PageLoader
             error={error.message}
@@ -203,7 +199,6 @@ const CollectionDetailPage = () => {
             fullPage={false}
           />
         )}
-
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
           <>
             {/* Main Content Area */}
@@ -246,7 +241,6 @@ const CollectionDetailPage = () => {
               userId={currentUserId ?? undefined}
             />
 
-            {/* Related Content Section */}
             <RelatedContentSection
               searchError={searchError}
               searchErrorObj={searchErrorObj}
@@ -254,23 +248,24 @@ const CollectionDetailPage = () => {
               relatedContentItems={relatedContentItems}
               searchRefetch={searchRefetch}
             />
-
-            <div className="mt-16">
-              <FAQSection />
-            </div>
+            <div className="mt-16"><FAQSection /></div>
           </>
         )}
       </main>
-
       <CertificatePreviewModal
         open={certificatePreviewOpen}
         onClose={() => setCertificatePreviewOpen(false)}
         previewUrl={certificatePreviewUrl}
         details={certificatePreviewDetails}
       />
+      <CourseCompletionDialog
+        courseProgressProps={courseProgressProps}
+        isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
+        collectionId={collectionId}
+        hasCertificate={hasCertificate}
+      />
       <Footer />
     </div>
   );
 };
-
 export default CollectionDetailPage;

@@ -183,7 +183,8 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('login-unlock-card')).not.toBeInTheDocument();
     // Not in batch, so show available batches
     expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
-    expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
+    // Certificate card only after enrollment
+    expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
   });
 
   it('renders View Course Dashboard button when user is the course owner', () => {
@@ -263,6 +264,22 @@ describe('CollectionContentArea', () => {
         />
       );
       expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
+      // Certificate card only after enrollment (not in batch route here)
+      expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
+    });
+
+    it('shows CertificateCard when enrolled in current batch', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          isTrackable={true}
+          isAuthenticated={true}
+          contentBlocked={false}
+          hasBatchInRoute={true}
+          isEnrolledInCurrentBatch={true}
+          contentCreatorPrivilege={false}
+        />
+      );
       expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
     });
 

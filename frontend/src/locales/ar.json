@@ -252,7 +252,10 @@
     "leaveCourseDescription": "هل تريد إلغاء تسجيلك من هذه الدفعة؟",
     "leaveCourseError": "تعذر مغادرة الدورة. يرجى المحاولة مرة أخرى.",
     "enrolSuccess": "تم تسجيلك في الدورة لهذه الدفعة بنجاح",
-    "unenrolSuccess": "تم إلغاء تسجيل المستخدم من الدفعة بنجاح"
+    "unenrolSuccess": "تم إلغاء تسجيل المستخدم من الدفعة بنجاح",
+    "courseCompletionMessage": "لقد أكملت هذه الدورة بنجاح",
+    "courseCompletionNoCertificateNote": "ملاحظة: لا تحتوي هذه الدورة على شهادة",
+    "courseCompletionCertificateNote": "يمكنك تنزيل شهادة الدورة من صفحة ملفك الشخصي بعد إنشائها"
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",
@@ -425,11 +428,6 @@
     "backTo": "العودة إلى {{page}}",
     "upcomingBatches": "الدفعات القادمة",
     "learningProgress": "تقدم التعلم",
-    "downloadCertificate": "تحميل الشهادة",
-    "manage": "إدارة",
-    "backTo": "العودة إلى {{page}}",
-    "upcomingBatches": "الدفعات القادمة",
-    "learningProgress": "تقدم التعلم",
     "downloadCertificate": "تحميل الشهادة"
   },
   "myLearning": {
@@ -556,10 +554,7 @@
       "publishWarningText": "لقد قدّمت بعض تعليقات/اقتراحات المراجعة، وستُفقد إذا تم نشر المحتوى.",
       "publishWarningQuestion": "هل تريد النشر؟",
       "processing": "جارٍ المعالجة..."
-    },
-    "collectionType": "نوع المجموعة",
-    "description": "الوصف",
-    "creating": "جارٍ الإنشاء..."
+    }
   },
   "homeComponents": {
     "openMenu": "فتح القائمة",
