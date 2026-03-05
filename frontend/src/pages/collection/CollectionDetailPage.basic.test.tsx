@@ -56,6 +56,7 @@ const mockEnrollment = {
   effectiveBatchId: undefined as string | undefined,
   isBatchEnded: false,
   contentStatusMap: undefined as Record<string, number> | undefined,
+  contentStateFetched: false,
   courseProgressProps: undefined as object | undefined,
   batches: [],
   batchListLoading: false,
@@ -322,6 +323,53 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       mockUseCollection.mockReturnValue({ data: { ...mockCollectionData, children: undefined, hierarchyRoot: { identifier: 'col-1', mimeType: 'application/vnd.ekstep.content-collection' } }, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
       expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/content/'), expect.anything());
+    });
+
+    it('navigates to first unconsumed content in whole course when unit 1 is all completed (two units)', () => {
+      const twoUnitHierarchy = {
+        identifier: 'col-1',
+        mimeType: 'application/vnd.ekstep.content-collection' as const,
+        children: [
+          {
+            identifier: 'mod-1',
+            name: 'Unit 1',
+            mimeType: 'application/vnd.ekstep.content-collection' as const,
+            children: [
+              { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+              { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
+            ],
+          },
+          {
+            identifier: 'mod-2',
+            name: 'Unit 2',
+            mimeType: 'application/vnd.ekstep.content-collection' as const,
+            children: [
+              { identifier: 'l3', name: 'Lesson 3', mimeType: 'video/mp4' },
+              { identifier: 'l4', name: 'Lesson 4', mimeType: 'application/pdf' },
+            ],
+          },
+        ],
+      };
+      mockUseParams.mockReturnValue({ collectionId: 'col-123', batchId: 'batch-1', contentId: undefined });
+      mockUseCollection.mockReturnValue({
+        data: {
+          ...mockCollectionData,
+          children: twoUnitHierarchy.children,
+          hierarchyRoot: twoUnitHierarchy,
+          trackable: { enabled: 'Yes' },
+        },
+        isLoading: false,
+      });
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
+      mockEnrollment.enrollmentForCollection = { batchId: 'batch-1' } as { batchId: string };
+      mockEnrollment.isEnrolledInCurrentBatch = true;
+      mockEnrollment.contentStatusMap = { l1: 2, l2: 2 };
+      mockEnrollment.contentStateFetched = true;
+      renderWithProviders(<CollectionDetailPage />);
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/collection/col-123/batch/batch-1/content/l3',
+        { replace: true }
+      );
     });
   });
 
