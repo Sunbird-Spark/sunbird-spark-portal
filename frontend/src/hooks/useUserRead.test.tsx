@@ -4,6 +4,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useUserRead } from './useUserRead';
 import React from 'react';
 
+const capturedArgs = vi.hoisted(() => ({ queryOptions: null as any }));
+
+vi.mock('@tanstack/react-query', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@tanstack/react-query')>();
+    return {
+        ...actual,
+        useQuery: (options: any) => {
+            capturedArgs.queryOptions = options;
+            return actual.useQuery(options);
+        },
+    };
+});
+
 // Mock services
 const { mockUserService, mockUserAuthInfoService } = vi.hoisted(() => ({
     mockUserService: {
@@ -130,5 +143,34 @@ describe('useUserRead hook', () => {
 
         await waitFor(() => expect(result.current.isSuccess).toBe(true));
         expect(result.current.data).toEqual(mockResponse);
+    });
+
+    describe('query options', () => {
+        it('uses 10-minute staleTime by default to cache user data across navigations', () => {
+            mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
+
+            renderHook(() => useUserRead(), { wrapper: createWrapper() });
+
+            expect(capturedArgs.queryOptions).toMatchObject({ staleTime: 10 * 60 * 1000 });
+        });
+
+        it('passes refetchOnMount: always through to useQuery when provided', () => {
+            mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
+
+            renderHook(() => useUserRead({ refetchOnMount: 'always' }), { wrapper: createWrapper() });
+
+            expect(capturedArgs.queryOptions).toMatchObject({
+                staleTime: 10 * 60 * 1000,
+                refetchOnMount: 'always',
+            });
+        });
+
+        it('leaves refetchOnMount undefined when no option is passed', () => {
+            mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
+
+            renderHook(() => useUserRead(), { wrapper: createWrapper() });
+
+            expect(capturedArgs.queryOptions.refetchOnMount).toBeUndefined();
+        });
     });
 });
