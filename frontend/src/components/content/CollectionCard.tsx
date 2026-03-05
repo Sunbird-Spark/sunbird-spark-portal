@@ -10,7 +10,7 @@ interface ContentCardProps {
 
 const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const location = useLocation();
-  const state = linkState ?? { from: location.pathname };
+  const state = linkState ?? { from: `${location.pathname}${location.search}${location.hash}` };
   return (
     <Link to={`/collection/${item.identifier}`} state={state} className="related-resource-card-link">
       <div className="group related-resource-card-container">
