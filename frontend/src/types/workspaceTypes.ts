@@ -113,6 +113,8 @@ export interface ContentSearchItem {
   primaryCategory?: string;
   contentType?: string;
   framework?: string;
+  leafNodesCount?: number;
+  me_averageRating?: number;
 }
 
 export interface ContentSearchResponse {
