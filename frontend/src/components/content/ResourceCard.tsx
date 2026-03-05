@@ -5,10 +5,11 @@ import { ContentSearchItem } from "@/types/workspaceTypes";
 
 interface ResourceCardProps {
   item: ContentSearchItem;
+  heightClass?: string; // Optional custom height class
   linkState?: Record<string, unknown>;
 }
 
-const ResourceCard = ({ item, linkState }: ResourceCardProps) => {
+const ResourceCard = ({ item, heightClass, linkState }: ResourceCardProps) => {
   const { t } = useAppI18n();
   const location = useLocation();
   // If no explicit linkState is provided, record the current page as the origin
@@ -39,7 +40,7 @@ const ResourceCard = ({ item, linkState }: ResourceCardProps) => {
 
   return (
     <Link to={`/content/${item.identifier}`} state={state} className="group resource-card-link">
-      <div className="resource-card-container">
+      <div className={`resource-card-container${heightClass ? ` ${heightClass}` : ""}`}>
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">
           {(item.posterImage || item.appIcon) ? (

@@ -55,7 +55,7 @@ export function useCollectionEnrollment(
     };
   }, [collectionId, effectiveBatchId, leafContentIds]);
 
-  const { data: contentStateResponse } = useContentState(contentStateRequest, {
+  const { data: contentStateResponse, isFetched: contentStateFetched } = useContentState(contentStateRequest, {
     enabled: isEnrolledInCurrentBatch && contentStateRequest !== null,
   });
   const contentList = contentStateResponse?.data?.contentList ?? [];
@@ -136,6 +136,7 @@ export function useCollectionEnrollment(
     effectiveBatchId,
     isBatchEnded,
     contentStatusMap,
+    contentStateFetched: contentStateFetched,
     contentAttemptInfoMap,
     courseProgressProps,
     batches,
