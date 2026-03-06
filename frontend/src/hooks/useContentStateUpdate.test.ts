@@ -86,7 +86,7 @@ describe('useContentStateUpdate', () => {
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
-  it('calls contentStateUpdate with status 1 and does not invalidate on START', async () => {
+  it('calls contentStateUpdate with status 1 and invalidates on START', async () => {
     const { result } = renderHook(() => useContentStateUpdate(defaultParams));
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
@@ -97,7 +97,7 @@ describe('useContentStateUpdate', () => {
         contents: [{ contentId: 'content_1', status: 1 }],
       });
     });
-    expect(mockInvalidateQueries).not.toHaveBeenCalled();
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['contentState'] });
   });
 
   it('calls contentStateUpdate only once for multiple START events', async () => {

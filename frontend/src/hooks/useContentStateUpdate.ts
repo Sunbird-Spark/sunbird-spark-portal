@@ -154,7 +154,7 @@ export function useContentStateUpdate({
         assessEventsRef.current = [];
         if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1) {
           lastSentStatusRef.current = 1;
-          void handleContentStateUpdate(1, false);
+          void handleContentStateUpdate(1, true);
         }
         return;
       }
