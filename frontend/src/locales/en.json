@@ -232,6 +232,8 @@
     "enrollmentEndsBy": "Enrollment ends by",
     "joinTheCourse": "Join The Course",
     "mustJoinToAccessContent": "You must join the course to get complete access to content",
+    "batchNotStartedYet": "This batch has not started yet. It starts on {{date}}. You can access the content once the batch begins.",
+    "batchNotStartedYetNoDate": "This batch has not started yet. You can access the content once the batch begins.",
     "certificate": "Certificate",
     "certificateEarnDescription": "Earn a certificate on completion of the course. Verify the details before completing the course.",
     "certificateNotAvailable": "Currently, this course does not have a certificate. The course creator may attach a certificate later.",
