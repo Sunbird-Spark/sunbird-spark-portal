@@ -28,7 +28,7 @@ export function ProtectedRoute({
   const location = useLocation();
 
   if (isLoading) {
-    return fallback ? <>{fallback}</> : <PageLoader message="Checking permissions..." />;
+    return fallback ? <>{fallback}</> : <PageLoader message="Checking permissions..." fullPage={false} />;
   }
 
   if (!isAuthenticated) {

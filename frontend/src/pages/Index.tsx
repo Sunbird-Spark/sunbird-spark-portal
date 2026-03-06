@@ -52,6 +52,7 @@ const Index = () => {
             title={section.title}
             sectionLabel="resource.header"
             criteria={section.criteria}
+            useCustomHeights={true}
           />
         );
       default:

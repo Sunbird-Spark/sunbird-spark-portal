@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import dayjs from 'dayjs';
 import MyLearningCourses from './MyLearningCourses';
 import { TrackableCollection } from '@/types/TrackableCollections';
 
@@ -28,7 +29,12 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
-const createMockCourse = (id: string, name: string, percentage: number): TrackableCollection => ({
+const createMockCourse = (
+  id: string,
+  name: string,
+  percentage: number,
+  startDate: string = '2023-01-01'
+): TrackableCollection => ({
   courseId: id,
   courseName: name,
   collectionId: id,
@@ -39,7 +45,7 @@ const createMockCourse = (id: string, name: string, percentage: number): Trackab
   active: true,
   status: 2,
   completionPercentage: percentage,
-  progress: percentage === 100 ? 5 : 1,
+  progress: percentage === 100 ? 5 : percentage > 0 ? 1 : 0,
   leafNodesCount: 5,
   description: `Description for ${name}`,
   courseLogoUrl: '',
@@ -49,8 +55,8 @@ const createMockCourse = (id: string, name: string, percentage: number): Trackab
     identifier: `batch-${id}`,
     batchId: `batch-${id}`,
     name: `Batch for ${name}`,
-    startDate: '2023-01-01',
-    status: 1,
+    startDate,
+    status: startDate > new Date().toISOString().slice(0, 10) ? 0 : 1,
     enrollmentType: 'open',
     createdBy: 'user1'
   },
@@ -118,6 +124,75 @@ describe('MyLearningCourses', () => {
     expect(screen.getByText('No courses found in this category.')).toBeInTheDocument();
   });
   
+  describe('Upcoming tab categorization', () => {
+    const FIXED_DATE = new Date('2025-06-15T12:00:00');
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(FIXED_DATE);
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('shows a course in Upcoming when startDate is in the future and progress is 0%', () => {
+      const courses = [createMockCourse('u1', 'Future Course', 0, '2099-12-31')];
+      render(<MyLearningCourses courses={courses} />);
+      fireEvent.click(screen.getByText('status.upcoming'));
+      expect(screen.getByText(/Future Course/)).toBeInTheDocument();
+    });
+
+    it('does not show a course in Upcoming when startDate is today', () => {
+      const today = dayjs().format('YYYY-MM-DD');
+      const courses = [createMockCourse('u2', 'Today Course', 0, today)];
+      render(<MyLearningCourses courses={courses} />);
+      fireEvent.click(screen.getByText('status.upcoming'));
+      expect(screen.queryByText(/Today Course/)).not.toBeInTheDocument();
+    });
+
+    it('shows a course starting today in Active tab instead of Upcoming', () => {
+      const today = dayjs().format('YYYY-MM-DD');
+      const courses = [createMockCourse('u3', 'Today Active Course', 0, today)];
+      render(<MyLearningCourses courses={courses} />);
+      expect(screen.getByText(/Today Active Course/)).toBeInTheDocument();
+    });
+
+    it('does not show a course in Upcoming when progress is greater than 0', () => {
+      const courses = [createMockCourse('u4', 'Partial Future Course', 10, '2099-12-31')];
+      render(<MyLearningCourses courses={courses} />);
+      fireEvent.click(screen.getByText('status.upcoming'));
+      expect(screen.queryByText(/Partial Future Course/)).not.toBeInTheDocument();
+    });
+
+    it('does not show a completed course in Upcoming even when startDate is in the future', () => {
+      const courses = [createMockCourse('u5', 'Completed Future Course', 100, '2099-12-31')];
+      render(<MyLearningCourses courses={courses} />);
+      fireEvent.click(screen.getByText('status.upcoming'));
+      expect(screen.queryByText(/Completed Future Course/)).not.toBeInTheDocument();
+    });
+
+    it('does not show a future-batch course with 0% progress in Active tab', () => {
+      const courses = [createMockCourse('u6', 'Not Started Future Course', 0, '2099-12-31')];
+      render(<MyLearningCourses courses={courses} />);
+      expect(screen.queryByText(/Not Started Future Course/)).not.toBeInTheDocument();
+    });
+
+    it('correctly handles UTC datetime startDate for today without timezone bug', () => {
+      const today = dayjs().format('YYYY-MM-DD');
+      const todayUTCMidnight = today + 'T00:00:00.000Z';
+      const courses = [createMockCourse('u7', 'UTC Today Course', 0, todayUTCMidnight)];
+      render(<MyLearningCourses courses={courses} />);
+      fireEvent.click(screen.getByText('status.upcoming'));
+      expect(screen.queryByText(/UTC Today Course/)).not.toBeInTheDocument();
+    });
+
+    it('correctly handles UTC datetime startDate for a future date in Upcoming', () => {
+      const courses = [createMockCourse('u8', 'UTC Future Course', 0, '2099-12-31T00:00:00.000Z')];
+      render(<MyLearningCourses courses={courses} />);
+      fireEvent.click(screen.getByText('status.upcoming'));
+      expect(screen.getByText(/UTC Future Course/)).toBeInTheDocument();
+    });
+  });
+
   it('shows "View More Courses" button when there are many courses', () => {
     // Create 12 active courses
     const manyCourses = Array.from({ length: 12 }, (_, i): TrackableCollection => ({

@@ -8,6 +8,7 @@ interface RelatedContentSectionProps {
   searchFetching: boolean;
   relatedContentItems: any[];
   searchRefetch: () => void;
+  linkState?: Record<string, unknown>;
 }
 
 export default function RelatedContentSection({
@@ -16,6 +17,7 @@ export default function RelatedContentSection({
   searchFetching,
   relatedContentItems,
   searchRefetch,
+  linkState,
 }: RelatedContentSectionProps) {
   const { t } = useAppI18n();
 
@@ -37,7 +39,7 @@ export default function RelatedContentSection({
         </div>
       )}
       {!searchError && (relatedContentItems.length > 0 || !searchFetching) && (
-        <RelatedContent items={relatedContentItems} cardType="collection" />
+        <RelatedContent items={relatedContentItems} cardType="collection" linkState={linkState} />
       )}
     </section>
   );

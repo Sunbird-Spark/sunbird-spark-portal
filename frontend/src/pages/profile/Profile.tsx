@@ -10,7 +10,7 @@ import "./profile.css";
 const Profile = () => {
     const { t } = useAppI18n();
 
-    const { data: userResponse, isLoading, isError } = useUserRead();
+    const { data: userResponse, isLoading, isError } = useUserRead({ refetchOnMount: 'always' });
     const userData = userResponse?.data?.response;
 
     return (

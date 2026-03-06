@@ -232,12 +232,15 @@
     "enrollmentEndsBy": "Enrollment ends by",
     "joinTheCourse": "Join The Course",
     "mustJoinToAccessContent": "You must join the course to get complete access to content",
+    "batchNotStartedYet": "This batch has not started yet. It starts on {{date}}. You can access the content once the batch begins.",
+    "batchNotStartedYetNoDate": "This batch has not started yet. You can access the content once the batch begins.",
     "certificate": "Certificate",
     "certificateEarnDescription": "Earn a certificate on completion of the course. Verify the details before completing the course.",
     "certificateNotAvailable": "Currently, this course does not have a certificate. The course creator may attach a certificate later.",
     "previewCertificate": "Preview Certificate",
     "courseProgress": "Course Progress",
-    "batchStartedOn": "Batch Started on",
+    "batchStartingOn": "Batch starting on",
+    "batchStartedOn": "Batch started on",
     "contentStatusCompleted": "Completed",
     "contentStatusInProgress": "In Progress",
     "contentStatusNotViewed": "Not viewed",
@@ -252,7 +255,10 @@
     "leaveCourseDescription": "Do you want to unenrol from this batch?",
     "leaveCourseError": "Unable to leave the course. Please try again.",
     "enrolSuccess": "Course enroled for this batch successfully",
-    "unenrolSuccess": "User unenroled from the batch successfully"
+    "unenrolSuccess": "User unenroled from the batch successfully",
+    "courseCompletionMessage": "You have successfully completed the course",
+    "courseCompletionNoCertificateNote": "Note: This course does not have a certificate",
+    "courseCompletionCertificateNote": "You can download your course certificate from your Profile page once it is generated"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
@@ -551,10 +557,7 @@
       "publishWarningText": "You have given some review comments/suggestions, they will be lost if content is published.",
       "publishWarningQuestion": "Do you want to publish?",
       "processing": "Processing..."
-    },
-    "collectionType": "Collection Type",
-    "description": "Description",
-    "creating": "Creating..."
+    }
   },
   "homeComponents": {
     "openMenu": "Open Menu",
@@ -853,7 +856,7 @@
   },
   "tabs": {
     "batches": "Batches",
-    "certificates": "Certificates",
+    "reissueCertificate": "Reissue Certificate",
     "all": "All"
   },
   "profileLearning": {
