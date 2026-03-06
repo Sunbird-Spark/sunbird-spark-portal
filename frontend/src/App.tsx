@@ -11,9 +11,14 @@ import { TncCheckWrapper } from '@/components/termsAndCondition/TncCheckWrapper'
 const queryClient = new QueryClient();
 
 export default function App() {
-  const { t } = useAppI18n();
+  const { t, dir } = useAppI18n();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Set dir attribute dynamically based on language
+  useEffect(() => {
+    document.documentElement.setAttribute('dir', dir);
+  }, [dir]);
 
   const initPortal = useCallback(async () => {
     setIsLoading(true);
