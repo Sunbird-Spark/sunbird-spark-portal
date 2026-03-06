@@ -22,7 +22,7 @@ const ContentPlayerPage = () => {
   // to prevent content→content and content→collection back chains. Falls back to /explore,
   // which is accessible to both authenticated and anonymous users.
   const stateFrom = (location.state as { from?: string } | null)?.from ?? '';
-  const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom: '/explore';
+  const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
   
   const { data, isLoading, error } = useContentRead(contentId || '');
