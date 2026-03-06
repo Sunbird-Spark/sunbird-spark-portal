@@ -5,10 +5,13 @@ import ProfileLearningList from "@/components/profile/ProfileLearningList";
 import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
 import "./profile.css";
 
 const Profile = () => {
     const { t } = useAppI18n();
+
+    useImpression({ type: 'view', pageid: 'profile' });
 
     const { data: userResponse, isLoading, isError } = useUserRead({ refetchOnMount: 'always' });
     const userData = userResponse?.data?.response;
