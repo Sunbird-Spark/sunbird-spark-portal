@@ -21,8 +21,14 @@ const CourseDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Capture the back-destination once on mount; tab switching clears location.state
-  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
+  // Capture the back-destination once on mount; tab switching clears location.state.
+  // Filter out /collection/ paths to prevent collection-to-collection back chains.
+  const dashboardStateFrom = (location.state as { from?: string } | null)?.from ?? '';
+  const backToRef = useRef<string>(
+    dashboardStateFrom && !dashboardStateFrom.startsWith('/collection/') && !dashboardStateFrom.startsWith('/content/')
+      ? dashboardStateFrom
+      : '/explore'
+  );
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
   const { data: currentUserId } = useCurrentUserId();

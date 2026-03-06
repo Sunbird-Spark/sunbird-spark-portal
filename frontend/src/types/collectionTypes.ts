@@ -173,4 +173,6 @@ export interface RelatedContentSearchItem {
   appIcon?: string;
   leafNodesCount?: number;
   resourceType?: string;
+  creator?: string;
+  createdBy?: string;
 }

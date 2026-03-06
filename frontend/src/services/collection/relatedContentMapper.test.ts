@@ -75,5 +75,27 @@ describe('relatedContentMapper', () => {
       const result = mapSearchContentToRelatedContentItems(items);
       expect(result[0]!.appIcon).toBe('https://icon.png');
     });
+
+    it('maps leafNodesCount from the search item', () => {
+      const items: RelatedContentSearchItem[] = [
+        { identifier: 'a', name: 'A', visibility: 'Default', leafNodesCount: 5 },
+        { identifier: 'b', name: 'B', visibility: 'Default' },
+      ];
+      const result = mapSearchContentToRelatedContentItems(items);
+      expect(result[0]!.leafNodesCount).toBe(5);
+      expect(result[1]!.leafNodesCount).toBeUndefined();
+    });
+
+    it('maps creator with fallback to createdBy then Unknown', () => {
+      const items: RelatedContentSearchItem[] = [
+        { identifier: 'a', name: 'A', visibility: 'Default', creator: 'Alice', createdBy: 'alice-id' },
+        { identifier: 'b', name: 'B', visibility: 'Default', createdBy: 'bob-id' },
+        { identifier: 'c', name: 'C', visibility: 'Default' },
+      ];
+      const result = mapSearchContentToRelatedContentItems(items);
+      expect(result[0]!.creator).toBe('Alice');
+      expect(result[1]!.creator).toBe('bob-id');
+      expect(result[2]!.creator).toBe('Unknown');
+    });
   });
 });

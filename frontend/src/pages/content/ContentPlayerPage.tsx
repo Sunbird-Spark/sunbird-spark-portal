@@ -18,9 +18,11 @@ const ContentPlayerPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Resolve where to go back: use the stored `from` only if it's not itself a content page
-  const stateFrom = (location.state as { from?: string } | null)?.from;
-  const backTo = stateFrom && !stateFrom.startsWith('/content/') ? stateFrom : '/home';
+  // Resolve where to go back: reject any /content/ or /collection/ path as a back-destination
+  // to prevent content→content and content→collection back chains. Falls back to /explore,
+  // which is accessible to both authenticated and anonymous users.
+  const stateFrom = (location.state as { from?: string } | null)?.from ?? '';
+  const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
   
   const { data, isLoading, error } = useContentRead(contentId || '');

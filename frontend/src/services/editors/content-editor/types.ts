@@ -63,6 +63,8 @@ export interface ContentEditorWindowConfig {
   cloudStorage: {
     provider?: string;
   };
+  contentFields?: string;
+  fwCategoryDetails?: { code: string; label: string }[];
 }
 
 export interface ContentEditorConfig {
