@@ -13,7 +13,7 @@ const Profile = () => {
 
     useImpression({ type: 'view', pageid: 'profile' });
 
-    const { data: userResponse, isLoading, isError } = useUserRead();
+    const { data: userResponse, isLoading, isError } = useUserRead({ refetchOnMount: 'always' });
     const userData = userResponse?.data?.response;
 
     return (
