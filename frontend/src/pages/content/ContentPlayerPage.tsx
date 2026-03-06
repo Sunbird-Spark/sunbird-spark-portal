@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
@@ -12,12 +12,18 @@ import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+import useImpression from "@/hooks/useImpression";
+import usePageSession from "@/hooks/usePageSession";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 const ContentPlayerPage = () => {
   const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
+
+  useImpression({ type: 'view', pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
+  usePageSession({ pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
+  const telemetry = useTelemetry();
 
   // Resolve where to go back: reject any /content/ or /collection/ path as a back-destination
   // to prevent content→content and content→collection back chains. Falls back to /explore,
@@ -25,7 +31,7 @@ const ContentPlayerPage = () => {
   const stateFrom = (location.state as { from?: string } | null)?.from ?? '';
   const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
-  
+
   const { data, isLoading, error } = useContentRead(contentId || '');
   const contentData = data?.data?.content;
   
@@ -69,13 +75,16 @@ const ContentPlayerPage = () => {
   );
   
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({
-    onPlayerEvent: (event) => {
-      // Handle player events (play, pause, complete, etc.)
-      console.log('Content player event:', event);
-    },
     onTelemetryEvent: (event) => {
-      // Handle telemetry events for analytics
-      console.log('Content telemetry event:', event);
+      if (event?.eid === 'ASSESS') {
+        telemetry.audit({
+          edata: {
+            props: ['score'],
+            state: (event?.edata?.pass === true || String(event?.edata?.pass).toLowerCase() === 'yes') ? 'Passed' : 'Failed',
+          },
+          object: { id: contentId || '', type: 'Content' },
+        });
+      }
     },
   });
 
@@ -111,7 +120,7 @@ const ContentPlayerPage = () => {
       <main className="content-player-container">
         {/* Go Back Link */}
         <button
-          onClick={() => navigate(backTo)}
+          onClick={() => navigate(-1)}
           className="content-player-go-back"
         >
           <FiArrowLeft className="content-player-back-arrow" />
@@ -157,7 +166,6 @@ const ContentPlayerPage = () => {
               ? "collection"
               : "resource"
           }
-          linkState={linkState}
         />
       </main>
 
