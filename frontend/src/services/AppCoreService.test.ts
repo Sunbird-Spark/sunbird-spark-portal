@@ -186,6 +186,9 @@ describe('AppCoreService', () => {
         });
 
         it('should return fallback values if app info endpoint returns empty data', async () => {
+            // Clear the pData cache to ensure fresh API call
+            (appCoreService as any).pDataCache = null;
+            
             const mockClient = {
                 get: vi.fn().mockResolvedValue({
                     data: {
