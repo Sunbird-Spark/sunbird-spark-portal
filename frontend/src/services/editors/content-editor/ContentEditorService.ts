@@ -4,6 +4,7 @@ import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
+import { fetchFwCategoryMeta } from '../fwCategoryMetaService';
 
 const CONTENT_EDITOR_URL = '/content-editor/index.html';
 
@@ -50,6 +51,9 @@ export class ContentEditorService {
         console.warn('Failed to fetch channel framework:', error);
       }
     }
+    const { contentFields, fwCategoryDetails } =
+      await fetchFwCategoryMeta(framework || undefined);
+
     const pdata = await appCoreService.getPData();
 
     const context = {
@@ -110,6 +114,8 @@ export class ContentEditorService {
       cloudStorage: {
         provider: '',
       },
+      contentFields,
+      fwCategoryDetails,
     };
 
     return { context, config };
