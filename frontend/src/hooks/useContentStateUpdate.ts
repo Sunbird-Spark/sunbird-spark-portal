@@ -55,6 +55,7 @@ export function useContentStateUpdate({
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
   const lastSentStatusRef = useRef<number | null>(null);
+  const startUpdateInFlightRef = useRef(false);
 
   const assessmentTsRef = useRef<number | null>(null);
   const assessEventsRef = useRef<unknown[]>([]);
@@ -69,6 +70,7 @@ export function useContentStateUpdate({
 
   useEffect(() => {
     lastSentStatusRef.current = null;
+    startUpdateInFlightRef.current = false;
     assessmentTsRef.current = null;
     assessEventsRef.current = [];
     sendingAssessmentRef.current = false;
@@ -91,6 +93,7 @@ export function useContentStateUpdate({
         }
       } catch (err) {
         console.error("Content state update failed:", err);
+        throw err;
       }
     },
     [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]
@@ -152,9 +155,18 @@ export function useContentStateUpdate({
         const ets = rawEvent?.ets ?? event?.ets;
         if (ets != null) assessmentTsRef.current = ets;
         assessEventsRef.current = [];
-        if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1) {
-          lastSentStatusRef.current = 1;
-          void handleContentStateUpdate(1, false);
+        if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1 && !startUpdateInFlightRef.current) {
+          startUpdateInFlightRef.current = true;
+          handleContentStateUpdate(1, true)
+            .then(() => {
+              lastSentStatusRef.current = 1;
+            })
+            .catch(() => {
+              /* Already logged in handleContentStateUpdate; ref left null so next START retries */
+            })
+            .finally(() => {
+              startUpdateInFlightRef.current = false;
+            });
         }
         return;
       }
