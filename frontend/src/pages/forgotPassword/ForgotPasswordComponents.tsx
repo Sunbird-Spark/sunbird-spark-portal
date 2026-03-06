@@ -16,13 +16,14 @@ export const InputLabel = ({ children, htmlFor, required }: { children: React.Re
     </label>
 );
 
-export const PrimaryButton = ({ children, onClick, disabled, loading, className = "" }: { children: React.ReactNode, onClick: () => void, disabled?: boolean, loading?: boolean, className?: string }) => {
+export const PrimaryButton = ({ children, onClick, disabled, loading, className = "", ...props }: { children: React.ReactNode, onClick: () => void, disabled?: boolean, loading?: boolean, className?: string, [key: string]: any }) => {
     const { t } = useAppI18n();
     return (
         <Button
             className={`login-primary-button ${className}`}
             onClick={onClick}
             disabled={disabled || loading}
+            {...props}
         >
             {loading ? t('confirmDialog.pleaseWait') : children}
         </Button>

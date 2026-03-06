@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import ForgotPassword from './ForgotPassword';
+
+vi.mock('react-router-dom', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('react-router-dom')>();
+    return {
+        ...actual,
+        useLocation: vi.fn(() => ({ pathname: '/' })),
+    };
+});
 import React from 'react';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 
