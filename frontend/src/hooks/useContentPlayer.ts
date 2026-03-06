@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 
-interface PlayerEvent {
+export interface PlayerEvent {
   type: string;
   data?: any;
   timestamp?: number;
 }
 
-interface TelemetryEvent {
+export interface TelemetryEvent {
   type: string;
   eid?: string;
   edata?: Record<string, unknown>;

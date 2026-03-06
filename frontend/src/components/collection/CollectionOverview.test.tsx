@@ -100,6 +100,23 @@ describe('CollectionOverview', () => {
     });
   });
 
+  describe('player area — when upcomingBatchBlocked is true', () => {
+    it('shows batchNotStartedYet message and no PageLoader or ContentPlayer', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentAccessBlocked={false}
+          upcomingBatchBlocked={true}
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.batchNotStartedYetNoDate')).toBeInTheDocument();
+      expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+  });
+
   describe('player area — when no contentId is provided', () => {
     it('shows error PageLoader when contentId is absent', () => {
       render(<CollectionOverview collectionData={mockCollectionData} />);

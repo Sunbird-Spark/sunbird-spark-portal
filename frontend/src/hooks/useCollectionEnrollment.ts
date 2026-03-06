@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from './useBatch';
@@ -110,6 +111,16 @@ export function useCollectionEnrollment(
     return Number.isFinite(endMs) && endMs < Date.now();
   }, [batchReadResponse?.data?.response?.endDate]);
 
+  const isBatchUpcoming = useMemo(() => {
+    const startDateStr = batchReadResponse?.data?.response?.startDate;
+    if (!startDateStr) {
+      return false;
+    }
+    return dayjs(startDateStr).isAfter(dayjs(), 'day');
+  }, [batchReadResponse?.data?.response?.startDate]);
+
+  const batchStartDateFromRead = batchReadResponse?.data?.response?.startDate;
+
   const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
   const handleJoinCourse = async (selectedBatchId: string) => {
     if (!collectionId || !selectedBatchId) return;
@@ -145,6 +156,7 @@ export function useCollectionEnrollment(
     isEnrolledInCurrentBatch,
     effectiveBatchId,
     isBatchEnded,
+    isBatchUpcoming,
     contentStatusMap,
     contentStateFetched: contentStateFetched,
     contentAttemptInfoMap,
@@ -158,5 +170,6 @@ export function useCollectionEnrollment(
     joinError,
     handleJoinCourse,
     batchEnrollmentType,
+    batchStartDateFromRead,
   };
 }

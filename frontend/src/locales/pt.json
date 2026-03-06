@@ -232,6 +232,8 @@
     "enrollmentEndsBy": "Inscrição até",
     "joinTheCourse": "Entrar no Curso",
     "mustJoinToAccessContent": "Você deve entrar no curso para ter acesso completo ao conteúdo",
+    "batchNotStartedYet": "Esta turma ainda não começou. Ela começa em {{date}}. Você poderá acessar o conteúdo assim que a turma iniciar.",
+    "batchNotStartedYetNoDate": "Esta turma ainda não começou. Você poderá acessar o conteúdo assim que a turma iniciar.",
     "certificate": "Certificado",
     "certificateEarnDescription": "Obtenha um certificado ao concluir o curso. Verifique os detalhes antes de concluir o curso.",
     "certificateNotAvailable": "Atualmente, este curso não possui certificado. O criador do curso pode anexar um certificado posteriormente.",

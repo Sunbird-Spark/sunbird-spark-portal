@@ -24,19 +24,13 @@ const MyLearning = () => {
   const totalLessons = courses.reduce((acc, course) => acc + (course.leafNodesCount || 0), 0);
   const contentsCompleted = courses.filter(course => course.completionPercentage === 100).length;
 
-  // Filter upcoming batches: startDate > today
-  // Note: This intentionally filters out courses that have already started, even if they are in progress.
-  // "Upcoming" strictly means batches with a start date in the future.
-  const today = dayjs().startOf('day');
-
-  const upcomingBatches = courses.filter(
-    (course: { batch?: { startDate?: string | Date } }) => {
-      if (course.batch && course.batch.startDate) {
-        return dayjs(course.batch.startDate).isAfter(today);
-      }
-      return false;
+  const upcomingBatches = courses.filter(course => {
+    if (course.completionPercentage > 0) return false;
+    if (course.batch?.startDate) {
+      return dayjs(course.batch.startDate).isAfter(dayjs(), 'day');
     }
-  );
+    return false;
+  });
 
   if (isLoading) {
     return <PageLoader message={t('myLearning.loading')} />;
@@ -63,14 +57,14 @@ const MyLearning = () => {
     <main className="page-main-content">
       <div className="page-content-wrapper">
         {/* Courses and Hours/Classes Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 lg:h-[calc(100vh-8rem)]">
           {/* Left Column - Courses (2 cols) */}
-          <div className="lg:col-span-2 h-full">
+          <div className="lg:col-span-2 h-full min-h-0">
             <MyLearningCourses courses={courses} />
           </div>
 
           {/* Right Column - Hours Spent + Upcoming Batches */}
-          <div className="space-y-6">
+          <div className="space-y-6 h-full min-h-0 overflow-y-auto">
             <MyLearningProgress
               lessonsVisited={lessonsVisited}
               totalLessons={totalLessons}
