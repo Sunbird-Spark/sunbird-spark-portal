@@ -21,12 +21,10 @@ const MyLearning = () => {
   const totalLessons = courses.reduce((acc, course) => acc + (course.leafNodesCount || 0), 0);
   const contentsCompleted = courses.filter(course => course.completionPercentage === 100).length;
 
-  const todayStr = dayjs().format('YYYY-MM-DD');
-
   const upcomingBatches = courses.filter(course => {
     if (course.completionPercentage > 0) return false;
     if (course.batch?.startDate) {
-      return dayjs(course.batch.startDate).format('YYYY-MM-DD') > todayStr;
+      return dayjs(course.batch.startDate).isAfter(dayjs(), 'day');
     }
     return false;
   });

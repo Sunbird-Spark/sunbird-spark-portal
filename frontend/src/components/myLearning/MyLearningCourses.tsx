@@ -26,13 +26,11 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
   ];
 
   const getFilteredCourses = () => {
-    const today = dayjs().startOf('day');
-    
     switch (activeTab) {
       case "active":
         return courses.filter(c => {
           if (c.completionPercentage >= 100) return false;
-          if (c.batch?.startDate && dayjs(c.batch.startDate).format('YYYY-MM-DD') > today.format('YYYY-MM-DD')) return false;
+          if (c.batch?.startDate && dayjs(c.batch.startDate).isAfter(dayjs(), 'day')) return false;
           return true;
         });
       case "completed":
@@ -41,7 +39,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
         return courses.filter(c => {
           if (c.completionPercentage > 0) return false;
           if (c.batch?.startDate) {
-            return dayjs(c.batch.startDate).format('YYYY-MM-DD') > today.format('YYYY-MM-DD');
+            return dayjs(c.batch.startDate).isAfter(dayjs(), 'day');
           }
           return false;
         });
