@@ -86,7 +86,7 @@ describe('useContentStateUpdate', () => {
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
-  it('calls contentStateUpdate with status 1 and does not invalidate on START', async () => {
+  it('calls contentStateUpdate with status 1 and invalidates on START', async () => {
     const { result } = renderHook(() => useContentStateUpdate(defaultParams));
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
@@ -96,8 +96,8 @@ describe('useContentStateUpdate', () => {
         batchId: 'batch_1',
         contents: [{ contentId: 'content_1', status: 1 }],
       });
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['contentState'] });
     });
-    expect(mockInvalidateQueries).not.toHaveBeenCalled();
   });
 
   it('calls contentStateUpdate only once for multiple START events', async () => {
@@ -106,6 +106,21 @@ describe('useContentStateUpdate', () => {
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('retries START update on failure (does not set lastSentStatusRef so next START retries)', async () => {
+    mockMutateAsync.mockRejectedValueOnce(new Error('Network error'));
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    result.current({ eid: 'START' });
+    await vi.waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    mockMutateAsync.mockResolvedValue(undefined);
+    result.current({ eid: 'START' });
+    await vi.waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -122,8 +137,8 @@ describe('useContentStateUpdate', () => {
         batchId: 'batch_1',
         contents: [{ contentId: 'content_1', status: 2 }],
       });
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['contentState'] });
     });
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['contentState'] });
   });
 
   it('does not call contentStateUpdate when getUserId returns undefined', () => {
@@ -196,31 +211,31 @@ describe('useContentStateUpdate', () => {
       result.current({ eid: 'END' });
       await vi.waitFor(() => {
         expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+        expect(mockMutateAsync).toHaveBeenCalledWith({
+          userId: 'user_1',
+          courseId: 'course_1',
+          batchId: 'batch_1',
+          contents: [
+            {
+              contentId: 'content_1',
+              status: 2,
+              lastAccessTime: expect.any(String),
+            },
+          ],
+          assessments: [
+            {
+              assessmentTs: 1700000000000,
+              batchId: 'batch_1',
+              courseId: 'course_1',
+              userId: 'user_1',
+              attemptId: expect.any(String),
+              contentId: 'content_1',
+              events: [],
+            },
+          ],
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['contentState'] });
       });
-      expect(mockMutateAsync).toHaveBeenCalledWith({
-        userId: 'user_1',
-        courseId: 'course_1',
-        batchId: 'batch_1',
-        contents: [
-          {
-            contentId: 'content_1',
-            status: 2,
-            lastAccessTime: expect.any(String),
-          },
-        ],
-        assessments: [
-          {
-            assessmentTs: 1700000000000,
-            batchId: 'batch_1',
-            courseId: 'course_1',
-            userId: 'user_1',
-            attemptId: expect.any(String),
-            contentId: 'content_1',
-            events: [],
-          },
-        ],
-      });
-      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['contentState'] });
     });
 
     it('accumulates ASSESS events and sends them in assessments.events on END', async () => {
