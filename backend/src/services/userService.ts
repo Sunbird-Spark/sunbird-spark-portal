@@ -115,10 +115,7 @@ export const getUserByEmail = async (emailId: string, req: Request): Promise<boo
         return responseData.result.exists;
     } catch (err: any) {
         if (err.response) {
-            logger.error('getUserByEmail API error', {
-                status: err.response.status,
-                data: err.response.data,
-            });
+            logger.error(`getUserByEmail API error: status=${err.response.status} data=${JSON.stringify(err.response.data)}`);
         }
         throw err;
     }

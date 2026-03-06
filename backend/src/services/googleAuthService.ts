@@ -55,13 +55,7 @@ export const exchangeKeycloakCode = async (
     }, { redirect_uri: callbackUrl });
 
     const claims = decodeJwtPayload(tokens.access_token);
-    logger.info('exchangeKeycloakCode: token claims received', {
-        email: claims?.email,
-        name: claims?.name,
-        given_name: claims?.given_name,
-        family_name: claims?.family_name,
-        sub: claims?.sub,
-    });
+    logger.info(`exchangeKeycloakCode: email=${claims?.email} name=${claims?.name} given_name=${claims?.given_name} family_name=${claims?.family_name} sub=${claims?.sub}`);
 
     const firstName = (claims?.given_name as string) || '';
     const lastName = (claims?.family_name as string) || '';
@@ -163,10 +157,7 @@ export const handleUserAuthentication = async (
     client_id: string,
     req: Request
 ): Promise<boolean> => {
-    logger.info('handleUserAuthentication: received googleUser', {
-        emailId: googleUser.emailId,
-        name: googleUser.name,
-    });
+    logger.info(`handleUserAuthentication: emailId=${googleUser.emailId} name=${googleUser.name}`);
 
     if (!googleUser.emailId) {
         throw new Error('GOOGLE_EMAIL_NOT_FOUND');
