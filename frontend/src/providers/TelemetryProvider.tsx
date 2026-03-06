@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useMemo } from 'react';
+import React, { createContext, useEffect, useMemo, useRef } from 'react';
 import { telemetryService } from '../services/TelemetryService';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 
@@ -9,15 +9,13 @@ interface TelemetryProviderProps {
 }
 
 export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }) => {
+  const isInitializedRef = useRef(false);
+
   const telemetryConfig = useMemo(() => {
     const defaultDid = localStorage.getItem('deviceId') || 'anonymous-device';
     const defaultUid = userAuthInfoService.getUserId() || 'anonymous';
     const defaultSid = sessionStorage.getItem('sid') || `session-${Date.now()}`;
     const channel = import.meta.env.VITE_APP_CHANNEL || 'default';
-
-    if (!sessionStorage.getItem('sid')) {
-        sessionStorage.setItem('sid', defaultSid);
-    }
 
     // Detect device type to match context.cdata "Device" entry in Sunbird telemetry spec
     const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
@@ -34,7 +32,7 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
       authtoken: '',
       uid: defaultUid,
       sid: defaultSid,
-      batchsize: 20, // Set to higher in prod, kept 1 for debugging
+      batchsize: 20,
       host: window.location.origin,
       endpoint: '/action/data/v3/telemetry',
       // tags: [channel] matches the sample IMPRESSION structure
@@ -51,23 +49,23 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
       enableValidation: import.meta.env.VITE_ENABLE_TELEMETRY_VALIDATION === 'true'
     };
   }, []); 
-  // do not fire telemetry events before the service is initialized.
-  // do not fire telemetry events before the service is initialized.
-  if (telemetryConfig && !telemetryService.isInitialized) {
-    telemetryService.initialize(telemetryConfig);
-    telemetryService.start(
-      telemetryConfig,
-      'app',           // contentId (or some default value)
-      '1.0',           // contentVer
-      { type: 'app', mode: 'play', pageid: 'home' } // data
-    );
-  }
+  useEffect(() => {
+    if (!sessionStorage.getItem('sid')) {
+      sessionStorage.setItem('sid', telemetryConfig.sid);
+    }
+  }, [telemetryConfig.sid]);
 
   useEffect(() => {
-     // Handle dynamic config updates when user context changes
-     if (telemetryConfig && !telemetryService.isInitialized) {
-        telemetryService.initialize(telemetryConfig);
-     }
+    if (telemetryConfig && !isInitializedRef.current && !telemetryService.isInitialized) {
+      telemetryService.initialize(telemetryConfig);
+      telemetryService.start(
+        telemetryConfig,
+        'app',           // contentId (or some default value)
+        '1.0',           // contentVer
+        { type: 'app', mode: 'play', pageid: 'home' } // data
+      );
+      isInitializedRef.current = true;
+    }
   }, [telemetryConfig]);
 
   useEffect(() => {
@@ -95,15 +93,15 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
       const cdataStr = target.getAttribute('data-cdata');
       if (cdataStr) {
         try {
-          payload.context = { cdata: JSON.parse(cdataStr) };
+          payload.options = { context: { cdata: JSON.parse(cdataStr) } };
         } catch (e) {
           console.error('Failed to parse telemetry cdata', e);
         }
       } else {
-        const objectid = target.getAttribute('data-objectid');
-        const objecttype = target.getAttribute('data-objecttype');
+        const objectid = target.getAttribute('data-objectid') || target.getAttribute('data-objid');
+        const objecttype = target.getAttribute('data-objecttype') || target.getAttribute('data-objtype');
         if (objectid && objecttype) {
-          payload.context = { cdata: [{ id: objectid, type: objecttype }] };
+          payload.options = { context: { cdata: [{ id: objectid, type: objecttype }] } };
         }
       }
 

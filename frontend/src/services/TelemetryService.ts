@@ -17,6 +17,17 @@ export interface TelemetryConfig {
 export class TelemetryService {
   private _isInitialized = false;
 
+  private getOptions(eventInput: TelemetryEventInput): any {
+    const options = { ...eventInput.options };
+    if (eventInput.context) {
+      options.context = { ...(options.context || {}), ...eventInput.context };
+    }
+    if (eventInput.object) {
+      options.object = { ...(options.object || {}), ...eventInput.object };
+    }
+    return Object.keys(options).length > 0 ? options : undefined;
+  }
+
   public initialize(config: TelemetryConfig): void {
     $t.initialize(config);
     this._isInitialized = true;
@@ -24,7 +35,7 @@ export class TelemetryService {
 
   public interact(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.interact(eventInput.edata, eventInput.options);
+      $t.interact(eventInput.edata, this.getOptions(eventInput));
     }
   }
 
@@ -53,7 +64,7 @@ export class TelemetryService {
       sessionStorage.setItem(lastTimeKey, Date.now().toString());
     }
 
-    $t.impression(eventInput.edata, eventInput.options);
+    $t.impression(eventInput.edata, this.getOptions(eventInput));
   }
 
   public start(config: any, contentId: string, contentVer: string, data: any, options?: any): void {
@@ -64,43 +75,43 @@ export class TelemetryService {
 
   public end(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.end(eventInput.edata, eventInput.options);
+      $t.end(eventInput.edata, this.getOptions(eventInput));
     }
   }
 
   public error(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.error(eventInput.edata, eventInput.options);
+      $t.error(eventInput.edata, this.getOptions(eventInput));
     }
   }
 
   public audit(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.audit(eventInput.edata, eventInput.options);
+      $t.audit(eventInput.edata, this.getOptions(eventInput));
     }
   }
 
   public share(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.share(eventInput.edata, eventInput.options);
+      $t.share(eventInput.edata, this.getOptions(eventInput));
     }
   }
 
   public log(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.log(eventInput.edata, eventInput.options);
+      $t.log(eventInput.edata, this.getOptions(eventInput));
     }
   }
 
   public exData(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.exdata(eventInput.edata, eventInput.options);
+      $t.exdata(eventInput.edata, this.getOptions(eventInput));
     }
   }
 
   public feedback(eventInput: TelemetryEventInput): void {
     if (this._isInitialized) {
-      $t.feedback(eventInput.edata, eventInput.options);
+      $t.feedback(eventInput.edata, this.getOptions(eventInput));
     }
   }
 

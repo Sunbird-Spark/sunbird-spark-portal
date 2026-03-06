@@ -164,8 +164,10 @@ describe('TelemetryProvider', () => {
           type: 'CLICK',
           pageid: 'test-page'
         },
-        context: {
-          cdata: [{ id: 'c1', type: 'context' }]
+        options: {
+          context: {
+            cdata: [{ id: 'c1', type: 'context' }]
+          }
         }
       });
     });
@@ -185,8 +187,10 @@ describe('TelemetryProvider', () => {
           id: 'test-button-2',
           type: 'CLICK'
         },
-        context: {
-          cdata: [{ id: 'obj1', type: 'content' }]
+        options: {
+          context: {
+            cdata: [{ id: 'obj1', type: 'content' }]
+          }
         }
       });
     });

@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -33,6 +33,21 @@ export default function ContentNameDialog({
   const [collectionType, setCollectionType] = useState("");
 
   const isCollection = optionId === 'collection';
+
+  const submitCdata = useMemo(() => {
+    let baseCdata: any[] = [];
+    if (submitButtonProps?.['data-cdata']) {
+      try {
+        const parsed = typeof submitButtonProps['data-cdata'] === 'string' 
+          ? JSON.parse(submitButtonProps['data-cdata']) 
+          : submitButtonProps['data-cdata'];
+        baseCdata = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn('Failed to parse data-cdata in ContentNameDialog', e);
+      }
+    }
+    return JSON.stringify([...baseCdata, { id: name, type: 'ContentName' }]);
+  }, [submitButtonProps, name]);
 
   // Reset fields when dialog is closed
   useEffect(() => {
@@ -159,7 +174,7 @@ export default function ContentNameDialog({
               disabled={!canSubmit || isLoading}
               className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
               {...submitButtonProps}
-              data-cdata={submitButtonProps?.['data-cdata'] ? JSON.stringify([...JSON.parse(submitButtonProps['data-cdata']), { id: name, type: 'ContentName' }]) : JSON.stringify([{ id: name, type: 'ContentName' }])}
+              data-cdata={submitCdata}
             >
               {isLoading ? t('workspace.creating') : t('create')}
             </Button>

@@ -228,4 +228,30 @@ describe('ContentNameDialog', () => {
       });
     });
   });
+
+  it('should handle invalid data-cdata gracefully without crashing', () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(
+      <ContentNameDialog 
+        {...defaultProps} 
+        submitButtonProps={{ 'data-cdata': 'invalid-json' }} 
+      />
+    );
+
+    const input = screen.getByPlaceholderText('Enter content name');
+    fireEvent.change(input, { target: { value: 'My Content' } });
+
+    const createButton = screen.getByRole('button', { name: 'Create' });
+    expect(createButton).toHaveAttribute(
+      'data-cdata',
+      JSON.stringify([{ id: 'My Content', type: 'ContentName' }])
+    );
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      'Failed to parse data-cdata in ContentNameDialog',
+      expect.any(Error)
+    );
+
+    consoleWarnSpy.mockRestore();
+  });
 });

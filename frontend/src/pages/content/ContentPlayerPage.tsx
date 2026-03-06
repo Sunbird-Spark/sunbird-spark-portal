@@ -72,7 +72,7 @@ const ContentPlayerPage = () => {
         telemetry.audit({
           edata: {
             props: ['score'],
-            state: event?.edata?.pass ? 'Passed' : 'Failed',
+            state: (event?.edata?.pass === true || String(event?.edata?.pass).toLowerCase() === 'yes') ? 'Passed' : 'Failed',
           },
           object: { id: contentId || '', type: 'Content' },
         });
