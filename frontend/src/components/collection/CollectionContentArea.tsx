@@ -9,30 +9,36 @@ import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
 import { useForceSync } from "@/hooks/useForceSync";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
+import type { BatchListItem } from "@/types/collectionTypes";
 import CourseProgressSection from "@/components/collection/CourseProgressSection";
 
-interface CollectionContentAreaProps {
-  collectionData: any;
-  contentId: string | undefined;
+/** Access and blocking state for the collection detail view. */
+export interface CollectionContentAreaAccessProps {
   isTrackable: boolean;
-  contentBlocked: boolean;
+  isAuthenticated: boolean;
+  hasBatchInRoute: boolean;
   isEnrolledInCurrentBatch: boolean;
-  showMaxAttemptsExceeded?: boolean;
+  contentBlocked: boolean;
+  upcomingBatchBlocked: boolean;
+  batchStartDateForOverview?: string;
+}
+
+/** Player state and handlers for the content player. */
+export interface CollectionContentAreaPlayerProps {
   playerMetadata: any;
   playerIsLoading: boolean;
   playerError: any;
   handlePlayerEvent: (event: any) => void;
   handleTelemetryEvent: (event: any) => void;
-  isAuthenticated: boolean;
-  collectionId: string | undefined;
-  hasBatchInRoute: boolean;
+  showMaxAttemptsExceeded?: boolean;
+}
+
+/** Enrollment, progress, batch list and certificate state. */
+export interface CollectionContentAreaEnrollmentProps {
   courseProgressProps: any;
-  batchIdParam: string | undefined;
-  expandedModules: string[];
-  toggleModule: (moduleId: string) => void;
   contentStatusMap: any;
   contentAttemptInfoMap?: Record<string, { attemptCount: number }>;
-  batches: any;
+  batches: BatchListItem[] | undefined;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
   handleJoinCourse: (id: string) => void;
@@ -44,54 +50,85 @@ interface CollectionContentAreaProps {
   firstCertPreviewUrl: string | undefined;
   setCertificatePreviewUrl: (url: string) => void;
   setCertificatePreviewOpen: (open: boolean) => void;
-  /** When true (creator viewing own collection), BatchCard is shown. */
+}
+
+/** Sidebar UI state and route identifiers. */
+export interface CollectionContentAreaSidebarProps {
+  expandedModules: string[];
+  toggleModule: (moduleId: string) => void;
+  collectionId: string | undefined;
+  batchIdParam: string | undefined;
+}
+
+/** Creator/viewer flags and user profile for consent. */
+export interface CollectionContentAreaCreatorProps {
   isCreatorViewingOwnCollection?: boolean;
-  /** When true (content creator viewing any collection), access without batch, no progress, learner cards hidden. */
   contentCreatorPrivilege?: boolean;
-  /** User profile for Profile Data Sharing consent modal (from useUserRead). */
   userProfile?: Record<string, unknown> | null;
-  /** Current user id for force sync (learner). */
   userId?: string | null;
+}
+
+interface CollectionContentAreaProps {
+  collectionData: any;
+  contentId: string | undefined;
+  access: CollectionContentAreaAccessProps;
+  player: CollectionContentAreaPlayerProps;
+  enrollment: CollectionContentAreaEnrollmentProps;
+  sidebar: CollectionContentAreaSidebarProps;
+  creator?: CollectionContentAreaCreatorProps;
 }
 
 export default function CollectionContentArea({
   collectionData,
   contentId,
-  isTrackable,
-  contentBlocked,
-  isEnrolledInCurrentBatch,
-  playerMetadata,
-  playerIsLoading,
-  playerError,
-  handlePlayerEvent,
-  handleTelemetryEvent,
-  showMaxAttemptsExceeded = false,
-  isAuthenticated,
-  collectionId,
-  hasBatchInRoute,
-  courseProgressProps,
-  batchIdParam,
-  expandedModules,
-  toggleModule,
-  contentStatusMap,
-  contentAttemptInfoMap,
-  batches,
-  selectedBatchId,
-  setSelectedBatchId,
-  handleJoinCourse,
-  batchListLoading,
-  joinLoading,
-  batchListError,
-  joinError,
-  hasCertificate,
-  firstCertPreviewUrl,
-  setCertificatePreviewUrl,
-  setCertificatePreviewOpen,
-  isCreatorViewingOwnCollection = false,
-  contentCreatorPrivilege = false,
-  userProfile = null,
-  userId = null,
+  access,
+  player,
+  enrollment,
+  sidebar,
+  creator = {},
 }: CollectionContentAreaProps) {
+  const {
+    isTrackable,
+    isAuthenticated,
+    hasBatchInRoute,
+    isEnrolledInCurrentBatch,
+    contentBlocked,
+    upcomingBatchBlocked,
+    batchStartDateForOverview,
+  } = access;
+  const {
+    playerMetadata,
+    playerIsLoading,
+    playerError,
+    handlePlayerEvent,
+    handleTelemetryEvent,
+    showMaxAttemptsExceeded = false,
+  } = player;
+  const {
+    courseProgressProps,
+    contentStatusMap,
+    contentAttemptInfoMap,
+    batches,
+    selectedBatchId,
+    setSelectedBatchId,
+    handleJoinCourse,
+    batchListLoading,
+    joinLoading,
+    batchListError,
+    joinError,
+    hasCertificate,
+    firstCertPreviewUrl,
+    setCertificatePreviewUrl,
+    setCertificatePreviewOpen,
+  } = enrollment;
+  const { expandedModules, toggleModule, collectionId, batchIdParam } = sidebar;
+  const {
+    isCreatorViewingOwnCollection = false,
+    contentCreatorPrivilege = false,
+    userProfile = null,
+    userId = null,
+  } = creator;
+
   const { t } = useAppI18n();
   const navigate = useNavigate();
   const { showForceSyncButton, handleForceSync, isForceSyncing } = useForceSync(
@@ -126,7 +163,9 @@ export default function CollectionContentArea({
         <CollectionOverview
           collectionData={collectionData}
           contentId={contentId}
-          contentAccessBlocked={contentBlocked}
+          contentAccessBlocked={contentBlocked && !upcomingBatchBlocked}
+          upcomingBatchBlocked={upcomingBatchBlocked}
+          batchStartDate={batchStartDateForOverview ?? courseProgressProps?.batchStartDate}
           playerMetadata={playerMetadata}
           playerIsLoading={playerIsLoading}
           playerError={playerError ?? null}
