@@ -24,9 +24,9 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
         className="flex gap-6 p-6 bg-white rounded-2xl border border-sunbird-gray-f3 hover:shadow-md transition-shadow"
       >
         {/* Thumbnail */}
-        {(course.content?.appIcon || course.courseLogoUrl) ? (
+        {(course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl) ? (
           <img
-            src={course.content?.appIcon || course.courseLogoUrl}
+            src={course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl}
             alt={course.courseName}
             className="w-[7.5rem] h-[7.5rem] rounded-2xl object-cover flex-shrink-0 shadow-sm"
           />

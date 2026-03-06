@@ -12,7 +12,6 @@ import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
-import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import { useIsContentCreator } from "@/hooks/useUser";
 import { useCollectionDetailSelfAssess } from "@/hooks/useCollectionDetailSelfAssess";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
@@ -24,6 +23,8 @@ import { CollectionStatusViews } from "@/components/collection/CollectionStatusV
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
+import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
+import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import useImpression from "@/hooks/useImpression";
 import usePageSession from "@/hooks/usePageSession";
 import { useCollectionAutoNavigate } from "@/hooks/useCollectionAutoNavigate";
@@ -31,6 +32,7 @@ import { useCollectionPageUIState } from "@/hooks/useCollectionPageUIState";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
+  const navigate = useNavigate();
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
 
   useImpression({ type: 'view', pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
@@ -44,7 +46,7 @@ const CollectionDetailPage = () => {
   } = useCollectionPageData(collectionId, batchIdParam);
 
   const {
-    isEnrolledInCurrentBatch, contentStatusMap, contentAttemptInfoMap, courseProgressProps, batches,
+    isEnrolledInCurrentBatch, contentStatusMap, contentStateFetched, contentAttemptInfoMap, courseProgressProps, batches,
     batchListLoading, batchListError, firstCertPreviewUrl, hasCertificate, joinLoading, joinError,
     handleJoinCourse, effectiveBatchId, isBatchEnded
   } = enrollment;
@@ -125,6 +127,19 @@ const CollectionDetailPage = () => {
   });
 
 
+  useInitialCollectionContentNavigation({
+    collectionData,
+    contentId,
+    isTrackable,
+    contentCreatorPrivilege,
+    collectionId,
+    hasBatchInRoute,
+    batchIdParam,
+    isEnrolledInCurrentBatch,
+    contentStatusMap,
+    contentStateFetched,
+  });
+
   useEffect(() => {
     const firstMainUnitId = collectionData?.children?.[0]?.identifier;
     if (firstMainUnitId && !initialExpandedSet.current) {
@@ -141,18 +156,32 @@ const CollectionDetailPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
-
       <main className="flex-1 container mx-auto px-4 py-6">
-        <CollectionGoBackButton batchIdParam={batchIdParam} />
+        {/* Go Back Link - always visible */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
+        >
+          <FiArrowLeft className="w-4 h-4" />
+          {t("button.goBack")}
+        </button>
 
-        <CollectionStatusViews
-          showLoading={showLoading}
-          isError={isError}
-          error={error}
-          collectionDataFromApi={collectionDataFromApi}
-          refetch={refetch}
-        />
+        {showLoading && <PageLoader message={t("loading")} fullPage={false} />}
+        {!showLoading && isError && error && (
+          <PageLoader
+            error={error.message}
+            onRetry={() => refetch()}
+            fullPage={false}
+          />
+        )}
 
+        {!showLoading && !isError && collectionDataFromApi == null && (
+          <PageLoader
+            error={t("collection.notFound")}
+            onRetry={() => refetch()}
+            fullPage={false}
+          />
+        )}
         {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
           <>
             {/* Main Content Area */}
@@ -195,26 +224,31 @@ const CollectionDetailPage = () => {
               userId={currentUserId ?? undefined}
             />
 
-            <CollectionSecondarySection
+            <RelatedContentSection
               searchError={searchError}
               searchErrorObj={searchErrorObj}
               searchFetching={searchFetching}
               relatedContentItems={relatedContentItems}
               searchRefetch={searchRefetch}
             />
+            <div className="mt-16"><FAQSection /></div>
           </>
         )}
       </main>
-
       <CertificatePreviewModal
         open={certificatePreviewOpen}
         onClose={() => setCertificatePreviewOpen(false)}
         previewUrl={certificatePreviewUrl}
         details={certificatePreviewDetails}
       />
+      <CourseCompletionDialog
+        courseProgressProps={courseProgressProps}
+        isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
+        collectionId={collectionId}
+        hasCertificate={hasCertificate}
+      />
       <Footer />
     </div>
   );
 };
-
 export default CollectionDetailPage;

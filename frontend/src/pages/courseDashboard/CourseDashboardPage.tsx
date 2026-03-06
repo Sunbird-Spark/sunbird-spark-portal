@@ -92,8 +92,7 @@ const CourseDashboardPage: React.FC = () => {
         )}
 
         {/* ─── Main Box ─── */}
-        <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col">
-          
+        <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col min-h-[372px]">
           {/* ─── Header area of Box ─── */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <p className="text-sm font-semibold text-foreground font-['Rubik']">
@@ -126,7 +125,7 @@ const CourseDashboardPage: React.FC = () => {
               onClick={() => switchTab('certificates')}
               data-testid="tab-certificates"
             >
-              {t('tabs.certificates')}
+              {t('tabs.reissueCertificate')}
               {activeTab === 'certificates' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
               )}
@@ -134,7 +133,7 @@ const CourseDashboardPage: React.FC = () => {
           </div>
 
           {/* ─── Tab content ─── */}
-          <div className="flex flex-col bg-white">
+          <div className="flex flex-col bg-white rounded-2xl">
             {collectionId && activeTab === 'batches' && (
               <BatchesTab collectionId={collectionId} />
             )}

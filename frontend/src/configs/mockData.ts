@@ -79,6 +79,7 @@ export const collectionCards: ContentSearchItem[] = [
     primaryCategory: "Leadership",
     description: "Comprehensive leadership training for modern managers",
     objectType: "Collection",
+    mimeType: "application/vnd.ekstep.content-collection",
     status: "Live",
   },
   {
@@ -88,6 +89,7 @@ export const collectionCards: ContentSearchItem[] = [
     primaryCategory: "Course",
     description: "Master Python programming from basics to advanced concepts",
     objectType: "Collection",
+    mimeType: "application/vnd.ekstep.content-collection",
     status: "Live",
   },
   {
@@ -97,6 +99,7 @@ export const collectionCards: ContentSearchItem[] = [
     primaryCategory: "Textbook",
     description: "Improve your communication and presentation abilities",
     objectType: "Collection",
+    mimeType: "application/vnd.ekstep.content-collection",
     status: "Live",
   },
   {
@@ -106,6 +109,7 @@ export const collectionCards: ContentSearchItem[] = [
     primaryCategory: "Course",
     description: "Learn data analytics using popular tools and technologies",
     objectType: "Collection",
+    mimeType: "application/vnd.ekstep.content-collection",
     status: "Live",
   },
   {
@@ -115,6 +119,7 @@ export const collectionCards: ContentSearchItem[] = [
     primaryCategory: "Skills",
     description: "Prepare for PMP certification with comprehensive training",
     objectType: "Collection",
+    mimeType: "application/vnd.ekstep.content-collection",
     status: "Live",
   },
   {
@@ -124,6 +129,7 @@ export const collectionCards: ContentSearchItem[] = [
     primaryCategory: "Course",
     description: "Master AWS cloud architecture and earn certification",
     objectType: "Collection",
+    mimeType: "application/vnd.ekstep.content-collection",
     status: "Live",
   },
 ];

@@ -79,7 +79,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
   const hasBatches = certUser && Array.isArray(certUser?.courses?.batches) && certUser.courses.batches.length > 0;
 
   return (
-    <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-white" data-testid="certificates-tab">
+    <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-white rounded-2xl" data-testid="certificates-tab">
       {/* Search row */}
       <form className="flex items-center gap-3 mb-6" onSubmit={handleSearch} data-testid="cert-search-form">
         <Input
@@ -103,7 +103,6 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
       </form>
 
       <CertHint hintOpen={hintOpen} setHintOpen={setHintOpen} />
-
       {reissueStatus && (
         <p
           className={reissueStatus.type === 'success' ? 'text-green-600 text-sm font-medium mt-3' : 'text-red-600 text-sm font-medium mt-3'}

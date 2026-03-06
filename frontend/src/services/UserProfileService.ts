@@ -4,6 +4,8 @@ import userAuthInfoService from './userAuthInfoService/userAuthInfoService';
 class UserProfileService {
     private static instance: UserProfileService;
     private channel: string | null = null;
+    private firstName: string | null = null;
+    private lastName: string | null = null;
     private isInitialized = false;
     private initializationPromise: Promise<void> | null = null;
     private userService = new UserService();
@@ -48,7 +50,10 @@ class UserProfileService {
         this.initializationPromise = (async () => {
             try {
                 const response = await this.userService.userRead(userId);
-                this.channel = (response as any)?.data?.response?.channel || null;
+                const userData = (response as any)?.data?.response;
+                this.channel = userData?.channel || null;
+                this.firstName = userData?.firstName?.trim() || null;
+                this.lastName = userData?.lastName?.trim() || null;
                 this.isInitialized = true;
                 console.log('UserProfileService: Initialized with channel:', this.channel);
             } catch (err) {
@@ -72,6 +77,20 @@ class UserProfileService {
             await this.initialize();
         }
         return this.channel || '';
+    }
+
+    /**
+     * Get the user's display name data.
+     * Returns firstName and lastName separately so callers can combine or use as needed.
+     */
+    async getUserData(): Promise<{ firstName: string; lastName: string }> {
+        if (!this.isInitialized) {
+            await this.initialize();
+        }
+        return {
+            firstName: this.firstName || '',
+            lastName: this.lastName || '',
+        };
     }
 }
 

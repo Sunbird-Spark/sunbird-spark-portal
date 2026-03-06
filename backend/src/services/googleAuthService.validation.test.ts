@@ -21,25 +21,16 @@ const {
     };
 });
 
-vi.mock('googleapis', () => ({
-    google: {
-        auth: {
-            OAuth2: vi.fn()
-        }
-    }
-}));
-
-vi.mock('google-auth-library', () => ({
-    OAuth2Client: vi.fn()
-}));
-
 vi.mock('../auth/oidcProvider.js', () => ({
     getGoogleOIDCConfig: mockGetGoogleOIDCConfig,
     decodeJwtPayload: mockDecodeJwtPayload
 }));
 
 vi.mock('openid-client', () => ({
-    clientCredentialsGrant: mockClientCredentialsGrant
+    authorizationCodeGrant: mockClientCredentialsGrant,
+    buildAuthorizationUrl: vi.fn(),
+    randomPKCECodeVerifier: vi.fn(),
+    calculatePKCECodeChallenge: vi.fn(),
 }));
 
 vi.mock('../utils/sessionUtils.js', () => ({
@@ -72,7 +63,7 @@ import {
     validateOAuthSession,
     validateOAuthCallback,
     markSessionAsUsed,
-    handleUserAuthentication
+    handleUserAuthentication,
 } from './googleAuthService.js';
 
 describe('GoogleAuthService - Validation & Helpers', () => {
@@ -104,25 +95,25 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             mockRequest.session = {
                 googleOAuth: {
                     state: 'test-state',
-                    nonce: 'test-nonce',
+                    codeVerifier: 'test-verifier',
                     client_id: 'test-client-id',
                     timestamp: Date.now(),
-                    sessionUsed: false
+                    sessionUsed: false,
                 }
             } as any;
             const result = validateOAuthSession(mockRequest as Request);
-            expect(result).toEqual({ state: 'test-state', nonce: 'test-nonce', client_id: 'test-client-id' });
+            expect(result).toEqual({ state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id' });
 
             // Missing session
             mockRequest.session = {} as any;
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_MISSING');
 
             // Already used
-            mockRequest.session = { googleOAuth: { state: 'test-state', nonce: 'test-nonce', client_id: 'test-client-id', sessionUsed: true, timestamp: Date.now() } } as any;
+            mockRequest.session = { googleOAuth: { state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', sessionUsed: true, timestamp: Date.now() } } as any;
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_ALREADY_USED');
 
             // Expired session
-            mockRequest.session = { googleOAuth: { state: 'test-state', nonce: 'test-nonce', client_id: 'test-client-id', timestamp: Date.now() - (6 * 60 * 1000), sessionUsed: false } } as any;
+            mockRequest.session = { googleOAuth: { state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', timestamp: Date.now() - (6 * 60 * 1000), sessionUsed: false } } as any;
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_EXPIRED');
         });
     });
@@ -154,7 +145,7 @@ describe('GoogleAuthService - Validation & Helpers', () => {
     describe('markSessionAsUsed', () => {
         it('should mark session as used or handle missing session', () => {
             // Mark existing session
-            mockRequest.session = { googleOAuth: { state: 'test-state', nonce: 'test-nonce', client_id: 'test-client-id', timestamp: Date.now(), sessionUsed: false } } as any;
+            mockRequest.session = { googleOAuth: { state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', timestamp: Date.now(), sessionUsed: false } } as any;
             markSessionAsUsed(mockRequest as Request);
             expect(mockRequest.session?.googleOAuth?.sessionUsed).toBe(true);
 
@@ -172,13 +163,6 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             vi.clearAllMocks();
             mockGetUserByEmail.mockReset();
             mockCreateUserWithEmail.mockReset();
-            mockClientCredentialsGrant.mockResolvedValue({
-                access_token: 'test-access-token',
-                refresh_token: 'test-refresh-token',
-                id_token: 'test-id-token'
-            });
-            mockDecodeJwtPayload.mockReturnValue({ exp: 1234567890 });
-            mockSaveSession.mockResolvedValue(undefined);
             vi.doMock('./userService.js', () => ({ getUserByEmail: mockGetUserByEmail, createUserWithEmail: mockCreateUserWithEmail }));
         });
 
@@ -209,11 +193,6 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             mockGetUserByEmail.mockResolvedValue(null);
             mockCreateUserWithEmail.mockRejectedValue(new Error('Create user error'));
             await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('CREATE_USER_FAILED');
-
-            // Session creation error
-            mockGetUserByEmail.mockResolvedValue({ email: 'test@example.com' });
-            mockClientCredentialsGrant.mockRejectedValue(new Error('Session error'));
-            await expect(handleUserAuthentication({ emailId: 'test@example.com', name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('SESSION_CREATION_FAILED');
         });
     });
 });

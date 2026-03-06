@@ -94,6 +94,12 @@ describe('Header', () => {
       expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
     });
 
+    it('logo links to / for anonymous users', () => {
+      renderHeader();
+      const logoLink = screen.getByAltText('Sunbird').closest('a');
+      expect(logoLink).toHaveAttribute('href', '/');
+    });
+
     it('renders the desktop navigation links', () => {
       renderHeader();
       // The t() mock now returns localized values

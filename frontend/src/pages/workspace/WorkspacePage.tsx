@@ -506,7 +506,9 @@ const WorkspacePage = () => {
     <div className="flex-1 flex flex-col min-w-0">
       <main className="workspace-main-content">
             {showContent && isCountsLoading && isLoading ? (
-              <PageLoader message={t('loading')} fullPage={false} />
+              <div className="workspace-content-wrapper">
+                <PageLoader message={t('loading')} fullPage={false} />
+              </div>
             ) : (
               <div className="workspace-content-wrapper">
                 <WorkspaceToolbar {...navigationProps} />

@@ -52,7 +52,8 @@ const Onboarding = () => {
     setCurrentScreenId(newHistory[newHistory.length - 1] ?? null);
   };
   const handleSkip = async () => {
-    if (isSubmitting || !userId) return;
+    if (isSubmitting || userId === undefined) return;
+    if (userId === null) { navigate("/"); return; }
     setIsSubmitting(true);
     try {
       await updateProfile.mutateAsync({
@@ -116,22 +117,14 @@ const Onboarding = () => {
     setOtherTexts(prev => ({ ...prev, [currentScreenId]: "" }));
   };
   if (isLoading || (onboardingData && !currentScreenId)) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-white">
-        <span className="onboarding-spinner" />
-      </div>
-    );
+    return <div className="h-screen flex items-center justify-center bg-white"><span className="onboarding-spinner" /></div>;
   }
   if (isError || !onboardingData || !currentScreenId) {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
         <p className="text-muted-foreground">
           Failed to load onboarding.{" "}
-          <button
-            type="button" onClick={() => navigate("/home")} className="text-primary underline"
-          >
-            Skip
-          </button>
+          <button type="button" onClick={() => navigate("/home")} className="text-primary underline">Skip</button>
         </p>
       </div>
     );
@@ -142,13 +135,7 @@ const Onboarding = () => {
       <div className="h-screen flex items-center justify-center bg-white">
         <p className="text-muted-foreground">
           Something went wrong.{" "}
-          <button
-            type="button"
-            onClick={() => navigate("/home")}
-            className="text-primary underline"
-          >
-            Go to Home
-          </button>
+          <button type="button" onClick={() => navigate("/home")} className="text-primary underline">Go to Home</button>
         </p>
       </div>
     );
@@ -238,7 +225,7 @@ const Onboarding = () => {
             </div>
           </div>
           <div className="mt-6">
-            <button type="button" onClick={handleSkip} disabled={isSubmitting || !userId} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            <button type="button" onClick={handleSkip} disabled={isSubmitting || userId === undefined} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Skip Onboarding
             </button>

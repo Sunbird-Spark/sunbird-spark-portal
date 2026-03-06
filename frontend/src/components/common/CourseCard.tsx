@@ -1,4 +1,4 @@
-import { FiStar } from "react-icons/fi";
+import { FiUser } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
@@ -8,7 +8,7 @@ export interface ContentCourse {
     title: string;
     image: string;
     type: string; // Using string to be more flexible, but traditionally "Course" | "Textbook" | "Skills"
-    rating: number;
+    creator: string;
     learners: string;
     lessons: number;
 }
@@ -63,15 +63,11 @@ export const CourseCard = ({ course }: CourseCardProps) => {
                     </h3>
 
                     {/* Stats - Pushed to bottom */}
-                    <div
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground pt-[0.125rem] mt-auto"
-                    >
-                        <span
-                            className="font-medium text-foreground"
-                        >
-                            {course.rating.toFixed(1)}
-                        </span>
-                        <FiStar className="w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick" />
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-[0.125rem] mt-auto">
+                        <div className="flex items-center gap-1">
+                            <FiUser className="w-3 h-3 text-sunbird-brick -translate-y-0.5" />
+                            <span className="text-xs text-muted-foreground">{course.creator}</span>
+                        </div>
                         <span className="mx-0.5">•</span>
                         <span>{course.learners} {t("contentStats.learners")}</span>
                         <span className="mx-0.5">•</span>

@@ -1,16 +1,19 @@
 import crypto from 'crypto';
-import googleOauth, {
+import * as oidcClient from 'openid-client';
+import {
     validateOAuthSession,
     validateOAuthCallback,
     markSessionAsUsed,
     handleUserAuthentication,
-    validateRedirectUrl
+    validateRedirectUrl,
+    buildKeycloakGoogleAuthUrl,
+    exchangeKeycloakCode,
 } from '../services/googleAuthService.js';
 import { Request, Response } from 'express';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
 
-export const initiateGoogleAuth = (req: Request, res: Response) => {
+export const initiateGoogleAuth = async (req: Request, res: Response) => {
     try {
         const fields = ['client_id', 'redirect_uri', 'error_callback'];
         if (!fields.every(field => _.has(req.query, field))) {
@@ -27,58 +30,50 @@ export const initiateGoogleAuth = (req: Request, res: Response) => {
             return res.status(400).send('INVALID_REDIRECT_URI_OR_ERROR_CALLBACK');
         }
 
-        const nonce = crypto.randomBytes(32).toString('hex');
-        const state = crypto.randomBytes(32).toString('hex');
+        const state = crypto.randomUUID();
+        const codeVerifier = oidcClient.randomPKCECodeVerifier();
+        const codeChallenge = await oidcClient.calculatePKCECodeChallenge(codeVerifier);
 
         req.session.googleOAuth = {
-            nonce,
+            codeVerifier,
             state,
             client_id: req.query.client_id as string,
             redirect_uri: validatedRedirectUri,
             error_callback: validatedErrorCallback,
             timestamp: Date.now(),
-            sessionUsed: false
+            sessionUsed: false,
         };
 
-        const authUrl = googleOauth.generateAuthUrl({
-            nonce,
-            state,
-            req
-        });
-
+        const authUrl = await buildKeycloakGoogleAuthUrl(req, state, codeChallenge);
         return res.redirect(authUrl);
     } catch (error) {
-        logger.error('Error initializing Google OAuth:', error);
+        logger.error('Error initializing Google OAuth via Keycloak:', error);
         const errorCallback = validateRedirectUrl(req.query.error_callback as string);
         return res.redirect(`${errorCallback}?error=GOOGLE_AUTH_INIT_FAILED`);
     }
 };
 
 export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
-    let redirectUrl: string;
-
     try {
-        const { state, nonce, client_id } = validateOAuthSession(req);
+        const { state, codeVerifier, client_id } = validateOAuthSession(req);
 
-        const code = validateOAuthCallback(req, state);
+        validateOAuthCallback(req, state);
 
         markSessionAsUsed(req);
 
-        const googleUser = await googleOauth.verifyAndGetProfile({
-            code,
-            nonce,
-            req
-        });
+        // Exchange the Keycloak auth code for a token — Keycloak acted as Google IDP broker
+        const googleUser = await exchangeKeycloakCode(req, codeVerifier, state);
 
-        const userExists = await handleUserAuthentication(googleUser, client_id, req);
+        await handleUserAuthentication(googleUser, client_id, req);
 
-        redirectUrl = userExists ? '/home' : '/onboarding';
-        return res.redirect(redirectUrl);
+        // Redirect to portal login. Keycloak has an active SSO session from the Google IDP
+        // flow above, so /portal/login (which sends prompt=none by default) will complete
+        // silently and issue a portal-scoped access token without showing the login form.
+        return res.redirect('/portal/login');
     } catch (error) {
         logger.error('Error in Google OAuth callback:', error);
         const safeErrorCallback = validateRedirectUrl(req.session?.googleOAuth?.error_callback);
-        redirectUrl = `${safeErrorCallback}?error=GOOGLE_SIGN_IN_FAILED`;
-        return res.redirect(redirectUrl);
+        return res.redirect(`${safeErrorCallback}?error=GOOGLE_SIGN_IN_FAILED`);
     } finally {
         delete req.session.googleOAuth;
     }

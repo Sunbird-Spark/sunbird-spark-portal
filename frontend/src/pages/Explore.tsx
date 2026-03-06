@@ -68,6 +68,14 @@ const Explore = () => {
     setSearchQuery(q);
   }, [searchParams]);
 
+  // Keep a ref to setSearchParams so the effect below doesn't re-fire when
+  // React Router recreates setSearchParams after every navigation (it closes
+  // over the latest `searchParams` in its useCallback deps).
+  const setSearchParamsRef = useRef(setSearchParams);
+  useEffect(() => {
+    setSearchParamsRef.current = setSearchParams;
+  }, [setSearchParams]);
+
   const hasInitiallyMounted = useRef(false);
   useEffect(() => {
     if (!hasInitiallyMounted.current) {
@@ -87,8 +95,8 @@ const Explore = () => {
     Object.entries(filters).forEach(([code, values]) => {
       values.forEach((value) => next.append(code, value));
     });
-    setSearchParams(next, { replace: true });
-  }, [filters, debouncedSearchQuery, setSearchParams]);
+    setSearchParamsRef.current(next, { replace: true });
+  }, [filters, debouncedSearchQuery]);
 
   return (
     <main className="flex-1 bg-white relative md:h-[calc(100vh-4.5rem)] overflow-hidden">

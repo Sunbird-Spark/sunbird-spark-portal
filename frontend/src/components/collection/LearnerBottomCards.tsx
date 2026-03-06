@@ -22,6 +22,8 @@ function toErrorMessage(value: unknown): string | undefined {
 
 interface LearnerBottomCardsProps {
   hasBatchInRoute: boolean;
+  /** When true, CertificateCard is shown (certificate is per batch; only known after enrollment). */
+  showCertificateCard: boolean;
   batches: unknown;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
@@ -41,6 +43,7 @@ interface LearnerBottomCardsProps {
 
 export function LearnerBottomCards({
   hasBatchInRoute,
+  showCertificateCard,
   batches,
   selectedBatchId,
   setSelectedBatchId,
@@ -97,11 +100,13 @@ export function LearnerBottomCards({
           joinError={toErrorMessage(joinError)}
         />
       )}
-      <CertificateCard
-        hasCertificate={hasCertificate}
-        previewUrl={firstCertPreviewUrl}
-        onPreviewClick={onCertificatePreviewClick}
-      />
+      {showCertificateCard && (
+        <CertificateCard
+          hasCertificate={hasCertificate}
+          previewUrl={firstCertPreviewUrl}
+          onPreviewClick={onCertificatePreviewClick}
+        />
+      )}
       {showProfileDataSharingCard && (
         <ProfileDataSharingCard
           status={consentStatus}

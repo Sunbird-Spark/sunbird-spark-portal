@@ -604,7 +604,7 @@
   }
 
   .related-resource-card-star {
-    @apply w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick;
+    @apply w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick -translate-y-[0.0625rem];
   }
 
   .related-resource-card-separator {

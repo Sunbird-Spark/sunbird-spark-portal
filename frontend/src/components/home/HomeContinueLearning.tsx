@@ -65,7 +65,7 @@ const HomeContinueLearning = () => {
 
     const continueTo = `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
 
-    const thumbnail = lastAccessedCourse.courseLogoUrl || lastAccessedCourse.content?.appIcon;
+    const thumbnail = lastAccessedCourse.content?.posterImage || lastAccessedCourse.content?.appIcon || lastAccessedCourse.courseLogoUrl;
     const title = lastAccessedCourse.courseName || lastAccessedCourse.content?.name || "Untitled Course";
 
     return (
