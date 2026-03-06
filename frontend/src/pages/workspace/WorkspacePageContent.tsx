@@ -5,6 +5,7 @@ import WorkspaceContentCard from "@/components/workspace/WorkspaceContentCard";
 import WorkspaceContentList from "@/components/workspace/WorkspaceContentList";
 import EmptyState from "@/components/workspace/EmptyState";
 import { Button } from "@/components/common/Button";
+import PageLoader from "@/components/common/PageLoader";
 import { type WorkspaceItem, type UserRole } from "@/types/workspaceTypes";
 
 export interface LockedContentMap {
@@ -84,12 +85,7 @@ export default function WorkspacePageContent({
 
   // Loading state (initial load for a tab)
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <FiLoader className="w-6 h-6 animate-spin text-sunbird-brick mr-3" />
-        <span className="text-sm text-muted-foreground font-rubik">{t('loadingContent')}</span>
-      </div>
-    );
+    return <PageLoader message={t('loadingContent')} fullPage={false} />;
   }
 
   const pageTitleMap: Record<string, { title: string; desc: string }> = {

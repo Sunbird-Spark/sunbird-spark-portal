@@ -15,7 +15,7 @@ const PageLoader = ({ message, error = null, onRetry, fullPage = true }: PageLoa
 
   const wrapperClass = fullPage
     ? "fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-background to-home-ivory/50 backdrop-blur-sm"
-    : "flex flex-1 h-full w-full items-center justify-center bg-white rounded-[1.25rem] border border-border shadow-sm p-8";
+    : "flex items-center justify-center w-full bg-white rounded-[1.25rem] border border-border shadow-sm p-8";
   return (
     <div className={wrapperClass}>
       <div className="flex flex-col items-center gap-6">

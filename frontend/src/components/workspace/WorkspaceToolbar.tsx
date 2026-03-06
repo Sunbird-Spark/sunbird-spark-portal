@@ -212,26 +212,6 @@ const WorkspaceToolbar = ({
       {/* Stats Row */}
       {userRole === 'creator' && showContentFilters && (
         <div className="flex items-center gap-6 px-2">
-          {activeView === 'all' && (<>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-sunbird-moss" />
-                <span className="text-sm font-rubik text-muted-foreground">
-                  <span className="font-semibold text-foreground">{counts.published}</span> {t('workspace.stats.published')}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-sunbird-ginger" />
-                <span className="text-sm font-rubik text-muted-foreground">
-                  <span className="font-semibold text-foreground">{counts.review}</span> {t('workspace.stats.inReview')}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-gray-400" />
-                <span className="text-sm font-rubik text-muted-foreground">
-                  <span className="font-semibold text-foreground">{counts.drafts}</span> {t('workspace.stats.drafts')}
-                </span>
-              </div>
-          </>)}
           {/* Section titles for secondary views */}
           {activeView === 'uploads' && (
             <span className="text-sm font-semibold font-rubik text-foreground">{t('workspace.stats.allUploads')}</span>

@@ -1,7 +1,7 @@
-import { FiStar } from "react-icons/fi";
-import { Badge } from "@/components/common/Badge";
+import { FiUser } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface ContentCardProps {
   item: ContentSearchItem;
@@ -9,8 +9,12 @@ interface ContentCardProps {
 }
 
 const CollectionCard = ({ item, linkState }: ContentCardProps) => {
+  const { t } = useAppI18n();
+  const lessons = item.leafNodesCount || 0;
+  const creator = item.creator ?? item.createdBy ?? 'Unknown';
   const location = useLocation();
   const state = linkState ?? { from: `${location.pathname}${location.search}${location.hash}` };
+
   return (
     <Link to={`/collection/${item.identifier}`} state={state} className="related-resource-card-link">
       <div className="group related-resource-card-container">
@@ -42,6 +46,16 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
           <h3 className="related-resource-card-title">
             {item.name || 'Untitled'}
           </h3>
+
+          {/* Stats: Creator and Lessons */}
+          <div className="related-resource-card-stats">
+            <div className="flex items-center gap-1">
+              <FiUser className="w-3 h-3 text-sunbird-brick -translate-y-0.5" />
+              <span className="text-xs text-muted-foreground">{creator}</span>
+            </div>
+            <span className="related-resource-card-separator">•</span>
+            <span>{lessons} {t("contentStats.lessons", { defaultValue: "Lessons" })}</span>
+          </div>
         </div>
       </div>
     </Link>
