@@ -73,6 +73,8 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
               title={t('batchRow.editBatch')}
               aria-label={t('batchRow.editBatch')}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors"
+              data-edataid="batch-row-edit"
+              data-pageid="course-consumption"
             >
               <FiEdit2 className="w-3.5 h-3.5" />
             </button>
@@ -117,6 +119,8 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
             type="button"
             onClick={() => onCertificateClick(batch)}
             className="text-xs text-sunbird-brick font-medium font-['Rubik'] hover:underline"
+            data-edataid="batch-row-certificate"
+            data-pageid="course-consumption"
           >
             {hasCertTemplate ? t('certificate.editCertificate') : t('certificate.addCertificate')}
           </button>

@@ -1,6 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import BatchesTab from './BatchesTab';
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useLocation: vi.fn(() => ({ pathname: '/' })),
+  };
+});
 import { useBatchListForCreator } from '@/hooks/useBatch';
 
 vi.mock('@/hooks/useBatch', () => ({

@@ -115,6 +115,8 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                                 }
                             `}
                             title={collapsed ? item.label : undefined}
+                            data-edataid={`nav-${item.id}`}
+                            data-pageid="sidebar"
                         >
                             <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-sunbird-brick" : "text-sunbird-ginger"}`} />
                             {!collapsed && <span className="text-[1.125rem] whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>}

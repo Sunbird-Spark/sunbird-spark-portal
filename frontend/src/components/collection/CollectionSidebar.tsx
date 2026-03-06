@@ -90,16 +90,25 @@ function ExpandedUnitContent({
         }
 
         return (
-          <ContentRow
+          <div
             key={node.identifier}
-            node={node}
-            href={getContentHref(node, collectionId, batchId)}
-            contentBlocked={contentBlocked}
-            isActive={activeContentId === node.identifier}
-            contentStatusMap={contentStatusMap}
-            contentAttemptInfoMap={contentAttemptInfoMap}
-            t={t}
-          />
+            data-edataid="collection-content-click"
+            data-pageid={batchId ? 'course-consumption' : 'collection-detail'}
+            data-objid={node.identifier}
+            data-objtype={node.contentType || 'Content'}
+            data-objver={(node as any).pkgVersion || '1.0'}
+            data-cdata={JSON.stringify([{ id: collectionId, type: 'Collection' }])}
+          >
+            <ContentRow
+              node={node}
+              href={getContentHref(node, collectionId, batchId)}
+              contentBlocked={contentBlocked}
+              isActive={activeContentId === node.identifier}
+              contentStatusMap={contentStatusMap}
+              contentAttemptInfoMap={contentAttemptInfoMap}
+              t={t}
+            />
+          </div>
         );
       })}
     </div>

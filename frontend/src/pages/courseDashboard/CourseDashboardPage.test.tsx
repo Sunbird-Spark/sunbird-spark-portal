@@ -10,8 +10,8 @@ import { useCurrentUserId } from '@/hooks/useUser';
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: vi.fn(() => ({ pathname: '/collection/col_123/dashboard/batches' })),
   useParams: vi.fn(() => ({ collectionId: 'col_123', tab: 'batches' })),
-  useLocation: vi.fn(() => ({ state: null, pathname: '/collection/col_123/dashboard/batches', search: '', hash: '', key: 'default' })),
   Link: ({ children, to }: { children: React.ReactNode, to: string }) => <a href={to}>{children}</a>,
 }));
 
@@ -68,7 +68,7 @@ describe('CourseDashboardPage', () => {
   it('navigates back to course page on back button click', () => {
     render(<CourseDashboardPage />);
     fireEvent.click(screen.getByTestId('back-to-course-btn'));
-    expect(mockNavigate).toHaveBeenCalledWith("/collection/col_123", { state: { from: '/explore' } });
+    expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 
   it('navigates to specific tab when clicked', () => {

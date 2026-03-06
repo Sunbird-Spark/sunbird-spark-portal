@@ -13,6 +13,7 @@ import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
+import useInteract from "@/hooks/useInteract";
 
 /* ─── Types ─── */
 
@@ -47,6 +48,7 @@ const inputClass =
 
 const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: CreateBatchModalProps) => {
   const isEditMode = !!initialBatch;
+  const { interact } = useInteract();
 
   const [form, setForm] = useState<BatchFormState>(() => makeInitialForm(initialBatch));
   const [mentorQuery, setMentorQuery] = useState("");
@@ -89,6 +91,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
+    interact({ id: isEditMode ? 'batch-modal-save' : 'batch-modal-create', type: 'SUBMIT', pageid: 'batch-create' });
     try {
       if (isEditMode && initialBatch) {
         await updateBatch.mutateAsync({
@@ -158,6 +161,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
               <button
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors"
                 aria-label="Close"
+                data-edataid="batch-modal-close"
+                data-pageid="batch-create"
               >
                 <FiX className="w-5 h-5" />
               </button>
@@ -229,6 +234,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 onClick={handleClose}
                 disabled={isPending}
                 className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-['Rubik']"
+                data-edataid="batch-modal-cancel"
+                data-pageid="batch-create"
               >
                 Cancel
               </button>

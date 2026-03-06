@@ -37,6 +37,8 @@ export function CertificateTemplatesPanel({
             disabled={templatesRefreshing}
             title="Refresh templates"
             className="p-1.5 rounded-lg border border-border bg-white text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors shadow-sm"
+            data-edataid="cert-templates-refresh"
+            data-pageid="course-consumption"
           >
             <FiRefreshCw className={cn("w-3.5 h-3.5", templatesRefreshing && "animate-spin")} />
           </button>
@@ -45,6 +47,8 @@ export function CertificateTemplatesPanel({
             onClick={() => { setView("createTemplate"); setErrorMsg(""); }}
             title="Create new template"
             className="p-1.5 rounded-lg border border-border bg-white text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors shadow-sm"
+            data-edataid="cert-templates-create"
+            data-pageid="course-consumption"
           >
             <FiPlus className="w-4 h-4" />
           </button>

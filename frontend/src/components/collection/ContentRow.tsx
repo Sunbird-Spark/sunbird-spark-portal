@@ -150,6 +150,10 @@ export default function ContentRow({
         type="button"
         className={`${baseClass} ${interactiveClass} text-left bg-transparent border-none`}
         onClick={handleClick}
+        data-edataid="content-row-click"
+        data-pageid="collection-detail"
+        data-objectid={node.identifier}
+        data-objecttype="Content"
       >
         {content}
       </button>
@@ -157,7 +161,14 @@ export default function ContentRow({
   }
 
   return (
-    <Link to={href} className={`${baseClass} ${interactiveClass}`}>
+    <Link
+      to={href}
+      className={`${baseClass} ${interactiveClass}`}
+      data-edataid="content-row-click"
+      data-pageid="collection-detail"
+      data-objectid={node.identifier}
+      data-objecttype="Content"
+    >
       {content}
     </Link>
   );
