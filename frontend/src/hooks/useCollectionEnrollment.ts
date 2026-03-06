@@ -114,9 +114,7 @@ export function useCollectionEnrollment(
     if (!startDateStr) {
       return false;
     }
-    const todayStr = dayjs().format('YYYY-MM-DD');
-    const batchStartStr = dayjs(startDateStr).format('YYYY-MM-DD');
-    return batchStartStr > todayStr;
+    return dayjs(startDateStr).isAfter(dayjs(), 'day');
   }, [batchReadResponse?.data?.response?.startDate]);
 
   const batchStartDateFromRead = batchReadResponse?.data?.response?.startDate;
