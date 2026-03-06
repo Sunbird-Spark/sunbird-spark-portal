@@ -13,7 +13,7 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const lessons = item.leafNodesCount || 0;
   const creator = item.creator ?? item.createdBy ?? 'Unknown';
   const location = useLocation();
-  const state = linkState ?? { from: `${location.pathname}${location.search}${location.hash}` };
+  const state = linkState ?? { from: location.pathname };
 
   return (
     <Link to={`/collection/${item.identifier}`} state={state} className="related-resource-card-link">

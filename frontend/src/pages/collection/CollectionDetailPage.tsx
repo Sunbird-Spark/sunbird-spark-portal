@@ -30,11 +30,11 @@ const CollectionDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/home');
+  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
   const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
   if (capturedCollectionIdRef.current !== collectionId) {
     capturedCollectionIdRef.current = collectionId;
-    backToRef.current = (location.state as { from?: string } | null)?.from ?? '/home';
+    backToRef.current = (location.state as { from?: string } | null)?.from ?? '/explore';
   }
   const backTo = backToRef.current;
   const linkState = { from: backTo };

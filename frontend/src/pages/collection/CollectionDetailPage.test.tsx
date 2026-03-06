@@ -415,7 +415,7 @@ describe('CollectionDetailPage', () => {
     it('navigates back when Go Back button is clicked', () => {
       renderWithProviders(<CollectionDetailPage />);
       fireEvent.click(screen.getByRole('button', { name: /button\.goBack/i }));
-      expect(mockNavigate).toHaveBeenCalledWith('/home');
+      expect(mockNavigate).toHaveBeenCalledWith('/explore');
     });
   });
 

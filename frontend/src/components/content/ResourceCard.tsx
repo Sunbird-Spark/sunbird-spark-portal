@@ -14,7 +14,7 @@ const ResourceCard = ({ item, heightClass, linkState }: ResourceCardProps) => {
   const location = useLocation();
   // If no explicit linkState is provided, record the current page as the origin
   const state = linkState ?? {
-    from: `${location.pathname}${location.search}${location.hash}`,
+    from: location.pathname,
   };
 
   const getViewLabel = (mimeType?: string) => {

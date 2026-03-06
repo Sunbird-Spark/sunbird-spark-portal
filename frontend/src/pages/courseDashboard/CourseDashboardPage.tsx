@@ -22,7 +22,7 @@ const CourseDashboardPage: React.FC = () => {
   const location = useLocation();
 
   // Capture the back-destination once on mount; tab switching clears location.state
-  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/home');
+  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
   const { data: currentUserId } = useCurrentUserId();
