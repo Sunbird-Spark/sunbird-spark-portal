@@ -51,8 +51,16 @@ export class ContentEditorService {
         console.warn('Failed to fetch channel framework:', error);
       }
     }
-    const { contentFields, fwCategoryDetails } =
-      await fetchFwCategoryMeta(framework || undefined);
+    
+    let contentFields: any = [];
+    let fwCategoryDetails: any = {};
+    try {
+      const meta = await fetchFwCategoryMeta(framework);
+      contentFields = meta.contentFields;
+      fwCategoryDetails = meta.fwCategoryDetails;
+    } catch (error) {
+      console.warn('Failed to fetch framework category metadata:', error);
+    }
 
     const pdata = await appCoreService.getPData();
 
