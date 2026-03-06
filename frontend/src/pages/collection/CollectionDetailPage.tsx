@@ -14,6 +14,7 @@ import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
+import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import "./collection.css";
 
@@ -197,63 +198,59 @@ const CollectionDetailPage = () => {
   const batchStartDateForOverview =
     courseProgressProps?.batchStartDate ?? batchStartDateFromRead ?? undefined;
 
+  const contentArea = useMemo(
+    () =>
+      buildCollectionDetailContentArea({
+        displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
+        contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading,
+        playerError: playerError ?? null, handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded,
+        courseProgressProps, contentStatusMap, contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId,
+        handleJoinCourse, batchListLoading, joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl,
+        setCertificatePreviewUrl, setCertificatePreviewOpen, expandedModules, toggleModule, collectionId, batchIdParam,
+        isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile: userProfile ?? undefined,
+        currentUserId: currentUserId ?? undefined,
+      }),
+    [
+      displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
+      contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading, playerError,
+      handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, courseProgressProps, contentStatusMap,
+      contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId, handleJoinCourse, batchListLoading,
+      joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl, expandedModules, toggleModule,
+      collectionId, batchIdParam, isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile, currentUserId,
+    ]
+  );
+
   return (
     <CollectionDetailLayout
-      onGoBack={() => navigate(-1)}
-      t={t}
-      showLoading={showLoading}
-      isError={isError}
-      error={error ?? null}
-      onRetry={refetch}
-      collectionDataFromApi={collectionDataFromApi ?? null}
-      hierarchySuccess={hierarchySuccess}
-      collectionData={collectionData}
-      displayCollectionData={displayCollectionData}
-      isTrackable={isTrackable}
-      isAuthenticated={isAuthenticated}
-      hasBatchInRoute={hasBatchInRoute}
-      isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
-      contentBlocked={contentBlocked}
-      upcomingBatchBlocked={upcomingBatchBlocked}
-      batchStartDateForOverview={batchStartDateForOverview}
-      collectionId={collectionId}
-      batchIdParam={batchIdParam}
-      contentId={contentId}
-      maxAttemptsExceeded={maxAttemptsExceeded}
-      playerMetadata={playerMetadata}
-      playerIsLoading={playerIsLoading}
-      playerError={playerError ?? null}
-      handlePlayerEvent={handlePlayerEvent}
-      handleTelemetryEvent={handleTelemetryEvent}
-      courseProgressProps={courseProgressProps}
-      contentStatusMap={contentStatusMap}
-      contentAttemptInfoMap={contentAttemptInfoMap}
-      batches={batches}
-      batchListLoading={batchListLoading}
-      batchListError={batchListError}
-      joinLoading={joinLoading}
-      joinError={joinError}
-      handleJoinCourse={handleJoinCourse}
-      hasCertificate={hasCertificate}
-      firstCertPreviewUrl={firstCertPreviewUrl}
-      expandedModules={expandedModules}
-      toggleModule={toggleModule}
-      selectedBatchId={selectedBatchId}
-      setSelectedBatchId={setSelectedBatchId}
-      isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
-      contentCreatorPrivilege={contentCreatorPrivilege}
-      userProfile={userProfile ?? undefined}
-      userId={currentUserId ?? undefined}
-      certificatePreviewOpen={certificatePreviewOpen}
-      certificatePreviewUrl={certificatePreviewUrl}
-      certificatePreviewDetails={certificatePreviewDetails}
-      setCertificatePreviewUrl={setCertificatePreviewUrl}
-      setCertificatePreviewOpen={setCertificatePreviewOpen}
-      searchError={searchError}
-      searchErrorObj={searchErrorObj ?? null}
-      searchFetching={searchFetching}
-      relatedContentItems={relatedContentItems}
-      searchRefetch={searchRefetch}
+      navigation={{ onGoBack: () => navigate(-1), t }}
+      loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
+      collection={{
+        collectionDataFromApi: collectionDataFromApi ?? null,
+        hierarchySuccess,
+        collectionData,
+        displayCollectionData,
+      }}
+      contentArea={contentArea}
+      certificateModal={{
+        certificatePreviewOpen,
+        certificatePreviewUrl,
+        certificatePreviewDetails,
+        setCertificatePreviewUrl,
+        setCertificatePreviewOpen,
+      }}
+      relatedContent={{
+        searchError,
+        searchErrorObj: searchErrorObj ?? null,
+        searchFetching,
+        relatedContentItems,
+        searchRefetch,
+      }}
+      courseCompletion={{
+        courseProgressProps,
+        isEnrolledInCurrentBatch,
+        collectionId,
+        hasCertificate,
+      }}
     />
   );
 };

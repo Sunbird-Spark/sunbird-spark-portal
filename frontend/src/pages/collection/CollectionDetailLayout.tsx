@@ -5,149 +5,109 @@ import PageLoader from "@/components/common/PageLoader";
 import FAQSection from "@/components/landing/FAQSection";
 import RelatedContentSection from "@/components/collection/RelatedContentSection";
 import CollectionContentArea from "@/components/collection/CollectionContentArea";
+import type {
+  CollectionContentAreaAccessProps,
+  CollectionContentAreaPlayerProps,
+  CollectionContentAreaEnrollmentProps,
+  CollectionContentAreaSidebarProps,
+  CollectionContentAreaCreatorProps,
+} from "@/components/collection/CollectionContentArea";
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
-import type { CollectionData, BatchListItem } from "@/types/collectionTypes";
-import type { PlayerEvent, TelemetryEvent } from "@/hooks/useContentPlayer";
+import type { CollectionData } from "@/types/collectionTypes";
 
-interface CollectionDetailLayoutProps {
-  // Navigation / i18n
+/** Navigation and i18n for the layout. */
+export interface CollectionDetailLayoutNavigationProps {
   onGoBack: () => void;
   t: (key: string) => string;
+}
 
-  // Top-level state
+/** Loading and error state for the layout. */
+export interface CollectionDetailLayoutLoadingProps {
   showLoading: boolean;
   isError: boolean;
   error: Error | null;
   onRetry: () => void;
+}
 
-  // Collection data
+/** Collection data and hierarchy state. */
+export interface CollectionDetailLayoutCollectionProps {
   collectionDataFromApi: CollectionData | null;
   hierarchySuccess: boolean;
   collectionData: CollectionData | null;
   displayCollectionData: CollectionData | null;
+}
 
-  // Enrollment / access
-  isTrackable: boolean;
-  isAuthenticated: boolean;
-  hasBatchInRoute: boolean;
-  isEnrolledInCurrentBatch: boolean;
-  contentBlocked: boolean;
-  upcomingBatchBlocked: boolean;
-  /** Batch start date for "batch not started" message (from batch read or enrollment). */
-  batchStartDateForOverview?: string;
-
-  // Routing identifiers
-  collectionId: string | undefined;
-  batchIdParam: string | undefined;
+/** Full props passed through to CollectionContentArea. */
+export interface CollectionDetailLayoutContentAreaProps {
+  collectionData: CollectionData;
   contentId: string | undefined;
+  access: CollectionContentAreaAccessProps;
+  player: CollectionContentAreaPlayerProps;
+  enrollment: CollectionContentAreaEnrollmentProps;
+  sidebar: CollectionContentAreaSidebarProps;
+  creator?: CollectionContentAreaCreatorProps;
+}
 
-  // Player / self-assess
-  maxAttemptsExceeded: boolean;
-  playerMetadata: unknown;
-  playerIsLoading: boolean;
-  playerError: Error | null;
-  handlePlayerEvent: (event: PlayerEvent) => void;
-  handleTelemetryEvent: (event: TelemetryEvent) => void;
-
-  // Enrollment / progress props
-  courseProgressProps: CourseProgressCardProps | null | undefined;
-  contentStatusMap: Record<string, number> | undefined;
-  contentAttemptInfoMap: Record<string, { attemptCount: number }> | undefined;
-  batches: BatchListItem[] | undefined;
-  batchListLoading: boolean;
-  batchListError: string | undefined;
-  joinLoading: boolean;
-  joinError: string;
-  handleJoinCourse: (batchId: string) => void;
-  hasCertificate: boolean;
-  firstCertPreviewUrl: string | undefined;
-
-  // UI state for sidebar
-  expandedModules: string[];
-  toggleModule: (moduleId: string) => void;
-  selectedBatchId: string;
-  setSelectedBatchId: (id: string) => void;
-
-  // Creator flags / profile
-  isCreatorViewingOwnCollection: boolean;
-  contentCreatorPrivilege: boolean;
-  userProfile: Record<string, unknown> | undefined;
-  userId: string | undefined;
-
-  // Certificate preview modal
+/** Certificate preview modal state and setters. */
+export interface CollectionDetailLayoutCertificateModalProps {
   certificatePreviewOpen: boolean;
   certificatePreviewUrl: string;
   certificatePreviewDetails: CertificatePreviewDetails;
   setCertificatePreviewUrl: (url: string) => void;
   setCertificatePreviewOpen: (open: boolean) => void;
+}
 
-  // Related content
+/** Related content section state. */
+export interface CollectionDetailLayoutRelatedContentProps {
   searchError: boolean;
   searchErrorObj: Error | null;
   searchFetching: boolean;
-  relatedContentItems: Array<{ identifier?: string; name?: string }> ;
+  relatedContentItems: Array<{ identifier?: string; name?: string }>;
   searchRefetch: () => void;
 }
 
+/** Course completion dialog props. */
+export interface CollectionDetailLayoutCourseCompletionProps {
+  courseProgressProps: CourseProgressCardProps | null | undefined;
+  isEnrolledInCurrentBatch: boolean;
+  collectionId: string | undefined;
+  hasCertificate: boolean;
+}
+
+export interface CollectionDetailLayoutProps {
+  navigation: CollectionDetailLayoutNavigationProps;
+  loading: CollectionDetailLayoutLoadingProps;
+  collection: CollectionDetailLayoutCollectionProps;
+  contentArea: CollectionDetailLayoutContentAreaProps | null | undefined;
+  certificateModal: CollectionDetailLayoutCertificateModalProps;
+  relatedContent: CollectionDetailLayoutRelatedContentProps;
+  courseCompletion: CollectionDetailLayoutCourseCompletionProps;
+}
+
 const CollectionDetailLayout = ({
-  onGoBack,
-  t,
-  showLoading,
-  isError,
-  error,
-  onRetry,
-  collectionDataFromApi,
-  hierarchySuccess,
-  collectionData,
-  displayCollectionData,
-  isTrackable,
-  isAuthenticated,
-  hasBatchInRoute,
-  isEnrolledInCurrentBatch,
-  contentBlocked,
-  upcomingBatchBlocked,
-  batchStartDateForOverview,
-  collectionId,
-  batchIdParam,
-  contentId,
-  maxAttemptsExceeded,
-  playerMetadata,
-  playerIsLoading,
-  playerError,
-  handlePlayerEvent,
-  handleTelemetryEvent,
-  courseProgressProps,
-  contentStatusMap,
-  contentAttemptInfoMap,
-  batches,
-  batchListLoading,
-  batchListError,
-  joinLoading,
-  joinError,
-  handleJoinCourse,
-  hasCertificate,
-  firstCertPreviewUrl,
-  expandedModules,
-  toggleModule,
-  selectedBatchId,
-  setSelectedBatchId,
-  isCreatorViewingOwnCollection,
-  contentCreatorPrivilege,
-  userProfile,
-  userId,
-  certificatePreviewOpen,
-  certificatePreviewUrl,
-  certificatePreviewDetails,
-  setCertificatePreviewUrl,
-  setCertificatePreviewOpen,
-  searchError,
-  searchErrorObj,
-  searchFetching,
-  relatedContentItems,
-  searchRefetch,
+  navigation,
+  loading,
+  collection,
+  contentArea,
+  certificateModal,
+  relatedContent,
+  courseCompletion,
 }: CollectionDetailLayoutProps) => {
+  const { onGoBack, t } = navigation;
+  const { showLoading, isError, error, onRetry } = loading;
+  const { collectionDataFromApi, hierarchySuccess, collectionData, displayCollectionData } = collection;
+  const {
+    certificatePreviewOpen,
+    certificatePreviewUrl,
+    certificatePreviewDetails,
+    setCertificatePreviewUrl: _setCertificatePreviewUrl,
+    setCertificatePreviewOpen,
+  } = certificateModal;
+  const { searchError, searchErrorObj, searchFetching, relatedContentItems, searchRefetch } = relatedContent;
+  const { courseProgressProps, isEnrolledInCurrentBatch, collectionId, hasCertificate } = courseCompletion;
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
@@ -177,49 +137,10 @@ const CollectionDetailLayout = ({
             fullPage={false}
           />
         )}
-        {!showLoading && hierarchySuccess && collectionData && displayCollectionData && (
+        {!showLoading && hierarchySuccess && collectionData && displayCollectionData && contentArea && (
           <>
             {/* Main Content Area */}
-            <CollectionContentArea
-              collectionData={displayCollectionData}
-              contentId={contentId}
-              isTrackable={isTrackable}
-              contentBlocked={contentBlocked}
-              upcomingBatchBlocked={upcomingBatchBlocked}
-              batchStartDateForOverview={batchStartDateForOverview}
-              isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}
-              playerMetadata={playerMetadata}
-              playerIsLoading={playerIsLoading}
-              playerError={playerError}
-              handlePlayerEvent={handlePlayerEvent}
-              handleTelemetryEvent={handleTelemetryEvent}
-              showMaxAttemptsExceeded={maxAttemptsExceeded}
-              isAuthenticated={isAuthenticated}
-              collectionId={collectionId}
-              hasBatchInRoute={hasBatchInRoute}
-              courseProgressProps={courseProgressProps}
-              batchIdParam={batchIdParam}
-              expandedModules={expandedModules}
-              toggleModule={toggleModule}
-              contentStatusMap={contentStatusMap}
-              contentAttemptInfoMap={contentAttemptInfoMap}
-              batches={batches}
-              selectedBatchId={selectedBatchId}
-              setSelectedBatchId={setSelectedBatchId}
-              handleJoinCourse={handleJoinCourse}
-              batchListLoading={batchListLoading}
-              joinLoading={joinLoading}
-              batchListError={batchListError}
-              joinError={joinError}
-              hasCertificate={hasCertificate}
-              firstCertPreviewUrl={firstCertPreviewUrl}
-              setCertificatePreviewUrl={setCertificatePreviewUrl}
-              setCertificatePreviewOpen={setCertificatePreviewOpen}
-              isCreatorViewingOwnCollection={isCreatorViewingOwnCollection}
-              contentCreatorPrivilege={contentCreatorPrivilege}
-              userProfile={userProfile ?? undefined}
-              userId={userId ?? undefined}
-            />
+            <CollectionContentArea {...contentArea} />
 
             <RelatedContentSection
               searchError={searchError}
