@@ -1,190 +1,84 @@
-import { google } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
 import { envConfig } from '../config/env.js';
 import { Request } from 'express';
 import * as oidcClient from 'openid-client';
 import { getGoogleOIDCConfig, decodeJwtPayload } from '../auth/oidcProvider.js';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
-import { saveSession } from '../utils/sessionUtils.js';
 
-export const createSession = async (emailId: string, req: Request): Promise<{ access_token: string; expires_at: number }> => {
-    let tokens;
+/**
+ * Builds a Keycloak authorization URL that redirects the user through the Google
+ * Identity Provider. The `google-auth` confidential client is used so that Node.js
+ * can exchange the resulting auth code for a token containing email/name claims.
+ */
+export const buildKeycloakGoogleAuthUrl = async (
+    req: Request,
+    state: string,
+    codeChallenge: string
+): Promise<string> => {
+    const config = await getGoogleOIDCConfig();
+    const callbackUrl = `${envConfig.DOMAIN_URL}/google/auth/callback`;
 
-    try {
-        const config = await getGoogleOIDCConfig();
-        tokens = await oidcClient.clientCredentialsGrant(config);
-    } catch (error) {
-        logger.error({
-            msg: 'googleOauthHelper:createSession failed',
-            error
-        });
-        throw error;
-    }
+    const redirectUrl = oidcClient.buildAuthorizationUrl(config, {
+        redirect_uri: callbackUrl,
+        scope: 'openid',
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        state,
+        // Tell Keycloak to skip the login page and go directly to Google IDP
+        kc_idp_hint: 'google',
+    });
 
-    // Store tokens in session
-    req.session['oidc-tokens'] = {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        id_token: tokens.id_token,
-    };
-
-    // Decode access token claims
-    const tokenClaims = decodeJwtPayload(tokens.access_token);
-
-    // Attach to req.oidc for downstream use
-    req.oidc = {
-        isAuthenticated: true,
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-        idToken: tokens.id_token,
-        tokenClaims: tokenClaims || undefined,
-    };
-
-    try {
-        const originalGoogleOAuth = req.session?.googleOAuth;
-        await saveSession(req);
-        if (req.session && originalGoogleOAuth && !req.session.googleOAuth) {
-            req.session.googleOAuth = originalGoogleOAuth;
-        }
-
-        if (!tokens.access_token || !tokenClaims?.exp) {
-            throw new Error('INVALID_GRANT_TOKEN');
-        }
-
-        return {
-            access_token: tokens.access_token,
-            expires_at: tokenClaims.exp
-        };
-    } catch (error) {
-        logger.error({
-            msg: 'googleOauthHelper:createSession failed during authentication',
-            error
-        });
-        throw error;
-    }
+    return redirectUrl.href;
 };
 
-class GoogleOauth {
-    createClient(req: Request) {
-        try {
-            const host = req.get('host');
-            if (!_.isString(host) || _.isEmpty(host.trim())) {
-                throw new Error('HOST_HEADER_MISSING');
-            }
-            if (!_.isString(envConfig.DOMAIN_URL) || _.isEmpty(envConfig.DOMAIN_URL.trim())) {
-                logger.error('GOOGLE_OAUTH_DOMAIN_URL_MISSING');
-                throw new Error('GOOGLE_OAUTH_DOMAIN_URL_MISSING');
-            }
+/**
+ * Exchanges the Keycloak authorization code (from the Google IDP callback) for
+ * tokens using the `google-auth` confidential client. Extracts email and name
+ * from the access token claims (populated via Keycloak protocol mappers).
+ */
+export const exchangeKeycloakCode = async (
+    req: Request,
+    codeVerifier: string,
+    state: string
+): Promise<{ emailId?: string; name?: string }> => {
+    const config = await getGoogleOIDCConfig();
+    const callbackUrl = `${envConfig.DOMAIN_URL}/google/auth/callback`;
 
-            const domainHost = new URL(envConfig.DOMAIN_URL).host;
-            if (host !== domainHost) {
-                logger.error(`HOST_MISMATCH: Request host ${host} does not match domain URL host ${domainHost}`);
-                throw new Error('HOST_MISMATCH');
-            }
+    const currentUrl = new URL(
+        `${req.protocol}://${req.get('host')}${req.originalUrl}`
+    );
 
-            const redirect = `${envConfig.DOMAIN_URL}/google/auth/callback`;
+    const tokens = await oidcClient.authorizationCodeGrant(config, currentUrl, {
+        pkceCodeVerifier: codeVerifier,
+        expectedState: state,
+        idTokenExpected: false,
+    }, { redirect_uri: callbackUrl });
 
-            if (!_.isString(envConfig.GOOGLE_OAUTH_CLIENT_ID) || _.isEmpty(envConfig.GOOGLE_OAUTH_CLIENT_ID.trim()) ||
-                !_.isString(envConfig.GOOGLE_OAUTH_CLIENT_SECRET) || _.isEmpty(envConfig.GOOGLE_OAUTH_CLIENT_SECRET.trim())) {
-                logger.error('GOOGLE_OAUTH_CONFIG_MISSING');
-                throw new Error('GOOGLE_OAUTH_CONFIG_MISSING');
-            }
+    const claims = decodeJwtPayload(tokens.access_token);
 
-            return new google.auth.OAuth2(
-                envConfig.GOOGLE_OAUTH_CLIENT_ID,
-                envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
-                redirect
-            );
-        } catch (error) {
-            logger.error({
-                msg: 'GoogleOauth:createClient failed',
-                error
-            });
-            throw error;
-        }
-    }
+    const firstName = (claims?.given_name as string) || '';
+    const lastName = (claims?.family_name as string) || '';
+    const fullName = (claims?.name as string) || `${firstName} ${lastName}`.trim();
 
-    generateAuthUrl({ nonce, state, req }: { nonce: string; state: string; req: Request }) {
-        try {
-            const client = this.createClient(req);
-            return client.generateAuthUrl({
-                access_type: 'offline',
-                response_type: 'code',
-                scope: ['openid', 'email', 'profile'],
-                state,
-                nonce,
-                prompt: 'consent'
-            });
-        } catch (error) {
-            logger.error({
-                msg: 'GoogleOauth:generateAuthUrl failed',
-                error
-            });
-            throw error;
-        }
-    }
+    return {
+        emailId: claims?.email as string | undefined,
+        name: fullName || undefined,
+    };
+};
 
-    async verifyAndGetProfile({ code, nonce, req }: { code: string; nonce: string; req: Request }) {
-        try {
-            const client = this.createClient(req);
-
-            const { tokens } = await client.getToken(code);
-
-            if (!tokens?.id_token) {
-                throw new Error('FAILED_TO_FETCH_ID_TOKEN');
-            }
-
-            const verifier = new OAuth2Client(envConfig.GOOGLE_OAUTH_CLIENT_ID);
-            const ticket = await verifier.verifyIdToken({
-                idToken: tokens.id_token,
-                audience: envConfig.GOOGLE_OAUTH_CLIENT_ID
-            });
-
-            const payload = ticket.getPayload();
-
-            if (!payload) {
-                throw new Error('INVALID_ID_TOKEN');
-            }
-
-            if (!payload.email_verified) {
-                throw new Error('EMAIL_NOT_VERIFIED');
-            }
-
-            if (payload.nonce !== nonce) {
-                throw new Error('INVALID_NONCE');
-            }
-
-            return {
-                emailId: payload.email,
-                name: payload.name
-            };
-        } catch (error) {
-            logger.error({
-                msg: 'GoogleOauth:verifyAndGetProfile failed',
-                error
-            });
-            throw error;
-        }
-    }
-
-}
-
-export default new GoogleOauth();
-
-export const validateOAuthSession = (req: Request): { state: string; nonce: string; client_id: string } => {
+export const validateOAuthSession = (req: Request): { state: string; codeVerifier: string; client_id: string } => {
     if (!req.session.googleOAuth) {
         throw new Error('OAUTH_SESSION_MISSING');
     }
 
-    const { state, nonce, client_id, timestamp, sessionUsed } = req.session.googleOAuth;
+    const { state, codeVerifier, client_id, timestamp, sessionUsed } = req.session.googleOAuth;
 
     if (!_.isString(state) || _.isEmpty(state.trim())) {
         throw new Error('OAUTH_SESSION_INVALID_STATE');
     }
 
-    if (!_.isString(nonce) || _.isEmpty(nonce.trim())) {
-        throw new Error('OAUTH_SESSION_INVALID_NONCE');
+    if (!_.isString(codeVerifier) || _.isEmpty(codeVerifier.trim())) {
+        throw new Error('OAUTH_SESSION_INVALID_CODE_VERIFIER');
     }
 
     if (!_.isString(client_id) || _.isEmpty(client_id.trim())) {
@@ -206,7 +100,7 @@ export const validateOAuthSession = (req: Request): { state: string; nonce: stri
         throw new Error('OAUTH_SESSION_EXPIRED');
     }
 
-    return { state, nonce, client_id };
+    return { state, codeVerifier, client_id };
 };
 
 export const validateOAuthCallback = (req: Request, expectedState: string): string => {
@@ -215,7 +109,7 @@ export const validateOAuthCallback = (req: Request, expectedState: string): stri
     }
 
     if (req.query.error) {
-        logger.error('Google OAuth error:', req.query.error);
+        logger.error('Keycloak Google OAuth error:', req.query.error);
         throw new Error(`GOOGLE_OAUTH_ERROR: ${req.query.error}`);
     }
 
@@ -283,13 +177,6 @@ export const handleUserAuthentication = async (
             logger.error('Error creating user:', error);
             throw new Error('CREATE_USER_FAILED');
         }
-    }
-
-    try {
-        await createSession(googleUser.emailId, req);
-    } catch (error) {
-        logger.error('Error creating session:', error);
-        throw new Error('SESSION_CREATION_FAILED');
     }
 
     return !!userExists;

@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
@@ -19,6 +19,10 @@ const CourseDashboardPage: React.FC = () => {
   const { t } = useAppI18n();
   const { collectionId, tab } = useParams<{ collectionId: string; tab: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Capture the back-destination once on mount; tab switching clears location.state
+  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
   const { data: currentUserId } = useCurrentUserId();
@@ -50,7 +54,7 @@ const CourseDashboardPage: React.FC = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/collection/${collectionId}`, { state: { from: backToRef.current } })}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
           data-testid="back-to-course-btn"
         >
@@ -84,8 +88,7 @@ const CourseDashboardPage: React.FC = () => {
         )}
 
         {/* ─── Main Box ─── */}
-        <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col">
-          
+        <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col min-h-[372px]">
           {/* ─── Header area of Box ─── */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <p className="text-sm font-semibold text-foreground font-['Rubik']">
@@ -118,7 +121,7 @@ const CourseDashboardPage: React.FC = () => {
               onClick={() => switchTab('certificates')}
               data-testid="tab-certificates"
             >
-              {t('tabs.certificates')}
+              {t('tabs.reissueCertificate')}
               {activeTab === 'certificates' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
               )}
@@ -126,7 +129,7 @@ const CourseDashboardPage: React.FC = () => {
           </div>
 
           {/* ─── Tab content ─── */}
-          <div className="flex flex-col bg-white">
+          <div className="flex flex-col bg-white rounded-2xl">
             {collectionId && activeTab === 'batches' && (
               <BatchesTab collectionId={collectionId} />
             )}

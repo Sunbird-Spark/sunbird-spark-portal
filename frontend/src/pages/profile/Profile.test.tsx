@@ -58,12 +58,9 @@ const mockUserData = {
     roles: [],
 };
 
+const mockUseUserRead = vi.fn();
 vi.mock('@/hooks/useUserRead', () => ({
-    useUserRead: () => ({
-        data: { data: { response: mockUserData } },
-        isLoading: false,
-        isError: false,
-    }),
+    useUserRead: (options?: any) => mockUseUserRead(options),
 }));
 
 describe('Profile Page', () => {
@@ -75,6 +72,11 @@ describe('Profile Page', () => {
                 queries: { retry: false },
                 mutations: { retry: false },
             },
+        });
+        mockUseUserRead.mockReturnValue({
+            data: { data: { response: mockUserData } },
+            isLoading: false,
+            isError: false,
         });
     });
 
@@ -98,5 +100,10 @@ describe('Profile Page', () => {
         expect(screen.getByTestId('personal-info')).toBeInTheDocument();
         expect(screen.getByTestId('stats-cards')).toBeInTheDocument();
         expect(screen.getByTestId('learning-list')).toBeInTheDocument();
+    });
+
+    it('calls useUserRead with refetchOnMount: always to always get fresh user data', () => {
+        renderProfile();
+        expect(mockUseUserRead).toHaveBeenCalledWith({ refetchOnMount: 'always' });
     });
 });

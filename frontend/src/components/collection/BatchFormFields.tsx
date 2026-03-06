@@ -31,6 +31,10 @@ export function BatchFormFields({
   inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']",
 }: BatchFormFieldsProps) {
   const { t } = useAppI18n();
+  const today = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
   return (
     <>
       {/* 1. Name of Batch */}
@@ -76,6 +80,7 @@ export function BatchFormFields({
             type="date"
             className={inputClass}
             value={form.startDate}
+            min={today}
             onChange={(e) => {
               const newStart = e.target.value;
               const updates: Partial<BatchFormState> = { startDate: newStart };
@@ -102,7 +107,7 @@ export function BatchFormFields({
             min={
               form.enrolmentEndDate && form.enrolmentEndDate > (form.startDate || "")
                 ? form.enrolmentEndDate
-                : form.startDate || undefined
+                : form.startDate || today
             }
             onChange={(e) => handleField("endDate", e.target.value)}
           />
@@ -123,7 +128,7 @@ export function BatchFormFields({
             type="date"
             className={inputClass}
             value={form.enrolmentEndDate}
-            min={form.startDate || undefined}
+            min={form.startDate || today}
             max={form.endDate || undefined}
             onChange={(e) => handleField("enrolmentEndDate", e.target.value)}
           />

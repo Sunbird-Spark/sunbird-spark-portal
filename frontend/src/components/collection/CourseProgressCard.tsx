@@ -32,6 +32,8 @@ export interface CourseProgressCardProps {
   completedContentCount?: number;
   contentStatus?: Record<string, number>;
   completionPercentage?: number;
+  /** When true, show "Batch starting on" instead of "Batch started on". */
+  isBatchUpcoming?: boolean;
   showForceSyncButton?: boolean;
   onForceSync?: () => void;
   isForceSyncing?: boolean;
@@ -46,6 +48,7 @@ const CourseProgressCard = ({
   completedContentCount: completedContentCountProp,
   contentStatus,
   completionPercentage = 0,
+  isBatchUpcoming = false,
   showForceSyncButton = false,
   onForceSync,
   isForceSyncing = false,
@@ -65,6 +68,7 @@ const CourseProgressCard = ({
       : 0;
 
   const displayDate = batchStartDate ? formatBatchDisplayDate(batchStartDate) : null;
+  const dateLabelKey = isBatchUpcoming ? "courseDetails.batchStartingOn" : "courseDetails.batchStartedOn";
 
   const showMenu = (showForceSyncButton && !!onForceSync) || (showUnenrollOption && !!onUnenroll);
   const isLoading = showUnenrollOption ? isUnenrolling : isForceSyncing;
@@ -112,7 +116,7 @@ const CourseProgressCard = ({
       </div>
       {displayDate && (
         <p className="font-rubik font-normal text-[0.8125rem] leading-[100%] text-muted-foreground">
-          {t("courseDetails.batchStartedOn")}: {displayDate}
+          {t(dateLabelKey)}: {displayDate}
         </p>
       )}
       <div className="flex items-center gap-3">

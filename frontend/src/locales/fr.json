@@ -232,11 +232,14 @@
     "enrollmentEndsBy": "Inscription jusqu'au",
     "joinTheCourse": "Rejoindre le cours",
     "mustJoinToAccessContent": "Vous devez rejoindre le cours pour avoir un accès complet au contenu",
+    "batchNotStartedYet": "Cette session n'a pas encore commencé. Elle commence le {{date}}. Vous pourrez accéder au contenu une fois la session démarrée.",
+    "batchNotStartedYetNoDate": "Cette session n'a pas encore commencé. Vous pourrez accéder au contenu une fois la session démarrée.",
     "certificate": "Certificat",
     "certificateEarnDescription": "Obtenez un certificat à la fin du cours. Vérifiez les détails avant de terminer le cours.",
     "certificateNotAvailable": "Actuellement, ce cours n'a pas de certificat. Le créateur du cours peut en ajouter un plus tard.",
     "previewCertificate": "Aperçu du certificat",
     "courseProgress": "Progression du cours",
+    "batchStartingOn": "Lot commence le",
     "batchStartedOn": "Lot commencé le",
     "contentStatusCompleted": "Terminé",
     "contentStatusInProgress": "En cours",
@@ -252,7 +255,10 @@
     "leaveCourseDescription": "Voulez-vous vous désinscrire de ce lot ?",
     "leaveCourseError": "Impossible de quitter le cours. Veuillez réessayer.",
     "enrolSuccess": "Inscription au cours pour ce lot réussie",
-    "unenrolSuccess": "Désinscription du lot réussie"
+    "unenrolSuccess": "Désinscription du lot réussie",
+    "courseCompletionMessage": "Vous avez terminé le cours avec succès",
+    "courseCompletionNoCertificateNote": "Remarque : ce cours n'a pas de certificat",
+    "courseCompletionCertificateNote": "Vous pouvez télécharger votre certificat de cours depuis votre page de profil une fois qu'il est généré"
   },
   "profileDataSharing": {
     "cardTitle": "Partage des données de profil",
@@ -843,7 +849,7 @@
   },
   "tabs": {
     "batches": "Lots",
-    "certificates": "Certificats",
+    "reissueCertificate": "Réémission du certificat",
     "all": "Tous"
   },
   "profileLearning": {

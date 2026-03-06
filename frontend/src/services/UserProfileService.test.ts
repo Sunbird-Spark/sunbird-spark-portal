@@ -204,7 +204,7 @@ describe('UserProfileService', () => {
 
       const userData = await service.getUserData();
 
-      expect(userData.firstName).toBe('');
+      expect(userData.firstName).toBe('Guest');
       expect(userData.lastName).toBe('Doe');
     });
 
@@ -226,7 +226,7 @@ describe('UserProfileService', () => {
 
       const userData = await service.getUserData();
 
-      expect(userData.firstName).toBe('');
+      expect(userData.firstName).toBe('Guest');
       expect(userData.lastName).toBe('');
     });
 
@@ -237,7 +237,7 @@ describe('UserProfileService', () => {
 
       const userData = await service.getUserData();
 
-      expect(userData.firstName).toBe('');
+      expect(userData.firstName).toBe('Guest');
       expect(userData.lastName).toBe('');
     });
 

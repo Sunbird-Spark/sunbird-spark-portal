@@ -67,6 +67,7 @@ const HomeDiscoverSections = () => {
             criteria={section.criteria}
             sectionClassName="resource-section-home"
             innerClassName="home-discover-resource-inner"
+            useCustomHeights={true}
           />
         );
       default:

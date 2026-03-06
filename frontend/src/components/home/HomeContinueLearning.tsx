@@ -102,7 +102,7 @@ const HomeContinueLearning = () => {
                     {/* CTA Button */}
                     <div className="home-continue-learning-cta">
                         <Button
-                            onClick={() => navigate(continueTo)}
+                            onClick={() => navigate(continueTo, { state: { from: '/home' } })}
                             className="home-continue-learning-btn group"
                         >
                             {t("homeComponents.continueLearning")}

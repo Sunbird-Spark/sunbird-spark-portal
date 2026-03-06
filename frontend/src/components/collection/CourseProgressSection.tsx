@@ -13,6 +13,7 @@ interface CourseProgressSectionProps {
   userId: string | null;
   isTrackable: boolean;
   contentBlocked: boolean;
+  upcomingBatchBlocked?: boolean;
   contentCreatorPrivilege: boolean;
   hasBatchInRoute: boolean;
   isEnrolledInCurrentBatch: boolean;
@@ -28,6 +29,7 @@ export default function CourseProgressSection({
   userId,
   isTrackable,
   contentBlocked,
+  upcomingBatchBlocked = false,
   contentCreatorPrivilege,
   hasBatchInRoute,
   isEnrolledInCurrentBatch,
@@ -46,15 +48,16 @@ export default function CourseProgressSection({
   const { totalContentCount, completedContentCount = 0 } = courseProgressProps;
 
   const progressPercentage = useMemo(() => {
+    if (upcomingBatchBlocked) return 0;
     if (!totalContentCount || totalContentCount <= 0) {
       return 0;
     }
     return Math.min(100, Math.ceil((completedContentCount / totalContentCount) * 100));
-  }, [totalContentCount, completedContentCount]);
+  }, [totalContentCount, completedContentCount, upcomingBatchBlocked]);
 
   const canShowUnenrol =
     isTrackable &&
-    !contentBlocked &&
+    (!contentBlocked || upcomingBatchBlocked) &&
     !contentCreatorPrivilege &&
     hasBatchInRoute &&
     isEnrolledInCurrentBatch &&
@@ -62,6 +65,10 @@ export default function CourseProgressSection({
     progressPercentage < 100;
 
   const showUnenrolOption = canShowUnenrol && showForceSyncButton === false;
+
+  const progressPropsForCard: CourseProgressCardProps = upcomingBatchBlocked
+    ? { ...courseProgressProps, completedContentCount: 0 }
+    : courseProgressProps;
 
   const handleConfirmUnenrol = async () => {
     if (!collectionId || !userId || !batchIdParam) return;
@@ -94,7 +101,8 @@ export default function CourseProgressSection({
   return (
     <>
       <CourseProgressCard
-        {...courseProgressProps}
+        {...progressPropsForCard}
+        isBatchUpcoming={upcomingBatchBlocked}
         showForceSyncButton={showForceSyncButton && !showUnenrolOption}
         onForceSync={onForceSync}
         isForceSyncing={isForceSyncing}

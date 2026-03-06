@@ -1,4 +1,5 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
+import dayjs from "dayjs";
 import { CheckIcon } from "./CollectionIcons";
 import type { CollectionData } from "@/types/collectionTypes";
 import { ContentPlayer } from "@/components/players";
@@ -10,6 +11,9 @@ interface CollectionOverviewProps {
   contentId?: string;
   /** When true (trackable + not logged in or not enrolled), show join message instead of player/error. */
   contentAccessBlocked?: boolean;
+  /** When true (enrolled in upcoming batch), show batch-not-started-yet message instead of player. */
+  upcomingBatchBlocked?: boolean;
+  batchStartDate?: string;
   showMaxAttemptsExceeded?: boolean;
   playerMetadata?: any;
   playerIsLoading?: boolean;
@@ -22,6 +26,8 @@ const CollectionOverview = ({
   collectionData,
   contentId,
   contentAccessBlocked = false,
+  upcomingBatchBlocked = false,
+  batchStartDate,
   showMaxAttemptsExceeded = false,
   playerMetadata,
   playerIsLoading,
@@ -41,6 +47,18 @@ const CollectionOverview = ({
               <div className="collection-player-loading">
                 <p className="text-center text-muted-foreground text-sm px-4">
                   {t("courseDetails.mustJoinToAccessContent")}
+                </p>
+              </div>
+            </div>
+          ) : upcomingBatchBlocked ? (
+            <div className="collection-player-wrapper">
+              <div className="collection-player-loading">
+                <p className="text-center text-muted-foreground text-sm px-4">
+                  {batchStartDate
+                    ? t("courseDetails.batchNotStartedYet", {
+                        date: dayjs(batchStartDate).format("DD MMM YYYY"),
+                      })
+                    : t("courseDetails.batchNotStartedYetNoDate")}
                 </p>
               </div>
             </div>

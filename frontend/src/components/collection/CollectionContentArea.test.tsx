@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CollectionContentArea from './CollectionContentArea';
+import type { BatchListItem } from '@/types/collectionTypes';
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn()
@@ -52,6 +53,55 @@ vi.mock('@/hooks/useConsent', () => ({
 }));
 
 describe('CollectionContentArea', () => {
+  const defaultAccess: {
+    isTrackable: boolean;
+    isAuthenticated: boolean;
+    hasBatchInRoute: boolean;
+    isEnrolledInCurrentBatch: boolean;
+    contentBlocked: boolean;
+    upcomingBatchBlocked: boolean;
+    batchStartDateForOverview?: string;
+  } = {
+    isTrackable: false,
+    isAuthenticated: false,
+    hasBatchInRoute: false,
+    isEnrolledInCurrentBatch: false,
+    contentBlocked: false,
+    upcomingBatchBlocked: false,
+    batchStartDateForOverview: undefined,
+  };
+  const defaultPlayer = {
+    playerMetadata: {},
+    playerIsLoading: false,
+    playerError: null as Error | null,
+    handlePlayerEvent: vi.fn(),
+    handleTelemetryEvent: vi.fn(),
+    showMaxAttemptsExceeded: false,
+  };
+  const defaultEnrollment = {
+    courseProgressProps: { progress: 50 },
+    contentStatusMap: {},
+    contentAttemptInfoMap: undefined as Record<string, { attemptCount: number }> | undefined,
+    batches: [] as BatchListItem[],
+    selectedBatchId: '',
+    setSelectedBatchId: vi.fn(),
+    handleJoinCourse: vi.fn(),
+    batchListLoading: false,
+    joinLoading: false,
+    batchListError: null as string | null,
+    joinError: null as string | null,
+    hasCertificate: false,
+    firstCertPreviewUrl: undefined as string | undefined,
+    setCertificatePreviewUrl: vi.fn(),
+    setCertificatePreviewOpen: vi.fn(),
+  };
+  const defaultSidebar = {
+    expandedModules: [] as string[],
+    toggleModule: vi.fn(),
+    collectionId: 'col_123' as string | undefined,
+    batchIdParam: undefined as string | undefined,
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const defaultProps: any = {
     collectionData: {
@@ -63,44 +113,24 @@ describe('CollectionContentArea', () => {
       channel: 'test-channel',
     },
     contentId: undefined,
-    isTrackable: false,
-    contentBlocked: false,
-    isEnrolledInCurrentBatch: false,
-    playerMetadata: {},
-    playerIsLoading: false,
-    playerError: null,
-    handlePlayerEvent: vi.fn(),
-    handleTelemetryEvent: vi.fn(),
-    isAuthenticated: false,
-    collectionId: 'col_123',
-    hasBatchInRoute: false,
-    courseProgressProps: { progress: 50 },
-    batchIdParam: undefined,
-    expandedModules: [],
-    toggleModule: vi.fn(),
-    contentStatusMap: {},
-    batches: [],
-    selectedBatchId: '',
-    setSelectedBatchId: vi.fn(),
-    handleJoinCourse: vi.fn(),
-    batchListLoading: false,
-    joinLoading: false,
-    batchListError: null,
-    joinError: null,
-    hasCertificate: false,
-    firstCertPreviewUrl: undefined,
-    setCertificatePreviewUrl: vi.fn(),
-    setCertificatePreviewOpen: vi.fn(),
+    access: defaultAccess,
+    player: defaultPlayer,
+    enrollment: defaultEnrollment,
+    sidebar: defaultSidebar,
+    creator: {},
   };
 
   const learnerWithBatchProps = {
     ...defaultProps,
-    isTrackable: true,
-    isAuthenticated: true,
-    contentBlocked: false,
-    hasBatchInRoute: true,
-    isEnrolledInCurrentBatch: true,
-    contentCreatorPrivilege: false,
+    access: {
+      ...defaultAccess,
+      isTrackable: true,
+      isAuthenticated: true,
+      contentBlocked: false,
+      hasBatchInRoute: true,
+      isEnrolledInCurrentBatch: true,
+    },
+    creator: { contentCreatorPrivilege: false },
   };
 
   beforeEach(() => {
@@ -120,9 +150,9 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        isAuthenticated={true}
-        collectionId="col_123"
-        isCreatorViewingOwnCollection={true}
+        access={{ ...defaultAccess, isAuthenticated: true }}
+        sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
+        creator={{ isCreatorViewingOwnCollection: true }}
       />
     );
     expect(screen.getByTestId('batch-card')).toBeInTheDocument();
@@ -132,8 +162,8 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        isAuthenticated={true}
-        isCreatorViewingOwnCollection={false}
+        access={{ ...defaultAccess, isAuthenticated: true }}
+        creator={{ isCreatorViewingOwnCollection: false }}
       />
     );
     expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
@@ -143,7 +173,7 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        contentBlocked={true}
+        access={{ ...defaultAccess, contentBlocked: true }}
       />
     );
     expect(screen.getByTestId('login-unlock-card')).toBeInTheDocument();
@@ -156,11 +186,14 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        isTrackable={true}
-        isAuthenticated={true}
-        contentBlocked={false}
-        hasBatchInRoute={true}
-        isEnrolledInCurrentBatch={true}
+        access={{
+          ...defaultAccess,
+          isTrackable: true,
+          isAuthenticated: true,
+          contentBlocked: false,
+          hasBatchInRoute: true,
+          isEnrolledInCurrentBatch: true,
+        }}
       />
     );
     expect(screen.queryByTestId('login-unlock-card')).not.toBeInTheDocument();
@@ -170,29 +203,51 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
   });
 
+  it('renders CourseProgressCard when enrolled in upcoming batch (content blocked but show progress for leave option)', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        access={{
+          ...defaultAccess,
+          isTrackable: true,
+          isAuthenticated: true,
+          contentBlocked: true,
+          upcomingBatchBlocked: true,
+          hasBatchInRoute: true,
+          isEnrolledInCurrentBatch: true,
+        }}
+      />
+    );
+    expect(screen.getByTestId('course-progress-card')).toBeInTheDocument();
+  });
+
   it('renders AvailableBatchesCard when trackable, authenticated, not blocked, and NOT in batch route', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        isTrackable={true}
-        isAuthenticated={true}
-        contentBlocked={false}
-        hasBatchInRoute={false}
+        access={{
+          ...defaultAccess,
+          isTrackable: true,
+          isAuthenticated: true,
+          contentBlocked: false,
+          hasBatchInRoute: false,
+        }}
       />
     );
     expect(screen.queryByTestId('login-unlock-card')).not.toBeInTheDocument();
     // Not in batch, so show available batches
     expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
-    expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
+    // Certificate card only after enrollment
+    expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
   });
 
   it('renders View Course Dashboard button when user is the course owner', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        isAuthenticated={true}
-        isCreatorViewingOwnCollection={true}
-        collectionId="col_123"
+        access={{ ...defaultAccess, isAuthenticated: true }}
+        sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
+        creator={{ isCreatorViewingOwnCollection: true }}
       />
     );
     expect(screen.getByTestId('view-dashboard-btn')).toBeInTheDocument();
@@ -202,9 +257,8 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        isAuthenticated={true}
-        isCreatorViewingOwnCollection={false}
-        collectionId="col_123"
+        access={{ ...defaultAccess, isAuthenticated: true }}
+        creator={{ isCreatorViewingOwnCollection: false }}
       />
     );
     expect(screen.queryByTestId('view-dashboard-btn')).not.toBeInTheDocument();
@@ -214,9 +268,9 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        isAuthenticated={false}
-        isCreatorViewingOwnCollection={true}
-        collectionId="col_123"
+        access={{ ...defaultAccess, isAuthenticated: false }}
+        sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
+        creator={{ isCreatorViewingOwnCollection: true }}
       />
     );
     expect(screen.queryByTestId('view-dashboard-btn')).not.toBeInTheDocument();
@@ -227,11 +281,14 @@ describe('CollectionContentArea', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
-          isTrackable={true}
-          contentBlocked={false}
-          hasBatchInRoute={true}
-          isEnrolledInCurrentBatch={true}
-          contentCreatorPrivilege={true}
+          access={{
+            ...defaultAccess,
+            isTrackable: true,
+            contentBlocked: false,
+            hasBatchInRoute: true,
+            isEnrolledInCurrentBatch: true,
+          }}
+          creator={{ contentCreatorPrivilege: true }}
         />
       );
       expect(screen.queryByTestId('course-progress-card')).not.toBeInTheDocument();
@@ -241,10 +298,13 @@ describe('CollectionContentArea', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
-          isTrackable={true}
-          contentBlocked={false}
-          hasBatchInRoute={false}
-          contentCreatorPrivilege={true}
+          access={{
+            ...defaultAccess,
+            isTrackable: true,
+            contentBlocked: false,
+            hasBatchInRoute: false,
+          }}
+          creator={{ contentCreatorPrivilege: true }}
         />
       );
       expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
@@ -255,14 +315,36 @@ describe('CollectionContentArea', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
-          isTrackable={true}
-          isAuthenticated={true}
-          contentBlocked={false}
-          hasBatchInRoute={false}
-          contentCreatorPrivilege={false}
+          access={{
+            ...defaultAccess,
+            isTrackable: true,
+            isAuthenticated: true,
+            contentBlocked: false,
+            hasBatchInRoute: false,
+          }}
+          creator={{ contentCreatorPrivilege: false }}
         />
       );
       expect(screen.getByTestId('available-batches-card')).toBeInTheDocument();
+      // Certificate card only after enrollment (not in batch route here)
+      expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
+    });
+
+    it('shows CertificateCard when enrolled in current batch', () => {
+      render(
+        <CollectionContentArea
+          {...defaultProps}
+          access={{
+            ...defaultAccess,
+            isTrackable: true,
+            isAuthenticated: true,
+            contentBlocked: false,
+            hasBatchInRoute: true,
+            isEnrolledInCurrentBatch: true,
+          }}
+          creator={{ contentCreatorPrivilege: false }}
+        />
+      );
       expect(screen.getByTestId('certificate-card')).toBeInTheDocument();
     });
 
@@ -270,10 +352,13 @@ describe('CollectionContentArea', () => {
       render(
         <CollectionContentArea
           {...defaultProps}
-          isTrackable={true}
-          contentBlocked={false}
-          isEnrolledInCurrentBatch={false}
-          contentCreatorPrivilege={true}
+          access={{
+            ...defaultAccess,
+            isTrackable: true,
+            contentBlocked: false,
+            isEnrolledInCurrentBatch: false,
+          }}
+          creator={{ contentCreatorPrivilege: true }}
         />
       );
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
@@ -305,7 +390,7 @@ describe('CollectionContentArea', () => {
       render(
         <CollectionContentArea
           {...learnerWithBatchProps}
-          contentCreatorPrivilege={true}
+          creator={{ ...learnerWithBatchProps.creator, contentCreatorPrivilege: true }}
           collectionData={{ ...defaultProps.collectionData, userConsent: 'yes', channel: 'ch1' }}
         />
       );
@@ -316,7 +401,7 @@ describe('CollectionContentArea', () => {
       render(
         <CollectionContentArea
           {...learnerWithBatchProps}
-          isAuthenticated={false}
+          access={{ ...learnerWithBatchProps.access, isAuthenticated: false }}
           collectionData={{ ...defaultProps.collectionData, userConsent: 'yes', channel: 'ch1' }}
         />
       );

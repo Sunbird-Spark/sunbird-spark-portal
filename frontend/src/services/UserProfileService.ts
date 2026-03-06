@@ -88,7 +88,7 @@ class UserProfileService {
             await this.initialize();
         }
         return {
-            firstName: this.firstName || '',
+            firstName: this.firstName || 'Guest',
             lastName: this.lastName || '',
         };
     }

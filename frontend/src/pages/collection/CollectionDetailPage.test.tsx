@@ -56,6 +56,8 @@ const mockEnrollment = {
   enrollmentForCollection: undefined,
   isEnrolledInCurrentBatch: false,
   effectiveBatchId: undefined,
+  isBatchEnded: false,
+  isBatchUpcoming: false,
   contentStatusMap: undefined,
   courseProgressProps: undefined,
   batches: [],
@@ -230,26 +232,26 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
   default: ({
     collectionData,
     contentId,
-    collectionId,
-    isCreatorViewingOwnCollection,
-    contentBlocked,
+    access,
+    creator,
+    sidebar,
   }: {
     collectionData: any;
     contentId?: string;
-    collectionId?: string;
-    isCreatorViewingOwnCollection?: boolean;
-    contentBlocked?: boolean;
+    access?: { contentBlocked?: boolean };
+    creator?: { isCreatorViewingOwnCollection?: boolean };
+    sidebar?: { collectionId?: string };
   }) => (
     <div
       data-testid="collection-content-area"
       data-content-id={contentId ?? ''}
-      data-is-creator-viewing-own={String(!!isCreatorViewingOwnCollection)}
-      data-content-blocked={String(!!contentBlocked)}
+      data-is-creator-viewing-own={String(!!creator?.isCreatorViewingOwnCollection)}
+      data-content-blocked={String(!!access?.contentBlocked)}
     >
       <div data-testid="collection-overview">{collectionData?.title}</div>
       <div>
-        {isCreatorViewingOwnCollection && (
-          <div data-testid="batch-card" data-collection-id={collectionId}>
+        {creator?.isCreatorViewingOwnCollection && (
+          <div data-testid="batch-card" data-collection-id={sidebar?.collectionId}>
             Batch Card
           </div>
         )}
@@ -415,7 +417,7 @@ describe('CollectionDetailPage', () => {
     it('navigates back when Go Back button is clicked', () => {
       renderWithProviders(<CollectionDetailPage />);
       fireEvent.click(screen.getByRole('button', { name: /button\.goBack/i }));
-      expect(mockNavigate).toHaveBeenCalledWith(-1);
+      expect(mockNavigate).toHaveBeenCalledWith('/explore');
     });
   });
 

@@ -54,7 +54,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   };
 
   return (
-    <div className="flex flex-col bg-gray-50/50 p-6 gap-6" data-testid="batches-tab">
+    <div className="flex flex-col bg-gray-50/50 p-6 gap-6 rounded-2xl" data-testid="batches-tab">
 
       {/* Batch Selector Dropdown */}
       <div className="flex items-center gap-4">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { EcmlPlayerService } from '../../services/players/ecml';
 import type { EcmlPlayerEvent, EcmlPlayerContextProps, EcmlPlayerMetadata } from '../../services/players/ecml';
 
@@ -24,6 +24,14 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const serviceRef = useRef<EcmlPlayerService>(new EcmlPlayerService());
 
+  // Store event handlers in refs so the player-init useEffect only re-runs
+  // when metadata/contextProps genuinely change, not when callback identities
+  // shift due to upstream re-renders (e.g. after content state updates).
+  const onPlayerEventRef = useRef(onPlayerEvent);
+  useEffect(() => { onPlayerEventRef.current = onPlayerEvent; }, [onPlayerEvent]);
+  const onTelemetryEventRef = useRef(onTelemetryEvent);
+  useEffect(() => { onTelemetryEventRef.current = onTelemetryEvent; }, [onTelemetryEvent]);
+
   const contextProps = useMemo<EcmlPlayerContextProps | undefined>(() => {
     if (mode === undefined && cdata === undefined && contextRollup === undefined && objectRollup === undefined) {
       return undefined;
@@ -35,14 +43,6 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
       ...(objectRollup !== undefined && { objectRollup }),
     };
   }, [mode, cdata, contextRollup, objectRollup]);
-
-  const handlePlayerEvent = useCallback((event: EcmlPlayerEvent) => {
-    onPlayerEvent?.(event);
-  }, [onPlayerEvent]);
-
-  const handleTelemetryEvent = useCallback((event: any) => {
-    onTelemetryEvent?.(event);
-  }, [onTelemetryEvent]);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -64,10 +64,10 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
         timestamp: Date.now(),
       };
 
-      handlePlayerEvent(playerEvent);
+      onPlayerEventRef.current?.(playerEvent);
 
       if (eventData.eid) {
-        handleTelemetryEvent(eventData);
+        onTelemetryEventRef.current?.(eventData);
       }
     };
 
@@ -91,10 +91,10 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
         timestamp: Date.now(),
       };
 
-      handlePlayerEvent(playerEvent);
+      onPlayerEventRef.current?.(playerEvent);
 
       if (telemetryData.eid) {
-        handleTelemetryEvent(telemetryData);
+        onTelemetryEventRef.current?.(telemetryData);
       }
     };
 
@@ -138,7 +138,7 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
         iframe.onload = null;
       }
     };
-  }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
+  }, [metadata, contextProps]);
 
   return (
     <iframe

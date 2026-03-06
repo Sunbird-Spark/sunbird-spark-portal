@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BatchFormFields, BatchFormState } from './BatchFormFields';
 
@@ -256,6 +256,37 @@ describe('BatchFormFields', () => {
     it('does not show helper text when start date is not provided', () => {
       render(<BatchFormFields form={form} handleField={handleField} setForm={setForm} />);
       expect(screen.queryByText(/between start/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Date min constraints (today fallback)', () => {
+    const fixedToday = '2026-03-05';
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(fixedToday));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('start date input has min set to today', () => {
+      render(<BatchFormFields form={form} handleField={handleField} setForm={setForm} />);
+      const input = screen.getByLabelText(/start date/i) as HTMLInputElement;
+      expect(input.min).toBe(fixedToday);
+    });
+
+    it('end date input has min set to today when start date and enrolment end date are empty', () => {
+      render(<BatchFormFields form={form} handleField={handleField} setForm={setForm} />);
+      const input = screen.getByLabelText(/^end date$/i) as HTMLInputElement;
+      expect(input.min).toBe(fixedToday);
+    });
+
+    it('enrolment end date input has min set to today when start date is empty', () => {
+      render(<BatchFormFields form={form} handleField={handleField} setForm={setForm} />);
+      const input = screen.getByLabelText(/enrolment end date/i) as HTMLInputElement;
+      expect(input.min).toBe(fixedToday);
     });
   });
 

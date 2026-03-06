@@ -55,7 +55,9 @@ const mockEnrollment = {
   isEnrolledInCurrentBatch: false,
   effectiveBatchId: undefined as string | undefined,
   isBatchEnded: false,
+  isBatchUpcoming: false,
   contentStatusMap: undefined as Record<string, number> | undefined,
+  contentStateFetched: false,
   courseProgressProps: undefined as object | undefined,
   batches: [],
   batchListLoading: false,
@@ -115,10 +117,31 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 vi.mock('@/components/collection/CollectionOverview', () => ({
-  default: ({ collectionData, contentId, contentAccessBlocked, playerIsLoading, playerError }: {
-    collectionData: { title: string }; contentId?: string; contentAccessBlocked?: boolean; playerIsLoading?: boolean; playerError?: Error | null;
+  default: ({
+    collectionData,
+    contentId,
+    contentAccessBlocked,
+    upcomingBatchBlocked,
+    playerIsLoading,
+    playerError,
+  }: {
+    collectionData: { title: string };
+    contentId?: string;
+    contentAccessBlocked?: boolean;
+    upcomingBatchBlocked?: boolean;
+    playerIsLoading?: boolean;
+    playerError?: Error | null;
   }) => (
-    <div data-testid="collection-overview" data-content-id={contentId ?? ''} data-content-access-blocked={String(!!contentAccessBlocked)} data-player-loading={String(!!playerIsLoading)} data-player-error={playerError?.message ?? ''}>{collectionData.title}</div>
+    <div
+      data-testid="collection-overview"
+      data-content-id={contentId ?? ''}
+      data-content-access-blocked={String(!!contentAccessBlocked)}
+      data-upcoming-blocked={String(!!upcomingBatchBlocked)}
+      data-player-loading={String(!!playerIsLoading)}
+      data-player-error={playerError?.message ?? ''}
+    >
+      {collectionData.title}
+    </div>
   ),
 }));
 vi.mock('@/hooks/usePermission', () => ({
@@ -230,7 +253,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     renderWithProviders(<CollectionDetailPage />);
     const goBackBtn = screen.getByRole('button', { name: /button\.goBack/i });
     fireEvent.click(goBackBtn);
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
+    expect(mockNavigate).toHaveBeenCalledWith("/explore");
   });
 
   it('shows stats row with lessons count', () => {
@@ -322,6 +345,53 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       mockUseCollection.mockReturnValue({ data: { ...mockCollectionData, children: undefined, hierarchyRoot: { identifier: 'col-1', mimeType: 'application/vnd.ekstep.content-collection' } }, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
       expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/content/'), expect.anything());
+    });
+
+    it('navigates to first unconsumed content in whole course when unit 1 is all completed (two units)', () => {
+      const twoUnitHierarchy = {
+        identifier: 'col-1',
+        mimeType: 'application/vnd.ekstep.content-collection' as const,
+        children: [
+          {
+            identifier: 'mod-1',
+            name: 'Unit 1',
+            mimeType: 'application/vnd.ekstep.content-collection' as const,
+            children: [
+              { identifier: 'l1', name: 'Lesson 1', mimeType: 'video/mp4' },
+              { identifier: 'l2', name: 'Lesson 2', mimeType: 'application/pdf' },
+            ],
+          },
+          {
+            identifier: 'mod-2',
+            name: 'Unit 2',
+            mimeType: 'application/vnd.ekstep.content-collection' as const,
+            children: [
+              { identifier: 'l3', name: 'Lesson 3', mimeType: 'video/mp4' },
+              { identifier: 'l4', name: 'Lesson 4', mimeType: 'application/pdf' },
+            ],
+          },
+        ],
+      };
+      mockUseParams.mockReturnValue({ collectionId: 'col-123', batchId: 'batch-1', contentId: undefined });
+      mockUseCollection.mockReturnValue({
+        data: {
+          ...mockCollectionData,
+          children: twoUnitHierarchy.children,
+          hierarchyRoot: twoUnitHierarchy,
+          trackable: { enabled: 'Yes' },
+        },
+        isLoading: false,
+      });
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
+      mockEnrollment.enrollmentForCollection = { batchId: 'batch-1' } as { batchId: string };
+      mockEnrollment.isEnrolledInCurrentBatch = true;
+      mockEnrollment.contentStatusMap = { l1: 2, l2: 2 };
+      mockEnrollment.contentStateFetched = true;
+      renderWithProviders(<CollectionDetailPage />);
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/collection/col-123/batch/batch-1/content/l3',
+        { replace: true }
+      );
     });
   });
 
@@ -416,6 +486,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       mockUseParams.mockReturnValue({ collectionId: 'col-123', batchId: 'batch-1', contentId: 'l1' });
       mockEnrollment.enrollmentForCollection = { batchId: 'batch-1' };
       mockEnrollment.isEnrolledInCurrentBatch = true;
+      mockEnrollment.isBatchUpcoming = false;
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
     });
@@ -423,6 +494,24 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
+    });
+
+    it('blocks content when user is enrolled but batch is upcoming', () => {
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
+        isLoading: false,
+      });
+      mockUseParams.mockReturnValue({ collectionId: 'col-123', batchId: 'batch-1', contentId: 'l1' });
+      mockEnrollment.enrollmentForCollection = { batchId: 'batch-1' };
+      mockEnrollment.isEnrolledInCurrentBatch = true;
+      mockEnrollment.isBatchUpcoming = true;
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      const overview = screen.getByTestId('collection-overview');
+      expect(overview).toHaveAttribute('data-content-access-blocked', 'false');
+      expect(overview).toHaveAttribute('data-upcoming-blocked', 'true');
     });
   });
 });

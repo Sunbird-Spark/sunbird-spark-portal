@@ -60,6 +60,13 @@ export function useContentStateUpdate({
   const assessEventsRef = useRef<unknown[]>([]);
   const sendingAssessmentRef = useRef(false);
 
+  // Use refs for values that change after content state updates to keep the
+  // returned telemetry callback identity stable and avoid re-initialising players.
+  const currentContentStatusRef = useRef(currentContentStatus);
+  useEffect(() => { currentContentStatusRef.current = currentContentStatus; }, [currentContentStatus]);
+  const contentTypeRef = useRef(contentType);
+  useEffect(() => { contentTypeRef.current = contentType; }, [contentType]);
+
   useEffect(() => {
     lastSentStatusRef.current = null;
     assessmentTsRef.current = null;
@@ -134,8 +141,8 @@ export function useContentStateUpdate({
       if (skipContentStateUpdate) return;
       if (!isEnrolledInCurrentBatch || !collectionId || !contentId || !effectiveBatchId) return;
       if (isBatchEnded) return;
-      const isSelfAssess = (contentType ?? "").toLowerCase() === "selfassess";
-      if (!isSelfAssess && currentContentStatus === 2) return;
+      const isSelfAssess = (contentTypeRef.current ?? "").toLowerCase() === "selfassess";
+      if (!isSelfAssess && currentContentStatusRef.current === 2) return;
 
       const eid = (event?.eid ?? event?.data?.eid ?? event?.type ?? "") as string;
       const eidUpper = eid.toUpperCase();
@@ -145,7 +152,7 @@ export function useContentStateUpdate({
         const ets = rawEvent?.ets ?? event?.ets;
         if (ets != null) assessmentTsRef.current = ets;
         assessEventsRef.current = [];
-        if (currentContentStatus !== 2 && lastSentStatusRef.current !== 1) {
+        if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1) {
           lastSentStatusRef.current = 1;
           void handleContentStateUpdate(1, false);
         }
@@ -186,8 +193,6 @@ export function useContentStateUpdate({
       contentId,
       effectiveBatchId,
       mimeType,
-      currentContentStatus,
-      contentType,
       handleContentStateUpdate,
       sendAssessmentAndInvalidate,
     ]

@@ -113,6 +113,7 @@ export interface ContentSearchItem {
   primaryCategory?: string;
   contentType?: string;
   framework?: string;
+  leafNodesCount?: number;
 }
 
 export interface ContentSearchResponse {

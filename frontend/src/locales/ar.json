@@ -232,11 +232,14 @@
     "enrollmentEndsBy": "ينتهي التسجيل في",
     "joinTheCourse": "انضم إلى الدورة",
     "mustJoinToAccessContent": "يجب عليك الانضمام إلى الدورة للحصول على وصول كامل للمحتوى",
+    "batchNotStartedYet": "لم تبدأ هذه الدفعة بعد. تبدأ في {{date}}. يمكنك الوصول إلى المحتوى بمجرد بدء الدفعة.",
+    "batchNotStartedYetNoDate": "لم تبدأ هذه الدفعة بعد. يمكنك الوصول إلى المحتوى بمجرد بدء الدفعة.",
     "certificate": "الشهادة",
     "certificateEarnDescription": "احصل على شهادة عند إكمال الدورة. تحقق من التفاصيل قبل إكمال الدورة.",
     "certificateNotAvailable": "حاليًا، لا تحتوي هذه الدورة على شهادة. قد يضيف منشئ الدورة شهادة لاحقًا.",
     "previewCertificate": "معاينة الشهادة",
     "courseProgress": "تقدم الدورة",
+    "batchStartingOn": "ستبدأ الدفعة في",
     "batchStartedOn": "بدأت الدفعة في",
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
@@ -252,7 +255,10 @@
     "leaveCourseDescription": "هل تريد إلغاء تسجيلك من هذه الدفعة؟",
     "leaveCourseError": "تعذر مغادرة الدورة. يرجى المحاولة مرة أخرى.",
     "enrolSuccess": "تم تسجيلك في الدورة لهذه الدفعة بنجاح",
-    "unenrolSuccess": "تم إلغاء تسجيل المستخدم من الدفعة بنجاح"
+    "unenrolSuccess": "تم إلغاء تسجيل المستخدم من الدفعة بنجاح",
+    "courseCompletionMessage": "لقد أكملت هذه الدورة بنجاح",
+    "courseCompletionNoCertificateNote": "ملاحظة: لا تحتوي هذه الدورة على شهادة",
+    "courseCompletionCertificateNote": "يمكنك تنزيل شهادة الدورة من صفحة ملفك الشخصي بعد إنشائها"
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",
@@ -425,11 +431,6 @@
     "backTo": "العودة إلى {{page}}",
     "upcomingBatches": "الدفعات القادمة",
     "learningProgress": "تقدم التعلم",
-    "downloadCertificate": "تحميل الشهادة",
-    "manage": "إدارة",
-    "backTo": "العودة إلى {{page}}",
-    "upcomingBatches": "الدفعات القادمة",
-    "learningProgress": "تقدم التعلم",
     "downloadCertificate": "تحميل الشهادة"
   },
   "myLearning": {
@@ -556,10 +557,7 @@
       "publishWarningText": "لقد قدّمت بعض تعليقات/اقتراحات المراجعة، وستُفقد إذا تم نشر المحتوى.",
       "publishWarningQuestion": "هل تريد النشر؟",
       "processing": "جارٍ المعالجة..."
-    },
-    "collectionType": "نوع المجموعة",
-    "description": "الوصف",
-    "creating": "جارٍ الإنشاء..."
+    }
   },
   "homeComponents": {
     "openMenu": "فتح القائمة",
@@ -843,7 +841,7 @@
   },
   "tabs": {
     "batches": "الدفعات",
-    "certificates": "الشهادات",
+    "reissueCertificate": "إعادة إصدار الشهادة",
     "all": "الكل"
   },
   "profileLearning": {
