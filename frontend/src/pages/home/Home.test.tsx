@@ -63,7 +63,7 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
 
 const mockUseUserRead = vi.fn();
 vi.mock('@/hooks/useUserRead', () => ({
-    useUserRead: () => mockUseUserRead(),
+    useUserRead: (options?: any) => mockUseUserRead(options),
 }));
 
 const mockUseUserEnrolledCollections = vi.fn();
@@ -205,5 +205,10 @@ describe('Home Page', () => {
         renderHome();
 
         expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-enrolled', '2');
+    });
+
+    it('calls useUserRead with refetchOnMount: always to always get fresh user data', () => {
+        renderHome();
+        expect(mockUseUserRead).toHaveBeenCalledWith({ refetchOnMount: 'always' });
     });
 });

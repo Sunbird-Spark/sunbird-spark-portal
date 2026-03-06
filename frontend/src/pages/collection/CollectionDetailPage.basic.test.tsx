@@ -55,6 +55,7 @@ const mockEnrollment = {
   isEnrolledInCurrentBatch: false,
   effectiveBatchId: undefined as string | undefined,
   isBatchEnded: false,
+  isBatchUpcoming: false,
   contentStatusMap: undefined as Record<string, number> | undefined,
   contentStateFetched: false,
   courseProgressProps: undefined as object | undefined,
@@ -116,10 +117,31 @@ vi.mock('@/components/common/PageLoader', () => ({
   ),
 }));
 vi.mock('@/components/collection/CollectionOverview', () => ({
-  default: ({ collectionData, contentId, contentAccessBlocked, playerIsLoading, playerError }: {
-    collectionData: { title: string }; contentId?: string; contentAccessBlocked?: boolean; playerIsLoading?: boolean; playerError?: Error | null;
+  default: ({
+    collectionData,
+    contentId,
+    contentAccessBlocked,
+    upcomingBatchBlocked,
+    playerIsLoading,
+    playerError,
+  }: {
+    collectionData: { title: string };
+    contentId?: string;
+    contentAccessBlocked?: boolean;
+    upcomingBatchBlocked?: boolean;
+    playerIsLoading?: boolean;
+    playerError?: Error | null;
   }) => (
-    <div data-testid="collection-overview" data-content-id={contentId ?? ''} data-content-access-blocked={String(!!contentAccessBlocked)} data-player-loading={String(!!playerIsLoading)} data-player-error={playerError?.message ?? ''}>{collectionData.title}</div>
+    <div
+      data-testid="collection-overview"
+      data-content-id={contentId ?? ''}
+      data-content-access-blocked={String(!!contentAccessBlocked)}
+      data-upcoming-blocked={String(!!upcomingBatchBlocked)}
+      data-player-loading={String(!!playerIsLoading)}
+      data-player-error={playerError?.message ?? ''}
+    >
+      {collectionData.title}
+    </div>
   ),
 }));
 vi.mock('@/hooks/usePermission', () => ({
@@ -464,6 +486,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       mockUseParams.mockReturnValue({ collectionId: 'col-123', batchId: 'batch-1', contentId: 'l1' });
       mockEnrollment.enrollmentForCollection = { batchId: 'batch-1' };
       mockEnrollment.isEnrolledInCurrentBatch = true;
+      mockEnrollment.isBatchUpcoming = false;
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
     });
@@ -471,6 +494,24 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
       renderWithProviders(<CollectionDetailPage />);
       expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-content-access-blocked', 'false');
+    });
+
+    it('blocks content when user is enrolled but batch is upcoming', () => {
+      vi.mocked(usePermissions).mockReturnValue(makePermissions(true));
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, trackable: { enabled: 'Yes' } },
+        isLoading: false,
+      });
+      mockUseParams.mockReturnValue({ collectionId: 'col-123', batchId: 'batch-1', contentId: 'l1' });
+      mockEnrollment.enrollmentForCollection = { batchId: 'batch-1' };
+      mockEnrollment.isEnrolledInCurrentBatch = true;
+      mockEnrollment.isBatchUpcoming = true;
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      const overview = screen.getByTestId('collection-overview');
+      expect(overview).toHaveAttribute('data-content-access-blocked', 'false');
+      expect(overview).toHaveAttribute('data-upcoming-blocked', 'true');
     });
   });
 });

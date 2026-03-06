@@ -26,17 +26,20 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
   ];
 
   const getFilteredCourses = () => {
-    const today = dayjs().startOf('day');
-    
     switch (activeTab) {
       case "active":
-        return courses.filter(c => c.completionPercentage < 100);
+        return courses.filter(c => {
+          if (c.completionPercentage >= 100) return false;
+          if (c.batch?.startDate && dayjs(c.batch.startDate).isAfter(dayjs(), 'day')) return false;
+          return true;
+        });
       case "completed":
         return courses.filter(c => c.completionPercentage === 100);
       case "upcoming":
         return courses.filter(c => {
-          if (c.batch && c.batch.startDate) {
-            return dayjs(c.batch.startDate).isAfter(today);
+          if (c.completionPercentage > 0) return false;
+          if (c.batch?.startDate) {
+            return dayjs(c.batch.startDate).isAfter(dayjs(), 'day');
           }
           return false;
         });
@@ -55,15 +58,15 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
   }, [activeTab]);
 
   return (
-    <div className="bg-white rounded-2xl p-6 h-full shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
+    <div className="bg-white rounded-2xl p-6 h-full flex flex-col shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit">
+      <div className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit shrink-0">
         <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-['Rubik']">{t('courses')}</h3>
         <FiChevronDown className="text-sunbird-obsidian w-[1.25rem] h-[1.25rem] mt-1" />
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="flex flex-wrap gap-3 mb-8 shrink-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -79,8 +82,8 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
         ))}
       </div>
 
-      {/* Course List */}
-      <div className="space-y-6">
+      {/* Course List — scrollable */}
+      <div className="overflow-y-auto flex-1 pr-1 space-y-6">
         {currentCourses.length > 0 ? (
           <>
             {currentCourses.map((course, index) => (

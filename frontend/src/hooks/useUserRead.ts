@@ -6,7 +6,13 @@ import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoSer
 
 const userService = new UserService();
 
-export const useUserRead = (): UseQueryResult<ApiResponse<UserReadResponse>, Error> => {
+// Cache user data for 10 minutes by default so navigating between pages
+// (workspace, explore, etc.) does not trigger a redundant API call every time.
+const DEFAULT_STALE_TIME = 10 * 60 * 1000;
+
+export const useUserRead = (
+    options?: { refetchOnMount?: boolean | 'always' }
+): UseQueryResult<ApiResponse<UserReadResponse>, Error> => {
     const isAuthenticated = userAuthInfoService.isUserAuthenticated();
 
     return useQuery({
@@ -23,5 +29,7 @@ export const useUserRead = (): UseQueryResult<ApiResponse<UserReadResponse>, Err
         },
         enabled: isAuthenticated,
         retry: 1,
+        staleTime: DEFAULT_STALE_TIME,
+        refetchOnMount: options?.refetchOnMount,
     });
 };

@@ -11,6 +11,7 @@ import { computeTotalSteps } from './utils';
 import { ProgressIndicator, OptionChip } from './OnboardingComponents';
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useCurrentUserId } from "@/hooks/useUser";
+import { useOnboardingRedirect } from './useOnboardingRedirect';
 import { toast } from "@/hooks/useToast";
 const Onboarding = () => {
   const { t } = useAppI18n();
@@ -29,6 +30,8 @@ const Onboarding = () => {
   });
   const onboardingData: OnboardingFormData | undefined =
     (formApiData?.data as { form?: { data?: OnboardingFormData } })?.form?.data;
+  useOnboardingRedirect();
+
   useEffect(() => {
     if (onboardingData && !currentScreenId) {
       if (!onboardingData.isEnabled) {
