@@ -1,6 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { getClient } from '../lib/http-client';
-import { ApiResponse } from '../lib/http-client';
+import { getClient, ApiResponse } from '../lib/http-client';
 
 interface AppInfo {
   appId: string;
