@@ -1,19 +1,22 @@
 import { FiUser } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface ContentCardProps {
   item: ContentSearchItem;
+  linkState?: Record<string, unknown>;
 }
 
-const CollectionCard = ({ item }: ContentCardProps) => {
+const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const { t } = useAppI18n();
   const lessons = item.leafNodesCount || 0;
   const creator = item.creator ?? item.createdBy ?? 'Unknown';
+  const location = useLocation();
+  const state = linkState ?? { from: location.pathname };
 
   return (
-    <Link to={`/collection/${item.identifier}`} className="related-resource-card-link">
+    <Link to={`/collection/${item.identifier}`} state={state} className="related-resource-card-link">
       <div className="group related-resource-card-container">
         {/* Image with padding */}
         <div className="related-resource-card-image-wrapper">

@@ -50,6 +50,17 @@ export function useCollectionDetailSelfAssess({
     attemptCount >= maxAttempts
   );
 
+  const attemptCountForPlayerRef = useRef(attemptCount);
+  const prevContentIdRef = useRef(contentId);
+  if (prevContentIdRef.current !== contentId) {
+    // User navigated to different content — pick up the fresh count.
+    prevContentIdRef.current = contentId;
+    attemptCountForPlayerRef.current = attemptCount;
+  } else if (attemptCountForPlayerRef.current === 0 && attemptCount > 0) {
+    // Initial server data arrived (was 0/loading, now has real value).
+    attemptCountForPlayerRef.current = attemptCount;
+  }
+
   const playerMetadata = useMemo((): Record<string, unknown> | undefined => {
     if (!rawPlayerMetadata) return undefined;
     const base = rawPlayerMetadata as Record<string, unknown>;
@@ -57,9 +68,9 @@ export function useCollectionDetailSelfAssess({
     return {
       ...base,
       maxAttempt: maxAttempts,
-      currentAttempt: attemptCount,
+      currentAttempt: attemptCountForPlayerRef.current,
     };
-  }, [rawPlayerMetadata, selfAssessWithBatch, maxAttemptsExceeded, maxAttempts, attemptCount]);
+  }, [rawPlayerMetadata, selfAssessWithBatch, maxAttemptsExceeded, maxAttempts]);
 
   const handleGoBack = useCallback(() => navigate(-1), [navigate]);
 

@@ -239,6 +239,7 @@
     "certificateNotAvailable": "حاليًا، لا تحتوي هذه الدورة على شهادة. قد يضيف منشئ الدورة شهادة لاحقًا.",
     "previewCertificate": "معاينة الشهادة",
     "courseProgress": "تقدم الدورة",
+    "batchStartingOn": "ستبدأ الدفعة في",
     "batchStartedOn": "بدأت الدفعة في",
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
