@@ -126,6 +126,8 @@ export function ImageUploadTab({
           type="button"
           onClick={handleBack}
           className="rounded-lg px-4 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+          data-edataid="cert-image-upload-back"
+          data-pageid="course-consumption"
         >
           ← Back
         </button>
@@ -133,6 +135,8 @@ export function ImageUploadTab({
           type="button"
           onClick={handleCancel}
           className="rounded-lg px-4 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+          data-edataid="cert-image-upload-cancel"
+          data-pageid="course-consumption"
         >
           Cancel
         </button>
@@ -140,6 +144,9 @@ export function ImageUploadTab({
           type="button"
           disabled={!uploadFile || !uploadFileName.trim()}
           onClick={handleUploadAndUse}
+          data-edataid="cert-image-upload-confirm"
+          data-edatatype="SUBMIT"
+          data-pageid="course-consumption"
           className={cn(
             "ml-auto rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik'] inline-flex items-center gap-2",
             !uploadFile || !uploadFileName.trim()

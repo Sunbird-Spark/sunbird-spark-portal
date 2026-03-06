@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/common/Select";
+import useInteract from "@/hooks/useInteract";
 
 function BatchOptionLabel({ batch }: { batch: BatchListItem }) {
   const { t } = useAppI18n();
@@ -43,6 +44,12 @@ const AvailableBatchesCard = ({
   joinError,
 }: AvailableBatchesCardProps) => {
   const { t } = useAppI18n();
+  const { interact } = useInteract();
+
+  const handleBatchSelect = (id: string) => {
+    interact({ id: 'batch-select-available', type: 'CLICK', pageid: 'collection-detail', cdata: [{ id, type: 'Batch' }] });
+    onBatchSelect(id);
+  };
 
   const isEmpty = batches.length === 0 && !isLoading;
 
@@ -70,7 +77,7 @@ const AvailableBatchesCard = ({
           </p>
           <Select
             value={selectedBatchId || ""}
-            onValueChange={onBatchSelect}
+            onValueChange={handleBatchSelect}
             disabled={isLoading || batches.length === 0}
           >
             <SelectTrigger
@@ -105,6 +112,8 @@ const AvailableBatchesCard = ({
             onClick={onJoinCourse}
             disabled={!selectedBatchId || joinLoading}
             className="font-rubik font-medium text-[1rem] leading-normal w-full h-[2.25rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center"
+            data-edataid="join-course-btn"
+            data-pageid="collection-detail"
           >
             {joinLoading ? t("loading") : t("courseDetails.joinTheCourse")}
           </button>

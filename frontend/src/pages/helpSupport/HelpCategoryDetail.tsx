@@ -1,5 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useImpression from "@/hooks/useImpression";
+import { useTelemetry } from "@/hooks/useTelemetry";
+import { navigationHelperService } from "@/services/NavigationHelperService";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import PageLoader from "@/components/common/PageLoader";
 import { useHelpFaqData } from "@/hooks/useFaqData";
@@ -25,13 +28,17 @@ const HelpCategoryDetail = () => {
     const [feedback, setFeedback] = useState<Record<number, "yes" | "no" | "submitted" | null>>({});
     const [feedbackText, setFeedbackText] = useState<Record<number, string>>({});
     const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
+    const [openValue, setOpenValue] = useState<string>("item-0");
+    const prevOpenValueRef = useRef<string>("item-0");
+
+    const telemetry = useTelemetry();
+    useImpression({ type: 'view', pageid: 'help-category-detail', object: { id: categoryId || '', type: 'HelpCategory' } });
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
 
     const { categories: allCategories, loading, error, refetch } = useHelpFaqData();
 
-    // Look up current category by slug
     const category = useMemo(() => {
         if (!allCategories || !Array.isArray(allCategories)) return null;
 
@@ -50,7 +57,6 @@ const HelpCategoryDetail = () => {
         };
     }, [allCategories, categoryId, appName]);
 
-
     const sanitizedFaqs = useMemo(
         () => (category?.faqs ?? []).map((faq) => ({
             ...faq,
@@ -59,6 +65,37 @@ const HelpCategoryDetail = () => {
         [category, appName]
     );
 
+    const handleAccordionChange = (newValue: string) => {
+        const prevValue = prevOpenValueRef.current;
+        let targetIndex: number;
+        let isOpened: boolean;
+
+        if (newValue) {
+            targetIndex = parseInt(newValue.replace("item-", ""), 10);
+            isOpened = true;
+        } else if (prevValue) {
+            targetIndex = parseInt(prevValue.replace("item-", ""), 10);
+            isOpened = false;
+        } else {
+            prevOpenValueRef.current = newValue;
+            setOpenValue(newValue);
+            return;
+        }
+
+        const faq = sanitizedFaqs[targetIndex];
+        if (faq) {
+            telemetry.interact({ edata: {
+                id: 'faq', subtype: 'toggle-clicked', type: 'TOUCH',
+                extra: { values: {
+                    action: 'toggle-clicked', position: targetIndex + 1,
+                    value: { topic: faq.question, description: faq.answer }, isOpened,
+                } },
+            } });
+        }
+
+        prevOpenValueRef.current = newValue;
+        setOpenValue(newValue);
+    };
 
     const handleFeedback = (index: number, value: "yes" | "no") => {
         setFeedback((prev) => ({ ...prev, [index]: value }));
@@ -66,7 +103,14 @@ const HelpCategoryDetail = () => {
 
     const handleSubmitFeedback = async (index: number) => {
         const text = feedbackText[index] ?? "";
-
+        const faq = sanitizedFaqs[index];
+        telemetry.interact({ edata: {
+            id: 'faq', subtype: 'submit-clicked', type: 'TOUCH',
+            extra: { values: {
+                action: 'submit-clicked', position: index + 1,
+                value: { topic: faq?.question || String(index), description: faq?.answer || '', knowMoreText: text },
+            } },
+        } });
         setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
         setFeedbackText((prev) => ({ ...prev, [index]: "" }));
     };
@@ -74,19 +118,23 @@ const HelpCategoryDetail = () => {
     return (
         <main className="profile-main-content">
             <div className="profile-content-wrapper">
-                {/* Header row */}
                 <div className="flex items-center justify-between mb-[2rem]">
                     <button
-                        onClick={() => navigate("/help-support")}
+                        onClick={() => { if (navigationHelperService.shouldProcessNavigationClick()) navigate("/help-support"); }}
                         className="flex items-center gap-[0.5rem] text-sunbird-brick font-medium font-['Rubik'] text-sm hover:opacity-80 transition-opacity"
+                        data-edataid="help-category-go-back"
+                        data-pageid="help-category-detail"
                     >
                         <FaArrowLeftLong className="w-[1rem] h-[1rem]" />
                         {t('button.goBack')}
                     </button>
                     <button
                         onClick={() => setIsReportIssueOpen(true)}
-                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
-                        aria-label={t('help.reportContentIssue')}>
+                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
+                        aria-label={t('help.reportContentIssue')}
+                        data-edataid="help-report-issue-open"
+                        data-pageid="help-category-detail"
+                    >
                         {t('help.reportIssueBtn')}
                     </button>
                 </div>
@@ -116,27 +164,18 @@ const HelpCategoryDetail = () => {
                     />
                 ) : (
                     <>
-                        {/* Category Title */}
-                        <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem] pt-[1.25rem]">
-                            {category.title}
-                        </h1>
+                        <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem] pt-[1.25rem]">{category.title}</h1>
 
-                        {/* FAQ Accordion */}
-                        <Accordion type="single" collapsible defaultValue="item-0" className="space-y-[0.75rem]">
+                        <Accordion type="single" collapsible value={openValue} onValueChange={handleAccordionChange} className="space-y-[0.75rem]">
                             {sanitizedFaqs.map((faq, index) => (
-                                <AccordionItem
-                                    key={index}
-                                    value={`item-${index}`}
-                                    className="rounded-[0.625rem] bg-sunbird-base-white border-b-0"
-                                >
-                                    <AccordionTrigger className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick">
+                                <AccordionItem key={index} value={`item-${index}`} className="rounded-[0.625rem] bg-sunbird-base-white border-b-0">
+                                    <AccordionTrigger
+                                        className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick"
+                                    >
                                         {faq.question}
                                     </AccordionTrigger>
                                     <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
-                                        <div
-                                            className="mb-[1rem] px-[1.25rem]"
-                                            dangerouslySetInnerHTML={{ __html: faq.answer }}
-                                        />
+                                        <div className="mb-[1rem] px-[1.25rem]" dangerouslySetInnerHTML={{ __html: faq.answer }} />
                                         <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
                                             {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
                                                 <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">
@@ -158,6 +197,8 @@ const HelpCategoryDetail = () => {
                                                         <button
                                                             onClick={() => handleSubmitFeedback(index)}
                                                             disabled={!feedbackText[index]?.trim()}
+                                                            data-edataid="faq-feedback-submit"
+                                                            data-pageid="help-category-detail"
                                                             className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
                                                                 ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
                                                                 : "bg-sunbird-brick hover:opacity-90"
@@ -173,12 +214,18 @@ const HelpCategoryDetail = () => {
                                                     <button
                                                         onClick={() => handleFeedback(index, "no")}
                                                         className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                        data-edataid="faq-feedback-no"
+                                                        data-pageid="help-category-detail"
+                                                        data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
                                                     >
                                                         {t('no')}
                                                     </button>
                                                     <button
                                                         onClick={() => handleFeedback(index, "yes")}
                                                         className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                        data-edataid="faq-feedback-yes"
+                                                        data-pageid="help-category-detail"
+                                                        data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
                                                     >
                                                         {t('yes')}
                                                     </button>

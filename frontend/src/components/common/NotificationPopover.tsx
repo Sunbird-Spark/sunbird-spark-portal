@@ -77,7 +77,7 @@ export const NotificationPopover = () => {
     return (
         <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
             <Popover.Trigger asChild>
-                <button className="profile-action-btn relative" aria-label={t("common.notifications")}>
+                <button className="profile-action-btn relative" aria-label={t("common.notifications")} data-edataid="notifications-btn" data-edatatype="CLICK">
                     <FiBell className="profile-action-icon" aria-hidden="true" />
                     {unreadCount > 0 && (
                         <span className="notification-badge"></span>

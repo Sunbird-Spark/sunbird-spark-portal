@@ -24,6 +24,10 @@ import ConfirmDialog from "@/components/common/ConfirmDialog";
 import "../home/home.css";
 import "./workspace.css";
 import { QumlEditor } from "@/components/quml-editor";
+import { useTelemetry } from "@/hooks/useTelemetry";
+import useImpression from "@/hooks/useImpression";
+import usePageSession from "@/hooks/usePageSession";
+import useInteract from "@/hooks/useInteract";
 
 // Resource editor option IDs that should trigger the content editor
 const RESOURCE_EDITOR_OPTIONS = ['quiz', 'story'];
@@ -102,6 +106,11 @@ const WorkspacePage = () => {
   const questionSetRetire = useQuestionSetRetire();
   const [orgData, setOrgData] = useState<any>(null);
   const orgFetchAttempted = useRef(false);
+  const telemetry = useTelemetry();
+  const { interact } = useInteract();
+
+  useImpression({ type: 'view', pageid: 'workspace' });
+  usePageSession({ pageid: 'workspace' });
 
   useEffect(() => {
     if (slug && !orgFetchAttempted.current) {
@@ -430,6 +439,7 @@ const WorkspacePage = () => {
 
   const handleConfirmAction = async () => {
     if (!confirmDialog) return;
+
     const { contentId, mimeType } = confirmDialog;
     setIsConfirming(true);
     try {
@@ -461,7 +471,18 @@ const WorkspacePage = () => {
   const handleRoleChange = (role: UserRole) => {
     if (role === 'creator' && !hasCreatorRole) return;
     if (role === 'reviewer' && !hasReviewerRole) return;
+    interact({ id: 'workspace-role-switch', type: 'CLICK', pageid: 'workspace', cdata: [{ id: role, type: 'Role' }] });
     setUserRole(role);
+  };
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    interact({ id: 'workspace-view-mode-toggle', type: 'CLICK', pageid: 'workspace', cdata: [{ id: mode, type: 'ViewMode' }] });
+    setViewMode(mode);
+  };
+
+  const handleTypeFilterChange = (type: ContentTypeFilter) => {
+    interact({ id: 'workspace-type-filter', type: 'CLICK', pageid: 'workspace', cdata: [{ id: type, type: 'ContentType' }] });
+    setTypeFilter(type);
   };
 
   const navigationProps = {
@@ -473,9 +494,9 @@ const WorkspacePage = () => {
     hasReviewerRole,
     counts,
     viewMode,
-    onViewModeChange: setViewMode,
+    onViewModeChange: handleViewModeChange,
     typeFilter,
-    onTypeFilterChange: setTypeFilter,
+    onTypeFilterChange: handleTypeFilterChange,
     contentCount: showContent ? visibleContents.length : undefined,
     totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,
@@ -525,6 +546,11 @@ const WorkspacePage = () => {
             description={t('workspace.deleteConfirmation')}
             confirmLabel={t('delete')}
             confirmVariant="destructive"
+            confirmButtonProps={{
+              'data-edataid': 'workspace-delete-content-confirm-btn',
+              'data-pageid': 'workspace',
+              'data-cdata': JSON.stringify(confirmDialog ? [{ id: confirmDialog.contentId, type: 'ContentId' }] : [])
+            }}
           />
           <ContentNameDialog
             open={showNameDialog}
@@ -533,6 +559,11 @@ const WorkspacePage = () => {
             isLoading={isCreating}
             optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
             optionId={selectedOption ?? undefined}
+            submitButtonProps={{
+              'data-edataid': 'workspace-create-collection-btn',
+              'data-pageid': 'workspace',
+              'data-cdata': JSON.stringify([{ id: selectedOption || 'unknown', type: 'EditorType' }])
+            }}
           />
           <ResourceFormDialog
             open={showResourceFormDialog}
@@ -543,6 +574,11 @@ const WorkspacePage = () => {
             orgFramework={orgFramework}
             formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
             title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('workspace.createContent')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
+            submitButtonProps={{
+               'data-edataid': 'workspace-create-resource-btn',
+               'data-pageid': 'workspace',
+               'data-cdata': JSON.stringify([{ id: selectedOption || 'unknown', type: 'EditorType' }])
+            }}
           />
     </div>
   );

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
@@ -9,6 +9,9 @@ import { useCurrentUserId } from '@/hooks/useUser';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import useImpression from '@/hooks/useImpression';
+import usePageSession from '@/hooks/usePageSession';
+import useInteract from '@/hooks/useInteract';
 import './courseDashboard.css';
 
 type DashboardTab = 'batches' | 'certificates';
@@ -19,10 +22,6 @@ const CourseDashboardPage: React.FC = () => {
   const { t } = useAppI18n();
   const { collectionId, tab } = useParams<{ collectionId: string; tab: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Capture the back-destination once on mount; tab switching clears location.state
-  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
   const { data: currentUserId } = useCurrentUserId();
@@ -30,6 +29,10 @@ const CourseDashboardPage: React.FC = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
+
+  useImpression({ type: 'view', pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
+  usePageSession({ pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
+  const { interact } = useInteract();
 
   // Redirect to default tab if the tab param is invalid
   useEffect(() => {
@@ -43,6 +46,7 @@ const CourseDashboardPage: React.FC = () => {
     : 'batches';
 
   const switchTab = (t: DashboardTab) => {
+    interact({ id: 'course-dashboard-tab-switch', type: 'CLICK', pageid: 'course-dashboard', cdata: [{ id: t, type: 'Tab' }] });
     navigate(`/collection/${collectionId}/dashboard/${t}`);
   };
 
@@ -54,7 +58,7 @@ const CourseDashboardPage: React.FC = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <button
-          onClick={() => navigate(`/collection/${collectionId}`, { state: { from: backToRef.current } })}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
           data-testid="back-to-course-btn"
         >

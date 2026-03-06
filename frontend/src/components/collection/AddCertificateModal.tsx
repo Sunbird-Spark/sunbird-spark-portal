@@ -43,6 +43,8 @@ const AddCertificateModal = ({
                   type="button"
                   onClick={() => { state.setView("main"); state.setErrorMsg(""); }}
                   className="text-sm text-sunbird-brick hover:underline font-['Rubik']"
+                  data-edataid="cert-modal-back"
+                  data-pageid="course-consumption"
                 >
                   ← Back
                 </button>
@@ -51,6 +53,8 @@ const AddCertificateModal = ({
                   <button
                     className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors"
                     aria-label="Close"
+                    data-edataid="cert-modal-close"
+                    data-pageid="course-consumption"
                   >
                     <FiX className="w-5 h-5" />
                   </button>
@@ -81,6 +85,8 @@ const AddCertificateModal = ({
                           key={tab}
                           type="button"
                           onClick={() => state.setCertTab(tab)}
+                          data-edataid={`cert-tab-${tab}`}
+                          data-pageid="course-consumption"
                           className={cn(
                             "flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors",
                             state.certTab === tab
@@ -140,6 +146,8 @@ const AddCertificateModal = ({
                     type="button"
                     onClick={state.handleClose}
                     className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+                    data-edataid="cert-modal-cancel"
+                    data-pageid="course-consumption"
                   >
                     Cancel
                   </button>
@@ -147,6 +155,9 @@ const AddCertificateModal = ({
                     type="button"
                     disabled={!state.isAddCertEnabled}
                     onClick={state.handleAddCertificate}
+                    data-edataid="cert-modal-add"
+                    data-edatatype="SUBMIT"
+                    data-pageid="course-consumption"
                     className={cn(
                       "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
                       !state.isAddCertEnabled

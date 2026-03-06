@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -15,6 +15,7 @@ interface ContentNameDialogProps {
   isLoading?: boolean;
   optionTitle?: string;
   optionId?: string;
+  submitButtonProps?: Record<string, any>;
 }
 
 export default function ContentNameDialog({
@@ -24,6 +25,7 @@ export default function ContentNameDialog({
   isLoading = false,
   optionTitle,
   optionId,
+  submitButtonProps,
 }: ContentNameDialogProps) {
   const { t } = useAppI18n();
   const [name, setName] = useState("");
@@ -31,6 +33,21 @@ export default function ContentNameDialog({
   const [collectionType, setCollectionType] = useState("");
 
   const isCollection = optionId === 'collection';
+
+  const submitCdata = useMemo(() => {
+    let baseCdata: any[] = [];
+    if (submitButtonProps?.['data-cdata']) {
+      try {
+        const parsed = typeof submitButtonProps['data-cdata'] === 'string' 
+          ? JSON.parse(submitButtonProps['data-cdata']) 
+          : submitButtonProps['data-cdata'];
+        baseCdata = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn('Failed to parse data-cdata in ContentNameDialog', e);
+      }
+    }
+    return JSON.stringify([...baseCdata, { id: name, type: 'ContentName' }]);
+  }, [submitButtonProps, name]);
 
   // Reset fields when dialog is closed
   useEffect(() => {
@@ -156,6 +173,8 @@ export default function ContentNameDialog({
               size="sm"
               disabled={!canSubmit || isLoading}
               className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
+              {...submitButtonProps}
+              data-cdata={submitCdata}
             >
               {isLoading ? t('workspace.creating') : t('create')}
             </Button>

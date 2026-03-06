@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CreateBatchModal from './CreateBatchModal';
 
+vi.mock('@/hooks/useInteract', () => ({
+  default: () => ({ interact: vi.fn() }),
+}));
+
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => {

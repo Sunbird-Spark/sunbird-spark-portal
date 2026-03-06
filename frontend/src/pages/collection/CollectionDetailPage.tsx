@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { useCollection } from "@/hooks/useCollection";
-import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
+import { useCollectionPageData } from "@/hooks/useCollectionPageData";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
@@ -14,62 +13,48 @@ import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
+import useImpression from "@/hooks/useImpression";
+import usePageSession from "@/hooks/usePageSession";
+import { useCollectionAutoNavigate } from "@/hooks/useCollectionAutoNavigate";
+import { useCollectionPageUIState } from "@/hooks/useCollectionPageUIState";
 import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
-  const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
 
-  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
-  const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
-  if (capturedCollectionIdRef.current !== collectionId) {
-    capturedCollectionIdRef.current = collectionId;
-    backToRef.current = (location.state as { from?: string } | null)?.from ?? '/explore';
-  }
-  const backTo = backToRef.current;
-  const { isAuthenticated } = usePermissions();
-  const isContentCreator = useIsContentCreator();
-  const { t } = useAppI18n();
-  const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
-  const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
+  useImpression({ type: 'view', pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
+  usePageSession({ pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
 
-  const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
-  const collectionData = collectionDataFromApi ?? null;
-  const { data: userReadData } = useUserRead();
-  const userProfile = userReadData?.data?.response;
-  const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
   const {
-    isEnrolledInCurrentBatch,
-    contentStatusMap,
-    contentStateFetched,
-    contentAttemptInfoMap,
-    courseProgressProps,
-    batches,
-    batchListLoading,
-    batchListError,
-    firstCertPreviewUrl,
-    hasCertificate,
-    joinLoading,
-    joinError,
-    handleJoinCourse,
-    effectiveBatchId,
-    isBatchEnded,
-    isBatchUpcoming,
-    batchStartDateFromRead,
-  } = enrollment;
-  const hasBatchInRoute = !!batchIdParam;
-  const [selectedBatchId, setSelectedBatchId] = useState("");
+    isAuthenticated, collectionDataFromApi, collectionData, userProfile, enrollment,
+    currentUserId, isCreatorViewingOwnCollection, contentCreatorPrivilege,
+    isTrackable, displayCollectionData,
+    isLoading, isFetching, isError, error, refetch
+  } = useCollectionPageData(collectionId, batchIdParam);
 
-  const currentUserId = userAuthInfoService.getUserId();
-  const isCreatorViewingOwnCollection =
-    !!isAuthenticated &&
-    !!collectionData?.createdBy &&
-    !!currentUserId &&
-    collectionData.createdBy === currentUserId;
-  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
+  const {
+    isEnrolledInCurrentBatch, contentStatusMap, contentStateFetched, contentAttemptInfoMap, courseProgressProps, batches,
+    batchListLoading, batchListError, firstCertPreviewUrl, hasCertificate, joinLoading, joinError,
+    handleJoinCourse, effectiveBatchId, isBatchEnded, isBatchUpcoming, batchStartDateFromRead
+  } = enrollment;
+
+  const hasBatchInRoute = !!batchIdParam;
+
+  const {
+    certificatePreviewOpen, setCertificatePreviewOpen,
+    certificatePreviewUrl, setCertificatePreviewUrl,
+    selectedBatchId, setSelectedBatchId,
+    expandedModules, setExpandedModules,
+    toggleModule
+  } = useCollectionPageUIState({ batchIdParam });
+
+  const { initialExpandedSet } = useCollectionAutoNavigate({
+    collectionId, contentId, collectionData, hasBatchInRoute,
+    batchIdParam, isTrackable, contentCreatorPrivilege, enrollment,
+  });
 
   const [, setAuthRefresh] = useState(0);
   const triedAuthRefreshRef = useRef(false);
@@ -82,14 +67,6 @@ const CollectionDetailPage = () => {
       .catch(() => {});
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
-    const batchId = enrollment.enrollmentForCollection?.batchId;
-    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true });
-  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate]);
-
-  const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
-
   const upcomingBatchBlocked =
     isTrackable &&
     !contentCreatorPrivilege &&
@@ -97,11 +74,6 @@ const CollectionDetailPage = () => {
     isEnrolledInCurrentBatch &&
     isBatchUpcoming;
 
-  /** Block content when trackable and:
-   * - not logged in, or
-   * - logged in but not enrolled in current batch (and not creator), or
-   * - enrolled in an upcoming (not yet started) batch.
-   */
   const contentBlocked =
     isTrackable &&
     (
@@ -109,12 +81,9 @@ const CollectionDetailPage = () => {
       (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch)) ||
       upcomingBatchBlocked
     );
+
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
-  const displayCollectionData = useMemo(
-    () => (collectionData ? { ...collectionData, image: collectionData.image || defaultCollectionImage } : null),
-    [collectionData]
-  );
 
   const {
     data: searchData,
@@ -133,6 +102,14 @@ const CollectionDetailPage = () => {
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
   const rawPlayerMetadata = isQumlContent ? qumlData : selectedContentData;
+
+  const { t } = useAppI18n();
+
+  const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
+  const relatedContentItems = useMemo(
+    () => (hasSearchResults ? mapSearchContentToRelatedContentItems(searchData?.data?.content, collectionData?.id ?? undefined, 3) : []),
+    [hasSearchResults, searchData?.data?.content, collectionData?.id]
+  );
 
   const {
     maxAttemptsExceeded,
@@ -166,8 +143,6 @@ const CollectionDetailPage = () => {
     contentType: currentContentNode?.contentType,
   });
 
-  const [expandedModules, setExpandedModules] = useState<string[]>([]);
-  const initialExpandedSet = useRef(false);
 
   useInitialCollectionContentNavigation({
     collectionData,
@@ -191,14 +166,6 @@ const CollectionDetailPage = () => {
   }, [collectionData?.children]);
   useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
 
-  const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
-  const relatedContentItems = useMemo(
-    () => (hasSearchResults ? mapSearchContentToRelatedContentItems(searchData?.data?.content, collectionData?.id ?? undefined, 3) : []),
-    [hasSearchResults, searchData?.data?.content, collectionData?.id]
-  );
-  const toggleModule = (moduleId: string) => {
-    setExpandedModules((prev) => (prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]));
-  };
   const certificatePreviewDetails = useMemo(() => ({
     recipientName: userProfile ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined : undefined,
   }), [userProfile?.firstName, userProfile?.lastName]);
@@ -230,7 +197,7 @@ const CollectionDetailPage = () => {
 
   return (
     <CollectionDetailLayout
-      navigation={{ onGoBack: () => navigate(backTo), t }}
+      navigation={{ onGoBack: () => navigate(-1), t }}
       loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
       collection={{
         collectionDataFromApi: collectionDataFromApi ?? null,

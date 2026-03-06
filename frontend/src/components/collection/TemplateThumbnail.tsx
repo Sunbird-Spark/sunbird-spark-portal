@@ -13,6 +13,8 @@ export function TemplateThumbnail({ name, previewUrl, selected, onClick }: Templ
     <button
       type="button"
       onClick={onClick}
+      data-edataid="cert-template-preview"
+      data-pageid="course-consumption"
       className={cn(
         "rounded-lg border-2 overflow-hidden transition-all text-left w-full",
         selected

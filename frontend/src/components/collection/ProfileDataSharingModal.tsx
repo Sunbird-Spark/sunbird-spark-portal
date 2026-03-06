@@ -108,6 +108,8 @@ export default function ProfileDataSharingModal({
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground"
             aria-label={t("close")}
+            data-edataid="profile-sharing-modal-close"
+            data-pageid="collection-detail"
           >
             <FiX className="w-5 h-5" />
           </Button>
@@ -142,6 +144,8 @@ export default function ProfileDataSharingModal({
             onClick={handleDoNotShare}
             disabled={isSubmitting}
             className="font-rubik"
+            data-edataid="profile-sharing-dont-share"
+            data-pageid="collection-detail"
           >
             {t("profileDataSharing.dontShare")}
           </Button>
@@ -150,6 +154,8 @@ export default function ProfileDataSharingModal({
             onClick={handleShare}
             disabled={!tncAgreed || isSubmitting}
             className="font-rubik bg-sunbird-brick text-white hover:opacity-90"
+            data-edataid="profile-sharing-share"
+            data-pageid="collection-detail"
           >
             {isSubmitting ? t("loading") : t("profileDataSharing.share")}
           </Button>

@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/useToast";
 import { useIsContentCreator } from "@/hooks/useUser";
 import { usePermissions } from "@/hooks/usePermission";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useInteract from "@/hooks/useInteract";
 
 interface BatchCardProps {
   collectionId: string;
@@ -26,6 +27,7 @@ import { TabBar, ActiveTab } from "./BatchTabBar";
 const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const { toast } = useToast();
   const { t } = useAppI18n();
+  const { interact } = useInteract();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editBatch, setEditBatch]   = useState<Batch | null>(null);
@@ -96,6 +98,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
               onClick={() => refetch()}
               disabled={isFetching}
               title="Refresh batch list"
+              data-edataid="batch-list-refresh"
+              data-pageid="course-consumption"
               className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiRefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
@@ -104,6 +108,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
               title="Create batch"
+              data-edataid="batch-create-open"
+              data-pageid="course-consumption"
               className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors"
             >
               <FiPlus className="w-4 h-4" />
@@ -126,6 +132,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                   type="button"
                   disabled={!reviewerTncChecked || acceptTncMutation.isPending}
                   onClick={handleAcceptReviewerTnc}
+                  data-edataid="report-viewer-tnc-accept"
+                  data-pageid="course-consumption"
                   className={cn(
                     "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors",
                     !reviewerTncChecked || acceptTncMutation.isPending
@@ -143,7 +151,15 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
         {/* ── Tabs ── */}
         {!isLoading && !isError && (
-          <TabBar activeTab={activeTab} counts={counts} onChange={setActiveTab} />
+          <TabBar activeTab={activeTab} counts={counts} onChange={(tab) => {
+            interact({
+              id: 'batch-tab-switch',
+              type: 'CLICK',
+              pageid: 'course-consumption',
+              cdata: [{ id: tab, type: 'Tab' }]
+            });
+            setActiveTab(tab);
+          }} />
         )}
 
         {/* ── Loading ── */}

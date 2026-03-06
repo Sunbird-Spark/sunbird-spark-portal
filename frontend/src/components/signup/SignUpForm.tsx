@@ -200,6 +200,8 @@ export const SignUpForm = ({
                     disabled={!isStep1Valid || isLoading}
                     onClick={handleContinue}
                     className="mt-4 h-[3rem]"
+                    data-edataid="signup-continue-btn"
+                    data-pageid="signup"
                 >
                     {isLoading ? t("signUp.creatingAccount") : t("continue")}
                 </PrimaryButton>

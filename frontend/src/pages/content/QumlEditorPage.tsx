@@ -7,6 +7,9 @@ import type { QumlEditorEvent, QumlEditorContextOverrides } from '@/services/edi
 import { QuestionSetService } from '@/services/QuestionSetService';
 import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
+import useImpression from '@/hooks/useImpression';
+import usePageSession from '@/hooks/usePageSession';
+import useInteract from '@/hooks/useInteract';
 
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -16,8 +19,12 @@ const QumlEditorPage = () => {
   const { t } = useAppI18n();
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
+  const { interact } = useInteract();
   const [metadata, setMetadata] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useImpression({ type: 'view', pageid: 'quml-editor', object: { id: contentId || '', type: 'Content' } });
+  usePageSession({ pageid: 'quml-editor', object: { id: contentId || '', type: 'Content' } });
 
   useEffect(() => {
     if (!contentId) {
@@ -46,12 +53,19 @@ const QumlEditorPage = () => {
   }), [editorMode]);
 
   const handleEditorEvent = useCallback(async (event: QumlEditorEvent) => {
+    interact({
+      id: 'quml-editor-event',
+      type: 'OTHER',
+      pageid: 'quml-editor',
+      cdata: [{ id: contentId || '', type: 'ContentId' }],
+    });
+
     const closeEditor = (event.data as any)?.close;
     if (closeEditor) {
       await retireLock();
       navigate('/workspace');
     }
-  }, [navigate, retireLock]);
+  }, [navigate, retireLock, interact, contentId]);
 
   const handleTelemetryEvent = useCallback((_event: any) => { }, []);
 

@@ -89,6 +89,8 @@ export const SignUpOtpVerification = ({ otp, setOtp, isOtpValid, handleVerifyOtp
                         disabled={!isOtpValid || isLoading}
                         onClick={handleVerifyOtp}
                         className="h-[3rem]"
+                        data-edataid="signup-verify-otp-btn"
+                        data-pageid="signup"
                     >
                         {isLoading ? t("signUp.verifying") : t("signUp.submit")}
                     </PrimaryButton>

@@ -57,6 +57,8 @@ export function ModalStatusOverlay({
                 setView("main");
               }}
               className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-['Rubik']"
+              data-edataid="cert-status-continue"
+              data-pageid="course-consumption"
             >
               <FiRefreshCw className="w-4 h-4" />
               Refresh
@@ -65,6 +67,8 @@ export function ModalStatusOverlay({
               type="button"
               onClick={() => { setStep("idle"); setView("main"); }}
               className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+              data-edataid="cert-status-back"
+              data-pageid="course-consumption"
             >
               Proceed Anyway
             </button>
@@ -88,6 +92,8 @@ export function ModalStatusOverlay({
             type="button"
             onClick={handleClose}
             className="mt-2 rounded-lg px-6 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-['Rubik']"
+            data-edataid="cert-status-close"
+            data-pageid="course-consumption"
           >
             Done
           </button>
@@ -109,6 +115,8 @@ export function ModalStatusOverlay({
               type="button"
               onClick={handleClose}
               className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+              data-edataid="cert-status-cancel"
+              data-pageid="course-consumption"
             >
               Cancel
             </button>
@@ -116,6 +124,8 @@ export function ModalStatusOverlay({
               type="button"
               onClick={() => setStep("idle")}
               className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-['Rubik']"
+              data-edataid="cert-status-retry"
+              data-pageid="course-consumption"
             >
               Try Again
             </button>
