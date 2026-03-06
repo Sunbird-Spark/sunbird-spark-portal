@@ -21,9 +21,9 @@
   background-color: hsl(var(--sunbird-brick) / 0.85);
 }
 
-/* Collection player: fixed 536px, all inner players fill the container */
+/* Collection player: fixed 33.5rem, all inner players fill the container */
 .collection-player-content {
-  height: 536px;
+  height: 33.5rem;
   overflow: hidden;
 }
 
