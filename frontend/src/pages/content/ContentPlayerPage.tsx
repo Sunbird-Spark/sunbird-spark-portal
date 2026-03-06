@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
@@ -16,6 +16,12 @@ const ContentPlayerPage = () => {
   const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Resolve where to go back: use the stored `from` only if it's not itself a content page
+  const stateFrom = (location.state as { from?: string } | null)?.from;
+  const backTo = stateFrom && !stateFrom.startsWith('/content/') ? stateFrom : '/home';
+  const linkState = { from: backTo };
   
   const { data, isLoading, error } = useContentRead(contentId || '');
   const contentData = data?.data?.content;
@@ -89,7 +95,7 @@ const ContentPlayerPage = () => {
       <main className="content-player-container">
         {/* Go Back Link */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(backTo)}
           className="content-player-go-back"
         >
           <FiArrowLeft className="content-player-back-arrow" />
@@ -139,6 +145,7 @@ const ContentPlayerPage = () => {
               ? "collection"
               : "resource"
           }
+          linkState={linkState}
         />
       </main>
 

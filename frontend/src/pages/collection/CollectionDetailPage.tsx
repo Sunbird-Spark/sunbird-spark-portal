@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
@@ -21,6 +21,15 @@ import "./collection.css";
 const CollectionDetailPage = () => {
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
+  const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
+  if (capturedCollectionIdRef.current !== collectionId) {
+    capturedCollectionIdRef.current = collectionId;
+    backToRef.current = (location.state as { from?: string } | null)?.from ?? '/explore';
+  }
+  const backTo = backToRef.current;
   const { isAuthenticated } = usePermissions();
   const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
@@ -60,7 +69,6 @@ const CollectionDetailPage = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
-  /** Content creators get access without batch and no progress (own or others' collection); BatchCard only when viewing own. */
   const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
 
   const [, setAuthRefresh] = useState(0);
@@ -222,7 +230,7 @@ const CollectionDetailPage = () => {
 
   return (
     <CollectionDetailLayout
-      navigation={{ onGoBack: () => navigate(-1), t }}
+      navigation={{ onGoBack: () => navigate(backTo), t }}
       loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
       collection={{
         collectionDataFromApi: collectionDataFromApi ?? null,

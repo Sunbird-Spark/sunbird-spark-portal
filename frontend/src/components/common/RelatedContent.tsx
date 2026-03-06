@@ -13,6 +13,7 @@ export interface RelatedContentProps {
   cardType: "collection" | "resource";
   title?: string;
   limit?: number;
+  linkState?: Record<string, unknown>;
 }
 
 const RelatedContent = ({
@@ -20,6 +21,7 @@ const RelatedContent = ({
   cardType,
   title,
   limit = DEFAULT_LIMIT,
+  linkState,
 }: RelatedContentProps) => {
   const { t } = useAppI18n();
   const displayTitle = title ?? t("courseDetails.relatedContent");
@@ -33,7 +35,7 @@ const RelatedContent = ({
   const renderCard = (item: RelatedContentItem) => {
     const itemCardType = item.cardType ?? cardType;
     const CardComponent = itemCardType === "collection" ? CollectionCard : ResourceCard;
-    const card = <CardComponent item={item} />;
+    const card = <CardComponent item={item} linkState={linkState} />;
     return <Fragment key={item.identifier}>{card}</Fragment>;
   };
 

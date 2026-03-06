@@ -66,6 +66,8 @@ export interface CollectionContentAreaCreatorProps {
   contentCreatorPrivilege?: boolean;
   userProfile?: Record<string, unknown> | null;
   userId?: string | null;
+  /** The route to return to when the user exits the collection (used for back navigation). */
+  backTo?: string;
 }
 
 interface CollectionContentAreaProps {
@@ -76,6 +78,7 @@ interface CollectionContentAreaProps {
   enrollment: CollectionContentAreaEnrollmentProps;
   sidebar: CollectionContentAreaSidebarProps;
   creator?: CollectionContentAreaCreatorProps;
+  backTo?: string;
 }
 
 export default function CollectionContentArea({
@@ -86,6 +89,7 @@ export default function CollectionContentArea({
   enrollment,
   sidebar,
   creator = {},
+  backTo = '/home',
 }: CollectionContentAreaProps) {
   const {
     isTrackable,
@@ -182,7 +186,7 @@ export default function CollectionContentArea({
               <Button
                 variant="outline"
                 className="w-full flex items-center justify-center gap-2 font-['Rubik'] text-sunbird-brick border-sunbird-brick hover:bg-sunbird-brick/5 bg-white shadow-sm"
-                onClick={() => navigate(`/collection/${collectionId}/dashboard/batches`)}
+                onClick={() => navigate(`/collection/${collectionId}/dashboard/batches`, { state: { from: backTo } })}
                 data-testid="view-dashboard-btn"
               >
                 <FiLayout className="w-4 h-4" />
