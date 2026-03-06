@@ -95,22 +95,33 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
 export const getUserByEmail = async (emailId: string, req: Request): Promise<boolean> => {
     const url = `${KONG_URL}/user/v1/exists/email/${emailId}`;
 
-    const headers = {
-        'x-device-id': req.get('x-device-id'),
+    const deviceId = req.get('x-device-id');
+    const headers: Record<string, string> = {
         'x-msgid': uuidv4(),
         ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
         'Content-Type': 'application/json',
         accept: 'application/json',
         Authorization: `Bearer ${resolveKongBearerToken(req)}`,
     };
+    if (deviceId) headers['x-device-id'] = deviceId;
 
-    const response = await axios.get(url, { headers });
-    const responseData = response.data;
-    if (responseData.responseCode !== 'OK') {
-        logger.error(`Failed to fetch user by google emailid: ${responseData.responseCode}`);
-        throw new Error(_.get(responseData, 'params.errmsg') || _.get(responseData, 'params.err'));
+    try {
+        const response = await axios.get(url, { headers });
+        const responseData = response.data;
+        if (responseData.responseCode !== 'OK') {
+            logger.error(`Failed to fetch user by google emailid: ${responseData.responseCode}`);
+            throw new Error(_.get(responseData, 'params.errmsg') || _.get(responseData, 'params.err'));
+        }
+        return responseData.result.exists;
+    } catch (err: any) {
+        if (err.response) {
+            logger.error('getUserByEmail API error', {
+                status: err.response.status,
+                data: err.response.data,
+            });
+        }
+        throw err;
     }
-    return responseData.result.exists;
 };
 
 export const createUserWithEmail = async (googleUser: any, client_id: string, req: Request): Promise<UserApiResponse> => {
