@@ -127,16 +127,12 @@ const ContentPlayerPage = () => {
 
         {/* Content Player */}
         <div className="content-player-video-container">
-          <div className="content-player-video-wrapper">
-            <div className="content-player-video-relative">
-              <PlayerComponent
-                mimeType={playerMetadata.mimeType}
-                metadata={playerMetadata}
-                onPlayerEvent={handlePlayerEvent}
-                onTelemetryEvent={handleTelemetryEvent}
-              />
-            </div>
-          </div>
+          <PlayerComponent
+            mimeType={playerMetadata.mimeType}
+            metadata={playerMetadata}
+            onPlayerEvent={handlePlayerEvent}
+            onTelemetryEvent={handleTelemetryEvent}
+          />
         </div>
 
         {/* Related Content Section */}

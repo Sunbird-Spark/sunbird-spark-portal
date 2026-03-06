@@ -20,3 +20,19 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--sunbird-brick) / 0.85);
 }
+
+/* Collection player: fixed 33.5rem, all inner players fill the container */
+.collection-player-content {
+  height: 33.5rem;
+  overflow: hidden;
+}
+
+.collection-player-content .content-player-wrapper,
+.collection-player-content .content-player-embed,
+.collection-player-content iframe.content-player-embed,
+.collection-player-content div.content-player-embed,
+.collection-player-content sunbird-pdf-player,
+.collection-player-content sunbird-epub-player,
+.collection-player-content sunbird-quml-player {
+  height: 100%;
+}
