@@ -70,7 +70,11 @@ export const RoleDialog = ({
       aria-modal="true"
       aria-label={dialogState.operation === "add" ? "Add New Role" : "Edit Role"}
     >
-      <div className="um-dialog-panel" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="um-dialog-panel"
+        onClick={(e) => e.stopPropagation()}
+        role="document"
+      >
         <div className="um-dialog-header">
           <h2 className="um-dialog-title">
             {dialogState.operation === "add" ? "Add New Role" : "Edit Role"}

@@ -12,6 +12,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:a11y": "vitest run a11y",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext ts,tsx",
     "lint:fix": "eslint src --ext ts,tsx --fix",
@@ -91,6 +92,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",
+    "axe-core": "^4.11.1",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.0.0",
@@ -105,6 +107,7 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "vitest-axe": "^0.1.0"
   }
 }

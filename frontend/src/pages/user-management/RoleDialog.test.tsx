@@ -17,14 +17,25 @@ vi.mock('@/components/common/Select', () => ({
   ),
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
   SelectContent: ({ children, onValueChange, disabled }: any) => (
-    <div>
+    <div role="listbox">
       {React.Children.map(children, (child) =>
         React.isValidElement(child) ? React.cloneElement(child as any, { onValueChange, disabled }) : child
       )}
     </div>
   ),
   SelectItem: ({ children, value, onValueChange }: any) => (
-    <div onClick={() => onValueChange?.(value)} data-testid={`item-${value}`}>
+    <div
+      onClick={() => onValueChange?.(value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onValueChange?.(value);
+        }
+      }}
+      data-testid={`item-${value}`}
+      role="option"
+      aria-selected="false"
+      tabIndex={0}
+    >
       {children}
     </div>
   ),

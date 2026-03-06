@@ -66,7 +66,17 @@ vi.mock('@/components/home/Sheet', () => ({
     children: React.ReactNode;
   }) => (open ? (
     <div data-testid="mobile-sheet">
-      <div data-testid="sheet-backdrop" onClick={() => onOpenChange(false)} />
+      <div
+        data-testid="sheet-backdrop"
+        onClick={() => onOpenChange(false)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onOpenChange(false);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      />
       {children}
     </div>
   ) : null),
@@ -76,7 +86,7 @@ vi.mock('@/components/home/Sheet', () => ({
     children: React.ReactNode;
     side?: string;
     className?: string;
-  }) => <div onClick={(e) => e.stopPropagation()}>{children}</div>,
+  }) => <div onClick={(e) => e.stopPropagation()} role="document">{children}</div>,
   SheetTitle: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),

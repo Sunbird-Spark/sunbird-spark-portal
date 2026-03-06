@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "axe-core": "^4.11.1",
+    "vitest-axe": "^0.1.0"
+  }
+}
