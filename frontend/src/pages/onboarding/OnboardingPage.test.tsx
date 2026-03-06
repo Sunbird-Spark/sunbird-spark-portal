@@ -27,10 +27,12 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
-const { mockMutateAsync, mockToast, mockUseCurrentUserId } = vi.hoisted(() => ({
+const { mockMutateAsync, mockToast, mockUseCurrentUserId, mockUseOnboardingRedirect } = vi.hoisted(() => ({
   mockMutateAsync: vi.fn().mockResolvedValue({}),
   mockToast: vi.fn(),
   mockUseCurrentUserId: vi.fn().mockReturnValue({ data: 'mock-user-id' }),
+  // Default: no-op — onboarding page renders normally.
+  mockUseOnboardingRedirect: vi.fn(),
 }));
 
 // Mock dependencies
@@ -42,6 +44,9 @@ vi.mock('@/hooks/useUser', () => ({
   useCurrentUserId: () => mockUseCurrentUserId(),
 }));
 vi.mock('@/hooks/useToast', () => ({ toast: mockToast }));
+vi.mock('./useOnboardingRedirect', () => ({
+  useOnboardingRedirect: () => mockUseOnboardingRedirect(),
+}));
 // Mock assets
 vi.mock('../../../src/assets/sunbird-logo.svg', () => ({
   default: 'sunbird-logo.svg',
@@ -103,6 +108,7 @@ describe('Onboarding Component', () => {
     vi.clearAllMocks();
     mockUseCurrentUserId.mockReturnValue({ data: 'mock-user-id' });
     mockMutateAsync.mockResolvedValue({});
+    mockUseOnboardingRedirect.mockReturnValue(undefined); // no-op by default
   });
 
   it('renders loading spinner while fetching data', () => {
@@ -897,5 +903,45 @@ describe('Onboarding Component', () => {
     expect(screen.getByText('What is your role?')).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
+  });
+
+  describe('redirect when onboarding already completed', () => {
+    const formReturnValue = {
+      data: { data: { form: { data: mockOnboardingData } } },
+      isLoading: false,
+      isError: false,
+    };
+
+    it('redirects to /home with replace when user has already completed onboarding', () => {
+      mockUseOnboardingRedirect.mockImplementation(() => {
+        mockNavigate('/home', { replace: true });
+      });
+      (useFormRead as Mock).mockReturnValue(formReturnValue);
+
+      renderWithRouter(<Onboarding />);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
+    });
+
+    it('redirects to /home with replace when user has skipped onboarding', () => {
+      mockUseOnboardingRedirect.mockImplementation(() => {
+        mockNavigate('/home', { replace: true });
+      });
+      (useFormRead as Mock).mockReturnValue(formReturnValue);
+
+      renderWithRouter(<Onboarding />);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
+    });
+
+    it('does not redirect and shows the form when user has not completed onboarding', () => {
+      mockUseOnboardingRedirect.mockReturnValue(undefined);
+      (useFormRead as Mock).mockReturnValue(formReturnValue);
+
+      renderWithRouter(<Onboarding />);
+
+      expect(mockNavigate).not.toHaveBeenCalledWith('/home', { replace: true });
+      expect(screen.getByText('What is your role?')).toBeInTheDocument();
+    });
   });
 });
