@@ -239,6 +239,7 @@
     "certificateNotAvailable": "Atualmente, este curso não possui certificado. O criador do curso pode anexar um certificado posteriormente.",
     "previewCertificate": "Visualizar Certificado",
     "courseProgress": "Progresso do Curso",
+    "batchStartingOn": "Turma começa em",
     "batchStartedOn": "Turma iniciada em",
     "contentStatusCompleted": "Concluído",
     "contentStatusInProgress": "Em andamento",
