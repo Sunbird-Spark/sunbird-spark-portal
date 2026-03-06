@@ -441,6 +441,12 @@ describe('GenericEditorService', () => {
         expiresIn: undefined,
       });
     });
+
+    it('should populate empty contentFields and fwCategoryDetails when no framework is provided', async () => {
+      const config = await service.buildEditorConfig();
+      expect(config.contentFields).toBe('');
+      expect(config.fwCategoryDetails).toEqual([]);
+    });
   });
 
   describe('shouldLockContent', () => {
