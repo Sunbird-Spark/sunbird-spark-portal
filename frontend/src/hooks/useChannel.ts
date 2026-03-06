@@ -9,5 +9,7 @@ export const useChannel = (id: string): UseQueryResult<ApiResponse<any>, Error> 
     queryKey: ['channel', id],
     queryFn: () => channelService.read(id),
     enabled: !!id,
+    staleTime:Infinity,
+    gcTime: 3600000,
   });
 };
