@@ -203,8 +203,8 @@ export default function CollectionContentArea({
             </div>
           )}
 
-          {/* Learner: Course progress (hidden when content creator privilege) */}
-          {isTrackable && !contentBlocked && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
+          {/* Learner: Course progress (hidden when content creator privilege); show for upcoming batch so user can leave course */}
+          {isTrackable && (!contentBlocked || upcomingBatchBlocked) && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && courseProgressProps && (
             <div className="flex-shrink-0 mb-4">
               <CourseProgressSection
                 collectionId={collectionId}
@@ -212,6 +212,7 @@ export default function CollectionContentArea({
                 userId={userId}
                 isTrackable={isTrackable}
                 contentBlocked={contentBlocked}
+                upcomingBatchBlocked={upcomingBatchBlocked}
                 contentCreatorPrivilege={contentCreatorPrivilege}
                 hasBatchInRoute={hasBatchInRoute}
                 isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}

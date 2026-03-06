@@ -203,6 +203,24 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('available-batches-card')).not.toBeInTheDocument();
   });
 
+  it('renders CourseProgressCard when enrolled in upcoming batch (content blocked but show progress for leave option)', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        access={{
+          ...defaultAccess,
+          isTrackable: true,
+          isAuthenticated: true,
+          contentBlocked: true,
+          upcomingBatchBlocked: true,
+          hasBatchInRoute: true,
+          isEnrolledInCurrentBatch: true,
+        }}
+      />
+    );
+    expect(screen.getByTestId('course-progress-card')).toBeInTheDocument();
+  });
+
   it('renders AvailableBatchesCard when trackable, authenticated, not blocked, and NOT in batch route', () => {
     render(
       <CollectionContentArea
