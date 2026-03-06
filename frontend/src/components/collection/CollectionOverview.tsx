@@ -84,7 +84,7 @@ const CollectionOverview = ({
                 </div>
               )}
               {!playerIsLoading && !playerError && playerMetadata && (() => {
-                const isVideoMime = ['video/x-youtube', 'video/webm', 'video/mp4'].includes(playerMetadata.mimeType);
+                const isVideoMime = ['video/webm', 'video/mp4'].includes(playerMetadata.mimeType);
                 return (
                   <div className={isVideoMime ? undefined : 'collection-player-content'}>
                     <ContentPlayer

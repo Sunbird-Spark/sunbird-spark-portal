@@ -10,7 +10,7 @@ import { useRatingTimer } from '@/hooks/useRatingTimer';
 // MIME type to player component mapping
 const MIME_TYPE_PLAYERS = {
   'application/epub': EpubPlayer,
-  'video/x-youtube': VideoPlayer,
+  'video/x-youtube': EcmlPlayer,
   'video/webm': VideoPlayer,
   'video/mp4': VideoPlayer,
   'application/pdf': PdfPlayer,
