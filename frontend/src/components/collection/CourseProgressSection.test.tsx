@@ -151,6 +151,19 @@ describe("CourseProgressSection", () => {
       );
     });
 
+    it("shows leave course option when content blocked but upcoming batch (so user can unenrol before start)", () => {
+      render(
+        <CourseProgressSection
+          {...baseProps}
+          contentBlocked
+          upcomingBatchBlocked
+        />
+      );
+      const card = screen.getByTestId("course-progress-card");
+      expect(card).toHaveAttribute("data-show-unenroll-option", "true");
+      expect(screen.getByTestId("trigger-unenrol")).toBeInTheDocument();
+    });
+
     it("hides leave course option when content creator privilege", () => {
       render(<CourseProgressSection {...baseProps} contentCreatorPrivilege />);
       expect(screen.getByTestId("course-progress-card")).toHaveAttribute(

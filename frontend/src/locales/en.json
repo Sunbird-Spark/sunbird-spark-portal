@@ -239,6 +239,7 @@
     "certificateNotAvailable": "Currently, this course does not have a certificate. The course creator may attach a certificate later.",
     "previewCertificate": "Preview Certificate",
     "courseProgress": "Course Progress",
+    "batchStartingOn": "Batch starting on",
     "batchStartedOn": "Batch Started on",
     "contentStatusCompleted": "Completed",
     "contentStatusInProgress": "In Progress",
