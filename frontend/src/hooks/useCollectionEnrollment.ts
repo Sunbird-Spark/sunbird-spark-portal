@@ -6,6 +6,7 @@ import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from 
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
 import { useAppI18n } from './useAppI18n';
 import { useToast } from './useToast';
+import { useTelemetry } from './useTelemetry';
 import {
   getEnrollmentForCollection,
   getLeafContentIds,
@@ -28,6 +29,7 @@ export function useCollectionEnrollment(
   const queryClient = useQueryClient();
   const { t } = useAppI18n();
   const { toast } = useToast();
+  const telemetry = useTelemetry();
   const { data: enrollmentsResponse, refetch: refetchEnrollments } = useUserEnrolledCollections({
     enabled: isAuthenticated,
   });
@@ -133,6 +135,14 @@ export function useCollectionEnrollment(
         title: t('success'),
         description: t('courseDetails.enrolSuccess'),
         variant: 'default',
+      });
+      telemetry.audit({
+        edata: {
+          props: ['enrollment'],
+          prevstate: 'NotEnrolled',
+          state: 'Enrolled',
+        },
+        object: { id: collectionId, type: 'Collection' },
       });
       navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
     } catch {

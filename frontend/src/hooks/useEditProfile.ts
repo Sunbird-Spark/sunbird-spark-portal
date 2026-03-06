@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import _ from 'lodash';
 import { useUpdateProfile } from './useUpdateProfile';
+import { useTelemetry } from './useTelemetry';
 import { toast } from './useToast';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { UserProfile } from '../types/userTypes';
@@ -50,6 +51,7 @@ export interface UseEditProfileReturn {
 export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileReturn => {
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<EditProfileFormData>(createInitialForm());
+  const telemetry = useTelemetry();
 
   const originalData = useRef<EditProfileFormData>(createInitialForm());
   const updateProfileMutation = useUpdateProfile();
@@ -217,6 +219,21 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
       toast({
         title: 'Profile updated',
         description: 'Your profile has been updated successfully.',
+      });
+      telemetry.audit({
+        edata: {
+          props: ['profileDetails'],
+          state: 'Updated',
+        },
+        object: { id: userId, type: 'User' },
+      });
+      telemetry.log({
+        edata: {
+          type: 'api',
+          level: 'INFO',
+          message: 'Profile updated successfully',
+          pageid: 'profile',
+        },
       });
       closeDialog();
     } catch (err) {

@@ -13,11 +13,18 @@ import { useAcceptTnc } from '@/hooks/useTnc';
 import { SignupService } from '@/services/SignupService';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
+import {  useEffect } from 'react';
+import useImpression from '@/hooks/useImpression';
+import { useTelemetry } from '@/hooks/useTelemetry';
+
 const SignUp: React.FC = () => {
     const { toast } = useToast();
     const { t } = useAppI18n();
     const captchaRef = useRef<ReCAPTCHA>(null);
     const signupService = useMemo(() => new SignupService(), []);
+
+    useImpression({ type: 'view', pageid: 'signup' });
+    const telemetry = useTelemetry();
 
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [firstName, setFirstName] = useState('');
@@ -58,6 +65,15 @@ const SignUp: React.FC = () => {
         const description = isResend
             ? t("signUpPage.newCodeSent")
             : t("signUpPage.checkEmailPhone");
+
+        telemetry.log({
+            edata: {
+                type: 'api',
+                level: 'INFO',
+                message: isResend ? 'OTP resent to user' : 'OTP sent to user',
+                pageid: 'signup',
+            },
+        });
 
         toast({ title, description, variant: "default" });
 
@@ -118,6 +134,15 @@ const SignUp: React.FC = () => {
             return;
         }
 
+        telemetry.log({
+            edata: {
+                type: 'api',
+                level: 'INFO',
+                message: 'User sign-up completed',
+                pageid: 'signup',
+            },
+        });
+
         // Accept TNC if terms were accepted during signup
         if (isTermsAccepted && tncConfig) {
             acceptTncMutation.mutate({ tncConfig, identifier: emailOrMobile });
@@ -143,6 +168,15 @@ const SignUp: React.FC = () => {
             });
             return;
         }
+
+        telemetry.log({
+            edata: {
+                type: 'api',
+                level: 'INFO',
+                message: 'OTP verified successfully',
+                pageid: 'signup',
+            },
+        });
 
         const deviceId = localStorage.getItem('deviceId') || undefined;
 

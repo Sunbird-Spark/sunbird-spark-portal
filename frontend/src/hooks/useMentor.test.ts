@@ -39,5 +39,101 @@ describe('useMentor hooks test', () => {
       expect((queryParams as any).queryKey).toEqual(['mentorList']);
       expect((queryParams as any).staleTime).toBe(5 * 60 * 1000); // 5 minutes
     });
+
+    describe('queryFn', () => {
+      let queryFn: () => Promise<any>;
+
+      beforeEach(() => {
+        (useQuery as import('vitest').Mock).mockImplementation((opts) => {
+          queryFn = opts.queryFn;
+          return opts;
+        });
+        useMentorList();
+      });
+
+      it('returns empty array if no user ID could be resolved', async () => {
+        (userAuthInfoService.getUserId as any).mockReturnValue(null);
+        (userAuthInfoService.getAuthInfo as any).mockResolvedValue(null);
+
+        const result = await queryFn();
+        expect(result).toEqual([]);
+      });
+
+      it('resolves user ID from getAuthInfo if getUserId returns null', async () => {
+        (userAuthInfoService.getUserId as any).mockReturnValue(null);
+        (userAuthInfoService.getAuthInfo as any).mockResolvedValue({ uid: 'auth-uid' });
+        
+        (userService.userRead as any).mockResolvedValue({ data: { response: { rootOrgId: 'org-123' } } });
+        (userService.searchMentors as any).mockResolvedValue({ data: { response: { content: [] } } });
+
+        await queryFn();
+        expect(userService.userRead).toHaveBeenCalledWith('auth-uid');
+      });
+
+      it('returns empty array if rootOrgId is missing in user profile', async () => {
+        (userAuthInfoService.getUserId as any).mockReturnValue('user-123');
+        (userService.userRead as any).mockResolvedValue({ data: { response: { /* no rootOrgId */ } } });
+
+        const result = await queryFn();
+        expect(result).toEqual([]);
+        expect(userService.searchMentors).not.toHaveBeenCalled();
+      });
+
+      it('returns mapped mentors on successful fetch', async () => {
+        (userAuthInfoService.getUserId as any).mockReturnValue('user-123');
+        (userService.userRead as any).mockResolvedValue({ data: { response: { rootOrgId: 'org-123' } } });
+        
+        (userService.searchMentors as any).mockResolvedValue({
+          data: {
+            response: {
+              content: [
+                {
+                  identifier: 'mentor-1',
+                  firstName: 'John',
+                  lastName: 'Doe',
+                  email: 'john@example.com',
+                  maskedEmail: 'j***@example.com'
+                },
+                {
+                  userId: 'mentor-2', // Falls back to identifier
+                  firstName: 'Jane',
+                }
+              ]
+            }
+          }
+        });
+
+        const result = await queryFn();
+        
+        expect(userService.searchMentors).toHaveBeenCalledWith('org-123');
+        expect(result).toEqual([
+          {
+            identifier: 'mentor-1',
+            userId: 'mentor-1',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+            maskedEmail: 'j***@example.com'
+          },
+          {
+            identifier: 'mentor-2',
+            userId: 'mentor-2',
+            firstName: 'Jane',
+            lastName: undefined,
+            email: undefined,
+            maskedEmail: undefined
+          }
+        ]);
+      });
+
+      it('returns empty array when searchMentors API has no content', async () => {
+        (userAuthInfoService.getUserId as any).mockReturnValue('user-123');
+        (userService.userRead as any).mockResolvedValue({ data: { response: { rootOrgId: 'org-123' } } });
+        (userService.searchMentors as any).mockResolvedValue({}); // Missing response.content
+
+        const result = await queryFn();
+        expect(result).toEqual([]);
+      });
+    });
   });
 });
