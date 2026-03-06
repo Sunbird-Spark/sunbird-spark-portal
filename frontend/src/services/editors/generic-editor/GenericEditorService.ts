@@ -1,17 +1,10 @@
-/**
- * Service for managing the Generic Editor lifecycle.
- * Handles building window.context, window.config, content locking,
- * and iframe management for the generic editor.
- *
- * Port of the Angular GenericEditorComponent from SunbirdEd-portal.
- */
-
 import { getClient } from '../../../lib/http-client';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
+import { fetchFwCategoryMeta } from '../fwCategoryMetaService';
 import {
   GENERIC_EDITOR_WINDOW_CONFIG,
   DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
@@ -43,18 +36,10 @@ export class GenericEditorService {
   private orgService = new OrganizationService();
   private channelService = new ChannelService();
 
-  /**
-   * Get the generic editor URL.
-   * Reads from a hidden input element (same pattern as Angular portal),
-   * falls back to env var or default path.
-   */
   getEditorUrl(): string {
     return import.meta.env.VITE_GENERIC_EDITOR_URL || '/generic-editor/index.html';
   }
 
-  /**
-   * Fetch content details for editing.
-   */
   async getContentDetails(contentId: string): Promise<ContentDetails> {
     const response = await getClient().get<{ content: ContentDetails }>(
       `/content/v1/read/${contentId}?mode=edit`
@@ -62,9 +47,6 @@ export class GenericEditorService {
     return response.data.content;
   }
 
-  /**
-   * Lock content to prevent concurrent edits.
-   */
   async lockContent(
     contentId: string,
     userId: string,
@@ -91,9 +73,6 @@ export class GenericEditorService {
     return response.data;
   }
 
-  /**
-   * Release content lock after editing.
-   */
   async retireLock(contentId: string): Promise<void> {
     await getClient().delete('/lock/v1/retire', {
       request: {
@@ -103,10 +82,6 @@ export class GenericEditorService {
     });
   }
 
-  /**
-   * Validate whether the user has permission to edit this content.
-   * Mirrors the Angular validateRequest() logic.
-   */
   validateRequest(
     contentDetails: ContentDetails,
     userId: string,
@@ -142,10 +117,6 @@ export class GenericEditorService {
     return false;
   }
 
-  /**
-   * Build the window.context object that the generic editor reads from.
-   * Mirrors the Angular setWindowContext() method.
-   */
   async buildEditorContext(
     params: GenericEditorRouteParams,
     contentDetails?: ContentDetails,
@@ -243,14 +214,14 @@ export class GenericEditorService {
     return context;
   }
 
-  /**
-   * Build the window.config object that the generic editor reads from.
-   * Mirrors the Angular setWindowConfig() method.
-   */
-  buildEditorConfig(
+  async buildEditorConfig(
     lockParams?: GenericEditorQueryParams,
-    headerLogo?: string
-  ): GenericEditorWindowConfig {
+    headerLogo?: string,
+    framework?: string
+  ): Promise<GenericEditorWindowConfig> {
+    const { contentFields, fwCategoryDetails } =
+      await fetchFwCategoryMeta(framework);
+
     return {
       ...GENERIC_EDITOR_WINDOW_CONFIG,
       build_number: '1.0',
@@ -264,13 +235,11 @@ export class GenericEditorService {
       enableTelemetryValidation: false,
       videoMaxSize: DEFAULT_VIDEO_MAX_SIZE,
       defaultContentFileSize: DEFAULT_CONTENT_FILE_SIZE,
+      contentFields,
+      fwCategoryDetails,
     };
   }
 
-  /**
-   * Check whether content should be locked before editing.
-   * Mirrors the Angular getDetails() lock logic.
-   */
   shouldLockContent(
     routeState?: string,
     contentStatus?: string,
@@ -288,10 +257,6 @@ export class GenericEditorService {
     return isEditableState && isDraft;
   }
 
-  /**
-   * Set window.context and window.config globals for the editor iframe.
-   * The generic editor iframe reads these globals on load.
-   */
   setWindowGlobals(
     context: GenericEditorContext,
     config: GenericEditorWindowConfig
@@ -300,9 +265,6 @@ export class GenericEditorService {
     (window as any).config = config;
   }
 
-  /**
-   * Clean up window globals set for the editor.
-   */
   clearWindowGlobals(): void {
     delete (window as any).context;
     delete (window as any).config;
