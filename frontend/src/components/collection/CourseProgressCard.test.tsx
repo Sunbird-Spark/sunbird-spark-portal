@@ -60,6 +60,18 @@ describe('CourseProgressCard', () => {
     expect(batchStartedText?.textContent).toMatch(/2025/);
   });
 
+  it('renders "Batch starting on" when isBatchUpcoming is true', () => {
+    render(
+      <CourseProgressCard
+        totalContentCount={5}
+        batchStartDate="2025-06-15T00:00:00.000Z"
+        isBatchUpcoming
+      />
+    );
+    expect(screen.getByText(/courseDetails\.batchStartingOn/)).toBeInTheDocument();
+    expect(screen.queryByText(/courseDetails\.batchStartedOn/)).not.toBeInTheDocument();
+  });
+
   it('does not render batch start date when batchStartDate is not provided', () => {
     render(<CourseProgressCard totalContentCount={5} />);
     expect(screen.queryByText(/courseDetails\.batchStartedOn/)).not.toBeInTheDocument();
