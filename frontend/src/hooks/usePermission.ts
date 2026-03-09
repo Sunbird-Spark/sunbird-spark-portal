@@ -17,7 +17,7 @@ export interface UsePermissionsReturn {
 
 // Reads roles from the shared useUserRead cache (which already fetches the
 // `roles` field). This avoids a separate getUserRoles API call on every
-// ProtectedRoute mount and benefits from the same 10-minute staleTime.
+// ProtectedRoute mount and benefits from the same 1 hour staleTime.
 export function usePermissions(): UsePermissionsReturn {
   const isAuthenticated = userAuthInfoService.isUserAuthenticated();
   const { data: userReadData, isLoading, error, refetch } = useUserRead();
