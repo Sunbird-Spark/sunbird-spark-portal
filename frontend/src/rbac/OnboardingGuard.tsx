@@ -3,14 +3,14 @@ import { Navigate } from 'react-router-dom';
 import { useUserRead } from '@/hooks/useUserRead';
 import { useFormRead } from '@/hooks/useForm';
 import { OnboardingFormData } from '@/types/formTypes';
-import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+import { useIsAuthenticated } from '@/hooks/useAuthInfo';
 
 interface OnboardingGuardProps {
   children: React.ReactNode;
 }
 
 const OnboardingGuard: React.FC<OnboardingGuardProps> = ({ children }) => {
-  const isAuthenticated = userAuthInfoService.isUserAuthenticated();
+  const isAuthenticated = useIsAuthenticated();
 
   const { data: formApiData, isLoading: formLoading } = useFormRead({
     request: { type: 'user', subType: 'onboarding', action: 'workflow', component: 'portal' },

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { batchService as creatorBatchService, Batch, CreateBatchRequest, UpdateBatchRequest } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useAuthInfo } from './useAuthInfo';
 import { resolveUserAndOrg } from '../utils/userUtils';
 import type {
   BatchListResponse,
@@ -29,22 +29,18 @@ export function useBatchListForCreator(
   options?: { enabled?: boolean }
 ): UseQueryResult<Batch[], Error> {
   const enabled = options?.enabled ?? true;
+  const { data: authInfo } = useAuthInfo();
+  const userId = authInfo?.uid ?? null;
 
   return useQuery({
     queryKey: ['batchList', courseId, true],
     queryFn: async () => {
-      if (!courseId) return [] as Batch[];
-
-      let userId = userAuthInfoService.getUserId();
-      if (!userId) {
-        const authInfo = await userAuthInfoService.getAuthInfo();
-        userId = authInfo?.uid;
-      }
-      if (!userId) return [] as Batch[];
+      if (!courseId || !userId) return [] as Batch[];
+      
       const response = await creatorBatchService.listBatches(courseId, userId);
       return (response?.data?.response?.content ?? []) as Batch[];
     },
-    enabled: enabled && !!courseId,
+    enabled: enabled && !!courseId && !!userId,
     staleTime: 0,
     retry: 1,
   });
