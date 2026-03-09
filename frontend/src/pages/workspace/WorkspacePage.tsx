@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import PageLoader from "@/components/common/PageLoader";
@@ -506,13 +506,11 @@ const WorkspacePage = () => {
   return (
     <div className="flex-1 flex flex-col min-w-0">
       <main className="workspace-main-content">
-            {showContent && isCountsLoading && isLoading ? (
-              <div className="workspace-content-wrapper">
+            <div className="workspace-content-wrapper">
+              <WorkspaceToolbar {...navigationProps} />
+              {showContent && isCountsLoading && isLoading ? (
                 <PageLoader message={t('loading')} fullPage={false} />
-              </div>
-            ) : (
-              <div className="workspace-content-wrapper">
-                <WorkspaceToolbar {...navigationProps} />
+              ) : (
                 <WorkspacePageContent
                   showCreateModal={showCreateModal}
                   activeView={activeView}
@@ -534,8 +532,8 @@ const WorkspacePage = () => {
                   onDelete={handleDelete}
                   onView={handleView}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </main>
           <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
           <ConfirmDialog
