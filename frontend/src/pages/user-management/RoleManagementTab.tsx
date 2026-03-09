@@ -112,6 +112,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
       toast({
         title: roleDialog.operation === "add" ? "Role Added" : "Role Updated",
         description: `Role ${selectedRole} has been ${roleDialog.operation === "add" ? "added" : "updated"} successfully.`,
+        variant: "success",
       });
       // Optimistic update — immediately reflect the new role in the table
       setSearchResults((prev) =>

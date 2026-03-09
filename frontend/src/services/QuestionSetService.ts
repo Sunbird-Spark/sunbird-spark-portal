@@ -22,6 +22,7 @@ export class QuestionSetService {
     createdBy: string;
     createdFor: string[];
     framework: string;
+    creator: string;
   }): Promise<{identifier: string, versionKey?: string}> {
     const payload = {
       request: {
@@ -30,6 +31,7 @@ export class QuestionSetService {
           mimeType: 'application/vnd.sunbird.questionset',
           primaryCategory: 'Practice Question Set',
           createdBy: options.createdBy,
+          creator: options.creator,
           createdFor: options.createdFor,
           framework: options.framework,
           code: crypto.randomUUID(),

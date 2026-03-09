@@ -59,7 +59,7 @@ const SignUp: React.FC = () => {
             ? t("signUpPage.newCodeSent")
             : t("signUpPage.checkEmailPhone");
 
-        toast({ title, description, variant: "default" });
+        toast({ title, description, variant: "success" });
 
         if (!isResend) {
             setStep(2);
