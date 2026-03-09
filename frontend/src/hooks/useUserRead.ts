@@ -6,9 +6,9 @@ import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoSer
 
 const userService = new UserService();
 
-// Cache user data for 10 minutes by default so navigating between pages
+// Cache user data for 1 hour by default so navigating between pages
 // (workspace, explore, etc.) does not trigger a redundant API call every time.
-const DEFAULT_STALE_TIME = 10 * 60 * 1000;
+const DEFAULT_STALE_TIME = 60 * 60 * 1000;
 
 export const useUserRead = (
     options?: { refetchOnMount?: boolean | 'always' }
