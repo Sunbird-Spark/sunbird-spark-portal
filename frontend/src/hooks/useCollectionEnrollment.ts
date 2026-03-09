@@ -15,7 +15,7 @@ import {
   getFirstCertPreviewUrl,
   getEnrollableBatches,
 } from '../services/collection/enrollmentMapper';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useUserId } from './useAuthInfo';
 import type { CollectionData } from '../types/collectionTypes';
 
 export function useCollectionEnrollment(
@@ -28,6 +28,7 @@ export function useCollectionEnrollment(
   const queryClient = useQueryClient();
   const { t } = useAppI18n();
   const { toast } = useToast();
+  const userId = useUserId();
   const { data: enrollmentsResponse, refetch: refetchEnrollments } = useUserEnrolledCollections({
     enabled: isAuthenticated,
   });
@@ -45,7 +46,6 @@ export function useCollectionEnrollment(
   const leafContentIds = useMemo(() => getLeafContentIds(collectionData), [collectionData]);
   const contentStateRequest = useMemo(() => {
     if (!collectionId || !effectiveBatchId || leafContentIds.length === 0) return null;
-    const userId = userAuthInfoService.getUserId();
     if (!userId) return null;
     return {
       userId,
@@ -54,7 +54,7 @@ export function useCollectionEnrollment(
       contentIds: leafContentIds,
       fields: ['progress', 'score', 'status'],
     };
-  }, [collectionId, effectiveBatchId, leafContentIds]);
+  }, [collectionId, effectiveBatchId, leafContentIds, userId]);
 
   const { data: contentStateResponse, isFetched: contentStateFetched } = useContentState(contentStateRequest, {
     enabled: isEnrolledInCurrentBatch && contentStateRequest !== null,
@@ -122,11 +122,10 @@ export function useCollectionEnrollment(
   const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
   const handleJoinCourse = async (selectedBatchId: string) => {
     if (!collectionId || !selectedBatchId) return;
-    const uid = userAuthInfoService.getUserId();
-    if (!uid) return;
+    if (!userId) return;
     resetEnrol();
     try {
-      await enrol({ courseId: collectionId, userId: uid, batchId: selectedBatchId });
+      await enrol({ courseId: collectionId, userId: userId, batchId: selectedBatchId });
       await queryClient.invalidateQueries({ queryKey: ['userEnrollments'] });
       refetchEnrollments();
       toast({

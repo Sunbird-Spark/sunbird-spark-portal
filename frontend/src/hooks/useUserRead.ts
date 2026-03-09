@@ -2,7 +2,7 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { UserService } from '../services/UserService';
 import { UserReadResponse } from '../types/userTypes';
 import { ApiResponse } from '../lib/http-client';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useAuthInfo } from './useAuthInfo';
 
 const userService = new UserService();
 
@@ -13,21 +13,20 @@ const DEFAULT_STALE_TIME = 10 * 60 * 1000;
 export const useUserRead = (
     options?: { refetchOnMount?: boolean | 'always' }
 ): UseQueryResult<ApiResponse<UserReadResponse>, Error> => {
-    const isAuthenticated = userAuthInfoService.isUserAuthenticated();
+    const { data: authInfo } = useAuthInfo();
+    const isAuthenticated = authInfo?.isAuthenticated ?? false;
+    const userId = authInfo?.uid ?? null;
 
     return useQuery({
         queryKey: ['userRead'],
         queryFn: async () => {
-            const id = userAuthInfoService.getUserId() ??
-                (await userAuthInfoService.getAuthInfo())?.uid;
-
-            if (!id) {
+            if (!userId) {
                 throw new Error('User ID not available');
             }
 
-            return userService.userRead(id);
+            return userService.userRead(userId);
         },
-        enabled: isAuthenticated,
+        enabled: isAuthenticated && !!userId,
         retry: 1,
         staleTime: DEFAULT_STALE_TIME,
         refetchOnMount: options?.refetchOnMount,

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { consentService } from '../services/consent';
 import type { ConsentStatus } from '../types/consentTypes';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useUserId } from './useAuthInfo';
 
 export interface UseConsentOptions {
   collectionId: string | undefined;
@@ -23,7 +23,7 @@ export function useConsent({ collectionId, channel, enabled = true }: UseConsent
   isUpdating: boolean;
 } {
   const queryClient = useQueryClient();
-  const userId = userAuthInfoService.getUserId();
+  const userId = useUserId();
 
   const {
     data,

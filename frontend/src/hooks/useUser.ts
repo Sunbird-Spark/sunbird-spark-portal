@@ -1,7 +1,7 @@
 import { useMutation, useQuery, UseMutationResult } from '@tanstack/react-query';
 import { UserService } from '../services/UserService';
 import { ApiResponse } from '../lib/http-client';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useAuthInfo } from './useAuthInfo';
 
 const userService = new UserService();
 
@@ -42,18 +42,17 @@ export const useSignup = (): UseMutationResult<
  * Hook to fetch the currently logged-in user's roles from the backend.
  */
 export const useUserRoles = () => {
+  const { data: authInfo } = useAuthInfo();
+  
   return useQuery({
-    queryKey: ['userRoles'],
+    queryKey: ['userRoles', authInfo?.uid],
     queryFn: async (): Promise<Array<{ role: string }>> => {
-      let userId = userAuthInfoService.getUserId();
-      if (!userId) {
-        const authInfo = await userAuthInfoService.getAuthInfo();
-        userId = authInfo?.uid ?? null;
-      }
+      const userId = authInfo?.uid;
       if (!userId) return [];
       const response = await userService.getUserRoles(userId);
       return response?.data?.response?.roles ?? [];
     },
+    enabled: !!authInfo?.uid, // Only run when we have a user ID
     staleTime: 5 * 60 * 1000, // 5 minutes — roles rarely change mid-session
     retry: 1,
   });
@@ -65,16 +64,14 @@ export const useUserRoles = () => {
  * fetching /user/v1/auth/info when the cache is empty.
  */
 export const useCurrentUserId = () => {
+  const { data: authInfo } = useAuthInfo();
+  
   return useQuery({
-    queryKey: ['currentUserId'],
+    queryKey: ['currentUserId', authInfo?.uid],
     queryFn: async (): Promise<string | null> => {
-      let userId = userAuthInfoService.getUserId();
-      if (!userId) {
-        const authInfo = await userAuthInfoService.getAuthInfo();
-        userId = authInfo?.uid ?? null;
-      }
-      return userId;
+      return authInfo?.uid ?? null;
     },
+    enabled: !!authInfo, // Only run when auth info is available
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
