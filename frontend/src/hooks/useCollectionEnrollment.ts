@@ -131,7 +131,7 @@ export function useCollectionEnrollment(
       toast({
         title: t('success'),
         description: t('courseDetails.enrolSuccess'),
-        variant: 'default',
+        variant: 'success',
       });
       navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
     } catch {

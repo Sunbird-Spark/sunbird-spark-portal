@@ -161,7 +161,7 @@ describe('useUserRead hook', () => {
 
             renderHook(() => useUserRead(), { wrapper: createWrapper() });
 
-            expect(capturedArgs.queryOptions).toMatchObject({ staleTime: 10 * 60 * 1000 });
+            expect(capturedArgs.queryOptions).toMatchObject({ staleTime: 60 * 60 * 1000 });
         });
 
         it('passes refetchOnMount: always through to useQuery when provided', () => {
@@ -174,7 +174,7 @@ describe('useUserRead hook', () => {
             renderHook(() => useUserRead({ refetchOnMount: 'always' }), { wrapper: createWrapper() });
 
             expect(capturedArgs.queryOptions).toMatchObject({
-                staleTime: 10 * 60 * 1000,
+                staleTime: 60 * 60 * 1000,
                 refetchOnMount: 'always',
             });
         });
