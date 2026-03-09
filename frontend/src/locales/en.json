@@ -480,6 +480,8 @@
     "roleCreator": "Creator",
     "roleReviewer": "Reviewer",
     "more": "More",
+    "searchPlaceholder": "Search content...",
+    "clearSearch": "Clear search",
     "inReview": "In Review",
     "showingItems": "Showing {{count}} items",
     "showingItemsOf": "Showing {{count}} of {{total}} items",

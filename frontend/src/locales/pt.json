@@ -480,6 +480,8 @@
     "roleCreator": "Criador",
     "roleReviewer": "Revisor",
     "more": "Mais",
+    "searchPlaceholder": "Pesquisar conteúdo...",
+    "clearSearch": "Limpar pesquisa",
     "inReview": "Em revisão",
     "showingItems": "Exibindo {{count}} item(ns)",
     "showingItemsOf": "Exibindo {{count}} de {{total}} item(ns)",

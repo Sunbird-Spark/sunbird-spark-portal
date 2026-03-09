@@ -480,6 +480,8 @@
     "roleCreator": "منشئ",
     "roleReviewer": "مراجع",
     "more": "المزيد",
+    "searchPlaceholder": "البحث في المحتوى...",
+    "clearSearch": "مسح البحث",
     "inReview": "قيد المراجعة",
     "showingItems": "عرض {{count}} عنصر",
     "showingItemsOf": "عرض {{count}} من {{total}} عنصر",

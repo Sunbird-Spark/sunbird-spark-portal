@@ -1,4 +1,5 @@
-import { FiPlus, FiGrid, FiList, FiChevronDown } from "react-icons/fi";
+import { useState, useRef } from "react";
+import { FiPlus, FiGrid, FiList, FiChevronDown, FiSearch, FiX } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/common/DropdownMenu";
@@ -22,6 +23,8 @@ interface WorkspaceToolbarProps {
   contentCount?: number;
   totalCount?: number;
   onCreateClick: () => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 const WorkspaceToolbar = ({
@@ -39,8 +42,12 @@ const WorkspaceToolbar = ({
   contentCount,
   totalCount,
   onCreateClick,
+  searchQuery,
+  onSearchChange,
 }: WorkspaceToolbarProps) => {
   const { t } = useAppI18n();
+  const [isSearchOpen, setIsSearchOpen] = useState(!!searchQuery);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const segments =
     userRole === 'creator' ? getCreatorSegments(counts) : getReviewerSegments(counts);
@@ -133,8 +140,55 @@ const WorkspaceToolbar = ({
             ))}
           </div>
 
-          {/* Secondary Actions + Filters */}
+          {/* Search + Secondary Actions + Filters */}
           <div className="flex items-center gap-3 ml-4">
+            {/* Search */}
+            <div className="flex items-center">
+              {isSearchOpen ? (
+                <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-3 h-9 transition-all border border-transparent">
+                  <FiSearch className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    placeholder={t('workspace.searchPlaceholder')}
+                    aria-label={t('workspace.searchPlaceholder')}
+                    className="bg-transparent border-none outline-none text-sm font-rubik w-48 placeholder:text-muted-foreground"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        onSearchChange('');
+                        setIsSearchOpen(false);
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      onSearchChange('');
+                      setIsSearchOpen(false);
+                    }}
+                    aria-label={t('workspace.clearSearch')}
+                    className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <FiX className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-rubik rounded-xl"
+                  aria-label={t('workspace.searchPlaceholder')}
+                  onClick={() => {
+                    setIsSearchOpen(true);
+                    setTimeout(() => searchInputRef.current?.focus(), 0);
+                  }}
+                >
+                  <FiSearch className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
             {/* Secondary Dropdown */}
             {secondaryActions.length > 0 && (
               <DropdownMenu>

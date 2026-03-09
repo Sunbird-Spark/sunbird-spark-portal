@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import useDebounce from "@/hooks/useDebounce";
 import PageLoader from "@/components/common/PageLoader";
 import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
 import WorkspaceToolbar from "@/components/workspace/WorkspaceToolbar";
@@ -93,6 +94,7 @@ const GENERIC_EDITOR_OPTIONS = ['upload-content', 'upload-large-content'];
 
 const WorkspacePage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: userData } = useUserRead();
   const slug = userData?.data?.response?.channel;
 
@@ -153,6 +155,22 @@ const WorkspacePage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
+  // Local input state for responsive typing; debounced value drives API + URL.
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
+  const debouncedSearch = useDebounce(searchInput, 400);
+
+  // Sync debounced value to URL params
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (debouncedSearch) {
+        next.set('search', debouncedSearch);
+      } else {
+        next.delete('search');
+      }
+      return next;
+    }, { replace: true });
+  }, [debouncedSearch, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showResourceFormDialog, setShowResourceFormDialog] = useState(false);
@@ -183,6 +201,7 @@ const WorkspacePage = () => {
     typeFilter,
     userRole,
     orgId: orgChannelId,
+    searchQuery: debouncedSearch,
     enabled: showContent,
   });
 
@@ -236,10 +255,11 @@ const WorkspacePage = () => {
     };
   }, [userRole, visibleContentIds]); // Changed from visibleContents to visibleContentIds
 
-  // Reset view when role changes
+  // Reset view and search when role changes
   useEffect(() => {
     const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';
     setActiveView((prev) => (prev === nextView ? prev : nextView));
+    setSearchInput('');
   }, [userRole]);
 
   const handleCreateOption = (optionId: string) => {
@@ -479,6 +499,8 @@ const WorkspacePage = () => {
     contentCount: showContent ? visibleContents.length : undefined,
     totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,
+    searchQuery: searchInput,
+    onSearchChange: setSearchInput,
   };
 
   return (
