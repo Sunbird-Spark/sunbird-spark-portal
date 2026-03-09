@@ -99,22 +99,6 @@
     .notification-popover-header{
         padding: 0.25rem 0.5rem !important;
     }
-
-    /* .notification-item {
-        @apply px-3 py-3 mx-2 mb-2 gap-2;
-    }
-
-    .notification-group-label-wrapper {
-        @apply px-3;
-    }
-
-    .notification-list {
-        max-height: min(350px, 55vh);
-    }
-
-    .notification-popover-arrow {
-        display: none;
-    } */
 }
 
 @media (max-width: 425px) {
