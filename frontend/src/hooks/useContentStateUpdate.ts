@@ -234,6 +234,8 @@ export function useContentStateUpdate({
             lastSentStatusRef.current = null;
             return;
           }
+          // Completion criteria not met; do not regress an already-completed content.
+          if (currentContentStatusRef.current === 2) return;
           const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
           const statusFromProgress = progressToStatus(effectiveProgress);
           const status = Math.min(statusFromProgress, 1);

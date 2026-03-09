@@ -250,22 +250,17 @@ describe('useContentStateUpdate', () => {
       });
     });
 
-    it('on END after START without ASSESS score sends progress path with status capped at 1 (no assessments)', async () => {
+    it('on END after START without ASSESS score does NOT send a progress PATCH when currentContentStatus is 2 (no regression)', async () => {
       const { result } = renderHook(() =>
         useContentStateUpdate({ ...selfAssessParams, currentContentStatus: 2 })
       );
+      // START is guarded (currentContentStatus === 2), so no PATCH is sent there either.
       result.current({ eid: 'START', ets: 1700000000000 });
+      // END without score/endpageseen must not downgrade an already-completed content.
       result.current({ eid: 'END' });
-      await vi.waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledTimes(1);
-      });
-      expect(mockMutateAsync).toHaveBeenNthCalledWith(1, {
-        userId: 'user_1',
-        courseId: 'course_1',
-        batchId: 'batch_1',
-        contents: [{ contentId: 'content_1', status: 0 }],
-      });
-      expect(mockMutateAsync.mock.calls[0]?.[0]?.assessments).toBeUndefined();
+      // Allow any pending microtasks to settle.
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockMutateAsync).not.toHaveBeenCalled();
     });
 
     it('accumulates ASSESS events and sends them in assessments.events when END has score', async () => {
