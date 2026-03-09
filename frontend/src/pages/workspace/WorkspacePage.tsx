@@ -155,12 +155,14 @@ const WorkspacePage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
-  // Local input state for responsive typing; debounced value drives API + URL.
+  // Local state for responsive typing; debounced value drives API + URL.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const debouncedSearch = useDebounce(searchInput, 400);
 
-  // Sync debounced value to URL params
+  // Sync debounced value to URL (only writes when debounced value settles)
   useEffect(() => {
+    const current = searchParams.get('search') || '';
+    if (current === debouncedSearch) return;
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       if (debouncedSearch) {
@@ -170,7 +172,7 @@ const WorkspacePage = () => {
       }
       return next;
     }, { replace: true });
-  }, [debouncedSearch, setSearchParams]);
+  }, [debouncedSearch]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showResourceFormDialog, setShowResourceFormDialog] = useState(false);
