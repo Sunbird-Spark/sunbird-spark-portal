@@ -173,8 +173,8 @@ describe('useContentStateUpdate', () => {
     });
   });
 
-  it('does not call contentStateUpdate when getUserId returns undefined', () => {
-    vi.mocked(useAuthInfoModule.useUserId).mockReturnValueOnce(undefined);
+  it('does not call contentStateUpdate when getUserId returns null', () => {
+    vi.mocked(useAuthInfoModule.useUserId).mockReturnValueOnce(null);
     const wrapper = createWrapper();
     const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({ eid: 'START' });

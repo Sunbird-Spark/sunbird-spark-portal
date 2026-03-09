@@ -34,7 +34,7 @@ vi.mock('../../UserProfileService', () => ({
 }));
 
 // Mock fetch for styles
-global.fetch = vi.fn(() =>
+globalThis.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     text: () => Promise.resolve('/* mock css */'),
