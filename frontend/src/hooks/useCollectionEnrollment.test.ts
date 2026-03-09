@@ -14,6 +14,11 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+  useQuery: () => ({
+    data: { uid: 'user_1', sid: 'session_1', isAuthenticated: true },
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 const mockUseBatchRead = vi.fn();

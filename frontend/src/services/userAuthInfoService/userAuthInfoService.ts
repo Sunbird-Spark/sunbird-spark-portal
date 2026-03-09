@@ -6,20 +6,6 @@ interface AuthStatusResponse {
     isAuthenticated: boolean;
 }
 
-/**
- * Service for managing authentication information.
- * 
- * IMPORTANT: For React components, prefer using the hooks from '@/hooks/useAuthInfo':
- * - useAuthInfo() - Get full auth info with React Query caching
- * - useSessionId() - Get session ID
- * - useUserId() - Get user ID
- * - useIsAuthenticated() - Check authentication status
- * 
- * This service should only be used in:
- * - Non-React contexts (services, utilities)
- * - Server-side code
- * - Places where hooks cannot be used
- */
 class userAuthInfoService {
     private static instance: userAuthInfoService;
     private sessionId: string | null = null;

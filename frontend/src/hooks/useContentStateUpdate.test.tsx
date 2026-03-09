@@ -1,14 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useQueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useContentStateUpdate } from './useContentStateUpdate';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import * as useAuthInfoModule from './useAuthInfo';
+import React from 'react';
 
 const mockMutateAsync = vi.fn().mockResolvedValue(undefined);
 
-vi.mock('@tanstack/react-query', () => ({
-  useQueryClient: vi.fn(),
-}));
+vi.mock('@tanstack/react-query', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tanstack/react-query')>();
+  return {
+    ...actual,
+    useQueryClient: vi.fn(),
+  };
+});
 
 vi.mock('./useBatch', () => ({
   useContentStateUpdateMutation: vi.fn(() => ({ mutateAsync: mockMutateAsync })),
@@ -19,6 +25,22 @@ vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
     getUserId: vi.fn(),
   },
 }));
+
+vi.mock('./useAuthInfo', () => ({
+  useUserId: vi.fn(() => 'user_1'),
+}));
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
 
 describe('useContentStateUpdate', () => {
   const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
@@ -39,55 +61,62 @@ describe('useContentStateUpdate', () => {
   });
 
   it('returns a function', () => {
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     expect(typeof result.current).toBe('function');
   });
 
   it('does not call contentStateUpdate when not enrolled in batch', () => {
+    const wrapper = createWrapper();
     const { result } = renderHook(() =>
       useContentStateUpdate({ ...defaultParams, isEnrolledInCurrentBatch: false })
-    );
+    , { wrapper });
     result.current({ eid: 'START' });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call contentStateUpdate when collectionId is missing', () => {
+    const wrapper = createWrapper();
     const { result } = renderHook(() =>
       useContentStateUpdate({ ...defaultParams, collectionId: undefined })
-    );
+    , { wrapper });
     result.current({ eid: 'START' });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call contentStateUpdate when isBatchEnded is true', () => {
+    const wrapper = createWrapper();
     const { result } = renderHook(() =>
       useContentStateUpdate({ ...defaultParams, isBatchEnded: true })
-    );
+    , { wrapper });
     result.current({ eid: 'START' });
     result.current({ eid: 'END', edata: { summary: [{ progress: 100 }] } });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call contentStateUpdate when currentContentStatus is 2', () => {
+    const wrapper = createWrapper();
     const { result } = renderHook(() =>
       useContentStateUpdate({ ...defaultParams, currentContentStatus: 2 })
-    );
+    , { wrapper });
     result.current({ eid: 'START' });
     result.current({ eid: 'END', edata: { summary: [{ progress: 100 }] } });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call contentStateUpdate when skipContentStateUpdate is true', () => {
+    const wrapper = createWrapper();
     const { result } = renderHook(() =>
       useContentStateUpdate({ ...defaultParams, skipContentStateUpdate: true })
-    );
+    , { wrapper });
     result.current({ eid: 'START' });
     result.current({ eid: 'END', edata: { summary: [{ progress: 100 }] } });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('calls contentStateUpdate with status 1 and invalidates on START', async () => {
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({
@@ -101,7 +130,8 @@ describe('useContentStateUpdate', () => {
   });
 
   it('calls contentStateUpdate only once for multiple START events', async () => {
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({ eid: 'START' });
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
@@ -111,7 +141,8 @@ describe('useContentStateUpdate', () => {
 
   it('retries START update on failure (does not set lastSentStatusRef so next START retries)', async () => {
     mockMutateAsync.mockRejectedValueOnce(new Error('Network error'));
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({ eid: 'START' });
     await vi.waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
@@ -125,7 +156,8 @@ describe('useContentStateUpdate', () => {
   });
 
   it('calls contentStateUpdate with computed status and invalidates on END', async () => {
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({
       eid: 'END',
       edata: { summary: [{ progress: 100 }] },
@@ -142,14 +174,16 @@ describe('useContentStateUpdate', () => {
   });
 
   it('does not call contentStateUpdate when getUserId returns undefined', () => {
-    (userAuthInfoService.getUserId as ReturnType<typeof vi.fn>).mockReturnValue(undefined);
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    vi.mocked(useAuthInfoModule.useUserId).mockReturnValueOnce(undefined);
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({ eid: 'START' });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('reads eid from event.data when present', async () => {
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({ data: { eid: 'START' } });
     await vi.waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith(
@@ -161,7 +195,8 @@ describe('useContentStateUpdate', () => {
   });
 
   it('reads summary from event.data.edata.summary for END', async () => {
-    const { result } = renderHook(() => useContentStateUpdate(defaultParams));
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useContentStateUpdate(defaultParams), { wrapper });
     result.current({
       eid: 'END',
       data: { edata: { summary: [{ progress: 50 }] } },
@@ -182,17 +217,19 @@ describe('useContentStateUpdate', () => {
     };
 
     it('does not call contentStateUpdate on START when currentContentStatus is 2', () => {
+      const wrapper = createWrapper();
       const { result } = renderHook(() =>
         useContentStateUpdate({ ...selfAssessParams, currentContentStatus: 2 })
-      );
+      , { wrapper });
       result.current({ eid: 'START', ets: 12345 });
       expect(mockMutateAsync).not.toHaveBeenCalled();
     });
 
     it('treats contentType as SelfAssess when lowercase', async () => {
+      const wrapper = createWrapper();
       const { result } = renderHook(() =>
         useContentStateUpdate({ ...defaultParams, contentType: 'selfassess' })
-      );
+      , { wrapper });
       result.current({ eid: 'START' });
       await vi.waitFor(() => {
         expect(mockMutateAsync).toHaveBeenCalledWith(
@@ -204,9 +241,10 @@ describe('useContentStateUpdate', () => {
     });
 
     it('on END after START sends single PATCH with contents and assessments', async () => {
+      const wrapper = createWrapper();
       const { result } = renderHook(() =>
         useContentStateUpdate({ ...selfAssessParams, currentContentStatus: 2 })
-      );
+      , { wrapper });
       result.current({ eid: 'START', ets: 1700000000000 });
       result.current({ eid: 'END' });
       await vi.waitFor(() => {
@@ -239,9 +277,10 @@ describe('useContentStateUpdate', () => {
     });
 
     it('accumulates ASSESS events and sends them in assessments.events on END', async () => {
+      const wrapper = createWrapper();
       const { result } = renderHook(() =>
         useContentStateUpdate({ ...selfAssessParams, currentContentStatus: 2 })
-      );
+      , { wrapper });
       result.current({ eid: 'START', ets: 1700000000000 });
       result.current({ eid: 'ASSESS', data: { q1: 'a1' } } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
       result.current({ eid: 'ASSESS', data: { q2: 'a2' } } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
@@ -262,7 +301,8 @@ describe('useContentStateUpdate', () => {
     });
 
     it('on END without prior START uses progress path (no assessments)', async () => {
-      const { result } = renderHook(() => useContentStateUpdate(selfAssessParams));
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useContentStateUpdate(selfAssessParams), { wrapper });
       result.current({
         eid: 'END',
         edata: { summary: [{ progress: 100 }] },
@@ -280,7 +320,8 @@ describe('useContentStateUpdate', () => {
     });
 
     it('when status is not 2, START sends status 1 and END sends assessment (two calls)', async () => {
-      const { result } = renderHook(() => useContentStateUpdate(selfAssessParams));
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useContentStateUpdate(selfAssessParams), { wrapper });
       result.current({ eid: 'START', ets: 1700000000000 });
       result.current({ eid: 'END' });
       await vi.waitFor(() => {
@@ -302,9 +343,10 @@ describe('useContentStateUpdate', () => {
     });
 
     it('reads START ets from event.data when present for assessmentTs', async () => {
+      const wrapper = createWrapper();
       const { result } = renderHook(() =>
         useContentStateUpdate({ ...selfAssessParams, currentContentStatus: 2 })
-      );
+      , { wrapper });
       result.current({ data: { eid: 'START', ets: 999 } });
       result.current({ eid: 'END' });
       await vi.waitFor(() => {

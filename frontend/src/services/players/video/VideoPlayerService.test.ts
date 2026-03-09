@@ -33,6 +33,14 @@ vi.mock('../../UserProfileService', () => ({
   },
 }));
 
+// Mock fetch for styles
+global.fetch = vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    text: () => Promise.resolve('/* mock css */'),
+  } as Response)
+);
+
 describe('VideoPlayerService', () => {
   let service: VideoPlayerService;
 

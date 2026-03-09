@@ -5,11 +5,12 @@ import { useEditProfile } from './useEditProfile';
 import { UserProfile } from '../types/userTypes';
 import React from 'react';
 
-const { mockOtpService } = vi.hoisted(() => ({
+const { mockOtpService, mockMutateAsync } = vi.hoisted(() => ({
   mockOtpService: {
     generateOtp: vi.fn(),
     verifyOtp: vi.fn(),
   },
+  mockMutateAsync: vi.fn(),
 }));
 
 vi.mock('../services/OtpService', () => ({
@@ -36,6 +37,21 @@ vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
     getUserId: vi.fn(() => 'user-123'),
     getAuthInfo: vi.fn(),
   },
+}));
+
+vi.mock('./useUpdateProfile', () => ({
+  useUpdateProfile: vi.fn(() => ({
+    mutateAsync: mockMutateAsync,
+    isPending: false,
+  })),
+}));
+
+vi.mock('./useToast', () => ({
+  toast: vi.fn(),
+}));
+
+vi.mock('./useAuthInfo', () => ({
+  useUserId: vi.fn(() => 'user-123'),
 }));
 
 const mockUser: UserProfile = {
@@ -65,6 +81,7 @@ const createWrapper = () => {
 describe('useEditProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockMutateAsync.mockResolvedValue({ data: { response: 'SUCCESS' }, status: 200, headers: {} });
   });
 
   it('initializes with dialog closed', () => {
@@ -493,7 +510,6 @@ describe('useEditProfile', () => {
 
       mockOtpService.generateOtp.mockResolvedValue({ data: 'success' });
       mockOtpService.verifyOtp.mockResolvedValue({ data: 'success' });
-      mockUserService.updateProfile.mockResolvedValue({ data: { response: 'SUCCESS' }, status: 200, headers: {} });
 
       act(() => {
         result.current.openDialog();
@@ -517,21 +533,26 @@ describe('useEditProfile', () => {
         result.current.verifyFieldOtp('mobileNumber');
       });
 
+      // Verify canSave is true before calling handleSave
+      expect(result.current.canSave).toBe(true);
+
       await act(async () => {
-        result.current.handleSave();
+        await result.current.handleSave();
       });
 
-      expect(mockUserService.updateProfile).toHaveBeenCalledWith({
-        request: {
-          userId: 'user-123',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          phone: '9999888877',
-          phoneVerified: true,
-        },
-      });
+      // Check if mutation was called
+      expect(mockMutateAsync).toHaveBeenCalled();
 
       await waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledWith({
+          request: {
+            userId: 'user-123',
+            firstName: 'Jane',
+            lastName: 'Smith',
+            phone: '9999888877',
+            phoneVerified: true,
+          },
+        });
         expect(result.current.isOpen).toBe(false);
       });
     });
@@ -539,8 +560,6 @@ describe('useEditProfile', () => {
     it('calls updateProfile when only fullName is changed (no OTP required)', async () => {
       const wrapper = createWrapper();
       const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-      mockUserService.updateProfile.mockResolvedValue({ data: { response: 'SUCCESS' }, status: 200, headers: {} });
 
       act(() => {
         result.current.openDialog();
@@ -554,18 +573,17 @@ describe('useEditProfile', () => {
       expect(result.current.canSave).toBe(true);
 
       await act(async () => {
-        result.current.handleSave();
-      });
-
-      expect(mockUserService.updateProfile).toHaveBeenCalledWith({
-        request: {
-          userId: 'user-123',
-          firstName: 'Jane',
-          lastName: 'Smith',
-        },
+        await result.current.handleSave();
       });
 
       await waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledWith({
+          request: {
+            userId: 'user-123',
+            firstName: 'Jane',
+            lastName: 'Smith',
+          },
+        });
         expect(result.current.isOpen).toBe(false);
       });
     });
