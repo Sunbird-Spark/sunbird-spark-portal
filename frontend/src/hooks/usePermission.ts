@@ -1,11 +1,9 @@
 // frontend/src/hooks/usePermission.ts
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Role } from '../auth/AuthContext';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
-import { UserService } from '../services/UserService';
 import permissionService, { Feature } from '../services/PermissionService';
-
-const userService = new UserService();
+import { useUserRead } from './useUserRead';
 
 export interface UsePermissionsReturn {
   roles: Role[];
@@ -17,57 +15,21 @@ export interface UsePermissionsReturn {
   refetch: () => Promise<void>;
 }
 
+// Reads roles from the shared useUserRead cache (which already fetches the
+// `roles` field). This avoids a separate getUserRoles API call on every
+// ProtectedRoute mount and benefits from the same 1 hour staleTime.
 export function usePermissions(): UsePermissionsReturn {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const isMountedRef = useRef(true);
+  const isAuthenticated = userAuthInfoService.isUserAuthenticated();
+  const { data: userReadData, isLoading, error, refetch } = useUserRead();
 
-  const fetchRoles = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const authInfo = await userAuthInfoService.getAuthInfo();
-      if (!isMountedRef.current) return;
-
-      setIsAuthenticated(authInfo.isAuthenticated);
-
-      if (authInfo.isAuthenticated && authInfo.uid) {
-        const rolesResponse = await userService.getUserRoles(authInfo.uid);
-        if (!isMountedRef.current) return;
-        const rawRoles = (rolesResponse.data.response.roles || []).map(
-          (r: { role: string } | string) => typeof r === 'string' ? r : r.role
-        );
-        const normalizedRoles = permissionService.normalizeRoles(rawRoles);
-        setRoles(normalizedRoles);
-      } else {
-        setRoles(['PUBLIC']);
-      }
-    } catch (err) {
-      if (!isMountedRef.current) return;
-      console.error('Failed to fetch user roles:', err);
-      setError(err as Error);
-      const status = (err as { response?: { status?: number }; status?: number })?.response?.status ?? (err as { status?: number })?.status;
-      if (status === 401 || status === 403) {
-        setRoles(['PUBLIC']);
-        setIsAuthenticated(false);
-      } else {
-        setRoles(prev => prev.length ? prev : ['PUBLIC']);
-      }
-    } finally {
-      if (isMountedRef.current) setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    fetchRoles();
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, [fetchRoles]);
+  const roles = useMemo<Role[]>(() => {
+    if (!isAuthenticated) return ['PUBLIC'];
+    const rawRoles = (userReadData?.data?.response?.roles ?? []).map(
+      (r: { role: string } | string) => (typeof r === 'string' ? r : r.role)
+    );
+    if (rawRoles.length === 0) return ['PUBLIC'];
+    return permissionService.normalizeRoles(rawRoles) as Role[];
+  }, [isAuthenticated, userReadData]);
 
   const hasAnyRole = useCallback(
     (requiredRoles: Role[]) => permissionService.hasAnyRole(roles, requiredRoles),
@@ -83,9 +45,9 @@ export function usePermissions(): UsePermissionsReturn {
     roles,
     isLoading,
     isAuthenticated,
-    error,
+    error: error ?? null,
     hasAnyRole,
     canAccessFeature,
-    refetch: fetchRoles,
+    refetch: async () => { await refetch(); },
   };
 }
