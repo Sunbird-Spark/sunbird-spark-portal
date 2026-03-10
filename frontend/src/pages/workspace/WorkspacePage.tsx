@@ -259,7 +259,8 @@ const WorkspacePage = () => {
       setShowCreateModal(false);
       toast({
         title: t("workspace.startingEditor"),
-        description: t("workspace.launchingEditor", { name: optionId.replace('-', ' ') })
+        description: t("workspace.launchingEditor", { name: optionId.replace('-', ' ') }),
+        variant: "success",
       });
     }
   };
@@ -344,13 +345,14 @@ const WorkspacePage = () => {
   };
 
   const handleQuestionSetCreate = async (name: string) => {
-    const { createdBy, createdFor } = getCreatorMeta();
+    const { createdBy, createdFor, creator } = getCreatorMeta();
 
     const response = await questionSetCreate.mutateAsync({
       name,
       createdBy,
       createdFor,
       framework: orgFramework || '',
+      creator,
     });
 
     const contentId = response?.identifier;

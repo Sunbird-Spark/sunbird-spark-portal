@@ -217,6 +217,7 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
       toast({
         title: 'Profile updated',
         description: 'Your profile has been updated successfully.',
+        variant: 'success',
       });
       closeDialog();
     } catch (err) {

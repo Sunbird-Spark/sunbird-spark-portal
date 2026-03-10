@@ -71,7 +71,7 @@ export function LearnerBottomCards({
   const handleConsentAgree = async () => {
     try {
       await updateConsent("ACTIVE");
-      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
+      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "success" });
     } catch (err) {
       toast({ title: t("error"), description: (err as Error).message || t("profileDataSharing.consentUpdateError"), variant: "destructive" });
     }
@@ -80,7 +80,7 @@ export function LearnerBottomCards({
   const handleConsentDisagree = async () => {
     try {
       await updateConsent("REVOKED");
-      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "default" });
+      toast({ title: t("success"), description: t("profileDataSharing.consentUpdateSuccess"), variant: "success" });
     } catch (err) {
       toast({ title: t("error"), description: (err as Error).message || t("profileDataSharing.consentUpdateError"), variant: "destructive" });
     }

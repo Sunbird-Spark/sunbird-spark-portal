@@ -121,7 +121,7 @@ const UserManagementPage = () => {
       await acceptTncMutation.mutateAsync({ tncConfig: activeTncConfig, tncType: activeTncType });
       setTncDialogOpen(false);
       refetchUser();
-      toast({ title: "Terms accepted", description: "You can now use User Management features." });
+      toast({ title: "Terms accepted", description: "You can now use User Management features.", variant: "success" });
     } catch {
       toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
     }

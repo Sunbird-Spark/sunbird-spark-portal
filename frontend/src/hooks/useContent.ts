@@ -73,6 +73,7 @@ export const useContentSearch = (
     queryKey,
     queryFn: () => contentService.contentSearch(effectiveRequest),
     enabled,
+    staleTime: 60 * 60 * 1000,
   });
 };
 
@@ -87,5 +88,6 @@ export const useContentRead = (
     queryKey: ['content-read', contentId, fields, mode],
     queryFn: () => contentService.contentRead(contentId, fields, mode),
     enabled: enabled && !!contentId,
+    staleTime: 60 * 60 * 1000,
   });
 };

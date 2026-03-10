@@ -15,5 +15,6 @@ export const useCollection = (
       return mapToCollectionData(content);
     },
     enabled: !!collectionId,
+    staleTime: 60 * 60 * 1000,
   });
 };
