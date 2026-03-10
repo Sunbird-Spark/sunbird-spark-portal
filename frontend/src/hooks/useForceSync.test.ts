@@ -89,7 +89,7 @@ describe("useForceSync", () => {
     expect(mockToast).toHaveBeenCalledWith({
       title: "success",
       description: "courseDetails.forceSyncSuccess",
-      variant: "default",
+      variant: "success",
       viewport: "center",
     });
   });
