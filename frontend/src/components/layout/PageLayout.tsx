@@ -84,7 +84,7 @@ const PageLayout = () => {
       <div className="flex flex-1 relative transition-all">
         {isMobile ? (
           <Sheet open={isSidebarOpen} onOpenChange={(open) => setSidebarOpen(open, true)}>
-            <SheetContent side="left" className="w-[17.5rem] pt-10 px-0 pb-0">
+            <SheetContent side="left" className="w-[17.5rem] px-0">
               <SheetTitle className="sr-only">{t('navigationMenu')}</SheetTitle>
               <HomeSidebar
                 activeNav={activeNav}
