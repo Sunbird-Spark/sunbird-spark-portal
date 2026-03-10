@@ -104,6 +104,7 @@ describe('WorkspaceContentList', () => {
     render(
       <WorkspaceContentList
         items={defaultItems}
+        userRole="creator"
         onEdit={vi.fn()}
         onDelete={onDelete}
         onView={vi.fn()}
