@@ -1,0 +1,21 @@
+{
+  "name": "ui_automation",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "save-auth": "npx playwright test tests/00_save_auth.spec.ts --project=chromium --headed",
+    "mcp-server": "node mcp-server/index.js",
+    "test:debug": "PWDEBUG=1 npx playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/mcp": "^0.0.68",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.3.2",
+    "dotenv": "^17.3.1"
+  }
+}
