@@ -245,18 +245,6 @@
   }
 }
 
-@media (max-width: 425px) {
-  [dir="rtl"] .notification-popover-content {
-    right: auto !important;
-    left: -5.75rem !important;
-  }
-
-  [dir="ltr"] .notification-popover-content {
-    left: auto !important;
-    right: -5.75rem !important;
-  }
-}
-
 /* Notification Item Indicator RTL */
 [dir="rtl"] .notification-item::before {
   left: auto;
