@@ -82,6 +82,13 @@ export function useBatchListForMentor(
 }
 
 
+// ─── Utility ─────────────────────────────────────────────────────────────────
+export function mergeBatches(batchesA?: Batch[], batchesB?: Batch[]): Batch[] {
+  const combined = [...(batchesA || []), ...(batchesB || [])];
+  const uniqueIds = Array.from(new Set(combined.map(b => b.id)));
+  return uniqueIds.map(id => combined.find(b => b.id === id)!);
+}
+
 // ─── useBatchListForLearner ──────────────────────────────────────────────────
 /**
  * Learner view: fetch all batches for enrollment

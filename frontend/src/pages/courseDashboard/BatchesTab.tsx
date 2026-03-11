@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PageLoader from '@/components/common/PageLoader';
-import { useBatchListForCreator, useBatchListForMentor } from '@/hooks/useBatch';
-import { useIsMentor } from '@/hooks/useUser';
+import { useBatchListForCreator, useBatchListForMentor, mergeBatches } from '@/hooks/useBatch';
+import { useIsMentor, useIsContentCreator } from '@/hooks/useUser';
 import type { Batch } from '@/services/BatchService';
 import { getBatchStatus } from '@/components/collection/BatchRow';
 import {
@@ -27,15 +27,16 @@ interface BatchesTabProps {
 const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const isMentor = useIsMentor();
-  const { data: creatorBatches, isLoading: isLoadingCreator, isError: isErrorCreator, error: creatorError } = useBatchListForCreator(collectionId);
+  const isContentCreator = useIsContentCreator();
+
+  const { data: creatorBatches, isLoading: isLoadingCreator, isError: isErrorCreator, error: creatorError } = useBatchListForCreator(collectionId, { enabled: isContentCreator });
   const { data: mentorBatches, isLoading: isLoadingMentor, isError: isErrorMentor, error: mentorError } = useBatchListForMentor(collectionId, { enabled: isMentor });
 
-  const batches = Array.from(new Set([...(creatorBatches ?? []), ...(mentorBatches ?? [])].map(b => b.id)))
-    .map(id => [...(creatorBatches ?? []), ...(mentorBatches ?? [])].find(b => b.id === id)!);
+  const batches = mergeBatches(creatorBatches, mentorBatches);
 
-  const isLoading = isLoadingCreator || (isMentor && isLoadingMentor);
-  const isError = isErrorCreator || (isMentor && isErrorMentor);
-  const error = creatorError || mentorError;
+  const isLoading = (isContentCreator && isLoadingCreator) || (isMentor && isLoadingMentor);
+  const isError = (isContentCreator && isErrorCreator) || (isMentor && isErrorMentor);
+  const error = (isContentCreator && creatorError) || (isMentor && mentorError);
 
   if (isLoading) {
     return (

@@ -59,7 +59,7 @@ export function useCollectionEnrollment(
   const effectiveBatchId =
     batchIdParam ?? enrollmentForCollection?.batchId ?? mentorBatches?.[0]?.id;
 
-  const isMentorOfAnyBatchInCourse = (mentorBatches?.[0]?.id !== undefined);
+  const isMentorOfAnyBatchInCourse = (mentorBatches?.length ?? 0) > 0;
 
 
   const leafContentIds = useMemo(() => getLeafContentIds(collectionData), [collectionData]);

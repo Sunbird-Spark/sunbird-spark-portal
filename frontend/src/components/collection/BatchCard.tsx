@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FiPlus, FiRefreshCw, FiLoader, FiCalendar } from "react-icons/fi";
 import CreateBatchModal from "./CreateBatchModal";
 import AddCertificateModal from "./AddCertificateModal";
-import { useBatchListForCreator, useBatchListForMentor } from "@/hooks/useBatch";
+import { useBatchListForCreator, useBatchListForMentor, mergeBatches } from "@/hooks/useBatch";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
@@ -58,18 +58,17 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
     }
   };
 
-  const { data: creatorBatches, isLoading: isLoadingCreator, isError: isErrorCreator, refetch: refetchCreator, isFetching: isFetchingCreator } = useBatchListForCreator(collectionId);
+  const { data: creatorBatches, isLoading: isLoadingCreator, isError: isErrorCreator, refetch: refetchCreator, isFetching: isFetchingCreator } = useBatchListForCreator(collectionId, { enabled: isContentCreator });
   const { data: mentorBatches,  isLoading: isLoadingMentor,  isError: isErrorMentor,  refetch: refetchMentor,  isFetching: isFetchingMentor  } = useBatchListForMentor(collectionId, { enabled: isMentor });
 
-  const batches = Array.from(new Set([...(creatorBatches ?? []), ...(mentorBatches ?? [])].map(b => b.id)))
-    .map(id => [...(creatorBatches ?? []), ...(mentorBatches ?? [])].find(b => b.id === id)!);
+  const batches = mergeBatches(creatorBatches, mentorBatches);
 
-  const isLoading = isLoadingCreator || (isMentor && isLoadingMentor);
-  const isError   = isErrorCreator   || (isMentor && isErrorMentor);
-  const isFetching = isFetchingCreator || (isMentor && isFetchingMentor);
+  const isLoading = (isContentCreator && isLoadingCreator) || (isMentor && isLoadingMentor);
+  const isError   = (isContentCreator && isErrorCreator)   || (isMentor && isErrorMentor);
+  const isFetching = (isContentCreator && isFetchingCreator) || (isMentor && isFetchingMentor);
 
   const refetch = () => {
-    refetchCreator();
+    if (isContentCreator) refetchCreator();
     if (isMentor) refetchMentor();
   };
 

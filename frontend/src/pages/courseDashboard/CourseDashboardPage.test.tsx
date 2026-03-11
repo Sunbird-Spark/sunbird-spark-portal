@@ -24,8 +24,15 @@ vi.mock('@/hooks/useCollection', () => ({
   })),
 }));
 
+vi.mock('@/hooks/useBatch', () => ({
+  useBatchListForCreator: vi.fn(() => ({ data: [], isLoading: false, isError: false })),
+  useBatchListForMentor: vi.fn(() => ({ data: [], isLoading: false, isError: false })),
+  mergeBatches: vi.fn(() => []),
+}));
+
 vi.mock('@/hooks/useUser', () => ({
   useCurrentUserId: vi.fn(() => ({ data: 'user-abc' })),
+  useIsMentor: vi.fn(() => false),
 }));
 
 vi.mock('@/components/home/Header', () => ({
@@ -39,8 +46,8 @@ vi.mock('./BatchesTab', () => ({
   default: () => <div data-testid="batches-tab-mock" />,
 }));
 vi.mock('./CertificatesTab', () => ({
-  default: ({ isOwner }: { isOwner: boolean }) => (
-    <div data-testid="certificates-tab-mock" data-is-owner={String(isOwner)} />
+  default: ({ canReissue }: { canReissue: boolean }) => (
+    <div data-testid="certificates-tab-mock" data-can-reissue={String(canReissue)} />
   ),
 }));
 
@@ -92,7 +99,7 @@ describe('CourseDashboardPage', () => {
     expect(screen.queryByTestId('batches-tab-mock')).not.toBeInTheDocument();
   });
 
-  it('passes isOwner=true to CertificatesTab when uid matches createdBy', () => {
+  it('passes canReissue=true to CertificatesTab when uid matches createdBy', () => {
     (useParams as Mock).mockReturnValue({ collectionId: 'col_123', tab: 'certificates' });
     (useCollection as Mock).mockReturnValue({
       data: { title: 'Test Course', createdBy: 'user-abc' },
@@ -102,10 +109,10 @@ describe('CourseDashboardPage', () => {
     (useCurrentUserId as Mock).mockReturnValue({ data: 'user-abc' });
 
     render(<CourseDashboardPage />);
-    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-is-owner', 'true');
+    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-can-reissue', 'true');
   });
 
-  it('passes isOwner=false to CertificatesTab when uid does not match createdBy', () => {
+  it('passes canReissue=false to CertificatesTab when uid does not match createdBy and is not mentor', () => {
     (useParams as Mock).mockReturnValue({ collectionId: 'col_123', tab: 'certificates' });
     (useCollection as Mock).mockReturnValue({
       data: { title: 'Test Course', createdBy: 'user-abc' },
@@ -115,14 +122,14 @@ describe('CourseDashboardPage', () => {
     (useCurrentUserId as Mock).mockReturnValue({ data: 'user-xyz' });
 
     render(<CourseDashboardPage />);
-    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-is-owner', 'false');
+    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-can-reissue', 'false');
   });
 
-  it('passes isOwner=false to CertificatesTab when uid is not yet loaded', () => {
+  it('passes canReissue=false to CertificatesTab when uid is not yet loaded', () => {
     (useParams as Mock).mockReturnValue({ collectionId: 'col_123', tab: 'certificates' });
     (useCurrentUserId as Mock).mockReturnValue({ data: undefined });
 
     render(<CourseDashboardPage />);
-    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-is-owner', 'false');
+    expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-can-reissue', 'false');
   });
 });

@@ -68,7 +68,6 @@ const CollectionDetailPage = () => {
     isBatchUpcoming,
     batchStartDateFromRead,
     isMentorOfAnyBatchInCourse,
-    isMentorOfCurrentBatch,
   } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");

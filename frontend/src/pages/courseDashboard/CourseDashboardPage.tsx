@@ -42,7 +42,7 @@ const CourseDashboardPage: React.FC = () => {
   const { data: mentorBatches } = useBatchListForMentor(collectionId, { enabled: isMentorRole });
   const isMentorOfCourse = !!mentorBatches && mentorBatches.length > 0;
 
-  const canManageDashboard = isOwner || isMentorOfCourse;
+  const canAccessDashboard = isOwner || isMentorOfCourse;
 
 
   // Redirect to default tab if the tab param is invalid
@@ -148,7 +148,7 @@ const CourseDashboardPage: React.FC = () => {
               <BatchesTab collectionId={collectionId} />
             )}
             {collectionId && activeTab === 'certificates' && (
-              <CertificatesTab collectionId={collectionId} canReissue={canManageDashboard} />
+              <CertificatesTab collectionId={collectionId} canReissue={canAccessDashboard} />
             )}
           </div>
         </div>

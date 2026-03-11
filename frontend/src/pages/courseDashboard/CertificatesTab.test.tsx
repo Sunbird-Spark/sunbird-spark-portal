@@ -269,4 +269,68 @@ describe('CertificatesTab', () => {
     expect(screen.getByTestId('reissue-btn-0')).toBeInTheDocument();
     expect(screen.queryByTestId('reissue-view-only-0')).not.toBeInTheDocument();
   });
+
+  /* ── Mentor Specific filtering ── */
+
+  it('filters batches to only show mentored batches for mentor-only users', () => {
+    (useIsContentCreator as any).mockReturnValue(false);
+    (useIsMentor as any).mockReturnValue(true);
+    (useBatchListForMentor as any).mockReturnValue({
+      data: [{ id: 'b1' }] // User only mentors b1
+    });
+
+    const mockResult = {
+      data: {
+        response: {
+          userId: 'u1', userName: 'User One',
+          courses: {
+            batches: [
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [] },
+              { batchId: 'b2', name: 'Batch 2', completionPercentage: 100, status: 2, issuedCertificates: [] },
+            ],
+          },
+        },
+      }
+    };
+
+    (useCertUserSearch as any).mockReturnValue({
+      mutate: vi.fn(), data: mockResult, isPending: false, error: null, reset: vi.fn(),
+    });
+
+    render(<CertificatesTab collectionId="col_123" canReissue={true} />);
+    
+    expect(screen.getByText('Batch 1')).toBeInTheDocument();
+    expect(screen.queryByText('Batch 2')).not.toBeInTheDocument();
+  });
+
+  it('shows all batches for users who are both creators and mentors', () => {
+    (useIsContentCreator as any).mockReturnValue(true);
+    (useIsMentor as any).mockReturnValue(true);
+    (useBatchListForMentor as any).mockReturnValue({
+      data: [{ id: 'b1' }] 
+    });
+
+    const mockResult = {
+      data: {
+        response: {
+          userId: 'u1', userName: 'User One',
+          courses: {
+            batches: [
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [] },
+              { batchId: 'b2', name: 'Batch 2', completionPercentage: 100, status: 2, issuedCertificates: [] },
+            ],
+          },
+        },
+      }
+    };
+
+    (useCertUserSearch as any).mockReturnValue({
+      mutate: vi.fn(), data: mockResult, isPending: false, error: null, reset: vi.fn(),
+    });
+
+    render(<CertificatesTab collectionId="col_123" canReissue={true} />);
+    
+    expect(screen.getByText('Batch 1')).toBeInTheDocument();
+    expect(screen.getByText('Batch 2')).toBeInTheDocument();
+  });
 });
