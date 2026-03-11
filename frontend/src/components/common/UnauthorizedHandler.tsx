@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useAppI18n } from '../../hooks/useAppI18n';
 
 // Module-level flag — survives component remounts caused by navigation bounces
 let redirectScheduled = false;
 
 const UnauthorizedHandler: React.FC = () => {
+  const { t } = useAppI18n();
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -16,7 +18,7 @@ const UnauthorizedHandler: React.FC = () => {
       timeoutId = setTimeout(() => { window.location.href = '/portal/logout?redirect=login'; }, 2500);
     };
 
-    const handleAuthError = authErrorHandler("You don't have access to perform this action. Redirecting to login.");
+    const handleAuthError = authErrorHandler(t('authErrorRedirectMessage'));
 
     window.addEventListener('unauthorized', handleAuthError);
     window.addEventListener('forbidden', handleAuthError);
