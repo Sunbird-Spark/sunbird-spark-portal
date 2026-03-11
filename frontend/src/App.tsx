@@ -1,24 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import AppRoutes from './AppRoutes';
 import PageLoader from '@/components/common/PageLoader';
 import { Toaster } from '@/components/common/Toaster';
 import { portalInitializer } from './utils/portalInitializer';
 import { TncCheckWrapper } from '@/components/termsAndCondition/TncCheckWrapper';
+import { createQueryClient } from './queryClient';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        const status = (error as Error & { status?: number }).status;
-        if (status !== undefined && status >= 400 && status < 500) return false;
-        return failureCount < 2;
-      },
-    },
-  },
-});
+const queryClient = createQueryClient();
 
 export default function App() {
   const { t } = useAppI18n();
