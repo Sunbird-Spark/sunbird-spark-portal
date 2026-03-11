@@ -92,14 +92,18 @@ vi.mock('@/hooks/useTnc', () => ({
 }));
 
 const mockUseBatchList = vi.fn();
+const mockUseBatchListForMentor = vi.fn();
 const mockUseIsContentCreator = vi.fn();
+const mockUseIsMentor = vi.fn();
 
 vi.mock('@/hooks/useBatch', () => ({
   useBatchListForCreator: (courseId: string, options?: any) => mockUseBatchList(courseId, options),
+  useBatchListForMentor: (courseId: string, options?: any) => mockUseBatchListForMentor(courseId, options),
 }));
 
 vi.mock('@/hooks/useUser', () => ({
   useIsContentCreator: () => mockUseIsContentCreator(),
+  useIsMentor: () => mockUseIsMentor(),
 }));
 
 vi.mock('@/hooks/usePermission', () => ({
@@ -125,7 +129,9 @@ describe('BatchCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseBatchList.mockReturnValue(defaultHookState);
+    mockUseBatchListForMentor.mockReturnValue(defaultHookState);
     mockUseIsContentCreator.mockReturnValue(true); // Default to creator
+    mockUseIsMentor.mockReturnValue(false); // Default to not mentor
   });
 
   /* ── Rendering ── */

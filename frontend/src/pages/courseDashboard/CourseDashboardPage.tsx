@@ -5,7 +5,8 @@ import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
 import PageLoader from '@/components/common/PageLoader';
 import { useCollection } from '@/hooks/useCollection';
-import { useCurrentUserId } from '@/hooks/useUser';
+import { useCurrentUserId, useIsMentor } from '@/hooks/useUser';
+import { useBatchListForMentor } from '@/hooks/useBatch';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
@@ -36,6 +37,13 @@ const CourseDashboardPage: React.FC = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
+
+  const isMentorRole = useIsMentor();
+  const { data: mentorBatches } = useBatchListForMentor(collectionId, { enabled: isMentorRole });
+  const isMentorOfCourse = !!mentorBatches && mentorBatches.length > 0;
+
+  const canManageDashboard = isOwner || isMentorOfCourse;
+
 
   // Redirect to default tab if the tab param is invalid
   useEffect(() => {
@@ -140,7 +148,7 @@ const CourseDashboardPage: React.FC = () => {
               <BatchesTab collectionId={collectionId} />
             )}
             {collectionId && activeTab === 'certificates' && (
-              <CertificatesTab collectionId={collectionId} isOwner={isOwner} />
+              <CertificatesTab collectionId={collectionId} canReissue={canManageDashboard} />
             )}
           </div>
         </div>

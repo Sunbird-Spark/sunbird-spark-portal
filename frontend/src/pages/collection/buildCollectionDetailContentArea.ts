@@ -38,6 +38,7 @@ export interface BuildContentAreaArgs {
   collectionId: string | undefined;
   batchIdParam: string | undefined;
   isCreatorViewingOwnCollection: boolean;
+  isMentorViewingCourse: boolean;
   contentCreatorPrivilege: boolean;
   userProfile: Record<string, unknown> | undefined;
   currentUserId: string | undefined;
@@ -93,6 +94,7 @@ export function buildCollectionDetailContentArea(
     },
     creator: {
       isCreatorViewingOwnCollection: args.isCreatorViewingOwnCollection,
+      isMentorViewingCourse: args.isMentorViewingCourse,
       contentCreatorPrivilege: args.contentCreatorPrivilege,
       userProfile: args.userProfile,
       userId: args.currentUserId,

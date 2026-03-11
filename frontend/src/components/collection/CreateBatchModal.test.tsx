@@ -64,6 +64,11 @@ vi.mock('@/hooks/useTnc', () => ({
   useGetTncUrl: () => ({ data: 'https://example.com/tnc' }),
 }));
 
+vi.mock('@/hooks/useUser', () => ({
+  useIsMentor: () => false,
+  useIsContentCreator: () => true,
+}));
+
 /* ── Helpers ── */
 const defaultProps = {
   open: true,

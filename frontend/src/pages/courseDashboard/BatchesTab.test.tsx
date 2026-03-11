@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import BatchesTab from './BatchesTab';
-import { useBatchListForCreator } from '@/hooks/useBatch';
+import { useBatchListForCreator, useBatchListForMentor } from '@/hooks/useBatch';
 
 vi.mock('@/hooks/useBatch', () => ({
   useBatchListForCreator: vi.fn(),
+  useBatchListForMentor: vi.fn(),
+}));
+
+vi.mock('@/hooks/useUser', () => ({
+  useIsMentor: vi.fn(),
 }));
 
 vi.mock('@/components/common/PageLoader', () => ({
@@ -35,10 +40,17 @@ vi.mock('@/components/reports/CourseReportContent', () => ({
 describe('BatchesTab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    import('@/hooks/useUser').then(m => (m.useIsMentor as any).mockReturnValue(false));
+    import('@/hooks/useBatch').then(m => (m.useBatchListForMentor as any).mockReturnValue({ data: undefined, isLoading: false, isError: false }));
   });
 
   it('renders loading state', () => {
     (useBatchListForCreator as any).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
+    (useBatchListForMentor as any).mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,

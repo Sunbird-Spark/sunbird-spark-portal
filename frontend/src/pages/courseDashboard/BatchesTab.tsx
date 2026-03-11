@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PageLoader from '@/components/common/PageLoader';
-import { useBatchListForCreator } from '@/hooks/useBatch';
+import { useBatchListForCreator, useBatchListForMentor } from '@/hooks/useBatch';
+import { useIsMentor } from '@/hooks/useUser';
 import type { Batch } from '@/services/BatchService';
 import { getBatchStatus } from '@/components/collection/BatchRow';
 import {
@@ -25,7 +26,16 @@ interface BatchesTabProps {
 
 const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
-  const { data: batches, isLoading, isError, error } = useBatchListForCreator(collectionId);
+  const isMentor = useIsMentor();
+  const { data: creatorBatches, isLoading: isLoadingCreator, isError: isErrorCreator, error: creatorError } = useBatchListForCreator(collectionId);
+  const { data: mentorBatches, isLoading: isLoadingMentor, isError: isErrorMentor, error: mentorError } = useBatchListForMentor(collectionId, { enabled: isMentor });
+
+  const batches = Array.from(new Set([...(creatorBatches ?? []), ...(mentorBatches ?? [])].map(b => b.id)))
+    .map(id => [...(creatorBatches ?? []), ...(mentorBatches ?? [])].find(b => b.id === id)!);
+
+  const isLoading = isLoadingCreator || (isMentor && isLoadingMentor);
+  const isError = isErrorCreator || (isMentor && isErrorMentor);
+  const error = creatorError || mentorError;
 
   if (isLoading) {
     return (

@@ -63,6 +63,7 @@ export interface CollectionContentAreaSidebarProps {
 /** Creator/viewer flags and user profile for consent. */
 export interface CollectionContentAreaCreatorProps {
   isCreatorViewingOwnCollection?: boolean;
+  isMentorViewingCourse?: boolean;
   contentCreatorPrivilege?: boolean;
   userProfile?: Record<string, unknown> | null;
   userId?: string | null;
@@ -128,6 +129,7 @@ export default function CollectionContentArea({
   const { expandedModules, toggleModule, collectionId, batchIdParam } = sidebar;
   const {
     isCreatorViewingOwnCollection = false,
+    isMentorViewingCourse = false,
     contentCreatorPrivilege = false,
     userProfile = null,
     userId = null,
@@ -180,8 +182,8 @@ export default function CollectionContentArea({
 
         {/* Right Sidebar */}
         <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:min-h-[calc(100vh-5rem)] lg:max-h-[calc(100vh-5rem)] pr-1">
-          {/* Creator: Dashboard link & Batch management card — only for the course owner */}
-          {isAuthenticated && isCreatorViewingOwnCollection && collectionId && (
+          {/* Creator/Mentor: Dashboard link & Batch management card */}
+          {isAuthenticated && (isCreatorViewingOwnCollection || isMentorViewingCourse) && collectionId && (
             <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
               <Button
                 variant="outline"
