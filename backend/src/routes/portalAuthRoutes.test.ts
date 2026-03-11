@@ -195,6 +195,32 @@ describe('PortalAuthRoutes Integration', () => {
             expect(res.header.location).toContain('oidc-provider.example.com/logout');
         });
 
+        it('should use SERVER_URL/portal/login as post_logout_redirect_uri when redirect=login', async () => {
+            const app = await setupApp();
+            const { buildEndSessionUrl } = await import('openid-client');
+            vi.mocked(buildEndSessionUrl).mockReturnValue(new URL('https://oidc-provider.example.com/logout'));
+
+            await request(app).get('/portal/logout?redirect=login');
+
+            expect(buildEndSessionUrl).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ post_logout_redirect_uri: 'http://server.com/portal/login' })
+            );
+        });
+
+        it('should use DEVELOPMENT_REACT_APP_URL as post_logout_redirect_uri by default', async () => {
+            const app = await setupApp();
+            const { buildEndSessionUrl } = await import('openid-client');
+            vi.mocked(buildEndSessionUrl).mockReturnValue(new URL('https://oidc-provider.example.com/logout'));
+
+            await request(app).get('/portal/logout');
+
+            expect(buildEndSessionUrl).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ post_logout_redirect_uri: 'http://localhost:3000' })
+            );
+        });
+
         it('should redirect to root on error', async () => {
             const app = await setupApp();
             const sessionUtils = await import('../utils/sessionUtils.js');

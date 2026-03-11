@@ -7,11 +7,13 @@ const UnauthorizedHandler: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     const authErrorHandler = (msg: string) => () => {
       if (redirectScheduled) return;
       redirectScheduled = true;
       setMessage(msg);
-      setTimeout(() => { window.location.href = '/portal/logout?redirect=login'; }, 2500);
+      timeoutId = setTimeout(() => { window.location.href = '/portal/logout?redirect=login'; }, 2500);
     };
 
     const handleAuthError = authErrorHandler("You don't have access to perform this action. Redirecting to login.");
@@ -21,6 +23,7 @@ const UnauthorizedHandler: React.FC = () => {
     return () => {
       window.removeEventListener('unauthorized', handleAuthError);
       window.removeEventListener('forbidden', handleAuthError);
+      clearTimeout(timeoutId);
     };
   }, []);
 
