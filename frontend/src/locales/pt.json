@@ -482,6 +482,8 @@
     "more": "Mais",
     "searchPlaceholder": "Pesquisar conteúdo...",
     "clearSearch": "Limpar pesquisa",
+    "gridView": "Vista em grelha",
+    "listView": "Vista em lista",
     "inReview": "Em revisão",
     "showingItems": "Exibindo {{count}} item(ns)",
     "showingItemsOf": "Exibindo {{count}} de {{total}} item(ns)",
