@@ -159,11 +159,17 @@ const WorkspacePage = () => {
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const debouncedSearch = useDebounce(searchInput, 400);
 
+  // Sync searchInput when URL changes externally (browser back/forward)
+  useEffect(() => {
+    const urlQuery = searchParams.get('search') || '';
+    setSearchInput((prev) => (prev === urlQuery ? prev : urlQuery));
+  }, [searchParams]);
+
   // Sync debounced value to URL (only writes when debounced value settles)
   useEffect(() => {
-    const current = searchParams.get('search') || '';
-    if (current === debouncedSearch) return;
     setSearchParams((prev) => {
+      const current = prev.get('search') || '';
+      if (current === debouncedSearch) return prev;
       const next = new URLSearchParams(prev);
       if (debouncedSearch) {
         next.set('search', debouncedSearch);
@@ -172,7 +178,7 @@ const WorkspacePage = () => {
       }
       return next;
     }, { replace: true });
-  }, [debouncedSearch]);
+  }, [debouncedSearch, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showResourceFormDialog, setShowResourceFormDialog] = useState(false);

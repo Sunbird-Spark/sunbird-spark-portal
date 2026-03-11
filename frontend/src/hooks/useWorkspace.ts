@@ -100,7 +100,7 @@ export function useWorkspace({
           status: [...WORKSPACE_STATUS_FILTER],
           primaryCategory: primaryCategoryFilter,
         },
-        query: searchQuery || '',
+        query: searchQuery,
         facets: ['status'],
         limit: 1,
         offset: 0,
@@ -170,7 +170,7 @@ export function useWorkspace({
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: getFiltersForTab(),
-        query: searchQuery || '',
+        query: searchQuery,
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),

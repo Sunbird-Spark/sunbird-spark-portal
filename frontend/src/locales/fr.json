@@ -487,6 +487,8 @@
     "more": "Plus",
     "searchPlaceholder": "Rechercher du contenu...",
     "clearSearch": "Effacer la recherche",
+    "gridView": "Vue grille",
+    "listView": "Vue liste",
     "inReview": "En révision",
     "showingItems": "Affichage de {{count}} élément(s)",
     "showingItemsOf": "Affichage de {{count}} sur {{total}} élément(s)",

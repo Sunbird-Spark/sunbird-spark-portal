@@ -482,6 +482,8 @@
     "more": "المزيد",
     "searchPlaceholder": "البحث في المحتوى...",
     "clearSearch": "مسح البحث",
+    "gridView": "عرض الشبكة",
+    "listView": "عرض القائمة",
     "inReview": "قيد المراجعة",
     "showingItems": "عرض {{count}} عنصر",
     "showingItemsOf": "عرض {{count}} من {{total}} عنصر",

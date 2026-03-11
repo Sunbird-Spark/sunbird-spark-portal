@@ -20,6 +20,8 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'allTypes': 'All Types',
         'workspace.searchPlaceholder': 'Search content...',
         'workspace.clearSearch': 'Clear search',
+        'workspace.gridView': 'Grid view',
+        'workspace.listView': 'List view',
         'course': 'Course',
         'workspace.showingItems': `Showing ${data?.count} items`,
         'workspace.showingItemsOf': `Showing ${data?.count} items of ${data?.total}`,
@@ -160,12 +162,8 @@ describe('WorkspaceToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Course' }));
     expect(onTypeFilterChange).toHaveBeenCalledWith('course');
 
-    // View mode toggles — the grid/list buttons are icon-only with no accessible name.
-    // Filter to only those inside the view-mode toggle container (bg-gray-100 wrapper).
-    const allUnnamedButtons = screen.getAllByRole('button', { name: '' });
-    // The last two unnamed buttons are the grid and list toggles
-    const gridBtn = allUnnamedButtons[allUnnamedButtons.length - 2]!;
-    fireEvent.click(gridBtn);
+    // View mode toggles
+    fireEvent.click(screen.getByRole('button', { name: 'Grid view' }));
     expect(onViewModeChange).toHaveBeenCalledWith('grid');
   });
 
