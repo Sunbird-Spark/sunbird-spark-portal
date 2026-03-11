@@ -33,8 +33,13 @@ const UnauthorizedHandler: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm mx-4 text-center">
-        <p className="text-gray-800 font-medium">{message}</p>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-describedby="auth-error-message"
+        className="bg-white rounded-lg p-6 shadow-xl max-w-sm mx-4 text-center"
+      >
+        <p id="auth-error-message" className="text-gray-800 font-medium" aria-live="assertive">{message}</p>
       </div>
     </div>
   );
