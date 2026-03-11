@@ -18,7 +18,7 @@ export const useUserRead = (
     const userId = authInfo?.uid ?? null;
 
     return useQuery({
-        queryKey: ['userRead'],
+        queryKey: ['userRead', userId],
         queryFn: async () => {
             if (!userId) {
                 throw new Error('User ID not available');

@@ -152,7 +152,7 @@ describe('useUserRead hook', () => {
     });
 
     describe('query options', () => {
-        it('uses 10-minute staleTime by default to cache user data across navigations', () => {
+        it('uses 1-hour staleTime by default to cache user data across navigations', () => {
             mockUseAuthInfo.mockReturnValue({
                 data: { uid: 'user-123', sid: 'session-123', isAuthenticated: true },
                 isSuccess: true,

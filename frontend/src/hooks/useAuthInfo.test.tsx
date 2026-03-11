@@ -149,7 +149,7 @@ describe('useUserId', () => {
 });
 
 describe('useIsAuthenticated', () => {
-  it('should return true for authenticated users', async () => {
+  it('should return authentication status and loading state for authenticated users', async () => {
     const mockAuthInfo = {
       sid: 'session-123',
       uid: 'user-456',
@@ -162,10 +162,15 @@ describe('useIsAuthenticated', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current).toBe(true));
+    // Initially loading
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isAuthenticated).toBe(false);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isAuthenticated).toBe(true);
   });
 
-  it('should return false for anonymous users', async () => {
+  it('should return authentication status and loading state for anonymous users', async () => {
     const mockAuthInfo = {
       sid: 'session-789',
       uid: null,
@@ -178,10 +183,11 @@ describe('useIsAuthenticated', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isAuthenticated).toBe(false);
   });
 
-  it('should return false while loading', () => {
+  it('should return loading state while auth info is being fetched', () => {
     vi.mocked(userAuthInfoService.getAuthInfo).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     );
@@ -190,6 +196,7 @@ describe('useIsAuthenticated', () => {
       wrapper: createWrapper(),
     });
 
-    expect(result.current).toBe(false);
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isAuthenticated).toBe(false);
   });
 });

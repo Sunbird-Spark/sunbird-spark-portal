@@ -17,7 +17,7 @@ export const useNotificationRead = (): UseNotificationReadReturn => {
     const userId = authInfo?.uid ?? null;
 
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['notificationFeed'],
+        queryKey: ['notificationFeed', userId],
         queryFn: async () => {
             if (!userId) throw new Error('User ID not available');
 

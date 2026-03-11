@@ -16,7 +16,7 @@ export const useUserEnrolledCollections = (
   const userId = authInfo?.uid ?? null;
 
   return useQuery({
-    queryKey: ['userEnrollments'],
+    queryKey: ['userEnrollments', userId],
     enabled: enabled && !!userId,
     queryFn: async () => {
       if (!userId) {

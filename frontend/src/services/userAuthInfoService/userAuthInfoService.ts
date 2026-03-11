@@ -12,6 +12,7 @@ class userAuthInfoService {
     private userId: string | null = null;
     private isAuthenticated: boolean = false;
     private cachedPromise: Promise<AuthStatusResponse> | null = null;
+    private requestGeneration: number = 0;
 
     private constructor() {
         // Private constructor for singleton pattern
@@ -27,7 +28,7 @@ class userAuthInfoService {
     /**
      * Fetches the authentication status from the backend
      * This includes the session ID (sid) and user ID (uid)
-     * Uses in-memory caching to prevent duplicate requests
+     * Uses in-memory caching to prevent duplicate in-flight requests
      * @returns Promise with the auth status response
      */
     async getAuthInfo(): Promise<AuthStatusResponse> {
@@ -37,18 +38,21 @@ class userAuthInfoService {
         }
 
         // Create and cache the promise
+        const currentGeneration = ++this.requestGeneration;
         this.cachedPromise = (async () => {
             try {
                 const response = await getClient().get<AuthStatusResponse>(
                     '/user/v1/auth/info');
-                this.sessionId = response.data.sid;
-                this.userId = response.data.uid;
-                this.isAuthenticated = response.data.isAuthenticated;
+                
+                // Only update state if this is still the current request generation
+                if (currentGeneration === this.requestGeneration) {
+                    this.sessionId = response.data.sid;
+                    this.userId = response.data.uid;
+                    this.isAuthenticated = response.data.isAuthenticated;
+                }
+                
                 return response.data;
             } catch (error) {
-                // Clear cache on error so retry is possible
-                this.cachedPromise = null;
-                
                 if (error && typeof error === 'object' && 'response' in error) {
                     const httpError = error as { response?: { status?: number; data?: { responseCode?: string; params?: { status?: string; errmsg?: string } } } };
                     console.error('Error fetching auth status:', error);
@@ -62,6 +66,9 @@ class userAuthInfoService {
                     console.error('Response:', safeData);
                 }
                 throw error;
+            } finally {
+                // Clear cache after completion (success or error) to allow re-fetching
+                this.cachedPromise = null;
             }
         })();
 
@@ -97,6 +104,7 @@ class userAuthInfoService {
         this.userId = null;
         this.isAuthenticated = false;
         this.cachedPromise = null;
+        this.requestGeneration++; // Invalidate any in-flight requests
     }
 }
 

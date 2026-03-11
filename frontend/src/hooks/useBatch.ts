@@ -33,7 +33,7 @@ export function useBatchListForCreator(
   const userId = authInfo?.uid ?? null;
 
   return useQuery({
-    queryKey: ['batchList', courseId, true],
+    queryKey: ['batchList', courseId, true, userId],
     queryFn: async () => {
       if (!courseId || !userId) return [] as Batch[];
       
