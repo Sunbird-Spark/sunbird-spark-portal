@@ -97,6 +97,34 @@ describe('AxiosAdapter', () => {
     await expect(adapter.get('/test')).rejects.toThrow('Server Error');
   });
 
+  it('should attach status code to thrown error for 4xx responses', async () => {
+    const mockResponse = { data: { params: { errmsg: 'Forbidden' } }, status: 403, headers: {} };
+    const error: any = new Error('Forbidden');
+    error.isAxiosError = true;
+    error.response = mockResponse;
+
+    mockAxiosInstance.get.mockRejectedValue(error);
+
+    const thrown = await adapter.get('/test').catch((e) => e);
+    expect(thrown).toBeInstanceOf(Error);
+    expect((thrown as any).status).toBe(403);
+    expect(thrown.message).toBe('Forbidden');
+  });
+
+  it('should attach status code to thrown error for 5xx responses', async () => {
+    const mockResponse = { data: { params: { errmsg: 'Internal Server Error' } }, status: 500, headers: {} };
+    const error: any = new Error('Internal Server Error');
+    error.isAxiosError = true;
+    error.response = mockResponse;
+
+    mockAxiosInstance.get.mockRejectedValue(error);
+
+    const thrown = await adapter.get('/test').catch((e) => e);
+    expect(thrown).toBeInstanceOf(Error);
+    expect((thrown as any).status).toBe(500);
+    expect(thrown.message).toBe('Internal Server Error');
+  });
+
   it('should throw on 4xx so status handlers are not invoked', async () => {
     const handler = vi.fn();
     adapter = new AxiosAdapter({
