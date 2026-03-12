@@ -1,4 +1,5 @@
 import type { EnrollmentCompletion, LearnerProgress, LearnerProgressApiItem, ProgressBucket } from "@/types/reports";
+import { toRelativeTime } from "@/utils/dateUtils";
 
 export const STATUS_MAP: Record<number, LearnerProgress["status"]> = {
   0: "Not Started",
@@ -97,7 +98,7 @@ export function mapApiItemToLearnerProgress(item: LearnerProgressApiItem): Learn
     enrollmentDate: toDateOnly(item.enrolled_date),
     progressPercent: item.completionpercentage ?? 0,
     status: STATUS_MAP[item.status] ?? "Not Started",
-    lastActiveDate: toDateOnly(item.datetime),
+    lastActiveDate: toRelativeTime(item.datetime),
     certificateStatus,
   };
 }

@@ -188,6 +188,8 @@ describe('mapApiItemToLearnerProgress', () => {
     });
     const result = mapApiItemToLearnerProgress(item);
     expect(result.enrollmentDate).toBe('2026-03-04');
-    expect(result.lastActiveDate).toBe('2026-03-06');
+    // lastActiveDate is now relative time, not a raw date
+    expect(result.lastActiveDate).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(result.lastActiveDate).toMatch(/ago|just now|last week|last month|last year/);
   });
 });

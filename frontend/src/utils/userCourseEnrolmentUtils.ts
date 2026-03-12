@@ -1,4 +1,5 @@
 import type { UserCourseEnrolmentApiItem, UserCourseProgress } from '@/types/reports';
+import { toRelativeTime } from '@/utils/dateUtils';
 
 const STATUS_MAP: Record<number, UserCourseProgress['status']> = {
   0: 'Not Started',
@@ -20,6 +21,6 @@ export function mapApiItemToUserCourseProgress(
     progressPercent: item.completionpercentage ?? 0,
     status: STATUS_MAP[item.status] ?? 'Not Started',
     enrollmentDate: toDateOnly(item.enrolled_date),
-    lastAccessed: toDateOnly(item.datetime),
+    lastAccessed: toRelativeTime(item.datetime),
   };
 }
