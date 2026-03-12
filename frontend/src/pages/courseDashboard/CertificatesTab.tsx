@@ -33,7 +33,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, canReis
 
   const isContentCreator = useIsContentCreator();
   const isMentor = useIsMentor();
-  const { data: mentorBatches } = useBatchListForMentor(collectionId, { enabled: isMentor && !isContentCreator });
+  const { data: mentorBatches, isLoading: isMentorBatchesLoading } = useBatchListForMentor(collectionId, { enabled: isMentor && !isContentCreator });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,12 +71,14 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, canReis
   const mentorBatchIds = mentorBatches?.map(b => b.id) ?? [];
   const displayBatches: CertUserBatch[] = certUser?.courses?.batches?.filter((b: CertUserBatch) => {
     if (!isContentCreator && isMentor) {
+      if (isMentorBatchesLoading) return true; // Show all until we know which ones to filter
       return mentorBatchIds.includes(b.batchId);
     }
     return true; // Creators see all
   }) ?? [];
 
   const hasBatches = displayBatches.length > 0;
+
 
   return (
     <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-white rounded-2xl" data-testid="certificates-tab">

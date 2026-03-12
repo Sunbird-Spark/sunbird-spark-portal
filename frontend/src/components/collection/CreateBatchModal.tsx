@@ -92,6 +92,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isOnlyMentor) return;
     setSubmitError(null);
     try {
       if (isEditMode && initialBatch) {

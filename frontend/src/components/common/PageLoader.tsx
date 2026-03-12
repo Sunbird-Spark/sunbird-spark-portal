@@ -71,7 +71,7 @@ const PageLoader = ({ message, error = null, onRetry, fullPage = true }: PageLoa
             </>
           ) : (
             <>
-              <p className="text-sunbird-ink font-semibold text-lg">{displayMessage}</p>
+              <p className="text-sunbird-ink font-semibold text-lg" data-testid="page-loader-message">{displayMessage}</p>
               <div className="flex gap-1">
                 <div className="w-2 h-2 rounded-full bg-sunbird-brick animate-bounce" style={{ animationDelay: "0ms" }} />
                 <div className="w-2 h-2 rounded-full bg-sunbird-ginger animate-bounce" style={{ animationDelay: "150ms" }} />

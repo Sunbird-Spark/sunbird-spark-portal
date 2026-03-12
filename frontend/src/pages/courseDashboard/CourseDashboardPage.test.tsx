@@ -4,7 +4,8 @@ import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { useParams } from 'react-router-dom';
 import CourseDashboardPage from './CourseDashboardPage';
 import { useCollection } from '@/hooks/useCollection';
-import { useCurrentUserId } from '@/hooks/useUser';
+import { useCurrentUserId, useIsMentor } from '@/hooks/useUser';
+import { useBatchListForMentor } from '@/hooks/useBatch';
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
@@ -131,5 +132,35 @@ describe('CourseDashboardPage', () => {
 
     render(<CourseDashboardPage />);
     expect(screen.getByTestId('certificates-tab-mock')).toHaveAttribute('data-can-reissue', 'false');
+  });
+
+  it('redirects to course page if user is not authorized after data has loaded', () => {
+    (useParams as Mock).mockReturnValue({ collectionId: 'col_123' });
+    (useCollection as Mock).mockReturnValue({
+      data: { title: 'Test Course', createdBy: 'owner-id' },
+      isLoading: false,
+      isError: false,
+    });
+    (useCurrentUserId as Mock).mockReturnValue({ data: 'stranger-id' });
+    (vi.mocked(useBatchListForMentor) as Mock).mockReturnValue({ data: [], isLoading: false });
+
+    render(<CourseDashboardPage />);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/collection/col_123', { replace: true });
+  });
+
+  it('shows permissions loading state while checking mentor batches', () => {
+    (useParams as Mock).mockReturnValue({ collectionId: 'col_123' });
+    (useCollection as Mock).mockReturnValue({
+      data: { title: 'Test Course', createdBy: 'owner-id' },
+      isLoading: false,
+      isError: false,
+    });
+    (useCurrentUserId as Mock).mockReturnValue({ data: 'stranger-id' });
+    (vi.mocked(useBatchListForMentor) as Mock).mockReturnValue({ data: undefined, isLoading: true });
+
+    render(<CourseDashboardPage />);
+    
+    expect(screen.getByTestId('page-loader-message')).toHaveTextContent('Checking permissions…');
   });
 });

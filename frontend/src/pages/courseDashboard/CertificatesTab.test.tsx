@@ -214,7 +214,7 @@ describe('CertificatesTab', () => {
     expect(screen.getByTestId('reissue-btn-0')).not.toBeDisabled();
   });
 
-  it('hides reissue button and shows view-only text when canReissue is false', () => {
+  it('renders View Only UI when canReissue is false', () => {
     const mockResult = {
       data: {
         response: {
@@ -222,7 +222,7 @@ describe('CertificatesTab', () => {
           userName: 'User One',
           courses: {
             batches: [
-              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [{ name: 'Cert A' }] },
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [{ name: 'Cert B' }] },
             ],
           },
         },
@@ -238,8 +238,13 @@ describe('CertificatesTab', () => {
     });
 
     render(<CertificatesTab collectionId="col_123" canReissue={false} />);
+    
+    // Search form should still be there
+    expect(screen.getByTestId('unique-id-input')).toBeInTheDocument();
+    
+    // Reissue button should be replaced by View Only text
+    expect(screen.getByTestId('reissue-view-only-0')).toHaveTextContent('certificatesTab.viewOnly');
     expect(screen.queryByTestId('reissue-btn-0')).not.toBeInTheDocument();
-    expect(screen.getByTestId('reissue-view-only-0')).toBeInTheDocument();
   });
 
   it('shows reissue button when canReissue is true and criteria is met', () => {
@@ -301,6 +306,45 @@ describe('CertificatesTab', () => {
     
     expect(screen.getByText('Batch 1')).toBeInTheDocument();
     expect(screen.queryByText('Batch 2')).not.toBeInTheDocument();
+  });
+
+  it('shows all batches if mentor batches are loading for mentor-only users', () => {
+    (useIsContentCreator as any).mockReturnValue(false);
+    (useIsMentor as any).mockReturnValue(true);
+    (useBatchListForMentor as any).mockReturnValue({
+      data: undefined,
+      isLoading: true
+    });
+
+    const mockResult = {
+      data: {
+        response: {
+          userId: 'u1', userName: 'User One',
+          courses: {
+            batches: [
+              { batchId: 'b1', name: 'Batch 1', completionPercentage: 100, status: 2, issuedCertificates: [] },
+              { batchId: 'b2', name: 'Batch 2', completionPercentage: 100, status: 2, issuedCertificates: [] },
+            ],
+          },
+        },
+      }
+    };
+
+    (useCertUserSearch as any).mockReturnValue({
+      mutate: vi.fn(), data: mockResult, isPending: false, error: null, reset: vi.fn(),
+    });
+
+    render(<CertificatesTab collectionId="col_123" canReissue={true} />);
+    
+    // Should show both initially while loading
+    expect(screen.getByText('Batch 1')).toBeInTheDocument();
+    expect(screen.getByText('Batch 2')).toBeInTheDocument();
+  });
+
+  it('renders search form even when canReissue is false', () => {
+    render(<CertificatesTab collectionId="col_123" canReissue={false} />);
+    expect(screen.queryByTestId('certificates-tab-unauthorized')).not.toBeInTheDocument();
+    expect(screen.getByTestId('cert-search-form')).toBeInTheDocument();
   });
 
   it('shows all batches for users who are both creators and mentors', () => {
