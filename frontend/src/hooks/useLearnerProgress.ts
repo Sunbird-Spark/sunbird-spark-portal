@@ -1,5 +1,6 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { observabilityService, type LearnerProgressResult } from '../services/reports/ObservabilityService';
+import { observabilityService } from '../services/reports/ObservabilityService';
+import type { LearnerProgressResult } from '../types/reports';
 
 /**
  * Fetches detailed learner progress for a course batch from the Observability API.
