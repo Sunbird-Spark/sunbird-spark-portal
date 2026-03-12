@@ -48,6 +48,7 @@ export interface CollectionDetailLayoutContentAreaProps {
   enrollment: CollectionContentAreaEnrollmentProps;
   sidebar: CollectionContentAreaSidebarProps;
   creator?: CollectionContentAreaCreatorProps;
+  backTo?: string;
 }
 
 /** Certificate preview modal state and setters. */

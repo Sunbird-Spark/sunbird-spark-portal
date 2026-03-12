@@ -201,15 +201,26 @@ describe('CollectionOverview', () => {
 
   // Course overview section is always visible regardless of contentId / player state
   describe('course overview section', () => {
-    it('renders overview heading', () => {
+    it('renders "Course Overview" heading when primaryCategory is Course', () => {
       render(
         <CollectionOverview
-          collectionData={mockCollectionData}
+          collectionData={{ ...mockCollectionData, primaryCategory: 'Course' }}
           contentId="content-1"
           playerMetadata={mockPlayerMetadata}
         />
       );
       expect(screen.getByText('courseDetails.overview')).toBeInTheDocument();
+    });
+
+    it('renders generic "Overview" heading when primaryCategory is not Course', () => {
+      render(
+        <CollectionOverview
+          collectionData={{ ...mockCollectionData, primaryCategory: 'Digital Textbook' }}
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.collectionOverview')).toBeInTheDocument();
     });
 
     it('renders units and lessons stats', () => {
@@ -253,7 +264,7 @@ describe('CollectionOverview', () => {
 
     it('renders overview section even when no contentId is provided', () => {
       render(<CollectionOverview collectionData={mockCollectionData} />);
-      expect(screen.getByText('courseDetails.overview')).toBeInTheDocument();
+      expect(screen.getByText('courseDetails.collectionOverview')).toBeInTheDocument();
       expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
     });
   });

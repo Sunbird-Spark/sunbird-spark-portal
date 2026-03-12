@@ -41,6 +41,7 @@ export interface BuildContentAreaArgs {
   contentCreatorPrivilege: boolean;
   userProfile: Record<string, unknown> | undefined;
   currentUserId: string | undefined;
+  backTo?: string;
 }
 
 export function buildCollectionDetailContentArea(
@@ -97,5 +98,6 @@ export function buildCollectionDetailContentArea(
       userProfile: args.userProfile,
       userId: args.currentUserId,
     },
+    backTo: args.backTo,
   };
 }

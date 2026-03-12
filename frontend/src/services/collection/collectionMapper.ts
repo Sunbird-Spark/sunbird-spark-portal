@@ -18,6 +18,7 @@ export function mapToCollectionData(content: HierarchyContentNode): CollectionDa
     hierarchyRoot: content,
     trackable: content.trackable,
     createdBy: content.createdBy,
+    primaryCategory: content.primaryCategory,
     channel: content.channel,
     userConsent: content.userConsent,
   };

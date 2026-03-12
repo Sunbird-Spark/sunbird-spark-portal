@@ -215,6 +215,7 @@
   },
   "courseDetails": {
     "overview": "Course Overview",
+    "collectionOverview": "Collection Overview",
     "units": "Units",
     "weeks": "Weeks",
     "skills": "Skills you will learn",
@@ -249,7 +250,7 @@
     "selfAssessMaxAttempt": "You have reached the maximum number of attempts for this assessment.",
     "selfAssessLastAttempt": "This is your last attempt for this assessment.",
     "attemptsLabel": "Attempt {{current}} of {{max}}",
-    "scoreLabel": "Score: {{score}}/{{max}}",
+    "scoreLabel": "Best Score: {{score}}/{{max}}",
     "forceSync": "Sync progress now",
     "forceSyncSuccess": "You can view your updated course progress within 24 hours",
     "forceSyncCooldown": "Please wait before syncing again.",

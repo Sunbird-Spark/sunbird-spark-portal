@@ -215,6 +215,7 @@
   },
   "courseDetails": {
     "overview": "نظرة عامة على الدورة",
+    "collectionOverview": "Collection Overview",
     "units": "وحدات",
     "weeks": "أسابيع",
     "skills": "المهارات التي ستتعلمها",
@@ -249,7 +250,7 @@
     "selfAssessMaxAttempt": "لقد وصلت إلى الحد الأقصى لعدد المحاولات لهذا التقييم.",
     "selfAssessLastAttempt": "هذه هي محاولتك الأخيرة لهذا التقييم.",
     "attemptsLabel": "المحاولة {{current}} من {{max}}",
-    "scoreLabel": "النتيجة: {{score}}/{{max}}",
+    "scoreLabel": "أفضل نتيجة: {{score}}/{{max}}",
     "forceSync": "مزامنة التقدم الآن",
     "forceSyncSuccess": "يمكنك عرض تحديث تقدم الدورة خلال 24 ساعة",
     "forceSyncCooldown": "يرجى الانتظار قبل المزامنة مرة أخرى.",

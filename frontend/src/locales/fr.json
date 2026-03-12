@@ -215,6 +215,7 @@
   },
   "courseDetails": {
     "overview": "Aperçu du cours",
+    "collectionOverview": "Collection Overview",
     "units": "Unités",
     "weeks": "Semaines",
     "skills": "Compétences que vous apprendrez",
@@ -249,7 +250,7 @@
     "selfAssessMaxAttempt": "Vous avez atteint le nombre maximum de tentatives pour cette évaluation.",
     "selfAssessLastAttempt": "Ceci est votre dernière tentative pour cette évaluation.",
     "attemptsLabel": "Tentative {{current}} sur {{max}}",
-    "scoreLabel": "Score : {{score}}/{{max}}",
+    "scoreLabel": "Meilleur score : {{score}}/{{max}}",
     "forceSync": "Synchroniser la progression maintenant",
     "forceSyncSuccess": "Vous pouvez consulter la progression mise à jour du cours sous 24 heures",
     "forceSyncCooldown": "Veuillez patienter avant de resynchroniser.",
