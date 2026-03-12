@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { getCreatorSegments, getReviewerSegments, getSecondaryActions, shouldShowContentFilters} from "@/services/workspace";
 import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
+import WorkspaceSearch from "./WorkspaceSearch";
 
 interface WorkspaceToolbarProps {
   activeView: WorkspaceView;
@@ -22,6 +23,8 @@ interface WorkspaceToolbarProps {
   contentCount?: number;
   totalCount?: number;
   onCreateClick: () => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 const WorkspaceToolbar = ({
@@ -39,6 +42,8 @@ const WorkspaceToolbar = ({
   contentCount,
   totalCount,
   onCreateClick,
+  searchQuery,
+  onSearchChange,
 }: WorkspaceToolbarProps) => {
   const { t } = useAppI18n();
 
@@ -103,7 +108,7 @@ const WorkspaceToolbar = ({
       <div className="bg-white rounded-2xl shadow-sm border border-border p-2">
         <div className="flex items-center justify-between">
           {/* Main Segments */}
-          <div className="flex bg-gray-100 rounded-xl p-1 flex-1 max-w-xl">
+          <div className="flex bg-gray-100 rounded-xl p-1 flex-1 max-w-xl min-w-0">
             {segments.map((segment) => (
               <button
                 key={segment.id}
@@ -112,7 +117,7 @@ const WorkspaceToolbar = ({
                   "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium font-rubik transition-all",
                   activeView === segment.id
                     ? "bg-white text-sunbird-brick shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-foreground hover:text-sunbird-brick"
                 )}
               >
                 <span>{segment.label}</span>
@@ -123,7 +128,7 @@ const WorkspaceToolbar = ({
                       "min-w-[20px] justify-center text-xs",
                       activeView === segment.id
                         ? "bg-sunbird-ginger/20 text-sunbird-brick border-transparent"
-                        : "bg-gray-200/70 text-muted-foreground border-transparent"
+                        : "bg-gray-200/70 text-foreground border-transparent"
                     )}
                   >
                     {segment.count}
@@ -133,13 +138,15 @@ const WorkspaceToolbar = ({
             ))}
           </div>
 
-          {/* Secondary Actions + Filters */}
-          <div className="flex items-center gap-3 ml-4">
+          {/* Search + Secondary Actions + Filters */}
+          <div className="flex items-center gap-3 ml-4 min-w-0">
+            <WorkspaceSearch query={searchQuery} onChange={onSearchChange} />
+
             {/* Secondary Dropdown */}
             {secondaryActions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="font-rubik rounded-xl">
+                  <Button variant="outline" size="sm" className="font-rubik rounded-xl flex-shrink-0">
                     {t('workspace.more')}
                     <FiChevronDown className="w-4 h-4 ml-1" />
                   </Button>
@@ -164,7 +171,7 @@ const WorkspaceToolbar = ({
                 {/* Type Filter */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="font-rubik rounded-xl">
+                    <Button variant="outline" size="sm" className="font-rubik rounded-xl flex-shrink-0">
                       {typeFilter === 'all' ? t('allTypes') : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
                       <FiChevronDown className="w-4 h-4 ml-1" />
                     </Button>
@@ -183,9 +190,10 @@ const WorkspaceToolbar = ({
                 </DropdownMenu>
 
                 {/* View Toggle */}
-                <div className="flex bg-gray-100 rounded-lg p-0.5">
+                <div className="flex bg-gray-100 rounded-lg p-0.5 flex-shrink-0">
                   <button
                     onClick={() => onViewModeChange('grid')}
+                    aria-label={t('workspace.gridView')}
                     className={cn(
                       "p-2 rounded-md transition-colors",
                       viewMode === 'grid' ? "bg-white text-sunbird-brick shadow-sm" : "text-muted-foreground"
@@ -195,6 +203,7 @@ const WorkspaceToolbar = ({
                   </button>
                   <button
                     onClick={() => onViewModeChange('list')}
+                    aria-label={t('workspace.listView')}
                     className={cn(
                       "p-2 rounded-md transition-colors",
                       viewMode === 'list' ? "bg-white text-sunbird-brick shadow-sm" : "text-muted-foreground"

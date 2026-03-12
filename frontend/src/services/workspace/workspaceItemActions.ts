@@ -34,6 +34,6 @@ export function getWorkspaceItemActionVisibility(
     isReview,
     showView: isPublished || isReview,
     showEdit: (!isPublished && !isReview) || (isCreator && isPublished),
-    showDelete: isDraft,
+    showDelete: isCreator && (isDraft || isPublished),
   };
 }
