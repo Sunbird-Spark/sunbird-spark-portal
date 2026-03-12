@@ -15,7 +15,7 @@ const UnauthorizedHandler: React.FC = () => {
       if (redirectScheduled) return;
       redirectScheduled = true;
       setMessage(msg);
-      timeoutId = setTimeout(() => { window.location.href = '/portal/logout?redirect=login'; }, 2500);
+      timeoutId = setTimeout(() => { window.location.href = '/portal/logout'; }, 2500);
     };
 
     const handleAuthError = authErrorHandler(t('authErrorRedirectMessage'));

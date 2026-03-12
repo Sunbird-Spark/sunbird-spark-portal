@@ -71,13 +71,13 @@ describe('UnauthorizedHandler', () => {
     expect(document.getElementById('auth-error-message')).toBeInTheDocument();
   });
 
-  it('redirects to /portal/logout?redirect=login after 2.5s', async () => {
+  it('redirects to /portal/logout after 2.5s', async () => {
     await renderComponent();
 
     act(() => { window.dispatchEvent(new CustomEvent('unauthorized')); });
     act(() => { vi.advanceTimersByTime(2500); });
 
-    expect(window.location.href).toBe('/portal/logout?redirect=login');
+    expect(window.location.href).toBe('/portal/logout');
   });
 
   it('does not redirect before 2.5s have elapsed', async () => {

@@ -189,10 +189,7 @@ router.get('/auth/callback',
 router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => {
     // Extract ID token before clearing session so we can pass it to the provider
     const idToken = req.session?.['oidc-tokens']?.id_token;
-    const isLoginRedirect = req.query.redirect === 'login';
-    const redirectUri = isLoginRedirect
-        ? envConfig.SERVER_URL + '/portal/login'
-        : envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/';
+    const redirectUri = envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/';
 
     // Destroy the session in the store and clear the cookie so the browser starts
     // completely fresh on the next login (no stale session data or ID).
