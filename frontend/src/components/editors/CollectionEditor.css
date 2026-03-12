@@ -16,3 +16,43 @@
 .collection-editor-loader-wrapper .flex {
   height: auto !important;
 }
+
+/* Prevent global .content-player-wrapper styles from breaking the
+   third-party collection editor's internal player elements. */
+#collection-editor-wrapper .content-player-wrapper {
+  overflow: visible !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#collection-editor-wrapper .content-player-embed,
+#collection-editor-wrapper iframe.content-player-embed {
+  height: 100% !important;
+}
+
+/* Video player: override the global height:auto rules so the player
+   has concrete dimensions inside the collection editor. */
+#collection-editor-wrapper div.content-player-embed {
+  min-height: 41.3125rem !important;
+}
+
+#collection-editor-wrapper [data-video-player-wrapper] {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#collection-editor-wrapper sunbird-video-player {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#collection-editor-wrapper sunbird-video-player video-player {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#collection-editor-wrapper .sunbird-video-player-container {
+  height: 100% !important;
+}

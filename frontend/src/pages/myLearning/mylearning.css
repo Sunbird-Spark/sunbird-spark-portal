@@ -26,7 +26,7 @@
 }
 
 .mylearning-tab-inactive {
-    @apply bg-white border border-sunbird-gray-ef text-gray-400 hover:border-sunbird-brick hover:text-sunbird-brick transition-colors;
+    @apply bg-white border border-gray-300 text-sunbird-obsidian hover:border-sunbird-brick hover:text-sunbird-brick transition-colors;
 }
 
 /* Upcoming Batches Colors */
