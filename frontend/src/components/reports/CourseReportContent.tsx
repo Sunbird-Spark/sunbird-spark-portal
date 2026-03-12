@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, Cell,
+  Cell, LabelList,
 } from "recharts";
 import SummaryCard from "@/components/reports/SummaryCard";
 import ChartCard from "@/components/reports/ChartCard";
@@ -9,15 +9,9 @@ import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  courseReportSummary,
-  enrollmentVsCompletion,
-  progressBuckets,
-  scoreBuckets,
-  assessmentRecords,
-} from "@/data/reportsMockData";
+import { assessmentRecords } from "@/data/reportsMockData";
 import { useLearnerProgress } from "@/hooks/useLearnerProgress";
-import { mapApiItemToLearnerProgress } from "@/utils/learnerProgressUtils";
+import { mapApiItemToLearnerProgress, buildEnrollmentVsCompletion, buildProgressBuckets } from "@/utils/learnerProgressUtils";
 import { learnerColumns, assessmentColumns } from "@/components/reports/reportTableColumns";
 
 const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
@@ -25,13 +19,28 @@ const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "
 interface CourseReportContentProps {
   courseId?: string;
   batchId?: string;
+  batchStartDate?: string;
 }
 
-const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) => {
-  const summary = courseReportSummary;
-
-  const { data: apiLearners, isLoading: isLearnersLoading, isError: isLearnersError } =
+const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReportContentProps) => {
+  const { data: apiResult, isLoading: isLearnersLoading, isError: isLearnersError } =
     useLearnerProgress(courseId, batchId);
+
+  const apiLearners = apiResult?.data ?? [];
+
+  const summaryTotalEnrolled = isLearnersLoading ? "—" : String(apiResult?.count ?? 0);
+  const summaryCompleted    = isLearnersLoading ? "—" : String(apiLearners.filter((l) => l.status === 2).length);
+  const summaryCerts        = isLearnersLoading ? "—" : String(apiLearners.filter((l) => l.issued_certificates != null).length);
+
+  const enrollmentChartData = useMemo(
+    () => buildEnrollmentVsCompletion(apiLearners, batchStartDate),
+    [apiLearners, batchStartDate]
+  );
+
+  const progressBucketsData = useMemo(
+    () => buildProgressBuckets(apiLearners),
+    [apiLearners]
+  );
 
   const [learnerSearch, setLearnerSearch] = useState("");
   const [progressFilter, setProgressFilter] = useState<Record<string, string>>({});
@@ -40,7 +49,6 @@ const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) =>
     () => (Array.isArray(apiLearners) ? apiLearners : []).map(mapApiItemToLearnerProgress),
     [apiLearners]
   );
-
   const filteredLearners = useMemo(() => {
     let result = mappedLearners;
     if (learnerSearch) {
@@ -65,10 +73,10 @@ const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) =>
     <div data-testid="course-report-content">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <SummaryCard label="Total Enrolled" value={summary.totalEnrolled} colorClass="bg-sunbird-ink" />
-        <SummaryCard label="Total Completed" value={summary.totalCompleted} colorClass="bg-sunbird-moss" />
-        <SummaryCard label="Certificates Issued" value={summary.certificatesIssued} colorClass="bg-sunbird-ginger" />
-        <SummaryCard label="Avg Score" value={`${summary.avgScore}%`} colorClass="bg-sunbird-lavender" />
+        <SummaryCard label="Total Enrolled" value={summaryTotalEnrolled} colorClass="bg-sunbird-ink" />
+        <SummaryCard label="Total Completed" value={summaryCompleted} colorClass="bg-sunbird-moss" />
+        <SummaryCard label="Certificates Issued" value={summaryCerts} colorClass="bg-sunbird-ginger" />
+        <SummaryCard label="Avg Score" value="—" colorClass="bg-sunbird-lavender" />
       </div>
 
       {/* Charts Row */}
@@ -76,7 +84,7 @@ const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) =>
         <ChartCard title="Enrollment vs Completion" className="xl:col-span-2">
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={enrollmentVsCompletion}>
+              <BarChart data={enrollmentChartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -90,27 +98,40 @@ const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) =>
         </ChartCard>
 
         <ChartCard title="Pending Completion Buckets">
-          <div className="h-56 flex items-center justify-center">
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={progressBuckets}
-                  dataKey="count"
-                  nameKey="bucket"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  stroke="none"
-                >
-                  {progressBuckets.map((_, i) => (
+              <BarChart
+                layout="vertical"
+                data={progressBucketsData}
+                margin={{ top: 4, right: 32, left: 8, bottom: 4 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                <YAxis
+                  type="category"
+                  dataKey="bucket"
+                  width={56}
+                  tick={{ fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <XAxis
+                  type="number"
+                  allowDecimals={false}
+                  tick={{ fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  formatter={(value: unknown) => [`${String(value)} learners`]}
+                  cursor={{ fill: "hsl(var(--muted))" }}
+                />
+                <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                  {progressBucketsData.map((_, i) => (
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
-                </Pie>
-                <Tooltip formatter={(value: unknown, name: unknown) => [`${String(value)} learners`, String(name)]} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-              </PieChart>
+                  <LabelList dataKey="count" position="right" style={{ fontSize: 11 }} />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </ChartCard>
@@ -118,13 +139,13 @@ const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) =>
         <ChartCard title="Score Distribution">
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={scoreBuckets}>
+              <BarChart data={[]}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="range" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(value: unknown) => [`${String(value)} learners`, "Learners"]} />
                 <Bar dataKey="count" name="Learners" radius={[6, 6, 0, 0]} barSize={28}>
-                  {scoreBuckets.map((_, i) => (
+                  {([] as unknown[]).map((_, i) => (
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
                 </Bar>

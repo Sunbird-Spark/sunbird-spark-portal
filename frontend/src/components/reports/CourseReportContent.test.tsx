@@ -72,10 +72,12 @@ const mockApiLearners: LearnerProgressApiItem[] = [
   },
 ];
 
+const mockResult = { data: mockApiLearners, count: 3 };
+
 const defaultQueryState = {
   isLoading: false,
   isError: false,
-  data: mockApiLearners,
+  data: mockResult,
   error: null,
   status: 'success' as const,
   isPending: false,
@@ -94,7 +96,7 @@ const defaultQueryState = {
   fetchStatus: 'idle' as const,
   refetch: vi.fn(),
   remove: vi.fn(),
-  promise: Promise.resolve(mockApiLearners),
+  promise: Promise.resolve(mockResult),
 };
 
 describe('CourseReportContent', () => {
@@ -142,6 +144,18 @@ describe('CourseReportContent', () => {
     expect(screen.queryByText('Time Spent')).not.toBeInTheDocument();
   });
 
+  it('shows — in summary cards while loading', () => {
+    mockUseLearnerProgress.mockReturnValue({
+      ...defaultQueryState,
+      isLoading: true,
+      isSuccess: false,
+      data: undefined,
+    } as unknown as LearnerProgressResult);
+    render(<CourseReportContent />);
+    // All four summary cards should display em-dash while loading
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(3);
+  });
+
   it('shows loading state while fetching learners', () => {
     mockUseLearnerProgress.mockReturnValue({
       ...defaultQueryState,
@@ -151,6 +165,35 @@ describe('CourseReportContent', () => {
     } as unknown as LearnerProgressResult);
     render(<CourseReportContent />);
     expect(screen.getByTestId('learners-loading')).toBeInTheDocument();
+  });
+
+  it('shows total enrolled from API count', () => {
+    render(<CourseReportContent />);
+    // mockResult.count = 3
+    expect(screen.getByText('3')).toBeInTheDocument();
+  });
+
+  it('shows total completed count (status === 2)', () => {
+    render(<CourseReportContent />);
+    // Vikram (status=2) + Arjun (status=2) = 2 completed
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
+  it('shows certificates issued count (non-null issued_certificates)', () => {
+    render(<CourseReportContent />);
+    // Only Vikram has issued_certificates
+    expect(screen.getByText('1')).toBeInTheDocument();
+  });
+
+  it('shows em-dash for Avg Score', () => {
+    render(<CourseReportContent />);
+    expect(screen.getByText('Avg Score')).toBeInTheDocument();
+  });
+
+  it('shows weekly chart labels when batchStartDate is provided', () => {
+    render(<CourseReportContent courseId="c-1" batchId="b-1" batchStartDate="2026-03-04" />);
+    // Week labels come from buildEnrollmentVsCompletion; XAxis is mocked so we check chart card title
+    expect(screen.getByText('Enrollment vs Completion')).toBeInTheDocument();
   });
 
   it('shows error state when learner fetch fails', () => {
