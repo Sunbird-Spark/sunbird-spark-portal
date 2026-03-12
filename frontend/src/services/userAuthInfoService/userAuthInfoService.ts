@@ -111,3 +111,4 @@ class userAuthInfoService {
 // Export singleton instance
 export default userAuthInfoService.getInstance();
 export { userAuthInfoService };
+export type { AuthStatusResponse };

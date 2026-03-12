@@ -1,11 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
-
-interface AuthStatusResponse {
-  sid: string;
-  uid: string | null;
-  isAuthenticated: boolean;
-}
+import userAuthInfoService, { type AuthStatusResponse } from '../services/userAuthInfoService/userAuthInfoService';
 
 /**
  * Hook to fetch and cache authentication information from /user/v1/auth/info
