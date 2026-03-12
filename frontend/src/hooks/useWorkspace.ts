@@ -44,6 +44,8 @@ interface UseWorkspaceOptions {
   userRole?: 'creator' | 'reviewer';
   /** Organisation channel ID — used to scope reviewer content to the same org. */
   orgId?: string;
+  /** Search query string to filter content by name. */
+  searchQuery?: string;
   enabled?: boolean;
 }
 
@@ -65,6 +67,7 @@ export function useWorkspace({
   typeFilter,
   userRole = 'creator',
   orgId,
+  searchQuery = '',
   enabled = true,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
@@ -88,7 +91,7 @@ export function useWorkspace({
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
   // typeFilter is included so tab badges and stats update when a type is selected.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
@@ -97,6 +100,7 @@ export function useWorkspace({
           status: [...WORKSPACE_STATUS_FILTER],
           primaryCategory: primaryCategoryFilter,
         },
+        query: searchQuery,
         facets: ['status'],
         limit: 1,
         offset: 0,
@@ -162,10 +166,11 @@ export function useWorkspace({
   }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, activeTab]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: getFiltersForTab(),
+        query: searchQuery,
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),
