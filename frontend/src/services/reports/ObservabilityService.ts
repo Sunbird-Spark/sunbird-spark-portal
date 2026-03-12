@@ -1,10 +1,27 @@
 import { getClient } from '../../lib/http-client';
-import type { LearnerProgressApiItem } from '../../types/reports';
+import type { LearnerProgressApiItem, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
 
 export interface LearnerProgressResult {
   data: LearnerProgressApiItem[];
   /** Server-authoritative total enrolment count */
   count: number;
+}
+
+/** Shared parser for the Sunbird observability response envelope. */
+function parseObservabilityResponse<T>(raw: unknown): { data: T[]; count: number } {
+  if (Array.isArray(raw)) return { data: raw as T[], count: (raw as unknown[]).length };
+  if (raw !== null && typeof raw === 'object') {
+    const asObj = raw as Record<string, unknown>;
+    const inner = asObj['response'];
+    if (inner !== null && typeof inner === 'object' && !Array.isArray(inner)) {
+      const innerObj = inner as Record<string, unknown>;
+      const data = Array.isArray(innerObj['data']) ? (innerObj['data'] as T[]) : [];
+      const count = typeof innerObj['count'] === 'number' ? innerObj['count'] : data.length;
+      return { data, count };
+    }
+    if (Array.isArray(inner)) return { data: inner as T[], count: (inner as unknown[]).length };
+  }
+  return { data: [], count: 0 };
 }
 
 export class ObservabilityService {
@@ -27,25 +44,23 @@ export class ObservabilityService {
           transform: ['userid'],
         },
       })
-      .then((response) => {
-        const raw = response.data;
-        // Plain array
-        if (Array.isArray(raw)) return { data: raw as LearnerProgressApiItem[], count: (raw as unknown[]).length };
-        if (raw !== null && typeof raw === 'object') {
-          const asObj = raw as Record<string, unknown>;
-          // { response: { data: [...], count: N } }  ← actual Sunbird shape
-          const inner = asObj['response'];
-          if (inner !== null && typeof inner === 'object' && !Array.isArray(inner)) {
-            const innerObj = inner as Record<string, unknown>;
-            const data = Array.isArray(innerObj['data']) ? (innerObj['data'] as LearnerProgressApiItem[]) : [];
-            const count = typeof innerObj['count'] === 'number' ? innerObj['count'] : data.length;
-            return { data, count };
-          }
-          // { response: [...] }  ← fallback
-          if (Array.isArray(inner)) return { data: inner as LearnerProgressApiItem[], count: (inner as unknown[]).length };
-        }
-        return { data: [], count: 0 };
-      });
+      .then((response) => parseObservabilityResponse<LearnerProgressApiItem>(response.data));
+  }
+
+  /**
+   * Fetch all course enrolments for a given user.
+   * POST /observability/v1/reports
+   */
+  public getUserCourseEnrolments(userId: string): Promise<UserCourseEnrolmentResult> {
+    return getClient()
+      .post<unknown>('/observability/v1/reports', {
+        request: {
+          reportId: 'user-course-enrolments',
+          filters: { userid: userId },
+          transform: ['courseid'],
+        },
+      })
+      .then((response) => parseObservabilityResponse<UserCourseEnrolmentApiItem>(response.data));
   }
 }
 
