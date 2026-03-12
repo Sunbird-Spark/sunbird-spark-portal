@@ -130,6 +130,12 @@ export interface UserCourseEnrolmentResult {
   count: number;
 }
 
+export interface LearnerProgressResult {
+  data: LearnerProgressApiItem[];
+  /** Server-authoritative total enrolment count */
+  count: number;
+}
+
 /** Raw shape returned by POST /observability/v1/reports for course-batch-enrolments */
 export interface LearnerProgressApiItem {
   userid: string;

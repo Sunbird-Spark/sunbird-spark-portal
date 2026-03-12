@@ -1,11 +1,5 @@
 import { getClient } from '../../lib/http-client';
-import type { LearnerProgressApiItem, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
-
-export interface LearnerProgressResult {
-  data: LearnerProgressApiItem[];
-  /** Server-authoritative total enrolment count */
-  count: number;
-}
+import type { LearnerProgressApiItem, LearnerProgressResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
 
 /** Shared parser for the Sunbird observability response envelope. */
 function parseObservabilityResponse<T>(raw: unknown): { data: T[]; count: number } {
