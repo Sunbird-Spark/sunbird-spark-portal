@@ -184,8 +184,7 @@ export const learnerProgressData: LearnerProgress[] = Array.from({ length: 30 },
   progressPercent: Math.floor(Math.random() * 100),
   status: (["In Progress", "Completed", "Not Started"] as const)[Math.floor(Math.random() * 3)]!,
   lastActiveDate: `2025-10-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
-  timeSpent: `${Math.floor(Math.random() * 40) + 1}h ${Math.floor(Math.random() * 59)}m`,
-  certificateStatus: (["Issued", "Pending", "N/A"] as const)[Math.floor(Math.random() * 3)]!,
+  certificateStatus: (["Issued", "N/A"] as const)[Math.floor(Math.random() * 2)]!,
 }));
 
 export const assessmentRecords: AssessmentRecord[] = Array.from({ length: 20 }, (_, i) => {

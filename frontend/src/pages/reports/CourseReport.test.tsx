@@ -34,6 +34,11 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+// Avoid needing QueryClientProvider — learner data is tested in CourseReportContent.test.tsx
+vi.mock('@/hooks/useLearnerProgress', () => ({
+  useLearnerProgress: () => ({ data: [], isLoading: false, isError: false }),
+}));
+
 const renderWithRoute = (courseId = 'course-1') =>
   render(
     <MemoryRouter initialEntries={[`/reports/course/${courseId}`]}>

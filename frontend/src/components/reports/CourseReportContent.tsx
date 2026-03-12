@@ -6,38 +6,43 @@ import {
 import SummaryCard from "@/components/reports/SummaryCard";
 import ChartCard from "@/components/reports/ChartCard";
 import FilterPanel from "@/components/reports/FilterPanel";
-import DataTableWrapper, { type Column } from "@/components/reports/DataTableWrapper";
+import DataTableWrapper from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   courseReportSummary,
   enrollmentVsCompletion,
   progressBuckets,
   scoreBuckets,
-  learnerProgressData,
   assessmentRecords,
 } from "@/data/reportsMockData";
-import type { LearnerProgress, AssessmentRecord } from "@/types/reports";
+import { useLearnerProgress } from "@/hooks/useLearnerProgress";
+import { mapApiItemToLearnerProgress } from "@/utils/learnerProgressUtils";
+import { learnerColumns, assessmentColumns } from "@/components/reports/reportTableColumns";
 
 const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
-const statusColor: Record<string, string> = { "Completed": "default", "In Progress": "secondary", "Not Started": "outline" };
-const certColor: Record<string, string> = { "Issued": "default", "Pending": "secondary", "N/A": "outline" };
 
 interface CourseReportContentProps {
   courseId?: string;
   batchId?: string;
 }
 
-const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseReportContentProps) => {
+const CourseReportContent = ({ courseId, batchId }: CourseReportContentProps) => {
   const summary = courseReportSummary;
+
+  const { data: apiLearners, isLoading: isLearnersLoading, isError: isLearnersError } =
+    useLearnerProgress(courseId, batchId);
 
   const [learnerSearch, setLearnerSearch] = useState("");
   const [progressFilter, setProgressFilter] = useState<Record<string, string>>({});
 
+  const mappedLearners = useMemo(
+    () => (Array.isArray(apiLearners) ? apiLearners : []).map(mapApiItemToLearnerProgress),
+    [apiLearners]
+  );
+
   const filteredLearners = useMemo(() => {
-    let result = learnerProgressData;
+    let result = mappedLearners;
     if (learnerSearch) {
       const q = learnerSearch.toLowerCase();
       result = result.filter((l) => l.learnerName.toLowerCase().includes(q));
@@ -54,66 +59,7 @@ const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseR
       result = result.filter((l) => l.progressPercent >= lo && l.progressPercent <= hi);
     }
     return result;
-  }, [learnerSearch, progressFilter]);
-
-  const learnerColumns: Column<LearnerProgress>[] = [
-    { key: "learnerName", header: "Learner Name", sortable: true },
-    { key: "enrollmentDate", header: "Enrolled", sortable: true },
-    {
-      key: "progressPercent",
-      header: "Progress",
-      sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-2 min-w-[7.5rem]">
-          <Progress value={row.progressPercent} className="h-2 flex-1" />
-          <span className="text-xs font-medium w-8 text-right">{row.progressPercent}%</span>
-        </div>
-      ),
-    },
-    {
-      key: "status",
-      header: "Status",
-      sortable: true,
-      render: (row) => (
-        <Badge variant={statusColor[row.status] as "default"} className="text-xs">{row.status}</Badge>
-      ),
-    },
-    { key: "lastActiveDate", header: "Last Active", sortable: true },
-    { key: "timeSpent", header: "Time Spent", sortable: true },
-    {
-      key: "certificateStatus",
-      header: "Certificate",
-      render: (row) => (
-        <Badge variant={certColor[row.certificateStatus] as "default"} className="text-xs">
-          {row.certificateStatus}
-        </Badge>
-      ),
-    },
-  ];
-
-  const assessmentColumns: Column<AssessmentRecord>[] = [
-    { key: "learnerName", header: "Learner Name", sortable: true },
-    { key: "attemptNumber", header: "Attempt #", sortable: true, className: "text-center" },
-    { key: "score", header: "Score", sortable: true, className: "text-right" },
-    { key: "maxScore", header: "Max Score", className: "text-right" },
-    {
-      key: "percentage",
-      header: "%",
-      sortable: true,
-      className: "text-right",
-      render: (r) => `${r.percentage}%`,
-    },
-    {
-      key: "passFail",
-      header: "Result",
-      render: (row) => (
-        <Badge variant={row.passFail === "Pass" ? "default" : "destructive"} className="text-xs">
-          {row.passFail}
-        </Badge>
-      ),
-    },
-    { key: "attemptDate", header: "Date", sortable: true },
-  ];
+  }, [mappedLearners, learnerSearch, progressFilter]);
 
   return (
     <div data-testid="course-report-content">
@@ -162,7 +108,7 @@ const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseR
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: any, name: any) => [`${value} learners`, name as string]} />
+                <Tooltip formatter={(value: unknown, name: unknown) => [`${String(value)} learners`, String(name)]} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
@@ -176,7 +122,7 @@ const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseR
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="range" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(value: any) => [`${value} learners`, "Learners"]} />
+                <Tooltip formatter={(value: unknown) => [`${String(value)} learners`, "Learners"]} />
                 <Bar dataKey="count" name="Learners" radius={[6, 6, 0, 0]} barSize={28}>
                   {scoreBuckets.map((_, i) => (
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
@@ -204,31 +150,54 @@ const CourseReportContent = ({ courseId: _courseId, batchId: _batchId }: CourseR
               columns={learnerColumns.map((c) => ({ key: c.key, header: c.header }))}
             />
           </div>
-          <FilterPanel
-            filters={[
-              {
-                key: "progress",
-                label: "Progress",
-                options: [
-                  { label: "0–25%", value: "0-25" },
-                  { label: "25–50%", value: "25-50" },
-                  { label: "50–75%", value: "50-75" },
-                  { label: "75–100%", value: "75-100" },
-                ],
-              },
-            ]}
-            values={progressFilter}
-            onChange={(k, v) => setProgressFilter((p) => ({ ...p, [k]: v }))}
-            searchValue={learnerSearch}
-            onSearchChange={setLearnerSearch}
-            searchPlaceholder="Search learners…"
-          />
-          <DataTableWrapper
-            columns={learnerColumns}
-            data={filteredLearners}
-            keyExtractor={(r) => r.id}
-            pageSize={10}
-          />
+
+          {isLearnersLoading && (
+            <div
+              className="flex items-center justify-center py-16 text-sm text-muted-foreground"
+              data-testid="learners-loading"
+            >
+              Loading learner data…
+            </div>
+          )}
+
+          {isLearnersError && !isLearnersLoading && (
+            <div
+              className="flex items-center justify-center py-16 text-sm text-destructive"
+              data-testid="learners-error"
+            >
+              Failed to load learner progress. Please try again.
+            </div>
+          )}
+
+          {!isLearnersLoading && !isLearnersError && (
+            <>
+              <FilterPanel
+                filters={[
+                  {
+                    key: "progress",
+                    label: "Progress",
+                    options: [
+                      { label: "0–25%", value: "0-25" },
+                      { label: "25–50%", value: "25-50" },
+                      { label: "50–75%", value: "50-75" },
+                      { label: "75–100%", value: "75-100" },
+                    ],
+                  },
+                ]}
+                values={progressFilter}
+                onChange={(k, v) => setProgressFilter((p) => ({ ...p, [k]: v }))}
+                searchValue={learnerSearch}
+                onSearchChange={setLearnerSearch}
+                searchPlaceholder="Search learners…"
+              />
+              <DataTableWrapper
+                columns={learnerColumns}
+                data={filteredLearners}
+                keyExtractor={(r) => r.id}
+                pageSize={10}
+              />
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="assessments">

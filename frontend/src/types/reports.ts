@@ -99,8 +99,29 @@ export interface LearnerProgress {
   progressPercent: number;
   status: "In Progress" | "Completed" | "Not Started";
   lastActiveDate: string;
-  timeSpent: string;
   certificateStatus: "Issued" | "Pending" | "N/A";
+}
+
+/** Raw shape returned by POST /observability/v1/reports for course-batch-enrolments */
+export interface LearnerProgressApiItem {
+  userid: string;
+  userDetails: {
+    firstName: string;
+    lastName?: string;
+  };
+  enrolled_date: string;
+  completionpercentage: number | null;
+  /** 0 = Not Started, 1 = In Progress, 2 = Completed */
+  status: number;
+  datetime: string;
+  issued_certificates: Array<{
+    identifier: string;
+    lastIssuedOn: string;
+    name: string;
+    templateUrl: string;
+    token: string;
+    type: string;
+  }> | null;
 }
 
 export interface AssessmentRecord {
