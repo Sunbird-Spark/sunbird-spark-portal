@@ -39,7 +39,7 @@
   "validation": "Please check your input and try again.",
   "notFound": "The requested resource was not found.",
   "unauthorized": "You are not authorized to access this resource.",
-  "authErrorRedirectMessage": "You don't have access to perform this action. Redirecting to login.",
+  "authErrorRedirectMessage": "You don't have access to perform this action. Logging out.",
   "title": "SunbirdEd Portal",
   "subtitle": "A modern, scalable educational platform",
   "description": "Built for the 21st century with state-of-the-art technology",

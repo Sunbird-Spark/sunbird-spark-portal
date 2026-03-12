@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import React from 'react';
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => {
       const map: Record<string, string> = {
-        authErrorRedirectMessage: "You don't have access to perform this action. Redirecting to login.",
+        authErrorRedirectMessage: "You don't have access to perform this action. Logging out.",
       };
       return map[key] ?? key;
     },
@@ -48,7 +47,7 @@ describe('UnauthorizedHandler', () => {
     act(() => { window.dispatchEvent(new CustomEvent('unauthorized')); });
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText("You don't have access to perform this action. Redirecting to login.")).toBeInTheDocument();
+    expect(screen.getByText("You don't have access to perform this action. Logging out.")).toBeInTheDocument();
   });
 
   it('shows message when forbidden event is dispatched', async () => {
@@ -57,7 +56,7 @@ describe('UnauthorizedHandler', () => {
     act(() => { window.dispatchEvent(new CustomEvent('forbidden')); });
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText("You don't have access to perform this action. Redirecting to login.")).toBeInTheDocument();
+    expect(screen.getByText("You don't have access to perform this action. Logging out.")).toBeInTheDocument();
   });
 
   it('has correct ARIA attributes', async () => {
