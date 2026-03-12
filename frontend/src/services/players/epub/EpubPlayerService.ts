@@ -84,6 +84,8 @@ export class EpubPlayerService {
       console.warn('Failed to fetch channel from org service, using random fallback:', channel);
     }
 
+    const pdata = await appCoreService.getPData();
+
     let userdata = { firstName: '', lastName: '' };
     try {
       userdata = await userProfileService.getUserData();
@@ -97,11 +99,7 @@ export class EpubPlayerService {
       did,
       uid,
       channel,
-      pdata: {
-        id: 'sunbird.portal',
-        ver: '3.2.12',
-        pid: 'sunbird-portal.contentplayer',
-      },
+      pdata,
       contextRollup: contextProps?.contextRollup || {
         l1: channel,
       },
@@ -109,7 +107,7 @@ export class EpubPlayerService {
       timeDiff: 0,
       objectRollup: contextProps?.objectRollup || {},
       host: '',
-      endpoint: '',
+      endpoint: '/portal/data/v1/telemetry',
       userData: userdata
     };
 

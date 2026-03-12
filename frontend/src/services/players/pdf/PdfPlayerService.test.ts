@@ -15,6 +15,7 @@ vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
 vi.mock('../../AppCoreService', () => ({
   default: {
     getDeviceId: vi.fn(() => Promise.resolve('')),
+    getPData: vi.fn(() => Promise.resolve({ id: 'sunbird.portal', ver: '1.0.0', pid: 'sunbird.portal' })),
   },
 }));
 
@@ -220,14 +221,15 @@ describe('PdfPlayerService', () => {
       expect(config.context.objectRollup).toEqual(objectRollup);
     });
 
-    it('should set fixed pdata values', async () => {
+    it('should set pdata from appCoreService.getPData()', async () => {
       const config = await service.createConfig(mockMetadata);
 
       expect(config.context.pdata).toEqual({
         id: 'sunbird.portal',
-        ver: '3.2.12',
-        pid: 'sunbird-portal.contentplayer',
+        ver: '1.0.0',
+        pid: 'sunbird.portal',
       });
+      expect(appCoreService.getPData).toHaveBeenCalled();
     });
 
     it('should set default values for timeDiff, host, and endpoint', async () => {
@@ -235,7 +237,7 @@ describe('PdfPlayerService', () => {
 
       expect(config.context.timeDiff).toBe(0);
       expect(config.context.host).toBe('');
-      expect(config.context.endpoint).toBe('');
+      expect(config.context.endpoint).toBe('/portal/data/v1/telemetry');
     });
 
     it('should set empty config object', async () => {

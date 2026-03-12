@@ -96,7 +96,7 @@ export class QumlPlayerService {
       timeDiff: 0,
       objectRollup: contextProps?.objectRollup || {},
       host: '',
-      endpoint: '',
+      endpoint: '/portal/data/v1/telemetry',
       userData: userdata
     };
 
