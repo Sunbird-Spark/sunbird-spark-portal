@@ -102,7 +102,11 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
       >
         {selectedBatchId ? (
           <div className="p-6">
-            <CourseReportContent courseId={collectionId} batchId={selectedBatchId} />
+            <CourseReportContent
+              courseId={collectionId}
+              batchId={selectedBatchId}
+              batchStartDate={batchList.find((b) => b.id === selectedBatchId)?.startDate}
+            />
           </div>
         ) : (
           <div className="flex items-center justify-center py-16 px-8">

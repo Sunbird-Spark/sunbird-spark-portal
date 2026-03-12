@@ -1,6 +1,5 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { observabilityService } from '../services/reports/ObservabilityService';
-import type { LearnerProgressApiItem } from '../types/reports';
+import { observabilityService, type LearnerProgressResult } from '../services/reports/ObservabilityService';
 
 /**
  * Fetches detailed learner progress for a course batch from the Observability API.
@@ -9,7 +8,7 @@ import type { LearnerProgressApiItem } from '../types/reports';
 export function useLearnerProgress(
   courseId: string | undefined,
   batchId: string | undefined
-): UseQueryResult<LearnerProgressApiItem[], Error> {
+): UseQueryResult<LearnerProgressResult, Error> {
   return useQuery({
     queryKey: ['learnerProgress', courseId, batchId],
     queryFn: () => observabilityService.getLearnerProgress(courseId!, batchId!),

@@ -1,9 +1,10 @@
 import { getClient } from '../../lib/http-client';
 import type { LearnerProgressApiItem } from '../../types/reports';
 
-export interface LearnerProgressRequest {
-  courseId: string;
-  batchId: string;
+export interface LearnerProgressResult {
+  data: LearnerProgressApiItem[];
+  /** Server-authoritative total enrolment count */
+  count: number;
 }
 
 export class ObservabilityService {
@@ -14,7 +15,7 @@ export class ObservabilityService {
   public getLearnerProgress(
     courseId: string,
     batchId: string
-  ): Promise<LearnerProgressApiItem[]> {
+  ): Promise<LearnerProgressResult> {
     return getClient()
       .post<unknown>('/observability/v1/reports', {
         request: {
@@ -29,19 +30,21 @@ export class ObservabilityService {
       .then((response) => {
         const raw = response.data;
         // Plain array
-        if (Array.isArray(raw)) return raw as LearnerProgressApiItem[];
+        if (Array.isArray(raw)) return { data: raw as LearnerProgressApiItem[], count: (raw as unknown[]).length };
         if (raw !== null && typeof raw === 'object') {
           const asObj = raw as Record<string, unknown>;
-          // { response: { data: [...] } }  ← actual Sunbird shape
+          // { response: { data: [...], count: N } }  ← actual Sunbird shape
           const inner = asObj['response'];
           if (inner !== null && typeof inner === 'object' && !Array.isArray(inner)) {
             const innerObj = inner as Record<string, unknown>;
-            if (Array.isArray(innerObj['data'])) return innerObj['data'] as LearnerProgressApiItem[];
+            const data = Array.isArray(innerObj['data']) ? (innerObj['data'] as LearnerProgressApiItem[]) : [];
+            const count = typeof innerObj['count'] === 'number' ? innerObj['count'] : data.length;
+            return { data, count };
           }
           // { response: [...] }  ← fallback
-          if (Array.isArray(inner)) return inner as LearnerProgressApiItem[];
+          if (Array.isArray(inner)) return { data: inner as LearnerProgressApiItem[], count: (inner as unknown[]).length };
         }
-        return [];
+        return { data: [], count: 0 };
       });
   }
 }
