@@ -102,6 +102,34 @@ export interface LearnerProgress {
   certificateStatus: "Issued" | "Pending" | "N/A";
 }
 
+/** Raw shape returned by POST /observability/v1/reports for user-course-enrolments */
+export interface UserCourseEnrolmentApiItem {
+  courseid: string;
+  collectionDetails: {
+    name: string;
+    identifier: string;
+    contentType: string;
+  };
+  completionpercentage: number | null;
+  /** 0 = Not Started, 1 = In Progress, 2 = Completed */
+  status: number;
+  enrolled_date: string;
+  datetime: string;
+  issued_certificates: Array<{
+    identifier: string;
+    lastIssuedOn: string;
+    name: string;
+    templateUrl: string;
+    token: string;
+    type: string;
+  }> | null;
+}
+
+export interface UserCourseEnrolmentResult {
+  data: UserCourseEnrolmentApiItem[];
+  count: number;
+}
+
 /** Raw shape returned by POST /observability/v1/reports for course-batch-enrolments */
 export interface LearnerProgressApiItem {
   userid: string;

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import ReportLayout from "@/components/reports/ReportLayout";
 import SummaryCard from "@/components/reports/SummaryCard";
@@ -6,13 +7,14 @@ import ExportButton from "@/components/reports/ExportButton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  userReportSummary,
-  userCourseProgressData,
   userCertificates,
   userAssessmentHistory,
 } from "@/data/reportsMockData";
 import type { UserCourseProgress, UserCertificate, UserAssessmentHistory } from "@/types/reports";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { useUserCourseEnrolments } from "@/hooks/useUserCourseEnrolments";
+import { useUserRead } from "@/hooks/useUserRead";
+import { mapApiItemToUserCourseProgress } from "@/utils/userCourseEnrolmentUtils";
 
 const statusColor: Record<string, string> = {
   "Completed": "default",
@@ -22,8 +24,38 @@ const statusColor: Record<string, string> = {
 
 const UserReport = () => {
   const { userId } = useParams();
-  const summary = userReportSummary;
   const { t } = useAppI18n();
+
+  const { data: userReadData } = useUserRead();
+  const userProfile = userReadData?.data?.response as { firstName?: string; lastName?: string } | undefined;
+  const userName = [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ') || String(userId ?? '');
+
+  const {
+    data: enrolmentResult,
+    isLoading: isCourseProgressLoading,
+    isError: isCourseProgressError,
+  } = useUserCourseEnrolments();
+
+  const apiCourses = enrolmentResult?.data ?? [];
+
+  /** Derived summary values */
+  const summaryCoursesCompleted = isCourseProgressLoading
+    ? '—'
+    : String(apiCourses.filter((c) => c.status === 2).length);
+  const summaryCoursesPending = isCourseProgressLoading
+    ? '—'
+    : String(apiCourses.filter((c) => c.status !== 2).length);
+  const summaryTotalCourses = isCourseProgressLoading
+    ? '—'
+    : String(enrolmentResult?.count ?? 0);
+  const summaryCertsIssued = isCourseProgressLoading
+    ? '—'
+    : String(apiCourses.filter((c) => c.issued_certificates != null).length);
+
+  const courseProgressData = useMemo(
+    () => apiCourses.map(mapApiItemToUserCourseProgress),
+    [apiCourses]
+  );
 
   const courseColumns: Column<UserCourseProgress>[] = [
     { key: "courseName", header: t('userReport.course'), sortable: true },
@@ -69,16 +101,16 @@ const UserReport = () => {
 
   return (
     <ReportLayout
-      title={`${t('userReport.title')}: ${summary.userName}`}
+      title={`${t('userReport.title')}: ${userName}`}
       breadcrumbs={[{ label: t('home'), href: "/home" }, { label: t('userReport.title') }]}
     >
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
-        <SummaryCard label={t('userReport.coursesCompleted')} value={summary.coursesCompleted} colorClass="bg-sunbird-moss" />
-        <SummaryCard label={t('userReport.coursesPending')} value={summary.coursesPending} colorClass="bg-sunbird-ginger" />
-        <SummaryCard label={t('userReport.certificatesIssued')} value={summary.certificatesIssued} colorClass="bg-sunbird-ink" />
-        <SummaryCard label={t('userReport.contentCompleted')} value={summary.contentCompleted} colorClass="bg-sunbird-wave" />
-        <SummaryCard label={t('userReport.assessmentsCompleted')} value={summary.assessmentsCompleted} colorClass="bg-sunbird-lavender" />
+        <SummaryCard label={t('userReport.totalCourses')} value={summaryTotalCourses} colorClass="bg-sunbird-wave" />
+        <SummaryCard label={t('userReport.coursesCompleted')} value={summaryCoursesCompleted} colorClass="bg-sunbird-moss" />
+        <SummaryCard label={t('userReport.coursesPending')} value={summaryCoursesPending} colorClass="bg-sunbird-ginger" />
+        <SummaryCard label={t('userReport.certificatesIssued')} value={summaryCertsIssued} colorClass="bg-sunbird-ink" />
+        <SummaryCard label={t('userReport.assessmentsCompleted')} value="—" colorClass="bg-sunbird-lavender" />
       </div>
 
       {/* Course Progress */}
@@ -86,12 +118,33 @@ const UserReport = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">{t('userReport.courseProgress')}</h2>
           <ExportButton
-            data={userCourseProgressData as unknown as Record<string, unknown>[]}
+            data={courseProgressData as unknown as Record<string, unknown>[]}
             filename="user-course-progress"
             columns={courseColumns.map((c) => ({ key: c.key, header: c.header }))}
           />
         </div>
-        <DataTableWrapper columns={courseColumns} data={userCourseProgressData} keyExtractor={(r) => r.id} pageSize={10} />
+
+        {isCourseProgressLoading && (
+          <div
+            className="flex items-center justify-center py-16 text-sm text-muted-foreground"
+            data-testid="course-progress-loading"
+          >
+            Loading course progress…
+          </div>
+        )}
+
+        {isCourseProgressError && !isCourseProgressLoading && (
+          <div
+            className="flex items-center justify-center py-16 text-sm text-destructive"
+            data-testid="course-progress-error"
+          >
+            Failed to load course progress. Please try again.
+          </div>
+        )}
+
+        {!isCourseProgressLoading && !isCourseProgressError && (
+          <DataTableWrapper columns={courseColumns} data={courseProgressData} keyExtractor={(r) => r.id} pageSize={10} />
+        )}
       </section>
 
       {/* Certificates */}
