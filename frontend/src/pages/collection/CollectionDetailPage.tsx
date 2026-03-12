@@ -228,6 +228,7 @@ const CollectionDetailPage = () => {
         setCertificatePreviewUrl, setCertificatePreviewOpen, expandedModules, toggleModule, collectionId, batchIdParam,
         isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile: userProfile ?? undefined,
         currentUserId: currentUserId ?? undefined,
+        backTo,
       }),
     [
       displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
@@ -235,7 +236,7 @@ const CollectionDetailPage = () => {
       handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, courseProgressProps, contentStatusMap,
       contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId, handleJoinCourse, batchListLoading,
       joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl, expandedModules, toggleModule,
-      collectionId, batchIdParam, isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile, currentUserId,
+      collectionId, batchIdParam, isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile, currentUserId, backTo,
     ]
   );
 

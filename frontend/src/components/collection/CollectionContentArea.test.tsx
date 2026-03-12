@@ -390,17 +390,13 @@ describe('CollectionContentArea', () => {
   });
 
   describe('Profile Data Sharing card', () => {
-    it('renders ProfileDataSharingCard when trackable, authenticated learner, in batch, enrolled, and collection has userConsent yes', async () => {
-      const user = (await import('@testing-library/user-event')).default.setup();
+    it('renders ProfileDataSharingCard when trackable, authenticated learner, in batch, enrolled, and collection has userConsent yes', () => {
       render(
         <CollectionContentArea
           {...learnerWithBatchProps}
           collectionData={{ ...defaultProps.collectionData, userConsent: 'yes', channel: 'ch1' }}
         />
       );
-      // ProfileDataSharingCard is in a Radix Tabs panel - click the tab to mount its content
-      const tab = screen.getByRole('tab', { name: 'profileDataSharing.cardTitle' });
-      await user.click(tab);
       expect(screen.getByTestId('profile-data-sharing-card')).toBeInTheDocument();
     });
 

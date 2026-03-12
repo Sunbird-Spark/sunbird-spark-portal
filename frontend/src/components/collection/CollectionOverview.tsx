@@ -109,9 +109,13 @@ const CollectionOverview = ({
           )}
         </div>
 
-        {/* Course Overview Section */}
+        {/* Overview Section */}
         <div className="collection-overview-section">
-          <h2 className="collection-overview-title">{t("courseDetails.overview")}</h2>
+          <h2 className="collection-overview-title">
+            {collectionData.primaryCategory?.toLowerCase() === "course"
+              ? t("courseDetails.overview")
+              : t("courseDetails.collectionOverview")}
+          </h2>
 
           {/* Stats: Units & Lessons */}
           <div className="collection-stats-container">
