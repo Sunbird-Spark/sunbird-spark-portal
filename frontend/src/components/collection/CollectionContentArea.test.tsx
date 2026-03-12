@@ -146,11 +146,11 @@ describe('CollectionContentArea', () => {
     expect(screen.getByTestId('collection-sidebar')).toBeInTheDocument();
   });
 
-  it('renders BatchCard when user is creator viewing own collection (isCreatorViewingOwnCollection)', () => {
+  it('renders BatchCard when user is creator viewing own trackable course (isCreatorViewingOwnCollection)', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        access={{ ...defaultAccess, isAuthenticated: true }}
+        access={{ ...defaultAccess, isTrackable: true, isAuthenticated: true }}
         sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
         creator={{ isCreatorViewingOwnCollection: true }}
       />
@@ -162,8 +162,20 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        access={{ ...defaultAccess, isAuthenticated: true }}
+        access={{ ...defaultAccess, isTrackable: true, isAuthenticated: true }}
         creator={{ isCreatorViewingOwnCollection: false }}
+      />
+    );
+    expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
+  });
+
+  it('does NOT render BatchCard for non-trackable collections even when creator is viewing own collection', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        access={{ ...defaultAccess, isTrackable: false, isAuthenticated: true }}
+        sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
+        creator={{ isCreatorViewingOwnCollection: true }}
       />
     );
     expect(screen.queryByTestId('batch-card')).not.toBeInTheDocument();
@@ -241,11 +253,11 @@ describe('CollectionContentArea', () => {
     expect(screen.queryByTestId('certificate-card')).not.toBeInTheDocument();
   });
 
-  it('renders View Course Dashboard button when user is the course owner', () => {
+  it('renders View Course Dashboard button when user is the course owner and collection is trackable', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        access={{ ...defaultAccess, isAuthenticated: true }}
+        access={{ ...defaultAccess, isTrackable: true, isAuthenticated: true }}
         sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
         creator={{ isCreatorViewingOwnCollection: true }}
       />
@@ -257,7 +269,7 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        access={{ ...defaultAccess, isAuthenticated: true }}
+        access={{ ...defaultAccess, isTrackable: true, isAuthenticated: true }}
         creator={{ isCreatorViewingOwnCollection: false }}
       />
     );
@@ -268,7 +280,19 @@ describe('CollectionContentArea', () => {
     render(
       <CollectionContentArea
         {...defaultProps}
-        access={{ ...defaultAccess, isAuthenticated: false }}
+        access={{ ...defaultAccess, isTrackable: true, isAuthenticated: false }}
+        sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
+        creator={{ isCreatorViewingOwnCollection: true }}
+      />
+    );
+    expect(screen.queryByTestId('view-dashboard-btn')).not.toBeInTheDocument();
+  });
+
+  it('does not render View Course Dashboard button for non-trackable collections', () => {
+    render(
+      <CollectionContentArea
+        {...defaultProps}
+        access={{ ...defaultAccess, isTrackable: false, isAuthenticated: true }}
         sidebar={{ ...defaultSidebar, collectionId: 'col_123' }}
         creator={{ isCreatorViewingOwnCollection: true }}
       />
@@ -366,13 +390,17 @@ describe('CollectionContentArea', () => {
   });
 
   describe('Profile Data Sharing card', () => {
-    it('renders ProfileDataSharingCard when trackable, authenticated learner, in batch, enrolled, and collection has userConsent yes', () => {
+    it('renders ProfileDataSharingCard when trackable, authenticated learner, in batch, enrolled, and collection has userConsent yes', async () => {
+      const user = (await import('@testing-library/user-event')).default.setup();
       render(
         <CollectionContentArea
           {...learnerWithBatchProps}
           collectionData={{ ...defaultProps.collectionData, userConsent: 'yes', channel: 'ch1' }}
         />
       );
+      // ProfileDataSharingCard is in a Radix Tabs panel - click the tab to mount its content
+      const tab = screen.getByRole('tab', { name: 'profileDataSharing.cardTitle' });
+      await user.click(tab);
       expect(screen.getByTestId('profile-data-sharing-card')).toBeInTheDocument();
     });
 

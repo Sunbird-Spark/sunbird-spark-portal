@@ -174,8 +174,9 @@ const CollectionDetailPage = () => {
     contentType: currentContentNode?.contentType,
   });
 
+  const firstMainUnitId = collectionData?.children?.[0]?.identifier;
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
-  const initialExpandedSet = useRef(false);
+  const prevCollectionId = useRef(collectionId);
 
   useInitialCollectionContentNavigation({
     collectionData,
@@ -191,13 +192,15 @@ const CollectionDetailPage = () => {
   });
 
   useEffect(() => {
-    const firstMainUnitId = collectionData?.children?.[0]?.identifier;
-    if (firstMainUnitId && !initialExpandedSet.current) {
-      setExpandedModules([firstMainUnitId]);
-      initialExpandedSet.current = true;
+    if (prevCollectionId.current !== collectionId) {
+      prevCollectionId.current = collectionId;
+      setExpandedModules(firstMainUnitId ? [firstMainUnitId] : []);
+      return;
     }
-  }, [collectionData?.children]);
-  useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
+    if (firstMainUnitId) {
+      setExpandedModules((prev) => prev.length === 0 ? [firstMainUnitId] : prev);
+    }
+  }, [collectionId, firstMainUnitId]);
 
   const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
   const relatedContentItems = useMemo(

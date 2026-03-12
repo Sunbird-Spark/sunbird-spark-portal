@@ -64,18 +64,31 @@ export function isSelfAssess(node: HierarchyContentNode | null | undefined): boo
   return (node?.contentType ?? '') === 'SelfAssess';
 }
 
-export interface ContentAttemptInfo {
-  attemptCount: number;
+export interface ContentScoreInfo {
+  totalScore: number;
+  totalMaxScore: number;
 }
 
-/** Map contentId -> { attemptCount } from content state (score.length = currentAttempts). */
+export interface ContentAttemptInfo {
+  attemptCount: number;
+  bestScore?: ContentScoreInfo;
+}
+
+/** Map contentId -> { attemptCount, bestScore } from content state (score.length = currentAttempts). */
 export function getContentAttemptInfoMap(contentList: ContentStateItem[]): Record<string, ContentAttemptInfo> {
   const map: Record<string, ContentAttemptInfo> = {};
   contentList.forEach((item) => {
     if (item.contentId == null) return;
     const score = item.score;
     const attemptCount = Array.isArray(score) ? score.length : 0;
-    map[item.contentId] = { attemptCount };
+    let bestScore: ContentScoreInfo | undefined;
+    if (Array.isArray(score) && score.length > 0) {
+      const last = score[score.length - 1] as { totalScore?: number; totalMaxScore?: number } | undefined;
+      if (last && typeof last.totalScore === 'number' && typeof last.totalMaxScore === 'number') {
+        bestScore = { totalScore: last.totalScore, totalMaxScore: last.totalMaxScore };
+      }
+    }
+    map[item.contentId] = { attemptCount, bestScore };
   });
   return map;
 }

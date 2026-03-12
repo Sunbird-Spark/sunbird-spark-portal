@@ -97,7 +97,7 @@ export default function ContentRow({
       </span>
       {showStatus && (
         <span
-          className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex items-center gap-1 ${
+          className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex flex-col items-end gap-0.5 ${
             status === 2
               ? "text-sunbird-status-completed-border"
               : status === 1
@@ -105,9 +105,16 @@ export default function ContentRow({
                 : "text-muted-foreground"
           }`}
         >
-          {status === 2 && <CiCircleCheck className="w-3.5 h-3.5 text-sunbird-status-completed-border" />}
-          {status === 1 && <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />}
-          {t(getStatusLabel(status))}
+          <span className="flex items-center gap-1">
+            {status === 2 && <CiCircleCheck className="w-3.5 h-3.5 text-sunbird-status-completed-border" />}
+            {status === 1 && <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />}
+            {t(getStatusLabel(status))}
+          </span>
+          {status === 2 && isSelfAssess && attemptInfo?.bestScore && (
+            <span className="text-[0.625rem] text-muted-foreground">
+              {t("courseDetails.scoreLabel", { score: attemptInfo.bestScore.totalScore, max: attemptInfo.bestScore.totalMaxScore })}
+            </span>
+          )}
         </span>
       )}
     </>
