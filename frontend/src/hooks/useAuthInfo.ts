@@ -11,7 +11,6 @@ interface AuthStatusResponse {
  * Hook to fetch and cache authentication information from /user/v1/auth/info
  * This includes session ID (sid), user ID (uid), and authentication status.
  * 
- * The data is cached for 1 hour by React Query to prevent unnecessary API calls.
  * This prevents unnecessary API calls while ensuring auth state stays current.
  */
 export const useAuthInfo = (): UseQueryResult<AuthStatusResponse, Error> => {
@@ -22,7 +21,7 @@ export const useAuthInfo = (): UseQueryResult<AuthStatusResponse, Error> => {
       return authInfo;
     },
     staleTime: Infinity, // Data remains fresh until page reload
-    gcTime: Infinity, // Keep in cache indefinitely until page reload
+    gcTime: 3600000, 
     retry: 1,
   });
 };
