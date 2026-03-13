@@ -4,6 +4,7 @@ import userAuthInfoService from '../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../AppCoreService';
 import { OrganizationService } from '../OrganizationService';
 import userProfileService from '../UserProfileService';
+import { SystemSettingService } from '../SystemSettingService';
 
 vi.mock('../userAuthInfoService/userAuthInfoService', () => ({
   default: {
@@ -39,11 +40,13 @@ vi.mock('../UserProfileService', () => ({
 }));
 
 vi.mock('../SystemSettingService', () => ({
-  SystemSettingService: class {
-    read = vi.fn().mockResolvedValue({
-      data: { response: { value: 'sunbird' } },
-    });
-  },
+  SystemSettingService: vi.fn().mockImplementation(function() {
+    return {
+      read: vi.fn().mockResolvedValue({
+        data: { response: { value: 'sunbird' } },
+      }),
+    };
+  }),
 }));
 
 describe('buildTelemetryContext', () => {
@@ -218,5 +221,42 @@ describe('buildTelemetryContext', () => {
     mockOrgSearch.mockRejectedValueOnce('string error');
 
     await expect(buildTelemetryContext()).rejects.toThrow('Failed to fetch organization data: string error');
+  });
+
+  it('should fallback to sunbird slug when SystemSettingService fails', async () => {
+    // Create a new mock instance that throws an error
+    vi.mocked(SystemSettingService).mockImplementationOnce(function() {
+      return {
+        read: vi.fn().mockRejectedValueOnce(new Error('system setting error')),
+      };
+    });
+
+    // Mock console.warn to verify it's called
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const context = await buildTelemetryContext();
+
+    // Should still build context successfully with fallback slug
+    expect(context.channel).toBe('test-channel');
+    expect(mockOrgSearch).toHaveBeenCalledWith({ filters: { isTenant: true, slug: 'sunbird' } });
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to read default_channel system setting, using fallback:', expect.any(Error));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should use custom slug from SystemSettingService when available', async () => {
+    // Create a new mock instance that returns custom value
+    vi.mocked(SystemSettingService).mockImplementationOnce(function() {
+      return {
+        read: vi.fn().mockResolvedValueOnce({
+          data: { response: { value: 'custom-channel' } },
+        }),
+      };
+    });
+
+    const context = await buildTelemetryContext();
+
+    expect(mockOrgSearch).toHaveBeenCalledWith({ filters: { isTenant: true, slug: 'custom-channel' } });
+    expect(context.channel).toBe('test-channel');
   });
 });
