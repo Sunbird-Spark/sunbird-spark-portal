@@ -1,8 +1,5 @@
 import { PdfPlayerConfig, PdfPlayerEvent, PdfPlayerContextProps, PdfPlayerMetadata } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
-import userProfileService from '../../UserProfileService';
+import { buildTelemetryContext } from '../telemetryContextBuilder';
 
 /**
  * Service for initializing and managing the PDF Player.
@@ -16,7 +13,6 @@ import userProfileService from '../../UserProfileService';
  */
 export class PdfPlayerService {
   private eventHandlers = new WeakMap<HTMLElement, { player: (event: Event) => void; telemetry: (event: Event) => void }>();
-  private orgService = new OrganizationService();
   private static cachedCss: string | null = null;
   private static cssLoading?: Promise<string>;
   private static scriptLoaded = false;
@@ -51,81 +47,13 @@ export class PdfPlayerService {
     contextProps?: PdfPlayerContextProps
   ): Promise<PdfPlayerConfig> {
     await this.loadScript();
-    // Get session and user info from auth service
-    const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
-    const uid = userAuthInfoService.getUserId() || 'anonymous';
+    const context = await buildTelemetryContext(contextProps, { contentId: metadata.identifier });
 
-    // Get device ID from AppCoreService (backend) with fallback
-    let did = '';
-    try {
-      did = await appCoreService.getDeviceId();
-    } catch (error) {
-      console.warn('Failed to fetch device ID, using fallback:', error);
-    }
-
-    // Get channel from org service with random fallback for testing
-    let channel = ''; // Random fallback for testing
-    try {
-      const orgResponse = await this.orgService.search({
-        filters: {
-          isTenant: true
-        }
-      });
-
-      const org = orgResponse?.data?.result?.response?.content?.[0];
-      if (org?.channel) {
-        channel = org.channel;
-        console.log('Using channel from org service:', channel);
-      } else {
-        console.warn('Channel not found from org service, using random fallback:', channel);
-      }
-    } catch (error) {
-      console.warn('Failed to fetch channel from org service, using random fallback:', channel);
-    }
-
-    const pdata = await appCoreService.getPData();
-
-    let userdata = { firstName: '', lastName: '' };
-    try {
-      userdata = await userProfileService.getUserData();
-    } catch (error) {
-      console.warn('Failed to fetch user data from UserProfileService:', error);
-    }
-    // Build context with defaults and overrides
-    const context = {
-      mode: contextProps?.mode || 'play',
-      sid,
-      did,
-      uid,
-      channel,
-      pdata,
-      contextRollup: contextProps?.contextRollup || {
-        l1: channel,
-      },
-      cdata: contextProps?.cdata || [],
-      timeDiff: 0,
-      objectRollup: contextProps?.objectRollup || {},
-      host: '',
-      endpoint: '/portal/data/v1/telemetry',
-      userData: userdata
-    };
-
-    const finalConfig = {
+    return {
       context,
       config: {},
       metadata,
     };
-
-    console.log('PDF Player Config Created:', {
-      channel,
-      sid,
-      uid,
-      did,
-      artifactUrl: metadata.artifactUrl,
-      identifier: metadata.identifier,
-    });
-
-    return finalConfig;
   }
   /**
    * Fetch and cache the PDF player CSS content.
