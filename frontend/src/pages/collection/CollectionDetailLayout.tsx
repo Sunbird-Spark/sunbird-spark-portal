@@ -11,7 +11,7 @@ import type {
   CollectionContentAreaEnrollmentProps,
   CollectionContentAreaSidebarProps,
   CollectionContentAreaCreatorProps,
-} from "@/components/collection/collectionContentAreaTypes";
+} from "@/types/collectionDetailTypes";
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
