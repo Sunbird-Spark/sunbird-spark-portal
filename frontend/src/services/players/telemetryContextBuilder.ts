@@ -43,8 +43,15 @@ export async function buildTelemetryContext(
 ): Promise<TelemetryContext> {
   const orgService = new OrganizationService();
   const systemSettingService = new SystemSettingService();
-  const defaultChannel = await systemSettingService.read<{ response: { value: string } }>('default_channel');
-  const slug = defaultChannel?.data?.response?.value || 'sunbird';
+  
+  // Safely read default_channel with fallback to 'sunbird' if the call fails
+  let slug = 'sunbird';
+  try {
+    const defaultChannel = await systemSettingService.read<{ response: { value: string } }>('default_channel');
+    slug = defaultChannel?.data?.response?.value;
+  } catch (error) {
+    console.warn('Failed to read default_channel system setting, using fallback:', error);
+  }
 
   // Identity
   const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
