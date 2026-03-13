@@ -17,6 +17,8 @@ interface WorkspaceToolbarProps {
   hasReviewerRole?: boolean;
   /** True when user has BOOK_CREATOR but not CONTENT_CREATOR */
   isBookCreatorOnly?: boolean;
+  /** True when user has BOOK_REVIEWER but not CONTENT_REVIEWER */
+  isBookReviewerOnly?: boolean;
   counts: { drafts: number; review: number; published: number; all: number; pendingReview?: number };
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
@@ -37,6 +39,7 @@ const WorkspaceToolbar = ({
   hasCreatorRole = false,
   hasReviewerRole = false,
   isBookCreatorOnly = false,
+  isBookReviewerOnly = false,
   counts,
   viewMode,
   onViewModeChange,
@@ -171,8 +174,8 @@ const WorkspaceToolbar = ({
             {/* Filters + View Mode (show when content is visible) */}
             {showContentFilters && (
               <>
-                {/* Type Filter - hidden for book-only creators who always see 'content' */}
-                {!isBookCreatorOnly && (
+                {/* Type Filter - hidden for book-only creators/reviewers who always see Digital Textbook */}
+                {!isBookCreatorOnly && !isBookReviewerOnly && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" className="font-rubik rounded-xl flex-shrink-0">

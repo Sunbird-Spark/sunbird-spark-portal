@@ -157,6 +157,9 @@ const WorkspacePage = () => {
   // BOOK_CREATOR without CONTENT_CREATOR can only create textbooks
   const isBookCreatorOnly = hasBookCreatorRole && !hasContentCreatorRole;
 
+  // BOOK_REVIEWER without CONTENT_REVIEWER can only review textbooks
+  const isBookReviewerOnly = hasBookReviewerRole && !hasContentReviewerRole;
+
   // Default to creator if available, otherwise reviewer
   const [userRole, setUserRole] = useState<UserRole>('creator');
 
@@ -175,10 +178,6 @@ const WorkspacePage = () => {
   const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
 
-  // Force type filter to 'content' for book-only creators
-  useEffect(() => {
-    if (isBookCreatorOnly) setTypeFilter('content');
-  }, [isBookCreatorOnly]);
   // Local state for responsive typing; debounced value drives API + URL.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const debouncedSearch = useDebounce(searchInput, 400);
@@ -235,6 +234,8 @@ const WorkspacePage = () => {
     orgId: orgChannelId,
     searchQuery: debouncedSearch,
     enabled: showContent,
+    isBookCreatorOnly,
+    isBookReviewerOnly,
   });
 
   const visibleContents = useMemo(
@@ -545,6 +546,7 @@ const WorkspacePage = () => {
     hasCreatorRole,
     hasReviewerRole,
     isBookCreatorOnly,
+    isBookReviewerOnly,
     counts,
     viewMode,
     onViewModeChange: setViewMode,
