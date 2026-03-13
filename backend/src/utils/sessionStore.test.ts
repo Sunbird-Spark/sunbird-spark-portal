@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import session from 'express-session';
-import { EventEmitter } from 'events';
 import { setupModuleMocks, resetTestEnvironment } from '../test-helpers.js';
 
 class MockPool {
