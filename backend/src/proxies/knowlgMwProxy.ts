@@ -40,7 +40,7 @@ export const contentActionProxy = createProxyMiddleware({
                 fixRequestBody(proxyReq, req);
             }
         },
-        proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req) => {
+        proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
             const statusCode = proxyRes.statusCode || 500;
             if (statusCode >= 400) {
                 const body = responseBuffer.toString('utf8');
