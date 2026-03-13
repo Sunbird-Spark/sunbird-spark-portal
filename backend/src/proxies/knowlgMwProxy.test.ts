@@ -18,10 +18,12 @@ describe('knowlgMwProxy', () => {
             return {
                 ...actual,
                 createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
-                fixRequestBody: vi.fn(),
-                responseInterceptor: vi.fn((fn: Function) => fn)
+                fixRequestBody: vi.fn()
             };
         });
+        vi.doMock('http-proxy-middleware/response-interceptor', () => ({
+            default: vi.fn((fn: Function) => fn)
+        }));
         vi.doMock('../utils/proxyUtils.js', () => ({
             decorateRequestHeaders: vi.fn()
         }));
