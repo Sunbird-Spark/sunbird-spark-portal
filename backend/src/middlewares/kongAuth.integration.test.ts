@@ -143,6 +143,14 @@ describe('Kong Auth Middleware Integration Tests', () => {
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
                 }
             }));
+            vi.doMock('../services/kongAuthService.js', () => ({
+                generateKongToken: vi.fn().mockRejectedValue(new Error('Device registration configuration missing')),
+                refreshSessionTTL: vi.fn(),
+                isSessionNearExpiry: vi.fn().mockReturnValue(false),
+            }));
+            vi.doMock('../utils/sessionUtils.js', () => ({
+                saveSession: vi.fn().mockResolvedValue(undefined),
+            }));
 
             const freshApp = express();
             freshApp.use(session({
@@ -176,6 +184,17 @@ describe('Kong Auth Middleware Integration Tests', () => {
                     KONG_ANONYMOUS_FALLBACK_TOKEN: undefined,
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
                 }
+            }));
+            vi.doMock('../services/kongAuthService.js', async (importOriginal) => {
+                const actual = await importOriginal<typeof import('../services/kongAuthService.js')>();
+                return {
+                    ...actual,
+                    refreshSessionTTL: vi.fn(),
+                    isSessionNearExpiry: vi.fn().mockReturnValue(false),
+                };
+            });
+            vi.doMock('../utils/sessionUtils.js', () => ({
+                saveSession: vi.fn().mockResolvedValue(undefined),
             }));
 
             const freshApp = express();

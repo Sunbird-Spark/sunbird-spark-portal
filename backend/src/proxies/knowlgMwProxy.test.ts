@@ -22,7 +22,7 @@ describe('knowlgMwProxy', () => {
         vi.doMock('http-proxy-middleware', () => ({
             createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
             fixRequestBody: vi.fn(),
-            responseInterceptor: vi.fn()
+            responseInterceptor: vi.fn((fn: Function) => fn)
         }));
         vi.doMock('../utils/proxyUtils.js', () => ({
             decorateRequestHeaders: vi.fn()
@@ -68,9 +68,10 @@ describe('knowlgMwProxy Integration', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
-        vi.doUnmock('http-proxy-middleware');
-        vi.doUnmock('../utils/proxyUtils.js');
-        vi.doUnmock('../utils/logger.js');
+        // Re-register actual modules to avoid vi.doUnmock issues in CI
+        vi.doMock('http-proxy-middleware', async () => await vi.importActual('http-proxy-middleware'));
+        vi.doMock('../utils/proxyUtils.js', async () => await vi.importActual('../utils/proxyUtils.js'));
+        vi.doMock('../utils/logger.js', async () => await vi.importActual('../utils/logger.js'));
 
         mockServer = express();
         mockServer.use(express.json());
