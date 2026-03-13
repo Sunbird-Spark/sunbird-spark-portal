@@ -1,8 +1,8 @@
 import React, { createContext, useEffect, useMemo, useRef } from 'react';
-import { telemetryService } from '../services/TelemetryService';
+import { ITelemetryService, telemetryService } from '../services/TelemetryService';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 
-export const TelemetryContext = createContext<typeof telemetryService | null>(null);
+export const TelemetryContext = createContext<ITelemetryService | null>(null);
 
 interface TelemetryProviderProps {
   children: React.ReactNode;

@@ -14,7 +14,21 @@ export interface TelemetryConfig {
   [key: string]: any;
 }
 
-export class TelemetryService {
+export interface ITelemetryService {
+  interact(eventInput: TelemetryEventInput): void;
+  impression(eventInput: TelemetryEventInput): void;
+  start(config: Record<string, unknown> | any, contentId: string, contentVer: string, data: Record<string, unknown> | any, options?: Omit<TelemetryEventInput, 'edata'>): void;
+  end(eventInput: TelemetryEventInput): void;
+  error(eventInput: TelemetryEventInput): void;
+  audit(eventInput: TelemetryEventInput): void;
+  share(eventInput: TelemetryEventInput): void;
+  log(eventInput: TelemetryEventInput): void;
+  exData(eventInput: TelemetryEventInput): void;
+  feedback(eventInput: TelemetryEventInput): void;
+  get isInitialized(): boolean;
+}
+
+export class TelemetryService implements ITelemetryService {
   private _isInitialized = false;
   private _lastImpressionPageId: string | null = null;
   private _lastImpressionTime: number = 0;
