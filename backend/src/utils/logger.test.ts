@@ -12,6 +12,8 @@ describe('Logger', () => {
 
     const loggerModule = await import('./logger.js');
     logger = loggerModule.default;
+    // Ensure logger level is 'info' even if env mock doesn't take effect in CI
+    logger.level = 'info';
   });
 
   afterEach(() => {
