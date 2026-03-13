@@ -3,25 +3,24 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import type { Server } from 'http';
-import { setupModuleMocks, resetTestEnvironment } from '../test-helpers.js';
+
+vi.mock('../utils/logger.js', () => ({
+    default: {
+        info: vi.fn(),
+        error: vi.fn()
+    }
+}));
 
 describe('kongProxy', () => {
     beforeEach(() => {
-        setupModuleMocks();
-        resetTestEnvironment();
+        vi.clearAllMocks();
+        vi.resetModules();
     });
 
     const importKongProxy = async (overrideEnv?: { KONG_URL?: string }) => {
-        vi.doMock('http-proxy-middleware', async (importOriginal) => {
-            const actual = await importOriginal<typeof import('http-proxy-middleware')>();
-            return {
-                ...actual,
-                createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
-                fixRequestBody: vi.fn()
-            };
-        });
-        vi.doMock('http-proxy-middleware/response-interceptor', () => ({
-            default: vi.fn((fn: Function) => fn)
+        vi.doMock('http-proxy-middleware', () => ({
+            createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
+            responseInterceptor: vi.fn()
         }));
         vi.doMock('../utils/proxyUtils.js', () => ({
             decorateRequestHeaders: vi.fn()
@@ -69,10 +68,9 @@ describe('Kong Proxy Integration', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
-        // Re-register actual modules to avoid vi.doUnmock issues in CI
-        vi.doMock('http-proxy-middleware', async () => await vi.importActual('http-proxy-middleware'));
-        vi.doMock('../utils/proxyUtils.js', async () => await vi.importActual('../utils/proxyUtils.js'));
-        vi.doMock('../utils/logger.js', async () => await vi.importActual('../utils/logger.js'));
+        vi.doUnmock('http-proxy-middleware');
+        vi.doUnmock('../utils/proxyUtils.js');
+        vi.doUnmock('../utils/logger.js');
 
         mockKongServer = express();
         mockKongServer.use(express.json());

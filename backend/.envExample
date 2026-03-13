@@ -1,49 +1,42 @@
 # Server Configuration
-PORT=3000
+# NOTE: For local development, change ENVIRONMENT to 'local' after copying this file to .env
+# Do NOT set NODE_ENV for local development (remove or comment out the line)
+NODE_ENV=test
 ENVIRONMENT=test
+PORT=3000
 
-DOMAIN_URL='https://test.example.com'
-KONG_URL='http://localhost:8000'
+DOMAIN_URL=http://localhost:3000
+KONG_URL=http://localhost:8000
 SERVER_URL='http://localhost:3000'
 DEVELOPMENT_REACT_APP_URL='http://localhost:5173'
-FORMS_DB_NAME=test_forms_db
-REVIEW_COMMENT_DB_NAME=test_review_comments
-KNOWLG_MW_BASE_URL='http://localhost:5000'
-
 # Logging Configuration
-SUNBIRD_PORTAL_LOG_LEVEL=debug
+SUNBIRD_PORTAL_LOG_LEVEL=error
+FORMS_DB_NAME=forms
 
 # Session Configuration
 SUNBIRD_ANONYMOUS_SESSION_TTL=60000
-SUNBIRD_ANONYMOUS_SESSION_SECRET=test_anonymous_session_secret
-SUNBIRD_LOGGEDIN_SESSION_SECRET=test_loggedin_session_secret
+SUNBIRD_SESSION_SECRET=test_session_secret
 SUNBIRD_PORTAL_SESSION_STORE=in-memory
 
-# YugabyteDB Configuration (PostgreSQL-compatible)
-# Only required when SUNBIRD_PORTAL_SESSION_STORE=yugabyte
-# For test environment with in-memory store, these can be left as defaults
-SUNBIRD_YUGABYTE_HOST=localhost
-SUNBIRD_YUGABYTE_PORT=9042
-SUNBIRD_YUGABYTE_DATABASE=test_portal
-SUNBIRD_YUGABYTE_USER=test_user
-SUNBIRD_YUGABYTE_PASSWORD=test_password
-
-# Kong Configuration - Test tokens (dummy values)
-KONG_ANONYMOUS_FALLBACK_TOKEN='test_fallback_token'
-KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN='test_device_register_token'
-KONG_LOGGEDIN_FALLBACK_TOKEN='test_loggedin_fallback_token'
-KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN='test_loggedin_device_register_token'
+# Kong Configuration (test tokens)
+KONG_ANONYMOUS_FALLBACK_TOKEN=test_anonymous_fallback_token
+KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN=test_anonymous_register_token
+KONG_LOGGEDIN_FALLBACK_TOKEN=test_loggedin_fallback_token
+KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN=test_loggedin_register_token
+SUNBIRD_YUGABYTE_YCQL_PORT=9042
 
 # Keycloak Configuration
-PORTAL_REALM='test_realm'
-PORTAL_AUTH_SERVER_CLIENT='test_client'
+PORTAL_REALM=sunbird
+PORTAL_AUTH_SERVER_CLIENT=portal
 
-GOOGLE_OAUTH_CLIENT_ID='test_google_client_id'
-GOOGLE_OAUTH_CLIENT_SECRET='test_google_client_secret'
+# Learn Service Configuration
+LEARN_BASE_URL=http://localhost:9000
 
-KEYCLOAK_GOOGLE_CLIENT_ID='test_google_auth'
-KEYCLOAK_GOOGLE_CLIENT_SECRET='test_google_client_secret'
+# Google reCAPTCHA (test values)
+GOOGLE_RECAPTCHA_SECRET=test_recaptcha_secret
 
-LEARN_BASE_URL='http://localhost:9000'
-
-GOOGLE_RECAPTCHA_SECRET='abcdefghijklmnopqrstuvwxyz1234567890'
+# Google OAuth Configuration
+GOOGLE_OAUTH_CLIENT_ID=test_client_id
+GOOGLE_OAUTH_CLIENT_SECRET=test_client_secret
+KEYCLOAK_GOOGLE_CLIENT_ID=test_keycloak_client_id
+KEYCLOAK_GOOGLE_CLIENT_SECRET=test_keycloak_client_secret
