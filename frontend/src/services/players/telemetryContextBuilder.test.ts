@@ -164,12 +164,12 @@ describe('buildTelemetryContext', () => {
     expect(context.contextRollup).toEqual({});
   });
 
-  it('should use empty contextRollup for anonymous users', async () => {
+  it('should set contextRollup from org hashTagId for anonymous users', async () => {
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
 
     const context = await buildTelemetryContext();
 
-    expect(context.contextRollup).toEqual({});
+    expect(context.contextRollup).toEqual({ l1: 'test-hash-tag' });
     expect(userProfileService.getUserData).not.toHaveBeenCalled();
     expect(userProfileService.getHashTagIds).not.toHaveBeenCalled();
     expect(userProfileService.getOrganisationHashTagIds).not.toHaveBeenCalled();
@@ -329,5 +329,39 @@ describe('buildTelemetryContext', () => {
 
     expect(mockOrgSearch).toHaveBeenCalledWith({ filters: { isTenant: true, slug: 'custom-channel' } });
     expect(context.channel).toBe('test-channel');
+  });
+
+  it('should append courseId and batchId to dims when cdata contains course and batch', async () => {
+    const cdata = [
+      { id: 'course-123', type: 'course' },
+      { id: 'batch-456', type: 'batch' },
+    ];
+    const context = await buildTelemetryContext({ cdata });
+
+    expect(context.dims).toEqual(['org-hash-1', 'org-hash-2', 'course-123', 'batch-456']);
+  });
+
+  it('should append only courseId to dims when cdata has course but no batch', async () => {
+    const cdata = [{ id: 'course-123', type: 'course' }];
+    const context = await buildTelemetryContext({ cdata });
+
+    expect(context.dims).toEqual(['org-hash-1', 'org-hash-2', 'course-123']);
+  });
+
+  it('should not append to dims when cdata has no course entry', async () => {
+    const context = await buildTelemetryContext({ cdata: [{ id: 'dial-1', type: 'DialCode' }] });
+
+    expect(context.dims).toEqual(['org-hash-1', 'org-hash-2']);
+  });
+
+  it('should set contextRollup to empty when anonymous and no hashTagId', async () => {
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
+    mockOrgSearch.mockResolvedValueOnce({
+      data: { response: { content: [{ channel: 'test-channel' }] }, ts: 0 },
+    });
+
+    const context = await buildTelemetryContext();
+
+    expect(context.contextRollup).toEqual({});
   });
 });
