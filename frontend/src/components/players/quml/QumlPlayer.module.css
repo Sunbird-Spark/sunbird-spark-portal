@@ -1,9 +1,3 @@
-.qumlPlayerContainer {
-  min-height: 37.5rem;
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
 
 .qumlPlayerContainer :global(.quml-option) {
   display: flex !important;

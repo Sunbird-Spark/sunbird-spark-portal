@@ -5,6 +5,7 @@ import { getClient } from '../lib/http-client';
 class AppCoreService {
     private static instance: AppCoreService;
     private deviceId: string | null = null;
+    private pDataCache: { id: string; ver: string; pid: string } | null = null;
 
     private constructor() {
         // Private constructor for singleton pattern
@@ -68,6 +69,11 @@ class AppCoreService {
     }
 
     async getPData(): Promise<{ id: string; ver: string; pid: string }> {
+        // Return cached pData if available
+        if (this.pDataCache) {
+            return this.pDataCache;
+        }
+
         const response = await getClient().get<{
             appId: string;
             version: string;
@@ -75,11 +81,13 @@ class AppCoreService {
         }>('/app/v1/info');
         const data = response.data;
 
-        return {
+        this.pDataCache = {
             id: data?.appId || "",
             ver: data?.version || "",
             pid: data?.appId || "",
         };
+
+        return this.pDataCache;
     }
 
     async initialize(): Promise<void> {

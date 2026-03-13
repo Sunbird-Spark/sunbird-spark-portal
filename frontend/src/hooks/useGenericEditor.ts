@@ -115,7 +115,7 @@ export const useGenericEditor = (
         details,
         isLargeFileUpload
       );
-      const config = service.buildEditorConfig(lockParamsRef.current);
+      const config = await service.buildEditorConfig(lockParamsRef.current, undefined, context.framework);
 
       // Step 4: Set window globals for the editor iframe
       service.setWindowGlobals(context, config);

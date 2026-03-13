@@ -76,6 +76,8 @@ export interface GenericEditorWindowConfig {
     };
     showEndPage: boolean;
   };
+  contentFields?: string;
+  fwCategoryDetails?: { code: string; label: string }[];
 }
 
 export interface GenericEditorRouteParams {
