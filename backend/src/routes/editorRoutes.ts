@@ -16,12 +16,12 @@ const editorRoutes: string[] = [
     '/collection/v1/export/*rest',
     '/collection/v1/import/*rest',
     '/data/v1/form/read',
-    '/data/v3/telemetry',
     '/framework/v1/read/*rest',
     '/asset/v1/create',
     '/asset/v1/upload/*rest',
 ];
 
+router.all('/data/v3/telemetry', sessionMiddleware, oidcSession(), kongProxy);
 router.all(editorRoutes, sessionMiddleware, oidcSession(), requireAuth(), kongProxy);
 
 export default router;
