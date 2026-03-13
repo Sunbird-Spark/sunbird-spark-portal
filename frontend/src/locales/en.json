@@ -499,8 +499,10 @@
       "story": "Story & Game",
       "course": "Course",
       "collection": "Collection",
+      "textbook": "TextBook",
       "questionSet": "Question Set"
     },
+    "noAccessToCreate": "You do not have access to create this content",
     "collectionDescriptions": {
       "course": "Enter description for Course",
       "contentPlaylist": "Enter description for Collection",

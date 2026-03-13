@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import WorkspacePage from './WorkspacePage';
 import type { UseWorkspaceReturn, WorkspaceItem } from '@/types/workspaceTypes';
-import type { ResourceFormData } from './ResourceFormDialog';
+import type { ContentFormData } from './ContentDynamicFormDialog';
 
 const { mockNavigate, mockContentCreate, mockQuestionSetMutateAsync, mockQuestionSetRetireMutateAsync } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
@@ -191,8 +191,8 @@ vi.mock('./ContentNameDialog', () => {
   };
 });
 
-vi.mock('./ResourceFormDialog', () => ({
-  default: ({ open, onClose, onSubmit, title, formSubType }: { open: boolean; onClose: () => void; onSubmit: (data: ResourceFormData) => void; title?: string; formSubType: string }) =>
+vi.mock('./ContentDynamicFormDialog', () => ({
+  default: ({ open, onClose, onSubmit, title, formSubType }: { open: boolean; onClose: () => void; onSubmit: (data: ContentFormData) => void; title?: string; formSubType: string }) =>
     open ? (
       <div role="dialog" aria-label={title || 'Create Content'}>
         <h2>{title || 'Create Content'}</h2>
@@ -382,7 +382,7 @@ describe('WorkspacePage', () => {
     });
   });
 
-  it('opens ResourceFormDialog for story and quiz options', async () => {
+  it('opens ContentDynamicFormDialog for story and quiz options', async () => {
     renderWithProviders(<WorkspacePage />);
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
     await waitFor(() => {
@@ -414,7 +414,7 @@ describe('WorkspacePage', () => {
     });
   });
 
-  it('creates resource and quiz content via ResourceFormDialog', async () => {
+  it('creates resource and quiz content via ContentDynamicFormDialog', async () => {
     // Test resource creation
     mockContentCreate.mockResolvedValue({ data: { identifier: 'do_resource_123' } });
     renderWithProviders(<WorkspacePage />);
@@ -466,7 +466,7 @@ describe('WorkspacePage', () => {
     });
   });
 
-  it('closes ResourceFormDialog and handles creation errors', async () => {
+  it('closes ContentDynamicFormDialog and handles creation errors', async () => {
     renderWithProviders(<WorkspacePage />);
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
     await waitFor(() => {

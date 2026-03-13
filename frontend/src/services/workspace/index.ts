@@ -1,5 +1,5 @@
 export { mapContentToWorkspaceItem } from './contentMapper';
-export { getEditorCategories } from './createOptionsConfig';
+export { getEditorCategories, BOOK_CREATOR_ALLOWED_OPTIONS } from './createOptionsConfig';
 export {
   getCreatorSegments,
   getReviewerSegments,
