@@ -11,64 +11,63 @@ interface TelemetryProviderProps {
 export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }) => {
   const isInitializedRef = useRef(false);
 
-  const telemetryConfig = useMemo(() => {
-    const defaultDid = localStorage.getItem('deviceId') || 'anonymous-device';
-    const defaultUid = userAuthInfoService.getUserId() || 'anonymous';
-    const defaultSid = sessionStorage.getItem('sid') || `session-${Date.now()}`;
-    const channel = import.meta.env.VITE_APP_CHANNEL || 'default';
-
-    // Detect device type to match context.cdata "Device" entry in Sunbird telemetry spec
-    const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
-
-    return {
-      pdata: {
-        id: import.meta.env.VITE_APP_ID || 'sunbird.portal',
-        ver: import.meta.env.VITE_APP_VERSION || '1.0.0',
-        pid: 'sunbird-portal'
-      },
-      env: import.meta.env.VITE_APP_ENV || 'production',
-      channel,
-      did: defaultDid,
-      authtoken: '',
-      uid: defaultUid,
-      sid: defaultSid,
-      batchsize: 20,
-      host: window.location.origin,
-      endpoint: '/action/data/v3/telemetry',
-      // tags: [channel] matches the sample IMPRESSION structure
-      tags: [channel],
-      // cdata: UserSession + Device entries match the sample context.cdata
-      cdata: [
-        { id: defaultSid, type: 'UserSession' },
-        { id: deviceType, type: 'Device' }
-      ],
-      // rollup.l1 = channel matches the sample context.rollup
-      rollup: { l1: channel },
-      // The @project-sunbird/telemetry-sdk validates every event against standard schemas when true.
-      // Controlled via .env.development (true) / .env.production (false).
-      enableValidation: import.meta.env.VITE_ENABLE_TELEMETRY_VALIDATION === 'true'
-    };
-  }, []); 
   useEffect(() => {
-    if (!sessionStorage.getItem('sid')) {
-      sessionStorage.setItem('sid', telemetryConfig.sid);
+    if (!isInitializedRef.current && !telemetryService.isInitialized) {
+      try {
+        const defaultDid = localStorage.getItem('deviceId') || 'anonymous-device';
+        let defaultUid = 'anonymous';
+        try {
+          defaultUid = userAuthInfoService.getUserId() || 'anonymous';
+        } catch (e) {
+          console.warn('Failed to read user id for telemetry config', e);
+        }
+        const defaultSid = sessionStorage.getItem('sid') || `session-${Date.now()}`;
+        
+        if (!sessionStorage.getItem('sid')) {
+          sessionStorage.setItem('sid', defaultSid);
+        }
+
+        const channel = import.meta.env.VITE_APP_CHANNEL || 'default';
+        const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+
+        const telemetryConfig = {
+          pdata: {
+            id: import.meta.env.VITE_APP_ID || 'sunbird.portal',
+            ver: import.meta.env.VITE_APP_VERSION || '1.0.0',
+            pid: 'sunbird-portal'
+          },
+          env: import.meta.env.VITE_APP_ENV || 'production',
+          channel,
+          did: defaultDid,
+          authtoken: '',
+          uid: defaultUid,
+          sid: defaultSid,
+          batchsize: 20,
+          host: window.location.origin,
+          endpoint: '/action/data/v3/telemetry',
+          tags: [channel],
+          cdata: [
+            { id: defaultSid, type: 'UserSession' },
+            { id: deviceType, type: 'Device' }
+          ],
+          rollup: { l1: channel },
+          enableValidation: import.meta.env.VITE_ENABLE_TELEMETRY_VALIDATION === 'true'
+        };
+
+        telemetryService.initialize(telemetryConfig);
+        telemetryService.start(
+          {},
+          'app',
+          '1.0',
+          { type: 'app', mode: 'play', pageid: 'home' }
+        );
+        isInitializedRef.current = true;
+      } catch (e) {
+        console.error('[TelemetryProvider] Failed to initialize telemetry', e);
+        return; // Do not attach click listener if init fails
+      }
     }
-  }, [telemetryConfig.sid]);
 
-  useEffect(() => {
-    if (telemetryConfig && !isInitializedRef.current && !telemetryService.isInitialized) {
-      telemetryService.initialize(telemetryConfig);
-      telemetryService.start(
-        telemetryConfig,
-        'app',           // contentId (or some default value)
-        '1.0',           // contentVer
-        { type: 'app', mode: 'play', pageid: 'home' } // data
-      );
-      isInitializedRef.current = true;
-    }
-  }, [telemetryConfig]);
-
-  useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
       const target = (event.target as HTMLElement).closest('[data-edataid]') as HTMLElement;
       if (!target) return;
@@ -108,7 +107,6 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
       telemetryService.interact(payload);
     };
 
-    // Use capture phase to ensure it catches even if propagation is stopped in React
     document.addEventListener('click', handleGlobalClick, true);
 
     return () => {

@@ -19,6 +19,7 @@ export const useTelemetry = () => {
       log: (eventInput: TelemetryEventInput) => {},
       exData: (eventInput: TelemetryEventInput) => {},
       feedback: (eventInput: TelemetryEventInput) => {},
+      share: (eventInput: TelemetryEventInput) => {},
       get isInitialized() {
         return false;
       }

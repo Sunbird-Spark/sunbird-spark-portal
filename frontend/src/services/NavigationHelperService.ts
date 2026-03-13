@@ -12,7 +12,15 @@
  */
 export class NavigationHelperService {
   /** Timestamp (ms) of the last navigation start. Updated after each impression. */
-  public pageStartTime: number = Date.now();
+  private _pageStartTime: number = Date.now();
+
+  public get pageStartTime(): number {
+    return this._pageStartTime;
+  }
+
+  public resetPageStartTime(): void {
+    this._pageStartTime = Date.now();
+  }
 
   private _history: string[] = [];
 

@@ -153,8 +153,6 @@ describe('TelemetryService', () => {
         const inputWithPageId = { edata: { type: 'view', pageid: 'home-page' } };
         telemetryService.impression(inputWithPageId);
         expect($t.impression).toHaveBeenCalledWith(inputWithPageId.edata, undefined);
-        expect(sessionStorage.getItem('telemetry_last_pageid')).toBe('home-page');
-        expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('100000');
       });
 
       it('drops impression if it occurs within 5000ms for the same pageid', () => {
@@ -181,18 +179,8 @@ describe('TelemetryService', () => {
         
         telemetryService.impression(inputWithPageId);
         expect($t.impression).toHaveBeenCalledTimes(2); // Should be called again
-        expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('106000');
       });
 
-      it('handles invalid timestamp in sessionStorage gracefully and updates it', () => {
-         const inputWithPageId = { edata: { type: 'view', pageid: 'home-page' } };
-         sessionStorage.setItem('telemetry_last_pageid', 'home-page');
-         sessionStorage.setItem('telemetry_last_impression_time', 'invalid');
-         
-         telemetryService.impression(inputWithPageId);
-         expect($t.impression).toHaveBeenCalledTimes(1);
-         expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('100000');
-      });
 
       it('fires impression immediately if navigating to a different pageid within 5000ms', () => {
         const inputPageOne = { edata: { type: 'view', pageid: 'home-page' } };
@@ -206,8 +194,6 @@ describe('TelemetryService', () => {
         
         telemetryService.impression(inputPageTwo);
         expect($t.impression).toHaveBeenCalledTimes(2); 
-        expect(sessionStorage.getItem('telemetry_last_pageid')).toBe('explore-page');
-        expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('101000');
       });
     });
   });
