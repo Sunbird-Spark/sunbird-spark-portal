@@ -23,10 +23,8 @@ vi.mock('../OrganizationService', () => ({
   OrganizationService: vi.fn().mockImplementation(() => ({
     search: vi.fn().mockResolvedValue({
       data: {
-        result: {
-          response: {
-            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
-          },
+        response: {
+          content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
         ts: '2026-03-13T10:00:00.000Z',
       },
@@ -40,6 +38,14 @@ vi.mock('../UserProfileService', () => ({
   },
 }));
 
+vi.mock('../SystemSettingService', () => ({
+  SystemSettingService: class {
+    read = vi.fn().mockResolvedValue({
+      data: { response: { value: 'sunbird' } },
+    });
+  },
+}));
+
 describe('buildTelemetryContext', () => {
   let mockOrgSearch: ReturnType<typeof vi.fn>;
 
@@ -50,10 +56,8 @@ describe('buildTelemetryContext', () => {
     // Setup default org search mock
     mockOrgSearch = vi.fn().mockResolvedValue({
       data: {
-        result: {
-          response: {
-            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
-          },
+        response: {
+          content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
         ts: '2026-03-13T10:00:00.000Z',
       },
@@ -158,10 +162,8 @@ describe('buildTelemetryContext', () => {
   it('should extract timeDiff from org search response data.ts', async () => {
     mockOrgSearch.mockResolvedValueOnce({
       data: {
-        result: {
-          response: {
-            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
-          },
+        response: {
+          content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
         ts: '2026-03-13T10:00:00.000Z',
       },
@@ -175,10 +177,8 @@ describe('buildTelemetryContext', () => {
   it('should default timeDiff to 0 when data.ts is missing', async () => {
     mockOrgSearch.mockResolvedValueOnce({
       data: {
-        result: {
-          response: {
-            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
-          },
+        response: {
+          content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
       },
     });
