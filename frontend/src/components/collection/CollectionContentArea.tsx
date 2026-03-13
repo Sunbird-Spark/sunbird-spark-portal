@@ -18,13 +18,6 @@ import type {
   CollectionContentAreaCreatorProps,
 } from "./collectionContentAreaTypes";
 
-export type {
-  CollectionContentAreaAccessProps,
-  CollectionContentAreaPlayerProps,
-  CollectionContentAreaEnrollmentProps,
-  CollectionContentAreaSidebarProps,
-  CollectionContentAreaCreatorProps,
-};
 
 interface CollectionContentAreaProps {
   collectionData: any;
