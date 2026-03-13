@@ -1,36 +1,49 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EcmlPlayerService } from './EcmlPlayerService';
 import type { EcmlPlayerMetadata } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
+import { buildTelemetryContext } from '../telemetryContextBuilder';
 
-vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
-  default: {
-    getSessionId: vi.fn(() => null),
-    getUserId: vi.fn(() => null),
-  },
+vi.mock('../telemetryContextBuilder', () => ({
+  buildTelemetryContext: vi.fn().mockResolvedValue({
+    mode: 'play',
+    sid: 'test-session-id',
+    did: 'test-device-id',
+    uid: 'test-user-id',
+    channel: 'test-channel',
+    pdata: { id: 'test.portal', ver: '1.0.0', pid: 'test.portal' },
+    contextRollup: { l1: 'test-channel' },
+    tags: ['test-channel'],
+    cdata: [],
+    timeDiff: 0,
+    objectRollup: {},
+    host: '',
+    endpoint: '/portal/data/v1/telemetry',
+    dims: ['test-channel'],
+    app: ['test-channel'],
+    partner: [],
+    userData: { firstName: '', lastName: '' },
+  }),
 }));
 
-vi.mock('../../AppCoreService', () => ({
-  default: {
-    getDeviceId: vi.fn(() => Promise.resolve('device-123')),
-    getPData: vi.fn(() => Promise.resolve({ id: 'test.portal', ver: '1.0.0', pid: 'test.portal' })),
-  },
-}));
-
-const mockOrgSearch = vi.fn();
-
-vi.mock('../../OrganizationService', () => ({
-  OrganizationService: class {
-    search = mockOrgSearch;
-  },
-}));
-
-vi.mock('../../UserProfileService', () => ({
-  default: {
-    getUserData: vi.fn(() => Promise.resolve({ firstName: '', lastName: '' })),
-  },
-}));
+const defaultContext = {
+  mode: 'play',
+  sid: 'test-session-id',
+  did: 'test-device-id',
+  uid: 'test-user-id',
+  channel: 'test-channel',
+  pdata: { id: 'test.portal', ver: '1.0.0', pid: 'test.portal' },
+  contextRollup: { l1: 'test-channel' },
+  tags: ['test-channel'],
+  cdata: [],
+  timeDiff: 0,
+  objectRollup: {},
+  host: '',
+  endpoint: '/portal/data/v1/telemetry',
+  dims: ['test-channel'],
+  app: ['test-channel'],
+  partner: [],
+  userData: { firstName: '', lastName: '' },
+};
 
 describe('EcmlPlayerService', () => {
   let service: EcmlPlayerService;
@@ -45,105 +58,34 @@ describe('EcmlPlayerService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockOrgSearch.mockResolvedValue({
-      data: {
-        result: {
-          response: {
-            content: [
-              {
-                channel: 'test-channel-456',
-                hashTagId: 'hash-tag-123',
-                identifier: 'org-123',
-              },
-            ],
-          },
-        },
-      },
-    });
+    (buildTelemetryContext as any).mockImplementation(async (contextProps?: any, options?: any) => ({
+      ...defaultContext,
+      mode: contextProps?.mode || 'play',
+      cdata: contextProps?.cdata || [],
+      contextRollup: contextProps?.contextRollup || { l1: 'test-channel' },
+      objectRollup: contextProps?.objectRollup || {},
+      contentId: options?.contentId,
+    }));
 
     service = new EcmlPlayerService();
   });
 
   describe('createConfig', () => {
     it('should create config with all required fields from services', async () => {
-      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('session-789');
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-456');
-
       const result = await service.createConfig(mockMetadata);
 
-      expect(result.context.sid).toBe('session-789');
-      expect(result.context.uid).toBe('user-456');
-      expect(result.context.did).toBe('device-123');
-      expect(result.context.channel).toBe('test-channel-456');
+      expect(result.context.sid).toBe('test-session-id');
+      expect(result.context.uid).toBe('test-user-id');
+      expect(result.context.did).toBe('test-device-id');
+      expect(result.context.channel).toBe('test-channel');
       expect(result.context.contentId).toBe('do_content_123');
       expect(result.metadata).toEqual(mockMetadata);
     });
 
-    it('should use anonymous for uid when not available', async () => {
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
+    it('should call buildTelemetryContext with contentId', async () => {
+      await service.createConfig(mockMetadata);
 
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.uid).toBe('anonymous');
-    });
-
-    it('should use null sid when session ID is not available', async () => {
-      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
-
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.sid).toBeNull();
-    });
-
-    it('should use empty fallback when device ID fails', async () => {
-      vi.mocked(appCoreService.getDeviceId).mockRejectedValue(new Error('fail'));
-
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.did).toBe('');
-    });
-
-    it('should use empty fallback when org service fails', async () => {
-      mockOrgSearch.mockRejectedValue(new Error('Network error'));
-
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.channel).toBe('');
-    });
-
-    it('should use empty fallback when channel is not found', async () => {
-      mockOrgSearch.mockResolvedValue({
-        data: { result: { response: { content: [] } } },
-      });
-
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.channel).toBe('');
-    });
-
-    it('should use hashTagId for tags when available', async () => {
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.tags).toEqual(['hash-tag-123']);
-      expect(result.context.dims).toEqual(['hash-tag-123']);
-    });
-
-    it('should use channel for tags when hashTagId is not available', async () => {
-      mockOrgSearch.mockResolvedValue({
-        data: {
-          result: {
-            response: {
-              content: [{ channel: 'my-channel', identifier: 'org-1' }],
-            },
-          },
-        },
-      });
-
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.tags).toEqual(['my-channel']);
-    });
-
-    it('should use empty tags when no channel or hashTagId', async () => {
-      mockOrgSearch.mockResolvedValue({
-        data: { result: { response: { content: [] } } },
-      });
-
-      const result = await service.createConfig(mockMetadata);
-      expect(result.context.tags).toEqual([]);
+      expect(buildTelemetryContext).toHaveBeenCalledWith(undefined, { contentId: 'do_content_123' });
     });
 
     it('should override mode when provided in contextProps', async () => {

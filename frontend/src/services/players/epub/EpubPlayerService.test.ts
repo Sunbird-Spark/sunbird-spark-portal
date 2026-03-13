@@ -1,39 +1,49 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EpubPlayerService } from './EpubPlayerService';
 import type { EpubPlayerMetadata } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
+import { buildTelemetryContext } from '../telemetryContextBuilder';
 
-// Mock the services
-vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
-  default: {
-    getSessionId: vi.fn(() => null),
-    getUserId: vi.fn(() => null),
-  },
+vi.mock('../telemetryContextBuilder', () => ({
+  buildTelemetryContext: vi.fn().mockResolvedValue({
+    mode: 'play',
+    sid: 'test-session-id',
+    did: 'test-device-id',
+    uid: 'test-user-id',
+    channel: 'test-channel-456',
+    pdata: { id: 'sunbird.portal', ver: '1.0.0', pid: 'sunbird.portal' },
+    contextRollup: { l1: 'test-channel-456' },
+    tags: ['test-channel-456'],
+    cdata: [],
+    timeDiff: 0,
+    objectRollup: {},
+    host: '',
+    endpoint: '/portal/data/v1/telemetry',
+    dims: ['test-channel-456'],
+    app: ['test-channel-456'],
+    partner: [],
+    userData: { firstName: '', lastName: '' },
+  }),
 }));
 
-vi.mock('../../AppCoreService', () => ({
-  default: {
-    getDeviceId: vi.fn(() => Promise.resolve('device-123')),
-    getPData: vi.fn(() => Promise.resolve({ id: 'sunbird.portal', ver: '1.0.0', pid: 'sunbird.portal' })),
-  },
-}));
-
-// Create a mock search function that we can control
-const mockOrgSearch = vi.fn();
-
-vi.mock('../../OrganizationService', () => ({
-  OrganizationService: class {
-    search = mockOrgSearch;
-  },
-}));
-
-vi.mock('../../UserProfileService', () => ({
-  default: {
-    getUserData: vi.fn(() => Promise.resolve({ firstName: '', lastName: '' })),
-  },
-}));
+const defaultContext = {
+  mode: 'play',
+  sid: 'test-session-id',
+  did: 'test-device-id',
+  uid: 'test-user-id',
+  channel: 'test-channel-456',
+  pdata: { id: 'sunbird.portal', ver: '1.0.0', pid: 'sunbird.portal' },
+  contextRollup: { l1: 'test-channel-456' },
+  tags: ['test-channel-456'],
+  cdata: [],
+  timeDiff: 0,
+  objectRollup: {},
+  host: '',
+  endpoint: '/portal/data/v1/telemetry',
+  dims: ['test-channel-456'],
+  app: ['test-channel-456'],
+  partner: [],
+  userData: { firstName: '', lastName: '' },
+};
 
 describe('EpubPlayerService', () => {
   let service: EpubPlayerService;
@@ -46,22 +56,15 @@ describe('EpubPlayerService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
-    // Set default mock behavior for org service
-    mockOrgSearch.mockResolvedValue({
-      data: {
-        result: {
-          response: {
-            content: [
-              {
-                channel: 'test-channel-456',
-                identifier: 'org-123',
-              },
-            ],
-          },
-        },
-      },
-    });
+
+    (buildTelemetryContext as any).mockImplementation(async (contextProps?: any, options?: any) => ({
+      ...defaultContext,
+      mode: contextProps?.mode || 'play',
+      cdata: contextProps?.cdata || [],
+      contextRollup: contextProps?.contextRollup || { l1: 'test-channel-456' },
+      objectRollup: contextProps?.objectRollup || {},
+      contentId: options?.contentId,
+    }));
 
     // Mock the custom element to prevent script loading
     if (!customElements.get('sunbird-epub-player')) {
@@ -73,94 +76,26 @@ describe('EpubPlayerService', () => {
 
   describe('createConfig', () => {
     it('should create config with all required fields from services', async () => {
-      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('session-789');
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-456');
-
       const config = await service.createConfig(mockMetadata);
 
-      expect(config.context.sid).toBe('session-789');
-      expect(config.context.uid).toBe('user-456');
-      expect(config.context.did).toBe('device-123');
+      expect(config.context.sid).toBe('test-session-id');
+      expect(config.context.uid).toBe('test-user-id');
+      expect(config.context.did).toBe('test-device-id');
       expect(config.context.channel).toBe('test-channel-456');
       expect(config.metadata).toEqual(mockMetadata);
     });
 
-    it('should use anonymous for uid when not available', async () => {
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
-
-      const config = await service.createConfig(mockMetadata);
-
-      expect(config.context.uid).toBe('anonymous');
-    });
-
-    it('should use null sid when session ID is not available', async () => {
-      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
-
-      const config = await service.createConfig(mockMetadata);
-
-      expect(config.context.sid).toBeNull();
-    });
-
-    it('should fetch channel from organization service', async () => {
+    it('should call buildTelemetryContext with correct arguments', async () => {
       await service.createConfig(mockMetadata);
 
-      expect(mockOrgSearch).toHaveBeenCalledWith({
-        filters: {
-          isTenant: true,
-        },
-      });
+      expect(buildTelemetryContext).toHaveBeenCalledWith(undefined, { contentId: 'content-123' });
     });
 
-    it('should use random fallback channel when channel is not found', async () => {
-      mockOrgSearch.mockResolvedValue({
-        data: {
-          result: {
-            response: {
-              content: [],
-            },
-          },
-        },
-      });
+    it('should call buildTelemetryContext with contextProps when provided', async () => {
+      const contextProps = { mode: 'preview' };
+      await service.createConfig(mockMetadata, contextProps);
 
-      const config = await service.createConfig(mockMetadata);
-      
-      // Should use empty fallback channel
-      expect(config.context.channel).toBe('');
-    });
-
-    it('should use empty fallback channel when org response is invalid', async () => {
-      mockOrgSearch.mockResolvedValue({
-        data: {
-          result: {
-            response: {
-              content: [{ identifier: 'org-123' }], // No channel
-            },
-          },
-        },
-      });
-
-      const config = await service.createConfig(mockMetadata);
-
-      // Should use empty fallback channel
-      expect(config.context.channel).toBe('');
-    });
-
-    it('should use empty fallback channel when org service throws error', async () => {
-      mockOrgSearch.mockRejectedValue(new Error('Network error'));
-
-      const config = await service.createConfig(mockMetadata);
-
-      // Should use empty fallback channel
-      expect(config.context.channel).toBe('');
-    });
-
-    it('should use empty fallback device ID when appCoreService fails', async () => {
-      vi.mocked(appCoreService.getDeviceId).mockRejectedValue(new Error('Device ID error'));
-
-      const config = await service.createConfig(mockMetadata);
-
-      // Should use empty fallback device ID
-      expect(config.context.did).toBe('');
+      expect(buildTelemetryContext).toHaveBeenCalledWith(contextProps, { contentId: 'content-123' });
     });
 
     it('should use default mode when not provided', async () => {
@@ -188,7 +123,7 @@ describe('EpubPlayerService', () => {
       expect(config.context.cdata).toEqual(cdata);
     });
 
-    it('should use default contextRollup with channel when not provided', async () => {
+    it('should use default contextRollup when not provided', async () => {
       const config = await service.createConfig(mockMetadata);
 
       expect(config.context.contextRollup).toEqual({
@@ -216,7 +151,7 @@ describe('EpubPlayerService', () => {
       expect(config.context.objectRollup).toEqual(objectRollup);
     });
 
-    it('should set pdata from appCoreService.getPData()', async () => {
+    it('should set pdata from context', async () => {
       const config = await service.createConfig(mockMetadata);
 
       expect(config.context.pdata).toEqual({
@@ -224,7 +159,6 @@ describe('EpubPlayerService', () => {
         ver: '1.0.0',
         pid: 'sunbird.portal',
       });
-      expect(appCoreService.getPData).toHaveBeenCalled();
     });
 
     it('should set default values for timeDiff, host, and endpoint', async () => {
@@ -247,12 +181,6 @@ describe('EpubPlayerService', () => {
       expect(config.metadata).toBe(mockMetadata);
       expect(config.metadata).toEqual(mockMetadata);
     });
-
-    it('should call appCoreService.getDeviceId', async () => {
-      await service.createConfig(mockMetadata);
-
-      expect(appCoreService.getDeviceId).toHaveBeenCalled();
-    });
   });
 
   describe('createElement', () => {
@@ -271,7 +199,7 @@ describe('EpubPlayerService', () => {
       const playerEl = element.querySelector('sunbird-epub-player');
       const configAttr = playerEl?.getAttribute('player-config');
       expect(configAttr).toBeTruthy();
-      
+
       const parsedConfig = JSON.parse(configAttr!);
       expect(parsedConfig.metadata.identifier).toBe('content-123');
     });
