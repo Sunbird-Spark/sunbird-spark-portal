@@ -133,7 +133,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
             data-testid="home-sidebar"
             className={`
                 bg-white flex flex-col shrink-0 z-20 relative h-full md:h-[calc(100vh-4.5rem)] transition-all duration-300
-                ${collapsed ? 'w-[5rem]' : 'w-[100%]'}
+                ${collapsed ? 'w-[5rem]' : 'w-[15.125rem]'}
             `}
             style={{
                 boxShadow: '0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09)'
