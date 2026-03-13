@@ -16,7 +16,7 @@ interface PageSessionOptions {
  * Usage:
  *   usePageSession({ pageid: 'content-player', object: { id: contentId, type: 'Content' } });
  */
-const usePageSession = ({
+export const usePageSession = ({
   pageid,
   type = 'view',
   mode = 'play',
@@ -24,30 +24,32 @@ const usePageSession = ({
 }: PageSessionOptions) => {
   const telemetry = useTelemetry();
   const mountTimeRef = useRef<number>(Date.now());
+  const sessionRef = useRef({ type, mode, pageid, object });
 
   useEffect(() => {
+    sessionRef.current = { type, mode, pageid, object };
     mountTimeRef.current = Date.now();
+    const s = sessionRef.current;
 
     telemetry.start(
       {},
-      object?.id || pageid,
-      object?.ver || '1.0',
-      { type, mode, pageid }
+      s.object?.id || s.pageid,
+      s.object?.ver || '1.0',
+      { type: s.type, mode: s.mode, pageid: s.pageid }
     );
 
     return () => {
+      const s = sessionRef.current;
       const duration = parseFloat(
         ((Date.now() - mountTimeRef.current) / 1000).toFixed(3)
       );
 
       telemetry.end({
-        edata: { type, mode, pageid, duration },
-        ...(object
-          ? { object: { id: object.id, type: object.type, ver: object.ver || '1.0' } }
+        edata: { type: s.type, mode: s.mode, pageid: s.pageid, duration },
+        ...(s.object
+          ? { object: { id: s.object.id, type: s.object.type, ver: s.object.ver || '1.0' } }
           : {}),
       });
     };
   }, [pageid, object?.id]);
 };
-
-export default usePageSession;

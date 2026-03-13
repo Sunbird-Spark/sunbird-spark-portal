@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import usePageSession from './usePageSession';
+import { usePageSession } from './usePageSession';
 
 // ── Mock useTelemetry ─────────────────────────────────────────────────────────
 const mockStart = vi.fn();
