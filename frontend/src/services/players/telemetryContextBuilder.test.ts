@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildTelemetryContext } from './telemetryContextBuilder';
+import userAuthInfoService from '../userAuthInfoService/userAuthInfoService';
+import appCoreService from '../AppCoreService';
+import { OrganizationService } from '../OrganizationService';
+import userProfileService from '../UserProfileService';
 
 vi.mock('../userAuthInfoService/userAuthInfoService', () => ({
   default: {
@@ -15,21 +19,19 @@ vi.mock('../AppCoreService', () => ({
   },
 }));
 
-const mockOrgSearch = vi.fn().mockResolvedValue({
-  data: {
-    result: {
-      response: {
-        content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
-      },
-    },
-    ts: '2026-03-13T10:00:00.000Z',
-  },
-});
-
 vi.mock('../OrganizationService', () => ({
-  OrganizationService: class {
-    search = mockOrgSearch;
-  },
+  OrganizationService: vi.fn().mockImplementation(() => ({
+    search: vi.fn().mockResolvedValue({
+      data: {
+        result: {
+          response: {
+            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
+          },
+        },
+        ts: '2026-03-13T10:00:00.000Z',
+      },
+    }),
+  })),
 }));
 
 vi.mock('../UserProfileService', () => ({
@@ -39,9 +41,34 @@ vi.mock('../UserProfileService', () => ({
 }));
 
 describe('buildTelemetryContext', () => {
+  let mockOrgSearch: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     sessionStorage.clear();
+
+    // Setup default org search mock
+    mockOrgSearch = vi.fn().mockResolvedValue({
+      data: {
+        result: {
+          response: {
+            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
+          },
+        },
+        ts: '2026-03-13T10:00:00.000Z',
+      },
+    });
+
+    vi.mocked(OrganizationService).mockImplementation(function (this: any) {
+      this.search = mockOrgSearch;
+    } as any);
+
+    // Reset default mocks
+    vi.mocked(appCoreService.getDeviceId).mockResolvedValue('test-device-id');
+    vi.mocked(appCoreService.getPData).mockResolvedValue({ id: 'test.portal', ver: '1.0', pid: 'test.portal' });
+    vi.mocked(userProfileService.getUserData).mockResolvedValue({ firstName: 'John', lastName: 'Doe' });
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('test-user-id');
+    vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('test-session-id');
   });
 
   it('should build context with all required fields', async () => {
@@ -161,20 +188,35 @@ describe('buildTelemetryContext', () => {
     expect(context.timeDiff).toBe(0);
   });
 
-  it('should default timeDiff to 0 when org search fails', async () => {
+  it('should throw error when org search fails', async () => {
     mockOrgSearch.mockRejectedValueOnce(new Error('network error'));
 
-    const context = await buildTelemetryContext();
-
-    expect(context.timeDiff).toBe(0);
+    await expect(buildTelemetryContext()).rejects.toThrow('Failed to fetch organization data: network error');
   });
 
   it('should fallback uid to anonymous when not available', async () => {
-    const { default: authService } = await import('../userAuthInfoService/userAuthInfoService');
-    (authService.getUserId as any).mockReturnValue(null);
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
 
     const context = await buildTelemetryContext();
 
     expect(context.uid).toBe('anonymous');
+  });
+
+  it('should throw error when getDeviceId fails', async () => {
+    vi.mocked(appCoreService.getDeviceId).mockRejectedValueOnce(new Error('device error'));
+
+    await expect(buildTelemetryContext()).rejects.toThrow('Failed to get device ID: device error');
+  });
+
+  it('should throw error when getUserData fails', async () => {
+    vi.mocked(userProfileService.getUserData).mockRejectedValueOnce(new Error('user profile error'));
+
+    await expect(buildTelemetryContext()).rejects.toThrow('Failed to fetch user profile data: user profile error');
+  });
+
+  it('should throw error when org search throws non-Error object', async () => {
+    mockOrgSearch.mockRejectedValueOnce('string error');
+
+    await expect(buildTelemetryContext()).rejects.toThrow('Failed to fetch organization data: string error');
   });
 });

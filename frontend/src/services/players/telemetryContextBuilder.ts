@@ -50,8 +50,8 @@ export async function buildTelemetryContext(
   let did = '';
   try {
     did = await appCoreService.getDeviceId();
-  } catch {
-    // device ID generation may fail; leave empty
+  } catch (error) {
+    throw new Error(`Failed to get device ID: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   // Organization / channel
@@ -65,8 +65,8 @@ export async function buildTelemetryContext(
     if (org?.hashTagId) hashTagId = org.hashTagId;
     if (orgResponse?.data?.ts) timeDiff = orgResponse.data.ts;
     
-  } catch {
-    // org service may be unavailable
+  } catch (error) {
+    throw new Error(`Failed to fetch organization data: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   // Producer data
@@ -76,8 +76,8 @@ export async function buildTelemetryContext(
   let userData = { firstName: '', lastName: '' };
   try {
     userData = await userProfileService.getUserData();
-  } catch {
-    // user profile may be unavailable for anonymous users
+  } catch (error) {
+    throw new Error(`Failed to fetch user profile data: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   // Derived fields
