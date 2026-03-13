@@ -12,7 +12,6 @@ vi.mock('../AppCoreService', () => ({
   default: {
     getDeviceId: vi.fn().mockResolvedValue('test-device-id'),
     getPData: vi.fn().mockResolvedValue({ id: 'test.portal', ver: '1.0', pid: 'test.portal' }),
-    getTimeDiff: vi.fn().mockResolvedValue(500),
   },
 }));
 
@@ -23,6 +22,7 @@ const mockOrgSearch = vi.fn().mockResolvedValue({
         content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
       },
     },
+    ts: '2026-03-13T10:00:00.000Z',
   },
 });
 
@@ -53,7 +53,7 @@ describe('buildTelemetryContext', () => {
     expect(context.channel).toBe('test-channel');
     expect(context.pdata).toEqual({ id: 'test.portal', ver: '1.0', pid: 'test.portal' });
     expect(context.userData).toEqual({ firstName: 'John', lastName: 'Doe' });
-    expect(context.timeDiff).toBe(500);
+    expect(context.timeDiff).toBe('2026-03-13T10:00:00.000Z');
     expect(context.endpoint).toBe('/portal/data/v1/telemetry');
     expect(context.host).toBe('');
   });
@@ -126,6 +126,47 @@ describe('buildTelemetryContext', () => {
     const context = await buildTelemetryContext();
 
     expect(context.contentId).toBeUndefined();
+  });
+
+  it('should extract timeDiff from org search response data.ts', async () => {
+    mockOrgSearch.mockResolvedValueOnce({
+      data: {
+        result: {
+          response: {
+            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
+          },
+        },
+        ts: '2026-03-13T10:00:00.000Z',
+      },
+    });
+
+    const context = await buildTelemetryContext();
+
+    expect(context.timeDiff).toBe('2026-03-13T10:00:00.000Z');
+  });
+
+  it('should default timeDiff to 0 when data.ts is missing', async () => {
+    mockOrgSearch.mockResolvedValueOnce({
+      data: {
+        result: {
+          response: {
+            content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
+          },
+        },
+      },
+    });
+
+    const context = await buildTelemetryContext();
+
+    expect(context.timeDiff).toBe(0);
+  });
+
+  it('should default timeDiff to 0 when org search fails', async () => {
+    mockOrgSearch.mockRejectedValueOnce(new Error('network error'));
+
+    const context = await buildTelemetryContext();
+
+    expect(context.timeDiff).toBe(0);
   });
 
   it('should fallback uid to anonymous when not available', async () => {

@@ -20,7 +20,7 @@ export interface TelemetryContext {
   contextRollup: Record<string, string>;
   tags: string[];
   cdata: any[];
-  timeDiff: number;
+  timeDiff: string | number;
   objectRollup: Record<string, string>;
   host: string;
   endpoint: string;
@@ -57,11 +57,14 @@ export async function buildTelemetryContext(
   // Organization / channel
   let channel = '';
   let hashTagId = '';
+  let timeDiff = 0;
   try {
     const orgResponse = await orgService.search({ filters: { isTenant: true } });
     const org = orgResponse?.data?.result?.response?.content?.[0];
     if (org?.channel) channel = org.channel;
     if (org?.hashTagId) hashTagId = org.hashTagId;
+    if (orgResponse?.data?.ts) timeDiff = orgResponse.data.ts;
+    
   } catch {
     // org service may be unavailable
   }
@@ -75,14 +78,6 @@ export async function buildTelemetryContext(
     userData = await userProfileService.getUserData();
   } catch {
     // user profile may be unavailable for anonymous users
-  }
-
-  // Server time diff
-  let timeDiff = 0;
-  try {
-    timeDiff = await appCoreService.getTimeDiff();
-  } catch {
-    // fallback to 0
   }
 
   // Derived fields
