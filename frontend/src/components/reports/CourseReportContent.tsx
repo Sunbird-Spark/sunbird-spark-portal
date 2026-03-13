@@ -1,10 +1,6 @@
 import { useState, useMemo } from "react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  Cell, LabelList,
-} from "recharts";
 import SummaryCard from "@/components/reports/SummaryCard";
-import ChartCard from "@/components/reports/ChartCard";
+import CourseReportCharts from "@/components/reports/CourseReportCharts";
 import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
@@ -16,8 +12,6 @@ import { learnerColumns, assessmentColumns } from "@/components/reports/reportTa
 import EmptyState from "@/components/workspace/EmptyState";
 import { FiAlertCircle } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
-
-const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
 
 interface CourseReportContentProps {
   courseId?: string;
@@ -108,63 +102,19 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        <ChartCard title={t('courseReport.enrollmentVsCompletion')} className="xl:col-span-2">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={enrollmentChartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="enrolled" fill="hsl(var(--sunbird-ink))" radius={[6, 6, 0, 0]} barSize={20} name={t('courseReport.enrolled')} />
-                <Bar dataKey="completed" fill="hsl(var(--sunbird-moss))" radius={[6, 6, 0, 0]} barSize={20} name={t('courseReport.completed')} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        <ChartCard title={t('courseReport.pendingCompletionBuckets')}>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={progressBucketsData} margin={{ top: 16, right: 8, left: 0, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  formatter={(value: unknown) => [`${String(value)} learners`]}
-                  cursor={{ fill: "hsl(var(--muted))" }}
-                />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={40}>
-                  {progressBucketsData.map((_, i) => (
-                    <Cell key={i} fill={donutColors[i % donutColors.length]} />
-                  ))}
-                  <LabelList dataKey="count" position="top" style={{ fontSize: 11 }} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        <ChartCard title={t('courseReport.scoreDistribution')}>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={scoreDistributionData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip formatter={(value: unknown) => [`${String(value)} learners`, t('courseReport.learners')]} />
-                <Bar dataKey="count" name={t('courseReport.learners')} radius={[6, 6, 0, 0]} barSize={28}>
-                  {scoreDistributionData.map((_, i) => (
-                    <Cell key={i} fill={donutColors[i % donutColors.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      </div>
+      <CourseReportCharts
+        enrollmentChartData={enrollmentChartData}
+        progressBucketsData={progressBucketsData}
+        scoreDistributionData={scoreDistributionData}
+        labels={{
+          enrollmentVsCompletion: t('courseReport.enrollmentVsCompletion'),
+          pendingCompletionBuckets: t('courseReport.pendingCompletionBuckets'),
+          scoreDistribution: t('courseReport.scoreDistribution'),
+          enrolled: t('courseReport.enrolled'),
+          completed: t('courseReport.completed'),
+          learners: t('courseReport.learners'),
+        }}
+      />
 
       {/* Tabs for Tables */}
       <Tabs defaultValue="learners" className="mb-8">

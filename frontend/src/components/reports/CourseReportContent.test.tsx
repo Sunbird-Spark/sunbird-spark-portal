@@ -23,6 +23,30 @@ vi.mock('recharts', () => ({
   LabelList: () => null,
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'courseReport.totalEnrolled': 'Total Enrolled',
+        'courseReport.totalCompleted': 'Total Completed',
+        'courseReport.certificatesIssued': 'Certificates Issued',
+        'courseReport.avgScore': 'Avg Score',
+        'courseReport.enrollmentVsCompletion': 'Enrollment vs Completion',
+        'courseReport.pendingCompletionBuckets': 'Pending Completion Buckets',
+        'courseReport.scoreDistribution': 'Score Distribution',
+        'courseReport.enrolled': 'Enrolled',
+        'courseReport.completed': 'Completed',
+        'courseReport.learners': 'Learners',
+        'courseReport.learnerProgress': 'Learner Progress',
+        'courseReport.assessments': 'Assessments',
+        'courseReport.detailedLearnerProgress': 'Detailed Learner Progress',
+        'courseReport.detailedAssessments': 'Detailed Assessments',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 // Mock the useLearnerProgress hook
 vi.mock('@/hooks/useLearnerProgress', () => ({
   useLearnerProgress: vi.fn(),
