@@ -31,6 +31,8 @@ export interface CollectionContentAreaPlayerProps {
   handlePlayerEvent: (event: any) => void;
   handleTelemetryEvent: (event: any) => void;
   showMaxAttemptsExceeded?: boolean;
+  cdata?: Array<{ id: string; type: string }>;
+  objectRollup?: Record<string, string>;
 }
 
 /** Enrollment, progress, batch list and certificate state. */
@@ -107,6 +109,8 @@ export default function CollectionContentArea({
     handlePlayerEvent,
     handleTelemetryEvent,
     showMaxAttemptsExceeded = false,
+    cdata,
+    objectRollup,
   } = player;
   const {
     courseProgressProps,
@@ -176,6 +180,8 @@ export default function CollectionContentArea({
           onPlayerEvent={handlePlayerEvent}
           onTelemetryEvent={handleTelemetryEvent}
           showMaxAttemptsExceeded={showMaxAttemptsExceeded}
+          cdata={cdata}
+          objectRollup={objectRollup}
         />
 
         {/* Right Sidebar */}

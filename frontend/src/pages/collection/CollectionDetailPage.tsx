@@ -15,6 +15,7 @@ import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoServ
 import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
+import { buildCollectionCdata, buildObjectRollup } from "@/utils/collectionTelemetryContext";
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import "./collection.css";
 
@@ -174,6 +175,16 @@ const CollectionDetailPage = () => {
     contentType: currentContentNode?.contentType,
   });
 
+  const collectionCdata = useMemo(
+    () => buildCollectionCdata(collectionId, effectiveBatchId),
+    [collectionId, effectiveBatchId]
+  );
+
+  const collectionObjectRollup = useMemo(
+    () => buildObjectRollup(collectionData?.hierarchyRoot, contentId),
+    [collectionData?.hierarchyRoot, contentId]
+  );
+
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const initialExpandedSet = useRef(false);
 
@@ -220,6 +231,7 @@ const CollectionDetailPage = () => {
         displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
         contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading,
         playerError: playerError ?? null, handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded,
+        cdata: collectionCdata, objectRollup: collectionObjectRollup,
         courseProgressProps, contentStatusMap, contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId,
         handleJoinCourse, batchListLoading, joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl,
         setCertificatePreviewUrl, setCertificatePreviewOpen, expandedModules, toggleModule, collectionId, batchIdParam,
@@ -229,7 +241,8 @@ const CollectionDetailPage = () => {
     [
       displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
       contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading, playerError,
-      handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, courseProgressProps, contentStatusMap,
+      handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, collectionCdata, collectionObjectRollup,
+      courseProgressProps, contentStatusMap,
       contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId, handleJoinCourse, batchListLoading,
       joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl, expandedModules, toggleModule,
       collectionId, batchIdParam, isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile, currentUserId,

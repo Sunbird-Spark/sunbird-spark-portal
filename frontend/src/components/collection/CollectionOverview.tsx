@@ -20,6 +20,8 @@ interface CollectionOverviewProps {
   playerError?: Error | null;
   onPlayerEvent?: (event: any) => void;
   onTelemetryEvent?: (event: any) => void;
+  cdata?: Array<{ id: string; type: string }>;
+  objectRollup?: Record<string, string>;
 }
 
 const CollectionOverview = ({
@@ -34,6 +36,8 @@ const CollectionOverview = ({
   playerError,
   onPlayerEvent,
   onTelemetryEvent,
+  cdata,
+  objectRollup,
 }: CollectionOverviewProps) => {
   const { t } = useAppI18n();
 
@@ -90,6 +94,8 @@ const CollectionOverview = ({
                     <ContentPlayer
                       mimeType={playerMetadata.mimeType}
                       metadata={playerMetadata}
+                      cdata={cdata}
+                      objectRollup={objectRollup}
                       onPlayerEvent={onPlayerEvent}
                       onTelemetryEvent={onTelemetryEvent}
                     />
