@@ -1,26 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import session from 'express-session';
 import { EventEmitter } from 'events';
-
-vi.mock('./logger.js', () => ({
-    default: {
-        info: vi.fn(),
-        error: vi.fn()
-    }
-}));
-
-vi.mock('connect-pg-simple', () => ({
-    default: vi.fn(() => {
-        return class MockPgStore extends EventEmitter {
-            constructor() {
-                super();
-            }
-            get() {}
-            set() {}
-            destroy() {}
-        };
-    })
-}));
+import { setupModuleMocks, resetTestEnvironment } from '../test-helpers.js';
 
 class MockPool {
     connect(cb: Mock) {
@@ -30,8 +11,8 @@ class MockPool {
 
 describe('getSessionStore', () => {
     beforeEach(() => {
-        vi.resetModules();
-        vi.clearAllMocks();
+        setupModuleMocks();
+        resetTestEnvironment();
     });
 
     afterEach(() => {
