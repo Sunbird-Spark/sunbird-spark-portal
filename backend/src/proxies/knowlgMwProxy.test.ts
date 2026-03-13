@@ -4,18 +4,12 @@ import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import type { Server } from 'http';
 import type { AddressInfo } from 'net';
-
-vi.mock('../utils/logger.js', () => ({
-    default: {
-        info: vi.fn(),
-        error: vi.fn()
-    }
-}));
+import { setupModuleMocks, resetTestEnvironment } from '../test-helpers.js';
 
 describe('knowlgMwProxy', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
-        vi.resetModules();
+        setupModuleMocks();
+        resetTestEnvironment();
     });
 
     const importKnowlgMwProxy = async (overrideEnv?: { KNOWLG_MW_BASE_URL?: string }) => {

@@ -3,18 +3,12 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import type { Server } from 'http';
-
-vi.mock('../utils/logger.js', () => ({
-    default: {
-        info: vi.fn(),
-        error: vi.fn()
-    }
-}));
+import { setupModuleMocks, resetTestEnvironment } from '../test-helpers.js';
 
 describe('kongProxy', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
-        vi.resetModules();
+        setupModuleMocks();
+        resetTestEnvironment();
     });
 
     const importKongProxy = async (overrideEnv?: { KONG_URL?: string }) => {
