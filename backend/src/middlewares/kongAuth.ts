@@ -48,7 +48,6 @@ export const registerDeviceWithKong = () => {
 
                 if (!token) {
                     logger.error('ANONYMOUS_KONG_TOKEN :: fallback token missing in config');
-                    token = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
                 }
             } catch (err) {
                 logger.error(
