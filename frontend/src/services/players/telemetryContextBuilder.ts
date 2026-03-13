@@ -2,6 +2,7 @@ import userAuthInfoService from '../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../AppCoreService';
 import { OrganizationService } from '../OrganizationService';
 import userProfileService from '../UserProfileService';
+import { SystemSettingService } from '../SystemSettingService';
 
 export interface TelemetryContextProps {
   mode?: string;
@@ -41,6 +42,9 @@ export async function buildTelemetryContext(
   options?: { contentId?: string }
 ): Promise<TelemetryContext> {
   const orgService = new OrganizationService();
+  const systemSettingService = new SystemSettingService();
+  const defaultChannel = await systemSettingService.read<{ response: { value: string } }>('default_channel');
+  const slug = defaultChannel?.data?.response?.value || 'sunbird';
 
   // Identity
   const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
@@ -59,8 +63,8 @@ export async function buildTelemetryContext(
   let hashTagId = '';
   let timeDiff = 0;
   try {
-    const orgResponse = await orgService.search({ filters: { isTenant: true } });
-    const org = orgResponse?.data?.result?.response?.content?.[0];
+    const orgResponse = await orgService.search({ filters: { isTenant: true, slug: slug } });
+    const org = orgResponse?.data?.response?.content?.[0];
     if (org?.channel) channel = org.channel;
     if (org?.hashTagId) hashTagId = org.hashTagId;
     if (orgResponse?.data?.ts) timeDiff = orgResponse.data.ts;
