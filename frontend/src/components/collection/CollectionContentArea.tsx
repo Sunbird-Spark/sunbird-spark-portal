@@ -16,7 +16,7 @@ import type {
   CollectionContentAreaEnrollmentProps,
   CollectionContentAreaSidebarProps,
   CollectionContentAreaCreatorProps,
-} from "./collectionContentAreaTypes";
+} from "@/types/collectionDetailTypes";
 
 
 interface CollectionContentAreaProps {
