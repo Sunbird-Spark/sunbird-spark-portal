@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import userAuthInfoService from '../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../AppCoreService';
 import { OrganizationService } from '../OrganizationService';
@@ -90,20 +91,31 @@ export async function buildTelemetryContext(
   // Producer data
   const pdata = await appCoreService.getPData();
 
-  // User data
+  // User data (only for logged-in users)
   let userData = { firstName: '', lastName: '' };
-  try {
-    userData = await userProfileService.getUserData();
-  } catch (error) {
-    // Log and proceed with default user data
-    console.warn(
+  const defaultContextRollup: Record<string, string> = {};
+  let userOrgHashTagIds: string[] = [];
+  const isLoggedIn = uid !== 'anonymous';
+  if (isLoggedIn) {
+    try {
+      userData = await userProfileService.getUserData();
+      const userHashTagIds = await userProfileService.getHashTagIds();
+      userHashTagIds.forEach((id, index) => { defaultContextRollup[`l${index + 1}`] = id; });
+      userOrgHashTagIds = await userProfileService.getOrganisationHashTagIds();
+    } catch (error) {
+      console.warn(
       'TelemetryContextBuilder: Failed to fetch user profile data, proceeding with default values.',
       error
     );
+    }
   }
 
-  // Derived fields
-  const tags = hashTagId ? [hashTagId] : channel ? [channel] : [];
+  // Derived fields — for logged-in users, tags come from user profile organisations (old portal pattern)
+  const tags = _.compact(
+    isLoggedIn && !_.isEmpty(userOrgHashTagIds)
+      ? userOrgHashTagIds
+      : [hashTagId || channel]
+  );
 
   // Use caller-provided cdata
   const cdata = contextProps?.cdata || [];
@@ -115,7 +127,7 @@ export async function buildTelemetryContext(
     uid,
     channel,
     pdata,
-    contextRollup: contextProps?.contextRollup || { l1: channel },
+    contextRollup: contextProps?.contextRollup || (isLoggedIn && Object.keys(defaultContextRollup).length > 0 ? defaultContextRollup : {}),
     tags,
     cdata,
     timeDiff,
@@ -132,5 +144,22 @@ export async function buildTelemetryContext(
     context.contentId = options.contentId;
   }
 
+
+  // eslint-disable-next-line no-console
+  console.log('[Telemetry] Context built:', {
+    mode: context.mode,
+    sid: context.sid,
+    uid: context.uid,
+    did: context.did,
+    channel: context.channel,
+    pdata: context.pdata,
+    contentId: context.contentId,
+    cdata: context.cdata,
+    contextRollup: context.contextRollup,
+    objectRollup: context.objectRollup,
+    tags: context.tags,
+    dims: context.dims,
+    timeDiff: context.timeDiff,
+  });
   return context;
 }

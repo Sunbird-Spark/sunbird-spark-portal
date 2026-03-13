@@ -1,9 +1,12 @@
+import _ from 'lodash';
 import { UserService } from './UserService';
 import userAuthInfoService from './userAuthInfoService/userAuthInfoService';
 
 class UserProfileService {
     private static instance: UserProfileService;
     private channel: string | null = null;
+    private hashTagIds: string[] = [];
+    private organisationHashTagIds: string[] = [];
     private firstName: string | null = null;
     private lastName: string | null = null;
     private isInitialized = false;
@@ -52,6 +55,10 @@ class UserProfileService {
                 const response = await this.userService.userRead(userId);
                 const userData = (response as any)?.data?.response;
                 this.channel = userData?.channel || null;
+                const rootOrgHashTagId = _.get(userData, 'rootOrg.hashTagId');
+                const orgHashTagIds = _.compact(_.map(_.get(userData, 'organisations', []), 'hashTagId'));
+                this.hashTagIds = _.compact([rootOrgHashTagId, ...orgHashTagIds]);
+                this.organisationHashTagIds = _.compact(_.map(_.get(userData, 'organisations', []), 'hashTagId'));
                 this.firstName = userData?.firstName?.trim() || null;
                 this.lastName = userData?.lastName?.trim() || null;
                 this.isInitialized = true;
@@ -77,6 +84,30 @@ class UserProfileService {
             await this.initialize();
         }
         return this.channel || '';
+    }
+
+    /**
+     * Get the user's hashTagIds (org identifiers the user belongs to).
+     * Used to build contextRollup for telemetry.
+     */
+    async getHashTagIds(): Promise<string[]> {
+        if (!this.isInitialized) {
+            await this.initialize();
+        }
+        console.log('user hashtagid', this.hashTagIds);
+        return this.hashTagIds;
+    }
+
+    /**
+     * Get hashTagIds from the user's organisations.
+     * Used to build tags for telemetry (same as old portal's userProfile.organisations[].hashTagId).
+     */
+    async getOrganisationHashTagIds(): Promise<string[]> {
+        if (!this.isInitialized) {
+            await this.initialize();
+        }
+        console.log('organisationHashTagIds', this.organisationHashTagIds);
+        return this.organisationHashTagIds;
     }
 
     /**

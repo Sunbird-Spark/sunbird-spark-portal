@@ -36,6 +36,8 @@ vi.mock('../OrganizationService', () => ({
 vi.mock('../UserProfileService', () => ({
   default: {
     getUserData: vi.fn().mockResolvedValue({ firstName: 'John', lastName: 'Doe' }),
+    getHashTagIds: vi.fn().mockResolvedValue(['0126796199493140480']),
+    getOrganisationHashTagIds: vi.fn().mockResolvedValue(['org-hash-1', 'org-hash-2']),
   },
 }));
 
@@ -74,6 +76,8 @@ describe('buildTelemetryContext', () => {
     vi.mocked(appCoreService.getDeviceId).mockResolvedValue('test-device-id');
     vi.mocked(appCoreService.getPData).mockResolvedValue({ id: 'test.portal', ver: '1.0', pid: 'test.portal' });
     vi.mocked(userProfileService.getUserData).mockResolvedValue({ firstName: 'John', lastName: 'Doe' });
+    vi.mocked(userProfileService.getHashTagIds).mockResolvedValue(['0126796199493140480']);
+    vi.mocked(userProfileService.getOrganisationHashTagIds).mockResolvedValue(['org-hash-1', 'org-hash-2']);
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('test-user-id');
     vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('test-session-id');
   });
@@ -92,7 +96,16 @@ describe('buildTelemetryContext', () => {
     expect(context.host).toBe('');
   });
 
-  it('should set tags and dims from hashTagId', async () => {
+  it('should set tags and dims from user profile organisations for logged-in users', async () => {
+    const context = await buildTelemetryContext();
+
+    expect(context.tags).toEqual(['org-hash-1', 'org-hash-2']);
+    expect(context.dims).toEqual(['org-hash-1', 'org-hash-2']);
+  });
+
+  it('should fallback tags to org hashTagId for anonymous users', async () => {
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
+
     const context = await buildTelemetryContext();
 
     expect(context.tags).toEqual(['test-hash-tag']);
@@ -137,10 +150,29 @@ describe('buildTelemetryContext', () => {
     expect(context.contextRollup).toEqual(contextRollup);
   });
 
-  it('should default contextRollup to { l1: channel }', async () => {
+  it('should default contextRollup from user hashTagIds', async () => {
     const context = await buildTelemetryContext();
 
-    expect(context.contextRollup).toEqual({ l1: 'test-channel' });
+    expect(context.contextRollup).toEqual({ l1: '0126796199493140480' });
+  });
+
+  it('should use empty contextRollup when hashTagIds is empty', async () => {
+    vi.mocked(userProfileService.getHashTagIds).mockResolvedValueOnce([]);
+
+    const context = await buildTelemetryContext();
+
+    expect(context.contextRollup).toEqual({});
+  });
+
+  it('should use empty contextRollup for anonymous users', async () => {
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
+
+    const context = await buildTelemetryContext();
+
+    expect(context.contextRollup).toEqual({});
+    expect(userProfileService.getUserData).not.toHaveBeenCalled();
+    expect(userProfileService.getHashTagIds).not.toHaveBeenCalled();
+    expect(userProfileService.getOrganisationHashTagIds).not.toHaveBeenCalled();
   });
 
   it('should override objectRollup from contextProps', async () => {
@@ -191,16 +223,16 @@ describe('buildTelemetryContext', () => {
     expect(context.timeDiff).toBe(0);
   });
 
-  it('should use fallback channel when org search fails', async () => {
+  it('should use fallback channel when org search fails but still get tags from user profile', async () => {
     mockOrgSearch.mockRejectedValueOnce(new Error('network error'));
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const context = await buildTelemetryContext();
 
-    // Should use empty channel when org search fails
+    // Channel/app empty when org search fails, but tags come from user profile for logged-in users
     expect(context.channel).toBe('');
-    expect(context.tags).toEqual([]);
-    expect(context.dims).toEqual([]);
+    expect(context.tags).toEqual(['org-hash-1', 'org-hash-2']);
+    expect(context.dims).toEqual(['org-hash-1', 'org-hash-2']);
     expect(context.app).toEqual([]);
     expect(consoleSpy).toHaveBeenCalledWith('TelemetryContextBuilder: Failed to fetch organization data, proceeding with default values.', expect.any(Error));
 
@@ -238,10 +270,10 @@ describe('buildTelemetryContext', () => {
 
     const context = await buildTelemetryContext();
 
-    // Should use empty channel when org search fails
+    // Channel/app empty, but tags still from user profile for logged-in users
     expect(context.channel).toBe('');
-    expect(context.tags).toEqual([]);
-    expect(context.dims).toEqual([]);
+    expect(context.tags).toEqual(['org-hash-1', 'org-hash-2']);
+    expect(context.dims).toEqual(['org-hash-1', 'org-hash-2']);
     expect(context.app).toEqual([]);
     expect(consoleSpy).toHaveBeenCalledWith('TelemetryContextBuilder: Failed to fetch organization data, proceeding with default values.', 'string error');
 
