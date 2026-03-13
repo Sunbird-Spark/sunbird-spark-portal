@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollection } from "@/hooks/useCollection";
 import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
@@ -16,29 +16,14 @@ import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
 import { buildCollectionCdata, buildObjectRollup } from "@/utils/collectionTelemetryContext";
+import { useCollectionBackNavigation, useAuthRefreshOnce } from "./useCollectionBackNavigation";
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Filter out any /collection/ path as a back-destination to prevent
-  // collection-to-collection navigation chains. Falls back to /explore,
-  // which is safe for both authenticated and anonymous users.
-  const stateFrom = (location.state as { from?: string } | null)?.from ?? '';
-  // Reject /collection/ and /content/ paths to prevent multi-hop back chains.
-  const resolveBackTo = (from: string) =>
-    from && !from.startsWith('/collection/') && !from.startsWith('/content/') ? from : '/explore';
-
-  const backToRef = useRef<string>(resolveBackTo(stateFrom));
-  const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
-  if (capturedCollectionIdRef.current !== collectionId) {
-    capturedCollectionIdRef.current = collectionId;
-    backToRef.current = resolveBackTo(stateFrom);
-  }
-  const backTo = backToRef.current;
+  const backTo = useCollectionBackNavigation(collectionId);
   const { isAuthenticated } = usePermissions();
   const isContentCreator = useIsContentCreator();
   const { t } = useAppI18n();
@@ -80,16 +65,7 @@ const CollectionDetailPage = () => {
     collectionData.createdBy === currentUserId;
   const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
 
-  const [, setAuthRefresh] = useState(0);
-  const triedAuthRefreshRef = useRef(false);
-  useEffect(() => {
-    if (!isAuthenticated || userAuthInfoService.getUserId() || triedAuthRefreshRef.current) return;
-    triedAuthRefreshRef.current = true;
-    userAuthInfoService
-      .getAuthInfo()
-      .then(() => setAuthRefresh((n) => n + 1))
-      .catch(() => {});
-  }, [isAuthenticated]);
+  useAuthRefreshOnce(isAuthenticated);
 
   useEffect(() => {
     if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
@@ -99,25 +75,8 @@ const CollectionDetailPage = () => {
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
 
-  const upcomingBatchBlocked =
-    isTrackable &&
-    !contentCreatorPrivilege &&
-    hasBatchInRoute &&
-    isEnrolledInCurrentBatch &&
-    isBatchUpcoming;
-
-  /** Block content when trackable and:
-   * - not logged in, or
-   * - logged in but not enrolled in current batch (and not creator), or
-   * - enrolled in an upcoming (not yet started) batch.
-   */
-  const contentBlocked =
-    isTrackable &&
-    (
-      !isAuthenticated ||
-      (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch)) ||
-      upcomingBatchBlocked
-    );
+  const upcomingBatchBlocked = isTrackable && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && isBatchUpcoming;
+  const contentBlocked = isTrackable && (!isAuthenticated || (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch)) || upcomingBatchBlocked);
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
   const displayCollectionData = useMemo(
