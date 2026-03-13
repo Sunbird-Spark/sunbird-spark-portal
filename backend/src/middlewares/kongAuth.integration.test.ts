@@ -15,7 +15,7 @@ vi.mock('../utils/logger.js', () => ({
 describe('Kong Auth Middleware Integration Tests', () => {
     let app: express.Application;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
         app = express();
@@ -25,14 +25,25 @@ describe('Kong Auth Middleware Integration Tests', () => {
             saveUninitialized: true,
             cookie: { httpOnly: true, sameSite: 'lax', secure: false }
         }));
+        
+        // Ensure all modules are properly reset before each test
+        await vi.importActual('../config/env.js');
+        await vi.importActual('./kongAuth.js');
+        await vi.importActual('../services/kongAuthService.js');
+        await vi.importActual('../utils/sessionUtils.js');
     });
 
     afterEach(() => {
         vi.doUnmock('../config/env.js');
+        vi.doUnmock('./kongAuth.js');
+        vi.doUnmock('../services/kongAuthService.js');
+        vi.doUnmock('../utils/sessionUtils.js');
+        vi.doUnmock('../utils/logger.js');
     });
 
     describe('Token Generation and Reuse', () => {
         beforeEach(async () => {
+            // Set up mocks before importing any modules that use them
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_URL: 'http://mock-kong-api',
@@ -42,6 +53,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
                 }
             }));
 
+            // Clear any cached modules and import fresh
+            vi.resetModules();
+            
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             app.use(registerDeviceWithKong());
             app.get('/test', (req, res) => {
@@ -90,6 +104,7 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
     describe('Fallback Token Usage', () => {
         beforeEach(async () => {
+            // Set up mocks before importing any modules that use them
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_URL: 'http://mock-kong-api',
@@ -99,6 +114,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
                 }
             }));
 
+            // Clear any cached modules and import fresh
+            vi.resetModules();
+            
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             app.use(registerDeviceWithKong());
             app.get('/test', (req, res) => {
