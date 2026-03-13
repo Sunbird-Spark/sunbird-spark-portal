@@ -158,6 +158,21 @@ export interface LearnerProgressApiItem {
   }> | null;
 }
 
+/** Raw shape returned by POST /observability/v1/reports for course-assessment-summary */
+export interface AssessmentApiItem {
+  user_id: string;
+  attempt_count: number;
+  total_score: number | null;
+  total_max_score: number | null;
+  userDetails: { firstName: string; lastName?: string };
+  last_attempted_on: string;
+}
+
+export interface AssessmentResult {
+  data: AssessmentApiItem[];
+  count: number;
+}
+
 export interface AssessmentRecord {
   id: string;
   learnerName: string;
@@ -165,7 +180,7 @@ export interface AssessmentRecord {
   score: number;
   maxScore: number;
   percentage: number;
-  passFail: "Pass" | "Fail";
+  passFail?: "Pass" | "Fail";
   attemptDate: string;
 }
 

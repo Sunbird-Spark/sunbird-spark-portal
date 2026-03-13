@@ -36,7 +36,11 @@ vi.mock('@/hooks/useToast', () => ({
 
 // Avoid needing QueryClientProvider — learner data is tested in CourseReportContent.test.tsx
 vi.mock('@/hooks/useLearnerProgress', () => ({
-  useLearnerProgress: () => ({ data: [], isLoading: false, isError: false }),
+  useLearnerProgress: () => ({ data: { data: [], count: 0 }, isLoading: false, isError: false, refetch: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useAssessmentData', () => ({
+  useAssessmentData: () => ({ data: { data: [] }, isLoading: false, isError: false, refetch: vi.fn() }),
 }));
 
 const renderWithRoute = (courseId = 'course-1') =>

@@ -1,4 +1,4 @@
-import type { EnrollmentCompletion, LearnerProgress, LearnerProgressApiItem, ProgressBucket } from "@/types/reports";
+import type { AssessmentApiItem, AssessmentRecord, EnrollmentCompletion, LearnerProgress, LearnerProgressApiItem, ProgressBucket } from "@/types/reports";
 import { toRelativeTime } from "@/utils/dateUtils";
 
 export const STATUS_MAP: Record<number, LearnerProgress["status"]> = {
@@ -81,6 +81,42 @@ export function buildProgressBuckets(
     else                counts[3]!++;
   }
   return PROGRESS_BUCKET_DEFS.map((b, i) => ({ bucket: b.bucket, count: counts[i]! }));
+}
+
+const SCORE_BUCKET_DEFS = [
+  { bucket: "0–20"  },
+  { bucket: "21–40" },
+  { bucket: "41–60" },
+  { bucket: "61–80" },
+  { bucket: "81–100" },
+] as const;
+
+export function buildScoreDistribution(records: AssessmentRecord[]): ProgressBucket[] {
+  const counts = [0, 0, 0, 0, 0];
+  for (const r of records) {
+    const pct = r.percentage;
+    if      (pct <= 20) counts[0]!++;
+    else if (pct <= 40) counts[1]!++;
+    else if (pct <= 60) counts[2]!++;
+    else if (pct <= 80) counts[3]!++;
+    else                counts[4]!++;
+  }
+  return SCORE_BUCKET_DEFS.map((b, i) => ({ bucket: b.bucket, count: counts[i]! }));
+}
+
+export function mapApiItemToAssessmentRecord(item: AssessmentApiItem): AssessmentRecord {
+  const score = item.total_score ?? 0;
+  const maxScore = item.total_max_score ?? 0;
+  const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+  return {
+    id: item.user_id,
+    learnerName: `${item.userDetails.firstName} ${item.userDetails.lastName ?? ''}`.trim(),
+    attemptNumber: item.attempt_count,
+    score,
+    maxScore,
+    percentage,
+    attemptDate: item.last_attempted_on.slice(0, 10),
+  };
 }
 
 export function mapApiItemToLearnerProgress(item: LearnerProgressApiItem): LearnerProgress {

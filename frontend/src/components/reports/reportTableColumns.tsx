@@ -52,14 +52,5 @@ export const assessmentColumns: Column<AssessmentRecord>[] = [
     className: "text-right",
     render: (r) => `${r.percentage}%`,
   },
-  {
-    key: "passFail",
-    header: "Result",
-    render: (row) => (
-      <Badge variant={row.passFail === "Pass" ? "default" : "destructive"} className="text-xs">
-        {row.passFail}
-      </Badge>
-    ),
-  },
   { key: "attemptDate", header: "Date", sortable: true },
 ];

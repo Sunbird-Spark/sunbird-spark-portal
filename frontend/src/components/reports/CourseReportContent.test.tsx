@@ -28,9 +28,17 @@ vi.mock('@/hooks/useLearnerProgress', () => ({
   useLearnerProgress: vi.fn(),
 }));
 
+// Mock the useAssessmentData hook
+vi.mock('@/hooks/useAssessmentData', () => ({
+  useAssessmentData: vi.fn(),
+}));
+
 import { useLearnerProgress } from '@/hooks/useLearnerProgress';
+import { useAssessmentData } from '@/hooks/useAssessmentData';
 const mockUseLearnerProgress = vi.mocked(useLearnerProgress);
+const mockUseAssessmentData = vi.mocked(useAssessmentData);
 type LearnerProgressResult = ReturnType<typeof useLearnerProgress>;
+type AssessmentDataResult = ReturnType<typeof useAssessmentData>;
 
 const mockApiLearners: LearnerProgressApiItem[] = [
   {
@@ -99,9 +107,35 @@ const defaultQueryState = {
   promise: Promise.resolve(mockResult),
 };
 
+const emptyAssessmentState = {
+  isLoading: false,
+  isError: false,
+  data: { data: [], count: 0 },
+  error: null,
+  status: 'success' as const,
+  isPending: false,
+  isSuccess: true,
+  isFetching: false,
+  isRefetching: false,
+  dataUpdatedAt: 0,
+  errorUpdatedAt: 0,
+  failureCount: 0,
+  failureReason: null,
+  isLoadingError: false,
+  isRefetchError: false,
+  isPlaceholderData: false,
+  isStale: false,
+  isInitialLoading: false,
+  fetchStatus: 'idle' as const,
+  refetch: vi.fn(),
+  remove: vi.fn(),
+  promise: Promise.resolve({ data: [], count: 0 }),
+};
+
 describe('CourseReportContent', () => {
   beforeEach(() => {
     mockUseLearnerProgress.mockReturnValue(defaultQueryState as unknown as LearnerProgressResult);
+    mockUseAssessmentData.mockReturnValue(emptyAssessmentState as unknown as AssessmentDataResult);
   });
 
   it('renders with data-testid', () => {

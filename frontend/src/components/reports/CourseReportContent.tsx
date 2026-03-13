@@ -9,10 +9,12 @@ import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { assessmentRecords } from "@/data/reportsMockData";
 import { useLearnerProgress } from "@/hooks/useLearnerProgress";
-import { mapApiItemToLearnerProgress, buildEnrollmentVsCompletion, buildProgressBuckets } from "@/utils/learnerProgressUtils";
+import { useAssessmentData } from "@/hooks/useAssessmentData";
+import { mapApiItemToLearnerProgress, mapApiItemToAssessmentRecord, buildEnrollmentVsCompletion, buildProgressBuckets, buildScoreDistribution } from "@/utils/learnerProgressUtils";
 import { learnerColumns, assessmentColumns } from "@/components/reports/reportTableColumns";
+import EmptyState from "@/components/workspace/EmptyState";
+import { FiAlertCircle } from "react-icons/fi";
 
 const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
 
@@ -23,8 +25,11 @@ interface CourseReportContentProps {
 }
 
 const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReportContentProps) => {
-  const { data: apiResult, isLoading: isLearnersLoading, isError: isLearnersError } =
+  const { data: apiResult, isLoading: isLearnersLoading, isError: isLearnersError, refetch: refetchLearners } =
     useLearnerProgress(courseId, batchId);
+
+  const { data: assessmentResult, isLoading: isAssessmentsLoading, isError: isAssessmentsError, refetch: refetchAssessments } =
+    useAssessmentData(courseId);
 
   const apiLearners = apiResult?.data ?? [];
 
@@ -41,6 +46,24 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
     () => buildProgressBuckets(apiLearners),
     [apiLearners]
   );
+
+  const assessmentRecords = useMemo(
+    () => (assessmentResult?.data ?? []).map(mapApiItemToAssessmentRecord),
+    [assessmentResult]
+  );
+
+  const scoreDistributionData = useMemo(
+    () => buildScoreDistribution(assessmentRecords),
+    [assessmentRecords]
+  );
+
+  const summaryAvgScore = useMemo(() => {
+    if (isAssessmentsLoading) return "—";
+    const valid = assessmentRecords.filter((r) => r.maxScore > 0);
+    if (valid.length === 0) return "—";
+    const avg = Math.round(valid.reduce((sum, r) => sum + r.percentage, 0) / valid.length);
+    return `${avg}%`;
+  }, [assessmentRecords, isAssessmentsLoading]);
 
   const [learnerSearch, setLearnerSearch] = useState("");
   const [progressFilter, setProgressFilter] = useState<Record<string, string>>({});
@@ -76,7 +99,7 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
         <SummaryCard label="Total Enrolled" value={summaryTotalEnrolled} colorClass="bg-sunbird-ink" />
         <SummaryCard label="Total Completed" value={summaryCompleted} colorClass="bg-sunbird-moss" />
         <SummaryCard label="Certificates Issued" value={summaryCerts} colorClass="bg-sunbird-ginger" />
-        <SummaryCard label="Avg Score" value="—" colorClass="bg-sunbird-lavender" />
+        <SummaryCard label="Avg Score" value={summaryAvgScore} colorClass="bg-sunbird-lavender" />
       </div>
 
       {/* Charts Row */}
@@ -100,36 +123,19 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
         <ChartCard title="Pending Completion Buckets">
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                layout="vertical"
-                data={progressBucketsData}
-                margin={{ top: 4, right: 32, left: 8, bottom: 4 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <YAxis
-                  type="category"
-                  dataKey="bucket"
-                  width={56}
-                  tick={{ fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <XAxis
-                  type="number"
-                  allowDecimals={false}
-                  tick={{ fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
+              <BarChart data={progressBucketsData} margin={{ top: 16, right: 8, left: 0, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip
                   formatter={(value: unknown) => [`${String(value)} learners`]}
                   cursor={{ fill: "hsl(var(--muted))" }}
                 />
-                <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={40}>
                   {progressBucketsData.map((_, i) => (
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
-                  <LabelList dataKey="count" position="right" style={{ fontSize: 11 }} />
+                  <LabelList dataKey="count" position="top" style={{ fontSize: 11 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -139,13 +145,13 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
         <ChartCard title="Score Distribution">
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[]}>
+              <BarChart data={scoreDistributionData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="range" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip formatter={(value: unknown) => [`${String(value)} learners`, "Learners"]} />
                 <Bar dataKey="count" name="Learners" radius={[6, 6, 0, 0]} barSize={28}>
-                  {([] as unknown[]).map((_, i) => (
+                  {scoreDistributionData.map((_, i) => (
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
                 </Bar>
@@ -182,11 +188,14 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
           )}
 
           {isLearnersError && !isLearnersLoading && (
-            <div
-              className="flex items-center justify-center py-16 text-sm text-destructive"
-              data-testid="learners-error"
-            >
-              Failed to load learner progress. Please try again.
+            <div data-testid="learners-error">
+              <EmptyState
+                icon={FiAlertCircle}
+                title="Something went wrong"
+                description="Failed to load learner progress. Please try again."
+                actionLabel="Try Again"
+                onAction={() => void refetchLearners()}
+              />
             </div>
           )}
 
@@ -230,12 +239,36 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
               columns={assessmentColumns.map((c) => ({ key: c.key, header: c.header }))}
             />
           </div>
-          <DataTableWrapper
-            columns={assessmentColumns}
-            data={assessmentRecords}
-            keyExtractor={(r) => r.id}
-            pageSize={10}
-          />
+
+          {isAssessmentsLoading && (
+            <div
+              className="flex items-center justify-center py-16 text-sm text-muted-foreground"
+              data-testid="assessments-loading"
+            >
+              Loading assessment data…
+            </div>
+          )}
+
+          {isAssessmentsError && !isAssessmentsLoading && (
+            <div data-testid="assessments-error">
+              <EmptyState
+                icon={FiAlertCircle}
+                title="Something went wrong"
+                description="Failed to load assessment data. Please try again."
+                actionLabel="Try Again"
+                onAction={() => void refetchAssessments()}
+              />
+            </div>
+          )}
+
+          {!isAssessmentsLoading && !isAssessmentsError && (
+            <DataTableWrapper
+              columns={assessmentColumns}
+              data={assessmentRecords}
+              keyExtractor={(r) => r.id}
+              pageSize={10}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>
