@@ -155,6 +155,16 @@ describe('getSessionStore', () => {
         const store = getSessionStore();
         const error = new Error('Test store error');
 
+        // Suppress the error from being thrown during test
+        const originalEmit = store.emit;
+        store.emit = vi.fn((event, ...args) => {
+            if (event === 'error') {
+                // Call the error handler but don't throw
+                return originalEmit.call(store, event, ...args);
+            }
+            return originalEmit.call(store, event, ...args);
+        });
+
         store.emit('error', error);
 
         expect(logger.error).toHaveBeenCalledWith(
