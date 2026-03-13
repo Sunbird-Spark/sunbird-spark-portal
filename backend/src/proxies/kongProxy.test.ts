@@ -19,9 +19,8 @@ describe('kongProxy', () => {
 
     const importKongProxy = async (overrideEnv?: { KONG_URL?: string }) => {
         vi.doMock('http-proxy-middleware', () => ({
-            createProxyMiddleware: vi.fn(() => (req: any, res: any, next: any) => next()),
-            responseInterceptor: vi.fn((handler) => handler),
-            fixRequestBody: vi.fn()
+            createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
+            responseInterceptor: vi.fn()
         }));
         vi.doMock('../utils/proxyUtils.js', () => ({
             decorateRequestHeaders: vi.fn()
