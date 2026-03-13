@@ -81,14 +81,20 @@ export function getContentAttemptInfoMap(contentList: ContentStateItem[]): Recor
     if (item.contentId == null) return;
     const score = item.score;
     const attemptCount = Array.isArray(score) ? score.length : 0;
-    let bestScore: ContentScoreInfo | undefined;
+    const entry: ContentAttemptInfo = { attemptCount };
     if (Array.isArray(score) && score.length > 0) {
-      const last = score[score.length - 1] as { totalScore?: number; totalMaxScore?: number } | undefined;
-      if (last && typeof last.totalScore === 'number' && typeof last.totalMaxScore === 'number') {
-        bestScore = { totalScore: last.totalScore, totalMaxScore: last.totalMaxScore };
+      let best: ContentScoreInfo | undefined;
+      for (const s of score) {
+        const attempt = s as { totalScore?: number; totalMaxScore?: number } | undefined;
+        if (attempt && typeof attempt.totalScore === 'number' && typeof attempt.totalMaxScore === 'number') {
+          if (!best || attempt.totalScore > best.totalScore) {
+            best = { totalScore: attempt.totalScore, totalMaxScore: attempt.totalMaxScore };
+          }
+        }
       }
+      if (best) entry.bestScore = best;
     }
-    map[item.contentId] = { attemptCount, bestScore };
+    map[item.contentId] = entry;
   });
   return map;
 }

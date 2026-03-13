@@ -118,11 +118,11 @@ export default function CollectionSidePanel({
         />
       </div>
 
-      {isTrackable && isAuthenticated && !contentCreatorPrivilege && !hasBatchInRoute && (
+      {((!contentCreatorPrivilege && !hasBatchInRoute) || showBottomSections) && isTrackable && isAuthenticated && (
         <div className="mt-4 flex-shrink-0">
           <LearnerBottomCards
             hasBatchInRoute={hasBatchInRoute}
-            showCertificateCard={false}
+            showCertificateCard={showBottomSections && showCertificateCard}
             batches={batches}
             selectedBatchId={selectedBatchId}
             setSelectedBatchId={setSelectedBatchId}
@@ -134,58 +134,11 @@ export default function CollectionSidePanel({
             hasCertificate={hasCertificate}
             firstCertPreviewUrl={firstCertPreviewUrl}
             onCertificatePreviewClick={certPreviewClick}
-            showProfileDataSharingCard={false}
+            showProfileDataSharingCard={showBottomSections && showProfileDataSharingCard}
             collectionId={collectionId}
             channel={collectionData?.channel}
             userProfile={userProfile ?? undefined}
           />
-        </div>
-      )}
-
-      {showBottomSections && (
-        <div className="flex-shrink-0 flex flex-col gap-4">
-          {showCertificateCard && (
-            <LearnerBottomCards
-              hasBatchInRoute={hasBatchInRoute}
-              showCertificateCard
-              batches={batches}
-              selectedBatchId={selectedBatchId}
-              setSelectedBatchId={setSelectedBatchId}
-              onJoinCourse={handleJoinCourse}
-              batchListLoading={batchListLoading}
-              joinLoading={joinLoading}
-              batchListError={batchListError}
-              joinError={joinError}
-              hasCertificate={hasCertificate}
-              firstCertPreviewUrl={firstCertPreviewUrl}
-              onCertificatePreviewClick={certPreviewClick}
-              showProfileDataSharingCard={false}
-              collectionId={collectionId}
-              channel={collectionData?.channel}
-              userProfile={userProfile ?? undefined}
-            />
-          )}
-          {showProfileDataSharingCard && (
-            <LearnerBottomCards
-              hasBatchInRoute={hasBatchInRoute}
-              showCertificateCard={false}
-              batches={batches}
-              selectedBatchId={selectedBatchId}
-              setSelectedBatchId={setSelectedBatchId}
-              onJoinCourse={handleJoinCourse}
-              batchListLoading={batchListLoading}
-              joinLoading={joinLoading}
-              batchListError={batchListError}
-              joinError={joinError}
-              hasCertificate={hasCertificate}
-              firstCertPreviewUrl={firstCertPreviewUrl}
-              onCertificatePreviewClick={certPreviewClick}
-              showProfileDataSharingCard
-              collectionId={collectionId}
-              channel={collectionData?.channel}
-              userProfile={userProfile ?? undefined}
-            />
-          )}
         </div>
       )}
     </aside>
