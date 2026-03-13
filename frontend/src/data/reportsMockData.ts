@@ -8,7 +8,6 @@ import type {
   AdminCourseSummary,
   EnrollmentCompletion,
   ProgressBucket,
-  ScoreBucket,
   LearnerProgress,
   AssessmentRecord,
   CourseReportSummary,
@@ -162,13 +161,6 @@ export const progressBuckets: ProgressBucket[] = [
   { bucket: "75–100%", count: 78 },
 ];
 
-export const scoreBuckets: ScoreBucket[] = [
-  { range: "0–20", count: 12 },
-  { range: "21–40", count: 28 },
-  { range: "41–60", count: 65 },
-  { range: "61–80", count: 98 },
-  { range: "81–100", count: 110 },
-];
 
 export const learnerProgressData: LearnerProgress[] = Array.from({ length: 30 }, (_, i) => ({
   id: `learner-${i + 1}`,
@@ -229,11 +221,11 @@ export const userCertificates: UserCertificate[] = [
 ];
 
 export const userAssessmentHistory: UserAssessmentHistory[] = [
-  { id: "1", courseName: "Introduction to AI", assessmentName: "Final Exam", score: 88, maxScore: 100, percentage: 88, passFail: "Pass", attemptDate: "2025-03-18" },
-  { id: "2", courseName: "Data Science Basics", assessmentName: "Mid-Term Quiz", score: 72, maxScore: 100, percentage: 72, passFail: "Pass", attemptDate: "2025-08-22" },
-  { id: "3", courseName: "Web Development 101", assessmentName: "Project Submission", score: 95, maxScore: 100, percentage: 95, passFail: "Pass", attemptDate: "2025-06-10" },
-  { id: "4", courseName: "Python Programming", assessmentName: "Quiz 1", score: 35, maxScore: 100, percentage: 35, passFail: "Fail", attemptDate: "2025-07-15" },
-  { id: "5", courseName: "Python Programming", assessmentName: "Quiz 1 (Retake)", score: 68, maxScore: 100, percentage: 68, passFail: "Pass", attemptDate: "2025-07-22" },
+  { id: "1", courseName: "Introduction to AI", assessmentName: "Final Exam", score: 88, maxScore: 100, percentage: 88, attemptDate: "2025-03-18" },
+  { id: "2", courseName: "Data Science Basics", assessmentName: "Mid-Term Quiz", score: 72, maxScore: 100, percentage: 72, attemptDate: "2025-08-22" },
+  { id: "3", courseName: "Web Development 101", assessmentName: "Project Submission", score: 95, maxScore: 100, percentage: 95, attemptDate: "2025-06-10" },
+  { id: "4", courseName: "Python Programming", assessmentName: "Quiz 1", score: 35, maxScore: 100, percentage: 35, attemptDate: "2025-07-15" },
+  { id: "5", courseName: "Python Programming", assessmentName: "Quiz 1 (Retake)", score: 68, maxScore: 100, percentage: 68, attemptDate: "2025-07-22" },
 ];
 
 /* ── MODULE 4 – User Consent Management ── */

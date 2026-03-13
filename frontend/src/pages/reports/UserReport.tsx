@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { useParams } from "react-router-dom";
 import ReportLayout from "@/components/reports/ReportLayout";
 import SummaryCard from "@/components/reports/SummaryCard";
 import DataTableWrapper, { type Column } from "@/components/reports/DataTableWrapper";
@@ -20,12 +19,11 @@ const statusColor: Record<string, string> = {
 };
 
 const UserReport = () => {
-  const { userId } = useParams();
   const { t } = useAppI18n();
 
   const { data: userReadData } = useUserRead();
   const userProfile = userReadData?.data?.response as { firstName?: string; lastName?: string } | undefined;
-  const userName = [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ') || String(userId ?? '');
+  const userName = [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ');
 
   const {
     data: enrolmentResult,

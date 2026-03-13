@@ -905,6 +905,22 @@
     "date": "Date",
     "dateTime": "Date & Time"
   },
+  "courseReport": {
+    "totalEnrolled": "Total Enrolled",
+    "totalCompleted": "Total Completed",
+    "certificatesIssued": "Certificates Issued",
+    "avgScore": "Avg Score",
+    "enrollmentVsCompletion": "Enrollment vs Completion",
+    "pendingCompletionBuckets": "Pending Completion Buckets",
+    "scoreDistribution": "Score Distribution",
+    "enrolled": "Enrolled",
+    "completed": "Completed",
+    "learners": "Learners",
+    "learnerProgress": "Learner Progress",
+    "assessments": "Assessments",
+    "detailedLearnerProgress": "Detailed Learner Progress",
+    "detailedAssessments": "Detailed Assessments"
+  },
   "editors": {
     "errorTitle": "Editor Error",
     "goBack": "Go Back",

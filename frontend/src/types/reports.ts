@@ -87,11 +87,6 @@ export interface ProgressBucket {
   count: number;
 }
 
-export interface ScoreBucket {
-  range: string;
-  count: number;
-}
-
 export interface LearnerProgress {
   id: string;
   learnerName: string;
