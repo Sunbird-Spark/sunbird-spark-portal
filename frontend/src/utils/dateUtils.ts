@@ -6,6 +6,7 @@
  */
 export function toRelativeTime(isoString: string, now: Date = new Date()): string {
   const past = new Date(isoString);
+  if (isNaN(past.getTime())) return '—';
   const diffMs = now.getTime() - past.getTime();
   const diffSec = Math.floor(diffMs / 1_000);
   const diffMin = Math.floor(diffSec / 60);

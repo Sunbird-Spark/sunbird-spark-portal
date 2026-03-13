@@ -15,6 +15,7 @@ import { mapApiItemToLearnerProgress, mapApiItemToAssessmentRecord, buildEnrollm
 import { learnerColumns, assessmentColumns } from "@/components/reports/reportTableColumns";
 import EmptyState from "@/components/workspace/EmptyState";
 import { FiAlertCircle } from "react-icons/fi";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
 
@@ -25,6 +26,8 @@ interface CourseReportContentProps {
 }
 
 const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReportContentProps) => {
+  const { t } = useAppI18n();
+
   const { data: apiResult, isLoading: isLearnersLoading, isError: isLearnersError, refetch: refetchLearners } =
     useLearnerProgress(courseId, batchId);
 
@@ -69,7 +72,7 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
   const [progressFilter, setProgressFilter] = useState<Record<string, string>>({});
 
   const mappedLearners = useMemo(
-    () => (Array.isArray(apiLearners) ? apiLearners : []).map(mapApiItemToLearnerProgress),
+    () => apiLearners.map(mapApiItemToLearnerProgress),
     [apiLearners]
   );
   const filteredLearners = useMemo(() => {
@@ -87,7 +90,9 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
         "75-100": [75, 100],
       };
       const [lo, hi] = ranges[bucket] ?? [0, 100];
-      result = result.filter((l) => l.progressPercent >= lo && l.progressPercent <= hi);
+      result = result.filter((l) =>
+        lo === 0 ? l.progressPercent <= hi : l.progressPercent > lo && l.progressPercent <= hi
+      );
     }
     return result;
   }, [mappedLearners, learnerSearch, progressFilter]);
@@ -96,15 +101,15 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
     <div data-testid="course-report-content">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <SummaryCard label="Total Enrolled" value={summaryTotalEnrolled} colorClass="bg-sunbird-ink" />
-        <SummaryCard label="Total Completed" value={summaryCompleted} colorClass="bg-sunbird-moss" />
-        <SummaryCard label="Certificates Issued" value={summaryCerts} colorClass="bg-sunbird-ginger" />
-        <SummaryCard label="Avg Score" value={summaryAvgScore} colorClass="bg-sunbird-lavender" />
+        <SummaryCard label={t('courseReport.totalEnrolled')} value={summaryTotalEnrolled} colorClass="bg-sunbird-ink" />
+        <SummaryCard label={t('courseReport.totalCompleted')} value={summaryCompleted} colorClass="bg-sunbird-moss" />
+        <SummaryCard label={t('courseReport.certificatesIssued')} value={summaryCerts} colorClass="bg-sunbird-ginger" />
+        <SummaryCard label={t('courseReport.avgScore')} value={summaryAvgScore} colorClass="bg-sunbird-lavender" />
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        <ChartCard title="Enrollment vs Completion" className="xl:col-span-2">
+        <ChartCard title={t('courseReport.enrollmentVsCompletion')} className="xl:col-span-2">
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={enrollmentChartData}>
@@ -113,14 +118,14 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="enrolled" fill="hsl(var(--sunbird-ink))" radius={[6, 6, 0, 0]} barSize={20} name="Enrolled" />
-                <Bar dataKey="completed" fill="hsl(var(--sunbird-moss))" radius={[6, 6, 0, 0]} barSize={20} name="Completed" />
+                <Bar dataKey="enrolled" fill="hsl(var(--sunbird-ink))" radius={[6, 6, 0, 0]} barSize={20} name={t('courseReport.enrolled')} />
+                <Bar dataKey="completed" fill="hsl(var(--sunbird-moss))" radius={[6, 6, 0, 0]} barSize={20} name={t('courseReport.completed')} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </ChartCard>
 
-        <ChartCard title="Pending Completion Buckets">
+        <ChartCard title={t('courseReport.pendingCompletionBuckets')}>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={progressBucketsData} margin={{ top: 16, right: 8, left: 0, bottom: 4 }}>
@@ -142,15 +147,15 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
           </div>
         </ChartCard>
 
-        <ChartCard title="Score Distribution">
+        <ChartCard title={t('courseReport.scoreDistribution')}>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={scoreDistributionData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip formatter={(value: unknown) => [`${String(value)} learners`, "Learners"]} />
-                <Bar dataKey="count" name="Learners" radius={[6, 6, 0, 0]} barSize={28}>
+                <Tooltip formatter={(value: unknown) => [`${String(value)} learners`, t('courseReport.learners')]} />
+                <Bar dataKey="count" name={t('courseReport.learners')} radius={[6, 6, 0, 0]} barSize={28}>
                   {scoreDistributionData.map((_, i) => (
                     <Cell key={i} fill={donutColors[i % donutColors.length]} />
                   ))}
@@ -164,13 +169,13 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
       {/* Tabs for Tables */}
       <Tabs defaultValue="learners" className="mb-8">
         <TabsList className="mb-4">
-          <TabsTrigger value="learners">Learner Progress</TabsTrigger>
-          <TabsTrigger value="assessments">Assessments</TabsTrigger>
+          <TabsTrigger value="learners">{t('courseReport.learnerProgress')}</TabsTrigger>
+          <TabsTrigger value="assessments">{t('courseReport.assessments')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="learners">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-            <h3 className="text-base font-semibold text-foreground">Detailed Learner Progress</h3>
+            <h3 className="text-base font-semibold text-foreground">{t('courseReport.detailedLearnerProgress')}</h3>
             <ExportButton
               data={filteredLearners as unknown as Record<string, unknown>[]}
               filename="learner-progress"
@@ -232,7 +237,7 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
 
         <TabsContent value="assessments">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-            <h3 className="text-base font-semibold text-foreground">Detailed Assessments</h3>
+            <h3 className="text-base font-semibold text-foreground">{t('courseReport.detailedAssessments')}</h3>
             <ExportButton
               data={assessmentRecords as unknown as Record<string, unknown>[]}
               filename="assessment-records"

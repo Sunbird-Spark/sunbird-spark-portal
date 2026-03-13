@@ -904,6 +904,22 @@
     "date": "التاريخ",
     "dateTime": "التاريخ والوقت"
   },
+  "courseReport": {
+    "totalEnrolled": "إجمالي المسجلين",
+    "totalCompleted": "إجمالي المكتملين",
+    "certificatesIssued": "الشهادات الصادرة",
+    "avgScore": "متوسط الدرجة",
+    "enrollmentVsCompletion": "التسجيل مقابل الإتمام",
+    "pendingCompletionBuckets": "مجموعات الإتمام المعلقة",
+    "scoreDistribution": "توزيع الدرجات",
+    "enrolled": "مسجّل",
+    "completed": "مكتمل",
+    "learners": "المتعلمون",
+    "learnerProgress": "تقدم المتعلم",
+    "assessments": "التقييمات",
+    "detailedLearnerProgress": "تفاصيل تقدم المتعلم",
+    "detailedAssessments": "تفاصيل التقييمات"
+  },
   "editors": {
     "errorTitle": "خطأ في المحرر",
     "goBack": "رجوع",
