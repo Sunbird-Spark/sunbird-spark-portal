@@ -191,10 +191,61 @@ describe('buildTelemetryContext', () => {
     expect(context.timeDiff).toBe(0);
   });
 
-  it('should throw error when org search fails', async () => {
+  it('should use fallback channel when org search fails', async () => {
     mockOrgSearch.mockRejectedValueOnce(new Error('network error'));
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    await expect(buildTelemetryContext()).rejects.toThrow('Failed to fetch organization data: network error');
+    const context = await buildTelemetryContext();
+
+    // Should use empty channel when org search fails
+    expect(context.channel).toBe('');
+    expect(context.tags).toEqual([]);
+    expect(context.dims).toEqual([]);
+    expect(context.app).toEqual([]);
+    expect(consoleSpy).toHaveBeenCalledWith('TelemetryContextBuilder: Failed to fetch organization data, proceeding with default values.', expect.any(Error));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should use empty device ID when getDeviceId fails', async () => {
+    vi.mocked(appCoreService.getDeviceId).mockRejectedValueOnce(new Error('device error'));
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const context = await buildTelemetryContext();
+
+    // Should use empty device ID when service fails
+    expect(context.did).toBe('');
+    expect(consoleSpy).toHaveBeenCalledWith('TelemetryContextBuilder: Failed to get device ID, proceeding with default value.', expect.any(Error));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should use empty user data when getUserData fails', async () => {
+    vi.mocked(userProfileService.getUserData).mockRejectedValueOnce(new Error('user profile error'));
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const context = await buildTelemetryContext();
+
+    expect(context.userData).toEqual({ firstName: '', lastName: '' });
+    expect(consoleSpy).toHaveBeenCalledWith('TelemetryContextBuilder: Failed to fetch user profile data, proceeding with default values.', expect.any(Error));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should use fallback channel when org search throws non-Error object', async () => {
+    mockOrgSearch.mockRejectedValueOnce('string error');
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const context = await buildTelemetryContext();
+
+    // Should use empty channel when org search fails
+    expect(context.channel).toBe('');
+    expect(context.tags).toEqual([]);
+    expect(context.dims).toEqual([]);
+    expect(context.app).toEqual([]);
+    expect(consoleSpy).toHaveBeenCalledWith('TelemetryContextBuilder: Failed to fetch organization data, proceeding with default values.', 'string error');
+
+    consoleSpy.mockRestore();
   });
 
   it('should fallback uid to anonymous when not available', async () => {
@@ -205,22 +256,10 @@ describe('buildTelemetryContext', () => {
     expect(context.uid).toBe('anonymous');
   });
 
-  it('should throw error when getDeviceId fails', async () => {
-    vi.mocked(appCoreService.getDeviceId).mockRejectedValueOnce(new Error('device error'));
+  it('should throw error when getPData fails', async () => {
+    vi.mocked(appCoreService.getPData).mockRejectedValueOnce(new Error('pdata error'));
 
-    await expect(buildTelemetryContext()).rejects.toThrow('Failed to get device ID: device error');
-  });
-
-  it('should throw error when getUserData fails', async () => {
-    vi.mocked(userProfileService.getUserData).mockRejectedValueOnce(new Error('user profile error'));
-
-    await expect(buildTelemetryContext()).rejects.toThrow('Failed to fetch user profile data: user profile error');
-  });
-
-  it('should throw error when org search throws non-Error object', async () => {
-    mockOrgSearch.mockRejectedValueOnce('string error');
-
-    await expect(buildTelemetryContext()).rejects.toThrow('Failed to fetch organization data: string error');
+    await expect(buildTelemetryContext()).rejects.toThrow('pdata error');
   });
 
   it('should fallback to sunbird slug when SystemSettingService fails', async () => {
