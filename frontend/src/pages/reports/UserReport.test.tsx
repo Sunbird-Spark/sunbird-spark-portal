@@ -43,6 +43,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'userReport.max': 'Max',
         'userReport.result': 'Result',
         'userReport.date': 'Date',
+        'userReport.dateTime': 'Date & Time',
         'home': 'Home',
       };
       return translations[key] ?? key;
@@ -58,10 +59,16 @@ vi.mock('@/hooks/useUserRead', () => ({
   useUserRead: vi.fn(),
 }));
 
+vi.mock('@/hooks/useUserAssessmentHistory', () => ({
+  useUserAssessmentHistory: vi.fn(),
+}));
+
 import { useUserCourseEnrolments } from '@/hooks/useUserCourseEnrolments';
 import { useUserRead } from '@/hooks/useUserRead';
+import { useUserAssessmentHistory } from '@/hooks/useUserAssessmentHistory';
 const mockUseUserCourseEnrolments = vi.mocked(useUserCourseEnrolments);
 const mockUseUserRead = vi.mocked(useUserRead);
+const mockUseUserAssessmentHistory = vi.mocked(useUserAssessmentHistory);
 
 type EnrolmentQueryResult = ReturnType<typeof useUserCourseEnrolments>;
 
@@ -147,6 +154,31 @@ const defaultUserReadState = {
   promise: Promise.resolve({ data: { response: { firstName: 'Aarav', lastName: 'Mehta' } } }),
 };
 
+const defaultAssessmentState = {
+  isLoading: false,
+  isError: false,
+  data: { data: [], count: 0 },
+  error: null,
+  status: 'success' as const,
+  isPending: false,
+  isSuccess: true,
+  isFetching: false,
+  isRefetching: false,
+  dataUpdatedAt: 0,
+  errorUpdatedAt: 0,
+  failureCount: 0,
+  failureReason: null,
+  isLoadingError: false,
+  isRefetchError: false,
+  isPlaceholderData: false,
+  isStale: false,
+  isInitialLoading: false,
+  fetchStatus: 'idle' as const,
+  refetch: vi.fn(),
+  remove: vi.fn(),
+  promise: Promise.resolve({ data: [], count: 0 }),
+};
+
 const renderWithRoute = (userId = 'me') =>
   render(
     <MemoryRouter initialEntries={[`/reports/user/${userId}`]}>
@@ -160,6 +192,7 @@ describe('UserReport', () => {
   beforeEach(() => {
     mockUseUserCourseEnrolments.mockReturnValue(defaultEnrolmentState as unknown as EnrolmentQueryResult);
     mockUseUserRead.mockReturnValue(defaultUserReadState as unknown as ReturnType<typeof useUserRead>);
+    mockUseUserAssessmentHistory.mockReturnValue(defaultAssessmentState as unknown as ReturnType<typeof useUserAssessmentHistory>);
   });
 
   it('renders without crashing', () => {
@@ -243,11 +276,6 @@ describe('UserReport', () => {
   it('renders Course Progress section', () => {
     renderWithRoute();
     expect(screen.getByRole('region', { name: /course progress/i })).toBeInTheDocument();
-  });
-
-  it('renders Certificates section', () => {
-    renderWithRoute();
-    expect(screen.getByRole('region', { name: /certificates/i })).toBeInTheDocument();
   });
 
   it('renders Assessment History section', () => {

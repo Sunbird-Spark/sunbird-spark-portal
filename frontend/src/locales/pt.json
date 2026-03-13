@@ -901,7 +901,8 @@
     "score": "Pontuação",
     "max": "Máx",
     "result": "Resultado",
-    "date": "Data"
+    "date": "Data",
+    "dateTime": "Data e hora"
   },
   "editors": {
     "errorTitle": "Erro do Editor",

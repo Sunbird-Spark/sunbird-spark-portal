@@ -6,15 +6,12 @@ import DataTableWrapper, { type Column } from "@/components/reports/DataTableWra
 import ExportButton from "@/components/reports/ExportButton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  userCertificates,
-  userAssessmentHistory,
-} from "@/data/reportsMockData";
-import type { UserCourseProgress, UserCertificate, UserAssessmentHistory } from "@/types/reports";
+import type { UserCourseProgress, UserAssessmentHistory } from "@/types/reports";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useUserCourseEnrolments } from "@/hooks/useUserCourseEnrolments";
 import { useUserRead } from "@/hooks/useUserRead";
-import { mapApiItemToUserCourseProgress } from "@/utils/userCourseEnrolmentUtils";
+import { useUserAssessmentHistory } from "@/hooks/useUserAssessmentHistory";
+import { mapApiItemToUserCourseProgress, mapApiItemToUserAssessmentHistory } from "@/utils/userCourseEnrolmentUtils";
 
 const statusColor: Record<string, string> = {
   "Completed": "default",
@@ -57,6 +54,21 @@ const UserReport = () => {
     [apiCourses]
   );
 
+  const {
+    data: assessmentResult,
+    isLoading: isAssessmentsLoading,
+    isError: isAssessmentsError,
+  } = useUserAssessmentHistory();
+
+  const assessmentHistoryData = useMemo(
+    () => (assessmentResult?.data ?? []).map(mapApiItemToUserAssessmentHistory),
+    [assessmentResult]
+  );
+
+  const summaryAssessmentsCompleted = isAssessmentsLoading
+    ? '—'
+    : String(assessmentResult?.count ?? 0);
+
   const courseColumns: Column<UserCourseProgress>[] = [
     { key: "courseName", header: t('userReport.course'), sortable: true },
     {
@@ -79,24 +91,13 @@ const UserReport = () => {
     { key: "lastAccessed", header: t('userReport.lastAccessed'), sortable: true },
   ];
 
-  const certColumns: Column<UserCertificate>[] = [
-    { key: "courseName", header: t('userReport.course'), sortable: true },
-    { key: "certificateId", header: t('userReport.certificateId') },
-    { key: "issuedDate", header: t('userReport.issuedDate'), sortable: true },
-  ];
-
   const assessColumns: Column<UserAssessmentHistory>[] = [
     { key: "courseName", header: t('userReport.course'), sortable: true },
     { key: "assessmentName", header: t('userReport.assessment'), sortable: true },
     { key: "score", header: t('userReport.score'), sortable: true, className: "text-right" },
     { key: "maxScore", header: t('userReport.max'), className: "text-right" },
     { key: "percentage", header: "%", sortable: true, className: "text-right", render: (r) => `${r.percentage}%` },
-    {
-      key: "passFail",
-      header: t('userReport.result'),
-      render: (row) => <Badge variant={row.passFail === "Pass" ? "default" : "destructive"} className="text-xs">{row.passFail}</Badge>,
-    },
-    { key: "attemptDate", header: t('userReport.date'), sortable: true },
+    { key: "attemptDate", header: t('userReport.dateTime'), sortable: true },
   ];
 
   return (
@@ -110,7 +111,7 @@ const UserReport = () => {
         <SummaryCard label={t('userReport.coursesCompleted')} value={summaryCoursesCompleted} colorClass="bg-sunbird-moss" />
         <SummaryCard label={t('userReport.coursesPending')} value={summaryCoursesPending} colorClass="bg-sunbird-ginger" />
         <SummaryCard label={t('userReport.certificatesIssued')} value={summaryCertsIssued} colorClass="bg-sunbird-ink" />
-        <SummaryCard label={t('userReport.assessmentsCompleted')} value="—" colorClass="bg-sunbird-lavender" />
+        <SummaryCard label={t('userReport.assessmentsCompleted')} value={summaryAssessmentsCompleted} colorClass="bg-sunbird-lavender" />
       </div>
 
       {/* Course Progress */}
@@ -147,30 +148,38 @@ const UserReport = () => {
         )}
       </section>
 
-      {/* Certificates */}
-      <section className="mb-8" aria-label={t('userReport.certificates')}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">{t('userReport.certificates')}</h2>
-          <ExportButton
-            data={userCertificates as unknown as Record<string, unknown>[]}
-            filename="user-certificates"
-            columns={certColumns.map((c) => ({ key: c.key, header: c.header }))}
-          />
-        </div>
-        <DataTableWrapper columns={certColumns} data={userCertificates} keyExtractor={(r) => r.id} pageSize={10} />
-      </section>
-
       {/* Assessment History */}
       <section className="mb-8" aria-label={t('userReport.assessmentHistory')}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">{t('userReport.assessmentHistory')}</h2>
           <ExportButton
-            data={userAssessmentHistory as unknown as Record<string, unknown>[]}
+            data={assessmentHistoryData as unknown as Record<string, unknown>[]}
             filename="user-assessments"
             columns={assessColumns.map((c) => ({ key: c.key, header: c.header }))}
           />
         </div>
-        <DataTableWrapper columns={assessColumns} data={userAssessmentHistory} keyExtractor={(r) => r.id} pageSize={10} />
+
+        {isAssessmentsLoading && (
+          <div
+            className="flex items-center justify-center py-16 text-sm text-muted-foreground"
+            data-testid="assessments-loading"
+          >
+            Loading assessment history…
+          </div>
+        )}
+
+        {isAssessmentsError && !isAssessmentsLoading && (
+          <div
+            className="flex items-center justify-center py-16 text-sm text-destructive"
+            data-testid="assessments-error"
+          >
+            Failed to load assessment history. Please try again.
+          </div>
+        )}
+
+        {!isAssessmentsLoading && !isAssessmentsError && (
+          <DataTableWrapper columns={assessColumns} data={assessmentHistoryData} keyExtractor={(r) => r.id} pageSize={10} />
+        )}
       </section>
     </ReportLayout>
   );

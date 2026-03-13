@@ -909,7 +909,8 @@
     "score": "Score",
     "max": "Max",
     "result": "Résultat",
-    "date": "Date"
+    "date": "Date",
+    "dateTime": "Date et heure"
   },
   "editors": {
     "errorTitle": "Erreur de l'éditeur",

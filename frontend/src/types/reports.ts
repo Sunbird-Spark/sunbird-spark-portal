@@ -173,6 +173,33 @@ export interface AssessmentResult {
   count: number;
 }
 
+/** Raw shape returned by POST /observability/v1/reports for user-assessment-summary */
+export interface UserAssessmentApiItem {
+  attempt_id: string;
+  course_id: string;
+  content_id: string;
+  batch_id: string;
+  total_score: number | null;
+  total_max_score: number | null;
+  last_attempted_on: string;
+  collectionDetails: {
+    name: string;
+    identifier: string;
+    contentType: string;
+  };
+  /** Optional — absent in some API records */
+  contentDetails?: {
+    name: string;
+    identifier: string;
+    contentType: string;
+  };
+}
+
+export interface UserAssessmentResult {
+  data: UserAssessmentApiItem[];
+  count: number;
+}
+
 export interface AssessmentRecord {
   id: string;
   learnerName: string;
@@ -228,7 +255,6 @@ export interface UserAssessmentHistory {
   score: number;
   maxScore: number;
   percentage: number;
-  passFail: "Pass" | "Fail";
   attemptDate: string;
 }
 

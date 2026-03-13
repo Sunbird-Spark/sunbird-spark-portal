@@ -1,5 +1,5 @@
 import { getClient } from '../../lib/http-client';
-import type { AssessmentApiItem, AssessmentResult, LearnerProgressApiItem, LearnerProgressResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
+import type { AssessmentApiItem, AssessmentResult, LearnerProgressApiItem, LearnerProgressResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
 
 /** Shared parser for the Sunbird observability response envelope.
  *  Handles two response shapes:
@@ -80,6 +80,22 @@ export class ObservabilityService {
         },
       })
       .then((response) => parseObservabilityResponse<AssessmentApiItem>(response.data));
+  }
+
+  /**
+   * Fetch assessment history for a given user.
+   * POST /observability/v1/reports
+   */
+  public getUserAssessments(userId: string): Promise<UserAssessmentResult> {
+    return getClient()
+      .post<unknown>('/observability/v1/reports', {
+        request: {
+          reportId: 'user-assessment-summary',
+          filters: { userid: userId },
+          transform: ['course_id', 'content_id'],
+        },
+      })
+      .then((response) => parseObservabilityResponse<UserAssessmentApiItem>(response.data));
   }
 }
 
