@@ -93,14 +93,13 @@ export async function buildTelemetryContext(
 
   // User data (only for logged-in users)
   let userData = { firstName: '', lastName: '' };
-  const defaultContextRollup: Record<string, string> = {};
+  let userHashTagIds: string[] = [];
   let userOrgHashTagIds: string[] = [];
   const isLoggedIn = uid !== 'anonymous';
   if (isLoggedIn) {
     try {
       userData = await userProfileService.getUserData();
-      const userHashTagIds = await userProfileService.getHashTagIds();
-      userHashTagIds.forEach((id, index) => { defaultContextRollup[`l${index + 1}`] = id; });
+      userHashTagIds = await userProfileService.getHashTagIds();
       userOrgHashTagIds = await userProfileService.getOrganisationHashTagIds();
     } catch (error) {
       console.warn(
@@ -109,6 +108,9 @@ export async function buildTelemetryContext(
     );
     }
   }
+
+  // contextRollup: logged-in → from user hashTagIds, anonymous → from org hashTagId
+  const contextRollup = getRollUpData(isLoggedIn ? userHashTagIds : _.compact([hashTagId]));
 
   // Derived fields — for logged-in users, tags come from user profile organisations (old portal pattern)
   const tags = _.compact(
@@ -120,6 +122,13 @@ export async function buildTelemetryContext(
   // Use caller-provided cdata
   const cdata = contextProps?.cdata || [];
 
+  // dims = tags + courseId + batchId (when playing content inside a course, matching old portal pattern)
+  const courseEntry = _.find(cdata, { type: 'course' });
+  const batchEntry = _.find(cdata, { type: 'batch' });
+  const dims = [...tags];
+  if (courseEntry?.id) dims.push(courseEntry.id);
+  if (batchEntry?.id) dims.push(batchEntry.id);
+
   const context: TelemetryContext = {
     mode: contextProps?.mode || 'play',
     sid,
@@ -127,14 +136,14 @@ export async function buildTelemetryContext(
     uid,
     channel,
     pdata,
-    contextRollup: contextProps?.contextRollup || (isLoggedIn && Object.keys(defaultContextRollup).length > 0 ? defaultContextRollup : {}),
+    contextRollup: contextProps?.contextRollup || contextRollup,
     tags,
     cdata,
     timeDiff,
     objectRollup: contextProps?.objectRollup || {},
     host: '',
     endpoint: '/portal/data/v1/telemetry',
-    dims: tags,
+    dims,
     app: channel ? [channel] : [],
     partner: [],
     userData,
@@ -144,22 +153,15 @@ export async function buildTelemetryContext(
     context.contentId = options.contentId;
   }
 
-
-  // eslint-disable-next-line no-console
-  console.log('[Telemetry] Context built:', {
-    mode: context.mode,
-    sid: context.sid,
-    uid: context.uid,
-    did: context.did,
-    channel: context.channel,
-    pdata: context.pdata,
-    contentId: context.contentId,
-    cdata: context.cdata,
-    contextRollup: context.contextRollup,
-    objectRollup: context.objectRollup,
-    tags: context.tags,
-    dims: context.dims,
-    timeDiff: context.timeDiff,
-  });
   return context;
+}
+
+/**
+ * Convert an array of IDs into a rollup object {l1: id1, l2: id2, ...}
+ * Same as old portal's getRollUpData().
+ */
+function getRollUpData(data: string[] = []): Record<string, string> {
+  const rollUp: Record<string, string> = {};
+  data.forEach((element, index) => { rollUp[`l${index + 1}`] = element; });
+  return rollUp;
 }

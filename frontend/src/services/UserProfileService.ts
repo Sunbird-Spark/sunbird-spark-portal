@@ -94,7 +94,6 @@ class UserProfileService {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        console.log('user hashtagid', this.hashTagIds);
         return this.hashTagIds;
     }
 
@@ -106,7 +105,6 @@ class UserProfileService {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        console.log('organisationHashTagIds', this.organisationHashTagIds);
         return this.organisationHashTagIds;
     }
 
