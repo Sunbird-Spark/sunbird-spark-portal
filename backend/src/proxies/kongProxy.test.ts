@@ -18,11 +18,15 @@ describe('kongProxy', () => {
     });
 
     const importKongProxy = async (overrideEnv?: { KONG_URL?: string }) => {
-        vi.doMock('http-proxy-middleware', () => ({
-            createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
-            responseInterceptor: vi.fn((fn: Function) => fn),
-            fixRequestBody: vi.fn()
-        }));
+        vi.doMock('http-proxy-middleware', async (importOriginal) => {
+            const actual = await importOriginal<typeof import('http-proxy-middleware')>();
+            return {
+                ...actual,
+                createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
+                responseInterceptor: vi.fn((fn: Function) => fn),
+                fixRequestBody: vi.fn()
+            };
+        });
         vi.doMock('../utils/proxyUtils.js', () => ({
             decorateRequestHeaders: vi.fn()
         }));

@@ -19,11 +19,15 @@ describe('knowlgMwProxy', () => {
     });
 
     const importKnowlgMwProxy = async (overrideEnv?: { KNOWLG_MW_BASE_URL?: string }) => {
-        vi.doMock('http-proxy-middleware', () => ({
-            createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
-            fixRequestBody: vi.fn(),
-            responseInterceptor: vi.fn((fn: Function) => fn)
-        }));
+        vi.doMock('http-proxy-middleware', async (importOriginal) => {
+            const actual = await importOriginal<typeof import('http-proxy-middleware')>();
+            return {
+                ...actual,
+                createProxyMiddleware: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
+                fixRequestBody: vi.fn(),
+                responseInterceptor: vi.fn((fn: Function) => fn)
+            };
+        });
         vi.doMock('../utils/proxyUtils.js', () => ({
             decorateRequestHeaders: vi.fn()
         }));
