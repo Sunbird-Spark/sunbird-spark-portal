@@ -62,7 +62,11 @@ export async function buildTelemetryContext(
   try {
     did = await appCoreService.getDeviceId();
   } catch (error) {
-    throw new Error(`Failed to get device ID: ${error instanceof Error ? error.message : String(error)}`);
+    // Log and proceed with default `did` to avoid blocking player initialization on transient failures
+    console.warn(
+      'TelemetryContextBuilder: Failed to get device ID, proceeding with default value.',
+      error
+    );
   }
 
   // Organization / channel
@@ -75,9 +79,12 @@ export async function buildTelemetryContext(
     if (org?.channel) channel = org.channel;
     if (org?.hashTagId) hashTagId = org.hashTagId;
     if (orgResponse?.data?.ts) timeDiff = orgResponse.data.ts;
-    
   } catch (error) {
-    throw new Error(`Failed to fetch organization data: ${error instanceof Error ? error.message : String(error)}`);
+    // Log and proceed with default org/channel values
+    console.warn(
+      'TelemetryContextBuilder: Failed to fetch organization data, proceeding with default values.',
+      error
+    );
   }
 
   // Producer data
@@ -88,7 +95,11 @@ export async function buildTelemetryContext(
   try {
     userData = await userProfileService.getUserData();
   } catch (error) {
-    throw new Error(`Failed to fetch user profile data: ${error instanceof Error ? error.message : String(error)}`);
+    // Log and proceed with default user data
+    console.warn(
+      'TelemetryContextBuilder: Failed to fetch user profile data, proceeding with default values.',
+      error
+    );
   }
 
   // Derived fields
