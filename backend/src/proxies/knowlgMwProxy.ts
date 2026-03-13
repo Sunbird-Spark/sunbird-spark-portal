@@ -40,7 +40,7 @@ export const contentActionProxy = createProxyMiddleware({
                 fixRequestBody(proxyReq, req);
             }
         },
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line no-unused-vars
         proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
             const statusCode = proxyRes.statusCode || 500;
             if (statusCode >= 400) {
