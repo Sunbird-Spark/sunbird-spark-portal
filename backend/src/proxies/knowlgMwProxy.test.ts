@@ -60,6 +60,10 @@ describe('knowlgMwProxy', () => {
     });
 });
 
+// Import the real http-proxy-middleware at the top level (before any mocking)
+// so we have stable references that survive vi.resetModules()
+import { createProxyMiddleware, responseInterceptor, fixRequestBody } from 'http-proxy-middleware';
+
 describe('knowlgMwProxy Integration', () => {
     let app: express.Application;
     let mockServer: express.Application;
@@ -68,7 +72,13 @@ describe('knowlgMwProxy Integration', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
-        vi.doUnmock('http-proxy-middleware');
+        // Use top-level imported references to avoid Node.js 24 ESM/CJS
+        // interop issues with vi.doUnmock + dynamic import of CJS modules
+        vi.doMock('http-proxy-middleware', () => ({
+            createProxyMiddleware,
+            responseInterceptor,
+            fixRequestBody
+        }));
         vi.doUnmock('../utils/proxyUtils.js');
         vi.doUnmock('../utils/logger.js');
 
