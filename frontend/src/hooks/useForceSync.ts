@@ -54,7 +54,7 @@ export function useForceSync(
       toast({
         title: t("success"),
         description: t("courseDetails.forceSyncSuccess"),
-        variant: "default",
+        variant: "success",
         viewport: "center",
       });
       // Trigger re-render so showForceSyncButton is recalculated and the sync button hides (canUseForceSync now returns false).

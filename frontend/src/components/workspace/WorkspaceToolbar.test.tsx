@@ -18,6 +18,10 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspaceCard.uploads': 'Uploads',
         'workspaceCard.collaborations': 'Collaborations',
         'allTypes': 'All Types',
+        'workspace.searchPlaceholder': 'Search content...',
+        'workspace.clearSearch': 'Clear search',
+        'workspace.gridView': 'Grid view',
+        'workspace.listView': 'List view',
         'course': 'Course',
         'workspace.showingItems': `Showing ${data?.count} items`,
         'workspace.showingItemsOf': `Showing ${data?.count} items of ${data?.total}`,
@@ -92,6 +96,8 @@ const renderToolbar = (overrides?: Partial<{
     onViewModeChange,
     onTypeFilterChange,
     onCreateClick,
+    searchQuery: '',
+    onSearchChange: vi.fn(),
     ...overrides,
   };
 
@@ -156,9 +162,8 @@ describe('WorkspaceToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Course' }));
     expect(onTypeFilterChange).toHaveBeenCalledWith('course');
 
-    // View mode toggles (two icon-only buttons, pick the first as grid)
-    const buttons = screen.getAllByRole('button', { name: '' });
-    fireEvent.click(buttons[0]!);
+    // View mode toggles
+    fireEvent.click(screen.getByRole('button', { name: 'Grid view' }));
     expect(onViewModeChange).toHaveBeenCalledWith('grid');
   });
 

@@ -93,6 +93,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 
   return (
-    <div ref={containerRef} className="w-full h-full min-h-[37.5rem] relative" />
+    <div ref={containerRef} className="content-player-embed" />
   );
 };

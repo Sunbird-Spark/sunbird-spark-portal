@@ -22,14 +22,7 @@ const HomeDashboardContent = ({ loading, error, enrolledCount, onRetry }: HomeDa
     return (
         <>
             <HomeStatsCards />
-            <div className="home-continue-section">
-                <h3 className="home-continue-section-title">{t('homeComponents.continueLearning')}</h3>
-                <div className="home-continue-grid">
-                    <div className="w-full lg:w-[65%]">
-                        <HomeContinueLearning />
-                    </div>
-                </div>
-            </div>
+            <HomeContinueLearning />
             {enrolledCount > 1 && <HomeInProgressGrid />}
             <HomeRecommendedSection />
         </>

@@ -439,7 +439,7 @@
   }
 
   .content-player-container {
-    @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+    @apply w-full px-4 sm:px-6 lg:px-8 mx-auto py-6 max-w-[78.125rem];
   }
 
   .content-player-resource-title {
@@ -458,7 +458,7 @@
   }
 
   .content-player-go-back {
-    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity font-rubik;
+    @apply flex items-center gap-1.5 font-rubik font-medium text-[1rem] leading-[1.625rem] tracking-normal text-sunbird-brick mb-6 hover:opacity-80 transition-opacity;
   }
 
   .content-player-back-arrow {
@@ -467,7 +467,7 @@
   }
 
   .content-player-title-row {
-    @apply flex items-start justify-between mb-2;
+    @apply flex items-start justify-between mb-4;
   }
 
   .content-player-title {
@@ -499,19 +499,23 @@
   }
 
   .content-player-video-container {
-    width: 100%;
-    height: 100%;
-    max-height: 41.313rem;
-    max-width: 71.625rem;
-    margin-inline: auto;
+    @apply w-full max-w-[74.125rem] p-5 rounded-[1.25rem] bg-white overflow-hidden;
   }
 
-  .content-player-video-wrapper {
-    @apply bg-white rounded-xl overflow-hidden border border-gray-100;
+  .content-player-wrapper {
+    @apply w-full overflow-hidden rounded-[1.25rem] relative shadow-sm;
   }
 
-  .content-player-video-relative {
-    @apply relative h-80 sm:h-96 md:h-[37.5rem] lg:h-[37.5rem];
+  .content-player-embed {
+    @apply w-full;
+  }
+
+  div.content-player-embed:empty {
+    min-height: 41.3125rem;
+  }
+
+  iframe.content-player-embed {
+    height: 41.3125rem;
   }
 
   .content-player-video-thumbnail {
@@ -531,11 +535,11 @@
   }
 
   .content-player-related-header {
-    @apply flex items-center gap-3 mb-6 mt-12;
+    @apply flex items-center gap-3 mb-4 mt-12;
   }
 
   .content-player-related-title {
-    @apply text-xl font-semibold text-foreground font-rubik my-2;
+    @apply font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground my-2;
   }
 
   .content-player-related-arrow {
@@ -543,7 +547,21 @@
   }
 
   .content-player-related-grid {
-    @apply grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-fr;
+    @apply grid grid-cols-1 gap-5 auto-rows-fr;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .content-player-related-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .content-player-related-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.375rem;
+    }
   }
 
 
@@ -717,39 +735,55 @@
     @apply w-full h-full border-0 rounded;
   }
 
-  /* Sunbird Player Styles - Video, PDF, EPUB & QUML */
-  sunbird-video-player,
+  /* Sunbird Player Styles */
+
+  /* Video player: height is managed by Video.js based on actual video dimensions */
+  sunbird-video-player {
+    display: block;
+    width: 100%;
+  }
+
+  /* PDF, EPUB, QUML: no intrinsic video dimensions, use fixed responsive heights */
   sunbird-pdf-player,
   sunbird-epub-player,
   sunbird-quml-player {
-    @apply block;
-    height: 37.5rem;
+    display: block;
+    width: 100%;
+    height: 41.3125rem;
   }
 
-  /* Responsive player heights */
   @media (max-width: 1024px) {
-    sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
     sunbird-quml-player {
       height: 28rem;
     }
+
+    iframe.content-player-embed {
+      height: 28rem;
+    }
   }
 
   @media (max-width: 768px) {
-    sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
     sunbird-quml-player {
       height: 22rem;
     }
+
+    iframe.content-player-embed {
+      height: 22rem;
+    }
   }
 
   @media (max-width: 640px) {
-    sunbird-video-player,
     sunbird-pdf-player,
     sunbird-epub-player,
     sunbird-quml-player {
+      height: 18rem;
+    }
+
+    iframe.content-player-embed {
       height: 18rem;
     }
   }
@@ -764,20 +798,43 @@
   }
 
   .collection-player-wrapper {
-    @apply p-4;
+    @apply p-4 relative;
   }
 
   .collection-player-loading {
-    @apply aspect-video flex items-center justify-center bg-gray-100;
+    @apply flex items-center justify-center bg-gray-100;
+    min-height: 41.3125rem;
     border-radius: 1.125rem;
   }
 
   .collection-player-error {
-    @apply aspect-video flex items-center justify-center bg-gray-100;
+    @apply flex items-center justify-center bg-gray-100;
+    min-height: 41.3125rem;
   }
 
   .collection-player-error-text {
     @apply text-sm text-red-500;
+  }
+
+  @media (max-width: 1024px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 28rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 22rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 18rem;
+    }
   }
 
   .collection-overview-section {
@@ -1122,5 +1179,43 @@
   /* Hide Google reCAPTCHA Badge */
   .grecaptcha-badge {
     visibility: hidden !important;
+  }
+
+  /* Hide Video.js Big Play Button only within the Sunbird video player wrapper */
+  [data-video-player-wrapper] .vjs-big-play-button {
+    display: none !important;
+  }
+  .sunbird-video-player-container {
+    border-radius: 1.25rem;
+  }
+
+  /* Video player internal tag: auto height so Video.js drives dimensions */
+  sunbird-video-player video-player {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Override VideoPlayerService inline height: 100% on its wrapper div */
+  [data-video-player-wrapper] {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  [data-video-player-wrapper] .video-js {
+    background-color: transparent !important;
+  }
+
+  /* Ensure control bar is always visible and interactive when video is paused */
+  [data-video-player-wrapper] .vjs-control-bar {
+    z-index: 3 !important;
+    pointer-events: auto !important;
+  }
+
+  [data-video-player-wrapper] .vjs-paused .vjs-control-bar,
+  [data-video-player-wrapper] .vjs-paused.vjs-user-inactive .vjs-control-bar {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 }

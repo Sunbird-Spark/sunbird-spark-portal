@@ -6,6 +6,7 @@ interface QuestionSetCreateParams {
   createdBy: string;
   createdFor: string[];
   framework: string;
+  creator: string;
 }
 
 export const useQuestionSetCreate = (): UseMutationResult<any, Error, QuestionSetCreateParams> => {

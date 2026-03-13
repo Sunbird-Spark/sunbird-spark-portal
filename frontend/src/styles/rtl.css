@@ -202,12 +202,12 @@
 /* Notification Popover RTL */
 [dir="rtl"] .notification-popover-content {
   right: auto !important;
-  left: -10rem !important;
+  left: -10.5rem !important;
 }
 
 [dir="ltr"] .notification-popover-content {
   left: auto !important;
-  right: -10rem !important;
+  right: -10.5rem !important;
 }
 
 [dir="rtl"] .notification-popover-arrow {
@@ -218,6 +218,31 @@
 [dir="ltr"] .notification-popover-arrow {
   left: auto !important;
   right: 3.25rem !important;
+}
+
+
+@media (max-width: 1023px) {
+  [dir="rtl"] .notification-popover-content {
+    right: auto !important;
+    left: -6rem !important;
+  }
+
+  [dir="ltr"] .notification-popover-content {
+    left: auto !important;
+    right: -6rem !important;
+  }
+}
+
+@media (max-width: 767px) {
+  [dir="rtl"] .notification-popover-content {
+    right: auto !important;
+    left: -5.75rem !important;
+  }
+
+  [dir="ltr"] .notification-popover-content {
+    left: auto !important;
+    right: -5.75rem !important;
+  }
 }
 
 /* Notification Item Indicator RTL */

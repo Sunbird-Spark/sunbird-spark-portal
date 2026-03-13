@@ -76,7 +76,7 @@ describe('ContentPlayer', () => {
 
   it('wraps player in a relative container', () => {
     const { container } = render(<ContentPlayer {...defaultProps} />);
-    expect(container.firstChild).toHaveClass('relative');
+    expect(container.firstChild).toHaveClass('content-player-wrapper');
   });
 
   it('does not show RatingDialog initially', () => {

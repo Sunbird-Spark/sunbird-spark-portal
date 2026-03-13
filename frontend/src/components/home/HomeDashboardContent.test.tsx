@@ -81,10 +81,10 @@ describe('HomeDashboardContent', () => {
         expect(screen.getByTestId('inprogress-grid')).toBeInTheDocument();
     });
 
-    it('shows "Continue from where you left" heading when enrolled', () => {
+    it('shows continue learning section when enrolled', () => {
         render(<HomeDashboardContent {...defaultProps} enrolledCount={1} />);
 
-        expect(screen.getByText('Continue from where you left')).toBeInTheDocument();
+        expect(screen.getByTestId('continue-learning')).toBeInTheDocument();
     });
 
     it('loading takes priority over error', () => {

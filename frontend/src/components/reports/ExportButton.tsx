@@ -33,7 +33,7 @@ const ExportButton = ({ data, filename = "report", columns }: ExportButtonProps)
     link.download = `${filename}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    toast({ title: "CSV exported successfully" });
+    toast({ title: "CSV exported successfully", variant: "success" });
   };
 
   return (

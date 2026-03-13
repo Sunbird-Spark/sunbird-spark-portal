@@ -30,16 +30,41 @@ type TelemetryEvent = {
   type?: string;
   actor?: { id?: string };
   ets?: number;
-  edata?: { summary?: ConsumptionSummary[] };
+  edata?: { summary?: ConsumptionSummary[]; score?: number; [key: string]: unknown };
   summary?: ConsumptionSummary | ConsumptionSummary[];
-  data?: {
+  data?: string | {
     eid?: string;
     actor?: { id?: string };
     ets?: number;
-    edata?: { summary?: ConsumptionSummary[] };
+    edata?: { summary?: ConsumptionSummary[]; score?: number; [key: string]: unknown };
     summary?: ConsumptionSummary | ConsumptionSummary[];
+    score?: number;
+    [key: string]: unknown;
   };
 };
+
+/** True when the event carries a score (submit), e.g. ASSESS with edata.score or summary score. */
+function eventHasScore(event: TelemetryEvent | undefined): boolean {
+  if (!event) return false;
+  const raw = event?.data ?? event;
+  if (typeof raw === "string") return false;
+  const rawData = raw as Record<string, unknown>;
+  if (typeof (rawData?.edata as { score?: number } | undefined)?.score === "number") return true;
+  if (typeof (rawData as { score?: number })?.score === "number") return true;
+  const summary = (rawData?.edata as any)?.summary ?? (rawData as any)?.summary;
+  const arr = Array.isArray(summary) ? summary : summary ? [summary] : [];
+  return arr.some(
+    (s) => typeof (s as ConsumptionSummary & { score?: number })?.score === "number"
+  );
+}
+
+function extractSummary(event: TelemetryEvent): ConsumptionSummary[] {
+  const raw = event?.data ?? event;
+  if (typeof raw === "string") return [];
+  const rawData = raw as any;
+  const rawSummary = rawData?.edata?.summary ?? rawData?.summary;
+  return Array.isArray(rawSummary) ? rawSummary : rawSummary ? [rawSummary] : [];
+}
 
 export function useContentStateUpdate({
   collectionId,
@@ -55,6 +80,7 @@ export function useContentStateUpdate({
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
   const lastSentStatusRef = useRef<number | null>(null);
+  const startUpdateInFlightRef = useRef(false);
 
   const assessmentTsRef = useRef<number | null>(null);
   const assessEventsRef = useRef<unknown[]>([]);
@@ -69,6 +95,7 @@ export function useContentStateUpdate({
 
   useEffect(() => {
     lastSentStatusRef.current = null;
+    startUpdateInFlightRef.current = false;
     assessmentTsRef.current = null;
     assessEventsRef.current = [];
     sendingAssessmentRef.current = false;
@@ -91,6 +118,7 @@ export function useContentStateUpdate({
         }
       } catch (err) {
         console.error("Content state update failed:", err);
+        throw err;
       }
     },
     [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]
@@ -144,40 +172,81 @@ export function useContentStateUpdate({
       const isSelfAssess = (contentTypeRef.current ?? "").toLowerCase() === "selfassess";
       if (!isSelfAssess && currentContentStatusRef.current === 2) return;
 
-      const eid = (event?.eid ?? event?.data?.eid ?? event?.type ?? "") as string;
+      const rawEvent = event?.data ?? event;
+      const eid = typeof rawEvent === "string" ? "" : (event?.eid ?? (event?.data as any)?.eid ?? event?.type ?? "") as string;
       const eidUpper = eid.toUpperCase();
 
-      if (eidUpper === "START") {
-        const rawEvent = event?.data ?? event;
-        const ets = rawEvent?.ets ?? event?.ets;
-        if (ets != null) assessmentTsRef.current = ets;
-        assessEventsRef.current = [];
-        if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1) {
-          lastSentStatusRef.current = 1;
-          void handleContentStateUpdate(1, false);
-        }
-        return;
-      }
-
-      if (eidUpper === "ASSESS") {
-        const rawEvent = event?.data ?? event;
-        assessEventsRef.current = [...assessEventsRef.current, rawEvent ?? event];
-        return;
-      }
-
-      if (eidUpper === "END") {
-        if (isSelfAssess && assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+      // Support renderer:question:submitscore for SelfAssess content (aligned with old portal)
+      if (isSelfAssess && event?.data === "renderer:question:submitscore") {
+        if (assessmentTsRef.current != null && !sendingAssessmentRef.current) {
           sendingAssessmentRef.current = true;
           void sendAssessmentAndInvalidate();
           lastSentStatusRef.current = null;
           return;
         }
-        const rawSummary =
-          event?.edata?.summary ??
-          event?.data?.edata?.summary ??
-          event?.summary ??
-          event?.data?.summary;
-        const summary = Array.isArray(rawSummary) ? rawSummary : rawSummary ? [rawSummary] : [];
+      }
+
+      if (eidUpper === "START") {
+        const ets = (rawEvent as any)?.ets ?? event?.ets;
+        if (ets != null) assessmentTsRef.current = ets;
+        assessEventsRef.current = [];
+        if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1 && !startUpdateInFlightRef.current) {
+          startUpdateInFlightRef.current = true;
+          handleContentStateUpdate(1, true)
+            .then(() => {
+              lastSentStatusRef.current = 1;
+            })
+            .catch(() => {
+              /* Already logged in handleContentStateUpdate; ref left null so next START retries */
+            })
+            .finally(() => {
+              startUpdateInFlightRef.current = false;
+            });
+        }
+        return;
+      }
+
+      if (eidUpper === "ASSESS") {
+        const rawEventData = event?.data ?? event;
+        assessEventsRef.current = [...assessEventsRef.current, rawEventData ?? event];
+        return;
+      }
+
+      if (eidUpper === "END") {
+        const summary = extractSummary(event);
+        if (isSelfAssess) {
+
+          const mergedSummary = (summary as ConsumptionSummary[]).reduce<ConsumptionSummary>((acc, s) => ({ ...acc, ...s }), {});
+          const endPageSeen = Boolean(mergedSummary.endpageseen || mergedSummary.visitedcontentend);
+
+          const hasScore =
+            eventHasScore(event) ||
+            assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent));
+
+          if (
+            hasScore &&
+            endPageSeen &&
+            assessmentTsRef.current != null &&
+            !sendingAssessmentRef.current
+          ) {
+            sendingAssessmentRef.current = true;
+            void sendAssessmentAndInvalidate();
+            lastSentStatusRef.current = null;
+            return;
+          }
+          // Completion criteria not met; do not regress an already-completed content.
+          if (currentContentStatusRef.current === 2) return;
+          const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
+          const statusFromProgress = progressToStatus(effectiveProgress);
+          const status = Math.min(statusFromProgress, 1);
+          if (status === 0 && lastSentStatusRef.current === 1) {
+            void handleContentStateUpdate(1, true);
+          } else {
+            lastSentStatusRef.current = null;
+            void handleContentStateUpdate(status, true);
+          }
+          return;
+        }
         const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
         let status = progressToStatus(effectiveProgress);
         if (status === 0 && lastSentStatusRef.current === 1) status = 1;

@@ -405,14 +405,14 @@ describe('GenericEditorService', () => {
   });
 
   describe('buildEditorConfig', () => {
-    it('should return correct config with lock params', () => {
+    it('should return correct config with lock params', async () => {
       const lockParams: GenericEditorQueryParams = {
         lockKey: 'key-1',
         expiresAt: '2026-02-19T00:00:00Z',
         expiresIn: '3600',
       };
 
-      const config = service.buildEditorConfig(lockParams, '/logo.png');
+      const config = await service.buildEditorConfig(lockParams, '/logo.png');
 
       expect(config.corePluginsPackaged).toBe(GENERIC_EDITOR_WINDOW_CONFIG.corePluginsPackaged);
       expect(config.build_number).toBe('1.0');
@@ -428,18 +428,24 @@ describe('GenericEditorService', () => {
       expect(config.defaultContentFileSize).toBe(DEFAULT_CONTENT_FILE_SIZE);
     });
 
-    it('should use empty string for headerLogo when not provided', () => {
-      const config = service.buildEditorConfig();
+    it('should use empty string for headerLogo when not provided', async () => {
+      const config = await service.buildEditorConfig();
       expect(config.headerLogo).toBe('');
     });
 
-    it('should use undefined lock values when no lock params provided', () => {
-      const config = service.buildEditorConfig();
+    it('should use undefined lock values when no lock params provided', async () => {
+      const config = await service.buildEditorConfig();
       expect(config.lock).toEqual({
         lockKey: undefined,
         expiresAt: undefined,
         expiresIn: undefined,
       });
+    });
+
+    it('should populate empty contentFields and fwCategoryDetails when no framework is provided', async () => {
+      const config = await service.buildEditorConfig();
+      expect(config.contentFields).toBe('');
+      expect(config.fwCategoryDetails).toEqual([]);
     });
   });
 

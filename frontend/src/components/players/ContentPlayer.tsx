@@ -10,7 +10,7 @@ import { useRatingTimer } from '@/hooks/useRatingTimer';
 // MIME type to player component mapping
 const MIME_TYPE_PLAYERS = {
   'application/epub': EpubPlayer,
-  'video/x-youtube': VideoPlayer,
+  'video/x-youtube': EcmlPlayer,
   'video/webm': VideoPlayer,
   'video/mp4': VideoPlayer,
   'application/pdf': PdfPlayer,
@@ -58,7 +58,7 @@ export const ContentPlayer: React.FC<ContentPlayerProps> = ({
   const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType] || EcmlPlayer;
 
   return (
-    <div className="relative">
+    <div className="content-player-wrapper">
       <PlayerComponent
         metadata={metadata}
         mode={mode}

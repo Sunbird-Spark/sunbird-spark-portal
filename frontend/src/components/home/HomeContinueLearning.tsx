@@ -69,45 +69,52 @@ const HomeContinueLearning = () => {
     const title = lastAccessedCourse.courseName || lastAccessedCourse.content?.name || "Untitled Course";
 
     return (
-        <div className="home-continue-learning-card">
-            <div className="home-continue-learning-inner">
-                {/* Thumbnail */}
-                <div className="home-continue-learning-thumbnail">
-                    {thumbnail ? (
-                        <img
-                            src={thumbnail}
-                            alt={title}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-black" />
-                    )}
-                </div>
+        <div className="home-continue-section">
+            <h3 className="home-continue-section-title">{t('homeComponents.continueLearning')}</h3>
+            <div className="home-continue-grid">
+                <div className="w-full lg:w-[65%]">
+                    <div className="home-continue-learning-card">
+                        <div className="home-continue-learning-inner">
+                            {/* Thumbnail */}
+                            <div className="home-continue-learning-thumbnail">
+                                {thumbnail ? (
+                                    <img
+                                        src={thumbnail}
+                                        alt={title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-black" />
+                                )}
+                            </div>
 
-                {/* Content */}
-                <div className="home-continue-learning-content">
-                    <div>
-                        <h4 className="home-continue-learning-title">
-                            {title}
-                        </h4>
-                    </div>
-                    {/* Progress */}
-                    <div className="home-continue-learning-progress">
-                        <CircularProgress progress={lastAccessedCourse.completionPercentage} />
-                        <span className="home-continue-learning-progress-label">
-                            {t("courseDetails.contentStatusCompleted")} : {lastAccessedCourse.completionPercentage}%
-                        </span>
-                    </div>
+                            {/* Content */}
+                            <div className="home-continue-learning-content">
+                                <div>
+                                    <h4 className="home-continue-learning-title">
+                                        {title}
+                                    </h4>
+                                </div>
+                                {/* Progress */}
+                                <div className="home-continue-learning-progress">
+                                    <CircularProgress progress={lastAccessedCourse.completionPercentage} />
+                                    <span className="home-continue-learning-progress-label">
+                                        {t("courseDetails.contentStatusCompleted")} : {lastAccessedCourse.completionPercentage}%
+                                    </span>
+                                </div>
 
-                    {/* CTA Button */}
-                    <div className="home-continue-learning-cta">
-                        <Button
-                            onClick={() => navigate(continueTo, { state: { from: '/home' } })}
-                            className="home-continue-learning-btn group"
-                        >
-                            {t("homeComponents.continueLearning")}
-                            <FiArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-                        </Button>
+                                {/* CTA Button */}
+                                <div className="home-continue-learning-cta">
+                                    <Button
+                                        onClick={() => navigate(continueTo, { state: { from: '/home' } })}
+                                        className="home-continue-learning-btn group"
+                                    >
+                                        {t("homeComponents.continueLearning")}
+                                        <FiArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

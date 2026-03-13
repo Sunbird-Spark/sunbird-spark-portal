@@ -146,12 +146,12 @@ describe('useUserRead hook', () => {
     });
 
     describe('query options', () => {
-        it('uses 10-minute staleTime by default to cache user data across navigations', () => {
+        it('uses 1-hour staleTime by default to cache user data across navigations', () => {
             mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
 
             renderHook(() => useUserRead(), { wrapper: createWrapper() });
 
-            expect(capturedArgs.queryOptions).toMatchObject({ staleTime: 10 * 60 * 1000 });
+            expect(capturedArgs.queryOptions).toMatchObject({ staleTime: 60 * 60 * 1000 });
         });
 
         it('passes refetchOnMount: always through to useQuery when provided', () => {
@@ -160,7 +160,7 @@ describe('useUserRead hook', () => {
             renderHook(() => useUserRead({ refetchOnMount: 'always' }), { wrapper: createWrapper() });
 
             expect(capturedArgs.queryOptions).toMatchObject({
-                staleTime: 10 * 60 * 1000,
+                staleTime: 60 * 60 * 1000,
                 refetchOnMount: 'always',
             });
         });

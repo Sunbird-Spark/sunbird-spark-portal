@@ -84,7 +84,7 @@ export default function CourseProgressSection({
       toast({
         title: t("success"),
         description: t("courseDetails.unenrolSuccess"),
-        variant: "default",
+        variant: "success",
       });
       navigate(`/collection/${collectionId}`);
     } catch (err) {

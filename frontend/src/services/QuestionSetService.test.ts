@@ -122,6 +122,7 @@ describe('QuestionSetService', () => {
       createdBy: 'user-123',
       createdFor: ['org-456'],
       framework: 'NCF',
+      creator: 'Test User',
     };
 
     it('should call client.post with correct url and payload structure', async () => {
@@ -143,6 +144,7 @@ describe('QuestionSetService', () => {
             mimeType: 'application/vnd.sunbird.questionset',
             primaryCategory: 'Practice Question Set',
             createdBy: createOptions.createdBy,
+            creator: createOptions.creator,
             createdFor: createOptions.createdFor,
             framework: createOptions.framework,
             code: mockUuid,

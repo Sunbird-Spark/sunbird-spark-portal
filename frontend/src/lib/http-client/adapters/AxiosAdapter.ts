@@ -40,10 +40,15 @@ export class AxiosAdapter extends BaseClient {
       if (axios.isAxiosError(error) && error.response) {
         const status = error.response.status;
         if (status >= 400) {
+          if (status === 401 || status === 403) {
+            this.onResponse(this.mapResponse(error.response as AxiosResponse<T>));
+          }
           const body = error.response.data as Record<string, unknown> | undefined;
           const params = body?.params as Record<string, unknown> | undefined;
           const errmsg = typeof params?.errmsg === 'string' ? params.errmsg : error.message || `Request failed (${status})`;
-          throw new Error(errmsg);
+          const err = new Error(errmsg) as Error & { status: number };
+          err.status = status;
+          throw err;
         }
         return this.mapResponse(error.response as AxiosResponse<T>);
       }

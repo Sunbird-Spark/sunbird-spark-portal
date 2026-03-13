@@ -23,11 +23,19 @@ const CollectionDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
+  // Filter out any /collection/ path as a back-destination to prevent
+  // collection-to-collection navigation chains. Falls back to /explore,
+  // which is safe for both authenticated and anonymous users.
+  const stateFrom = (location.state as { from?: string } | null)?.from ?? '';
+  // Reject /collection/ and /content/ paths to prevent multi-hop back chains.
+  const resolveBackTo = (from: string) =>
+    from && !from.startsWith('/collection/') && !from.startsWith('/content/') ? from : '/explore';
+
+  const backToRef = useRef<string>(resolveBackTo(stateFrom));
   const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
   if (capturedCollectionIdRef.current !== collectionId) {
     capturedCollectionIdRef.current = collectionId;
-    backToRef.current = (location.state as { from?: string } | null)?.from ?? '/explore';
+    backToRef.current = resolveBackTo(stateFrom);
   }
   const backTo = backToRef.current;
   const { isAuthenticated } = usePermissions();

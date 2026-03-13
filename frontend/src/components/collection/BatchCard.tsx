@@ -51,7 +51,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
         tncType: "reportViewerTnc",
       });
       setReviewerTncAccepted(true);
-      toast({ title: "Terms accepted", description: "You can now view batch reports." });
+      toast({ title: "Terms accepted", description: "You can now view batch reports.", variant: "success" });
     } catch {
       toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
     }

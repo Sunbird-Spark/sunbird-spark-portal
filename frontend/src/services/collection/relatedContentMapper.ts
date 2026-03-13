@@ -32,5 +32,7 @@ export function mapSearchContentToRelatedContentItems(
     mimeType: item.mimeType,
     primaryCategory: item.primaryCategory,
     cardType: (item.mimeType ?? '').toLowerCase() === 'application/vnd.ekstep.content-collection' ? 'collection' : 'resource',
+    leafNodesCount: item.leafNodesCount,
+    creator: item.creator ?? item.createdBy ?? 'Unknown',
   }));
 }

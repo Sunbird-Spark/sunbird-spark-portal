@@ -3,7 +3,7 @@ import { getWorkspaceItemActionVisibility } from './workspaceItemActions';
 
 describe('workspaceItemActions', () => {
   it('returns correct action visibility for draft status', () => {
-    expect(getWorkspaceItemActionVisibility('draft')).toEqual({
+    expect(getWorkspaceItemActionVisibility('draft', 'creator')).toEqual({
       isDraft: true,
       isPublished: false,
       isReview: false,
@@ -42,7 +42,7 @@ describe('workspaceItemActions', () => {
       isReview: false,
       showView: true,
       showEdit: true,
-      showDelete: false,
+      showDelete: true,
     });
   });
 

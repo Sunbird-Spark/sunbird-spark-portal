@@ -9,5 +9,7 @@ export const useSystemSetting = (id: string): UseQueryResult<ApiResponse<any>, E
     queryKey: ['system-setting', id],
     queryFn: () => systemSettingService.read(id),
     enabled: !!id,
+    staleTime: Infinity, // Data remains fresh until page reload
+    gcTime: 3600000, // Keep in cache indefinitely
   });
 };
