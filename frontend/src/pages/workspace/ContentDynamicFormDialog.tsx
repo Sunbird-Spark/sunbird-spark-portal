@@ -51,10 +51,7 @@ const processFormSubmission = (formValues: Record<string, string | string[]>, fi
     if (val && (typeof val === 'string' ? val.trim() : val.length > 0)) {
       if (field.inputType === 'number' && typeof val === 'string') {
         const num = Number(val);
-        if (!isNaN(num)) {
-          dynamicFields[field.code] = num;
-          continue;
-        }
+        if (!isNaN(num)) { dynamicFields[field.code] = num; continue; }
       }
       dynamicFields[field.code] = val;
     }
@@ -80,9 +77,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
   return (
     <div className="content-form-error-state">
       <p className="content-form-error-text">{error}</p>
-      <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">
-        {t('retry')}
-      </Button>
+      <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{t('retry')}</Button>
     </div>
   )
 };
