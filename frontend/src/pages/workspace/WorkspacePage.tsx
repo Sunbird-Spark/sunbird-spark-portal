@@ -468,7 +468,7 @@ const WorkspacePage = () => {
       return `/edit/quml-editor/${id}`;
     }
     if (item.mimeType === 'application/vnd.ekstep.ecml-archive') {
-        return `/edit/content-editor/${id}`;
+      return `/edit/content-editor/${id}`;
     }
     const state = (item.status || 'Draft').toLowerCase();
     const framework = item.framework || orgFramework || '';
@@ -562,65 +562,65 @@ const WorkspacePage = () => {
   return (
     <div className="flex-1 flex flex-col min-w-0">
       <main className="workspace-main-content">
-            <div className="workspace-content-wrapper">
-              <WorkspaceToolbar {...navigationProps} />
-              {showContent && isCountsLoading && isLoading ? (
-                <PageLoader message={t('loading')} fullPage={false} />
-              ) : (
-                <WorkspacePageContent
-                  showCreateModal={showCreateModal}
-                  activeView={activeView}
-                  filteredItems={visibleContents}
-                  viewMode={viewMode}
-                  t={t}
-                  isLoading={isLoading}
-                  isLoadingMore={isLoadingMore}
-                  hasMore={hasMore}
-                  isError={!!error}
-                  error={error}
-                  userRole={userRole}
-                  lockedContentMap={lockedContentMap}
-                  onLoadMore={loadMore}
-                  onRetry={refetchAll}
-                  onCreateOption={handleCreateOption}
-                  onCreateClick={handleCreateClick}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onView={handleView}
-                />
-              )}
-            </div>
-          </main>
-          <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} isBookCreator={isBookCreatorOnly} />
-          <ConfirmDialog
-            open={!!confirmDialog}
-            onClose={() => setConfirmDialog(null)}
-            onConfirm={handleConfirmAction}
-            isLoading={isConfirming}
-            title={t('workspace.deleteContent')}
-            description={t('workspace.deleteConfirmation')}
-            confirmLabel={t('delete')}
-            confirmVariant="destructive"
-          />
-          <ContentNameDialog
-            open={showNameDialog}
-            onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
-            onSubmit={handleContentNameSubmit}
-            isLoading={isCreating}
-            optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
-            optionId={selectedOption ?? undefined}
-          />
-          <ContentDynamicFormDialog
-            open={showDynamicFormDialog}
-            onClose={() => { setShowDynamicFormDialog(false); setSelectedOption(null); }}
-            onSubmit={handleDynamicFormSubmit}
-            isLoading={isCreating}
-            orgChannelId={orgChannelId}
-            orgFramework={orgFramework}
-            formSubType={selectedOption === 'quiz' ? 'assessment' : selectedOption === 'textbook' ? 'textbook' : selectedOption === 'collection' ? 'collection' : 'resource'}
-            title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('workspace.createContent')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
-            defaultFields={DEFAULT_FIELDS}
-          />
+        <div className="workspace-content-wrapper">
+          <WorkspaceToolbar {...navigationProps} />
+          {showContent && isCountsLoading && isLoading ? (
+            <PageLoader message={t('loading')} fullPage={false} />
+          ) : (
+            <WorkspacePageContent
+              showCreateModal={showCreateModal}
+              activeView={activeView}
+              filteredItems={visibleContents}
+              viewMode={viewMode}
+              t={t}
+              isLoading={isLoading}
+              isLoadingMore={isLoadingMore}
+              hasMore={hasMore}
+              isError={!!error}
+              error={error}
+              userRole={userRole}
+              lockedContentMap={lockedContentMap}
+              onLoadMore={loadMore}
+              onRetry={refetchAll}
+              onCreateOption={handleCreateOption}
+              onCreateClick={handleCreateClick}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onView={handleView}
+            />
+          )}
+        </div>
+      </main>
+      <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} isBookCreator={isBookCreatorOnly} />
+      <ConfirmDialog
+        open={!!confirmDialog}
+        onClose={() => setConfirmDialog(null)}
+        onConfirm={handleConfirmAction}
+        isLoading={isConfirming}
+        title={t('workspace.deleteContent')}
+        description={t('workspace.deleteConfirmation')}
+        confirmLabel={t('delete')}
+        confirmVariant="destructive"
+      />
+      <ContentNameDialog
+        open={showNameDialog}
+        onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
+        onSubmit={handleContentNameSubmit}
+        isLoading={isCreating}
+        optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
+        optionId={selectedOption ?? undefined}
+      />
+      <ContentDynamicFormDialog
+        open={showDynamicFormDialog}
+        onClose={() => { setShowDynamicFormDialog(false); setSelectedOption(null); }}
+        onSubmit={handleDynamicFormSubmit}
+        isLoading={isCreating}
+        orgChannelId={orgChannelId}
+        orgFramework={orgFramework}
+        formSubType={selectedOption === 'quiz' ? 'assessment' : selectedOption === 'textbook' ? 'textbook' : selectedOption === 'collection' ? 'collection' : 'resource'}
+        title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('create')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
+        defaultFields={DEFAULT_FIELDS}
+      />
     </div>
   );
 };
