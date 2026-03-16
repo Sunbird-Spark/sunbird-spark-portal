@@ -22,7 +22,7 @@ export interface TelemetryContext {
   contextRollup: Record<string, string>;
   tags: string[];
   cdata: any[];
-  timeDiff: string | number;
+  timeDiff: number;
   objectRollup: Record<string, string>;
   host: string;
   endpoint: string;
@@ -79,7 +79,9 @@ export async function buildTelemetryContext(
     const org = orgResponse?.data?.response?.content?.[0];
     if (org?.channel) channel = org.channel;
     if (org?.hashTagId) hashTagId = org.hashTagId;
-    if (orgResponse?.data?.ts) timeDiff = orgResponse.data.ts;
+    // Compute clock skew from response Date header: (serverTime - clientTime) / 1000
+    // Same as old portal's DataService.getDateDiff()
+    timeDiff = getDateDiff(orgResponse?.headers?.['date'] as string);
   } catch (error) {
     // Log and proceed with default org/channel values
     console.warn(
@@ -154,6 +156,17 @@ export async function buildTelemetryContext(
   }
 
   return context;
+}
+
+/**
+ * Compute clock skew between server and client in seconds.
+ * Same as old portal's DataService.getDateDiff().
+ */
+function getDateDiff(serverDate?: string): number {
+  if (!serverDate) return 0;
+  const serverTime = new Date(serverDate).getTime();
+  const clientTime = new Date().getTime();
+  return (serverTime - clientTime) / 1000;
 }
 
 /**

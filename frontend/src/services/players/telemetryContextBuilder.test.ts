@@ -27,8 +27,8 @@ vi.mock('../OrganizationService', () => ({
         response: {
           content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
-        ts: '2026-03-13T10:00:00.000Z',
       },
+      headers: { date: new Date().toUTCString() },
     }),
   })),
 }));
@@ -58,14 +58,14 @@ describe('buildTelemetryContext', () => {
     vi.clearAllMocks();
     sessionStorage.clear();
 
-    // Setup default org search mock
+    // Setup default org search mock with Date header for timeDiff computation
     mockOrgSearch = vi.fn().mockResolvedValue({
       data: {
         response: {
           content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
-        ts: '2026-03-13T10:00:00.000Z',
       },
+      headers: { date: new Date().toUTCString() },
     });
 
     vi.mocked(OrganizationService).mockImplementation(function (this: any) {
@@ -91,7 +91,7 @@ describe('buildTelemetryContext', () => {
     expect(context.channel).toBe('test-channel');
     expect(context.pdata).toEqual({ id: 'test.portal', ver: '1.0', pid: 'test.portal' });
     expect(context.userData).toEqual({ firstName: 'John', lastName: 'Doe' });
-    expect(context.timeDiff).toBe('2026-03-13T10:00:00.000Z');
+    expect(typeof context.timeDiff).toBe('number');
     expect(context.endpoint).toBe('/portal/data/v1/telemetry');
     expect(context.host).toBe('');
   });
@@ -194,28 +194,33 @@ describe('buildTelemetryContext', () => {
     expect(context.contentId).toBeUndefined();
   });
 
-  it('should extract timeDiff from org search response data.ts', async () => {
+  it('should compute timeDiff as clock skew from response Date header', async () => {
+    // Server date 5 seconds ahead of client
+    const serverDate = new Date(Date.now() + 5000).toUTCString();
     mockOrgSearch.mockResolvedValueOnce({
       data: {
         response: {
           content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
-        ts: '2026-03-13T10:00:00.000Z',
       },
+      headers: { date: serverDate },
     });
 
     const context = await buildTelemetryContext();
 
-    expect(context.timeDiff).toBe('2026-03-13T10:00:00.000Z');
+    // timeDiff should be approximately 5 seconds (allow 1s tolerance for execution time)
+    expect(context.timeDiff).toBeGreaterThan(4);
+    expect(context.timeDiff).toBeLessThan(6);
   });
 
-  it('should default timeDiff to 0 when data.ts is missing', async () => {
+  it('should default timeDiff to 0 when Date header is missing', async () => {
     mockOrgSearch.mockResolvedValueOnce({
       data: {
         response: {
           content: [{ channel: 'test-channel', hashTagId: 'test-hash-tag' }],
         },
       },
+      headers: {},
     });
 
     const context = await buildTelemetryContext();
@@ -357,7 +362,8 @@ describe('buildTelemetryContext', () => {
   it('should set contextRollup to empty when anonymous and no hashTagId', async () => {
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
     mockOrgSearch.mockResolvedValueOnce({
-      data: { response: { content: [{ channel: 'test-channel' }] }, ts: 0 },
+      data: { response: { content: [{ channel: 'test-channel' }] } },
+      headers: {},
     });
 
     const context = await buildTelemetryContext();
