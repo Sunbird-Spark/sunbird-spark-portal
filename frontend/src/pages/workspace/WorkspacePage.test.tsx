@@ -104,6 +104,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => {
       const map: Record<string, string> = {
+        'create': 'Create',
         'workspace.createContent': 'Create',
         'workspace.closeDialog': 'Close dialog',
         'loading': 'loading',
