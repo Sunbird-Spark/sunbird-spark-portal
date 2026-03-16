@@ -10,6 +10,7 @@ import { useBatchListForMentor } from '@/hooks/useBatch';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import './courseDashboard.css';
 
 type DashboardTab = 'batches' | 'certificates';
@@ -74,6 +75,10 @@ const CourseDashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100" data-testid="dashboard-page">
+      <TelemetryTracker 
+        startEventInput={{ type: 'workflow', mode: 'course-dashboard', pageid: 'course-dashboard-page' }}
+        endEventInput={{ type: 'workflow', mode: 'course-dashboard', pageid: 'course-dashboard-exit' }}
+      />
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-6">

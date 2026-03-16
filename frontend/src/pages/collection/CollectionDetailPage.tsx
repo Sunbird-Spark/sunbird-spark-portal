@@ -16,6 +16,7 @@ import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
 import CollectionDetailLayout from "./CollectionDetailLayout";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import "./collection.css";
 
 const CollectionDetailPage = () => {
@@ -243,37 +244,43 @@ const CollectionDetailPage = () => {
   );
 
   return (
-    <CollectionDetailLayout
-      navigation={{ onGoBack: () => navigate(backTo), t }}
-      loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
-      collection={{
-        collectionDataFromApi: collectionDataFromApi ?? null,
-        hierarchySuccess,
-        collectionData,
-        displayCollectionData,
-      }}
-      contentArea={contentArea}
-      certificateModal={{
-        certificatePreviewOpen,
-        certificatePreviewUrl,
-        certificatePreviewDetails,
-        setCertificatePreviewUrl,
-        setCertificatePreviewOpen,
-      }}
-      relatedContent={{
-        searchError,
-        searchErrorObj: searchErrorObj ?? null,
-        searchFetching,
-        relatedContentItems,
-        searchRefetch,
-      }}
-      courseCompletion={{
-        courseProgressProps,
-        isEnrolledInCurrentBatch,
-        collectionId,
-        hasCertificate,
-      }}
-    />
+    <>
+      <TelemetryTracker 
+        startEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-page' }}
+        endEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-exit' }}
+      />
+      <CollectionDetailLayout
+        navigation={{ onGoBack: () => navigate(backTo), t }}
+        loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
+        collection={{
+          collectionDataFromApi: collectionDataFromApi ?? null,
+          hierarchySuccess,
+          collectionData,
+          displayCollectionData,
+        }}
+        contentArea={contentArea}
+        certificateModal={{
+          certificatePreviewOpen,
+          certificatePreviewUrl,
+          certificatePreviewDetails,
+          setCertificatePreviewUrl,
+          setCertificatePreviewOpen,
+        }}
+        relatedContent={{
+          searchError,
+          searchErrorObj: searchErrorObj ?? null,
+          searchFetching,
+          relatedContentItems,
+          searchRefetch,
+        }}
+        courseCompletion={{
+          courseProgressProps,
+          isEnrolledInCurrentBatch,
+          collectionId,
+          hasCertificate,
+        }}
+      />
+    </>
   );
 };
 export default CollectionDetailPage;

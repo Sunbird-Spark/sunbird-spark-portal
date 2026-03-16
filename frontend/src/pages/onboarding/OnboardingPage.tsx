@@ -13,6 +13,8 @@ import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useCurrentUserId } from "@/hooks/useUser";
 import { useOnboardingRedirect } from './useOnboardingRedirect';
 import { toast } from "@/hooks/useToast";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+
 const Onboarding = () => {
   const { t } = useAppI18n();
   const navigate = useNavigate();
@@ -164,6 +166,10 @@ const Onboarding = () => {
   const isSubmitDisabled = isSubmitting || !userId || !selectedFieldId || (showOtherInput && !otherText.trim());
   return (
     <div className="h-screen flex items-center justify-center bg-white p-4 md:p-6 lg:p-8">
+      <TelemetryTracker 
+        startEventInput={{ type: 'workflow', mode: 'user-onboarding', pageid: 'onboarding-page' }}
+        endEventInput={{ type: 'workflow', mode: 'user-onboarding', pageid: 'onboarding-page' }}
+      />
       <div className="flex w-full max-w-7xl h-full max-h-[calc(100vh-4rem)] gap-6">
         <div className="w-full lg:w-1/2 p-8 md:p-10 lg:p-12 flex flex-col bg-white rounded-3xl overflow-y-auto">
           <div className="mb-6">

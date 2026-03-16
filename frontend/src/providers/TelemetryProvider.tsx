@@ -102,13 +102,7 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
         telemetryService.initialize(telemetryConfig);
         isInitializedRef.current = true;
 
-        // Fire global session END when the user closes or navigates away from the portal
-        const handleUnload = () => {
-          telemetryService.end({
-            edata: { type: 'app', pageid: 'home', mode: 'play' },
-          });
-        };
-        window.addEventListener('beforeunload', handleUnload);
+        // Global session START/END telemetry is handled by the backend
       } catch (e) {
         console.error('[TelemetryProvider] Failed to initialize telemetry', e);
       }

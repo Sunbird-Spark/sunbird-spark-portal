@@ -12,6 +12,7 @@ import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { useAcceptTnc } from '@/hooks/useTnc';
 import { SignupService } from '@/services/SignupService';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 const SignUp: React.FC = () => {
     const { toast } = useToast();
@@ -187,6 +188,10 @@ const SignUp: React.FC = () => {
 
     return (
         <AuthLayout isOtpPage={step === 2}>
+            <TelemetryTracker 
+                startEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
+                endEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
+            />
             <div className="w-full font-rubik">
                 {step === 1 && (
                     <SignUpForm
