@@ -118,6 +118,7 @@ describe('WorkspaceContentCard', () => {
     render(
       <WorkspaceContentCard
         item={defaultItem}
+        userRole="creator"
         onEdit={vi.fn()}
         onDelete={onDelete}
         onView={vi.fn()}

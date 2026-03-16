@@ -117,7 +117,7 @@ const WorkspaceToolbar = ({
                   "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium font-rubik transition-all",
                   activeView === segment.id
                     ? "bg-white text-sunbird-brick shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-foreground hover:text-sunbird-brick"
                 )}
               >
                 <span>{segment.label}</span>
@@ -128,7 +128,7 @@ const WorkspaceToolbar = ({
                       "min-w-[20px] justify-center text-xs",
                       activeView === segment.id
                         ? "bg-sunbird-ginger/20 text-sunbird-brick border-transparent"
-                        : "bg-gray-200/70 text-muted-foreground border-transparent"
+                        : "bg-gray-200/70 text-foreground border-transparent"
                     )}
                   >
                     {segment.count}

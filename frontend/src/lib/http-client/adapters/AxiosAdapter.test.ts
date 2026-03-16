@@ -125,7 +125,7 @@ describe('AxiosAdapter', () => {
     expect(thrown.message).toBe('Internal Server Error');
   });
 
-  it('should throw on 4xx so status handlers are not invoked', async () => {
+  it('should invoke status handlers for 401/403 errors', async () => {
     const handler = vi.fn();
     adapter = new AxiosAdapter({
       baseURL: 'http://test.com',
@@ -140,6 +140,28 @@ describe('AxiosAdapter', () => {
     mockAxiosInstance.get.mockRejectedValue(error);
 
     await expect(adapter.get('/test')).rejects.toThrow('Forbidden');
+    expect(handler).toHaveBeenCalledWith({
+      data: null,
+      status: 403,
+      headers: {},
+    });
+  });
+
+  it('should not invoke status handlers for other 4xx errors', async () => {
+    const handler = vi.fn();
+    adapter = new AxiosAdapter({
+      baseURL: 'http://test.com',
+      statusHandlers: { 404: handler },
+    });
+
+    const mockResponse = { data: null, status: 404, headers: {} };
+    const error: any = new Error('Not Found');
+    error.isAxiosError = true;
+    error.response = mockResponse;
+
+    mockAxiosInstance.get.mockRejectedValue(error);
+
+    await expect(adapter.get('/test')).rejects.toThrow('Not Found');
     expect(handler).not.toHaveBeenCalled();
   });
 
