@@ -71,7 +71,7 @@ describe('ContentNameDialog', () => {
     fireEvent.change(input, { target: { value: '  My Content  ' } });
     fireEvent.submit(input.closest('form')!);
 
-    expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Content');
+    expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Content', { description: undefined });
   });
 
   it('should not call onSubmit when name is empty or whitespace', () => {
@@ -171,61 +171,45 @@ describe('ContentNameDialog', () => {
   describe('collection mode (optionId="collection")', () => {
     const collectionProps = { ...defaultProps, optionId: 'collection', optionTitle: 'Collection' };
 
-    it('should render description and collection type fields', () => {
+    it('should render name field and title for collection', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
-      expect(screen.getByText('Description')).toBeInTheDocument();
-      expect(screen.getByText(/Collection Type/)).toBeInTheDocument();
-      expect(screen.getByText('Select a collection type')).toBeInTheDocument();
+      expect(screen.getByText('Create Collection')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Enter collection name')).toBeInTheDocument();
     });
 
-    it('should disable Create button when collection type is not selected', () => {
+    it('should disable Create button when name is empty', () => {
       render(<ContentNameDialog {...collectionProps} />);
-
-      const input = screen.getByPlaceholderText('Enter collection name');
-      fireEvent.change(input, { target: { value: 'My Collection' } });
 
       const createButton = screen.getByRole('button', { name: 'Create' });
       expect(createButton).toBeDisabled();
     });
 
-    it('should enable Create button when name and collection type are filled', () => {
+    it('should enable Create button when name is filled', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
       fireEvent.change(screen.getByPlaceholderText('Enter collection name'), { target: { value: 'My Collection' } });
-      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'content-playlist' } });
 
       const createButton = screen.getByRole('button', { name: 'Create' });
       expect(createButton).not.toBeDisabled();
     });
 
-    it('should call onSubmit with name and extra data', () => {
+    it('should call onSubmit with name and extra data on submit', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
       fireEvent.change(screen.getByPlaceholderText('Enter collection name'), { target: { value: 'My Collection' } });
-      fireEvent.change(screen.getByPlaceholderText('Enter a description'), { target: { value: 'A description' } });
-      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'digital-textbook' } });
-
       fireEvent.submit(screen.getByPlaceholderText('Enter collection name').closest('form')!);
 
-      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', {
-        description: 'A description',
-        collectionType: 'digital-textbook',
-      });
+      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', { description: undefined });
     });
 
     it('should not include description when it is empty', () => {
       render(<ContentNameDialog {...collectionProps} />);
 
       fireEvent.change(screen.getByPlaceholderText('Enter collection name'), { target: { value: 'My Collection' } });
-      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'question-paper' } });
-
       fireEvent.submit(screen.getByPlaceholderText('Enter collection name').closest('form')!);
 
-      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', {
-        description: undefined,
-        collectionType: 'question-paper',
-      });
+      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', { description: undefined });
     });
   });
 });

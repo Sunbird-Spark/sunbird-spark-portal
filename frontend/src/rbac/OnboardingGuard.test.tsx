@@ -7,7 +7,7 @@ import OnboardingGuard from './OnboardingGuard';
 
 const mockUseFormRead = vi.fn();
 const mockUseUserRead = vi.fn();
-const mockIsUserAuthenticated = vi.fn();
+const mockUseIsAuthenticated = vi.fn();
 
 vi.mock('@/hooks/useForm', () => ({
   useFormRead: () => mockUseFormRead(),
@@ -17,8 +17,8 @@ vi.mock('@/hooks/useUserRead', () => ({
   useUserRead: () => mockUseUserRead(),
 }));
 
-vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
-  default: { isUserAuthenticated: () => mockIsUserAuthenticated() },
+vi.mock('@/hooks/useAuthInfo', () => ({
+  useIsAuthenticated: () => mockUseIsAuthenticated(),
 }));
 
 const createQueryClient = () =>
@@ -60,7 +60,7 @@ const userWithoutOnboarding = {
 describe('OnboardingGuard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockIsUserAuthenticated.mockReturnValue(true);
+    mockUseIsAuthenticated.mockReturnValue(true);
     mockUseFormRead.mockReturnValue(formEnabled);
     mockUseUserRead.mockReturnValue(userWithoutOnboarding);
   });
@@ -68,7 +68,7 @@ describe('OnboardingGuard', () => {
   // ── Authentication ────────────────────────────────────────────────────────
 
   it('renders children immediately for unauthenticated users without any checks', () => {
-    mockIsUserAuthenticated.mockReturnValue(false);
+    mockUseIsAuthenticated.mockReturnValue(false);
 
     renderGuard();
     expect(screen.getByText('Protected Content')).toBeInTheDocument();

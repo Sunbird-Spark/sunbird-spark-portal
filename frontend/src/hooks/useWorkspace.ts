@@ -47,6 +47,10 @@ interface UseWorkspaceOptions {
   /** Search query string to filter content by name. */
   searchQuery?: string;
   enabled?: boolean;
+  /** When true, restrict primaryCategory to Digital Textbook only (BOOK_CREATOR without CONTENT_CREATOR). */
+  isBookCreatorOnly?: boolean;
+  /** When true, restrict primaryCategory to Digital Textbook only (BOOK_REVIEWER without CONTENT_REVIEWER). */
+  isBookReviewerOnly?: boolean;
 }
 
 /**
@@ -69,6 +73,8 @@ export function useWorkspace({
   orgId,
   searchQuery = '',
   enabled = true,
+  isBookCreatorOnly = false,
+  isBookReviewerOnly = false,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create'].includes(activeTab);
@@ -82,8 +88,11 @@ export function useWorkspace({
   const isReviewerTab = isReviewerMode && ['pending-review', 'my-published'].includes(activeTab);
 
   // Derive primaryCategory filter from typeFilter (shared by both counts and content queries).
-  const primaryCategoryFilter =
-    getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
+  // Book-only creators/reviewers can only see Digital Textbook content regardless of type filter.
+  const isBookRoleOnly = isBookCreatorOnly || isBookReviewerOnly;
+  const primaryCategoryFilter = isBookRoleOnly
+    ? ['Digital Textbook']
+    : getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
   // ── Counts query (per role + typeFilter, shared across tabs) ───────────
   // Both modes use facets (limit=1) for lightweight counting.

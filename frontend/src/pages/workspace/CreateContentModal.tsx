@@ -6,12 +6,14 @@ interface CreateContentModalProps {
   open: boolean;
   onClose: () => void;
   onOptionSelect: (optionId: string) => void;
+  isBookCreator?: boolean;
 }
 
 export default function CreateContentModal({
   open,
   onClose,
   onOptionSelect,
+  isBookCreator = false,
 }: CreateContentModalProps) {
   const { t } = useAppI18n();
   if (!open) return null;
@@ -39,7 +41,7 @@ export default function CreateContentModal({
             ✕
           </Button>
         </div>
-        <CreateOptions onOptionSelect={onOptionSelect} />
+        <CreateOptions onOptionSelect={onOptionSelect} isBookCreator={isBookCreator} />
       </div>
     </div>
   );

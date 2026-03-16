@@ -9,7 +9,35 @@ import {
 } from 'react-icons/fi';
 import type { EditorCategory } from '../../types/workspaceTypes';
 
-export function getEditorCategories(): EditorCategory[] {
+/** Option IDs that BOOK_CREATOR role is allowed to use */
+export const BOOK_CREATOR_ALLOWED_OPTIONS = ['textbook'];
+
+export function getEditorCategories(forBookCreator = false): EditorCategory[] {
+  const collectionOptions = [
+    {
+      id: 'course',
+      title: 'Course',
+      description: 'Design courses with modules, lessons, and assessments.',
+      icon: FiBook,
+      iconBg: 'bg-sunbird-wave/15',
+      iconColor: 'text-sunbird-ink',
+    }, ...(forBookCreator ? [{
+      id: 'textbook',
+      title: 'TextBook',
+      description: 'Create and organize digital textbooks with chapters and units.',
+      icon: FiBook,
+      iconBg: 'bg-sunbird-wave/15',
+      iconColor: 'text-sunbird-ink',
+    }] : [{
+      id: 'collection',
+      title: 'Collection',
+      description: 'Organize and curate resources into thematic collections.',
+      icon: FiGrid,
+      iconBg: 'bg-sunbird-wave/15',
+      iconColor: 'text-sunbird-ink',
+    }])
+  ];
+
   return [
     {
       id: 'collection-editor',
@@ -18,24 +46,7 @@ export function getEditorCategories(): EditorCategory[] {
       accentColor: 'bg-sunbird-wave',
       borderColor: 'border-sunbird-wave/30',
       headerStyle: { background: 'var(--category-gradient-1)' },
-      options: [
-        {
-          id: 'course',
-          title: 'Course',
-          description: 'Design courses with modules, lessons, and assessments.',
-          icon: FiBook,
-          iconBg: 'bg-sunbird-wave/15',
-          iconColor: 'text-sunbird-ink',
-        },
-        {
-          id: 'collection',
-          title: 'Collection',
-          description: 'Organize and curate resources into thematic collections.',
-          icon: FiGrid,
-          iconBg: 'bg-sunbird-wave/15',
-          iconColor: 'text-sunbird-ink',
-        },
-      ],
+      options: collectionOptions,
     },
     {
       id: 'upload-editor',

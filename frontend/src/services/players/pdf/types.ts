@@ -1,10 +1,10 @@
+import type { TelemetryContext } from '../telemetryContextBuilder';
+
 export interface PdfPlayerContextProps {
   mode?: string;
   cdata?: any[];
-  contextRollup?: {
-    l1: string;
-  };
-  objectRollup?: Record<string, any>;
+  contextRollup?: Record<string, string>;
+  objectRollup?: Record<string, string>;
 }
 
 export interface PdfPlayerMetadata {
@@ -18,26 +18,7 @@ export interface PdfPlayerMetadata {
 }
 
 export interface PdfPlayerConfig {
-  context: {
-    mode: string;
-    sid: string;
-    did: string;
-    uid: string;
-    channel: string;
-    pdata: {
-      id: string;
-      ver: string;
-      pid: string;
-    };
-    contextRollup: {
-      l1: string;
-    };
-    cdata: any[];
-    timeDiff: number;
-    objectRollup: Record<string, any>;
-    host: string;
-    endpoint: string;
-  };
+  context: TelemetryContext;
   config: Record<string, any>;
   metadata: PdfPlayerMetadata;
 }

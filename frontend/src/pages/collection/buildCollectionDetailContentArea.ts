@@ -24,6 +24,8 @@ export interface BuildContentAreaArgs {
   batches: unknown;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
+  cdata?: Array<{ id: string; type: string }>;
+  objectRollup?: Record<string, string>;
   handleJoinCourse: (batchId: string) => void;
   batchListLoading: boolean;
   joinLoading: boolean;
@@ -69,6 +71,8 @@ export function buildCollectionDetailContentArea(
       handlePlayerEvent: args.handlePlayerEvent,
       handleTelemetryEvent: args.handleTelemetryEvent,
       showMaxAttemptsExceeded: args.maxAttemptsExceeded,
+      cdata: args.cdata,
+      objectRollup: args.objectRollup,
     },
     enrollment: {
       courseProgressProps: args.courseProgressProps,

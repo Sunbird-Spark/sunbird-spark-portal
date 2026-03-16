@@ -22,13 +22,15 @@ export function getReviewerSegments(counts: WorkspaceSidebarCounts): WorkspaceSe
   ];
 }
 
-export function getSecondaryActions(userRole: UserRole): WorkspaceSecondaryAction[] {
-  return userRole === 'creator'
-    ? [
-        { id: 'uploads', label: 'Uploads' },
-        { id: 'collaborations', label: 'Collaborations' },
-      ]
-    : [];
+export function getSecondaryActions(userRole: UserRole, isBookCreatorOnly = false): WorkspaceSecondaryAction[] {
+  if (userRole !== 'creator') return [];
+  if (isBookCreatorOnly) {
+    return [{ id: 'collaborations', label: 'Collaborations' }];
+  }
+  return [
+    { id: 'uploads', label: 'Uploads' },
+    { id: 'collaborations', label: 'Collaborations' },
+  ];
 }
 
 export function shouldShowContentFilters(activeView: WorkspaceView): boolean {

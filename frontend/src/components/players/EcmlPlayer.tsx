@@ -6,8 +6,8 @@ interface EcmlPlayerProps {
   metadata: EcmlPlayerMetadata;
   mode?: string;
   cdata?: any[];
-  contextRollup?: { l1: string };
-  objectRollup?: Record<string, any>;
+  contextRollup?: Record<string, string>;
+  objectRollup?: Record<string, string>;
   onPlayerEvent?: (event: EcmlPlayerEvent) => void;
   onTelemetryEvent?: (event: any) => void;
 }
