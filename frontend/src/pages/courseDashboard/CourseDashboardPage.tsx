@@ -5,7 +5,8 @@ import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
 import PageLoader from '@/components/common/PageLoader';
 import { useCollection } from '@/hooks/useCollection';
-import { useCurrentUserId } from '@/hooks/useUser';
+import { useCurrentUserId, useIsMentor } from '@/hooks/useUser';
+import { useBatchListForMentor } from '@/hooks/useBatch';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
@@ -36,6 +37,23 @@ const CourseDashboardPage: React.FC = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
+
+  const isMentorRole = useIsMentor();
+  const { data: mentorBatches, isLoading: isMentorBatchesLoading } = useBatchListForMentor(collectionId, { enabled: isMentorRole });
+  const isMentorOfCourse = !!mentorBatches && mentorBatches.length > 0;
+
+  const canAccessDashboard = isOwner || isMentorOfCourse;
+
+  // Enforce access control: redirect if not authorized after data has loaded
+  const isPermissionDetermining = isLoading || isMentorBatchesLoading;
+  
+  useEffect(() => {
+    if (!isPermissionDetermining && collectionData && currentUserId !== undefined) {
+      if (!canAccessDashboard) {
+        navigate(`/collection/${collectionId}`, { replace: true });
+      }
+    }
+  }, [canAccessDashboard, isPermissionDetermining, collectionData, currentUserId, collectionId, navigate]);
 
   // Redirect to default tab if the tab param is invalid
   useEffect(() => {
@@ -68,19 +86,19 @@ const CourseDashboardPage: React.FC = () => {
           Back to Course Page
         </button>
 
-        {/* ─── Loading / error for collection name ─── */}
-        {isLoading && (
+        {/* ─── Loading / error for collection name and permissions ─── */}
+        {isPermissionDetermining && (
           <div className="mb-6">
-            <PageLoader message="Loading course…" fullPage={false} />
+            <PageLoader message="Checking permissions…" fullPage={false} />
           </div>
         )}
-        {!isLoading && isError && (
+        {!isPermissionDetermining && isError && (
           <div className="mb-6">
             <PageLoader error={(error as Error)?.message ?? 'Failed to load course.'} fullPage={false} />
           </div>
         )}
 
-        {!isLoading && !isError && (
+        {!isPermissionDetermining && !isError && (
           <div className="flex flex-col mb-6">
             <div className="flex items-start justify-between mb-2">
               <h1 className="text-xl md:text-2xl font-semibold text-foreground max-w-[75%]" data-testid="dashboard-title">
@@ -94,56 +112,58 @@ const CourseDashboardPage: React.FC = () => {
         )}
 
         {/* ─── Main Box ─── */}
-        <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col min-h-[372px]">
-          {/* ─── Header area of Box ─── */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <p className="text-sm font-semibold text-foreground font-['Rubik']">
-              Manage dashboard for this course
-            </p>
-          </div>
+        {!isPermissionDetermining && !isError && (
+          <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col min-h-[372px]">
+            {/* ─── Header area of Box ─── */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <p className="text-sm font-semibold text-foreground font-['Rubik']">
+                Manage dashboard for this course
+              </p>
+            </div>
 
-          {/* ─── Tab bar ─── */}
-          <div className="flex border-b border-border" data-testid="tab-bar">
-            <button
-              className={`flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors ${
-                activeTab === 'batches'
-                  ? 'text-sunbird-brick'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-              onClick={() => switchTab('batches')}
-              data-testid="tab-batches"
-            >
-              {t('tabs.batches')}
-              {activeTab === 'batches' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
-              )}
-            </button>
-            <button
-              className={`flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors ${
-                activeTab === 'certificates'
-                  ? 'text-sunbird-brick'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-              onClick={() => switchTab('certificates')}
-              data-testid="tab-certificates"
-            >
-              {t('tabs.reissueCertificate')}
-              {activeTab === 'certificates' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
-              )}
-            </button>
-          </div>
+            {/* ─── Tab bar ─── */}
+            <div className="flex border-b border-border" data-testid="tab-bar">
+              <button
+                className={`flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors ${
+                  activeTab === 'batches'
+                    ? 'text-sunbird-brick'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => switchTab('batches')}
+                data-testid="tab-batches"
+              >
+                {t('tabs.batches')}
+                {activeTab === 'batches' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+                )}
+              </button>
+              <button
+                className={`flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors ${
+                  activeTab === 'certificates'
+                    ? 'text-sunbird-brick'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => switchTab('certificates')}
+                data-testid="tab-certificates"
+              >
+                {t('tabs.reissueCertificate')}
+                {activeTab === 'certificates' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+                )}
+              </button>
+            </div>
 
-          {/* ─── Tab content ─── */}
-          <div className="flex flex-col bg-white rounded-2xl">
-            {collectionId && activeTab === 'batches' && (
-              <BatchesTab collectionId={collectionId} />
-            )}
-            {collectionId && activeTab === 'certificates' && (
-              <CertificatesTab collectionId={collectionId} isOwner={isOwner} />
-            )}
+            {/* ─── Tab content ─── */}
+            <div className="flex flex-col bg-white rounded-2xl">
+              {collectionId && activeTab === 'batches' && (
+                <BatchesTab collectionId={collectionId} />
+              )}
+              {collectionId && activeTab === 'certificates' && (
+                <CertificatesTab collectionId={collectionId} canReissue={canAccessDashboard} />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </main>
       <Footer />
     </div>

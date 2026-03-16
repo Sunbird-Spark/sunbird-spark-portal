@@ -10,25 +10,7 @@ import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
 import { useForceSync } from "@/hooks/useForceSync";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
 import CourseProgressSection from "@/components/collection/CourseProgressSection";
-import type {
-  CollectionContentAreaAccessProps,
-  CollectionContentAreaPlayerProps,
-  CollectionContentAreaEnrollmentProps,
-  CollectionContentAreaSidebarProps,
-  CollectionContentAreaCreatorProps,
-} from "@/types/collectionDetailTypes";
-
-
-interface CollectionContentAreaProps {
-  collectionData: any;
-  contentId: string | undefined;
-  access: CollectionContentAreaAccessProps;
-  player: CollectionContentAreaPlayerProps;
-  enrollment: CollectionContentAreaEnrollmentProps;
-  sidebar: CollectionContentAreaSidebarProps;
-  creator?: CollectionContentAreaCreatorProps;
-  backTo?: string;
-}
+import type { CollectionContentAreaProps } from "@/types/collectionContentAreaTypes";
 
 export default function CollectionContentArea({
   collectionData,
@@ -79,6 +61,7 @@ export default function CollectionContentArea({
   const { expandedModules, toggleModule, collectionId, batchIdParam } = sidebar;
   const {
     isCreatorViewingOwnCollection = false,
+    isMentorViewingCourse = false,
     contentCreatorPrivilege = false,
     userProfile = null,
     userId = null,
@@ -133,8 +116,8 @@ export default function CollectionContentArea({
 
         {/* Right Sidebar */}
         <div className="lg:sticky lg:top-6 flex flex-col min-h-0 lg:min-h-[calc(100vh-5rem)] lg:max-h-[calc(100vh-5rem)] pr-1">
-          {/* Creator: Dashboard link & Batch management card — only for the course owner */}
-          {isAuthenticated && isCreatorViewingOwnCollection && collectionId && (
+          {/* Creator/Mentor: Dashboard link & Batch management card */}
+          {isAuthenticated && (isCreatorViewingOwnCollection || isMentorViewingCourse) && collectionId && (
             <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
               <Button
                 variant="outline"
