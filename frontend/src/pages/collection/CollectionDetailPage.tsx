@@ -245,7 +245,13 @@ const CollectionDetailPage = () => {
 
   return (
     <>
-      <TelemetryTracker startEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-page' }} endEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-exit' }} />
+      <TelemetryTracker
+        disabled={!collectionData}
+        startEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-page' }}
+        endEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-exit' }}
+        startOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+        endOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+      />
       <CollectionDetailLayout
         navigation={{ onGoBack: () => navigate(backTo), t }}
         loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}

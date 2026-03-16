@@ -32,6 +32,8 @@ export interface CollectionData {
   trackable?: { enabled?: TrackableEnabled };
   createdBy?: string;
   primaryCategory?: string;
+  /** Package version from the course hierarchy API. Used for telemetry `object.ver`. */
+  pkgVersion?: number | string;
 }
 
 export interface HierarchyContentNode {
