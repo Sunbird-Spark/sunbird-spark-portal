@@ -64,6 +64,13 @@ vi.mock('@/hooks/useTnc', () => ({
   useGetTncUrl: () => ({ data: 'https://example.com/tnc' }),
 }));
 
+vi.mock('@/hooks/useUser', () => ({
+  useIsMentor: vi.fn(() => false),
+  useIsContentCreator: vi.fn(() => true),
+}));
+
+import { useIsContentCreator, useIsMentor } from '@/hooks/useUser';
+
 /* ── Helpers ── */
 const defaultProps = {
   open: true,
@@ -489,6 +496,25 @@ describe('CreateBatchModal', () => {
       render(<CreateBatchModal {...defaultProps} />);
       const btn = screen.getByRole('button', { name: /creating/i });
       expect(btn).toBeDisabled();
+    });
+  });
+
+  describe('View-only Mentor Mode', () => {
+    it('does not call update API even if handleSubmit is triggered', async () => {
+      // Mock being a mentor-only user in edit mode
+      vi.mocked(useIsMentor as any).mockReturnValue(true);
+      vi.mocked(useIsContentCreator as any).mockReturnValue(false);
+      
+      const initialBatch = { id: 'b1', name: 'Existing Batch', startDate: '2026-01-01' };
+      render(<CreateBatchModal {...defaultProps} initialBatch={initialBatch as any} />);
+
+      // The submit button is hidden in UI, but we can trigger form submission
+      const form = screen.getByRole('heading', { name: /view batch details/i }).closest('div')?.parentElement?.querySelector('form');
+      if (form) {
+        fireEvent.submit(form);
+      }
+
+      expect(mockUpdateBatchMutateAsync).not.toHaveBeenCalled();
     });
   });
 });

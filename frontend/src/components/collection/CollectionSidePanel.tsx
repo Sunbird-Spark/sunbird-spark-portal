@@ -5,9 +5,9 @@ import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
 import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
-import type { CollectionContentAreaAccessProps } from "./CollectionContentArea";
-import type { CollectionContentAreaEnrollmentProps } from "./CollectionContentArea";
-import type { CollectionContentAreaSidebarProps } from "./CollectionContentArea";
+import type { CollectionContentAreaAccessProps } from "@/types/collectionContentAreaTypes";
+import type { CollectionContentAreaEnrollmentProps } from "@/types/collectionContentAreaTypes";
+import type { CollectionContentAreaSidebarProps } from "@/types/collectionContentAreaTypes";
 
 interface CollectionSidePanelProps {
   contentId: string | undefined;
@@ -18,6 +18,7 @@ interface CollectionSidePanelProps {
     isCreatorViewingOwnCollection: boolean;
     contentCreatorPrivilege: boolean;
     userProfile: Record<string, unknown> | null;
+    isMentorViewingCourse: boolean;
   };
   collectionData: { title: string; children: any[]; channel?: string; userConsent?: string };
   leftColHeight: number | undefined;
@@ -68,6 +69,7 @@ export default function CollectionSidePanel({
     isCreatorViewingOwnCollection,
     contentCreatorPrivilege,
     userProfile,
+    isMentorViewingCourse
   } = creator;
   const navigate = useNavigate();
 
@@ -83,7 +85,7 @@ export default function CollectionSidePanel({
       className="flex flex-col overflow-hidden"
       style={leftColHeight != null ? { maxHeight: leftColHeight } : undefined}
     >
-      {isTrackable && isAuthenticated && isCreatorViewingOwnCollection && collectionId && (
+      {isTrackable && isAuthenticated && (isCreatorViewingOwnCollection || isMentorViewingCourse) && collectionId && (
         <div className="flex flex-col gap-3 mb-4">
           <Button
             variant="outline"

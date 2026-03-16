@@ -67,6 +67,7 @@ const CollectionDetailPage = () => {
     isBatchEnded,
     isBatchUpcoming,
     batchStartDateFromRead,
+    isMentorOfAnyBatchInCourse,
   } = enrollment;
   const hasBatchInRoute = !!batchIdParam;
   const [selectedBatchId, setSelectedBatchId] = useState("");
@@ -77,7 +78,8 @@ const CollectionDetailPage = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
-  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
+  const isMentorOfCourse = isMentorOfAnyBatchInCourse;
+  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator || isMentorOfCourse;
 
   const [, setAuthRefresh] = useState(0);
   const triedAuthRefreshRef = useRef(false);
@@ -87,7 +89,7 @@ const CollectionDetailPage = () => {
     userAuthInfoService
       .getAuthInfo()
       .then(() => setAuthRefresh((n) => n + 1))
-      .catch(() => {});
+      .catch(() => { });
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -226,7 +228,7 @@ const CollectionDetailPage = () => {
         courseProgressProps, contentStatusMap, contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId,
         handleJoinCourse, batchListLoading, joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl,
         setCertificatePreviewUrl, setCertificatePreviewOpen, expandedModules, toggleModule, collectionId, batchIdParam,
-        isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile: userProfile ?? undefined,
+        isCreatorViewingOwnCollection, isMentorViewingCourse: isMentorOfCourse, contentCreatorPrivilege, userProfile: userProfile ?? undefined,
         currentUserId: currentUserId ?? undefined,
         backTo,
       }),
@@ -236,7 +238,7 @@ const CollectionDetailPage = () => {
       handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, courseProgressProps, contentStatusMap,
       contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId, handleJoinCourse, batchListLoading,
       joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl, expandedModules, toggleModule,
-      collectionId, batchIdParam, isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile, currentUserId, backTo,
+      collectionId, batchIdParam, isCreatorViewingOwnCollection, isMentorOfCourse, contentCreatorPrivilege, userProfile, currentUserId, backTo
     ]
   );
 

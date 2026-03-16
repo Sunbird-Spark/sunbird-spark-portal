@@ -801,6 +801,7 @@
   "batchRow": {
     "enrolmentEnds": "Enrolment ends {{date}}",
     "editBatch": "Edit batch",
+    "viewBatch": "View batch",
     "batchCannotBeEdited": "Batch cannot be edited after the start date has passed",
     "certificateCannotBeModified": "Certificate cannot be modified after the batch end date",
     "refreshBatchList": "Refresh batch list",

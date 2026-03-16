@@ -5,79 +5,10 @@ import { FiArrowLeft } from "react-icons/fi";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import { useForceSync } from "@/hooks/useForceSync";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
-import type { BatchListItem } from "@/types/collectionTypes";
 import CourseProgressSection from "@/components/collection/CourseProgressSection";
 import CollectionSidePanel from "@/components/collection/CollectionSidePanel";
+import type { CollectionContentAreaProps } from "@/types/collectionContentAreaTypes";
 
-
-/** Access and blocking state for the collection detail view. */
-export interface CollectionContentAreaAccessProps {
-  isTrackable: boolean;
-  isAuthenticated: boolean;
-  hasBatchInRoute: boolean;
-  isEnrolledInCurrentBatch: boolean;
-  contentBlocked: boolean;
-  upcomingBatchBlocked: boolean;
-  batchStartDateForOverview?: string;
-}
-
-/** Player state and handlers for the content player. */
-export interface CollectionContentAreaPlayerProps {
-  playerMetadata: any;
-  playerIsLoading: boolean;
-  playerError: any;
-  handlePlayerEvent: (event: any) => void;
-  handleTelemetryEvent: (event: any) => void;
-  showMaxAttemptsExceeded?: boolean;
-}
-
-/** Enrollment, progress, batch list and certificate state. */
-export interface CollectionContentAreaEnrollmentProps {
-  courseProgressProps: any;
-  contentStatusMap: any;
-  contentAttemptInfoMap?: Record<string, { attemptCount: number }>;
-  batches: BatchListItem[] | undefined;
-  selectedBatchId: string;
-  setSelectedBatchId: (id: string) => void;
-  handleJoinCourse: (id: string) => void;
-  batchListLoading: boolean;
-  joinLoading: boolean;
-  batchListError: any;
-  joinError: any;
-  hasCertificate: boolean;
-  firstCertPreviewUrl: string | undefined;
-  setCertificatePreviewUrl: (url: string) => void;
-  setCertificatePreviewOpen: (open: boolean) => void;
-}
-
-/** Sidebar UI state and route identifiers. */
-export interface CollectionContentAreaSidebarProps {
-  expandedModules: string[];
-  toggleModule: (moduleId: string) => void;
-  collectionId: string | undefined;
-  batchIdParam: string | undefined;
-}
-
-/** Creator/viewer flags and user profile for consent. */
-export interface CollectionContentAreaCreatorProps {
-  isCreatorViewingOwnCollection?: boolean;
-  contentCreatorPrivilege?: boolean;
-  userProfile?: Record<string, unknown> | null;
-  userId?: string | null;
-  /** The route to return to when the user exits the collection (used for back navigation). */
-  backTo?: string;
-}
-
-interface CollectionContentAreaProps {
-  collectionData: any;
-  contentId: string | undefined;
-  access: CollectionContentAreaAccessProps;
-  player: CollectionContentAreaPlayerProps;
-  enrollment: CollectionContentAreaEnrollmentProps;
-  sidebar: CollectionContentAreaSidebarProps;
-  creator?: CollectionContentAreaCreatorProps;
-  backTo?: string;
-}
 
 export default function CollectionContentArea({
   collectionData,
@@ -110,6 +41,7 @@ export default function CollectionContentArea({
   const { collectionId, batchIdParam } = sidebar;
   const {
     isCreatorViewingOwnCollection = false,
+    isMentorViewingCourse = false,
     contentCreatorPrivilege = false,
     userProfile = null,
     userId = null,
@@ -227,6 +159,7 @@ export default function CollectionContentArea({
             isCreatorViewingOwnCollection,
             contentCreatorPrivilege,
             userProfile,
+            isMentorViewingCourse,
           }}
           collectionData={collectionData}
           leftColHeight={leftColHeight}

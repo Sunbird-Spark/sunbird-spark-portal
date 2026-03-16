@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import session from 'express-session';
-import { setupModuleMocks, resetTestEnvironment } from '../test-helpers.js';
+import { EventEmitter } from 'events';
+
+vi.mock('./logger.js', () => ({
+    default: {
+        info: vi.fn(),
+        error: vi.fn()
+    }
+}));
 
 class MockPool {
     connect(cb: Mock) {
@@ -8,21 +15,36 @@ class MockPool {
     }
 }
 
+vi.mock('pg', () => ({
+    default: {
+        Pool: MockPool
+    }
+}));
+
+vi.mock('connect-pg-simple', () => ({
+    default: vi.fn(() => {
+        return class MockPgStore extends EventEmitter {
+            constructor() {
+                super();
+            }
+            get() {}
+            set() {}
+            destroy() {}
+        };
+    })
+}));
+
 describe('getSessionStore', () => {
     beforeEach(() => {
-        setupModuleMocks();
-        resetTestEnvironment();
+        vi.resetModules();
+        vi.clearAllMocks();
     });
 
     afterEach(() => {
         vi.doUnmock('../config/env.js');
-        vi.doUnmock('pg');
     });
 
     it('should return MemoryStore when SUNBIRD_PORTAL_SESSION_STORE is not yugabyte', async () => {
-        vi.doMock('pg', () => ({
-            default: { Pool: MockPool }
-        }));
         vi.doMock('../config/env.js', () => ({
             envConfig: {
                 SUNBIRD_PORTAL_SESSION_STORE: 'memory'
@@ -36,9 +58,6 @@ describe('getSessionStore', () => {
     });
 
     it('should return MemoryStore when SUNBIRD_PORTAL_SESSION_STORE is undefined', async () => {
-        vi.doMock('pg', () => ({
-            default: { Pool: MockPool }
-        }));
         vi.doMock('../config/env.js', () => ({
             envConfig: {}
         }));
@@ -50,9 +69,6 @@ describe('getSessionStore', () => {
     });
 
     it('should create PgStore when SUNBIRD_PORTAL_SESSION_STORE is yugabyte', async () => {
-        vi.doMock('pg', () => ({
-            default: { Pool: MockPool }
-        }));
         vi.doMock('../config/env.js', () => ({
             envConfig: {
                 SUNBIRD_PORTAL_SESSION_STORE: 'yugabyte',
@@ -121,9 +137,6 @@ describe('getSessionStore', () => {
     });
 
     it('should log error when session store emits error', async () => {
-        vi.doMock('pg', () => ({
-            default: { Pool: MockPool }
-        }));
         vi.doMock('../config/env.js', () => ({
             envConfig: {
                 SUNBIRD_PORTAL_SESSION_STORE: 'yugabyte',

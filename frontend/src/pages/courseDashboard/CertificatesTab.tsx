@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useCertUserSearch, useReissueCert } from '@/hooks/useCourseDashboard';
+import { useBatchListForMentor } from '@/hooks/useBatch';
+import { useIsContentCreator, useIsMentor } from '@/hooks/useUser';
 import type { CertUserBatch } from '@/services/CertificateTypes';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -9,7 +11,7 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface CertificatesTabProps {
   collectionId: string;
-  isOwner: boolean;
+  canReissue: boolean;
 }
 
 interface ReissueTarget {
@@ -19,7 +21,7 @@ interface ReissueTarget {
   batchName: string;
 }
 
-const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner }) => {
+const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, canReissue }) => {
   const { t } = useAppI18n();
   const [uniqueId, setUniqueId] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
@@ -28,6 +30,10 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
 
   const { mutate: searchUser, data: searchResult, isPending: searching, error: searchError, reset: resetSearch } = useCertUserSearch();
   const { mutate: reissueCert, isPending: reissuing } = useReissueCert();
+
+  const isContentCreator = useIsContentCreator();
+  const isMentor = useIsMentor();
+  const { data: mentorBatches, isLoading: isMentorBatchesLoading } = useBatchListForMentor(collectionId, { enabled: isMentor && !isContentCreator });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +67,18 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
 
   const certUser = searchResult?.data?.response ?? null;
 
-  const hasBatches = certUser && Array.isArray(certUser?.courses?.batches) && certUser.courses.batches.length > 0;
+  // If the user only has the mentor role, they should only see batches they mentor.
+  const mentorBatchIds = mentorBatches?.map(b => b.id) ?? [];
+  const displayBatches: CertUserBatch[] = certUser?.courses?.batches?.filter((b: CertUserBatch) => {
+    if (!isContentCreator && isMentor) {
+      if (isMentorBatchesLoading) return true; // Show all until we know which ones to filter
+      return mentorBatchIds.includes(b.batchId);
+    }
+    return true; // Creators see all
+  }) ?? [];
+
+  const hasBatches = displayBatches.length > 0;
+
 
   return (
     <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-white rounded-2xl" data-testid="certificates-tab">
@@ -144,7 +161,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
                   </td>
                 </tr>
               ) : (
-                certUser?.courses.batches.map((batch: CertUserBatch, idx: number) => {
+                displayBatches.map((batch: CertUserBatch, idx: number) => {
                   const hasCertificate = batch.issuedCertificates && batch.issuedCertificates.length > 0;
                   const isCompleted = batch.status === 2;
                   const criteriaMet = isCompleted ? t('certificatesTab.yes') : t('certificatesTab.no');
@@ -166,7 +183,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
                           )}
                         </div>
                       </td>
-                      <td className="border-b border-border p-3 text-foreground">{certUser.userName}</td>
+                      <td className="border-b border-border p-3 text-foreground">{certUser?.userName ?? ''}</td>
                       <td className="border-b border-border p-3 text-foreground">{batch.completionPercentage ?? 0}%</td>
                       <td className="border-b border-border p-3 text-foreground">
                         <span className={criteriaMet === t('certificatesTab.yes') ? 'text-green-600 font-medium' : 'text-gray-500'}>
@@ -174,7 +191,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
                         </span>
                       </td>
                       <td className="border-b border-border p-3 text-foreground">
-                        {isOwner ? (
+                        {canReissue ? (
                           <Button
                             variant="link"
                             size="sm"
@@ -187,8 +204,8 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, isOwner
                             title={criteriaMet === t('certificatesTab.no') ? t('certificatesTab.criteriaMustBeMet') : t('certificatesTab.reissueCertificate')}
                             onClick={() =>
                               setReissueTarget({
-                                userId: certUser.userId,
-                                userName: certUser.userName,
+                                userId: certUser?.userId ?? '',
+                                userName: certUser?.userName ?? '',
                                 batchId: batch.batchId,
                                 batchName: batch.name ?? batch.batchId,
                               })

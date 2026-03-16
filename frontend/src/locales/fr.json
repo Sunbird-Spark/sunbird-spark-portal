@@ -792,6 +792,7 @@
   "batchRow": {
     "enrolmentEnds": "Inscription jusqu'au {{date}}",
     "editBatch": "Modifier le lot",
+    "viewBatch": "Voir le lot",
     "batchCannotBeEdited": "Le lot ne peut pas être modifié après le passage de la date de début",
     "certificateCannotBeModified": "Le certificat ne peut pas être modifié après la date de fin du lot",
     "refreshBatchList": "Actualiser la liste des lots",
