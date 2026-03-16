@@ -5,9 +5,10 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface ContentCardProps {
   item: ContentSearchItem;
+  linkState?: Record<string, unknown>;
 }
 
-const CollectionCard = ({ item }: ContentCardProps) => {
+const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const { t } = useAppI18n();
   const lessons = item.leafNodesCount || 0;
   const creator = item.creator ?? item.createdBy ?? 'Unknown';
@@ -15,6 +16,7 @@ const CollectionCard = ({ item }: ContentCardProps) => {
   return (
     <Link
       to={`/collection/${item.identifier}`}
+      state={linkState}
       className="related-resource-card-link"
       data-edataid="collection-card-click"
       data-objectid={item.identifier}
