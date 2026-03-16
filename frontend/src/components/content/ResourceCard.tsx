@@ -6,9 +6,10 @@ import { ContentSearchItem } from "@/types/workspaceTypes";
 interface ResourceCardProps {
   item: ContentSearchItem;
   heightClass?: string; // Optional custom height class
+  linkState?: Record<string, unknown>;
 }
 
-const ResourceCard = ({ item, heightClass }: ResourceCardProps) => {
+const ResourceCard = ({ item, heightClass, linkState }: ResourceCardProps) => {
   const { t } = useAppI18n();
 
   const getViewLabel = (mimeType?: string) => {
@@ -35,6 +36,7 @@ const ResourceCard = ({ item, heightClass }: ResourceCardProps) => {
   return (
     <Link
       to={`/content/${item.identifier}`}
+      state={linkState}
       className="group resource-card-link"
       data-edataid="resource-card-click"
       data-objectid={item.identifier}

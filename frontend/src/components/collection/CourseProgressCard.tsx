@@ -28,6 +28,7 @@ function getCompletedCount(
 
 export interface CourseProgressCardProps {
   batchStartDate?: string;
+  isBatchUpcoming?: boolean;
   totalContentCount: number;
   completedContentCount?: number;
   contentStatus?: Record<string, number>;
@@ -42,6 +43,7 @@ export interface CourseProgressCardProps {
 
 const CourseProgressCard = ({
   batchStartDate,
+  isBatchUpcoming = false,
   totalContentCount,
   completedContentCount: completedContentCountProp,
   contentStatus,
@@ -116,7 +118,7 @@ const CourseProgressCard = ({
       </div>
       {displayDate && (
         <p className="font-rubik font-normal text-[0.8125rem] leading-[100%] text-muted-foreground">
-          {t("courseDetails.batchStartedOn")}: {displayDate}
+          {t(isBatchUpcoming ? "courseDetails.batchStartingOn" : "courseDetails.batchStartedOn")}: {displayDate}
         </p>
       )}
       <div className="flex items-center gap-3">
