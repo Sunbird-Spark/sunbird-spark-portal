@@ -5,9 +5,10 @@ import { FiArrowLeft } from "react-icons/fi";
 import CollectionOverview from "@/components/collection/CollectionOverview";
 import { useForceSync } from "@/hooks/useForceSync";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
-import type { BatchListItem } from "@/types/collectionTypes";
 import CourseProgressSection from "@/components/collection/CourseProgressSection";
 import CollectionSidePanel from "@/components/collection/CollectionSidePanel";
+import type { CollectionContentAreaProps } from "@/types/collectionContentAreaTypes";
+import { BatchListItem } from "@/types/collectionTypes";
 
 
 /** Access and blocking state for the collection detail view. */
@@ -68,17 +69,6 @@ export interface CollectionContentAreaCreatorProps {
   backTo?: string;
 }
 
-interface CollectionContentAreaProps {
-  collectionData: any;
-  contentId: string | undefined;
-  access: CollectionContentAreaAccessProps;
-  player: CollectionContentAreaPlayerProps;
-  enrollment: CollectionContentAreaEnrollmentProps;
-  sidebar: CollectionContentAreaSidebarProps;
-  creator?: CollectionContentAreaCreatorProps;
-  backTo?: string;
-}
-
 export default function CollectionContentArea({
   collectionData,
   contentId,
@@ -110,6 +100,7 @@ export default function CollectionContentArea({
   const { collectionId, batchIdParam } = sidebar;
   const {
     isCreatorViewingOwnCollection = false,
+    isMentorViewingCourse = false,
     contentCreatorPrivilege = false,
     userProfile = null,
     userId = null,
@@ -227,6 +218,7 @@ export default function CollectionContentArea({
             isCreatorViewingOwnCollection,
             contentCreatorPrivilege,
             userProfile,
+            isMentorViewingCourse,
           }}
           collectionData={collectionData}
           leftColHeight={leftColHeight}

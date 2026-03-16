@@ -64,19 +64,24 @@ export interface CreateBatchResponse {
 export class BatchService {
   async listBatches(
     courseId: string,
-    createdBy: string
+    createdBy?: string,
+    mentors?: string[]
   ): Promise<ApiResponse<BatchListResponse>> {
+    const filters: any = {
+      courseId,
+      status: ['0', '1', '2'],
+    };
+    if (createdBy) filters.createdBy = createdBy;
+    if (mentors?.length) filters.mentors = mentors;
+
     return getClient().post<BatchListResponse>('/course/v1/batch/list', {
       request: {
-        filters: {
-          courseId,
-          status: ['0', '1', '2'],
-          createdBy,
-        },
+        filters,
         sort_by: { createdDate: 'desc' },
       },
     });
   }
+
 
   async createBatch(
     request: CreateBatchRequest,
