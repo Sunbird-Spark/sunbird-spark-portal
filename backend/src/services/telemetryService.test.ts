@@ -50,7 +50,7 @@ describe('Telemetry Service', () => {
         await dispatchTelemetry(req as Request, events);
 
         expect(axios.post).toHaveBeenCalled();
-        const callArgs = (axios.post as Mock).mock.calls[0];
+        const callArgs = (axios.post as Mock).mock.calls[0]!;
         expect(callArgs[0]).toBe(`${envConfig.KONG_URL}/data/v3/telemetry`);
         expect(callArgs[1].events).toEqual(events);
         expect(callArgs[1].id).toBe('api.telemetry');

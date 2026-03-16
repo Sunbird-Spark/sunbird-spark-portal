@@ -245,10 +245,7 @@ const CollectionDetailPage = () => {
 
   return (
     <>
-      <TelemetryTracker 
-        startEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-page' }}
-        endEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-exit' }}
-      />
+      <TelemetryTracker startEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-page' }} endEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-exit' }} />
       <CollectionDetailLayout
         navigation={{ onGoBack: () => navigate(backTo), t }}
         loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
@@ -259,26 +256,9 @@ const CollectionDetailPage = () => {
           displayCollectionData,
         }}
         contentArea={contentArea}
-        certificateModal={{
-          certificatePreviewOpen,
-          certificatePreviewUrl,
-          certificatePreviewDetails,
-          setCertificatePreviewUrl,
-          setCertificatePreviewOpen,
-        }}
-        relatedContent={{
-          searchError,
-          searchErrorObj: searchErrorObj ?? null,
-          searchFetching,
-          relatedContentItems,
-          searchRefetch,
-        }}
-        courseCompletion={{
-          courseProgressProps,
-          isEnrolledInCurrentBatch,
-          collectionId,
-          hasCertificate,
-        }}
+        certificateModal={{ certificatePreviewOpen, certificatePreviewUrl, certificatePreviewDetails, setCertificatePreviewUrl, setCertificatePreviewOpen }}
+        relatedContent={{ searchError, searchErrorObj: searchErrorObj ?? null, searchFetching, relatedContentItems, searchRefetch }}
+        courseCompletion={{ courseProgressProps, isEnrolledInCurrentBatch, collectionId, hasCertificate }}
       />
     </>
   );
