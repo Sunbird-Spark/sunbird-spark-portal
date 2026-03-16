@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useRef } from 'react';
 import _ from 'lodash';
 import { useUpdateProfile } from './useUpdateProfile';
 import { toast } from './useToast';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useUserId } from './useAuthInfo';
 import { UserProfile } from '../types/userTypes';
 import {
   OtpRequiredField,
@@ -50,6 +50,7 @@ export interface UseEditProfileReturn {
 export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileReturn => {
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<EditProfileFormData>(createInitialForm());
+  const userId = useUserId();
 
   const originalData = useRef<EditProfileFormData>(createInitialForm());
   const updateProfileMutation = useUpdateProfile();
@@ -153,7 +154,6 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
   const handleSave = useCallback(async () => {
     if (!canSave) return;
 
-    const userId = userAuthInfoService.getUserId();
     if (!userId) {
       toast({
         variant: 'destructive',
@@ -228,7 +228,7 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
         description: message,
       });
     }
-  }, [canSave, form, fieldStates, updateProfileMutation, closeDialog]);
+  }, [canSave, userId, form, fieldStates, updateProfileMutation, closeDialog]);
 
   return {
     isOpen,

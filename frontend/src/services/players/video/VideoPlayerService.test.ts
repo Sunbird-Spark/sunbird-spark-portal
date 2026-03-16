@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { VideoPlayerService } from './VideoPlayerService';
 import type { VideoPlayerMetadata } from './types';
 import { buildTelemetryContext } from '../telemetryContextBuilder';
@@ -45,6 +45,14 @@ const defaultContext = {
   userData: { firstName: '', lastName: '' },
 };
 
+// Mock fetch for styles
+const mockFetch = vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    text: () => Promise.resolve('/* mock css */'),
+  } as Response)
+);
+
 describe('VideoPlayerService', () => {
   let service: VideoPlayerService;
 
@@ -56,6 +64,9 @@ describe('VideoPlayerService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock fetch globally for each test
+    vi.stubGlobal('fetch', mockFetch);
 
     (buildTelemetryContext as any).mockImplementation(async (contextProps?: any, options?: any) => ({
       ...defaultContext,
@@ -72,6 +83,10 @@ describe('VideoPlayerService', () => {
     }
 
     service = new VideoPlayerService();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe('createConfig', () => {

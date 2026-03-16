@@ -5,11 +5,10 @@ import React from 'react';
 
 /* ── Mocks must be hoisted before imports ── */
 
-vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
-  default: {
-    getUserId: vi.fn(),
-    getAuthInfo: vi.fn(),
-  },
+const mockUseAuthInfo = vi.fn();
+
+vi.mock('./useAuthInfo', () => ({
+  useAuthInfo: () => mockUseAuthInfo(),
 }));
 
 // Mock UserService as a class with vi.fn prototype methods
@@ -29,7 +28,6 @@ vi.mock('../services/UserService', () => {
 
 /* ── Imports after mocks ── */
 import { useIsAdmin, useIsContentCreator } from './useUser';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import * as UserServiceModule from '../services/UserService';
 
 /* ── Helper ── */
@@ -51,18 +49,24 @@ const createWrapper = () => {
 describe('useIsAdmin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: authenticated user
+    mockUseAuthInfo.mockReturnValue({
+      data: { sid: 'session-123', uid: 'user123', isAuthenticated: true },
+      isSuccess: true,
+    });
   });
 
   it('returns false when userId is unavailable', () => {
-    (userAuthInfoService.getUserId as any).mockReturnValue(null);
-    (userAuthInfoService.getAuthInfo as any).mockResolvedValue({ uid: null });
+    mockUseAuthInfo.mockReturnValue({
+      data: { sid: 'session-789', uid: null, isAuthenticated: false },
+      isSuccess: true,
+    });
 
     const { result } = renderHook(() => useIsAdmin(), { wrapper: createWrapper() });
     expect(result.current).toBe(false);
   });
 
   it('returns true when user has ORG_ADMIN role', async () => {
-    (userAuthInfoService.getUserId as any).mockReturnValue('user123');
     getGetUserRoles().mockResolvedValue({
       data: { response: { roles: [{ role: 'ORG_ADMIN' }] } },
       status: 200,
@@ -74,7 +78,6 @@ describe('useIsAdmin', () => {
   });
 
   it('returns false when user does not have ORG_ADMIN role', async () => {
-    (userAuthInfoService.getUserId as any).mockReturnValue('user123');
     getGetUserRoles().mockResolvedValue({
       data: { response: { roles: [{ role: 'CONTENT_CREATOR' }] } },
       status: 200,
@@ -87,8 +90,10 @@ describe('useIsAdmin', () => {
   });
 
   it('falls back to getAuthInfo when getUserId returns null', async () => {
-    (userAuthInfoService.getUserId as any).mockReturnValue(null);
-    (userAuthInfoService.getAuthInfo as any).mockResolvedValue({ uid: 'fallback-uid' });
+    mockUseAuthInfo.mockReturnValue({
+      data: { sid: 'session-456', uid: 'fallback-uid', isAuthenticated: true },
+      isSuccess: true,
+    });
     getGetUserRoles().mockResolvedValue({
       data: { response: { roles: [{ role: 'ORG_ADMIN' }] } },
       status: 200,
@@ -97,7 +102,6 @@ describe('useIsAdmin', () => {
 
     const { result } = renderHook(() => useIsAdmin(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current).toBe(true));
-    expect(userAuthInfoService.getAuthInfo).toHaveBeenCalled();
   });
 });
 
@@ -106,18 +110,24 @@ describe('useIsAdmin', () => {
 describe('useIsContentCreator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: authenticated user
+    mockUseAuthInfo.mockReturnValue({
+      data: { sid: 'session-123', uid: 'user123', isAuthenticated: true },
+      isSuccess: true,
+    });
   });
 
   it('returns false when userId is unavailable', () => {
-    (userAuthInfoService.getUserId as any).mockReturnValue(null);
-    (userAuthInfoService.getAuthInfo as any).mockResolvedValue({ uid: null });
+    mockUseAuthInfo.mockReturnValue({
+      data: { sid: 'session-789', uid: null, isAuthenticated: false },
+      isSuccess: true,
+    });
 
     const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
     expect(result.current).toBe(false);
   });
 
   it('returns true when user has CONTENT_CREATOR role', async () => {
-    (userAuthInfoService.getUserId as any).mockReturnValue('user123');
     getGetUserRoles().mockResolvedValue({
       data: { response: { roles: [{ role: 'CONTENT_CREATOR' }] } },
       status: 200,
@@ -129,7 +139,6 @@ describe('useIsContentCreator', () => {
   });
 
   it('returns false when user lacks CONTENT_CREATOR role', async () => {
-    (userAuthInfoService.getUserId as any).mockReturnValue('user123');
     getGetUserRoles().mockResolvedValue({
       data: { response: { roles: [{ role: 'ORG_ADMIN' }] } },
       status: 200,

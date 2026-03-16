@@ -87,11 +87,6 @@ export interface ProgressBucket {
   count: number;
 }
 
-export interface ScoreBucket {
-  range: string;
-  count: number;
-}
-
 export interface LearnerProgress {
   id: string;
   learnerName: string;
@@ -99,8 +94,105 @@ export interface LearnerProgress {
   progressPercent: number;
   status: "In Progress" | "Completed" | "Not Started";
   lastActiveDate: string;
-  timeSpent: string;
   certificateStatus: "Issued" | "Pending" | "N/A";
+}
+
+/** Raw shape returned by POST /observability/v1/reports for user-course-enrolments */
+export interface UserCourseEnrolmentApiItem {
+  courseid: string;
+  collectionDetails: {
+    name: string;
+    identifier: string;
+    contentType: string;
+  };
+  completionpercentage: number | null;
+  /** 0 = Not Started, 1 = In Progress, 2 = Completed */
+  status: number;
+  enrolled_date: string;
+  datetime: string;
+  issued_certificates: Array<{
+    identifier: string;
+    lastIssuedOn: string;
+    name: string;
+    templateUrl: string;
+    token: string;
+    type: string;
+  }> | null;
+}
+
+export interface UserCourseEnrolmentResult {
+  data: UserCourseEnrolmentApiItem[];
+  count: number;
+}
+
+export interface LearnerProgressResult {
+  data: LearnerProgressApiItem[];
+  /** Server-authoritative total enrolment count */
+  count: number;
+}
+
+/** Raw shape returned by POST /observability/v1/reports for course-batch-enrolments */
+export interface LearnerProgressApiItem {
+  userid: string;
+  userDetails: {
+    firstName: string;
+    lastName?: string;
+  };
+  enrolled_date: string;
+  completionpercentage: number | null;
+  /** 0 = Not Started, 1 = In Progress, 2 = Completed */
+  status: number;
+  datetime: string;
+  issued_certificates: Array<{
+    identifier: string;
+    lastIssuedOn: string;
+    name: string;
+    templateUrl: string;
+    token: string;
+    type: string;
+  }> | null;
+}
+
+/** Raw shape returned by POST /observability/v1/reports for course-assessment-summary */
+export interface AssessmentApiItem {
+  user_id: string;
+  attempt_count: number;
+  total_score: number | null;
+  total_max_score: number | null;
+  userDetails: { firstName: string; lastName?: string };
+  last_attempted_on: string;
+}
+
+export interface AssessmentResult {
+  data: AssessmentApiItem[];
+  count: number;
+}
+
+/** Raw shape returned by POST /observability/v1/reports for user-assessment-summary */
+export interface UserAssessmentApiItem {
+  attempt_id: string;
+  course_id: string;
+  content_id: string;
+  batch_id: string;
+  total_score: number | null;
+  total_max_score: number | null;
+  last_attempted_on: string;
+  collectionDetails: {
+    name: string;
+    identifier: string;
+    contentType: string;
+  };
+  /** Optional — absent in some API records */
+  contentDetails?: {
+    name: string;
+    identifier: string;
+    contentType: string;
+  };
+}
+
+export interface UserAssessmentResult {
+  data: UserAssessmentApiItem[];
+  count: number;
 }
 
 export interface AssessmentRecord {
@@ -110,7 +202,7 @@ export interface AssessmentRecord {
   score: number;
   maxScore: number;
   percentage: number;
-  passFail: "Pass" | "Fail";
+  passFail?: "Pass" | "Fail";
   attemptDate: string;
 }
 
@@ -158,7 +250,6 @@ export interface UserAssessmentHistory {
   score: number;
   maxScore: number;
   percentage: number;
-  passFail: "Pass" | "Fail";
   attemptDate: string;
 }
 
