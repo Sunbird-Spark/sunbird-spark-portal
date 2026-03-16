@@ -10,55 +10,55 @@ const hoursAgo = (h: number) => new Date(NOW.getTime() - h * 3_600_000).toISOStr
 const daysAgo  = (d: number) => new Date(NOW.getTime() - d * 86_400_000).toISOString();
 
 describe('toRelativeTime', () => {
-  it('returns "just now" for < 60 seconds ago', () => {
+  it('returns "a few seconds ago" for < 45 seconds ago', () => {
     const ts = new Date(NOW.getTime() - 30_000).toISOString();
-    expect(toRelativeTime(ts, NOW)).toBe('just now');
+    expect(toRelativeTime(ts, NOW)).toBe('a few seconds ago');
   });
 
-  it('returns singular "1 minute ago"', () => {
-    const ts = new Date(NOW.getTime() - 90_000).toISOString();
-    expect(toRelativeTime(ts, NOW)).toBe('1 minute ago');
+  it('returns "a minute ago" for ~60 seconds ago', () => {
+    const ts = new Date(NOW.getTime() - 60_000).toISOString();
+    expect(toRelativeTime(ts, NOW)).toBe('a minute ago');
   });
 
-  it('returns plural "45 minutes ago"', () => {
-    const ts = new Date(NOW.getTime() - 45 * 60_000).toISOString();
-    expect(toRelativeTime(ts, NOW)).toBe('45 minutes ago');
+  it('returns "30 minutes ago"', () => {
+    const ts = new Date(NOW.getTime() - 30 * 60_000).toISOString();
+    expect(toRelativeTime(ts, NOW)).toBe('30 minutes ago');
   });
 
-  it('returns "1 hour ago"', () => {
-    expect(toRelativeTime(hoursAgo(1), NOW)).toBe('1 hour ago');
+  it('returns "an hour ago"', () => {
+    expect(toRelativeTime(hoursAgo(1), NOW)).toBe('an hour ago');
   });
 
   it('returns "3 hours ago"', () => {
     expect(toRelativeTime(hoursAgo(3), NOW)).toBe('3 hours ago');
   });
 
-  it('returns "1 day ago"', () => {
-    expect(toRelativeTime(daysAgo(1), NOW)).toBe('1 day ago');
+  it('returns "a day ago"', () => {
+    expect(toRelativeTime(daysAgo(1), NOW)).toBe('a day ago');
   });
 
   it('returns "5 days ago"', () => {
     expect(toRelativeTime(daysAgo(5), NOW)).toBe('5 days ago');
   });
 
-  it('returns "last week" for exactly 7 days ago', () => {
-    expect(toRelativeTime(daysAgo(7), NOW)).toBe('last week');
+  it('returns "7 days ago" for exactly 7 days ago', () => {
+    expect(toRelativeTime(daysAgo(7), NOW)).toBe('7 days ago');
   });
 
-  it('returns "3 weeks ago"', () => {
-    expect(toRelativeTime(daysAgo(21), NOW)).toBe('3 weeks ago');
+  it('returns "21 days ago"', () => {
+    expect(toRelativeTime(daysAgo(21), NOW)).toBe('21 days ago');
   });
 
-  it('returns "last month" for ~30 days ago', () => {
-    expect(toRelativeTime(daysAgo(30), NOW)).toBe('last month');
+  it('returns "a month ago" for ~30 days ago', () => {
+    expect(toRelativeTime(daysAgo(30), NOW)).toBe('a month ago');
   });
 
   it('returns "4 months ago"', () => {
     expect(toRelativeTime(daysAgo(120), NOW)).toBe('4 months ago');
   });
 
-  it('returns "last year" for ~365 days ago', () => {
-    expect(toRelativeTime(daysAgo(365), NOW)).toBe('last year');
+  it('returns "a year ago" for ~365 days ago', () => {
+    expect(toRelativeTime(daysAgo(365), NOW)).toBe('a year ago');
   });
 
   it('returns "2 years ago"', () => {
@@ -110,8 +110,8 @@ describe('mapApiItemToUserCourseProgress', () => {
     const result = mapApiItemToUserCourseProgress(makeItem({}));
     // should NOT look like YYYY-MM-DD
     expect(result.lastAccessed).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    // should be one of the known relative time formats
-    expect(result.lastAccessed).toMatch(/ago|just now|last week|last month|last year/);
+    // should be a dayjs relative time string (always contains "ago" or "seconds")
+    expect(result.lastAccessed).toMatch(/ago|seconds/);
   });
 
   it('falls back to courseid when collectionDetails is undefined', () => {
