@@ -499,8 +499,10 @@
       "story": "قصة ولعبة",
       "course": "دورة",
       "collection": "مجموعة",
+      "textbook": "كتاب مدرسي",
       "questionSet": "مجموعة أسئلة"
     },
+    "noAccessToCreate": "ليس لديك صلاحية لإنشاء هذا المحتوى",
     "collectionDescriptions": {
       "course": "أدخل وصفاً للدورة",
       "contentPlaylist": "أدخل وصفاً للمجموعة",

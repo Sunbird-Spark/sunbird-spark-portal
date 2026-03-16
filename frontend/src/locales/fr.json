@@ -504,8 +504,10 @@
       "story": "Histoire et jeu",
       "course": "Cours",
       "collection": "Collection",
+      "textbook": "Manuel",
       "questionSet": "Ensemble de questions"
     },
+    "noAccessToCreate": "Vous n'avez pas accès pour créer ce contenu",
     "collectionDescriptions": {
       "course": "Entrez une description pour le cours",
       "contentPlaylist": "Entrez une description pour la collection",
