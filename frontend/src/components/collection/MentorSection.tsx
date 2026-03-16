@@ -13,6 +13,7 @@ interface MentorSectionProps {
   toggleMentor: (id: string) => void;
   labelClass?: string;
   inputClass?: string;
+  disabled?: boolean;
 }
 
 export function MentorSection({
@@ -24,6 +25,7 @@ export function MentorSection({
   toggleMentor,
   labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']",
   inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']",
+  disabled = false,
 }: MentorSectionProps) {
   const filteredMentors: MentorUser[] =
     mentorQuery.trim().length >= 1
@@ -40,22 +42,24 @@ export function MentorSection({
       <label className={labelClass}>Mentors in the Batch</label>
 
       {/* Search box */}
-      <div className="relative mb-2">
-        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
-          type="text"
-          className={cn(inputClass, "pl-9")}
-          placeholder="Search mentors by name or email…"
-          value={mentorQuery}
-          onChange={(e) => setMentorQuery(e.target.value)}
-        />
-        {mentorsLoading && (
-          <FiLoader className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
-        )}
-      </div>
+      {!disabled && (
+        <div className="relative mb-2">
+          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            className={cn(inputClass, "pl-9")}
+            placeholder="Search mentors by name or email…"
+            value={mentorQuery}
+            onChange={(e) => setMentorQuery(e.target.value)}
+          />
+          {mentorsLoading && (
+            <FiLoader className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+          )}
+        </div>
+      )}
 
       {/* Mentor list */}
-      {filteredMentors.length > 0 && (
+      {!disabled && filteredMentors.length > 0 && (
         <div className="rounded-lg border border-border bg-white shadow-sm max-h-40 overflow-y-auto divide-y divide-border">
           {filteredMentors.map((user) => {
             const isSelected = selectedMentorIds.includes(user.identifier);
@@ -109,14 +113,16 @@ export function MentorSection({
                 className="inline-flex items-center gap-1 text-xs bg-sunbird-brick/10 text-sunbird-brick rounded-full px-2.5 py-0.5 font-['Rubik']"
               >
                 {name}
-                <button
-                  type="button"
-                  onClick={() => toggleMentor(id)}
-                  className="hover:opacity-70"
-                  aria-label={`Remove ${name}`}
-                >
-                  <FiX className="w-3 h-3" />
-                </button>
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={() => toggleMentor(id)}
+                    className="hover:opacity-70"
+                    aria-label={`Remove ${name}`}
+                  >
+                    <FiX className="w-3 h-3" />
+                  </button>
+                )}
               </span>
             );
           })}

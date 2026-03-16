@@ -12,8 +12,6 @@ describe('Logger', () => {
 
     const loggerModule = await import('./logger.js');
     logger = loggerModule.default;
-    // Ensure logger level is 'info' even if env mock doesn't take effect in CI
-    logger.level = 'info';
   });
 
   afterEach(() => {
@@ -38,7 +36,7 @@ describe('Logger', () => {
     expect(logger.transports).toHaveLength(1);
   });
 
-  it('should write logs to console transport', () => {
+  it('should write logs to console transport', async () => {
     const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
 
     const spy = vi
@@ -50,12 +48,14 @@ describe('Logger', () => {
 
     logger.info('Test log message');
 
-    expect(spy).toHaveBeenCalled();
+    await vi.waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
 
     spy.mockRestore();
   });
 
-  it('should format log with timestamp, level and message', () => {
+  it('should format log with timestamp, level and message', async () => {
     const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
 
     const spy = vi
@@ -71,7 +71,9 @@ describe('Logger', () => {
 
     logger.info('Formatted log test');
 
-    expect(spy).toHaveBeenCalled();
+    await vi.waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
 
     spy.mockRestore();
   });

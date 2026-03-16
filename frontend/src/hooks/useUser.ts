@@ -100,3 +100,15 @@ export const useIsAdmin = (): boolean => {
   const { data: roles } = useUserRoles();
   return (roles ?? []).some((r) => r.role === 'ORG_ADMIN');
 };
+
+/**
+ * Returns true when the currently logged-in user has the COURSE_MENTOR
+ * role in their Sunbird profile (fetched from /user/v5/read).
+ * Returns false while the request is in-flight or if the user has no
+ * such role.
+ */
+export const useIsMentor = (): boolean => {
+  const { data: roles } = useUserRoles();
+  return (roles ?? []).some((r) => r.role === 'COURSE_MENTOR');
+};
+

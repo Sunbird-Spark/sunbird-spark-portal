@@ -784,6 +784,7 @@
   "batchRow": {
     "enrolmentEnds": "ينتهي التسجيل {{date}}",
     "editBatch": "تعديل الدفعة",
+    "viewBatch": "عرض الدفعة",
     "batchCannotBeEdited": "لا يمكن تعديل الدفعة بعد مرور تاريخ البدء",
     "certificateCannotBeModified": "لا يمكن تعديل الشهادة بعد تاريخ انتهاء الدفعة",
     "refreshBatchList": "تحديث قائمة الدفعات",

@@ -784,6 +784,7 @@
   "batchRow": {
     "enrolmentEnds": "Inscrição até {{date}}",
     "editBatch": "Editar lote",
+    "viewBatch": "Ver lote",
     "batchCannotBeEdited": "O lote não pode ser editado após a data de início ter passado",
     "certificateCannotBeModified": "O certificado não pode ser modificado após a data de término do lote",
     "refreshBatchList": "Atualizar lista de lotes",

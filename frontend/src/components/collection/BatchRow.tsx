@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { FiAward, FiCalendar, FiEdit2, FiLock } from "react-icons/fi";
+import { FiAward, FiCalendar, FiEdit2, FiLock, FiEye } from "react-icons/fi";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
@@ -32,9 +32,10 @@ interface BatchRowProps {
   batch: Batch;
   onEditClick: (batch: Batch) => void;
   onCertificateClick: (batch: Batch) => void;
+  canManageCertificates?: boolean;
 }
 
-export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowProps) => {
+export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCertificates = true }: BatchRowProps) => {
   const { t } = useAppI18n();
   const status = getBatchStatus(batch.status);
   const hasCertTemplate =
@@ -65,20 +66,20 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
           >
             {t(`batchTabs.${status.toLowerCase()}`)}
           </span>
-          {/* Edit — disabled if start date has passed */}
+          {/* Edit/View — disabled if start date has passed */}
           {batchEditable ? (
             <button
               type="button"
               onClick={() => onEditClick(batch)}
-              title={t('batchRow.editBatch')}
-              aria-label={t('batchRow.editBatch')}
+              title={canManageCertificates ? t('batchRow.editBatch') : t('batchRow.viewBatch')}
+              aria-label={canManageCertificates ? t('batchRow.editBatch') : t('batchRow.viewBatch')}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors"
             >
-              <FiEdit2 className="w-3.5 h-3.5" />
+              {canManageCertificates ? <FiEdit2 className="w-3.5 h-3.5" /> : <FiEye className="w-3.5 h-3.5" />}
             </button>
           ) : (
             <span
-              title={t('batchRow.batchCannotBeEdited')}
+              title={canManageCertificates ? t('batchRow.batchCannotBeEdited') : t('batchRow.viewBatch')}
               className="p-1.5 rounded-lg text-muted-foreground/40 cursor-not-allowed"
             >
               <FiLock className="w-3.5 h-3.5" />
@@ -102,26 +103,29 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick }: BatchRowPro
       </div>
 
       {/* Certificate action */}
-      <div className="flex items-center gap-1.5 pt-0.5 border-t border-border/60">
-        <FiAward className="w-3.5 h-3.5 text-sunbird-brick shrink-0" />
-        {certLocked ? (
-          <span
-            className="flex items-center gap-1 text-xs text-muted-foreground font-['Rubik'] cursor-not-allowed"
-            title={t('batchRow.certificateCannotBeModified')}
-          >
-            <FiLock className="w-3 h-3" />
-            {hasCertTemplate ? t('certificate.certificateLocked') : t('certificate.certificateUnavailable')}
-          </span>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onCertificateClick(batch)}
-            className="text-xs text-sunbird-brick font-medium font-['Rubik'] hover:underline"
-          >
-            {hasCertTemplate ? t('certificate.editCertificate') : t('certificate.addCertificate')}
-          </button>
-        )}
-      </div>
+      {canManageCertificates && (
+        <div className="flex items-center gap-1.5 pt-0.5 border-t border-border/60">
+          <FiAward className="w-3.5 h-3.5 text-sunbird-brick shrink-0" />
+          {certLocked ? (
+            <span
+              className="flex items-center gap-1 text-xs text-muted-foreground font-['Rubik'] cursor-not-allowed"
+              title={t('batchRow.certificateCannotBeModified')}
+            >
+              <FiLock className="w-3 h-3" />
+              {hasCertTemplate ? t('certificate.certificateLocked') : t('certificate.certificateUnavailable')}
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onCertificateClick(batch)}
+              className="text-xs text-sunbird-brick font-medium font-['Rubik'] hover:underline"
+            >
+              {hasCertTemplate ? t('certificate.editCertificate') : t('certificate.addCertificate')}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
+
