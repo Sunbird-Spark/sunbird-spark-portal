@@ -52,6 +52,14 @@ vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
   }
 }));
 
+vi.mock('./useAuthInfo', () => ({
+  useAuthInfo: vi.fn(() => ({
+    data: { uid: 'user_123', sid: 'session_123', isAuthenticated: true },
+    isLoading: false,
+    error: null,
+  })),
+}));
+
 describe('useBatch hooks test', () => {
   const mockQueryClient = {
     invalidateQueries: vi.fn(),
@@ -80,7 +88,7 @@ describe('useBatch hooks test', () => {
       const queryParams = useBatchListForCreator('course_123');
       
       expect(useQuery).toHaveBeenCalled();
-      expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', true]);
+      expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', true, 'user_123']);
       expect((queryParams as any).staleTime).toBe(0);
       expect((queryParams as any).retry).toBe(1);
     });

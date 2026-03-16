@@ -78,106 +78,10 @@ const createWrapper = () => {
   );
 };
 
-describe('useEditProfile', () => {
+describe('useEditProfile - Save Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockMutateAsync.mockResolvedValue({ data: { response: 'SUCCESS' }, status: 200, headers: {} });
-  });
-
-  it('initializes with dialog closed', () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    expect(result.current.isOpen).toBe(false);
-  });
-
-  it('opens dialog with correct form values from user data', () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    expect(result.current.isOpen).toBe(true);
-    expect(result.current.form.fullName).toBe('John Doe');
-    expect(result.current.form.mobileNumber).toBe('9876543210');
-    expect(result.current.form.emailId).toBe('john@example.com');
-    expect(result.current.form.alternateEmail).toBe('recovery@example.com');
-  });
-
-  it('resets all state when dialog is closed', () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    act(() => {
-      result.current.updateField('mobileNumber', '9999999999');
-    });
-
-    act(() => {
-      result.current.closeDialog();
-    });
-
-    expect(result.current.isOpen).toBe(false);
-    expect(result.current.fieldStates.mobileNumber.status).toBe('pristine');
-  });
-
-  it('sets field status to modified when value changes', () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    act(() => {
-      result.current.updateField('mobileNumber', '9999999999');
-    });
-
-    expect(result.current.fieldStates.mobileNumber.status).toBe('modified');
-  });
-
-  it('reverts field to pristine when value matches original', () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    act(() => {
-      result.current.updateField('mobileNumber', '9999999999');
-    });
-
-    expect(result.current.fieldStates.mobileNumber.status).toBe('modified');
-
-    act(() => {
-      result.current.updateField('mobileNumber', '9876543210');
-    });
-
-    expect(result.current.fieldStates.mobileNumber.status).toBe('pristine');
-  });
-
-  it('does not track fullName as OTP-required field', () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    act(() => {
-      result.current.updateField('fullName', 'Jane Doe');
-    });
-
-    // fullName is not in fieldStates, all OTP fields remain pristine
-    expect(result.current.fieldStates.mobileNumber.status).toBe('pristine');
-    expect(result.current.fieldStates.emailId.status).toBe('pristine');
-    expect(result.current.fieldStates.alternateEmail.status).toBe('pristine');
   });
 
   describe('canSave', () => {
@@ -322,7 +226,7 @@ describe('useEditProfile', () => {
       expect(result.current.canSave).toBe(true);
 
       await act(async () => {
-        await result.current.handleSave();
+        result.current.handleSave();
       });
 
       // Check if mutation was called
@@ -358,7 +262,7 @@ describe('useEditProfile', () => {
       expect(result.current.canSave).toBe(true);
 
       await act(async () => {
-        await result.current.handleSave();
+        result.current.handleSave();
       });
 
       await waitFor(() => {
@@ -374,84 +278,12 @@ describe('useEditProfile', () => {
     });
   });
 
-  it('resets verified field to modified when value is changed again', async () => {
+  it('formats time correctly', () => {
     const wrapper = createWrapper();
     const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
 
-    mockOtpService.generateOtp.mockResolvedValue({ data: 'success' });
-    mockOtpService.verifyOtp.mockResolvedValue({ data: 'success' });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    act(() => {
-      result.current.updateField('mobileNumber', '9999888877');
-    });
-
-    await act(async () => {
-      result.current.initiateOtp('mobileNumber');
-    });
-
-    act(() => {
-      result.current.setFieldOtp('mobileNumber', '123456');
-    });
-
-    await act(async () => {
-      result.current.verifyFieldOtp('mobileNumber');
-    });
-
-    expect(result.current.fieldStates.mobileNumber.status).toBe('verified');
-
-    // Change the value again
-    act(() => {
-      result.current.updateField('mobileNumber', '8888777766');
-    });
-
-    expect(result.current.fieldStates.mobileNumber.status).toBe('modified');
-  });
-
-  it('blocks alternateEmail OTP when it matches emailId', async () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    // Set alternateEmail to the same value as emailId (john@example.com)
-    act(() => {
-      result.current.updateField('alternateEmail', 'john@example.com');
-    });
-
-    await act(async () => {
-      result.current.initiateOtp('alternateEmail');
-    });
-
-    expect(result.current.fieldStates.alternateEmail.status).toBe('error');
-    expect(result.current.fieldStates.alternateEmail.errorMessage).toContain('cannot be the same');
-    expect(mockOtpService.generateOtp).not.toHaveBeenCalled();
-  });
-
-  it('blocks emailId OTP when it matches alternateEmail', async () => {
-    const wrapper = createWrapper();
-    const { result } = renderHook(() => useEditProfile({ user: mockUser }), { wrapper });
-
-    act(() => {
-      result.current.openDialog();
-    });
-
-    // Set emailId to the same value as alternateEmail (recovery@example.com)
-    act(() => {
-      result.current.updateField('emailId', 'recovery@example.com');
-    });
-
-    await act(async () => {
-      result.current.initiateOtp('emailId');
-    });
-
-    expect(result.current.fieldStates.emailId.status).toBe('error');
-    expect(result.current.fieldStates.emailId.errorMessage).toContain('cannot be the same');
-    expect(mockOtpService.generateOtp).not.toHaveBeenCalled();
+    expect(result.current.formatTime(0)).toBe('00:00');
+    expect(result.current.formatTime(20)).toBe('00:20');
+    expect(result.current.formatTime(90)).toBe('01:30');
   });
 });

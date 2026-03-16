@@ -18,15 +18,11 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
 });
 
 // Mock services
-const { mockUserService, mockUserAuthInfoService } = vi.hoisted(() => ({
+const { mockUserService, mockUseAuthInfo } = vi.hoisted(() => ({
     mockUserService: {
         userRead: vi.fn(),
     },
-    mockUserAuthInfoService: {
-        getUserId: vi.fn(),
-        getAuthInfo: vi.fn(),
-        isUserAuthenticated: vi.fn(),
-    }
+    mockUseAuthInfo: vi.fn(),
 }));
 
 // Mock UserService module
@@ -34,13 +30,10 @@ vi.mock('../services/UserService', () => ({
     UserService: vi.fn(function () { return mockUserService; }),
 }));
 
-// Mock userAuthInfoService module
-vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
-    default: mockUserAuthInfoService,
+// Mock useAuthInfo hook
+vi.mock('./useAuthInfo', () => ({
+    useAuthInfo: () => mockUseAuthInfo(),
 }));
-
-// Add isUserAuthenticated to the mock
-mockUserAuthInfoService.isUserAuthenticated = vi.fn().mockReturnValue(true);
 
 // Setup QueryClient wrapper
 const createWrapper = () => {
@@ -67,8 +60,12 @@ describe('useUserRead hook', () => {
         const mockUserId = 'user-123';
         const mockResponse = { data: { response: { firstName: 'Test', lastName: 'User' } } };
 
-        // Simulate userId already cached
-        mockUserAuthInfoService.getUserId.mockReturnValue(mockUserId);
+        // Mock useAuthInfo to return auth data
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: mockUserId, sid: 'session-123', isAuthenticated: true },
+            isSuccess: true,
+            isLoading: false,
+        });
         mockUserService.userRead.mockResolvedValue(mockResponse);
 
         const { result } = renderHook(() => useUserRead(), { wrapper: createWrapper() });
@@ -77,8 +74,6 @@ describe('useUserRead hook', () => {
         await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
         expect(result.current.data).toEqual(mockResponse);
-        expect(mockUserAuthInfoService.getUserId).toHaveBeenCalled();
-        expect(mockUserAuthInfoService.getAuthInfo).not.toHaveBeenCalled(); // optimized path
         expect(mockUserService.userRead).toHaveBeenCalledWith(mockUserId);
     });
 
@@ -87,10 +82,12 @@ describe('useUserRead hook', () => {
         const mockUserId = 'user-456';
         const mockResponse = { data: { response: { firstName: 'Async', lastName: 'User' } } };
 
-        // Simulate no cached userId initially
-        mockUserAuthInfoService.getUserId.mockReturnValue(null);
-        // Simulate successful auth fetch
-        mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: mockUserId });
+        // Mock useAuthInfo to return auth data
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: mockUserId, sid: 'session-456', isAuthenticated: true },
+            isSuccess: true,
+            isLoading: false,
+        });
 
         mockUserService.userRead.mockResolvedValue(mockResponse);
 
@@ -99,22 +96,23 @@ describe('useUserRead hook', () => {
         await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
         expect(result.current.data).toEqual(mockResponse);
-        expect(mockUserAuthInfoService.getUserId).toHaveBeenCalled();
-        expect(mockUserAuthInfoService.getAuthInfo).toHaveBeenCalled(); // fallback path
         expect(mockUserService.userRead).toHaveBeenCalledWith(mockUserId);
     });
 
     it('should throw error when userId is not available even after auth check', async () => {
-        // Setup mocks
-        mockUserAuthInfoService.getUserId.mockReturnValue(null);
-        mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: null });
+        // Setup mocks - no userId available
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: null, sid: 'session-789', isAuthenticated: false },
+            isSuccess: true,
+            isLoading: false,
+        });
 
         const { result } = renderHook(() => useUserRead(), { wrapper: createWrapper() });
 
-        await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 3000 });
+        // Query should be disabled, so it won't be in error state, just won't run
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-        expect(result.current.error).toBeInstanceOf(Error);
-        expect(result.current.error?.message).toBe('User ID not available');
+        expect(result.current.data).toBeUndefined();
         expect(mockUserService.userRead).not.toHaveBeenCalled();
     });
 
@@ -122,7 +120,11 @@ describe('useUserRead hook', () => {
         const mockUserId = 'user-789';
         const mockError = new Error('API Error');
 
-        mockUserAuthInfoService.getUserId.mockReturnValue(mockUserId);
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: mockUserId, sid: 'session-789', isAuthenticated: true },
+            isSuccess: true,
+            isLoading: false,
+        });
         mockUserService.userRead.mockRejectedValue(mockError);
 
         const { result } = renderHook(() => useUserRead(), { wrapper: createWrapper() });
@@ -135,8 +137,12 @@ describe('useUserRead hook', () => {
     it('accepts refetchOnMount option and still fetches data correctly', async () => {
         const mockUserId = 'user-123';
         const mockResponse = { data: { response: { firstName: 'Test', lastName: 'User' } } };
-        mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
-        mockUserAuthInfoService.getUserId.mockReturnValue(mockUserId);
+        
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: mockUserId, sid: 'session-123', isAuthenticated: true },
+            isSuccess: true,
+            isLoading: false,
+        });
         mockUserService.userRead.mockResolvedValue(mockResponse);
 
         const { result } = renderHook(() => useUserRead({ refetchOnMount: 'always' }), { wrapper: createWrapper() });
@@ -147,7 +153,11 @@ describe('useUserRead hook', () => {
 
     describe('query options', () => {
         it('uses 1-hour staleTime by default to cache user data across navigations', () => {
-            mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
+            mockUseAuthInfo.mockReturnValue({
+                data: { uid: 'user-123', sid: 'session-123', isAuthenticated: true },
+                isSuccess: true,
+                isLoading: false,
+            });
 
             renderHook(() => useUserRead(), { wrapper: createWrapper() });
 
@@ -155,7 +165,11 @@ describe('useUserRead hook', () => {
         });
 
         it('passes refetchOnMount: always through to useQuery when provided', () => {
-            mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
+            mockUseAuthInfo.mockReturnValue({
+                data: { uid: 'user-123', sid: 'session-123', isAuthenticated: true },
+                isSuccess: true,
+                isLoading: false,
+            });
 
             renderHook(() => useUserRead({ refetchOnMount: 'always' }), { wrapper: createWrapper() });
 
@@ -166,7 +180,11 @@ describe('useUserRead hook', () => {
         });
 
         it('leaves refetchOnMount undefined when no option is passed', () => {
-            mockUserAuthInfoService.isUserAuthenticated.mockReturnValue(true);
+            mockUseAuthInfo.mockReturnValue({
+                data: { uid: 'user-123', sid: 'session-123', isAuthenticated: true },
+                isSuccess: true,
+                isLoading: false,
+            });
 
             renderHook(() => useUserRead(), { wrapper: createWrapper() });
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { VideoPlayerService } from './VideoPlayerService';
 import type { VideoPlayerMetadata } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
@@ -33,6 +33,14 @@ vi.mock('../../UserProfileService', () => ({
   },
 }));
 
+// Mock fetch for styles
+const mockFetch = vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    text: () => Promise.resolve('/* mock css */'),
+  } as Response)
+);
+
 describe('VideoPlayerService', () => {
   let service: VideoPlayerService;
 
@@ -44,6 +52,9 @@ describe('VideoPlayerService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    // Mock fetch globally for each test
+    vi.stubGlobal('fetch', mockFetch);
     
     // Set default mock behavior for org service
     mockOrgSearch.mockResolvedValue({
@@ -67,6 +78,10 @@ describe('VideoPlayerService', () => {
     }
 
     service = new VideoPlayerService();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe('createConfig', () => {

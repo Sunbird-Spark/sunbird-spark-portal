@@ -131,6 +131,55 @@ describe('userAuthInfoService', () => {
                 errmsg: undefined
             });
         });
+
+        it('should cache the promise and prevent duplicate HTTP calls', async () => {
+            const mockResponse = {
+                data: {
+                    sid: 'session-123',
+                    uid: 'user-456',
+                    isAuthenticated: true
+                },
+                status: 200,
+                headers: {}
+            };
+            mockGet.mockResolvedValue(mockResponse);
+
+            // Call getAuthInfo multiple times simultaneously
+            const promise1 = userAuthInfoService.getAuthInfo();
+            const promise2 = userAuthInfoService.getAuthInfo();
+            const promise3 = userAuthInfoService.getAuthInfo();
+
+            const [result1, result2, result3] = await Promise.all([promise1, promise2, promise3]);
+
+            // HTTP client should only be called once
+            expect(mockGet).toHaveBeenCalledTimes(1);
+            
+            // All results should be the same
+            expect(result1).toEqual(mockResponse.data);
+            expect(result2).toEqual(mockResponse.data);
+            expect(result3).toEqual(mockResponse.data);
+        });
+
+        it('should clear cached promise on error to allow retry', async () => {
+            const networkError = new Error('Network Error');
+            mockGet.mockRejectedValueOnce(networkError);
+
+            // First call fails
+            await expect(userAuthInfoService.getAuthInfo()).rejects.toThrow('Network Error');
+            expect(mockGet).toHaveBeenCalledTimes(1);
+
+            // Second call should retry (not use cached error)
+            const mockResponse = {
+                data: { sid: 's1', uid: 'u1', isAuthenticated: true },
+                status: 200,
+                headers: {}
+            };
+            mockGet.mockResolvedValueOnce(mockResponse);
+            
+            const result = await userAuthInfoService.getAuthInfo();
+            expect(mockGet).toHaveBeenCalledTimes(2);
+            expect(result).toEqual(mockResponse.data);
+        });
     });
 
     describe('State Management', () => {
