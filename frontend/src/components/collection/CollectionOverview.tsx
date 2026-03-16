@@ -48,7 +48,7 @@ const CollectionOverview = ({
         <div>
           {contentAccessBlocked ? (
             <div className="collection-player-wrapper">
-              <div className="collection-player-loading">
+              <div className="collection-player-loading !h-[33.5rem] !min-h-0">
                 <p className="text-center text-muted-foreground text-sm px-4">
                   {t("courseDetails.mustJoinToAccessContent")}
                 </p>
@@ -56,7 +56,7 @@ const CollectionOverview = ({
             </div>
           ) : upcomingBatchBlocked ? (
             <div className="collection-player-wrapper">
-              <div className="collection-player-loading">
+              <div className="collection-player-loading !h-[33.5rem] !min-h-0">
                 <p className="text-center text-muted-foreground text-sm px-4">
                   {batchStartDate
                     ? t("courseDetails.batchNotStartedYet", {
@@ -68,7 +68,7 @@ const CollectionOverview = ({
             </div>
           ) : showMaxAttemptsExceeded ? (
             <div className="collection-player-wrapper">
-              <div className="collection-player-loading flex flex-col items-center justify-center py-8 px-4">
+              <div className="collection-player-loading !h-[33.5rem] !min-h-0 flex flex-col items-center justify-center py-8 px-4">
                 <p className="text-center text-muted-foreground text-sm">
                   {t("courseDetails.selfAssessMaxAttempt")}
                 </p>
@@ -78,19 +78,18 @@ const CollectionOverview = ({
             /* Content Player */
             <div className="collection-player-wrapper">
               {playerIsLoading && (
-                <div className="collection-player-loading">
+                <div className="collection-player-loading !h-[33.5rem] !min-h-0">
                   <PageLoader message={t("loading")} fullPage={false} />
                 </div>
               )}
               {!playerIsLoading && playerError && (
-                <div className="collection-player-error">
+                <div className="collection-player-error !h-[33.5rem] !min-h-0">
                   <p className="collection-player-error-text">{playerError.message}</p>
                 </div>
               )}
               {!playerIsLoading && !playerError && playerMetadata && (() => {
-                const isVideoMime = ['video/webm', 'video/mp4'].includes(playerMetadata.mimeType);
                 return (
-                  <div className={isVideoMime ? undefined : 'collection-player-content'}>
+                  <div className={'collection-player-content'}>
                     <ContentPlayer
                       mimeType={playerMetadata.mimeType}
                       metadata={playerMetadata}
@@ -105,7 +104,7 @@ const CollectionOverview = ({
             </div>
           ) : (
             /* No Content Error */
-            <div className="collection-player-error">
+            <div className="collection-player-error !h-[33.5rem] !min-h-0">
               <PageLoader 
                 error={t("noContentFound")} 
                 onRetry={() => window.location.reload()} 
@@ -115,9 +114,13 @@ const CollectionOverview = ({
           )}
         </div>
 
-        {/* Course Overview Section */}
+        {/* Overview Section */}
         <div className="collection-overview-section">
-          <h2 className="collection-overview-title">{t("courseDetails.overview")}</h2>
+          <h2 className="collection-overview-title">
+            {collectionData.primaryCategory?.toLowerCase() === "course"
+              ? t("courseDetails.overview")
+              : t("courseDetails.collectionOverview")}
+          </h2>
 
           {/* Stats: Units & Lessons */}
           <div className="collection-stats-container">

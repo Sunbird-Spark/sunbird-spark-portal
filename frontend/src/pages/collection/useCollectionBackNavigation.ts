@@ -30,12 +30,13 @@ export function useCollectionBackNavigation(collectionId: string | undefined): s
  */
 export function useAuthRefreshOnce(isAuthenticated: boolean): void {
   const [, setAuthRefresh] = useState(0);
-  const triedRef = useRef(false);
+  const triedAuthRefreshRef = useRef(false);
   useEffect(() => {
-    if (!isAuthenticated || userAuthInfoService.getUserId() || triedRef.current) return;
-    triedRef.current = true;
-    userAuthInfoService.getAuthInfo()
+    if (!isAuthenticated || userAuthInfoService.getUserId() || triedAuthRefreshRef.current) return;
+    triedAuthRefreshRef.current = true;
+    userAuthInfoService
+      .getAuthInfo()
       .then(() => setAuthRefresh((n) => n + 1))
-      .catch(() => {});
+      .catch(() => { });
   }, [isAuthenticated]);
 }
