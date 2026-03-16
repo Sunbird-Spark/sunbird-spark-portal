@@ -42,10 +42,9 @@ interface ContentDynamicFormDialogProps {
   defaultFields?: Record<string, readonly { key: string; name: string }[]>;
 }
 
-const processFormSubmission = ( formValues: Record<string, string | string[]>, fields: FormField[]): ContentFormData => {
+const processFormSubmission = (formValues: Record<string, string | string[]>, fields: FormField[]): ContentFormData => {
   const nameValue = ((formValues['name'] as string) || '').trim() || 'Untitled content';
   const dynamicFields: Record<string, string | string[] | number> = {};
-  
   for (const field of fields) {
     if (field.code === 'name' || field.code === 'description') continue;
     const val = formValues[field.code];
@@ -79,13 +78,14 @@ const createFormDefaults = (fields: FormField[]): Record<string, string | string
 const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => {
   const { t } = useAppI18n();
   return (
-  <div className="content-form-error-state">
-    <p className="content-form-error-text">{error}</p>
-    <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">
-      {t('retry')}
-    </Button>
-  </div>
-)};
+    <div className="content-form-error-state">
+      <p className="content-form-error-text">{error}</p>
+      <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">
+        {t('retry')}
+      </Button>
+    </div>
+  )
+};
 
 export default function ContentDynamicFormDialog({
   open,
@@ -123,9 +123,7 @@ export default function ContentDynamicFormDialog({
 
   const fields = useMemo(() => {
     const formFields: FormField[] = formData?.data?.form?.data?.fields ?? [];
-    return [...formFields]
-      .filter((f) => f.visible && f.inputType !== 'Concept')
-      .sort((a, b) => a.index - b.index);
+    return [...formFields].filter((f) => f.visible && f.inputType !== 'Concept').sort((a, b) => a.index - b.index);
   }, [formData]);
 
   const frameworkCategories = useMemo(() => {
@@ -133,9 +131,7 @@ export default function ContentDynamicFormDialog({
   }, [frameworkData]);
 
   const isFetchingForm = isFormLoading || isFrameworkLoading;
-  const fetchError = formError || frameworkError
-    ? t("resourceForm.failedToLoadForm")
-    : null;
+  const fetchError = formError || frameworkError ? t("resourceForm.failedToLoadForm") : null;
 
   useEffect(() => {
     if (fields.length > 0) {
@@ -144,17 +140,14 @@ export default function ContentDynamicFormDialog({
   }, [fields]);
 
   const getOptionsForField = useCallback((field: FormField): { key: string; name: string }[] => {
-    // If the field has a range (options), use those
     if (field.range && field.range.length > 0) {
       return field.range;
     }
-    
-    // If no range, check for default values based on field code
+
     if (defaultFields && defaultFields[field.code]) {
       return Array.from(defaultFields[field.code] || []);
     }
-    
-    // Default behavior for other fields
+
     const category = frameworkCategories.find((cat: { code: string; terms?: { name: string; code: string }[] }) => cat.code === field.code);
     if (category?.terms) {
       return category.terms.map((term: { name: string; code: string }) => ({ key: term.name, name: term.name }));
@@ -169,9 +162,7 @@ export default function ContentDynamicFormDialog({
   const handleMultiSelectToggle = useCallback((code: string, optionKey: string) => {
     setFormValues((prev) => {
       const current = (prev[code] as string[]) || [];
-      const next = current.includes(optionKey)
-        ? current.filter((v) => v !== optionKey)
-        : [...current, optionKey];
+      const next = current.includes(optionKey) ? current.filter((v) => v !== optionKey) : [...current, optionKey];
       return { ...prev, [code]: next };
     });
   }, []);
