@@ -89,7 +89,7 @@ const CollectionDetailPage = () => {
     userAuthInfoService
       .getAuthInfo()
       .then(() => setAuthRefresh((n) => n + 1))
-      .catch(() => {});
+      .catch(() => { });
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -176,8 +176,9 @@ const CollectionDetailPage = () => {
     contentType: currentContentNode?.contentType,
   });
 
+  const firstMainUnitId = collectionData?.children?.[0]?.identifier;
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
-  const initialExpandedSet = useRef(false);
+  const prevCollectionId = useRef(collectionId);
 
   useInitialCollectionContentNavigation({
     collectionData,
@@ -193,13 +194,15 @@ const CollectionDetailPage = () => {
   });
 
   useEffect(() => {
-    const firstMainUnitId = collectionData?.children?.[0]?.identifier;
-    if (firstMainUnitId && !initialExpandedSet.current) {
-      setExpandedModules([firstMainUnitId]);
-      initialExpandedSet.current = true;
+    if (prevCollectionId.current !== collectionId) {
+      prevCollectionId.current = collectionId;
+      setExpandedModules(firstMainUnitId ? [firstMainUnitId] : []);
+      return;
     }
-  }, [collectionData?.children]);
-  useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
+    if (firstMainUnitId) {
+      setExpandedModules((prev) => prev.length === 0 ? [firstMainUnitId] : prev);
+    }
+  }, [collectionId, firstMainUnitId]);
 
   const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
   const relatedContentItems = useMemo(
@@ -227,6 +230,7 @@ const CollectionDetailPage = () => {
         setCertificatePreviewUrl, setCertificatePreviewOpen, expandedModules, toggleModule, collectionId, batchIdParam,
         isCreatorViewingOwnCollection, isMentorViewingCourse: isMentorOfCourse, contentCreatorPrivilege, userProfile: userProfile ?? undefined,
         currentUserId: currentUserId ?? undefined,
+        backTo,
       }),
     [
       displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
@@ -234,7 +238,7 @@ const CollectionDetailPage = () => {
       handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, courseProgressProps, contentStatusMap,
       contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId, handleJoinCourse, batchListLoading,
       joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl, expandedModules, toggleModule,
-      collectionId, batchIdParam, isCreatorViewingOwnCollection, isMentorOfCourse, contentCreatorPrivilege, userProfile, currentUserId,
+      collectionId, batchIdParam, isCreatorViewingOwnCollection, isMentorOfCourse, contentCreatorPrivilege, userProfile, currentUserId, backTo
     ]
   );
 
