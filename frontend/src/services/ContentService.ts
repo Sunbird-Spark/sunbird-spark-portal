@@ -27,6 +27,7 @@ export class ContentService {
         offset: request.offset ?? 0,
         query: request.query ?? '',
         sort_by: request.sort_by ?? { lastUpdatedOn: 'desc' },
+        ...(request.fields ? { fields: request.fields } : {}),
       },
     });
   }

@@ -74,6 +74,20 @@ export interface AdminCourseSummary {
   lastUpdated: string;
 }
 
+/** Raw shape returned by POST /observability/v1/reports for org-course-enrolment-summary */
+export interface OrgCourseEnrolmentApiItem {
+  courseid: string;
+  collectionDetails?: { name?: string; identifier?: string; contentType?: string };
+  total_enrolled?: number;
+  total_completed?: number;
+  certificates_issued?: number;
+}
+
+export interface OrgCourseEnrolmentResult {
+  data: OrgCourseEnrolmentApiItem[];
+  count: number;
+}
+
 /* ---------- MODULE 2 – Course Report ---------- */
 
 export interface EnrollmentCompletion {
@@ -100,11 +114,11 @@ export interface LearnerProgress {
 /** Raw shape returned by POST /observability/v1/reports for user-course-enrolments */
 export interface UserCourseEnrolmentApiItem {
   courseid: string;
-  collectionDetails: {
+  collectionDetails?: {
     name: string;
     identifier: string;
     contentType: string;
-  };
+  } | null;
   completionpercentage: number | null;
   /** 0 = Not Started, 1 = In Progress, 2 = Completed */
   status: number;
@@ -177,11 +191,11 @@ export interface UserAssessmentApiItem {
   total_score: number | null;
   total_max_score: number | null;
   last_attempted_on: string;
-  collectionDetails: {
+  collectionDetails?: {
     name: string;
     identifier: string;
     contentType: string;
-  };
+  } | null;
   /** Optional — absent in some API records */
   contentDetails?: {
     name: string;

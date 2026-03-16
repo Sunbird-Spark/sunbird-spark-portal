@@ -1,5 +1,5 @@
 import { getClient } from '../../lib/http-client';
-import type { AssessmentApiItem, AssessmentResult, LearnerProgressApiItem, LearnerProgressResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
+import type { AssessmentApiItem, AssessmentResult, LearnerProgressApiItem, LearnerProgressResult, OrgCourseEnrolmentApiItem, OrgCourseEnrolmentResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
 
 /** Shared parser for the Sunbird observability response envelope.
  *  Handles two response shapes:
@@ -96,6 +96,22 @@ export class ObservabilityService {
         },
       })
       .then((response) => parseObservabilityResponse<UserAssessmentApiItem>(response.data));
+  }
+
+  /**
+   * Fetch enrolment summary for all courses in an org.
+   * POST /observability/v1/reports
+   */
+  public getOrgCourseEnrolmentSummary(courseIds: string[]): Promise<OrgCourseEnrolmentResult> {
+    return getClient()
+      .post<unknown>('/observability/v1/reports', {
+        request: {
+          reportId: 'org-course-enrolment-summary',
+          filters: { courseids: courseIds },
+          transform: ['course_id'],
+        },
+      })
+      .then((response) => parseObservabilityResponse<OrgCourseEnrolmentApiItem>(response.data));
   }
 }
 

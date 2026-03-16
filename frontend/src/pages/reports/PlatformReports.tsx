@@ -22,9 +22,9 @@ import {
   userGrowthData,
   userDemographics,
   userByAppType,
-  adminCourseSummaries,
 } from "@/data/reportsMockData";
 import type { AdminCourseSummary, ContentByGroup } from "@/types/reports";
+import { useOrgCourseSummary } from "@/hooks/useOrgCourseSummary";
 
 const PIE_COLORS = [
   "hsl(var(--sunbird-ink))",
@@ -47,14 +47,13 @@ const PlatformReports = () => {
 
   const totalUsers = useMemo(() => userDemographics.reduce((s, d) => s + d.count, 0), []);
 
+  const { data: apiCourses, isLoading: isCoursesLoading, isError: isCoursesError } = useOrgCourseSummary();
+
   const filteredCourses = useMemo(() => {
-    let result = adminCourseSummaries;
-    if (tableSearch) {
-      const q = tableSearch.toLowerCase();
-      result = result.filter((c) => c.courseName.toLowerCase().includes(q));
-    }
-    return result;
-  }, [tableSearch]);
+    if (!tableSearch) return apiCourses;
+    const q = tableSearch.toLowerCase();
+    return apiCourses.filter((c) => c.courseName.toLowerCase().includes(q));
+  }, [apiCourses, tableSearch]);
 
   const handleFilterChange = useCallback((key: string, value: string) => {
     setTableFilters((prev) => ({ ...prev, [key]: value }));
@@ -76,7 +75,6 @@ const PlatformReports = () => {
       ),
     },
     { key: "certificatesIssued", header: "Certificates", sortable: true, className: "text-right" },
-    { key: "lastUpdated", header: "Last Updated", sortable: true },
   ];
 
   return (
@@ -224,6 +222,10 @@ const PlatformReports = () => {
           />
         </div>
 
+        {isCoursesError && (
+          <p className="text-sm text-destructive mb-3">Failed to load course summary. Please try again later.</p>
+        )}
+
         <FilterPanel
           filters={[]}
           values={tableFilters}
@@ -238,6 +240,7 @@ const PlatformReports = () => {
           data={filteredCourses}
           keyExtractor={(r) => r.id}
           pageSize={10}
+          loading={isCoursesLoading}
         />
       </section>
     </ReportLayout>

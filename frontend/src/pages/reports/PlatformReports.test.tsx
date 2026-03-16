@@ -1,8 +1,9 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PlatformReports from './PlatformReports';
+import type { AdminCourseSummary } from '@/types/reports';
 
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -33,6 +34,26 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+const MOCK_COURSES: AdminCourseSummary[] = [
+  {
+    id: 'do_1',
+    courseName: 'Introduction to AI',
+    totalEnrolled: 10,
+    totalCompleted: 5,
+    completionPercent: 50,
+    certificatesIssued: 3,
+    lastUpdated: '',
+  },
+];
+
+const { mockUseOrgCourseSummary } = vi.hoisted(() => ({
+  mockUseOrgCourseSummary: vi.fn(),
+}));
+
+vi.mock('@/hooks/useOrgCourseSummary', () => ({
+  useOrgCourseSummary: mockUseOrgCourseSummary,
+}));
+
 const renderPage = () =>
   render(
     <MemoryRouter>
@@ -41,6 +62,10 @@ const renderPage = () =>
   );
 
 describe('PlatformReports', () => {
+  beforeEach(() => {
+    mockUseOrgCourseSummary.mockReturnValue({ data: MOCK_COURSES, isLoading: false, isError: false });
+  });
+
   it('renders page title', () => {
     renderPage();
     expect(screen.getByRole('heading', { name: 'Platform Reports' })).toBeInTheDocument();
@@ -103,5 +128,23 @@ describe('PlatformReports', () => {
   it('renders content grouping select', () => {
     renderPage();
     expect(screen.getByText('Content by Grouping')).toBeInTheDocument();
+  });
+
+  it('renders course rows from hook data', () => {
+    renderPage();
+    expect(screen.getByText('Introduction to AI')).toBeInTheDocument();
+  });
+
+  it('shows loading skeleton when courses are loading', () => {
+    mockUseOrgCourseSummary.mockReturnValueOnce({ data: [], isLoading: true, isError: false });
+    renderPage();
+    // DataTableWrapper renders Skeleton rows when loading=true; course rows should be absent
+    expect(screen.queryByText('Introduction to AI')).not.toBeInTheDocument();
+  });
+
+  it('shows error message when course summary fails', () => {
+    mockUseOrgCourseSummary.mockReturnValueOnce({ data: [], isLoading: false, isError: true });
+    renderPage();
+    expect(screen.getByText(/failed to load course summary/i)).toBeInTheDocument();
   });
 });
