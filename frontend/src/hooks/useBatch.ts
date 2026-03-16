@@ -3,6 +3,7 @@ import { batchService as creatorBatchService, Batch, CreateBatchRequest, UpdateB
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
 import { useAuthInfo } from './useAuthInfo';
 import { resolveUserAndOrg } from '../utils/userUtils';
+import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import type {
   BatchListResponse,
   BatchReadResponse,
