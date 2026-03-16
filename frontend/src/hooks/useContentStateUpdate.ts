@@ -7,7 +7,7 @@ import {
   progressToStatus,
 } from "../services/collection/contentProgressCalculator";
 import type { ConsumptionSummary } from "../services/collection/contentProgressCalculator";
-import userAuthInfoService from "../services/userAuthInfoService/userAuthInfoService";
+import { useUserId } from "./useAuthInfo";
 
 interface UseContentStateUpdateParams {
   collectionId: string | undefined;
@@ -79,6 +79,7 @@ export function useContentStateUpdate({
 }: UseContentStateUpdateParams): (event: TelemetryEvent) => void {
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
+  const userId = useUserId();
   const lastSentStatusRef = useRef<number | null>(null);
   const startUpdateInFlightRef = useRef(false);
 
@@ -104,7 +105,6 @@ export function useContentStateUpdate({
   const handleContentStateUpdate = useCallback(
     async (status: number, invalidate: boolean) => {
       if (!collectionId || !contentId || !effectiveBatchId) return;
-      const userId = userAuthInfoService.getUserId();
       if (!userId) return;
       try {
         await contentStateUpdate({
@@ -121,12 +121,11 @@ export function useContentStateUpdate({
         throw err;
       }
     },
-    [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]
+    [collectionId, contentId, effectiveBatchId, userId, queryClient, contentStateUpdate]
   );
 
   const sendAssessmentAndInvalidate = useCallback(async () => {
     if (!collectionId || !contentId || !effectiveBatchId) return;
-    const userId = userAuthInfoService.getUserId();
     if (!userId) return;
     const ts = assessmentTsRef.current;
     if (ts == null) return;
@@ -162,7 +161,7 @@ export function useContentStateUpdate({
       assessEventsRef.current = [];
       sendingAssessmentRef.current = false;
     }
-  }, [collectionId, contentId, effectiveBatchId, queryClient, contentStateUpdate]);
+  }, [collectionId, contentId, effectiveBatchId, userId, queryClient, contentStateUpdate]);
 
   return useCallback(
     (event: TelemetryEvent) => {

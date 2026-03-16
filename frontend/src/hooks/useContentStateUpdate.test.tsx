@@ -6,8 +6,17 @@ import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoSer
 
 const mockMutateAsync = vi.fn().mockResolvedValue(undefined);
 
+const { mockUseQuery } = vi.hoisted(() => ({
+  mockUseQuery: vi.fn(() => ({
+    data: { uid: 'user_1', sid: 'session_1', isAuthenticated: true },
+    isLoading: false,
+    error: null,
+  })),
+}));
+
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: vi.fn(),
+  useQuery: mockUseQuery,
 }));
 
 vi.mock('./useBatch', () => ({
@@ -34,6 +43,11 @@ describe('useContentStateUpdate', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseQuery.mockReturnValue({
+      data: { uid: 'user_1', sid: 'session_1', isAuthenticated: true },
+      isLoading: false,
+      error: null,
+    });
     (useQueryClient as ReturnType<typeof vi.fn>).mockReturnValue(mockQueryClient);
     (userAuthInfoService.getUserId as ReturnType<typeof vi.fn>).mockReturnValue('user_1');
   });
@@ -142,7 +156,11 @@ describe('useContentStateUpdate', () => {
   });
 
   it('does not call contentStateUpdate when getUserId returns undefined', () => {
-    (userAuthInfoService.getUserId as ReturnType<typeof vi.fn>).mockReturnValue(undefined);
+    mockUseQuery.mockReturnValue({
+      data: { uid: null, sid: 'session_1', isAuthenticated: false } as any,
+      isLoading: false,
+      error: null,
+    });
     const { result } = renderHook(() => useContentStateUpdate(defaultParams));
     result.current({ eid: 'START' });
     expect(mockMutateAsync).not.toHaveBeenCalled();

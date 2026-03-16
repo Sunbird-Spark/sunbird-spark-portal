@@ -4,17 +4,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useLearnerFuzzySearch, useResetPassword, useSignup, useIsContentCreator } from './useUser';
 import React from 'react';
 
-const { mockUserService, mockUserAuthInfoService } = vi.hoisted(() => ({
+const { mockUserService, mockUseAuthInfo } = vi.hoisted(() => ({
   mockUserService: {
     searchUser: vi.fn(),
     resetPassword: vi.fn(),
     signup: vi.fn(),
     getUserRoles: vi.fn(),
   },
-  mockUserAuthInfoService: {
-    getUserId: vi.fn(),
-    getAuthInfo: vi.fn(),
-  },
+  mockUseAuthInfo: vi.fn(),
 }));
 
 vi.mock('../services/UserService', () => ({
@@ -23,8 +20,8 @@ vi.mock('../services/UserService', () => ({
   }),
 }));
 
-vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
-  default: mockUserAuthInfoService,
+vi.mock('./useAuthInfo', () => ({
+  useAuthInfo: () => mockUseAuthInfo(),
 }));
 
 const createWrapper = () => {
@@ -43,8 +40,11 @@ const createWrapper = () => {
 describe('useUser hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: userId available from cache, no getAuthInfo needed
-    mockUserAuthInfoService.getUserId.mockReturnValue('user-123');
+    // Default: userId available from auth info
+    mockUseAuthInfo.mockReturnValue({
+      data: { sid: 'session-123', uid: 'user-123', isAuthenticated: true },
+      isSuccess: true,
+    });
   });
 
   describe('useLearnerFuzzySearch', () => {
@@ -143,8 +143,10 @@ describe('useUser hooks', () => {
     });
 
     it('falls back to getAuthInfo when getUserId returns null', async () => {
-      mockUserAuthInfoService.getUserId.mockReturnValue(null);
-      mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: 'auth-user-456' });
+      mockUseAuthInfo.mockReturnValue({
+        data: { sid: 'session-456', uid: 'auth-user-456', isAuthenticated: true },
+        isSuccess: true,
+      });
       mockUserService.getUserRoles.mockResolvedValue({
         data: {
           response: {
@@ -158,19 +160,20 @@ describe('useUser hooks', () => {
       await waitFor(() => {
         expect(result.current).toBe(true);
       });
-      expect(mockUserAuthInfoService.getAuthInfo).toHaveBeenCalled();
       expect(mockUserService.getUserRoles).toHaveBeenCalledWith('auth-user-456');
     });
 
     it('returns false when both getUserId and getAuthInfo return no userId', async () => {
-      mockUserAuthInfoService.getUserId.mockReturnValue(null);
-      mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: null });
+      mockUseAuthInfo.mockReturnValue({
+        data: { sid: 'session-789', uid: null, isAuthenticated: false },
+        isSuccess: true,
+      });
 
       const { result } = renderHook(() => useIsContentCreator(), { wrapper: createWrapper() });
 
       // queryFn returns [] when userId is absent — hook returns false
       await waitFor(() => {
-        expect(mockUserAuthInfoService.getAuthInfo).toHaveBeenCalled();
+        expect(mockUseAuthInfo).toHaveBeenCalled();
       });
       expect(result.current).toBe(false);
       expect(mockUserService.getUserRoles).not.toHaveBeenCalled();
