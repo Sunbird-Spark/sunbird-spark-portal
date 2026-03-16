@@ -97,7 +97,7 @@ const DEFAULT_FIELDS = {
   'primaryCategory': [
     { key: 'Content Playlist', name: 'Content Playlist' },
     { key: 'Digital Textbook', name: 'Digital Textbook' },
-    { key: 'question-paper', name: 'Question Paper' },
+    { key: 'Question paper', name: 'Question Paper' },
   ],
 } as const;
 
@@ -348,7 +348,7 @@ const WorkspacePage = () => {
           createdBy,
           creator,
           ...apiConfig,
-          description: formData.description || t(descriptionKey),
+          description: formData.description || "Enter the description",
           organisation,
           createdFor,
           framework: orgFramework,
@@ -591,7 +591,7 @@ const WorkspacePage = () => {
           )}
         </div>
       </main>
-      <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} isBookCreator={isBookCreatorOnly} />
+      <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} isBookCreator={hasBookCreatorRole} />
       <ConfirmDialog
         open={!!confirmDialog}
         onClose={() => setConfirmDialog(null)}
