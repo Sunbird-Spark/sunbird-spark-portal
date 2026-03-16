@@ -1,6 +1,6 @@
 import { envConfig } from '../config/env.js';
 import { Request } from 'express';
-import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client, CodeChallengeMethod } from 'google-auth-library';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
 
@@ -23,7 +23,7 @@ export const buildGoogleAuthUrl = (state: string, codeChallenge: string): string
         scope: ['openid', 'email', 'profile'],
         state,
         code_challenge: codeChallenge,
-        code_challenge_method: 'S256',
+        code_challenge_method: CodeChallengeMethod.S256,
         access_type: 'online',
     });
 };

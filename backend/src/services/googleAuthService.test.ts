@@ -12,7 +12,10 @@ vi.mock('google-auth-library', () => {
         getToken(opts: unknown) { return mockGetToken(opts); }
         verifyIdToken(opts: unknown) { return mockVerifyIdToken(opts); }
     }
-    return { OAuth2Client: MockOAuth2Client };
+    return {
+        OAuth2Client: MockOAuth2Client,
+        CodeChallengeMethod: { S256: 'S256', Plain: 'plain' },
+    };
 });
 
 vi.mock('../utils/logger.js', () => ({
