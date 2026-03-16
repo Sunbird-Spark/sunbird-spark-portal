@@ -8,6 +8,7 @@
   "loading": "جارٍ التحميل...",
   "error": "حدث خطأ",
   "success": "نجاح",
+  "congratulations": "تهانينا!",
   "name": "الاسم",
   "cancel": "إلغاء",
   "save": "حفظ",
@@ -214,6 +215,7 @@
   },
   "courseDetails": {
     "overview": "نظرة عامة على الدورة",
+    "collectionOverview": "نظرة عامة على المجموعة",
     "units": "وحدات",
     "weeks": "أسابيع",
     "skills": "المهارات التي ستتعلمها",
@@ -248,6 +250,7 @@
     "selfAssessMaxAttempt": "لقد وصلت إلى الحد الأقصى لعدد المحاولات لهذا التقييم.",
     "selfAssessLastAttempt": "هذه هي محاولتك الأخيرة لهذا التقييم.",
     "attemptsLabel": "المحاولة {{current}} من {{max}}",
+    "scoreLabel": "أفضل نتيجة: {{score}}/{{max}}",
     "forceSync": "مزامنة التقدم الآن",
     "forceSyncSuccess": "يمكنك عرض تحديث تقدم الدورة خلال 24 ساعة",
     "forceSyncCooldown": "يرجى الانتظار قبل المزامنة مرة أخرى.",
@@ -781,6 +784,7 @@
   "batchRow": {
     "enrolmentEnds": "ينتهي التسجيل {{date}}",
     "editBatch": "تعديل الدفعة",
+    "viewBatch": "عرض الدفعة",
     "batchCannotBeEdited": "لا يمكن تعديل الدفعة بعد مرور تاريخ البدء",
     "certificateCannotBeModified": "لا يمكن تعديل الشهادة بعد تاريخ انتهاء الدفعة",
     "refreshBatchList": "تحديث قائمة الدفعات",

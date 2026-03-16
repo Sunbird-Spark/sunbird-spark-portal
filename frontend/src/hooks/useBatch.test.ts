@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useBatchListForCreator, useBatchListForLearner, useBatchRead, useContentState, useEnrol, useUnenrol, useCreateBatch, useUpdateBatch } from './useBatch';
+import { useBatchListForCreator, useBatchListForMentor, useBatchListForLearner, useBatchRead, useContentState, useEnrol, useUnenrol, useCreateBatch, useUpdateBatch } from './useBatch';
 import { batchService as creatorBatchService } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
 import { userService } from '../services/UserService';
@@ -81,6 +81,18 @@ describe('useBatch hooks test', () => {
       
       expect(useQuery).toHaveBeenCalled();
       expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', true]);
+      expect((queryParams as any).staleTime).toBe(0);
+      expect((queryParams as any).retry).toBe(1);
+    });
+  });
+
+  describe('useBatchListForMentor', () => {
+    it('sets up mentor batch list query with correct staleTime and queryKey', () => {
+      (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
+      const queryParams = useBatchListForMentor('course_123');
+      
+      expect(useQuery).toHaveBeenCalled();
+      expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', 'mentor']);
       expect((queryParams as any).staleTime).toBe(0);
       expect((queryParams as any).retry).toBe(1);
     });

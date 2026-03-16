@@ -13,6 +13,7 @@
   "save": "Enregistrer",
   "delete": "Supprimer",
   "edit": "Modifier",
+  "congratulations": "Félicitations !",
   "close": "Fermer",
   "confirm": "Confirmer",
   "back": "Retour",
@@ -214,6 +215,7 @@
   },
   "courseDetails": {
     "overview": "Aperçu du cours",
+    "collectionOverview": "Aperçu de la collection",
     "units": "Unités",
     "weeks": "Semaines",
     "skills": "Compétences que vous apprendrez",
@@ -248,6 +250,7 @@
     "selfAssessMaxAttempt": "Vous avez atteint le nombre maximum de tentatives pour cette évaluation.",
     "selfAssessLastAttempt": "Ceci est votre dernière tentative pour cette évaluation.",
     "attemptsLabel": "Tentative {{current}} sur {{max}}",
+    "scoreLabel": "Meilleur score : {{score}}/{{max}}",
     "forceSync": "Synchroniser la progression maintenant",
     "forceSyncSuccess": "Vous pouvez consulter la progression mise à jour du cours sous 24 heures",
     "forceSyncCooldown": "Veuillez patienter avant de resynchroniser.",
@@ -789,6 +792,7 @@
   "batchRow": {
     "enrolmentEnds": "Inscription jusqu'au {{date}}",
     "editBatch": "Modifier le lot",
+    "viewBatch": "Voir le lot",
     "batchCannotBeEdited": "Le lot ne peut pas être modifié après le passage de la date de début",
     "certificateCannotBeModified": "Le certificat ne peut pas être modifié après la date de fin du lot",
     "refreshBatchList": "Actualiser la liste des lots",
