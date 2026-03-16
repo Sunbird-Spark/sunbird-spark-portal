@@ -891,6 +891,7 @@
     "coursesCompleted": "Cursos concluídos",
     "coursesPending": "Cursos pendentes",
     "certificatesIssued": "Certificados emitidos",
+    "totalCourses": "Total de cursos",
     "contentCompleted": "Conteúdo concluído",
     "assessmentsCompleted": "Avaliações realizadas",
     "course": "Curso",
@@ -904,7 +905,24 @@
     "score": "Pontuação",
     "max": "Máx",
     "result": "Resultado",
-    "date": "Data"
+    "date": "Data",
+    "dateTime": "Data e hora"
+  },
+  "courseReport": {
+    "totalEnrolled": "Total de Inscritos",
+    "totalCompleted": "Total de Concluídos",
+    "certificatesIssued": "Certificados Emitidos",
+    "avgScore": "Pontuação Média",
+    "enrollmentVsCompletion": "Inscrições vs Conclusões",
+    "pendingCompletionBuckets": "Grupos de Conclusão Pendentes",
+    "scoreDistribution": "Distribuição de Pontuações",
+    "enrolled": "Inscrito",
+    "completed": "Concluído",
+    "learners": "Aprendizes",
+    "learnerProgress": "Progresso do Aprendiz",
+    "assessments": "Avaliações",
+    "detailedLearnerProgress": "Progresso Detalhado do Aprendiz",
+    "detailedAssessments": "Avaliações Detalhadas"
   },
   "editors": {
     "errorTitle": "Erro do Editor",
