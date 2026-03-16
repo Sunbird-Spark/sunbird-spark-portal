@@ -3,6 +3,7 @@ import { Request } from 'express';
 
 const {
     mockAuthorizationCodeGrant,
+    mockFetchUserInfo,
     mockBuildAuthorizationUrl,
     mockRandomPKCECodeVerifier,
     mockCalculatePKCECodeChallenge,
@@ -10,19 +11,22 @@ const {
     mockDecodeJwtPayload,
 } = vi.hoisted(() => {
     const mockAuthorizationCodeGrant = vi.fn();
-    const mockBuildAuthorizationUrl = vi.fn();
-    const mockRandomPKCECodeVerifier = vi.fn().mockReturnValue('test-verifier');
-    const mockCalculatePKCECodeChallenge = vi.fn().mockResolvedValue('test-challenge');
-    const mockGetGoogleOIDCConfig = vi.fn().mockResolvedValue({});
-    const mockDecodeJwtPayload = vi.fn().mockReturnValue({
+    const mockFetchUserInfo = vi.fn().mockResolvedValue({
+        sub: 'keycloak-user-id',
         email: 'test@example.com',
         given_name: 'Test',
         family_name: 'User',
         name: 'Test User',
     });
+    const mockBuildAuthorizationUrl = vi.fn();
+    const mockRandomPKCECodeVerifier = vi.fn().mockReturnValue('test-verifier');
+    const mockCalculatePKCECodeChallenge = vi.fn().mockResolvedValue('test-challenge');
+    const mockGetGoogleOIDCConfig = vi.fn().mockResolvedValue({});
+    const mockDecodeJwtPayload = vi.fn().mockReturnValue({ sub: 'keycloak-user-id' });
 
     return {
         mockAuthorizationCodeGrant,
+        mockFetchUserInfo,
         mockBuildAuthorizationUrl,
         mockRandomPKCECodeVerifier,
         mockCalculatePKCECodeChallenge,
@@ -38,6 +42,7 @@ vi.mock('../auth/oidcProvider.js', () => ({
 
 vi.mock('openid-client', () => ({
     authorizationCodeGrant: mockAuthorizationCodeGrant,
+    fetchUserInfo: mockFetchUserInfo,
     buildAuthorizationUrl: mockBuildAuthorizationUrl,
     randomPKCECodeVerifier: mockRandomPKCECodeVerifier,
     calculatePKCECodeChallenge: mockCalculatePKCECodeChallenge,
@@ -133,7 +138,8 @@ describe('GoogleAuthService - Keycloak OIDC flow', () => {
 
         it('should fall back to given_name + family_name if name claim is absent', async () => {
             mockAuthorizationCodeGrant.mockResolvedValue({ access_token: 'test-access-token' });
-            mockDecodeJwtPayload.mockReturnValue({
+            mockFetchUserInfo.mockResolvedValue({
+                sub: 'keycloak-user-id',
                 email: 'user@example.com',
                 given_name: 'Jane',
                 family_name: 'Doe',
@@ -144,13 +150,22 @@ describe('GoogleAuthService - Keycloak OIDC flow', () => {
             expect(result).toEqual({ emailId: 'user@example.com', name: 'Jane Doe' });
         });
 
-        it('should return undefined email/name when claims are missing', async () => {
+        it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when userinfo returns no email', async () => {
             mockAuthorizationCodeGrant.mockResolvedValue({ access_token: 'test-access-token' });
-            mockDecodeJwtPayload.mockReturnValue({});
+            mockFetchUserInfo.mockResolvedValue({ sub: 'keycloak-user-id' });
 
-            const result = await exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state');
+            await expect(
+                exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state')
+            ).rejects.toThrow('GOOGLE_EMAIL_INVALID_OR_MASKED');
+        });
 
-            expect(result).toEqual({ emailId: undefined, name: undefined });
+        it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when userinfo returns a masked email', async () => {
+            mockAuthorizationCodeGrant.mockResolvedValue({ access_token: 'test-access-token' });
+            mockFetchUserInfo.mockResolvedValue({ sub: 'keycloak-user-id', email: 'ha****@sanketika.in' });
+
+            await expect(
+                exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state')
+            ).rejects.toThrow('GOOGLE_EMAIL_INVALID_OR_MASKED');
         });
 
         it('should throw if authorizationCodeGrant fails', async () => {

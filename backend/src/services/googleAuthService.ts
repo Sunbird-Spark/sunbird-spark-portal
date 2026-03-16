@@ -54,15 +54,30 @@ export const exchangeKeycloakCode = async (
         idTokenExpected: false,
     }, { redirect_uri: callbackUrl });
 
-    const claims = decodeJwtPayload(tokens.access_token);
-    logger.info(`exchangeKeycloakCode: email=${claims?.email} name=${claims?.name} given_name=${claims?.given_name} family_name=${claims?.family_name} sub=${claims?.sub}`);
+    // Use the userinfo endpoint instead of decoding the access token directly.
+    // The access token claims go through Keycloak's protocol mappers (and any SPI)
+    // which can mask the email (e.g. "ha****@domain.com"). The userinfo endpoint
+    // reads directly from the Keycloak user store, which — once the Google IDP
+    // Attribute Importer mapper is in place — always contains the real email.
+    const tokenClaims = decodeJwtPayload(tokens.access_token);
+    const sub = tokenClaims?.sub as string | undefined;
+    const userInfo = await oidcClient.fetchUserInfo(config, tokens.access_token, sub!);
 
-    const firstName = (claims?.given_name as string) || '';
-    const lastName = (claims?.family_name as string) || '';
-    const fullName = (claims?.name as string) || `${firstName} ${lastName}`.trim();
+    logger.info(`exchangeKeycloakCode: email=${userInfo.email} name=${userInfo.name} given_name=${userInfo.given_name} sub=${userInfo.sub}`);
+
+    const email = userInfo.email as string | undefined;
+    const EMAIL_REGEX = /^[^\s@*]+@[^\s@*]+\.[^\s@*]+$/;
+    if (!email || !EMAIL_REGEX.test(email)) {
+        logger.error(`exchangeKeycloakCode: invalid or masked email from userinfo endpoint: "${email}". Ensure the Google IDP has an Attribute Importer mapper for email with Sync Mode = FORCE.`);
+        throw new Error('GOOGLE_EMAIL_INVALID_OR_MASKED');
+    }
+
+    const firstName = (userInfo.given_name as string) || '';
+    const lastName = (userInfo.family_name as string) || '';
+    const fullName = (userInfo.name as string) || `${firstName} ${lastName}`.trim();
 
     return {
-        emailId: claims?.email as string | undefined,
+        emailId: email,
         name: fullName || undefined,
     };
 };
