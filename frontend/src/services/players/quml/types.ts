@@ -1,5 +1,7 @@
+import type { TelemetryContext } from '../telemetryContextBuilder';
+
 export interface QumlPlayerConfig {
-  context: Record<string, any>;
+  context: TelemetryContext;
   config: Record<string, any>;
   metadata: any;
 }
@@ -23,6 +25,6 @@ export interface QumlPlayerEvent {
 export interface QumlPlayerContextProps {
   mode?: string;
   cdata?: any[];
-  contextRollup?: { l1: string };
-  objectRollup?: Record<string, any>;
+  contextRollup?: Record<string, string>;
+  objectRollup?: Record<string, string>;
 }

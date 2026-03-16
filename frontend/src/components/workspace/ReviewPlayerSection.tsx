@@ -31,12 +31,13 @@ const ContentPlayerSection: React.FC<ContentPlayerSectionProps> = React.memo(({
         <PlayerComponent
           mimeType={playerMetadata.mimeType}
           metadata={playerMetadata}
+          mode={isReviewMode ? 'preview' : 'play'}
           onPlayerEvent={handlePlayerEvent}
           onTelemetryEvent={handleTelemetryEvent}
         />
       </div>
     </div>
-  ), [playerMetadata, handlePlayerEvent, handleTelemetryEvent]);
+  ), [playerMetadata, handlePlayerEvent, handleTelemetryEvent, isReviewMode]);
 
   // Show comments only for ECML content
   if (isEcmlContent && contentId) {

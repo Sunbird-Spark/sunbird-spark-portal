@@ -19,6 +19,8 @@ export interface CollectionContentAreaPlayerProps {
   handlePlayerEvent: (event: any) => void;
   handleTelemetryEvent: (event: any) => void;
   showMaxAttemptsExceeded?: boolean;
+  cdata?: Array<{ id: string; type: string }>;
+  objectRollup?: Record<string, string>;
 }
 
 /** Enrollment, progress, batch list and certificate state. */

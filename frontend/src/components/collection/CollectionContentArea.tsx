@@ -36,6 +36,8 @@ export default function CollectionContentArea({
     handlePlayerEvent,
     handleTelemetryEvent,
     showMaxAttemptsExceeded = false,
+    cdata,
+    objectRollup,
   } = player;
   const { courseProgressProps } = enrollment;
   const { collectionId, batchIdParam } = sidebar;
@@ -145,6 +147,8 @@ export default function CollectionContentArea({
               onPlayerEvent={handlePlayerEvent}
               onTelemetryEvent={handleTelemetryEvent}
               showMaxAttemptsExceeded={showMaxAttemptsExceeded}
+              cdata={cdata}
+              objectRollup={objectRollup}
             />
           </div>
         </div>

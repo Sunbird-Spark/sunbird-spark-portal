@@ -6,8 +6,8 @@ interface PdfPlayerProps {
   metadata: PdfPlayerMetadata; // Required - complete metadata object from backend
   mode?: string; // Optional - default: 'play'
   cdata?: any[]; // Optional - default: []
-  contextRollup?: { l1: string }; // Optional - default: { l1: channel }
-  objectRollup?: Record<string, any>; // Optional - default: {}
+  contextRollup?: Record<string, string>; // Optional - default: { l1: channel }
+  objectRollup?: Record<string, string>; // Optional - default: {}
   onPlayerEvent?: (event: PdfPlayerEvent) => void;
   onTelemetryEvent?: (event: any) => void;
 }
