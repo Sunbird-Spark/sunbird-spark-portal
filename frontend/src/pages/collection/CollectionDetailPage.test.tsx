@@ -228,6 +228,7 @@ vi.mock('@/components/collection/RelatedContentSection', () => ({
   ),
 }));
 
+const mockContentAreaGoBack = vi.fn();
 vi.mock('@/components/collection/CollectionContentArea', () => ({
   default: ({
     collectionData,
@@ -235,31 +236,37 @@ vi.mock('@/components/collection/CollectionContentArea', () => ({
     access,
     creator,
     sidebar,
+    backTo,
   }: {
     collectionData: any;
     contentId?: string;
     access?: { contentBlocked?: boolean };
     creator?: { isCreatorViewingOwnCollection?: boolean };
     sidebar?: { collectionId?: string };
-  }) => (
-    <div
-      data-testid="collection-content-area"
-      data-content-id={contentId ?? ''}
-      data-is-creator-viewing-own={String(!!creator?.isCreatorViewingOwnCollection)}
-      data-content-blocked={String(!!access?.contentBlocked)}
-    >
-      <div data-testid="collection-overview">{collectionData?.title}</div>
-      <div>
-        {creator?.isCreatorViewingOwnCollection && (
-          <div data-testid="batch-card" data-collection-id={sidebar?.collectionId}>
-            Batch Card
-          </div>
-        )}
+    backTo?: string;
+  }) => {
+    mockContentAreaGoBack.mockImplementation(() => mockNavigate(backTo ?? '/home'));
+    return (
+      <div
+        data-testid="collection-content-area"
+        data-content-id={contentId ?? ''}
+        data-is-creator-viewing-own={String(!!creator?.isCreatorViewingOwnCollection)}
+        data-content-blocked={String(!!access?.contentBlocked)}
+      >
+        <button onClick={() => mockNavigate(backTo ?? '/home')}>button.goBack</button>
+        <div data-testid="collection-overview">{collectionData?.title}</div>
+        <div>
+          {creator?.isCreatorViewingOwnCollection && (
+            <div data-testid="batch-card" data-collection-id={sidebar?.collectionId}>
+              Batch Card
+            </div>
+          )}
+        </div>
+        <aside data-testid="collection-sidebar">Sidebar</aside>
+        <div>Stats: {collectionData?.lessons} lessons</div>
       </div>
-      <aside data-testid="collection-sidebar">Sidebar</aside>
-      <div>Stats: {collectionData?.lessons} lessons</div>
-    </div>
-  ),
+    );
+  },
 }));
 
 let lastCertificateModalDetails: CertificatePreviewDetails | undefined;

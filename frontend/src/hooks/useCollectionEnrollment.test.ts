@@ -19,6 +19,7 @@ vi.mock('@tanstack/react-query', () => ({
 const mockUseBatchRead = vi.fn();
 vi.mock('./useBatch', () => ({
   useBatchListForLearner: () => ({ data: null, isLoading: false, error: null }),
+  useBatchListForMentor: () => ({ data: null, isLoading: false, error: null }),
   useBatchRead: (batchId: string | undefined, _opts: { enabled?: boolean }) => mockUseBatchRead(batchId),
   useContentState: () => ({ data: { contentList: [] } }),
   useEnrol: () => ({
@@ -27,6 +28,10 @@ vi.mock('./useBatch', () => ({
     error: null,
     reset: vi.fn(),
   }),
+}));
+
+vi.mock('./useUser', () => ({
+  useIsMentor: () => false,
 }));
 
 vi.mock('./useUserEnrolledCollections', () => ({

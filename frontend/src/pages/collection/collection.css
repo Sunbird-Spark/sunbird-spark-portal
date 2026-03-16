@@ -1,20 +1,23 @@
 /* Collection page styles - scrollbar uses sunbird-brick */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--sunbird-brick)) transparent;
+  scrollbar-color: hsl(var(--sunbird-brick)) hsl(var(--sunbird-brick) / 0.1);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
+  -webkit-appearance: none;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: hsl(var(--sunbird-brick) / 0.1);
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: hsl(var(--sunbird-brick));
   border-radius: 3px;
+  min-height: 30px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -35,4 +38,9 @@
 .collection-player-content sunbird-epub-player,
 .collection-player-content sunbird-quml-player {
   height: 100%;
+}
+
+.collection-player-content .content-player-embed [data-video-player-wrapper="true"] {
+  border-radius: 1.25rem;
+  overflow: hidden;
 }

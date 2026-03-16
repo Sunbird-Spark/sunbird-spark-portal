@@ -11,7 +11,7 @@ import type {
   CollectionContentAreaEnrollmentProps,
   CollectionContentAreaSidebarProps,
   CollectionContentAreaCreatorProps,
-} from "@/components/collection/CollectionContentArea";
+} from "@/types/collectionContentAreaTypes";
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
@@ -48,6 +48,7 @@ export interface CollectionDetailLayoutContentAreaProps {
   enrollment: CollectionContentAreaEnrollmentProps;
   sidebar: CollectionContentAreaSidebarProps;
   creator?: CollectionContentAreaCreatorProps;
+  backTo?: string;
 }
 
 /** Certificate preview modal state and setters. */
@@ -112,14 +113,17 @@ const CollectionDetailLayout = ({
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-6">
-        {/* Go Back Link - always visible */}
-        <button
-          onClick={onGoBack}
-          className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
-        >
-          <FiArrowLeft className="w-4 h-4" />
-          {t("button.goBack")}
-        </button>
+        {/* Go Back Link — only shown for loading/error states.
+             When the content area is visible, it renders its own Go Back inside the grid. */}
+        {(showLoading || isError || collectionDataFromApi == null) && (
+          <button
+            onClick={onGoBack}
+            className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+            {t("button.goBack")}
+          </button>
+        )}
 
         {showLoading && <PageLoader message={t("loading")} fullPage={false} />}
         {!showLoading && isError && error && (

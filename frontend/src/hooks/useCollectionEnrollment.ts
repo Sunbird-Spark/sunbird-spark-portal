@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from './useBatch';
+import { useBatchListForLearner, useBatchListForMentor, useBatchRead, useContentState, useEnrol } from './useBatch';
+import { useIsMentor } from './useUser';
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
 import { useAppI18n } from './useAppI18n';
 import { useToast } from './useToast';
@@ -32,15 +33,34 @@ export function useCollectionEnrollment(
     enabled: isAuthenticated,
   });
 
+  const isMentorRole = useIsMentor();
+  const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? '') === 'yes';
+
+  const { data: mentorBatches } = useBatchListForMentor(collectionId, {
+    enabled: isAuthenticated && isTrackableForBatch && isMentorRole,
+  });
+
   const enrollmentForCollection = useMemo(
     () => getEnrollmentForCollection(enrollmentsResponse?.data?.courses, collectionId),
     [collectionId, enrollmentsResponse?.data?.courses],
   );
+
+  const isMentorOfCurrentBatch = useMemo(
+    () => !!batchIdParam && (mentorBatches?.some((b) => b.id === batchIdParam) ?? false),
+    [batchIdParam, mentorBatches],
+  );
+
   const hasBatchInRoute = !!batchIdParam;
   const isEnrolledInCurrentBatch =
-    !!enrollmentForCollection &&
-    (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam);
-  const effectiveBatchId = batchIdParam ?? enrollmentForCollection?.batchId;
+    (!!enrollmentForCollection &&
+      (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam)) ||
+    isMentorOfCurrentBatch;
+
+  const effectiveBatchId =
+    batchIdParam ?? enrollmentForCollection?.batchId ?? mentorBatches?.[0]?.id;
+
+  const isMentorOfAnyBatchInCourse = (mentorBatches?.length ?? 0) > 0;
+
 
   const leafContentIds = useMemo(() => getLeafContentIds(collectionData), [collectionData]);
   const contentStateRequest = useMemo(() => {
@@ -77,7 +97,6 @@ export function useCollectionEnrollment(
     [enrollmentForCollection, collectionData, totalFromState, completedFromState],
   );
 
-  const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? '') === 'yes';
   const {
     data: batchListResponse,
     isLoading: batchListLoading,
@@ -161,5 +180,8 @@ export function useCollectionEnrollment(
     handleJoinCourse,
     batchEnrollmentType,
     batchStartDateFromRead,
+    isMentorOfAnyBatchInCourse,
+    isMentorOfCurrentBatch,
+    mentorBatches,
   };
 }

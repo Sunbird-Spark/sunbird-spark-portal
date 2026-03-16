@@ -50,6 +50,45 @@ export function useBatchListForCreator(
   });
 }
 
+// ─── useBatchListForMentor ─────────────────────────────────────────────────────
+/**
+ * Mentor view: fetch only batches where the current user is a mentor
+ * Returns `Batch[]`.
+ */
+export function useBatchListForMentor(
+  courseId: string | undefined,
+  options?: { enabled?: boolean }
+): UseQueryResult<Batch[], Error> {
+  const enabled = options?.enabled ?? true;
+
+  return useQuery({
+    queryKey: ['batchList', courseId, 'mentor'],
+    queryFn: async () => {
+      if (!courseId) return [] as Batch[];
+
+      let userId = userAuthInfoService.getUserId();
+      if (!userId) {
+        const authInfo = await userAuthInfoService.getAuthInfo();
+        userId = authInfo?.uid;
+      }
+      if (!userId) return [] as Batch[];
+      const response = await creatorBatchService.listBatches(courseId, undefined, [userId]);
+      return (response?.data?.response?.content ?? []) as Batch[];
+    },
+    enabled: enabled && !!courseId,
+    staleTime: 0,
+    retry: 1,
+  });
+}
+
+
+// ─── Utility ─────────────────────────────────────────────────────────────────
+export function mergeBatches(batchesA?: Batch[], batchesB?: Batch[]): Batch[] {
+  const combined = [...(batchesA || []), ...(batchesB || [])];
+  const uniqueIds = Array.from(new Set(combined.map(b => b.id)));
+  return uniqueIds.map(id => combined.find(b => b.id === id)!);
+}
+
 // ─── useBatchListForLearner ──────────────────────────────────────────────────
 /**
  * Learner view: fetch all batches for enrollment

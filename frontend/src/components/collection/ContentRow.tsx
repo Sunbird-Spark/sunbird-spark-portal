@@ -63,7 +63,7 @@ export default function ContentRow({
   const baseClass = contentBlocked
     ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-60 pointer-events-none cursor-not-allowed select-none"
     : isDisabledByAttempts
-      ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-60 cursor-not-allowed select-none"
+      ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] cursor-not-allowed select-none"
       : `flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] ${isActive
         ? "border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100"
         : "border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-90"
@@ -78,8 +78,8 @@ export default function ContentRow({
     contentAttemptInfoMap !== undefined;
   const content = (
     <>
-      {type === "video" ? <VideoIcon /> : <DocumentIcon />}
-      <span className="flex-1 text-base leading-snug flex items-center gap-2 min-w-0">
+      <span className={isDisabledByAttempts ? "opacity-60" : ""}>{type === "video" ? <VideoIcon /> : <DocumentIcon />}</span>
+      <span className={`flex-1 text-base leading-snug flex items-center gap-2 min-w-0 ${isDisabledByAttempts ? "opacity-60" : ""}`}>
         <span className="truncate">{title}</span>
         {showAttempts && (
           <span className="group/attempt relative flex-shrink-0">
@@ -97,17 +97,24 @@ export default function ContentRow({
       </span>
       {showStatus && (
         <span
-          className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex items-center gap-1 ${
+          className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex flex-col items-end gap-0.5 ${
             status === 2
-              ? "text-sunbird-status-completed-border"
+              ? "text-[#3D6A1C]"
               : status === 1
                 ? "text-sunbird-status-ongoing-border"
                 : "text-muted-foreground"
           }`}
         >
-          {status === 2 && <CiCircleCheck className="w-3.5 h-3.5 text-sunbird-status-completed-border" />}
-          {status === 1 && <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />}
-          {t(getStatusLabel(status))}
+          <span className="flex items-center gap-1">
+            {status === 2 && <CiCircleCheck className="w-3.5 h-3.5 text-[#3D6A1C]" />}
+            {status === 1 && <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />}
+            {t(getStatusLabel(status))}
+          </span>
+          {status === 2 && isSelfAssess && attemptInfo?.bestScore && (
+            <span className="text-[0.625rem] text-gray-600">
+              {t("courseDetails.scoreLabel", { score: attemptInfo.bestScore.totalScore, max: attemptInfo.bestScore.totalMaxScore })}
+            </span>
+          )}
         </span>
       )}
     </>

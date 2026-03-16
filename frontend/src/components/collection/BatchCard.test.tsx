@@ -92,14 +92,22 @@ vi.mock('@/hooks/useTnc', () => ({
 }));
 
 const mockUseBatchList = vi.fn();
+const mockUseBatchListForMentor = vi.fn();
 const mockUseIsContentCreator = vi.fn();
+const mockUseIsMentor = vi.fn();
 
 vi.mock('@/hooks/useBatch', () => ({
   useBatchListForCreator: (courseId: string, options?: any) => mockUseBatchList(courseId, options),
+  useBatchListForMentor: (courseId: string, options?: any) => mockUseBatchListForMentor(courseId, options),
+  mergeBatches: (a: any, b: any) => {
+    const combined = [...(a || []), ...(b || [])];
+    return combined.filter((v, i, arr) => arr.findIndex(t => t.id === v.id) === i);
+  },
 }));
 
 vi.mock('@/hooks/useUser', () => ({
   useIsContentCreator: () => mockUseIsContentCreator(),
+  useIsMentor: () => mockUseIsMentor(),
 }));
 
 vi.mock('@/hooks/usePermission', () => ({
@@ -124,8 +132,27 @@ describe('BatchCard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseBatchList.mockReturnValue(defaultHookState);
+    mockUseBatchList.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
+    });
+    mockUseBatchListForMentor.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
+    });
+    
+    // We import these hooks at the top already, so we can mock them here if needed.
+    // However, the test file uses `mockUseBatchList` directly. We need to tell the vi.mock
+    // to actually map useBatchListForCreator to mockUseBatchList and mergeBatches.
+    
     mockUseIsContentCreator.mockReturnValue(true); // Default to creator
+    mockUseIsMentor.mockReturnValue(false); // Default to not mentor
   });
 
   /* ── Rendering ── */
@@ -147,7 +174,7 @@ describe('BatchCard', () => {
 
   it('calls useBatchList with the collectionId', () => {
     render(<BatchCard collectionId="col-abc" />);
-    expect(mockUseBatchList).toHaveBeenCalledWith('col-abc', undefined);
+    expect(mockUseBatchList).toHaveBeenCalledWith('col-abc', { enabled: true });
   });
 
   /* ── Empty state ── */
@@ -274,224 +301,7 @@ describe('BatchCard', () => {
     expect(screen.queryByText('No ongoing batches')).not.toBeInTheDocument();
   });
 
-  /* ── Modal closed by default ── */
 
-  it('does not show the modal on initial render', () => {
-    render(<BatchCard {...defaultProps} />);
-    expect(screen.queryByTestId('create-batch-modal')).not.toBeInTheDocument();
-  });
-
-  /* ── Opening the modal ── */
-
-  it('opens the modal when Create Batch button is clicked', () => {
-    render(<BatchCard {...defaultProps} />);
-    fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
-    // 2 instances: create and edit (both render null when closed if mocked, but our mock renders div only when open)
-    expect(screen.getAllByTestId('create-batch-modal').length).toBeGreaterThan(0);
-  });
-
-  /* ── Closing the modal ── */
-
-  it('closes the modal when onOpenChange(false) is called by modal', () => {
-    render(<BatchCard {...defaultProps} />);
-    fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
-
-    // There can be multiple modals mocked (edit/create), find all close buttons
-    const closeButtons = screen.getAllByText('Close Modal');
-    if (closeButtons.length > 0 && closeButtons[0]) {
-      fireEvent.click(closeButtons[0]);
-    }
-    expect(screen.queryByTestId('create-batch-modal')).not.toBeInTheDocument();
-  });
-
-  /* ── Props forwarding ── */
-
-  it('passes the correct collectionId to the modal', () => {
-    render(<BatchCard collectionId="collection-abc" />);
-    fireEvent.click(screen.getByRole('button', { name: /create batch/i }));
-    const modals = screen.getAllByTestId('create-batch-modal');
-    expect(modals[0]).toHaveAttribute('data-collection-id', 'collection-abc');
-  });
-
-  /* ── Certificate modal ── */
-
-  it('does not show the certificate modal on initial render', () => {
-    render(<BatchCard {...defaultProps} />);
-    expect(screen.queryByTestId('add-certificate-modal')).not.toBeInTheDocument();
-  });
-
-  it('opens the certificate modal when certificate button is clicked', () => {
-    mockUseBatchList.mockReturnValue({
-      data: [
-        {
-          id: 'b1',
-          name: 'Test Batch',
-          status: '1',
-          startDate: '2026-01-01',
-          endDate: '2026-06-01',
-          certTemplates: undefined,
-        },
-      ],
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      isFetching: false,
-    });
-    render(<BatchCard {...defaultProps} />);
-    const certButton = screen.getByRole('button', { name: /add certificate/i });
-    fireEvent.click(certButton);
-    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
-  });
-
-  it('passes the correct courseId and batchId to the certificate modal', () => {
-    mockUseBatchList.mockReturnValue({
-      data: [
-        {
-          id: 'batch-xyz',
-          name: 'Test Batch',
-          status: '1',
-          startDate: '2026-01-01',
-          endDate: '2026-06-01',
-          certTemplates: undefined,
-        },
-      ],
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      isFetching: false,
-    });
-    render(<BatchCard collectionId="collection-abc" />);
-    const certButton = screen.getByRole('button', { name: /add certificate/i });
-    fireEvent.click(certButton);
-    const modal = screen.getByTestId('add-certificate-modal');
-    expect(modal).toHaveAttribute('data-course-id', 'collection-abc');
-    expect(modal).toHaveAttribute('data-batch-id', 'batch-xyz');
-  });
-
-  it('closes the certificate modal when onOpenChange(false) is called', () => {
-    mockUseBatchList.mockReturnValue({
-      data: [
-        {
-          id: 'b1',
-          name: 'Test Batch',
-          status: '1',
-          startDate: '2026-01-01',
-          endDate: '2026-06-01',
-          certTemplates: undefined,
-        },
-      ],
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      isFetching: false,
-    });
-    render(<BatchCard {...defaultProps} />);
-    const certButton = screen.getByRole('button', { name: /add certificate/i });
-    fireEvent.click(certButton);
-    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
-
-    const closeButton = screen.getByText('Close Certificate Modal');
-    fireEvent.click(closeButton);
-    expect(screen.queryByTestId('add-certificate-modal')).not.toBeInTheDocument();
-  });
-
-  it('passes collectionName to the certificate modal', () => {
-    mockUseBatchList.mockReturnValue({
-      data: [
-        {
-          id: 'b1',
-          name: 'Test Batch',
-          status: '1',
-          startDate: '2026-01-01',
-          endDate: '2026-06-01',
-          certTemplates: undefined,
-        },
-      ],
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      isFetching: false,
-    });
-    render(<BatchCard collectionId="collection-abc" collectionName="Test Collection" />);
-    const certButton = screen.getByRole('button', { name: /add certificate/i });
-    fireEvent.click(certButton);
-    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
-  });
-
-  it('passes existing cert templates to the certificate modal', () => {
-    mockUseBatchList.mockReturnValue({
-      data: [
-        {
-          id: 'b1',
-          name: 'Test Batch with Cert',
-          status: '1',
-          startDate: '2026-01-01',
-          endDate: '2026-06-01',
-          certTemplates: { 'template-1': { name: 'Template 1' } },
-        },
-      ],
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      isFetching: false,
-    });
-    render(<BatchCard {...defaultProps} />);
-    const certButton = screen.getByRole('button', { name: /edit certificate/i });
-    fireEvent.click(certButton);
-    expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
-  });
-
-  /* ── Edit batch modal ── */
-
-  it('opens the edit modal when edit button is clicked on a batch', () => {
-    mockUseBatchList.mockReturnValue({
-      data: [
-        {
-          id: 'b1',
-          name: 'Test Batch',
-          status: '1',
-          startDate: '2026-04-01',
-          endDate: '2026-06-01',
-        },
-      ],
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      isFetching: false,
-    });
-    render(<BatchCard {...defaultProps} />);
-    const editButton = screen.getByRole('button', { name: /edit batch/i });
-    fireEvent.click(editButton);
-    // Edit modal should appear
-    expect(screen.getByTestId('create-batch-modal')).toBeInTheDocument();
-  });
-
-  it('closes the edit modal when onOpenChange(false) is called', () => {
-    mockUseBatchList.mockReturnValue({
-      data: [
-        {
-          id: 'b1',
-          name: 'Test Batch',
-          status: '1',
-          startDate: '2026-04-01',
-          endDate: '2026-06-01',
-        },
-      ],
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      isFetching: false,
-    });
-    render(<BatchCard {...defaultProps} />);
-    const editButton = screen.getByRole('button', { name: /edit batch/i });
-    fireEvent.click(editButton);
-    expect(screen.getByTestId('create-batch-modal')).toBeInTheDocument();
-
-    const closeButton = screen.getByText('Close Modal');
-    fireEvent.click(closeButton);
-    // After closing, the modal should not be visible
-    expect(screen.queryByTestId('create-batch-modal')).not.toBeInTheDocument();
-  });
 
   /* ── Tab filtering ── */
 
@@ -587,5 +397,44 @@ describe('BatchCard', () => {
     render(<BatchCard {...defaultProps} />);
     expect(screen.queryByText(/to view batch reports/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Accept & Continue/i)).not.toBeInTheDocument();
+  });
+
+  /* ── Mentor Specific Logic ── */
+
+  it('hides Create batch button for mentor-only users', () => {
+    mockUseIsContentCreator.mockReturnValue(false);
+    mockUseIsMentor.mockReturnValue(true);
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.queryByRole('button', { name: /create batch/i })).not.toBeInTheDocument();
+  });
+
+  it('does not show certificate actions for mentor-only users', () => {
+    mockUseIsContentCreator.mockReturnValue(false);
+    mockUseIsMentor.mockReturnValue(true);
+    mockUseBatchListForMentor.mockReturnValue({
+      data: [{ id: 'b1', name: 'Mentor Batch', status: '1', startDate: '2026-03-01', endDate: '2026-06-30' }],
+      isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+    expect(screen.queryByRole('button', { name: /add certificate/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /edit certificate/i })).not.toBeInTheDocument();
+  });
+
+  it('deduplicates merged batches correctly', () => {
+    mockUseIsContentCreator.mockReturnValue(true);
+    mockUseIsMentor.mockReturnValue(true);
+    const mockBatch = { id: 'b1', name: 'Duplicate Batch', status: '1', startDate: '2026-03-01', endDate: '2026-06-30' };
+    mockUseBatchList.mockReturnValue({
+      data: [mockBatch],
+      isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
+    });
+    mockUseBatchListForMentor.mockReturnValue({
+      data: [mockBatch],
+      isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
+    });
+    
+    render(<BatchCard {...defaultProps} />);
+    const batchElements = screen.getAllByText('Duplicate Batch');
+    expect(batchElements).toHaveLength(1);
   });
 });

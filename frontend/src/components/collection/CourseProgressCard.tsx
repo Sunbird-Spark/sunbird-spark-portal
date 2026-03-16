@@ -75,11 +75,11 @@ const CourseProgressCard = ({
 
   return (
     <div
-      className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col gap-3"
+      className="font-rubik w-full rounded-xl border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg px-3 py-2.5 flex flex-col gap-1.5"
       data-testid="course-progress-card"
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] text-sunbird-status-ongoing-text">
+        <h3 className="font-rubik font-medium text-[1rem] leading-[100%] text-sunbird-status-ongoing-text">
           {t("courseDetails.courseProgress")}
         </h3>
         {showMenu && (
@@ -115,12 +115,12 @@ const CourseProgressCard = ({
         )}
       </div>
       {displayDate && (
-        <p className="font-rubik font-normal text-[0.8125rem] leading-[100%] text-muted-foreground">
+        <p className="font-rubik font-normal text-xs leading-tight text-muted-foreground">
           {t(dateLabelKey)}: {displayDate}
         </p>
       )}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-2 rounded-full bg-white/80 overflow-hidden">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-1.5 rounded-full bg-white/80 overflow-hidden">
           <div
             className="h-full rounded-full bg-sunbird-brick transition-[width] duration-300"
             style={{ width: `${progressPercentage}%` }}
@@ -131,7 +131,7 @@ const CourseProgressCard = ({
             aria-label={t("courseDetails.courseProgress")}
           />
         </div>
-        <span className="font-rubik font-medium text-[0.875rem] leading-[100%] text-sunbird-status-ongoing-text tabular-nums">
+        <span className="font-rubik font-medium text-xs leading-tight text-sunbird-status-ongoing-text tabular-nums">
           {progressPercentage}%
         </span>
       </div>

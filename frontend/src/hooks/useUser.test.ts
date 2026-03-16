@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQuery } from '@tanstack/react-query';
-import { useCurrentUserId } from './useUser';
+import { useCurrentUserId, useIsMentor } from './useUser';
 import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 
 vi.mock('@tanstack/react-query', () => ({
@@ -72,5 +72,21 @@ describe('useCurrentUserId', () => {
     const uid = await result.queryFn();
 
     expect(uid).toBeNull();
+  });
+});
+
+describe('useIsMentor', () => {
+  it('returns true if the user has COURSE_MENTOR role', () => {
+    (useQuery as import('vitest').Mock).mockReturnValue({
+      data: [{ role: 'COURSE_MENTOR' }]
+    });
+    expect(useIsMentor()).toBe(true);
+  });
+
+  it('returns false if the user does not have COURSE_MENTOR role', () => {
+    (useQuery as import('vitest').Mock).mockReturnValue({
+      data: [{ role: 'CONTENT_CREATOR' }]
+    });
+    expect(useIsMentor()).toBe(false);
   });
 });

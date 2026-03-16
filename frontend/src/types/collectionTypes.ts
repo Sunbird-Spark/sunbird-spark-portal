@@ -31,6 +31,7 @@ export interface CollectionData {
   hierarchyRoot: HierarchyContentNode;
   trackable?: { enabled?: TrackableEnabled };
   createdBy?: string;
+  primaryCategory?: string;
 }
 
 export interface HierarchyContentNode {

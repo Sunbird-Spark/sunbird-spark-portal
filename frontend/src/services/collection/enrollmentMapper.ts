@@ -64,18 +64,37 @@ export function isSelfAssess(node: HierarchyContentNode | null | undefined): boo
   return (node?.contentType ?? '') === 'SelfAssess';
 }
 
-export interface ContentAttemptInfo {
-  attemptCount: number;
+export interface ContentScoreInfo {
+  totalScore: number;
+  totalMaxScore: number;
 }
 
-/** Map contentId -> { attemptCount } from content state (score.length = currentAttempts). */
+export interface ContentAttemptInfo {
+  attemptCount: number;
+  bestScore?: ContentScoreInfo;
+}
+
+/** Map contentId -> { attemptCount, bestScore } from content state (score.length = currentAttempts). */
 export function getContentAttemptInfoMap(contentList: ContentStateItem[]): Record<string, ContentAttemptInfo> {
   const map: Record<string, ContentAttemptInfo> = {};
   contentList.forEach((item) => {
     if (item.contentId == null) return;
     const score = item.score;
     const attemptCount = Array.isArray(score) ? score.length : 0;
-    map[item.contentId] = { attemptCount };
+    const entry: ContentAttemptInfo = { attemptCount };
+    if (Array.isArray(score) && score.length > 0) {
+      let best: ContentScoreInfo | undefined;
+      for (const s of score) {
+        const attempt = s as { totalScore?: number; totalMaxScore?: number } | undefined;
+        if (attempt && typeof attempt.totalScore === 'number' && typeof attempt.totalMaxScore === 'number') {
+          if (!best || attempt.totalScore > best.totalScore) {
+            best = { totalScore: attempt.totalScore, totalMaxScore: attempt.totalMaxScore };
+          }
+        }
+      }
+      if (best) entry.bestScore = best;
+    }
+    map[item.contentId] = entry;
   });
   return map;
 }
