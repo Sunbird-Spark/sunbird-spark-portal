@@ -97,7 +97,7 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         <Route path="/edit/collection-editor/:contentId" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
             <CollectionEditorPage />
           </ProtectedRoute>
         } />

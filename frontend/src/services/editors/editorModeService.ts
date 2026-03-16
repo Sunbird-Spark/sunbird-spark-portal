@@ -7,9 +7,9 @@ export type EditorMode = 'read' | 'review' | 'edit';
 /**
  * Derives the user's workspace role from the user-read API response.
  *
- *   CONTENT_REVIEWER → 'reviewer'
- *   CONTENT_CREATOR  → 'creator'
- *   otherwise        →  null
+ *   CONTENT_REVIEWER / BOOK_REVIEWER → 'reviewer'
+ *   CONTENT_CREATOR  / BOOK_CREATOR  → 'creator'
+ *   otherwise                        →  null
  */
 export function getUserRole(
   userData: ApiResponse<UserReadResponse> | undefined,
@@ -17,8 +17,8 @@ export function getUserRole(
   const roles = userData?.data?.response?.roles;
   if (!Array.isArray(roles)) return null;
   const roleNames = roles.map((r) => r?.role).filter(Boolean);
-  if (roleNames.includes('CONTENT_REVIEWER')) return 'reviewer';
-  if (roleNames.includes('CONTENT_CREATOR')) return 'creator';
+  if (roleNames.includes('CONTENT_REVIEWER') || roleNames.includes('BOOK_REVIEWER')) return 'reviewer';
+  if (roleNames.includes('CONTENT_CREATOR') || roleNames.includes('BOOK_CREATOR')) return 'creator';
   return null;
 }
 

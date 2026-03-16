@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
-import ResourceFormField from './FormFields';
+import ContentFormField from './FormFields';
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
@@ -34,7 +34,7 @@ const mockOptions = [
   { key: 'option3', name: 'Option 3' },
 ];
 
-describe('ResourceFormField', () => {
+describe('ContentFormField', () => {
   const mockOnFieldChange = vi.fn();
   const mockOnMultiSelectToggle = vi.fn();
   const mockOnDropdownToggle = vi.fn();
@@ -57,7 +57,7 @@ describe('ResourceFormField', () => {
   describe('Text Input Field', () => {
     it('renders text input field correctly', () => {
       render(
-        <ResourceFormField
+        <ContentFormField
           field={mockField}
           value=""
           options={[]}
@@ -76,7 +76,7 @@ describe('ResourceFormField', () => {
 
     it('handles text input changes', () => {
       render(
-        <ResourceFormField
+        <ContentFormField
           field={mockField}
           value=""
           options={[]}
@@ -96,7 +96,7 @@ describe('ResourceFormField', () => {
 
     it('displays current value in text input', () => {
       render(
-        <ResourceFormField
+        <ContentFormField
           field={mockField}
           value="existing value"
           options={[]}
@@ -113,7 +113,7 @@ describe('ResourceFormField', () => {
 
     it('disables input when loading or not editable', () => {
       const { rerender } = render(
-        <ResourceFormField
+        <ContentFormField
           field={mockField}
           value=""
           options={[]}
@@ -128,7 +128,7 @@ describe('ResourceFormField', () => {
       expect(screen.getByPlaceholderText('Enter test value')).toBeDisabled();
 
       rerender(
-        <ResourceFormField
+        <ContentFormField
           field={{ ...mockField, editable: false }}
           value=""
           options={[]}
@@ -148,7 +148,7 @@ describe('ResourceFormField', () => {
     it('renders number input field correctly', () => {
       const numberField = { ...mockField, inputType: 'number' };
       render(
-        <ResourceFormField
+        <ContentFormField
           field={numberField}
           value=""
           options={[]}
@@ -167,7 +167,7 @@ describe('ResourceFormField', () => {
     it('handles number input changes', () => {
       const numberField = { ...mockField, inputType: 'number' };
       render(
-        <ResourceFormField
+        <ContentFormField
           field={numberField}
           value=""
           options={[]}
@@ -190,7 +190,7 @@ describe('ResourceFormField', () => {
     it('renders select field correctly', () => {
       const selectField = { ...mockField, inputType: 'select' };
       render(
-        <ResourceFormField
+        <ContentFormField
           field={selectField}
           value=""
           options={mockOptions}
@@ -212,7 +212,7 @@ describe('ResourceFormField', () => {
     it('handles select changes', () => {
       const selectField = { ...mockField, inputType: 'select' };
       render(
-        <ResourceFormField
+        <ContentFormField
           field={selectField}
           value=""
           options={mockOptions}
@@ -233,7 +233,7 @@ describe('ResourceFormField', () => {
     it('displays selected value in select', () => {
       const selectField = { ...mockField, inputType: 'select' };
       render(
-        <ResourceFormField
+        <ContentFormField
           field={selectField}
           value="option2"
           options={mockOptions}
@@ -255,7 +255,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={[]}
             options={mockOptions}
@@ -276,7 +276,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={['option1', 'option2']}
             options={mockOptions}
@@ -297,7 +297,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={[]}
             options={mockOptions}
@@ -320,7 +320,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={[]}
             options={mockOptions}
@@ -347,7 +347,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={[]}
             options={mockOptions}
@@ -368,7 +368,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={[]}
             options={mockOptions}
@@ -394,7 +394,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={['option1']}
             options={mockOptions}
@@ -417,7 +417,7 @@ describe('ResourceFormField', () => {
       const multiSelectField = { ...mockField, inputType: 'multiSelect' };
       render(
         <TestWrapper needsRef>
-          <ResourceFormField
+          <ContentFormField
             field={multiSelectField}
             value={['option1']}
             options={mockOptions}
@@ -441,7 +441,7 @@ describe('ResourceFormField', () => {
     it('does not show required indicator for optional fields', () => {
       const optionalField = { ...mockField, required: false };
       render(
-        <ResourceFormField
+        <ContentFormField
           field={optionalField}
           value=""
           options={[]}
@@ -459,7 +459,7 @@ describe('ResourceFormField', () => {
     it('uses default placeholder when none provided', () => {
       const fieldWithoutPlaceholder = { ...mockField, placeholder: '' };
       render(
-        <ResourceFormField
+        <ContentFormField
           field={fieldWithoutPlaceholder}
           value=""
           options={[]}
@@ -477,7 +477,7 @@ describe('ResourceFormField', () => {
     it('returns null for unsupported input types', () => {
       const unsupportedField = { ...mockField, inputType: 'unsupported' };
       const { container } = render(
-        <ResourceFormField
+        <ContentFormField
           field={unsupportedField}
           value=""
           options={[]}
@@ -495,7 +495,7 @@ describe('ResourceFormField', () => {
     it('sets autofocus on name field', () => {
       const nameField = { ...mockField, code: 'name' };
       const { container } = render(
-        <ResourceFormField
+        <ContentFormField
           field={nameField}
           value=""
           options={[]}

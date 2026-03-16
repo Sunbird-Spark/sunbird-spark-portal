@@ -72,7 +72,7 @@ export function getPrimaryCategoryForTypeFilter(
     case 'quiz':
       return ['Practice Question Set', 'Course Assessment', 'Exam Question', 'Question paper'];
     case 'collection':
-      return ['Content Playlist'];
+      return ['Content Playlist', 'Digital Textbook'];
     case 'all':
     default:
       return undefined;
