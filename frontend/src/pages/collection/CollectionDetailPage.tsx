@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollectionPageData } from "@/hooks/useCollectionPageData";
 import { useUserRead } from "@/hooks/useUserRead";
@@ -23,6 +23,8 @@ import "./collection.css";
 
 const CollectionDetailPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
 
   useImpression({ type: 'view', pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
@@ -197,7 +199,7 @@ const CollectionDetailPage = () => {
 
   return (
     <CollectionDetailLayout
-      navigation={{ onGoBack: () => navigate(-1), t }}
+      navigation={{ onGoBack: () => navigate(backToRef.current), t }}
       loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
       collection={{
         collectionDataFromApi: collectionDataFromApi ?? null,
