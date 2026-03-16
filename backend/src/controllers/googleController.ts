@@ -6,8 +6,8 @@ import {
     markSessionAsUsed,
     handleUserAuthentication,
     validateRedirectUrl,
-    buildKeycloakGoogleAuthUrl,
-    exchangeKeycloakCode,
+    buildGoogleAuthUrl,
+    exchangeGoogleCode,
 } from '../services/googleAuthService.js';
 import { Request, Response } from 'express';
 import logger from '../utils/logger.js';
@@ -44,10 +44,10 @@ export const initiateGoogleAuth = async (req: Request, res: Response) => {
             sessionUsed: false,
         };
 
-        const authUrl = await buildKeycloakGoogleAuthUrl(req, state, codeChallenge);
+        const authUrl = buildGoogleAuthUrl(state, codeChallenge);
         return res.redirect(authUrl);
     } catch (error) {
-        logger.error('Error initializing Google OAuth via Keycloak:', error);
+        logger.error('Error initializing Google OAuth:', error);
         const errorCallback = validateRedirectUrl(req.query.error_callback as string);
         return res.redirect(`${errorCallback}?error=GOOGLE_AUTH_INIT_FAILED`);
     }
@@ -57,19 +57,21 @@ export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
     try {
         const { state, codeVerifier, client_id } = validateOAuthSession(req);
 
-        validateOAuthCallback(req, state);
+        const code = validateOAuthCallback(req, state);
 
         markSessionAsUsed(req);
 
-        // Exchange the Keycloak auth code for a token — Keycloak acted as Google IDP broker
-        const googleUser = await exchangeKeycloakCode(req, codeVerifier, state);
+        // Exchange the Google authorization code for tokens and extract email/name
+        // directly from Google's ID token — no Keycloak broker, no SPI masking.
+        const googleUser = await exchangeGoogleCode(code, codeVerifier);
 
         await handleUserAuthentication(googleUser, client_id, req);
 
-        // Redirect to portal login. Keycloak has an active SSO session from the Google IDP
-        // flow above, so /portal/login (which sends prompt=none by default) will complete
-        // silently and issue a portal-scoped access token without showing the login form.
-        return res.redirect('/portal/login');
+        // Redirect to portal login with kc_idp_hint=google.
+        // The user just authenticated with Google so the browser has an active
+        // Google session. Keycloak will use it for silent SSO (prompt=none default)
+        // and issue a portal-scoped access token without showing a login form.
+        return res.redirect('/portal/login?kc_idp_hint=google');
     } catch (error) {
         logger.error('Error in Google OAuth callback:', error);
         const safeErrorCallback = validateRedirectUrl(req.session?.googleOAuth?.error_callback);

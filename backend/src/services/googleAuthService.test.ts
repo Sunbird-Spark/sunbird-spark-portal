@@ -1,56 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Request } from 'express';
 
-const {
-    mockAuthorizationCodeGrant,
-    mockFetchUserInfo,
-    mockBuildAuthorizationUrl,
-    mockRandomPKCECodeVerifier,
-    mockCalculatePKCECodeChallenge,
-    mockGetGoogleOIDCConfig,
-    mockDecodeJwtPayload,
-} = vi.hoisted(() => {
-    const mockAuthorizationCodeGrant = vi.fn();
-    const mockFetchUserInfo = vi.fn().mockResolvedValue({
-        sub: 'keycloak-user-id',
-        email: 'test@example.com',
-        given_name: 'Test',
-        family_name: 'User',
-        name: 'Test User',
-    });
-    const mockBuildAuthorizationUrl = vi.fn();
-    const mockRandomPKCECodeVerifier = vi.fn().mockReturnValue('test-verifier');
-    const mockCalculatePKCECodeChallenge = vi.fn().mockResolvedValue('test-challenge');
-    const mockGetGoogleOIDCConfig = vi.fn().mockResolvedValue({});
-    const mockDecodeJwtPayload = vi.fn().mockReturnValue({ sub: 'keycloak-user-id' });
+const { mockGenerateAuthUrl, mockGetToken, mockVerifyIdToken } = vi.hoisted(() => ({
+    mockGenerateAuthUrl: vi.fn(),
+    mockGetToken: vi.fn(),
+    mockVerifyIdToken: vi.fn(),
+}));
 
-    return {
-        mockAuthorizationCodeGrant,
-        mockFetchUserInfo,
-        mockBuildAuthorizationUrl,
-        mockRandomPKCECodeVerifier,
-        mockCalculatePKCECodeChallenge,
-        mockGetGoogleOIDCConfig,
-        mockDecodeJwtPayload,
-    };
+vi.mock('google-auth-library', () => {
+    class MockOAuth2Client {
+        generateAuthUrl(opts: unknown) { return mockGenerateAuthUrl(opts); }
+        getToken(opts: unknown) { return mockGetToken(opts); }
+        verifyIdToken(opts: unknown) { return mockVerifyIdToken(opts); }
+    }
+    return { OAuth2Client: MockOAuth2Client };
 });
-
-vi.mock('../auth/oidcProvider.js', () => ({
-    getGoogleOIDCConfig: mockGetGoogleOIDCConfig,
-    decodeJwtPayload: mockDecodeJwtPayload,
-}));
-
-vi.mock('openid-client', () => ({
-    authorizationCodeGrant: mockAuthorizationCodeGrant,
-    fetchUserInfo: mockFetchUserInfo,
-    buildAuthorizationUrl: mockBuildAuthorizationUrl,
-    randomPKCECodeVerifier: mockRandomPKCECodeVerifier,
-    calculatePKCECodeChallenge: mockCalculatePKCECodeChallenge,
-}));
-
-vi.mock('../utils/sessionStore.js', () => ({
-    sessionStore: {},
-}));
 
 vi.mock('../utils/logger.js', () => ({
     default: { error: vi.fn(), info: vi.fn() },
@@ -60,118 +23,114 @@ vi.mock('../config/env.js', () => ({
     envConfig: {
         PORTAL_REALM: 'test-realm',
         DOMAIN_URL: 'https://example.com',
-        KEYCLOAK_GOOGLE_CLIENT_ID: 'test-keycloak-client-id',
-        KEYCLOAK_GOOGLE_CLIENT_SECRET: 'test-keycloak-secret',
+        GOOGLE_OAUTH_CLIENT_ID: 'test-google-client-id',
+        GOOGLE_OAUTH_CLIENT_SECRET: 'test-google-secret',
     },
 }));
 
-import { buildKeycloakGoogleAuthUrl, exchangeKeycloakCode } from './googleAuthService.js';
+import { buildGoogleAuthUrl, exchangeGoogleCode } from './googleAuthService.js';
 
-describe('GoogleAuthService - Keycloak OIDC flow', () => {
-    let mockRequest: Partial<Request>;
+const DEFAULT_PAYLOAD = {
+    sub: 'google-user-id',
+    email: 'test@example.com',
+    name: 'Test User',
+    given_name: 'Test',
+    family_name: 'User',
+};
 
+describe('GoogleAuthService - direct Google OAuth flow', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockGetGoogleOIDCConfig.mockResolvedValue({});
-
-        mockRequest = {
-            get: vi.fn((header: string) => {
-                if (header === 'host') return 'example.com';
-                return undefined;
-            }) as any,
-            protocol: 'https',
-            originalUrl: '/google/auth/callback?code=abc&state=xyz',
-            session: {} as any,
-            oidc: undefined,
-        };
+        mockGenerateAuthUrl.mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth?mock=1');
+        mockGetToken.mockResolvedValue({ tokens: { id_token: 'mock-id-token' } });
+        mockVerifyIdToken.mockResolvedValue({ getPayload: () => DEFAULT_PAYLOAD });
     });
 
-    describe('buildKeycloakGoogleAuthUrl', () => {
-        it('should build Keycloak authorization URL with kc_idp_hint=google', async () => {
-            mockBuildAuthorizationUrl.mockReturnValue(
-                new URL('https://keycloak.example.com/auth/realms/sunbird/protocol/openid-connect/auth?kc_idp_hint=google')
-            );
+    describe('buildGoogleAuthUrl', () => {
+        it('should return a Google authorization URL', () => {
+            const url = buildGoogleAuthUrl('test-state', 'test-challenge');
 
-            const url = await buildKeycloakGoogleAuthUrl(mockRequest as Request, 'test-state', 'test-challenge');
-
-            expect(mockGetGoogleOIDCConfig).toHaveBeenCalled();
-            expect(mockBuildAuthorizationUrl).toHaveBeenCalledWith(
-                {},
+            expect(mockGenerateAuthUrl).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    redirect_uri: 'https://example.com/google/auth/callback',
-                    scope: 'openid',
+                    scope: ['openid', 'email', 'profile'],
+                    state: 'test-state',
                     code_challenge: 'test-challenge',
                     code_challenge_method: 'S256',
-                    state: 'test-state',
-                    kc_idp_hint: 'google',
+                    access_type: 'online',
                 })
             );
-            expect(url).toContain('kc_idp_hint=google');
-        });
-
-        it('should throw if getGoogleOIDCConfig fails', async () => {
-            mockGetGoogleOIDCConfig.mockRejectedValue(new Error('Discovery failed'));
-            await expect(
-                buildKeycloakGoogleAuthUrl(mockRequest as Request, 'test-state', 'test-challenge')
-            ).rejects.toThrow('Discovery failed');
+            expect(url).toContain('accounts.google.com');
         });
     });
 
-    describe('exchangeKeycloakCode', () => {
-        it('should exchange code and return email + name from token claims', async () => {
-            mockAuthorizationCodeGrant.mockResolvedValue({ access_token: 'test-access-token' });
+    describe('exchangeGoogleCode', () => {
+        it('should exchange code and return email + name from ID token', async () => {
+            const result = await exchangeGoogleCode('test-code', 'test-verifier');
 
-            const result = await exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state');
-
-            expect(mockAuthorizationCodeGrant).toHaveBeenCalledWith(
-                {},
-                expect.any(URL),
-                expect.objectContaining({
-                    pkceCodeVerifier: 'test-verifier',
-                    expectedState: 'test-state',
-                    idTokenExpected: false,
-                }),
-                { redirect_uri: 'https://example.com/google/auth/callback' }
-            );
+            expect(mockGetToken).toHaveBeenCalledWith({ code: 'test-code', codeVerifier: 'test-verifier' });
+            expect(mockVerifyIdToken).toHaveBeenCalledWith({
+                idToken: 'mock-id-token',
+                audience: 'test-google-client-id',
+            });
             expect(result).toEqual({ emailId: 'test@example.com', name: 'Test User' });
         });
 
         it('should fall back to given_name + family_name if name claim is absent', async () => {
-            mockAuthorizationCodeGrant.mockResolvedValue({ access_token: 'test-access-token' });
-            mockFetchUserInfo.mockResolvedValue({
-                sub: 'keycloak-user-id',
-                email: 'user@example.com',
-                given_name: 'Jane',
-                family_name: 'Doe',
+            mockVerifyIdToken.mockResolvedValueOnce({
+                getPayload: () => ({
+                    sub: 'google-user-id',
+                    email: 'user@example.com',
+                    given_name: 'Jane',
+                    family_name: 'Doe',
+                }),
             });
 
-            const result = await exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state');
+            const result = await exchangeGoogleCode('test-code', 'test-verifier');
 
             expect(result).toEqual({ emailId: 'user@example.com', name: 'Jane Doe' });
         });
 
-        it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when userinfo returns no email', async () => {
-            mockAuthorizationCodeGrant.mockResolvedValue({ access_token: 'test-access-token' });
-            mockFetchUserInfo.mockResolvedValue({ sub: 'keycloak-user-id' });
+        it('should throw GOOGLE_ID_TOKEN_MISSING when no id_token is returned', async () => {
+            mockGetToken.mockResolvedValueOnce({ tokens: {} });
 
             await expect(
-                exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state')
+                exchangeGoogleCode('test-code', 'test-verifier')
+            ).rejects.toThrow('GOOGLE_ID_TOKEN_MISSING');
+        });
+
+        it('should throw GOOGLE_TOKEN_PAYLOAD_MISSING when verifyIdToken returns null payload', async () => {
+            mockVerifyIdToken.mockResolvedValueOnce({ getPayload: () => null });
+
+            await expect(
+                exchangeGoogleCode('test-code', 'test-verifier')
+            ).rejects.toThrow('GOOGLE_TOKEN_PAYLOAD_MISSING');
+        });
+
+        it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when payload has no email', async () => {
+            mockVerifyIdToken.mockResolvedValueOnce({
+                getPayload: () => ({ sub: 'google-user-id' }),
+            });
+
+            await expect(
+                exchangeGoogleCode('test-code', 'test-verifier')
             ).rejects.toThrow('GOOGLE_EMAIL_INVALID_OR_MASKED');
         });
 
-        it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when userinfo returns a masked email', async () => {
-            mockAuthorizationCodeGrant.mockResolvedValue({ access_token: 'test-access-token' });
-            mockFetchUserInfo.mockResolvedValue({ sub: 'keycloak-user-id', email: 'ha****@sanketika.in' });
+        it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when payload has a masked email', async () => {
+            mockVerifyIdToken.mockResolvedValueOnce({
+                getPayload: () => ({ sub: 'google-user-id', email: 'ha****@sanketika.in' }),
+            });
 
             await expect(
-                exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state')
+                exchangeGoogleCode('test-code', 'test-verifier')
             ).rejects.toThrow('GOOGLE_EMAIL_INVALID_OR_MASKED');
         });
 
-        it('should throw if authorizationCodeGrant fails', async () => {
-            mockAuthorizationCodeGrant.mockRejectedValue(new Error('Token exchange failed'));
+        it('should throw if getToken fails', async () => {
+            mockGetToken.mockRejectedValueOnce(new Error('Token exchange failed'));
+
             await expect(
-                exchangeKeycloakCode(mockRequest as Request, 'test-verifier', 'test-state')
+                exchangeGoogleCode('test-code', 'test-verifier')
             ).rejects.toThrow('Token exchange failed');
         });
     });

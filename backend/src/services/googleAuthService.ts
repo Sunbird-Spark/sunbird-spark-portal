@@ -1,80 +1,72 @@
 import { envConfig } from '../config/env.js';
 import { Request } from 'express';
-import * as oidcClient from 'openid-client';
-import { getGoogleOIDCConfig, decodeJwtPayload } from '../auth/oidcProvider.js';
+import { OAuth2Client } from 'google-auth-library';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
 
-/**
- * Builds a Keycloak authorization URL that redirects the user through the Google
- * Identity Provider. The `google-auth` confidential client is used so that Node.js
- * can exchange the resulting auth code for a token containing email/name claims.
- */
-export const buildKeycloakGoogleAuthUrl = async (
-    req: Request,
-    state: string,
-    codeChallenge: string
-): Promise<string> => {
-    const config = await getGoogleOIDCConfig();
-    const callbackUrl = `${envConfig.DOMAIN_URL}/google/auth/callback`;
+const GOOGLE_CALLBACK_URL = () => `${envConfig.DOMAIN_URL}/google/auth/callback`;
 
-    const redirectUrl = oidcClient.buildAuthorizationUrl(config, {
-        redirect_uri: callbackUrl,
-        scope: 'openid',
-        code_challenge: codeChallenge,
-        code_challenge_method: 'S256',
-        state,
-        // Tell Keycloak to skip the login page and go directly to Google IDP
-        kc_idp_hint: 'google',
+const createOAuth2Client = () =>
+    new OAuth2Client({
+        clientId: envConfig.GOOGLE_OAUTH_CLIENT_ID,
+        clientSecret: envConfig.GOOGLE_OAUTH_CLIENT_SECRET,
+        redirectUri: GOOGLE_CALLBACK_URL(),
     });
 
-    return redirectUrl.href;
+/**
+ * Builds a direct Google OAuth2 authorization URL using PKCE.
+ * The portal backend acts as the OAuth client — no Keycloak broker involved.
+ */
+export const buildGoogleAuthUrl = (state: string, codeChallenge: string): string => {
+    const client = createOAuth2Client();
+    return client.generateAuthUrl({
+        scope: ['openid', 'email', 'profile'],
+        state,
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        access_type: 'online',
+    });
 };
 
 /**
- * Exchanges the Keycloak authorization code (from the Google IDP callback) for
- * tokens using the `google-auth` confidential client. Extracts email and name
- * from the access token claims (populated via Keycloak protocol mappers).
+ * Exchanges the Google authorization code for tokens using PKCE, then
+ * extracts the real email and name from the verified ID token payload.
+ * Because we call Google directly (no Keycloak SPI), the email is never masked.
  */
-export const exchangeKeycloakCode = async (
-    req: Request,
-    codeVerifier: string,
-    state: string
+export const exchangeGoogleCode = async (
+    code: string,
+    codeVerifier: string
 ): Promise<{ emailId?: string; name?: string }> => {
-    const config = await getGoogleOIDCConfig();
-    const callbackUrl = `${envConfig.DOMAIN_URL}/google/auth/callback`;
+    const client = createOAuth2Client();
 
-    const currentUrl = new URL(
-        `${req.protocol}://${req.get('host')}${req.originalUrl}`
-    );
+    const { tokens } = await client.getToken({ code, codeVerifier });
 
-    const tokens = await oidcClient.authorizationCodeGrant(config, currentUrl, {
-        pkceCodeVerifier: codeVerifier,
-        expectedState: state,
-        idTokenExpected: false,
-    }, { redirect_uri: callbackUrl });
+    if (!tokens.id_token) {
+        throw new Error('GOOGLE_ID_TOKEN_MISSING');
+    }
 
-    // Use the userinfo endpoint instead of decoding the access token directly.
-    // The access token claims go through Keycloak's protocol mappers (and any SPI)
-    // which can mask the email (e.g. "ha****@domain.com"). The userinfo endpoint
-    // reads directly from the Keycloak user store, which — once the Google IDP
-    // Attribute Importer mapper is in place — always contains the real email.
-    const tokenClaims = decodeJwtPayload(tokens.access_token);
-    const sub = tokenClaims?.sub as string | undefined;
-    const userInfo = await oidcClient.fetchUserInfo(config, tokens.access_token, sub!);
+    const ticket = await client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: envConfig.GOOGLE_OAUTH_CLIENT_ID,
+    });
 
-    logger.info(`exchangeKeycloakCode: email=${userInfo.email} name=${userInfo.name} given_name=${userInfo.given_name} sub=${userInfo.sub}`);
+    const payload = ticket.getPayload();
+    if (!payload) {
+        throw new Error('GOOGLE_TOKEN_PAYLOAD_MISSING');
+    }
 
-    const email = userInfo.email as string | undefined;
+    logger.info(`exchangeGoogleCode: email=${payload.email} name=${payload.name} sub=${payload.sub}`);
+
+    const email = payload.email;
     const EMAIL_REGEX = /^[^\s@*]+@[^\s@*]+\.[^\s@*]+$/;
     if (!email || !EMAIL_REGEX.test(email)) {
-        logger.error(`exchangeKeycloakCode: invalid or masked email from userinfo endpoint: "${email}". Ensure the Google IDP has an Attribute Importer mapper for email with Sync Mode = FORCE.`);
+        logger.error(`exchangeGoogleCode: invalid or masked email from Google ID token: "${email}"`);
         throw new Error('GOOGLE_EMAIL_INVALID_OR_MASKED');
     }
 
-    const firstName = (userInfo.given_name as string) || '';
-    const lastName = (userInfo.family_name as string) || '';
-    const fullName = (userInfo.name as string) || `${firstName} ${lastName}`.trim();
+    const firstName = payload.given_name || '';
+    const lastName = payload.family_name || '';
+    const fullName = payload.name || `${firstName} ${lastName}`.trim();
 
     return {
         emailId: email,
@@ -125,7 +117,7 @@ export const validateOAuthCallback = (req: Request, expectedState: string): stri
     }
 
     if (req.query.error) {
-        logger.error('Keycloak Google OAuth error:', req.query.error);
+        logger.error('Google OAuth error:', req.query.error);
         throw new Error(`GOOGLE_OAUTH_ERROR: ${req.query.error}`);
     }
 

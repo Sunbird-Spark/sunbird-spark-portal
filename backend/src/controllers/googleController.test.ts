@@ -9,18 +9,18 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.envExample') });
 
 const {
-    mockBuildKeycloakGoogleAuthUrl,
-    mockExchangeKeycloakCode,
+    mockBuildGoogleAuthUrl,
+    mockExchangeGoogleCode,
     mockHandleUserAuthentication,
 } = vi.hoisted(() => ({
-    mockBuildKeycloakGoogleAuthUrl: vi.fn(),
-    mockExchangeKeycloakCode: vi.fn(),
+    mockBuildGoogleAuthUrl: vi.fn(),
+    mockExchangeGoogleCode: vi.fn(),
     mockHandleUserAuthentication: vi.fn(),
 }));
 
 vi.mock('../services/googleAuthService.js', () => ({
-    buildKeycloakGoogleAuthUrl: mockBuildKeycloakGoogleAuthUrl,
-    exchangeKeycloakCode: mockExchangeKeycloakCode,
+    buildGoogleAuthUrl: mockBuildGoogleAuthUrl,
+    exchangeGoogleCode: mockExchangeGoogleCode,
     handleUserAuthentication: mockHandleUserAuthentication,
     validateOAuthSession: vi.fn(),
     validateOAuthCallback: vi.fn(),
@@ -107,9 +107,9 @@ describe('GoogleController', () => {
             expect(mockRes.send).toHaveBeenCalledWith('INVALID_REDIRECT_URI_OR_ERROR_CALLBACK');
         });
 
-        it('stores PKCE codeVerifier in session and redirects to Keycloak auth URL', async () => {
-            const mockAuthUrl = 'https://keycloak.example.com/auth?kc_idp_hint=google';
-            mockBuildKeycloakGoogleAuthUrl.mockResolvedValue(mockAuthUrl);
+        it('stores PKCE codeVerifier in session and redirects to Google auth URL', async () => {
+            const mockAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?kc_idp_hint=google';
+            mockBuildGoogleAuthUrl.mockReturnValue(mockAuthUrl);
 
             mockReq.query = {
                 client_id: 'test-client',
@@ -128,8 +128,27 @@ describe('GoogleController', () => {
             expect(mockRes.redirect).toHaveBeenCalledWith(mockAuthUrl);
         });
 
+        it('calls buildGoogleAuthUrl with state and codeChallenge (not req)', async () => {
+            const mockAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?mock=1';
+            mockBuildGoogleAuthUrl.mockReturnValue(mockAuthUrl);
+
+            mockReq.query = {
+                client_id: 'test-client',
+                redirect_uri: 'https://example.com/callback',
+                error_callback: 'https://example.com/error',
+            };
+
+            await initiateGoogleAuth(mockReq, mockRes);
+
+            expect(mockBuildGoogleAuthUrl).toHaveBeenCalledWith(
+                expect.any(String), // state
+                'test-challenge'    // codeChallenge
+            );
+            expect(mockBuildGoogleAuthUrl).toHaveBeenCalledTimes(1);
+        });
+
         it('redirects to error_callback on exception', async () => {
-            mockBuildKeycloakGoogleAuthUrl.mockRejectedValue(new Error('Keycloak discovery failed'));
+            mockBuildGoogleAuthUrl.mockImplementation(() => { throw new Error('Google auth init failed'); });
 
             mockReq.query = {
                 client_id: 'test-client',
@@ -206,7 +225,7 @@ describe('GoogleController', () => {
             });
             mockValidateOAuthCallback.mockReturnValue('test-code');
             mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
             mockHandleUserAuthentication.mockRejectedValue(new Error('AUTHENTICATION_FAILED'));
 
             await handleGoogleAuthCallback(mockReq, mockRes);
@@ -214,7 +233,7 @@ describe('GoogleController', () => {
             expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
 
-        it('should redirect to /portal/login for existing user on successful authentication', async () => {
+        it('should redirect to /portal/login?kc_idp_hint=google for existing user', async () => {
             mockReq.query = { code: 'test-code', state: 'test-state' };
             mockReq.session = {
                 googleOAuth: {
@@ -235,13 +254,13 @@ describe('GoogleController', () => {
             });
             mockValidateOAuthCallback.mockReturnValue('test-code');
             mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'existing@example.com', name: 'Existing User' });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'existing@example.com', name: 'Existing User' });
             mockHandleUserAuthentication.mockResolvedValue(true);
 
             await handleGoogleAuthCallback(mockReq, mockRes);
 
-            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login');
-            expect(mockExchangeKeycloakCode).toHaveBeenCalledWith(mockReq, 'test-verifier', 'test-state');
+            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login?kc_idp_hint=google');
+            expect(mockExchangeGoogleCode).toHaveBeenCalledWith('test-code', 'test-verifier');
             expect(mockHandleUserAuthentication).toHaveBeenCalledWith(
                 { emailId: 'existing@example.com', name: 'Existing User' },
                 'test-client',
@@ -249,7 +268,7 @@ describe('GoogleController', () => {
             );
         });
 
-        it('should redirect to /portal/login for new user on successful authentication', async () => {
+        it('should redirect to /portal/login?kc_idp_hint=google for new user', async () => {
             mockReq.query = { code: 'test-code', state: 'test-state' };
             mockReq.session = {
                 googleOAuth: {
@@ -270,13 +289,12 @@ describe('GoogleController', () => {
             });
             mockValidateOAuthCallback.mockReturnValue('test-code');
             mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'newuser@example.com', name: 'New User' });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'newuser@example.com', name: 'New User' });
             mockHandleUserAuthentication.mockResolvedValue(false);
 
             await handleGoogleAuthCallback(mockReq, mockRes);
 
-            // Both new and existing users go to /portal/login to complete OIDC flow
-            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login');
+            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login?kc_idp_hint=google');
         });
 
         it('should clear googleOAuth session data after callback', async () => {
@@ -300,7 +318,7 @@ describe('GoogleController', () => {
             });
             mockValidateOAuthCallback.mockReturnValue('test-code');
             mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
             mockHandleUserAuthentication.mockResolvedValue(true);
 
             await handleGoogleAuthCallback(mockReq, mockRes);

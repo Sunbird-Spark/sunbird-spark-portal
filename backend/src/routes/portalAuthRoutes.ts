@@ -45,6 +45,9 @@ router.get('/login',
             // handler redirects to /portal/login?prompt=login for interactive login.
             const promptParam = allowedPrompts.includes(rawPrompt as string) ? rawPrompt : 'none';
 
+            const rawKcIdpHint = req.query.kc_idp_hint as string | undefined;
+            const kcIdpHint = rawKcIdpHint === 'google' ? rawKcIdpHint : undefined;
+
             const redirectTo = oidcClient.buildAuthorizationUrl(config, {
                 redirect_uri: callbackUrl,
                 scope: 'openid',
@@ -52,6 +55,7 @@ router.get('/login',
                 code_challenge_method: 'S256',
                 state: state,
                 ...(promptParam ? { prompt: promptParam } : {}),
+                ...(kcIdpHint ? { kc_idp_hint: kcIdpHint } : {}),
             });
 
             logger.info('Redirecting to OIDC provider for login');
