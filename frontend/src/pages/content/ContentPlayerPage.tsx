@@ -93,9 +93,18 @@ const ContentPlayerPage = () => {
 
   return (
     <div className="content-player-background">
-      <TelemetryTracker 
-        startEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-page' }}
-        endEventInput={{ type: 'workflow', mode: 'play', pageid: 'collection-detail-exit' }}
+      <TelemetryTracker
+        disabled={!playerMetadata}
+        startEventInput={{ type: 'workflow', mode: 'play', pageid: 'content-player-page' }}
+        endEventInput={{ type: 'workflow', mode: 'play', pageid: 'content-player-exit' }}
+        startOptions={{ 
+          object: { id: contentId, type: playerMetadata?.contentType || 'Content', ver: playerMetadata?.pkgVersion?.toString() || '1' },
+          context: { env: 'content-player' }
+        }}
+        endOptions={{ 
+          object: { id: contentId, type: playerMetadata?.contentType || 'Content', ver: playerMetadata?.pkgVersion?.toString() || '1' },
+          context: { env: 'content-player' }
+        }}
       />
       <Header />
 
