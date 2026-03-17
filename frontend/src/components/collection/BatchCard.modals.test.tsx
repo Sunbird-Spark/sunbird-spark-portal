@@ -79,6 +79,10 @@ vi.mock('@/hooks/useUser', () => ({
   useIsMentor: () => false,
 }));
 
+vi.mock('@/hooks/useInteract', () => ({
+  default: () => ({ interact: vi.fn() }),
+}));
+
 vi.mock('@/hooks/usePermission', () => ({
   usePermissions: () => ({
     roles: ['PUBLIC'],

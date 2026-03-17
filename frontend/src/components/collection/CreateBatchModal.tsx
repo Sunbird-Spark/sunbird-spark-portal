@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { FiX, FiSearch, FiLoader } from "react-icons/fi";
+import { FiX, FiLoader } from "react-icons/fi";
 import { useCreateBatch, useUpdateBatch } from "@/hooks/useBatch";
-import { useMentorList, MentorUser } from "@/hooks/useMentor";
+import { useMentorList } from "@/hooks/useMentor";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
@@ -135,17 +135,9 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     }
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-    setMentorQuery("");
-    setSubmitError(null);
-  };
+  const handleClose = () => { onOpenChange(false); setMentorQuery(""); setSubmitError(null); };
 
-  const isSubmitDisabled =
-    !form.batchName.trim() ||
-    !form.startDate ||
-    (!isEditMode && !form.acceptTerms) ||
-    isPending;
+  const isSubmitDisabled = !form.batchName.trim() || !form.startDate || (!isEditMode && !form.acceptTerms) || isPending;
 
   return (
     <>

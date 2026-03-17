@@ -9,7 +9,6 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
-import usePageSession from '@/hooks/usePageSession';
 import useInteract from '@/hooks/useInteract';
 
 const COLLECTION_EDITOR_READ_FIELDS = [
@@ -41,7 +40,6 @@ const CollectionEditorPage = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useImpression({ type: 'view', pageid: 'collection-editor', object: { id: contentId || '', type: 'Content' } });
-  usePageSession({ pageid: 'collection-editor', object: { id: contentId || '', type: 'Content' } });
 
   useEffect(() => {
     setLoadError(null);

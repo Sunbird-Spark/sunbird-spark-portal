@@ -13,6 +13,7 @@ vi.mock('@/services/NavigationHelperService', () => ({
   navigationHelperService: {
     get pageStartTime() { return mockPageStartTime; },
     set pageStartTime(v: number) { mockPageStartTime = v; },
+    resetPageStartTime: () => { mockPageStartTime = Date.now(); },
     getPageLoadTime: () => mockGetPageLoadTime(),
     storeUrlHistory: (...args: any[]) => mockStoreUrlHistory(...args),
   },

@@ -8,7 +8,6 @@ import { QuestionSetService } from '@/services/QuestionSetService';
 import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
-import usePageSession from '@/hooks/usePageSession';
 import useInteract from '@/hooks/useInteract';
 
 import { useAppI18n } from '@/hooks/useAppI18n';
@@ -24,7 +23,6 @@ const QumlEditorPage = () => {
   const [loading, setLoading] = useState(true);
 
   useImpression({ type: 'view', pageid: 'quml-editor', object: { id: contentId || '', type: 'Content' } });
-  usePageSession({ pageid: 'quml-editor', object: { id: contentId || '', type: 'Content' } });
 
   useEffect(() => {
     if (!contentId) {
