@@ -1,5 +1,5 @@
 import { getClient } from '../../lib/http-client';
-import type { AssessmentApiItem, AssessmentResult, LearnerProgressApiItem, LearnerProgressResult, OrgCourseEnrolmentApiItem, OrgCourseEnrolmentResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
+import type { AssessmentApiItem, AssessmentResult, ContentStatusSummaryApiResult, ContentStatusSummaryFacet, LearnerProgressApiItem, LearnerProgressResult, OrgCourseEnrolmentApiItem, OrgCourseEnrolmentResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
 
 /** Shared parser for the Sunbird observability response envelope.
  *  Handles two response shapes:
@@ -96,6 +96,22 @@ export class ObservabilityService {
         },
       })
       .then((response) => parseObservabilityResponse<UserAssessmentApiItem>(response.data));
+  }
+
+  /**
+   * Fetch content status summary for an org (facets: status, createdBy, primaryCategory).
+   * POST /observability/v1/reports
+   */
+  public getContentStatusSummary(orgId: string): Promise<ContentStatusSummaryApiResult> {
+    return getClient()
+      .post<unknown>('/observability/v1/reports', {
+        request: {
+          reportId: 'content-status-summary',
+          filters: { createdFor: orgId },
+          transform: ['createdBy'],
+        },
+      })
+      .then((response) => parseObservabilityResponse<ContentStatusSummaryFacet>(response.data));
   }
 
   /**

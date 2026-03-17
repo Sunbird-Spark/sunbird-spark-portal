@@ -46,12 +46,17 @@ const MOCK_COURSES: AdminCourseSummary[] = [
   },
 ];
 
-const { mockUseOrgCourseSummary } = vi.hoisted(() => ({
+const { mockUseOrgCourseSummary, mockUseContentStatusSummary } = vi.hoisted(() => ({
   mockUseOrgCourseSummary: vi.fn(),
+  mockUseContentStatusSummary: vi.fn(),
 }));
 
 vi.mock('@/hooks/useOrgCourseSummary', () => ({
   useOrgCourseSummary: mockUseOrgCourseSummary,
+}));
+
+vi.mock('@/hooks/useContentStatusSummary', () => ({
+  useContentStatusSummary: mockUseContentStatusSummary,
 }));
 
 const renderPage = () =>
@@ -64,6 +69,13 @@ const renderPage = () =>
 describe('PlatformReports', () => {
   beforeEach(() => {
     mockUseOrgCourseSummary.mockReturnValue({ data: MOCK_COURSES, isLoading: false, isError: false });
+    mockUseContentStatusSummary.mockReturnValue({
+      statusData: [{ status: 'Live', count: 155 }, { status: 'Draft', count: 274 }],
+      topCreatorsData: [{ name: 'Test Creator', count: 84 }],
+      categoryData: [{ group: 'Course', count: 245 }],
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('renders page title', () => {

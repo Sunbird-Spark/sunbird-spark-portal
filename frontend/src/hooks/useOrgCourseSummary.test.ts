@@ -16,7 +16,7 @@ const { mockContentService, mockObservabilityService, mockUserAuthInfoService } 
   mockUserAuthInfoService: {
     isUserAuthenticated: vi.fn().mockReturnValue(true),
     getUserId: vi.fn().mockReturnValue('user-123'),
-    getAuthInfo: vi.fn(),
+    getAuthInfo: vi.fn().mockResolvedValue({ isAuthenticated: true, uid: 'user-123', sid: 'session-abc' }),
   },
 }));
 

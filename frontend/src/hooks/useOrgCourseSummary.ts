@@ -19,7 +19,7 @@ export function useOrgCourseSummary(): {
   isLoading: boolean;
   isError: boolean;
 } {
-  const { data: userReadData, isLoading: isUserLoading } = useUserRead();
+  const { data: userReadData, isPending: isUserPending } = useUserRead();
 
   const rootOrgId = useMemo(() => {
     const response = userReadData?.data?.response as Record<string, unknown> | undefined;
@@ -73,7 +73,7 @@ export function useOrgCourseSummary(): {
 
   return {
     data,
-    isLoading: isUserLoading || isCoursesLoading || isSummaryLoading,
+    isLoading: isUserPending || isCoursesLoading || isSummaryLoading,
     isError: isCoursesError || isSummaryError,
   };
 }

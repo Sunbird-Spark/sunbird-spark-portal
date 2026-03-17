@@ -12,12 +12,6 @@ import ExportButton from "@/components/reports/ExportButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  contentStatusCounts,
-  contentByTaxonomy,
-  contentBySkills,
-  contentByType,
-  contentByCategory,
-  topCreators,
   popularContent,
   userGrowthData,
   userDemographics,
@@ -25,6 +19,7 @@ import {
 } from "@/data/reportsMockData";
 import type { AdminCourseSummary, ContentByGroup } from "@/types/reports";
 import { useOrgCourseSummary } from "@/hooks/useOrgCourseSummary";
+import { useContentStatusSummary } from "@/hooks/useContentStatusSummary";
 
 const PIE_COLORS = [
   "hsl(var(--sunbird-ink))",
@@ -33,21 +28,20 @@ const PIE_COLORS = [
   "hsl(var(--sunbird-lavender))",
 ];
 
-const groupingMap: Record<string, ContentByGroup[]> = {
-  taxonomy: contentByTaxonomy,
-  skills: contentBySkills,
-  type: contentByType,
-  category: contentByCategory,
-};
-
 const PlatformReports = () => {
-  const [contentGrouping, setContentGrouping] = useState("taxonomy");
+  const [contentGrouping, setContentGrouping] = useState("type");
   const [tableSearch, setTableSearch] = useState("");
   const [tableFilters, setTableFilters] = useState<Record<string, string>>({});
 
   const totalUsers = useMemo(() => userDemographics.reduce((s, d) => s + d.count, 0), []);
 
+  const { statusData, topCreatorsData, categoryData } = useContentStatusSummary();
   const { data: apiCourses, isLoading: isCoursesLoading, isError: isCoursesError } = useOrgCourseSummary();
+
+  const groupingData = useMemo<ContentByGroup[]>(
+    () => (contentGrouping === "type" ? categoryData : []),
+    [contentGrouping, categoryData]
+  );
 
   const filteredCourses = useMemo(() => {
     if (!tableSearch) return apiCourses;
@@ -91,8 +85,8 @@ const PlatformReports = () => {
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={contentStatusCounts} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3}>
-                    {contentStatusCounts.map((_, i) => (
+                  <Pie data={statusData} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3}>
+                    {statusData.map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
@@ -110,9 +104,9 @@ const PlatformReports = () => {
               <Select value={contentGrouping} onValueChange={setContentGrouping}>
                 <SelectTrigger className="w-[8.75rem] h-8 text-xs border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="type">Content Type</SelectItem>
                   <SelectItem value="taxonomy">Taxonomy</SelectItem>
                   <SelectItem value="skills">Skills</SelectItem>
-                  <SelectItem value="type">Content Type</SelectItem>
                   <SelectItem value="category">Category</SelectItem>
                 </SelectContent>
               </Select>
@@ -120,7 +114,7 @@ const PlatformReports = () => {
           >
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={groupingMap[contentGrouping]} layout="vertical" margin={{ left: 10 }}>
+                <BarChart data={groupingData} layout="vertical" margin={{ left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis dataKey="group" type="category" tick={{ fontSize: 11 }} width={90} />
@@ -135,7 +129,7 @@ const PlatformReports = () => {
           <ChartCard title="Top 5 Creators">
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topCreators} layout="vertical" margin={{ left: 10 }}>
+                <BarChart data={topCreatorsData} layout="vertical" margin={{ left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />

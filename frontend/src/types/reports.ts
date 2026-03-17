@@ -32,7 +32,17 @@ export interface SortConfig {
 /* ---------- MODULE 1 – Platform Reports ---------- */
 
 export interface ContentStatusCount {
-  status: "Live" | "Draft" | "Retired";
+  status: string;
+  count: number;
+}
+
+export interface ContentStatusSummaryFacet {
+  facet: string;
+  values: Record<string, unknown>[];
+}
+
+export interface ContentStatusSummaryApiResult {
+  data: ContentStatusSummaryFacet[];
   count: number;
 }
 
