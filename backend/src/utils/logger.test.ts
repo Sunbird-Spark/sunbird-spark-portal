@@ -17,6 +17,8 @@ describe('Logger', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.doUnmock('../config/env.js');
+    process.removeAllListeners('unhandledRejection');
+    process.removeAllListeners('uncaughtException');
   });
 
   it('should initialize logger with level from envConfig', () => {
@@ -50,7 +52,7 @@ describe('Logger', () => {
 
     await vi.waitFor(() => {
       expect(spy).toHaveBeenCalled();
-    });
+    }, { timeout: 1000, interval: 50 });
 
     spy.mockRestore();
   });
@@ -73,7 +75,7 @@ describe('Logger', () => {
 
     await vi.waitFor(() => {
       expect(spy).toHaveBeenCalled();
-    });
+    }, { timeout: 1000, interval: 50 });
 
     spy.mockRestore();
   });

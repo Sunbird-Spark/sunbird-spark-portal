@@ -11,6 +11,7 @@ import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 const ContentPlayerPage = () => {
   const { t } = useAppI18n();
@@ -92,6 +93,19 @@ const ContentPlayerPage = () => {
 
   return (
     <div className="content-player-background">
+      <TelemetryTracker
+        disabled={!playerMetadata}
+        startEventInput={{ type: 'workflow', mode: 'play', pageid: 'content-player-page' }}
+        endEventInput={{ type: 'workflow', mode: 'play', pageid: 'content-player-exit' }}
+        startOptions={{ 
+          object: { id: contentId, type: playerMetadata?.contentType || 'Content', ver: playerMetadata?.pkgVersion?.toString() || '1' },
+          context: { env: 'content-player' }
+        }}
+        endOptions={{ 
+          object: { id: contentId, type: playerMetadata?.contentType || 'Content', ver: playerMetadata?.pkgVersion?.toString() || '1' },
+          context: { env: 'content-player' }
+        }}
+      />
       <Header />
 
       <main className="content-player-container">
