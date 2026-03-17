@@ -100,7 +100,8 @@ export interface LearnerProgress {
 /** Raw shape returned by POST /observability/v1/reports for user-course-enrolments */
 export interface UserCourseEnrolmentApiItem {
   courseid: string;
-  collectionDetails: {
+  /** May be absent when the course has been deleted or the join fails */
+  collectionDetails?: {
     name: string;
     identifier: string;
     contentType: string;
@@ -177,7 +178,8 @@ export interface UserAssessmentApiItem {
   total_score: number | null;
   total_max_score: number | null;
   last_attempted_on: string;
-  collectionDetails: {
+  /** May be absent when the course has been deleted or the join fails */
+  collectionDetails?: {
     name: string;
     identifier: string;
     contentType: string;

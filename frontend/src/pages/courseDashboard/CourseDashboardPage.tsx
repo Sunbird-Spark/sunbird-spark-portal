@@ -11,6 +11,7 @@ import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+import useImpression from '@/hooks/useImpression';
 import './courseDashboard.css';
 
 type DashboardTab = 'batches' | 'certificates';
@@ -20,6 +21,7 @@ const VALID_TABS: DashboardTab[] = ['batches', 'certificates'];
 const CourseDashboardPage: React.FC = () => {
   const { t } = useAppI18n();
   const { collectionId, tab } = useParams<{ collectionId: string; tab: string }>();
+  useImpression({ type: 'view', pageid: 'course-dashboard', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const navigate = useNavigate();
   const location = useLocation();
 

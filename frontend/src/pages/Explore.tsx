@@ -12,6 +12,7 @@ import {
 import { useAppI18n } from '../hooks/useAppI18n';
 import useDebounce from '../hooks/useDebounce';
 import { useSearchParams } from 'react-router-dom';
+import useImpression from '../hooks/useImpression';
 import { useFormRead } from '../hooks/useForm';
 
 // Keys are the API `code` field (e.g. "primaryCategory", "mimeType"), values are selected option values
@@ -24,6 +25,7 @@ const SORT_OPTIONS = [
 
 const Explore = () => {
   const { t } = useAppI18n();
+  useImpression({ type: 'view', pageid: 'explore', env: 'explore' });
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Initialize filters from URL on mount — every param except 'q' is treated as a filter code.

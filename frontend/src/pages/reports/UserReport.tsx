@@ -22,7 +22,7 @@ const statusColor: Record<string, string> = {
 
 const UserReport = () => {
   const { userId } = useParams();
-  useImpression({ type: 'view', pageid: 'user-report', object: { id: userId || '', type: 'User' } });
+  useImpression({ type: 'view', pageid: 'user-report', env: 'reports', object: { id: userId || '', type: 'User' } });
   const { t } = useAppI18n();
 
   const { data: userReadData } = useUserRead();

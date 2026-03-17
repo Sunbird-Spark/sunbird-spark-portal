@@ -11,7 +11,7 @@ import "./profile.css";
 const Profile = () => {
     const { t } = useAppI18n();
 
-    useImpression({ type: 'view', pageid: 'profile' });
+    useImpression({ type: 'view', pageid: 'profile', env: 'profile' });
 
     const { data: userResponse, isLoading, isError } = useUserRead({ refetchOnMount: 'always' });
     const userData = userResponse?.data?.response;

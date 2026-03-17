@@ -7,6 +7,7 @@ import useImpression from './useImpression';
 // ── Mock navigationHelperService ─────────────────────────────────────────────
 const mockGetPageLoadTime = vi.fn(() => 0.529);
 const mockStoreUrlHistory = vi.fn();
+const mockResetPageStartTime = vi.fn(() => { mockPageStartTime = Date.now(); });
 let mockPageStartTime = Date.now();
 
 vi.mock('@/services/NavigationHelperService', () => ({
@@ -15,6 +16,7 @@ vi.mock('@/services/NavigationHelperService', () => ({
     set pageStartTime(v: number) { mockPageStartTime = v; },
     getPageLoadTime: () => mockGetPageLoadTime(),
     storeUrlHistory: (...args: any[]) => mockStoreUrlHistory(...args),
+    resetPageStartTime: () => mockResetPageStartTime(),
   },
 }));
 
@@ -40,6 +42,7 @@ describe('useImpression', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetPageLoadTime.mockReturnValue(0.529);
+    mockResetPageStartTime.mockImplementation(() => { mockPageStartTime = Date.now(); });
   });
 
   afterEach(() => {
@@ -125,5 +128,69 @@ describe('useImpression', () => {
     renderHook(() => useImpression({ pageid: 'test' }), { wrapper });
     // pageStartTime should have been updated to approximately Date.now()
     expect(mockPageStartTime).toBeGreaterThanOrEqual(before);
+  });
+
+  // ── env (context.env) ─────────────────────────────────────────────────────
+
+  it('includes context.env when env is provided', () => {
+    renderHook(() => useImpression({ pageid: 'home', env: 'home' }), { wrapper });
+
+    expect(mockImpression).toHaveBeenCalledWith(
+      expect.objectContaining({ context: { env: 'home' } })
+    );
+  });
+
+  it('does not include context when env is not provided', () => {
+    renderHook(() => useImpression({ pageid: 'home' }), { wrapper });
+
+    const call = mockImpression.mock.calls[0]![0];
+    expect(call.context).toBeUndefined();
+  });
+
+  it('includes visits in edata when provided', () => {
+    const visits = [{ objid: 'do_123', objtype: 'Resource', section: 'Drafts', index: 0 }];
+    renderHook(() => useImpression({ pageid: 'workspace', visits }), { wrapper });
+
+    const edata = mockImpression.mock.calls[0]![0].edata;
+    expect(edata.visits).toEqual(visits);
+  });
+
+  it('omits visits from edata when array is empty', () => {
+    renderHook(() => useImpression({ pageid: 'workspace', visits: [] }), { wrapper });
+
+    const edata = mockImpression.mock.calls[0]![0].edata;
+    expect(edata).not.toHaveProperty('visits');
+  });
+
+  // ── pageexit (ngOnDestroy equivalent) ─────────────────────────────────────
+
+  it('fires pageexit impression on unmount when pageexit=true', () => {
+    const visits = [{ objid: 'do_123', objtype: 'Resource', index: 0 }];
+    const { unmount } = renderHook(
+      () => useImpression({ pageid: 'workspace', env: 'workspace', pageexit: true, visits }),
+      { wrapper }
+    );
+
+    mockImpression.mockClear(); // clear the initial impression
+    unmount();
+
+    expect(mockImpression).toHaveBeenCalledTimes(1);
+    const call = mockImpression.mock.calls[0]![0];
+    expect(call.edata.subtype).toBe('pageexit');
+    expect(call.edata.pageid).toBe('workspace');
+    expect(call.edata.visits).toEqual(visits);
+    expect(call.context).toEqual({ env: 'workspace' });
+  });
+
+  it('does NOT fire pageexit impression on unmount when pageexit is not set', () => {
+    const { unmount } = renderHook(
+      () => useImpression({ pageid: 'home', env: 'home' }),
+      { wrapper }
+    );
+
+    mockImpression.mockClear();
+    unmount();
+
+    expect(mockImpression).not.toHaveBeenCalled();
   });
 });

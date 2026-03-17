@@ -42,7 +42,7 @@ const groupingMap: Record<string, ContentByGroup[]> = {
 };
 
 const PlatformReports = () => {
-  useImpression({ type: 'view', pageid: 'platform-reports' });
+  useImpression({ type: 'view', pageid: 'platform-reports', env: 'reports' });
   const [contentGrouping, setContentGrouping] = useState("taxonomy");
   const [tableSearch, setTableSearch] = useState("");
   const [tableFilters, setTableFilters] = useState<Record<string, string>>({});
