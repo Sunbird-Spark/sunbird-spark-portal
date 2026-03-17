@@ -39,18 +39,15 @@ describe('Logger', () => {
   });
 
   it('should write logs to console transport', async () => {
-    const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
-    const spy = vi.spyOn(consoleTransport, 'log').mockImplementation((_info, callback) => {
-      callback();
-    });
+    const writeSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
     logger.info('Test log message');
 
     await vi.waitFor(() => {
-      expect(spy).toHaveBeenCalled();
+      expect(writeSpy).toHaveBeenCalled();
     }, { timeout: 1000, interval: 50 });
 
-    spy.mockRestore();
+    writeSpy.mockRestore();
   });
 
   it('should format log with timestamp, level and message', async () => {
