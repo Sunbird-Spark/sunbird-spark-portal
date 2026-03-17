@@ -74,7 +74,7 @@ interface ImpressionData {
  */
 const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visits, pageexit }: ImpressionData) => {
     const location = useLocation();
-    const { pathname } = location;
+    const { pathname, search, hash } = location;
     const telemetry = useTelemetry();
     const telemetryRef = useRef(telemetry);
     useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
@@ -83,8 +83,10 @@ const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visit
     const visitsRef = useRef(visits);
     useEffect(() => { visitsRef.current = visits; }, [visits]);
 
-    const pathnameRef = useRef(pathname);
-    useEffect(() => { pathnameRef.current = pathname; }, [pathname]);
+    // Full URL (pathname + query string + hash) used for both uri and deduplication
+    const fullUrl = pathname + search + hash;
+    const fullUrlRef = useRef(fullUrl);
+    useEffect(() => { fullUrlRef.current = fullUrl; }, [fullUrl]);
 
     // Default the page identification to the path name
     const effectivePageId = pageid || pathname;
@@ -97,10 +99,16 @@ const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visit
     const envRef = useRef(env);
     useEffect(() => { envRef.current = env; }, [env]);
 
+    // Track latest pageexit value via ref so cleanup always reads the current value
+    const pageexitRef = useRef(pageexit);
+    useEffect(() => { pageexitRef.current = pageexit; }, [pageexit]);
+
     // ── Main impression effect — fires on each navigation ───────────────────
     useEffect(() => {
-        // Records the URL for deduplication; the service suppresses same-URL re-fires.
-        navigationHelperService.storeUrlHistory(pathname);
+        // Guard: skip IMPRESSION when navigating to the same URL (e.g. refresh,
+        // same-page link). storeUrlHistory returns false for duplicate URLs.
+        const isNewUrl = navigationHelperService.storeUrlHistory(fullUrl);
+        if (!isNewUrl) return;
 
         // Duration = seconds elapsed since last pageStartTime
         const duration = parseFloat(navigationHelperService.getPageLoadTime().toFixed(3));
@@ -108,7 +116,7 @@ const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visit
         const edata: Record<string, unknown> = {
             type,
             pageid: effectivePageId,
-            uri: pathname,
+            uri: fullUrl, // full URL including query string and hash
             duration
         };
         if (subtype) {
@@ -126,16 +134,18 @@ const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visit
         navigationHelperService.resetPageStartTime();
     // location.key changes on every history push/replace, including same-pathname
     // navigations, ensuring a fresh impression fires on each distinct history entry.
-    }, [effectivePageId, pathname, location.key]); // intentional: telemetry/env/visits accessed via ref
+    }, [effectivePageId, fullUrl, location.key]); // intentional: telemetry/env/visits accessed via ref
 
     // ── Pageexit effect — mirrors ngOnDestroy of TelemetryImpressionDirective ─
+    // Always registers cleanup so it fires even when pageexit becomes true after
+    // mount (e.g. after data loads). The ref is checked inside the cleanup.
     useEffect(() => {
-        if (!pageexit) return;
         return () => {
+            if (!pageexitRef.current) return;
             const exitEdata: Record<string, unknown> = {
                 type,
                 pageid: effectivePageIdRef.current,
-                uri: pathnameRef.current,
+                uri: fullUrlRef.current,
                 subtype: 'pageexit',
             };
             const currentVisits = visitsRef.current;

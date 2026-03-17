@@ -6,7 +6,7 @@ import useImpression from './useImpression';
 
 // ── Mock navigationHelperService ─────────────────────────────────────────────
 const mockGetPageLoadTime = vi.fn(() => 0.529);
-const mockStoreUrlHistory = vi.fn();
+const mockStoreUrlHistory = vi.fn((_url: string) => true); // default: new URL → fire impression
 const mockResetPageStartTime = vi.fn(() => { mockPageStartTime = Date.now(); });
 let mockPageStartTime = Date.now();
 
@@ -15,7 +15,7 @@ vi.mock('@/services/NavigationHelperService', () => ({
     get pageStartTime() { return mockPageStartTime; },
     set pageStartTime(v: number) { mockPageStartTime = v; },
     getPageLoadTime: () => mockGetPageLoadTime(),
-    storeUrlHistory: (...args: any[]) => mockStoreUrlHistory(...args),
+    storeUrlHistory: (url: string) => mockStoreUrlHistory(url),
     resetPageStartTime: () => mockResetPageStartTime(),
   },
 }));
@@ -57,6 +57,7 @@ describe('useImpression', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetPageLoadTime.mockReturnValue(0.529);
+    mockStoreUrlHistory.mockReturnValue(true);
     mockResetPageStartTime.mockImplementation(() => { mockPageStartTime = Date.now(); });
   });
 
@@ -133,6 +134,29 @@ describe('useImpression', () => {
     expect(call.object).toBeUndefined();
   });
 
+  it('calls storeUrlHistory with full URL (pathname + search + hash)', () => {
+    const wrapperWithQuery = ({ children }: { children: React.ReactNode }) => (
+      <MemoryRouter initialEntries={['/home?tab=2#section']}>{children}</MemoryRouter>
+    );
+    renderHook(() => useImpression({ pageid: 'test' }), { wrapper: wrapperWithQuery });
+    expect(mockStoreUrlHistory).toHaveBeenCalledWith('/home?tab=2#section');
+  });
+
+  it('uses full URL as edata.uri', () => {
+    const wrapperWithQuery = ({ children }: { children: React.ReactNode }) => (
+      <MemoryRouter initialEntries={['/course?id=do_123']}>{children}</MemoryRouter>
+    );
+    renderHook(() => useImpression({ pageid: 'course' }), { wrapper: wrapperWithQuery });
+    const edata = mockImpression.mock.calls[0]![0].edata;
+    expect(edata.uri).toBe('/course?id=do_123');
+  });
+
+  it('suppresses IMPRESSION when storeUrlHistory returns false (same-URL navigation)', () => {
+    mockStoreUrlHistory.mockReturnValue(false);
+    renderHook(() => useImpression({ pageid: 'test' }), { wrapper });
+    expect(mockImpression).not.toHaveBeenCalled();
+  });
+
   it('calls storeUrlHistory with current pathname', () => {
     renderHook(() => useImpression({ pageid: 'test' }), { wrapper });
     expect(mockStoreUrlHistory).toHaveBeenCalledWith('/home');
@@ -207,6 +231,24 @@ describe('useImpression', () => {
     unmount();
 
     expect(mockImpression).not.toHaveBeenCalled();
+  });
+
+  it('fires pageexit impression on unmount when pageexit becomes true after mount', () => {
+    let pageexitProp = false;
+    const { rerender, unmount } = renderHook(
+      () => useImpression({ pageid: 'workspace', env: 'workspace', pageexit: pageexitProp }),
+      { wrapper }
+    );
+
+    // Enable pageexit after initial mount
+    pageexitProp = true;
+    rerender();
+
+    mockImpression.mockClear();
+    unmount();
+
+    expect(mockImpression).toHaveBeenCalledTimes(1);
+    expect(mockImpression.mock.calls[0]![0].edata.subtype).toBe('pageexit');
   });
 
   // ── Navigation re-fire ────────────────────────────────────────────────────
