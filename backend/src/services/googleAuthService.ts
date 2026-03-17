@@ -1,6 +1,8 @@
 import { envConfig } from '../config/env.js';
 import { Request } from 'express';
 import { OAuth2Client, CodeChallengeMethod } from 'google-auth-library';
+import axios from 'axios';
+import { issuerUrl, decodeJwtPayload } from '../auth/oidcProvider.js';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
 
@@ -72,6 +74,44 @@ export const exchangeGoogleCode = async (
         emailId: email,
         name: fullName || undefined,
     };
+};
+
+/**
+ * Creates a Keycloak session for a Google-authenticated user using the
+ * Resource Owner Password Credentials grant with the google-auth confidential
+ * client (KEYCLOAK_GOOGLE_CLIENT_ID/SECRET). Keycloak recognises the email as
+ * a federated Google user and issues portal-scoped access/refresh/id tokens
+ * without requiring a browser redirect.
+ *
+ * This mirrors the reference `createSession → obtainDirectly(emailId)` approach
+ * from the SunbirdEd portal.
+ */
+export const createKeycloakGoogleSession = async (emailId: string): Promise<{
+    access_token: string;
+    refresh_token?: string;
+    id_token?: string;
+    tokenClaims: Record<string, unknown> | null;
+}> => {
+    const tokenEndpoint = `${issuerUrl}/protocol/openid-connect/token`;
+
+    const params = new URLSearchParams({
+        grant_type: 'password',
+        client_id: envConfig.KEYCLOAK_GOOGLE_CLIENT_ID,
+        client_secret: envConfig.KEYCLOAK_GOOGLE_CLIENT_SECRET,
+        username: emailId,
+        scope: 'openid',
+    });
+
+    const response = await axios.post(tokenEndpoint, params.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    const { access_token, refresh_token, id_token } = response.data;
+    const tokenClaims = decodeJwtPayload(access_token);
+
+    logger.info(`createKeycloakGoogleSession: session created for ${emailId}`);
+
+    return { access_token, refresh_token, id_token, tokenClaims };
 };
 
 export const validateOAuthSession = (req: Request): { state: string; codeVerifier: string; client_id: string } => {
