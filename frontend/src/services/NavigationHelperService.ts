@@ -42,16 +42,20 @@ export class NavigationHelperService {
   /**
    * Deduplicates same-URL navigations (refresh / clicking a link to the current page).
    *   - Pops the last URL from history.
-   *   - If same as incoming URL, pushes only the new URL (no growth).
-   *   - If different, pushes both old and new URLs.
+   *   - If same as incoming URL, pushes only the new URL (no growth) and returns false.
+   *   - If different, pushes both old and new URLs and returns true.
+   *
+   * @returns true when the URL is new (caller should fire an IMPRESSION),
+   *          false when it is a duplicate (caller should skip the IMPRESSION).
    */
-  public storeUrlHistory(url: string): void {
+  public storeUrlHistory(url: string): boolean {
     const previousUrl = this._history.pop();
     if (previousUrl === undefined || previousUrl === url) {
       this._history.push(url);
-    } else {
-      this._history.push(previousUrl, url);
+      return previousUrl === undefined; // true on very first call, false on duplicate
     }
+    this._history.push(previousUrl, url);
+    return true;
   }
 
   public getPreviousUrl(): string | undefined {
