@@ -180,7 +180,7 @@ describe('GoogleAuthService - direct Google OAuth flow', () => {
         it('should include KEYCLOAK_GOOGLE_CLIENT_ID in the POST body', async () => {
             await createKeycloakGoogleSession('user@example.com');
 
-            const postedBody = mockAxiosPost.mock.calls[0][1] as string;
+            const postedBody = mockAxiosPost.mock.calls[0]![1] as string;
             expect(postedBody).toContain('client_id=test-keycloak-client-id');
             expect(postedBody).toContain('scope=openid');
         });
