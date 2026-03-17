@@ -6,7 +6,7 @@ import { courseReportSummary } from "@/data/reportsMockData";
 
 const CourseReport = () => {
   const { courseId } = useParams();
-  useImpression({ type: 'view', pageid: 'course-report', object: { id: courseId || '', type: 'Collection' } });
+  useImpression({ type: 'view', pageid: 'course-report', env: 'reports', object: { id: courseId || '', type: 'Collection' } });
   const summary = courseReportSummary;
 
   return (

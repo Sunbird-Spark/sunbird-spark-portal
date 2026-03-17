@@ -13,7 +13,7 @@ import "./mylearning.css";
 const MyLearning = () => {
   const { t } = useAppI18n();
 
-  useImpression({ type: 'view', pageid: 'my-learning' });
+  useImpression({ type: 'view', pageid: 'my-learning', env: 'learn' });
 
   const { data, isLoading, error } = useUserEnrolledCollections();
   const courses = data?.data?.courses || [];
