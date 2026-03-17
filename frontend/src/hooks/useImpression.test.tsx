@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { act, renderHook } from '@testing-library/react';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 import React from 'react';
 import useImpression from './useImpression';
 
@@ -36,6 +36,21 @@ vi.mock('@/hooks/useTelemetry', () => ({
 // ── Wrapper ───────────────────────────────────────────────────────────────────
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter initialEntries={['/home']}>{children}</MemoryRouter>
+);
+
+// ── Navigation wrapper — exposes navigate() for programmatic route changes ───
+let triggerNavigate: (to: string) => void = () => {};
+
+const NavigationCapture = ({ children }: { children: React.ReactNode }) => {
+  const navigate = useNavigate();
+  triggerNavigate = navigate;
+  return <>{children}</>;
+};
+
+const navigationWrapper = ({ children }: { children: React.ReactNode }) => (
+  <MemoryRouter initialEntries={['/home']}>
+    <NavigationCapture>{children}</NavigationCapture>
+  </MemoryRouter>
 );
 
 describe('useImpression', () => {
@@ -192,5 +207,22 @@ describe('useImpression', () => {
     unmount();
 
     expect(mockImpression).not.toHaveBeenCalled();
+  });
+
+  // ── Navigation re-fire ────────────────────────────────────────────────────
+
+  it('re-fires impression when navigating to a new route', async () => {
+    renderHook(() => useImpression({ env: 'home' }), { wrapper: navigationWrapper });
+
+    mockImpression.mockClear();
+    mockGetPageLoadTime.mockReturnValue(1.2);
+
+    await act(async () => { triggerNavigate('/explore'); });
+
+    expect(mockImpression).toHaveBeenCalledTimes(1);
+    const edata = mockImpression.mock.calls[0]![0].edata;
+    expect(edata.uri).toBe('/explore');
+    expect(edata.pageid).toBe('/explore');
+    expect(edata.duration).toBe(1.2);
   });
 });

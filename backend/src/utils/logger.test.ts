@@ -40,13 +40,9 @@ describe('Logger', () => {
 
   it('should write logs to console transport', async () => {
     const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
-
-    const spy = vi
-      .spyOn(consoleTransport, 'log')
-      .mockImplementation((_info, callback) => {
-        callback?.();
-        return true;
-      });
+    const spy = vi.spyOn(consoleTransport, 'log').mockImplementation((_info, callback) => {
+      callback();
+    });
 
     logger.info('Test log message');
 
@@ -59,17 +55,13 @@ describe('Logger', () => {
 
   it('should format log with timestamp, level and message', async () => {
     const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
-
-    const spy = vi
-      .spyOn(consoleTransport, 'log')
-      .mockImplementation((info, callback) => {
-        const formattedMessage = info[Symbol.for('message')];
-        expect(formattedMessage).toMatch(
-          /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[info\]: Formatted log test/
-        );
-        callback?.();
-        return true;
-      });
+    const spy = vi.spyOn(consoleTransport, 'log').mockImplementation((info, callback) => {
+      const formattedMessage = info[Symbol.for('message')];
+      expect(formattedMessage).toMatch(
+        /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[info\]: Formatted log test/
+      );
+      callback();
+    });
 
     logger.info('Formatted log test');
 

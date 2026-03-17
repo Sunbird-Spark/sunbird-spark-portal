@@ -4,6 +4,23 @@ import { useTelemetry } from '@/hooks/useTelemetry';
 import { type TelemetryEventInput } from '@/services/TelemetryService';
 import { navigationHelperService } from '@/services/NavigationHelperService';
 
+// ── Module-level helper: pure function, no hook state ───────────────────────
+function buildImpressionInput(
+    edataOverrides: Record<string, unknown>,
+    currentObject: Record<string, unknown>,
+    currentEnv?: string
+): TelemetryEventInput {
+    const impressionInput: TelemetryEventInput = { edata: edataOverrides };
+    // context.env mirrors IImpressionEventInput.context.env from SunbirdEd spec
+    if (currentEnv) {
+        impressionInput.context = { env: currentEnv };
+    }
+    if (Object.keys(currentObject).length > 0) {
+        impressionInput.object = currentObject;
+    }
+    return impressionInput;
+}
+
 /** Mirrors IImpressionEventVisits from SunbirdEd-portal telemetry interfaces */
 export interface ImpressionEventVisit {
     objid: string;
@@ -52,7 +69,8 @@ interface ImpressionData {
  *     via navigationHelperService.getPageLoadTime().
  *   - After firing the impression, resets pageStartTime so the next page's
  *     impression captures dwell time on the current page.
- *   - storeUrlHistory() deduplicates same-URL navigations (refresh / same-page links).
+ *   - storeUrlHistory() records the URL for deduplication; same-URL navigations
+ *     are suppressed inside the service itself.
  */
 const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visits, pageexit }: ImpressionData) => {
     const location = useLocation();
@@ -76,26 +94,12 @@ const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visit
     const objectRef = useRef(object);
     useEffect(() => { objectRef.current = object; }, [object]);
 
-    // ── Helper: build the full impression input from current values ─────────
-    const buildImpressionInput = (
-        edataOverrides: Record<string, unknown>,
-        currentObject: Record<string, unknown>,
-        currentEnv?: string
-    ): TelemetryEventInput => {
-        const impressionInput: TelemetryEventInput = { edata: edataOverrides };
-        // context.env mirrors IImpressionEventInput.context.env from SunbirdEd spec
-        if (currentEnv) {
-            impressionInput.context = { env: currentEnv };
-        }
-        if (Object.keys(currentObject).length > 0) {
-            impressionInput.object = currentObject;
-        }
-        return impressionInput;
-    };
+    const envRef = useRef(env);
+    useEffect(() => { envRef.current = env; }, [env]);
 
     // ── Main impression effect — fires on each navigation ───────────────────
     useEffect(() => {
-        // Deduplicate same-URL navigations (mirrors storeUrlHistory from reference service)
+        // Records the URL for deduplication; the service suppresses same-URL re-fires.
         navigationHelperService.storeUrlHistory(pathname);
 
         // Duration = seconds elapsed since last pageStartTime
@@ -120,7 +124,9 @@ const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visit
         // Reset pageStartTime after firing so the NEXT page's impression captures
         // how long the user spent on this page
         navigationHelperService.resetPageStartTime();
-    }, [effectivePageId, pathname, location.key]); // intentional: telemetry accessed via ref
+    // location.key changes on every history push/replace, including same-pathname
+    // navigations, ensuring a fresh impression fires on each distinct history entry.
+    }, [effectivePageId, pathname, location.key]); // intentional: telemetry/env/visits accessed via ref
 
     // ── Pageexit effect — mirrors ngOnDestroy of TelemetryImpressionDirective ─
     useEffect(() => {
@@ -137,7 +143,7 @@ const useImpression = ({ type = "view", subtype, pageid, env, object = {}, visit
                 exitEdata.visits = currentVisits;
             }
             telemetryRef.current.impression(
-                buildImpressionInput(exitEdata, objectRef.current, env)
+                buildImpressionInput(exitEdata, objectRef.current, envRef.current)
             );
         };
     }, []); // intentional: runs once on mount, cleanup fires on unmount with latest values via refs
