@@ -31,6 +31,9 @@ export interface CollectionData {
   hierarchyRoot: HierarchyContentNode;
   trackable?: { enabled?: TrackableEnabled };
   createdBy?: string;
+  primaryCategory?: string;
+  /** Package version from the course hierarchy API. Used for telemetry `object.ver`. */
+  pkgVersion?: number | string;
 }
 
 export interface HierarchyContentNode {
@@ -173,4 +176,6 @@ export interface RelatedContentSearchItem {
   appIcon?: string;
   leafNodesCount?: number;
   resourceType?: string;
+  creator?: string;
+  createdBy?: string;
 }

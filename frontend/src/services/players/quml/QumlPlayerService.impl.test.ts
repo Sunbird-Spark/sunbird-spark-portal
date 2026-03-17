@@ -19,7 +19,7 @@ describe('QumlPlayerService - Implementation Details', () => {
   describe('createElement - detailed tests', () => {
     it('should set player-config attribute', () => {
       const config = {
-        context: { sid: 'test' },
+        context: { sid: 'test' } as any,
         config: {},
         metadata: mockMetadata,
         data: {},
@@ -34,7 +34,7 @@ describe('QumlPlayerService - Implementation Details', () => {
 
     it('should set data-player-id attribute', () => {
       const config = {
-        context: { sid: 'test' },
+        context: { sid: 'test' } as any,
         config: {},
         metadata: mockMetadata,
         data: {},
@@ -47,7 +47,7 @@ describe('QumlPlayerService - Implementation Details', () => {
 
     it('should load styles on first createElement call', () => {
       const config = {
-        context: { sid: 'test' },
+        context: { sid: 'test' } as any,
         config: {},
         metadata: mockMetadata,
         data: {},

@@ -6,8 +6,8 @@ interface PdfPlayerProps {
   metadata: PdfPlayerMetadata; // Required - complete metadata object from backend
   mode?: string; // Optional - default: 'play'
   cdata?: any[]; // Optional - default: []
-  contextRollup?: { l1: string }; // Optional - default: { l1: channel }
-  objectRollup?: Record<string, any>; // Optional - default: {}
+  contextRollup?: Record<string, string>; // Optional - default: { l1: channel }
+  objectRollup?: Record<string, string>; // Optional - default: {}
   onPlayerEvent?: (event: PdfPlayerEvent) => void;
   onTelemetryEvent?: (event: any) => void;
 }
@@ -96,7 +96,7 @@ export const PdfPlayer: React.FC<PdfPlayerProps> = ({
   return (
     <div
       ref={containerRef}
-      className="w-full h-full min-h-[37.5rem] relative"
+      className="content-player-embed"
     />
   );
 };

@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { batchService as creatorBatchService, Batch, CreateBatchRequest, UpdateBatchRequest } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useAuthInfo } from './useAuthInfo';
 import { resolveUserAndOrg } from '../utils/userUtils';
+import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import type {
   BatchListResponse,
   BatchReadResponse,
@@ -29,9 +30,36 @@ export function useBatchListForCreator(
   options?: { enabled?: boolean }
 ): UseQueryResult<Batch[], Error> {
   const enabled = options?.enabled ?? true;
+  const { data: authInfo } = useAuthInfo();
+  const userId = authInfo?.uid ?? null;
 
   return useQuery({
-    queryKey: ['batchList', courseId, true],
+    queryKey: ['batchList', courseId, true, userId],
+    queryFn: async () => {
+      if (!courseId || !userId) return [] as Batch[];
+      
+      const response = await creatorBatchService.listBatches(courseId, userId);
+      return (response?.data?.response?.content ?? []) as Batch[];
+    },
+    enabled: enabled && !!courseId && !!userId,
+    staleTime: 0,
+    retry: 1,
+  });
+}
+
+// ─── useBatchListForMentor ─────────────────────────────────────────────────────
+/**
+ * Mentor view: fetch only batches where the current user is a mentor
+ * Returns `Batch[]`.
+ */
+export function useBatchListForMentor(
+  courseId: string | undefined,
+  options?: { enabled?: boolean }
+): UseQueryResult<Batch[], Error> {
+  const enabled = options?.enabled ?? true;
+
+  return useQuery({
+    queryKey: ['batchList', courseId, 'mentor'],
     queryFn: async () => {
       if (!courseId) return [] as Batch[];
 
@@ -41,13 +69,21 @@ export function useBatchListForCreator(
         userId = authInfo?.uid;
       }
       if (!userId) return [] as Batch[];
-      const response = await creatorBatchService.listBatches(courseId, userId);
+      const response = await creatorBatchService.listBatches(courseId, undefined, [userId]);
       return (response?.data?.response?.content ?? []) as Batch[];
     },
     enabled: enabled && !!courseId,
     staleTime: 0,
     retry: 1,
   });
+}
+
+
+// ─── Utility ─────────────────────────────────────────────────────────────────
+export function mergeBatches(batchesA?: Batch[], batchesB?: Batch[]): Batch[] {
+  const combined = [...(batchesA || []), ...(batchesB || [])];
+  const uniqueIds = Array.from(new Set(combined.map(b => b.id)));
+  return uniqueIds.map(id => combined.find(b => b.id === id)!);
 }
 
 // ─── useBatchListForLearner ──────────────────────────────────────────────────

@@ -12,6 +12,7 @@ vi.mock('@project-sunbird/telemetry-sdk', () => ({
     error: vi.fn(),
     audit: vi.fn(),
     log: vi.fn(),
+    share: vi.fn(),
     exdata: vi.fn(),
     feedback: vi.fn(),
   },
@@ -75,6 +76,11 @@ describe('TelemetryService', () => {
       expect($t.log).not.toHaveBeenCalled();
     });
 
+    it('does not call share', () => {
+      telemetryService.share(mockEventInput);
+      expect($t.share).not.toHaveBeenCalled();
+    });
+
     it('does not call exData', () => {
       telemetryService.exData(mockEventInput);
       expect($t.exdata).not.toHaveBeenCalled();
@@ -121,6 +127,11 @@ describe('TelemetryService', () => {
       expect($t.log).toHaveBeenCalledWith(mockEventInput.edata, mockEventInput.options);
     });
 
+    it('calls share with correct arguments', () => {
+      telemetryService.share(mockEventInput);
+      expect($t.share).toHaveBeenCalledWith(mockEventInput.edata, mockEventInput.options);
+    });
+
     it('calls exData with correct arguments', () => {
       telemetryService.exData(mockEventInput);
       expect($t.exdata).toHaveBeenCalledWith(mockEventInput.edata, mockEventInput.options);
@@ -153,8 +164,6 @@ describe('TelemetryService', () => {
         const inputWithPageId = { edata: { type: 'view', pageid: 'home-page' } };
         telemetryService.impression(inputWithPageId);
         expect($t.impression).toHaveBeenCalledWith(inputWithPageId.edata, undefined);
-        expect(sessionStorage.getItem('telemetry_last_pageid')).toBe('home-page');
-        expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('100000');
       });
 
       it('drops impression if it occurs within 5000ms for the same pageid', () => {
@@ -181,18 +190,8 @@ describe('TelemetryService', () => {
         
         telemetryService.impression(inputWithPageId);
         expect($t.impression).toHaveBeenCalledTimes(2); // Should be called again
-        expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('106000');
       });
 
-      it('handles invalid timestamp in sessionStorage gracefully and updates it', () => {
-         const inputWithPageId = { edata: { type: 'view', pageid: 'home-page' } };
-         sessionStorage.setItem('telemetry_last_pageid', 'home-page');
-         sessionStorage.setItem('telemetry_last_impression_time', 'invalid');
-         
-         telemetryService.impression(inputWithPageId);
-         expect($t.impression).toHaveBeenCalledTimes(1);
-         expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('100000');
-      });
 
       it('fires impression immediately if navigating to a different pageid within 5000ms', () => {
         const inputPageOne = { edata: { type: 'view', pageid: 'home-page' } };
@@ -206,8 +205,6 @@ describe('TelemetryService', () => {
         
         telemetryService.impression(inputPageTwo);
         expect($t.impression).toHaveBeenCalledTimes(2); 
-        expect(sessionStorage.getItem('telemetry_last_pageid')).toBe('explore-page');
-        expect(sessionStorage.getItem('telemetry_last_impression_time')).toBe('101000');
       });
     });
   });

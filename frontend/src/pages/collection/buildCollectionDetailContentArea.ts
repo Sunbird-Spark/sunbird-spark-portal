@@ -24,6 +24,8 @@ export interface BuildContentAreaArgs {
   batches: unknown;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
+  cdata?: Array<{ id: string; type: string }>;
+  objectRollup?: Record<string, string>;
   handleJoinCourse: (batchId: string) => void;
   batchListLoading: boolean;
   joinLoading: boolean;
@@ -38,9 +40,11 @@ export interface BuildContentAreaArgs {
   collectionId: string | undefined;
   batchIdParam: string | undefined;
   isCreatorViewingOwnCollection: boolean;
+  isMentorViewingCourse: boolean;
   contentCreatorPrivilege: boolean;
   userProfile: Record<string, unknown> | undefined;
   currentUserId: string | undefined;
+  backTo?: string;
 }
 
 export function buildCollectionDetailContentArea(
@@ -67,6 +71,8 @@ export function buildCollectionDetailContentArea(
       handlePlayerEvent: args.handlePlayerEvent,
       handleTelemetryEvent: args.handleTelemetryEvent,
       showMaxAttemptsExceeded: args.maxAttemptsExceeded,
+      cdata: args.cdata,
+      objectRollup: args.objectRollup,
     },
     enrollment: {
       courseProgressProps: args.courseProgressProps,
@@ -93,9 +99,11 @@ export function buildCollectionDetailContentArea(
     },
     creator: {
       isCreatorViewingOwnCollection: args.isCreatorViewingOwnCollection,
+      isMentorViewingCourse: args.isMentorViewingCourse,
       contentCreatorPrivilege: args.contentCreatorPrivilege,
       userProfile: args.userProfile,
       userId: args.currentUserId,
     },
+    backTo: args.backTo,
   };
 }

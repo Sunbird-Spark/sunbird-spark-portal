@@ -44,7 +44,13 @@ interface UseWorkspaceOptions {
   userRole?: 'creator' | 'reviewer';
   /** Organisation channel ID — used to scope reviewer content to the same org. */
   orgId?: string;
+  /** Search query string to filter content by name. */
+  searchQuery?: string;
   enabled?: boolean;
+  /** When true, restrict primaryCategory to Digital Textbook only (BOOK_CREATOR without CONTENT_CREATOR). */
+  isBookCreatorOnly?: boolean;
+  /** When true, restrict primaryCategory to Digital Textbook only (BOOK_REVIEWER without CONTENT_REVIEWER). */
+  isBookReviewerOnly?: boolean;
 }
 
 /**
@@ -65,7 +71,10 @@ export function useWorkspace({
   typeFilter,
   userRole = 'creator',
   orgId,
+  searchQuery = '',
   enabled = true,
+  isBookCreatorOnly = false,
+  isBookReviewerOnly = false,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create'].includes(activeTab);
@@ -79,8 +88,11 @@ export function useWorkspace({
   const isReviewerTab = isReviewerMode && ['pending-review', 'my-published'].includes(activeTab);
 
   // Derive primaryCategory filter from typeFilter (shared by both counts and content queries).
-  const primaryCategoryFilter =
-    getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
+  // Book-only creators/reviewers can only see Digital Textbook content regardless of type filter.
+  const isBookRoleOnly = isBookCreatorOnly || isBookReviewerOnly;
+  const primaryCategoryFilter = isBookRoleOnly
+    ? ['Digital Textbook']
+    : getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
 
   // ── Counts query (per role + typeFilter, shared across tabs) ───────────
   // Both modes use facets (limit=1) for lightweight counting.
@@ -88,7 +100,7 @@ export function useWorkspace({
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
   // typeFilter is included so tab badges and stats update when a type is selected.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
@@ -97,6 +109,7 @@ export function useWorkspace({
           status: [...WORKSPACE_STATUS_FILTER],
           primaryCategory: primaryCategoryFilter,
         },
+        query: searchQuery,
         facets: ['status'],
         limit: 1,
         offset: 0,
@@ -162,10 +175,11 @@ export function useWorkspace({
   }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, activeTab]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: getFiltersForTab(),
+        query: searchQuery,
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),

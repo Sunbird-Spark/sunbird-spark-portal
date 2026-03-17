@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useBatchListForLearner, useBatchRead, useContentState, useEnrol } from './useBatch';
+import { useBatchListForLearner, useBatchListForMentor, useBatchRead, useContentState, useEnrol } from './useBatch';
+import { useIsMentor } from './useUser';
 import { useUserEnrolledCollections } from './useUserEnrolledCollections';
 import { useAppI18n } from './useAppI18n';
 import { useToast } from './useToast';
@@ -15,7 +16,7 @@ import {
   getFirstCertPreviewUrl,
   getEnrollableBatches,
 } from '../services/collection/enrollmentMapper';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useUserId } from './useAuthInfo';
 import type { CollectionData } from '../types/collectionTypes';
 
 export function useCollectionEnrollment(
@@ -28,24 +29,43 @@ export function useCollectionEnrollment(
   const queryClient = useQueryClient();
   const { t } = useAppI18n();
   const { toast } = useToast();
+  const userId = useUserId();
   const { data: enrollmentsResponse, refetch: refetchEnrollments } = useUserEnrolledCollections({
     enabled: isAuthenticated,
+  });
+
+  const isMentorRole = useIsMentor();
+  const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? '') === 'yes';
+
+  const { data: mentorBatches } = useBatchListForMentor(collectionId, {
+    enabled: isAuthenticated && isTrackableForBatch && isMentorRole,
   });
 
   const enrollmentForCollection = useMemo(
     () => getEnrollmentForCollection(enrollmentsResponse?.data?.courses, collectionId),
     [collectionId, enrollmentsResponse?.data?.courses],
   );
+
+  const isMentorOfCurrentBatch = useMemo(
+    () => !!batchIdParam && (mentorBatches?.some((b) => b.id === batchIdParam) ?? false),
+    [batchIdParam, mentorBatches],
+  );
+
   const hasBatchInRoute = !!batchIdParam;
   const isEnrolledInCurrentBatch =
-    !!enrollmentForCollection &&
-    (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam);
-  const effectiveBatchId = batchIdParam ?? enrollmentForCollection?.batchId;
+    (!!enrollmentForCollection &&
+      (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam)) ||
+    isMentorOfCurrentBatch;
+
+  const effectiveBatchId =
+    batchIdParam ?? enrollmentForCollection?.batchId ?? mentorBatches?.[0]?.id;
+
+  const isMentorOfAnyBatchInCourse = (mentorBatches?.length ?? 0) > 0;
+
 
   const leafContentIds = useMemo(() => getLeafContentIds(collectionData), [collectionData]);
   const contentStateRequest = useMemo(() => {
     if (!collectionId || !effectiveBatchId || leafContentIds.length === 0) return null;
-    const userId = userAuthInfoService.getUserId();
     if (!userId) return null;
     return {
       userId,
@@ -54,7 +74,7 @@ export function useCollectionEnrollment(
       contentIds: leafContentIds,
       fields: ['progress', 'score', 'status'],
     };
-  }, [collectionId, effectiveBatchId, leafContentIds]);
+  }, [collectionId, effectiveBatchId, leafContentIds, userId]);
 
   const { data: contentStateResponse, isFetched: contentStateFetched } = useContentState(contentStateRequest, {
     enabled: isEnrolledInCurrentBatch && contentStateRequest !== null,
@@ -77,7 +97,6 @@ export function useCollectionEnrollment(
     [enrollmentForCollection, collectionData, totalFromState, completedFromState],
   );
 
-  const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? '') === 'yes';
   const {
     data: batchListResponse,
     isLoading: batchListLoading,
@@ -122,17 +141,16 @@ export function useCollectionEnrollment(
   const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
   const handleJoinCourse = async (selectedBatchId: string) => {
     if (!collectionId || !selectedBatchId) return;
-    const uid = userAuthInfoService.getUserId();
-    if (!uid) return;
+    if (!userId) return;
     resetEnrol();
     try {
-      await enrol({ courseId: collectionId, userId: uid, batchId: selectedBatchId });
+      await enrol({ courseId: collectionId, userId: userId, batchId: selectedBatchId });
       await queryClient.invalidateQueries({ queryKey: ['userEnrollments'] });
       refetchEnrollments();
       toast({
         title: t('success'),
         description: t('courseDetails.enrolSuccess'),
-        variant: 'default',
+        variant: 'success',
       });
       navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
     } catch {
@@ -161,5 +179,8 @@ export function useCollectionEnrollment(
     handleJoinCourse,
     batchEnrollmentType,
     batchStartDateFromRead,
+    isMentorOfAnyBatchInCourse,
+    isMentorOfCurrentBatch,
+    mentorBatches,
   };
 }

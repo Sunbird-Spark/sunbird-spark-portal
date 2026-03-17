@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useBatchListForCreator, useBatchListForLearner, useBatchRead, useContentState, useEnrol, useUnenrol, useCreateBatch, useUpdateBatch } from './useBatch';
+import { useBatchListForCreator, useBatchListForMentor, useBatchListForLearner, useBatchRead, useContentState, useEnrol, useUnenrol, useCreateBatch, useUpdateBatch } from './useBatch';
 import { batchService as creatorBatchService } from '../services/BatchService';
 import { BatchService as LearnerBatchService } from '../services/collection/BatchService';
 import { userService } from '../services/UserService';
@@ -52,6 +52,14 @@ vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
   }
 }));
 
+vi.mock('./useAuthInfo', () => ({
+  useAuthInfo: vi.fn(() => ({
+    data: { uid: 'user_123', sid: 'session_123', isAuthenticated: true },
+    isLoading: false,
+    error: null,
+  })),
+}));
+
 describe('useBatch hooks test', () => {
   const mockQueryClient = {
     invalidateQueries: vi.fn(),
@@ -80,7 +88,19 @@ describe('useBatch hooks test', () => {
       const queryParams = useBatchListForCreator('course_123');
       
       expect(useQuery).toHaveBeenCalled();
-      expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', true]);
+      expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', true, 'user_123']);
+      expect((queryParams as any).staleTime).toBe(0);
+      expect((queryParams as any).retry).toBe(1);
+    });
+  });
+
+  describe('useBatchListForMentor', () => {
+    it('sets up mentor batch list query with correct staleTime and queryKey', () => {
+      (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
+      const queryParams = useBatchListForMentor('course_123');
+      
+      expect(useQuery).toHaveBeenCalled();
+      expect((queryParams as any).queryKey).toEqual(['batchList', 'course_123', 'mentor']);
       expect((queryParams as any).staleTime).toBe(0);
       expect((queryParams as any).retry).toBe(1);
     });

@@ -1,10 +1,10 @@
+import type { TelemetryContext } from '../telemetryContextBuilder';
+
 export interface EcmlPlayerContextProps {
   mode?: string;
   cdata?: any[];
-  contextRollup?: {
-    l1: string;
-  };
-  objectRollup?: Record<string, any>;
+  contextRollup?: Record<string, string>;
+  objectRollup?: Record<string, string>;
 }
 
 export interface EcmlPlayerMetadata {
@@ -20,35 +20,7 @@ export interface EcmlPlayerMetadata {
 }
 
 export interface EcmlPlayerConfig {
-  context: {
-    mode: string;
-    sid: string | null;
-    did: string;
-    uid: string;
-    channel: string;
-    contentId: string;
-    pdata: {
-      id: string;
-      ver: string;
-      pid: string;
-    };
-    contextRollup: {
-      l1: string;
-    };
-    tags: string[];
-    cdata: any[];
-    timeDiff: number;
-    objectRollup: Record<string, any>;
-    host: string;
-    endpoint: string;
-    dims: string[];
-    app: string[];
-    partner?: any[];
-    userData: {
-      firstName: string;
-      lastName: string;
-    };
-  };
+  context: TelemetryContext;
   config: {
     showEndPage: boolean;
     endPage?: Array<{ template: string; contentType: string[] }>;

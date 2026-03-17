@@ -14,11 +14,17 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+  useQuery: () => ({
+    data: { uid: 'user_1', sid: 'session_1', isAuthenticated: true },
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 const mockUseBatchRead = vi.fn();
 vi.mock('./useBatch', () => ({
   useBatchListForLearner: () => ({ data: null, isLoading: false, error: null }),
+  useBatchListForMentor: () => ({ data: null, isLoading: false, error: null }),
   useBatchRead: (batchId: string | undefined, _opts: { enabled?: boolean }) => mockUseBatchRead(batchId),
   useContentState: () => ({ data: { contentList: [] } }),
   useEnrol: () => ({
@@ -27,6 +33,10 @@ vi.mock('./useBatch', () => ({
     error: null,
     reset: vi.fn(),
   }),
+}));
+
+vi.mock('./useUser', () => ({
+  useIsMentor: () => false,
 }));
 
 vi.mock('./useUserEnrolledCollections', () => ({

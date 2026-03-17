@@ -89,7 +89,10 @@ function DataTableWrapper<T>({
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
                   aria-sort={sortField === col.key ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
                 >
-                  <span className="flex items-center gap-1">
+                  <span className={`flex items-center gap-1 ${
+                    col.className?.includes("text-right") ? "justify-end" :
+                    col.className?.includes("text-center") ? "justify-center" : ""
+                  }`}>
                     {col.header}
                     {col.sortable && sortField === col.key && (
                       sortDir === "asc" ? <FiChevronUp className="w-3.5 h-3.5" /> : <FiChevronDown className="w-3.5 h-3.5" />
