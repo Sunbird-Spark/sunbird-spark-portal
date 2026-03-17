@@ -12,6 +12,7 @@ vi.mock('@project-sunbird/telemetry-sdk', () => ({
     error: vi.fn(),
     audit: vi.fn(),
     log: vi.fn(),
+    share: vi.fn(),
     exdata: vi.fn(),
     feedback: vi.fn(),
   },
@@ -75,6 +76,11 @@ describe('TelemetryService', () => {
       expect($t.log).not.toHaveBeenCalled();
     });
 
+    it('does not call share', () => {
+      telemetryService.share(mockEventInput);
+      expect($t.share).not.toHaveBeenCalled();
+    });
+
     it('does not call exData', () => {
       telemetryService.exData(mockEventInput);
       expect($t.exdata).not.toHaveBeenCalled();
@@ -119,6 +125,11 @@ describe('TelemetryService', () => {
     it('calls log with correct arguments', () => {
       telemetryService.log(mockEventInput);
       expect($t.log).toHaveBeenCalledWith(mockEventInput.edata, mockEventInput.options);
+    });
+
+    it('calls share with correct arguments', () => {
+      telemetryService.share(mockEventInput);
+      expect($t.share).toHaveBeenCalledWith(mockEventInput.edata, mockEventInput.options);
     });
 
     it('calls exData with correct arguments', () => {

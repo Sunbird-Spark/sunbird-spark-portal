@@ -81,7 +81,6 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
 
         const telemetryConfig = {
           pdata,
-          env: 'home',
           channel,
           did,
           uid,
