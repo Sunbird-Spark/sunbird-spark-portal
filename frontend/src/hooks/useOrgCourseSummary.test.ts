@@ -122,7 +122,7 @@ describe('useOrgCourseSummary', () => {
     const { result } = renderHook(() => useOrgCourseSummary(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.data[0].completionPercent).toBe(0);
+    expect(result.current.data[0]!.completionPercent).toBe(0);
   });
 
   it('falls back to courseid as courseName when collectionDetails is missing', async () => {
@@ -134,7 +134,7 @@ describe('useOrgCourseSummary', () => {
     const { result } = renderHook(() => useOrgCourseSummary(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.data[0].courseName).toBe('do_4');
+    expect(result.current.data[0]!.courseName).toBe('do_4');
   });
 
   it('passes course IDs from search results to the observability API', async () => {
