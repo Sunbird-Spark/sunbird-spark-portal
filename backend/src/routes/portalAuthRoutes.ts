@@ -237,9 +237,14 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
     // Redirect to OIDC provider logout
     try {
         const config = await getPortalOIDCConfig();
+        // Only pass id_token_hint if the token was issued for the portal client.
+        // Google-auth sessions produce tokens with aud="google-auth"; passing those
+        // as id_token_hint with client_id=portal causes Keycloak to reject the request.
+        const idTokenAud = idToken ? (decodeJwtPayload(idToken) as Record<string, unknown> | null)?.aud : undefined;
+        const isPortalToken = idTokenAud === 'portal' || (Array.isArray(idTokenAud) && idTokenAud.includes('portal'));
         const logoutUrl = oidcClient.buildEndSessionUrl(config, {
             post_logout_redirect_uri: redirectUri,
-            ...(idToken ? { id_token_hint: idToken } : {}),
+            ...(idToken && isPortalToken ? { id_token_hint: idToken } : {}),
         });
         res.redirect(logoutUrl.href);
     } catch {
