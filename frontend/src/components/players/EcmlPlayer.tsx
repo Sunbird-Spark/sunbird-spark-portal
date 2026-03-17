@@ -6,8 +6,8 @@ interface EcmlPlayerProps {
   metadata: EcmlPlayerMetadata;
   mode?: string;
   cdata?: any[];
-  contextRollup?: { l1: string };
-  objectRollup?: Record<string, any>;
+  contextRollup?: Record<string, string>;
+  objectRollup?: Record<string, string>;
   onPlayerEvent?: (event: EcmlPlayerEvent) => void;
   onTelemetryEvent?: (event: any) => void;
 }
@@ -145,7 +145,7 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
       ref={iframeRef}
       id="contentPlayer"
       name="contentPlayer"
-      className="w-full h-full min-h-[600px] border-0"
+      className="content-player-embed border-0"
       title="Content Player"
       aria-label="Content Player"
       allow="autoplay"

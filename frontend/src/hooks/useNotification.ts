@@ -3,7 +3,7 @@ import { useQuery, useQueryClient, useMutation, UseMutationResult } from '@tanst
 import { ApiResponse } from '../lib/http-client';
 import { notificationService, getDateGroup, parseTemplateMessage } from '../services/NotificationService';
 import { NotificationFeed, NotificationDateGroup, GroupedNotification } from '../types/notificationTypes';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useAuthInfo } from './useAuthInfo';
 
 export interface UseNotificationReadReturn {
     notifications: NotificationFeed[];
@@ -13,17 +13,18 @@ export interface UseNotificationReadReturn {
 }
 
 export const useNotificationRead = (): UseNotificationReadReturn => {
-    const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['notificationFeed'],
-        queryFn: async () => {
-            const userId = userAuthInfoService.getUserId() ??
-                (await userAuthInfoService.getAuthInfo())?.uid;
+    const { data: authInfo } = useAuthInfo();
+    const userId = authInfo?.uid ?? null;
 
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['notificationFeed', userId],
+        queryFn: async () => {
             if (!userId) throw new Error('User ID not available');
 
             const response = await notificationService.notificationsRead(userId);
             return response.data.feeds;
         },
+        enabled: !!userId,
         retry: 1,
     });
 

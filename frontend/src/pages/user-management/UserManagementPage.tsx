@@ -13,6 +13,7 @@ import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAcceptTnc, useGetTncUrl } from "@/hooks/useTnc";
 import { useUserRead } from "@/hooks/useUserRead";
 import { TncService } from "@/services/TncService";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import _ from "lodash";
 import "../home/home.css";
 import "./user-management.css";
@@ -121,7 +122,7 @@ const UserManagementPage = () => {
       await acceptTncMutation.mutateAsync({ tncConfig: activeTncConfig, tncType: activeTncType });
       setTncDialogOpen(false);
       refetchUser();
-      toast({ title: "Terms accepted", description: "You can now use User Management features." });
+      toast({ title: "Terms accepted", description: "You can now use User Management features.", variant: "success" });
     } catch {
       toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
     }
@@ -129,6 +130,10 @@ const UserManagementPage = () => {
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
+      <TelemetryTracker 
+        startEventInput={{ type: 'workflow', mode: 'user-management', pageid: 'user-management-page' }}
+        endEventInput={{ type: 'workflow', mode: 'user-management', pageid: 'user-management-completion' }}
+      />
       <main className="workspace-main-content">
         <div className="workspace-content-wrapper">
 

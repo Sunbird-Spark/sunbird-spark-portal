@@ -1,101 +1,139 @@
-import React, { createContext, useEffect, useMemo, useRef } from 'react';
-import { telemetryService } from '../services/TelemetryService';
+import React, { createContext, useEffect, useRef } from 'react';
+import { ITelemetryService, telemetryService } from '../services/TelemetryService';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+import appCoreService from '@/services/AppCoreService';
+import userProfileService from '@/services/UserProfileService';
+import { OrganizationService } from '@/services/OrganizationService';
+import { SystemSettingService } from '@/services/SystemSettingService';
 
-export const TelemetryContext = createContext<typeof telemetryService | null>(null);
+export const TelemetryContext = createContext<ITelemetryService | null>(null);
 
 interface TelemetryProviderProps {
   children: React.ReactNode;
 }
 
+function getDateDiff(serverDate?: unknown): number {
+  if (!serverDate || typeof serverDate !== 'string') return 0;
+  return (new Date(serverDate).getTime() - new Date().getTime()) / 1000;
+}
+
 export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }) => {
   const isInitializedRef = useRef(false);
 
-  const telemetryConfig = useMemo(() => {
-    const defaultDid = localStorage.getItem('deviceId') || 'anonymous-device';
-    const defaultUid = userAuthInfoService.getUserId() || 'anonymous';
-    const defaultSid = sessionStorage.getItem('sid') || `session-${Date.now()}`;
-    const channel = import.meta.env.VITE_APP_CHANNEL || 'default';
+  useEffect(() => {
+    if (isInitializedRef.current || telemetryService.isInitialized) return;
 
-    // Detect device type to match context.cdata "Device" entry in Sunbird telemetry spec
-    const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+    const init = async () => {
+      try {
+        const orgService = new OrganizationService();
+        const systemSettingService = new SystemSettingService();
 
-    return {
-      pdata: {
-        id: import.meta.env.VITE_APP_ID || 'sunbird.portal',
-        ver: import.meta.env.VITE_APP_VERSION || '1.0.0',
-        pid: 'sunbird-portal'
-      },
-      env: import.meta.env.VITE_APP_ENV || 'production',
-      channel,
-      did: defaultDid,
-      authtoken: '',
-      uid: defaultUid,
-      sid: defaultSid,
-      batchsize: 20,
-      host: window.location.origin,
-      endpoint: '/action/data/v3/telemetry',
-      // tags: [channel] matches the sample IMPRESSION structure
-      tags: [channel],
-      // cdata: UserSession + Device entries match the sample context.cdata
-      cdata: [
-        { id: defaultSid, type: 'UserSession' },
-        { id: deviceType, type: 'Device' }
-      ],
-      // rollup.l1 = channel matches the sample context.rollup
-      rollup: { l1: channel },
-      // The @project-sunbird/telemetry-sdk validates every event against standard schemas when true.
-      // Controlled via .env.development (true) / .env.production (false).
-      enableValidation: import.meta.env.VITE_ENABLE_TELEMETRY_VALIDATION === 'true'
+        // pdata and device ID — fetch in parallel
+        const [pdata, did] = await Promise.all([
+          appCoreService.getPData().catch(() => ({ id: 'sunbird.portal', ver: '1.0.0', pid: 'sunbird-portal' })),
+          appCoreService.getDeviceId().catch(() => ''),
+        ]);
+
+        // Session and identity — already populated by auth bootstrap
+        const sid = userAuthInfoService.getSessionId() || `session-${Date.now()}`;
+        const uid = userAuthInfoService.getUserId() || 'anonymous';
+        const isLoggedIn = uid !== 'anonymous';
+
+        let channel = '';
+        let timeDiff = 0;
+
+        if (isLoggedIn) {
+          // Logged-in: channel from user profile (rootOrg channel), matching SunbirdEd-portal
+          try {
+            channel = await userProfileService.getChannel();
+          } catch (e) {
+            console.warn('[TelemetryProvider] Failed to get user channel', e);
+          }
+          // Compute server clock skew from org API response header
+          if (channel) {
+            try {
+              const orgResponse = await orgService.search({ filters: { isTenant: true, slug: channel } });
+              timeDiff = getDateDiff(orgResponse?.headers?.['date']);
+            } catch (e) {
+              console.warn('[TelemetryProvider] Failed to get org timeDiff', e);
+            }
+          }
+        } else {
+          // Anonymous: resolve channel from system default_channel setting → org hashTagId
+          let slug = 'sunbird';
+          try {
+            const setting = await systemSettingService.read<{ response: { value: string } }>('default_channel');
+            slug = (setting as any)?.data?.response?.value || slug;
+          } catch (e) {
+            console.warn('[TelemetryProvider] Failed to read default_channel', e);
+          }
+          try {
+            const orgResponse = await orgService.search({ filters: { isTenant: true, slug } });
+            const org = orgResponse?.data?.response?.content?.[0];
+            channel = org?.hashTagId || org?.channel || '';
+            timeDiff = getDateDiff(orgResponse?.headers?.['date']);
+          } catch (e) {
+            console.warn('[TelemetryProvider] Failed to fetch org for anonymous user', e);
+          }
+        }
+
+        const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+
+        const telemetryConfig = {
+          pdata,
+          channel,
+          did,
+          uid,
+          sid,
+          batchsize: 20,
+          host: '',
+          endpoint: '/action/data/v3/telemetry',
+          tags: channel ? [channel] : [],
+          cdata: [
+            { id: sid, type: 'UserSession' },
+            { id: deviceType, type: 'Device' },
+          ],
+          rollup: channel ? { l1: channel } : {},
+          timeDiff,
+          enableValidation: false,
+        };
+
+        telemetryService.initialize(telemetryConfig);
+        isInitializedRef.current = true;
+
+        // Global session START/END telemetry is handled by the backend
+      } catch (e) {
+        console.error('[TelemetryProvider] Failed to initialize telemetry', e);
+      }
     };
-  }, []); 
-  useEffect(() => {
-    if (!sessionStorage.getItem('sid')) {
-      sessionStorage.setItem('sid', telemetryConfig.sid);
-    }
-  }, [telemetryConfig.sid]);
 
-  useEffect(() => {
-    if (telemetryConfig && !isInitializedRef.current && !telemetryService.isInitialized) {
-      telemetryService.initialize(telemetryConfig);
-      telemetryService.start(
-        telemetryConfig,
-        'app',           // contentId (or some default value)
-        '1.0',           // contentVer
-        { type: 'app', mode: 'play', pageid: 'home' } // data
-      );
-      isInitializedRef.current = true;
-    }
-  }, [telemetryConfig]);
+    init();
+  }, []);
 
+  // Global INTERACT listener — picks up any element with data-edataid attribute
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
       const target = (event.target as HTMLElement).closest('[data-edataid]') as HTMLElement;
       if (!target) return;
 
       const edataid = target.getAttribute('data-edataid');
-      const edatatype = target.getAttribute('data-edatatype') || 'CLICK';
-      const pageid = target.getAttribute('data-pageid');
-      
       if (!edataid) return;
 
+      const edatatype = target.getAttribute('data-edatatype') || 'CLICK';
+      const pageid = target.getAttribute('data-pageid');
+
       const payload: any = {
-        edata: {
-          id: edataid,
-          type: edatatype,
-        },
+        edata: { id: edataid, type: edatatype },
       };
 
-      if (pageid) {
-        payload.edata.pageid = pageid;
-      }
+      if (pageid) payload.edata.pageid = pageid;
 
       const cdataStr = target.getAttribute('data-cdata');
       if (cdataStr) {
         try {
           payload.options = { context: { cdata: JSON.parse(cdataStr) } };
         } catch (e) {
-          console.error('Failed to parse telemetry cdata', e);
+          console.error('[TelemetryProvider] Failed to parse data-cdata', e);
         }
       } else {
         const objectid = target.getAttribute('data-objectid') || target.getAttribute('data-objid');
@@ -108,12 +146,8 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
       telemetryService.interact(payload);
     };
 
-    // Use capture phase to ensure it catches even if propagation is stopped in React
     document.addEventListener('click', handleGlobalClick, true);
-
-    return () => {
-      document.removeEventListener('click', handleGlobalClick, true);
-    };
+    return () => document.removeEventListener('click', handleGlobalClick, true);
   }, []);
 
   return (

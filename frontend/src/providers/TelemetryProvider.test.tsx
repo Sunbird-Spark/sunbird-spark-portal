@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TelemetryProvider, TelemetryContext } from './TelemetryProvider';
 import { telemetryService } from '../services/TelemetryService';
@@ -9,15 +9,49 @@ vi.mock('../services/TelemetryService', () => ({
   telemetryService: {
     isInitialized: false,
     initialize: vi.fn(),
-    start: vi.fn(),
     interact: vi.fn(),
+    end: vi.fn(),
   },
 }));
 
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
   default: {
     getUserId: vi.fn(() => 'test-user-id'),
+    getSessionId: vi.fn(() => 'test-session'),
   },
+}));
+
+vi.mock('@/services/AppCoreService', () => ({
+  default: {
+    getPData: vi.fn().mockResolvedValue({ id: 'test-app', ver: '1.0.0', pid: 'test-app' }),
+    getDeviceId: vi.fn().mockResolvedValue('test-device'),
+  },
+}));
+
+vi.mock('@/services/UserProfileService', () => ({
+  default: {
+    getChannel: vi.fn().mockResolvedValue('test-channel'),
+  },
+}));
+
+// Use regular functions (not arrow functions) so Vitest can call them with `new`
+vi.mock('@/services/OrganizationService', () => ({
+  OrganizationService: vi.fn(function (this: any) {
+    this.search = vi.fn().mockResolvedValue({
+      data: { response: { content: [{ hashTagId: 'test-channel', channel: 'test-channel' }] } },
+      headers: { date: new Date().toUTCString() },
+      status: 200,
+    });
+  }),
+}));
+
+vi.mock('@/services/SystemSettingService', () => ({
+  SystemSettingService: vi.fn(function (this: any) {
+    this.read = vi.fn().mockResolvedValue({
+      data: { response: { value: 'sunbird' } },
+      status: 200,
+    });
+  }),
 }));
 
 const TestChild = () => {
@@ -27,7 +61,7 @@ const TestChild = () => {
       <span data-testid="telemetry-status">
         {telemetry ? 'Available' : 'Not Available'}
       </span>
-      <button 
+      <button
         data-testid="interactive-btn"
         data-edataid="test-button"
         data-edatatype="CLICK"
@@ -36,7 +70,7 @@ const TestChild = () => {
       >
         Click Me (with cdata)
       </button>
-      <button 
+      <button
         data-testid="interactive-btn-object"
         data-edataid="test-button-2"
         data-objectid="obj1"
@@ -44,7 +78,7 @@ const TestChild = () => {
       >
         Click Me (with objectid)
       </button>
-      <button 
+      <button
         data-testid="interactive-btn-invalid-cdata"
         data-edataid="test-button-3"
         data-cdata="invalid-json"
@@ -63,7 +97,6 @@ describe('TelemetryProvider', () => {
     vi.clearAllMocks();
     localStorage.clear();
     sessionStorage.clear();
-    // Reset telemetryService mock state
     Object.defineProperty(telemetryService, 'isInitialized', { value: false, writable: true });
   });
 
@@ -80,24 +113,19 @@ describe('TelemetryProvider', () => {
     expect(screen.getByTestId('telemetry-status')).toHaveTextContent('Available');
   });
 
-  it('initializes telemetryService when mounted if not already initialized', () => {
+  it('initializes telemetryService when mounted if not already initialized', async () => {
     render(
       <TelemetryProvider>
         <TestChild />
       </TelemetryProvider>
     );
 
-    expect(telemetryService.initialize).toHaveBeenCalled();
-    expect(telemetryService.start).toHaveBeenCalledWith(
-      expect.any(Object),
-      'app',
-      '1.0',
-      { type: 'app', mode: 'play', pageid: 'home' }
-    );
+    await waitFor(() => {
+      expect(telemetryService.initialize).toHaveBeenCalled();
+    });
   });
 
-  it('does not re-initialize telemetryService if already initialized', () => {
-    // Set up mock to act as if already initialized
+  it('does not re-initialize telemetryService if already initialized', async () => {
     Object.defineProperty(telemetryService, 'isInitialized', { value: true, writable: true });
 
     render(
@@ -106,45 +134,45 @@ describe('TelemetryProvider', () => {
       </TelemetryProvider>
     );
 
+    await new Promise(r => setTimeout(r, 50));
     expect(telemetryService.initialize).not.toHaveBeenCalled();
-    expect(telemetryService.start).not.toHaveBeenCalled();
   });
 
-  it('computes telemetryConfig correctly with fallbacks', () => {
-    localStorage.setItem('deviceId', 'test-device');
-    sessionStorage.setItem('sid', 'test-session');
-    
+  it('computes telemetryConfig correctly with real service values', async () => {
     render(
       <TelemetryProvider>
         <TestChild />
       </TelemetryProvider>
     );
 
-    expect(telemetryService.initialize).toHaveBeenCalledWith(
-      expect.objectContaining({
-        did: 'test-device',
-        uid: 'test-user-id',
-        sid: 'test-session',
-      })
-    );
+    await waitFor(() => {
+      expect(telemetryService.initialize).toHaveBeenCalledWith(
+        expect.objectContaining({
+          did: 'test-device',
+          uid: 'test-user-id',
+          sid: 'test-session',
+        })
+      );
+    });
   });
 
-  it('computes telemetryConfig correctly when local storage is empty', () => {
-    (userAuthInfoService.getUserId as any).mockReturnValueOnce(null);
-    
+  it('computes telemetryConfig correctly for anonymous user', async () => {
+    (userAuthInfoService.getUserId as any).mockReturnValue(null);
+    (userAuthInfoService.getSessionId as any).mockReturnValue(null);
+
     render(
       <TelemetryProvider>
         <TestChild />
       </TelemetryProvider>
     );
 
-    expect(telemetryService.initialize).toHaveBeenCalledWith(
-      expect.objectContaining({
-        did: 'anonymous-device',
-        uid: 'anonymous',
-        sid: expect.stringMatching(/^session-\d+$/),
-      })
-    );
+    await waitFor(() => {
+      expect(telemetryService.initialize).toHaveBeenCalledWith(
+        expect.objectContaining({
+          uid: 'anonymous',
+        })
+      );
+    });
   });
 
   describe('Global Click Listener', () => {
@@ -213,7 +241,6 @@ describe('TelemetryProvider', () => {
           id: 'test-button-3',
           type: 'CLICK'
         }
-        // context is missing because JSON parsing failed
       });
 
       consoleErrorSpy.mockRestore();
@@ -242,50 +269,55 @@ describe('TelemetryProvider', () => {
       );
 
       expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function), true);
-      
+
       unmount();
 
       expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function), true);
-      
+
       addEventListenerSpy.mockRestore();
       removeEventListenerSpy.mockRestore();
     });
   });
 
   describe('Telemetry Config', () => {
-    it('passes tags containing the channel', () => {
+    it('passes tags containing the channel', async () => {
       render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      await waitFor(() => expect(telemetryService.initialize).toHaveBeenCalled());
       const config = (telemetryService.initialize as any).mock.calls[0][0];
       expect(Array.isArray(config.tags)).toBe(true);
       expect(config.tags).toContain(config.channel);
     });
 
-    it('passes cdata with UserSession entry containing the session id', () => {
-      sessionStorage.setItem('sid', 'my-session-123');
+    it('passes cdata with UserSession entry containing the session id', async () => {
+      (userAuthInfoService.getSessionId as any).mockReturnValue('my-session-123');
       render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      await waitFor(() => expect(telemetryService.initialize).toHaveBeenCalled());
       const config = (telemetryService.initialize as any).mock.calls[0][0];
       const userSessionEntry = config.cdata.find((c: any) => c.type === 'UserSession');
       expect(userSessionEntry).toBeDefined();
       expect(userSessionEntry.id).toBe('my-session-123');
     });
 
-    it('passes cdata with Device entry (Desktop or Mobile)', () => {
+    it('passes cdata with Device entry (Desktop or Mobile)', async () => {
       render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      await waitFor(() => expect(telemetryService.initialize).toHaveBeenCalled());
       const config = (telemetryService.initialize as any).mock.calls[0][0];
       const deviceEntry = config.cdata.find((c: any) => c.type === 'Device');
       expect(deviceEntry).toBeDefined();
       expect(['Desktop', 'Mobile']).toContain(deviceEntry.id);
     });
 
-    it('passes rollup with l1 equal to the channel', () => {
+    it('passes rollup with l1 equal to the channel', async () => {
       render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      await waitFor(() => expect(telemetryService.initialize).toHaveBeenCalled());
       const config = (telemetryService.initialize as any).mock.calls[0][0];
       expect(config.rollup).toBeDefined();
       expect(config.rollup.l1).toBe(config.channel);
     });
 
-    it('passes enableValidation as a boolean', () => {
+    it('passes enableValidation as a boolean', async () => {
       render(<TelemetryProvider><TestChild /></TelemetryProvider>);
+      await waitFor(() => expect(telemetryService.initialize).toHaveBeenCalled());
       const config = (telemetryService.initialize as any).mock.calls[0][0];
       expect(typeof config.enableValidation).toBe('boolean');
     });

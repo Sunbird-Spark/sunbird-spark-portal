@@ -15,7 +15,7 @@ const PageLoader = ({ message, error = null, onRetry, fullPage = true }: PageLoa
 
   const wrapperClass = fullPage
     ? "fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-background to-home-ivory/50 backdrop-blur-sm"
-    : "flex items-center justify-center w-full bg-white rounded-[1.25rem] border border-border shadow-sm p-8";
+    : "flex flex-1 self-stretch w-full items-center justify-center bg-white rounded-[1.25rem] border border-border shadow-sm p-8";
   return (
     <div className={wrapperClass}>
       <div className="flex flex-col items-center gap-6">
@@ -71,7 +71,7 @@ const PageLoader = ({ message, error = null, onRetry, fullPage = true }: PageLoa
             </>
           ) : (
             <>
-              <p className="text-sunbird-ink font-semibold text-lg">{displayMessage}</p>
+              <p className="text-sunbird-ink font-semibold text-lg" data-testid="page-loader-message">{displayMessage}</p>
               <div className="flex gap-1">
                 <div className="w-2 h-2 rounded-full bg-sunbird-brick animate-bounce" style={{ animationDelay: "0ms" }} />
                 <div className="w-2 h-2 rounded-full bg-sunbird-ginger animate-bounce" style={{ animationDelay: "150ms" }} />

@@ -7,8 +7,8 @@ interface QumlPlayerProps {
   metadata: QumlPlayerMetadata;
   mode?: string;
   cdata?: any[];
-  contextRollup?: { l1: string };
-  objectRollup?: Record<string, any>;
+  contextRollup?: Record<string, string>;
+  objectRollup?: Record<string, string>;
   onPlayerEvent?: (event: QumlPlayerEvent) => void;
   onTelemetryEvent?: (event: any) => void;
 }
@@ -108,7 +108,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({
   }, [metadata, contextProps, handlePlayerEvent, handleTelemetryEvent]);
 
   return (
-    <div className={styles.qumlPlayerContainer} ref={containerRef} />
+    <div className={`content-player-embed ${styles.qumlPlayerContainer}`} ref={containerRef} />
   );
 };
 

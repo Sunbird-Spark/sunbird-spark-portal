@@ -13,16 +13,13 @@ import {
 import { NotificationFeed } from '../types/notificationTypes';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
-const { mockNotificationService, mockUserAuthInfoService } = vi.hoisted(() => ({
+const { mockNotificationService, mockUseAuthInfo } = vi.hoisted(() => ({
     mockNotificationService: {
         notificationsRead: vi.fn(),
         notificationsUpdate: vi.fn(),
         notificationsDelete: vi.fn(),
     },
-    mockUserAuthInfoService: {
-        getUserId: vi.fn(),
-        getAuthInfo: vi.fn(),
-    },
+    mockUseAuthInfo: vi.fn(),
 }));
 
 vi.mock('../services/NotificationService', async (importOriginal) => {
@@ -33,8 +30,8 @@ vi.mock('../services/NotificationService', async (importOriginal) => {
     };
 });
 
-vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
-    default: mockUserAuthInfoService,
+vi.mock('./useAuthInfo', () => ({
+    useAuthInfo: () => mockUseAuthInfo(),
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -171,7 +168,11 @@ describe('useNotificationRead', () => {
 
     it('fetches notifications using synchronous userId', async () => {
         const feeds = [makeFeed()];
-        mockUserAuthInfoService.getUserId.mockReturnValue('user-1');
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: 'user-1', sid: 'session-1', isAuthenticated: true },
+            isSuccess: true,
+            isLoading: false,
+        });
         mockNotificationService.notificationsRead.mockResolvedValue({
             data: { feeds },
             status: 200,
@@ -186,8 +187,11 @@ describe('useNotificationRead', () => {
     });
 
     it('falls back to getAuthInfo when getUserId returns null', async () => {
-        mockUserAuthInfoService.getUserId.mockReturnValue(null);
-        mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: 'user-from-auth' });
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: 'user-from-auth', sid: 'session-auth', isAuthenticated: true },
+            isSuccess: true,
+            isLoading: false,
+        });
         mockNotificationService.notificationsRead.mockResolvedValue({
             data: { feeds: [] },
             status: 200,
@@ -201,17 +205,25 @@ describe('useNotificationRead', () => {
     });
 
     it('sets error when no userId is available', async () => {
-        mockUserAuthInfoService.getUserId.mockReturnValue(null);
-        mockUserAuthInfoService.getAuthInfo.mockResolvedValue({ uid: null });
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: null, sid: 'session-anon', isAuthenticated: false },
+            isSuccess: true,
+            isLoading: false,
+        });
 
         const { result } = renderHook(() => useNotificationRead(), { wrapper: createWrapper() });
 
-        await waitFor(() => expect(result.current.error).toBeInstanceOf(Error), { timeout: 3000 });
-        expect(result.current.error?.message).toBe('User ID not available');
+        // Query should be disabled when userId is null
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        expect(result.current.notifications).toEqual([]);
     });
 
     it('returns empty array as default before data loads', () => {
-        mockUserAuthInfoService.getUserId.mockReturnValue('user-1');
+        mockUseAuthInfo.mockReturnValue({
+            data: { uid: 'user-1', sid: 'session-1', isAuthenticated: true },
+            isSuccess: true,
+            isLoading: false,
+        });
         mockNotificationService.notificationsRead.mockResolvedValue({
             data: { feeds: [] },
             status: 200,

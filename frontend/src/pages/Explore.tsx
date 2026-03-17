@@ -2,13 +2,13 @@ import { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import ExploreFilters from '../components/explore/ExploreFilters';
 import ExploreGrid from '../components/explore/ExploreGrid';
 import { FiChevronDown, FiSearch } from 'react-icons/fi';
-import { Input } from "../components/common/Input";
+import { Input } from '../components/common/Input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../components/common/DropdownMenu";
+} from '../components/common/DropdownMenu';
 import { useAppI18n } from '../hooks/useAppI18n';
 import useDebounce from '../hooks/useDebounce';
 import { useSearchParams } from 'react-router-dom';
@@ -18,6 +18,11 @@ import useInteract from '../hooks/useInteract';
 
 // Keys are the API `code` field (e.g. "primaryCategory", "mimeType"), values are selected option values
 export type FilterState = Record<string, string[]>;
+
+const SORT_OPTIONS = [
+  { key: 'newest', label: 'sortOptions.newest', value: { lastUpdatedOn: 'desc' } },
+  { key: 'oldest', label: 'sortOptions.oldest', value: { lastUpdatedOn: 'asc' } },
+];
 
 const Explore = () => {
   const { t } = useAppI18n();
@@ -142,7 +147,7 @@ const Explore = () => {
                       <line x1="3" y1="12" x2="3.01" y2="12"></line>
                       <line x1="3" y1="18" x2="3.01" y2="18"></line>
                     </svg>
-                    <span className="text-sm font-medium">{t("sortBy")}</span>
+                    <span className="text-sm font-medium">{t('sortBy')}</span>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -152,28 +157,22 @@ const Explore = () => {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[8.75rem] bg-white z-50">
-                      <DropdownMenuItem
-                        className="cursor-pointer hover:bg-gray-50"
-                        data-edataid="sort-by-newest"
-                        data-pageid="explore-page"
-                        onClick={() => {
-                          setSortBy({ lastUpdatedOn: 'desc' });
-                          setSortLabelKey('newest');
-                        }}
-                      >
-                        {t("sortOptions.newest")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer hover:bg-gray-50"
-                        data-edataid="sort-by-oldest"
-                        data-pageid="explore-page"
-                        onClick={() => {
-                          setSortBy({ lastUpdatedOn: 'asc' });
-                          setSortLabelKey('oldest');
-                        }}
-                      >
-                        {t("sortOptions.oldest")}
-                      </DropdownMenuItem>
+                      {SORT_OPTIONS.map((option) => (
+                        <DropdownMenuItem
+                          key={option.key}
+                          className={`cursor-pointer hover:bg-gray-50 ${sortLabelKey === option.key ? 'bg-gray-50 font-medium' : ''}`}
+                          data-edataid={`sort-by-${option.key}`}
+                          data-pageid="explore-page"
+                          onClick={() => {
+                            if (sortLabelKey !== option.key) {
+                              setSortBy(option.value);
+                              setSortLabelKey(option.key);
+                            }
+                          }}
+                        >
+                          {t(option.label)}
+                        </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

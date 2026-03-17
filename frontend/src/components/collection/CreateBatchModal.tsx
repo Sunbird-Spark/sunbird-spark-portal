@@ -14,6 +14,7 @@ import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAn
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
 import useInteract from "@/hooks/useInteract";
+import { useIsContentCreator, useIsMentor } from "@/hooks/useUser";
 
 /* ─── Types ─── */
 
@@ -49,6 +50,9 @@ const inputClass =
 const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: CreateBatchModalProps) => {
   const isEditMode = !!initialBatch;
   const { interact } = useInteract();
+  const isContentCreator = useIsContentCreator();
+  const isMentor         = useIsMentor();
+  const isOnlyMentor     = isMentor && !isContentCreator && isEditMode;
 
   const [form, setForm] = useState<BatchFormState>(() => makeInitialForm(initialBatch));
   const [mentorQuery, setMentorQuery] = useState("");
@@ -90,6 +94,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isOnlyMentor) return;
     setSubmitError(null);
     interact({ id: isEditMode ? 'batch-modal-save' : 'batch-modal-create', type: 'SUBMIT', pageid: 'batch-create' });
     try {
@@ -155,7 +160,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-border sticky top-0 bg-white rounded-t-2xl z-10">
             <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-['Rubik']">
-              {isEditMode ? "Edit Batch" : "Create Batch"}
+              {isOnlyMentor ? "View Batch Details" : (isEditMode ? "Edit Batch" : "Create Batch")}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
@@ -179,6 +184,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
               setForm={setForm}
               labelClass={labelClass}
               inputClass={inputClass}
+              disabledFields={isOnlyMentor ? ["batchName", "aboutBatch", "startDate", "endDate", "enrolmentEndDate"] : []}
             />
 
             {/* 6. Issue Certificate + Batch Type */}
@@ -189,6 +195,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                   label="Issue Certificate"
                   checked={form.issueCertificate}
                   onChange={(v) => handleField("issueCertificate", v)}
+                  disabled={isOnlyMentor}
                 />
               </div>
               <div className="px-4 py-3 flex items-center justify-between gap-4">
@@ -207,6 +214,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
               toggleMentor={toggleMentor}
               labelClass={labelClass}
               inputClass={inputClass}
+              disabled={isOnlyMentor}
             />
 
             {/* 8. Terms & Conditions (create mode only) */}
@@ -237,27 +245,29 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 data-edataid="batch-modal-cancel"
                 data-pageid="batch-create"
               >
-                Cancel
+                {isOnlyMentor ? "Close" : "Cancel"}
               </button>
-              <button
-                type="submit"
-                disabled={isSubmitDisabled}
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
-                  isSubmitDisabled
-                    ? "bg-sunbird-brick/40 cursor-not-allowed"
-                    : "bg-sunbird-brick hover:bg-opacity-90"
-                )}
-              >
-                {isPending && <FiLoader className="w-4 h-4 animate-spin" />}
-                {isPending
-                  ? isEditMode
-                    ? "Saving…"
-                    : "Creating…"
-                  : isEditMode
-                  ? "Save Changes"
-                  : "Create Batch"}
-              </button>
+              {!isOnlyMentor && (
+                <button
+                  type="submit"
+                  disabled={isSubmitDisabled}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
+                    isSubmitDisabled
+                      ? "bg-sunbird-brick/40 cursor-not-allowed"
+                      : "bg-sunbird-brick hover:bg-opacity-90"
+                  )}
+                >
+                  {isPending && <FiLoader className="w-4 h-4 animate-spin" />}
+                  {isPending
+                    ? isEditMode
+                      ? "Saving…"
+                      : "Creating…"
+                    : isEditMode
+                    ? "Save Changes"
+                    : "Create Batch"}
+                </button>
+              )}
             </div>
           </form>
         </Dialog.Content>

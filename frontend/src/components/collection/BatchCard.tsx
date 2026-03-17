@@ -2,14 +2,14 @@ import { useState } from "react";
 import { FiPlus, FiRefreshCw, FiLoader, FiCalendar } from "react-icons/fi";
 import CreateBatchModal from "./CreateBatchModal";
 import AddCertificateModal from "./AddCertificateModal";
-import { useBatchListForCreator } from "@/hooks/useBatch";
+import { useBatchListForCreator, useBatchListForMentor, mergeBatches } from "@/hooks/useBatch";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAcceptTnc } from "@/hooks/useTnc";
 import { useToast } from "@/hooks/useToast";
-import { useIsContentCreator } from "@/hooks/useUser";
+import { useIsContentCreator, useIsMentor } from "@/hooks/useUser";
 import { usePermissions } from "@/hooks/usePermission";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import useInteract from "@/hooks/useInteract";
@@ -36,6 +36,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
   /* ── Reviewer TnC state ── */
   const isContentCreator = useIsContentCreator();
+  const isMentor         = useIsMentor();
   const { hasAnyRole } = usePermissions();
   const isReviewer = hasAnyRole(['CONTENT_REVIEWER']) && !isContentCreator;
   const [reviewerTncChecked, setReviewerTncChecked] = useState(false);
@@ -53,13 +54,26 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
         tncType: "reportViewerTnc",
       });
       setReviewerTncAccepted(true);
-      toast({ title: "Terms accepted", description: "You can now view batch reports." });
+      toast({ title: "Terms accepted", description: "You can now view batch reports.", variant: "success" });
     } catch {
       toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
     }
   };
 
-  const { data: batches, isLoading, isError, refetch, isFetching } = useBatchListForCreator(collectionId);
+  const { data: creatorBatches, isLoading: isLoadingCreator, isError: isErrorCreator, refetch: refetchCreator, isFetching: isFetchingCreator } = useBatchListForCreator(collectionId, { enabled: isContentCreator });
+  const { data: mentorBatches,  isLoading: isLoadingMentor,  isError: isErrorMentor,  refetch: refetchMentor,  isFetching: isFetchingMentor  } = useBatchListForMentor(collectionId, { enabled: isMentor });
+
+  const batches = mergeBatches(creatorBatches, mentorBatches);
+
+  const isLoading = (isContentCreator && isLoadingCreator) || (isMentor && isLoadingMentor);
+  const isError   = (isContentCreator && isErrorCreator)   || (isMentor && isErrorMentor);
+  const isFetching = (isContentCreator && isFetchingCreator) || (isMentor && isFetchingMentor);
+
+  const refetch = () => {
+    if (isContentCreator) refetchCreator();
+    if (isMentor) refetchMentor();
+  };
+
 
   /* ── Per-tab filtered lists ── */
   const ongoing  = batches?.filter((b) => getBatchStatus(b.status) === "Ongoing")  ?? [];
@@ -104,16 +118,18 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
             >
               <FiRefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
             </button>
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              title="Create batch"
-              data-edataid="batch-create-open"
-              data-pageid="course-consumption"
-              className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors"
-            >
-              <FiPlus className="w-4 h-4" />
-            </button>
+            {isContentCreator && (
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                title="Create batch"
+                data-edataid="batch-create-open"
+                data-pageid="course-consumption"
+                className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors"
+              >
+                <FiPlus className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -193,6 +209,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                   batch={batch}
                   onEditClick={handleEditClick}
                   onCertificateClick={handleCertificateClick}
+                  canManageCertificates={isContentCreator}
                 />
               ))
             )}

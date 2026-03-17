@@ -17,6 +17,7 @@ const ScrollToTop = () => {
   return null;
 };
 import { AuthProvider } from './auth/AuthContext';
+import UnauthorizedHandler from './components/common/UnauthorizedHandler';
 import { ProtectedRoute } from './rbac/ProtectedRoute';
 import PageLayout from './components/layout/PageLayout';
 
@@ -52,6 +53,7 @@ import UserReport from './pages/reports/UserReport';
 const AppRoutes: React.FC = () => {
   return (
     <AuthProvider>
+      <UnauthorizedHandler />
       <ScrollToTop />
       <Routes>
         {/* Standalone public routes (no shared sidebar layout) */}
@@ -95,7 +97,7 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         <Route path="/edit/collection-editor/:contentId" element={
-          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER']}>
+          <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
             <CollectionEditorPage />
           </ProtectedRoute>
         } />

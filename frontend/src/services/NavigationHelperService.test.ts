@@ -18,7 +18,7 @@ describe('NavigationHelperService', () => {
   describe('getPageLoadTime()', () => {
     it('returns elapsed seconds since pageStartTime', () => {
       vi.setSystemTime(1000);
-      service.pageStartTime = 1000;
+      service.resetPageStartTime();
 
       vi.setSystemTime(2500); // 1.5s later
       expect(service.getPageLoadTime()).toBe(1.5);
@@ -26,16 +26,16 @@ describe('NavigationHelperService', () => {
 
     it('returns 0 when called immediately after pageStartTime is set', () => {
       vi.setSystemTime(5000);
-      service.pageStartTime = 5000;
+      service.resetPageStartTime();
       expect(service.getPageLoadTime()).toBe(0);
     });
 
     it('reflects updated pageStartTime when reassigned', () => {
       vi.setSystemTime(1000);
-      service.pageStartTime = 1000;
+      service.resetPageStartTime();
 
       vi.setSystemTime(3000); // 2s elapsed
-      service.pageStartTime = 3000; // reset
+      service.resetPageStartTime(); // reset
 
       vi.setSystemTime(3500); // 0.5s after reset
       expect(service.getPageLoadTime()).toBe(0.5);

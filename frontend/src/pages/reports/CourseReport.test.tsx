@@ -34,6 +34,39 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'courseReport.totalEnrolled': 'Total Enrolled',
+        'courseReport.totalCompleted': 'Total Completed',
+        'courseReport.certificatesIssued': 'Certificates Issued',
+        'courseReport.avgScore': 'Avg Score',
+        'courseReport.enrollmentVsCompletion': 'Enrollment vs Completion',
+        'courseReport.pendingCompletionBuckets': 'Pending Completion Buckets',
+        'courseReport.scoreDistribution': 'Score Distribution',
+        'courseReport.enrolled': 'Enrolled',
+        'courseReport.completed': 'Completed',
+        'courseReport.learners': 'Learners',
+        'courseReport.learnerProgress': 'Learner Progress',
+        'courseReport.assessments': 'Assessments',
+        'courseReport.detailedLearnerProgress': 'Detailed Learner Progress',
+        'courseReport.detailedAssessments': 'Detailed Assessments',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
+// Avoid needing QueryClientProvider — learner data is tested in CourseReportContent.test.tsx
+vi.mock('@/hooks/useLearnerProgress', () => ({
+  useLearnerProgress: () => ({ data: { data: [], count: 0 }, isLoading: false, isError: false, refetch: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useAssessmentData', () => ({
+  useAssessmentData: () => ({ data: { data: [] }, isLoading: false, isError: false, refetch: vi.fn() }),
+}));
+
 const renderWithRoute = (courseId = 'course-1') =>
   render(
     <MemoryRouter initialEntries={[`/reports/course/${courseId}`]}>

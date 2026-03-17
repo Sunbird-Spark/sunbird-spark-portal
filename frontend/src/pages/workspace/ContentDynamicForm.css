@@ -1,5 +1,5 @@
-/* Resource Form Dialog Styles */
-.resource-form-overlay {
+/* Content Dynamic Form Dialog Styles */
+.content-form-overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
@@ -47,7 +47,7 @@
   font-family: 'Rubik', sans-serif;
 }
 
-.resource-form-container {
+.content-form-container {
   background-color: white;
   border-radius: 1rem;
   max-width: 56rem;
@@ -57,7 +57,7 @@
   overflow-y: auto;
 }
 
-.resource-form-title {
+.content-form-title {
   font-size: 1.25rem;
   font-weight: bold;
   font-family: 'Rubik', sans-serif;
@@ -65,14 +65,14 @@
   margin-bottom: 0.5rem;
 }
 
-.resource-form-subtitle {
+.content-form-subtitle {
   font-size: 0.875rem;
   color: hsl(var(--muted-foreground));
   margin-bottom: 1rem;
   font-family: 'Rubik', sans-serif;
 }
 
-.resource-form-error-state {
+.content-form-error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -81,31 +81,31 @@
   gap: 0.75rem;
 }
 
-.resource-form-error-text {
+.content-form-error-text {
   font-size: 0.875rem;
   color: rgb(220, 38, 38);
   font-family: 'Rubik', sans-serif;
 }
 
-.resource-form-fields {
+.content-form-fields {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
 }
 
-.resource-field-col-twelve {
+.content-field-col-twelve {
   grid-column: span 12;
 }
 
-.resource-field-col-six {
+.content-field-col-six {
   grid-column: span 6;
 }
 
-.resource-field-col-four {
+.content-field-col-four {
   grid-column: span 4;
 }
 
-.resource-form-actions {
+.content-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;

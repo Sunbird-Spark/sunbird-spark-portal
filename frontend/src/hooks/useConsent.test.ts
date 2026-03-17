@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConsent } from './useConsent';
 import { consentService } from '../services/consent';
-import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+import { useUserId } from './useAuthInfo';
 
 vi.mock('@tanstack/react-query', () => ({
   useQuery: vi.fn(),
@@ -18,10 +18,8 @@ vi.mock('../services/consent', () => ({
   },
 }));
 
-vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
-  default: {
-    getUserId: vi.fn(),
-  },
+vi.mock('./useAuthInfo', () => ({
+  useUserId: vi.fn(),
 }));
 
 describe('useConsent', () => {
@@ -32,7 +30,7 @@ describe('useConsent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useQueryClient).mockReturnValue(mockQueryClient as unknown as ReturnType<typeof useQueryClient>);
-    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
+    vi.mocked(useUserId).mockReturnValue('user-123');
     vi.mocked(useMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
       isPending: false,
@@ -40,7 +38,7 @@ describe('useConsent', () => {
   });
 
   it('disables query when userId is missing', () => {
-    vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null as unknown as string);
+    vi.mocked(useUserId).mockReturnValue(null);
     vi.mocked(useQuery).mockImplementation((opts) => opts as unknown as ReturnType<typeof useQuery>);
     renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
     expect(useQuery).toHaveBeenCalled();

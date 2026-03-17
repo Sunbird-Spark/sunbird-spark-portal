@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollectionPageData } from "@/hooks/useCollectionPageData";
 import { useUserRead } from "@/hooks/useUserRead";
@@ -14,75 +14,75 @@ import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoServ
 import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import useImpression from "@/hooks/useImpression";
-import usePageSession from "@/hooks/usePageSession";
 import { useCollectionAutoNavigate } from "@/hooks/useCollectionAutoNavigate";
 import { useCollectionPageUIState } from "@/hooks/useCollectionPageUIState";
 import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
+import { buildCollectionCdata, buildObjectRollup } from "@/utils/collectionTelemetryContext";
+import { useCollectionBackNavigation, useAuthRefreshOnce } from "./useCollectionBackNavigation";
 import CollectionDetailLayout from "./CollectionDetailLayout";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const backToRef = useRef<string>((location.state as { from?: string } | null)?.from ?? '/explore');
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
-
+  const backTo = useCollectionBackNavigation(collectionId);
+  const { isAuthenticated } = usePermissions();
+  const isContentCreator = useIsContentCreator();
+  const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
+  const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
   useImpression({ type: 'view', pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
-  usePageSession({ pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
 
   const {
-    isAuthenticated, collectionDataFromApi, collectionData, userProfile, enrollment,
-    currentUserId, isCreatorViewingOwnCollection, contentCreatorPrivilege,
-    isTrackable, displayCollectionData,
+    collectionDataFromApi, collectionData, userProfile, enrollment,
+    displayCollectionData,
     isLoading, isFetching, isError, error, refetch
   } = useCollectionPageData(collectionId, batchIdParam);
 
   const {
-    isEnrolledInCurrentBatch, contentStatusMap, contentStateFetched, contentAttemptInfoMap, courseProgressProps, batches,
-    batchListLoading, batchListError, firstCertPreviewUrl, hasCertificate, joinLoading, joinError,
-    handleJoinCourse, effectiveBatchId, isBatchEnded, isBatchUpcoming, batchStartDateFromRead
+    isEnrolledInCurrentBatch,
+    contentStatusMap,
+    contentStateFetched,
+    contentAttemptInfoMap,
+    courseProgressProps,
+    batches,
+    batchListLoading,
+    batchListError,
+    firstCertPreviewUrl,
+    hasCertificate,
+    joinLoading,
+    joinError,
+    handleJoinCourse,
+    effectiveBatchId,
+    isBatchEnded,
+    isBatchUpcoming,
+    batchStartDateFromRead,
+    isMentorOfAnyBatchInCourse,
   } = enrollment;
-
   const hasBatchInRoute = !!batchIdParam;
+  const [selectedBatchId, setSelectedBatchId] = useState("");
 
-  const {
-    certificatePreviewOpen, setCertificatePreviewOpen,
-    certificatePreviewUrl, setCertificatePreviewUrl,
-    selectedBatchId, setSelectedBatchId,
-    expandedModules, setExpandedModules,
-    toggleModule
-  } = useCollectionPageUIState({ batchIdParam });
+  const currentUserId = userAuthInfoService.getUserId();
+  const isCreatorViewingOwnCollection =
+    !!isAuthenticated &&
+    !!collectionData?.createdBy &&
+    !!currentUserId &&
+    collectionData.createdBy === currentUserId;
+  const isMentorOfCourse = isMentorOfAnyBatchInCourse;
+  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator || isMentorOfCourse;
 
-  const { initialExpandedSet } = useCollectionAutoNavigate({
-    collectionId, contentId, collectionData, hasBatchInRoute,
-    batchIdParam, isTrackable, contentCreatorPrivilege, enrollment,
-  });
+  useAuthRefreshOnce(isAuthenticated);
 
-  const [, setAuthRefresh] = useState(0);
-  const triedAuthRefreshRef = useRef(false);
   useEffect(() => {
-    if (!isAuthenticated || userAuthInfoService.getUserId() || triedAuthRefreshRef.current) return;
-    triedAuthRefreshRef.current = true;
-    userAuthInfoService
-      .getAuthInfo()
-      .then(() => setAuthRefresh((n) => n + 1))
-      .catch(() => {});
-  }, [isAuthenticated]);
+    if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
+    const batchId = enrollment.enrollmentForCollection?.batchId;
+    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true });
+  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate]);
 
-  const upcomingBatchBlocked =
-    isTrackable &&
-    !contentCreatorPrivilege &&
-    hasBatchInRoute &&
-    isEnrolledInCurrentBatch &&
-    isBatchUpcoming;
+  const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
 
-  const contentBlocked =
-    isTrackable &&
-    (
-      !isAuthenticated ||
-      (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch)) ||
-      upcomingBatchBlocked
-    );
+  const upcomingBatchBlocked = isTrackable && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && isBatchUpcoming;
+  const contentBlocked = isTrackable && (!isAuthenticated || (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch)) || upcomingBatchBlocked);
 
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
@@ -145,6 +145,24 @@ const CollectionDetailPage = () => {
     contentType: currentContentNode?.contentType,
   });
 
+  const collectionCdata = useMemo(
+    () => buildCollectionCdata(collectionId, effectiveBatchId),
+    [collectionId, effectiveBatchId]
+  );
+
+  const collectionObjectRollup = useMemo(
+    () => buildObjectRollup(collectionData?.hierarchyRoot, contentId),
+    [collectionData?.hierarchyRoot, contentId]
+  );
+
+  const firstMainUnitId = collectionData?.children?.[0]?.identifier;
+  const [expandedModules, setExpandedModules] = useState<string[]>([]);
+  const prevCollectionId = useRef(collectionId);
+  const toggleModule = useCallback((moduleId: string) => {
+    setExpandedModules((prev: string[]) =>
+      prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
+    );
+  }, []);
 
   useInitialCollectionContentNavigation({
     collectionData,
@@ -160,13 +178,15 @@ const CollectionDetailPage = () => {
   });
 
   useEffect(() => {
-    const firstMainUnitId = collectionData?.children?.[0]?.identifier;
-    if (firstMainUnitId && !initialExpandedSet.current) {
-      setExpandedModules([firstMainUnitId]);
-      initialExpandedSet.current = true;
+    if (prevCollectionId.current !== collectionId) {
+      prevCollectionId.current = collectionId;
+      setExpandedModules(firstMainUnitId ? [firstMainUnitId] : []);
+      return;
     }
-  }, [collectionData?.children]);
-  useEffect(() => { initialExpandedSet.current = false; setExpandedModules([]); }, [collectionId]);
+    if (firstMainUnitId) {
+      setExpandedModules((prev) => prev.length === 0 ? [firstMainUnitId] : prev);
+    }
+  }, [collectionId, firstMainUnitId]);
 
   const certificatePreviewDetails = useMemo(() => ({
     recipientName: userProfile ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined : undefined,
@@ -181,54 +201,49 @@ const CollectionDetailPage = () => {
         displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
         contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading,
         playerError: playerError ?? null, handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded,
+        cdata: collectionCdata, objectRollup: collectionObjectRollup,
         courseProgressProps, contentStatusMap, contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId,
         handleJoinCourse, batchListLoading, joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl,
         setCertificatePreviewUrl, setCertificatePreviewOpen, expandedModules, toggleModule, collectionId, batchIdParam,
-        isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile: userProfile ?? undefined,
+        isCreatorViewingOwnCollection, isMentorViewingCourse: isMentorOfCourse, contentCreatorPrivilege, userProfile: userProfile ?? undefined,
         currentUserId: currentUserId ?? undefined,
+        backTo,
       }),
     [
       displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
       contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading, playerError,
-      handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, courseProgressProps, contentStatusMap,
+      handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, collectionCdata, collectionObjectRollup,
+      courseProgressProps, contentStatusMap,
       contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId, handleJoinCourse, batchListLoading,
       joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl, expandedModules, toggleModule,
-      collectionId, batchIdParam, isCreatorViewingOwnCollection, contentCreatorPrivilege, userProfile, currentUserId,
+      collectionId, batchIdParam, isCreatorViewingOwnCollection, isMentorOfCourse, contentCreatorPrivilege, userProfile, currentUserId, backTo
     ]
   );
 
   return (
-    <CollectionDetailLayout
-      navigation={{ onGoBack: () => navigate(backToRef.current), t }}
-      loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
-      collection={{
-        collectionDataFromApi: collectionDataFromApi ?? null,
-        hierarchySuccess,
-        collectionData,
-        displayCollectionData,
-      }}
-      contentArea={contentArea}
-      certificateModal={{
-        certificatePreviewOpen,
-        certificatePreviewUrl,
-        certificatePreviewDetails,
-        setCertificatePreviewUrl,
-        setCertificatePreviewOpen,
-      }}
-      relatedContent={{
-        searchError,
-        searchErrorObj: searchErrorObj ?? null,
-        searchFetching,
-        relatedContentItems,
-        searchRefetch,
-      }}
-      courseCompletion={{
-        courseProgressProps,
-        isEnrolledInCurrentBatch,
-        collectionId,
-        hasCertificate,
-      }}
-    />
+    <>
+      <TelemetryTracker
+        disabled={!collectionData}
+        startEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-page' }}
+        endEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-exit' }}
+        startOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+        endOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+      />
+      <CollectionDetailLayout
+        navigation={{ onGoBack: () => navigate(backTo), t }}
+        loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
+        collection={{
+          collectionDataFromApi: collectionDataFromApi ?? null,
+          hierarchySuccess,
+          collectionData,
+          displayCollectionData,
+        }}
+        contentArea={contentArea}
+        certificateModal={{ certificatePreviewOpen, certificatePreviewUrl, certificatePreviewDetails, setCertificatePreviewUrl, setCertificatePreviewOpen }}
+        relatedContent={{ searchError, searchErrorObj: searchErrorObj ?? null, searchFetching, relatedContentItems, searchRefetch }}
+        courseCompletion={{ courseProgressProps, isEnrolledInCurrentBatch, collectionId, hasCertificate }}
+      />
+    </>
   );
 };
 export default CollectionDetailPage;

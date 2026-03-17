@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import useDebounce from "@/hooks/useDebounce";
 import PageLoader from "@/components/common/PageLoader";
 import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
 import WorkspaceToolbar from "@/components/workspace/WorkspaceToolbar";
@@ -19,21 +20,20 @@ import userProfileService from "@/services/UserProfileService";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
-import ResourceFormDialog, { type ResourceFormData } from "./ResourceFormDialog";
+import ContentDynamicFormDialog, { type ContentFormData } from "./ContentDynamicFormDialog";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import "../home/home.css";
 import "./workspace.css";
 import { QumlEditor } from "@/components/quml-editor";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import useImpression from "@/hooks/useImpression";
-import usePageSession from "@/hooks/usePageSession";
 import useInteract from "@/hooks/useInteract";
 
-// Resource editor option IDs that should trigger the content editor
-const RESOURCE_EDITOR_OPTIONS = ['quiz', 'story'];
+// Option IDs that use the dynamic form dialog for content creation
+const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection'];
 
-// Collection editor option IDs that should trigger the collection editor
-const COLLECTION_EDITOR_OPTIONS = ['course', 'collection'];
+// Option IDs for collection-type content created via the dynamic form (textbook, collection)
+const COLLECTION_FORM_OPTIONS = ['textbook', 'collection'];
 
 /** QuML editor option IDs */
 const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
@@ -43,6 +43,7 @@ const EDITOR_OPTION_LABELS: Record<string, string> = {
   'story': 'workspace.editorOptions.story',
   'course': 'workspace.editorOptions.course',
   'collection': 'workspace.editorOptions.collection',
+  'textbook': 'workspace.editorOptions.textbook',
   'question-set': 'workspace.editorOptions.questionSet',
   'question-editor': 'workspace.editorOptions.questionSet',
 };
@@ -95,8 +96,17 @@ const contentService = new ContentService();
 /** Option IDs that should open the generic (upload) editor */
 const GENERIC_EDITOR_OPTIONS = ['upload-content', 'upload-large-content'];
 
+const DEFAULT_FIELDS = {
+  'primaryCategory': [
+    { key: 'Content Playlist', name: 'Content Playlist' },
+    { key: 'Digital Textbook', name: 'Digital Textbook' },
+    { key: 'Question paper', name: 'Question Paper' },
+  ],
+} as const;
+
 const WorkspacePage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: userData } = useUserRead();
   const slug = userData?.data?.response?.channel;
 
@@ -110,7 +120,6 @@ const WorkspacePage = () => {
   const { interact } = useInteract();
 
   useImpression({ type: 'view', pageid: 'workspace' });
-  usePageSession({ pageid: 'workspace' });
 
   useEffect(() => {
     if (slug && !orgFetchAttempted.current) {
@@ -142,8 +151,21 @@ const WorkspacePage = () => {
       .filter((role): role is string => Boolean(role));
   }, [userData]);
 
-  const hasCreatorRole = userRoles.includes('CONTENT_CREATOR');
-  const hasReviewerRole = userRoles.includes('CONTENT_REVIEWER');
+  const hasContentCreatorRole = userRoles.includes('CONTENT_CREATOR');
+  const hasContentReviewerRole = userRoles.includes('CONTENT_REVIEWER');
+  const hasBookCreatorRole = userRoles.includes('BOOK_CREATOR');
+  const hasBookReviewerRole = userRoles.includes('BOOK_REVIEWER');
+
+  // A user can create if they have CONTENT_CREATOR or BOOK_CREATOR
+  const hasCreatorRole = hasContentCreatorRole || hasBookCreatorRole;
+  // A user can review if they have CONTENT_REVIEWER or BOOK_REVIEWER
+  const hasReviewerRole = hasContentReviewerRole || hasBookReviewerRole;
+
+  // BOOK_CREATOR without CONTENT_CREATOR can only create textbooks
+  const isBookCreatorOnly = hasBookCreatorRole && !hasContentCreatorRole;
+
+  // BOOK_REVIEWER without CONTENT_REVIEWER can only review textbooks
+  const isBookReviewerOnly = hasBookReviewerRole && !hasContentReviewerRole;
 
   // Default to creator if available, otherwise reviewer
   const [userRole, setUserRole] = useState<UserRole>('creator');
@@ -162,9 +184,34 @@ const WorkspacePage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
+
+  // Local state for responsive typing; debounced value drives API + URL.
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
+  const debouncedSearch = useDebounce(searchInput, 400);
+
+  // Sync searchInput when URL changes externally (browser back/forward)
+  useEffect(() => {
+    const urlQuery = searchParams.get('search') || '';
+    setSearchInput((prev) => (prev === urlQuery ? prev : urlQuery));
+  }, [searchParams]);
+
+  // Sync debounced value to URL (only writes when debounced value settles)
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const current = prev.get('search') || '';
+      if (current === debouncedSearch) return prev;
+      const next = new URLSearchParams(prev);
+      if (debouncedSearch) {
+        next.set('search', debouncedSearch);
+      } else {
+        next.delete('search');
+      }
+      return next;
+    }, { replace: true });
+  }, [debouncedSearch, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
-  const [showResourceFormDialog, setShowResourceFormDialog] = useState(false);
+  const [showDynamicFormDialog, setShowDynamicFormDialog] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{ type: 'delete'; contentId: string; mimeType: string } | null>(null);
@@ -192,7 +239,10 @@ const WorkspacePage = () => {
     typeFilter,
     userRole,
     orgId: orgChannelId,
+    searchQuery: debouncedSearch,
     enabled: showContent,
+    isBookCreatorOnly,
+    isBookReviewerOnly,
   });
 
   const visibleContents = useMemo(
@@ -245,30 +295,33 @@ const WorkspacePage = () => {
     };
   }, [userRole, visibleContentIds]); // Changed from visibleContents to visibleContentIds
 
-  // Reset view when role changes
+  // Reset view and search when role changes
   useEffect(() => {
     const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';
     setActiveView((prev) => (prev === nextView ? prev : nextView));
+    setSearchInput('');
   }, [userRole]);
 
   const handleCreateOption = (optionId: string) => {
     setShowCreateModal(false);
-    if (RESOURCE_EDITOR_OPTIONS.includes(optionId)) {
+    // Quiz, story, textbook, and collection use the dynamic form dialog
+    if (DYNAMIC_FORM_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
-      setShowResourceFormDialog(true);
+      setShowDynamicFormDialog(true);
       return;
     }
-    if (COLLECTION_EDITOR_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
+    // Course and question-set use the simple name dialog
+    if (optionId === 'course' || QUML_EDITOR_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
       navigate(optionId === 'upload-content' ? '/workspace/content/edit/generic' : '/workspace/content/edit/editorforlargecontent');
       return;
     } else {
-      setShowCreateModal(false);
       toast({
         title: t("workspace.startingEditor"),
-        description: t("workspace.launchingEditor", { name: optionId.replace('-', ' ') })
+        description: t("workspace.launchingEditor", { name: optionId.replace('-', ' ') }),
+        variant: "success",
       });
     }
   };
@@ -284,38 +337,66 @@ const WorkspacePage = () => {
     return { creator, createdBy, organisation, createdFor };
   };
 
-  const handleResourceFormSubmit = async (formData: ResourceFormData) => {
+  const handleDynamicFormSubmit = async (formData: ContentFormData) => {
     setIsCreating(true);
     try {
       const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
-      const isQuiz = selectedOption === 'quiz';
+      const isCollectionType = selectedOption && COLLECTION_FORM_OPTIONS.includes(selectedOption);
 
-      const resourceType = (formData.dynamicFields['resourceType'] as string) || 'Learn';
-      
-      // Remove resourceType from dynamicFields to avoid duplication
-      const { resourceType: _, ...extraFields } = formData.dynamicFields;
+      if (isCollectionType) {
+        // Textbook / Collection: create collection-type content
+        const configKey = selectedOption === 'textbook' ? 'digital-textbook' : 'content-playlist';
+        const config = COLLECTION_CONTENT_CONFIG[configKey];
+        if (!config) throw new Error(t("workspace.errors.invalidContentType"));
 
-      const response = await contentService.contentCreate(formData.name, {
-        createdBy,
-        creator,
-        mimeType: 'application/vnd.ekstep.ecml-archive',
-        contentType: isQuiz ? 'SelfAssess' : 'Resource',
-        ...(isQuiz ? { primaryCategory: 'Course Assessment' } : {}),
-        description: formData.description || 'Enter description for Resource',
-        organisation,
-        createdFor,
-        framework: orgFramework,
-        resourceType,
-        extraFields,
-      });
-      const contentId = response.data?.identifier || response.data?.content_id;
-      if (!contentId) {
-        console.error("Content creation response missing identifier:", response);
-        throw new Error(t("workspace.errors.unexpectedResponse"));
+        const { descriptionKey, ...apiConfig } = config;
+
+        const response = await contentService.contentCreate(formData.name, {
+          createdBy,
+          creator,
+          ...apiConfig,
+          description: formData.description || "Enter the description",
+          organisation,
+          createdFor,
+          framework: orgFramework,
+          extraFields: formData.dynamicFields,
+        });
+        const contentId = response.data?.identifier || response.data?.content_id;
+        if (!contentId) {
+          console.error("Collection creation response missing identifier:", response);
+          throw new Error(t("workspace.errors.unexpectedResponse"));
+        }
+        setShowDynamicFormDialog(false);
+        setSelectedOption(null);
+        navigate(`/edit/collection-editor/${contentId}`);
+      } else {
+        // Quiz / Story: create resource-type content
+        const isQuiz = selectedOption === 'quiz';
+        const resourceType = (formData.dynamicFields['resourceType'] as string) || 'Learn';
+        const { resourceType: _, ...extraFields } = formData.dynamicFields;
+
+        const response = await contentService.contentCreate(formData.name, {
+          createdBy,
+          creator,
+          mimeType: 'application/vnd.ekstep.ecml-archive',
+          contentType: isQuiz ? 'SelfAssess' : 'Resource',
+          ...(isQuiz ? { primaryCategory: 'Course Assessment' } : {}),
+          description: formData.description || 'Enter description for Resource',
+          organisation,
+          createdFor,
+          framework: orgFramework,
+          resourceType,
+          extraFields,
+        });
+        const contentId = response.data?.identifier || response.data?.content_id;
+        if (!contentId) {
+          console.error("Content creation response missing identifier:", response);
+          throw new Error(t("workspace.errors.unexpectedResponse"));
+        }
+        setShowDynamicFormDialog(false);
+        setSelectedOption(null);
+        navigate(`/edit/content-editor/${contentId}`);
       }
-      setShowResourceFormDialog(false);
-      setSelectedOption(null);
-      navigate(`/edit/content-editor/${contentId}`);
     } catch (error) {
       console.error('Failed to create content:', error);
       toast({ title: t("workspace.errors.creationFailed"), description: t("workspace.errors.unableToCreate"), variant: "destructive" });
@@ -324,42 +405,15 @@ const WorkspacePage = () => {
     }
   };
 
-  const handleCollectionCreate = async (name: string, optionId: string, description?: string) => {
-    const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
-    const config = COLLECTION_CONTENT_CONFIG[optionId];
-    if (!config) {
-      throw new Error(t("workspace.errors.invalidContentType"));
-    }
-    const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
-
-    // Destructure to exclude descriptionKey from being sent to API
-    const { descriptionKey, ...apiConfig } = config;
-
-    const response = await contentService.contentCreate(name, {
-      createdBy,
-      creator,
-      ...apiConfig,
-      ...(description ? { description } : { description: t(descriptionKey) }),
-      organisation,
-      createdFor,
-      targetFWIds,
-    });
-    const contentId = response.data?.identifier || response.data?.content_id;
-    if (!contentId) {
-      console.error("Collection creation response missing identifier:", response);
-      throw new Error(t("workspace.errors.unexpectedResponse"));
-    }
-    navigate(`/edit/collection-editor/${contentId}`);
-  };
-
   const handleQuestionSetCreate = async (name: string) => {
-    const { createdBy, createdFor } = getCreatorMeta();
+    const { createdBy, createdFor, creator } = getCreatorMeta();
 
     const response = await questionSetCreate.mutateAsync({
       name,
       createdBy,
       createdFor,
       framework: orgFramework || '',
+      creator,
     });
 
     const contentId = response?.identifier;
@@ -371,13 +425,31 @@ const WorkspacePage = () => {
     navigate(`/edit/quml-editor/${contentId}`);
   };
 
-  const handleContentNameSubmit = async (name: string, extra?: { description?: string; collectionType?: string }) => {
+  const handleContentNameSubmit = async (name: string, extra?: { description?: string }) => {
     setIsCreating(true);
     try {
-      if (selectedOption === 'collection' && extra?.collectionType) {
-        await handleCollectionCreate(name, extra.collectionType, extra.description);
-      } else if (selectedOption && COLLECTION_EDITOR_OPTIONS.includes(selectedOption)) {
-        await handleCollectionCreate(name, selectedOption);
+      if (selectedOption === 'course') {
+        // Course creation: inline collection creation logic
+        const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
+        const config = COLLECTION_CONTENT_CONFIG['course']!;
+        const { descriptionKey, ...apiConfig } = config;
+        const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
+
+        const response = await contentService.contentCreate(name, {
+          createdBy,
+          creator,
+          ...apiConfig,
+          description: extra?.description || t(descriptionKey),
+          organisation,
+          createdFor,
+          targetFWIds,
+        });
+        const contentId = response.data?.identifier || response.data?.content_id;
+        if (!contentId) {
+          console.error("Course creation response missing identifier:", response);
+          throw new Error(t("workspace.errors.unexpectedResponse"));
+        }
+        navigate(`/edit/collection-editor/${contentId}`);
       } else if (selectedOption && QUML_EDITOR_OPTIONS.includes(selectedOption)) {
         await handleQuestionSetCreate(name);
       }
@@ -403,7 +475,7 @@ const WorkspacePage = () => {
       return `/edit/quml-editor/${id}`;
     }
     if (item.mimeType === 'application/vnd.ekstep.ecml-archive') {
-        return `/edit/content-editor/${id}`;
+      return `/edit/content-editor/${id}`;
     }
     const state = (item.status || 'Draft').toLowerCase();
     const framework = item.framework || orgFramework || '';
@@ -492,6 +564,8 @@ const WorkspacePage = () => {
     onRoleChange: handleRoleChange,
     hasCreatorRole,
     hasReviewerRole,
+    isBookCreatorOnly,
+    isBookReviewerOnly,
     counts,
     viewMode,
     onViewModeChange: handleViewModeChange,
@@ -500,86 +574,82 @@ const WorkspacePage = () => {
     contentCount: showContent ? visibleContents.length : undefined,
     totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,
+    searchQuery: searchInput,
+    onSearchChange: setSearchInput,
   };
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
       <main className="workspace-main-content">
-            {showContent && isCountsLoading && isLoading ? (
-              <div className="workspace-content-wrapper">
-                <PageLoader message={t('loading')} fullPage={false} />
-              </div>
-            ) : (
-              <div className="workspace-content-wrapper">
-                <WorkspaceToolbar {...navigationProps} />
-                <WorkspacePageContent
-                  showCreateModal={showCreateModal}
-                  activeView={activeView}
-                  filteredItems={visibleContents}
-                  viewMode={viewMode}
-                  t={t}
-                  isLoading={isLoading}
-                  isLoadingMore={isLoadingMore}
-                  hasMore={hasMore}
-                  isError={!!error}
-                  error={error}
-                  userRole={userRole}
-                  lockedContentMap={lockedContentMap}
-                  onLoadMore={loadMore}
-                  onRetry={refetchAll}
-                  onCreateOption={handleCreateOption}
-                  onCreateClick={handleCreateClick}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onView={handleView}
-                />
-              </div>
-            )}
-          </main>
-          <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} />
-          <ConfirmDialog
-            open={!!confirmDialog}
-            onClose={() => setConfirmDialog(null)}
-            onConfirm={handleConfirmAction}
-            isLoading={isConfirming}
-            title={t('workspace.deleteContent')}
-            description={t('workspace.deleteConfirmation')}
-            confirmLabel={t('delete')}
-            confirmVariant="destructive"
-            confirmButtonProps={{
-              'data-edataid': 'workspace-delete-content-confirm-btn',
-              'data-pageid': 'workspace',
-              'data-cdata': JSON.stringify(confirmDialog ? [{ id: confirmDialog.contentId, type: 'ContentId' }] : [])
-            }}
-          />
-          <ContentNameDialog
-            open={showNameDialog}
-            onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
-            onSubmit={handleContentNameSubmit}
-            isLoading={isCreating}
-            optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
-            optionId={selectedOption ?? undefined}
-            submitButtonProps={{
-              'data-edataid': 'workspace-create-collection-btn',
-              'data-pageid': 'workspace',
-              'data-cdata': JSON.stringify([{ id: selectedOption || 'unknown', type: 'EditorType' }])
-            }}
-          />
-          <ResourceFormDialog
-            open={showResourceFormDialog}
-            onClose={() => { setShowResourceFormDialog(false); setSelectedOption(null); }}
-            onSubmit={handleResourceFormSubmit}
-            isLoading={isCreating}
-            orgChannelId={orgChannelId}
-            orgFramework={orgFramework}
-            formSubType={selectedOption === 'quiz' ? 'assessment' : 'resource'}
-            title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('workspace.createContent')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
-            submitButtonProps={{
-               'data-edataid': 'workspace-create-resource-btn',
-               'data-pageid': 'workspace',
-               'data-cdata': JSON.stringify([{ id: selectedOption || 'unknown', type: 'EditorType' }])
-            }}
-          />
+        <div className="workspace-content-wrapper">
+          <WorkspaceToolbar {...navigationProps} />
+          {showContent && isCountsLoading && isLoading ? (
+            <PageLoader message={t('loading')} fullPage={false} />
+          ) : (
+            <WorkspacePageContent
+              showCreateModal={showCreateModal}
+              activeView={activeView}
+              filteredItems={visibleContents}
+              viewMode={viewMode}
+              t={t}
+              isLoading={isLoading}
+              isLoadingMore={isLoadingMore}
+              hasMore={hasMore}
+              isError={!!error}
+              error={error}
+              userRole={userRole}
+              lockedContentMap={lockedContentMap}
+              onLoadMore={loadMore}
+              onRetry={refetchAll}
+              onCreateOption={handleCreateOption}
+              onCreateClick={handleCreateClick}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onView={handleView}
+            />
+          )}
+        </div>
+      </main>
+      <CreateContentModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onOptionSelect={handleCreateOption} isBookCreator={hasBookCreatorRole} />
+      <ConfirmDialog
+        open={!!confirmDialog}
+        onClose={() => setConfirmDialog(null)}
+        onConfirm={handleConfirmAction}
+        isLoading={isConfirming}
+        title={t('workspace.deleteContent')}
+        description={t('workspace.deleteConfirmation')}
+        confirmLabel={t('delete')}
+        confirmVariant="destructive"
+        confirmButtonProps={{
+          'data-edataid': 'workspace-delete-content-confirm-btn',
+          'data-pageid': 'workspace',
+          'data-cdata': JSON.stringify(confirmDialog ? [{ id: confirmDialog.contentId, type: 'ContentId' }] : [])
+        }}
+      />
+      <ContentNameDialog
+        open={showNameDialog}
+        onClose={() => { setShowNameDialog(false); setSelectedOption(null); }}
+        onSubmit={handleContentNameSubmit}
+        isLoading={isCreating}
+        optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
+        optionId={selectedOption ?? undefined}
+        submitButtonProps={{
+          'data-edataid': 'workspace-create-collection-btn',
+          'data-pageid': 'workspace',
+          'data-cdata': JSON.stringify([{ id: selectedOption || 'unknown', type: 'EditorType' }])
+        }}
+      />
+      <ContentDynamicFormDialog
+        open={showDynamicFormDialog}
+        onClose={() => { setShowDynamicFormDialog(false); setSelectedOption(null); }}
+        onSubmit={handleDynamicFormSubmit}
+        isLoading={isCreating}
+        orgChannelId={orgChannelId}
+        orgFramework={orgFramework}
+        formSubType={selectedOption === 'quiz' ? 'assessment' : selectedOption === 'textbook' ? 'textbook' : selectedOption === 'collection' ? 'collection' : 'resource'}
+        title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('create')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
+        defaultFields={DEFAULT_FIELDS}
+      />
     </div>
   );
 };

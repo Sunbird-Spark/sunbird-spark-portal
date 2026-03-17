@@ -11,6 +11,7 @@ import { useContentPlayer } from "@/hooks/useContentPlayer";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 const ContentPlayerPage = () => {
   const { t } = useAppI18n();
@@ -18,9 +19,11 @@ const ContentPlayerPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Resolve where to go back: use the stored `from` only if it's not itself a content page
-  const stateFrom = (location.state as { from?: string } | null)?.from;
-  const backTo = stateFrom && !stateFrom.startsWith('/content/') ? stateFrom : '/home';
+  // Resolve where to go back: reject any /content/ or /collection/ path as a back-destination
+  // to prevent content→content and content→collection back chains. Falls back to /explore,
+  // which is accessible to both authenticated and anonymous users.
+  const stateFrom = (location.state as { from?: string } | null)?.from ?? '';
+  const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
   
   const { data, isLoading, error } = useContentRead(contentId || '');
@@ -90,6 +93,19 @@ const ContentPlayerPage = () => {
 
   return (
     <div className="content-player-background">
+      <TelemetryTracker
+        disabled={!playerMetadata}
+        startEventInput={{ type: 'workflow', mode: 'play', pageid: 'content-player-page' }}
+        endEventInput={{ type: 'workflow', mode: 'play', pageid: 'content-player-exit' }}
+        startOptions={{ 
+          object: { id: contentId, type: playerMetadata?.contentType || 'Content', ver: playerMetadata?.pkgVersion?.toString() || '1' },
+          context: { env: 'content-player' }
+        }}
+        endOptions={{ 
+          object: { id: contentId, type: playerMetadata?.contentType || 'Content', ver: playerMetadata?.pkgVersion?.toString() || '1' },
+          context: { env: 'content-player' }
+        }}
+      />
       <Header />
 
       <main className="content-player-container">
@@ -125,16 +141,12 @@ const ContentPlayerPage = () => {
 
         {/* Content Player */}
         <div className="content-player-video-container">
-          <div className="content-player-video-wrapper">
-            <div className="content-player-video-relative">
-              <PlayerComponent
-                mimeType={playerMetadata.mimeType}
-                metadata={playerMetadata}
-                onPlayerEvent={handlePlayerEvent}
-                onTelemetryEvent={handleTelemetryEvent}
-              />
-            </div>
-          </div>
+          <PlayerComponent
+            mimeType={playerMetadata.mimeType}
+            metadata={playerMetadata}
+            onPlayerEvent={handlePlayerEvent}
+            onTelemetryEvent={handleTelemetryEvent}
+          />
         </div>
 
         {/* Related Content Section */}

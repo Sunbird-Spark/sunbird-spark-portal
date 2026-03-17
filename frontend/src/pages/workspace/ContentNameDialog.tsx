@@ -2,16 +2,10 @@ import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react
 import { Button } from "@/components/common/Button";
 import { useAppI18n } from '@/hooks/useAppI18n';
 
-const COLLECTION_TYPES = [
-  { value: 'content-playlist', labelKey: 'collection.contentPlaylist' },
-  { value: 'digital-textbook', labelKey: 'collection.digitalTextbook' },
-  { value: 'question-paper', labelKey: 'collection.questionPaper' },
-] as const;
-
 interface ContentNameDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (name: string, extra?: { description?: string; collectionType?: string }) => void;
+  onSubmit: (name: string, extra?: { description?: string }) => void;
   isLoading?: boolean;
   optionTitle?: string;
   optionId?: string;
@@ -30,9 +24,9 @@ export default function ContentNameDialog({
   const { t } = useAppI18n();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [collectionType, setCollectionType] = useState("");
 
-  const isCollection = optionId === 'collection';
+  // Only show description for course creation
+  const showDescription = optionId === 'course';
 
   const submitCdata = useMemo(() => {
     let baseCdata: any[] = [];
@@ -54,14 +48,12 @@ export default function ContentNameDialog({
     if (!open) {
       setName("");
       setDescription("");
-      setCollectionType("");
     }
   }, [open]);
 
   const handleClose = useCallback(() => {
     setName("");
     setDescription("");
-    setCollectionType("");
     onClose();
   }, [onClose]);
 
@@ -79,18 +71,14 @@ export default function ContentNameDialog({
 
   if (!open) return null;
 
-  const canSubmit = name.trim() && (!isCollection || collectionType);
+  const canSubmit = name.trim();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
-    if (isCollection) {
-      if (!collectionType) return;
-      onSubmit(trimmed, { description: description.trim() || undefined, collectionType });
-    } else {
-      onSubmit(trimmed);
-    }
+    
+    onSubmit(trimmed, { description: description.trim() || undefined });
   };
 
   return (
@@ -99,7 +87,7 @@ export default function ContentNameDialog({
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
-      aria-label={isCollection ? `${t('create')} ${t('collection.label')}` : t('workspace.enterContentName')}
+      aria-label={t('workspace.enterContentName')}
     >
       <div
         className="bg-white rounded-2xl max-w-md w-full p-6"
@@ -109,9 +97,7 @@ export default function ContentNameDialog({
           {t('create')} {optionTitle || t('content.label')}
         </h2>
         <p className="text-sm text-muted-foreground mb-4 font-rubik">
-          {isCollection
-            ? t('workspace.fillDetails')
-            : t('workspace.fillDetails')}
+          {t('workspace.fillDetails')}
         </p>
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium font-rubik text-foreground mb-1">
@@ -127,7 +113,7 @@ export default function ContentNameDialog({
             disabled={isLoading}
           />
 
-          {isCollection && (
+          {showDescription && (
             <>
               <label className="block text-sm font-medium font-rubik text-foreground mb-1">
                 {t('workspace.description')}
@@ -140,21 +126,6 @@ export default function ContentNameDialog({
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-wave/50 focus:border-sunbird-wave mb-4"
                 disabled={isLoading}
               />
-
-              <label className="block text-sm font-medium font-rubik text-foreground mb-1">
-                {t('workspace.collectionType')} <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={collectionType}
-                onChange={(e) => setCollectionType(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick mb-4 bg-white"
-                disabled={isLoading}
-              >
-                <option value="" disabled>{t('workspace.selectCollectionType')}</option>
-                {COLLECTION_TYPES.map((ct) => (
-                  <option key={ct.value} value={ct.value}>{t(ct.labelKey)}</option>
-                ))}
-              </select>
             </>
           )}
 

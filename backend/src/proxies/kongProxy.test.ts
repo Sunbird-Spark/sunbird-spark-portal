@@ -3,6 +3,7 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import type { Server } from 'http';
+import { createProxyMiddleware, responseInterceptor, fixRequestBody } from 'http-proxy-middleware';
 
 vi.mock('../utils/logger.js', () => ({
     default: {
@@ -68,7 +69,11 @@ describe('Kong Proxy Integration', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
-        vi.doUnmock('http-proxy-middleware');
+        vi.doMock('http-proxy-middleware', () => ({
+            createProxyMiddleware,
+            responseInterceptor,
+            fixRequestBody
+        }));
         vi.doUnmock('../utils/proxyUtils.js');
         vi.doUnmock('../utils/logger.js');
 

@@ -14,8 +14,24 @@ export interface TelemetryConfig {
   [key: string]: any;
 }
 
-export class TelemetryService {
+export interface ITelemetryService {
+  interact(eventInput: TelemetryEventInput): void;
+  impression(eventInput: TelemetryEventInput): void;
+  start(config: Record<string, unknown> | any, contentId: string, contentVer: string, data: Record<string, unknown> | any, options?: Omit<TelemetryEventInput, 'edata'>): void;
+  end(eventInput: TelemetryEventInput): void;
+  error(eventInput: TelemetryEventInput): void;
+  audit(eventInput: TelemetryEventInput): void;
+  share(eventInput: TelemetryEventInput): void;
+  log(eventInput: TelemetryEventInput): void;
+  exData(eventInput: TelemetryEventInput): void;
+  feedback(eventInput: TelemetryEventInput): void;
+  get isInitialized(): boolean;
+}
+
+export class TelemetryService implements ITelemetryService {
   private _isInitialized = false;
+  private _lastImpressionPageId: string | null = null;
+  private _lastImpressionTime: number = 0;
 
   private getOptions(eventInput: TelemetryEventInput): any {
     const options = { ...eventInput.options };
@@ -46,30 +62,25 @@ export class TelemetryService {
     // Debounce to prevent spam from duplicate/refresh events
     // Only debounce if the current pageId is EXACTLY the same as the immediately preceding pageId within the time window
     if (pageId) {
-      const lastPageIdKey = 'telemetry_last_pageid';
-      const lastTimeKey = 'telemetry_last_impression_time';
-
-      const lastPageId = sessionStorage.getItem(lastPageIdKey);
-      const lastTime = sessionStorage.getItem(lastTimeKey);
-
-      if (lastPageId === pageId && lastTime) {
-        const timeDiff = Date.now() - parseInt(lastTime, 10);
+      if (this._lastImpressionPageId === pageId && this._lastImpressionTime) {
+        const timeDiff = Date.now() - this._lastImpressionTime;
         if (timeDiff < 5000) {
           // Drop event
           return;
         }
       }
 
-      sessionStorage.setItem(lastPageIdKey, pageId);
-      sessionStorage.setItem(lastTimeKey, Date.now().toString());
+      this._lastImpressionPageId = pageId;
+      this._lastImpressionTime = Date.now();
     }
 
     $t.impression(eventInput.edata, this.getOptions(eventInput));
   }
 
-  public start(config: any, contentId: string, contentVer: string, data: any, options?: any): void {
+  public start(config: Record<string, unknown> | any, contentId: string, contentVer: string, data: Record<string, unknown> | any, options?: Omit<TelemetryEventInput, 'edata'>): void {
      if (this._isInitialized) {
-       $t.start(config, contentId, contentVer, data, options);
+       const mergedOptions = options ? this.getOptions({ edata: data, ...options } as TelemetryEventInput) : undefined;
+       $t.start(config, contentId, contentVer, data, mergedOptions);
      }
   }
 

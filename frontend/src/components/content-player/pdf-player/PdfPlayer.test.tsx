@@ -55,6 +55,11 @@ describe('PdfPlayer Component', () => {
       objectRollup: {},
       host: '',
       endpoint: '',
+      tags: [],
+      dims: [],
+      app: [],
+      partner: [],
+      userData: { firstName: '', lastName: '' },
     },
     config: {},
     metadata: mockMetadata,
@@ -72,7 +77,7 @@ describe('PdfPlayer Component', () => {
     const { container } = render(<PdfPlayer metadata={mockMetadata} />);
     const div = container.querySelector('div');
     expect(div).toBeInTheDocument();
-    expect(div).toHaveClass('w-full', 'h-full', 'min-h-[37.5rem]', 'relative');
+    expect(div).toHaveClass('content-player-embed');
   });
 
   it('should initialize player with metadata', async () => {

@@ -21,6 +21,7 @@ interface BatchFormFieldsProps {
   setForm: React.Dispatch<React.SetStateAction<BatchFormState>>;
   labelClass?: string;
   inputClass?: string;
+  disabledFields?: (keyof BatchFormState)[];
 }
 
 export function BatchFormFields({
@@ -29,6 +30,7 @@ export function BatchFormFields({
   setForm,
   labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']",
   inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']",
+  disabledFields = [],
 }: BatchFormFieldsProps) {
   const { t } = useAppI18n();
   const today = (() => {
@@ -49,6 +51,7 @@ export function BatchFormFields({
           placeholder={t("batch.enterBatchName")}
           value={form.batchName}
           onChange={(e) => handleField("batchName", e.target.value)}
+          disabled={disabledFields.includes("batchName")}
           required
         />
       </div>
@@ -65,6 +68,7 @@ export function BatchFormFields({
           placeholder={t("batch.briefDescBatch")}
           value={form.aboutBatch}
           onChange={(e) => handleField("aboutBatch", e.target.value)}
+          disabled={disabledFields.includes("aboutBatch")}
         />
       </div>
 
@@ -90,6 +94,7 @@ export function BatchFormFields({
                 updates.endDate = "";
               setForm((prev) => ({ ...prev, ...updates }));
             }}
+            disabled={disabledFields.includes("startDate")}
             required
           />
         </div>
@@ -110,6 +115,7 @@ export function BatchFormFields({
                 : form.startDate || today
             }
             onChange={(e) => handleField("endDate", e.target.value)}
+            disabled={disabledFields.includes("endDate")}
           />
           {form.enrolmentEndDate && !form.endDate && (
              <p className="mt-0.5 text-xs text-amber-600 font-['Rubik']">
@@ -131,6 +137,7 @@ export function BatchFormFields({
             min={form.startDate || today}
             max={form.endDate || undefined}
             onChange={(e) => handleField("enrolmentEndDate", e.target.value)}
+            disabled={disabledFields.includes("enrolmentEndDate")}
           />
           {form.startDate && (
             <p className="mt-0.5 text-xs text-muted-foreground font-['Rubik']">

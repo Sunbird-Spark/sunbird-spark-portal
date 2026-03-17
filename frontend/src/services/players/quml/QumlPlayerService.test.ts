@@ -1,40 +1,52 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { QumlPlayerService } from './QumlPlayerService';
 import type { QumlPlayerMetadata } from './types';
-import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
-import appCoreService from '../../AppCoreService';
-import { OrganizationService } from '../../OrganizationService';
+import { buildTelemetryContext } from '../telemetryContextBuilder';
 
-// Mock dependencies
-vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
-  default: {
-    getSessionId: vi.fn(),
-    getUserId: vi.fn(),
-  },
+vi.mock('../telemetryContextBuilder', () => ({
+  buildTelemetryContext: vi.fn().mockResolvedValue({
+    mode: 'play',
+    sid: 'session-123',
+    did: 'device-123',
+    uid: 'user-123',
+    channel: 'org-channel',
+    pdata: { id: 'sunbird.portal', ver: '3.2.12', pid: 'sunbird.portal.contentplayer' },
+    contextRollup: { l1: 'org-channel' },
+    tags: ['org-channel'],
+    cdata: [],
+    timeDiff: 0,
+    objectRollup: {},
+    host: '',
+    endpoint: '/portal/data/v1/telemetry',
+    dims: ['org-channel'],
+    app: ['org-channel'],
+    partner: [],
+    userData: { firstName: '', lastName: '' },
+  }),
 }));
 
-vi.mock('../../AppCoreService', () => ({
-  default: {
-    getDeviceId: vi.fn(),
-    getPData: vi.fn(),
-  },
-}));
-
-vi.mock('../../OrganizationService', () => ({
-  OrganizationService: class {
-    search = vi.fn();
-  },
-}));
-
-vi.mock('../../UserProfileService', () => ({
-  default: {
-    getUserData: vi.fn(() => Promise.resolve({ firstName: '', lastName: '' })),
-  },
-}));
+const defaultContext = {
+  mode: 'play',
+  sid: 'session-123',
+  did: 'device-123',
+  uid: 'user-123',
+  channel: 'org-channel',
+  pdata: { id: 'sunbird.portal', ver: '3.2.12', pid: 'sunbird.portal.contentplayer' },
+  contextRollup: { l1: 'org-channel' },
+  tags: ['org-channel'],
+  cdata: [],
+  timeDiff: 0,
+  objectRollup: {},
+  host: '',
+  endpoint: '/portal/data/v1/telemetry',
+  dims: ['org-channel'],
+  app: ['org-channel'],
+  partner: [],
+  userData: { firstName: '', lastName: '' },
+};
 
 describe('QumlPlayerService', () => {
   let service: QumlPlayerService;
-  let mockOrgService: any;
 
   const mockMetadata: QumlPlayerMetadata = {
     identifier: 'do_123',
@@ -49,27 +61,16 @@ describe('QumlPlayerService', () => {
       customElements.define('sunbird-quml-player', class extends HTMLElement {});
     }
 
-    service = new QumlPlayerService();
-    mockOrgService = (service as any).orgService;
+    (buildTelemetryContext as any).mockImplementation(async (contextProps?: any, options?: any) => ({
+      ...defaultContext,
+      mode: contextProps?.mode || 'play',
+      cdata: contextProps?.cdata || [],
+      contextRollup: contextProps?.contextRollup || { l1: 'org-channel' },
+      objectRollup: contextProps?.objectRollup || {},
+      contentId: options?.contentId,
+    }));
 
-    // Setup default mocks
-    vi.mocked(userAuthInfoService.getSessionId).mockReturnValue('session-123');
-    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
-    vi.mocked(appCoreService.getDeviceId).mockResolvedValue('device-123');
-    vi.mocked(appCoreService.getPData).mockResolvedValue({
-      id: 'sunbird.portal',
-      ver: '3.2.12',
-      pid: 'sunbird.portal.contentplayer',
-    });
-    mockOrgService.search.mockResolvedValue({
-      data: {
-        result: {
-          response: {
-            content: [{ channel: 'org-channel' }],
-          },
-        },
-      },
-    });
+    service = new QumlPlayerService();
   });
 
   afterEach(() => {
@@ -87,45 +88,10 @@ describe('QumlPlayerService', () => {
       expect(config.metadata).toEqual(mockMetadata);
     });
 
-    it('should use fallback session ID when not available', async () => {
-      vi.mocked(userAuthInfoService.getSessionId).mockReturnValue(null);
+    it('should call buildTelemetryContext with correct arguments', async () => {
+      await service.createConfig(mockMetadata);
 
-      const config = await service.createConfig(mockMetadata);
-
-      expect(config.context.sid).toMatch(/^session-\d+$/);
-    });
-
-    it('should use fallback user ID when not available', async () => {
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
-
-      const config = await service.createConfig(mockMetadata);
-
-      expect(config.context.uid).toBe('anonymous');
-    });
-
-    it('should use empty device ID when fetch fails', async () => {
-      vi.mocked(appCoreService.getDeviceId).mockRejectedValue(new Error('Failed'));
-
-      const config = await service.createConfig(mockMetadata);
-
-      expect(config.context.did).toBe('');
-    });
-
-    it('should use empty channel when org service fails', async () => {
-      mockOrgService.search.mockRejectedValue(new Error('Failed'));
-
-      const config = await service.createConfig(mockMetadata);
-
-      expect(config.context.channel).toBe('');
-    });
-
-    it('should use empty channel when metadata has no channel and org service fails', async () => {
-      mockOrgService.search.mockRejectedValue(new Error('Failed'));
-      const metadataWithoutChannel = { ...mockMetadata, channel: undefined };
-
-      const config = await service.createConfig(metadataWithoutChannel);
-
-      expect(config.context.channel).toBe('');
+      expect(buildTelemetryContext).toHaveBeenCalledWith(undefined, { contentId: 'do_123' });
     });
 
     it('should apply context props', async () => {
@@ -160,7 +126,7 @@ describe('QumlPlayerService', () => {
       });
     });
 
-    it('should initialize config and data as empty objects', async () => {
+    it('should initialize config as empty object', async () => {
       const config = await service.createConfig(mockMetadata);
 
       expect(config.config).toEqual({});
@@ -170,7 +136,7 @@ describe('QumlPlayerService', () => {
   describe('createElement', () => {
     it('should create sunbird-quml-player element with config', () => {
       const config = {
-        context: { sid: 'test' },
+        context: { sid: 'test' } as any,
         config: {},
         metadata: mockMetadata,
         data: {},
