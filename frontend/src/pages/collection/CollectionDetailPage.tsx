@@ -18,6 +18,7 @@ import { buildCollectionDetailContentArea } from "./buildCollectionDetailContent
 import { buildCollectionCdata, buildObjectRollup } from "@/utils/collectionTelemetryContext";
 import { useCollectionBackNavigation, useAuthRefreshOnce } from "./useCollectionBackNavigation";
 import CollectionDetailLayout from "./CollectionDetailLayout";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import "./collection.css";
 
 const CollectionDetailPage = () => {
@@ -215,37 +216,29 @@ const CollectionDetailPage = () => {
   );
 
   return (
-    <CollectionDetailLayout
-      navigation={{ onGoBack: () => navigate(backTo), t }}
-      loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
-      collection={{
-        collectionDataFromApi: collectionDataFromApi ?? null,
-        hierarchySuccess,
-        collectionData,
-        displayCollectionData,
-      }}
-      contentArea={contentArea}
-      certificateModal={{
-        certificatePreviewOpen,
-        certificatePreviewUrl,
-        certificatePreviewDetails,
-        setCertificatePreviewUrl,
-        setCertificatePreviewOpen,
-      }}
-      relatedContent={{
-        searchError,
-        searchErrorObj: searchErrorObj ?? null,
-        searchFetching,
-        relatedContentItems,
-        searchRefetch,
-      }}
-      courseCompletion={{
-        courseProgressProps,
-        isEnrolledInCurrentBatch,
-        collectionId,
-        hasCertificate,
-      }}
-    />
+    <>
+      <TelemetryTracker
+        disabled={!collectionData}
+        startEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-page' }}
+        endEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-exit' }}
+        startOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+        endOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+      />
+      <CollectionDetailLayout
+        navigation={{ onGoBack: () => navigate(backTo), t }}
+        loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
+        collection={{
+          collectionDataFromApi: collectionDataFromApi ?? null,
+          hierarchySuccess,
+          collectionData,
+          displayCollectionData,
+        }}
+        contentArea={contentArea}
+        certificateModal={{ certificatePreviewOpen, certificatePreviewUrl, certificatePreviewDetails, setCertificatePreviewUrl, setCertificatePreviewOpen }}
+        relatedContent={{ searchError, searchErrorObj: searchErrorObj ?? null, searchFetching, relatedContentItems, searchRefetch }}
+        courseCompletion={{ courseProgressProps, isEnrolledInCurrentBatch, collectionId, hasCertificate }}
+      />
+    </>
   );
 };
 export default CollectionDetailPage;

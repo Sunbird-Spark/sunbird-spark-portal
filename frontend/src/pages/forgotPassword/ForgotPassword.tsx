@@ -7,6 +7,7 @@ import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 const ForgotPassword: React.FC = () => {
   const { mutateAsync: searchUser } = useLearnerFuzzySearch();
@@ -33,6 +34,10 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <AuthLayout onClose={() => window.location.href = '/portal/login?prompt=none'} isOtpPage={step === 3}>
+      <TelemetryTracker 
+        startEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
+        endEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
+      />
       <div className="w-full font-rubik">
         {step === 1 && (
           <IdentifyUser

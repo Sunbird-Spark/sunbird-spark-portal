@@ -6,19 +6,14 @@ import _ from 'lodash';
 import { saveSession } from '../utils/sessionUtils.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
-const {
-    KONG_URL,
-    SUNBIRD_ANONYMOUS_SESSION_TTL,
-    KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: bearerToken,
-    KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: loggedBearerToken,
-} = envConfig;
+// Use envConfig directly to ensure mocks are picked up correctly in tests
 
 export const refreshSessionTTL = (req: Request) => {
     if (req?.session?.userId && req?.oidc?.isAuthenticated) {
         setSessionTTLFromToken(req);
     } else {
-        _.set(req, 'session.cookie.maxAge', SUNBIRD_ANONYMOUS_SESSION_TTL);
-        _.set(req, 'session.cookie.expires', new Date(Date.now() + SUNBIRD_ANONYMOUS_SESSION_TTL));
+        _.set(req, 'session.cookie.maxAge', envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL);
+        _.set(req, 'session.cookie.expires', new Date(Date.now() + envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL));
     }
 };
 
@@ -26,15 +21,15 @@ export const isSessionNearExpiry = (req: Request): boolean => {
     const expiresAt = req.session?.cookie?.expires;
     if (!expiresAt || !(expiresAt instanceof Date)) return true;
     const remaining = expiresAt.getTime() - Date.now();
-    const maxAge = req.session?.cookie?.maxAge ?? SUNBIRD_ANONYMOUS_SESSION_TTL;
+    const maxAge = req.session?.cookie?.maxAge ?? envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL;
     const threshold = maxAge / 2;
     return remaining <= threshold;
 };
 
 export const generateKongToken = async (req: Request): Promise<string> => {
-    const apiEndpoint = `${KONG_URL}/api-manager/v2/consumer/portal_anonymous/credential/register`;
+    const apiEndpoint = `${envConfig.KONG_URL}/api-manager/v2/consumer/portal_anonymous/credential/register`;
 
-    if (!KONG_URL || !bearerToken) {
+    if (!envConfig.KONG_URL || !envConfig.KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN) {
         throw new Error('Device registration configuration missing');
     }
 
@@ -44,7 +39,7 @@ export const generateKongToken = async (req: Request): Promise<string> => {
 
     const headers = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${bearerToken}`
+        Authorization: `Bearer ${envConfig.KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN}`
     };
 
     const response = await axios.post(
@@ -72,10 +67,10 @@ export const generateKongToken = async (req: Request): Promise<string> => {
 export const generateLoggedInKongToken = async (req: Request): Promise<string> => {
     logger.info('LOGGEDIN_KONG_TOKEN :: requesting logged-in token from Kong');
 
-    const apiEndpoint = `${KONG_URL}/api-manager/v2/consumer/portal_loggedin/credential/register`;
+    const apiEndpoint = `${envConfig.KONG_URL}/api-manager/v2/consumer/portal_loggedin/credential/register`;
 
     try {
-        if (!KONG_URL || !loggedBearerToken) {
+        if (!envConfig.KONG_URL || !envConfig.KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN) {
             throw new Error('Device registration configuration missing for logged-in user');
         }
 
@@ -85,7 +80,7 @@ export const generateLoggedInKongToken = async (req: Request): Promise<string> =
 
         const headers = {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${loggedBearerToken}`
+            Authorization: `Bearer ${envConfig.KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN}`
         };
 
         const response = await axios.post(

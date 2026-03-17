@@ -9,6 +9,7 @@ import { envConfig } from '../config/env.js';
 import { sessionMiddleware } from '../middlewares/conditionalSession.js';
 import crypto from 'crypto';
 import _ from 'lodash';
+import { generateTelemetryStart, generateTelemetryEnd, dispatchTelemetry } from '../services/telemetryService.js';
 
 const router = express.Router();
 
@@ -168,6 +169,16 @@ router.get('/auth/callback',
                 // Explicitly save session before redirect to ensure all data is persisted
                 await saveSession(req);
 
+                // Dispatch Global Session START Telemetry
+                try {
+                    const startEvent = generateTelemetryStart(req);
+                    dispatchTelemetry(req, [startEvent]).catch(err => {
+                        logger.error('Background telemetry dispatch failed', err);
+                    });
+                } catch (telemetryErr) {
+                    logger.error('Failed to generate START telemetry event', telemetryErr);
+                }
+
                 logger.info('Session setup complete, redirecting to /home');
                 // Use HTML redirect instead of 302 to break the POST redirect chain.
                 // When Keycloak redirects back via POST, a 302 keeps the chain alive
@@ -194,6 +205,16 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
     // Extract ID token before clearing session so we can pass it to the provider
     const idToken = req.session?.['oidc-tokens']?.id_token;
     const redirectUri = envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/';
+
+    // Dispatch Global Session END Telemetry before destroying the session
+    try {
+        const endEvent = generateTelemetryEnd(req);
+        dispatchTelemetry(req, [endEvent]).catch(err => {
+            logger.error('Background telemetry dispatch failed on logout', err);
+        });
+    } catch (telemetryErr) {
+        logger.error('Failed to generate END telemetry event', telemetryErr);
+    }
 
     // Destroy the session in the store and clear the cookie so the browser starts
     // completely fresh on the next login (no stale session data or ID).

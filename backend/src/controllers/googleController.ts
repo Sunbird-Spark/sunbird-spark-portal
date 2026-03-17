@@ -8,7 +8,12 @@ import {
     validateRedirectUrl,
     buildGoogleAuthUrl,
     exchangeGoogleCode,
+    createKeycloakGoogleSession,
 } from '../services/googleAuthService.js';
+import { regenerateSession, saveSession } from '../utils/sessionUtils.js';
+import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
+import { fetchUserById, setUserSession } from '../services/userService.js';
+import { envConfig } from '../config/env.js';
 import { Request, Response } from 'express';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
@@ -57,21 +62,62 @@ export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
     try {
         const { state, codeVerifier, client_id } = validateOAuthSession(req);
 
+        // Capture redirect_uri before session cleanup in finally
+        const redirectUri = req.session.googleOAuth?.redirect_uri;
+
         const code = validateOAuthCallback(req, state);
 
         markSessionAsUsed(req);
 
-        // Exchange the Google authorization code for tokens and extract email/name
-        // directly from Google's ID token — no Keycloak broker, no SPI masking.
+        // Step 1: Exchange Google auth code → real email/name from Google ID token
         const googleUser = await exchangeGoogleCode(code, codeVerifier);
 
+        // Step 2: Create/find user in Sunbird
         await handleUserAuthentication(googleUser, client_id, req);
 
-        // Redirect to portal login with kc_idp_hint=google.
-        // The user just authenticated with Google so the browser has an active
-        // Google session. Keycloak will use it for silent SSO (prompt=none default)
-        // and issue a portal-scoped access token without showing a login form.
-        return res.redirect('/portal/login?kc_idp_hint=google');
+        // Step 3: Create Keycloak session directly using ROPC grant with
+        // KEYCLOAK_GOOGLE_CLIENT_ID/SECRET — mirrors obtainDirectly(emailId)
+        // from the reference SunbirdEd portal implementation
+        const tokens = await createKeycloakGoogleSession(googleUser.emailId!);
+
+        // Step 4: Set up portal session (same as portalAuthRoutes.ts callback)
+        req.session['oidc-tokens'] = {
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+            id_token: tokens.id_token,
+        };
+
+        req.oidc = {
+            isAuthenticated: true,
+            accessToken: tokens.access_token,
+            refreshToken: tokens.refresh_token,
+            idToken: tokens.id_token,
+            tokenClaims: tokens.tokenClaims || undefined,
+        };
+
+        await regenerateSession(req);
+        setSessionTTLFromToken(req);
+
+        const tokenSubject = tokens.tokenClaims?.sub as string | undefined;
+        if (tokenSubject) {
+            const userIdFromToken = _.last(_.split(tokenSubject, ':'));
+            req.session.userId = userIdFromToken;
+
+            if (userIdFromToken) {
+                try {
+                    const userProfileResponse = await fetchUserById(userIdFromToken, req);
+                    await setUserSession(req, userProfileResponse);
+                } catch (userErr) {
+                    logger.error('Failed to fetch user profile during Google callback:', userErr);
+                }
+            }
+        }
+
+        await saveSession(req);
+
+        const homeUrl = (envConfig.DEVELOPMENT_REACT_APP_URL || '') + '/home';
+        const destination = redirectUri || homeUrl;
+        return res.redirect(destination);
     } catch (error) {
         logger.error('Error in Google OAuth callback:', error);
         const safeErrorCallback = validateRedirectUrl(req.session?.googleOAuth?.error_callback);

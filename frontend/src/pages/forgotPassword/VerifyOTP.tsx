@@ -6,6 +6,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/common/Input
 import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
 import { redirectWithError } from '../../utils/forgotPasswordUtils';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 interface VerifyOTPProps {
     selectedIdentifier: OtpIdentifier;
@@ -158,6 +159,10 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
 
     return (
         <>
+            <TelemetryTracker 
+                startEventInput={{ type: 'workflow', mode: 'otp-verification', pageid: 'verify-otp-step' }}
+                endEventInput={{ type: 'workflow', mode: 'otp-verification', pageid: 'verify-otp-step' }}
+            />
             <Header
                 title={t('forgotPasswordPage.enterCode')}
                 subtitle={t('forgotPasswordPage.otpSentInstruction')}
