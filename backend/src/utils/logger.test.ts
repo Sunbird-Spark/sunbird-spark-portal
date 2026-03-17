@@ -39,7 +39,10 @@ describe('Logger', () => {
   });
 
   it('should write logs to console transport', async () => {
-    const writeSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    // Spy on the Writable stream write() method rather than process.stdout — Vitest
+    // captures stdout internally, so a process.stdout.write spy is unreliable here.
+    const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
+    const writeSpy = vi.spyOn(consoleTransport, 'write');
 
     logger.info('Test log message');
 
