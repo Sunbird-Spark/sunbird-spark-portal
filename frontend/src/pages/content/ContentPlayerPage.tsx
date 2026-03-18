@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
@@ -19,6 +19,7 @@ const ContentPlayerPage = () => {
   const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useImpression({ type: 'view', pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
   const telemetry = useTelemetry();

@@ -14,6 +14,7 @@ interface ReissueTarget {
 
 interface CertResultsTableProps {
   certUser: any;
+  batches: CertUserBatch[];
   searchError: any;
   uniqueId: string;
   isOwner: boolean;
@@ -22,13 +23,14 @@ interface CertResultsTableProps {
 
 export const CertResultsTable: React.FC<CertResultsTableProps> = ({
   certUser,
+  batches,
   searchError,
   uniqueId,
   isOwner,
   setReissueTarget,
 }) => {
   const { t } = useAppI18n();
-  const hasBatches = certUser && Array.isArray(certUser?.courses?.batches) && certUser.courses.batches.length > 0;
+  const hasBatches = certUser && batches.length > 0;
 
   if (!certUser && !searchError) return null;
 
@@ -58,7 +60,7 @@ export const CertResultsTable: React.FC<CertResultsTableProps> = ({
               </td>
             </tr>
           ) : (
-            certUser?.courses.batches.map((batch: CertUserBatch, idx: number) => {
+            batches.map((batch: CertUserBatch, idx: number) => {
               const hasCertificate = batch.issuedCertificates && batch.issuedCertificates.length > 0;
               const isCompleted = batch.status === 2;
               const criteriaMet = isCompleted ? t('certificatesTab.yes') : t('certificatesTab.no');
