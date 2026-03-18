@@ -26,6 +26,7 @@ const SORT_OPTIONS = [
 
 const Explore = () => {
   const { t } = useAppI18n();
+  useImpression({ type: 'view', pageid: 'explore', env: 'explore' });
   const [searchParams, setSearchParams] = useSearchParams();
   const { interact } = useInteract();
 

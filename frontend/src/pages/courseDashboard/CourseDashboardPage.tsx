@@ -22,6 +22,7 @@ const VALID_TABS: DashboardTab[] = ['batches', 'certificates'];
 const CourseDashboardPage: React.FC = () => {
   const { t } = useAppI18n();
   const { collectionId, tab } = useParams<{ collectionId: string; tab: string }>();
+  useImpression({ type: 'view', pageid: 'course-dashboard', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const navigate = useNavigate();
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);

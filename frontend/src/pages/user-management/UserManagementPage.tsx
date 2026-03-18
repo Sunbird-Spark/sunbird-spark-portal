@@ -14,6 +14,7 @@ import { useAcceptTnc, useGetTncUrl } from "@/hooks/useTnc";
 import { useUserRead } from "@/hooks/useUserRead";
 import { TncService } from "@/services/TncService";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+import useImpression from '@/hooks/useImpression';
 import _ from "lodash";
 import "../home/home.css";
 import "./user-management.css";
@@ -35,6 +36,7 @@ const UM_TABS: UMTab[] = [
 
 const UserManagementPage = () => {
   const { toast } = useToast();
+  useImpression({ type: 'view', pageid: 'user-management', env: 'user-management' });
 
   const [activeTab, setActiveTab] = useState<string>(UM_TABS[0]?.id ?? "role-management");
   const [availableRoles, setAvailableRoles] = useState<RoleItem[]>([]);

@@ -14,7 +14,7 @@ import "./landing.css";
 
 const Index = () => {
   const { t } = useAppI18n();
-  useImpression({ type: 'view', pageid: 'landing' });
+  useImpression({ type: 'view', pageid: 'landing', env: 'public' });
 
   const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {

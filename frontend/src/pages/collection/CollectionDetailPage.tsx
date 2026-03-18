@@ -26,12 +26,12 @@ import "./collection.css";
 const CollectionDetailPage = () => {
   const navigate = useNavigate();
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
+  useImpression({ type: 'view', pageid: 'collection-detail', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const backTo = useCollectionBackNavigation(collectionId);
   const { isAuthenticated } = usePermissions();
   const isContentCreator = useIsContentCreator();
   const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
   const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
-  useImpression({ type: 'view', pageid: 'collection-detail', object: { id: collectionId || '', type: 'Collection' } });
 
   const {
     collectionDataFromApi, collectionData, userProfile, enrollment,

@@ -17,7 +17,7 @@ export function mapApiItemToUserCourseProgress(
 ): UserCourseProgress {
   return {
     id: item.courseid,
-    courseName: item.collectionDetails.name,
+    courseName: item.collectionDetails?.name ?? '—',
     progressPercent: item.completionpercentage ?? 0,
     status: STATUS_MAP[item.status] ?? 'Not Started',
     enrollmentDate: toDateOnly(item.enrolled_date),
@@ -33,7 +33,7 @@ export function mapApiItemToUserAssessmentHistory(
   const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
   return {
     id: item.attempt_id,
-    courseName: item.collectionDetails.name,
+    courseName: item.collectionDetails?.name ?? '—',
     assessmentName: item.contentDetails?.name ?? '—',
     score,
     maxScore,

@@ -69,6 +69,7 @@ describe('getSessionStore', () => {
     });
 
     it('should create PgStore when SUNBIRD_PORTAL_SESSION_STORE is yugabyte', async () => {
+        vi.resetModules();
         vi.doMock('../config/env.js', () => ({
             envConfig: {
                 SUNBIRD_PORTAL_SESSION_STORE: 'yugabyte',

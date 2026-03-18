@@ -6,7 +6,7 @@ import useImpression from '@/hooks/useImpression';
 const ReportsPage: React.FC = () => {
   const { t } = useAppI18n();
 
-  useImpression({ type: 'view', pageid: 'reports' });
+  useImpression({ type: 'view', pageid: 'reports', env: 'reports' });
 
   return (
     <div>

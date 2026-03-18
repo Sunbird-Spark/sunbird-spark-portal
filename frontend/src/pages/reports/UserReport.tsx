@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useParams } from "react-router-dom";
 import ReportLayout from "@/components/reports/ReportLayout";
 import useImpression from "@/hooks/useImpression";
 import SummaryCard from "@/components/reports/SummaryCard";
@@ -20,7 +21,10 @@ const statusColor: Record<string, string> = {
 };
 
 const UserReport = () => {
-  useImpression({ type: 'view', pageid: 'user-report' });
+  const { userId } = useParams();
+  // userId is 'me' on the self-service route (/reports/user/me), which mirrors
+  // the reference portal's convention of using 'me' as a proxy for the logged-in user.
+  useImpression({ type: 'view', pageid: 'user-report', env: 'reports', object: { id: userId || '', type: 'User' } });
   const { t } = useAppI18n();
 
   const { data: userReadData } = useUserRead();
