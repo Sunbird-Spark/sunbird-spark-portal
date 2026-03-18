@@ -114,14 +114,14 @@ describe('mapApiItemToUserCourseProgress', () => {
     expect(result.lastAccessed).toMatch(/ago|seconds/);
   });
 
-  it('falls back to courseid when collectionDetails is undefined', () => {
+  it('falls back to "—" when collectionDetails is undefined', () => {
     const result = mapApiItemToUserCourseProgress(makeItem({ collectionDetails: undefined }));
-    expect(result.courseName).toBe('do_1');
+    expect(result.courseName).toBe('—');
   });
 
-  it('falls back to courseid when collectionDetails is null', () => {
+  it('falls back to "—" when collectionDetails is null', () => {
     const result = mapApiItemToUserCourseProgress(makeItem({ collectionDetails: null }));
-    expect(result.courseName).toBe('do_1');
+    expect(result.courseName).toBe('—');
   });
 });
 
@@ -146,14 +146,14 @@ describe('mapApiItemToUserAssessmentHistory', () => {
     expect(mapApiItemToUserAssessmentHistory(makeAssessmentItem({}))).toMatchObject({ courseName: 'Test Course' });
   });
 
-  it('falls back to course_id when collectionDetails is undefined', () => {
+  it('falls back to "—" when collectionDetails is undefined', () => {
     const result = mapApiItemToUserAssessmentHistory(makeAssessmentItem({ collectionDetails: undefined }));
-    expect(result.courseName).toBe('do_course_1');
+    expect(result.courseName).toBe('—');
   });
 
-  it('falls back to course_id when collectionDetails is null', () => {
+  it('falls back to "—" when collectionDetails is null', () => {
     const result = mapApiItemToUserAssessmentHistory(makeAssessmentItem({ collectionDetails: null }));
-    expect(result.courseName).toBe('do_course_1');
+    expect(result.courseName).toBe('—');
   });
 
   it('calculates percentage from score / maxScore', () => {
@@ -189,11 +189,6 @@ describe('mapApiItemToUserAssessmentHistory', () => {
     expect(result.attemptDate).toBe('2026-03-04 14:22');
   });
 
-  it('falls back to "—" when collectionDetails is undefined', () => {
-    expect(
-      mapApiItemToUserCourseProgress(makeItem({ collectionDetails: undefined })).courseName
-    ).toBe('—');
-  });
 });
 
 describe('mapApiItemToUserAssessmentHistory', () => {
