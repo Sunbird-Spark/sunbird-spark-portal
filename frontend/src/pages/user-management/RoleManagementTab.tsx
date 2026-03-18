@@ -8,6 +8,7 @@ import { RoleDialog, type RoleDialogState } from "./RoleDialog";
 import { DeleteRoleDialog, type DeleteDialogState } from "./DeleteRoleDialog";
 import { UserRoleTable } from "./UserRoleTable";
 import { useToast } from "@/hooks/useToast";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import {
   userManagementService,
   type UserSearchResult,
@@ -28,6 +29,7 @@ interface RoleManagementTabProps {
 
 const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations }: RoleManagementTabProps) => {
   const { toast } = useToast();
+  const telemetry = useTelemetry();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
@@ -109,6 +111,10 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
     setIsSavingRole(true);
     try {
       await userManagementService.assignRole(roleDialog.userId, selectedRole, organisationId.trim(), roleDialog.operation);
+      telemetry.audit({
+        edata: { props: ['roles'], state: roleDialog.operation === 'add' ? 'RoleAdded' : 'RoleUpdated' },
+        object: { id: roleDialog.userId, type: 'User' },
+      });
       toast({
         title: roleDialog.operation === "add" ? "Role Added" : "Role Updated",
         description: `Role ${selectedRole} has been ${roleDialog.operation === "add" ? "added" : "updated"} successfully.`,
@@ -159,6 +165,10 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
         deleteDialog.roleInfo.scope?.[0]?.organisationId ?? "",
         "remove"
       );
+      telemetry.audit({
+        edata: { props: ['roles'], state: 'RoleRemoved' },
+        object: { id: removedUserId, type: 'User' },
+      });
       toast({ title: "Role Removed", description: `Role ${removedRole} has been removed.`, variant: "destructive" });
       // Optimistic update — immediately remove the role chip from the table
       setSearchResults((prev) =>
@@ -193,7 +203,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
             onKeyDown={handleSearchKeyDown}
           />
         </div>
-        <Button onClick={handleSearch} disabled={isSearching} className="um-search-btn">
+        <Button onClick={handleSearch} disabled={isSearching} className="um-search-btn" data-edataid="um-user-search" data-pageid="user-management">
           {isSearching ? "Searching..." : "Search"}
         </Button>
       </div>
