@@ -36,8 +36,10 @@ export const TelemetryTracker: React.FC<TelemetryTrackerProps> = ({
   const telemetryRef = useRef(telemetry);
   useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
 
-  // Effect that fires START once data is available (disabled becomes false)
-  // Runs whenever disabled flips to false
+  // Effect that fires START once data is available (disabled becomes false).
+  // `startEventInput` and `startOptions` are intentionally excluded from deps:
+  // START must fire exactly once when disabled flips to false, not re-fire
+  // if props change later (hasStarted.current guards the single-fire semantic).
   useEffect(() => {
     if (disabled) return;
     if (startEventInput && !hasStarted.current) {

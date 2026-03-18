@@ -19,6 +19,10 @@ vi.mock('@/hooks/useUser', () => ({
 
 import { useIsMentor, useIsContentCreator } from '@/hooks/useUser';
 
+vi.mock('@/hooks/useInteract', () => ({
+  default: () => ({ interact: vi.fn() }),
+}));
+
 vi.mock('@/components/common/PageLoader', () => ({
   default: ({ message, error }: { message?: string; error?: string }) => (
     <div data-testid="page-loader">

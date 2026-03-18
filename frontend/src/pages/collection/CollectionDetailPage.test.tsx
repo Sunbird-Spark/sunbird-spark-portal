@@ -106,6 +106,10 @@ vi.mock('@/hooks/useContentPlayer', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useCollectionAutoNavigate', () => ({
+  useCollectionAutoNavigate: () => {},
+}));
+
 vi.mock('@/services/collection', () => ({
   mapSearchContentToRelatedContentItems: (content?: Array<any>) => {
     return content && content.length > 0 ? content.slice(0, 3) : [];

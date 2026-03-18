@@ -1,3 +1,5 @@
+// Provides stable handlePlayerEvent and handleTelemetryEvent callbacks for the
+// embedded content player, with optional console logging controlled by enableLogging.
 import { useCallback } from 'react';
 
 export interface PlayerEvent {
@@ -8,7 +10,9 @@ export interface PlayerEvent {
 
 export interface TelemetryEvent {
   type: string;
-  data?: any;
+  eid?: string;
+  edata?: Record<string, unknown>;
+  data?: Record<string, unknown>;
   timestamp?: number;
 }
 

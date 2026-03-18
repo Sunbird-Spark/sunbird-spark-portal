@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -9,6 +9,8 @@ interface ContentNameDialogProps {
   isLoading?: boolean;
   optionTitle?: string;
   optionId?: string;
+  cdata?: Array<{ id: string; type: string }>;
+  submitButtonProps?: Record<string, any>;
 }
 
 export default function ContentNameDialog({
@@ -18,6 +20,8 @@ export default function ContentNameDialog({
   isLoading = false,
   optionTitle,
   optionId,
+  cdata,
+  submitButtonProps,
 }: ContentNameDialogProps) {
   const { t } = useAppI18n();
   const [name, setName] = useState("");
@@ -25,6 +29,11 @@ export default function ContentNameDialog({
 
   // Only show description for course creation
   const showDescription = optionId === 'course';
+
+  const submitCdata = useMemo(
+    () => JSON.stringify([...(cdata ?? []), { id: name, type: 'ContentName' }]),
+    [cdata, name]
+  );
 
   // Reset fields when dialog is closed
   useEffect(() => {
@@ -127,6 +136,8 @@ export default function ContentNameDialog({
               size="sm"
               disabled={!canSubmit || isLoading}
               className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
+              {...submitButtonProps}
+              data-cdata={submitCdata}
             >
               {isLoading ? t('workspace.creating') : t('create')}
             </Button>

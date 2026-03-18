@@ -84,6 +84,9 @@ vi.mock('@/hooks/useContentPlayer', () => ({
     handleTelemetryEvent: vi.fn(),
   }),
 }));
+vi.mock('@/hooks/useCollectionAutoNavigate', () => ({
+  useCollectionAutoNavigate: () => {},
+}));
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => key,
