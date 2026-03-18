@@ -39,37 +39,29 @@ describe('Logger', () => {
   });
 
   it('should write logs to console transport', async () => {
+    // Spy on the Writable stream write() method rather than process.stdout — Vitest
+    // captures stdout internally, so a process.stdout.write spy is unreliable here.
     const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
-
-    const spy = vi
-      .spyOn(consoleTransport, 'log')
-      .mockImplementation((_info, callback) => {
-        callback?.();
-        return true;
-      });
+    const writeSpy = vi.spyOn(consoleTransport, 'write');
 
     logger.info('Test log message');
 
     await vi.waitFor(() => {
-      expect(spy).toHaveBeenCalled();
+      expect(writeSpy).toHaveBeenCalled();
     }, { timeout: 1000, interval: 50 });
 
-    spy.mockRestore();
+    writeSpy.mockRestore();
   });
 
   it('should format log with timestamp, level and message', async () => {
     const consoleTransport = logger.transports[0] as winston.transports.ConsoleTransportInstance;
-
-    const spy = vi
-      .spyOn(consoleTransport, 'log')
-      .mockImplementation((info, callback) => {
-        const formattedMessage = info[Symbol.for('message')];
-        expect(formattedMessage).toMatch(
-          /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[info\]: Formatted log test/
-        );
-        callback?.();
-        return true;
-      });
+    const spy = vi.spyOn(consoleTransport, 'log').mockImplementation((info, callback) => {
+      const formattedMessage = info[Symbol.for('message')];
+      expect(formattedMessage).toMatch(
+        /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[info\]: Formatted log test/
+      );
+      callback();
+    });
 
     logger.info('Formatted log test');
 

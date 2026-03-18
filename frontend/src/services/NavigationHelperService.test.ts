@@ -45,20 +45,23 @@ describe('NavigationHelperService', () => {
   // ─── storeUrlHistory ────────────────────────────────────────────────────────
 
   describe('storeUrlHistory()', () => {
-    it('pushes the first URL into history', () => {
-      service.storeUrlHistory('/home');
+    it('pushes the first URL into history and returns true', () => {
+      const result = service.storeUrlHistory('/home');
+      expect(result).toBe(true);
       expect(service.getPreviousUrl()).toBeUndefined(); // only 1 entry, no "previous"
     });
 
-    it('grows history when URLs differ', () => {
+    it('grows history when URLs differ and returns true', () => {
       service.storeUrlHistory('/home');
-      service.storeUrlHistory('/explore');
+      const result = service.storeUrlHistory('/explore');
+      expect(result).toBe(true);
       expect(service.getPreviousUrl()).toBe('/home');
     });
 
-    it('does NOT grow history when the same URL is pushed twice (refresh / same-page link)', () => {
+    it('does NOT grow history when the same URL is pushed twice and returns false (refresh / same-page link)', () => {
       service.storeUrlHistory('/home');
-      service.storeUrlHistory('/home'); // same URL again
+      const result = service.storeUrlHistory('/home'); // same URL again
+      expect(result).toBe(false);
       // History stays at 1 entry — no previous
       expect(service.getPreviousUrl()).toBeUndefined();
     });
@@ -73,9 +76,24 @@ describe('NavigationHelperService', () => {
     it('handles refresh mid-session without corrupting history', () => {
       service.storeUrlHistory('/home');
       service.storeUrlHistory('/explore');
-      service.storeUrlHistory('/explore'); // refresh
+      const result = service.storeUrlHistory('/explore'); // refresh
+      expect(result).toBe(false);
       // Still 2 entries: /home + /explore
       expect(service.getPreviousUrl()).toBe('/home');
+    });
+
+    it('treats URLs with different query strings as distinct navigations', () => {
+      service.storeUrlHistory('/course?id=1');
+      const result = service.storeUrlHistory('/course?id=2');
+      expect(result).toBe(true);
+      expect(service.getPreviousUrl()).toBe('/course?id=1');
+    });
+
+    it('returns false when the same full URL (with query string) is repeated', () => {
+      service.storeUrlHistory('/course?id=1');
+      const result = service.storeUrlHistory('/course?id=1');
+      expect(result).toBe(false);
+      expect(service.getPreviousUrl()).toBeUndefined();
     });
   });
 

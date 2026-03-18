@@ -6,11 +6,14 @@ import MyLearningProgress from "@/components/myLearning/MyLearningProgress";
 import MyLearningUpcomingBatches from "@/components/myLearning/MyLearningUpcomingBatches";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
 
 import "./mylearning.css";
 
 const MyLearning = () => {
   const { t } = useAppI18n();
+
+  useImpression({ type: 'view', pageid: 'my-learning', env: 'learn' });
 
   const { data, isLoading, error } = useUserEnrolledCollections();
   const courses = data?.data?.courses || [];
