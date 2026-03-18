@@ -1,25 +1,12 @@
-import { Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { Request, Response as ExpressResponse } from 'express';
 import { decodeJwtPayload } from '../auth/oidcProvider.js';
 import {
     getMobileClients,
     verifyEchoAuthToken,
     refreshMobileToken,
 } from '../services/mobileAuthService.js';
+import { Response } from '../models/Response.js';
 import logger from '../utils/logger.js';
-
-const buildResponse = (status: 'SUCCESS' | 'FAILED', result: unknown, error?: { err: string; errmsg: string }) => ({
-    id: 'api.refresh.token',
-    ver: '1.0',
-    ts: new Date().toISOString(),
-    params: {
-        resmsgid: uuidv4(),
-        status,
-        ...(error ?? {}),
-    },
-    responseCode: error?.errmsg ?? 'OK',
-    result: status === 'SUCCESS' ? result : {},
-});
 
 /**
  * POST /mobile/auth/v1/refresh/token
@@ -36,16 +23,16 @@ const buildResponse = (status: 'SUCCESS' | 'FAILED', result: unknown, error?: { 
  *
  * Response: standardised Sunbird envelope with { access_token, refresh_token, ... }
  */
-export const handleMobileTokenRefresh = async (req: Request, res: Response): Promise<void> => {
+export const handleMobileTokenRefresh = async (req: Request, res: ExpressResponse): Promise<void> => {
     logger.info('handleMobileTokenRefresh: called');
 
     const { refresh_token: refreshToken } = req.body ?? {};
 
     if (!refreshToken) {
         logger.error('handleMobileTokenRefresh: refresh_token missing');
-        res.status(400).json(
-            buildResponse('FAILED', {}, { err: 'refresh_token is required', errmsg: 'REFRESH_TOKEN_REQUIRED' })
-        );
+        const response = new Response('api.refresh.token');
+        response.setError({ err: 'REFRESH_TOKEN_REQUIRED', errmsg: 'refresh_token is required', responseCode: 'CLIENT_ERROR' });
+        res.status(400).json(response);
         return;
     }
 
@@ -53,9 +40,9 @@ export const handleMobileTokenRefresh = async (req: Request, res: Response): Pro
     const decoded = decodeJwtPayload(refreshToken);
     if (!decoded) {
         logger.error('handleMobileTokenRefresh: invalid JWT payload');
-        res.status(400).json(
-            buildResponse('FAILED', {}, { err: 'refresh_token is invalid', errmsg: 'INVALID_REFRESH_TOKEN' })
-        );
+        const response = new Response('api.refresh.token');
+        response.setError({ err: 'INVALID_REFRESH_TOKEN', errmsg: 'refresh_token is invalid', responseCode: 'CLIENT_ERROR' });
+        res.status(400).json(response);
         return;
     }
 
@@ -68,9 +55,9 @@ export const handleMobileTokenRefresh = async (req: Request, res: Response): Pro
 
     if (!clientDetails) {
         logger.error(`handleMobileTokenRefresh: unknown client aud=${aud}`);
-        res.status(400).json(
-            buildResponse('FAILED', {}, { err: 'client not supported', errmsg: 'INVALID_CLIENT' })
-        );
+        const response = new Response('api.refresh.token');
+        response.setError({ err: 'INVALID_CLIENT', errmsg: 'client not supported', responseCode: 'CLIENT_ERROR' });
+        res.status(400).json(response);
         return;
     }
 
@@ -83,13 +70,17 @@ export const handleMobileTokenRefresh = async (req: Request, res: Response): Pro
         const tokenResponse = await refreshMobileToken(clientDetails, refreshToken);
 
         logger.info('handleMobileTokenRefresh: success');
-        res.json(buildResponse('SUCCESS', tokenResponse));
+        const response = new Response('api.refresh.token');
+        response.setResult({ data: tokenResponse });
+        res.json(response);
     } catch (err: any) {
         logger.error('handleMobileTokenRefresh: failed', err);
-        const errMsg = err.error_msg || err.message || 'Something went wrong';
-        const errCode = err.error || 'UNHANDLED_EXCEPTION';
-        res.status(err.statusCode || 500).json(
-            buildResponse('FAILED', {}, { err: errMsg, errmsg: errCode })
-        );
+        const response = new Response('api.refresh.token');
+        response.setError({
+            err: err.error || 'UNHANDLED_EXCEPTION',
+            errmsg: err.error_msg || err.message || 'Something went wrong',
+            responseCode: err.statusCode >= 400 && err.statusCode < 500 ? 'CLIENT_ERROR' : 'SERVER_ERROR',
+        });
+        res.status(err.statusCode || 500).json(response);
     }
 };
