@@ -13,7 +13,6 @@ import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from "@/hooks/useImpression";
-import usePageSession from "@/hooks/usePageSession";
 import { useTelemetry } from "@/hooks/useTelemetry";
 
 const ContentPlayerPage = () => {
@@ -22,7 +21,6 @@ const ContentPlayerPage = () => {
   const navigate = useNavigate();
 
   useImpression({ type: 'view', pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
-  usePageSession({ pageid: 'content-player', object: { id: contentId || '', type: 'Content' } });
   const telemetry = useTelemetry();
 
   // Resolve where to go back: reject any /content/ or /collection/ path as a back-destination
