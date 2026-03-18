@@ -2,11 +2,8 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserRead } from './useUserRead';
 import { observabilityService } from '@/services/reports/ObservabilityService';
-import type { ContentByGroup, ContentStatusCount, TopCreator } from '@/types/reports';
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+import type { CategoryFacetValue, ContentByGroup, ContentStatusCount, CreatedByFacetValue, StatusFacetValue, TopCreator } from '@/types/reports';
+import { capitalize } from '@/utils/stringUtils';
 
 export function useContentStatusSummary(): {
   statusData: ContentStatusCount[];
@@ -15,7 +12,7 @@ export function useContentStatusSummary(): {
   isLoading: boolean;
   isError: boolean;
 } {
-  const { data: userReadData, isLoading: isUserLoading } = useUserRead();
+  const { data: userReadData, isPending: isUserPending } = useUserRead();
 
   const rootOrgId = useMemo(() => {
     const response = userReadData?.data?.response as Record<string, unknown> | undefined;
@@ -32,14 +29,14 @@ export function useContentStatusSummary(): {
   const statusData = useMemo<ContentStatusCount[]>(() => {
     const facet = summaryResult?.data.find((f) => f.facet === 'status');
     if (!facet) return [];
-    return (facet.values as Array<{ status: string; count: number }>)
+    return (facet.values as unknown as StatusFacetValue[])
       .map((v) => ({ status: capitalize(v.status), count: v.count }));
   }, [summaryResult]);
 
   const topCreatorsData = useMemo<TopCreator[]>(() => {
     const facet = summaryResult?.data.find((f) => f.facet === 'createdBy');
     if (!facet) return [];
-    return (facet.values as Array<{ createdBy: string; count: number; userDetails?: { firstName: string; lastName?: string } }>)
+    return (facet.values as unknown as CreatedByFacetValue[])
       .filter((v) => v.userDetails)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
@@ -52,7 +49,7 @@ export function useContentStatusSummary(): {
   const categoryData = useMemo<ContentByGroup[]>(() => {
     const facet = summaryResult?.data.find((f) => f.facet === 'primaryCategory');
     if (!facet) return [];
-    return (facet.values as Array<{ primaryCategory: string; count: number }>)
+    return (facet.values as unknown as CategoryFacetValue[])
       .map((v) => ({ group: capitalize(v.primaryCategory), count: v.count }));
   }, [summaryResult]);
 
@@ -60,7 +57,7 @@ export function useContentStatusSummary(): {
     statusData,
     topCreatorsData,
     categoryData,
-    isLoading: isUserLoading || isSummaryLoading,
+    isLoading: isUserPending || isSummaryLoading,
     isError: isSummaryError,
   };
 }

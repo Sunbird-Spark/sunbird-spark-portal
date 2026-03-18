@@ -81,7 +81,23 @@ export interface AdminCourseSummary {
   totalCompleted: number;
   completionPercent: number;
   certificatesIssued: number;
-  lastUpdated: string;
+  lastUpdated?: string;
+}
+
+export interface StatusFacetValue {
+  status: string;
+  count: number;
+}
+
+export interface CreatedByFacetValue {
+  createdBy: string;
+  count: number;
+  userDetails?: { firstName: string; lastName?: string };
+}
+
+export interface CategoryFacetValue {
+  primaryCategory: string;
+  count: number;
 }
 
 /** Raw shape returned by POST /observability/v1/reports for org-course-enrolment-summary */

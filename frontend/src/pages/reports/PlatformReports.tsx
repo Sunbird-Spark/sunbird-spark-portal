@@ -10,7 +10,6 @@ import ChartCard from "@/components/reports/ChartCard";
 import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper, { type Column } from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   popularContent,
@@ -18,7 +17,7 @@ import {
   userDemographics,
   userByAppType,
 } from "@/data/reportsMockData";
-import type { AdminCourseSummary, ContentByGroup } from "@/types/reports";
+import type { AdminCourseSummary } from "@/types/reports";
 import { useOrgCourseSummary } from "@/hooks/useOrgCourseSummary";
 import { useContentStatusSummary } from "@/hooks/useContentStatusSummary";
 
@@ -31,19 +30,13 @@ const PIE_COLORS = [
 
 const PlatformReports = () => {
   useImpression({ type: 'view', pageid: 'platform-reports', env: 'reports' });
-  const [contentGrouping, setContentGrouping] = useState("type");
   const [tableSearch, setTableSearch] = useState("");
   const [tableFilters, setTableFilters] = useState<Record<string, string>>({});
 
   const totalUsers = useMemo(() => userDemographics.reduce((s, d) => s + d.count, 0), []);
 
-  const { statusData, topCreatorsData, categoryData } = useContentStatusSummary();
+  const { statusData, topCreatorsData, categoryData: groupingData } = useContentStatusSummary();
   const { data: apiCourses, isLoading: isCoursesLoading, isError: isCoursesError } = useOrgCourseSummary();
-
-  const groupingData = useMemo<ContentByGroup[]>(
-    () => (contentGrouping === "type" ? categoryData : []),
-    [contentGrouping, categoryData]
-  );
 
   const filteredCourses = useMemo(() => {
     if (!tableSearch) return apiCourses;
@@ -100,20 +93,7 @@ const PlatformReports = () => {
           </ChartCard>
 
           {/* Content by Grouping – Bar Chart */}
-          <ChartCard
-            title="Content by Grouping"
-            actions={
-              <Select value={contentGrouping} onValueChange={setContentGrouping}>
-                <SelectTrigger className="w-[8.75rem] h-8 text-xs border-border"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="type">Content Type</SelectItem>
-                  <SelectItem value="taxonomy">Taxonomy</SelectItem>
-                  <SelectItem value="skills">Skills</SelectItem>
-                  <SelectItem value="category">Category</SelectItem>
-                </SelectContent>
-              </Select>
-            }
-          >
+          <ChartCard title="Content by Type">
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={groupingData} layout="vertical" margin={{ left: 10 }}>
@@ -212,7 +192,7 @@ const PlatformReports = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h2 className="text-lg font-semibold text-foreground">Admin Course Summary</h2>
           <ExportButton
-            data={filteredCourses as unknown as Record<string, unknown>[]}
+            data={filteredCourses}
             filename="platform-course-summary"
             columns={courseColumns.map((c) => ({ key: c.key, header: c.header }))}
           />

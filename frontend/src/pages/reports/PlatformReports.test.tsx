@@ -137,9 +137,9 @@ describe('PlatformReports', () => {
     expect(screen.getByText('No data available.')).toBeInTheDocument();
   });
 
-  it('renders content grouping select', () => {
+  it('renders content by type chart', () => {
     renderPage();
-    expect(screen.getByText('Content by Grouping')).toBeInTheDocument();
+    expect(screen.getByText('Content by Type')).toBeInTheDocument();
   });
 
   it('renders course rows from hook data', () => {
