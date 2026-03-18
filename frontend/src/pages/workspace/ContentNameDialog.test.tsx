@@ -213,13 +213,11 @@ describe('ContentNameDialog', () => {
     });
   });
 
-  it('should handle invalid data-cdata gracefully without crashing', () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
+  it('should include cdata prop entries before ContentName in data-cdata attribute', () => {
     render(
-      <ContentNameDialog 
-        {...defaultProps} 
-        submitButtonProps={{ 'data-cdata': 'invalid-json' }} 
+      <ContentNameDialog
+        {...defaultProps}
+        cdata={[{ id: 'course', type: 'EditorType' }]}
       />
     );
 
@@ -229,13 +227,7 @@ describe('ContentNameDialog', () => {
     const createButton = screen.getByRole('button', { name: 'Create' });
     expect(createButton).toHaveAttribute(
       'data-cdata',
-      JSON.stringify([{ id: 'My Content', type: 'ContentName' }])
+      JSON.stringify([{ id: 'course', type: 'EditorType' }, { id: 'My Content', type: 'ContentName' }])
     );
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      'Failed to parse data-cdata in ContentNameDialog',
-      expect.any(Error)
-    );
-
-    consoleWarnSpy.mockRestore();
   });
 });

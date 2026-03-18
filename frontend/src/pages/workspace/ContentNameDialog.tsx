@@ -9,6 +9,7 @@ interface ContentNameDialogProps {
   isLoading?: boolean;
   optionTitle?: string;
   optionId?: string;
+  cdata?: Array<{ id: string; type: string }>;
   submitButtonProps?: Record<string, any>;
 }
 
@@ -19,6 +20,7 @@ export default function ContentNameDialog({
   isLoading = false,
   optionTitle,
   optionId,
+  cdata,
   submitButtonProps,
 }: ContentNameDialogProps) {
   const { t } = useAppI18n();
@@ -28,20 +30,10 @@ export default function ContentNameDialog({
   // Only show description for course creation
   const showDescription = optionId === 'course';
 
-  const submitCdata = useMemo(() => {
-    let baseCdata: any[] = [];
-    if (submitButtonProps?.['data-cdata']) {
-      try {
-        const parsed = typeof submitButtonProps['data-cdata'] === 'string' 
-          ? JSON.parse(submitButtonProps['data-cdata']) 
-          : submitButtonProps['data-cdata'];
-        baseCdata = Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
-        console.warn('Failed to parse data-cdata in ContentNameDialog', e);
-      }
-    }
-    return JSON.stringify([...baseCdata, { id: name, type: 'ContentName' }]);
-  }, [submitButtonProps, name]);
+  const submitCdata = useMemo(
+    () => JSON.stringify([...(cdata ?? []), { id: name, type: 'ContentName' }]),
+    [cdata, name]
+  );
 
   // Reset fields when dialog is closed
   useEffect(() => {

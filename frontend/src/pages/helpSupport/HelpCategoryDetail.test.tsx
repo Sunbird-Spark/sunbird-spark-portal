@@ -216,6 +216,7 @@ describe('HelpCategoryDetail', () => {
                     id: 'faq',
                     subtype: 'toggle-clicked',
                     type: 'TOUCH',
+                    pageid: expect.any(String),
                     extra: {
                         values: {
                             action: 'toggle-clicked',
@@ -273,6 +274,7 @@ describe('HelpCategoryDetail', () => {
                         id: 'faq',
                         subtype: 'submit-clicked',
                         type: 'TOUCH',
+                        pageid: expect.any(String),
                         extra: {
                             values: {
                                 action: 'submit-clicked',

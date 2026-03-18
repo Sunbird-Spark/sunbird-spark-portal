@@ -14,7 +14,6 @@ import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoServ
 import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
 import useImpression from "@/hooks/useImpression";
-import { useCollectionAutoNavigate } from "@/hooks/useCollectionAutoNavigate";
 import { useCollectionPageUIState } from "@/hooks/useCollectionPageUIState";
 import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
 import { buildCollectionCdata, buildObjectRollup } from "@/utils/collectionTelemetryContext";

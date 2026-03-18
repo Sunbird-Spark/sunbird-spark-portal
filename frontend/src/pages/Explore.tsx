@@ -30,8 +30,6 @@ const Explore = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { interact } = useInteract();
 
-  useImpression({ type: 'view', pageid: 'explore-page' });
-
   // Initialize filters from URL on mount — every param except 'q' is treated as a filter code.
   // e.g. ?primaryCategory=Course&primaryCategory=Content+Playlist&mimeType=video%2Fmp4
   const [filters, setFilters] = useState<FilterState>(() => {

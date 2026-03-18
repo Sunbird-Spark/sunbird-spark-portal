@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 
@@ -24,8 +24,6 @@ export const useCollectionAutoNavigate = ({
   enrollment,
 }: UseCollectionAutoNavigateProps) => {
   const navigate = useNavigate();
-  const initialExpandedSet = useRef(false);
-
   // Redirect to batch if needed
   useEffect(() => {
     if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
@@ -47,5 +45,4 @@ export const useCollectionAutoNavigate = ({
     }
   }, [contentId, collectionData?.hierarchyRoot, collectionId, navigate, isTrackable, contentCreatorPrivilege, hasBatchInRoute, batchIdParam]);
 
-  return { initialExpandedSet };
 };

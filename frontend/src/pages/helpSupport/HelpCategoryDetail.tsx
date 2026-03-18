@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useImpression from "@/hooks/useImpression";
-import { useTelemetry } from "@/hooks/useTelemetry";
+import useInteract from "@/hooks/useInteract";
 import { navigationHelperService } from "@/services/NavigationHelperService";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import PageLoader from "@/components/common/PageLoader";
@@ -31,7 +31,7 @@ const HelpCategoryDetail = () => {
     const [openValue, setOpenValue] = useState<string>("item-0");
     const prevOpenValueRef = useRef<string>("item-0");
 
-    const telemetry = useTelemetry();
+    const { interact } = useInteract();
     useImpression({ type: 'view', pageid: 'help-category-detail', object: { id: categoryId || '', type: 'HelpCategory' } });
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
@@ -84,13 +84,13 @@ const HelpCategoryDetail = () => {
 
         const faq = sanitizedFaqs[targetIndex];
         if (faq) {
-            telemetry.interact({ edata: {
+            interact({
                 id: 'faq', subtype: 'toggle-clicked', type: 'TOUCH',
                 extra: { values: {
                     action: 'toggle-clicked', position: targetIndex + 1,
                     value: { topic: faq.question, description: faq.answer }, isOpened,
                 } },
-            } });
+            });
         }
 
         prevOpenValueRef.current = newValue;
@@ -104,13 +104,13 @@ const HelpCategoryDetail = () => {
     const handleSubmitFeedback = async (index: number) => {
         const text = feedbackText[index] ?? "";
         const faq = sanitizedFaqs[index];
-        telemetry.interact({ edata: {
+        interact({
             id: 'faq', subtype: 'submit-clicked', type: 'TOUCH',
             extra: { values: {
                 action: 'submit-clicked', position: index + 1,
                 value: { topic: faq?.question || String(index), description: faq?.answer || '', knowMoreText: text },
             } },
-        } });
+        });
         setFeedback((prev) => ({ ...prev, [index]: "submitted" }));
         setFeedbackText((prev) => ({ ...prev, [index]: "" }));
     };
@@ -193,7 +193,15 @@ const HelpCategoryDetail = () => {
                                                         aria-label={t('help.additionalFeedback')}
                                                         aria-required="true"
                                                     />
-                                                    <div className="flex justify-end">
+                                                    <div className="flex justify-end gap-[0.75rem]">
+                                                        <button
+                                                            onClick={() => setFeedback((prev) => ({ ...prev, [index]: null }))}
+                                                            data-edataid="faq-feedback-cancel"
+                                                            data-pageid="help-category-detail"
+                                                            className="text-sm font-medium font-['Rubik'] text-muted-foreground hover:opacity-80 transition-opacity px-[1.25rem] py-[0.5rem]"
+                                                        >
+                                                            {t('cancel')}
+                                                        </button>
                                                         <button
                                                             onClick={() => handleSubmitFeedback(index)}
                                                             disabled={!feedbackText[index]?.trim()}

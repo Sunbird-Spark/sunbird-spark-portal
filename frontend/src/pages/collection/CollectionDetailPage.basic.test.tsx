@@ -85,7 +85,7 @@ vi.mock('@/hooks/useContentPlayer', () => ({
   }),
 }));
 vi.mock('@/hooks/useCollectionAutoNavigate', () => ({
-  useCollectionAutoNavigate: () => ({ initialExpandedSet: { current: false } }),
+  useCollectionAutoNavigate: () => {},
 }));
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({

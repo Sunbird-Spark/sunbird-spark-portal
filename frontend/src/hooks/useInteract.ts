@@ -5,6 +5,7 @@ import { useTelemetry } from '@/hooks/useTelemetry';
 interface InteractData {
     id: string;
     type?: string;
+    subtype?: string;
     pageid?: string;
     extra?: Record<string, any>;
     object?: { id: string; type: string; ver?: string };
@@ -30,13 +31,14 @@ const useInteract = () => {
     const telemetry = useTelemetry();
 
     const interact = useCallback(
-        ({ id, type = 'CLICK', pageid, extra, object, cdata }: InteractData) => {
+        ({ id, type = 'CLICK', subtype, pageid, extra, object, cdata }: InteractData) => {
             const effectivePageId = pageid || location.pathname;
 
             telemetry.interact({
                 edata: {
                     type,
                     id,
+                    ...(subtype && { subtype }),
                     pageid: effectivePageId,
                     extra,
                 },

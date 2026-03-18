@@ -117,10 +117,7 @@ const WorkspacePage = () => {
   const questionSetRetire = useQuestionSetRetire();
   const [orgData, setOrgData] = useState<any>(null);
   const orgFetchAttempted = useRef(false);
-  const telemetry = useTelemetry();
   const { interact } = useInteract();
-
-  useImpression({ type: 'view', pageid: 'workspace' });
 
   useEffect(() => {
     if (slug && !orgFetchAttempted.current) {
@@ -634,10 +631,10 @@ const WorkspacePage = () => {
         isLoading={isCreating}
         optionTitle={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? t(EDITOR_OPTION_LABELS[selectedOption]) : undefined}
         optionId={selectedOption ?? undefined}
+        cdata={[{ id: selectedOption || 'unknown', type: 'EditorType' }]}
         submitButtonProps={{
           'data-edataid': 'workspace-create-collection-btn',
           'data-pageid': 'workspace',
-          'data-cdata': JSON.stringify([{ id: selectedOption || 'unknown', type: 'EditorType' }])
         }}
       />
       <ContentDynamicFormDialog
