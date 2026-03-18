@@ -15,9 +15,9 @@ vi.mock('axios', () => ({
 }));
 
 vi.mock('google-auth-library', () => ({
-    OAuth2Client: vi.fn(function (this: any) {
-        this.verifyIdToken = mockVerifyIdToken;
-    }),
+    OAuth2Client: class {
+        verifyIdToken = mockVerifyIdToken;
+    },
 }));
 
 vi.mock('../auth/oidcProvider.js', () => ({
