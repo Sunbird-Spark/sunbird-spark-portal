@@ -114,7 +114,7 @@ describe('mobileAuthService', () => {
 
     // -------------------------------------------------------------------------
     describe('keycloakNativeLogin', () => {
-        it('returns tokens on success and always sends client_secret', async () => {
+        it('returns tokens on success and omits client_secret when not configured', async () => {
             mockAxiosPost.mockResolvedValue({
                 data: {
                     access_token: 'acc',
@@ -131,8 +131,23 @@ describe('mobileAuthService', () => {
             expect(call[0]).toContain('/openid-connect/token');
             expect(call[1]).toContain('grant_type=password');
             expect(call[1]).toContain('username=user%40example.com');
-            // client_secret is always sent since Android client is confidential
-            expect(call[1]).toContain('client_secret=');
+            // KEYCLOAK_ANDROID_CLIENT_SECRET is '' in the mock env — must not send empty secret
+            expect(call[1]).not.toContain('client_secret');
+        });
+
+        it('sends client_secret when KEYCLOAK_ANDROID_CLIENT_SECRET is configured', async () => {
+            const { envConfig: mockEnv } = await import('../config/env.js');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (mockEnv as unknown as Record<string, string>).KEYCLOAK_ANDROID_CLIENT_SECRET = 'android-secret';
+            mockAxiosPost.mockResolvedValue({ data: { access_token: 'acc', refresh_token: 'ref' } });
+
+            await keycloakNativeLogin('user@example.com', 'password');
+
+            const call = mockAxiosPost.mock.calls[0] as [string, string];
+            expect(call[1]).toContain('client_secret=android-secret');
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (mockEnv as unknown as Record<string, string>).KEYCLOAK_ANDROID_CLIENT_SECRET = '';
         });
 
         it('throws mapped error on Keycloak failure', async () => {

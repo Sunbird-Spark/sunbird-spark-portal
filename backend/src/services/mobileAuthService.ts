@@ -86,11 +86,14 @@ export const keycloakNativeLogin = async (
     const params = new URLSearchParams({
         grant_type: 'password',
         client_id: envConfig.KEYCLOAK_ANDROID_CLIENT_ID,
-        client_secret: envConfig.KEYCLOAK_ANDROID_CLIENT_SECRET,
         username: emailId,
         password,
         scope: 'openid',
     });
+
+    if (envConfig.KEYCLOAK_ANDROID_CLIENT_SECRET) {
+        params.set('client_secret', envConfig.KEYCLOAK_ANDROID_CLIENT_SECRET);
+    }
 
     try {
         const response = await axios.post(tokenEndpoint, params.toString(), {
@@ -228,10 +231,13 @@ export const createKeycloakGoogleAndroidSession = async (
     const params = new URLSearchParams({
         grant_type: 'password',
         client_id: envConfig.KEYCLOAK_GOOGLE_ANDROID_CLIENT_ID,
-        client_secret: envConfig.KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET,
         username: emailId,
         scope: 'offline_access',
     });
+
+    if (envConfig.KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET) {
+        params.set('client_secret', envConfig.KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET);
+    }
 
     try {
         const response = await axios.post(tokenEndpoint, params.toString(), {
