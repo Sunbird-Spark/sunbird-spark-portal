@@ -1,3 +1,5 @@
+// Manages local UI state for CollectionDetailPage: certificate preview modal,
+// batch selector, accordion expansion, and the telemetry-instrumented toggleModule handler.
 import { useState, useCallback } from "react";
 import useInteract from "@/hooks/useInteract";
 

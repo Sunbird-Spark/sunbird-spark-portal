@@ -1,3 +1,6 @@
+// Handles two URL-redirect side effects for CollectionDetailPage:
+// 1. Redirects unenrolled users to their batch URL when no batch is in the route.
+// 2. Auto-navigates to the first leaf content item when no contentId is in the URL.
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
