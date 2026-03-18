@@ -2,6 +2,7 @@ import { useUserRead } from "@/hooks/useUserRead";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import HomeDashboardContent from "@/components/home/HomeDashboardContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
 
 import "./home.css";
 
@@ -15,6 +16,8 @@ const Home = () => {
         error: enrollmentsError
     } = useUserEnrolledCollections();
     const enrolledCount = enrolledCollections?.data?.courses?.length ?? 0;
+
+    useImpression({ type: 'view', pageid: 'home', env: 'home' });
 
     return (
         <main className="home-main-content">

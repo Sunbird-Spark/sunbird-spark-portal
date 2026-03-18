@@ -152,7 +152,7 @@ describe('Onboarding Component', () => {
     });
 
     renderWithRouter(<Onboarding />);
-    expect(mockNavigate).toHaveBeenCalledWith('/home');
+    expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
   });
 
   it('renders first screen with correct title and options', () => {
@@ -331,7 +331,7 @@ describe('Onboarding Component', () => {
           }),
         })
       );
-      expect(mockNavigate).toHaveBeenCalledWith('/home');
+      expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
     });
   });
 
@@ -363,7 +363,7 @@ describe('Onboarding Component', () => {
           }),
         })
       );
-      expect(mockNavigate).toHaveBeenCalledWith('/home');
+      expect(mockNavigate).toHaveBeenCalledWith('/home', { replace: true });
     });
   });
 
@@ -413,7 +413,7 @@ describe('Onboarding Component', () => {
 
     await waitFor(() => {
       expect(mockMutateAsync).not.toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
     });
   });
 

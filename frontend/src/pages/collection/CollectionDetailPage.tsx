@@ -19,10 +19,12 @@ import { buildCollectionCdata, buildObjectRollup } from "@/utils/collectionTelem
 import { useCollectionBackNavigation, useAuthRefreshOnce } from "./useCollectionBackNavigation";
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+import useImpression from '@/hooks/useImpression';
 import "./collection.css";
 
 const CollectionDetailPage = () => {
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
+  useImpression({ type: 'view', pageid: 'collection-detail', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const navigate = useNavigate();
   const backTo = useCollectionBackNavigation(collectionId);
   const { isAuthenticated } = usePermissions();

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import useImpression from "@/hooks/useImpression";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend,
@@ -29,6 +30,7 @@ const PIE_COLORS = [
 ];
 
 const PlatformReports = () => {
+  useImpression({ type: 'view', pageid: 'platform-reports', env: 'reports' });
   const [contentGrouping, setContentGrouping] = useState("type");
   const [tableSearch, setTableSearch] = useState("");
   const [tableFilters, setTableFilters] = useState<Record<string, string>>({});
