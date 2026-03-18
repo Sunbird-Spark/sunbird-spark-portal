@@ -60,7 +60,7 @@ const userWithoutOnboarding = {
 describe('OnboardingGuard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseIsAuthenticated.mockReturnValue(true);
+    mockUseIsAuthenticated.mockReturnValue({ isAuthenticated: true, isLoading: false });
     mockUseFormRead.mockReturnValue(formEnabled);
     mockUseUserRead.mockReturnValue(userWithoutOnboarding);
   });
@@ -68,7 +68,7 @@ describe('OnboardingGuard', () => {
   // ── Authentication ────────────────────────────────────────────────────────
 
   it('renders children immediately for unauthenticated users without any checks', () => {
-    mockUseIsAuthenticated.mockReturnValue(false);
+    mockUseIsAuthenticated.mockReturnValue({ isAuthenticated: false, isLoading: false });
 
     renderGuard();
     expect(screen.getByText('Protected Content')).toBeInTheDocument();

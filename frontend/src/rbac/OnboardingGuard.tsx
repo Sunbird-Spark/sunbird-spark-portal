@@ -10,7 +10,7 @@ interface OnboardingGuardProps {
 }
 
 const OnboardingGuard: React.FC<OnboardingGuardProps> = ({ children }) => {
-  const isAuthenticated = useIsAuthenticated();
+  const { isAuthenticated } = useIsAuthenticated();
 
   const { data: formApiData, isLoading: formLoading } = useFormRead({
     request: { type: 'user', subType: 'onboarding', action: 'workflow', component: 'portal' },
