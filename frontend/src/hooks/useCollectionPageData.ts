@@ -1,3 +1,5 @@
+// Aggregates all server-state needed by CollectionDetailPage: hierarchy, user profile,
+// enrollment, and derived flags (isTrackable, contentCreatorPrivilege, contentBlocked).
 import { useMemo } from "react";
 import { useCollection } from "@/hooks/useCollection";
 import { useUserRead } from "@/hooks/useUserRead";

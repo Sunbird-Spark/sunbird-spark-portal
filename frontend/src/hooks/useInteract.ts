@@ -25,6 +25,7 @@ interface InteractData {
  * @example
  * const { interact } = useInteract();
  * interact({ id: 'search-query', type: 'SEARCH', cdata: [{ id: query, type: 'Query' }] });
+ * interact({ id: 'faq', type: 'TOUCH', subtype: 'toggle-clicked', extra: { values: { ... } } });
  */
 const useInteract = () => {
     const location = useLocation();
