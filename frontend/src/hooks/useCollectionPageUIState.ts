@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import useInteract from "@/hooks/useInteract";
 
 interface UseCollectionPageUIStateProps {
@@ -12,7 +12,7 @@ export const useCollectionPageUIState = ({ batchIdParam }: UseCollectionPageUISt
   const [selectedBatchId, setSelectedBatchId] = useState("");
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
 
-  const toggleModule = (moduleId: string) => {
+  const toggleModule = useCallback((moduleId: string) => {
     interact({
       id: 'collection-unit-toggle',
       type: 'CLICK',
@@ -20,7 +20,7 @@ export const useCollectionPageUIState = ({ batchIdParam }: UseCollectionPageUISt
       cdata: [{ id: moduleId, type: 'Unit' }]
     });
     setExpandedModules((prev) => (prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]));
-  };
+  }, [interact, batchIdParam]);
 
   return {
     certificatePreviewOpen,
