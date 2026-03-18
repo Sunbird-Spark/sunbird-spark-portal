@@ -102,6 +102,15 @@ describe('handleMobileGoogleLogin', () => {
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ msg: 'emailId do not match' }));
     });
 
+    it('accepts emailId that differs only in case or whitespace', async () => {
+        const req = makeReq({ body: { emailId: '  User@Example.COM  ', platform: 'android' } });
+
+        await handleMobileGoogleLogin(req as Request, res as Response);
+
+        expect(res.status).not.toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(defaultTokens);
+    });
+
     it('returns 400 when Google token verification fails', async () => {
         mockVerifyGoogleIdToken.mockRejectedValue(new Error('Invalid token'));
 

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import { envConfig } from '../config/env.js';
 import {
     verifyGoogleIdToken,
@@ -53,8 +54,9 @@ export const handleMobileGoogleLogin = async (req: Request, res: Response): Prom
             return;
         }
 
-        // Step 2: Validate that the emailId in the body matches the token payload
-        if (emailId !== payload.email) {
+        // Step 2: Validate that the emailId in the body matches the token payload.
+        // Compare in lowercase+trimmed form since email addresses are case-insensitive.
+        if (_.toLower(_.trim(emailId)) !== _.toLower(_.trim(payload.email))) {
             logger.error(`handleMobileGoogleLogin: emailId mismatch — body=${emailId} token=${payload.email}`);
             res.status(400).json({ msg: 'emailId do not match' });
             return;
