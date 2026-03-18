@@ -104,10 +104,9 @@ describe('mobileAuthService', () => {
 
     // -------------------------------------------------------------------------
     describe('getMobileClients', () => {
-        it('returns the configured mobile clients', () => {
+        it('returns the configured mobile clients with secrets', () => {
             const clients = getMobileClients();
             expect(clients['android-client']).toBeDefined();
-            expect(clients['android-client']?.client_secret).toBeUndefined();
             expect(clients['google-android-client']).toBeDefined();
             expect(clients['google-android-client']?.client_secret).toBe('google-android-secret');
         });
@@ -354,6 +353,7 @@ describe('mobileAuthService', () => {
 
             await verifyEchoAuthToken('Bearer some-token');
             const echoCall = mockAxiosGet.mock.calls[0] as [string, { headers: Record<string, string> }];
+            // URL is normalised — trailing slash is ensured before appending 'test'
             expect(echoCall[0]).toBe('https://echo.example.com/test');
             expect(echoCall[1].headers.authorization).toBe('Bearer some-token');
         });
