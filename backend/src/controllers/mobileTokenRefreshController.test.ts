@@ -77,7 +77,7 @@ describe('handleMobileTokenRefresh', () => {
             expect.objectContaining({
                 id: 'api.refresh.token',
                 responseCode: 'OK',
-                params: expect.objectContaining({ status: 'SUCCESS' }),
+                params: expect.objectContaining({ status: 'successful' }),
                 result: { access_token: 'new-acc', refresh_token: 'new-ref' },
             })
         );
@@ -90,7 +90,7 @@ describe('handleMobileTokenRefresh', () => {
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith(
-            expect.objectContaining({ params: expect.objectContaining({ errmsg: 'REFRESH_TOKEN_REQUIRED' }) })
+            expect.objectContaining({ params: expect.objectContaining({ status: 'failed', err: 'REFRESH_TOKEN_REQUIRED' }) })
         );
         expect(mockVerifyEchoAuthToken).not.toHaveBeenCalled();
     });
@@ -102,7 +102,7 @@ describe('handleMobileTokenRefresh', () => {
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith(
-            expect.objectContaining({ params: expect.objectContaining({ errmsg: 'INVALID_REFRESH_TOKEN' }) })
+            expect.objectContaining({ params: expect.objectContaining({ status: 'failed', err: 'INVALID_REFRESH_TOKEN' }) })
         );
     });
 
@@ -113,7 +113,7 @@ describe('handleMobileTokenRefresh', () => {
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith(
-            expect.objectContaining({ params: expect.objectContaining({ errmsg: 'INVALID_CLIENT' }) })
+            expect.objectContaining({ params: expect.objectContaining({ status: 'failed', err: 'INVALID_CLIENT' }) })
         );
         expect(mockVerifyEchoAuthToken).not.toHaveBeenCalled();
     });
@@ -150,7 +150,7 @@ describe('handleMobileTokenRefresh', () => {
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith(
             expect.objectContaining({
-                params: expect.objectContaining({ status: 'FAILED' }),
+                params: expect.objectContaining({ status: 'failed' }),
             })
         );
     });
