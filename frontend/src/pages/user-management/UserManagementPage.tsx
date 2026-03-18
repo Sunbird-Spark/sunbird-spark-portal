@@ -193,8 +193,6 @@ const UserManagementPage = () => {
                             interact({ id: 'um-tab-switch', type: 'CLICK', pageid: 'user-management', cdata: [{ id: tab.id, type: 'Tab' }] });
                             setActiveTab(tab.id);
                           }}
-                          data-edataid={`um-tab-${tab.id}`}
-                          data-pageid="user-management"
                           className={`flex items-center gap-2 pb-3 px-1 border-b-2 text-[0.9375rem] font-medium transition-colors ${
                             isActive
                               ? "border-sunbird-brick text-sunbird-brick"

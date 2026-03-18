@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
@@ -27,7 +27,6 @@ const Onboarding = () => {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: userId } = useCurrentUserId();
   const updateProfile = useUpdateProfile();
@@ -92,9 +91,6 @@ const Onboarding = () => {
   const handleSubmit = async () => {
     if (isSubmitting || !userId) return;
     setIsSubmitting(true);
-    telemetry.audit({ edata: { props: ['onboardingSelections'], state: 'Submitted' } });
-    telemetry.log({ edata: { type: 'api', level: 'INFO', message: 'Onboarding selections saved', pageid: 'onboarding' } });
-    timeoutRef.current = setTimeout(async () => {setIsSubmitting(false);
     const formattedData: Record<string, { values: string[] }> = {};
     Object.entries(selections).forEach(([screenId, fieldId]) => {
       const screen = onboardingData?.screens[screenId];
@@ -109,13 +105,14 @@ const Onboarding = () => {
           framework: { onboardingDetails: { isSkipped: false, data: formattedData } }
         }
       });
+      telemetry.audit({ edata: { props: ['onboardingSelections'], state: 'Submitted' } });
+      telemetry.log({ edata: { type: 'api', level: 'INFO', message: 'Onboarding selections saved', pageid: 'onboarding' } });
       navigate("/home", { replace: true });
     } catch {
       toast({ variant: 'destructive', title: 'Failed to save onboarding', description: 'Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
-    }, 0);
   };
   const handleSelect = (fieldId: string) => {
     if (!currentScreenId) return;

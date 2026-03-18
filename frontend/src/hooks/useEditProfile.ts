@@ -244,6 +244,14 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
         title: 'Update failed',
         description: message,
       });
+      telemetry.log({
+        edata: {
+          type: 'api',
+          level: 'ERROR',
+          message: `Profile update failed: ${message}`,
+          pageid: 'profile',
+        },
+      });
     }
   }, [canSave, userId, form, fieldStates, updateProfileMutation, closeDialog]);
 

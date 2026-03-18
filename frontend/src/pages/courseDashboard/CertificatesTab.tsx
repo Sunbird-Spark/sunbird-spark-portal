@@ -61,15 +61,11 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, canReis
           setReissueTarget(null);
           telemetry.audit({
             edata: {
-              type: 'certificate-reissue',
               props: ['courseId', 'batchId', 'userIds'],
-              state: 'SUCCESS',
+              prevstate: 'Issued',
+              state: 'Reissued',
             },
-            object: {
-              id: collectionId,
-              type: 'Course',
-              version: '1.0',
-            },
+            object: { id: collectionId, type: 'Course' },
           });
         },
         onError: (err: Error) => {

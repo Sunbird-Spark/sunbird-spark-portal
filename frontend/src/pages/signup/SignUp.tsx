@@ -14,7 +14,6 @@ import { SignupService } from '@/services/SignupService';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
-import {  useEffect } from 'react';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
 
