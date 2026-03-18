@@ -24,7 +24,7 @@ export const useCollectionPageData = (collectionId: string | undefined, batchIdP
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
     
-  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator || !!enrollment.isMentorOfAnyBatchInCourse;
+  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const contentBlocked = isTrackable && (
     !isAuthenticated
