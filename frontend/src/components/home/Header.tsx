@@ -103,6 +103,8 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
                   className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors"
                   onClick={() => setIsSearchOpen(true)}
                   aria-label={t("header.search")}
+                  data-edataid="search-btn"
+                  data-edatatype="CLICK"
                 >
                   <FiSearch className="w-[1.125rem] h-[1.125rem] stroke-[2]" aria-hidden="true" />
                 </button>
@@ -112,7 +114,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
                 {/* Language Selector */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-1 p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors">
+                    <button className="flex items-center gap-1 p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors" data-edataid="language-dropdown-btn" data-edatatype="CLICK">
                       <img src={translationIcon} alt="Language" width={21} height={21} />
                       <FiChevronDown className="w-3.5 h-3.5" />
                     </button>
@@ -124,6 +126,8 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
                         className={`cursor-pointer hover:bg-gray-50 ${currentCode === lang.code ? 'font-medium text-sunbird-brick' : ''
                           }`}
                         onClick={() => changeLanguage(lang.code)}
+                        data-edataid={`lang-select-${lang.code}`}
+                        data-edatatype="CLICK"
                       >
                         {lang.label}
                       </DropdownMenuItem>
@@ -176,6 +180,8 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
                     setIsSearchOpen(true);
                     setIsMenuOpen(false);
                   }}
+                  data-edataid="mobile-search-btn"
+                  data-edatatype="CLICK"
                 >
                   <FiSearch className="w-5 h-5" />
                   <span>{t("header.search")}</span>
@@ -188,6 +194,8 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
                     className="bg-transparent text-sm font-medium text-gray-600 focus:outline-none"
                     value={currentCode}
                     onChange={(e) => changeLanguage(e.target.value as any)}
+                    data-edataid="mobile-language-select"
+                    data-edatatype="SELECT"
                   >
                     {languages.map((lang) => (
                       <option key={lang.code} value={lang.code}>

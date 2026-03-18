@@ -7,11 +7,16 @@ import type { ContentEditorEvent } from '@/services/editors/content-editor';
 import { useContentRead } from '@/hooks/useContent';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useEditorLock } from '@/hooks/useEditorLock';
+import useImpression from '@/hooks/useImpression';
+import useInteract from '@/hooks/useInteract';
 
 const ContentEditorPage = () => {
   const { t } = useAppI18n();
   const { contentId } = useParams();
   const navigate = useNavigate();
+  const { interact } = useInteract();
+
+  useImpression({ type: 'view', pageid: 'content-editor', object: { id: contentId || '', type: 'Content' } });
 
   const { data, isLoading, error } = useContentRead(contentId || '');
   const contentData = data?.data?.content;
@@ -23,8 +28,15 @@ const ContentEditorPage = () => {
 
   // Memoize the event handler to prevent unnecessary re-renders
   const handleEditorEvent = useCallback((event: ContentEditorEvent) => {
+    interact({
+      id: 'content-editor-event',
+      type: 'OTHER',
+      pageid: 'content-editor',
+      object: { id: event.type, type: 'Event' },
+      cdata: [{ id: contentId || '', type: 'ContentId' }],
+    });
     console.warn('Content editor event:', event);
-  }, []);
+  }, [interact, contentId]);
 
   // Memoize the close handler to prevent unnecessary re-renders
   const handleClose = useCallback(async () => {

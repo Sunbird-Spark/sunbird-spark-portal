@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { FiX, FiSearch, FiLoader } from "react-icons/fi";
+import { FiX, FiLoader } from "react-icons/fi";
 import { useCreateBatch, useUpdateBatch } from "@/hooks/useBatch";
-import { useMentorList, MentorUser } from "@/hooks/useMentor";
+import { useMentorList } from "@/hooks/useMentor";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
+import useInteract from "@/hooks/useInteract";
 import { useIsContentCreator, useIsMentor } from "@/hooks/useUser";
 
 /* ─── Types ─── */
@@ -48,6 +49,7 @@ const inputClass =
 
 const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: CreateBatchModalProps) => {
   const isEditMode = !!initialBatch;
+  const { interact } = useInteract();
   const isContentCreator = useIsContentCreator();
   const isMentor         = useIsMentor();
   const isOnlyMentor     = isMentor && !isContentCreator && isEditMode;
@@ -94,6 +96,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     e.preventDefault();
     if (isOnlyMentor) return;
     setSubmitError(null);
+    interact({ id: isEditMode ? 'batch-modal-save' : 'batch-modal-create', type: 'SUBMIT', pageid: 'batch-create' });
     try {
       if (isEditMode && initialBatch) {
         await updateBatch.mutateAsync({
@@ -132,17 +135,9 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     }
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-    setMentorQuery("");
-    setSubmitError(null);
-  };
+  const handleClose = () => { onOpenChange(false); setMentorQuery(""); setSubmitError(null); };
 
-  const isSubmitDisabled =
-    !form.batchName.trim() ||
-    !form.startDate ||
-    (!isEditMode && !form.acceptTerms) ||
-    isPending;
+  const isSubmitDisabled = !form.batchName.trim() || !form.startDate || (!isEditMode && !form.acceptTerms) || isPending;
 
   return (
     <>
@@ -163,6 +158,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
               <button
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors"
                 aria-label="Close"
+                data-edataid="batch-modal-close"
+                data-pageid="batch-create"
               >
                 <FiX className="w-5 h-5" />
               </button>
@@ -237,6 +234,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 onClick={handleClose}
                 disabled={isPending}
                 className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-['Rubik']"
+                data-edataid="batch-modal-cancel"
+                data-pageid="batch-create"
               >
                 {isOnlyMentor ? "Close" : "Cancel"}
               </button>

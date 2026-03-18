@@ -12,6 +12,7 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   confirmVariant?: "destructive" | "default";
   isLoading?: boolean;
+  confirmButtonProps?: Record<string, any>;
 }
 
 export default function ConfirmDialog({
@@ -23,6 +24,7 @@ export default function ConfirmDialog({
   confirmLabel,
   confirmVariant = "default",
   isLoading = false,
+  confirmButtonProps,
 }: ConfirmDialogProps) {
   const { t } = useAppI18n();
   const resolvedConfirmLabel = confirmLabel ?? t("confirm");
@@ -74,6 +76,7 @@ export default function ConfirmDialog({
             onClick={handleClose}
             disabled={isLoading}
             className="font-rubik border-sunbird-gray-d0 text-sunbird-obsidian hover:bg-sunbird-gray-f3 hover:text-sunbird-obsidian"
+            data-edataid="confirm-dialog-cancel"
           >
             {t("cancel")}
           </Button>
@@ -83,6 +86,8 @@ export default function ConfirmDialog({
             onClick={onConfirm}
             disabled={isLoading}
             className={confirmButtonClass}
+            data-edataid="confirm-dialog-confirm"
+            {...confirmButtonProps}
           >
             {isLoading ? t("confirmDialog.pleaseWait") : resolvedConfirmLabel}
           </Button>
