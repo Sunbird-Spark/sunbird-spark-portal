@@ -39,7 +39,7 @@ const Onboarding = () => {
   useEffect(() => {
     if (onboardingData && !currentScreenId) {
       if (!onboardingData.isEnabled) {
-        navigate("/home");
+        navigate("/home", { replace: true });
         return;
       }
       setCurrentScreenId(onboardingData.initialScreenId);
@@ -55,13 +55,13 @@ const Onboarding = () => {
   };
   const handleSkip = async () => {
     if (isSubmitting || userId === undefined) return;
-    if (userId === null) { navigate("/"); return; }
+    if (userId === null) { navigate("/", { replace: true }); return; }
     setIsSubmitting(true);
     try {
       await updateProfile.mutateAsync({
         request: { userId, framework: { onboardingDetails: { isSkipped: true, data: {} } } }
       });
-      navigate("/home");
+      navigate("/home", { replace: true });
     } catch {
       toast({ variant: 'destructive', title: 'Failed to skip onboarding', description: 'Please try again.' });
     } finally {
@@ -102,7 +102,7 @@ const Onboarding = () => {
           framework: { onboardingDetails: { isSkipped: false, data: formattedData } }
         }
       });
-      navigate("/home");
+      navigate("/home", { replace: true });
     } catch {
       toast({ variant: 'destructive', title: 'Failed to save onboarding', description: 'Please try again.' });
     } finally {
@@ -127,7 +127,7 @@ const Onboarding = () => {
         <p className="text-muted-foreground">
           Failed to load onboarding.{" "}
           <button
-            type="button" onClick={() => navigate("/home")} className="text-primary underline"
+            type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline"
           >
             Skip
           </button>
@@ -143,7 +143,7 @@ const Onboarding = () => {
           Something went wrong.{" "}
           <button
             type="button"
-            onClick={() => navigate("/home")}
+            onClick={() => navigate("/home", { replace: true })}
             className="text-primary underline"
           >
             Go to Home
