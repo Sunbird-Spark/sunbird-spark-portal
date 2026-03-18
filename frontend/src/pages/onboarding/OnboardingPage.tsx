@@ -12,11 +12,13 @@ import { ProgressIndicator, OptionChip } from './OnboardingComponents';
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useCurrentUserId } from "@/hooks/useUser";
 import { useOnboardingRedirect } from './useOnboardingRedirect';
+import useImpression from '@/hooks/useImpression';
 import { toast } from "@/hooks/useToast";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 const Onboarding = () => {
   const { t } = useAppI18n();
+  useImpression({ type: 'view', pageid: 'onboarding', env: 'onboarding' });
   const navigate = useNavigate();
   const [screenHistory, setScreenHistory] = useState<string[]>([]);
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);

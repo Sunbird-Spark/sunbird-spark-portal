@@ -17,7 +17,7 @@ const Home = () => {
     } = useUserEnrolledCollections();
     const enrolledCount = enrolledCollections?.data?.courses?.length ?? 0;
 
-    useImpression({ type: 'view', pageid: 'home' });
+    useImpression({ type: 'view', pageid: 'home', env: 'home' });
 
     return (
         <main className="home-main-content">

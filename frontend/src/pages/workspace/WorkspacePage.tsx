@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import useImpression from "@/hooks/useImpression";
 import useDebounce from "@/hooks/useDebounce";
 import PageLoader from "@/components/common/PageLoader";
 import { type WorkspaceView, type UserRole, type ViewMode, type SortOption, type ContentTypeFilter } from "@/types/workspaceTypes";
@@ -26,7 +27,6 @@ import "../home/home.css";
 import "./workspace.css";
 import { QumlEditor } from "@/components/quml-editor";
 import { useTelemetry } from "@/hooks/useTelemetry";
-import useImpression from "@/hooks/useImpression";
 import useInteract from "@/hooks/useInteract";
 
 // Option IDs that use the dynamic form dialog for content creation
@@ -106,6 +106,7 @@ const DEFAULT_FIELDS = {
 
 const WorkspacePage = () => {
   const navigate = useNavigate();
+  useImpression({ type: 'view', pageid: 'workspace', env: 'workspace' });
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: userData } = useUserRead();
   const slug = userData?.data?.response?.channel;
