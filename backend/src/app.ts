@@ -18,6 +18,7 @@ import { sessionMiddleware, anonymousMiddlewares } from './middlewares/condition
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
+import mobileRoutes from './routes/mobileRoutes.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +35,9 @@ app.use(express.urlencoded());
 app.get('/health', checkHealth);
 app.get('/portal/app/v1/info', getAppInfo);
 
+
+// Mobile API Routes (stateless — returns tokens directly, no session)
+app.use('/mobile', mobileRoutes);
 
 // Portal Authentication Routes (Login, Callback, Logout) — registered first to bypass anonymous middleware
 app.use('/portal', portalAuthRoutes);
