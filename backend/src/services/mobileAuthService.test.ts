@@ -107,9 +107,9 @@ describe('mobileAuthService', () => {
         it('returns the configured mobile clients', () => {
             const clients = getMobileClients();
             expect(clients['android-client']).toBeDefined();
-            expect(clients['android-client'].client_secret).toBeUndefined();
+            expect(clients['android-client']?.client_secret).toBeUndefined();
             expect(clients['google-android-client']).toBeDefined();
-            expect(clients['google-android-client'].client_secret).toBe('google-android-secret');
+            expect(clients['google-android-client']?.client_secret).toBe('google-android-secret');
         });
     });
 
@@ -128,12 +128,12 @@ describe('mobileAuthService', () => {
             expect(result.access_token).toBe('acc');
             expect(result.refresh_token).toBe('ref');
 
-            const [url, body] = mockAxiosPost.mock.calls[0];
-            expect(url).toContain('/openid-connect/token');
-            expect(body).toContain('grant_type=password');
-            expect(body).toContain('username=user%40example.com');
+            const call = mockAxiosPost.mock.calls[0] as [string, string];
+            expect(call[0]).toContain('/openid-connect/token');
+            expect(call[1]).toContain('grant_type=password');
+            expect(call[1]).toContain('username=user%40example.com');
             // client_secret is always sent since Android client is confidential
-            expect(body).toContain('client_secret=');
+            expect(call[1]).toContain('client_secret=');
         });
 
         it('throws mapped error on Keycloak failure', async () => {
@@ -233,8 +233,8 @@ describe('mobileAuthService', () => {
             const req = makeReq();
             await checkMobileUserExists('user@example.com', req);
 
-            const [, config] = mockAxiosGet.mock.calls[0];
-            expect(config.headers.Authorization).toBe('Bearer test-token');
+            const getCall0 = mockAxiosGet.mock.calls[0] as [string, { headers: Record<string, string> }];
+            expect(getCall0[1].headers.Authorization).toBe('Bearer test-token');
         });
 
         it('falls back to device register token when no auth header', async () => {
@@ -245,8 +245,8 @@ describe('mobileAuthService', () => {
             const req = makeReq({ get: vi.fn().mockReturnValue(undefined) } as any);
             await checkMobileUserExists('user@example.com', req);
 
-            const [, config] = mockAxiosGet.mock.calls[0];
-            expect(config.headers.Authorization).toBe('Bearer device-token');
+            const getCall1 = mockAxiosGet.mock.calls[0] as [string, { headers: Record<string, string> }];
+            expect(getCall1[1].headers.Authorization).toBe('Bearer device-token');
         });
     });
 
@@ -267,10 +267,10 @@ describe('mobileAuthService', () => {
                 createMobileUser({ emailId: 'user@example.com', name: 'Test User' }, 'android', makeReq())
             ).resolves.not.toThrow();
 
-            const [url, body] = mockAxiosPost.mock.calls[0];
-            expect(url).toContain('/user/v2/signup');
-            expect(body.request.firstName).toBe('Test User');
-            expect(body.params.signupType).toBe('google');
+            const postCall = mockAxiosPost.mock.calls[0] as [string, { request: Record<string, unknown>; params: Record<string, unknown> }, unknown];
+            expect(postCall[0]).toContain('/user/v2/signup');
+            expect(postCall[1].request.firstName).toBe('Test User');
+            expect(postCall[1].params.signupType).toBe('google');
         });
 
         it('throws when API returns non-OK response', async () => {
@@ -328,9 +328,9 @@ describe('mobileAuthService', () => {
             const result = await createKeycloakGoogleAndroidSession('user@example.com');
             expect(result.access_token).toBe('acc');
 
-            const [, body] = mockAxiosPost.mock.calls[0];
-            expect(body).toContain('scope=offline_access');
-            expect(body).toContain('client_id=google-android-client');
+            const androidCall = mockAxiosPost.mock.calls[0] as [string, string];
+            expect(androidCall[1]).toContain('scope=offline_access');
+            expect(androidCall[1]).toContain('client_id=google-android-client');
         });
 
         it('throws mapped error on Keycloak failure', async () => {
@@ -353,9 +353,9 @@ describe('mobileAuthService', () => {
             mockAxiosGet.mockResolvedValue({ status: 200 });
 
             await verifyEchoAuthToken('Bearer some-token');
-            const [url, config] = mockAxiosGet.mock.calls[0];
-            expect(url).toBe('https://echo.example.com/test');
-            expect(config.headers.authorization).toBe('Bearer some-token');
+            const echoCall = mockAxiosGet.mock.calls[0] as [string, { headers: Record<string, string> }];
+            expect(echoCall[0]).toBe('https://echo.example.com/test');
+            expect(echoCall[1].headers.authorization).toBe('Bearer some-token');
         });
 
         it('throws when echo API returns an error', async () => {
@@ -377,10 +377,10 @@ describe('mobileAuthService', () => {
             );
 
             expect(result).toMatchObject({ access_token: 'new-acc' });
-            const [, body] = mockAxiosPost.mock.calls[0];
-            expect(body).toContain('grant_type=refresh_token');
-            expect(body).toContain('client_id=android-client');
-            expect(body).not.toContain('client_secret');
+            const refreshCall = mockAxiosPost.mock.calls[0] as [string, string];
+            expect(refreshCall[1]).toContain('grant_type=refresh_token');
+            expect(refreshCall[1]).toContain('client_id=android-client');
+            expect(refreshCall[1]).not.toContain('client_secret');
         });
 
         it('includes client_secret for confidential clients', async () => {
@@ -391,8 +391,8 @@ describe('mobileAuthService', () => {
                 'ref-token'
             );
 
-            const [, body] = mockAxiosPost.mock.calls[0];
-            expect(body).toContain('client_secret=secret');
+            const secretCall = mockAxiosPost.mock.calls[0] as [string, string];
+            expect(secretCall[1]).toContain('client_secret=secret');
         });
 
         it('throws structured error on failure', async () => {

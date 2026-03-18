@@ -36,10 +36,11 @@ const makeRes = (): Partial<Response> => ({
 
 const makeReq = (overrides: Partial<Request> = {}): Partial<Request> => ({
     body: { refresh_token: 'test-refresh-token' },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get: vi.fn((header: string) => {
         if (header === 'authorization') return 'Bearer current-token';
         return undefined;
-    }),
+    }) as any,
     ...overrides,
 });
 

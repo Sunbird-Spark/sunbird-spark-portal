@@ -37,10 +37,11 @@ const makeRes = (): Partial<Response> => ({
 
 const makeReq = (overrides: Partial<Request> = {}): Partial<Request> => ({
     body: { emailId: 'user@example.com', platform: 'android' },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get: vi.fn((header: string) => {
         if (header === 'X-GOOGLE-ID-TOKEN') return 'google-id-token';
         return undefined;
-    }),
+    }) as any,
     session: {} as any,
     ...overrides,
 });
