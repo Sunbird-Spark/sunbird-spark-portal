@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { OAuth2Client } from 'google-auth-library';
 import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
 import { Request } from 'express';
 import { envConfig } from '../config/env.js';
 import { issuerUrl } from '../auth/oidcProvider.js';
@@ -29,6 +30,7 @@ export const getMobileClients = (): Record<string, MobileClientConfig> => {
     if (envConfig.KEYCLOAK_ANDROID_CLIENT_ID) {
         clients[envConfig.KEYCLOAK_ANDROID_CLIENT_ID] = {
             client_id: envConfig.KEYCLOAK_ANDROID_CLIENT_ID,
+            client_secret: envConfig.KEYCLOAK_ANDROID_CLIENT_SECRET || undefined,
         };
     }
 
@@ -142,7 +144,7 @@ const getMobileKongToken = (req: Request): string => {
 const buildMobileApiHeaders = (req: Request): Record<string, string> => {
     const headers: Record<string, string> = {
         'x-msgid': uuidv4(),
-        ts: new Date().toISOString(),
+        ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
         'Content-Type': 'application/json',
         accept: 'application/json',
         Authorization: `Bearer ${getMobileKongToken(req)}`,
@@ -256,7 +258,10 @@ export const verifyEchoAuthToken = async (authorization: string): Promise<void> 
         return;
     }
 
-    await axios.get(`${envConfig.PORTAL_ECHO_API_URL}test`, {
+    const echoBase = envConfig.PORTAL_ECHO_API_URL.endsWith('/')
+        ? envConfig.PORTAL_ECHO_API_URL
+        : `${envConfig.PORTAL_ECHO_API_URL}/`;
+    await axios.get(`${echoBase}test`, {
         headers: { authorization },
         timeout: 60000,
     });
