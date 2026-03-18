@@ -130,11 +130,7 @@ const Onboarding = () => {
       <div className="h-screen flex items-center justify-center bg-white">
         <p className="text-muted-foreground">
           Failed to load onboarding.{" "}
-          <button
-            type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline"
-          >
-            Skip
-          </button>
+          <button type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline">Skip</button>
         </p>
       </div>
     );
@@ -145,13 +141,7 @@ const Onboarding = () => {
       <div className="h-screen flex items-center justify-center bg-white">
         <p className="text-muted-foreground">
           Something went wrong.{" "}
-          <button
-            type="button"
-            onClick={() => navigate("/home", { replace: true })}
-            className="text-primary underline"
-          >
-            Go to Home
-          </button>
+          <button type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline">Go to Home</button>
         </p>
       </div>
     );

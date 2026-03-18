@@ -92,7 +92,6 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, canReis
     return true; // Creators see all
   }) ?? [];
 
-  const hasBatches = displayBatches.length > 0;
 
 
   return (
@@ -131,6 +130,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, canReis
 
       <CertResultsTable
         certUser={certUser}
+        batches={displayBatches}
         searchError={searchError}
         uniqueId={uniqueId}
         isOwner={canReissue}
