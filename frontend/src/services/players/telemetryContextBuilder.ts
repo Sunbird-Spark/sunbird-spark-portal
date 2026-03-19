@@ -4,7 +4,19 @@ import appCoreService from '../AppCoreService';
 import { OrganizationService } from '../OrganizationService';
 import userProfileService from '../UserProfileService';
 import { SystemSettingService } from '../SystemSettingService';
-import { TELEMETRY_ENDPOINT } from '../../providers/TelemetryProvider';
+
+/**
+ * Telemetry path for editor & player iframes.
+ * Iframes concatenate `apislug` + this value to build the request URL.
+ * apislug=/action  =>  /action + /data/v3/telemetry = /action/data/v3/telemetry
+ */
+export const TELEMETRY_ENDPOINT = '/data/v3/telemetry';
+
+/**
+ * Full telemetry URL for the Sunbird JS SDK (TelemetryProvider).
+ * The SDK calls fetch(host + endpoint) directly with no apislug prepending.
+ */
+export const TELEMETRY_SDK_ENDPOINT = '/action/data/v3/telemetry';
 
 export interface TelemetryContextProps {
   mode?: string;

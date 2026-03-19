@@ -5,7 +5,7 @@ import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
 import { fetchFwCategoryMeta } from '../fwCategoryMetaService';
-import { TELEMETRY_ENDPOINT } from '../../../providers/TelemetryProvider';
+import { TELEMETRY_ENDPOINT } from '../../players/telemetryContextBuilder';
 
 const CONTENT_EDITOR_URL = '/content-editor/index.html';
 

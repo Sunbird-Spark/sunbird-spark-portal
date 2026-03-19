@@ -2,7 +2,7 @@
  * Default configuration for the Generic Editor.
  * Mirrors the GENERIC_EDITOR section from SunbirdEd-portal's editor.config.json.
  */
-import { TELEMETRY_ENDPOINT } from '../../../providers/TelemetryProvider';
+import { TELEMETRY_ENDPOINT } from '../../players/telemetryContextBuilder';
 
 /** Default window.config values for the generic editor iframe */
 export const GENERIC_EDITOR_WINDOW_CONFIG = {

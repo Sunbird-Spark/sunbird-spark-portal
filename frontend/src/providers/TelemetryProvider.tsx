@@ -5,22 +5,9 @@ import appCoreService from '@/services/AppCoreService';
 import userProfileService from '@/services/UserProfileService';
 import { OrganizationService } from '@/services/OrganizationService';
 import { SystemSettingService } from '@/services/SystemSettingService';
+import { TELEMETRY_SDK_ENDPOINT } from '@/services/players/telemetryContextBuilder';
 
 export const TelemetryContext = createContext<ITelemetryService | null>(null);
-
-/**
- * Telemetry path for editor & player iframes.
- * Iframes concatenate `apislug` + this value to build the request URL.
- * apislug=/action  =>  /action + /data/v3/telemetry = /action/data/v3/telemetry ✓
- */
-export const TELEMETRY_ENDPOINT = '/data/v3/telemetry';
-
-/**
- * Full telemetry URL for the Sunbird JS SDK (TelemetryProvider).
- * The SDK calls fetch(host + endpoint) directly with no apislug — so the
- * full path including /action must be provided here.
- */
-export const TELEMETRY_SDK_ENDPOINT = '/action/data/v3/telemetry';
 
 interface TelemetryProviderProps {
   children: React.ReactNode;
