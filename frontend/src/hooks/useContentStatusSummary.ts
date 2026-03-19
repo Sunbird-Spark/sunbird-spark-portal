@@ -12,7 +12,7 @@ export function useContentStatusSummary(): {
   isLoading: boolean;
   isError: boolean;
 } {
-  const { data: userReadData, isPending: isUserPending } = useUserRead();
+  const { data: userReadData, isPending: isUserLoading } = useUserRead();
 
   const rootOrgId = useMemo(() => {
     const response = userReadData?.data?.response as Record<string, unknown> | undefined;
@@ -55,7 +55,7 @@ export function useContentStatusSummary(): {
     statusData,
     topCreatorsData,
     categoryData,
-    isLoading: isUserPending || isSummaryLoading,
+    isLoading: isUserLoading || isSummaryLoading,
     isError: isSummaryError,
   };
 }

@@ -18,7 +18,7 @@ export function useOrgCourseSummary(): {
   isError: boolean;
 } {
   const contentService = useMemo(() => new ContentService(), []);
-  const { data: userReadData, isLoading: isUserLoading } = useUserRead();
+  const { data: userReadData, isPending: isUserLoading } = useUserRead();
 
   const rootOrgId = useMemo(() => {
     const response = userReadData?.data?.response as Record<string, unknown> | undefined;

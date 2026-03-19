@@ -39,8 +39,7 @@ export interface ContentStatusCount {
 export type ContentStatusSummaryFacet =
   | { facet: 'status'; values: StatusFacetValue[] }
   | { facet: 'createdBy'; values: CreatedByFacetValue[] }
-  | { facet: 'primaryCategory'; values: CategoryFacetValue[] }
-  | { facet: string; values: Record<string, unknown>[] };
+  | { facet: 'primaryCategory'; values: CategoryFacetValue[] };
 
 export interface ContentStatusSummaryApiResult {
   data: ContentStatusSummaryFacet[];
