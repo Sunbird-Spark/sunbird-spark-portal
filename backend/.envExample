@@ -49,5 +49,3 @@ KEYCLOAK_ANDROID_CLIENT_SECRET=test_android_client_secret
 # Keycloak client used to create sessions for Google Sign-In on Android
 KEYCLOAK_GOOGLE_ANDROID_CLIENT_ID=test_google_android_client_id
 KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET=test_google_android_client_secret
-# Echo API URL for bearer token validation in mobile token refresh (trailing slash required)
-PORTAL_ECHO_API_URL=https://test.sunbirded.org/api/
