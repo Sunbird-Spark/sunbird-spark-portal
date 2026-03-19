@@ -4,6 +4,7 @@ import appCoreService from '../AppCoreService';
 import { OrganizationService } from '../OrganizationService';
 import userProfileService from '../UserProfileService';
 import { SystemSettingService } from '../SystemSettingService';
+import { TELEMETRY_ENDPOINT } from '../../providers/TelemetryProvider';
 
 export interface TelemetryContextProps {
   mode?: string;
@@ -144,7 +145,7 @@ export async function buildTelemetryContext(
     timeDiff,
     objectRollup: contextProps?.objectRollup || {},
     host: '',
-    endpoint: '/portal/data/v1/telemetry',
+    endpoint: TELEMETRY_ENDPOINT,
     dims,
     app: channel ? [channel] : [],
     partner: [],
