@@ -1,5 +1,5 @@
 import { FiArrowRight } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 
@@ -11,11 +11,6 @@ interface ResourceCardProps {
 
 const ResourceCard = ({ item, heightClass, linkState }: ResourceCardProps) => {
   const { t } = useAppI18n();
-  const location = useLocation();
-  // If no explicit linkState is provided, record the current page as the origin
-  const state = linkState ?? {
-    from: location.pathname,
-  };
 
   const getViewLabel = (mimeType?: string) => {
     switch (mimeType) {
@@ -39,7 +34,14 @@ const ResourceCard = ({ item, heightClass, linkState }: ResourceCardProps) => {
   };
 
   return (
-    <Link to={`/content/${item.identifier}`} state={state} className="group resource-card-link">
+    <Link
+      to={`/content/${item.identifier}`}
+      state={linkState}
+      className="group resource-card-link"
+      data-edataid="resource-card-click"
+      data-objectid={item.identifier}
+      data-objecttype="Content"
+    >
       <div className={`resource-card-container${heightClass ? ` ${heightClass}` : ""}`}>
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">

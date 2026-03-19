@@ -212,4 +212,22 @@ describe('ContentNameDialog', () => {
       expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', { description: undefined });
     });
   });
+
+  it('should include cdata prop entries before ContentName in data-cdata attribute', () => {
+    render(
+      <ContentNameDialog
+        {...defaultProps}
+        cdata={[{ id: 'course', type: 'EditorType' }]}
+      />
+    );
+
+    const input = screen.getByPlaceholderText('Enter content name');
+    fireEvent.change(input, { target: { value: 'My Content' } });
+
+    const createButton = screen.getByRole('button', { name: 'Create' });
+    expect(createButton).toHaveAttribute(
+      'data-cdata',
+      JSON.stringify([{ id: 'course', type: 'EditorType' }, { id: 'My Content', type: 'ContentName' }])
+    );
+  });
 });

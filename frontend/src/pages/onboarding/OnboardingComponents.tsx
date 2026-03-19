@@ -45,13 +45,15 @@ interface OptionChipProps {
   field: OnboardingField;
   isSelected: boolean;
   onClick: () => void;
+  [key: string]: any;
 }
 
-export const OptionChip = ({ field, isSelected, onClick }: OptionChipProps) => (
+export const OptionChip = ({ field, isSelected, onClick, ...props }: OptionChipProps) => (
   <button
     type="button"
     onClick={onClick}
     className={`option-chip ${isSelected ? "option-chip-selected" : "option-chip-default"}`}
+    {...props}
   >
     {isSelected && (
       <div className="option-chip-checkmark">

@@ -223,6 +223,10 @@ const UserConsentTab = () => {
         confirmLabel={confirm.type === "revoke" ? "Revoke" : "Reissue"}
         confirmVariant={confirm.type === "revoke" ? "destructive" : "default"}
         isLoading={confirm.isLoading}
+        confirmButtonProps={{
+          'data-edataid': confirm.type === 'revoke' ? 'um-consent-bulk-revoke-confirm' : 'um-consent-bulk-reissue-confirm',
+          'data-pageid': 'user-management',
+        }}
       />
     </>
   );

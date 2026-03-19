@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
+import useImpression from "@/hooks/useImpression";
+import useInteract from "@/hooks/useInteract";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { FiShield, FiLock } from "react-icons/fi";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -14,7 +17,6 @@ import { useAcceptTnc, useGetTncUrl } from "@/hooks/useTnc";
 import { useUserRead } from "@/hooks/useUserRead";
 import { TncService } from "@/services/TncService";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
-import useImpression from '@/hooks/useImpression';
 import _ from "lodash";
 import "../home/home.css";
 import "./user-management.css";
@@ -37,6 +39,8 @@ const UM_TABS: UMTab[] = [
 const UserManagementPage = () => {
   const { toast } = useToast();
   useImpression({ type: 'view', pageid: 'user-management', env: 'user-management' });
+  const { interact } = useInteract();
+  const telemetry = useTelemetry();
 
   const [activeTab, setActiveTab] = useState<string>(UM_TABS[0]?.id ?? "role-management");
   const [availableRoles, setAvailableRoles] = useState<RoleItem[]>([]);
@@ -124,6 +128,10 @@ const UserManagementPage = () => {
       await acceptTncMutation.mutateAsync({ tncConfig: activeTncConfig, tncType: activeTncType });
       setTncDialogOpen(false);
       refetchUser();
+      telemetry.audit({
+        edata: { props: ['tncAccepted'], state: 'Accepted' },
+        object: { id: userRes?.data?.response?.userId || '', type: 'User' },
+      });
       toast({ title: "Terms accepted", description: "You can now use User Management features.", variant: "success" });
     } catch {
       toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
@@ -155,6 +163,8 @@ const UserManagementPage = () => {
                     >
                       <button
                         type="button"
+                        data-edataid="um-tnc-open"
+                        data-pageid="user-management"
                         className="underline text-sunbird-brick hover:opacity-80 font-medium"
                       >
                         Terms &amp; Conditions
@@ -179,7 +189,10 @@ const UserManagementPage = () => {
                       return (
                         <button
                           key={tab.id}
-                          onClick={() => setActiveTab(tab.id)}
+                          onClick={() => {
+                            interact({ id: 'um-tab-switch', type: 'CLICK', pageid: 'user-management', cdata: [{ id: tab.id, type: 'Tab' }] });
+                            setActiveTab(tab.id);
+                          }}
                           className={`flex items-center gap-2 pb-3 px-1 border-b-2 text-[0.9375rem] font-medium transition-colors ${
                             isActive
                               ? "border-sunbird-brick text-sunbird-brick"

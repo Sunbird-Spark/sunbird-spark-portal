@@ -42,6 +42,8 @@ export function ImageGallery({ loading, images, emptyMessage, selectedUrl, onSel
           type="button"
           title={img.name}
           onClick={() => onSelect(img.url)}
+          data-edataid="cert-image-gallery-select"
+          data-pageid="course-consumption"
           className={cn(
             "aspect-square rounded-lg overflow-hidden border-2 transition-colors",
             selectedUrl === img.url

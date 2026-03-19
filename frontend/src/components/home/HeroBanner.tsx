@@ -32,7 +32,7 @@ const HeroBanner = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/courses">
+              <Link to="/courses" data-edataid="hero-explore-cta" data-pageid="landing">
                 <Button
                   size="lg"
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold text-base px-8"
@@ -45,6 +45,8 @@ const HeroBanner = () => {
                 size="lg"
                 variant="outline"
                 className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold text-base"
+                data-edataid="hero-watch-demo"
+                data-pageid="landing"
               >
                 <FiPlay className="w-5 h-5 me-2" />
                 {t("watchDemo")}

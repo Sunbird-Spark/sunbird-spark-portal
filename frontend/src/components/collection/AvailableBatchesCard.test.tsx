@@ -3,6 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import AvailableBatchesCard from './AvailableBatchesCard';
 import type { BatchListItem } from '@/types/collectionTypes';
 
+vi.mock('@/hooks/useInteract', () => ({
+  default: () => ({ interact: vi.fn() }),
+}));
+
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => key,
