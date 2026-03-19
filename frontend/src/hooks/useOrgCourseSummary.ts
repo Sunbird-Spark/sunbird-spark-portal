@@ -5,8 +5,6 @@ import { ContentService } from '@/services/ContentService';
 import { observabilityService } from '@/services/reports/ObservabilityService';
 import type { AdminCourseSummary } from '@/types/reports';
 
-const contentService = new ContentService();
-
 /**
  * Fetches the org-level course enrolment summary:
  * 1. Gets rootOrgId from the logged-in user's profile
@@ -19,7 +17,8 @@ export function useOrgCourseSummary(): {
   isLoading: boolean;
   isError: boolean;
 } {
-  const { data: userReadData, isPending: isUserPending } = useUserRead();
+  const contentService = useMemo(() => new ContentService(), []);
+  const { data: userReadData, isLoading: isUserLoading } = useUserRead();
 
   const rootOrgId = useMemo(() => {
     const response = userReadData?.data?.response as Record<string, unknown> | undefined;
@@ -66,14 +65,13 @@ export function useOrgCourseSummary(): {
         totalCompleted: completed,
         completionPercent: enrolled > 0 ? Math.round((completed / enrolled) * 100) : 0,
         certificatesIssued: item.certificates_issued ?? 0,
-        lastUpdated: '',
       };
     });
   }, [summaryResult]);
 
   return {
     data,
-    isLoading: isUserPending || isCoursesLoading || isSummaryLoading,
+    isLoading: isUserLoading || isCoursesLoading || isSummaryLoading,
     isError: isCoursesError || isSummaryError,
   };
 }
