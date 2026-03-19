@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 
@@ -21,8 +21,8 @@ vi.mock('../middlewares/conditionalSession.js', () => ({
 }));
 
 // ─── Static imports (after mocks) ──────────────────────────────────────────
-// In Vitest/ESM, vi.mock is hoisted so these imports will already see the
-// mocked versions of the transitive dependencies.
+// In Vitest/ESM, vi.mock is hoisted so these imports already see the mocked
+// versions of transitive dependencies.
 import anonymousActionRoutes from '../routes/anonymousActionRoutes.js';
 import { kongProxy } from '../proxies/kongProxy.js';
 
@@ -75,11 +75,12 @@ const samplePayload = {
 // ─── Test Suite ────────────────────────────────────────────────────────────
 
 describe('anonymousActionRoutes', () => {
-  const kongProxyMock = kongProxy as ReturnType<typeof vi.fn>;
+  // Cast using Mock type from vitest — same pattern as telemetryService.test.ts
+  const kongProxyMock = kongProxy as unknown as Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    kongProxyMock.mockImplementation((_req: Request, res: Response) => {
+    kongProxyMock.mockImplementation((_req: unknown, res: Response) => {
       res.status(200).json({ id: 'api.telemetry', responseCode: 'OK' });
     });
   });
@@ -103,14 +104,13 @@ describe('anonymousActionRoutes', () => {
       const res = await request(app)
         .post('/action/data/v3/telemetry')
         .send(samplePayload);
-        // No Authorization header set
 
       expect(res.status).toBe(200);
     });
 
     it('forwards a payload where actor.id is "anonymous"', async () => {
       const app = buildApp();
-      let capturedBody: any;
+      let capturedBody: unknown;
       kongProxyMock.mockImplementation((req: Request, res: Response) => {
         capturedBody = req.body;
         res.status(200).json({ responseCode: 'OK' });
@@ -120,7 +120,7 @@ describe('anonymousActionRoutes', () => {
         .post('/action/data/v3/telemetry')
         .send(samplePayload);
 
-      expect(capturedBody.events[0].actor.id).toBe('anonymous');
+      expect((capturedBody as any).events[0].actor.id).toBe('anonymous');
     });
 
     it('accepts an empty events array without error', async () => {
@@ -179,7 +179,7 @@ describe('anonymousActionRoutes', () => {
 
     it('correctly passes a user-attributed actor.id through to Kong', async () => {
       const app = buildApp(withLoggedInSession);
-      let capturedBody: any;
+      let capturedBody: unknown;
       kongProxyMock.mockImplementation((req: Request, res: Response) => {
         capturedBody = req.body;
         res.status(200).json({ responseCode: 'OK' });
@@ -189,7 +189,7 @@ describe('anonymousActionRoutes', () => {
         .post('/action/data/v3/telemetry')
         .send(loggedInPayload);
 
-      expect(capturedBody.events[0].actor.id).toBe('real-user-456');
+      expect((capturedBody as any).events[0].actor.id).toBe('real-user-456');
     });
 
     it('accepts a multi-event batch (START, IMPRESSION, INTERACT, END)', async () => {
@@ -329,7 +329,7 @@ describe('anonymousActionRoutes', () => {
 
   describe('Kong error propagation', () => {
     it('relays Kong 5xx error to the caller', async () => {
-      kongProxyMock.mockImplementation((_req: Request, res: Response) => {
+      kongProxyMock.mockImplementation((_req: unknown, res: Response) => {
         res.status(503).json({ message: 'Kong unavailable' });
       });
 
@@ -341,7 +341,7 @@ describe('anonymousActionRoutes', () => {
     });
 
     it('relays Kong 4xx error to the caller', async () => {
-      kongProxyMock.mockImplementation((_req: Request, res: Response) => {
+      kongProxyMock.mockImplementation((_req: unknown, res: Response) => {
         res.status(400).json({ message: 'Bad Request' });
       });
 
