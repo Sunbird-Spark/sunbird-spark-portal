@@ -36,10 +36,11 @@ export interface ContentStatusCount {
   count: number;
 }
 
-export interface ContentStatusSummaryFacet {
-  facet: string;
-  values: Record<string, unknown>[];
-}
+export type ContentStatusSummaryFacet =
+  | { facet: 'status'; values: StatusFacetValue[] }
+  | { facet: 'createdBy'; values: CreatedByFacetValue[] }
+  | { facet: 'primaryCategory'; values: CategoryFacetValue[] }
+  | { facet: string; values: Record<string, unknown>[] };
 
 export interface ContentStatusSummaryApiResult {
   data: ContentStatusSummaryFacet[];

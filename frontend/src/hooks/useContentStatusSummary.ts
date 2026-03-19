@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserRead } from './useUserRead';
 import { observabilityService } from '@/services/reports/ObservabilityService';
-import type { CategoryFacetValue, ContentByGroup, ContentStatusCount, CreatedByFacetValue, StatusFacetValue, TopCreator } from '@/types/reports';
+import type { ContentByGroup, ContentStatusCount, TopCreator } from '@/types/reports';
 import { capitalize } from '@/utils/stringUtils';
 
 export function useContentStatusSummary(): {
@@ -28,15 +28,14 @@ export function useContentStatusSummary(): {
 
   const statusData = useMemo<ContentStatusCount[]>(() => {
     const facet = summaryResult?.data.find((f) => f.facet === 'status');
-    if (!facet) return [];
-    return (facet.values as unknown as StatusFacetValue[])
-      .map((v) => ({ status: capitalize(v.status), count: v.count }));
+    if (!facet || facet.facet !== 'status') return [];
+    return facet.values.map((v) => ({ status: capitalize(v.status), count: v.count }));
   }, [summaryResult]);
 
   const topCreatorsData = useMemo<TopCreator[]>(() => {
     const facet = summaryResult?.data.find((f) => f.facet === 'createdBy');
-    if (!facet) return [];
-    return (facet.values as unknown as CreatedByFacetValue[])
+    if (!facet || facet.facet !== 'createdBy') return [];
+    return facet.values
       .filter((v) => v.userDetails)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
@@ -48,9 +47,8 @@ export function useContentStatusSummary(): {
 
   const categoryData = useMemo<ContentByGroup[]>(() => {
     const facet = summaryResult?.data.find((f) => f.facet === 'primaryCategory');
-    if (!facet) return [];
-    return (facet.values as unknown as CategoryFacetValue[])
-      .map((v) => ({ group: capitalize(v.primaryCategory), count: v.count }));
+    if (!facet || facet.facet !== 'primaryCategory') return [];
+    return facet.values.map((v) => ({ group: capitalize(v.primaryCategory), count: v.count }));
   }, [summaryResult]);
 
   return {
