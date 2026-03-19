@@ -256,18 +256,9 @@ export const createKeycloakGoogleAndroidSession = async (
 /**
  * Verifies the caller's authorization token against the echo API.
  * Mirrors verifyAuthToken from the reference refreshTokenRoutes.js.
- * Skips verification if PORTAL_ECHO_API_URL is not configured.
  */
 export const verifyEchoAuthToken = async (authorization: string): Promise<void> => {
-    if (!envConfig.PORTAL_ECHO_API_URL) {
-        logger.warn('verifyEchoAuthToken: PORTAL_ECHO_API_URL not configured, skipping');
-        return;
-    }
-
-    const echoBase = envConfig.PORTAL_ECHO_API_URL.endsWith('/')
-        ? envConfig.PORTAL_ECHO_API_URL
-        : `${envConfig.PORTAL_ECHO_API_URL}/`;
-    await axios.get(`${echoBase}test`, {
+    await axios.get(`${envConfig.KONG_URL}/test`, {
         headers: { authorization },
         timeout: 60000,
     });

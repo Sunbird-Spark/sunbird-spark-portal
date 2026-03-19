@@ -39,7 +39,6 @@ vi.mock('../config/env.js', () => ({
         KONG_URL: 'https://kong.example.com',
         KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'device-token',
         KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-token',
-        PORTAL_ECHO_API_URL: 'https://echo.example.com/',
     },
 }));
 
@@ -368,8 +367,7 @@ describe('mobileAuthService', () => {
 
             await verifyEchoAuthToken('Bearer some-token');
             const echoCall = mockAxiosGet.mock.calls[0] as [string, { headers: Record<string, string> }];
-            // URL is normalised — trailing slash is ensured before appending 'test'
-            expect(echoCall[0]).toBe('https://echo.example.com/test');
+            expect(echoCall[0]).toBe('https://kong.example.com/test');
             expect(echoCall[1].headers.authorization).toBe('Bearer some-token');
         });
 
