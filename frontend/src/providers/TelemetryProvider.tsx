@@ -5,6 +5,7 @@ import appCoreService from '@/services/AppCoreService';
 import userProfileService from '@/services/UserProfileService';
 import { OrganizationService } from '@/services/OrganizationService';
 import { SystemSettingService } from '@/services/SystemSettingService';
+import { TELEMETRY_SDK_ENDPOINT } from '@/services/players/telemetryContextBuilder';
 
 export const TelemetryContext = createContext<ITelemetryService | null>(null);
 
@@ -87,7 +88,7 @@ export const TelemetryProvider: React.FC<TelemetryProviderProps> = ({ children }
           sid,
           batchsize: 20,
           host: '',
-          endpoint: '/action/data/v3/telemetry',
+          endpoint: TELEMETRY_SDK_ENDPOINT,
           tags: channel ? [channel] : [],
           cdata: [
             { id: sid, type: 'UserSession' },
