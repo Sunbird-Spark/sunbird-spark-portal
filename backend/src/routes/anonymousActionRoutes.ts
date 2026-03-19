@@ -22,13 +22,30 @@
  * and org/search are treated for anonymous users.
  */
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { kongProxy } from '../proxies/kongProxy.js';
 
 const router = express.Router();
 
 // Telemetry sync endpoint — open to anonymous users.
 // The SDK sends batched events here; Kong receives and stores them server-side.
-router.post('/data/v3/telemetry', kongProxy);
+//
+// Body limit: the global express.json() in app.ts defaults to 100KB which can
+// silently 413 large SDK batches. Apply a generous 10mb limit here to match what
+// the authenticated /action/* routes set in knowlgMwProxyRoutes (50mb).
+router.post(
+  '/data/v3/telemetry',
+  express.json({ limit: '10mb' }),
+  (req: Request, res: Response, next: NextFunction) => {
+    // Guard against empty bodies or payloads missing the events array.
+    // Kong would return a cryptic error; we surface a clear 400 here instead.
+    if (!req.body || !Array.isArray(req.body.events)) {
+      res.status(400).json({ message: 'Invalid telemetry payload: events array required' });
+      return;
+    }
+    next();
+  },
+  kongProxy,
+);
 
 export default router;

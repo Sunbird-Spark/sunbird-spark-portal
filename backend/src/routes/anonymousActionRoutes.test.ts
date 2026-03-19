@@ -3,8 +3,6 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 
 // ─── Mocks ─────────────────────────────────────────────────────────────────
-// vi.mock calls are hoisted to the top of the file by Vitest, so these
-// run before any imports and correctly intercept the modules.
 
 vi.mock('../proxies/kongProxy.js', () => ({
   kongProxy: vi.fn((_req: Request, res: Response) => {
@@ -20,9 +18,7 @@ vi.mock('../middlewares/conditionalSession.js', () => ({
   ],
 }));
 
-// ─── Static imports (after mocks) ──────────────────────────────────────────
-// In Vitest/ESM, vi.mock is hoisted so these imports already see the mocked
-// versions of transitive dependencies.
+// In Vitest/ESM, vi.mock is hoisted so these imports already see the mocked versions.
 import anonymousActionRoutes from '../routes/anonymousActionRoutes.js';
 import { kongProxy } from '../proxies/kongProxy.js';
 
@@ -35,7 +31,6 @@ const buildApp = (sessionMiddlewareOverride?: express.RequestHandler) => {
 
   const sessionSetup = sessionMiddlewareOverride
     ?? ((req: Request, _res: Response, next: NextFunction) => {
-        // Default: anonymous session (no userId, has kong token)
         // @ts-ignore
         req.session = { kongToken: 'anon-token', roles: ['ANONYMOUS'] };
         next();
@@ -46,36 +41,50 @@ const buildApp = (sessionMiddlewareOverride?: express.RequestHandler) => {
   return app;
 };
 
-// ─── Sample telemetry payload (Sunbird SDK batch format) ───────────────────
+const withLoggedInSession = (req: Request, _res: Response, next: NextFunction) => {
+  // @ts-ignore
+  req.session = { userId: 'real-user-456', kongToken: 'auth-kong-token', roles: ['PUBLIC'] };
+  next();
+};
+
+// ─── Sample payloads ────────────────────────────────────────────────────────
+
+const makeEvent = (uid: string, eid: string, contentId?: string) => ({
+  eid,
+  ets: Date.now(),
+  ver: '3.0',
+  mid: `${eid}:${contentId ?? 'home'}`,
+  actor: { id: uid, type: 'User' },
+  context: {
+    channel: 'test-channel',
+    pdata: { id: 'sunbird.portal', pid: 'sunbird-portal', ver: '1.0' },
+    env: contentId ? 'content' : 'home',
+    sid: 'test-session',
+    did: 'device-001',
+  },
+  ...(contentId ? { object: { id: contentId, type: 'Content', ver: '1' } } : {}),
+  edata: { type: 'view', pageid: contentId ? 'player' : 'home', uri: '/' },
+});
 
 const samplePayload = {
   id: 'api.telemetry',
   ver: '3.0',
   params: { msgid: 'test-msg-id' },
   ets: Date.now(),
-  events: [
-    {
-      eid: 'IMPRESSION',
-      ets: Date.now(),
-      ver: '3.0',
-      mid: 'IMPRESSION:test-msg-id',
-      actor: { id: 'anonymous', type: 'User' },
-      context: {
-        channel: 'test-channel',
-        pdata: { id: 'sunbird.portal', pid: 'sunbird-portal', ver: '1.0' },
-        env: 'home',
-        sid: 'anon-session-001',
-        did: 'device-001',
-      },
-      edata: { type: 'view', pageid: 'home', uri: '/home', subtype: '' },
-    },
-  ],
+  events: [makeEvent('anonymous', 'IMPRESSION')],
 };
+
+const buildPlayerPayload = (uid: string, contentId: string) => ({
+  id: 'api.telemetry',
+  ver: '3.0',
+  params: { msgid: 'player-batch-001' },
+  ets: Date.now(),
+  events: ['START', 'IMPRESSION', 'END'].map(eid => makeEvent(uid, eid, contentId)),
+});
 
 // ─── Test Suite ────────────────────────────────────────────────────────────
 
 describe('anonymousActionRoutes', () => {
-  // Cast using Mock type from vitest — same pattern as telemetryService.test.ts
   const kongProxyMock = kongProxy as unknown as Mock;
 
   beforeEach(() => {
@@ -85,14 +94,54 @@ describe('anonymousActionRoutes', () => {
     });
   });
 
+  // ── Payload validation (new guard) ────────────────────────────────────────
+
+  describe('POST /action/data/v3/telemetry — payload validation', () => {
+    it('returns 400 when body is empty (no events array)', async () => {
+      const res = await request(buildApp())
+        .post('/action/data/v3/telemetry')
+        .send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.message).toMatch(/events array required/);
+      expect(kongProxyMock).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 when events is not an array', async () => {
+      const res = await request(buildApp())
+        .post('/action/data/v3/telemetry')
+        .send({ id: 'api.telemetry', events: 'not-an-array' });
+
+      expect(res.status).toBe(400);
+      expect(kongProxyMock).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 when body is missing entirely', async () => {
+      const res = await request(buildApp())
+        .post('/action/data/v3/telemetry')
+        .set('Content-Type', 'application/json')
+        .send();
+
+      expect(res.status).toBe(400);
+      expect(kongProxyMock).not.toHaveBeenCalled();
+    });
+
+    it('accepts an empty events array (valid SDK flush)', async () => {
+      const res = await request(buildApp())
+        .post('/action/data/v3/telemetry')
+        .send({ ...samplePayload, events: [] });
+
+      expect(res.status).toBe(200);
+      expect(kongProxyMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
   // ── Anonymous (guest) user ───────────────────────────────────────────────
 
   describe('POST /action/data/v3/telemetry — anonymous user', () => {
     it('proxies the payload to Kong and returns 200', async () => {
-      const app = buildApp();
-      const res = await request(app)
+      const res = await request(buildApp())
         .post('/action/data/v3/telemetry')
-        .set('Content-Type', 'application/json')
         .send(samplePayload);
 
       expect(res.status).toBe(200);
@@ -100,8 +149,7 @@ describe('anonymousActionRoutes', () => {
     });
 
     it('does NOT require an Authorization header to succeed', async () => {
-      const app = buildApp();
-      const res = await request(app)
+      const res = await request(buildApp())
         .post('/action/data/v3/telemetry')
         .send(samplePayload);
 
@@ -109,28 +157,17 @@ describe('anonymousActionRoutes', () => {
     });
 
     it('forwards a payload where actor.id is "anonymous"', async () => {
-      const app = buildApp();
       let capturedBody: unknown;
       kongProxyMock.mockImplementation((req: Request, res: Response) => {
         capturedBody = req.body;
         res.status(200).json({ responseCode: 'OK' });
       });
 
-      await request(app)
+      await request(buildApp())
         .post('/action/data/v3/telemetry')
         .send(samplePayload);
 
       expect((capturedBody as any).events[0].actor.id).toBe('anonymous');
-    });
-
-    it('accepts an empty events array without error', async () => {
-      const app = buildApp();
-      const res = await request(app)
-        .post('/action/data/v3/telemetry')
-        .send({ ...samplePayload, events: [] });
-
-      expect(res.status).toBe(200);
-      expect(kongProxyMock).toHaveBeenCalledTimes(1);
     });
 
     it('returns 200 even when session has no userId (pure unauthenticated)', async () => {
@@ -151,25 +188,13 @@ describe('anonymousActionRoutes', () => {
   // ── Logged-in user ──────────────────────────────────────────────────────
 
   describe('POST /action/data/v3/telemetry — logged-in user', () => {
-    const withLoggedInSession = (req: Request, _res: Response, next: NextFunction) => {
-      // @ts-ignore
-      req.session = {
-        userId: 'real-user-456',
-        kongToken: 'auth-kong-token',
-        roles: ['PUBLIC'],
-        rootOrghashTagId: 'org-hash-tag-001',
-      };
-      next();
-    };
-
     const loggedInPayload = {
       ...samplePayload,
-      events: [{ ...samplePayload.events[0], actor: { id: 'real-user-456', type: 'User' } }],
+      events: [makeEvent('real-user-456', 'IMPRESSION')],
     };
 
     it('proxies the payload to Kong and returns 200', async () => {
-      const app = buildApp(withLoggedInSession);
-      const res = await request(app)
+      const res = await request(buildApp(withLoggedInSession))
         .post('/action/data/v3/telemetry')
         .send(loggedInPayload);
 
@@ -178,14 +203,13 @@ describe('anonymousActionRoutes', () => {
     });
 
     it('correctly passes a user-attributed actor.id through to Kong', async () => {
-      const app = buildApp(withLoggedInSession);
       let capturedBody: unknown;
       kongProxyMock.mockImplementation((req: Request, res: Response) => {
         capturedBody = req.body;
         res.status(200).json({ responseCode: 'OK' });
       });
 
-      await request(app)
+      await request(buildApp(withLoggedInSession))
         .post('/action/data/v3/telemetry')
         .send(loggedInPayload);
 
@@ -193,17 +217,14 @@ describe('anonymousActionRoutes', () => {
     });
 
     it('accepts a multi-event batch (START, IMPRESSION, INTERACT, END)', async () => {
-      const app = buildApp(withLoggedInSession);
       const batchPayload = {
         ...samplePayload,
-        events: ['START', 'IMPRESSION', 'INTERACT', 'END'].map(eid => ({
-          ...samplePayload.events[0],
-          eid,
-          actor: { id: 'real-user-456', type: 'User' },
-        })),
+        events: ['START', 'IMPRESSION', 'INTERACT', 'END'].map(eid =>
+          makeEvent('real-user-456', eid),
+        ),
       };
 
-      const res = await request(app)
+      const res = await request(buildApp(withLoggedInSession))
         .post('/action/data/v3/telemetry')
         .send(batchPayload);
 
@@ -212,96 +233,33 @@ describe('anonymousActionRoutes', () => {
     });
   });
 
-  // ── Player-specific scenarios ──────────────────────────────────────────
+  // ── Player-specific scenarios (it.each — same proxy path, different content IDs) ──
 
   describe('POST /action/data/v3/telemetry — player telemetry events', () => {
-    const buildPlayerPayload = (uid: string, contentId: string) => ({
-      id: 'api.telemetry',
-      ver: '3.0',
-      params: { msgid: 'player-batch-001' },
-      ets: Date.now(),
-      events: ['START', 'IMPRESSION', 'END'].map(eid => ({
-        eid,
-        ets: Date.now(),
-        ver: '3.0',
-        mid: `${eid}:${contentId}`,
-        actor: { id: uid, type: 'User' },
-        context: {
-          channel: 'test-channel',
-          pdata: { id: 'sunbird.portal', pid: 'sunbird-portal', ver: '1.0' },
-          env: 'content',
-          sid: 'test-session',
-          did: 'device-001',
-        },
-        object: { id: contentId, type: 'Content', ver: '1' },
-        edata: { type: 'content', pageid: 'player', mode: 'play' },
-      })),
-    });
-
-    it('syncs ECML player events for an anonymous user', async () => {
+    it.each([
+      ['ECML', 'do_ecml_content_001'],
+      ['PDF',  'do_pdf_content_001'],
+      ['EPUB', 'do_epub_content_001'],
+    ])('syncs %s player events for an anonymous user', async (_type, contentId) => {
       const res = await request(buildApp())
         .post('/action/data/v3/telemetry')
-        .send(buildPlayerPayload('anonymous', 'do_ecml_content_001'));
+        .send(buildPlayerPayload('anonymous', contentId));
 
       expect(res.status).toBe(200);
       expect(kongProxyMock).toHaveBeenCalledTimes(1);
     });
 
-    it('syncs PDF player events for an anonymous user', async () => {
-      const res = await request(buildApp())
+    it.each([
+      ['ECML', 'do_ecml_content_001'],
+      ['PDF',  'do_pdf_content_001'],
+      ['EPUB', 'do_epub_content_001'],
+    ])('syncs %s player events for a logged-in user', async (_type, contentId) => {
+      const res = await request(buildApp(withLoggedInSession))
         .post('/action/data/v3/telemetry')
-        .send(buildPlayerPayload('anonymous', 'do_pdf_content_001'));
+        .send(buildPlayerPayload('real-user-456', contentId));
 
       expect(res.status).toBe(200);
       expect(kongProxyMock).toHaveBeenCalledTimes(1);
-    });
-
-    it('syncs EPUB player events for an anonymous user', async () => {
-      const res = await request(buildApp())
-        .post('/action/data/v3/telemetry')
-        .send(buildPlayerPayload('anonymous', 'do_epub_content_001'));
-
-      expect(res.status).toBe(200);
-      expect(kongProxyMock).toHaveBeenCalledTimes(1);
-    });
-
-    it('syncs ECML player events for a logged-in user', async () => {
-      const app = buildApp((req: Request, _res: Response, next: NextFunction) => {
-        // @ts-ignore
-        req.session = { userId: 'real-user-456', kongToken: 'auth-token' };
-        next();
-      });
-      const res = await request(app)
-        .post('/action/data/v3/telemetry')
-        .send(buildPlayerPayload('real-user-456', 'do_ecml_content_001'));
-
-      expect(res.status).toBe(200);
-    });
-
-    it('syncs PDF player events for a logged-in user', async () => {
-      const app = buildApp((req: Request, _res: Response, next: NextFunction) => {
-        // @ts-ignore
-        req.session = { userId: 'real-user-456', kongToken: 'auth-token' };
-        next();
-      });
-      const res = await request(app)
-        .post('/action/data/v3/telemetry')
-        .send(buildPlayerPayload('real-user-456', 'do_pdf_content_001'));
-
-      expect(res.status).toBe(200);
-    });
-
-    it('syncs EPUB player events for a logged-in user', async () => {
-      const app = buildApp((req: Request, _res: Response, next: NextFunction) => {
-        // @ts-ignore
-        req.session = { userId: 'real-user-456', kongToken: 'auth-token' };
-        next();
-      });
-      const res = await request(app)
-        .post('/action/data/v3/telemetry')
-        .send(buildPlayerPayload('real-user-456', 'do_epub_content_001'));
-
-      expect(res.status).toBe(200);
     });
   });
 
@@ -309,16 +267,14 @@ describe('anonymousActionRoutes', () => {
 
   describe('Route exclusivity — only POST /data/v3/telemetry is registered', () => {
     it('does NOT handle GET /action/data/v3/telemetry (returns 404)', async () => {
-      const app = buildApp();
-      const res = await request(app).get('/action/data/v3/telemetry');
+      const res = await request(buildApp()).get('/action/data/v3/telemetry');
 
       expect(res.status).toBe(404);
       expect(kongProxyMock).not.toHaveBeenCalled();
     });
 
     it('does NOT handle /action/content/v3/read (returns 404)', async () => {
-      const app = buildApp();
-      const res = await request(app).get('/action/content/v3/read/do_123');
+      const res = await request(buildApp()).get('/action/content/v3/read/do_123');
 
       expect(res.status).toBe(404);
       expect(kongProxyMock).not.toHaveBeenCalled();
@@ -347,7 +303,7 @@ describe('anonymousActionRoutes', () => {
 
       const res = await request(buildApp())
         .post('/action/data/v3/telemetry')
-        .send({});
+        .send(samplePayload);
 
       expect(res.status).toBe(400);
     });
