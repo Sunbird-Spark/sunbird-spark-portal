@@ -30,12 +30,10 @@ const router = express.Router();
 // Telemetry sync endpoint — open to anonymous users.
 // The SDK sends batched events here; Kong receives and stores them server-side.
 //
-// Body limit: the global express.json() in app.ts defaults to 100KB which can
-// silently 413 large SDK batches. Apply a generous 10mb limit here to match what
-// the authenticated /action/* routes set in knowlgMwProxyRoutes (50mb).
+// Note: the 10mb body limit for this path is applied globally in app.ts, before
+// the global express.json() parser, so large SDK batches are parsed correctly.
 router.post(
   '/data/v3/telemetry',
-  express.json({ limit: '10mb' }),
   (req: Request, res: Response, next: NextFunction) => {
     // Guard against empty bodies or payloads missing the events array.
     // Kong would return a cryptic error; we surface a clear 400 here instead.
