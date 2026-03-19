@@ -90,6 +90,7 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
     describe('Fallback Token Usage', () => {
         beforeEach(async () => {
+            vi.resetModules();
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_URL: 'http://mock-kong-api',
