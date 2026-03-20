@@ -16,7 +16,9 @@ const editorRoutes: string[] = [
     '/collection/v1/export/*rest',
     '/collection/v1/import/*rest',
     '/data/v1/form/read',
-    '/data/v3/telemetry',
+    // '/data/v3/telemetry' — removed: anonymous users POST here too.
+    // This is now handled by anonymousActionRoutes (no requireAuth) which
+    // serves both anonymous and logged-in SDK batch flushes.
     '/framework/v1/read/*rest',
     '/asset/v1/create',
     '/asset/v1/upload/*rest',
