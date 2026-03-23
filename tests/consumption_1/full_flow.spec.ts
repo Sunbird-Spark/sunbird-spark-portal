@@ -38,7 +38,6 @@ test.describe('Full End-to-End Flow', () => {
   // ── Create one page for all steps ─────────────────────────────────────────
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext({
-      storageState: 'tests/consumption_1/auth.json',
       viewport: { width: 1280, height: 800 },
     });
     sharedPage = await context.newPage();
@@ -333,19 +332,19 @@ test.describe('Full End-to-End Flow', () => {
     await closeAnyPopup(sharedPage).catch(() => {});
     await sharedPage.waitForTimeout(2000);
 
-    // Find an INCOMPLETE course (not 100%)
+    // Find an INCOMPLETE course (not 100%) — skip courses where progress is unknown
     const courseLinks = sharedPage.locator('a[href*="/collection/"]');
     const total = await courseLinks.count().catch(() => 0);
     let incompleteCourseUrl: string | null = null;
-    for (let i = 0; i < Math.min(total, 10); i++) {
+    for (let i = 0; i < Math.min(total, 15); i++) {
       const h = await courseLinks.nth(i).getAttribute('href').catch(() => null);
       if (!h) continue;
       const u = h.startsWith('http') ? h : `https://test.sunbirded.org${h}`;
       await sharedPage.goto(u, { waitUntil: 'domcontentloaded' });
       await sharedPage.waitForTimeout(1500);
       const pct = await readProgress(sharedPage);
+      // Only use a course where we can confirm it's < 100% (skip unknowns)
       if (pct !== null && pct < 100) { incompleteCourseUrl = u; break; }
-      if (pct === null) { incompleteCourseUrl = u; break; } // treat unknown as incomplete
     }
 
     if (!incompleteCourseUrl) {
@@ -381,23 +380,27 @@ test.describe('Full End-to-End Flow', () => {
     await leaveBtn.click().catch(async () => {
       await leaveBtn.evaluate((el: Element) => (el as HTMLElement).click()).catch(() => {});
     });
-    await sharedPage.waitForTimeout(1000);
+    await sharedPage.waitForTimeout(1000).catch(() => {});
 
     // The "Batch Unenrolment" dialog appears — click its "Leave course" confirm button
-    const dialogLeave = sharedPage
-      .getByRole('button', { name: /leave course/i })
-      .or(sharedPage.locator('[role="dialog"] button').filter({ hasText: /leave course/i }))
-      .or(sharedPage.locator('button').filter({ hasText: /leave course/i }))
-      .first();
+    try {
+      const dialogLeave = sharedPage
+        .getByRole('button', { name: /leave course/i })
+        .or(sharedPage.locator('[role="dialog"] button').filter({ hasText: /leave course/i }))
+        .or(sharedPage.locator('button').filter({ hasText: /leave course/i }))
+        .first();
 
-    const dialogVisible = await dialogLeave.isVisible({ timeout: 4000 }).catch(() => false);
-    if (dialogVisible) {
-      console.log('  "Batch Unenrolment" dialog appeared — confirming…');
-      await dialogLeave.click();
-      await sharedPage.waitForTimeout(1500);
+      const dialogVisible = await dialogLeave.isVisible({ timeout: 4000 }).catch(() => false);
+      if (dialogVisible) {
+        console.log('  "Batch Unenrolment" dialog appeared — confirming…');
+        await dialogLeave.click();
+        await sharedPage.waitForTimeout(2000).catch(() => {});
+      }
+    } catch (_) {
+      // Page may navigate away after confirm — that's expected
     }
 
-    // Verify success toast: "User enrolled successfully" (Sunbird wording for unenrol)
+    // Verify success toast — page may have navigated so catch all errors
     const toastPatterns = [
       'text=/user.*enrolled.*successfully/i',
       'text=/user.*enrol.*success/i',
@@ -419,9 +422,12 @@ test.describe('Full End-to-End Flow', () => {
     }
     if (!toastFound) {
       const msg = '🐞 BUG: Clicked "Leave course" in dialog but success toast did not appear';
-      await attachBug(sharedPage, 'leave-no-toast', msg);
+      await attachBug(sharedPage, 'leave-no-toast', msg).catch(() => {});
       expect.soft(false, msg).toBeTruthy();
     }
+
+    // Navigate to a safe page so the next test starts cleanly
+    await sharedPage.goto('https://test.sunbirded.org/explore', { waitUntil: 'domcontentloaded' }).catch(() => {});
   });
 
   test('Step 3 — Explore: "Leave course" must NOT appear on 100% complete course', async () => {

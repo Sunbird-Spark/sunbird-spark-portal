@@ -92,6 +92,15 @@ async function consumeCurrentLesson(page: Page, lessonLabel: string): Promise<bo
     ).first().isVisible({ timeout: 500 }).catch(() => false);
   };
 
+  // ── Helper: "You just completed" banner = lesson is done in the player ────
+  // Sunbird shows this congratulations screen right after a lesson finishes,
+  // before or instead of the feedback form. It always means the lesson is done.
+  const isYouJustCompletedVisible = async () => {
+    return await page.locator(
+      'text=/you just completed/i'
+    ).first().isVisible({ timeout: 500 }).catch(() => false);
+  };
+
   // ── Helper: dismiss the feedback form, then wait for TOC to confirm Completed ─
   // The app updates lesson status AFTER the feedback form is dismissed (async).
   // We wait up to 6 s for the TOC to reflect "Completed" before returning.
@@ -152,6 +161,12 @@ async function consumeCurrentLesson(page: Page, lessonLabel: string): Promise<bo
 
   if (await isLessonCompleted()) {
     console.log(`  [${lessonLabel}] Already Completed — skipping`);
+    return true;
+  }
+
+  // If "You just completed" banner is visible — lesson is done
+  if (await isYouJustCompletedVisible()) {
+    console.log(`  [${lessonLabel}] "You just completed" banner visible on entry — lesson done`);
     return true;
   }
 
@@ -246,6 +261,10 @@ async function consumeCurrentLesson(page: Page, lessonLabel: string): Promise<bo
           if (await isFeedbackFormVisible()) {
             console.log(`  [${lessonLabel}] ✅ Feedback form appeared — video lesson done`);
             await dismissFeedbackForm();
+            return true;
+          }
+          if (await isYouJustCompletedVisible()) {
+            console.log(`  [${lessonLabel}] ✅ "You just completed" banner — video lesson done`);
             return true;
           }
           if (await isLessonCompleted()) {
@@ -356,6 +375,7 @@ async function consumeCurrentLesson(page: Page, lessonLabel: string): Promise<bo
           // On last page — wait for app to mark Completed
           await page.waitForTimeout(1500);
           if (await isFeedbackFormVisible()) { await dismissFeedbackForm(); return true; }
+          if (await isYouJustCompletedVisible()) { console.log(`  [${lessonLabel}] ✅ "You just completed" banner`); return true; }
           if (await isLessonCompleted()) return true;
         }
       }
@@ -374,6 +394,10 @@ async function consumeCurrentLesson(page: Page, lessonLabel: string): Promise<bo
         await dismissFeedbackForm();
         return true;
       }
+      if (await isYouJustCompletedVisible()) {
+        console.log(`  [${lessonLabel}] ✅ "You just completed" banner — lesson done`);
+        return true;
+      }
       if (await isLessonCompleted()) {
         console.log(`  [${lessonLabel}] ✅ Completed (TOC)`);
         return true;
@@ -384,6 +408,7 @@ async function consumeCurrentLesson(page: Page, lessonLabel: string): Promise<bo
         if (cur.current >= cur.total) {
           await page.waitForTimeout(1500);
           if (await isFeedbackFormVisible()) { await dismissFeedbackForm(); return true; }
+          if (await isYouJustCompletedVisible()) { console.log(`  [${lessonLabel}] ✅ "You just completed" banner`); return true; }
           if (await isLessonCompleted()) return true;
         }
       }
@@ -634,7 +659,21 @@ test.describe('Home course flow', () => {
       const progressBefore = await readProgress(page);
       console.log(`  Progress before: ${progressBefore ?? 'unknown'}%`);
 
+      // ── Check whether "You just completed" banner appears DURING consumption ─
+      // We check it right after consumeCurrentLesson returns (it may still be on screen).
       await consumeCurrentLesson(page, label);
+
+      // Capture the "You just completed" banner before navigating away — it's proof the
+      // lesson finished in the player. If the TOC later still shows "In Progress", that's a bug.
+      const youJustCompletedVisible = await page.locator('text=/you just completed/i')
+        .first().isVisible({ timeout: 1000 }).catch(() => false);
+      if (youJustCompletedVisible) {
+        console.log(`  [${label}] 📸 "You just completed" banner is visible — capturing screenshot as evidence`);
+        const bannerShot = `test-results/you-just-completed-${label.replace(/\s+/g, '-')}-${Date.now()}.png`;
+        await page.screenshot({ path: bannerShot, fullPage: false }).catch(() => {});
+        await test.info().attach(`you-just-completed-${label}`, { path: bannerShot, contentType: 'image/png' }).catch(() => {});
+      }
+
       await page.waitForTimeout(1000);
 
       // Re-expand so TOC status badges are visible
@@ -664,16 +703,21 @@ test.describe('Home course flow', () => {
         const rawHtml = await anchor.evaluate((el: Element) => el.outerHTML).catch(() => '(unavailable)');
         console.log(`  Raw anchor HTML: ${rawHtml.substring(0, 300)}`);
 
+        // Sharper bug message if we CONFIRMED lesson end via "You just completed" banner
+        const proofLine = youJustCompletedVisible
+          ? `  The player showed "You just completed" confirming the lesson ended in the player,\n`
+          : `  Feedback form ("We would love to hear from you") confirmed lesson end,\n`;
+
         const bugMsg =
           `BUG: [${label}] Lesson status did NOT update to "Completed" after the lesson was finished.\n` +
-          `  Feedback form ("We would love to hear from you") confirmed lesson end,\n` +
+          proofLine +
           `  but TOC anchor still shows: "${rawTxt.substring(0, 120)}"\n` +
-          `  Expected: "Completed"\n` +
+          `  Expected: "Completed"   Got: "${statusAfter}"\n` +
           `  Lesson URL: ${href}`;
 
         await bugReport(page, `lesson-status-not-updated-${label.replace(/\s+/g, '-')}`, bugMsg);
 
-        // Also fail the test so this is visible in the Playwright report
+        // Fail visibly in the Playwright HTML report
         expect.soft(statusAfter, bugMsg).toBe('Completed');
       } else {
         console.log(`  ✅ [${label}] TOC shows Completed ✓`);
@@ -685,9 +729,14 @@ test.describe('Home course flow', () => {
 
       if (progressBefore !== null && progressAfter !== null) {
         if (progressAfter <= progressBefore) {
+          // Sharper message if "You just completed" confirmed the lesson end
+          const proofLine2 = youJustCompletedVisible
+            ? `  The player showed "You just completed" confirming the lesson ended,\n`
+            : `  Lesson consumption reported complete,\n`;
           const progMsg =
             `BUG: [${label}] Course Progress bar did not increase after completing this lesson.\n` +
-            `  Before: ${progressBefore}%  →  After: ${progressAfter}%\n` +
+            proofLine2 +
+            `  Before: ${progressBefore}%  →  After: ${progressAfter}%  (no change)\n` +
             `  Lesson URL: ${href}`;
           await bugReport(page, `progress-no-increase-${label.replace(/\s+/g, '-')}`, progMsg);
           expect.soft(progressAfter, progMsg).toBeGreaterThan(progressBefore);

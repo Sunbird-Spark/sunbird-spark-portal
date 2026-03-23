@@ -1,33 +1,162 @@
-# Using Playwright Test for VS Code
+# Playwright Test Suite – Setup & Usage Guide
 
-Quick steps to get Playwright Test integrated into VS Code for this project.
+## 📌 Overview
 
-1. Install the Playwright Test extension for VS Code
-   - Open the Extensions pane (Cmd+Shift+X) and install: ms-playwright.playwright
+This repository contains an end-to-end (E2E) automation test suite built using Playwright to validate user consumption flows on the Spark Portal. It covers critical user journeys such as login, course consumption, progress tracking, and certificate downloads.
 
-2. Recommended workspace extensions
-   - The repository recommends Playwright extension via `.vscode/extensions.json`.
+---
 
-3. Run or Debug a test file
-   - Open any test file under `tests/`.
-   - Use the Run Code Lens provided by the extension, or use the Run / Debug panel.
-   - Alternatively use the debug configuration "Run Playwright Test (current file)" from the Run and Debug UI.
+## 🚀 Getting Started
 
-4. Debugging with PWDEBUG
-   - Use the debug configuration "Debug Playwright Test (current file)" which sets `PWDEBUG=1` and runs the test in headed mode; you'll be able to interact with the browser.
-   - You can also use `npm run test:debug` to run `PWDEBUG=1 npx playwright test` from the terminal.
-
-5. Using the MCP server (optional)
-   - Start the local server: `npm run mcp-server`.
-   - Trigger tests remotely via POST to `http://localhost:3001/run` with JSON `{ "spec":"tests/02_course_consume_and_certificate.spec.ts", "headed": true }`.
-
-6. Open Playwright traces
-   - When a test produces a trace (trace.zip), open it with:
+### 1. Clone the Repository
 
 ```bash
-npx playwright show-trace path/to/trace.zip
+git clone https://github.com/akshitha-1210/UI_automation.git
+cd UI_automation
+git checkout some-changes
 ```
 
-Notes
-- The repo already contains `playwright.config.ts`; the VS Code extension will pick up configuration automatically.
-- If you prefer skipping onboarding, regenerate an up-to-date `auth.json` via `npm run save-auth` and the `tests/02_*.spec.ts` will use it if present.
+---
+
+### 2. Install Dependencies
+
+Install the required Node.js packages:
+
+```bash
+npm install
+```
+
+---
+
+### 3. Install Playwright Browsers
+
+```bash
+npx playwright install
+```
+
+---
+
+### 4. Install Playwright MCP Extension
+
+Download and install the Playwright MCP extension (if required for your environment).
+
+---
+
+## 📂 Project Structure
+
+### Main Test Directory
+
+```
+tests/consumption_1/
+```
+
+This folder contains all the test scenarios related to user consumption flows.
+
+---
+
+## 🧪 Test Files Overview
+
+### 1. `full_flow.spec.ts`
+
+* Covers the complete end-to-end flow
+* Includes login → course consumption → certificate download
+
+---
+
+### 2. `login_flow.spec.ts`
+
+* Validates login functionality
+* Covers:
+
+  * Login with valid credentials
+  * Sign in with Google
+  * Negative scenario: invalid credentials and alert validation
+
+---
+
+### 3. `home_course_flow.spec.ts`
+
+* Tests course continuation from the homepage
+* Validates:
+
+  * “Continue from where you left” feature
+  * “Sync Progress Now” functionality
+  * Consumption of PDF and video content
+  * Progress and status updates
+
+---
+
+### 4. `course_flow_explore.spec.ts`
+
+* Tests course discovery and enrollment
+* Covers:
+
+  * Navigating to Explore page
+  * Joining a course via batch selection
+  * Verifying “Leave Course” functionality
+
+---
+
+### 5. `certificate_download.spec.ts`
+
+* Validates certificate-related scenarios
+* Covers:
+
+  * Certificate download for completed courses
+  * Verification that courses without certificates do not show one
+
+---
+
+### 6. `helpers.ts`
+
+* Contains reusable utility functions such as:
+
+  * Login helpers
+  * Course progress validation
+* Helps reduce code duplication across test files
+
+---
+
+### 7. `playwright.config.ts`
+
+* Configuration file for Playwright
+* Includes:
+
+  * Test settings
+  * Browser configuration
+  * Timeouts and environment setup
+
+---
+
+## ▶️ Running Tests
+
+Run all tests:
+
+```bash
+npx playwright test
+```
+
+Run a specific test file:
+
+```bash
+npx playwright test tests/consumption_1/login_flow.spec.ts
+```
+
+---
+
+## 📊 Viewing Test Reports
+
+After running tests, view the HTML report:
+
+```bash
+npx playwright show-report
+```
+
+If you encounter port issues, use:
+
+```bash
+npx playwright show-report --port=9324
+```
+
+---
+

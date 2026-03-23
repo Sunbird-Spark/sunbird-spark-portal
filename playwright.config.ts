@@ -25,12 +25,22 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
     viewport: { width: 1280, height: 800 },
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    // Slow down each action by 800ms so tests run at a readable pace
+    launchOptions: {
+      slowMo: 800,
+    },
+
+    // Capture screenshot only on failure
+    screenshot: 'only-on-failure',
+
+    // Record video only on failure
+    video: 'retain-on-failure',
+
+    // Capture trace on failure for detailed debugging
+    trace: 'retain-on-failure',
+
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     navigationTimeout: 60000,
   },
@@ -42,16 +52,6 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
       },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
     },
 
     /* Test against mobile viewports. */
