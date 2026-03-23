@@ -11,7 +11,7 @@ const getRedirectUrl = (): string => {
 
 const onProceedToLogin = () => {
     window.location.href = getRedirectUrl();
-}
+};
 
 const PasswordResetSuccess: React.FC = () => {
     const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
