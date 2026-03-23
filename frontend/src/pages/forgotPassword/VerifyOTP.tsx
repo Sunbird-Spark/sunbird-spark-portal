@@ -90,7 +90,16 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                 const redirectUri = currentParams.get('redirect_uri');
                 let link = resetRes.data.link;
                 if (redirectUri) {
-                    link += (link.includes('?') ? '&' : '?') + `redirect_uri=${encodeURIComponent(redirectUri)}`;
+                    try {
+                        const parsed = new URL(redirectUri);
+                        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+                            const linkUrl = new URL(link);
+                            linkUrl.searchParams.set('redirect_uri', redirectUri);
+                            link = linkUrl.toString();
+                        }
+                    } catch (e) {
+                        console.warn('VerifyOTP: invalid redirect_uri, ignoring', e);
+                    }
                 }
                 window.location.href = link;
                 return;
