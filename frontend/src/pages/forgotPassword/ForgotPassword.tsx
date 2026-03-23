@@ -43,8 +43,14 @@ const ForgotPassword: React.FC = () => {
     setStep(3);
   };
 
+  const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+
   return (
-    <AuthLayout onClose={() => window.location.href = '/portal/login?prompt=none'} isOtpPage={step === 3}>
+    <AuthLayout onClose={() => {
+      const params = new URLSearchParams(window.location.search);
+      const redirectUri = params.get('redirect_uri');
+      window.location.href = redirectUri || '/portal/login?prompt=none';
+    }} isOtpPage={step === 3} hideClose={isMobileRedirect}>
       <TelemetryTracker 
         startEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
         endEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}

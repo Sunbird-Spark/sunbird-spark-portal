@@ -216,11 +216,19 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        window.location.href = '/portal/login?prompt=none';
+        const params = new URLSearchParams(window.location.search);
+        const redirectUri = params.get('redirect_uri');
+        if (redirectUri) {
+            window.location.href = redirectUri;
+        } else {
+            window.location.href = '/portal/login?prompt=none';
+        }
     };
 
+    const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+
     return (
-        <AuthLayout isOtpPage={step === 2}>
+        <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect}>
             <TelemetryTracker 
                 startEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
                 endEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}

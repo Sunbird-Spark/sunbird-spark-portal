@@ -85,7 +85,14 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             });
 
             if (resetRes?.data?.link) {
-                window.location.href = resetRes.data.link;
+                // Preserve redirect_uri param for mobile app redirect
+                const currentParams = new URLSearchParams(window.location.search);
+                const redirectUri = currentParams.get('redirect_uri');
+                let link = resetRes.data.link;
+                if (redirectUri) {
+                    link += (link.includes('?') ? '&' : '?') + `redirect_uri=${encodeURIComponent(redirectUri)}`;
+                }
+                window.location.href = link;
                 return;
             }
 
