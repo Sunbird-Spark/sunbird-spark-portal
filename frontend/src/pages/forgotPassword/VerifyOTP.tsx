@@ -5,7 +5,7 @@ import { Header, PrimaryButton } from './ForgotPasswordComponents';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/common/InputOTP';
 import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
-import { redirectWithError } from '../../utils/forgotPasswordUtils';
+import { redirectWithError, appendSafeRedirectUri } from '../../utils/forgotPasswordUtils';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 interface VerifyOTPProps {
@@ -85,23 +85,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             });
 
             if (resetRes?.data?.link) {
-                // Preserve redirect_uri param for mobile app redirect
-                const currentParams = new URLSearchParams(window.location.search);
-                const redirectUri = currentParams.get('redirect_uri');
-                let link = resetRes.data.link;
-                if (redirectUri) {
-                    try {
-                        const parsed = new URL(redirectUri);
-                        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-                            const linkUrl = new URL(link);
-                            linkUrl.searchParams.set('redirect_uri', redirectUri);
-                            link = linkUrl.toString();
-                        }
-                    } catch (e) {
-                        console.warn('VerifyOTP: invalid redirect_uri, ignoring', e);
-                    }
-                }
-                window.location.href = link;
+                window.location.href = appendSafeRedirectUri(resetRes.data.link);
                 return;
             }
 

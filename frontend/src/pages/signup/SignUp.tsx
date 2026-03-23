@@ -11,6 +11,7 @@ import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { useAcceptTnc } from '@/hooks/useTnc';
 import { SignupService } from '@/services/SignupService';
+import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
@@ -216,13 +217,7 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        const params = new URLSearchParams(window.location.search);
-        const redirectUri = params.get('redirect_uri');
-        if (redirectUri) {
-            window.location.href = redirectUri;
-        } else {
-            window.location.href = '/portal/login?prompt=none';
-        }
+        window.location.href = getSafeRedirectUrl();
     };
 
     const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');

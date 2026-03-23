@@ -7,6 +7,7 @@ import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
+import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -47,9 +48,7 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <AuthLayout onClose={() => {
-      const params = new URLSearchParams(window.location.search);
-      const redirectUri = params.get('redirect_uri');
-      window.location.href = redirectUri || '/portal/login?prompt=none';
+      window.location.href = getSafeRedirectUrl();
     }} isOtpPage={step === 3} hideClose={isMobileRedirect}>
       <TelemetryTracker 
         startEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
