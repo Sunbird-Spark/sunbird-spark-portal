@@ -3,10 +3,22 @@ import { FiCheck } from 'react-icons/fi';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
 
+const DEFAULT_LOGIN_URL = '/portal/login?prompt=none';
+
 const getRedirectUrl = (): string => {
     const params = new URLSearchParams(window.location.search);
     const redirectUri = params.get('redirect_uri');
-    return redirectUri || '/portal/login?prompt=none';
+    if (redirectUri) {
+        try {
+            const parsed = new URL(redirectUri);
+            if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+                return redirectUri;
+            }
+        } catch (e) {
+            console.warn('PasswordResetSuccess: invalid redirect_uri, ignoring', e);
+        }
+    }
+    return DEFAULT_LOGIN_URL;
 };
 
 const onProceedToLogin = () => {
