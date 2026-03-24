@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button";
 import { FiDownload } from "react-icons/fi";
 import { useToast } from "@/hooks/useToast";
 
-interface ExportButtonProps {
-  data: Record<string, unknown>[];
+interface ExportButtonProps<T extends object> {
+  data: T[];
   filename?: string;
   columns: { key: string; header: string }[];
 }
 
-const ExportButton = ({ data, filename = "report", columns }: ExportButtonProps) => {
+function ExportButton<T extends object>({ data, filename = "report", columns }: ExportButtonProps<T>) {
   const { toast } = useToast();
 
   const handleExport = () => {
@@ -20,7 +20,7 @@ const ExportButton = ({ data, filename = "report", columns }: ExportButtonProps)
     const header = columns.map((c) => c.header).join(",");
     const rows = data.map((row) =>
       columns.map((c) => {
-        const val = row[c.key];
+        const val = (row as Record<string, unknown>)[c.key];
         const str = String(val ?? "");
         return str.includes(",") ? `"${str}"` : str;
       }).join(",")
@@ -42,6 +42,6 @@ const ExportButton = ({ data, filename = "report", columns }: ExportButtonProps)
       Export CSV
     </Button>
   );
-};
+}
 
 export default ExportButton;

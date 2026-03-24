@@ -32,7 +32,17 @@ export interface SortConfig {
 /* ---------- MODULE 1 – Platform Reports ---------- */
 
 export interface ContentStatusCount {
-  status: "Live" | "Draft" | "Retired";
+  status: string;
+  count: number;
+}
+
+export type ContentStatusSummaryFacet =
+  | { facet: 'status'; values: StatusFacetValue[] }
+  | { facet: 'createdBy'; values: CreatedByFacetValue[] }
+  | { facet: 'primaryCategory'; values: CategoryFacetValue[] };
+
+export interface ContentStatusSummaryApiResult {
+  data: ContentStatusSummaryFacet[];
   count: number;
 }
 
@@ -71,7 +81,37 @@ export interface AdminCourseSummary {
   totalCompleted: number;
   completionPercent: number;
   certificatesIssued: number;
-  lastUpdated: string;
+  lastUpdated?: string;
+}
+
+export interface StatusFacetValue {
+  status: string;
+  count: number;
+}
+
+export interface CreatedByFacetValue {
+  createdBy: string;
+  count: number;
+  userDetails?: { firstName: string; lastName?: string };
+}
+
+export interface CategoryFacetValue {
+  primaryCategory: string;
+  count: number;
+}
+
+/** Raw shape returned by POST /observability/v1/reports for org-course-enrolment-summary */
+export interface OrgCourseEnrolmentApiItem {
+  courseid: string;
+  collectionDetails?: { name?: string; identifier?: string; contentType?: string };
+  total_enrolled?: number;
+  total_completed?: number;
+  certificates_issued?: number;
+}
+
+export interface OrgCourseEnrolmentResult {
+  data: OrgCourseEnrolmentApiItem[];
+  count: number;
 }
 
 /* ---------- MODULE 2 – Course Report ---------- */
@@ -100,12 +140,11 @@ export interface LearnerProgress {
 /** Raw shape returned by POST /observability/v1/reports for user-course-enrolments */
 export interface UserCourseEnrolmentApiItem {
   courseid: string;
-  /** May be absent when the course has been deleted or the join fails */
   collectionDetails?: {
     name: string;
     identifier: string;
     contentType: string;
-  };
+  } | null;
   completionpercentage: number | null;
   /** 0 = Not Started, 1 = In Progress, 2 = Completed */
   status: number;
@@ -178,12 +217,11 @@ export interface UserAssessmentApiItem {
   total_score: number | null;
   total_max_score: number | null;
   last_attempted_on: string;
-  /** May be absent when the course has been deleted or the join fails */
   collectionDetails?: {
     name: string;
     identifier: string;
     contentType: string;
-  };
+  } | null;
   /** Optional — absent in some API records */
   contentDetails?: {
     name: string;
@@ -254,6 +292,11 @@ export interface UserAssessmentHistory {
   percentage: number;
   attemptDate: string;
 }
+
+/* ---------- User Creation Count (user-creation-count report) ---------- */
+
+export interface UserCreationCountApiItem { month: string; userCount: number; }
+export interface UserCreationCountResult { data: UserCreationCountApiItem[]; count: number; }
 
 /* ---------- MODULE 4 – User Consent Management ---------- */
 

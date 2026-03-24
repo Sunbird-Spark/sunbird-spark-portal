@@ -3,8 +3,6 @@ import type {
   ContentByGroup,
   TopCreator,
   PopularContent,
-  UserGrowthPoint,
-  UserDemographic,
   AdminCourseSummary,
   EnrollmentCompletion,
   ProgressBucket,
@@ -68,34 +66,6 @@ export const popularContent: PopularContent[] = [
   { id: "3", title: "Web Development 101", enrollments: 1650, views: 6100, type: "Course" },
   { id: "4", title: "Python Programming", enrollments: 1420, views: 5800, type: "Resource" },
   { id: "5", title: "Machine Learning Guide", enrollments: 1280, views: 5200, type: "Textbook" },
-];
-
-export const userGrowthData: UserGrowthPoint[] = [
-  { date: "Jan", users: 1200 },
-  { date: "Feb", users: 1800 },
-  { date: "Mar", users: 2400 },
-  { date: "Apr", users: 3100 },
-  { date: "May", users: 4200 },
-  { date: "Jun", users: 5800 },
-  { date: "Jul", users: 6500 },
-  { date: "Aug", users: 7900 },
-  { date: "Sep", users: 9200 },
-  { date: "Oct", users: 10400 },
-  { date: "Nov", users: 11800 },
-  { date: "Dec", users: 13500 },
-];
-
-export const userDemographics: UserDemographic[] = [
-  { label: "Students", count: 8400 },
-  { label: "Teachers", count: 3200 },
-  { label: "Admin", count: 420 },
-  { label: "Others", count: 1480 },
-];
-
-export const userByAppType: UserDemographic[] = [
-  { label: "Mobile App", count: 7800 },
-  { label: "Web Portal", count: 4200 },
-  { label: "Desktop", count: 1500 },
 ];
 
 export const adminCourseSummaries: AdminCourseSummary[] = Array.from({ length: 25 }, (_, i) => ({

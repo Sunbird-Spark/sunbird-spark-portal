@@ -94,6 +94,7 @@ export interface ContentSearchRequest {
   offset?: number;
   query?: string;
   sort_by?: Record<string, string>;
+  fields?: string[];
 }
 
 export interface ContentSearchItem {
