@@ -1,16 +1,18 @@
 import { expect, Page } from '@playwright/test';
 import fs from 'fs';
 
-export const LOGIN_URL =
-  'https://test.sunbirded.org/auth/realms/sunbird/protocol/openid-connect/auth' +
-  '?redirect_uri=https%3A%2F%2Ftest.sunbirded.org%2Fportal%2Fauth%2Fcallback' +
-  '&scope=openid' +
-  '&code_challenge=GKZ_TMQHPb4d42sBgPGxmV8tWFB9Wn6BVmMjqN6MI9U' +
-  '&code_challenge_method=S256' +
-  '&state=de644eaf-2385-4160-be32-1d39635bf82d' +
-  '&prompt=login' +
-  '&client_id=portal' +
-  '&response_type=code';
+// ─── Environment variables ─────────────────────────────────────────────────
+// All URLs and credentials are read from .env (loaded by playwright.config.ts
+// via dotenv). Provide a .env file based on .env.sample before running tests.
+
+export const BASE_URL    = process.env['BASE_URL']    ?? 'https://test.sunbirded.org';
+export const LOGIN_URL   = process.env['LOGIN_URL']   ?? `${BASE_URL}/auth/realms/sunbird/protocol/openid-connect/auth?redirect_uri=${encodeURIComponent(BASE_URL + '/portal/auth/callback')}&scope=openid&prompt=login&client_id=portal&response_type=code`;
+export const HOME_URL    = process.env['HOME_URL']    ?? `${BASE_URL}/home`;
+export const EXPLORE_URL = process.env['EXPLORE_URL'] ?? `${BASE_URL}/explore`;
+export const PROFILE_URL = process.env['PROFILE_URL'] ?? `${BASE_URL}/profile`;
+
+export const TEST_USER_EMAIL    = process.env['TEST_USER_EMAIL']    ?? 'user1@yopmail.com';
+export const TEST_USER_PASSWORD = process.env['TEST_USER_PASSWORD'] ?? 'User1@123';
 
 /** Check for any visible failure/error alerts on the page and fail with a bug identifier */
 export async function checkForFailureAlerts(page: Page, context: string) {
@@ -41,8 +43,8 @@ export async function checkForFailureAlerts(page: Page, context: string) {
 export async function loginWithValidCredentials(page: Page) {
   await page.goto(LOGIN_URL);
   await page.waitForSelector('#emailormobile', { timeout: 10000 });
-  await page.fill('#emailormobile', 'user1@yopmail.com');
-  await page.fill('#password', 'User1@123');
+  await page.fill('#emailormobile', TEST_USER_EMAIL);
+  await page.fill('#password', TEST_USER_PASSWORD);
   await page.click('#kc-login');
   try {
     await page.waitForURL('**/home', { timeout: 20000 });

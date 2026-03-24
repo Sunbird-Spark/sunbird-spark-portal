@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import fs from 'fs';
-import { loginWithValidCredentials } from './helpers';
+import { PROFILE_URL, loginWithValidCredentials } from './helpers';
 
 test.describe('Certificate download from Profile My Learning', () => {
   test.setTimeout(5 * 60 * 1000); // 5 min — up from 3 min to cover many courses
@@ -9,7 +9,7 @@ test.describe('Certificate download from Profile My Learning', () => {
     await loginWithValidCredentials(page);
 
     // Navigate to profile page and wait for full render
-    await page.goto('https://test.sunbirded.org/profile', { waitUntil: 'networkidle' });
+    await page.goto(PROFILE_URL, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
 
     // Scroll slowly so all lazy-loaded course cards appear
@@ -105,7 +105,7 @@ test.describe('Certificate download from Profile My Learning', () => {
 
   /** Navigate to /profile, expand the course list, scroll the whole page, and return every course card's data */
   async function collectCourseCards(page: import('@playwright/test').Page) {
-    await page.goto('https://test.sunbirded.org/profile', { waitUntil: 'networkidle' });
+    await page.goto(PROFILE_URL, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
 
     // Click "View Courses" / "View All" to expand the full My Learning list
@@ -244,7 +244,7 @@ test.describe('Certificate download from Profile My Learning', () => {
   // means the certificate EXISTS but is NOT shown on the profile — major bug.
   test('100% completed courses showing "No certificate" on profile must truly have no certificate', async ({ page }) => {
     await loginWithValidCredentials(page);
-    await page.goto('https://test.sunbirded.org/profile', { waitUntil: 'networkidle' });
+    await page.goto(PROFILE_URL, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
 
     // Expand full list
@@ -337,7 +337,7 @@ test.describe('Certificate download from Profile My Learning', () => {
         // Close search and go back to profile for the next course
         await page.keyboard.press('Escape').catch(() => {});
         await page.waitForTimeout(500);
-        await page.goto('https://test.sunbirded.org/profile', { waitUntil: 'networkidle' });
+        await page.goto(PROFILE_URL, { waitUntil: 'networkidle' });
         await page.waitForTimeout(1500);
         continue;
       }
@@ -381,7 +381,7 @@ test.describe('Certificate download from Profile My Learning', () => {
       }
 
       // Go back to profile for the next iteration (use domcontentloaded — faster than networkidle)
-      await page.goto('https://test.sunbirded.org/profile', { waitUntil: 'domcontentloaded' });
+      await page.goto(PROFILE_URL, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(1200);
       // re-scroll to reload the list
       for (let i = 0; i < 6; i++) {

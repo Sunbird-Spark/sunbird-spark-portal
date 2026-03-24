@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { LOGIN_URL, checkForFailureAlerts, loginWithValidCredentials } from './helpers';
+import { LOGIN_URL, TEST_USER_EMAIL, TEST_USER_PASSWORD, checkForFailureAlerts, loginWithValidCredentials } from './helpers';
 
 test('Login: Valid credentials', async ({ page }) => {
   await loginWithValidCredentials(page);
@@ -118,8 +118,8 @@ test('Login: Forgot password — OTP reset flow', async ({ page, context }) => {
   ).first();
   const emailVisible = await emailField.isVisible({ timeout: 5000 }).catch(() => false);
   expect(emailVisible, 'Bug Identifier [ForgotPassword]: Email input field not found on reset page').toBeTruthy();
-  await emailField.fill('user1@yopmail.com');
-  console.log('Filled email: user1@yopmail.com');
+  await emailField.fill(TEST_USER_EMAIL);
+  console.log(`Filled email: ${TEST_USER_EMAIL}`);
 
   // Fill username field
   const usernameField = page.locator(
@@ -147,7 +147,7 @@ test('Login: Forgot password — OTP reset flow', async ({ page, context }) => {
   const submitVisible = await submitBtn.isVisible({ timeout: 5000 }).catch(() => false);
   expect(submitVisible, 'Bug Identifier [ForgotPassword]: Submit button not found on reset page').toBeTruthy();
   await submitBtn.click();
-  console.log('Submitted reset form — OTP should be sent to user1@yopmail.com');
+  console.log(`Submitted reset form — OTP should be sent to ${TEST_USER_EMAIL}`);
 
   await page.waitForTimeout(5000); // Wait for OTP email to arrive
 
@@ -155,9 +155,9 @@ test('Login: Forgot password — OTP reset flow', async ({ page, context }) => {
   const yopmailPage = await context.newPage();
   await yopmailPage.goto('https://yopmail.com/en/');
   await yopmailPage.waitForSelector('#login', { timeout: 10000 });
-  await yopmailPage.fill('#login', 'user1');
+  await yopmailPage.fill('#login', TEST_USER_EMAIL.split('@')[0]);
   await yopmailPage.press('#login', 'Enter');
-  console.log('Opened yopmail inbox for user1@yopmail.com');
+  console.log(`Opened yopmail inbox for ${TEST_USER_EMAIL}`);
 
   await yopmailPage.waitForTimeout(3000);
 
@@ -217,8 +217,8 @@ test('Login: Forgot password — OTP reset flow', async ({ page, context }) => {
   const newPwdVisible = await newPasswordField.isVisible({ timeout: 10000 }).catch(() => false);
   expect(newPwdVisible, 'Bug Identifier [ForgotPassword]: New password field not found after OTP verification').toBeTruthy();
 
-  await newPasswordField.fill('User1@123');
-  await confirmPasswordField.fill('User1@123');
+  await newPasswordField.fill(TEST_USER_PASSWORD);
+  await confirmPasswordField.fill(TEST_USER_PASSWORD);
   console.log('Entered new password and confirmation');
 
   // Click Continue/Submit
@@ -285,12 +285,12 @@ test('Login: Create account — registration flow', async ({ page }) => {
   const passwordCount = await passwordFields.count();
   expect(passwordCount, 'Bug Identifier [CreateAccount]: Password fields not found on registration page').toBeGreaterThanOrEqual(1);
 
-  await passwordFields.nth(0).fill('User1@123');
+  await passwordFields.nth(0).fill(TEST_USER_PASSWORD);
   console.log('Filled password');
 
   // ── Step 5: Fill in Confirm Password (if separate field exists) ───────────
   if (passwordCount >= 2) {
-    await passwordFields.nth(1).fill('User1@123');
+    await passwordFields.nth(1).fill(TEST_USER_PASSWORD);
     console.log('Filled confirm password');
   }
 

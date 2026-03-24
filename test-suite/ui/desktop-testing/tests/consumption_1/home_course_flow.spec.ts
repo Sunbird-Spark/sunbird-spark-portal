@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginWithValidCredentials, closeAnyPopup, reportBug } from './helpers';
+import { HOME_URL, loginWithValidCredentials, closeAnyPopup, reportBug } from './helpers';
 
 test.setTimeout(15 * 60 * 1000);
 
@@ -663,7 +663,7 @@ test.describe('Home course flow', () => {
 
     // Make sure we are on /home (not /explore or anywhere else)
     if (!page.url().includes('/home')) {
-      await page.goto('https://test.sunbirded.org/home', { waitUntil: 'domcontentloaded' });
+      await page.goto(HOME_URL, { waitUntil: 'domcontentloaded' });
     }
     await page.waitForTimeout(1500);
 
@@ -1226,7 +1226,7 @@ test.describe('Home course flow', () => {
 
     // Make sure we are actually on /home
     if (!page.url().includes('/home')) {
-      await page.goto('https://test.sunbirded.org/home', { waitUntil: 'domcontentloaded' });
+      await page.goto(HOME_URL, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(2000);
     }
 

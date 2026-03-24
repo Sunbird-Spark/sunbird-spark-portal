@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginWithValidCredentials, closeAnyPopup, reportBug } from './helpers';
+import { EXPLORE_URL, HOME_URL, BASE_URL, loginWithValidCredentials, closeAnyPopup, reportBug } from './helpers';
 
 test.setTimeout(15 * 60 * 1000);
 
@@ -652,7 +652,7 @@ async function findCourseFromExplore(
   const timedOut = () => Date.now() > deadline;
 
   console.log(`  [findCourse] condition="${condition}" — navigating to /explore…`);
-  await page.goto('https://test.sunbirded.org/explore', {
+  await page.goto(EXPLORE_URL, {
     waitUntil: 'domcontentloaded', timeout: PER_GOTO_MS,
   }).catch(() => {});
   await page.waitForTimeout(1500);
@@ -672,7 +672,7 @@ async function findCourseFromExplore(
     for (let i = 0; i < count; i++) {
       const href = await cards.nth(i).getAttribute('href').catch(() => null);
       if (!href) continue;
-      const url = href.startsWith('http') ? href : `https://test.sunbirded.org${href}`;
+      const url = href.startsWith('http') ? href : `${BASE_URL}${href}`;
       if (!allUrls.includes(url)) allUrls.push(url);
     }
   }
@@ -754,7 +754,7 @@ test.describe('Course Flow — Explore page', () => {
     // ── Step 1: Go to Explore and find a usable course ──────────────────────
     // Iterate course cards and skip any that show "No batches available for
     // enrollment" — those courses cannot be joined so they are useless here.
-    await page.goto('https://test.sunbirded.org/explore', { waitUntil: 'domcontentloaded' });
+    await page.goto(EXPLORE_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1500);
     await closeAnyPopup(page).catch(() => {});
 
@@ -1072,7 +1072,7 @@ test.describe('Course Flow — Explore page', () => {
     await page.waitForURL(/\/home/, { timeout: 8000 }).catch(() => {});
     await page.waitForTimeout(2000);
     if (!page.url().includes('/home')) {
-      await page.goto('https://test.sunbirded.org/home', { waitUntil: 'domcontentloaded' });
+      await page.goto(HOME_URL, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(2000);
     }
     const titleKey = courseTitle.trim().substring(0, 40);
