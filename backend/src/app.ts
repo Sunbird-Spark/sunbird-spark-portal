@@ -18,6 +18,7 @@ import { sessionMiddleware, anonymousMiddlewares } from './middlewares/condition
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
+import anonymousActionRoutes from './routes/anonymousActionRoutes.js';
 import mobileRoutes from './routes/mobileRoutes.js';
 
 
@@ -53,6 +54,11 @@ app.use('/google', googleRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // Specific /action endpoints must always proxy to kong.
 app.use("/action", editorRoutes);
+
+// Anonymous-safe /action/* routes — registered BEFORE the authenticated catch-all.
+// Allows the Sunbird Telemetry JS SDK to POST /action/data/v3/telemetry for
+// anonymous/guest users without needing OIDC tokens.
+app.use('/action', sessionMiddleware, ...anonymousMiddlewares, anonymousActionRoutes);
 
 // All remaining /action/* routes proxy to knowledge-mw-service.
 // oidcSession() deserializes the OIDC tokens from the session so that

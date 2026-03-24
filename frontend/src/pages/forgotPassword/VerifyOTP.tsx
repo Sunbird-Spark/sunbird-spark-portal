@@ -5,7 +5,7 @@ import { Header, PrimaryButton } from './ForgotPasswordComponents';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/common/InputOTP';
 import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
-import { redirectWithError } from '../../utils/forgotPasswordUtils';
+import { redirectWithError, appendSafeRedirectUri } from '../../utils/forgotPasswordUtils';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 interface VerifyOTPProps {
@@ -85,7 +85,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             });
 
             if (resetRes?.data?.link) {
-                window.location.href = resetRes.data.link;
+                window.location.href = appendSafeRedirectUri(resetRes.data.link);
                 return;
             }
 

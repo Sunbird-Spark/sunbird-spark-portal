@@ -90,6 +90,9 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
     describe('Fallback Token Usage', () => {
         beforeEach(async () => {
+            // vi.resetModules() is required so that vi.doMock() below takes effect on the
+            // next dynamic import — without it, the module cache returns the already-loaded version.
+            vi.resetModules();
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_URL: 'http://mock-kong-api',

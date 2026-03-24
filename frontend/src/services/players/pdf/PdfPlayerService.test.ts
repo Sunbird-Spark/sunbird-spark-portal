@@ -17,7 +17,7 @@ vi.mock('../telemetryContextBuilder', () => ({
     timeDiff: 0,
     objectRollup: {},
     host: '',
-    endpoint: '/portal/data/v1/telemetry',
+    endpoint: '/data/v3/telemetry',
     dims: ['test-channel-456'],
     app: ['test-channel-456'],
     partner: [],
@@ -38,7 +38,7 @@ const defaultContext = {
   timeDiff: 0,
   objectRollup: {},
   host: '',
-  endpoint: '/portal/data/v1/telemetry',
+  endpoint: '/data/v3/telemetry',
   dims: ['test-channel-456'],
   app: ['test-channel-456'],
   partner: [],
@@ -166,7 +166,7 @@ describe('PdfPlayerService', () => {
 
       expect(config.context.timeDiff).toBe(0);
       expect(config.context.host).toBe('');
-      expect(config.context.endpoint).toBe('/portal/data/v1/telemetry');
+      expect(config.context.endpoint).toBe('/data/v3/telemetry');
     });
 
     it('should set empty config object', async () => {
@@ -371,3 +371,4 @@ describe('PdfPlayerService', () => {
     });
   });
 });
+

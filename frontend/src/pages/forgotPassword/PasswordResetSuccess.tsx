@@ -2,14 +2,17 @@ import React from 'react';
 import { FiCheck } from 'react-icons/fi';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
+import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
 
 const onProceedToLogin = () => {
-    window.location.href = '/portal/login?prompt=none';
-}
+    window.location.href = getSafeRedirectUrl();
+};
 
 const PasswordResetSuccess: React.FC = () => {
+    const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+
     return (
-        <AuthLayout onClose={() => window.location.href = '/portal/login?prompt=none'}>
+        <AuthLayout onClose={() => window.location.href = getSafeRedirectUrl()} hideClose={isMobileRedirect}>
             <div className="flex flex-col items-center">
                 <Header
                     title="Congratulations!"

@@ -8,9 +8,10 @@ interface AuthLayoutProps {
   children: React.ReactNode;
   onClose?: () => void;
   isOtpPage?: boolean;
+  hideClose?: boolean;
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage, hideClose }) => {
   const navigate = useNavigate();
   const { t } = useAppI18n();
 
@@ -38,10 +39,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage })
 
         {/* Right Content Area */}
         <div className="login-card">
-          {/* Close Button */}
-          <button onClick={handleClose} className="close-button">
-            <FiX className="w-6 h-6" />
-          </button>
+          {/* Close Button — hidden when opened from mobile app */}
+          {!hideClose && (
+            <button onClick={handleClose} className="close-button">
+              <FiX className="w-6 h-6" />
+            </button>
+          )}
 
           <div className="login-inner-container">
             <div className="logo-container">

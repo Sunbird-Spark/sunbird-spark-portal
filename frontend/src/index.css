@@ -229,8 +229,18 @@
     @apply font-rubik min-h-screen w-full flex items-center justify-center relative bg-sunbird-theme-teal auth-bg-wave overflow-x-hidden;
   }
 
+  /* Mobile: full screen white, no rounded corners, no wave background visible */
+  @media (max-width: 767px) {
+    .login-wrapper {
+      @apply bg-white items-start;
+      background-image: none !important;
+    }
+  }
+
   .login-split-container {
-    @apply flex flex-col md:flex-row m-[0.625rem] md:m-auto bg-white rounded-[4rem] p-[0.375rem] relative z-10 shadow-2xl overflow-hidden w-[67.375rem] h-[41.625rem] min-h-[41.625rem];
+    @apply flex flex-col md:flex-row bg-white relative z-10 overflow-hidden
+      w-full min-h-screen rounded-none p-0 m-0 shadow-none
+      md:w-[67.375rem] md:h-[41.625rem] md:min-h-[41.625rem] md:rounded-[4rem] md:p-[0.375rem] md:m-auto md:shadow-2xl;
   }
 
   /* Tablet view responsiveness */
@@ -258,7 +268,7 @@
   }
 
   .login-card {
-    @apply flex-[0.85] p-6 md:p-10 relative flex flex-col justify-center md:pt-8 pt-8;
+    @apply flex-[0.85] p-6 md:p-10 relative flex flex-col justify-start md:justify-center md:pt-8 pt-6 overflow-y-auto;
   }
 
   .close-button {
