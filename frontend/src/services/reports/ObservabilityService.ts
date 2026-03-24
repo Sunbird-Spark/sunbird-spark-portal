@@ -1,5 +1,5 @@
 import { getClient } from '../../lib/http-client';
-import type { AssessmentApiItem, AssessmentResult, ContentStatusSummaryApiResult, ContentStatusSummaryFacet, LearnerProgressApiItem, LearnerProgressResult, OrgCourseEnrolmentApiItem, OrgCourseEnrolmentResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult } from '../../types/reports';
+import type { AssessmentApiItem, AssessmentResult, ContentStatusSummaryApiResult, ContentStatusSummaryFacet, LearnerProgressApiItem, LearnerProgressResult, OrgCourseEnrolmentApiItem, OrgCourseEnrolmentResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult, UserCreationCountApiItem, UserCreationCountResult } from '../../types/reports';
 
 /** Shared parser for the Sunbird observability response envelope.
  *  Handles two response shapes:
@@ -112,6 +112,18 @@ export class ObservabilityService {
         },
       })
       .then((response) => parseObservabilityResponse<ContentStatusSummaryFacet>(response.data));
+  }
+
+  /**
+   * Fetch monthly user creation counts.
+   * POST /observability/v1/reports
+   */
+  public getUserCreationCount(): Promise<UserCreationCountResult> {
+    return getClient()
+      .post<unknown>('/observability/v1/reports', {
+        request: { reportId: 'user-creation-count', filters: {} },
+      })
+      .then((response) => parseObservabilityResponse<UserCreationCountApiItem>(response.data));
   }
 
   /**

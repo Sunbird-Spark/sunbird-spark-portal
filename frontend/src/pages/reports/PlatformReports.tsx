@@ -11,15 +11,11 @@ import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper, { type Column } from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
 import { Badge } from "@/components/ui/badge";
-import {
-  popularContent,
-  userGrowthData,
-  userDemographics,
-  userByAppType,
-} from "@/data/reportsMockData";
+import { popularContent } from "@/data/reportsMockData";
 import type { AdminCourseSummary } from "@/types/reports";
 import { useOrgCourseSummary } from "@/hooks/useOrgCourseSummary";
 import { useContentStatusSummary } from "@/hooks/useContentStatusSummary";
+import { useUserCreationCount } from "@/hooks/useUserCreationCount";
 
 const PIE_COLORS = [
   "hsl(var(--sunbird-ink))",
@@ -33,9 +29,8 @@ const PlatformReports = () => {
   const [tableSearch, setTableSearch] = useState("");
   const [tableFilters, setTableFilters] = useState<Record<string, string>>({});
 
-  const totalUsers = useMemo(() => userDemographics.reduce((s, d) => s + d.count, 0), []);
-
   const { statusData, topCreatorsData, categoryData: groupingData } = useContentStatusSummary();
+  const { data: growthData, totalUsers, isLoading: isGrowthLoading, isError: isGrowthError } = useUserCreationCount();
   const { data: apiCourses, isLoading: isCoursesLoading, isError: isCoursesError } = useOrgCourseSummary();
 
   const filteredCourses = useMemo(() => {
@@ -146,45 +141,26 @@ const PlatformReports = () => {
         <h2 className="text-lg font-semibold text-foreground mb-4">User Analytics</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <SummaryCard label="Total Users" value={totalUsers.toLocaleString()} colorClass="bg-sunbird-ink" />
-          {userDemographics.map((d) => (
-            <SummaryCard key={d.label} label={d.label} value={d.count.toLocaleString()} colorClass="bg-sunbird-wave" />
-          ))}
+          <SummaryCard label="Total Users" value={isGrowthLoading ? "…" : totalUsers.toLocaleString()} colorClass="bg-sunbird-ink" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          {/* Growth Trend */}
-          <ChartCard title="User Growth Trend">
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={userGrowthData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="users" stroke="hsl(var(--sunbird-ginger))" strokeWidth={2.5} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartCard>
+        {isGrowthError && (
+          <p className="text-sm text-destructive mb-3">Failed to load user growth data. Please try again later.</p>
+        )}
 
-          {/* Users by App Type */}
-          <ChartCard title="Users by App Type">
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={userByAppType} dataKey="count" nameKey="label" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                    {userByAppType.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartCard>
-        </div>
+        <ChartCard title="User Growth Trend">
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={growthData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="userCount" stroke="hsl(var(--sunbird-ginger))" strokeWidth={2.5} dot={{ r: 3 }} name="Users" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartCard>
       </section>
 
       {/* ── Section 3: Admin Course Summary Table ── */}

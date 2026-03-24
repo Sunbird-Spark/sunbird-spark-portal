@@ -293,6 +293,11 @@ export interface UserAssessmentHistory {
   attemptDate: string;
 }
 
+/* ---------- User Creation Count (user-creation-count report) ---------- */
+
+export interface UserCreationCountApiItem { month: string; userCount: number; }
+export interface UserCreationCountResult { data: UserCreationCountApiItem[]; count: number; }
+
 /* ---------- MODULE 4 – User Consent Management ---------- */
 
 export interface UserConsentRecord {
