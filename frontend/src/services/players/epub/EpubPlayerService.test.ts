@@ -17,7 +17,7 @@ vi.mock('../telemetryContextBuilder', () => ({
     timeDiff: 0,
     objectRollup: {},
     host: '',
-    endpoint: '/portal/data/v1/telemetry',
+    endpoint: '/data/v3/telemetry',
     dims: ['test-channel-456'],
     app: ['test-channel-456'],
     partner: [],
@@ -38,7 +38,7 @@ const defaultContext = {
   timeDiff: 0,
   objectRollup: {},
   host: '',
-  endpoint: '/portal/data/v1/telemetry',
+  endpoint: '/data/v3/telemetry',
   dims: ['test-channel-456'],
   app: ['test-channel-456'],
   partner: [],
@@ -56,6 +56,18 @@ describe('EpubPlayerService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Reset static caches so each test starts fresh
+    (EpubPlayerService as any).scriptLoaded = false;
+    (EpubPlayerService as any).scriptLoading = undefined;
+    (EpubPlayerService as any).cachedCss = null;
+    (EpubPlayerService as any).cssLoading = undefined;
+
+    // Prevent fetchStyles() from hanging — return empty CSS immediately
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(''),
+    }));
 
     (buildTelemetryContext as any).mockImplementation(async (contextProps?: any, options?: any) => ({
       ...defaultContext,
@@ -166,7 +178,7 @@ describe('EpubPlayerService', () => {
 
       expect(config.context.timeDiff).toBe(0);
       expect(config.context.host).toBe('');
-      expect(config.context.endpoint).toBe('/portal/data/v1/telemetry');
+      expect(config.context.endpoint).toBe('/data/v3/telemetry');
     });
 
     it('should set empty config object', async () => {
@@ -326,3 +338,4 @@ describe('EpubPlayerService', () => {
     });
   });
 });
+

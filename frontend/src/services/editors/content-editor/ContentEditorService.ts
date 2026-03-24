@@ -5,6 +5,7 @@ import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
 import { fetchFwCategoryMeta } from '../fwCategoryMetaService';
+import { TELEMETRY_ENDPOINT } from '../../players/telemetryContextBuilder';
 
 const CONTENT_EDITOR_URL = '/content-editor/index.html';
 
@@ -99,7 +100,7 @@ export class ContentEditorService {
       ],
       corePluginsPackaged: true,
       dispatcher: 'local',
-      localDispatcherEndpoint: '/portal/data/v1/telemetry',
+      localDispatcherEndpoint: TELEMETRY_ENDPOINT,
       modalId: 'contentEditor',
       alertOnUnload: true,
       headerLogo: '',

@@ -102,7 +102,7 @@ export function mapApiItemToAssessmentRecord(item: AssessmentApiItem): Assessmen
   const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
   return {
     id: item.user_id,
-    learnerName: `${item.userDetails.firstName} ${item.userDetails.lastName ?? ''}`.trim(),
+    learnerName: `${item.userDetails?.firstName ?? ''} ${item.userDetails?.lastName ?? ''}`.trim(),
     attemptNumber: item.attempt_count,
     score,
     maxScore,
@@ -112,7 +112,7 @@ export function mapApiItemToAssessmentRecord(item: AssessmentApiItem): Assessmen
 }
 
 export function mapApiItemToLearnerProgress(item: LearnerProgressApiItem): LearnerProgress {
-  const nameParts = [item.userDetails.firstName, item.userDetails.lastName].filter(Boolean);
+  const nameParts = [item.userDetails?.firstName, item.userDetails?.lastName].filter(Boolean);
   const hasCertificate = item.issued_certificates != null;
   const isCompleted = item.completionpercentage === 100 || item.status === 2;
   const certificateStatus: LearnerProgress["certificateStatus"] = hasCertificate
