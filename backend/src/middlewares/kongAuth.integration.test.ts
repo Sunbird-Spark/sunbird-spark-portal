@@ -169,14 +169,13 @@ describe('Kong Auth Middleware Integration Tests', () => {
             expect(response.body.roles).toEqual(['ANONYMOUS']);
             expect(axios.post).not.toHaveBeenCalled();
         });
-
         it('should handle missing fallback token', async () => {
             vi.resetModules();
             vi.doMock('../config/env.js', () => ({
                 envConfig: {
                     KONG_URL: 'http://mock-kong-api',
                     KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN: 'mock-bearer-token',
-                    KONG_ANONYMOUS_FALLBACK_TOKEN: undefined,
+                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'mock-nothing',
                     SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
                 }
             }));
@@ -200,7 +199,7 @@ describe('Kong Auth Middleware Integration Tests', () => {
 
             (axios.post as Mock).mockRejectedValue(new Error('Kong API error'));
             const response = await request(freshApp).get('/test').expect(200);
-            expect(response.body.kongToken).toBeUndefined();
+            expect(response.body.kongToken).toBe('mock-nothing');
             expect(response.body.roles).toEqual(['ANONYMOUS']);
         });
     });

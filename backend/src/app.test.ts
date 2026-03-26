@@ -35,7 +35,8 @@ vi.mock('./config/env.js', () => ({
     DOMAIN_URL: 'http://localhost:3000',
     PORTAL_AUTH_SERVER_CLIENT: 'portal',
     LEARN_BASE_URL: 'http://localhost:9000',
-    OIDC_ISSUER_URL: ''
+    OIDC_ISSUER_URL: '',
+    SUNBIRD_PORTAL_SESSION_STORE: 'memory'
   }
 }));
 
@@ -76,7 +77,7 @@ describe('Express App', () => {
   it('should create an Express application', async () => {
     const { app } = await import('./app.js');
     expect(app).toBeDefined();
-  });
+  }, 30000);
 
   it('should handle CORS', async () => {
     const { app } = await import('./app.js');

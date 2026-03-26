@@ -2,6 +2,7 @@ import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ContentSearchItem } from "@/types/workspaceTypes";
+import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
 
 interface ResourceCardProps {
   item: ContentSearchItem;
@@ -45,15 +46,11 @@ const ResourceCard = ({ item, heightClass, linkState }: ResourceCardProps) => {
       <div className={`resource-card-container${heightClass ? ` ${heightClass}` : ""}`}>
         {/* Background Image Container */}
         <div className="resource-card-image-wrapper">
-          {(item.posterImage || item.appIcon) ? (
-            <img 
-              src={item.posterImage || item.appIcon} 
-              alt={item.name || 'Resource'} 
-              className="resource-card-image" 
-            />
-          ) : (
-            <div className="resource-card-image bg-black" />
-          )}
+          <img
+            src={item.posterImage || item.appIcon || getPlaceholderImage(item.identifier)}
+            alt={item.name || 'Resource'}
+            className="resource-card-image"
+          />
         </div>
 
         {/* Top-left Badge */}

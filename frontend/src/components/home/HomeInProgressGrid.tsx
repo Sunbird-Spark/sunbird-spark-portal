@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useUserEnrolledCollections } from "../../hooks/useUserEnrolledCollections";
 import type { TrackableCollection } from "../../types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { getPlaceholderImage } from '@/utils/getPlaceholderImage';
 
 const HomeInProgressGrid = () => {
     const { t } = useAppI18n();
@@ -71,15 +72,11 @@ const HomeInProgressGrid = () => {
                         </div>
                         {/* Thumbnail */}
                         <div className="home-inprogress-thumbnail">
-                            {course.content?.posterImage || course.courseLogoUrl ||  course.content?.appIcon ? (
-                                <img
-                                    src={course.content?.posterImage || course.courseLogoUrl || course.content?.appIcon}
-                                    alt={course.courseName || "Untitled Course"}
-                                    className="home-inprogress-thumbnail-img"
-                                />
-                            ) : (
-                                <div className="home-inprogress-thumbnail-placeholder" />
-                            )}
+                            <img
+                                src={course.content?.posterImage || course.courseLogoUrl || course.content?.appIcon || getPlaceholderImage(course.collectionId || course.courseId || course.contentId || '')}
+                                alt={course.courseName || "Untitled Course"}
+                                className="home-inprogress-thumbnail-img"
+                            />
                         </div>
                     </Link>
                 ))}

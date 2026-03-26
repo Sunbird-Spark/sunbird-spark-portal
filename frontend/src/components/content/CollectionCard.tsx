@@ -2,6 +2,7 @@ import { FiUser } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
 
 interface ContentCardProps {
   item: ContentSearchItem;
@@ -26,15 +27,11 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
         {/* Image with padding */}
         <div className="related-resource-card-image-wrapper">
           <div className="related-resource-card-image-inner">
-            {(item.posterImage || item.appIcon) ? (
-              <img
-                src={item.posterImage || item.appIcon}
-                alt={item.name}
-                className="resource-card-image"
-              />
-            ) : (
-              <div className="resource-card-image bg-black" />
-            )}
+            <img
+              src={item.posterImage || item.appIcon || getPlaceholderImage(item.identifier)}
+              alt={item.name || 'Untitled'}
+              className="resource-card-image"
+            />
           </div>
         </div>
 

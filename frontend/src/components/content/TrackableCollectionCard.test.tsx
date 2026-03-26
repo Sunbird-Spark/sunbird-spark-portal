@@ -42,12 +42,12 @@ const mockCourse: TrackableCollection = {
 };
 
 const mockCourseNoIcon: TrackableCollection = {
-    ...mockCourse,
-    courseLogoUrl: '',
-    content: {
-        ...mockCourse.content!,
-        appIcon: ''
-    }
+  ...mockCourse,
+  courseLogoUrl: '',
+  content: {
+    ...mockCourse.content!,
+    appIcon: ''
+  }
 };
 
 describe('TrackableCollectionCard', () => {
@@ -61,42 +61,43 @@ describe('TrackableCollectionCard', () => {
 
   it('renders course name and completion percentage', () => {
     renderComponent(mockCourse);
-    
+
     expect(screen.getByText('Test Course 101')).toBeInTheDocument();
     expect(screen.getByText('45%')).toBeInTheDocument();
   });
 
   it('renders the course image when available', () => {
     renderComponent(mockCourse);
-    
+
     const img = screen.getByAltText('Test Course 101');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', 'https://example.com/icon.png');
   });
 
-  it('renders fallback div when image is missing', () => {
+  it('renders placeholder image when image is missing', () => {
     renderComponent(mockCourseNoIcon);
-    
-    // The image tag should not be present
+
+    // Should render a placeholder img instead of nothing
     const img = screen.queryByAltText('Test Course 101');
-    expect(img).not.toBeInTheDocument();
-    
-    // Look for the fallback using container (or we can add a data-testid if needed, but checking for div class is harder without it)
-    // However, we can check that we don't crash and the content is there.
-    // Alternatively, inspect the container structure manually but that is brittle.
-    // Since we conditionally render, "not finding the img" is a strong enough signal for now alongside text presence.
+    expect(img).toBeInTheDocument();
+    // And the placeholder should have a non-empty src attribute
+    if (!img) {
+      throw new Error('Expected placeholder image to be rendered');
+    }
+    expect(img).toHaveAttribute('src');
+    expect(img.getAttribute('src')).toBeTruthy();
   });
 
   it('links to the correct content page', () => {
     renderComponent(mockCourse);
-    
+
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/collection/do_12345');
   });
 
   it('renders progress bar with correct width', () => {
     renderComponent(mockCourse);
-    
+
     // Check if the style includes the width. 
     // Usually easier to find by role or specific class/style
     // We can assume the DOM structure:
