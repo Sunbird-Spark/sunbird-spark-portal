@@ -5,7 +5,7 @@ import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { userConsentData as initialData } from "@/data/reportsMockData";
+import { useConsentSummary } from "@/hooks/useConsentSummary";
 import type { UserConsentRecord } from "@/types/reports";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -20,20 +20,22 @@ import {
 
 const UserConsentTab = () => {
   const { toast } = useToast();
+  const { data: apiData, isLoading, isError } = useConsentSummary();
 
-  const [data, setData] = useState<UserConsentRecord[]>(() => initialData);
+  const [localOverrides, setLocalOverrides] = useState<Map<string, Partial<UserConsentRecord>>>(new Map());
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [orgFilter, setOrgFilter] = useState("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState<ConfirmState>(CLOSED_CONFIRM);
 
-  /* ── Derived data ──────────────────────────────────────────────────────── */
+  /* ── Merge API data with local overrides ───────────────────────────────── */
 
-  const uniqueOrgs = useMemo(
-    () => [...new Set(data.flatMap((r) => r.consumerOrgs))].sort(),
-    [data]
+  const data = useMemo<UserConsentRecord[]>(
+    () => apiData.map((r) => ({ ...r, ...localOverrides.get(r.id) })),
+    [apiData, localOverrides],
   );
+
+  /* ── Derived data ──────────────────────────────────────────────────────── */
 
   const filteredData = useMemo(() => {
     let result = data;
@@ -44,9 +46,8 @@ const UserConsentTab = () => {
       );
     }
     if (statusFilter !== "all") result = result.filter((r) => r.consentStatus === statusFilter);
-    if (orgFilter !== "all") result = result.filter((r) => r.consumerOrgs.includes(orgFilter));
     return result;
-  }, [data, search, statusFilter, orgFilter]);
+  }, [data, search, statusFilter]);
 
   const stats = useMemo(
     () => ({
@@ -104,18 +105,17 @@ const UserConsentTab = () => {
       const newStatus: UserConsentRecord["consentStatus"] = type === "revoke" ? "Revoked" : "Granted";
       const today = new Date().toISOString().split("T")[0]!;
 
-      setData((prev) =>
-        prev.map((r) => {
-          if (!idsToUpdate.includes(r.id)) return r;
-          return {
-            ...r,
+      setLocalOverrides((prev) => {
+        const next = new Map(prev);
+        for (const id of idsToUpdate) {
+          next.set(id, {
+            ...next.get(id),
             consentStatus: newStatus,
-            consumerOrgs: newStatus === "Revoked" ? [] : ["Diksha Platform"],
-            consentGivenOn: newStatus === "Granted" ? today : r.consentGivenOn,
-            lastUpdated: today,
-          };
-        })
-      );
+            consentGivenOn: newStatus === "Granted" ? today : undefined,
+          });
+        }
+        return next;
+      });
 
       if (isBulk) setSelectedIds(new Set());
       toast({
@@ -148,6 +148,22 @@ const UserConsentTab = () => {
       : "This will reissue PII consent for the selected user(s), re-enabling data sharing with consumer organisations.";
 
   /* ── Render ────────────────────────────────────────────────────────────── */
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
+        Loading consent data…
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center py-16 text-destructive text-sm">
+        Failed to load consent data. Please try again later.
+      </div>
+    );
+  }
 
   return (
     <>
@@ -186,16 +202,10 @@ const UserConsentTab = () => {
               { label: "Revoked", value: "Revoked" },
             ],
           },
-          {
-            key: "org",
-            label: "Consumer Org",
-            options: uniqueOrgs.map((o) => ({ label: o, value: o })),
-          },
         ]}
-        values={{ status: statusFilter, org: orgFilter }}
+        values={{ status: statusFilter }}
         onChange={(key, value) => {
           if (key === "status") setStatusFilter(value);
-          else setOrgFilter(value);
           setSelectedIds(new Set());
         }}
         searchValue={search}

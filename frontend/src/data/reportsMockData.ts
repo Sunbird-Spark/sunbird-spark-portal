@@ -209,25 +209,12 @@ const CONSENT_USER_NAMES = [
   "Gaurav Mishra", "Hina Bose", "Ishaan Chauhan", "Jyoti Pandit", "Kunal Srinivasan",
 ];
 
-const CONSUMER_ORGS = [
-  "Diksha Platform",
-  "NCERT Portal",
-  "State Ed Board - MH",
-  "State Ed Board - KA",
-  "NIC Data Hub",
-];
-
 const CONSENT_STATUSES: UserConsentRecord["consentStatus"][] = ["Granted", "Granted", "Granted", "Pending", "Revoked"];
+
+const MOCK_COURSES = ["Business and Management", "Finance and Accounting", "Information Technology", "Multi Quiz Contest"];
 
 export const userConsentData: UserConsentRecord[] = Array.from({ length: 40 }, (_, i) => {
   const status = CONSENT_STATUSES[i % CONSENT_STATUSES.length]!;
-  const orgCount = (i % 3) + 1;
-  const consumerOrgs =
-    status === "Granted"
-      ? CONSUMER_ORGS.slice(0, orgCount)
-      : status === "Pending" && i % 2 === 0
-      ? [CONSUMER_ORGS[0]!]
-      : [];
   const month = String((i % 12) + 1).padStart(2, "0");
   const day = String((i % 28) + 1).padStart(2, "0");
   const consentGivenOn = status !== "Pending" ? `2025-${month}-${day}` : null;
@@ -237,8 +224,8 @@ export const userConsentData: UserConsentRecord[] = Array.from({ length: 40 }, (
     userName: CONSENT_USER_NAMES[i % CONSENT_USER_NAMES.length]!,
     email: `user${i + 1}@example.org`,
     consentStatus: status,
-    consumerOrgs,
+    course: MOCK_COURSES[i % MOCK_COURSES.length]!,
     consentGivenOn,
-    lastUpdated: `2025-${month}-${day}`,
+    expiry: `2025-${month}-${day}`,
   };
 });

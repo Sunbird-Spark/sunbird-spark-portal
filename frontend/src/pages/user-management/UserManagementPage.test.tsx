@@ -38,6 +38,10 @@ vi.mock('@/hooks/useTnc', () => ({
   useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useConsentSummary', () => ({
+  useConsentSummary: () => ({ data: [], isLoading: false, isError: false }),
+}));
+
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, onConfirm, onClose }: any) =>
     open ? (
