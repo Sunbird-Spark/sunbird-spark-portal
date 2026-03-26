@@ -74,17 +74,12 @@ describe('TrackableCollectionCard', () => {
     expect(img).toHaveAttribute('src', 'https://example.com/icon.png');
   });
 
-  it('renders fallback div when image is missing', () => {
+  it('renders placeholder image when image is missing', () => {
     renderComponent(mockCourseNoIcon);
-    
-    // The image tag should not be present
+
+    // Should render a placeholder img instead of nothing
     const img = screen.queryByAltText('Test Course 101');
-    expect(img).not.toBeInTheDocument();
-    
-    // Look for the fallback using container (or we can add a data-testid if needed, but checking for div class is harder without it)
-    // However, we can check that we don't crash and the content is there.
-    // Alternatively, inspect the container structure manually but that is brittle.
-    // Since we conditionally render, "not finding the img" is a strong enough signal for now alongside text presence.
+    expect(img).toBeInTheDocument();
   });
 
   it('links to the correct content page', () => {

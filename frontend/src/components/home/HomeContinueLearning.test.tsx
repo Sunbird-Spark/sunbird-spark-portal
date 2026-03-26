@@ -281,8 +281,8 @@ describe('HomeContinueLearning', () => {
 
         const { container } = renderComponent();
 
-        // Should render the black placeholder div instead of an img
-        expect(container.querySelector('img')).toBeNull();
-        expect(container.querySelector('.bg-black')).toBeInTheDocument();
+        // Should render a placeholder img instead of a black div
+        expect(container.querySelector('img')).toBeInTheDocument();
+        expect(container.querySelector('.bg-black')).toBeNull();
     });
 });

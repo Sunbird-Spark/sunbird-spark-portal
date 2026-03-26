@@ -16,5 +16,5 @@ export const getPlaceholderImage = (seed: string): string => {
     hash = (hash << 5) - hash + seed.charCodeAt(i);
     hash |= 0;
   }
-  return PLACEHOLDER_IMAGES[Math.abs(hash) % PLACEHOLDER_IMAGES.length];
+  return PLACEHOLDER_IMAGES[Math.abs(hash) % PLACEHOLDER_IMAGES.length] || placeholder1;
 };
