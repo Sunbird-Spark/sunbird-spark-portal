@@ -29,7 +29,7 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
           <div className="related-resource-card-image-inner">
             <img
               src={item.posterImage || item.appIcon || getPlaceholderImage(item.identifier)}
-              alt={item.name}
+              alt={item.name || 'Untitled'}
               className="resource-card-image"
             />
           </div>

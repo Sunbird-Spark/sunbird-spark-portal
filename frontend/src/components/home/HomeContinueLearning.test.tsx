@@ -281,8 +281,10 @@ describe('HomeContinueLearning', () => {
 
         const { container } = renderComponent();
 
-        // Should render a placeholder img instead of a black div
-        expect(container.querySelector('img')).toBeInTheDocument();
-        expect(container.querySelector('.bg-black')).toBeNull();
+        // Should render a placeholder img for the course thumbnail instead of a black div
+        const courseThumbnail = screen.getByRole('img');
+        expect(courseThumbnail).toBeInTheDocument();
+        expect(courseThumbnail).toHaveAttribute('src');
+        expect(courseThumbnail.getAttribute('src')).not.toBe('');
     });
 });

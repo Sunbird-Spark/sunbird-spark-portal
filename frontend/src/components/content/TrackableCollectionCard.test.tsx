@@ -42,12 +42,12 @@ const mockCourse: TrackableCollection = {
 };
 
 const mockCourseNoIcon: TrackableCollection = {
-    ...mockCourse,
-    courseLogoUrl: '',
-    content: {
-        ...mockCourse.content!,
-        appIcon: ''
-    }
+  ...mockCourse,
+  courseLogoUrl: '',
+  content: {
+    ...mockCourse.content!,
+    appIcon: ''
+  }
 };
 
 describe('TrackableCollectionCard', () => {
@@ -61,14 +61,14 @@ describe('TrackableCollectionCard', () => {
 
   it('renders course name and completion percentage', () => {
     renderComponent(mockCourse);
-    
+
     expect(screen.getByText('Test Course 101')).toBeInTheDocument();
     expect(screen.getByText('45%')).toBeInTheDocument();
   });
 
   it('renders the course image when available', () => {
     renderComponent(mockCourse);
-    
+
     const img = screen.getByAltText('Test Course 101');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', 'https://example.com/icon.png');
@@ -80,18 +80,24 @@ describe('TrackableCollectionCard', () => {
     // Should render a placeholder img instead of nothing
     const img = screen.queryByAltText('Test Course 101');
     expect(img).toBeInTheDocument();
+    // And the placeholder should have a non-empty src attribute
+    if (!img) {
+      throw new Error('Expected placeholder image to be rendered');
+    }
+    expect(img).toHaveAttribute('src');
+    expect(img.getAttribute('src')).toBeTruthy();
   });
 
   it('links to the correct content page', () => {
     renderComponent(mockCourse);
-    
+
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/collection/do_12345');
   });
 
   it('renders progress bar with correct width', () => {
     renderComponent(mockCourse);
-    
+
     // Check if the style includes the width. 
     // Usually easier to find by role or specific class/style
     // We can assume the DOM structure:
