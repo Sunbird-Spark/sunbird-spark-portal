@@ -156,6 +156,10 @@ describe('getSessionStore', () => {
         const store = getSessionStore();
         const error = new Error('Test store error');
 
+        // Add a dummy listener to be extra safe in some environments
+        const errorHandler = vi.fn();
+        store.on('error', errorHandler);
+
         store.emit('error', error);
 
         expect(logger.error).toHaveBeenCalledWith(
