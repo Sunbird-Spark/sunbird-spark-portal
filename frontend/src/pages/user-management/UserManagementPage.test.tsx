@@ -426,7 +426,6 @@ describe('UserManagementPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Total Users')).toBeInTheDocument();
         expect(screen.getByText('Consent Granted')).toBeInTheDocument();
-        expect(screen.getByText('Consent Pending')).toBeInTheDocument();
         expect(screen.getByText('Consent Revoked')).toBeInTheDocument();
       });
     });

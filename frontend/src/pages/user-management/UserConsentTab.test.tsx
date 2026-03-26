@@ -107,11 +107,10 @@ describe('UserConsentTab', () => {
       expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument();
     });
 
-    it('renders all four summary card labels', () => {
+    it('renders summary card labels', () => {
       renderTab();
       expect(screen.getByText('Total Users')).toBeInTheDocument();
       expect(screen.getByText('Consent Granted')).toBeInTheDocument();
-      expect(screen.getByText('Consent Pending')).toBeInTheDocument();
       expect(screen.getByText('Consent Revoked')).toBeInTheDocument();
     });
 

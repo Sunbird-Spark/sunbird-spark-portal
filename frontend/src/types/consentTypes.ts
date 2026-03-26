@@ -9,7 +9,7 @@ export interface UserConsentApiItem {
   object_id: string;
   status: ConsentStatus;
   created_on: string;
-  expiry: string;
+  expiry?: string | null;
   userDetails: { firstName: string; lastName: string; maskedEmail: string };
   collectionDetails?: { name: string; identifier: string; contentType: string };
 }
@@ -24,11 +24,11 @@ export interface UserConsentRecord {
   userId: string;
   userName: string;
   email: string;
-  consentStatus: 'Granted' | 'Pending' | 'Revoked';
+  consentStatus: 'Granted' | 'Revoked';
   course: string;
-  /** null when consent has never been given (Pending users) */
+  /** null when consent has never been given */
   consentGivenOn: string | null;
-  expiry: string;
+  expiry: string | null;
 }
 
 export interface ConsentReadRequest {

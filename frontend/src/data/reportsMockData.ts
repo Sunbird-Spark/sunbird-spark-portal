@@ -209,7 +209,7 @@ const CONSENT_USER_NAMES = [
   "Gaurav Mishra", "Hina Bose", "Ishaan Chauhan", "Jyoti Pandit", "Kunal Srinivasan",
 ];
 
-const CONSENT_STATUSES: UserConsentRecord["consentStatus"][] = ["Granted", "Granted", "Granted", "Pending", "Revoked"];
+const CONSENT_STATUSES: UserConsentRecord["consentStatus"][] = ["Granted", "Granted", "Revoked"];
 
 const MOCK_COURSES = ["Business and Management", "Finance and Accounting", "Information Technology", "Multi Quiz Contest"];
 
@@ -217,7 +217,7 @@ export const userConsentData: UserConsentRecord[] = Array.from({ length: 40 }, (
   const status = CONSENT_STATUSES[i % CONSENT_STATUSES.length]!;
   const month = String((i % 12) + 1).padStart(2, "0");
   const day = String((i % 28) + 1).padStart(2, "0");
-  const consentGivenOn = status !== "Pending" ? `2025-${month}-${day}` : null;
+  const consentGivenOn = status === "Granted" ? `2025-${month}-${day}` : null;
   return {
     id: `consent-${i + 1}`,
     userId: `user-${i + 1}`,

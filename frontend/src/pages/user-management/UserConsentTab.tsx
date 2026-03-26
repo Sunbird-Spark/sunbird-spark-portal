@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { FiUsers, FiUserCheck, FiUserX, FiClock } from "react-icons/fi";
+import { FiUsers, FiUserCheck, FiUserX } from "react-icons/fi";
 import SummaryCard from "@/components/reports/SummaryCard";
 import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper from "@/components/reports/DataTableWrapper";
@@ -53,7 +53,6 @@ const UserConsentTab = () => {
     () => ({
       total: data.length,
       granted: data.filter((r) => r.consentStatus === "Granted").length,
-      pending: data.filter((r) => r.consentStatus === "Pending").length,
       revoked: data.filter((r) => r.consentStatus === "Revoked").length,
     }),
     [data]
@@ -111,7 +110,7 @@ const UserConsentTab = () => {
           next.set(id, {
             ...next.get(id),
             consentStatus: newStatus,
-            consentGivenOn: newStatus === "Granted" ? today : undefined,
+            consentGivenOn: newStatus === "Granted" ? today : null,
           });
         }
         return next;
@@ -175,10 +174,9 @@ const UserConsentTab = () => {
         />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
         <SummaryCard label="Total Users" value={stats.total} colorClass="bg-sunbird-ink" icon={<FiUsers className="w-4 h-4" />} />
         <SummaryCard label="Consent Granted" value={stats.granted} colorClass="bg-sunbird-moss" icon={<FiUserCheck className="w-4 h-4" />} />
-        <SummaryCard label="Consent Pending" value={stats.pending} colorClass="bg-sunbird-ginger" icon={<FiClock className="w-4 h-4" />} />
         <SummaryCard label="Consent Revoked" value={stats.revoked} colorClass="bg-sunbird-lavender" icon={<FiUserX className="w-4 h-4" />} />
       </div>
 
@@ -198,7 +196,6 @@ const UserConsentTab = () => {
             label: "Consent Status",
             options: [
               { label: "Granted", value: "Granted" },
-              { label: "Pending", value: "Pending" },
               { label: "Revoked", value: "Revoked" },
             ],
           },

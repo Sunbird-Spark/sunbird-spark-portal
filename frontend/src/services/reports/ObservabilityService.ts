@@ -151,6 +151,7 @@ export class ObservabilityService {
       .post<unknown>('/observability/v1/reports', {
         request: {
           reportId: 'user-consent-summary',
+          filters: {},
           transform: ['user_id', 'object_id'],
         },
       })

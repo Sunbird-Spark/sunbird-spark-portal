@@ -1,19 +1,24 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { observabilityService } from '@/services/reports/ObservabilityService';
-import type { UserConsentApiItem, UserConsentRecord } from '@/types/reports';
+import type { ConsentStatus, UserConsentApiItem, UserConsentRecord } from '@/types/reports';
 
-function mapApiItem(item: UserConsentApiItem, index: number): UserConsentRecord {
+const STATUS_MAP: Record<ConsentStatus, UserConsentRecord['consentStatus']> = {
+  ACTIVE: 'Granted',
+  REVOKED: 'Revoked',
+};
+
+function mapApiItem(item: UserConsentApiItem): UserConsentRecord {
   const { userDetails, user_id, object_id, status, created_on, expiry, collectionDetails } = item;
   return {
-    id: `${user_id}_${object_id}_${index}`,
+    id: `${user_id}_${object_id}`,
     userId: user_id,
     userName: `${userDetails.firstName} ${userDetails.lastName}`.trim(),
     email: userDetails.maskedEmail,
-    consentStatus: status === 'ACTIVE' ? 'Granted' : 'Revoked',
+    consentStatus: STATUS_MAP[status] ?? 'Revoked',
     course: collectionDetails?.name ?? '',
     consentGivenOn: created_on ? created_on.split('T')[0]! : null,
-    expiry: expiry ? expiry.split('T')[0]! : '',
+    expiry: expiry ? expiry.split('T')[0]! : null,
   };
 }
 
@@ -29,7 +34,7 @@ export function useConsentSummary(): {
   });
 
   const data = useMemo<UserConsentRecord[]>(
-    () => (result?.data ?? []).map(mapApiItem),
+    () => (result?.data ?? []).map((item) => mapApiItem(item)),
     [result],
   );
 

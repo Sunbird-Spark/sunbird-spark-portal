@@ -136,6 +136,16 @@ export function buildColumns(
           <span className="text-muted-foreground">—</span>
         ),
     },
-    { key: "expiry", header: "Expiry", sortable: true },
+    {
+      key: "expiry",
+      header: "Expiry",
+      sortable: true,
+      render: (row) =>
+        row.expiry ? (
+          <span>{row.expiry}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
   ];
 }
