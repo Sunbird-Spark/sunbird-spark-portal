@@ -6,6 +6,7 @@ import { useCollection } from "@/hooks/useCollection";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 import type { TrackableCollection } from "@/types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { getPlaceholderImage } from '@/utils/getPlaceholderImage';
 
 // Circular progress component
 const CircularProgress = ({ progress }: { progress: number }) => {
@@ -77,15 +78,11 @@ const HomeContinueLearning = () => {
                         <div className="home-continue-learning-inner">
                             {/* Thumbnail */}
                             <div className="home-continue-learning-thumbnail">
-                                {thumbnail ? (
-                                    <img
-                                        src={thumbnail}
-                                        alt={title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full bg-black" />
-                                )}
+                                <img
+                                    src={thumbnail || getPlaceholderImage(lastAccessedCourse.collectionId)}
+                                    alt={title}
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
 
                             {/* Content */}

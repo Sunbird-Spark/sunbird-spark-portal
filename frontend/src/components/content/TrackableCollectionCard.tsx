@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { TrackableCollection } from "@/types/TrackableCollections";
 import { FiBookOpen } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
 
 
 interface TrackableCollectionCardProps {
@@ -24,15 +25,11 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
         className="flex gap-6 p-6 bg-white rounded-2xl border border-sunbird-gray-f3 hover:shadow-md transition-shadow"
       >
         {/* Thumbnail */}
-        {(course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl) ? (
-          <img
-            src={course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl}
-            alt={course.courseName}
-            className="w-[7.5rem] h-[7.5rem] rounded-2xl object-cover flex-shrink-0 shadow-sm"
-          />
-        ) : (
-          <div className="w-[7.5rem] h-[7.5rem] rounded-2xl bg-black flex-shrink-0 shadow-sm" />
-        )}
+        <img
+          src={course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId)}
+          alt={course.courseName}
+          className="w-[7.5rem] h-[7.5rem] rounded-2xl object-cover flex-shrink-0 shadow-sm"
+        />
 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
