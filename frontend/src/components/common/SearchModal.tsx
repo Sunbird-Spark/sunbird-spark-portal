@@ -65,7 +65,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
         const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
-        
+
         if (!focusableElements || focusableElements.length === 0) return;
 
         const firstElement = focusableElements[0];
@@ -99,17 +99,18 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
     : t("recommended");
 
   return (
-    <div 
+    <div
       ref={dialogRef}
       className="fixed inset-0 z-50 flex flex-col"
       role="dialog"
       aria-modal="true"
       aria-label={t("search_for_content_placeholder")}
     >
-      {/* White search panel */}
-      <div className="bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-        <div className="container mx-auto px-4 lg:px-[3.75rem] pt-5 pb-6">
-          {/* Search bar row */}
+      {/* White search panel: pinned search bar + independent scrollable results */}
+      <div className="bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)] flex flex-col max-h-[55vh] md:max-h-[85vh]">
+
+        {/* Search bar row — always visible, never scrolls away */}
+        <div className="flex-shrink-0 container mx-auto px-4 lg:px-[3.75rem] pt-4 pb-3 md:pt-5 md:pb-4">
           <div className="flex items-center gap-4">
             <div className="flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3">
               <FiSearch className="w-5 h-5 text-sunbird-brick flex-shrink-0" />
@@ -142,61 +143,61 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
               {t("cancel")}
             </button>
           </div>
+        </div>
 
-          {/* Results section */}
-          <div className="mt-8">
-            <h2 className="font-rubik font-semibold text-[1.5rem] leading-[2rem] text-foreground mb-5">
-              {sectionTitle}
-            </h2>
+        {/* Results section — scrolls independently within the panel */}
+        <div className="overflow-y-auto flex-1 container mx-auto px-4 lg:px-[3.75rem] pb-4 md:pb-6">
+          <h2 className="font-rubik font-semibold text-[1.25rem] md:text-[1.5rem] leading-[2rem] text-foreground mb-4">
+            {sectionTitle}
+          </h2>
 
-            {isLoading ? (
-              <div className="min-h-[20rem]">
-                <PageLoader message={t("loading")} fullPage={false} />
+          {isLoading ? (
+            <div className="min-h-[8rem]">
+              <PageLoader message={t("loading")} fullPage={false} />
+            </div>
+          ) : error ? (
+            <div className="min-h-[8rem]">
+              <PageLoader
+                error={error.message || t("failed_to_search")}
+                onRetry={() => refetch()}
+                fullPage={false}
+              />
+            </div>
+          ) : results.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {results.map((item) => (
+                  <div key={item.identifier} onClick={onClose}>
+                    {item.mimeType === COLLECTION_MIME_TYPE ? (
+                      <CollectionCard item={item} />
+                    ) : (
+                      <ResourceCard item={item} />
+                    )}
+                  </div>
+                ))}
               </div>
-            ) : error ? (
-              <div className="min-h-[20rem]">
-                <PageLoader 
-                  error={error.message || t("failed_to_search")} 
-                  onRetry={() => refetch()}
-                  fullPage={false} 
-                />
-              </div>
-            ) : results.length > 0 ? (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {results.map((item) => (
-                    <div key={item.identifier} onClick={onClose}>
-                      {item.mimeType === COLLECTION_MIME_TYPE ? (
-                        <CollectionCard item={item} />
-                      ) : (
-                        <ResourceCard item={item} />
-                      )}
-                    </div>
-                  ))}
-                </div>
 
-                <div className="mt-6 flex justify-center">
-                  <button
-                    onClick={handleViewMore}
-                    className="flex items-center gap-2 font-rubik font-medium text-sunbird-brick hover:opacity-80 transition-opacity"
-                  >
-                    {t("view_all_results")}
-                    <span aria-hidden="true">→</span>
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="flex justify-center items-center min-h-[20rem]">
-                <p className="text-muted-foreground text-2xl">{t("no_results_found")}</p>
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleViewMore}
+                  className="flex items-center gap-2 font-rubik font-medium text-sunbird-brick hover:opacity-80 transition-opacity"
+                >
+                  {t("view_all_results")}
+                  <span aria-hidden="true">→</span>
+                </button>
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="flex justify-center items-center min-h-[8rem]">
+              <p className="text-muted-foreground text-2xl">{t("no_results_found")}</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Dimmed backdrop over remaining page */}
-      <div 
-        className="flex-1 bg-black/20" 
+      {/* Dimmed backdrop over remaining page — always visible below the panel */}
+      <div
+        className="flex-1 bg-black/20"
         onClick={onClose}
         aria-hidden="true"
       />
