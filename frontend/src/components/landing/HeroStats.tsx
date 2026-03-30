@@ -27,7 +27,7 @@ const HeroStats = () => {
                     <div className="font-rubik font-semibold text-[2.125rem] leading-[2.875rem] tracking-normal text-center text-foreground">
                         500+
                     </div>
-                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-[#757575]">
+                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-sunbird-gray-75">
                         {t("stats.courses")}
                     </div>
                 </div>
@@ -40,7 +40,7 @@ const HeroStats = () => {
                     <div className="font-rubik font-semibold text-[2.125rem] leading-[2.875rem] tracking-normal text-center text-foreground">
                         50K+
                     </div>
-                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-[#757575]">
+                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-sunbird-gray-75">
                         {t("stats.activeLearners")}
                     </div>
                 </div>
@@ -53,7 +53,7 @@ const HeroStats = () => {
                     <div className="font-rubik font-semibold text-[2.125rem] leading-[2.875rem] tracking-normal text-center text-foreground">
                         200+
                     </div>
-                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-[#757575]">
+                    <div className="font-rubik font-normal text-[1.125rem] leading-[1.25rem] tracking-normal text-center text-sunbird-gray-75">
                         {t("stats.certifications")}
                     </div>
                 </div>
@@ -69,7 +69,7 @@ const HeroStats = () => {
                     </p>
                 </div>
                 <div>
-                    <span className="flex items-center justify-center w-[5rem] h-[2.125rem] rounded-[1.375rem] border border-[#D2D6DE] font-rubik font-normal text-[0.875rem] leading-[1.25rem] tracking-[0rem] text-center opacity-[0.99] text-foreground">
+                    <span className="flex items-center justify-center w-[5rem] h-[2.125rem] rounded-[1.375rem] border border-sunbird-gray-d0 font-rubik font-normal text-[0.875rem] leading-[1.25rem] tracking-[0rem] text-center opacity-[0.99] text-foreground">
                         {t("hero.online")}
                     </span>
                 </div>
@@ -77,7 +77,7 @@ const HeroStats = () => {
 
             {/* Study at your own pace Card */}
             <div className="relative w-full lg:w-[16.6875rem] h-[11.625rem]">
-                <div className="h-full w-full drop-shadow-[0_0.9375rem_1.875rem_rgba(0,0,0,0.15)]">
+                <div className="h-full w-full drop-shadow-sunbird-lg">
                     <div
                         className="relative flex h-full flex-col justify-between bg-white px-6 py-6 rounded-2xl card-mask-custom"
                     >

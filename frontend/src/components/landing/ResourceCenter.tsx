@@ -20,15 +20,15 @@ const ResourceCenter = () => {
     const { t } = useAppI18n();
 
     return (
-        <section className="pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7]">
+        <section className="pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light">
             <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
 
                 <div className="flex items-center justify-center gap-4 mb-[1.25rem]">
-                    <div className="h-[0.0625rem] w-12 lg:w-[6.25rem] bg-[#333333]"></div>
-                    <span className="font-rubik font-normal text-[1rem] leading-[1.5rem] tracking-normal text-[#333333]">
+                    <div className="h-[0.0625rem] w-12 lg:w-[6.25rem] bg-sunbird-charcoal"></div>
+                    <span className="font-rubik font-normal text-[1rem] leading-[1.5rem] tracking-normal text-sunbird-charcoal">
                         {t("resource.header")}
                     </span>
-                    <div className="h-[0.0625rem] w-12 lg:w-[6.25rem] bg-[#333333]"></div>
+                    <div className="h-[0.0625rem] w-12 lg:w-[6.25rem] bg-sunbird-charcoal"></div>
                 </div>
                 <h2 className="resource-section-title">
                     {t("resource.title")}

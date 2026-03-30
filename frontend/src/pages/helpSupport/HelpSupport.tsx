@@ -85,7 +85,7 @@ const HelpSupport = () => {
                             <div
                                 key={cat.slug}
                                 onClick={() => navigate(`/help-support/${cat.slug}`)}
-                                className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-[0.125rem_0.125rem_1.25rem_rgba(0,0,0,0.09)] hover:shadow-md transition-shadow cursor-pointer"
+                                className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-sunbird-md hover:shadow-md transition-shadow cursor-pointer"
                                 data-edataid="help-category-click"
                                 data-pageid="help-support"
                                 data-objectid={cat.slug}

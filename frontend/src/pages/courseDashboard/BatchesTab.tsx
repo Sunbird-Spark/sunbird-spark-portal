@@ -111,7 +111,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
 
       {/* Report panel */}
       <main
-        className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border"
+        className="bg-white rounded-2xl shadow-sunbird-sm border border-border"
         data-testid="batches-main-panel"
       >
         {selectedBatchId ? (

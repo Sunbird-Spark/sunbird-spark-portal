@@ -22,12 +22,12 @@ interface CardThumbnailBackgroundProps {
  * Falls back to type-based theming when primaryCategory is not provided.
  *
  * Color assignments (from Figma design tokens):
- *  - Course / Digital Textbook  → Wave (#70adbf) + Ink (#376673)
- *  - Textbook / eTextbook       → Sunflower (#ffdb73) + Ginger (#cc8545)
- *  - Video / Learning Resource   → Ginger (#cc8545) + Brick (#a85236)
- *  - PDF / Teacher Resource      → Forest (#82a668) + Moss (#66a682)
- *  - Quiz / Assessment           → Lavender (#99708a) + Jamun (#540f3b)
- *  - Collection / Playlist       → Leaf (#a1a603) + Forest (#82a668)
+ *  - Course / Digital Textbook  → Wave + Ink
+ *  - Textbook / eTextbook       → Sunflower + Ginger
+ *  - Video / Learning Resource   → Ginger + Brick
+ *  - PDF / Teacher Resource      → Forest + Moss
+ *  - Quiz / Assessment           → Lavender + Jamun
+ *  - Collection / Playlist       → Leaf + Forest
  */
 
 /**

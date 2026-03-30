@@ -132,6 +132,11 @@ export default {
         '18': '4.5rem',
         '100': '25rem',
       },
+      boxShadow: {
+        'sunbird-sm': 'var(--sunbird-shadow-sm)',
+        'sunbird-md': 'var(--sunbird-shadow-md)',
+        'sunbird-lg': 'var(--sunbird-shadow-lg)',
+      },
       keyframes: {
         "accordion-down": {
           from: {
