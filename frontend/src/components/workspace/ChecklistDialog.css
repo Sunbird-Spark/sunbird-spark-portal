@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: hsl(var(--foreground) / 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .review-dialog {

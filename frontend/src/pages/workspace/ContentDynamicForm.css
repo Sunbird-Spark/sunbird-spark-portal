@@ -2,7 +2,7 @@
 .content-form-overlay {
   position: fixed;
   inset: 0;
-  background-color: hsl(var(--foreground) / 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 50;
   display: flex;
   align-items: center;
@@ -14,7 +14,7 @@
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background-color: hsl(var(--foreground) / 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 50;
   display: flex;
   align-items: center;

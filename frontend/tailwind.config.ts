@@ -137,6 +137,11 @@ export default {
         'sunbird-md': 'var(--sunbird-shadow-md)',
         'sunbird-lg': 'var(--sunbird-shadow-lg)',
       },
+      dropShadow: {
+        'sunbird-sm': '0 0.125rem 0.625rem rgba(0, 0, 0, 0.05)',
+        'sunbird-md': '0 0.875rem 0.875rem rgba(0, 0, 0, 0.05)',
+        'sunbird-lg': '0 0.25rem 1.25rem rgba(0, 0, 0, 0.1)',
+      },
       keyframes: {
         "accordion-down": {
           from: {

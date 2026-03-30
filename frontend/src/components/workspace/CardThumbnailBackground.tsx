@@ -63,7 +63,7 @@ const CardThumbnailBackground = ({
           style={{
             color: theme.iconColor,
             opacity: 0.7,
-            filter: `drop-shadow(0 2px 8px ${theme.accent}33)`,
+            filter: `drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2))`,
           }}
         />
       </div>

@@ -77,7 +77,7 @@ const HeroStats = () => {
 
             {/* Study at your own pace Card */}
             <div className="relative w-full lg:w-[16.6875rem] h-[11.625rem]">
-                <div className="h-full w-full drop-shadow-sunbird-lg">
+                <div className="h-full w-full shadow-sunbird-lg">
                     <div
                         className="relative flex h-full flex-col justify-between bg-white px-6 py-6 rounded-2xl card-mask-custom"
                     >

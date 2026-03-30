@@ -147,7 +147,7 @@ export const EMPTY_STATE_VARIANT_STYLES: Record<
 
 /**
  * Describes the colour tokens used to render a card thumbnail background.
- * All values are plain hex colours consumed by the SVG patterns.
+ * All values are CSS color strings (HSL tokens) that can be used directly in styles.
  */
 export interface CardTheme {
   /** Short unique prefix for SVG gradient IDs (avoids collisions). */
