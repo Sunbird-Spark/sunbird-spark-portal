@@ -23,8 +23,8 @@ export function MentorSection({
   setMentorQuery,
   selectedMentorIds,
   toggleMentor,
-  labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']",
-  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']",
+  labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik",
+  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
   disabled = false,
 }: MentorSectionProps) {
   const filteredMentors: MentorUser[] =
@@ -85,7 +85,7 @@ export function MentorSection({
                     <FiCheck className="w-3 h-3" />
                   </Checkbox.Indicator>
                 </Checkbox.Root>
-                <span className="text-sm text-foreground font-['Rubik']">{displayName}</span>
+                <span className="text-sm text-foreground font-rubik">{displayName}</span>
               </label>
             );
           })}
@@ -110,7 +110,7 @@ export function MentorSection({
             return (
               <span
                 key={id}
-                className="inline-flex items-center gap-1 text-xs bg-sunbird-brick/10 text-sunbird-brick rounded-full px-2.5 py-0.5 font-['Rubik']"
+                className="inline-flex items-center gap-1 text-xs bg-sunbird-brick/10 text-sunbird-brick rounded-full px-2.5 py-0.5 font-rubik"
               >
                 {name}
                 {!disabled && (

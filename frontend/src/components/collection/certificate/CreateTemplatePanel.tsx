@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 import { NewTemplateForm, ModalView } from "./types";
 import { ImagePickerDialog } from "./ImagePickerDialog";
 
-const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']";
-const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']";
+const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik";
+const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
 
 interface CreateTemplatePanelProps {
   newTmpl: NewTemplateForm;
@@ -30,7 +30,7 @@ export function CreateTemplatePanel({
   return (
     <>
       <div className="overflow-y-auto px-6 py-5 space-y-5" style={{ maxHeight: "calc(90vh - 130px)" }}>
-        <p className="text-xs text-muted-foreground font-['Rubik'] -mt-1">
+        <p className="text-xs text-muted-foreground font-rubik -mt-1">
           Fill in the details below to create a new certificate template for your organisation.
         </p>
 
@@ -133,7 +133,7 @@ export function CreateTemplatePanel({
               onChange={(e) => handleNewTmplField("termsAccepted", e.target.checked)}
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-amber-400 accent-sunbird-brick cursor-pointer"
             />
-            <span className="text-xs text-amber-800 font-['Rubik'] leading-relaxed">
+            <span className="text-xs text-amber-800 font-rubik leading-relaxed">
               I confirm that all the elements for this certificate provided by me are correct and
               appropriate and I am authorised by the signatories and logo owners to provide the same.
             </span>
@@ -141,7 +141,7 @@ export function CreateTemplatePanel({
         </div>
 
         {errorMsg && (
-          <p className="text-xs text-red-600 font-['Rubik']">{errorMsg}</p>
+          <p className="text-xs text-red-600 font-rubik">{errorMsg}</p>
         )}
       </div>
 
@@ -150,7 +150,7 @@ export function CreateTemplatePanel({
         <button
           type="button"
           onClick={() => { setView("main"); setErrorMsg(""); }}
-          className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+          className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-rubik"
           data-edataid="create-template-back"
           data-pageid="course-consumption"
         >
@@ -164,7 +164,7 @@ export function CreateTemplatePanel({
           data-edatatype="SUBMIT"
           data-pageid="course-consumption"
           className={cn(
-            "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
+            "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik",
             !isNewTmplValid || createLoading
               ? "bg-sunbird-brick/40 cursor-not-allowed"
               : "bg-sunbird-brick hover:bg-opacity-90"

@@ -39,11 +39,11 @@ export const CertResultsTable: React.FC<CertResultsTableProps> = ({
       <table className="w-full text-sm">
         <thead>
           <tr>
-            <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.batchName')}</th>
-            <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.userName')}</th>
-            <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.courseProgress')}</th>
-            <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.criteriaMet')}</th>
-            <th className="text-left font-['Rubik'] font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.action')}</th>
+            <th className="text-left font-rubik font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.batchName')}</th>
+            <th className="text-left font-rubik font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.userName')}</th>
+            <th className="text-left font-rubik font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.courseProgress')}</th>
+            <th className="text-left font-rubik font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.criteriaMet')}</th>
+            <th className="text-left font-rubik font-medium text-muted-foreground border-b border-border p-3">{t('certificatesTab.action')}</th>
           </tr>
         </thead>
         <tbody>
@@ -118,7 +118,7 @@ export const CertResultsTable: React.FC<CertResultsTableProps> = ({
                       </Button>
                     ) : (
                       <span
-                        className="text-xs text-muted-foreground font-['Rubik']"
+                        className="text-xs text-muted-foreground font-rubik"
                         data-testid={`reissue-view-only-${idx}`}
                       >
                         {t('certificatesTab.viewOnly')}

@@ -150,7 +150,7 @@ const UserManagementPage = () => {
               {/* ── Page header ── */}
               <div className="um-page-header">
                 <h1 className="um-page-title">User Management</h1>
-                <p className="text-xs text-sunbird-gray-75 mt-1 font-['Rubik']">
+                <p className="text-xs text-sunbird-gray-75 mt-1 font-rubik">
                   By using User Management features, you acknowledge and accept the{" "}
                   {termsUrl ? (
                     <TermsAndConditionsDialog

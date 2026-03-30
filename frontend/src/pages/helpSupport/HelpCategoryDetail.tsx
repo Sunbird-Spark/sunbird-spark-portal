@@ -121,7 +121,7 @@ const HelpCategoryDetail = () => {
                 <div className="flex items-center justify-between mb-[2rem]">
                     <button
                         onClick={() => { if (navigationHelperService.shouldProcessNavigationClick()) navigate("/help-support"); }}
-                        className="flex items-center gap-[0.5rem] text-sunbird-brick font-medium font-['Rubik'] text-sm hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-[0.5rem] text-sunbird-brick font-medium font-rubik text-sm hover:opacity-80 transition-opacity"
                         data-edataid="help-category-go-back"
                         data-pageid="help-category-detail"
                     >
@@ -130,7 +130,7 @@ const HelpCategoryDetail = () => {
                     </button>
                     <button
                         onClick={() => setIsReportIssueOpen(true)}
-                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
+                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-rubik rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
                         aria-label={t('help.reportContentIssue')}
                         data-edataid="help-report-issue-open"
                         data-pageid="help-category-detail"
@@ -164,32 +164,32 @@ const HelpCategoryDetail = () => {
                     />
                 ) : (
                     <>
-                        <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem] pt-[1.25rem]">{category.title}</h1>
+                        <h1 className="font-rubik font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground mb-[1.5rem] pt-[1.25rem]">{category.title}</h1>
 
                         <Accordion type="single" collapsible value={openValue} onValueChange={handleAccordionChange} className="space-y-[0.75rem]">
                             {sanitizedFaqs.map((faq, index) => (
                                 <AccordionItem key={index} value={`item-${index}`} className="rounded-[0.625rem] bg-sunbird-base-white border-b-0">
                                     <AccordionTrigger
-                                        className="text-left font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick"
+                                        className="text-left font-rubik font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick"
                                     >
                                         {faq.question}
                                     </AccordionTrigger>
-                                    <AccordionContent className="font-['Rubik'] font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
+                                    <AccordionContent className="font-rubik font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
                                         <div className="mb-[1rem] px-[1.25rem]" dangerouslySetInnerHTML={{ __html: faq.answer }} />
                                         <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
                                             {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
-                                                <p className="text-sm font-medium text-sunbird-brick font-['Rubik'] py-[0.5rem]">
+                                                <p className="text-sm font-medium text-sunbird-brick font-rubik py-[0.5rem]">
                                                     {t('help.feedbackThanks')}
                                                 </p>
                                             ) : feedback[index] === "no" ? (
                                                 <div className="py-[0.5rem] space-y-[0.75rem]">
-                                                    <p className="text-sm font-semibold text-foreground font-['Rubik']">{t('help.sorry')}</p>
-                                                    <p className="text-sm font-semibold text-foreground font-['Rubik']">{t('help.whatMore')}</p>
+                                                    <p className="text-sm font-semibold text-foreground font-rubik">{t('help.sorry')}</p>
+                                                    <p className="text-sm font-semibold text-foreground font-rubik">{t('help.whatMore')}</p>
                                                     <textarea
                                                         placeholder={t('help.typeHere')}
                                                         value={feedbackText[index] || ""}
                                                         onChange={(e) => setFeedbackText((prev) => ({ ...prev, [index]: e.target.value }))}
-                                                        className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-['Rubik'] resize-none h-[5rem] focus:outline-none focus:border-sunbird-brick"
+                                                        className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-rubik resize-none h-[5rem] focus:outline-none focus:border-sunbird-brick"
                                                         aria-label={t('help.additionalFeedback')}
                                                         aria-required="true"
                                                     />
@@ -198,7 +198,7 @@ const HelpCategoryDetail = () => {
                                                             onClick={() => setFeedback((prev) => ({ ...prev, [index]: null }))}
                                                             data-edataid="faq-feedback-cancel"
                                                             data-pageid="help-category-detail"
-                                                            className="text-sm font-medium font-['Rubik'] text-muted-foreground hover:opacity-80 transition-opacity px-[1.25rem] py-[0.5rem]"
+                                                            className="text-sm font-medium font-rubik text-muted-foreground hover:opacity-80 transition-opacity px-[1.25rem] py-[0.5rem]"
                                                         >
                                                             {t('cancel')}
                                                         </button>
@@ -207,7 +207,7 @@ const HelpCategoryDetail = () => {
                                                             disabled={!feedbackText[index]?.trim()}
                                                             data-edataid="faq-feedback-submit"
                                                             data-pageid="help-category-detail"
-                                                            className={`text-sunbird-base-white text-sm font-medium font-['Rubik'] px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
+                                                            className={`text-sunbird-base-white text-sm font-medium font-rubik px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
                                                                 ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
                                                                 : "bg-sunbird-brick hover:opacity-90"
                                                                 }`}
@@ -218,10 +218,10 @@ const HelpCategoryDetail = () => {
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center gap-[0.75rem]">
-                                                    <span className="text-sm text-muted-foreground font-['Rubik']">{t('help.didThisHelp')}</span>
+                                                    <span className="text-sm text-muted-foreground font-rubik">{t('help.didThisHelp')}</span>
                                                     <button
                                                         onClick={() => handleFeedback(index, "no")}
-                                                        className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                        className="text-sm font-medium font-rubik text-sunbird-brick hover:opacity-80 transition-opacity"
                                                         data-edataid="faq-feedback-no"
                                                         data-pageid="help-category-detail"
                                                         data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
@@ -230,7 +230,7 @@ const HelpCategoryDetail = () => {
                                                     </button>
                                                     <button
                                                         onClick={() => handleFeedback(index, "yes")}
-                                                        className="text-sm font-medium font-['Rubik'] text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                        className="text-sm font-medium font-rubik text-sunbird-brick hover:opacity-80 transition-opacity"
                                                         data-edataid="faq-feedback-yes"
                                                         data-pageid="help-category-detail"
                                                         data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}

@@ -72,11 +72,11 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
 
       {/* Batch Selector Dropdown */}
       <div className="flex items-center gap-4">
-        <label className="text-sm font-semibold text-foreground font-['Rubik'] shrink-0">
+        <label className="text-sm font-semibold text-foreground font-rubik shrink-0">
           Select Batch
         </label>
         {batchList.length === 0 ? (
-          <p className="text-sm text-muted-foreground font-['Rubik']">No batches found.</p>
+          <p className="text-sm text-muted-foreground font-rubik">No batches found.</p>
         ) : (
           <Select onValueChange={handleBatchSelect}>
             <SelectTrigger
@@ -124,7 +124,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
           </div>
         ) : (
           <div className="flex items-center justify-center py-16 px-8">
-            <p className="text-muted-foreground text-sm font-['Rubik']" data-testid="no-batch-selected">
+            <p className="text-muted-foreground text-sm font-rubik" data-testid="no-batch-selected">
               Select a batch from the dropdown above to view its course report.
             </p>
           </div>

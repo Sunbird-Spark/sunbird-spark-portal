@@ -92,7 +92,7 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
                       <FiCheck className="w-3 h-3" />
                     </Checkbox.Indicator>
                   </Checkbox.Root>
-                  <span className="text-sm text-foreground font-['Rubik']">
+                  <span className="text-sm text-foreground font-rubik">
                     {t('tncPopup.checkboxLabel')}
                   </span>
                 </label>
@@ -102,7 +102,7 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
                   disabled={!tncChecked || accepting}
                   onClick={onAccept}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors shrink-0 min-w-[120px]",
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-rubik transition-colors shrink-0 min-w-[120px]",
                     !tncChecked || accepting
                       ? "bg-sunbird-brick/40 cursor-not-allowed"
                       : "bg-sunbird-brick hover:bg-opacity-90"

@@ -25,9 +25,9 @@ export const emptyImage = (): ImagePickerState => ({
 type ImageTab = "myImages" | "allImages" | "upload";
 
 const labelClass =
-  "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']";
+  "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik";
 const inputClass =
-  "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']";
+  "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
 
 const LICENSE_STATEMENT =
   "I understand and confirm that all resources and assets created through the content editor or uploaded on the platform shall be available for free and public use without limitations on the platform (web portal, applications and any other end-user interface that the platform would enable) as per platform policy guidelines. In doing so, I confirm that the copyright and license of the original author are not infringed.";
@@ -113,7 +113,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
       type="button"
       onClick={() => handleTabChange(t)}
       className={cn(
-        "flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors",
+        "flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors",
         tab === t ? "text-sunbird-brick" : "text-muted-foreground hover:text-foreground"
       )}
     >
@@ -136,7 +136,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "w-full rounded-lg border border-dashed border-border py-3 flex items-center justify-center gap-2 text-sm font-['Rubik'] transition-colors hover:border-sunbird-brick hover:text-sunbird-brick",
+          "w-full rounded-lg border border-dashed border-border py-3 flex items-center justify-center gap-2 text-sm font-rubik transition-colors hover:border-sunbird-brick hover:text-sunbird-brick",
           value.preview ? "text-sunbird-brick border-sunbird-brick/40" : "text-muted-foreground"
         )}
       >
@@ -156,7 +156,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
         <button
           type="button"
           onClick={() => onChange(emptyImage())}
-          className="mt-1 text-xs text-red-400 hover:text-red-600 font-['Rubik']"
+          className="mt-1 text-xs text-red-400 hover:text-red-600 font-rubik"
         >
           {t('imagePicker.remove')}
         </button>
@@ -172,7 +172,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-              <Dialog.Title className="text-base font-semibold text-sunbird-obsidian font-['Rubik']">
+              <Dialog.Title className="text-base font-semibold text-sunbird-obsidian font-rubik">
                 {t('imagePicker.selectImageTitle', { label })}
               </Dialog.Title>
               <Dialog.Close asChild>
@@ -251,7 +251,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+                    className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-rubik"
                   >
                     {t('imagePicker.cancel')}
                   </button>
@@ -259,7 +259,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                 <button
                   type="button"
                   onClick={() => handleTabChange("upload")}
-                  className="rounded-lg px-5 py-2 text-sm font-medium text-sunbird-brick border border-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors font-['Rubik'] inline-flex items-center gap-2"
+                  className="rounded-lg px-5 py-2 text-sm font-medium text-sunbird-brick border border-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors font-rubik inline-flex items-center gap-2"
                 >
                   <FiUpload className="w-4 h-4" />
                   {t('imagePicker.uploadNew')}

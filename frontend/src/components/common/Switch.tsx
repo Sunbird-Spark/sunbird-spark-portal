@@ -45,14 +45,14 @@ export interface SwitchRowProps {
 
 export const SwitchRow = ({ id, checked, onChange, label, valueLabel, disabled }: SwitchRowProps) => (
   <div className={cn("flex items-center justify-between gap-4", disabled && "opacity-50 pointer-events-none")}>
-    <label htmlFor={id} className="text-sm font-medium text-foreground font-['Rubik'] cursor-pointer">
+    <label htmlFor={id} className="text-sm font-medium text-foreground font-rubik cursor-pointer">
       {label}
     </label>
     <div className="flex items-center gap-2">
       {valueLabel && (
         <span
           className={cn(
-            "text-xs font-medium font-['Rubik'] transition-colors",
+            "text-xs font-medium font-rubik transition-colors",
             checked ? "text-sunbird-brick" : "text-muted-foreground"
           )}
         >

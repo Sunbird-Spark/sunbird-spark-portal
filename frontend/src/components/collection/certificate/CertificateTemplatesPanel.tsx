@@ -27,7 +27,7 @@ export function CertificateTemplatesPanel({
   return (
     <div className="w-72 flex-shrink-0 p-4 space-y-3 overflow-y-auto bg-gray-50/50">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-sunbird-obsidian font-['Rubik'] uppercase tracking-wide">
+        <h3 className="text-sm font-semibold text-sunbird-obsidian font-rubik uppercase tracking-wide">
           Certificate Template
         </h3>
         <div className="flex items-center gap-1">
@@ -64,11 +64,11 @@ export function CertificateTemplatesPanel({
       {!templatesLoading && certTemplates.length === 0 && (
         <div className="text-center py-8">
           <FiAward className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-xs text-muted-foreground font-['Rubik']">No templates available.</p>
+          <p className="text-xs text-muted-foreground font-rubik">No templates available.</p>
           <button
             type="button"
             onClick={() => { setView("createTemplate"); setErrorMsg(""); }}
-            className="mt-2 text-xs text-sunbird-brick hover:underline font-['Rubik']"
+            className="mt-2 text-xs text-sunbird-brick hover:underline font-rubik"
           >
             Create New Template
           </button>

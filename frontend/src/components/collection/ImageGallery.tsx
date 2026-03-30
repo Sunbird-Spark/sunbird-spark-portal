@@ -29,7 +29,7 @@ export function ImageGallery({ loading, images, emptyMessage, selectedUrl, onSel
     return (
       <div className="text-center py-8 text-muted-foreground">
         <FiImage className="w-8 h-8 mx-auto mb-2" />
-        <p className="text-xs font-['Rubik']">{emptyMessage}</p>
+        <p className="text-xs font-rubik">{emptyMessage}</p>
       </div>
     );
   }

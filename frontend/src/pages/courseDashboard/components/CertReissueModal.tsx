@@ -34,7 +34,7 @@ export const CertReissueModal: React.FC<CertReissueModalProps> = ({
         <div className="flex gap-3 justify-end">
           <Button
             variant="outline"
-            className="font-['Rubik']"
+            className="font-rubik"
             onClick={onClose}
             data-testid="modal-no-btn"
             disabled={reissuing}
@@ -42,7 +42,7 @@ export const CertReissueModal: React.FC<CertReissueModalProps> = ({
             {t('certificatesTab.no')}
           </Button>
           <Button
-            className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-['Rubik'] transition-colors"
+            className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik transition-colors"
             onClick={onConfirm}
             data-testid="modal-yes-btn"
             data-edataid="certificate-reissue-confirm"

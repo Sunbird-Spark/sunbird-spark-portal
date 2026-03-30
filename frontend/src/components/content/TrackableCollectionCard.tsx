@@ -33,10 +33,10 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <h4 className="font-bold text-[1.125rem] leading-[1.4] text-sunbird-obsidian line-clamp-2 mb-2 font-['Rubik']">
+          <h4 className="font-bold text-[1.125rem] leading-[1.4] text-sunbird-obsidian line-clamp-2 mb-2 font-rubik">
             {course.courseName}
           </h4>
-          <p className="text-[1rem] font-normal text-sunbird-obsidian mb-3 font-['Rubik']">
+          <p className="text-[1rem] font-normal text-sunbird-obsidian mb-3 font-rubik">
             {t('trackableCollection.completed')} : <span className="font-medium">{course.completionPercentage}%</span>
           </p>
           {/* Progress Bar */}

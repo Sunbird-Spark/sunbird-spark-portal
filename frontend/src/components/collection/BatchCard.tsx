@@ -103,7 +103,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <p className="text-sm font-semibold text-foreground font-['Rubik']">
+          <p className="text-sm font-semibold text-foreground font-rubik">
             Manage batches for this course
           </p>
           <div className="flex items-center gap-2">
@@ -151,7 +151,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                   data-edataid="report-viewer-tnc-accept"
                   data-pageid="course-consumption"
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors",
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-rubik transition-colors",
                     !reviewerTncChecked || acceptTncMutation.isPending
                       ? "bg-sunbird-brick/40 cursor-not-allowed"
                       : "bg-sunbird-brick hover:bg-opacity-90"
@@ -187,7 +187,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
         {/* ── Error ── */}
         {!isLoading && isError && (
-          <p className="text-xs text-red-500 font-['Rubik'] px-5 py-4">
+          <p className="text-xs text-red-500 font-rubik px-5 py-4">
             Failed to load batches.
           </p>
         )}
@@ -198,7 +198,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
             {currentBatches.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
                 <FiCalendar className="w-7 h-7" />
-                <p className="text-xs font-['Rubik']">
+                <p className="text-xs font-rubik">
                   No {activeTab.toLowerCase()} batches
                 </p>
               </div>

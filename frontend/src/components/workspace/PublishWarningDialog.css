@@ -50,7 +50,7 @@
 
 .publish-warning-title {
   margin: 0;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 2rem;
@@ -63,7 +63,7 @@
 
 .publish-warning-text {
   margin: 0 0 1rem 0;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   font-size: 0.9375rem;
   line-height: 1.5rem;
   color: #757575;
@@ -71,7 +71,7 @@
 
 .publish-warning-question {
   margin: 0;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5rem;
@@ -85,7 +85,7 @@
 }
 
 .publish-warning-btn {
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   padding: 0.625rem 1.75rem;
   border: none;
   border-radius: 0.5rem;
