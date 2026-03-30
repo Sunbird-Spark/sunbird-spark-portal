@@ -10,11 +10,12 @@ const PLACEHOLDER_IMAGES = [placeholder1, placeholder2, placeholder3, placeholde
  * Returns a deterministic placeholder image based on a seed string
  * (e.g. content identifier), so the same item always shows the same image.
  */
-export const getPlaceholderImage = (seed: string): string => {
+export const getPlaceholderImage = (seed?: string | null): string => {
+  if (!seed) return (placeholder1 as string);
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     hash = (hash << 5) - hash + seed.charCodeAt(i);
     hash |= 0;
   }
-  return PLACEHOLDER_IMAGES[Math.abs(hash) % PLACEHOLDER_IMAGES.length] || placeholder1;
+  return (PLACEHOLDER_IMAGES[Math.abs(hash) % PLACEHOLDER_IMAGES.length] || placeholder1) as string;
 };
