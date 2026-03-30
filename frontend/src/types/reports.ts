@@ -300,4 +300,4 @@ export interface UserCreationCountResult { data: UserCreationCountApiItem[]; cou
 
 /* ---------- MODULE 4 – User Consent Management ---------- */
 // Types live in @/types/consentTypes to keep this file within the 250-line limit.
-export type { UserConsentApiItem, UserConsentSummaryResult, UserConsentRecord } from './consentTypes';
+export type { ConsentStatus, UserConsentApiItem, UserConsentSummaryResult, UserConsentRecord } from './consentTypes';
