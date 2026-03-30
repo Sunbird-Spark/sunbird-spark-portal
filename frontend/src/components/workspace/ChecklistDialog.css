@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: hsl(var(--foreground) / 0.5);
 }
 
 .review-dialog {
@@ -15,7 +15,7 @@
   width: 100%;
   max-width: 56rem;
   margin: 1rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--sunbird-shadow-lg);
 }
 
 .review-dialog-main-title {
@@ -91,7 +91,7 @@
   margin-top: 0.125rem;
   flex-shrink: 0;
   cursor: pointer;
-  accent-color: #a85236;
+  accent-color: hsl(var(--sunbird-brick));
 }
 
 .review-dialog-checkbox:disabled {
@@ -112,8 +112,8 @@
 
 .review-dialog-textarea:focus {
   outline: none;
-  border-color: #a85236;
-  box-shadow: 0 0 0 3px rgba(168, 82, 54, 0.1);
+  border-color: hsl(var(--sunbird-brick));
+  box-shadow: 0 0 0 3px hsl(var(--sunbird-brick) / 0.1);
 }
 
 .review-dialog-textarea:disabled {
@@ -160,20 +160,20 @@
   font-weight: 500;
   font-family: var(--app-font-family);
   color: white;
-  background-color: #a85236;
-  border: 1px solid #a85236;
+  background-color: hsl(var(--sunbird-brick));
+  border: 1px solid hsl(var(--sunbird-brick));
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
 .review-dialog-btn-primary:hover:not(:disabled) {
-  background-color: #8a4429;
-  border-color: #8a4429;
+  background-color: hsl(var(--sunbird-brick) / 0.85);
+  border-color: hsl(var(--sunbird-brick) / 0.85);
 }
 
 .review-dialog-btn-primary:disabled {
   cursor: not-allowed;
   opacity: 0.5;
-  background-color: #d1d5db;
-  border-color: #d1d5db;
+  background-color: hsl(var(--sunbird-gray-d0));
+  border-color: hsl(var(--sunbird-gray-d0));
 }

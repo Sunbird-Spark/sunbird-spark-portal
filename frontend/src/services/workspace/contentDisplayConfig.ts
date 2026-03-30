@@ -167,51 +167,51 @@ export interface CardTheme {
 /* ── Shared base palettes (each family shares one set of colours) ── */
 
 const THEME_WAVE: Omit<CardTheme, 'id'> = {
-  bgLight: '#e8f4f8',
-  bgLighter: '#f2f9fb',
-  accent: '#70adbf',
-  accentDark: '#376673',
-  iconColor: '#376673',
+  bgLight: 'hsl(var(--theme-wave-bg-light))',
+  bgLighter: 'hsl(var(--theme-wave-bg-lighter))',
+  accent: 'hsl(var(--theme-wave-accent))',
+  accentDark: 'hsl(var(--theme-wave-accent-dark))',
+  iconColor: 'hsl(var(--theme-wave-icon))',
 };
 
 const THEME_SUNFLOWER: Omit<CardTheme, 'id'> = {
-  bgLight: '#fff8e1',
-  bgLighter: '#fffcf0',
-  accent: '#ffdb73',
-  accentDark: '#cc8545',
-  iconColor: '#a85236',
+  bgLight: 'hsl(var(--theme-sunflower-bg-light))',
+  bgLighter: 'hsl(var(--theme-sunflower-bg-lighter))',
+  accent: 'hsl(var(--theme-sunflower-accent))',
+  accentDark: 'hsl(var(--theme-sunflower-accent-dark))',
+  iconColor: 'hsl(var(--theme-sunflower-icon))',
 };
 
 const THEME_GINGER: Omit<CardTheme, 'id'> = {
-  bgLight: '#fdf0e3',
-  bgLighter: '#fef7f0',
-  accent: '#cc8545',
-  accentDark: '#a85236',
-  iconColor: '#a85236',
+  bgLight: 'hsl(var(--theme-ginger-bg-light))',
+  bgLighter: 'hsl(var(--theme-ginger-bg-lighter))',
+  accent: 'hsl(var(--theme-ginger-accent))',
+  accentDark: 'hsl(var(--theme-ginger-accent-dark))',
+  iconColor: 'hsl(var(--theme-ginger-icon))',
 };
 
 const THEME_FOREST: Omit<CardTheme, 'id'> = {
-  bgLight: '#eef5ea',
-  bgLighter: '#f5f9f3',
-  accent: '#82a668',
-  accentDark: '#66a682',
-  iconColor: '#4a7a3e',
+  bgLight: 'hsl(var(--theme-forest-bg-light))',
+  bgLighter: 'hsl(var(--theme-forest-bg-lighter))',
+  accent: 'hsl(var(--theme-forest-accent))',
+  accentDark: 'hsl(var(--theme-forest-accent-dark))',
+  iconColor: 'hsl(var(--theme-forest-icon))',
 };
 
 const THEME_LAVENDER: Omit<CardTheme, 'id'> = {
-  bgLight: '#f3edf1',
-  bgLighter: '#f9f5f8',
-  accent: '#99708a',
-  accentDark: '#540f3b',
-  iconColor: '#540f3b',
+  bgLight: 'hsl(var(--sunbird-beige-light))',
+  bgLighter: 'hsl(var(--sunbird-gray-f3))',
+  accent: 'hsl(var(--sunbird-lavender))',
+  accentDark: 'hsl(var(--sunbird-jamun))',
+  iconColor: 'hsl(var(--sunbird-jamun))',
 };
 
 const THEME_LEAF: Omit<CardTheme, 'id'> = {
-  bgLight: '#f2f5e2',
-  bgLighter: '#f8f9ef',
-  accent: '#a1a603',
-  accentDark: '#82a668',
-  iconColor: '#6b8a00',
+  bgLight: 'hsl(var(--sunbird-gray-f1))',
+  bgLighter: 'hsl(var(--sunbird-gray-f3))',
+  accent: 'hsl(var(--sunbird-leaf))',
+  accentDark: 'hsl(var(--sunbird-forest))',
+  iconColor: 'hsl(var(--sunbird-moss))',
 };
 
 /** Helper to stamp a unique `id` onto a shared base palette. */

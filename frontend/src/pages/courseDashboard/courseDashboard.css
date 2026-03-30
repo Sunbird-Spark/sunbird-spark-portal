@@ -19,8 +19,8 @@
 }
 
 .dashboard-tab.active {
-  color: var(--sunbird-brick, #b35000);
-  border-bottom-color: var(--sunbird-brick, #b35000);
+  color: hsl(var(--sunbird-brick));
+  border-bottom-color: hsl(var(--sunbird-brick));
   font-weight: 600;
 }
 
@@ -71,7 +71,7 @@
 .batch-sidebar-item.active {
   background: var(--accent);
   font-weight: 600;
-  color: var(--sunbird-brick, #b35000);
+  color: hsl(var(--sunbird-brick));
 }
 
 .batches-main {
@@ -113,7 +113,7 @@
 }
 
 .certs-search-input:focus {
-  border-color: var(--sunbird-brick, #b35000);
+  border-color: hsl(var(--sunbird-brick));
 }
 
 .certs-search-btn {
@@ -121,8 +121,8 @@
   border-radius: 0.375rem;
   font-size: 0.9375rem;
   font-weight: 500;
-  background: var(--sunbird-brick, #b35000);
-  color: #fff;
+  background: hsl(var(--sunbird-brick));
+  color: hsl(var(--primary-foreground));
   border: none;
   cursor: pointer;
   transition: opacity 0.15s ease;
@@ -199,7 +199,7 @@
 }
 
 .reissue-link {
-  color: var(--sunbird-brick, #b35000);
+  color: hsl(var(--sunbird-brick));
   font-weight: 500;
   cursor: pointer;
   background: none;
@@ -217,7 +217,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: hsl(var(--foreground) / 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,7 +230,7 @@
   padding: 2rem;
   width: 100%;
   max-width: 26rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--sunbird-shadow-lg);
 }
 
 .modal-title {
@@ -268,8 +268,8 @@
   border-radius: 0.375rem;
   font-size: 0.9375rem;
   font-weight: 500;
-  background: var(--sunbird-brick, #b35000);
-  color: #fff;
+  background: hsl(var(--sunbird-brick));
+  color: hsl(var(--primary-foreground));
   border: none;
   cursor: pointer;
 }
@@ -281,14 +281,14 @@
 
 /* ─── Status messages ─────────────────────────────────────────────────────────── */
 .status-success {
-  color: #16a34a;
+  color: hsl(var(--sunbird-success-green));
   font-size: 0.875rem;
   font-weight: 500;
   margin-top: 0.75rem;
 }
 
 .status-error {
-  color: #dc2626;
+  color: hsl(var(--destructive));
   font-size: 0.875rem;
   font-weight: 500;
   margin-top: 0.75rem;

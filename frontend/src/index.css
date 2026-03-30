@@ -1,3 +1,5 @@
+@import './fonts.css';
+
 /* Sunbird Joyful Design System - Professional Training LMS */
 
 @tailwind base;
@@ -149,6 +151,31 @@
     --sunbird-success-message-bg: 120 16% 95%;
     /* #F0F4F0 */
 
+    /* Theme Colors for Content Cards */
+    --theme-wave-bg-light: 194 47% 95%;
+    --theme-wave-bg-lighter: 194 47% 97%;
+    --theme-wave-accent: 194 36% 59%;
+    --theme-wave-accent-dark: 193 35% 33%;
+    --theme-wave-icon: 193 35% 33%;
+
+    --theme-sunflower-bg-light: 45 100% 94%;
+    --theme-sunflower-bg-lighter: 45 100% 97%;
+    --theme-sunflower-accent: 45 100% 73%;
+    --theme-sunflower-accent-dark: 28 57% 54%;
+    --theme-sunflower-icon: 15 51% 44%;
+
+    --theme-ginger-bg-light: 28 66% 95%;
+    --theme-ginger-bg-lighter: 28 66% 97%;
+    --theme-ginger-accent: 28 57% 54%;
+    --theme-ginger-accent-dark: 15 51% 44%;
+    --theme-ginger-icon: 15 51% 44%;
+
+    --theme-forest-bg-light: 95 26% 93%;
+    --theme-forest-bg-lighter: 95 26% 96%;
+    --theme-forest-accent: 95 26% 53%;
+    --theme-forest-accent-dark: 146 26% 53%;
+    --theme-forest-icon: 95 26% 40%;
+
     /* Category Card Gradients */
     --category-gradient-1: linear-gradient(to right, #45C0ED, #8E46C5);
     --category-gradient-2: linear-gradient(to right, #D55E1D, #F6C35C);
@@ -157,9 +184,11 @@
 
     /* Box Shadows */
     --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
-    --sunbird-shadow-sm: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
-    --sunbird-shadow-md: 0 0.875rem 0.875rem rgba(0, 0, 0, 0.05);
-    --sunbird-shadow-lg: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
+    --sunbird-shadow-sm: 0 0.125rem 0.625rem hsl(var(--foreground) / 0.05);
+    --sunbird-shadow-md: 0 0.875rem 0.875rem hsl(var(--foreground) / 0.05);
+    --sunbird-shadow-lg: 0 0.25rem 1.25rem 0 hsl(var(--foreground) / 0.1);
+    --sunbird-text-shadow-strong: 0 0.125rem 0.625rem hsl(var(--foreground) / 0.55);
+    --sunbird-text-shadow-light: 0 0.0625rem 0.375rem hsl(var(--foreground) / 0.45);
 
     /* Component Specific Colors */
     --sunbird-progress-bg: 39 77% 76%;
@@ -169,8 +198,8 @@
     /* #CAE5B6 */
     --sunbird-status-completed-border: 95 26% 53%;
     /* #82A668 */
-    --sunbird-status-completed-text: 0 0% 0%;
-    /* #000000 */
+    --sunbird-status-completed-text: 95 26% 30%;
+    /* Dark green for completed status */
 
     --sunbird-status-ongoing-bg: 45 100% 89%;
     /* #FFF1C7 */
@@ -455,11 +484,11 @@
 
   .content-player-resource-title {
     @apply font-rubik font-medium text-[1.625rem] leading-[2.375rem] tracking-normal text-white font-semibold mb-2;
-    text-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.55);
+    text-shadow: var(--sunbird-text-shadow-strong);
   }
 
   .content-player-resource-subtitle {
-    text-shadow: 0 0.0625rem 0.375rem rgba(0, 0, 0, 0.45);
+    text-shadow: var(--sunbird-text-shadow-light);
   }
 
 
@@ -587,7 +616,7 @@
 
   .related-resource-card-container {
     @apply bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[22.5rem] flex flex-col;
-    box-shadow: 0.125rem 0.125rem 1.25rem 0rem rgba(0, 0, 0, 0.09);
+    box-shadow: var(--sunbird-shadow-md);
   }
 
   .related-resource-card-image-wrapper {
@@ -874,7 +903,7 @@
 
   .collection-description {
     @apply text-base leading-relaxed mb-6;
-    color: #222222;
+    color: hsl(var(--foreground));
   }
 
   .collection-suited-title {
@@ -966,7 +995,7 @@
   }
 
   .option-chip-selected {
-    background-color: #376673;
+    background-color: hsl(var(--sunbird-ink));
     color: white;
     border: 0;
   }

@@ -190,7 +190,7 @@
     @apply flex items-start gap-3 px-4 py-4 transition-colors mx-4 mb-3 relative;
     background: hsl(var(--sunbird-white));
     border: 1px solid transparent;
-    box-shadow: 2px 2px 20px 0px rgba(0, 0, 0, 0.09);
+    box-shadow: var(--sunbird-shadow-md);
     border-radius: 14px;
 }
 

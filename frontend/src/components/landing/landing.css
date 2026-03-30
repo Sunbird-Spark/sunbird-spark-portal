@@ -20,22 +20,22 @@
 
 /* ── DynamicResourceSection ─────────────────────────────────── */
 .resource-section {
-    @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7];
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light;
 }
 
 /* Full-bleed variant: overrides home-content-wrapper's horizontal padding */
 .resource-section-home {
-    @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7];
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light;
     margin-left: calc(-1 * var(--hcw-pl, 1rem));
     margin-right: calc(-1 * var(--hcw-pr, 1rem));
 }
 
 .resource-section-skeleton {
-    @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7] animate-pulse;
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light animate-pulse;
 }
 
 .resource-section-skeleton-home {
-    @apply pt-[1.875rem] pb-[1.875rem] bg-[#FFF1C7] animate-pulse;
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light animate-pulse;
     margin-left: calc(-1 * var(--hcw-pl, 1rem));
     margin-right: calc(-1 * var(--hcw-pr, 1rem));
 }
@@ -62,19 +62,19 @@
 
 .resource-section-label-line {
     height: 0;
-    border: 0.0625rem solid #222222;
+    border: 0.0625rem solid hsl(var(--foreground));
     width: 13.5rem;
 }
 
 .resource-section-label {
-    @apply font-rubik font-normal text-[#222222] whitespace-nowrap text-center;
+    @apply font-rubik font-normal text-sunbird-charcoal whitespace-nowrap text-center;
     font-size: 1.25rem;
     line-height: 2.875rem;
     letter-spacing: 0%;
 }
 
 .resource-section-title {
-    @apply font-rubik font-medium text-[2.875rem] leading-[2.875rem] tracking-normal text-[#333333] text-center mb-[1.25rem];
+    @apply font-rubik font-medium text-[2.875rem] leading-[2.875rem] tracking-normal text-sunbird-charcoal text-center mb-[1.25rem];
 }
 
 .resource-section-grid {

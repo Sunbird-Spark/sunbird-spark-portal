@@ -14,7 +14,7 @@
 
 /* My Learning Component Refinements */
 .mylearning-progress-bar-container {
-    @apply w-full h-1.5 bg-[#F1F1F1] rounded-full overflow-hidden mb-2;
+    @apply w-full h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden mb-2;
 }
 
 .mylearning-progress-bar-fill {

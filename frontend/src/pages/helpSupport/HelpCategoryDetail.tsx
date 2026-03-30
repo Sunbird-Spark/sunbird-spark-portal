@@ -176,7 +176,7 @@ const HelpCategoryDetail = () => {
                                     </AccordionTrigger>
                                     <AccordionContent className="font-rubik font-normal text-[1rem] leading-[1.625rem] tracking-[0%] pb-0 text-muted-foreground px-0">
                                         <div className="mb-[1rem] px-[1.25rem]" dangerouslySetInnerHTML={{ __html: faq.answer }} />
-                                        <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-[0_-0.0625rem_0.25rem_rgba(0,0,0,0.06)] px-[1.25rem]">
+                                        <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-sunbird-sm px-[1.25rem]">
                                             {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
                                                 <p className="text-sm font-medium text-sunbird-brick font-rubik py-[0.5rem]">
                                                     {t('help.feedbackThanks')}

@@ -105,8 +105,8 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                                 w-full flex items-center transition-all
                                 ${collapsed ? 'justify-center px-2 py-4' : 'gap-3 px-6 py-4'}
                                 ${isActive
-                                    ? "text-sunbird-brick font-normal shadow-[0_0.125rem_0.5rem_rgba(0,0,0,0.15)]"
-                                    : "text-sunbird-obsidian font-normal hover:bg-gray-50 hover:shadow-[0_0.125rem_0.375rem_rgba(0,0,0,0.08)]"
+                                    ? "text-sunbird-brick font-normal shadow-sunbird-sm"
+                                    : "text-sunbird-obsidian font-normal hover:bg-gray-50 hover:shadow-sunbird-sm"
                                 }
                             `}
                             title={collapsed ? item.label : undefined}
@@ -138,7 +138,7 @@ const HomeSidebar = ({ activeNav, onNavChange, collapsed = false, onToggle }: Ho
                  ${collapsed ? 'w-[5rem]' : 'w-full md:w-[15.125rem]'}
             `}
             style={{
-                boxShadow: '0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09)'
+                boxShadow: 'var(--sunbird-shadow-md)'
             }}
         >
             <nav className="flex flex-col justify-between h-full pt-[1.875rem] pb-4">

@@ -56,7 +56,7 @@ const CertificateCard = ({
 
   return (
     <div
-      className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-white p-5 flex flex-col gap-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+      className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-white p-5 flex flex-col gap-4 shadow-sunbird-sm"
       data-testid="certificate-card"
     >
       <div className="flex items-center gap-2">

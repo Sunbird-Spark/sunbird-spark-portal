@@ -48,7 +48,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
 
   if (upcomingBatchesData.length === 0) {
      return (
-        <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
+        <div className="bg-white rounded-2xl p-6 shadow-sunbird-sm">
             <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-rubik">{t('common.upcomingBatches')}</h3>
             <div className="text-gray-500 text-sm">No upcoming batches scheduled.</div>
         </div>
@@ -56,7 +56,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
   }
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
+    <div className="bg-white rounded-2xl p-6 shadow-sunbird-sm">
       {/* Header */}
       <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-rubik">{t('common.upcomingBatches')}</h3>
 

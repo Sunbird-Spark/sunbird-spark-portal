@@ -115,7 +115,7 @@ const CourseDashboardPage: React.FC = () => {
 
         {/* ─── Main Box ─── */}
         {!isPermissionDetermining && !isError && (
-          <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col min-h-[372px]">
+          <div className="bg-white rounded-2xl shadow-sunbird-sm border border-border flex flex-col min-h-[372px]">
             {/* ─── Header area of Box ─── */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <p className="text-sm font-semibold text-foreground font-rubik">

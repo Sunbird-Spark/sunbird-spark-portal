@@ -21,7 +21,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     const { t } = useAppI18n();
 
     const getBadgeStyle = () => {
-        return "bg-[#FFF1C7] text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-[#CC8545] border-[0.0625rem]";
+        return "bg-sunbird-beige-light text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-sunbird-status-ongoing-border border-[0.0625rem]";
     };
 
     return (
@@ -33,7 +33,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
           data-objecttype="Content"
         >
             <div
-                className="group bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-[0.125rem_0.125rem_1.25rem_0rem_rgba(0,0,0,0.09)] w-full max-w-[23.125rem] h-[24.5rem] flex flex-col mx-auto"
+                className="group bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg shadow-sunbird-md w-full max-w-[23.125rem] h-[24.5rem] flex flex-col mx-auto"
             >
                 {/* Image with padding */}
                 <div className="px-[1.25rem] pt-[1.25rem] w-full">

@@ -88,11 +88,11 @@
 
 /* Sidebar shadow for RTL - flip the shadow direction */
 [dir="rtl"] aside[data-testid="home-sidebar"] {
-  box-shadow: -0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09) !important;
+  box-shadow: -0.125rem 0.125rem 1.25rem 0 hsl(var(--foreground) / 0.09) !important;
 }
 
 [dir="ltr"] aside[data-testid="home-sidebar"] {
-  box-shadow: 0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09) !important;
+  box-shadow: 0.125rem 0.125rem 1.25rem 0 hsl(var(--foreground) / 0.09) !important;
 }
 
 /* Toast/Notification positioning */

@@ -30,7 +30,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   if (isLoading && location.pathname !== "/") {
-    return <div className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)] h-16 md:h-[4.5rem]" />;
+    return <div className="sticky top-0 z-50 bg-white shadow-sunbird-md h-16 md:h-[4.5rem]" />;
   }
 
   if (!isLoading && isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
@@ -63,7 +63,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white shadow-[0_14px_14px_rgba(0,0,0,0.05)]">
+      <header className="sticky top-0 z-50 bg-white shadow-sunbird-md">
         <div className="container mx-auto px-0">
           <div className="flex items-center justify-between h-16 md:h-[4.5rem] px-4 lg:pl-[3.75rem] lg:pr-[7.9375rem]">
             {/* Logo */}
