@@ -107,12 +107,7 @@ export function buildColumns(
       header: "PII Consent Status",
       sortable: true,
       render: (row) => {
-        const variant =
-          row.consentStatus === "Granted"
-            ? "default"
-            : row.consentStatus === "Pending"
-            ? "secondary"
-            : "destructive";
+        const variant = row.consentStatus === "Granted" ? "default" : "destructive";
         return <Badge variant={variant}>{row.consentStatus}</Badge>;
       },
     },
