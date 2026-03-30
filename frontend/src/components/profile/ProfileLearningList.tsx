@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FiChevronDown, FiDownload } from "react-icons/fi";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { TrackableCollection } from "@/types/TrackableCollections";
@@ -40,6 +41,13 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
     const isDownloading = downloadingCourseId === course.courseId;
 
     return (
+        <Link
+            to={`/collection/${course.collectionId}`}
+            className="block"
+            data-edataid="profile-learning-card-click"
+            data-objectid={course.collectionId}
+            data-objecttype="Collection"
+        >
         <div className="profile-learning-item">
             {/* 1. Thumbnail + Details */}
             <div className="profile-learning-info">
@@ -89,7 +97,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                     <button
                         className={`flex items-center gap-2 transition-opacity min-w-fit ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
                         disabled={isDownloading}
-                        onClick={() => downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates, course.completedOn)}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates, course.completedOn); }}
                     >
                         {isDownloading ? (
                             <div className="w-[1.125rem] h-[1.125rem] border-2 border-sunbird-ginger border-t-transparent rounded-full animate-spin" />
@@ -107,6 +115,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                 ) : null}
             </div>
         </div>
+        </Link>
     );
 };
 
