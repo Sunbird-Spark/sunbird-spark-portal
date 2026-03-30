@@ -26,9 +26,9 @@ export const EXPORT_COLUMNS = [
   { key: "userName", header: "User Name" },
   { key: "email", header: "Email" },
   { key: "consentStatus", header: "PII Consent Status" },
-  { key: "consumerOrgs", header: "Consumer Org(s)" },
+  { key: "course", header: "Course" },
   { key: "consentGivenOn", header: "Consent Given On" },
-  { key: "lastUpdated", header: "Last Updated" },
+  { key: "expiry", header: "Expiry" },
 ];
 
 /* ── BulkActionsBar ──────────────────────────────────────────────────────── */
@@ -107,21 +107,17 @@ export function buildColumns(
       header: "PII Consent Status",
       sortable: true,
       render: (row) => {
-        const variant =
-          row.consentStatus === "Granted"
-            ? "default"
-            : row.consentStatus === "Pending"
-            ? "secondary"
-            : "destructive";
+        const variant = row.consentStatus === "Granted" ? "default" : "destructive";
         return <Badge variant={variant}>{row.consentStatus}</Badge>;
       },
     },
     {
-      key: "consumerOrgs",
-      header: "Consumer Org(s)",
+      key: "course",
+      header: "Course",
+      sortable: true,
       render: (row) =>
-        row.consumerOrgs.length ? (
-          <span>{row.consumerOrgs.join(", ")}</span>
+        row.course ? (
+          <span>{row.course}</span>
         ) : (
           <span className="text-muted-foreground">—</span>
         ),
@@ -135,6 +131,16 @@ export function buildColumns(
           <span className="text-muted-foreground">—</span>
         ),
     },
-    { key: "lastUpdated", header: "Last Updated", sortable: true },
+    {
+      key: "expiry",
+      header: "Expiry",
+      sortable: true,
+      render: (row) =>
+        row.expiry ? (
+          <span>{row.expiry}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
   ];
 }

@@ -1,5 +1,5 @@
 import { getClient } from '../../lib/http-client';
-import type { AssessmentApiItem, AssessmentResult, ContentStatusSummaryApiResult, ContentStatusSummaryFacet, LearnerProgressApiItem, LearnerProgressResult, OrgCourseEnrolmentApiItem, OrgCourseEnrolmentResult, UserAssessmentApiItem, UserAssessmentResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult, UserCreationCountApiItem, UserCreationCountResult } from '../../types/reports';
+import type { AssessmentApiItem, AssessmentResult, ContentStatusSummaryApiResult, ContentStatusSummaryFacet, LearnerProgressApiItem, LearnerProgressResult, OrgCourseEnrolmentApiItem, OrgCourseEnrolmentResult, UserAssessmentApiItem, UserAssessmentResult, UserConsentApiItem, UserConsentSummaryResult, UserCourseEnrolmentApiItem, UserCourseEnrolmentResult, UserCreationCountApiItem, UserCreationCountResult } from '../../types/reports';
 
 /** Shared parser for the Sunbird observability response envelope.
  *  Handles two response shapes:
@@ -140,6 +140,22 @@ export class ObservabilityService {
         },
       })
       .then((response) => parseObservabilityResponse<OrgCourseEnrolmentApiItem>(response.data));
+  }
+
+  /**
+   * Fetch user consent summary.
+   * POST /observability/v1/reports
+   */
+  public getConsentSummary(): Promise<UserConsentSummaryResult> {
+    return getClient()
+      .post<unknown>('/observability/v1/reports', {
+        request: {
+          reportId: 'user-consent-summary',
+          filters: {},
+          transform: ['user_id', 'object_id'],
+        },
+      })
+      .then((response) => parseObservabilityResponse<UserConsentApiItem>(response.data));
   }
 }
 

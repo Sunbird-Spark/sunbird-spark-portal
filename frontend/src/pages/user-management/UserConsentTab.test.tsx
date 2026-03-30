@@ -2,8 +2,49 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import UserConsentTab from './UserConsentTab';
+import type { UserConsentRecord } from '@/types/reports';
+import * as useConsentSummaryModule from '@/hooks/useConsentSummary';
+
+/* ── Mock data ───────────────────────────────────────────────────────────── */
+
+const MOCK_DATA: UserConsentRecord[] = [
+  {
+    id: 'uid1_oid1_0',
+    userId: 'uid1',
+    userName: 'Aarav Mehta',
+    email: 'ar*****@yopmail.com',
+    consentStatus: 'Granted',
+    course: 'Business and Management',
+    consentGivenOn: '2026-03-01',
+    expiry: '2026-06-01',
+  },
+  {
+    id: 'uid2_oid2_1',
+    userId: 'uid2',
+    userName: 'Priya Sharma',
+    email: 'pr*****@yopmail.com',
+    consentStatus: 'Revoked',
+    course: 'Finance and Accounting',
+    consentGivenOn: '2026-02-10',
+    expiry: '2026-05-10',
+  },
+  {
+    id: 'uid3_oid3_2',
+    userId: 'uid3',
+    userName: 'Rohan Gupta',
+    email: 'ro*****@yopmail.com',
+    consentStatus: 'Granted',
+    course: 'Information Technology',
+    consentGivenOn: '2026-03-15',
+    expiry: '2026-06-15',
+  },
+];
 
 /* ── Mocks ───────────────────────────────────────────────────────────────── */
+
+vi.mock('@/hooks/useConsentSummary', () => ({
+  useConsentSummary: () => ({ data: MOCK_DATA, isLoading: false, isError: false }),
+}));
 
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
@@ -19,7 +60,6 @@ vi.mock('@/components/common/ConfirmDialog', () => ({
 }));
 
 // Radix Select → plain <select> so fireEvent.change works.
-// SelectTrigger/SelectValue must render null — <span> inside <select> is invalid HTML.
 vi.mock('@/components/ui/select', () => ({
   Select: ({ children, onValueChange, value }: any) => (
     <select value={value} onChange={(e: any) => onValueChange?.(e.target.value)}>
@@ -45,6 +85,21 @@ describe('UserConsentTab', () => {
     vi.clearAllMocks();
   });
 
+  /* ── Loading / error states ── */
+  describe('loading and error states', () => {
+    it('shows loading indicator while fetching', () => {
+      vi.spyOn(useConsentSummaryModule, 'useConsentSummary').mockReturnValueOnce({ data: [], isLoading: true, isError: false });
+      renderTab();
+      expect(screen.getByText(/loading consent data/i)).toBeInTheDocument();
+    });
+
+    it('shows error message on failure', () => {
+      vi.spyOn(useConsentSummaryModule, 'useConsentSummary').mockReturnValueOnce({ data: [], isLoading: false, isError: true });
+      renderTab();
+      expect(screen.getByText(/failed to load consent data/i)).toBeInTheDocument();
+    });
+  });
+
   /* ── Layout ── */
   describe('layout', () => {
     it('renders the Export CSV button', () => {
@@ -52,17 +107,16 @@ describe('UserConsentTab', () => {
       expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument();
     });
 
-    it('renders all four summary card labels', () => {
+    it('renders summary card labels', () => {
       renderTab();
       expect(screen.getByText('Total Users')).toBeInTheDocument();
       expect(screen.getByText('Consent Granted')).toBeInTheDocument();
-      expect(screen.getByText('Consent Pending')).toBeInTheDocument();
       expect(screen.getByText('Consent Revoked')).toBeInTheDocument();
     });
 
-    it('shows the correct Total Users count (40)', () => {
+    it('shows the correct Total Users count', () => {
       renderTab();
-      expect(screen.getByText('40')).toBeInTheDocument();
+      expect(screen.getByText(String(MOCK_DATA.length))).toBeInTheDocument();
     });
 
     it('renders the search input', () => {
@@ -70,7 +124,7 @@ describe('UserConsentTab', () => {
       expect(screen.getByPlaceholderText('Search by name or email…')).toBeInTheDocument();
     });
 
-    it('renders user rows in the table (first page)', () => {
+    it('renders user rows in the table', () => {
       renderTab();
       expect(screen.getByText('Aarav Mehta')).toBeInTheDocument();
       expect(screen.getByText('Priya Sharma')).toBeInTheDocument();
@@ -81,11 +135,20 @@ describe('UserConsentTab', () => {
       expect(screen.getAllByText('Granted').length).toBeGreaterThan(0);
     });
 
+    it('renders the Expiry column header', () => {
+      renderTab();
+      expect(screen.getByText('Expiry')).toBeInTheDocument();
+    });
+
+    it('does not render Consumer Org(s) column', () => {
+      renderTab();
+      expect(screen.queryByText('Consumer Org(s)')).not.toBeInTheDocument();
+    });
+
     it('does not show the bulk actions toolbar by default', () => {
       renderTab();
       expect(screen.queryByRole('toolbar', { name: /bulk actions/i })).not.toBeInTheDocument();
     });
-
   });
 
   /* ── Search filter ── */
@@ -105,12 +168,12 @@ describe('UserConsentTab', () => {
     it('filters the table when searching by email', async () => {
       renderTab();
       fireEvent.change(screen.getByPlaceholderText('Search by name or email…'), {
-        target: { value: 'user1@example.org' },
+        target: { value: 'ar*****' },
       });
 
       await waitFor(() => {
-        expect(screen.getByText('user1@example.org')).toBeInTheDocument();
-        expect(screen.queryByText('user2@example.org')).not.toBeInTheDocument();
+        expect(screen.getByText('ar*****@yopmail.com')).toBeInTheDocument();
+        expect(screen.queryByText('pr*****@yopmail.com')).not.toBeInTheDocument();
       });
     });
 
@@ -162,7 +225,7 @@ describe('UserConsentTab', () => {
       fireEvent.click(screen.getByRole('button', { name: /select all/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/40 user\(s\) selected/)).toBeInTheDocument();
+        expect(screen.getByText(new RegExp(`${MOCK_DATA.length} user\\(s\\) selected`))).toBeInTheDocument();
       });
     });
 
