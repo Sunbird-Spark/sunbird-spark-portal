@@ -139,8 +139,8 @@ describe('CardThumbnailBackground', () => {
             );
             const iconEl = container.querySelector('.relative.z-10') as HTMLElement;
             expect(iconEl).toBeTruthy();
-            // Course fallback theme has iconColor using Sunbird ink color
-            expect(iconEl.style.color).toBe('hsl(var(--sunbird-ink))');
+            // Course uses THEME_WAVE, whose iconColor is the wave-icon CSS variable
+            expect(iconEl.style.color).toBe('hsl(var(--theme-wave-icon))');
         });
 
         it('applies opacity and drop-shadow filter to icon', () => {
