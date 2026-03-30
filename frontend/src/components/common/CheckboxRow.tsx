@@ -23,7 +23,7 @@ export const CheckboxRow = ({ id, checked, onCheckedChange, label, required }: C
         <FiCheck className="w-3 h-3" />
       </Checkbox.Indicator>
     </Checkbox.Root>
-    <span className="text-sm text-foreground font-['Rubik']">
+    <span className="text-sm text-foreground font-rubik">
       {label}
       {required && <span className="text-red-500 ml-0.5">*</span>}
     </span>

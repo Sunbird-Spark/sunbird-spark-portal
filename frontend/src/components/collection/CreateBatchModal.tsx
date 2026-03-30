@@ -41,9 +41,9 @@ const makeInitialForm = (batch?: Batch): BatchFormState => ({
   acceptTerms: false,
 });
 
-const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']";
+const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik";
 const inputClass =
-  "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']";
+  "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
 
 /* ─── Modal ─── */
 
@@ -151,7 +151,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
 
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-border sticky top-0 bg-white rounded-t-2xl z-10">
-            <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-['Rubik']">
+            <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-rubik">
               {isOnlyMentor ? "View Batch Details" : (isEditMode ? "Edit Batch" : "Create Batch")}
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -191,8 +191,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 />
               </div>
               <div className="px-4 py-3 flex items-center justify-between gap-4">
-                <span className="text-sm font-medium text-foreground font-['Rubik']">Batch Type</span>
-                <span className="text-sm font-medium text-sunbird-brick font-['Rubik']">Open</span>
+                <span className="text-sm font-medium text-foreground font-rubik">Batch Type</span>
+                <span className="text-sm font-medium text-sunbird-brick font-rubik">Open</span>
               </div>
             </div>
 
@@ -222,7 +222,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
 
             {/* Error message */}
             {submitError && (
-              <p role="alert" className="text-xs text-red-600 font-['Rubik'] -mt-1">
+              <p role="alert" className="text-xs text-red-600 font-rubik -mt-1">
                 {submitError}
               </p>
             )}
@@ -233,7 +233,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 type="button"
                 onClick={handleClose}
                 disabled={isPending}
-                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-['Rubik']"
+                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-rubik"
                 data-edataid="batch-modal-cancel"
                 data-pageid="batch-create"
               >
@@ -244,7 +244,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                   type="submit"
                   disabled={isSubmitDisabled}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik",
                     isSubmitDisabled
                       ? "bg-sunbird-brick/40 cursor-not-allowed"
                       : "bg-sunbird-brick hover:bg-opacity-90"

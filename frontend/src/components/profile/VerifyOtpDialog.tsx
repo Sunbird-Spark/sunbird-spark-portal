@@ -53,7 +53,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
         >
             <DialogContent hideCloseButton className="fixed left-1/2 top-1/2 z-50 w-full max-w-[720px] h-[472px] -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-white px-10 pb-10 pt-8 shadow-lg flex flex-col">
                 <div className="relative flex items-center justify-center mb-4">
-                    <DialogTitle className="text-[22px] font-medium text-[hsl(var(--sunbird-obsidian))] font-['Rubik'] text-center">
+                    <DialogTitle className="text-[22px] font-medium text-[hsl(var(--sunbird-obsidian))] font-rubik text-center">
                         {t("forgotPasswordPage.enterCode")}
                     </DialogTitle>
                     <button
@@ -63,12 +63,12 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                         <MdOutlineClose className="w-6 h-6 text-[hsl(var(--sunbird-brick))]" />
                     </button>
                 </div>
-                <p className="text-[13px] text-[hsl(var(--sunbird-gray-75))] font-['Rubik'] text-center mb-6">
+                <p className="text-[13px] text-[hsl(var(--sunbird-gray-75))] font-rubik text-center mb-6">
                     {FIELD_OTP_TYPE_MAP[field] === 'phone'
                         ? t("editProfile.enterDigitCodePhone")
                         : t("editProfile.enterDigitCodeEmail")}
                 </p>
-                <p className="text-[13px] text-[hsl(var(--sunbird-gray-75))] font-['Rubik'] text-center mb-4">
+                <p className="text-[13px] text-[hsl(var(--sunbird-gray-75))] font-rubik text-center mb-4">
                     {t("forgotPasswordPage.otpValidity")}
                 </p>
                 <div className="flex items-center justify-center gap-3 mb-4">
@@ -84,18 +84,18 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                                 <InputOTPSlot
                                     key={index}
                                     index={index}
-                                    className="w-[50px] h-[50px] text-[18px] font-semibold border border-[hsl(var(--sunbird-gray-d9))] rounded-[10px] font-['Rubik'] focus:border-[hsl(var(--sunbird-ginger))] focus:ring-1 focus:ring-[hsl(var(--sunbird-ginger))]"
+                                    className="w-[50px] h-[50px] text-[18px] font-semibold border border-[hsl(var(--sunbird-gray-d9))] rounded-[10px] font-rubik focus:border-[hsl(var(--sunbird-ginger))] focus:ring-1 focus:ring-[hsl(var(--sunbird-ginger))]"
                                 />
                             ))}
                         </InputOTPGroup>
                     </InputOTP>
                 </div>
                 {fieldState.errorMessage && (
-                    <p className="text-red-500 text-[13px] font-['Rubik'] text-center -mt-2 mb-2">
+                    <p className="text-red-500 text-[13px] font-rubik text-center -mt-2 mb-2">
                         {fieldState.errorMessage}
                     </p>
                 )}
-                <div className="flex items-center justify-center gap-2 mt-1 text-[13px] font-['Rubik'] mb-6">
+                <div className="flex items-center justify-center gap-2 mt-1 text-[13px] font-rubik mb-6">
                     <span className="text-[hsl(var(--sunbird-obsidian))] font-medium">
                         {formatTime(fieldState.resendTimer)}
                     </span>
@@ -121,7 +121,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                         fieldState.otp.length !== 6 ||
                         fieldState.status === 'otp_verifying'
                     }
-                    className="mt-auto w-[360px] h-[46px] mx-auto rounded-[12px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-['Rubik'] hover:opacity-90 transition-opacity disabled:opacity-50"
+                    className="mt-auto w-[360px] h-[46px] mx-auto rounded-[12px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-rubik hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                     {fieldState.status === 'otp_verifying' ? t("editProfile.submitting") : t("signUp.submit")}
                 </button>

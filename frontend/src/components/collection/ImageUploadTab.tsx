@@ -36,8 +36,8 @@ export function ImageUploadTab({
   handleUploadAndUse,
   uploadFile,
   LICENSE_STATEMENT,
-  labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']",
-  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']",
+  labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik",
+  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
 }: ImageUploadTabProps) {
   return (
     <div className="p-5 space-y-4">
@@ -66,10 +66,10 @@ export function ImageUploadTab({
         ) : (
           <>
             <FiUpload className="w-6 h-6 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground font-['Rubik'] text-center">
+            <p className="text-sm text-muted-foreground font-rubik text-center">
               Choose or drag and drop your image here
             </p>
-            <p className="text-xs text-muted-foreground font-['Rubik']">
+            <p className="text-xs text-muted-foreground font-rubik">
               PNG, JPG, SVG supported
             </p>
           </>
@@ -89,7 +89,7 @@ export function ImageUploadTab({
           Copyrights and License <span className="text-red-500">*</span>
         </label>
         <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
-          <p className="text-xs text-amber-800 font-['Rubik'] leading-relaxed">
+          <p className="text-xs text-amber-800 font-rubik leading-relaxed">
             {LICENSE_STATEMENT}
           </p>
         </div>
@@ -125,7 +125,7 @@ export function ImageUploadTab({
         <button
           type="button"
           onClick={handleBack}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+          className="rounded-lg px-4 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-rubik"
           data-edataid="cert-image-upload-back"
           data-pageid="course-consumption"
         >
@@ -134,7 +134,7 @@ export function ImageUploadTab({
         <button
           type="button"
           onClick={handleCancel}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+          className="rounded-lg px-4 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-rubik"
           data-edataid="cert-image-upload-cancel"
           data-pageid="course-consumption"
         >
@@ -148,7 +148,7 @@ export function ImageUploadTab({
           data-edatatype="SUBMIT"
           data-pageid="course-consumption"
           className={cn(
-            "ml-auto rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik'] inline-flex items-center gap-2",
+            "ml-auto rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik inline-flex items-center gap-2",
             !uploadFile || !uploadFileName.trim()
               ? "bg-sunbird-brick/40 cursor-not-allowed"
               : "bg-sunbird-brick hover:bg-opacity-90"

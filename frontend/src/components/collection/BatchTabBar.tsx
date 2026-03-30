@@ -19,7 +19,7 @@ export function TabBar({ activeTab, counts, onChange }: TabBarProps) {
           type="button"
           onClick={() => onChange(tab)}
           className={cn(
-            "flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors",
+            "flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors",
             activeTab === tab
               ? "text-sunbird-brick"
               : "text-muted-foreground hover:text-foreground"
@@ -29,7 +29,7 @@ export function TabBar({ activeTab, counts, onChange }: TabBarProps) {
           {counts[tab] > 0 && (
             <span
               className={cn(
-                "ml-1.5 inline-flex items-center justify-center rounded-full text-xs w-4 h-4 font-['Rubik']",
+                "ml-1.5 inline-flex items-center justify-center rounded-full text-xs w-4 h-4 font-rubik",
                 activeTab === tab
                   ? "bg-sunbird-brick text-white"
                   : "bg-gray-100 text-gray-500"

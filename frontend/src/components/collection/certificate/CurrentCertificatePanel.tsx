@@ -21,13 +21,13 @@ export function CurrentCertificatePanel({
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-sunbird-obsidian font-['Rubik'] uppercase tracking-wide">
+        <h3 className="text-sm font-semibold text-sunbird-obsidian font-rubik uppercase tracking-wide">
           {t('certificate.attachedTemplate')}
         </h3>
         <button
           type="button"
           onClick={() => setCertTab("change")}
-          className="text-sm font-medium text-sunbird-brick hover:underline font-['Rubik']"
+          className="text-sm font-medium text-sunbird-brick hover:underline font-rubik"
         >
           {t('certificate.editCertificate')}
         </button>
@@ -41,18 +41,18 @@ export function CurrentCertificatePanel({
             ) : (
               <div className="flex flex-col items-center gap-1 text-muted-foreground">
                 <FiAward className="w-8 h-8" />
-                <span className="text-xs font-['Rubik']">{t('certificate.noPreviewAvailable')}</span>
+                <span className="text-xs font-rubik">{t('certificate.noPreviewAvailable')}</span>
               </div>
             )}
           </div>
           <div className="px-3 py-2 border-t border-border">
-            <p className="text-xs font-semibold font-['Rubik'] text-foreground truncate">{name}</p>
-            <p className="text-xs text-muted-foreground font-['Rubik'] truncate mt-0.5">{id}</p>
+            <p className="text-xs font-semibold font-rubik text-foreground truncate">{name}</p>
+            <p className="text-xs text-muted-foreground font-rubik truncate mt-0.5">{id}</p>
           </div>
         </div>
       </div>
       
-      <p className="text-xs text-muted-foreground font-['Rubik'] italic" dangerouslySetInnerHTML={{ __html: t('certificate.activeTemplateDescription') }} />
+      <p className="text-xs text-muted-foreground font-rubik italic" dangerouslySetInnerHTML={{ __html: t('certificate.activeTemplateDescription') }} />
     </div>
   );
 }

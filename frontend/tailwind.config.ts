@@ -15,7 +15,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        rubik: ['Rubik', 'sans-serif'],
+        rubik: ['var(--app-font-family)', 'sans-serif'],
         sans: ['Noto Sans', 'system-ui', 'sans-serif'],
       },
       colors: {

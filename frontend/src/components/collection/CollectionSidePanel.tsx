@@ -89,7 +89,7 @@ export default function CollectionSidePanel({
         <div className="flex flex-col gap-3 mb-4">
           <Button
             variant="outline"
-            className="w-full flex items-center justify-center gap-2 font-['Rubik'] text-sunbird-brick border-sunbird-brick hover:bg-sunbird-brick/5 bg-white shadow-sm"
+            className="w-full flex items-center justify-center gap-2 font-rubik text-sunbird-brick border-sunbird-brick hover:bg-sunbird-brick/5 bg-white shadow-sm"
             onClick={() => navigate(`/collection/${collectionId}/dashboard/batches`, { state: { from: backTo } })}
             data-testid="view-dashboard-btn"
           >

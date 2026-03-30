@@ -5,13 +5,14 @@ export interface LanguageConfig {
   label: string;
   dir: Direction;
   index: number;
+  font: string;
 }
 
 export const LANGUAGES: readonly LanguageConfig[] = [
-  { code: 'en', label: 'English', dir: 'ltr', index: 1 },
-  { code: 'fr', label: 'Français', dir: 'ltr', index: 2 },
-  { code: 'pt', label: 'Português', dir: 'ltr', index: 3 },
-  { code: 'ar', label: 'العربية', dir: 'rtl', index: 4 },
+  { code: 'en', label: 'English',   dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+  { code: 'fr', label: 'Français',  dir: 'ltr', index: 2, font: "'Rubik', sans-serif" },
+  { code: 'pt', label: 'Português', dir: 'ltr', index: 3, font: "'Rubik', sans-serif" },
+  { code: 'ar', label: 'العربية',   dir: 'rtl', index: 4, font: "'Noto Sans Arabic', sans-serif" },
 ] as const;
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]['code'];

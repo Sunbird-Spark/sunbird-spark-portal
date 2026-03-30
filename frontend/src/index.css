@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    --app-font-family: 'Rubik', sans-serif;
     /* Sunbird Joyful Theme Colors */
     --background: 48 23% 91%;
     /* #E9E8D9 - Body background */
@@ -1115,8 +1116,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Rubik', sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--app-font-family);
   }
 
   h1,
@@ -1125,7 +1126,7 @@
   h4,
   h5,
   h6 {
-    font-family: 'Rubik', sans-serif;
+    font-family: var(--app-font-family);
     font-weight: 600;
   }
 

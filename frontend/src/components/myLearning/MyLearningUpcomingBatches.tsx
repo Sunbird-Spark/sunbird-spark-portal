@@ -49,7 +49,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
   if (upcomingBatchesData.length === 0) {
      return (
         <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
-            <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-['Rubik']">{t('common.upcomingBatches')}</h3>
+            <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-rubik">{t('common.upcomingBatches')}</h3>
             <div className="text-gray-500 text-sm">No upcoming batches scheduled.</div>
         </div>
      )
@@ -58,14 +58,14 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
   return (
     <div className="bg-white rounded-2xl p-6 shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
-      <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-['Rubik']">{t('common.upcomingBatches')}</h3>
+      <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-rubik">{t('common.upcomingBatches')}</h3>
 
       {/* Batches by Date */}
       <div className="space-y-6">
         {upcomingBatchesData.map((dateGroup) => (
           <div key={dateGroup.date}>
             {/* Date Header */}
-            <div className="text-[1.125rem] font-normal text-sunbird-obsidian mb-4 font-['Rubik']">
+            <div className="text-[1.125rem] font-normal text-sunbird-obsidian mb-4 font-rubik">
               {dateGroup.date}
             </div>
 
@@ -78,10 +78,10 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
                 >
                   {/* Content Box */}
                   <div className="flex-1 py-4 pl-6 pr-6 flex flex-col justify-center">
-                    <h4 className="text-[1rem] font-normal text-sunbird-obsidian mb-1.5 font-['Rubik'] leading-snug">
+                    <h4 className="text-[1rem] font-normal text-sunbird-obsidian mb-1.5 font-rubik leading-snug">
                       {batchItem.title}
                     </h4>
-                    <div className="flex items-center gap-6 text-[0.875rem] text-gray-500 font-['Rubik']">
+                    <div className="flex items-center gap-6 text-[0.875rem] text-gray-500 font-rubik">
                       <div className="flex items-center gap-1.5">
                         <FiBookOpen className="text-sunbird-brick w-[0.875rem] h-[0.875rem]" />
                         <span className="font-light">{batchItem.lessons} Lessons</span>

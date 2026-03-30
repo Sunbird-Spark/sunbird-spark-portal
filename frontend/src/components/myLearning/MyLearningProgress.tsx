@@ -39,7 +39,7 @@ const MyLearningProgress = ({
   return (
     <div className="mylearning-donut-container">
       {/* Header */}
-      <h3 className="text-[1.25rem] font-semibold text-sunbird-obsidian mb-6 font-['Rubik']">{t('myLearning.learningProgress')}</h3>
+      <h3 className="text-[1.25rem] font-semibold text-sunbird-obsidian mb-6 font-rubik">{t('myLearning.learningProgress')}</h3>
 
       <div className="flex items-center gap-8">
         {/* Double Donut Chart */}
@@ -92,7 +92,7 @@ const MyLearningProgress = ({
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[2rem] font-bold text-sunbird-obsidian font-['Rubik']">{totalHours}</span>
+            <span className="text-[2rem] font-bold text-sunbird-obsidian font-rubik">{totalHours}</span>
           </div>
         </div>
 
@@ -102,10 +102,10 @@ const MyLearningProgress = ({
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-2 bg-[hsl(var(--sunbird-learning-outer))] rounded-full"></div>
             </div>
-            <div className="text-[1.125rem] font-bold text-sunbird-obsidian mb-0.5 font-['Rubik']">
+            <div className="text-[1.125rem] font-bold text-sunbird-obsidian mb-0.5 font-rubik">
               {lessonsVisited}/{totalLessons}
             </div>
-            <div className="text-[0.875rem] text-gray-500 font-['Rubik']">
+            <div className="text-[0.875rem] text-gray-500 font-rubik">
               {t('myLearning.lessonVisited')}
             </div>
           </div>
@@ -114,10 +114,10 @@ const MyLearningProgress = ({
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-2 bg-[hsl(var(--sunbird-learning-inner))] rounded-full"></div>
             </div>
-            <div className="text-[1.125rem] font-bold text-[hsl(var(--sunbird-learning-inner))] mb-0.5 font-['Rubik']">
+            <div className="text-[1.125rem] font-bold text-[hsl(var(--sunbird-learning-inner))] mb-0.5 font-rubik">
               {contentsCompleted}/{totalContents}
             </div>
-            <div className="text-[0.875rem] text-gray-500 font-['Rubik']">
+            <div className="text-[0.875rem] text-gray-500 font-rubik">
               {t('myLearning.contentsCompleted')}
             </div>
           </div>

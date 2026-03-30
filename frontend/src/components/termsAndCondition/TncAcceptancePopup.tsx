@@ -85,7 +85,7 @@ export const TncAcceptancePopup: React.FC<TncAcceptancePopupProps> = ({
                     <FiCheck className="w-3 h-3" />
                   </Checkbox.Indicator>
                 </Checkbox.Root>
-                <label htmlFor={checkboxId} className="text-sm text-foreground font-['Rubik'] cursor-pointer">
+                <label htmlFor={checkboxId} className="text-sm text-foreground font-rubik cursor-pointer">
                   I accept the Terms &amp; Conditions
                 </label>
               </div>
@@ -94,7 +94,7 @@ export const TncAcceptancePopup: React.FC<TncAcceptancePopupProps> = ({
                 disabled={!tncChecked || isAccepting}
                 onClick={onAccept}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors shrink-0",
+                  "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-rubik transition-colors shrink-0",
                   !tncChecked || isAccepting
                     ? "bg-sunbird-brick/40 cursor-not-allowed"
                     : "bg-sunbird-brick hover:bg-opacity-90"

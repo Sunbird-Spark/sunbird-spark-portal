@@ -61,7 +61,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
     <div className="bg-white rounded-2xl p-6 h-full flex flex-col shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit shrink-0">
-        <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-['Rubik']">{t('courses')}</h3>
+        <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-rubik">{t('courses')}</h3>
         <FiChevronDown className="text-sunbird-obsidian w-[1.25rem] h-[1.25rem] mt-1" />
       </div>
 
@@ -71,7 +71,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`pl-6 pr-6 py-2.5 rounded-full text-[0.875rem] font-medium font-['Rubik'] transition-all ${
+            className={`pl-6 pr-6 py-2.5 rounded-full text-[0.875rem] font-medium font-rubik transition-all ${
               activeTab === tab.id
                 ? "mylearning-tab-active"
                 : "mylearning-tab-inactive"
@@ -99,7 +99,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
               <div className="flex justify-center py-6 mt-4">
                 <button
                   onClick={() => setVisibleCount(prev => prev + COURSES_PER_PAGE)}
-                  className="bg-white border border-sunbird-brick text-sunbird-brick pl-8 pr-8 py-2.5 rounded-full text-[0.875rem] font-medium hover:bg-sunbird-brick hover:text-white transition-all shadow-sm font-['Rubik'] min-w-fit"
+                  className="bg-white border border-sunbird-brick text-sunbird-brick pl-8 pr-8 py-2.5 rounded-full text-[0.875rem] font-medium hover:bg-sunbird-brick hover:text-white transition-all shadow-sm font-rubik min-w-fit"
                 >
                   {t('profileLearning.viewMoreCourses')}
                 </button>
@@ -108,13 +108,13 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
             
             {/* End of List Message */}
             {!hasMore && allFilteredCourses.length > COURSES_PER_PAGE && (
-              <div className="text-center py-4 text-gray-500 text-[0.875rem] font-['Rubik']">
+              <div className="text-center py-4 text-gray-500 text-[0.875rem] font-rubik">
                 No more courses to show
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-10 text-gray-500 font-['Rubik']">
+          <div className="text-center py-10 text-gray-500 font-rubik">
             No courses found in this category.
           </div>
         )}

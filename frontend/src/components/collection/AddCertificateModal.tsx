@@ -34,7 +34,7 @@ const AddCertificateModal = ({
             <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white sticky top-0 z-10">
               <div className="flex items-center gap-2">
                 <FiAward className="w-5 h-5 text-sunbird-brick" />
-                <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-['Rubik']">
+                <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-rubik">
                   {state.view === "createTemplate" ? "Create Certificate Template" : "Certificate"}
                 </Dialog.Title>
               </div>
@@ -42,7 +42,7 @@ const AddCertificateModal = ({
                 <button
                   type="button"
                   onClick={() => { state.setView("main"); state.setErrorMsg(""); }}
-                  className="text-sm text-sunbird-brick hover:underline font-['Rubik']"
+                  className="text-sm text-sunbird-brick hover:underline font-rubik"
                   data-edataid="cert-modal-back"
                   data-pageid="course-consumption"
                 >
@@ -88,7 +88,7 @@ const AddCertificateModal = ({
                           data-edataid={`cert-tab-${tab}`}
                           data-pageid="course-consumption"
                           className={cn(
-                            "flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors",
+                            "flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors",
                             state.certTab === tab
                               ? "text-sunbird-brick"
                               : "text-muted-foreground hover:text-foreground"
@@ -145,7 +145,7 @@ const AddCertificateModal = ({
                   <button
                     type="button"
                     onClick={state.handleClose}
-                    className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+                    className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-rubik"
                     data-edataid="cert-modal-cancel"
                     data-pageid="course-consumption"
                   >
@@ -159,7 +159,7 @@ const AddCertificateModal = ({
                     data-edatatype="SUBMIT"
                     data-pageid="course-consumption"
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
+                      "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik",
                       !state.isAddCertEnabled
                         ? "bg-sunbird-brick/40 cursor-not-allowed"
                         : "bg-sunbird-brick hover:bg-opacity-90"

@@ -7,7 +7,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   color: hsl(var(--foreground));
   margin-bottom: 0.25rem;
 }
@@ -23,7 +23,7 @@
   border: 1px solid rgb(209, 213, 219);
   border-radius: 0.75rem;
   font-size: 0.875rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   background-color: white;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -64,7 +64,7 @@
   background-color: hsl(var(--sunbird-brick) / 0.1);
   color: hsl(var(--sunbird-ink));
   font-size: 0.75rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
 }
 
 .content-field-multiselect-tag-remove {
@@ -112,7 +112,7 @@
   text-align: left;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   display: flex;
   align-items: center;
   gap: 0.5rem;

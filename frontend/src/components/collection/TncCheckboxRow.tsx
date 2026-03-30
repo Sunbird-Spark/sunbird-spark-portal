@@ -51,7 +51,7 @@ export const TncCheckboxRow = ({
         </Checkbox.Indicator>
       </Checkbox.Root>
 
-      <span className="text-sm text-foreground font-['Rubik']">
+      <span className="text-sm text-foreground font-rubik">
         {/* Clicking "I accept the" text toggles the checkbox */}
         <label htmlFor={id} className="cursor-pointer">I accept the{" "}</label>
         {termsUrl ? (
