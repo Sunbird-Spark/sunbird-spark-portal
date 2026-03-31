@@ -58,7 +58,7 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
   }, [activeTab]);
 
   return (
-    <div className="bg-white rounded-2xl p-6 h-full flex flex-col shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.03)]">
+    <div className="bg-white rounded-2xl p-6 h-full flex flex-col shadow-sunbird-sm">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit shrink-0">
         <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-rubik">{t('courses')}</h3>

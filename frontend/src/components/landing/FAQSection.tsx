@@ -122,7 +122,7 @@ const FAQSection = () => {
                                 >
                                     {faq.title}
                                 </AccordionTrigger>
-                                <AccordionContent className="!pb-0 pt-5 font-rubik font-normal text-[1rem] leading-[1.625rem] tracking-normal text-[#757575]">
+                                <AccordionContent className="!pb-0 pt-5 font-rubik font-normal text-[1rem] leading-[1.625rem] tracking-normal text-sunbird-gray-75">
                                     <div dangerouslySetInnerHTML={{ __html: faq.description }} />
                                 </AccordionContent>
                             </AccordionItem>

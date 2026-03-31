@@ -99,7 +99,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
   return (
     <>
-      <div className="w-full bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col overflow-hidden">
+      <div className="w-full bg-white rounded-2xl shadow-sunbird-sm border border-border flex flex-col overflow-hidden">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
