@@ -61,8 +61,8 @@ export const SignUpForm = ({
                 <div className="form-divider-line"></div>
             </div>
 
-            <div className="space-y-3">
-                <div className="form-group relative">
+            <div className="space-y-1">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="firstName" required>{t("signUp.firstName")}</InputLabel>
                     <Input
                         id="firstName"
@@ -78,7 +78,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
-                <div className="form-group relative">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="emailOrMobile" required>{t("signUp.emailOrMobileLabel")}</InputLabel>
                     <Input
                         id="emailOrMobile"
@@ -94,7 +94,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
-                <div className="form-group relative">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="password" required>{t("password")}</InputLabel>
                     <div className="relative">
                         <Input
@@ -125,7 +125,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
-                <div className="form-group relative">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="confirmPassword" required>{t("signUp.confirmPassword")}</InputLabel>
                     <div className="relative">
                         <Input
