@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { useCollection } from "@/hooks/useCollection";
-import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
+import { useCollectionPageData } from "@/hooks/useCollectionPageData";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
 import { useQumlContent } from "@/hooks/useQumlContent";
@@ -14,27 +13,31 @@ import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { usePermissions } from "@/hooks/usePermission";
 import { useInitialCollectionContentNavigation } from "@/hooks/useInitialCollectionContentNavigation";
+import useImpression from "@/hooks/useImpression";
+import { useCollectionPageUIState } from "@/hooks/useCollectionPageUIState";
 import { buildCollectionDetailContentArea } from "./buildCollectionDetailContentArea";
 import { buildCollectionCdata, buildObjectRollup } from "@/utils/collectionTelemetryContext";
 import { useCollectionBackNavigation, useAuthRefreshOnce } from "./useCollectionBackNavigation";
 import CollectionDetailLayout from "./CollectionDetailLayout";
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import "./collection.css";
 
 const CollectionDetailPage = () => {
-  const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   const navigate = useNavigate();
+  const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
+  useImpression({ type: 'view', pageid: 'collection-detail', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const backTo = useCollectionBackNavigation(collectionId);
   const { isAuthenticated } = usePermissions();
   const isContentCreator = useIsContentCreator();
-  const { t } = useAppI18n();
   const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
   const [certificatePreviewUrl, setCertificatePreviewUrl] = useState("");
 
-  const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
-  const collectionData = collectionDataFromApi ?? null;
-  const { data: userReadData } = useUserRead();
-  const userProfile = userReadData?.data?.response;
-  const enrollment = useCollectionEnrollment(collectionId, batchIdParam, collectionData, isAuthenticated);
+  const {
+    collectionDataFromApi, collectionData, userProfile, enrollment,
+    displayCollectionData,
+    isLoading, isFetching, isError, error, refetch
+  } = useCollectionPageData(collectionId, batchIdParam);
+
   const {
     isEnrolledInCurrentBatch,
     contentStatusMap,
@@ -79,12 +82,9 @@ const CollectionDetailPage = () => {
 
   const upcomingBatchBlocked = isTrackable && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && isBatchUpcoming;
   const contentBlocked = isTrackable && (!isAuthenticated || (!contentCreatorPrivilege && !(hasBatchInRoute && isEnrolledInCurrentBatch)) || upcomingBatchBlocked);
+
   const showLoading = isLoading || (isError && isFetching);
   const hierarchySuccess = !isError && !!collectionDataFromApi;
-  const displayCollectionData = useMemo(
-    () => (collectionData ? { ...collectionData, image: collectionData.image || defaultCollectionImage } : null),
-    [collectionData]
-  );
 
   const {
     data: searchData,
@@ -103,6 +103,14 @@ const CollectionDetailPage = () => {
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
   const rawPlayerMetadata = isQumlContent ? qumlData : selectedContentData;
+
+  const { t } = useAppI18n();
+
+  const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
+  const relatedContentItems = useMemo(
+    () => (hasSearchResults ? mapSearchContentToRelatedContentItems(searchData?.data?.content, collectionData?.id ?? undefined, 3) : []),
+    [hasSearchResults, searchData?.data?.content, collectionData?.id]
+  );
 
   const {
     maxAttemptsExceeded,
@@ -149,6 +157,11 @@ const CollectionDetailPage = () => {
   const firstMainUnitId = collectionData?.children?.[0]?.identifier;
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const prevCollectionId = useRef(collectionId);
+  const toggleModule = useCallback((moduleId: string) => {
+    setExpandedModules((prev: string[]) =>
+      prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
+    );
+  }, []);
 
   useInitialCollectionContentNavigation({
     collectionData,
@@ -174,14 +187,6 @@ const CollectionDetailPage = () => {
     }
   }, [collectionId, firstMainUnitId]);
 
-  const hasSearchResults = (searchData?.data?.content?.length ?? 0) > 0;
-  const relatedContentItems = useMemo(
-    () => (hasSearchResults ? mapSearchContentToRelatedContentItems(searchData?.data?.content, collectionData?.id ?? undefined, 3) : []),
-    [hasSearchResults, searchData?.data?.content, collectionData?.id]
-  );
-  const toggleModule = (moduleId: string) => {
-    setExpandedModules((prev) => (prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]));
-  };
   const certificatePreviewDetails = useMemo(() => ({
     recipientName: userProfile ? [userProfile.firstName ?? "", userProfile.lastName ?? ""].filter(Boolean).join(" ").trim() || undefined : undefined,
   }), [userProfile?.firstName, userProfile?.lastName]);
@@ -215,37 +220,29 @@ const CollectionDetailPage = () => {
   );
 
   return (
-    <CollectionDetailLayout
-      navigation={{ onGoBack: () => navigate(backTo), t }}
-      loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
-      collection={{
-        collectionDataFromApi: collectionDataFromApi ?? null,
-        hierarchySuccess,
-        collectionData,
-        displayCollectionData,
-      }}
-      contentArea={contentArea}
-      certificateModal={{
-        certificatePreviewOpen,
-        certificatePreviewUrl,
-        certificatePreviewDetails,
-        setCertificatePreviewUrl,
-        setCertificatePreviewOpen,
-      }}
-      relatedContent={{
-        searchError,
-        searchErrorObj: searchErrorObj ?? null,
-        searchFetching,
-        relatedContentItems,
-        searchRefetch,
-      }}
-      courseCompletion={{
-        courseProgressProps,
-        isEnrolledInCurrentBatch,
-        collectionId,
-        hasCertificate,
-      }}
-    />
+    <>
+      <TelemetryTracker
+        disabled={!collectionData}
+        startEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-page' }}
+        endEventInput={{ type: 'workflow', mode: contentCreatorPrivilege ? 'preview' : 'play', pageid: 'collection-detail-exit' }}
+        startOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+        endOptions={{ object: { id: collectionId, type: 'Course', ver: collectionData?.pkgVersion ?? '1' }, context: { env: 'course', cdata: batchIdParam ? [{ id: batchIdParam, type: 'CourseBatch' }] : [] } }}
+      />
+      <CollectionDetailLayout
+        navigation={{ onGoBack: () => navigate(backTo), t }}
+        loading={{ showLoading, isError, error: error ?? null, onRetry: refetch }}
+        collection={{
+          collectionDataFromApi: collectionDataFromApi ?? null,
+          hierarchySuccess,
+          collectionData,
+          displayCollectionData,
+        }}
+        contentArea={contentArea}
+        certificateModal={{ certificatePreviewOpen, certificatePreviewUrl, certificatePreviewDetails, setCertificatePreviewUrl, setCertificatePreviewOpen }}
+        relatedContent={{ searchError, searchErrorObj: searchErrorObj ?? null, searchFetching, relatedContentItems, searchRefetch }}
+        courseCompletion={{ courseProgressProps, isEnrolledInCurrentBatch, collectionId, hasCertificate }}
+      />
+    </>
   );
 };
 export default CollectionDetailPage;

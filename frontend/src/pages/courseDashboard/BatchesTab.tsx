@@ -13,6 +13,7 @@ import {
 } from '@/components/common/Select';
 import { cn } from '@/lib/utils';
 import CourseReportContent from '@/components/reports/CourseReportContent';
+import useInteract from '@/hooks/useInteract';
 
 const STATUS_STYLES: Record<string, string> = {
   Upcoming: "bg-yellow-100 text-yellow-700",
@@ -28,6 +29,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const isMentor = useIsMentor();
   const isContentCreator = useIsContentCreator();
+  const { interact } = useInteract();
 
   const { data: creatorBatches, isLoading: isLoadingCreator, isError: isErrorCreator, error: creatorError } = useBatchListForCreator(collectionId, { enabled: isContentCreator });
   const { data: mentorBatches, isLoading: isLoadingMentor, isError: isErrorMentor, error: mentorError } = useBatchListForMentor(collectionId, { enabled: isMentor });
@@ -61,6 +63,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   const batchList: Batch[] = batches ?? [];
 
   const handleBatchSelect = (batchId: string) => {
+    interact({ id: 'course-dashboard-batch-select', type: 'CLICK', pageid: 'course-dashboard', cdata: [{ id: batchId, type: 'Batch' }] });
     setSelectedBatchId(batchId);
   };
 
@@ -69,11 +72,11 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
 
       {/* Batch Selector Dropdown */}
       <div className="flex items-center gap-4">
-        <label className="text-sm font-semibold text-foreground font-['Rubik'] shrink-0">
+        <label className="text-sm font-semibold text-foreground font-rubik shrink-0">
           Select Batch
         </label>
         {batchList.length === 0 ? (
-          <p className="text-sm text-muted-foreground font-['Rubik']">No batches found.</p>
+          <p className="text-sm text-muted-foreground font-rubik">No batches found.</p>
         ) : (
           <Select onValueChange={handleBatchSelect}>
             <SelectTrigger
@@ -108,7 +111,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
 
       {/* Report panel */}
       <main
-        className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border"
+        className="bg-white rounded-2xl shadow-sunbird-sm border border-border"
         data-testid="batches-main-panel"
       >
         {selectedBatchId ? (
@@ -121,7 +124,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
           </div>
         ) : (
           <div className="flex items-center justify-center py-16 px-8">
-            <p className="text-muted-foreground text-sm font-['Rubik']" data-testid="no-batch-selected">
+            <p className="text-muted-foreground text-sm font-rubik" data-testid="no-batch-selected">
               Select a batch from the dropdown above to view its course report.
             </p>
           </div>

@@ -15,11 +15,11 @@
   width: 100%;
   max-width: 56rem;
   margin: 1rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--sunbird-shadow-lg);
 }
 
 .review-dialog-main-title {
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   font-weight: 700;
   font-size: 1.5rem;
   color: hsl(var(--foreground));
@@ -28,7 +28,7 @@
 }
 
 .review-dialog-subtitle-text {
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   font-weight: 500;
   font-size: 0.9375rem;
   color: hsl(var(--muted-foreground));
@@ -37,7 +37,7 @@
 }
 
 .review-dialog-section-title {
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   font-weight: 600;
   font-size: 0.875rem;
   color: hsl(var(--foreground));
@@ -75,7 +75,7 @@
   gap: 0.75rem;
   margin-bottom: 0;
   cursor: pointer;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   font-size: 0.875rem;
   color: hsl(var(--foreground));
   line-height: 1.5;
@@ -91,7 +91,7 @@
   margin-top: 0.125rem;
   flex-shrink: 0;
   cursor: pointer;
-  accent-color: #a85236;
+  accent-color: hsl(var(--sunbird-brick));
 }
 
 .review-dialog-checkbox:disabled {
@@ -105,15 +105,15 @@
   border-radius: 0.5rem;
   padding: 0.75rem;
   font-size: 0.875rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   resize: vertical;
   margin-top: 0.75rem;
 }
 
 .review-dialog-textarea:focus {
   outline: none;
-  border-color: #a85236;
-  box-shadow: 0 0 0 3px rgba(168, 82, 54, 0.1);
+  border-color: hsl(var(--sunbird-brick));
+  box-shadow: 0 0 0 3px hsl(var(--sunbird-brick) / 0.1);
 }
 
 .review-dialog-textarea:disabled {
@@ -136,7 +136,7 @@
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   color: hsl(var(--muted-foreground));
   background-color: transparent;
   border: none;
@@ -158,22 +158,22 @@
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  font-family: 'Rubik', sans-serif;
+  font-family: var(--app-font-family);
   color: white;
-  background-color: #a85236;
-  border: 1px solid #a85236;
+  background-color: hsl(var(--sunbird-brick));
+  border: 1px solid hsl(var(--sunbird-brick));
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
 .review-dialog-btn-primary:hover:not(:disabled) {
-  background-color: #8a4429;
-  border-color: #8a4429;
+  background-color: hsl(var(--sunbird-brick) / 0.85);
+  border-color: hsl(var(--sunbird-brick) / 0.85);
 }
 
 .review-dialog-btn-primary:disabled {
   cursor: not-allowed;
   opacity: 0.5;
-  background-color: #d1d5db;
-  border-color: #d1d5db;
+  background-color: hsl(var(--sunbird-gray-d0));
+  border-color: hsl(var(--sunbird-gray-d0));
 }

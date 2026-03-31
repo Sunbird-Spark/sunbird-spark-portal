@@ -1,7 +1,8 @@
 import { FiUser } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
 
 interface ContentCardProps {
   item: ContentSearchItem;
@@ -12,24 +13,25 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const { t } = useAppI18n();
   const lessons = item.leafNodesCount || 0;
   const creator = item.creator ?? item.createdBy ?? 'Unknown';
-  const location = useLocation();
-  const state = linkState ?? { from: location.pathname };
 
   return (
-    <Link to={`/collection/${item.identifier}`} state={state} className="related-resource-card-link">
+    <Link
+      to={`/collection/${item.identifier}`}
+      state={linkState}
+      className="related-resource-card-link"
+      data-edataid="collection-card-click"
+      data-objectid={item.identifier}
+      data-objecttype="Collection"
+    >
       <div className="group related-resource-card-container">
         {/* Image with padding */}
         <div className="related-resource-card-image-wrapper">
           <div className="related-resource-card-image-inner">
-            {(item.posterImage || item.appIcon) ? (
-              <img
-                src={item.posterImage || item.appIcon}
-                alt={item.name}
-                className="resource-card-image"
-              />
-            ) : (
-              <div className="resource-card-image bg-black" />
-            )}
+            <img
+              src={item.posterImage || item.appIcon || getPlaceholderImage(item.identifier)}
+              alt={item.name || 'Untitled'}
+              className="resource-card-image"
+            />
           </div>
         </div>
 

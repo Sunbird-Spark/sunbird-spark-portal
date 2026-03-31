@@ -5,6 +5,7 @@ import PageLoader from "@/components/common/PageLoader";
 import { useHelpFaqData } from "@/hooks/useFaqData";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useImpression from "@/hooks/useImpression";
 
 import {
     buildHelpCategories,
@@ -17,6 +18,8 @@ const HelpSupport = () => {
     const { t } = useAppI18n();
     const navigate = useNavigate();
     const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
+
+    useImpression({ type: 'view', pageid: 'help-support' });
 
     const { data: appNameSetting } = useSystemSetting("sunbird");
     const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || " ";
@@ -47,13 +50,15 @@ const HelpSupport = () => {
             <div className="profile-content-wrapper">
                 {/* Header row */}
                 <div className="flex items-center justify-between mb-[2rem]">
-                    <h1 className="font-['Rubik'] font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground">
+                    <h1 className="font-rubik font-medium text-[1.5rem] leading-[100%] tracking-[0%] text-foreground">
                         {t('help.assistPrompt')}
                     </h1>
                     <button
                         onClick={() => setIsReportIssueOpen(true)}
                         aria-label={t('help.reportAppIssue')}
-                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-['Rubik'] pl-[0.9375rem] pr-[0.875rem] py-[0.625rem] rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
+                        data-edataid="help-report-issue-open"
+                        data-pageid="help-support"
+                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-rubik rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
                         {t('help.reportIssueBtn')}
                     </button>
                 </div>
@@ -80,16 +85,20 @@ const HelpSupport = () => {
                             <div
                                 key={cat.slug}
                                 onClick={() => navigate(`/help-support/${cat.slug}`)}
-                                className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-[0.125rem_0.125rem_1.25rem_rgba(0,0,0,0.09)] hover:shadow-md transition-shadow cursor-pointer"
+                                className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-sunbird-md hover:shadow-md transition-shadow cursor-pointer"
+                                data-edataid="help-category-click"
+                                data-pageid="help-support"
+                                data-objectid={cat.slug}
+                                data-objecttype="HelpCategory"
                             >
                                 <div className="w-[2rem] h-[0.75rem] bg-sunbird-ginger ml-[1.875rem]" />
                                 <div className="px-[1.25rem] pb-[1.25rem] pt-[1.5rem] flex flex-col flex-1">
-                                    <h3 className="font-['Rubik'] font-medium text-[1.125rem] leading-[100%] tracking-[0%] text-foreground mb-[0.5rem]">{cat.title}</h3>
-                                    <p className="text-base text-foreground font-['Rubik'] leading-relaxed mb-[1rem]">
+                                    <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-[0%] text-foreground mb-[0.5rem]">{cat.title}</h3>
+                                    <p className="text-base text-foreground font-rubik leading-relaxed mb-[1rem]">
                                         {cat.description}
                                     </p>
                                     <div className="flex items-center justify-between mt-auto">
-                                        <span className="font-['Rubik'] font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{t('help.faqCount', { count: cat.faqCount })}</span>
+                                        <span className="font-rubik font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{t('help.faqCount', { count: cat.faqCount })}</span>
                                         <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
                                     </div>
                                 </div>

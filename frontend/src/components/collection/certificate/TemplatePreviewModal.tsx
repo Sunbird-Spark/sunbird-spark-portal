@@ -31,7 +31,7 @@ export function TemplatePreviewModal({
           style={{ width: "min(90vw, 44rem)" }}
         >
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <Dialog.Title className="text-base font-semibold text-sunbird-obsidian font-['Rubik']">
+            <Dialog.Title className="text-base font-semibold text-sunbird-obsidian font-rubik">
               {tmpl.name}
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -58,7 +58,7 @@ export function TemplatePreviewModal({
                 style={{ height: "16rem" }}
               >
                 <FiAward className="w-12 h-12 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground font-['Rubik']">No preview available</p>
+                <p className="text-sm text-muted-foreground font-rubik">No preview available</p>
               </div>
             )}
           </div>
@@ -67,7 +67,7 @@ export function TemplatePreviewModal({
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-['Rubik']"
+                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-rubik"
               >
                 Close
               </button>
@@ -78,7 +78,7 @@ export function TemplatePreviewModal({
                 setSelectedTemplateId(tmpl.identifier);
                 setPreviewTemplate(null);
               }}
-              className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-['Rubik'] inline-flex items-center gap-2"
+              className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-rubik inline-flex items-center gap-2"
             >
               <FiCheck className="w-4 h-4" />
               Select

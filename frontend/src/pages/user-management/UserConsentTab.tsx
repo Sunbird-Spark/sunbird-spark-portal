@@ -1,11 +1,11 @@
 import { useState, useMemo, useCallback } from "react";
-import { FiUsers, FiUserCheck, FiUserX, FiClock } from "react-icons/fi";
+import { FiUsers, FiUserCheck, FiUserX } from "react-icons/fi";
 import SummaryCard from "@/components/reports/SummaryCard";
 import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { userConsentData as initialData } from "@/data/reportsMockData";
+import { useConsentSummary } from "@/hooks/useConsentSummary";
 import type { UserConsentRecord } from "@/types/reports";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -20,20 +20,22 @@ import {
 
 const UserConsentTab = () => {
   const { toast } = useToast();
+  const { data: apiData, isLoading, isError } = useConsentSummary();
 
-  const [data, setData] = useState<UserConsentRecord[]>(() => initialData);
+  const [localOverrides, setLocalOverrides] = useState<Map<string, Partial<UserConsentRecord>>>(new Map());
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [orgFilter, setOrgFilter] = useState("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState<ConfirmState>(CLOSED_CONFIRM);
 
-  /* ── Derived data ──────────────────────────────────────────────────────── */
+  /* ── Merge API data with local overrides ───────────────────────────────── */
 
-  const uniqueOrgs = useMemo(
-    () => [...new Set(data.flatMap((r) => r.consumerOrgs))].sort(),
-    [data]
+  const data = useMemo<UserConsentRecord[]>(
+    () => apiData.map((r) => ({ ...r, ...localOverrides.get(r.id) })),
+    [apiData, localOverrides],
   );
+
+  /* ── Derived data ──────────────────────────────────────────────────────── */
 
   const filteredData = useMemo(() => {
     let result = data;
@@ -44,15 +46,13 @@ const UserConsentTab = () => {
       );
     }
     if (statusFilter !== "all") result = result.filter((r) => r.consentStatus === statusFilter);
-    if (orgFilter !== "all") result = result.filter((r) => r.consumerOrgs.includes(orgFilter));
     return result;
-  }, [data, search, statusFilter, orgFilter]);
+  }, [data, search, statusFilter]);
 
   const stats = useMemo(
     () => ({
       total: data.length,
       granted: data.filter((r) => r.consentStatus === "Granted").length,
-      pending: data.filter((r) => r.consentStatus === "Pending").length,
       revoked: data.filter((r) => r.consentStatus === "Revoked").length,
     }),
     [data]
@@ -104,18 +104,17 @@ const UserConsentTab = () => {
       const newStatus: UserConsentRecord["consentStatus"] = type === "revoke" ? "Revoked" : "Granted";
       const today = new Date().toISOString().split("T")[0]!;
 
-      setData((prev) =>
-        prev.map((r) => {
-          if (!idsToUpdate.includes(r.id)) return r;
-          return {
-            ...r,
+      setLocalOverrides((prev) => {
+        const next = new Map(prev);
+        for (const id of idsToUpdate) {
+          next.set(id, {
+            ...next.get(id),
             consentStatus: newStatus,
-            consumerOrgs: newStatus === "Revoked" ? [] : ["Diksha Platform"],
-            consentGivenOn: newStatus === "Granted" ? today : r.consentGivenOn,
-            lastUpdated: today,
-          };
-        })
-      );
+            consentGivenOn: newStatus === "Granted" ? today : null,
+          });
+        }
+        return next;
+      });
 
       if (isBulk) setSelectedIds(new Set());
       toast({
@@ -149,6 +148,22 @@ const UserConsentTab = () => {
 
   /* ── Render ────────────────────────────────────────────────────────────── */
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
+        Loading consent data…
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center py-16 text-destructive text-sm">
+        Failed to load consent data. Please try again later.
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="flex justify-end mb-4">
@@ -159,10 +174,9 @@ const UserConsentTab = () => {
         />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
         <SummaryCard label="Total Users" value={stats.total} colorClass="bg-sunbird-ink" icon={<FiUsers className="w-4 h-4" />} />
         <SummaryCard label="Consent Granted" value={stats.granted} colorClass="bg-sunbird-moss" icon={<FiUserCheck className="w-4 h-4" />} />
-        <SummaryCard label="Consent Pending" value={stats.pending} colorClass="bg-sunbird-ginger" icon={<FiClock className="w-4 h-4" />} />
         <SummaryCard label="Consent Revoked" value={stats.revoked} colorClass="bg-sunbird-lavender" icon={<FiUserX className="w-4 h-4" />} />
       </div>
 
@@ -182,20 +196,13 @@ const UserConsentTab = () => {
             label: "Consent Status",
             options: [
               { label: "Granted", value: "Granted" },
-              { label: "Pending", value: "Pending" },
               { label: "Revoked", value: "Revoked" },
             ],
           },
-          {
-            key: "org",
-            label: "Consumer Org",
-            options: uniqueOrgs.map((o) => ({ label: o, value: o })),
-          },
         ]}
-        values={{ status: statusFilter, org: orgFilter }}
+        values={{ status: statusFilter }}
         onChange={(key, value) => {
           if (key === "status") setStatusFilter(value);
-          else setOrgFilter(value);
           setSelectedIds(new Set());
         }}
         searchValue={search}
@@ -223,6 +230,10 @@ const UserConsentTab = () => {
         confirmLabel={confirm.type === "revoke" ? "Revoke" : "Reissue"}
         confirmVariant={confirm.type === "revoke" ? "destructive" : "default"}
         isLoading={confirm.isLoading}
+        confirmButtonProps={{
+          'data-edataid': confirm.type === 'revoke' ? 'um-consent-bulk-revoke-confirm' : 'um-consent-bulk-reissue-confirm',
+          'data-pageid': 'user-management',
+        }}
       />
     </>
   );

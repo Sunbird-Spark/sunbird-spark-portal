@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/useToast";
 import { useIsContentCreator, useIsMentor } from "@/hooks/useUser";
 import { usePermissions } from "@/hooks/usePermission";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import useInteract from "@/hooks/useInteract";
 
 interface BatchCardProps {
   collectionId: string;
@@ -26,6 +27,7 @@ import { TabBar, ActiveTab } from "./BatchTabBar";
 const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
   const { toast } = useToast();
   const { t } = useAppI18n();
+  const { interact } = useInteract();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editBatch, setEditBatch]   = useState<Batch | null>(null);
@@ -97,11 +99,11 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
   return (
     <>
-      <div className="w-full bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col overflow-hidden">
+      <div className="w-full bg-white rounded-2xl shadow-sunbird-sm border border-border flex flex-col overflow-hidden">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <p className="text-sm font-semibold text-foreground font-['Rubik']">
+          <p className="text-sm font-semibold text-foreground font-rubik">
             Manage batches for this course
           </p>
           <div className="flex items-center gap-2">
@@ -110,6 +112,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
               onClick={() => refetch()}
               disabled={isFetching}
               title="Refresh batch list"
+              data-edataid="batch-list-refresh"
+              data-pageid="course-consumption"
               className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiRefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
@@ -119,6 +123,8 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                 type="button"
                 onClick={() => setIsCreateModalOpen(true)}
                 title="Create batch"
+                data-edataid="batch-create-open"
+                data-pageid="course-consumption"
                 className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-sunbird-brick text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors"
               >
                 <FiPlus className="w-4 h-4" />
@@ -142,8 +148,10 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                   type="button"
                   disabled={!reviewerTncChecked || acceptTncMutation.isPending}
                   onClick={handleAcceptReviewerTnc}
+                  data-edataid="report-viewer-tnc-accept"
+                  data-pageid="course-consumption"
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-['Rubik'] transition-colors",
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-rubik transition-colors",
                     !reviewerTncChecked || acceptTncMutation.isPending
                       ? "bg-sunbird-brick/40 cursor-not-allowed"
                       : "bg-sunbird-brick hover:bg-opacity-90"
@@ -159,7 +167,15 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
         {/* ── Tabs ── */}
         {!isLoading && !isError && (
-          <TabBar activeTab={activeTab} counts={counts} onChange={setActiveTab} />
+          <TabBar activeTab={activeTab} counts={counts} onChange={(tab) => {
+            interact({
+              id: 'batch-tab-switch',
+              type: 'CLICK',
+              pageid: 'course-consumption',
+              cdata: [{ id: tab, type: 'Tab' }]
+            });
+            setActiveTab(tab);
+          }} />
         )}
 
         {/* ── Loading ── */}
@@ -171,7 +187,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
 
         {/* ── Error ── */}
         {!isLoading && isError && (
-          <p className="text-xs text-red-500 font-['Rubik'] px-5 py-4">
+          <p className="text-xs text-red-500 font-rubik px-5 py-4">
             Failed to load batches.
           </p>
         )}
@@ -182,7 +198,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
             {currentBatches.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
                 <FiCalendar className="w-7 h-7" />
-                <p className="text-xs font-['Rubik']">
+                <p className="text-xs font-rubik">
                   No {activeTab.toLowerCase()} batches
                 </p>
               </div>

@@ -9,23 +9,47 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.envExample') });
 
 const {
-    mockBuildKeycloakGoogleAuthUrl,
-    mockExchangeKeycloakCode,
+    mockBuildGoogleAuthUrl,
+    mockExchangeGoogleCode,
     mockHandleUserAuthentication,
+    mockCreateKeycloakGoogleSession,
 } = vi.hoisted(() => ({
-    mockBuildKeycloakGoogleAuthUrl: vi.fn(),
-    mockExchangeKeycloakCode: vi.fn(),
+    mockBuildGoogleAuthUrl: vi.fn(),
+    mockExchangeGoogleCode: vi.fn(),
     mockHandleUserAuthentication: vi.fn(),
+    mockCreateKeycloakGoogleSession: vi.fn(),
 }));
 
 vi.mock('../services/googleAuthService.js', () => ({
-    buildKeycloakGoogleAuthUrl: mockBuildKeycloakGoogleAuthUrl,
-    exchangeKeycloakCode: mockExchangeKeycloakCode,
+    buildGoogleAuthUrl: mockBuildGoogleAuthUrl,
+    exchangeGoogleCode: mockExchangeGoogleCode,
     handleUserAuthentication: mockHandleUserAuthentication,
+    createKeycloakGoogleSession: mockCreateKeycloakGoogleSession,
     validateOAuthSession: vi.fn(),
     validateOAuthCallback: vi.fn(),
     markSessionAsUsed: vi.fn(),
     validateRedirectUrl: vi.fn((url: string) => url || '/'),
+}));
+
+vi.mock('../utils/sessionUtils.js', () => ({
+    regenerateSession: vi.fn().mockResolvedValue(undefined),
+    saveSession: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../utils/sessionTTLUtil.js', () => ({
+    setSessionTTLFromToken: vi.fn(),
+}));
+
+vi.mock('../services/userService.js', () => ({
+    fetchUserById: vi.fn().mockResolvedValue({}),
+    setUserSession: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../config/env.js', () => ({
+    envConfig: {
+        DOMAIN_URL: 'https://example.com',
+        DEVELOPMENT_REACT_APP_URL: 'https://example.com',
+    },
 }));
 
 vi.mock('openid-client', () => ({
@@ -107,9 +131,9 @@ describe('GoogleController', () => {
             expect(mockRes.send).toHaveBeenCalledWith('INVALID_REDIRECT_URI_OR_ERROR_CALLBACK');
         });
 
-        it('stores PKCE codeVerifier in session and redirects to Keycloak auth URL', async () => {
-            const mockAuthUrl = 'https://keycloak.example.com/auth?kc_idp_hint=google';
-            mockBuildKeycloakGoogleAuthUrl.mockResolvedValue(mockAuthUrl);
+        it('stores PKCE codeVerifier in session and redirects to Google auth URL', async () => {
+            const mockAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?mock=1';
+            mockBuildGoogleAuthUrl.mockReturnValue(mockAuthUrl);
 
             mockReq.query = {
                 client_id: 'test-client',
@@ -129,7 +153,7 @@ describe('GoogleController', () => {
         });
 
         it('redirects to error_callback on exception', async () => {
-            mockBuildKeycloakGoogleAuthUrl.mockRejectedValue(new Error('Keycloak discovery failed'));
+            mockBuildGoogleAuthUrl.mockImplementation(() => { throw new Error('Google auth init failed'); });
 
             mockReq.query = {
                 client_id: 'test-client',
@@ -144,13 +168,27 @@ describe('GoogleController', () => {
     });
 
     describe('GET /google/auth/callback', () => {
+        const defaultSession = {
+            state: 'test-state',
+            codeVerifier: 'test-verifier',
+            client_id: 'test-client',
+            redirect_uri: 'https://example.com/callback',
+            error_callback: 'https://example.com/error',
+            timestamp: Date.now(),
+            sessionUsed: false,
+        };
+
+        const defaultTokens = {
+            access_token: 'test-access-token',
+            refresh_token: 'test-refresh-token',
+            id_token: 'test-id-token',
+            tokenClaims: { sub: 'f:google:user-id', email: 'test@example.com' },
+        };
+
         it('should redirect with error if OAuth session is missing', async () => {
             mockReq.query = { code: 'test-code', state: 'test-state' };
             mockReq.session = {} as any;
-
-            mockValidateOAuthSession.mockImplementation(() => {
-                throw new Error('OAUTH_SESSION_MISSING');
-            });
+            mockValidateOAuthSession.mockImplementation(() => { throw new Error('OAUTH_SESSION_MISSING'); });
 
             await handleGoogleAuthCallback(mockReq, mockRes);
 
@@ -158,150 +196,86 @@ describe('GoogleController', () => {
         });
 
         it('should redirect with error if state does not match', async () => {
-            mockReq.query = { code: 'test-code', state: 'wrong-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'correct-state',
-                    codeVerifier: 'test-verifier',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false,
-                }
-            } as any;
-
-            mockValidateOAuthSession.mockReturnValue({
-                state: 'correct-state',
-                codeVerifier: 'test-verifier',
-                client_id: 'test-client',
-            });
-            mockValidateOAuthCallback.mockImplementation(() => {
-                throw new Error('INVALID_OAUTH_STATE');
-            });
+            mockReq.session = { googleOAuth: defaultSession } as any;
+            mockValidateOAuthSession.mockReturnValue({ state: 'correct-state', codeVerifier: 'test-verifier', client_id: 'test-client' });
+            mockValidateOAuthCallback.mockImplementation(() => { throw new Error('INVALID_OAUTH_STATE'); });
 
             await handleGoogleAuthCallback(mockReq, mockRes);
 
             expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
 
-        it('should redirect with error if user authentication fails', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    codeVerifier: 'test-verifier',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false,
-                }
-            } as any;
-
-            mockValidateOAuthSession.mockReturnValue({
-                state: 'test-state',
-                codeVerifier: 'test-verifier',
-                client_id: 'test-client',
-            });
+        it('should redirect with error if Keycloak session creation fails', async () => {
+            mockReq.session = { googleOAuth: defaultSession } as any;
+            mockValidateOAuthSession.mockReturnValue({ state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client' });
             mockValidateOAuthCallback.mockReturnValue('test-code');
             mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
-            mockHandleUserAuthentication.mockRejectedValue(new Error('AUTHENTICATION_FAILED'));
-
-            await handleGoogleAuthCallback(mockReq, mockRes);
-
-            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
-        });
-
-        it('should redirect to /portal/login for existing user on successful authentication', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    codeVerifier: 'test-verifier',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false,
-                }
-            } as any;
-
-            mockValidateOAuthSession.mockReturnValue({
-                state: 'test-state',
-                codeVerifier: 'test-verifier',
-                client_id: 'test-client',
-            });
-            mockValidateOAuthCallback.mockReturnValue('test-code');
-            mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'existing@example.com', name: 'Existing User' });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
             mockHandleUserAuthentication.mockResolvedValue(true);
+            mockCreateKeycloakGoogleSession.mockRejectedValue(new Error('KEYCLOAK_SESSION_CREATE_FAILED'));
 
             await handleGoogleAuthCallback(mockReq, mockRes);
 
-            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login');
-            expect(mockExchangeKeycloakCode).toHaveBeenCalledWith(mockReq, 'test-verifier', 'test-state');
-            expect(mockHandleUserAuthentication).toHaveBeenCalledWith(
-                { emailId: 'existing@example.com', name: 'Existing User' },
-                'test-client',
-                mockReq
-            );
+            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/error?error=GOOGLE_SIGN_IN_FAILED');
         });
 
-        it('should redirect to /portal/login for new user on successful authentication', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    codeVerifier: 'test-verifier',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false,
-                }
-            } as any;
-
-            mockValidateOAuthSession.mockReturnValue({
-                state: 'test-state',
-                codeVerifier: 'test-verifier',
-                client_id: 'test-client',
-            });
+        it('should redirect to redirect_uri on successful authentication', async () => {
+            mockReq.session = { googleOAuth: defaultSession } as any;
+            mockValidateOAuthSession.mockReturnValue({ state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client' });
             mockValidateOAuthCallback.mockReturnValue('test-code');
             mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'newuser@example.com', name: 'New User' });
-            mockHandleUserAuthentication.mockResolvedValue(false);
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
+            mockHandleUserAuthentication.mockResolvedValue(true);
+            mockCreateKeycloakGoogleSession.mockResolvedValue(defaultTokens);
 
             await handleGoogleAuthCallback(mockReq, mockRes);
 
-            // Both new and existing users go to /portal/login to complete OIDC flow
-            expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login');
+            expect(mockExchangeGoogleCode).toHaveBeenCalledWith('test-code', 'test-verifier');
+            expect(mockCreateKeycloakGoogleSession).toHaveBeenCalledWith('test@example.com');
+            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/callback');
+        });
+
+        it('should fall back to /home when redirect_uri is missing', async () => {
+            const sessionWithoutRedirect = { ...defaultSession, redirect_uri: undefined };
+            mockReq.session = { googleOAuth: sessionWithoutRedirect } as any;
+            mockValidateOAuthSession.mockReturnValue({ state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client' });
+            mockValidateOAuthCallback.mockReturnValue('test-code');
+            mockMarkSessionAsUsed.mockImplementation(() => { });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
+            mockHandleUserAuthentication.mockResolvedValue(true);
+            mockCreateKeycloakGoogleSession.mockResolvedValue(defaultTokens);
+
+            await handleGoogleAuthCallback(mockReq, mockRes);
+
+            expect(mockRes.redirect).toHaveBeenCalledWith('https://example.com/home');
+        });
+
+        it('should store oidc-tokens in session from Keycloak response', async () => {
+            mockReq.session = { googleOAuth: defaultSession } as any;
+            mockValidateOAuthSession.mockReturnValue({ state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client' });
+            mockValidateOAuthCallback.mockReturnValue('test-code');
+            mockMarkSessionAsUsed.mockImplementation(() => { });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
+            mockHandleUserAuthentication.mockResolvedValue(true);
+            mockCreateKeycloakGoogleSession.mockResolvedValue(defaultTokens);
+
+            await handleGoogleAuthCallback(mockReq, mockRes);
+
+            expect(mockReq.session?.['oidc-tokens']).toEqual({
+                access_token: 'test-access-token',
+                refresh_token: 'test-refresh-token',
+                id_token: 'test-id-token',
+            });
         });
 
         it('should clear googleOAuth session data after callback', async () => {
-            mockReq.query = { code: 'test-code', state: 'test-state' };
-            mockReq.session = {
-                googleOAuth: {
-                    state: 'test-state',
-                    codeVerifier: 'test-verifier',
-                    client_id: 'test-client',
-                    redirect_uri: 'https://example.com/callback',
-                    error_callback: 'https://example.com/error',
-                    timestamp: Date.now(),
-                    sessionUsed: false,
-                }
-            } as any;
-
-            mockValidateOAuthSession.mockReturnValue({
-                state: 'test-state',
-                codeVerifier: 'test-verifier',
-                client_id: 'test-client',
-            });
+            mockReq.session = { googleOAuth: defaultSession } as any;
+            mockValidateOAuthSession.mockReturnValue({ state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client' });
             mockValidateOAuthCallback.mockReturnValue('test-code');
             mockMarkSessionAsUsed.mockImplementation(() => { });
-            mockExchangeKeycloakCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
+            mockExchangeGoogleCode.mockResolvedValue({ emailId: 'test@example.com', name: 'Test User' });
             mockHandleUserAuthentication.mockResolvedValue(true);
+            mockCreateKeycloakGoogleSession.mockResolvedValue(defaultTokens);
 
             await handleGoogleAuthCallback(mockReq, mockRes);
 

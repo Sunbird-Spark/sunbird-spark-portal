@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { FiX, FiSearch, FiLoader } from "react-icons/fi";
+import { FiX, FiLoader } from "react-icons/fi";
 import { useCreateBatch, useUpdateBatch } from "@/hooks/useBatch";
-import { useMentorList, MentorUser } from "@/hooks/useMentor";
+import { useMentorList } from "@/hooks/useMentor";
 import { Batch } from "@/services/BatchService";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ import { TncCheckboxRow } from "@/components/collection/TncCheckboxRow";
 import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
+import useInteract from "@/hooks/useInteract";
 import { useIsContentCreator, useIsMentor } from "@/hooks/useUser";
 
 /* ─── Types ─── */
@@ -40,14 +41,15 @@ const makeInitialForm = (batch?: Batch): BatchFormState => ({
   acceptTerms: false,
 });
 
-const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']";
+const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik";
 const inputClass =
-  "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']";
+  "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
 
 /* ─── Modal ─── */
 
 const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: CreateBatchModalProps) => {
   const isEditMode = !!initialBatch;
+  const { interact } = useInteract();
   const isContentCreator = useIsContentCreator();
   const isMentor         = useIsMentor();
   const isOnlyMentor     = isMentor && !isContentCreator && isEditMode;
@@ -94,6 +96,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     e.preventDefault();
     if (isOnlyMentor) return;
     setSubmitError(null);
+    interact({ id: isEditMode ? 'batch-modal-save' : 'batch-modal-create', type: 'SUBMIT', pageid: 'batch-create' });
     try {
       if (isEditMode && initialBatch) {
         await updateBatch.mutateAsync({
@@ -132,17 +135,9 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     }
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-    setMentorQuery("");
-    setSubmitError(null);
-  };
+  const handleClose = () => { onOpenChange(false); setMentorQuery(""); setSubmitError(null); };
 
-  const isSubmitDisabled =
-    !form.batchName.trim() ||
-    !form.startDate ||
-    (!isEditMode && !form.acceptTerms) ||
-    isPending;
+  const isSubmitDisabled = !form.batchName.trim() || !form.startDate || (!isEditMode && !form.acceptTerms) || isPending;
 
   return (
     <>
@@ -156,13 +151,15 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
 
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-border sticky top-0 bg-white rounded-t-2xl z-10">
-            <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-['Rubik']">
+            <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-rubik">
               {isOnlyMentor ? "View Batch Details" : (isEditMode ? "Edit Batch" : "Create Batch")}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors"
                 aria-label="Close"
+                data-edataid="batch-modal-close"
+                data-pageid="batch-create"
               >
                 <FiX className="w-5 h-5" />
               </button>
@@ -194,8 +191,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 />
               </div>
               <div className="px-4 py-3 flex items-center justify-between gap-4">
-                <span className="text-sm font-medium text-foreground font-['Rubik']">Batch Type</span>
-                <span className="text-sm font-medium text-sunbird-brick font-['Rubik']">Open</span>
+                <span className="text-sm font-medium text-foreground font-rubik">Batch Type</span>
+                <span className="text-sm font-medium text-sunbird-brick font-rubik">Open</span>
               </div>
             </div>
 
@@ -225,7 +222,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
 
             {/* Error message */}
             {submitError && (
-              <p role="alert" className="text-xs text-red-600 font-['Rubik'] -mt-1">
+              <p role="alert" className="text-xs text-red-600 font-rubik -mt-1">
                 {submitError}
               </p>
             )}
@@ -236,7 +233,9 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 type="button"
                 onClick={handleClose}
                 disabled={isPending}
-                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-['Rubik']"
+                className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors font-rubik"
+                data-edataid="batch-modal-cancel"
+                data-pageid="batch-create"
               >
                 {isOnlyMentor ? "Close" : "Cancel"}
               </button>
@@ -245,7 +244,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                   type="submit"
                   disabled={isSubmitDisabled}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-['Rubik']",
+                    "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik",
                     isSubmitDisabled
                       ? "bg-sunbird-brick/40 cursor-not-allowed"
                       : "bg-sunbird-brick hover:bg-opacity-90"

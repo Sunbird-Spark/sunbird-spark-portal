@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import type { AssessmentApiItem, AssessmentRecord, EnrollmentCompletion, LearnerProgress, LearnerProgressApiItem, ProgressBucket } from "@/types/reports";
 import { toRelativeTime } from "@/utils/dateUtils";
 
@@ -6,11 +7,6 @@ export const STATUS_MAP: Record<number, LearnerProgress["status"]> = {
   1: "In Progress",
   2: "Completed",
 };
-
-/** Extract YYYY-MM-DD from an ISO datetime string */
-export function toDateOnly(isoString: string): string {
-  return isoString.slice(0, 10);
-}
 
 const NUM_WEEKS = 4;
 
@@ -27,8 +23,7 @@ export function buildEnrollmentVsCompletion(
 ): EnrollmentCompletion[] {
   if (!batchStartDate) return [];
 
-  const batchStart = new Date(batchStartDate);
-  batchStart.setHours(0, 0, 0, 0);
+  const batchStart = dayjs(batchStartDate).startOf('day');
 
   const buckets: EnrollmentCompletion[] = Array.from({ length: NUM_WEEKS }, (_, i) => ({
     label: `Week ${i + 1}`,
@@ -36,11 +31,8 @@ export function buildEnrollmentVsCompletion(
     completed: 0,
   }));
 
-  const weekIndex = (isoString: string): number => {
-    const d = new Date(isoString);
-    const diffDays = Math.floor((d.getTime() - batchStart.getTime()) / 86_400_000);
-    return Math.floor(diffDays / 7); // 0-indexed
-  };
+  const weekIndex = (isoString: string): number =>
+    Math.floor(dayjs(isoString).diff(batchStart, 'day') / 7);
 
   for (const learner of learners) {
     const enrollWeek = weekIndex(learner.enrolled_date);
@@ -110,17 +102,17 @@ export function mapApiItemToAssessmentRecord(item: AssessmentApiItem): Assessmen
   const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
   return {
     id: item.user_id,
-    learnerName: `${item.userDetails.firstName} ${item.userDetails.lastName ?? ''}`.trim(),
+    learnerName: `${item.userDetails?.firstName ?? ''} ${item.userDetails?.lastName ?? ''}`.trim(),
     attemptNumber: item.attempt_count,
     score,
     maxScore,
     percentage,
-    attemptDate: item.last_attempted_on.slice(0, 10),
+    attemptDate: dayjs(item.last_attempted_on).format('YYYY-MM-DD'),
   };
 }
 
 export function mapApiItemToLearnerProgress(item: LearnerProgressApiItem): LearnerProgress {
-  const nameParts = [item.userDetails.firstName, item.userDetails.lastName].filter(Boolean);
+  const nameParts = [item.userDetails?.firstName, item.userDetails?.lastName].filter(Boolean);
   const hasCertificate = item.issued_certificates != null;
   const isCompleted = item.completionpercentage === 100 || item.status === 2;
   const certificateStatus: LearnerProgress["certificateStatus"] = hasCertificate
@@ -131,7 +123,7 @@ export function mapApiItemToLearnerProgress(item: LearnerProgressApiItem): Learn
   return {
     id: item.userid,
     learnerName: nameParts.join(' '),
-    enrollmentDate: toDateOnly(item.enrolled_date),
+    enrollmentDate: dayjs(item.enrolled_date).format('YYYY-MM-DD'),
     progressPercent: item.completionpercentage ?? 0,
     status: STATUS_MAP[item.status] ?? "Not Started",
     lastActiveDate: toRelativeTime(item.datetime),

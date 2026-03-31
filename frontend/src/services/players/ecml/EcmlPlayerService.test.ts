@@ -17,7 +17,7 @@ vi.mock('../telemetryContextBuilder', () => ({
     timeDiff: 0,
     objectRollup: {},
     host: '',
-    endpoint: '/portal/data/v1/telemetry',
+    endpoint: '/data/v3/telemetry',
     dims: ['test-channel'],
     app: ['test-channel'],
     partner: [],
@@ -38,7 +38,7 @@ const defaultContext = {
   timeDiff: 0,
   objectRollup: {},
   host: '',
-  endpoint: '/portal/data/v1/telemetry',
+  endpoint: '/data/v3/telemetry',
   dims: ['test-channel'],
   app: ['test-channel'],
   partner: [],
@@ -144,7 +144,7 @@ describe('EcmlPlayerService', () => {
 
     it('should set telemetry endpoint', async () => {
       const result = await service.createConfig(mockMetadata);
-      expect(result.context.endpoint).toBe('/portal/data/v1/telemetry');
+      expect(result.context.endpoint).toBe('/data/v3/telemetry');
     });
   });
 
@@ -154,3 +154,4 @@ describe('EcmlPlayerService', () => {
     });
   });
 });
+

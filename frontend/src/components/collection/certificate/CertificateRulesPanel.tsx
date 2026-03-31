@@ -2,8 +2,8 @@ import { FiChevronDown, FiAward } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import { IssueTo } from "./types";
 
-const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']";
-const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']";
+const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik";
+const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
 
 interface CertificateRulesPanelProps {
   issueTo: IssueTo;
@@ -32,7 +32,7 @@ export function CertificateRulesPanel({
 }: CertificateRulesPanelProps) {
   return (
     <div className="flex-1 border-r border-border p-6 space-y-5 overflow-y-auto">
-      <h3 className="text-sm font-semibold text-sunbird-obsidian font-['Rubik'] uppercase tracking-wide">
+      <h3 className="text-sm font-semibold text-sunbird-obsidian font-rubik uppercase tracking-wide">
         Certificate Rules
       </h3>
 
@@ -75,7 +75,7 @@ export function CertificateRulesPanel({
           <button
             type="button"
             onClick={() => setEnableScoreRule(true)}
-            className="flex items-center gap-1 text-sm font-medium text-sunbird-brick hover:underline font-['Rubik']"
+            className="flex items-center gap-1 text-sm font-medium text-sunbird-brick hover:underline font-rubik"
           >
             + Add Score Rule Condition
           </button>
@@ -85,7 +85,7 @@ export function CertificateRulesPanel({
       {enableScoreRule && (
         <div className="rounded-xl border border-border bg-white overflow-hidden">
           <div className="px-4 py-2 border-b border-border bg-gray-50 flex justify-between items-center">
-            <span className="text-xs font-semibold text-sunbird-obsidian font-['Rubik'] uppercase tracking-wide">
+            <span className="text-xs font-semibold text-sunbird-obsidian font-rubik uppercase tracking-wide">
               Score Rule
             </span>
             <button
@@ -101,10 +101,10 @@ export function CertificateRulesPanel({
             </button>
           </div>
           <div className="px-4 py-4 flex items-center gap-3">
-            <label htmlFor="scoreRuleValue" className="text-sm font-medium text-sunbird-obsidian font-['Rubik'] whitespace-nowrap">
+            <label htmlFor="scoreRuleValue" className="text-sm font-medium text-sunbird-obsidian font-rubik whitespace-nowrap">
               Best Attempted Score
             </label>
-            <span className="text-lg font-medium text-sunbird-obsidian font-['Rubik']">{">="}</span>
+            <span className="text-lg font-medium text-sunbird-obsidian font-rubik">{">="}</span>
             <div className="relative w-32">
               <input
                 id="scoreRuleValue"
@@ -115,7 +115,7 @@ export function CertificateRulesPanel({
                 value={scoreRuleValue}
                 onChange={(e) => setScoreRuleValue(e.target.value)}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-['Rubik'] pointer-events-none">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-rubik pointer-events-none">
                 %
               </span>
             </div>
@@ -136,7 +136,7 @@ export function CertificateRulesPanel({
               onChange={(e) => setIssueToAccepted(e.target.checked)}
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-amber-400 accent-sunbird-brick cursor-pointer"
             />
-            <span className="text-xs text-amber-800 font-['Rubik'] leading-relaxed">
+            <span className="text-xs text-amber-800 font-rubik leading-relaxed">
               All the elements and attributes are thoroughly verified and I agree to issue
               the certificate as per the rules set above.
             </span>
@@ -164,12 +164,12 @@ export function CertificateRulesPanel({
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <FiAward className="w-8 h-8" />
-                    <span className="text-xs font-['Rubik']">No preview</span>
+                    <span className="text-xs font-rubik">No preview</span>
                   </div>
                 )}
               </div>
               <div className="px-3 py-2 border-t border-border bg-white">
-                <p className="text-xs font-medium font-['Rubik'] text-foreground">
+                <p className="text-xs font-medium font-rubik text-foreground">
                   {selectedTemplate.name}
                 </p>
               </div>
@@ -177,7 +177,7 @@ export function CertificateRulesPanel({
           ) : (
             <div className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
               <FiAward className="w-8 h-8" />
-              <p className="text-xs font-['Rubik']">Select a template from the right panel</p>
+              <p className="text-xs font-rubik">Select a template from the right panel</p>
             </div>
           )}
         </div>

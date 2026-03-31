@@ -92,7 +92,7 @@ describe('buildTelemetryContext', () => {
     expect(context.pdata).toEqual({ id: 'test.portal', ver: '1.0', pid: 'test.portal' });
     expect(context.userData).toEqual({ firstName: 'John', lastName: 'Doe' });
     expect(typeof context.timeDiff).toBe('number');
-    expect(context.endpoint).toBe('/portal/data/v1/telemetry');
+    expect(context.endpoint).toBe('/data/v3/telemetry');
     expect(context.host).toBe('');
   });
 

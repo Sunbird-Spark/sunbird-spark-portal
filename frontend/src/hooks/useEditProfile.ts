@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import _ from 'lodash';
 import { useUpdateProfile } from './useUpdateProfile';
+import { useTelemetry } from './useTelemetry';
 import { toast } from './useToast';
 import { useUserId } from './useAuthInfo';
 import { UserProfile } from '../types/userTypes';
@@ -51,6 +52,7 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<EditProfileFormData>(createInitialForm());
   const userId = useUserId();
+  const telemetry = useTelemetry();
 
   const originalData = useRef<EditProfileFormData>(createInitialForm());
   const updateProfileMutation = useUpdateProfile();
@@ -219,6 +221,21 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
         description: 'Your profile has been updated successfully.',
         variant: 'success',
       });
+      telemetry.audit({
+        edata: {
+          props: ['profileDetails'],
+          state: 'Updated',
+        },
+        object: { id: userId, type: 'User' },
+      });
+      telemetry.log({
+        edata: {
+          type: 'api',
+          level: 'INFO',
+          message: 'Profile updated successfully',
+          pageid: 'profile',
+        },
+      });
       closeDialog();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to update profile';
@@ -226,6 +243,14 @@ export const useEditProfile = ({ user }: UseEditProfileParams): UseEditProfileRe
         variant: 'destructive',
         title: 'Update failed',
         description: message,
+      });
+      telemetry.log({
+        edata: {
+          type: 'api',
+          level: 'ERROR',
+          message: `Profile update failed: ${message}`,
+          pageid: 'profile',
+        },
       });
     }
   }, [canSave, userId, form, fieldStates, updateProfileMutation, closeDialog]);

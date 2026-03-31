@@ -30,7 +30,7 @@ export const ProgressIndicator = ({ totalSteps, currentStep, isFirstScreen, onBa
       {Array.from({ length: totalSteps }, (_, i) => (
         <div
           key={i}
-          className={`progress-dot ${i < currentStep ? "bg-primary" : "bg-[#C1C1C1]"}`}
+          className={`progress-dot ${i < currentStep ? "bg-primary" : "bg-sunbird-gray-d0"}`}
         />
       ))}
     </div>
@@ -45,19 +45,21 @@ interface OptionChipProps {
   field: OnboardingField;
   isSelected: boolean;
   onClick: () => void;
+  [key: string]: any;
 }
 
-export const OptionChip = ({ field, isSelected, onClick }: OptionChipProps) => (
+export const OptionChip = ({ field, isSelected, onClick, ...props }: OptionChipProps) => (
   <button
     type="button"
     onClick={onClick}
     className={`option-chip ${isSelected ? "option-chip-selected" : "option-chip-default"}`}
+    {...props}
   >
     {isSelected && (
       <div className="option-chip-checkmark">
         <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="7.5" cy="7.5" r="6.5" stroke="rgba(255,255,255,0.6)" strokeWidth="2" />
-          <path d="M4 7.5L6.625 10L11 5" stroke="rgba(255,255,255,0.6)" strokeWidth="2" />
+          <circle cx="7.5" cy="7.5" r="6.5" stroke="hsl(var(--primary-foreground) / 0.6)" strokeWidth="2" />
+          <path d="M4 7.5L6.625 10L11 5" stroke="hsl(var(--primary-foreground) / 0.6)" strokeWidth="2" />
         </svg>
       </div>
     )}

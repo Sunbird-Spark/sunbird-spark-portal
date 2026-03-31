@@ -119,7 +119,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
           <AiOutlineClose className="w-[24px] h-[24px]" />
         </DialogClose>
         <div className="flex justify-between items-center">
-          <DialogTitle className="font-['Rubik'] font-medium text-[1.5rem] leading-[1.25rem] tracking-normal text-foreground">
+          <DialogTitle className="font-rubik font-medium text-[1.5rem] leading-[1.25rem] tracking-normal text-foreground">
             {t("reportIssueDialog.title")}
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -129,12 +129,12 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
 
         <div className="grid grid-cols-2 gap-4 mt-8">
           <Select value={category} onValueChange={handleCategoryChange} disabled={loading}>
-            <SelectTrigger className="border-sunbird-gray-d0 rounded-[0.625rem] h-[3rem] px-4 font-['Rubik'] font-normal text-[1rem] leading-[1.25rem] tracking-normal bg-white text-left [&>svg]:text-sunbird-brick [&>svg]:opacity-100 [&>svg]:w-[1.5rem] [&>svg]:h-[1.5rem]">
+            <SelectTrigger className="border-sunbird-gray-d0 rounded-[0.625rem] h-[3rem] px-4 font-rubik font-normal text-[1rem] leading-[1.25rem] tracking-normal bg-white text-left [&>svg]:text-sunbird-brick [&>svg]:opacity-100 [&>svg]:w-[1.5rem] [&>svg]:h-[1.5rem]">
               <SelectValue placeholder={<span className="text-muted-foreground">{loading ? t("loading") : t("reportIssueDialog.selectCategory")}</span>} />
             </SelectTrigger>
             <SelectContent className="bg-white z-[100]">
               {categoryOptions.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value} className="font-['Rubik'] font-normal text-[1rem] leading-[1.25rem] focus:bg-sunbird-ginger focus:text-white">
+                <SelectItem key={cat.value} value={cat.value} className="font-rubik font-normal text-[1rem] leading-[1.25rem] focus:bg-sunbird-ginger focus:text-white">
                   {cat.label}
                 </SelectItem>
               ))}
@@ -143,12 +143,12 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
 
           {category !== "otherissues" && (
             <Select value={subcategory} onValueChange={setSubcategory} disabled={loading || !category || currentSubcategoryOptions.length === 0}>
-              <SelectTrigger className="border-sunbird-gray-d0 rounded-[0.625rem] h-[3rem] px-4 font-['Rubik'] font-normal text-[1rem] leading-[1.25rem] tracking-normal bg-white text-left [&>svg]:text-sunbird-brick [&>svg]:opacity-100 [&>svg]:w-[1.5rem] [&>svg]:h-[1.5rem]">
+              <SelectTrigger className="border-sunbird-gray-d0 rounded-[0.625rem] h-[3rem] px-4 font-rubik font-normal text-[1rem] leading-[1.25rem] tracking-normal bg-white text-left [&>svg]:text-sunbird-brick [&>svg]:opacity-100 [&>svg]:w-[1.5rem] [&>svg]:h-[1.5rem]">
                 <SelectValue placeholder={<span className="text-muted-foreground">{t("reportIssueDialog.selectSubcategory")}</span>} />
               </SelectTrigger>
               <SelectContent className="bg-white z-[100]">
                 {currentSubcategoryOptions.map((sub) => (
-                  <SelectItem key={sub.value} value={sub.value} className="font-['Rubik'] font-normal text-[1rem] leading-[1.25rem] focus:bg-sunbird-ginger focus:text-white">
+                  <SelectItem key={sub.value} value={sub.value} className="font-rubik font-normal text-[1rem] leading-[1.25rem] focus:bg-sunbird-ginger focus:text-white">
                     {sub.label}
                   </SelectItem>
                 ))}
@@ -162,13 +162,13 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t("reportIssueDialog.tellUsMore")}
           maxLength={5000}
-          className="border-sunbird-gray-d0 rounded-[0.625rem] min-h-[10rem] font-['Rubik'] font-normal text-[1rem] leading-[1.25rem] tracking-normal mt-1 resize-none placeholder:text-muted-foreground px-4 py-3 bg-white"
+          className="border-sunbird-gray-d0 rounded-[0.625rem] min-h-[10rem] font-rubik font-normal text-[1rem] leading-[1.25rem] tracking-normal mt-1 resize-none placeholder:text-muted-foreground px-4 py-3 bg-white"
         />
 
         {submitted && (
           <div className="absolute top-[2.25rem] left-[4.125rem] right-[4.125rem] flex items-start gap-3 bg-sunbird-success-message-bg border-l-4 border-sunbird-success-message rounded-[0.625rem] px-4 py-3 z-10">
             <span className="text-sunbird-success-message text-lg mt-0.5">✓</span>
-            <p className="font-['Rubik'] text-[0.875rem] leading-[1.4] text-foreground">
+            <p className="font-rubik text-[0.875rem] leading-[1.4] text-foreground">
               {t("reportIssueDialog.feedbackSuccess", { appName: (import.meta as any).env?.VITE_APP_NAME || "this application" })}
             </p>
           </div>
@@ -178,7 +178,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
           <button
             onClick={handleSubmit}
             disabled={submitted || !category || (currentSubcategoryOptions.length > 0 && !subcategory)}
-            className={`w-[13.125rem] h-[2.875rem] rounded-[0.625rem] font-['Rubik'] text-[1rem] leading-[1.1875rem] font-medium transition-colors flex items-center justify-center ${!category || (currentSubcategoryOptions.length > 0 && !subcategory)
+            className={`w-[13.125rem] h-[2.875rem] rounded-[0.625rem] font-rubik text-[1rem] leading-[1.1875rem] font-medium transition-colors flex items-center justify-center ${!category || (currentSubcategoryOptions.length > 0 && !subcategory)
               ? "bg-sunbird-gray-d0 text-sunbird-gray-75 cursor-not-allowed"
               : "bg-sunbird-brick text-white hover:opacity-90"
               }`}

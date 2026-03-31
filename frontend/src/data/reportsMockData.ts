@@ -3,8 +3,6 @@ import type {
   ContentByGroup,
   TopCreator,
   PopularContent,
-  UserGrowthPoint,
-  UserDemographic,
   AdminCourseSummary,
   EnrollmentCompletion,
   ProgressBucket,
@@ -68,34 +66,6 @@ export const popularContent: PopularContent[] = [
   { id: "3", title: "Web Development 101", enrollments: 1650, views: 6100, type: "Course" },
   { id: "4", title: "Python Programming", enrollments: 1420, views: 5800, type: "Resource" },
   { id: "5", title: "Machine Learning Guide", enrollments: 1280, views: 5200, type: "Textbook" },
-];
-
-export const userGrowthData: UserGrowthPoint[] = [
-  { date: "Jan", users: 1200 },
-  { date: "Feb", users: 1800 },
-  { date: "Mar", users: 2400 },
-  { date: "Apr", users: 3100 },
-  { date: "May", users: 4200 },
-  { date: "Jun", users: 5800 },
-  { date: "Jul", users: 6500 },
-  { date: "Aug", users: 7900 },
-  { date: "Sep", users: 9200 },
-  { date: "Oct", users: 10400 },
-  { date: "Nov", users: 11800 },
-  { date: "Dec", users: 13500 },
-];
-
-export const userDemographics: UserDemographic[] = [
-  { label: "Students", count: 8400 },
-  { label: "Teachers", count: 3200 },
-  { label: "Admin", count: 420 },
-  { label: "Others", count: 1480 },
-];
-
-export const userByAppType: UserDemographic[] = [
-  { label: "Mobile App", count: 7800 },
-  { label: "Web Portal", count: 4200 },
-  { label: "Desktop", count: 1500 },
 ];
 
 export const adminCourseSummaries: AdminCourseSummary[] = Array.from({ length: 25 }, (_, i) => ({
@@ -239,36 +209,23 @@ const CONSENT_USER_NAMES = [
   "Gaurav Mishra", "Hina Bose", "Ishaan Chauhan", "Jyoti Pandit", "Kunal Srinivasan",
 ];
 
-const CONSUMER_ORGS = [
-  "Diksha Platform",
-  "NCERT Portal",
-  "State Ed Board - MH",
-  "State Ed Board - KA",
-  "NIC Data Hub",
-];
+const CONSENT_STATUSES: UserConsentRecord["consentStatus"][] = ["Granted", "Granted", "Revoked"];
 
-const CONSENT_STATUSES: UserConsentRecord["consentStatus"][] = ["Granted", "Granted", "Granted", "Pending", "Revoked"];
+const MOCK_COURSES = ["Business and Management", "Finance and Accounting", "Information Technology", "Multi Quiz Contest"];
 
 export const userConsentData: UserConsentRecord[] = Array.from({ length: 40 }, (_, i) => {
   const status = CONSENT_STATUSES[i % CONSENT_STATUSES.length]!;
-  const orgCount = (i % 3) + 1;
-  const consumerOrgs =
-    status === "Granted"
-      ? CONSUMER_ORGS.slice(0, orgCount)
-      : status === "Pending" && i % 2 === 0
-      ? [CONSUMER_ORGS[0]!]
-      : [];
   const month = String((i % 12) + 1).padStart(2, "0");
   const day = String((i % 28) + 1).padStart(2, "0");
-  const consentGivenOn = status !== "Pending" ? `2025-${month}-${day}` : null;
+  const consentGivenOn = status === "Granted" ? `2025-${month}-${day}` : null;
   return {
     id: `consent-${i + 1}`,
     userId: `user-${i + 1}`,
     userName: CONSENT_USER_NAMES[i % CONSENT_USER_NAMES.length]!,
     email: `user${i + 1}@example.org`,
     consentStatus: status,
-    consumerOrgs,
+    course: MOCK_COURSES[i % MOCK_COURSES.length]!,
     consentGivenOn,
-    lastUpdated: `2025-${month}-${day}`,
+    expiry: `2025-${month}-${day}`,
   };
 });

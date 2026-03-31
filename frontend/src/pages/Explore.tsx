@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import ExploreFilters from '../components/explore/ExploreFilters';
 import ExploreGrid from '../components/explore/ExploreGrid';
 import { FiChevronDown, FiSearch } from 'react-icons/fi';
@@ -13,6 +13,8 @@ import { useAppI18n } from '../hooks/useAppI18n';
 import useDebounce from '../hooks/useDebounce';
 import { useSearchParams } from 'react-router-dom';
 import { useFormRead } from '../hooks/useForm';
+import useImpression from '../hooks/useImpression';
+import useInteract from '../hooks/useInteract';
 
 // Keys are the API `code` field (e.g. "primaryCategory", "mimeType"), values are selected option values
 export type FilterState = Record<string, string[]>;
@@ -24,7 +26,9 @@ const SORT_OPTIONS = [
 
 const Explore = () => {
   const { t } = useAppI18n();
+  useImpression({ type: 'view', pageid: 'explore', env: 'explore' });
   const [searchParams, setSearchParams] = useSearchParams();
+  const { interact } = useInteract();
 
   // Initialize filters from URL on mount — every param except 'q' is treated as a filter code.
   // e.g. ?primaryCategory=Course&primaryCategory=Content+Playlist&mimeType=video%2Fmp4
@@ -42,6 +46,17 @@ const Explore = () => {
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
   const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
   const [sortLabelKey, setSortLabelKey] = useState('newest');
+
+  const handleFilterChange: Dispatch<SetStateAction<FilterState>> = (value) => {
+    const resolved = typeof value === 'function' ? value(filters) : value;
+    interact({
+      id: 'explore-filter-change',
+      type: 'CLICK',
+      pageid: 'explore-page',
+      cdata: Object.keys(resolved).map((k) => ({ id: k, type: 'Filter' })),
+    });
+    setFilters(value);
+  };
 
   // Same query key as ExploreFilters — React Query returns cached data, no extra API call.
   // Used here only to control whether the aside is rendered (scenario 3: hide layout when empty/errored)
@@ -72,7 +87,15 @@ const Explore = () => {
       return;
     }
     const next = new URLSearchParams();
-    if (debouncedSearchQuery) next.set('q', debouncedSearchQuery);
+    if (debouncedSearchQuery) {
+      next.set('q', debouncedSearchQuery);
+      interact({
+        id: 'explore-search',
+        type: 'search',
+        pageid: 'explore-page',
+        cdata: [{ type: 'Query', id: debouncedSearchQuery }],
+      });
+    }
     Object.entries(filters).forEach(([code, values]) => {
       values.forEach((value) => next.append(code, value));
     });
@@ -86,7 +109,7 @@ const Explore = () => {
           {/* Filters Sidebar — sticky and separate */}
           {showFilters && (
             <aside className="w-full md:w-auto md:min-w-[18rem] shrink-0 overflow-y-auto">
-              <ExploreFilters filters={filters} setFilters={setFilters} />
+              <ExploreFilters filters={filters} setFilters={handleFilterChange} />
             </aside>
           )}
 
@@ -102,7 +125,7 @@ const Explore = () => {
                     placeholder={t('searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[1rem] placeholder:text-[#999999] w-full"
+                    className="pl-10 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[1rem] placeholder:text-muted-foreground w-full"
                   />
                 </div>
 
@@ -133,11 +156,12 @@ const Explore = () => {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[8.75rem] bg-white z-50">
-                      {/* 2. Map instead of repeating DropdownMenuItem */}
                       {SORT_OPTIONS.map((option) => (
                         <DropdownMenuItem
                           key={option.key}
                           className={`cursor-pointer hover:bg-gray-50 ${sortLabelKey === option.key ? 'bg-gray-50 font-medium' : ''}`}
+                          data-edataid={`sort-by-${option.key}`}
+                          data-pageid="explore-page"
                           onClick={() => {
                             if (sortLabelKey !== option.key) {
                               setSortBy(option.value);

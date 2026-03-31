@@ -15,7 +15,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        rubik: ['Rubik', 'sans-serif'],
+        rubik: ['var(--app-font-family)', 'sans-serif'],
         sans: ['Noto Sans', 'system-ui', 'sans-serif'],
       },
       colors: {
@@ -131,6 +131,16 @@ export default {
         '13': '3.25rem',
         '18': '4.5rem',
         '100': '25rem',
+      },
+      boxShadow: {
+        'sunbird-sm': 'var(--sunbird-shadow-sm)',
+        'sunbird-md': 'var(--sunbird-shadow-md)',
+        'sunbird-lg': 'var(--sunbird-shadow-lg)',
+      },
+      dropShadow: {
+        'sunbird-sm': '0 0.125rem 0.625rem rgba(0, 0, 0, 0.05)',
+        'sunbird-md': '0 0.875rem 0.875rem rgba(0, 0, 0, 0.05)',
+        'sunbird-lg': '0 0.25rem 1.25rem rgba(0, 0, 0, 0.1)',
       },
       keyframes: {
         "accordion-down": {

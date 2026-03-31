@@ -69,6 +69,7 @@ describe('getSessionStore', () => {
     });
 
     it('should create PgStore when SUNBIRD_PORTAL_SESSION_STORE is yugabyte', async () => {
+        vi.resetModules();
         vi.doMock('../config/env.js', () => ({
             envConfig: {
                 SUNBIRD_PORTAL_SESSION_STORE: 'yugabyte',
@@ -154,6 +155,10 @@ describe('getSessionStore', () => {
 
         const store = getSessionStore();
         const error = new Error('Test store error');
+
+        // Add a dummy listener to be extra safe in some environments
+        const errorHandler = vi.fn();
+        store.on('error', errorHandler);
 
         store.emit('error', error);
 

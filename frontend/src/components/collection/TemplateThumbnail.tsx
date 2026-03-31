@@ -13,6 +13,8 @@ export function TemplateThumbnail({ name, previewUrl, selected, onClick }: Templ
     <button
       type="button"
       onClick={onClick}
+      data-edataid="cert-template-preview"
+      data-pageid="course-consumption"
       className={cn(
         "rounded-lg border-2 overflow-hidden transition-all text-left w-full",
         selected
@@ -26,7 +28,7 @@ export function TemplateThumbnail({ name, previewUrl, selected, onClick }: Templ
         ) : (
           <div className="flex flex-col items-center gap-1 text-muted-foreground">
             <FiAward className="w-6 h-6" />
-            <span className="text-xs font-['Rubik']">Preview</span>
+            <span className="text-xs font-rubik">Preview</span>
           </div>
         )}
         {selected && (
@@ -36,7 +38,7 @@ export function TemplateThumbnail({ name, previewUrl, selected, onClick }: Templ
         )}
       </div>
       <div className="px-2 py-1.5 border-t border-border bg-white">
-        <p className="text-xs font-medium font-['Rubik'] text-foreground truncate">{name}</p>
+        <p className="text-xs font-medium font-rubik text-foreground truncate">{name}</p>
       </div>
     </button>
   );

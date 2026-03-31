@@ -7,12 +7,19 @@ import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
+import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+import useImpression from '@/hooks/useImpression';
+import { useTelemetry } from '@/hooks/useTelemetry';
 
 const ForgotPassword: React.FC = () => {
   const { mutateAsync: searchUser } = useLearnerFuzzySearch();
   const { mutateAsync: generateOtp } = useGenerateOtp();
   const { mutateAsync: verifyOtp } = useVerifyOtp();
   const { mutateAsync: resetPassword } = useResetPassword();
+  const telemetry = useTelemetry();
+
+  useImpression({ type: 'view', pageid: 'forgot-password' });
 
   const [step, setStep] = useState<Step>(1);
   const [validIdentifiers, setValidIdentifiers] = useState<OtpIdentifier[]>([]);
@@ -22,17 +29,31 @@ const ForgotPassword: React.FC = () => {
   const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
 
   const handleIdentifySuccess = (identifiers: OtpIdentifier[]) => {
+    telemetry.log({
+      edata: { type: 'api', level: 'INFO', message: 'Forgot password: user identified', pageid: 'forgot-password' },
+    });
     setValidIdentifiers(identifiers);
     setStep(2);
   };
 
   const handleOtpDeliverySuccess = (identifier: OtpIdentifier) => {
+    telemetry.log({
+      edata: { type: 'api', level: 'INFO', message: 'Forgot password: OTP delivery method selected', pageid: 'forgot-password' },
+    });
     setSelectedIdentifier(identifier);
     setStep(3);
   };
 
+  const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+
   return (
-    <AuthLayout onClose={() => window.location.href = '/portal/login?prompt=none'} isOtpPage={step === 3}>
+    <AuthLayout onClose={() => {
+      window.location.href = getSafeRedirectUrl();
+    }} isOtpPage={step === 3} hideClose={isMobileRedirect}>
+      <TelemetryTracker 
+        startEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
+        endEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
+      />
       <div className="w-full font-rubik">
         {step === 1 && (
           <IdentifyUser

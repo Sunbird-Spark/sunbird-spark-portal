@@ -28,8 +28,8 @@ export function BatchFormFields({
   form,
   handleField,
   setForm,
-  labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-['Rubik']",
-  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-['Rubik']",
+  labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik",
+  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
   disabledFields = [],
 }: BatchFormFieldsProps) {
   const { t } = useAppI18n();
@@ -118,7 +118,7 @@ export function BatchFormFields({
             disabled={disabledFields.includes("endDate")}
           />
           {form.enrolmentEndDate && !form.endDate && (
-             <p className="mt-0.5 text-xs text-amber-600 font-['Rubik']">
+             <p className="mt-0.5 text-xs text-amber-600 font-rubik">
               {t("batch.mustBeAfterEnrolmentEnd")}
             </p>
           )}
@@ -140,7 +140,7 @@ export function BatchFormFields({
             disabled={disabledFields.includes("enrolmentEndDate")}
           />
           {form.startDate && (
-            <p className="mt-0.5 text-xs text-muted-foreground font-['Rubik']">
+            <p className="mt-0.5 text-xs text-muted-foreground font-rubik">
               {form.endDate ? t("batch.betweenStartAndEndDate") : t("batch.betweenStartDate")}
             </p>
           )}

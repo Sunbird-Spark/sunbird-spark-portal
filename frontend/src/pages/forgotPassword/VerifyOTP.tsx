@@ -5,7 +5,8 @@ import { Header, PrimaryButton } from './ForgotPasswordComponents';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/common/InputOTP';
 import { OTP_REGEX } from '@/utils/ValidationUtils';
 import { OtpIdentifier } from '../../types/forgotPasswordTypes';
-import { redirectWithError } from '../../utils/forgotPasswordUtils';
+import { redirectWithError, appendSafeRedirectUri } from '../../utils/forgotPasswordUtils';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 interface VerifyOTPProps {
     selectedIdentifier: OtpIdentifier;
@@ -84,7 +85,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             });
 
             if (resetRes?.data?.link) {
-                window.location.href = resetRes.data.link;
+                window.location.href = appendSafeRedirectUri(resetRes.data.link);
                 return;
             }
 
@@ -158,6 +159,10 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
 
     return (
         <>
+            <TelemetryTracker 
+                startEventInput={{ type: 'workflow', mode: 'otp-verification', pageid: 'verify-otp-step' }}
+                endEventInput={{ type: 'workflow', mode: 'otp-verification', pageid: 'verify-otp-step' }}
+            />
             <Header
                 title={t('forgotPasswordPage.enterCode')}
                 subtitle={t('forgotPasswordPage.otpSentInstruction')}
@@ -186,7 +191,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                         </InputOTP>
                     </div>
 
-                    <div className="resend-otp-container text-center text-[0.875rem] font-medium text-[#4A5568] mt-6">
+                    <div className="resend-otp-container text-center text-[0.875rem] font-medium text-sunbird-gray-4a mt-6">
                         <button
                             disabled={disableResendOtp}
                             onClick={handleResendOtp}

@@ -1,5 +1,9 @@
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import type { UserAssessmentApiItem, UserAssessmentHistory, UserCourseEnrolmentApiItem, UserCourseProgress } from '@/types/reports';
 import { toRelativeTime } from '@/utils/dateUtils';
+
+dayjs.extend(utc);
 
 const STATUS_MAP: Record<number, UserCourseProgress['status']> = {
   0: 'Not Started',
@@ -7,20 +11,15 @@ const STATUS_MAP: Record<number, UserCourseProgress['status']> = {
   2: 'Completed',
 };
 
-/** Extract YYYY-MM-DD from an ISO datetime string */
-function toDateOnly(isoString: string): string {
-  return isoString.slice(0, 10);
-}
-
 export function mapApiItemToUserCourseProgress(
   item: UserCourseEnrolmentApiItem
 ): UserCourseProgress {
   return {
     id: item.courseid,
-    courseName: item.collectionDetails.name,
+    courseName: item.collectionDetails?.name ?? '—',
     progressPercent: item.completionpercentage ?? 0,
     status: STATUS_MAP[item.status] ?? 'Not Started',
-    enrollmentDate: toDateOnly(item.enrolled_date),
+    enrollmentDate: dayjs(item.enrolled_date).format('YYYY-MM-DD'),
     lastAccessed: toRelativeTime(item.datetime),
   };
 }
@@ -33,11 +32,11 @@ export function mapApiItemToUserAssessmentHistory(
   const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
   return {
     id: item.attempt_id,
-    courseName: item.collectionDetails.name,
+    courseName: item.collectionDetails?.name ?? '—',
     assessmentName: item.contentDetails?.name ?? '—',
     score,
     maxScore,
     percentage,
-    attemptDate: item.last_attempted_on.slice(0, 16).replace('T', ' '),
+    attemptDate: dayjs.utc(item.last_attempted_on).format('YYYY-MM-DD HH:mm'),
   };
 }

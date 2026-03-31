@@ -78,7 +78,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
 
         return (
             <div key={field}>
-                <label className="block text-[14px] text-[hsl(var(--sunbird-gray-75))] font-['Rubik'] mb-2">
+                <label className="block text-[14px] text-[hsl(var(--sunbird-gray-75))] font-rubik mb-2">
                     {label}
                 </label>
                 <div className="flex items-center gap-2">
@@ -87,10 +87,10 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                         onChange={(e) => updateField(field, e.target.value)}
                         disabled={isInputDisabled}
                         placeholder={placeholder}
-                        className={`flex-1 border ${state.status === 'error' ? 'border-red-500' : 'border-[hsl(var(--sunbird-gray-d9))]'} rounded-[10px] h-[44px] px-4 text-[15px] font-medium text-[hsl(var(--sunbird-obsidian))] font-['Rubik'] outline-none focus:border-[hsl(var(--sunbird-ginger))] placeholder:text-[hsl(var(--sunbird-gray-b2))] disabled:bg-[hsl(var(--sunbird-gray-f3))] disabled:text-[hsl(var(--sunbird-gray-75))]`}
+                        className={`flex-1 border ${state.status === 'error' ? 'border-red-500' : 'border-[hsl(var(--sunbird-gray-d9))]'} rounded-[10px] h-[44px] px-4 text-[15px] font-medium text-[hsl(var(--sunbird-obsidian))] font-rubik outline-none focus:border-[hsl(var(--sunbird-ginger))] placeholder:text-[hsl(var(--sunbird-gray-b2))] disabled:bg-[hsl(var(--sunbird-gray-f3))] disabled:text-[hsl(var(--sunbird-gray-75))]`}
                     />
                     {state.status === 'otp_sending' && (
-                        <span className="text-[hsl(var(--sunbird-brick))] text-[14px] font-medium font-['Rubik'] whitespace-nowrap">
+                        <span className="text-[hsl(var(--sunbird-brick))] text-[14px] font-medium font-rubik whitespace-nowrap">
                             {t("editProfile.sending")}
                         </span>
                     )}
@@ -104,13 +104,13 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                                 if (otpType === 'email') return !EMAIL_REGEX.test(val);
                                 return !val;
                             })()}
-                            className="text-[hsl(var(--sunbird-brick))] text-[14px] font-medium font-['Rubik'] whitespace-nowrap hover:text-[hsl(var(--sunbird-brick)/0.8)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-[hsl(var(--sunbird-brick))] text-[14px] font-medium font-rubik whitespace-nowrap hover:text-[hsl(var(--sunbird-brick)/0.8)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {t("editProfile.validate")}
                         </button>
                     )}
                     {showVerified && (
-                        <span className="text-green-600 text-[14px] font-medium font-['Rubik'] flex items-center gap-1 whitespace-nowrap">
+                        <span className="text-green-600 text-[14px] font-medium font-rubik flex items-center gap-1 whitespace-nowrap">
                             <FiCheck className="w-4 h-4" /> {t("editProfile.verified")}
                         </span>
                     )}
@@ -118,7 +118,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
 
                 {/* Validation error message (outside OTP section) */}
                 {state.status === 'error' && state.errorMessage && (
-                    <p className="text-red-500 text-[13px] font-['Rubik'] mt-1">{state.errorMessage}</p>
+                    <p className="text-red-500 text-[13px] font-rubik mt-1">{state.errorMessage}</p>
                 )}
             </div>
         );
@@ -129,11 +129,11 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
             <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
                 <DialogContent
                     hideCloseButton
-                    className="fixed left-1/2 top-1/2 z-50 w-full max-w-[720px] h-[472px] -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-white border-none px-10 pb-10 pt-8 shadow-lg flex flex-col"
+                    className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[720px] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-white border-none px-6 sm:px-10 pb-6 sm:pb-10 pt-8 shadow-lg flex flex-col overflow-y-auto"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8">
-                        <DialogTitle className="text-[22px] font-medium text-[hsl(var(--sunbird-obsidian))] font-['Rubik']">
+                        <DialogTitle className="text-[22px] font-medium text-[hsl(var(--sunbird-obsidian))] font-rubik">
                             {t("editProfile.title")}
                         </DialogTitle>
                         <DialogDescription className="sr-only">
@@ -151,13 +151,13 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
                         {/* Row 1: Full Name and Mobile Number */}
                         <div>
-                            <label className="block text-[13px] text-[hsl(var(--sunbird-gray-75))] font-['Rubik'] mb-2">
+                            <label className="block text-[13px] text-[hsl(var(--sunbird-gray-75))] font-rubik mb-2">
                                 {t("personalInfo.fullName")}
                             </label>
                             <input
                                 value={form.fullName}
                                 onChange={(e) => updateField('fullName', e.target.value)}
-                                className="w-full border border-[hsl(var(--sunbird-gray-d9))] rounded-[10px] h-[44px] px-4 text-[15px] font-medium text-[hsl(var(--sunbird-obsidian))] font-['Rubik'] outline-none focus:border-[hsl(var(--sunbird-ginger))] placeholder:text-[hsl(var(--sunbird-gray-b2))]"
+                                className="w-full border border-[hsl(var(--sunbird-gray-d9))] rounded-[10px] h-[44px] px-4 text-[15px] font-medium text-[hsl(var(--sunbird-obsidian))] font-rubik outline-none focus:border-[hsl(var(--sunbird-ginger))] placeholder:text-[hsl(var(--sunbird-gray-b2))]"
                             />
                         </div>
 
@@ -174,7 +174,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
                             type="button"
                             onClick={handleSave}
                             disabled={!canSave || isSaving}
-                            className="min-w-[210px] h-[46px] rounded-[10px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-['Rubik'] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed px-6 py-1"
+                            className="min-w-[210px] h-[46px] rounded-[10px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-rubik hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed px-6 py-1"
                         >
                             {isSaving ? t("editProfile.saving") : t("save")}
                         </button>

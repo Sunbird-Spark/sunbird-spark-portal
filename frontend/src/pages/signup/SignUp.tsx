@@ -10,13 +10,21 @@ import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
+import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+
+import useImpression from '@/hooks/useImpression';
+import { useTelemetry } from '@/hooks/useTelemetry';
 
 const SignUp: React.FC = () => {
     const { toast } = useToast();
     const { t } = useAppI18n();
     const captchaRef = useRef<ReCAPTCHA>(null);
     const signupService = useMemo(() => new SignupService(), []);
+
+    useImpression({ type: 'view', pageid: 'signup' });
+    const telemetry = useTelemetry();
 
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [firstName, setFirstName] = useState('');
@@ -54,6 +62,15 @@ const SignUp: React.FC = () => {
         const description = isResend
             ? t("signUpPage.newCodeSent")
             : t("signUpPage.checkEmailPhone");
+
+        telemetry.log({
+            edata: {
+                type: 'api',
+                level: 'INFO',
+                message: isResend ? 'OTP resent to user' : 'OTP sent to user',
+                pageid: 'signup',
+            },
+        });
 
         toast({ title, description, variant: "success" });
 
@@ -114,6 +131,15 @@ const SignUp: React.FC = () => {
             return;
         }
 
+        telemetry.log({
+            edata: {
+                type: 'api',
+                level: 'INFO',
+                message: 'User sign-up completed',
+                pageid: 'signup',
+            },
+        });
+
         setStep(3);
     };
 
@@ -134,6 +160,15 @@ const SignUp: React.FC = () => {
             });
             return;
         }
+
+        telemetry.log({
+            edata: {
+                type: 'api',
+                level: 'INFO',
+                message: 'OTP verified successfully',
+                pageid: 'signup',
+            },
+        });
 
         const deviceId = localStorage.getItem('deviceId') || undefined;
 
@@ -173,11 +208,17 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        window.location.href = '/portal/login?prompt=none';
+        window.location.href = getSafeRedirectUrl();
     };
 
+    const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+
     return (
-        <AuthLayout isOtpPage={step === 2}>
+        <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect}>
+            <TelemetryTracker 
+                startEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
+                endEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
+            />
             <div className="w-full font-rubik">
                 {step === 1 && (
                     <SignUpForm

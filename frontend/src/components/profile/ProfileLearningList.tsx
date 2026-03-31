@@ -6,6 +6,7 @@ import PageLoader from "@/components/common/PageLoader";
 import { ProgressRing } from "./ProfileIcons";
 import { useCertificateDownload } from "@/hooks/useCertificateDownload";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -33,7 +34,7 @@ interface CourseRowProps {
 const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId, t }: CourseRowProps) => {
     const status = getCompletionStatus(course.status);
     const progress = course.completionPercentage ?? 0;
-    const thumbnail = course.content?.posterImage || course.courseLogoUrl || course.content?.appIcon;
+    const thumbnail = course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId);
     const title = course.courseName || course.content?.name || "Untitled Course";
 
     const isDownloading = downloadingCourseId === course.courseId;
@@ -43,15 +44,15 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
             {/* 1. Thumbnail + Details */}
             <div className="profile-learning-info">
                 <div className="w-[4.375rem] flex-shrink-0">
-                    {thumbnail ? (
-                        <img
-                            src={thumbnail}
-                            alt={title}
-                            className="w-[4.375rem] h-[4.375rem] rounded-xl object-cover"
-                        />
-                    ) : (
-                        <div className="w-[4.375rem] h-[4.375rem] rounded-xl bg-black flex-shrink-0" />
-                    )}
+                    <img
+                        src={thumbnail}
+                        alt={title}
+                        className="w-[4.375rem] h-[4.375rem] rounded-xl object-cover"
+                        onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = getPlaceholderImage(course.collectionId);
+                        }}
+                    />
                 </div>
                 <div className="profile-learning-details">
                     <h4 className="profile-learning-title">{title}</h4>

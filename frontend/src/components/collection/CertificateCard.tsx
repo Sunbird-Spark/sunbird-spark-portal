@@ -45,6 +45,8 @@ const CertificateCard = ({
           onClick={handlePreviewCertificate}
           disabled={!previewUrl}
           className="font-rubik font-medium text-[1rem] leading-normal w-fit h-[2.25rem] px-5 rounded-[0.375rem] bg-sunbird-brick text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center self-start"
+          data-edataid="collection-cert-preview-open"
+          data-pageid="collection-detail"
         >
           {t("courseDetails.previewCertificate")}
         </button>
@@ -54,7 +56,7 @@ const CertificateCard = ({
 
   return (
     <div
-      className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-white p-5 flex flex-col gap-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+      className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-white p-5 flex flex-col gap-4 shadow-sunbird-sm"
       data-testid="certificate-card"
     >
       <div className="flex items-center gap-2">

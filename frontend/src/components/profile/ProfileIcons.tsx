@@ -1,7 +1,7 @@
 export const TimeSpentIcon = () => (
     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 25C19.6274 25 25 19.6274 25 13C25 6.37258 19.6274 1 13 1C6.37258 1 1 6.37258 1 13C1 19.6274 6.37258 25 13 25Z" stroke="#F4F4F4" strokeWidth="2" />
-        <path d="M19 13.0002H13.3333C13.1493 13.0002 13 12.8535 13 12.6668V8.3335" stroke="#F4F4F4" strokeWidth="2" strokeLinecap="round" />
+        <path d="M13 25C19.6274 25 25 19.6274 25 13C25 6.37258 19.6274 1 13 1C6.37258 1 1 6.37258 1 13C1 19.6274 6.37258 25 13 25Z" stroke="hsl(var(--sunbird-gray-f1))" strokeWidth="2" />
+        <path d="M19 13.0002H13.3333C13.1493 13.0002 13 12.8535 13 12.6668V8.3335" stroke="hsl(var(--sunbird-gray-f1))" strokeWidth="2" strokeLinecap="round" />
     </svg>
 );
 

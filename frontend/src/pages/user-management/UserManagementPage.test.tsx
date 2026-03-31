@@ -38,6 +38,10 @@ vi.mock('@/hooks/useTnc', () => ({
   useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useConsentSummary', () => ({
+  useConsentSummary: () => ({ data: [], isLoading: false, isError: false }),
+}));
+
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, onConfirm, onClose }: any) =>
     open ? (
@@ -422,7 +426,6 @@ describe('UserManagementPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Total Users')).toBeInTheDocument();
         expect(screen.getByText('Consent Granted')).toBeInTheDocument();
-        expect(screen.getByText('Consent Pending')).toBeInTheDocument();
         expect(screen.getByText('Consent Revoked')).toBeInTheDocument();
       });
     });

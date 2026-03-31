@@ -13,22 +13,22 @@ const CategorySection = () => {
     {
       id: "ui-ux-design",
       icon: uiuxIcon,
-      background: "linear-gradient(to right, #45C0ED, #8E46C5)",
+      background: "var(--category-gradient-1)",
     },
     {
       id: "it-development",
       icon: devIcon,
-      background: "linear-gradient(to right, #D55E1D, #F6C35C)",
+      background: "var(--category-gradient-2)",
     },
     {
       id: "digital-marketing",
       icon: marketingIcon,
-      background: "linear-gradient(to right, #1D79D5, #6ED97B)",
+      background: "var(--category-gradient-3)",
     },
     {
       id: "entrepreneurship",
       icon: entrepreneurIcon,
-      background: "linear-gradient(to right, #F59C84, #D655E7)",
+      background: "var(--category-gradient-4)",
     },
   ];
 

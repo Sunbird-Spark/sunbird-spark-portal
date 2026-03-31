@@ -97,7 +97,7 @@ const RatingDialog = ({ open, onClose, onSubmit, playerMetadata }: RatingDialogP
                                 className={`transition-colors ${
                                     star <= (hovered || rating)
                                         ? "fill-sunbird-brick text-sunbird-brick"
-                                        : "fill-[#D4D4D4] text-[#D4D4D4]"
+                                        : "fill-sunbird-gray-d0 text-sunbird-gray-d0"
                                 }`}
                             />
                         </button>

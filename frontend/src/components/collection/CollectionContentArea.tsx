@@ -18,7 +18,7 @@ export default function CollectionContentArea({
   enrollment,
   sidebar,
   creator = {},
-  backTo = '/home',
+  backTo = '/explore',
 }: CollectionContentAreaProps) {
   const {
     isTrackable,

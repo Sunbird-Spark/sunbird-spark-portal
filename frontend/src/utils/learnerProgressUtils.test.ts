@@ -190,6 +190,6 @@ describe('mapApiItemToLearnerProgress', () => {
     expect(result.enrollmentDate).toBe('2026-03-04');
     // lastActiveDate is now relative time, not a raw date
     expect(result.lastActiveDate).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(result.lastActiveDate).toMatch(/ago|just now|last week|last month|last year/);
+    expect(result.lastActiveDate).toMatch(/ago|seconds/);
   });
 });

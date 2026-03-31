@@ -499,8 +499,10 @@
       "story": "História e jogo",
       "course": "Curso",
       "collection": "Coleção",
+      "textbook": "Livro Didático",
       "questionSet": "Conjunto de perguntas"
     },
+    "noAccessToCreate": "Você não tem acesso para criar este conteúdo",
     "collectionDescriptions": {
       "course": "Digite uma descrição para o curso",
       "contentPlaylist": "Digite uma descrição para a coleção",

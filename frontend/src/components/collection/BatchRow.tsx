@@ -54,13 +54,13 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
     <div className="rounded-xl border border-border bg-white p-4 flex flex-col gap-2 hover:shadow-sm transition-shadow">
       {/* Name row */}
       <div className="flex items-start justify-between gap-2">
-        <span className="text-sm font-semibold text-foreground font-['Rubik'] leading-snug flex-1">
+        <span className="text-sm font-semibold text-foreground font-rubik leading-snug flex-1">
           {batch.name}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
           <span
             className={cn(
-              "inline-flex items-center text-xs font-medium rounded-full px-2.5 py-0.5 font-['Rubik']",
+              "inline-flex items-center text-xs font-medium rounded-full px-2.5 py-0.5 font-rubik",
               STATUS_STYLES[status]
             )}
           >
@@ -74,6 +74,8 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
               title={canManageCertificates ? t('batchRow.editBatch') : t('batchRow.viewBatch')}
               aria-label={canManageCertificates ? t('batchRow.editBatch') : t('batchRow.viewBatch')}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors"
+              data-edataid="batch-row-edit"
+              data-pageid="course-consumption"
             >
               {canManageCertificates ? <FiEdit2 className="w-3.5 h-3.5" /> : <FiEye className="w-3.5 h-3.5" />}
             </button>
@@ -89,7 +91,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
       </div>
 
       {/* Dates */}
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-['Rubik']">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-rubik">
         <FiCalendar className="w-3 h-3 shrink-0 text-sunbird-brick/70" />
         <span>
           {formatDate(batch.startDate)} – {formatDate(batch.endDate)}
@@ -108,7 +110,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
           <FiAward className="w-3.5 h-3.5 text-sunbird-brick shrink-0" />
           {certLocked ? (
             <span
-              className="flex items-center gap-1 text-xs text-muted-foreground font-['Rubik'] cursor-not-allowed"
+              className="flex items-center gap-1 text-xs text-muted-foreground font-rubik cursor-not-allowed"
               title={t('batchRow.certificateCannotBeModified')}
             >
               <FiLock className="w-3 h-3" />
@@ -118,7 +120,9 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
             <button
               type="button"
               onClick={() => onCertificateClick(batch)}
-              className="text-xs text-sunbird-brick font-medium font-['Rubik'] hover:underline"
+              className="text-xs text-sunbird-brick font-medium font-rubik hover:underline"
+              data-edataid="batch-row-certificate"
+              data-pageid="course-consumption"
             >
               {hasCertTemplate ? t('certificate.editCertificate') : t('certificate.addCertificate')}
             </button>

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
@@ -10,6 +10,9 @@ import { useBatchListForMentor } from '@/hooks/useBatch';
 import BatchesTab from './BatchesTab';
 import CertificatesTab from './CertificatesTab';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import useImpression from '@/hooks/useImpression';
+import useInteract from '@/hooks/useInteract';
+import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import './courseDashboard.css';
 
 type DashboardTab = 'batches' | 'certificates';
@@ -19,17 +22,8 @@ const VALID_TABS: DashboardTab[] = ['batches', 'certificates'];
 const CourseDashboardPage: React.FC = () => {
   const { t } = useAppI18n();
   const { collectionId, tab } = useParams<{ collectionId: string; tab: string }>();
+  useImpression({ type: 'view', pageid: 'course-dashboard', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Capture the back-destination once on mount; tab switching clears location.state.
-  // Filter out /collection/ paths to prevent collection-to-collection back chains.
-  const dashboardStateFrom = (location.state as { from?: string } | null)?.from ?? '';
-  const backToRef = useRef<string>(
-    dashboardStateFrom && !dashboardStateFrom.startsWith('/collection/') && !dashboardStateFrom.startsWith('/content/')
-      ? dashboardStateFrom
-      : '/explore'
-  );
 
   const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
   const { data: currentUserId } = useCurrentUserId();
@@ -37,6 +31,9 @@ const CourseDashboardPage: React.FC = () => {
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
+
+  useImpression({ type: 'view', pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
+  const { interact } = useInteract();
 
   const isMentorRole = useIsMentor();
   const { data: mentorBatches, isLoading: isMentorBatchesLoading } = useBatchListForMentor(collectionId, { enabled: isMentorRole });
@@ -46,7 +43,7 @@ const CourseDashboardPage: React.FC = () => {
 
   // Enforce access control: redirect if not authorized after data has loaded
   const isPermissionDetermining = isLoading || isMentorBatchesLoading;
-  
+
   useEffect(() => {
     if (!isPermissionDetermining && collectionData && currentUserId !== undefined) {
       if (!canAccessDashboard) {
@@ -67,6 +64,7 @@ const CourseDashboardPage: React.FC = () => {
     : 'batches';
 
   const switchTab = (t: DashboardTab) => {
+    interact({ id: 'course-dashboard-tab-switch', type: 'CLICK', pageid: 'course-dashboard', cdata: [{ id: t, type: 'Tab' }] });
     navigate(`/collection/${collectionId}/dashboard/${t}`);
   };
 
@@ -74,11 +72,15 @@ const CourseDashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100" data-testid="dashboard-page">
+      <TelemetryTracker 
+        startEventInput={{ type: 'workflow', mode: 'course-dashboard', pageid: 'course-dashboard-page' }}
+        endEventInput={{ type: 'workflow', mode: 'course-dashboard', pageid: 'course-dashboard-exit' }}
+      />
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <button
-          onClick={() => navigate(`/collection/${collectionId}`, { state: { from: backToRef.current } })}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
           data-testid="back-to-course-btn"
         >
@@ -113,10 +115,10 @@ const CourseDashboardPage: React.FC = () => {
 
         {/* ─── Main Box ─── */}
         {!isPermissionDetermining && !isError && (
-          <div className="bg-white rounded-2xl shadow-[0_0.125rem_0.75rem_rgba(0,0,0,0.08)] border border-border flex flex-col min-h-[372px]">
+          <div className="bg-white rounded-2xl shadow-sunbird-sm border border-border flex flex-col min-h-[372px]">
             {/* ─── Header area of Box ─── */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <p className="text-sm font-semibold text-foreground font-['Rubik']">
+              <p className="text-sm font-semibold text-foreground font-rubik">
                 Manage dashboard for this course
               </p>
             </div>
@@ -124,7 +126,7 @@ const CourseDashboardPage: React.FC = () => {
             {/* ─── Tab bar ─── */}
             <div className="flex border-b border-border" data-testid="tab-bar">
               <button
-                className={`flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors ${
+                className={`flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors ${
                   activeTab === 'batches'
                     ? 'text-sunbird-brick'
                     : 'text-muted-foreground hover:text-foreground'
@@ -138,7 +140,7 @@ const CourseDashboardPage: React.FC = () => {
                 )}
               </button>
               <button
-                className={`flex-1 py-2.5 text-sm font-['Rubik'] font-medium relative transition-colors ${
+                className={`flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors ${
                   activeTab === 'certificates'
                     ? 'text-sunbird-brick'
                     : 'text-muted-foreground hover:text-foreground'

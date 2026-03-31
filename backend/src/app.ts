@@ -18,6 +18,8 @@ import { sessionMiddleware, anonymousMiddlewares } from './middlewares/condition
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
+import anonymousActionRoutes from './routes/anonymousActionRoutes.js';
+import mobileRoutes from './routes/mobileRoutes.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +37,9 @@ app.get('/health', checkHealth);
 app.get('/portal/app/v1/info', getAppInfo);
 
 
+// Mobile API Routes (stateless — returns tokens directly, no session)
+app.use('/mobile', mobileRoutes);
+
 // Portal Authentication Routes (Login, Callback, Logout) — registered first to bypass anonymous middleware
 app.use('/portal', portalAuthRoutes);
 // Portal Anonymous Routes
@@ -49,6 +54,11 @@ app.use('/google', googleRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // Specific /action endpoints must always proxy to kong.
 app.use("/action", editorRoutes);
+
+// Anonymous-safe /action/* routes — registered BEFORE the authenticated catch-all.
+// Allows the Sunbird Telemetry JS SDK to POST /action/data/v3/telemetry for
+// anonymous/guest users without needing OIDC tokens.
+app.use('/action', sessionMiddleware, ...anonymousMiddlewares, anonymousActionRoutes);
 
 // All remaining /action/* routes proxy to knowledge-mw-service.
 // oidcSession() deserializes the OIDC tokens from the session so that

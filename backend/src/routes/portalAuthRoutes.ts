@@ -9,6 +9,7 @@ import { envConfig } from '../config/env.js';
 import { sessionMiddleware } from '../middlewares/conditionalSession.js';
 import crypto from 'crypto';
 import _ from 'lodash';
+import { generateTelemetryStart, generateTelemetryEnd, dispatchTelemetry } from '../services/telemetryService.js';
 
 const router = express.Router();
 
@@ -45,6 +46,9 @@ router.get('/login',
             // handler redirects to /portal/login?prompt=login for interactive login.
             const promptParam = allowedPrompts.includes(rawPrompt as string) ? rawPrompt : 'none';
 
+            const rawKcIdpHint = req.query.kc_idp_hint as string | undefined;
+            const kcIdpHint = rawKcIdpHint === 'google' ? rawKcIdpHint : undefined;
+
             const redirectTo = oidcClient.buildAuthorizationUrl(config, {
                 redirect_uri: callbackUrl,
                 scope: 'openid',
@@ -52,6 +56,7 @@ router.get('/login',
                 code_challenge_method: 'S256',
                 state: state,
                 ...(promptParam ? { prompt: promptParam } : {}),
+                ...(kcIdpHint ? { kc_idp_hint: kcIdpHint } : {}),
             });
 
             logger.info('Redirecting to OIDC provider for login');
@@ -164,6 +169,16 @@ router.get('/auth/callback',
                 // Explicitly save session before redirect to ensure all data is persisted
                 await saveSession(req);
 
+                // Dispatch Global Session START Telemetry
+                try {
+                    const startEvent = generateTelemetryStart(req);
+                    dispatchTelemetry(req, [startEvent]).catch(err => {
+                        logger.error('Background telemetry dispatch failed', err);
+                    });
+                } catch (telemetryErr) {
+                    logger.error('Failed to generate START telemetry event', telemetryErr);
+                }
+
                 logger.info('Session setup complete, redirecting to /home');
                 // Use HTML redirect instead of 302 to break the POST redirect chain.
                 // When Keycloak redirects back via POST, a 302 keeps the chain alive
@@ -191,6 +206,16 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
     const idToken = req.session?.['oidc-tokens']?.id_token;
     const redirectUri = envConfig.DEVELOPMENT_REACT_APP_URL || envConfig.SERVER_URL + '/';
 
+    // Dispatch Global Session END Telemetry before destroying the session
+    try {
+        const endEvent = generateTelemetryEnd(req);
+        dispatchTelemetry(req, [endEvent]).catch(err => {
+            logger.error('Background telemetry dispatch failed on logout', err);
+        });
+    } catch (telemetryErr) {
+        logger.error('Failed to generate END telemetry event', telemetryErr);
+    }
+
     // Destroy the session in the store and clear the cookie so the browser starts
     // completely fresh on the next login (no stale session data or ID).
     // The anonymous session will be created naturally by registerDeviceWithKong on
@@ -212,9 +237,14 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
     // Redirect to OIDC provider logout
     try {
         const config = await getPortalOIDCConfig();
+        // Only pass id_token_hint if the token was issued for the portal client.
+        // Google-auth sessions produce tokens with aud="google-auth"; passing those
+        // as id_token_hint with client_id=portal causes Keycloak to reject the request.
+        const idTokenAud = idToken ? (decodeJwtPayload(idToken) as Record<string, unknown> | null)?.aud : undefined;
+        const isPortalToken = idTokenAud === 'portal' || (Array.isArray(idTokenAud) && idTokenAud.includes('portal'));
         const logoutUrl = oidcClient.buildEndSessionUrl(config, {
             post_logout_redirect_uri: redirectUri,
-            ...(idToken ? { id_token_hint: idToken } : {}),
+            ...(idToken && isPortalToken ? { id_token_hint: idToken } : {}),
         });
         res.redirect(logoutUrl.href);
     } catch {
