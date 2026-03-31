@@ -7,7 +7,7 @@ interface ProfileCardProps {
 }
 
 const ProfileCard = ({ user }: ProfileCardProps) => {
-    const fullName = `${_.get(user, 'firstName', '')} ${_.get(user, 'lastName', '')}`;
+    const fullName = [_.get(user, 'firstName'), _.get(user, 'lastName')].filter(Boolean).join(' ');
     const displayId = _.get(user, 'userName', '');
 
     const formatRole = (role: string) => {
