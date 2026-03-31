@@ -129,7 +129,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
             <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
                 <DialogContent
                     hideCloseButton
-                    className="fixed left-1/2 top-1/2 z-50 w-full max-w-[720px] h-[472px] -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-white border-none px-10 pb-10 pt-8 shadow-lg flex flex-col"
+                    className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[720px] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-white border-none px-6 sm:px-10 pb-6 sm:pb-10 pt-8 shadow-lg flex flex-col overflow-y-auto"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8">
