@@ -9,7 +9,6 @@ import { SignUpSuccess } from '@/components/signup/SignUpSuccess';
 import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
-import { useAcceptTnc } from '@/hooks/useTnc';
 import { SignupService } from '@/services/SignupService';
 import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
@@ -32,22 +31,19 @@ const SignUp: React.FC = () => {
     const [emailOrMobile, setEmailOrMobile] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [otp, setOtp] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
     const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
-    const { data: tncConfig } = useSystemSetting('tncConfig');
 
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
     const generateOtpMutation = useGenerateOtp();
-    const acceptTncMutation = useAcceptTnc();
 
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
-    const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword && isTermsAccepted);
+    const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword);
     const isOtpValid = OTP_REGEX.test(otp);
 
     const handleOtpSuccess = (response: any, isResend = false) => {
@@ -111,7 +107,7 @@ const SignUp: React.FC = () => {
     };
 
     const handleContinue = () => {
-        const validation = signupService.validateSignupForm(firstName, emailOrMobile, password, confirmPassword, isTermsAccepted);
+        const validation = signupService.validateSignupForm(firstName, emailOrMobile, password, confirmPassword);
 
         if (!validation.isValid && validation.error) {
             toast({
@@ -143,11 +139,6 @@ const SignUp: React.FC = () => {
                 pageid: 'signup',
             },
         });
-
-        // Accept TNC if terms were accepted during signup
-        if (isTermsAccepted && tncConfig) {
-            acceptTncMutation.mutate({ tncConfig, identifier: emailOrMobile });
-        }
 
         setStep(3);
     };
@@ -239,8 +230,6 @@ const SignUp: React.FC = () => {
                         setPassword={setPassword}
                         confirmPassword={confirmPassword}
                         setConfirmPassword={setConfirmPassword}
-                        isTermsAccepted={isTermsAccepted}
-                        setIsTermsAccepted={setIsTermsAccepted}
                         showPassword={showPassword}
                         setShowPassword={setShowPassword}
                         showConfirmPassword={showConfirmPassword}

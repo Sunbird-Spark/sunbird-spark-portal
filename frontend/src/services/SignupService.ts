@@ -48,28 +48,17 @@ export class SignupService {
             : SignupService.VALIDATION_SUCCESS;
     }
 
-    validateTermsAccepted(isTermsAccepted: boolean): SignupValidationResult {
-        return !isTermsAccepted
-            ? this.createError(
-                "Terms Not Accepted",
-                "Please accept the Terms of Use to continue."
-            )
-            : SignupService.VALIDATION_SUCCESS;
-    }
-
     validateSignupForm(
         firstName: string,
         emailOrMobile: string,
         password: string,
         confirmPassword: string,
-        isTermsAccepted: boolean
     ): SignupValidationResult {
         const validations = [
             this.validateFirstName(firstName),
             this.validateIdentifier(emailOrMobile),
             this.validatePassword(password),
             this.validatePasswordMatch(password, confirmPassword),
-            this.validateTermsAccepted(isTermsAccepted),
         ];
 
         return _.find(validations, { isValid: false }) || SignupService.VALIDATION_SUCCESS;

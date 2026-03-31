@@ -1,14 +1,10 @@
 import React from "react";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
-import { Checkbox } from "@/components/common/CheckBox";
 import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/ForgotPasswordComponents";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
-import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
-import { useSystemSetting } from "@/hooks/useSystemSetting";
-import { useGetTncUrl } from "@/hooks/useTnc";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface Step1Props {
@@ -20,8 +16,6 @@ interface Step1Props {
     setPassword: (val: string) => void;
     confirmPassword: string;
     setConfirmPassword: (val: string) => void;
-    isTermsAccepted: boolean;
-    setIsTermsAccepted: (val: boolean) => void;
     showPassword: boolean;
     setShowPassword: (val: React.SetStateAction<boolean>) => void;
     showConfirmPassword: boolean;
@@ -36,7 +30,6 @@ export const SignUpForm = ({
     emailOrMobile, setEmailOrMobile,
     password, setPassword,
     confirmPassword, setConfirmPassword,
-    isTermsAccepted, setIsTermsAccepted,
     showPassword, setShowPassword,
     showConfirmPassword, setShowConfirmPassword,
     handleContinue,
@@ -44,8 +37,6 @@ export const SignUpForm = ({
     isLoading = false
 }: Step1Props) => {
     const { t } = useAppI18n();
-    const { data: tncConfig, isSuccess: isTncConfigSuccess } = useSystemSetting('tncConfig');
-    const { data: termsUrl } = useGetTncUrl(isTncConfigSuccess ? tncConfig : null);
 
     return (
     <>
@@ -70,8 +61,8 @@ export const SignUpForm = ({
                 <div className="form-divider-line"></div>
             </div>
 
-            <div className="space-y-3">
-                <div className="form-group relative pb-4">
+            <div className="space-y-1">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="firstName" required>{t("signUp.firstName")}</InputLabel>
                     <Input
                         id="firstName"
@@ -87,7 +78,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
-                <div className="form-group relative pb-4">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="emailOrMobile" required>{t("signUp.emailOrMobileLabel")}</InputLabel>
                     <Input
                         id="emailOrMobile"
@@ -103,7 +94,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
-                <div className="form-group relative pb-4">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="password" required>{t("password")}</InputLabel>
                     <div className="relative">
                         <Input
@@ -134,7 +125,7 @@ export const SignUpForm = ({
                     )}
                 </div>
 
-                <div className="form-group relative pb-4">
+                <div className="form-group relative pb-3">
                     <InputLabel htmlFor="confirmPassword" required>{t("signUp.confirmPassword")}</InputLabel>
                     <div className="relative">
                         <Input
@@ -163,37 +154,6 @@ export const SignUpForm = ({
                             {t("signUp.passwordsDoNotMatch")}
                         </p>
                     )}
-                </div>
-
-                <div className="flex items-center space-x-2 mt-1">
-                    <Checkbox
-                        id="terms"
-                        checked={isTermsAccepted}
-                        onCheckedChange={(checked) => setIsTermsAccepted(checked === true)}
-                        className="themed-checkbox"
-                    />
-                    <div className="text-[0.75rem] font-medium leading-none text-sunbird-charcoal">
-                        <label htmlFor="terms" className="cursor-pointer">
-                            {t("signUp.iUnderstand")}{' '}
-                        </label>
-                        {termsUrl ? (
-                            <TermsAndConditionsDialog
-                                termsUrl={termsUrl}
-                                title={t("signUp.termsTitle")}
-                            >
-                                <button
-                                    type="button"
-                                    className="themed-link inline"
-                                >
-                                   {t("signUp.acceptTermsOfUse")}
-                                </button>
-                            </TermsAndConditionsDialog>
-                        ) : (
-                            <span className="themed-link inline">
-                                {t("signUp.acceptTermsOfUse")}
-                            </span>
-                        )}.
-                    </div>
                 </div>
 
                 <PrimaryButton

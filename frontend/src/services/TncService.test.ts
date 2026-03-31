@@ -197,21 +197,31 @@ describe('TncService', () => {
     });
 
     describe('acceptTnc', () => {
-        it('calls API with correct version and identifier', async () => {
-            const tncConfig = {
-                data: {
-                    response: {
-                        value: {
-                            latestVersion: 'v1'
-                        }
+        const validTncConfig = {
+            data: {
+                response: {
+                    value: {
+                        latestVersion: 'v1'
                     }
                 }
-            };
-            const identifier = 'user@example.com';
-            const mockResponse = { data: { success: true } };
-            mockPost.mockResolvedValue(mockResponse);
+            }
+        };
 
-            const result = await tncService.acceptTnc(tncConfig, identifier);
+        it('sends version only when called without optional params', async () => {
+            mockPost.mockResolvedValue({ data: { success: true } });
+
+            const result = await tncService.acceptTnc(validTncConfig);
+
+            expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
+                request: { version: 'v1' },
+            });
+            expect(result).toEqual({ data: { success: true } });
+        });
+
+        it('includes identifier when provided', async () => {
+            mockPost.mockResolvedValue({ data: { success: true } });
+
+            await tncService.acceptTnc(validTncConfig, 'user@example.com');
 
             expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
                 request: {
@@ -219,67 +229,50 @@ describe('TncService', () => {
                     identifier: 'user@example.com',
                 },
             });
-            expect(result).toEqual(mockResponse);
         });
 
-        it('calls API with correct tncType', async () => {
-            const tncConfig = {
-                data: {
-                    response: {
-                        value: {
-                            latestVersion: 'v1'
-                        }
-                    }
-                }
-            };
-            const identifier = 'user@example.com';
-            const tncType = 'orgAdminTnc';
-            const mockResponse = { data: { success: true } };
-            mockPost.mockResolvedValue(mockResponse);
+        it('includes tncType when provided', async () => {
+            mockPost.mockResolvedValue({ data: { success: true } });
 
-            await tncService.acceptTnc(tncConfig, identifier, tncType);
+            await tncService.acceptTnc(validTncConfig, undefined, 'orgAdminTnc');
 
             expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
                 request: {
                     version: 'v1',
-                    identifier: 'user@example.com',
                     tncType: 'orgAdminTnc',
                 },
             });
         });
 
-        it('calls API with empty version when config is invalid', async () => {
-            const tncConfig = null;
-            const identifier = 'user@example.com';
-            const mockResponse = { data: { success: false } };
-            mockPost.mockResolvedValue(mockResponse);
+        it('includes both identifier and tncType when both provided', async () => {
+            mockPost.mockResolvedValue({ data: { success: true } });
 
-            const result = await tncService.acceptTnc(tncConfig, identifier);
+            await tncService.acceptTnc(validTncConfig, 'user@example.com', 'reportViewerTnc');
 
             expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
                 request: {
-                    version: '',
+                    version: 'v1',
                     identifier: 'user@example.com',
+                    tncType: 'reportViewerTnc',
                 },
             });
-            expect(result).toEqual(mockResponse);
         });
 
-        it('handles API errors', async () => {
-            const tncConfig = {
-                data: {
-                    response: {
-                        value: {
-                            latestVersion: 'v1'
-                        }
-                    }
-                }
-            };
-            const identifier = 'user@example.com';
-            const error = new Error('API Error');
-            mockPost.mockRejectedValue(error);
+        it('sends empty version when config is invalid', async () => {
+            mockPost.mockResolvedValue({ data: { success: false } });
 
-            await expect(tncService.acceptTnc(tncConfig, identifier)).rejects.toThrow('API Error');
+            const result = await tncService.acceptTnc(null);
+
+            expect(mockPost).toHaveBeenCalledWith('/user/v1/tnc/accept', {
+                request: { version: '' },
+            });
+            expect(result).toEqual({ data: { success: false } });
+        });
+
+        it('propagates API errors', async () => {
+            mockPost.mockRejectedValue(new Error('API Error'));
+
+            await expect(tncService.acceptTnc(validTncConfig)).rejects.toThrow('API Error');
         });
     });
 });

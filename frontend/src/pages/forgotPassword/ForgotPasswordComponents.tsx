@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 export const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => (
-    <div className="login-header text-center mb-8">
+    <div className="login-header text-center mb-4">
         <h1 className="login-header-title">{title}</h1>
         {subtitle && <p className="login-header-subtitle">{subtitle}</p>}
     </div>

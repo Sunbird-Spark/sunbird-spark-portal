@@ -53,30 +53,55 @@ describe('useTnc hooks', () => {
     });
 
     describe('useAcceptTnc', () => {
-        it('successfully accepts TNC', async () => {
-            mockAcceptTnc.mockResolvedValue({
-                data: { success: true },
-            });
+        const tncConfig = {
+            data: {
+                response: {
+                    value: { latestVersion: 'v1' }
+                }
+            }
+        };
+
+        it('successfully accepts TNC without optional params', async () => {
+            mockAcceptTnc.mockResolvedValue({ data: { success: true } });
 
             const { result } = renderHook(() => useAcceptTnc(), { wrapper });
 
-            const tncConfig = {
-                data: {
-                    response: {
-                        value: { latestVersion: 'v1' }
-                    }
-                }
-            };
-            const identifier = 'user@example.com';
-
-            result.current.mutate({ tncConfig, identifier });
+            result.current.mutate({ tncConfig });
 
             await waitFor(() => {
                 expect(result.current.isSuccess).toBe(true);
             });
 
-            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, identifier, undefined);
+            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, undefined, undefined);
             expect(result.current.data).toEqual({ data: { success: true } });
+        });
+
+        it('passes identifier to the service', async () => {
+            mockAcceptTnc.mockResolvedValue({ data: { success: true } });
+
+            const { result } = renderHook(() => useAcceptTnc(), { wrapper });
+
+            result.current.mutate({ tncConfig, identifier: 'user@example.com' });
+
+            await waitFor(() => {
+                expect(result.current.isSuccess).toBe(true);
+            });
+
+            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, 'user@example.com', undefined);
+        });
+
+        it('passes tncType to the service', async () => {
+            mockAcceptTnc.mockResolvedValue({ data: { success: true } });
+
+            const { result } = renderHook(() => useAcceptTnc(), { wrapper });
+
+            result.current.mutate({ tncConfig, tncType: 'orgAdminTnc' });
+
+            await waitFor(() => {
+                expect(result.current.isSuccess).toBe(true);
+            });
+
+            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, undefined, 'orgAdminTnc');
         });
 
         it('handles error when accepting TNC fails', async () => {
@@ -85,16 +110,7 @@ describe('useTnc hooks', () => {
 
             const { result } = renderHook(() => useAcceptTnc(), { wrapper });
 
-            const tncConfig = {
-                data: {
-                    response: {
-                        value: { latestVersion: 'v1' }
-                    }
-                }
-            };
-            const identifier = 'user@example.com';
-
-            result.current.mutate({ tncConfig, identifier });
+            result.current.mutate({ tncConfig });
 
             await waitFor(() => {
                 expect(result.current.isError).toBe(true);
@@ -104,7 +120,7 @@ describe('useTnc hooks', () => {
         });
 
         it('tracks loading state correctly', async () => {
-            mockAcceptTnc.mockImplementation(() => 
+            mockAcceptTnc.mockImplementation(() =>
                 new Promise(resolve => setTimeout(() => resolve({ data: { success: true } }), 100))
             );
 
@@ -112,23 +128,13 @@ describe('useTnc hooks', () => {
 
             expect(result.current.isPending).toBe(false);
 
-            const tncConfig = {
-                data: {
-                    response: {
-                        value: { latestVersion: 'v1' }
-                    }
-                }
-            };
-            const identifier = 'user@example.com';
-
-            result.current.mutate({ tncConfig, identifier });
+            result.current.mutate({ tncConfig });
 
             await waitFor(() => {
                 expect(result.current.isSuccess).toBe(true);
             });
 
             expect(result.current.isPending).toBe(false);
-            expect(mockAcceptTnc).toHaveBeenCalledWith(tncConfig, identifier, undefined);
         });
     });
 
