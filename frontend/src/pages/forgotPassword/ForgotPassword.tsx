@@ -7,7 +7,7 @@ import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
-import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -44,7 +44,7 @@ const ForgotPassword: React.FC = () => {
     setStep(3);
   };
 
-  const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+  const isMobileRedirect = isMobileApp();
 
   return (
     <AuthLayout onClose={() => {

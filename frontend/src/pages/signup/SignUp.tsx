@@ -10,7 +10,7 @@ import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
-import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
@@ -211,7 +211,7 @@ const SignUp: React.FC = () => {
         window.location.href = getSafeRedirectUrl();
     };
 
-    const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+    const isMobileRedirect = isMobileApp();
 
     return (
         <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect}>

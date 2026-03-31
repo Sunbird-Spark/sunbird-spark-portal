@@ -2,14 +2,14 @@ import React from 'react';
 import { FiCheck } from 'react-icons/fi';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
-import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
 
 const onProceedToLogin = () => {
     window.location.href = getSafeRedirectUrl();
 };
 
 const PasswordResetSuccess: React.FC = () => {
-    const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+    const isMobileRedirect = isMobileApp();
 
     return (
         <AuthLayout onClose={() => window.location.href = getSafeRedirectUrl()} hideClose={isMobileRedirect}>

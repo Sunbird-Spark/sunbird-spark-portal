@@ -51,19 +51,25 @@ export const buildValidIdentifiers = (results: any[]): OtpIdentifier[] => {
     return list;
 };
 
-export const appendSafeRedirectUri = (link: string): string => {
+export const isMobileApp = (): boolean => {
+    return new URLSearchParams(window.location.search).get('client') === 'mobileApp';
+};
+
+export const appendMobileParams = (link: string): string => {
     const params = new URLSearchParams(window.location.search);
     const redirectUri = params.get('redirect_uri');
-    if (redirectUri && isSafeUrl(redirectUri)) {
-        try {
-            const linkUrl = new URL(link);
+    const client = params.get('client');
+    try {
+        const linkUrl = new URL(link, window.location.origin);
+        if (redirectUri && isSafeUrl(redirectUri)) {
             linkUrl.searchParams.set('redirect_uri', redirectUri);
-            return linkUrl.toString();
-        } catch (e) {
-            console.warn('appendSafeRedirectUri: invalid base link, ignoring', e);
         }
-    } else if (redirectUri) {
-        console.warn('appendSafeRedirectUri: invalid redirect_uri, ignoring');
+        if (client) {
+            linkUrl.searchParams.set('client', client);
+        }
+        return linkUrl.toString();
+    } catch (e) {
+        console.warn('appendMobileParams: invalid base link, ignoring', e);
     }
     return link;
 };
