@@ -131,8 +131,6 @@ describe('SignUpForm', () => {
         setPassword: vi.fn(),
         confirmPassword: '',
         setConfirmPassword: vi.fn(),
-        isTermsAccepted: false,
-        setIsTermsAccepted: vi.fn(),
         showPassword: false,
         setShowPassword: vi.fn(),
         showConfirmPassword: false,
@@ -203,13 +201,6 @@ describe('SignUpForm', () => {
 
         if (eyeButtons[2]) fireEvent.click(eyeButtons[2]);
         expect(setShowConfirmPassword).toHaveBeenCalled();
-    });
-
-    it('handles terms checkbox', () => {
-        renderWithProviders(<SignUpForm {...defaultProps} />);
-        const checkbox = screen.getByRole('checkbox');
-        fireEvent.click(checkbox);
-        expect(defaultProps.setIsTermsAccepted).toHaveBeenCalled();
     });
 
     it('calls handleContinue when primary button is clicked', () => {

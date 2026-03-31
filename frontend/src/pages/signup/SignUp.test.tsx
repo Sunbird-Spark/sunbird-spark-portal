@@ -47,13 +47,13 @@ vi.mock('@/hooks/useOtp', () => ({
     })
 }));
 
-// Mock ReCAPTCHA
+// Mock ReCAPTCHA — calling execute() triggers onChange with a fake token
 vi.mock('react-google-recaptcha', async () => {
     const React = await import('react');
     return {
-        default: React.forwardRef((_props: any, ref: any) => {
+        default: React.forwardRef((props: any, ref: any) => {
             React.useImperativeHandle(ref, () => ({
-                execute: vi.fn(),
+                execute: () => props.onChange?.('mock-captcha-token'),
                 reset: vi.fn(),
             }));
             return null;
@@ -70,14 +70,13 @@ vi.mock('@/services/SystemSettingService', () => ({
 
 // Mock individual step components to control the flow in the Page test
 vi.mock('@/components/signup/SignUpForm', () => ({
-    SignUpForm: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword, setIsTermsAccepted }: any) => (
+    SignUpForm: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword }: any) => (
         <div>
             <button data-testid="continue-btn" onClick={handleContinue}>Continue</button>
             <input data-testid="firstname-input" onChange={(e) => setFirstName(e.target.value)} />
             <input data-testid="email-input" onChange={(e) => setEmailOrMobile(e.target.value)} />
             <input data-testid="pass-input" onChange={(e) => setPassword(e.target.value)} />
             <input data-testid="conf-input" onChange={(e) => setConfirmPassword(e.target.value)} />
-            <input type="checkbox" data-testid="terms-check" onChange={(e) => setIsTermsAccepted(e.target.checked)} />
         </div>
     )
 }));
@@ -156,24 +155,12 @@ describe('SignUp Page', () => {
         expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Passwords Mismatch' }));
     });
 
-    it('shows error if terms not accepted', () => {
-        renderWithProviders(<SignUp />);
-        fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });
-        fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } });
-        fireEvent.change(screen.getByTestId('pass-input'), { target: { value: 'Pass123!' } });
-        fireEvent.change(screen.getByTestId('conf-input'), { target: { value: 'Pass123!' } });
-        // terms-check is false by default
-        fireEvent.click(screen.getByTestId('continue-btn'));
-        expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Terms Not Accepted' }));
-    });
-
     it('transitions to Step 2 when validation passes', async () => {
         renderWithProviders(<SignUp />);
         fireEvent.change(screen.getByTestId('firstname-input'), { target: { value: 'John' } });
         fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByTestId('pass-input'), { target: { value: 'Pass123!' } });
         fireEvent.change(screen.getByTestId('conf-input'), { target: { value: 'Pass123!' } });
-        fireEvent.click(screen.getByTestId('terms-check'));
 
         fireEvent.click(screen.getByTestId('continue-btn'));
 
@@ -193,7 +180,6 @@ describe('SignUp Page', () => {
         fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByTestId('pass-input'), { target: { value: 'Pass123!' } });
         fireEvent.change(screen.getByTestId('conf-input'), { target: { value: 'Pass123!' } });
-        fireEvent.click(screen.getByTestId('terms-check'));
         fireEvent.click(screen.getByTestId('continue-btn'));
 
         // Wait for step 2
