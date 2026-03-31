@@ -361,7 +361,7 @@ describe('useNotificationDelete', () => {
         expect(result.current.filterDeleted([feed1, feed2])).toEqual([]);
     });
 
-    it('deleteAll calls notificationsDelete once per notification', async () => {
+    it('deleteAll batches notifications with the same userId and category into one API call', async () => {
         mockNotificationService.notificationsDelete.mockResolvedValue({
             data: {},
             status: 200,
@@ -376,6 +376,35 @@ describe('useNotificationDelete', () => {
             await result.current.deleteAll([feed1, feed2]);
         });
 
+        expect(mockNotificationService.notificationsDelete).toHaveBeenCalledTimes(1);
+        expect(mockNotificationService.notificationsDelete).toHaveBeenCalledWith(
+            ['notif-1', 'notif-2'],
+            feed1.userId,
+            feed1.action.category,
+        );
+    });
+
+    it('deleteAll sends one API call per unique category', async () => {
+        mockNotificationService.notificationsDelete.mockResolvedValue({
+            data: {},
+            status: 200,
+            headers: {},
+        });
+
+        const feed1 = makeFeed({ id: 'notif-1', action: { ...makeFeed().action, category: 'group-feed' } });
+        const feed2 = makeFeed({ id: 'notif-2', action: { ...makeFeed().action, category: 'certificate' } });
+        const { result } = renderHook(() => useNotificationDelete(), { wrapper: createWrapper() });
+
+        await act(async () => {
+            await result.current.deleteAll([feed1, feed2]);
+        });
+
         expect(mockNotificationService.notificationsDelete).toHaveBeenCalledTimes(2);
+        expect(mockNotificationService.notificationsDelete).toHaveBeenCalledWith(
+            ['notif-1'], feed1.userId, 'group-feed',
+        );
+        expect(mockNotificationService.notificationsDelete).toHaveBeenCalledWith(
+            ['notif-2'], feed2.userId, 'certificate',
+        );
     });
 });

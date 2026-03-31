@@ -74,13 +74,18 @@ export const useNotificationDelete = () => {
 
     const deleteAll = useCallback(async (notifications: NotificationFeed[]): Promise<void> => {
         setDeletedIds(new Set(notifications.map(n => n.id)));
-        await Promise.all(
-            notifications.map(n => deleteApi({
-                ids: [n.id],
-                userId: n.userId,
-                category: n.action.category,
-            }))
-        );
+
+        // Group by (userId, action.category) → one API call per group
+        const groups = new Map<string, { ids: string[]; userId: string; category: string }>();
+        for (const n of notifications) {
+            const key = `${n.userId}::${n.action.category}`;
+            if (!groups.has(key)) {
+                groups.set(key, { ids: [], userId: n.userId, category: n.action.category });
+            }
+            groups.get(key)!.ids.push(n.id);
+        }
+
+        await Promise.all([...groups.values()].map(g => deleteApi(g)));
     }, [deleteApi]);
 
     const filterDeleted = useCallback((notifications: NotificationFeed[]) => {
