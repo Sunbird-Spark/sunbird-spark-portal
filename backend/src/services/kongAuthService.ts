@@ -111,7 +111,11 @@ export const generateLoggedInKongToken = async (req: Request): Promise<string> =
         );
     }
 
-    return envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
+    const fallback = envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
+    if (!fallback) {
+        throw new Error('LOGGEDIN_KONG_TOKEN :: Registration failed and KONG_LOGGEDIN_FALLBACK_TOKEN is not configured');
+    }
+    return fallback;
 };
 
 export const saveKongTokenToSession = async (req: Request, token: string): Promise<void> => {

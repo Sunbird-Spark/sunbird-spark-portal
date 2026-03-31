@@ -302,5 +302,97 @@ describe('kongAuth middleware', () => {
             );
             expect(mockRequest.session?.kongToken).toBe('fallback-token');
         });
+
+        describe('authenticated user without kongToken', () => {
+            const loggedInEnvConfig = {
+                ...mockEnvConfig,
+                KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'loggedin-register-token',
+                KONG_LOGGEDIN_FALLBACK_TOKEN: 'loggedin-fallback-token',
+            };
+
+            it('should generate logged-in token and save session when userId is set but no kongToken', async () => {
+                vi.doMock('../config/env.js', () => ({ envConfig: loggedInEnvConfig }));
+                vi.doMock('../services/kongAuthService.js', () => ({
+                    generateKongToken: vi.fn(),
+                    generateLoggedInKongToken: vi.fn().mockResolvedValue('new-loggedin-token'),
+                    refreshSessionTTL: vi.fn(),
+                    isSessionNearExpiry: vi.fn().mockReturnValue(false),
+                    saveKongTokenToSession: vi.fn(),
+                }));
+                const { registerDeviceWithKong } = await import('./kongAuth.js');
+                const logger = (await import('../utils/logger.js')).default;
+                const { generateLoggedInKongToken } = await import('../services/kongAuthService.js');
+
+                if (mockRequest.session) {
+                    mockRequest.session.userId = 'test-user-id';
+                }
+
+                await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
+
+                expect(logger.info).toHaveBeenCalledWith(
+                    'LOGGEDIN_KONG_TOKEN :: no token for authenticated user, re-registering session'
+                );
+                expect(generateLoggedInKongToken).toHaveBeenCalledWith(mockRequest);
+                expect(mockRequest.session?.kongToken).toBe('new-loggedin-token');
+                expect(mockRequest.session?.save).toHaveBeenCalled();
+                expect(mockNext).toHaveBeenCalledWith();
+            });
+
+            it('should call next with error when logged-in token generation fails', async () => {
+                vi.doMock('../config/env.js', () => ({ envConfig: loggedInEnvConfig }));
+                const tokenError = new Error('Kong registration failed');
+                vi.doMock('../services/kongAuthService.js', () => ({
+                    generateKongToken: vi.fn(),
+                    generateLoggedInKongToken: vi.fn().mockRejectedValue(tokenError),
+                    refreshSessionTTL: vi.fn(),
+                    isSessionNearExpiry: vi.fn().mockReturnValue(false),
+                    saveKongTokenToSession: vi.fn(),
+                }));
+                const { registerDeviceWithKong } = await import('./kongAuth.js');
+                const logger = (await import('../utils/logger.js')).default;
+
+                if (mockRequest.session) {
+                    mockRequest.session.userId = 'test-user-id';
+                }
+
+                await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
+
+                expect(logger.error).toHaveBeenCalledWith(
+                    'LOGGEDIN_KONG_TOKEN :: re-registration failed for session test-session-id',
+                    tokenError
+                );
+                expect(mockNext).toHaveBeenCalledWith(tokenError);
+            });
+
+            it('should call next with error when session save fails after logged-in token generation', async () => {
+                vi.doMock('../config/env.js', () => ({ envConfig: loggedInEnvConfig }));
+                vi.doMock('../services/kongAuthService.js', () => ({
+                    generateKongToken: vi.fn(),
+                    generateLoggedInKongToken: vi.fn().mockResolvedValue('new-loggedin-token'),
+                    refreshSessionTTL: vi.fn(),
+                    isSessionNearExpiry: vi.fn().mockReturnValue(false),
+                    saveKongTokenToSession: vi.fn(),
+                }));
+                const { registerDeviceWithKong } = await import('./kongAuth.js');
+                const logger = (await import('../utils/logger.js')).default;
+
+                const saveError = new Error('Session save failed');
+                if (mockRequest.session) {
+                    mockRequest.session.userId = 'test-user-id';
+                    mockRequest.session.save = vi.fn((callback) => {
+                        if (callback) callback(saveError);
+                        return mockRequest.session as Session & Partial<SessionData>;
+                    });
+                }
+
+                await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
+
+                expect(logger.error).toHaveBeenCalledWith(
+                    'LOGGEDIN_KONG_TOKEN :: failed to save session',
+                    saveError
+                );
+                expect(mockNext).toHaveBeenCalledWith(saveError);
+            });
+        });
     });
 });
