@@ -41,14 +41,15 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
     const isDownloading = downloadingCourseId === course.courseId;
 
     return (
-        <Link
-            to={`/collection/${course.collectionId}`}
-            className="block"
-            data-edataid="profile-learning-card-click"
-            data-objectid={course.collectionId}
-            data-objecttype="Collection"
-        >
-        <div className="profile-learning-item">
+        <div className="profile-learning-item relative">
+            <Link
+                to={`/collection/${course.collectionId}`}
+                className="absolute inset-0"
+                aria-label={title}
+                data-edataid="profile-learning-card-click"
+                data-objectid={course.collectionId}
+                data-objecttype="Collection"
+            />
             {/* 1. Thumbnail + Details */}
             <div className="profile-learning-info">
                 <div className="w-[4.375rem] flex-shrink-0">
@@ -92,12 +93,12 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                 </div>
             </div>
 
-            <div className="profile-learning-actions">
+            <div className="profile-learning-actions relative z-10">
                 {status === "completed" && hasCertificate(course.courseId, course.batchId, title, course.issuedCertificates) ? (
                     <button
                         className={`flex items-center gap-2 transition-opacity min-w-fit ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
                         disabled={isDownloading}
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates, course.completedOn); }}
+                        onClick={() => { downloadCertificate(course.courseId, course.batchId, title, course.issuedCertificates, course.completedOn); }}
                     >
                         {isDownloading ? (
                             <div className="w-[1.125rem] h-[1.125rem] border-2 border-sunbird-ginger border-t-transparent rounded-full animate-spin" />
@@ -115,7 +116,6 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                 ) : null}
             </div>
         </div>
-        </Link>
     );
 };
 

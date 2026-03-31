@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, createMemoryRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
 import ProfileLearningList from './ProfileLearningList';
 import { useUserEnrolledCollections } from '@/hooks/useUserEnrolledCollections';
@@ -343,15 +343,16 @@ describe('ProfileLearningList', () => {
             downloadingCourseId: null,
         });
 
-        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
+        const router = createMemoryRouter(
+            [{ path: '/', element: <ProfileLearningList /> }],
+            { initialEntries: ['/'] }
+        );
+        render(<RouterProvider router={router} />);
 
         const downloadButton = screen.getByText('common.downloadCertificate').closest('button')!;
         fireEvent.click(downloadButton);
 
-        // downloadCertificate was called (action happened)
         expect(mockDownloadCertificate).toHaveBeenCalled();
-        // Course titles still visible — we haven't navigated away
-        expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
-        expect(screen.getByText('Completed Course')).toBeInTheDocument();
+        expect(router.state.location.pathname).toBe('/');
     });
 });
