@@ -191,7 +191,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                         </InputOTP>
                     </div>
 
-                    <div className="resend-otp-container text-center text-[0.875rem] font-medium text-[#4A5568] mt-6">
+                    <div className="resend-otp-container text-center text-[0.875rem] font-medium text-sunbird-gray-4a mt-6">
                         <button
                             disabled={disableResendOtp}
                             onClick={handleResendOtp}

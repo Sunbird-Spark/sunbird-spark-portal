@@ -106,11 +106,10 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
       aria-modal="true"
       aria-label={t("search_for_content_placeholder")}
     >
-      {/* White search panel: pinned search bar + independent scrollable results */}
-      <div className="bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)] flex flex-col max-h-[55vh] md:max-h-[85vh]">
-
-        {/* Search bar row — always visible, never scrolls away */}
-        <div className="flex-shrink-0 container mx-auto px-4 lg:px-[3.75rem] pt-4 pb-3 md:pt-5 md:pb-4">
+      {/* White search panel */}
+      <div className="bg-white shadow-sunbird-sm">
+        <div className="container mx-auto px-4 lg:px-[3.75rem] pt-5 pb-6">
+          {/* Search bar row */}
           <div className="flex items-center gap-4">
             <div className="flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3">
               <FiSearch className="w-5 h-5 text-sunbird-brick flex-shrink-0" />

@@ -34,8 +34,8 @@
 .loading-spinner {
   width: 3rem;
   height: 3rem;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 4px solid hsl(var(--primary-foreground) / 0.3);
+  border-top-color: hsl(var(--primary-foreground));
   border-radius: 9999px;
   animation: spin 1s linear infinite;
 }
@@ -83,7 +83,7 @@
 
 .content-form-error-text {
   font-size: 0.875rem;
-  color: rgb(220, 38, 38);
+  color: hsl(var(--destructive));
   font-family: var(--app-font-family);
 }
 

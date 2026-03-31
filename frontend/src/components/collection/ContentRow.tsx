@@ -61,12 +61,12 @@ export default function ContentRow({
     !isDisabledByAttempts;
 
   const baseClass = contentBlocked
-    ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-60 pointer-events-none cursor-not-allowed select-none"
+    ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-sunbird-sm opacity-60 pointer-events-none cursor-not-allowed select-none"
     : isDisabledByAttempts
-      ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-[0_1px_14px_#0000001A] cursor-not-allowed select-none"
+      ? "flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-sunbird-sm cursor-not-allowed select-none"
       : `flex items-center gap-3 rounded-[0.625rem] px-4 py-3 w-full h-[4.375rem] ${isActive
-        ? "border border-sunbird-brick bg-white shadow-[0_1px_14px_#0000001A] opacity-100"
-        : "border border-transparent bg-white shadow-[0_1px_14px_#0000001A] opacity-90"
+        ? "border border-sunbird-brick bg-white shadow-sunbird-sm opacity-100"
+        : "border border-transparent bg-white shadow-sunbird-sm opacity-90"
       }`;
   const interactiveClass = contentBlocked ? "" : (isDisabledByAttempts ? "" : "hover:bg-gray-200 transition-colors cursor-pointer");
 
@@ -99,14 +99,14 @@ export default function ContentRow({
         <span
           className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex flex-col items-end gap-0.5 ${
             status === 2
-              ? "text-[#3D6A1C]"
+              ? "text-sunbird-status-completed-text"
               : status === 1
                 ? "text-sunbird-status-ongoing-border"
                 : "text-muted-foreground"
           }`}
         >
           <span className="flex items-center gap-1">
-            {status === 2 && <CiCircleCheck className="w-3.5 h-3.5 text-[#3D6A1C]" />}
+            {status === 2 && <CiCircleCheck className="w-3.5 h-3.5 text-sunbird-status-completed-text" />}
             {status === 1 && <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />}
             {t(getStatusLabel(status))}
           </span>

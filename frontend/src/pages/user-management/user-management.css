@@ -19,7 +19,7 @@
 /* ─── Search Card ────────────────────────────────────────────────────── */
 .um-search-card {
   @apply bg-white rounded-2xl p-6 mb-6;
-  box-shadow: 0 0.125rem 0.75rem 0 rgba(0, 0, 0, 0.07);
+  box-shadow: var(--sunbird-shadow-sm);
 }
 
 .um-search-label {
@@ -50,7 +50,7 @@
 /* ─── Results Card ───────────────────────────────────────────────────── */
 .um-results-card {
   @apply bg-white rounded-2xl overflow-hidden;
-  box-shadow: 0 0.125rem 0.75rem 0 rgba(0, 0, 0, 0.07);
+  box-shadow: var(--sunbird-shadow-sm);
 }
 
 /* ─── Table ──────────────────────────────────────────────────────────── */
@@ -182,7 +182,7 @@
 
 .um-dialog-panel {
   @apply bg-white rounded-2xl w-full max-w-md flex flex-col;
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+  box-shadow: var(--sunbird-shadow-lg);
 }
 
 .um-dialog-header {
