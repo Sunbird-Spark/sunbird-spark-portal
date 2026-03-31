@@ -41,9 +41,9 @@ const PersonalInformation = ({ user }: PersonalInformationProps) => {
         captchaRef.current?.execute();
     }, [googleCaptchaSiteKey]);
 
-    const firstName = _.get(user, 'firstName', '');
-    const lastName = _.get(user, 'lastName', '');
-    const fullName = `${firstName} ${lastName}`;
+    const firstName = _.get(user, 'firstName') || '';
+    const lastName = _.get(user, 'lastName') || '';
+    const fullName = [firstName, lastName].filter(Boolean).join(' ');
     const truncatedName = fullName.length > 20 ? `${fullName.substring(0, 20)}...` : fullName;
 
     const maskedEmail = _.get(user, 'maskedEmail');
