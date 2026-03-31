@@ -5,11 +5,19 @@ import { Header, PrimaryButton } from './ForgotPasswordComponents';
 import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
 
 const onProceedToLogin = () => {
-    window.location.href = getSafeRedirectUrl();
+    console.log('[PasswordResetSuccess] Proceed to Login clicked');
+    console.log('[PasswordResetSuccess] Current URL:', window.location.href);
+    const redirectUrl = getSafeRedirectUrl();
+    console.log('[PasswordResetSuccess] Redirecting to:', redirectUrl);
+    window.location.href = redirectUrl;
 };
 
 const PasswordResetSuccess: React.FC = () => {
+    console.log('[PasswordResetSuccess] Component mounted');
+    console.log('[PasswordResetSuccess] Current URL:', window.location.href);
     const isMobileRedirect = isMobileApp();
+    console.log('[PasswordResetSuccess] isMobileApp:', isMobileRedirect);
+    console.log('[PasswordResetSuccess] hideClose:', isMobileRedirect);
 
     return (
         <AuthLayout onClose={() => window.location.href = getSafeRedirectUrl()} hideClose={isMobileRedirect}>

@@ -208,10 +208,16 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        window.location.href = getSafeRedirectUrl();
+        console.log('[SignUp] Proceed to Login clicked');
+        console.log('[SignUp] Current URL:', window.location.href);
+        const redirectUrl = getSafeRedirectUrl();
+        console.log('[SignUp] Redirecting to:', redirectUrl);
+        window.location.href = redirectUrl;
     };
 
     const isMobileRedirect = isMobileApp();
+    console.log('[SignUp] isMobileApp:', isMobileRedirect);
+    console.log('[SignUp] hideClose:', isMobileRedirect);
 
     return (
         <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect}>

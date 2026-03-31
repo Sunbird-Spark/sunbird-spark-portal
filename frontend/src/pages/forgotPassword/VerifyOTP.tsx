@@ -85,7 +85,13 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             });
 
             if (resetRes?.data?.link) {
-                window.location.href = appendMobileParams(resetRes.data.link);
+                console.log('[VerifyOTP] Password reset successful');
+                console.log('[VerifyOTP] API returned link:', resetRes.data.link);
+                console.log('[VerifyOTP] Current URL:', window.location.href);
+                const enhancedLink = appendMobileParams(resetRes.data.link);
+                console.log('[VerifyOTP] Enhanced link with params:', enhancedLink);
+                console.log('[VerifyOTP] Navigating to enhanced link...');
+                window.location.href = enhancedLink;
                 return;
             }
 

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { buildValidIdentifiers, redirectWithError } from './forgotPasswordUtils';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { buildValidIdentifiers, redirectWithError, isMobileApp, getSafeRedirectUrl, appendMobileParams } from './forgotPasswordUtils';
 
 describe('forgotPasswordUtils', () => {
     describe('buildValidIdentifiers', () => {
@@ -98,6 +98,204 @@ describe('forgotPasswordUtils', () => {
             expect(result).toBe(false);
 
             expect(window.location.href).toBe(initialHref);
+        });
+    });
+
+    describe('isMobileApp', () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        it('should return true when client=mobileApp is in URL', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=https://example.com/callback',
+            });
+
+            expect(isMobileApp()).toBe(true);
+        });
+
+        it('should return false when client param is not mobileApp', () => {
+            vi.stubGlobal('location', {
+                search: '?client=web',
+            });
+
+            expect(isMobileApp()).toBe(false);
+        });
+
+        it('should return false when client param is missing', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=https://example.com/callback',
+            });
+
+            expect(isMobileApp()).toBe(false);
+        });
+
+        it('should return false when URL has no query params', () => {
+            vi.stubGlobal('location', {
+                search: '',
+            });
+
+            expect(isMobileApp()).toBe(false);
+        });
+    });
+
+    describe('getSafeRedirectUrl', () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        it('should return redirect_uri when it is a valid HTTPS URL', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=https://example.com/oauth2callback',
+            });
+
+            expect(getSafeRedirectUrl()).toBe('https://example.com/oauth2callback');
+        });
+
+        it('should return redirect_uri when it is a valid HTTP URL', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=http://localhost:3000/callback',
+            });
+
+            expect(getSafeRedirectUrl()).toBe('http://localhost:3000/callback');
+        });
+
+        it('should return fallback when redirect_uri is missing', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp',
+            });
+
+            expect(getSafeRedirectUrl()).toBe('/portal/login?prompt=none');
+        });
+
+        it('should return custom fallback when provided', () => {
+            vi.stubGlobal('location', {
+                search: '',
+            });
+
+            expect(getSafeRedirectUrl('/custom/fallback')).toBe('/custom/fallback');
+        });
+
+        it('should return fallback when redirect_uri is not a valid URL', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=javascript:alert(1)',
+            });
+
+            expect(getSafeRedirectUrl()).toBe('/portal/login?prompt=none');
+        });
+
+        it('should return fallback when redirect_uri uses invalid protocol', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=ftp://example.com/callback',
+            });
+
+            expect(getSafeRedirectUrl()).toBe('/portal/login?prompt=none');
+        });
+    });
+
+    describe('appendMobileParams', () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        it('should append both redirect_uri and client params to absolute URL', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=https://example.com/callback&client=mobileApp',
+                origin: 'https://portal.example.com',
+            });
+
+            const result = appendMobileParams('https://portal.example.com/password-reset-success');
+
+            expect(result).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fcallback');
+            expect(result).toContain('client=mobileApp');
+            expect(result).toBe('https://portal.example.com/password-reset-success?redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&client=mobileApp');
+        });
+
+        it('should append both redirect_uri and client params to relative URL', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=https://example.com/callback&client=mobileApp',
+                origin: 'https://portal.example.com',
+            });
+
+            const result = appendMobileParams('/password-reset-success');
+
+            expect(result).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fcallback');
+            expect(result).toContain('client=mobileApp');
+            expect(result).toBe('https://portal.example.com/password-reset-success?redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&client=mobileApp');
+        });
+
+        it('should only append client param when redirect_uri is missing', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp',
+                origin: 'https://portal.example.com',
+            });
+
+            const result = appendMobileParams('/password-reset-success');
+
+            expect(result).not.toContain('redirect_uri');
+            expect(result).toContain('client=mobileApp');
+            expect(result).toBe('https://portal.example.com/password-reset-success?client=mobileApp');
+        });
+
+        it('should only append redirect_uri when client is missing', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=https://example.com/callback',
+                origin: 'https://portal.example.com',
+            });
+
+            const result = appendMobileParams('/password-reset-success');
+
+            expect(result).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fcallback');
+            expect(result).not.toContain('client');
+            expect(result).toBe('https://portal.example.com/password-reset-success?redirect_uri=https%3A%2F%2Fexample.com%2Fcallback');
+        });
+
+        it('should return original link when no params to append', () => {
+            vi.stubGlobal('location', {
+                search: '',
+                origin: 'https://portal.example.com',
+            });
+
+            const result = appendMobileParams('/password-reset-success');
+
+            expect(result).toBe('https://portal.example.com/password-reset-success');
+        });
+
+        it('should not append redirect_uri when it is invalid', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=javascript:alert(1)&client=mobileApp',
+                origin: 'https://portal.example.com',
+            });
+
+            const result = appendMobileParams('/password-reset-success');
+
+            expect(result).not.toContain('redirect_uri');
+            expect(result).toContain('client=mobileApp');
+        });
+
+        it('should preserve existing query params in the link', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=https://example.com/callback&client=mobileApp',
+                origin: 'https://portal.example.com',
+            });
+
+            const result = appendMobileParams('/password-reset-success?foo=bar');
+
+            expect(result).toContain('foo=bar');
+            expect(result).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fcallback');
+            expect(result).toContain('client=mobileApp');
+        });
+
+        it('should return original link on error', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=https://example.com/callback&client=mobileApp',
+                origin: undefined, // This will cause URL constructor to fail
+            });
+
+            const result = appendMobileParams('/password-reset-success');
+
+            // Should return original link when error occurs
+            expect(result).toBe('/password-reset-success');
         });
     });
 });

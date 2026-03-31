@@ -39,6 +39,13 @@ export const SignUpForm = ({
 }: Step1Props) => {
     const { t } = useAppI18n();
 
+    console.log('[SignUpForm] Component rendered');
+    console.log('[SignUpForm] Current URL:', window.location.href);
+    const isMobile = isMobileApp();
+    const loginHref = isMobile ? getSafeRedirectUrl() : "/login";
+    console.log('[SignUpForm] isMobileApp:', isMobile);
+    console.log('[SignUpForm] Login link href:', loginHref);
+
     return (
     <>
         <Header
@@ -168,7 +175,7 @@ export const SignUpForm = ({
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
-                    {t("signUp.alreadyHaveAccount")} <a href={isMobileApp() ? getSafeRedirectUrl() : "/login"} className="themed-link no-underline hover:underline">{t("login")}</a>
+                    {t("signUp.alreadyHaveAccount")} <a href={loginHref} className="themed-link no-underline hover:underline">{t("login")}</a>
                 </div>
             </div>
         </div>
