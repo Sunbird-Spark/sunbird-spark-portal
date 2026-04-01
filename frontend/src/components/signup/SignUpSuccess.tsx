@@ -21,7 +21,7 @@ export const SignUpSuccess = () => {
 
             <a
                 href={getSafeRedirectUrl()}
-                className="primary-button w-full text-center"
+                className="login-primary-button w-full text-center inline-block"
             >
                 {t("signUp.proceedToLogin")}
             </a>

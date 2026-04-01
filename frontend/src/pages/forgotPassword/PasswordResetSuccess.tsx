@@ -23,7 +23,7 @@ const PasswordResetSuccess: React.FC = () => {
 
                 <a
                     href={getSafeRedirectUrl()}
-                    className="primary-button w-full text-center"
+                    className="login-primary-button w-full text-center inline-block"
                 >
                     Proceed to Login
                 </a>
