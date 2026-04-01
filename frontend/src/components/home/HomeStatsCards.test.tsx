@@ -13,6 +13,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         }[key] ?? key),
         languages: [],
         currentCode: 'en',
+        currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
         changeLanguage: vi.fn(),
         isRTL: false,
         dir: 'ltr',
