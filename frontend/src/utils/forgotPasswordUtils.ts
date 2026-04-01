@@ -63,7 +63,9 @@ const isSafeUrl = (url: string): boolean => {
 
 export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     const params = new URLSearchParams(window.location.search);
+    console.log('params', params);
     const redirectUri = params.get('redirect_uri');
+    console.log('redirectUri',redirectUri);
     if (redirectUri && isSafeUrl(redirectUri)) {
         return redirectUri;
     }
@@ -72,6 +74,7 @@ export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     }
     // Fallback to sessionStorage (survives Keycloak redirects)
     const ctx = getMobileContext();
+    console.log('mobile context', ctx);
     if (ctx?.redirectUri && isSafeUrl(ctx.redirectUri)) {
         return ctx.redirectUri;
     }
