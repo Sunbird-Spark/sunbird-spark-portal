@@ -1,6 +1,11 @@
 import { FiArrowLeft } from "react-icons/fi";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
+import HomeSidebar from "@/components/home/HomeSidebar";
+import { Sheet, SheetContent, SheetTitle } from "@/components/home/Sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useSidebarState } from "@/hooks/useSidebarState";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import PageLoader from "@/components/common/PageLoader";
 import FAQSection from "@/components/landing/FAQSection";
 import RelatedContentSection from "@/components/collection/RelatedContentSection";
@@ -96,6 +101,10 @@ const CollectionDetailLayout = ({
   relatedContent,
   courseCompletion,
 }: CollectionDetailLayoutProps) => {
+  const { t: tLayout } = useAppI18n();
+  const isMobile = useIsMobile();
+  const { isOpen: isSidebarOpen, setSidebarOpen } = useSidebarState(!isMobile);
+
   const { onGoBack, t } = navigation;
   const { showLoading, isError, error, onRetry } = loading;
   const { collectionDataFromApi, hierarchySuccess, collectionData, displayCollectionData } = collection;
@@ -111,7 +120,18 @@ const CollectionDetailLayout = ({
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      <Header />
+      <Header
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setSidebarOpen(true, true)}
+      />
+      {isMobile && (
+        <Sheet open={isSidebarOpen} onOpenChange={(open) => setSidebarOpen(open, true)}>
+          <SheetContent side="left" className="w-[17.5rem] px-0">
+            <SheetTitle className="sr-only">{tLayout("navigationMenu")}</SheetTitle>
+            <HomeSidebar activeNav="" onNavChange={() => setSidebarOpen(false, true)} />
+          </SheetContent>
+        </Sheet>
+      )}
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Go Back Link — only shown for loading/error states.
              When the content area is visible, it renders its own Go Back inside the grid. */}
