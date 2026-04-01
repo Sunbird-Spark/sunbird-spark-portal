@@ -7,7 +7,7 @@ import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
-import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -21,8 +21,8 @@ const ForgotPassword: React.FC = () => {
 
   useImpression({ type: 'view', pageid: 'forgot-password' });
 
-  console.log('[ForgotPassword] Component mounted');
-  console.log('[ForgotPassword] Current URL:', window.location.href);
+  // Persist mobile context to sessionStorage so it survives Keycloak redirects
+  persistMobileContext();
 
   const [step, setStep] = useState<Step>(1);
   const [validIdentifiers, setValidIdentifiers] = useState<OtpIdentifier[]>([]);

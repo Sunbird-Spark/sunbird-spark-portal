@@ -10,7 +10,7 @@ import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
-import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
@@ -24,6 +24,7 @@ const SignUp: React.FC = () => {
     const signupService = useMemo(() => new SignupService(), []);
 
     useImpression({ type: 'view', pageid: 'signup' });
+    persistMobileContext();
     const telemetry = useTelemetry();
 
     const [step, setStep] = useState<1 | 2 | 3>(1);

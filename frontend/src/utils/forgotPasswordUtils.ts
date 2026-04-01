@@ -1,6 +1,56 @@
 import { OtpIdentifier, IdentifierType } from '../types/forgotPasswordTypes';
 
 const DEFAULT_LOGIN_URL = '/portal/login?prompt=none';
+const MOBILE_CONTEXT_KEY = 'sunbird_mobile_context';
+
+interface MobileContext {
+    client: string;
+    redirectUri: string;
+}
+
+/**
+ * Persists mobile context (client + redirect_uri) to sessionStorage.
+ * Called when auth pages load with client=mobileApp so the context
+ * survives external redirects (e.g., Keycloak password reset flow).
+ */
+export const persistMobileContext = (): void => {
+    const params = new URLSearchParams(window.location.search);
+    const client = params.get('client');
+    const redirectUri = params.get('redirect_uri');
+    if (client === 'mobileApp' && redirectUri) {
+        try {
+            sessionStorage.setItem(MOBILE_CONTEXT_KEY, JSON.stringify({ client, redirectUri }));
+        } catch {
+            // sessionStorage unavailable — ignore
+        }
+    }
+};
+
+/**
+ * Retrieves persisted mobile context from sessionStorage.
+ */
+const getMobileContext = (): MobileContext | null => {
+    try {
+        const stored = sessionStorage.getItem(MOBILE_CONTEXT_KEY);
+        if (stored) {
+            return JSON.parse(stored) as MobileContext;
+        }
+    } catch {
+        // sessionStorage unavailable or invalid JSON — ignore
+    }
+    return null;
+};
+
+/**
+ * Clears persisted mobile context from sessionStorage.
+ */
+export const clearMobileContext = (): void => {
+    try {
+        sessionStorage.removeItem(MOBILE_CONTEXT_KEY);
+    } catch {
+        // sessionStorage unavailable — ignore
+    }
+};
 
 const isSafeUrl = (url: string): boolean => {
     try {
@@ -14,17 +64,17 @@ const isSafeUrl = (url: string): boolean => {
 export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     const params = new URLSearchParams(window.location.search);
     const redirectUri = params.get('redirect_uri');
-    console.log('[getSafeRedirectUrl] Current URL:', window.location.href);
-    console.log('[getSafeRedirectUrl] redirect_uri param:', redirectUri);
-    console.log('[getSafeRedirectUrl] fallback:', fallback);
     if (redirectUri && isSafeUrl(redirectUri)) {
-        console.log('[getSafeRedirectUrl] Returning redirect_uri:', redirectUri);
         return redirectUri;
     }
     if (redirectUri) {
         console.warn('getSafeRedirectUrl: invalid redirect_uri, ignoring');
     }
-    console.log('[getSafeRedirectUrl] Returning fallback:', fallback);
+    // Fallback to sessionStorage (survives Keycloak redirects)
+    const ctx = getMobileContext();
+    if (ctx?.redirectUri && isSafeUrl(ctx.redirectUri)) {
+        return ctx.redirectUri;
+    }
     return fallback;
 };
 
@@ -58,11 +108,12 @@ export const buildValidIdentifiers = (results: any[]): OtpIdentifier[] => {
 
 export const isMobileApp = (): boolean => {
     const client = new URLSearchParams(window.location.search).get('client');
-    const isMobile = client === 'mobileApp';
-    console.log('[isMobileApp] Current URL:', window.location.href);
-    console.log('[isMobileApp] client param:', client);
-    console.log('[isMobileApp] Result:', isMobile);
-    return isMobile;
+    if (client === 'mobileApp') {
+        return true;
+    }
+    // Fallback to sessionStorage (survives Keycloak redirects)
+    const ctx = getMobileContext();
+    return ctx?.client === 'mobileApp';
 };
 
 export const appendMobileParams = (link: string): string => {
