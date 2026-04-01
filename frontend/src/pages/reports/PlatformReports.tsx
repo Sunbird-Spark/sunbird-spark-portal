@@ -11,7 +11,6 @@ import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper, { type Column } from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
 import { Badge } from "@/components/ui/badge";
-import { popularContent } from "@/data/reportsMockData";
 import type { AdminCourseSummary } from "@/types/reports";
 import { useOrgCourseSummary } from "@/hooks/useOrgCourseSummary";
 import { useContentStatusSummary } from "@/hooks/useContentStatusSummary";
@@ -118,22 +117,6 @@ const PlatformReports = () => {
           </ChartCard>
         </div>
 
-        {/* Most Popular Content */}
-        <ChartCard title="Most Popular Content" className="mb-6">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={popularContent}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="title" tick={{ fontSize: 10 }} interval={0} angle={-15} textAnchor="end" height={50} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="enrollments" fill="hsl(var(--sunbird-ink))" radius={[6, 6, 0, 0]} barSize={24} name="Enrollments" />
-                <Bar dataKey="views" fill="hsl(var(--sunbird-wave))" radius={[6, 6, 0, 0]} barSize={24} name="Views" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
       </section>
 
       {/* ── Section 2: User Analytics ── */}
