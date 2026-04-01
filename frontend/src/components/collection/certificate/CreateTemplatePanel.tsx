@@ -2,6 +2,7 @@ import { FiLoader } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import { NewTemplateForm, ModalView } from "./types";
 import { ImagePickerDialog } from "./ImagePickerDialog";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik";
 const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
@@ -27,23 +28,25 @@ export function CreateTemplatePanel({
   createLoading,
   handleSaveNewTemplate,
 }: CreateTemplatePanelProps) {
+  const { t } = useAppI18n();
+
   return (
     <>
       <div className="overflow-y-auto px-6 py-5 space-y-5" style={{ maxHeight: "calc(90vh - 130px)" }}>
         <p className="text-xs text-muted-foreground font-rubik -mt-1">
-          Fill in the details below to create a new certificate template for your organisation.
+          {t('createTemplate.description')}
         </p>
 
         {/* Certificate Title */}
         <div>
           <label htmlFor="certTitle" className={labelClass}>
-            Certificate Title <span className="text-red-500">*</span>
+            {t('createTemplate.certificateTitle')} <span className="text-red-500">*</span>
           </label>
           <input
             id="certTitle"
             type="text"
             className={inputClass}
-            placeholder="e.g. Certificate of Completion"
+            placeholder={t('createTemplate.titlePlaceholder')}
             value={newTmpl.certTitle}
             onChange={(e) => handleNewTmplField("certTitle", e.target.value)}
           />
@@ -52,13 +55,13 @@ export function CreateTemplatePanel({
         {/* Brand Name */}
         <div>
           <label htmlFor="tmplName" className={labelClass}>
-            Brand Name <span className="text-red-500">*</span>
+            {t('createTemplate.brandName')} <span className="text-red-500">*</span>
           </label>
           <input
             id="tmplName"
             type="text"
             className={inputClass}
-            placeholder="e.g. Signatory full name"
+            placeholder={t('createTemplate.brandNamePlaceholder')}
             value={newTmpl.name}
             onChange={(e) => handleNewTmplField("name", e.target.value)}
           />
@@ -67,13 +70,13 @@ export function CreateTemplatePanel({
         {/* Brand Logos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <ImagePickerDialog
-            label="Brand Logo 1"
+            label={t('createTemplate.brandLogo1')}
             required
             value={newTmpl.logo1}
             onChange={(v) => handleNewTmplField("logo1", v)}
           />
           <ImagePickerDialog
-            label="Brand Logo 2"
+            label={t('createTemplate.brandLogo2')}
             value={newTmpl.logo2}
             onChange={(v) => handleNewTmplField("logo2", v)}
           />
@@ -83,20 +86,20 @@ export function CreateTemplatePanel({
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <ImagePickerDialog
-              label="Signature 1"
+              label={t('createTemplate.signature1')}
               required
               value={newTmpl.sig1}
               onChange={(v) => handleNewTmplField("sig1", v)}
             />
             <div>
               <label htmlFor="sig1Des" className={labelClass}>
-                Signatory 1 Designation <span className="text-red-500">*</span>
+                {t('createTemplate.signatory1Designation')} <span className="text-red-500">*</span>
               </label>
               <input
                 id="sig1Des"
                 type="text"
                 className={inputClass}
-                placeholder="e.g. Director"
+                placeholder={t('createTemplate.signatory1Placeholder')}
                 value={newTmpl.sig1Designation}
                 onChange={(e) => handleNewTmplField("sig1Designation", e.target.value)}
               />
@@ -104,19 +107,19 @@ export function CreateTemplatePanel({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <ImagePickerDialog
-              label="Signature 2"
+              label={t('createTemplate.signature2')}
               value={newTmpl.sig2}
               onChange={(v) => handleNewTmplField("sig2", v)}
             />
             <div>
               <label htmlFor="sig2Des" className={labelClass}>
-                Signatory 2 Designation
+                {t('createTemplate.signatory2Designation')}
               </label>
               <input
                 id="sig2Des"
                 type="text"
                 className={inputClass}
-                placeholder="e.g. CEO"
+                placeholder={t('createTemplate.signatory2Placeholder')}
                 value={newTmpl.sig2Designation}
                 onChange={(e) => handleNewTmplField("sig2Designation", e.target.value)}
               />
@@ -134,8 +137,7 @@ export function CreateTemplatePanel({
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-amber-400 accent-sunbird-brick cursor-pointer"
             />
             <span className="text-xs text-amber-800 font-rubik leading-relaxed">
-              I confirm that all the elements for this certificate provided by me are correct and
-              appropriate and I am authorised by the signatories and logo owners to provide the same.
+              {t('createTemplate.consent')}
             </span>
           </label>
         </div>
@@ -154,7 +156,7 @@ export function CreateTemplatePanel({
           data-edataid="create-template-back"
           data-pageid="course-consumption"
         >
-          Cancel
+          {t('createTemplate.cancel')}
         </button>
         <button
           type="button"
@@ -171,7 +173,7 @@ export function CreateTemplatePanel({
           )}
         >
           {createLoading && <FiLoader className="w-4 h-4 animate-spin" />}
-          Save Template
+          {t('createTemplate.saveTemplate')}
         </button>
       </div>
     </>

@@ -46,9 +46,27 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'userReport.dateTime': 'Date & Time',
         'home': 'Home',
         'exportButton.exportCsv': 'Export CSV',
+        'exportButton.noDataToExport': 'No data to export',
+        'exportButton.csvExportedSuccessfully': 'CSV exported successfully',
+        'dataTable.noData': 'No data available.',
+        'dataTable.showing': 'Showing {{from}}–{{to}} of {{total}}',
+        'dataTable.pageIndicator': '{{page}} / {{total}}',
+        'dataTable.firstPage': 'First page',
+        'dataTable.prevPage': 'Previous page',
+        'dataTable.nextPage': 'Next page',
+        'dataTable.lastPage': 'Last page',
+        'filterPanel.searchPlaceholder': 'Search…',
+        'filterPanel.allOption': 'All {{label}}',
+        'exportButton.exportCsv': 'Export CSV',
       };
       return translations[key] ?? key;
     },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
   }),
 }));
 

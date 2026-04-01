@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import useImpression from "@/hooks/useImpression";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend,
@@ -25,6 +26,7 @@ const PIE_COLORS = [
 
 const PlatformReports = () => {
   useImpression({ type: 'view', pageid: 'platform-reports', env: 'reports' });
+  const { t } = useAppI18n();
   const [tableSearch, setTableSearch] = useState("");
   const [tableFilters, setTableFilters] = useState<Record<string, string>>({});
 
@@ -43,12 +45,12 @@ const PlatformReports = () => {
   }, []);
 
   const courseColumns: Column<AdminCourseSummary>[] = [
-    { key: "courseName", header: "Course Name", sortable: true },
-    { key: "totalEnrolled", header: "Enrolled", sortable: true, className: "text-right" },
-    { key: "totalCompleted", header: "Completed", sortable: true, className: "text-right" },
+    { key: "courseName", header: t("platformReport.colCourseName"), sortable: true },
+    { key: "totalEnrolled", header: t("platformReport.colEnrolled"), sortable: true, className: "text-right" },
+    { key: "totalCompleted", header: t("platformReport.colCompleted"), sortable: true, className: "text-right" },
     {
       key: "completionPercent",
-      header: "Completion %",
+      header: t("platformReport.colCompletionPct"),
       sortable: true,
       className: "text-right",
       render: (row) => (
@@ -57,20 +59,20 @@ const PlatformReports = () => {
         </Badge>
       ),
     },
-    { key: "certificatesIssued", header: "Certificates", sortable: true, className: "text-right" },
+    { key: "certificatesIssued", header: t("platformReport.colCertificates"), sortable: true, className: "text-right" },
   ];
 
   return (
     <ReportLayout
-      title="Platform Reports"
+      title={t("platformReport.title")}
     >
       {/* ── Section 1: Content Overview ── */}
-      <section className="mb-10" aria-label="Content Overview">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Content Overview</h2>
+      <section className="mb-10" aria-label={t("platformReport.contentOverview")}>
+        <h2 className="text-lg font-semibold text-foreground mb-4">{t("platformReport.contentOverview")}</h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           {/* Content by Status – Pie Chart */}
-          <ChartCard title="Content by Status">
+          <ChartCard title={t("platformReport.contentByStatus")}>
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -87,7 +89,7 @@ const PlatformReports = () => {
           </ChartCard>
 
           {/* Content by Grouping – Bar Chart */}
-          <ChartCard title="Content by Type">
+          <ChartCard title={t("platformReport.contentByType")}>
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={groupingData} layout="vertical" margin={{ left: 10 }}>
@@ -102,7 +104,7 @@ const PlatformReports = () => {
           </ChartCard>
 
           {/* Top Creators – Bar Chart */}
-          <ChartCard title="Top 5 Creators">
+          <ChartCard title={t("platformReport.top5Creators")}>
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topCreatorsData} layout="vertical" margin={{ left: 10 }}>
@@ -120,18 +122,18 @@ const PlatformReports = () => {
       </section>
 
       {/* ── Section 2: User Analytics ── */}
-      <section className="mb-10" aria-label="User Analytics">
-        <h2 className="text-lg font-semibold text-foreground mb-4">User Analytics</h2>
+      <section className="mb-10" aria-label={t("platformReport.userAnalytics")}>
+        <h2 className="text-lg font-semibold text-foreground mb-4">{t("platformReport.userAnalytics")}</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <SummaryCard label="Total Users" value={isGrowthLoading ? "…" : totalUsers.toLocaleString()} colorClass="bg-sunbird-ink" />
+          <SummaryCard label={t("platformReport.totalUsers")} value={isGrowthLoading ? "…" : totalUsers.toLocaleString()} colorClass="bg-sunbird-ink" />
         </div>
 
         {isGrowthError && (
-          <p className="text-sm text-destructive mb-3">Failed to load user growth data. Please try again later.</p>
+          <p className="text-sm text-destructive mb-3">{t("platformReport.failedUserGrowth")}</p>
         )}
 
-        <ChartCard title="User Growth Trend">
+        <ChartCard title={t("platformReport.userGrowthTrend")}>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={growthData}>
@@ -139,7 +141,7 @@ const PlatformReports = () => {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="userCount" stroke="hsl(var(--sunbird-ginger))" strokeWidth={2.5} dot={{ r: 3 }} name="Users" />
+                <Line type="monotone" dataKey="userCount" stroke="hsl(var(--sunbird-ginger))" strokeWidth={2.5} dot={{ r: 3 }} name={t("platformReport.users")} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -147,9 +149,9 @@ const PlatformReports = () => {
       </section>
 
       {/* ── Section 3: Admin Course Summary Table ── */}
-      <section aria-label="Admin Course Summary">
+      <section aria-label={t("platformReport.adminCourseSummary")}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Admin Course Summary</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t("platformReport.adminCourseSummary")}</h2>
           <ExportButton
             data={filteredCourses}
             filename="platform-course-summary"
@@ -158,7 +160,7 @@ const PlatformReports = () => {
         </div>
 
         {isCoursesError && (
-          <p className="text-sm text-destructive mb-3">Failed to load course summary. Please try again later.</p>
+          <p className="text-sm text-destructive mb-3">{t("platformReport.failedCourseSummary")}</p>
         )}
 
         <FilterPanel
@@ -167,7 +169,7 @@ const PlatformReports = () => {
           onChange={handleFilterChange}
           searchValue={tableSearch}
           onSearchChange={setTableSearch}
-          searchPlaceholder="Search courses…"
+          searchPlaceholder={t("platformReport.searchCourses")}
         />
 
         <DataTableWrapper

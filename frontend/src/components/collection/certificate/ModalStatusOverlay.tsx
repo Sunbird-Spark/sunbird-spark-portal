@@ -1,5 +1,6 @@
 import { FiX, FiLoader, FiAlertCircle, FiRefreshCw, FiAward } from "react-icons/fi";
 import { Step, ModalView } from "./types";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface ModalStatusOverlayProps {
   step: Step;
@@ -21,6 +22,7 @@ export function ModalStatusOverlay({
   setView,
   handleClose,
 }: ModalStatusOverlayProps) {
+  const { t } = useAppI18n();
   if (step === "idle") return null;
 
   return (
@@ -40,13 +42,10 @@ export function ModalStatusOverlay({
             <FiAlertCircle className="w-7 h-7 text-amber-600" />
           </div>
           <p className="text-base font-semibold text-sunbird-obsidian font-rubik text-center">
-            Template Created Successfully!
+            {t('certificate.templateCreatedTitle')}
           </p>
           <p className="text-sm text-muted-foreground font-rubik text-center max-w-sm leading-relaxed">
-            You have created the template successfully. The preview of the new template will be
-            displayed in about 30 minutes. Click{" "}
-            <span className="font-semibold text-sunbird-brick">Refresh</span> in case the
-            template is not displayed.
+            {t('certificate.templateCreatedDesc')}
           </p>
           <div className="flex gap-3 mt-2">
             <button
@@ -61,7 +60,7 @@ export function ModalStatusOverlay({
               data-pageid="course-consumption"
             >
               <FiRefreshCw className="w-4 h-4" />
-              Refresh
+              {t('certificate.refresh')}
             </button>
             <button
               type="button"
@@ -70,7 +69,7 @@ export function ModalStatusOverlay({
               data-edataid="cert-status-back"
               data-pageid="course-consumption"
             >
-              Proceed Anyway
+              {t('certificate.proceedAnyway')}
             </button>
           </div>
         </div>
@@ -83,10 +82,10 @@ export function ModalStatusOverlay({
             <FiAward className="w-7 h-7 text-green-600" />
           </div>
           <p className="text-base font-semibold text-sunbird-obsidian font-rubik">
-            Certificate Added!
+            {t('certificate.certificateAddedTitle')}
           </p>
           <p className="text-sm text-muted-foreground font-rubik text-center max-w-xs">
-            The certificate template has been successfully attached to this batch.
+            {t('certificate.certificateAddedDesc')}
           </p>
           <button
             type="button"
@@ -95,7 +94,7 @@ export function ModalStatusOverlay({
             data-edataid="cert-status-close"
             data-pageid="course-consumption"
           >
-            Done
+            {t('certificate.done')}
           </button>
         </div>
       )}
@@ -107,7 +106,7 @@ export function ModalStatusOverlay({
             <FiX className="w-7 h-7 text-red-500" />
           </div>
           <p className="text-base font-semibold text-sunbird-obsidian font-rubik">
-            Something went wrong
+            {t('certificate.somethingWentWrong')}
           </p>
           <p className="text-sm text-red-600 font-rubik text-center max-w-xs">{errorMsg}</p>
           <div className="flex gap-3 mt-2">
@@ -118,7 +117,7 @@ export function ModalStatusOverlay({
               data-edataid="cert-status-cancel"
               data-pageid="course-consumption"
             >
-              Cancel
+              {t('certificate.cancelButton2')}
             </button>
             <button
               type="button"
@@ -127,7 +126,7 @@ export function ModalStatusOverlay({
               data-edataid="cert-status-retry"
               data-pageid="course-consumption"
             >
-              Try Again
+              {t('certificate.tryAgain')}
             </button>
           </div>
         </div>

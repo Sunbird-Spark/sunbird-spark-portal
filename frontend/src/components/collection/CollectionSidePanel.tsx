@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FiLayout } from "react-icons/fi";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { Button } from "@/components/common/Button";
 import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
@@ -72,6 +73,7 @@ export default function CollectionSidePanel({
     isMentorViewingCourse
   } = creator;
   const navigate = useNavigate();
+  const { t } = useAppI18n();
 
   const certPreviewClick = () => {
     if (firstCertPreviewUrl) {
@@ -94,7 +96,7 @@ export default function CollectionSidePanel({
             data-testid="view-dashboard-btn"
           >
             <FiLayout className="w-4 h-4" />
-            View Course Dashboard
+            {t('collection.viewCourseDashboard')}
           </Button>
           <BatchCard collectionId={collectionId} collectionName={collectionData.title} />
         </div>

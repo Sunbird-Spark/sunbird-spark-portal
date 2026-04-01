@@ -22,14 +22,16 @@ export const CLOSED_CONFIRM: ConfirmState = {
   isLoading: false,
 };
 
-export const EXPORT_COLUMNS = [
-  { key: "userName", header: "User Name" },
-  { key: "email", header: "Email" },
-  { key: "consentStatus", header: "PII Consent Status" },
-  { key: "course", header: "Course" },
-  { key: "consentGivenOn", header: "Consent Given On" },
-  { key: "expiry", header: "Expiry" },
-];
+export function getExportColumns(t: (k: string, opts?: Record<string, unknown>) => string) {
+  return [
+    { key: "userName", header: t("userManagement.consentColumns.colUserName") },
+    { key: "email", header: t("userManagement.consentColumns.colEmail") },
+    { key: "consentStatus", header: t("userManagement.consentColumns.colPiiStatus") },
+    { key: "course", header: t("userManagement.consentColumns.colCourse") },
+    { key: "consentGivenOn", header: t("userManagement.consentColumns.colConsentGivenOn") },
+    { key: "expiry", header: t("userManagement.consentColumns.colExpiry") },
+  ];
+}
 
 /* ── BulkActionsBar ──────────────────────────────────────────────────────── */
 
@@ -40,6 +42,7 @@ interface BulkActionsBarProps {
   onClear: () => void;
   onBulkRevoke: () => void;
   onBulkReissue: () => void;
+  t: (k: string, opts?: Record<string, unknown>) => string;
 }
 
 export function BulkActionsBar({
@@ -49,31 +52,32 @@ export function BulkActionsBar({
   onClear,
   onBulkRevoke,
   onBulkReissue,
+  t,
 }: BulkActionsBarProps) {
   if (selectedCount === 0) return null;
   return (
     <div
       className="flex flex-wrap items-center gap-3 mb-4 px-4 py-3 bg-muted/30 rounded-xl border border-border"
       role="toolbar"
-      aria-label="Bulk actions"
+      aria-label={t("userManagement.consentColumns.bulkActions")}
     >
       <span className="text-sm font-medium text-foreground">
-        {selectedCount} user(s) selected
+        {t("userManagement.consentColumns.selectedCount", { count: selectedCount })}
       </span>
       <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={onSelectAll}>
-        Select All ({filteredCount})
+        {t("userManagement.consentColumns.selectAll", { count: filteredCount })}
       </Button>
       <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={onClear}>
         <FiX className="w-3.5 h-3.5 mr-1" />
-        Clear
+        {t("userManagement.consentColumns.clear")}
       </Button>
       <div className="flex-1" />
       <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={onBulkReissue}>
         <FiRefreshCw className="w-3.5 h-3.5" />
-        Reissue Consent
+        {t("userManagement.consentColumns.reissueConsent")}
       </Button>
       <Button variant="destructive" size="sm" className="h-8 text-xs" onClick={onBulkRevoke}>
-        Revoke Consent
+        {t("userManagement.consentColumns.revokeConsent")}
       </Button>
     </div>
   );
@@ -84,6 +88,7 @@ export function BulkActionsBar({
 export function buildColumns(
   selectedIds: Set<string>,
   handleToggle: (id: string) => void,
+  t: (k: string, opts?: Record<string, unknown>) => string,
 ): Column<UserConsentRecord>[] {
   return [
     {
@@ -96,15 +101,15 @@ export function buildColumns(
           onChange={() => handleToggle(row.id)}
           onClick={(e) => e.stopPropagation()}
           className="w-4 h-4 cursor-pointer accent-sunbird-brick"
-          aria-label={`Select ${row.userName}`}
+          aria-label={t("userManagement.consentColumns.selectUser", { name: row.userName })}
         />
       ),
     },
-    { key: "userName", header: "User Name", sortable: true },
-    { key: "email", header: "Email", sortable: true },
+    { key: "userName", header: t("userManagement.consentColumns.colUserName"), sortable: true },
+    { key: "email", header: t("userManagement.consentColumns.colEmail"), sortable: true },
     {
       key: "consentStatus",
-      header: "PII Consent Status",
+      header: t("userManagement.consentColumns.colPiiStatus"),
       sortable: true,
       render: (row) => {
         const variant = row.consentStatus === "Granted" ? "default" : "destructive";
@@ -113,7 +118,7 @@ export function buildColumns(
     },
     {
       key: "course",
-      header: "Course",
+      header: t("userManagement.consentColumns.colCourse"),
       sortable: true,
       render: (row) =>
         row.course ? (
@@ -124,7 +129,7 @@ export function buildColumns(
     },
     {
       key: "consentGivenOn",
-      header: "Consent Given On",
+      header: t("userManagement.consentColumns.colConsentGivenOn"),
       sortable: true,
       render: (row) =>
         row.consentGivenOn ?? (
@@ -133,7 +138,7 @@ export function buildColumns(
     },
     {
       key: "expiry",
-      header: "Expiry",
+      header: t("userManagement.consentColumns.colExpiry"),
       sortable: true,
       render: (row) =>
         row.expiry ? (

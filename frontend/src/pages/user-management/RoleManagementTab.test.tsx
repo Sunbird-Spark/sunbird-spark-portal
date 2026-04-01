@@ -9,6 +9,56 @@ import RoleManagementTab from './RoleManagementTab';
 
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (k: string) => {
+      const map: Record<string, string> = {
+        'userManagement.addRole': 'Add Role',
+        'userManagement.roleManagement.searchPlaceholder': 'Search User by Sunbird ID',
+        'userManagement.roleManagement.searching': 'Searching...',
+        'userManagement.roleManagement.search': 'Search',
+        'userManagement.roleManagement.initialHint': 'Enter a Sunbird ID above and click Search to find users',
+        'userManagement.roleManagement.searchingUsers': 'Searching users...',
+        'userManagement.roleDialog.addTitle': 'Add New Role',
+        'userManagement.roleDialog.editTitle': 'Edit Role',
+        'userManagement.roleDialog.close': 'Close',
+        'userManagement.roleDialog.roleLabel': 'Role',
+        'userManagement.roleDialog.orgLabel': 'Organisation Name',
+        'userManagement.roleDialog.selectRole': 'Select a role',
+        'userManagement.roleDialog.selectOrg': 'Select an organisation',
+        'userManagement.roleDialog.noOrgs': 'No organisations available',
+        'userManagement.roleDialog.noOrgHint': 'Please ensure the user has at least one organisation.',
+        'userManagement.roleDialog.cancel': 'Cancel',
+        'userManagement.roleDialog.saving': 'Saving...',
+        'userManagement.roleDialog.add': 'Add',
+        'userManagement.roleDialog.save': 'Save',
+        'userManagement.userRoleTable.active': 'Active',
+        'userManagement.userRoleTable.inactive': 'Inactive',
+        'userManagement.userRoleTable.noUsersFound': 'No users found for "{{query}}"',
+        'userManagement.userRoleTable.colNumber': '#',
+        'userManagement.userRoleTable.colName': 'Name',
+        'userManagement.userRoleTable.colEmail': 'Email',
+        'userManagement.userRoleTable.colUsername': 'Username',
+        'userManagement.userRoleTable.colStatus': 'Status',
+        'userManagement.userRoleTable.colCurrentRoles': 'Current Roles',
+        'userManagement.userRoleTable.colActions': 'Actions',
+        'userManagement.userRoleTable.noRolesAssigned': 'No roles assigned',
+        'userManagement.userRoleTable.removeRole': 'Remove role',
+        'userManagement.userRoleTable.removeRoleAriaLabel': 'Remove role {{role}}',
+        'userManagement.userRoleTable.addRole': 'Add Role',
+        'userManagement.userRoleTable.addNewRole': 'Add a new role',
+      };
+      return map[k] ?? k;
+    },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
+
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, onConfirm, onClose }: any) =>
     open ? (
