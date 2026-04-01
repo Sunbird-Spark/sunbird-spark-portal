@@ -170,7 +170,7 @@ export const SignUpForm = ({
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
-                    {t("signUp.alreadyHaveAccount")} <a href={isMobile ? getSafeRedirectUrl() : "/login"} className="themed-link no-underline hover:underline">{t("login")}</a>
+                    {t("signUp.alreadyHaveAccount")} <a href={isMobile ? getSafeRedirectUrl() : "/portal/login?prompt=none"} className="themed-link no-underline hover:underline">{t("login")}</a>
                 </div>
             </div>
         </div>
