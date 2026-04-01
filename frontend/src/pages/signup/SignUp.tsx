@@ -213,8 +213,6 @@ const SignUp: React.FC = () => {
     };
 
     const isMobileRedirect = isMobileApp();
-    console.log('[SignUp] isMobileApp:', isMobileRedirect);
-    console.log('[SignUp] hideClose:', isMobileRedirect);
 
     return (
         <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect}>

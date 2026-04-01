@@ -142,28 +142,19 @@ export const appendMobileParams = (link: string): string => {
     const params = new URLSearchParams(window.location.search);
     const redirectUri = params.get('redirect_uri');
     const client = params.get('client');
-    console.log('[appendMobileParams] Input link:', link);
-    console.log('[appendMobileParams] Current URL:', window.location.href);
-    console.log('[appendMobileParams] redirect_uri param:', redirectUri);
-    console.log('[appendMobileParams] client param:', client);
     try {
         const linkUrl = new URL(link, window.location.origin);
-        console.log('[appendMobileParams] Parsed link URL:', linkUrl.toString());
         if (redirectUri && isSafeUrl(redirectUri)) {
             linkUrl.searchParams.set('redirect_uri', redirectUri);
-            console.log('[appendMobileParams] Added redirect_uri to link');
         }
         if (client) {
             linkUrl.searchParams.set('client', client);
-            console.log('[appendMobileParams] Added client to link');
         }
         const result = linkUrl.toString();
-        console.log('[appendMobileParams] Result:', result);
         return result;
     } catch (e) {
         console.warn('appendMobileParams: invalid base link, ignoring', e);
     }
-    console.log('[appendMobileParams] Returning original link due to error');
     return link;
 };
 

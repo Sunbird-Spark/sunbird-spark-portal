@@ -84,22 +84,12 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
                 }
             });
 
-            console.log('[VerifyOTP] Reset password API response:', JSON.stringify(resetRes, null, 2));
-            console.log('[VerifyOTP] resetRes.data:', resetRes?.data);
-            console.log('[VerifyOTP] resetRes.data.link:', resetRes?.data?.link);
-
             if (resetRes?.data?.link) {
-                console.log('[VerifyOTP] Password reset successful');
-                console.log('[VerifyOTP] API returned link:', resetRes.data.link);
-                console.log('[VerifyOTP] Current URL:', window.location.href);
                 const enhancedLink = appendMobileParams(resetRes.data.link);
-                console.log('[VerifyOTP] Enhanced link with params:', enhancedLink);
-                console.log('[VerifyOTP] Navigating to enhanced link...');
                 window.location.href = enhancedLink;
                 return;
             }
 
-            console.log('[VerifyOTP] No link in response, throwing error');
             throw new Error(t('forgotPasswordPage.errorResetFailed'));
         } catch (err: any) {
             const remaining = err?.response?.data?.result?.remainingAttempt;

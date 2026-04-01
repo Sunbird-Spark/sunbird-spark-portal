@@ -35,7 +35,6 @@ const ForgotPassword: React.FC = () => {
     telemetry.log({
       edata: { type: 'api', level: 'INFO', message: 'Forgot password: user identified', pageid: 'forgot-password' },
     });
-    console.log('[ForgotPassword] User identified, moving to step 2');
     setValidIdentifiers(identifiers);
     setStep(2);
   };
@@ -44,14 +43,11 @@ const ForgotPassword: React.FC = () => {
     telemetry.log({
       edata: { type: 'api', level: 'INFO', message: 'Forgot password: OTP delivery method selected', pageid: 'forgot-password' },
     });
-    console.log('[ForgotPassword] OTP delivery method selected, moving to step 3');
     setSelectedIdentifier(identifier);
     setStep(3);
   };
 
   const isMobileRedirect = isMobileApp();
-  console.log('[ForgotPassword] isMobileApp:', isMobileRedirect);
-  console.log('[ForgotPassword] hideClose:', isMobileRedirect);
 
   return (
     <AuthLayout onClose={() => {

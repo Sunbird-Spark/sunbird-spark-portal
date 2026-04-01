@@ -39,8 +39,6 @@ export const SignUpForm = ({
 }: Step1Props) => {
     const { t } = useAppI18n();
 
-    console.log('[SignUpForm] Component rendered');
-    console.log('[SignUpForm] Current URL:', window.location.href);
     const isMobile = isMobileApp();
 
     return (
