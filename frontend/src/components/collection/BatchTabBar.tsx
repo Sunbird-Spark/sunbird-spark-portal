@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 export type ActiveTab = "Ongoing" | "Upcoming" | "Expired";
-
-const TABS: ActiveTab[] = ["Ongoing", "Upcoming", "Expired"];
 
 interface TabBarProps {
   activeTab: ActiveTab;
@@ -11,6 +10,9 @@ interface TabBarProps {
 }
 
 export function TabBar({ activeTab, counts, onChange }: TabBarProps) {
+  const { t } = useAppI18n();
+  const TABS: ActiveTab[] = ["Ongoing", "Upcoming", "Expired"];
+
   return (
     <div className="flex border-b border-border">
       {TABS.map((tab) => (
@@ -25,7 +27,7 @@ export function TabBar({ activeTab, counts, onChange }: TabBarProps) {
               : "text-muted-foreground hover:text-foreground"
           )}
         >
-          {tab}
+          {t(`batchTabs.${tab.toLowerCase()}`)}
           {counts[tab] > 0 && (
             <span
               className={cn(

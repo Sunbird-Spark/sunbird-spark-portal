@@ -1,6 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AddCertificateModal from './AddCertificateModal';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'certificate.createTemplateTitle': 'Create Certificate Template',
+        'certificate.certificateTitle': 'Certificate',
+        'certificate.back': '← Back',
+        'certificate.currentCertificate': 'Current Certificate',
+        'certificate.changeCertificate': 'Change Certificate',
+        'certificate.cancelButton': 'Cancel',
+        'certificate.addCertificate': 'Add Certificate',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
 import type { ModalView, Step, IssueTo } from './certificate/types';
 
 type CertTab = 'current' | 'change';

@@ -9,6 +9,7 @@ import { DeleteRoleDialog, type DeleteDialogState } from "./DeleteRoleDialog";
 import { UserRoleTable } from "./UserRoleTable";
 import { useToast } from "@/hooks/useToast";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import {
   userManagementService,
   type UserSearchResult,
@@ -28,6 +29,7 @@ interface RoleManagementTabProps {
 }
 
 const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations }: RoleManagementTabProps) => {
+  const { t } = useAppI18n();
   const { toast } = useToast();
   const telemetry = useTelemetry();
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,14 +60,14 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
       setSearchResults(response.data?.response?.content ?? []);
       onRefreshSearch();
     } catch {
-      toast({ title: "Refresh failed", description: "Could not refresh user search results.", variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.refreshFailed"), description: t("userManagement.roleManagement.refreshFailedDesc"), variant: "destructive" });
     }
   }, [onRefreshSearch, toast]);
 
   const handleSearch = async () => {
     const query = searchQuery.trim();
     if (!query) {
-      toast({ title: "Enter a username", description: "Please enter a username to search.", variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.enterUsername"), description: t("userManagement.roleManagement.enterUsernameDesc"), variant: "destructive" });
       return;
     }
     setIsSearching(true);
@@ -74,7 +76,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
       const response = await userManagementService.searchUser(query);
       setSearchResults(response.data?.response?.content ?? []);
     } catch (err) {
-      toast({ title: "Search failed", description: (err as Error).message || "Could not fetch user data.", variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.searchFailed"), description: (err as Error).message || t("userManagement.roleManagement.searchFailedDesc"), variant: "destructive" });
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -101,11 +103,11 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
 
   const handleSaveRole = async () => {
     if (!selectedRole) {
-      toast({ title: "Select a role", description: "Please choose a role.", variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.selectRole"), description: t("userManagement.roleManagement.selectRoleDesc"), variant: "destructive" });
       return;
     }
     if (!organisationId.trim()) {
-      toast({ title: "Enter Organisation ID", description: "Please enter an Organisation ID.", variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.enterOrgId"), description: t("userManagement.roleManagement.enterOrgIdDesc"), variant: "destructive" });
       return;
     }
     setIsSavingRole(true);
@@ -116,8 +118,10 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
         object: { id: roleDialog.userId, type: 'User' },
       });
       toast({
-        title: roleDialog.operation === "add" ? "Role Added" : "Role Updated",
-        description: `Role ${selectedRole} has been ${roleDialog.operation === "add" ? "added" : "updated"} successfully.`,
+        title: roleDialog.operation === "add" ? t("userManagement.roleManagement.roleAdded") : t("userManagement.roleManagement.roleUpdated"),
+        description: roleDialog.operation === "add"
+          ? t("userManagement.roleManagement.roleAddedDesc").replace("{{role}}", selectedRole)
+          : t("userManagement.roleManagement.roleUpdatedDesc").replace("{{role}}", selectedRole),
         variant: "success",
       });
       // Optimistic update — immediately reflect the new role in the table
@@ -138,7 +142,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
       closeRoleDialog();
       refreshResults(searchQuery); // background sync — no await
     } catch (err) {
-      toast({ title: "Operation failed", description: (err as Error).message || "Could not save role.", variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.operationFailed"), description: (err as Error).message || t("userManagement.roleManagement.couldNotSaveRole"), variant: "destructive" });
     } finally {
       setIsSavingRole(false);
     }
@@ -169,7 +173,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
         edata: { props: ['roles'], state: 'RoleRemoved' },
         object: { id: removedUserId, type: 'User' },
       });
-      toast({ title: "Role Removed", description: `Role ${removedRole} has been removed.`, variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.roleRemoved"), description: t("userManagement.roleManagement.roleRemovedDesc").replace("{{role}}", removedRole), variant: "destructive" });
       // Optimistic update — immediately remove the role chip from the table
       setSearchResults((prev) =>
         prev.map((user) => {
@@ -181,7 +185,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
       closeDeleteDialog();
       refreshResults(searchQuery); // background sync — no await
     } catch (err) {
-      toast({ title: "Delete failed", description: (err as Error).message || "Could not remove role.", variant: "destructive" });
+      toast({ title: t("userManagement.roleManagement.deleteFailed"), description: (err as Error).message || t("userManagement.roleManagement.couldNotRemoveRole"), variant: "destructive" });
     } finally {
       setIsDeletingRole(false);
     }
@@ -197,19 +201,19 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
             id="um-search-input"
             type="text"
             className="um-search-input"
-            placeholder="Search User by Sunbird ID"
+            placeholder={t("userManagement.roleManagement.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
           />
         </div>
         <Button onClick={handleSearch} disabled={isSearching} className="um-search-btn" data-edataid="um-user-search" data-pageid="user-management">
-          {isSearching ? "Searching..." : "Search"}
+          {isSearching ? t("userManagement.roleManagement.searching") : t("userManagement.roleManagement.search")}
         </Button>
       </div>
 
       {/* Results */}
-      {isSearching && <PageLoader message="Searching users..." fullPage={false} />}
+      {isSearching && <PageLoader message={t("userManagement.roleManagement.searchingUsers")} fullPage={false} />}
 
       {!isSearching && hasSearched && (
         <div className="um-results-card">
@@ -225,7 +229,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
       {!isSearching && !hasSearched && (
         <div className="um-initial-state">
           <FiSearch className="um-initial-icon" aria-hidden="true" />
-          <p className="um-initial-text">Enter a Sunbird ID above and click Search to find users</p>
+          <p className="um-initial-text">{t("userManagement.roleManagement.initialHint")}</p>
         </div>
       )}
 

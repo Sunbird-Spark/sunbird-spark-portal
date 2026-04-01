@@ -1,6 +1,29 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import DataTableWrapper, { type Column } from './DataTableWrapper';
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'dataTable.noData': 'No data available.',
+        'dataTable.showing': 'Showing {{from}}–{{to}} of {{total}}',
+        'dataTable.pageIndicator': '{{page}} / {{total}}',
+        'dataTable.firstPage': 'First page',
+        'dataTable.prevPage': 'Previous page',
+        'dataTable.nextPage': 'Next page',
+        'dataTable.lastPage': 'Last page',
+      };
+      return map[key] ?? key;
+    },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
 
 interface Row {
   id: string;

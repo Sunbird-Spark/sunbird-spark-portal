@@ -2,6 +2,20 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TemplatePreviewModal } from './TemplatePreviewModal';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'certificate.closePreview': 'Close preview',
+        'certificate.noPreviewAvailable': 'No preview available',
+        'certificate.closeButton': 'Close',
+        'certificate.selectButton': 'Select',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 const mockTemplates = [
   { identifier: 'tmpl-1', name: 'Template One', previewUrl: 'https://example.com/t1.png' },
   { identifier: 'tmpl-2', name: 'Template Two' },

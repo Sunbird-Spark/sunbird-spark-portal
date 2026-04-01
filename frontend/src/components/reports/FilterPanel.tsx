@@ -2,6 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { FiSearch } from "react-icons/fi";
 import type { FilterOption } from "@/types/reports";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface FilterDef {
   key: string;
@@ -18,7 +19,9 @@ interface FilterPanelProps {
   searchPlaceholder?: string;
 }
 
-const FilterPanel = ({ filters, values, onChange, searchValue, onSearchChange, searchPlaceholder = "Search…" }: FilterPanelProps) => {
+const FilterPanel = ({ filters, values, onChange, searchValue, onSearchChange, searchPlaceholder }: FilterPanelProps) => {
+  const { t } = useAppI18n();
+  const placeholder = searchPlaceholder ?? t("filterPanel.searchPlaceholder");
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
       {onSearchChange !== undefined && (
@@ -27,9 +30,9 @@ const FilterPanel = ({ filters, values, onChange, searchValue, onSearchChange, s
           <Input
             value={searchValue ?? ""}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={searchPlaceholder}
+            placeholder={placeholder}
             className="pl-9 h-10 bg-surface border-border rounded-lg"
-            aria-label={searchPlaceholder}
+            aria-label={placeholder}
           />
         </div>
       )}
@@ -39,7 +42,7 @@ const FilterPanel = ({ filters, values, onChange, searchValue, onSearchChange, s
             <SelectValue placeholder={f.label} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All {f.label}</SelectItem>
+            <SelectItem value="all">{t("filterPanel.allOption").replace("{{label}}", f.label)}</SelectItem>
             {f.options.map((o) => (
               <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
             ))}

@@ -1,5 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { FiX, FiAward, FiCheck } from "react-icons/fi";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface TemplatePreviewModalProps {
   previewTemplate: string | null;
@@ -14,6 +15,8 @@ export function TemplatePreviewModal({
   certTemplates,
   setSelectedTemplateId,
 }: TemplatePreviewModalProps) {
+  const { t } = useAppI18n();
+
   if (!previewTemplate) return null;
 
   const tmpl = certTemplates.find((t) => t.identifier === previewTemplate);
@@ -37,7 +40,7 @@ export function TemplatePreviewModal({
             <Dialog.Close asChild>
               <button
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors"
-                aria-label="Close preview"
+                aria-label={t('certificate.closePreview')}
               >
                 <FiX className="w-4 h-4" />
               </button>
@@ -58,7 +61,7 @@ export function TemplatePreviewModal({
                 style={{ height: "16rem" }}
               >
                 <FiAward className="w-12 h-12 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground font-rubik">No preview available</p>
+                <p className="text-sm text-muted-foreground font-rubik">{t('certificate.noPreviewAvailable')}</p>
               </div>
             )}
           </div>
@@ -69,7 +72,7 @@ export function TemplatePreviewModal({
                 type="button"
                 className="rounded-lg px-5 py-2 text-sm font-medium text-foreground bg-gray-100 hover:bg-gray-200 transition-colors font-rubik"
               >
-                Close
+                {t('certificate.closeButton')}
               </button>
             </Dialog.Close>
             <button
@@ -81,7 +84,7 @@ export function TemplatePreviewModal({
               className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-rubik inline-flex items-center gap-2"
             >
               <FiCheck className="w-4 h-4" />
-              Select
+              {t('certificate.selectButton')}
             </button>
           </div>
         </Dialog.Content>

@@ -3,6 +3,29 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DeleteRoleDialog, DeleteDialogState } from './DeleteRoleDialog';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (k: string) => {
+      const map: Record<string, string> = {
+        'cancel': 'cancel',
+        'confirm': 'Confirm',
+        'confirmDialog.pleaseWait': 'confirmDialog.pleaseWait',
+        'userManagement.deleteRoleDialog.title': 'Remove Role',
+        'userManagement.deleteRoleDialog.confirmDesc': 'Are you sure you want to remove the role "{{role}}"?',
+        'userManagement.deleteRoleDialog.confirmDescFallback': 'Are you sure you want to remove this role?',
+        'userManagement.deleteRoleDialog.remove': 'Remove',
+      };
+      return map[k] ?? k;
+    },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
+
 const mockStateOpen: DeleteDialogState = {
   open: true,
   userId: 'user1',

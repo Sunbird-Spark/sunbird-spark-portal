@@ -15,6 +15,7 @@ import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
 import useInteract from "@/hooks/useInteract";
 import { useIsContentCreator, useIsMentor } from "@/hooks/useUser";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 /* ─── Types ─── */
 
@@ -53,6 +54,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
   const isContentCreator = useIsContentCreator();
   const isMentor         = useIsMentor();
   const isOnlyMentor     = isMentor && !isContentCreator && isEditMode;
+  const { t } = useAppI18n();
 
   const [form, setForm] = useState<BatchFormState>(() => makeInitialForm(initialBatch));
   const [mentorQuery, setMentorQuery] = useState("");
@@ -129,8 +131,8 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
         err instanceof Error
           ? err.message
           : isEditMode
-          ? "Failed to update batch. Please try again."
-          : "Failed to create batch. Please try again."
+          ? t('createBatch.failedToUpdate')
+          : t('createBatch.failedToCreate')
       );
     }
   };
@@ -152,7 +154,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-border sticky top-0 bg-white rounded-t-2xl z-10">
             <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-rubik">
-              {isOnlyMentor ? "View Batch Details" : (isEditMode ? "Edit Batch" : "Create Batch")}
+              {isOnlyMentor ? t('createBatch.viewTitle') : (isEditMode ? t('createBatch.editTitle') : t('createBatch.createTitle'))}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
@@ -190,9 +192,9 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                   disabled={isOnlyMentor}
                 />
               </div>
-              <div className="px-4 py-3 flex items-center justify-between gap-4">
-                <span className="text-sm font-medium text-foreground font-rubik">Batch Type</span>
-                <span className="text-sm font-medium text-sunbird-brick font-rubik">Open</span>
+              <div className="px-4 py-3 text-sm flex items-center justify-between gap-4 font-rubik">
+                <span className="font-medium text-foreground">{t('createBatch.batchType')}</span>
+                <span className="font-medium text-sunbird-brick">{t('createBatch.batchTypeOpen')}</span>
               </div>
             </div>
 
@@ -237,7 +239,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                 data-edataid="batch-modal-cancel"
                 data-pageid="batch-create"
               >
-                {isOnlyMentor ? "Close" : "Cancel"}
+                {isOnlyMentor ? t('createBatch.close') : t('createBatch.cancel')}
               </button>
               {!isOnlyMentor && (
                 <button
@@ -253,11 +255,11 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
                   {isPending && <FiLoader className="w-4 h-4 animate-spin" />}
                   {isPending
                     ? isEditMode
-                      ? "Saving…"
-                      : "Creating…"
+                      ? t('createBatch.saving')
+                      : t('createBatch.creating')
                     : isEditMode
-                    ? "Save Changes"
-                    : "Create Batch"}
+                    ? t('createBatch.saveChanges')
+                    : t('createBatch.create')}
                 </button>
               )}
             </div>
@@ -270,7 +272,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
     {termsUrl && (
       <TermsAndConditionsDialog
         termsUrl={termsUrl}
-        title="Terms &amp; Conditions"
+        title={t('tncCheckbox.termsLink')}
         open={tncDialogOpen}
         onOpenChange={setTncDialogOpen}
       >

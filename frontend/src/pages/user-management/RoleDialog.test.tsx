@@ -4,6 +4,35 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { RoleDialog, RoleDialogState } from './RoleDialog';
 import { RoleItem } from '@/services/UserManagementService';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (k: string) => {
+      const map: Record<string, string> = {
+        'userManagement.roleDialog.addTitle': 'Add New Role',
+        'userManagement.roleDialog.editTitle': 'Edit Role',
+        'userManagement.roleDialog.close': 'Close',
+        'userManagement.roleDialog.roleLabel': 'Role',
+        'userManagement.roleDialog.orgLabel': 'Organisation Name',
+        'userManagement.roleDialog.selectRole': 'Select a role',
+        'userManagement.roleDialog.selectOrg': 'Select an organisation',
+        'userManagement.roleDialog.noOrgs': 'No organisations available',
+        'userManagement.roleDialog.noOrgHint': 'Please ensure the user has at least one organisation.',
+        'userManagement.roleDialog.cancel': 'Cancel',
+        'userManagement.roleDialog.saving': 'Saving...',
+        'userManagement.roleDialog.add': 'Add',
+        'userManagement.roleDialog.save': 'Save',
+      };
+      return map[k] ?? k;
+    },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
+
 vi.mock('@/components/common/Select', () => ({
   Select: ({ children, onValueChange, disabled }: any) => (
     <div data-testid="mock-select" data-disabled={disabled}>

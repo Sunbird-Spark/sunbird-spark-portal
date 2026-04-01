@@ -3,6 +3,32 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { CreateTemplatePanel } from './CreateTemplatePanel';
 import { emptyNewTemplate } from './utils';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'createTemplate.description': 'Enter the details below to create a new certificate template.',
+        'createTemplate.certificateTitle': 'Certificate Title',
+        'createTemplate.titlePlaceholder': 'e.g. Certificate of Completion',
+        'createTemplate.brandName': 'Brand Name',
+        'createTemplate.brandNamePlaceholder': 'e.g. Signatory full name',
+        'createTemplate.brandLogo1': 'Brand Logo 1',
+        'createTemplate.brandLogo2': 'Brand Logo 2',
+        'createTemplate.signature1': 'Signature 1',
+        'createTemplate.signatory1Designation': 'Signatory 1 Designation',
+        'createTemplate.signatory1Placeholder': 'e.g. Director',
+        'createTemplate.signature2': 'Signature 2',
+        'createTemplate.signatory2Designation': 'Signatory 2 Designation',
+        'createTemplate.signatory2Placeholder': 'e.g. CEO',
+        'createTemplate.consent': 'I accept the Terms & Conditions for creating this template',
+        'createTemplate.saveTemplate': 'Save Template',
+        'createTemplate.cancel': 'Cancel',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 vi.mock('./ImagePickerDialog', () => ({
   ImagePickerDialog: ({
     label,

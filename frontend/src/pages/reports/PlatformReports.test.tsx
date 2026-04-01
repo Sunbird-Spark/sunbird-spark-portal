@@ -34,6 +34,53 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'platformReport.title': 'Platform Reports',
+        'platformReport.contentOverview': 'Content Overview',
+        'platformReport.contentByStatus': 'Content by Status',
+        'platformReport.contentByType': 'Content by Type',
+        'platformReport.top5Creators': 'Top 5 Creators',
+        'platformReport.mostPopularContent': 'Most Popular Content',
+        'platformReport.userAnalytics': 'User Analytics',
+        'platformReport.totalUsers': 'Total Users',
+        'platformReport.userGrowthTrend': 'User Growth Trend',
+        'platformReport.users': 'Users',
+        'platformReport.adminCourseSummary': 'Admin Course Summary',
+        'platformReport.colCourseName': 'Course Name',
+        'platformReport.colEnrolled': 'Enrolled',
+        'platformReport.colCompleted': 'Completed',
+        'platformReport.colCompletionPct': 'Completion %',
+        'platformReport.colCertificates': 'Certificates',
+        'platformReport.failedUserGrowth': 'Failed to load user growth data. Please try again later.',
+        'platformReport.failedCourseSummary': 'Failed to load course summary. Please try again later.',
+        'platformReport.searchCourses': 'Search courses…',
+        'dataTable.noData': 'No data available.',
+        'dataTable.showing': 'Showing {{from}}–{{to}} of {{total}}',
+        'dataTable.pageIndicator': '{{page}} / {{total}}',
+        'dataTable.firstPage': 'First page',
+        'dataTable.prevPage': 'Previous page',
+        'dataTable.nextPage': 'Next page',
+        'dataTable.lastPage': 'Last page',
+        'filterPanel.searchPlaceholder': 'Search…',
+        'filterPanel.allOption': 'All {{label}}',
+        'exportButton.exportCsv': 'Export CSV',
+        'exportButton.noDataToExport': 'No data to export',
+        'exportButton.csvExportedSuccessfully': 'CSV exported successfully',
+      };
+      return map[key] ?? key;
+    },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
+
 const MOCK_COURSES: AdminCourseSummary[] = [
   {
     id: 'do_1',

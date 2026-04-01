@@ -3,6 +3,7 @@ import * as Checkbox from "@radix-ui/react-checkbox";
 import { FiCheck, FiSearch, FiLoader, FiX } from "react-icons/fi";
 import { MentorUser } from "@/hooks/useMentor";
 import { cn } from "@/lib/utils";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface MentorSectionProps {
   mentorsLoading: boolean;
@@ -27,6 +28,8 @@ export function MentorSection({
   inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
   disabled = false,
 }: MentorSectionProps) {
+  const { t } = useAppI18n();
+
   const filteredMentors: MentorUser[] =
     mentorQuery.trim().length >= 1
       ? allMentors.filter((u) => {
@@ -39,7 +42,7 @@ export function MentorSection({
 
   return (
     <div>
-      <label className={labelClass}>Mentors in the Batch</label>
+      <label className={labelClass}>{t('mentorSection.title')}</label>
 
       {/* Search box */}
       {!disabled && (
@@ -48,7 +51,7 @@ export function MentorSection({
           <input
             type="text"
             className={cn(inputClass, "pl-9")}
-            placeholder="Search mentors by name or email…"
+            placeholder={t('mentorSection.searchPlaceholder')}
             value={mentorQuery}
             onChange={(e) => setMentorQuery(e.target.value)}
           />
@@ -93,7 +96,7 @@ export function MentorSection({
       )}
 
       {!mentorsLoading && allMentors.length === 0 && (
-        <p className="text-xs text-muted-foreground mt-1">No mentors found in your organisation.</p>
+        <p className="text-xs text-muted-foreground mt-1">{t('mentorSection.noMentorsFound')}</p>
       )}
 
       {/* Selected mentor tags */}
@@ -118,7 +121,7 @@ export function MentorSection({
                     type="button"
                     onClick={() => toggleMentor(id)}
                     className="hover:opacity-70"
-                    aria-label={`Remove ${name}`}
+                    aria-label={t('mentorSection.removeMentor').replace('{{name}}', name)}
                   >
                     <FiX className="w-3 h-3" />
                   </button>

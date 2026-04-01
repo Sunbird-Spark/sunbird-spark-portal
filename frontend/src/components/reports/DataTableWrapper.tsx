@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import {
   Table,
   TableBody,
@@ -34,9 +35,11 @@ function DataTableWrapper<T>({
   data,
   pageSize = 10,
   loading = false,
-  emptyMessage = "No data available.",
+  emptyMessage,
   keyExtractor,
 }: DataTableWrapperProps<T>) {
+  const { t } = useAppI18n();
+  const resolvedEmptyMessage = emptyMessage ?? t("dataTable.noData");
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDirection>("asc");
@@ -106,7 +109,7 @@ function DataTableWrapper<T>({
             {paged.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="text-center py-12 text-muted-foreground">
-                  {emptyMessage}
+                  {resolvedEmptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
@@ -128,20 +131,25 @@ function DataTableWrapper<T>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <span className="text-xs text-muted-foreground">
-            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, sorted.length)} of {sorted.length}
+            {t("dataTable.showing")
+              .replace("{{from}}", String((page - 1) * pageSize + 1))
+              .replace("{{to}}", String(Math.min(page * pageSize, sorted.length)))
+              .replace("{{total}}", String(sorted.length))}
           </span>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(1)} aria-label="First page">
+            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(1)} aria-label={t("dataTable.firstPage")}>
               <FiChevronsLeft className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(p => p - 1)} aria-label="Previous page">
+            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(p => p - 1)} aria-label={t("dataTable.prevPage")}>
               <FiChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-sm px-2 font-medium text-foreground">{page} / {totalPages}</span>
-            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(p => p + 1)} aria-label="Next page">
+            <span className="text-sm px-2 font-medium text-foreground">
+              {t("dataTable.pageIndicator").replace("{{page}}", String(page)).replace("{{total}}", String(totalPages))}
+            </span>
+            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(p => p + 1)} aria-label={t("dataTable.nextPage")}>
               <FiChevronRight className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(totalPages)} aria-label="Last page">
+            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(totalPages)} aria-label={t("dataTable.lastPage")}>
               <FiChevronsRight className="w-4 h-4" />
             </Button>
           </div>
