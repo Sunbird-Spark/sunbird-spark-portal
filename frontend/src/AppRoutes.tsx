@@ -48,6 +48,7 @@ import UserManagementPage from './pages/user-management/UserManagementPage';
 import PlatformReports from './pages/reports/PlatformReports';
 import CourseReport from './pages/reports/CourseReport';
 import UserReport from './pages/reports/UserReport';
+import PageLoader from './components/common/PageLoader';
 
 
 const AppRoutes: React.FC = () => {
@@ -61,8 +62,8 @@ const AppRoutes: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
-        {/* No-op route: prevents SPA catch-all from redirecting before mobile InAppBrowser can detect the callback URL */}
-        <Route path="/oauth2callback" element={<div />} />
+        {/* Mobile close signal: InAppBrowser detects this URL and closes the browser */}
+        <Route path="/mobile-close" element={<PageLoader fullPage={true} />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="collection">

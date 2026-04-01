@@ -84,14 +84,17 @@ export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
  * the browserClosed event the mobile app already listens for.
  * On web: navigates to redirect_uri or falls back to portal login.
  */
+/**
+ * Dedicated close signal URL. The portal navigates here to trigger
+ * InAppBrowser's browserPageNavigationCompleted event. The mobile app
+ * detects this URL and closes the browser.
+ */
+export const MOBILE_CLOSE_URL = '/mobile-close';
+
 export const handleMobileRedirect = (): void => {
     if (isMobileApp()) {
         clearMobileContext();
-        // Navigate to about:blank to trigger InAppBrowser's browserPageLoaded event.
-        // The mobile app detects this and closes the browser.
-        // We can't use window.close() (blocked: window not opened by script)
-        // or navigate to redirect_uri (server intercepts it, shows "OK" page).
-        window.location.href = 'about:blank';
+        window.location.href = MOBILE_CLOSE_URL;
     } else {
         window.location.href = getSafeRedirectUrl();
     }
