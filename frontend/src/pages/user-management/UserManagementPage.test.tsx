@@ -19,7 +19,9 @@ vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
-  useAppI18n: () => ({ t: (k: string) => k }),
+  useAppI18n: () => ({
+    t: (k: string) => ({ 'exportButton.exportCsv': 'Export CSV' }[k] ?? k),
+  }),
 }));
 
 vi.mock('@/hooks/useUserRead', () => ({
