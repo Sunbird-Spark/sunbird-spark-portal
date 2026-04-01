@@ -52,10 +52,12 @@ export const clearMobileContext = (): void => {
     }
 };
 
+const BLOCKED_PROTOCOLS = ['javascript:', 'data:', 'vbscript:', 'blob:'];
+
 const isSafeUrl = (url: string): boolean => {
     try {
         const parsed = new URL(url);
-        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        return !BLOCKED_PROTOCOLS.includes(parsed.protocol);
     } catch {
         return false;
     }

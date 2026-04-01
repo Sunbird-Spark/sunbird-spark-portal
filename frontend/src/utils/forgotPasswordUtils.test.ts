@@ -184,12 +184,20 @@ describe('forgotPasswordUtils', () => {
             expect(getSafeRedirectUrl()).toBe('/portal/login?prompt=none');
         });
 
-        it('should return fallback when redirect_uri uses invalid protocol', () => {
+        it('should return fallback when redirect_uri uses blocked protocol', () => {
             vi.stubGlobal('location', {
-                search: '?redirect_uri=ftp://example.com/callback',
+                search: '?redirect_uri=javascript:alert(1)',
             });
 
             expect(getSafeRedirectUrl()).toBe('/portal/login?prompt=none');
+        });
+
+        it('should accept custom app scheme redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=org.sunbird.app://oauth2callback',
+            });
+
+            expect(getSafeRedirectUrl()).toBe('org.sunbird.app://oauth2callback');
         });
     });
 
