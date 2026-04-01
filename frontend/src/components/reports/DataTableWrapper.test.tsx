@@ -4,7 +4,7 @@ import DataTableWrapper, { type Column } from './DataTableWrapper';
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => {
+    t: (key: string, opts?: Record<string, unknown>) => {
       const map: Record<string, string> = {
         'dataTable.noData': 'No data available.',
         'dataTable.showing': 'Showing {{from}}–{{to}} of {{total}}',
@@ -14,7 +14,13 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'dataTable.nextPage': 'Next page',
         'dataTable.lastPage': 'Last page',
       };
-      return map[key] ?? key;
+      let str = map[key] ?? key;
+      if (opts) {
+        for (const [k, v] of Object.entries(opts)) {
+          str = str.replace(`{{${k}}}`, String(v));
+        }
+      }
+      return str;
     },
     languages: [],
     currentCode: 'en',

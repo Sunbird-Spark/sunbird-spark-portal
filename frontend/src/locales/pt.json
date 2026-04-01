@@ -363,7 +363,8 @@
     "notFound": "Coleção não encontrada.",
     "contentPlaylist": "Lista de reprodução de conteúdo",
     "digitalTextbook": "Livro didático digital",
-    "questionPaper": "Prova de questões"
+    "questionPaper": "Prova de questões",
+    "viewCourseDashboard": "Ver painel do curso"
   },
   "homePage": {
     "hiUser": "Olá {{name}}",
@@ -923,7 +924,16 @@
     "course2": "Curso 2"
   },
   "courseDashboard": {
-    "title": "Painel do curso"
+    "title": "Painel do curso",
+    "backToCoursePage": "Voltar à página do curso",
+    "checkingPermissions": "Verificando permissões\u2026",
+    "failedToLoad": "Falha ao carregar o curso.",
+    "manageDashboard": "Gerenciar painel deste curso"
+  },
+  "batchStatus": {
+    "upcoming": "Próximo",
+    "ongoing": "Em andamento",
+    "expired": "Expirado"
   },
   "userManagement": {
     "addRole": "Adicionar função",

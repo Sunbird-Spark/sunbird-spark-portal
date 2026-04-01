@@ -121,7 +121,7 @@ export function MentorSection({
                     type="button"
                     onClick={() => toggleMentor(id)}
                     className="hover:opacity-70"
-                    aria-label={t('mentorSection.removeMentor').replace('{{name}}', name)}
+                    aria-label={t('mentorSection.removeMentor', { name })}
                   >
                     <FiX className="w-3 h-3" />
                   </button>

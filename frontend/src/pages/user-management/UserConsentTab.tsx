@@ -122,8 +122,8 @@ const UserConsentTab = () => {
       toast({
         title:
           type === "revoke"
-            ? t("userManagement.consentTab.revokedToast").replace("{{count}}", String(idsToUpdate.length))
-            : t("userManagement.consentTab.reissuedToast").replace("{{count}}", String(idsToUpdate.length)),
+            ? t("userManagement.consentTab.revokedToast", { count: idsToUpdate.length })
+            : t("userManagement.consentTab.reissuedToast", { count: idsToUpdate.length }),
       });
       setConfirm(CLOSED_CONFIRM);
     }, 600);
@@ -140,10 +140,10 @@ const UserConsentTab = () => {
 
   const confirmTitle = confirm.type === "revoke"
     ? (confirm.isBulk
-        ? t("userManagement.consentTab.revokeTitleBulk").replace("{{count}}", String(selectedIds.size))
+        ? t("userManagement.consentTab.revokeTitleBulk", { count: selectedIds.size })
         : t("userManagement.consentTab.revokeTitle"))
     : (confirm.isBulk
-        ? t("userManagement.consentTab.reissueTitleBulk").replace("{{count}}", String(selectedIds.size))
+        ? t("userManagement.consentTab.reissueTitleBulk", { count: selectedIds.size })
         : t("userManagement.consentTab.reissueTitle"));
 
   const confirmDescription = confirm.type === "revoke"

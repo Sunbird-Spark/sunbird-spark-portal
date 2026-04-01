@@ -199,7 +199,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
               <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
                 <FiCalendar className="w-7 h-7" />
                 <p className="text-xs font-rubik">
-                  {t('batch.noTabBatches').replace('{{tab}}', t(`batchTabs.${activeTab.toLowerCase()}`))}
+                  {t('batch.noTabBatches', { tab: t(`batchTabs.${activeTab.toLowerCase()}`) })}
                 </p>
               </div>
             ) : (

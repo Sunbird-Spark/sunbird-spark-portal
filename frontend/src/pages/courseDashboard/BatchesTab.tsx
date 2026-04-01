@@ -100,7 +100,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
                           STATUS_STYLES[status]
                         )}
                       >
-                        {status}
+                        {t(`batchStatus.${status.toLowerCase()}`)}
                       </span>
                     </span>
                   </SelectItem>

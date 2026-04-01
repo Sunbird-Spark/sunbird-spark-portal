@@ -112,7 +112,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
               {isOnlyMentor ? t('createBatch.viewTitle') : (isEditMode ? t('createBatch.editTitle') : t('createBatch.createTitle'))}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors" aria-label="Close" data-edataid="batch-modal-close" data-pageid="batch-create">
+              <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors" aria-label={t('createBatch.close')} data-edataid="batch-modal-close" data-pageid="batch-create">
                 <FiX className="w-5 h-5" />
               </button>
             </Dialog.Close>
@@ -120,7 +120,7 @@ const CreateBatchModal = ({ open, onOpenChange, collectionId, initialBatch }: Cr
           <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
             <BatchFormFields form={form} handleField={handleField} setForm={setForm} labelClass={labelClass} inputClass={inputClass} disabledFields={isOnlyMentor ? ["batchName", "aboutBatch", "startDate", "endDate", "enrolmentEndDate"] : []} />
             <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-              <div className="px-4 py-3"><SwitchRow id="issueCertificate" label="Issue Certificate" checked={form.issueCertificate} onChange={(v) => handleField("issueCertificate", v)} disabled={isOnlyMentor} /></div>
+              <div className="px-4 py-3"><SwitchRow id="issueCertificate" label={t('createBatch.issueCertificate')} checked={form.issueCertificate} onChange={(v) => handleField("issueCertificate", v)} disabled={isOnlyMentor} /></div>
               <div className="px-4 py-3 text-sm flex items-center justify-between gap-4 font-rubik">
                 <span className="font-medium text-foreground">{t('createBatch.batchType')}</span>
                 <span className="font-medium text-sunbird-brick">{t('createBatch.batchTypeOpen')}</span>

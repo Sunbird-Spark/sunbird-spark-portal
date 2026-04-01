@@ -363,7 +363,8 @@
     "notFound": "المجموعة غير موجودة.",
     "contentPlaylist": "قائمة تشغيل المحتوى",
     "digitalTextbook": "كتاب مدرسي رقمي",
-    "questionPaper": "ورقة الأسئلة"
+    "questionPaper": "ورقة الأسئلة",
+    "viewCourseDashboard": "عرض لوحة تحكم الدورة"
   },
   "homePage": {
     "hiUser": "مرحباً {{name}}",
@@ -923,7 +924,16 @@
     "course2": "الدورة 2"
   },
   "courseDashboard": {
-    "title": "لوحة تحكم الدورة"
+    "title": "لوحة تحكم الدورة",
+    "backToCoursePage": "العودة إلى صفحة الدورة",
+    "checkingPermissions": "جارٍ التحقق من الصلاحيات\u2026",
+    "failedToLoad": "فشل تحميل الدورة.",
+    "manageDashboard": "إدارة لوحة التحكم لهذه الدورة"
+  },
+  "batchStatus": {
+    "upcoming": "قادمة",
+    "ongoing": "جارية",
+    "expired": "منتهية"
   },
   "userManagement": {
     "addRole": "إضافة دور",
@@ -1041,7 +1051,8 @@
       "colPiiStatus": "حالة موافقة PII",
       "colCourse": "الدورة",
       "colConsentGivenOn": "تاريخ الموافقة",
-      "colExpiry": "تاريخ الانتهاء"
+      "colExpiry": "تاريخ الانتهاء",
+      "bulkActions": "إجراءات مجمعة"
     }
   },
   "formFields": {

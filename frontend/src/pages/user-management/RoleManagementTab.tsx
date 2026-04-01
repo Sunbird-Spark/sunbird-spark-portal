@@ -62,7 +62,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
     } catch {
       toast({ title: t("userManagement.roleManagement.refreshFailed"), description: t("userManagement.roleManagement.refreshFailedDesc"), variant: "destructive" });
     }
-  }, [onRefreshSearch, toast]);
+  }, [onRefreshSearch, toast, t]);
 
   const handleSearch = async () => {
     const query = searchQuery.trim();

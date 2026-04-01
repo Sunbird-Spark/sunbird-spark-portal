@@ -363,7 +363,8 @@
     "notFound": "Collection not found.",
     "contentPlaylist": "Content Playlist",
     "digitalTextbook": "Digital Textbook",
-    "questionPaper": "Question Paper"
+    "questionPaper": "Question Paper",
+    "viewCourseDashboard": "View Course Dashboard"
   },
   "homePage": {
     "hiUser": "Hi {{name}}",
@@ -938,7 +939,16 @@
     "course2": "Course 2"
   },
   "courseDashboard": {
-    "title": "Course Dashboard"
+    "title": "Course Dashboard",
+    "backToCoursePage": "Back to Course Page",
+    "checkingPermissions": "Checking permissions\u2026",
+    "failedToLoad": "Failed to load course.",
+    "manageDashboard": "Manage dashboard for this course"
+  },
+  "batchStatus": {
+    "upcoming": "Upcoming",
+    "ongoing": "Ongoing",
+    "expired": "Expired"
   },
   "userManagement": {
     "addRole": "Add Role",
@@ -1056,7 +1066,8 @@
       "colPiiStatus": "PII Consent Status",
       "colCourse": "Course",
       "colConsentGivenOn": "Consent Given On",
-      "colExpiry": "Expiry"
+      "colExpiry": "Expiry",
+      "bulkActions": "Bulk actions"
     }
   },
   "formFields": {

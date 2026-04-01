@@ -121,7 +121,7 @@ const UserManagementPage = () => {
     } catch {
       toast({ title: t("userManagement.toast.failedToLoadRoles"), description: t("userManagement.toast.rolesCouldNotBeLoaded"), variant: "destructive" });
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { loadRoles(); }, [loadRoles]);
 

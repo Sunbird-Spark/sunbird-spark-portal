@@ -5,7 +5,7 @@ import { DeleteRoleDialog, DeleteDialogState } from './DeleteRoleDialog';
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (k: string) => {
+    t: (k: string, opts?: Record<string, unknown>) => {
       const map: Record<string, string> = {
         'cancel': 'cancel',
         'confirm': 'Confirm',
@@ -15,7 +15,13 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'userManagement.deleteRoleDialog.confirmDescFallback': 'Are you sure you want to remove this role?',
         'userManagement.deleteRoleDialog.remove': 'Remove',
       };
-      return map[k] ?? k;
+      let str = map[k] ?? k;
+      if (opts) {
+        for (const [key, v] of Object.entries(opts)) {
+          str = str.replace(`{{${key}}}`, String(v));
+        }
+      }
+      return str;
     },
     languages: [],
     currentCode: 'en',

@@ -42,7 +42,7 @@ const FilterPanel = ({ filters, values, onChange, searchValue, onSearchChange, s
             <SelectValue placeholder={f.label} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t("filterPanel.allOption").replace("{{label}}", f.label)}</SelectItem>
+            <SelectItem value="all">{t("filterPanel.allOption", { label: f.label })}</SelectItem>
             {f.options.map((o) => (
               <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
             ))}

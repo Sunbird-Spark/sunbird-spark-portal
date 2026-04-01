@@ -22,7 +22,7 @@ export const CLOSED_CONFIRM: ConfirmState = {
   isLoading: false,
 };
 
-export function getExportColumns(t: (k: string) => string) {
+export function getExportColumns(t: (k: string, opts?: Record<string, unknown>) => string) {
   return [
     { key: "userName", header: t("userManagement.consentColumns.colUserName") },
     { key: "email", header: t("userManagement.consentColumns.colEmail") },
@@ -42,7 +42,7 @@ interface BulkActionsBarProps {
   onClear: () => void;
   onBulkRevoke: () => void;
   onBulkReissue: () => void;
-  t: (k: string) => string;
+  t: (k: string, opts?: Record<string, unknown>) => string;
 }
 
 export function BulkActionsBar({
@@ -59,13 +59,13 @@ export function BulkActionsBar({
     <div
       className="flex flex-wrap items-center gap-3 mb-4 px-4 py-3 bg-muted/30 rounded-xl border border-border"
       role="toolbar"
-      aria-label="Bulk actions"
+      aria-label={t("userManagement.consentColumns.bulkActions")}
     >
       <span className="text-sm font-medium text-foreground">
-        {t("userManagement.consentColumns.selectedCount").replace("{{count}}", String(selectedCount))}
+        {t("userManagement.consentColumns.selectedCount", { count: selectedCount })}
       </span>
       <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={onSelectAll}>
-        {t("userManagement.consentColumns.selectAll").replace("{{count}}", String(filteredCount))}
+        {t("userManagement.consentColumns.selectAll", { count: filteredCount })}
       </Button>
       <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={onClear}>
         <FiX className="w-3.5 h-3.5 mr-1" />
@@ -88,7 +88,7 @@ export function BulkActionsBar({
 export function buildColumns(
   selectedIds: Set<string>,
   handleToggle: (id: string) => void,
-  t: (k: string) => string,
+  t: (k: string, opts?: Record<string, unknown>) => string,
 ): Column<UserConsentRecord>[] {
   return [
     {
@@ -101,7 +101,7 @@ export function buildColumns(
           onChange={() => handleToggle(row.id)}
           onClick={(e) => e.stopPropagation()}
           className="w-4 h-4 cursor-pointer accent-sunbird-brick"
-          aria-label={t("userManagement.consentColumns.selectUser").replace("{{name}}", row.userName)}
+          aria-label={t("userManagement.consentColumns.selectUser", { name: row.userName })}
         />
       ),
     },

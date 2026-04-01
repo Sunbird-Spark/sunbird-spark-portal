@@ -50,7 +50,7 @@ vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (k: string) => {
+    t: (k: string, opts?: Record<string, unknown>) => {
       const map: Record<string, string> = {
         'exportButton.exportCsv': 'Export CSV',
         'exportButton.noDataToExport': 'No data to export',
@@ -85,6 +85,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'userManagement.consentColumns.colCourse': 'Course',
         'userManagement.consentColumns.colConsentGivenOn': 'Consent Given On',
         'userManagement.consentColumns.colExpiry': 'Expiry',
+        'userManagement.consentColumns.bulkActions': 'Bulk actions',
         'dataTable.noData': 'No data available.',
         'dataTable.showing': 'Showing {{from}}–{{to}} of {{total}}',
         'dataTable.pageIndicator': '{{page}} / {{total}}',
@@ -95,7 +96,13 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'filterPanel.searchPlaceholder': 'Search…',
         'filterPanel.allOption': 'All {{label}}',
       };
-      return map[k] ?? k;
+      let str = map[k] ?? k;
+      if (opts) {
+        for (const [key, v] of Object.entries(opts)) {
+          str = str.replace(`{{${key}}}`, String(v));
+        }
+      }
+      return str;
     },
     languages: [],
     currentCode: 'en',

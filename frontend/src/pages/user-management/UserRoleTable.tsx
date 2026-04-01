@@ -28,7 +28,7 @@ export const UserRoleTable = ({
     return (
       <div className="um-empty-state">
         <p className="um-empty-text">
-          {t("userManagement.userRoleTable.noUsersFound").replace("{{query}}", searchQuery)}
+          {t("userManagement.userRoleTable.noUsersFound", { query: searchQuery })}
         </p>
       </div>
     );

@@ -85,18 +85,18 @@ const CourseDashboardPage: React.FC = () => {
           data-testid="back-to-course-btn"
         >
           <FiArrowLeft className="w-4 h-4" />
-          Back to Course Page
+          {t('courseDashboard.backToCoursePage')}
         </button>
 
         {/* ─── Loading / error for collection name and permissions ─── */}
         {isPermissionDetermining && (
           <div className="mb-6">
-            <PageLoader message="Checking permissions…" fullPage={false} />
+            <PageLoader message={t('courseDashboard.checkingPermissions')} fullPage={false} />
           </div>
         )}
         {!isPermissionDetermining && isError && (
           <div className="mb-6">
-            <PageLoader error={(error as Error)?.message ?? 'Failed to load course.'} fullPage={false} />
+            <PageLoader error={(error as Error)?.message ?? t('courseDashboard.failedToLoad')} fullPage={false} />
           </div>
         )}
 
@@ -119,7 +119,7 @@ const CourseDashboardPage: React.FC = () => {
             {/* ─── Header area of Box ─── */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <p className="text-sm font-semibold text-foreground font-rubik">
-                Manage dashboard for this course
+                {t('courseDashboard.manageDashboard')}
               </p>
             </div>
 

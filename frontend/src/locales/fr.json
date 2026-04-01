@@ -363,7 +363,8 @@
     "notFound": "Collection introuvable.",
     "contentPlaylist": "Liste de lecture de contenu",
     "digitalTextbook": "Manuel numérique",
-    "questionPaper": "Sujet d'examen"
+    "questionPaper": "Sujet d'examen",
+    "viewCourseDashboard": "Voir le tableau de bord du cours"
   },
   "homePage": {
     "hiUser": "Bonjour {{name}}",
@@ -923,7 +924,16 @@
     "course2": "Cours 2"
   },
   "courseDashboard": {
-    "title": "Tableau de bord du cours"
+    "title": "Tableau de bord du cours",
+    "backToCoursePage": "Retour à la page du cours",
+    "checkingPermissions": "Vérification des permissions\u2026",
+    "failedToLoad": "Échec du chargement du cours.",
+    "manageDashboard": "Gérer le tableau de bord de ce cours"
+  },
+  "batchStatus": {
+    "upcoming": "À venir",
+    "ongoing": "En cours",
+    "expired": "Expiré"
   },
   "userManagement": {
     "addRole": "Ajouter un rôle",

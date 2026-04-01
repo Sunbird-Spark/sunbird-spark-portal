@@ -33,7 +33,7 @@ export const DeleteRoleDialog = ({
       title={t("userManagement.deleteRoleDialog.title")}
       description={
         dialogState.roleInfo
-          ? t("userManagement.deleteRoleDialog.confirmDesc").replace("{{role}}", dialogState.roleInfo.role)
+          ? t("userManagement.deleteRoleDialog.confirmDesc", { role: dialogState.roleInfo.role })
           : t("userManagement.deleteRoleDialog.confirmDescFallback")
       }
       confirmLabel={t("userManagement.deleteRoleDialog.remove")}

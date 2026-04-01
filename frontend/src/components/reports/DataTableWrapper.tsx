@@ -131,10 +131,7 @@ function DataTableWrapper<T>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <span className="text-xs text-muted-foreground">
-            {t("dataTable.showing")
-              .replace("{{from}}", String((page - 1) * pageSize + 1))
-              .replace("{{to}}", String(Math.min(page * pageSize, sorted.length)))
-              .replace("{{total}}", String(sorted.length))}
+            {t("dataTable.showing", { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, sorted.length), total: sorted.length })}
           </span>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(1)} aria-label={t("dataTable.firstPage")}>
@@ -144,7 +141,7 @@ function DataTableWrapper<T>({
               <FiChevronLeft className="w-4 h-4" />
             </Button>
             <span className="text-sm px-2 font-medium text-foreground">
-              {t("dataTable.pageIndicator").replace("{{page}}", String(page)).replace("{{total}}", String(totalPages))}
+              {t("dataTable.pageIndicator", { page, total: totalPages })}
             </span>
             <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(p => p + 1)} aria-label={t("dataTable.nextPage")}>
               <FiChevronRight className="w-4 h-4" />

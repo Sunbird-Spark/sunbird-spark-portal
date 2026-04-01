@@ -16,6 +16,26 @@ vi.mock('react-router-dom', () => ({
   Link: ({ children, to }: { children: React.ReactNode, to: string }) => <a href={to}>{children}</a>,
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (k: string) => {
+      const map: Record<string, string> = {
+        'courseDashboard.title': 'Course Dashboard',
+        'courseDashboard.backToCoursePage': 'Back to Course Page',
+        'courseDashboard.checkingPermissions': 'Checking permissions\u2026',
+        'courseDashboard.failedToLoad': 'Failed to load course.',
+        'courseDashboard.manageDashboard': 'Manage dashboard for this course',
+        'tabs.batches': 'Batches',
+        'tabs.reissueCertificate': 'Reissue Certificate',
+      };
+      return map[k] ?? k;
+    },
+    isRTL: false,
+    dir: 'ltr',
+    currentCode: 'en',
+  }),
+}));
+
 // Mock hooks and components
 vi.mock('@/hooks/useCollection', () => ({
   useCollection: vi.fn(() => ({
