@@ -252,7 +252,7 @@
     "attemptsLabel": "المحاولة {{current}} من {{max}}",
     "scoreLabel": "أفضل نتيجة: {{score}}/{{max}}",
     "forceSync": "مزامنة التقدم الآن",
-    "forceSyncSuccess": "يمكنك عرض تحديث تقدم الدورة خلال 24 ساعة",
+    "forceSyncSuccess": "تم تحديث تقدمك في الدورة",
     "forceSyncCooldown": "يرجى الانتظار قبل المزامنة مرة أخرى.",
     "leaveCourse": "مغادرة الدورة",
     "leaveCourseTitle": "إلغاء التسجيل من الدفعة",
@@ -933,5 +933,11 @@
     "preparing": "جارٍ تجهيز بيئة المحرر...",
     "genericEditor": "المحرر العام",
     "contentEditor": "محرر المحتوى"
+  },
+  "statsCards": {
+    "totalCourses": "إجمالي الدورات",
+    "inProgress": "قيد التقدم",
+    "completed": "مكتمل",
+    "certificationsEarned": "الشهادات المكتسبة"
   }
 }

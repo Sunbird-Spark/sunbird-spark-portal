@@ -1,5 +1,6 @@
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { useUserCertificates } from "@/hooks/useCertificate";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 // Custom icons matching the design
 const TotalContentsIcon = () => (
@@ -40,6 +41,7 @@ const CertificationsIcon = () => (
 );
 
 const HomeStatsCards = () => {
+    const { t } = useAppI18n();
     const { data: enrolledCollections, isLoading: enrollmentsLoading } = useUserEnrolledCollections();
     const { data: certificatesData, isLoading: certificatesLoading } = useUserCertificates();
     const courses = enrolledCollections?.data?.courses || [];
@@ -61,7 +63,7 @@ const HomeStatsCards = () => {
         {
             id: "total",
             value: totalCourses === 0 ? '0' : totalCourses.toString().padStart(2, '0'),
-            label: "Total Courses",
+            label: t("statsCards.totalCourses"),
             bgColor: "bg-sunbird-blue-light",
             iconBg: "hsl(var(--sunbird-blue-medium))",
             icon: TotalContentsIcon,
@@ -69,7 +71,7 @@ const HomeStatsCards = () => {
         {
             id: "progress",
             value: coursesInProgress === 0 ? '0' : coursesInProgress.toString().padStart(2, '0'),
-            label: "In Progress",
+            label: t("statsCards.inProgress"),
             bgColor: "bg-sunbird-ginger",
             iconBg: "hsl(var(--sunbird-brown-dark))",
             icon: InProgressIcon,
@@ -77,7 +79,7 @@ const HomeStatsCards = () => {
         {
             id: "completed",
             value: coursesCompleted === 0 ? '0' : coursesCompleted.toString().padStart(2, '0'),
-            label: "Completed",
+            label: t("statsCards.completed"),
             bgColor: "bg-sunbird-moss",
             iconBg: "hsl(var(--sunbird-green-dark))",
             icon: CompletedIcon,
@@ -85,7 +87,7 @@ const HomeStatsCards = () => {
         {
             id: "certs",
             value: certificatesEarned === 0 ? '0' : certificatesEarned.toString().padStart(2, '0'),
-            label: "Certifications Earned",
+            label: t("statsCards.certificationsEarned"),
             bgColor: "bg-sunbird-lavender",
             iconBg: "hsl(var(--sunbird-purple-dark))",
             icon: CertificationsIcon,

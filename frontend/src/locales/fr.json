@@ -252,7 +252,7 @@
     "attemptsLabel": "Tentative {{current}} sur {{max}}",
     "scoreLabel": "Meilleur score : {{score}}/{{max}}",
     "forceSync": "Synchroniser la progression maintenant",
-    "forceSyncSuccess": "Vous pouvez consulter la progression mise à jour du cours sous 24 heures",
+    "forceSyncSuccess": "La progression de votre cours a été mise à jour",
     "forceSyncCooldown": "Veuillez patienter avant de resynchroniser.",
     "leaveCourse": "Quitter le cours",
     "leaveCourseTitle": "Désinscription du lot",
@@ -941,5 +941,11 @@
     "preparing": "Préparation de l'environnement de l'éditeur...",
     "genericEditor": "Éditeur générique",
     "contentEditor": "Éditeur de contenu"
+  },
+  "statsCards": {
+    "totalCourses": "Total des cours",
+    "inProgress": "En cours",
+    "completed": "Terminé",
+    "certificationsEarned": "Certifications obtenues"
   }
 }
