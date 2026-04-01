@@ -84,17 +84,15 @@ export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
  * the browserClosed event the mobile app already listens for.
  * On web: navigates to redirect_uri or falls back to portal login.
  */
-/**
- * Dedicated close signal URL. The portal navigates here to trigger
- * InAppBrowser's browserPageNavigationCompleted event. The mobile app
- * detects this URL and closes the browser.
- */
-export const MOBILE_CLOSE_URL = '/mobile-close';
-
 export const handleMobileRedirect = (): void => {
     if (isMobileApp()) {
         clearMobileContext();
-        window.location.href = MOBILE_CLOSE_URL;
+        // Navigate to an intent:// URL that brings the mobile app's main activity
+        // to the foreground. The InAppBrowser plugin natively handles intent:// URLs
+        // via startActivity(). Once the app resumes in the foreground, the mobile app
+        // detects the app state change and closes the InAppBrowser.
+        const appPackage = new URLSearchParams(window.location.search).get('appId') || 'org.sunbird.app';
+        window.location.href = `intent://callback#Intent;scheme=sunbird;package=${appPackage};end`;
     } else {
         window.location.href = getSafeRedirectUrl();
     }

@@ -48,7 +48,6 @@ import UserManagementPage from './pages/user-management/UserManagementPage';
 import PlatformReports from './pages/reports/PlatformReports';
 import CourseReport from './pages/reports/CourseReport';
 import UserReport from './pages/reports/UserReport';
-import PageLoader from './components/common/PageLoader';
 
 
 const AppRoutes: React.FC = () => {
@@ -62,9 +61,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
-        {/* Mobile close signal: InAppBrowser detects this URL and closes the browser */}
-        <Route path="/mobile-close" element={<PageLoader fullPage={true} />} />
-        <Route path="/content/:contentId" element={<ContentPlayerPage />} />
+<Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
