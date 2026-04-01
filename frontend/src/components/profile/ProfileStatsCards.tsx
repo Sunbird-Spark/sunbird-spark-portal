@@ -1,9 +1,11 @@
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { useUserCertificates } from "@/hooks/useCertificate";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 import { TotalContentsIcon, InProgressIcon, ContentsCompletedIcon, CertificationsIcon } from "./ProfileIcons";
 
 const ProfileStatsCards = () => {
+    const { t } = useAppI18n();
     const { data: enrolledCollections, isLoading: enrollmentsLoading } = useUserEnrolledCollections();
     const { data: certificatesData, isLoading: certificatesLoading } = useUserCertificates();
     const courses = enrolledCollections?.data?.courses || [];
@@ -25,25 +27,25 @@ const ProfileStatsCards = () => {
         {
             id: "total",
             value: totalCourses === 0 ? '0' : totalCourses.toString().padStart(2, '0'),
-            label: "Total Courses",
+            label: t("statsCards.totalCourses"),
             icon: TotalContentsIcon,
         },
         {
             id: "progress",
             value: coursesInProgress === 0 ? '0' : coursesInProgress.toString().padStart(2, '0'),
-            label: "In Progress",
+            label: t("statsCards.inProgress"),
             icon: InProgressIcon,
         },
         {
             id: "completed",
             value: coursesCompleted === 0 ? '0' : coursesCompleted.toString().padStart(2, '0'),
-            label: "Completed",
+            label: t("statsCards.completed"),
             icon: ContentsCompletedIcon,
         },
         {
             id: "certs",
             value: certificatesEarned === 0 ? '0' : certificatesEarned.toString().padStart(2, '0'),
-            label: "Certifications Earned",
+            label: t("statsCards.certificationsEarned"),
             icon: CertificationsIcon,
         },
     ];

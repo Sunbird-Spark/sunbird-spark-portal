@@ -2,6 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import HomeStatsCards from './HomeStatsCards';
 
+// Mock useAppI18n
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => ({
+            'statsCards.totalCourses': 'Total Courses',
+            'statsCards.inProgress': 'In Progress',
+            'statsCards.completed': 'Completed',
+            'statsCards.certificationsEarned': 'Certifications Earned',
+        }[key] ?? key),
+        languages: [],
+        currentCode: 'en',
+        currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+        changeLanguage: vi.fn(),
+        isRTL: false,
+        dir: 'ltr',
+    }),
+}));
+
 // Mock useUserEnrolledCollections
 const mockUseUserEnrolledCollections = vi.fn();
 vi.mock('@/hooks/useUserEnrolledCollections', () => ({

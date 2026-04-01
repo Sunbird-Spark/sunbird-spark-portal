@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { FiDownload } from "react-icons/fi";
 import { useToast } from "@/hooks/useToast";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface ExportButtonProps<T extends object> {
   data: T[];
@@ -9,11 +10,12 @@ interface ExportButtonProps<T extends object> {
 }
 
 function ExportButton<T extends object>({ data, filename = "report", columns }: ExportButtonProps<T>) {
+  const { t } = useAppI18n();
   const { toast } = useToast();
 
   const handleExport = () => {
     if (data.length === 0) {
-      toast({ title: "No data to export", variant: "destructive" });
+      toast({ title: t("exportButton.noDataToExport"), variant: "destructive" });
       return;
     }
 
@@ -33,13 +35,13 @@ function ExportButton<T extends object>({ data, filename = "report", columns }: 
     link.download = `${filename}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    toast({ title: "CSV exported successfully", variant: "success" });
+    toast({ title: t("exportButton.csvExportedSuccessfully"), variant: "success" });
   };
 
   return (
     <Button variant="outline" size="sm" onClick={handleExport} className="gap-2 border-border">
       <FiDownload className="w-4 h-4" />
-      Export CSV
+      {t("exportButton.exportCsv")}
     </Button>
   );
 }

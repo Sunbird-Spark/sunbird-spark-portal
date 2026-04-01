@@ -252,7 +252,7 @@
     "attemptsLabel": "Attempt {{current}} of {{max}}",
     "scoreLabel": "Best Score: {{score}}/{{max}}",
     "forceSync": "Sync progress now",
-    "forceSyncSuccess": "You can view your updated course progress within 24 hours",
+    "forceSyncSuccess": "Your course progress has been updated",
     "forceSyncCooldown": "Please wait before syncing again.",
     "leaveCourse": "Leave course",
     "leaveCourseTitle": "Batch Unenrolment",
@@ -934,5 +934,17 @@
     "preparing": "Preparing the editor environment...",
     "genericEditor": "Generic Editor",
     "contentEditor": "Content Editor"
+  },
+  "statsCards": {
+    "totalCourses": "Total Courses",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "certificationsEarned": "Certifications Earned"
+  },
+  "exportButton": {
+    "exportCsv": "Export CSV",
+    "noDataToExport": "No data to export",
+    "csvExportedSuccessfully": "CSV exported successfully"
   }
 }
+

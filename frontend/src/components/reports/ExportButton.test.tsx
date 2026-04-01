@@ -6,6 +6,22 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => ({
+      'exportButton.exportCsv': 'Export CSV',
+      'exportButton.noDataToExport': 'No data to export',
+      'exportButton.csvExportedSuccessfully': 'CSV exported successfully',
+    }[key] ?? key),
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
+
 const columns = [
   { key: 'name', header: 'Name' },
   { key: 'score', header: 'Score' },
