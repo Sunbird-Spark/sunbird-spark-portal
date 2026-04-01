@@ -61,7 +61,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
-<Route path="/content/:contentId" element={<ContentPlayerPage />} />
+        <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
