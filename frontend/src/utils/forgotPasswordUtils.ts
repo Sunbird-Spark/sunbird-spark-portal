@@ -63,13 +63,32 @@ const isSafeUrl = (url: string): boolean => {
     }
 };
 
+/**
+ * Converts a custom scheme URL to an Android intent:// URL.
+ * e.g., org.sunbird.app://oauth2callback → intent://oauth2callback#Intent;scheme=org.sunbird.app;package=org.sunbird.app;end
+ * Returns the original URL for http/https URLs.
+ */
+const toIntentUrl = (url: string): string => {
+    try {
+        const parsed = new URL(url);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            return url;
+        }
+        const scheme = parsed.protocol.replace(':', '');
+        const path = url.substring(parsed.protocol.length + '//'.length);
+        return `intent://${path}#Intent;scheme=${scheme};package=${scheme};end`;
+    } catch {
+        return url;
+    }
+};
+
 export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     const params = new URLSearchParams(window.location.search);
     console.log('params', params);
     const redirectUri = params.get('redirect_uri');
     console.log('redirectUri',redirectUri);
     if (redirectUri && isSafeUrl(redirectUri)) {
-        return redirectUri;
+        return toIntentUrl(redirectUri);
     }
     if (redirectUri) {
         console.warn('getSafeRedirectUrl: invalid redirect_uri, ignoring');
@@ -78,7 +97,7 @@ export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     const ctx = getMobileContext();
     console.log('mobile context', ctx);
     if (ctx?.redirectUri && isSafeUrl(ctx.redirectUri)) {
-        return ctx.redirectUri;
+        return toIntentUrl(ctx.redirectUri);
     }
     return fallback;
 };
