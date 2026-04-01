@@ -10,7 +10,7 @@ import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
-import { isMobileApp, persistMobileContext, handleMobileRedirect } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
@@ -209,7 +209,7 @@ const SignUp: React.FC = () => {
     };
 
     const handleProceedToLogin = () => {
-        handleMobileRedirect();
+        window.location.href = getSafeRedirectUrl();
     };
 
     const isMobileRedirect = isMobileApp();

@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { isMobileApp, handleMobileRedirect } from "@/utils/forgotPasswordUtils";
+import { isMobileApp, getSafeRedirectUrl } from "@/utils/forgotPasswordUtils";
 
 interface Step1Props {
     firstName: string;
@@ -170,10 +170,7 @@ export const SignUpForm = ({
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
-                    {t("signUp.alreadyHaveAccount")} {isMobile
-                        ? <button type="button" onClick={handleMobileRedirect} className="themed-link no-underline hover:underline">{t("login")}</button>
-                        : <a href="/login" className="themed-link no-underline hover:underline">{t("login")}</a>
-                    }
+                    {t("signUp.alreadyHaveAccount")} <a href={isMobile ? getSafeRedirectUrl() : "/login"} className="themed-link no-underline hover:underline">{t("login")}</a>
                 </div>
             </div>
         </div>

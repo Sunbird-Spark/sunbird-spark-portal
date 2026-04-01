@@ -2,13 +2,17 @@ import React from 'react';
 import { FiCheck } from 'react-icons/fi';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
-import { isMobileApp, handleMobileRedirect } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
+
+const onProceedToLogin = () => {
+    window.location.href = getSafeRedirectUrl();
+};
 
 const PasswordResetSuccess: React.FC = () => {
     const isMobileRedirect = isMobileApp();
 
     return (
-        <AuthLayout onClose={() => handleMobileRedirect()} hideClose={isMobileRedirect}>
+        <AuthLayout onClose={() => { window.location.href = getSafeRedirectUrl(); }} hideClose={isMobileRedirect}>
             <div className="flex flex-col items-center">
                 <Header
                     title="Congratulations!"
@@ -21,7 +25,7 @@ const PasswordResetSuccess: React.FC = () => {
                     </div>
                 </div>
 
-                <PrimaryButton onClick={handleMobileRedirect}>
+                <PrimaryButton onClick={onProceedToLogin}>
                     Proceed to Login
                 </PrimaryButton>
             </div>
