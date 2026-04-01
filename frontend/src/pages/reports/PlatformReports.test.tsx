@@ -34,6 +34,17 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'exportButton.exportCsv': 'Export CSV',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 const MOCK_COURSES: AdminCourseSummary[] = [
   {
     id: 'do_1',

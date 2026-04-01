@@ -45,6 +45,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'userReport.date': 'Date',
         'userReport.dateTime': 'Date & Time',
         'home': 'Home',
+        'exportButton.exportCsv': 'Export CSV',
       };
       return translations[key] ?? key;
     },

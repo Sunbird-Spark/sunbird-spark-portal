@@ -41,6 +41,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'courseReport.assessments': 'Assessments',
         'courseReport.detailedLearnerProgress': 'Detailed Learner Progress',
         'courseReport.detailedAssessments': 'Detailed Assessments',
+        'exportButton.exportCsv': 'Export CSV',
       };
       return translations[key] ?? key;
     },

@@ -48,6 +48,17 @@ vi.mock('@/hooks/useConsentSummary', () => ({
 
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'exportButton.exportCsv': 'Export CSV',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, title, onConfirm, onClose }: any) =>
     open ? (
