@@ -57,7 +57,6 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'dataTable.lastPage': 'Last page',
         'filterPanel.searchPlaceholder': 'Search…',
         'filterPanel.allOption': 'All {{label}}',
-        'exportButton.exportCsv': 'Export CSV',
       };
       return translations[key] ?? key;
     },
