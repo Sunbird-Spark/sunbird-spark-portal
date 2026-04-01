@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter, createMemoryRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
 import ProfileLearningList from './ProfileLearningList';
 import { useUserEnrolledCollections } from '@/hooks/useUserEnrolledCollections';
@@ -95,8 +96,8 @@ describe('ProfileLearningList', () => {
             data: {
                 data: {
                     courses: [
-                        { courseId: 'c1', batchId: '1', status: 1, courseName: 'Ongoing Course', completionPercentage: 50 },
-                        { courseId: 'c2', batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
+                        { courseId: 'c1', collectionId: 'col1', batchId: '1', status: 1, courseName: 'Ongoing Course', completionPercentage: 50 },
+                        { courseId: 'c2', collectionId: 'col2', batchId: '2', status: 2, courseName: 'Completed Course', completionPercentage: 100 }
                     ]
                 }
             },
@@ -107,7 +108,7 @@ describe('ProfileLearningList', () => {
     });
 
     it('renders the list of courses', () => {
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
         expect(screen.getByText('Ongoing Course')).toBeInTheDocument();
         expect(screen.getByText('Completed Course')).toBeInTheDocument();
         // Check default filter label (appears in trigger + dropdown item)
@@ -116,7 +117,7 @@ describe('ProfileLearningList', () => {
     });
 
     it('filters by Ongoing', () => {
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         // Click "Ongoing" filter option (exposed by mock)
         fireEvent.click(screen.getByTestId('filter-option-ongoing'));
@@ -128,7 +129,7 @@ describe('ProfileLearningList', () => {
     });
 
     it('filters by Completed', () => {
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         // Click "Completed" filter option
         fireEvent.click(screen.getByTestId('filter-option-completed'));
@@ -152,7 +153,7 @@ describe('ProfileLearningList', () => {
             isError: false,
         });
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         // Filter by Ongoing
         fireEvent.click(screen.getByTestId('filter-option-ongoing'));
@@ -167,7 +168,7 @@ describe('ProfileLearningList', () => {
             isError: false,
         });
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
         expect(screen.getByText('Loading your courses...')).toBeInTheDocument();
     });
 
@@ -180,7 +181,7 @@ describe('ProfileLearningList', () => {
             refetch: mockRefetch,
         });
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
         expect(screen.getByText('Failed to load courses. Please try again.')).toBeInTheDocument();
 
         fireEvent.click(screen.getByText('Retry'));
@@ -198,7 +199,7 @@ describe('ProfileLearningList', () => {
             isError: false,
         });
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
         expect(screen.getByText('No courses enrolled yet.')).toBeInTheDocument();
     });
 
@@ -221,7 +222,7 @@ describe('ProfileLearningList', () => {
             isError: false,
         });
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         // Initially should show 6 courses and "View More Courses" button
         expect(screen.getByText('Course 1')).toBeInTheDocument();
@@ -266,7 +267,7 @@ describe('ProfileLearningList', () => {
             isError: false,
         });
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         // Expand list
         fireEvent.click(screen.getByText('View More Courses'));
@@ -284,7 +285,7 @@ describe('ProfileLearningList', () => {
     it('renders download button only for completed courses with certificates', () => {
         mockHasCertificate.mockImplementation((courseId) => courseId === 'c2');
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         const downloadButtons = screen.queryAllByText('common.downloadCertificate');
         expect(downloadButtons).toHaveLength(1);
@@ -293,7 +294,7 @@ describe('ProfileLearningList', () => {
     it('does not render download button for completed courses without certificates', () => {
         mockHasCertificate.mockReturnValue(false);
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         const downloadButtons = screen.queryAllByText('common.downloadCertificate');
         expect(downloadButtons).toHaveLength(0);
@@ -302,7 +303,7 @@ describe('ProfileLearningList', () => {
     it('calls downloadCertificate with correct parameters when download button is clicked', () => {
         mockHasCertificate.mockReturnValue(true);
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         const downloadButton = screen.getByText('common.downloadCertificate');
         fireEvent.click(downloadButton);
@@ -318,10 +319,40 @@ describe('ProfileLearningList', () => {
             downloadingCourseId: 'c2',
         });
 
-        render(<ProfileLearningList />);
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         expect(screen.getByText('Downloading...')).toBeInTheDocument();
         const downloadButton = screen.getByText('Downloading...').closest('button');
         expect(downloadButton).toBeDisabled();
+    });
+
+    it('renders each course card as a link to /collection/:collectionId', () => {
+        render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
+
+        const links = screen.getAllByRole('link');
+        const hrefs = links.map((l) => l.getAttribute('href'));
+        expect(hrefs).toContain('/collection/col1');
+        expect(hrefs).toContain('/collection/col2');
+    });
+
+    it('clicking download button does not navigate away from page', () => {
+        mockHasCertificate.mockReturnValue(true);
+        (useCertificateDownload as Mock).mockReturnValue({
+            downloadCertificate: mockDownloadCertificate,
+            hasCertificate: mockHasCertificate,
+            downloadingCourseId: null,
+        });
+
+        const router = createMemoryRouter(
+            [{ path: '/', element: <ProfileLearningList /> }],
+            { initialEntries: ['/'] }
+        );
+        render(<RouterProvider router={router} />);
+
+        const downloadButton = screen.getByText('common.downloadCertificate').closest('button')!;
+        fireEvent.click(downloadButton);
+
+        expect(mockDownloadCertificate).toHaveBeenCalled();
+        expect(router.state.location.pathname).toBe('/');
     });
 });
