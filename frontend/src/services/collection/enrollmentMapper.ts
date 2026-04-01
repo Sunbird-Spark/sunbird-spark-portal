@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import type {
   CollectionData,
   ContentStateItem,
@@ -15,12 +16,14 @@ export function getEnrollableBatches(
   now: Date = new Date()
 ): BatchListItem[] {
   if (!batches?.length) return [];
-  const nowMs = now.getTime();
+  const today = dayjs(now).startOf('day');
   return batches.filter((b) => {
     if (b.status !== BATCH_STATUS.Ongoing && b.status !== BATCH_STATUS.Upcoming) return false;
     if (b.enrollmentEndDate == null || b.enrollmentEndDate === '') return true;
-    const endMs = new Date(b.enrollmentEndDate).getTime();
-    return Number.isFinite(endMs) && endMs >= nowMs;
+    
+    // Check if enrollment end date is today or in the future
+    const end = dayjs(b.enrollmentEndDate).startOf('day');
+    return end.isSame(today, 'day') || end.isAfter(today, 'day');
   });
 }
 
