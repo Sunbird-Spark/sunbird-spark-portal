@@ -78,6 +78,21 @@ export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     return fallback;
 };
 
+/**
+ * Handles redirect after a flow completes (signup success, password reset, etc.).
+ * In mobile context: closes the InAppBrowser via window.close(), which triggers
+ * the browserClosed event the mobile app already listens for.
+ * On web: navigates to redirect_uri or falls back to portal login.
+ */
+export const handleMobileRedirect = (): void => {
+    if (isMobileApp()) {
+        clearMobileContext();
+        window.close();
+    } else {
+        window.location.href = getSafeRedirectUrl();
+    }
+};
+
 export const buildValidIdentifiers = (results: any[]): OtpIdentifier[] => {
     const keys: IdentifierType[] = [
         'phone',
