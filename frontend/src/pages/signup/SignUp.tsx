@@ -10,7 +10,7 @@ import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
-import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
+import { isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
@@ -208,9 +208,6 @@ const SignUp: React.FC = () => {
         googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation(undefined, true);
     };
 
-    const handleProceedToLogin = () => {
-        window.location.href = getSafeRedirectUrl();
-    };
 
     const isMobileRedirect = isMobileApp();
 
@@ -254,7 +251,6 @@ const SignUp: React.FC = () => {
 
                 {step === 3 && (
                     <SignUpSuccess
-                        handleProceed={handleProceedToLogin}
                     />
                 )}
 

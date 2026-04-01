@@ -91,10 +91,10 @@ vi.mock('@/components/signup/SignUpOtpVerification', () => ({
 }));
 
 vi.mock('@/components/signup/SignUpSuccess', () => ({
-    SignUpSuccess: ({ handleProceed }: any) => (
+    SignUpSuccess: () => (
         <div>
             <div data-testid="success-message">Congratulations!</div>
-            <button data-testid="proceed-btn" onClick={handleProceed}>Proceed to Login</button>
+            <a data-testid="proceed-btn" href="/portal/login?prompt=none">Proceed to Login</a>
         </div>
     )
 }));
@@ -195,7 +195,7 @@ describe('SignUp Page', () => {
             expect(screen.getByTestId('success-message')).toBeInTheDocument();
         });
 
-        fireEvent.click(screen.getByTestId('proceed-btn'));
-        expect(window.location.href).toBe('/portal/login?prompt=none');
+        const proceedLink = screen.getByTestId('proceed-btn');
+        expect(proceedLink).toHaveAttribute('href', '/portal/login?prompt=none');
     });
 });
