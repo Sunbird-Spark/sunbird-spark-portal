@@ -75,8 +75,8 @@ describe('enrollmentMapper', () => {
     });
 
     it('keeps batch when enrollmentEndDate is Today and it is currently later in the day', () => {
-      // Current time: 2026-04-01 16:00:00
-      const now = new Date('2026-04-01T16:00:00Z');
+      // Current time: 2026-04-01 16:00:00 (local time)
+      const now = new Date('2026-04-01T16:00:00');
       const batches: BatchListItem[] = [
         { identifier: 'b1', status: BATCH_STATUS.Ongoing, enrollmentEndDate: '2026-04-01' },
       ];
