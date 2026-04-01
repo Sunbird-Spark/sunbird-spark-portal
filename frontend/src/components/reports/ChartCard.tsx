@@ -25,7 +25,7 @@ const ChartCard = ({ title, children, loading = false, actions, className = "" }
         <h3 className="text-base font-semibold text-foreground">{title}</h3>
         {actions}
       </div>
-      {children}
+      <div dir="ltr">{children}</div>
     </div>
   );
 };

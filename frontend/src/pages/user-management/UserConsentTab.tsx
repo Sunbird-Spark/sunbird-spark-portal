@@ -8,10 +8,11 @@ import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { useConsentSummary } from "@/hooks/useConsentSummary";
 import type { UserConsentRecord } from "@/types/reports";
 import { useToast } from "@/hooks/useToast";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import {
   type ConfirmState,
   CLOSED_CONFIRM,
-  EXPORT_COLUMNS,
+  getExportColumns,
   BulkActionsBar,
   buildColumns,
 } from "./userConsentColumns";
@@ -19,6 +20,7 @@ import {
 /* ── Component ───────────────────────────────────────────────────────────── */
 
 const UserConsentTab = () => {
+  const { t } = useAppI18n();
   const { toast } = useToast();
   const { data: apiData, isLoading, isError } = useConsentSummary();
 
@@ -120,38 +122,40 @@ const UserConsentTab = () => {
       toast({
         title:
           type === "revoke"
-            ? `Consent revoked for ${idsToUpdate.length} user(s)`
-            : `Consent reissued for ${idsToUpdate.length} user(s)`,
+            ? t("userManagement.consentTab.revokedToast", { count: idsToUpdate.length })
+            : t("userManagement.consentTab.reissuedToast", { count: idsToUpdate.length }),
       });
       setConfirm(CLOSED_CONFIRM);
     }, 600);
-  }, [confirm, selectedIds, toast]);
+  }, [confirm, selectedIds, toast, t]);
 
   /* ── Table columns ─────────────────────────────────────────────────────── */
 
   const columns = useMemo(
-    () => buildColumns(selectedIds, handleToggle),
-    [selectedIds, handleToggle]
+    () => buildColumns(selectedIds, handleToggle, t),
+    [selectedIds, handleToggle, t]
   );
 
   /* ── Confirm dialog text ───────────────────────────────────────────────── */
 
-  const confirmTitle =
-    confirm.type === "revoke"
-      ? `Revoke Consent${confirm.isBulk ? ` (${selectedIds.size} users)` : ""}`
-      : `Reissue Consent${confirm.isBulk ? ` (${selectedIds.size} users)` : ""}`;
+  const confirmTitle = confirm.type === "revoke"
+    ? (confirm.isBulk
+        ? t("userManagement.consentTab.revokeTitleBulk", { count: selectedIds.size })
+        : t("userManagement.consentTab.revokeTitle"))
+    : (confirm.isBulk
+        ? t("userManagement.consentTab.reissueTitleBulk", { count: selectedIds.size })
+        : t("userManagement.consentTab.reissueTitle"));
 
-  const confirmDescription =
-    confirm.type === "revoke"
-      ? "This will revoke PII consent for the selected user(s). They will no longer share data with consumer organisations. Consent can be reissued at any time."
-      : "This will reissue PII consent for the selected user(s), re-enabling data sharing with consumer organisations.";
+  const confirmDescription = confirm.type === "revoke"
+    ? t("userManagement.consentTab.revokeDesc")
+    : t("userManagement.consentTab.reissueDesc");
 
   /* ── Render ────────────────────────────────────────────────────────────── */
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
-        Loading consent data…
+        {t("userManagement.consentTab.loading")}
       </div>
     );
   }
@@ -159,7 +163,7 @@ const UserConsentTab = () => {
   if (isError) {
     return (
       <div className="flex items-center justify-center py-16 text-destructive text-sm">
-        Failed to load consent data. Please try again later.
+        {t("userManagement.consentTab.loadFailed")}
       </div>
     );
   }
@@ -170,14 +174,14 @@ const UserConsentTab = () => {
         <ExportButton
           data={filteredData as unknown as Record<string, unknown>[]}
           filename="user-consent-report"
-          columns={EXPORT_COLUMNS}
+          columns={getExportColumns(t)}
         />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-        <SummaryCard label="Total Users" value={stats.total} colorClass="bg-sunbird-ink" icon={<FiUsers className="w-4 h-4" />} />
-        <SummaryCard label="Consent Granted" value={stats.granted} colorClass="bg-sunbird-moss" icon={<FiUserCheck className="w-4 h-4" />} />
-        <SummaryCard label="Consent Revoked" value={stats.revoked} colorClass="bg-sunbird-lavender" icon={<FiUserX className="w-4 h-4" />} />
+        <SummaryCard label={t("userManagement.consentTab.totalUsers")} value={stats.total} colorClass="bg-sunbird-ink" icon={<FiUsers className="w-4 h-4" />} />
+        <SummaryCard label={t("userManagement.consentTab.consentGranted")} value={stats.granted} colorClass="bg-sunbird-moss" icon={<FiUserCheck className="w-4 h-4" />} />
+        <SummaryCard label={t("userManagement.consentTab.consentRevoked")} value={stats.revoked} colorClass="bg-sunbird-lavender" icon={<FiUserX className="w-4 h-4" />} />
       </div>
 
       <BulkActionsBar
@@ -187,16 +191,17 @@ const UserConsentTab = () => {
         onClear={handleClearSelection}
         onBulkRevoke={openBulkRevoke}
         onBulkReissue={openBulkReissue}
+        t={t}
       />
 
       <FilterPanel
         filters={[
           {
             key: "status",
-            label: "Consent Status",
+            label: t("userManagement.consentTab.filterLabel"),
             options: [
-              { label: "Granted", value: "Granted" },
-              { label: "Revoked", value: "Revoked" },
+              { label: t("userManagement.consentTab.filterGranted"), value: "Granted" },
+              { label: t("userManagement.consentTab.filterRevoked"), value: "Revoked" },
             ],
           },
         ]}
@@ -210,7 +215,7 @@ const UserConsentTab = () => {
           setSearch(v);
           setSelectedIds(new Set());
         }}
-        searchPlaceholder="Search by name or email…"
+        searchPlaceholder={t("userManagement.consentTab.searchPlaceholder")}
       />
 
       <DataTableWrapper
@@ -218,7 +223,7 @@ const UserConsentTab = () => {
         data={filteredData}
         keyExtractor={(r) => r.id}
         pageSize={10}
-        emptyMessage="No users match the current filters."
+        emptyMessage={t("userManagement.consentTab.noUsersMatch")}
       />
 
       <ConfirmDialog
@@ -227,7 +232,7 @@ const UserConsentTab = () => {
         onConfirm={handleConfirm}
         title={confirmTitle}
         description={confirmDescription}
-        confirmLabel={confirm.type === "revoke" ? "Revoke" : "Reissue"}
+        confirmLabel={confirm.type === "revoke" ? t("userManagement.consentTab.revokeTitle") : t("userManagement.consentTab.reissueTitle")}
         confirmVariant={confirm.type === "revoke" ? "destructive" : "default"}
         isLoading={confirm.isLoading}
         confirmButtonProps={{

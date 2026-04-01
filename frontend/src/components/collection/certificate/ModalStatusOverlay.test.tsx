@@ -2,6 +2,26 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ModalStatusOverlay } from './ModalStatusOverlay';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'certificate.templateCreatedTitle': 'Template Created Successfully!',
+        'certificate.templateCreatedDesc': 'You have created the template...',
+        'certificate.refresh': 'Refresh',
+        'certificate.proceedAnyway': 'Proceed Anyway',
+        'certificate.certificateAddedTitle': 'Certificate Added!',
+        'certificate.certificateAddedDesc': 'The certificate template has been...',
+        'certificate.done': 'Done',
+        'certificate.somethingWentWrong': 'Something went wrong',
+        'certificate.cancelButton2': 'Cancel',
+        'certificate.tryAgain': 'Try Again',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 const defaultProps = {
   step: 'idle' as const,
   stepLabel: '',

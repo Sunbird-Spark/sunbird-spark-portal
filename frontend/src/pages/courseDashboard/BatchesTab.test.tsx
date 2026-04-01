@@ -3,6 +3,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import BatchesTab from './BatchesTab';
 import { useBatchListForCreator, useBatchListForMentor, mergeBatches } from '@/hooks/useBatch';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'batchesTab.loading': 'Loading batches…',
+        'batchesTab.failed': 'Failed to load batches.',
+        'batchesTab.selectBatch': 'Select Batch',
+        'batchesTab.noBatchesFound': 'No batches found.',
+        'batchesTab.chooseToViewReport': 'Choose a batch to view its report…',
+        'batchesTab.selectFromDropdown': 'Select a batch from the dropdown above to view its course report.',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 vi.mock('@/hooks/useBatch', () => ({
   useBatchListForCreator: vi.fn(),
   useBatchListForMentor: vi.fn(),

@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import CourseReportContent from '@/components/reports/CourseReportContent';
 import useInteract from '@/hooks/useInteract';
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const STATUS_STYLES: Record<string, string> = {
   Upcoming: "bg-yellow-100 text-yellow-700",
@@ -35,6 +36,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
   const { data: mentorBatches, isLoading: isLoadingMentor, isError: isErrorMentor, error: mentorError } = useBatchListForMentor(collectionId, { enabled: isMentor });
 
   const batches = mergeBatches(creatorBatches, mentorBatches);
+  const { t } = useAppI18n();
 
   const isLoading = (isContentCreator && isLoadingCreator) || (isMentor && isLoadingMentor);
   const isError = (isContentCreator && isErrorCreator) || (isMentor && isErrorMentor);
@@ -44,7 +46,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
     return (
       <div className="flex flex-1 overflow-hidden min-h-0 bg-white" data-testid="batches-loading">
         <div className="m-6">
-          <PageLoader message="Loading batches…" fullPage={false} />
+          <PageLoader message={t('batchesTab.loading')} fullPage={false} />
         </div>
       </div>
     );
@@ -54,7 +56,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
     return (
       <div className="flex flex-1 overflow-hidden min-h-0 bg-white" data-testid="batches-error">
         <div className="m-6">
-          <PageLoader error={(error as Error)?.message ?? 'Failed to load batches.'} fullPage={false} />
+          <PageLoader error={(error as Error)?.message ?? t('batchesTab.failed')} fullPage={false} />
         </div>
       </div>
     );
@@ -73,17 +75,17 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
       {/* Batch Selector Dropdown */}
       <div className="flex items-center gap-4">
         <label className="text-sm font-semibold text-foreground font-rubik shrink-0">
-          Select Batch
+          {t('batchesTab.selectBatch')}
         </label>
         {batchList.length === 0 ? (
-          <p className="text-sm text-muted-foreground font-rubik">No batches found.</p>
+          <p className="text-sm text-muted-foreground font-rubik">{t('batchesTab.noBatchesFound')}</p>
         ) : (
           <Select onValueChange={handleBatchSelect}>
             <SelectTrigger
               className="w-full max-w-md bg-white border-border focus:ring-sunbird-brick"
               data-testid="batch-select-trigger"
             >
-              <SelectValue placeholder="Choose a batch to view its report…" />
+              <SelectValue placeholder={t('batchesTab.chooseToViewReport')} />
             </SelectTrigger>
             <SelectContent>
               {batchList.map((batch) => {
@@ -98,7 +100,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
                           STATUS_STYLES[status]
                         )}
                       >
-                        {status}
+                        {t(`batchStatus.${status.toLowerCase()}`)}
                       </span>
                     </span>
                   </SelectItem>
@@ -125,7 +127,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
         ) : (
           <div className="flex items-center justify-center py-16 px-8">
             <p className="text-muted-foreground text-sm font-rubik" data-testid="no-batch-selected">
-              Select a batch from the dropdown above to view its course report.
+              {t('batchesTab.selectFromDropdown')}
             </p>
           </div>
         )}

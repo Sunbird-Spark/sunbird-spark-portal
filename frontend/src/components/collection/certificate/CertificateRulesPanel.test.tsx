@@ -2,6 +2,30 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CertificateRulesPanel } from './CertificateRulesPanel';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'certificate.rules': 'Certificate Rules',
+        'certificate.issueTo': 'Issue Certificate To',
+        'certificate.issueToAll': 'All Attendees',
+        'certificate.issueToOrg': 'My Organisation',
+        'certificate.progressRule': 'Progress Rule',
+        'certificate.scoreRule': 'Score Rule',
+        'certificate.addScoreRule': '+ Add Score Rule Condition',
+        'certificate.bestAttemptedScore': 'Best attempted score minimum criteria is',
+        'certificate.removeScoreRule': 'Remove Score Rule',
+        'certificate.condition': 'Condition',
+        'certificate.rulesConsent': 'I accept the Terms & Conditions for creating this batch',
+        'certificate.selectedTemplate': 'Selected Template',
+        'certificate.noPreview': 'No preview available',
+        'certificate.selectFromPanel': 'Select a template from the right panel',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 const defaultProps = {
   issueTo: 'all' as const,
   setIssueTo: vi.fn(),
@@ -128,6 +152,6 @@ describe('CertificateRulesPanel', () => {
   it('shows "No preview" text when template has no previewUrl', () => {
     const template = { identifier: 't1', name: 'My Cert Template' };
     render(<CertificateRulesPanel {...defaultProps} selectedTemplate={template} />);
-    expect(screen.getByText('No preview')).toBeInTheDocument();
+    expect(screen.getByText('No preview available')).toBeInTheDocument();
   });
 });

@@ -2,6 +2,21 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CertificateTemplatesPanel } from './CertificateTemplatesPanel';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'certificate.templateTitle': 'Certificate Template',
+        'certificate.refreshTemplates': 'Refresh templates',
+        'certificate.createNewTemplate': 'Create new template',
+        'certificate.noTemplatesAvailable': 'No templates available.',
+        'certificate.createNewTemplateButton': 'Create New Template',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 vi.mock('../TemplateThumbnail', () => ({
   TemplateThumbnail: ({ name, selected, onClick }: { name: string; selected: boolean; onClick: () => void }) => (
     <button type="button" onClick={onClick} data-selected={selected}>

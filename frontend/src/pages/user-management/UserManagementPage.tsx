@@ -4,6 +4,7 @@ import useInteract from "@/hooks/useInteract";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { FiShield, FiLock } from "react-icons/fi";
 import { useToast } from "@/hooks/useToast";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import {
   userManagementService,
   type RoleItem,
@@ -29,19 +30,21 @@ type UMTab = {
   icon: React.ElementType;
 };
 
-const UM_TABS: UMTab[] = [
-  { id: "role-management", label: "Change User Roles", icon: FiShield },
-  { id: "user-consent", label: "User Consent", icon: FiLock },
+const getUmTabs = (t: (k: string) => string): UMTab[] => [
+  { id: "role-management", label: t("userManagement.tabs.changeUserRoles"), icon: FiShield },
+  { id: "user-consent", label: t("userManagement.tabs.userConsent"), icon: FiLock },
 ];
 
 /* ── Main Page ───────────────────────────────────────────────────────────── */
 
 const UserManagementPage = () => {
+  const { t } = useAppI18n();
   const { toast } = useToast();
   useImpression({ type: 'view', pageid: 'user-management', env: 'user-management' });
   const { interact } = useInteract();
   const telemetry = useTelemetry();
 
+  const UM_TABS = getUmTabs(t);
   const [activeTab, setActiveTab] = useState<string>(UM_TABS[0]?.id ?? "role-management");
   const [availableRoles, setAvailableRoles] = useState<RoleItem[]>([]);
   const [tncDialogOpen, setTncDialogOpen] = useState(false);
@@ -116,9 +119,9 @@ const UserManagementPage = () => {
         [];
       setAvailableRoles(roles.filter((r) => r.id !== 'PUBLIC'));
     } catch {
-      toast({ title: "Failed to load roles", description: "Roles could not be loaded.", variant: "destructive" });
+      toast({ title: t("userManagement.toast.failedToLoadRoles"), description: t("userManagement.toast.rolesCouldNotBeLoaded"), variant: "destructive" });
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { loadRoles(); }, [loadRoles]);
 
@@ -132,9 +135,9 @@ const UserManagementPage = () => {
         edata: { props: ['tncAccepted'], state: 'Accepted' },
         object: { id: userRes?.data?.response?.userId || '', type: 'User' },
       });
-      toast({ title: "Terms accepted", description: "You can now use User Management features.", variant: "success" });
+      toast({ title: t("userManagement.toast.termsAccepted"), description: t("userManagement.toast.termsAcceptedDesc"), variant: "success" });
     } catch {
-      toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
+      toast({ title: t("userManagement.toast.failedToAcceptTerms"), description: t("userManagement.toast.pleaseRetry"), variant: "destructive" });
     }
   };
 
@@ -149,13 +152,13 @@ const UserManagementPage = () => {
 
               {/* ── Page header ── */}
               <div className="um-page-header">
-                <h1 className="um-page-title">User Management</h1>
+                <h1 className="um-page-title">{t("userManagement.pageTitle")}</h1>
                 <p className="text-xs text-sunbird-gray-75 mt-1 font-rubik">
-                  By using User Management features, you acknowledge and accept the{" "}
+                  {t("userManagement.disclaimer.intro")}{" "}
                   {termsUrl ? (
                     <TermsAndConditionsDialog
                       termsUrl={termsUrl}
-                      title="Terms &amp; Conditions"
+                      title={t("userManagement.disclaimer.termsLink")}
                       open={tncDialogOpen}
                       onOpenChange={setTncDialogOpen}
                       onAccept={shouldShowTnc ? handleAcceptOrgTnc : undefined}
@@ -167,13 +170,13 @@ const UserManagementPage = () => {
                         data-pageid="user-management"
                         className="underline text-sunbird-brick hover:opacity-80 font-medium"
                       >
-                        Terms &amp; Conditions
+                        {t("userManagement.disclaimer.termsLink")}
                       </button>
                     </TermsAndConditionsDialog>
                   ) : (
-                    <span className="font-medium text-sunbird-obsidian">Terms &amp; Conditions</span>
+                    <span className="font-medium text-sunbird-obsidian">{t("userManagement.disclaimer.termsLink")}</span>
                   )}
-                  .
+                  {t("userManagement.disclaimer.outro")}
                 </p>
               </div>
 

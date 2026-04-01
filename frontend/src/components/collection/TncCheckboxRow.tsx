@@ -4,6 +4,7 @@ import { FiCheck } from "react-icons/fi";
 import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
 import { useGetTncUrl } from "@/hooks/useTnc";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface TncCheckboxRowProps {
   checked: boolean;
@@ -23,9 +24,11 @@ export const TncCheckboxRow = ({
   checked,
   onCheckedChange,
   settingKey = "tncConfig",
-  label = "for creating this batch.",
+  label,
   onTermsClick,
 }: TncCheckboxRowProps) => {
+  const { t } = useAppI18n();
+  const resolvedLabel = label ?? t('tncCheckbox.forCreatingBatch');
   const id = useId();
   const { data: tncRes } = useSystemSetting(settingKey);
   const { data: globalTncRes } = useSystemSetting("tncConfig");
@@ -53,37 +56,37 @@ export const TncCheckboxRow = ({
 
       <span className="text-sm text-foreground font-rubik">
         {/* Clicking "I accept the" text toggles the checkbox */}
-        <label htmlFor={id} className="cursor-pointer">I accept the{" "}</label>
+        <label htmlFor={id} className="cursor-pointer">{t('tncCheckbox.iAccept')}{" "}</label>
         {termsUrl ? (
           onTermsClick ? (
             // Plain button — NOT inside a <label>, so it cannot accidentally
             // re-dispatch to the checkbox via browser label-activation.
             <button
               type="button"
-              aria-label="Terms &amp; Conditions"
+              aria-label={t('tncCheckbox.termsLink')}
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); onTermsClick(); }}
               className="underline text-sunbird-brick hover:opacity-80 font-medium"
             >
-              Terms &amp; Conditions
+              {t('tncCheckbox.termsLink')}
             </button>
           ) : (
-            <TermsAndConditionsDialog termsUrl={termsUrl} title="Terms &amp; Conditions">
+            <TermsAndConditionsDialog termsUrl={termsUrl} title={t('tncCheckbox.termsLink')}>
               <button
                 type="button"
-                aria-label="Terms &amp; Conditions"
+                aria-label={t('tncCheckbox.termsLink')}
                 className="underline text-sunbird-brick hover:opacity-80 font-medium"
               >
-                Terms &amp; Conditions
+                {t('tncCheckbox.termsLink')}
               </button>
             </TermsAndConditionsDialog>
           )
         ) : (
-          <span className="font-medium">Terms &amp; Conditions</span>
+          <span className="font-medium">{t('tncCheckbox.termsLink')}</span>
         )}
         {/* Clicking the trailing label text also toggles the checkbox */}
         {" "}
         <label htmlFor={id} className="cursor-pointer">
-          {label}
+          {resolvedLabel}
           <span className="text-red-500 ml-0.5">*</span>
         </label>
       </span>

@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLearnerProgress } from "@/hooks/useLearnerProgress";
 import { useAssessmentData } from "@/hooks/useAssessmentData";
 import { mapApiItemToLearnerProgress, mapApiItemToAssessmentRecord, buildEnrollmentVsCompletion, buildProgressBuckets, buildScoreDistribution } from "@/utils/learnerProgressUtils";
-import { learnerColumns, assessmentColumns } from "@/components/reports/reportTableColumns";
+import { buildLearnerColumns, buildAssessmentColumns } from "@/components/reports/reportTableColumns";
 import EmptyState from "@/components/workspace/EmptyState";
 import { FiAlertCircle } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
@@ -61,6 +61,9 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
     const avg = Math.round(valid.reduce((sum, r) => sum + r.percentage, 0) / valid.length);
     return `${avg}%`;
   }, [assessmentRecords, isAssessmentsLoading]);
+
+  const learnerColumns = buildLearnerColumns(t);
+  const assessmentColumns = buildAssessmentColumns(t);
 
   const [learnerSearch, setLearnerSearch] = useState("");
   const [progressFilter, setProgressFilter] = useState<Record<string, string>>({});
@@ -138,7 +141,7 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
               className="flex items-center justify-center py-16 text-sm text-muted-foreground"
               data-testid="learners-loading"
             >
-              Loading learner data…
+              {t("courseReport.loadingLearners")}
             </div>
           )}
 
@@ -146,9 +149,9 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
             <div data-testid="learners-error">
               <EmptyState
                 icon={FiAlertCircle}
-                title="Something went wrong"
-                description="Failed to load learner progress. Please try again."
-                actionLabel="Try Again"
+                title={t("courseReport.somethingWentWrong")}
+                description={t("courseReport.failedLearnerProgress")}
+                actionLabel={t("courseReport.tryAgain")}
                 onAction={() => void refetchLearners()}
               />
             </div>
@@ -160,12 +163,12 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
                 filters={[
                   {
                     key: "progress",
-                    label: "Progress",
+                    label: t("courseReport.progressFilter"),
                     options: [
-                      { label: "0–25%", value: "0-25" },
-                      { label: "25–50%", value: "25-50" },
-                      { label: "50–75%", value: "50-75" },
-                      { label: "75–100%", value: "75-100" },
+                      { label: t("courseReport.progress025"), value: "0-25" },
+                      { label: t("courseReport.progress2550"), value: "25-50" },
+                      { label: t("courseReport.progress5075"), value: "50-75" },
+                      { label: t("courseReport.progress75100"), value: "75-100" },
                     ],
                   },
                 ]}
@@ -173,7 +176,7 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
                 onChange={(k, v) => setProgressFilter((p) => ({ ...p, [k]: v }))}
                 searchValue={learnerSearch}
                 onSearchChange={setLearnerSearch}
-                searchPlaceholder="Search learners…"
+                searchPlaceholder={t("courseReport.searchLearners")}
               />
               <DataTableWrapper
                 columns={learnerColumns}
@@ -200,7 +203,7 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
               className="flex items-center justify-center py-16 text-sm text-muted-foreground"
               data-testid="assessments-loading"
             >
-              Loading assessment data…
+              {t("courseReport.loadingAssessments")}
             </div>
           )}
 
@@ -208,9 +211,9 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
             <div data-testid="assessments-error">
               <EmptyState
                 icon={FiAlertCircle}
-                title="Something went wrong"
-                description="Failed to load assessment data. Please try again."
-                actionLabel="Try Again"
+                title={t("courseReport.somethingWentWrong")}
+                description={t("courseReport.failedAssessmentData")}
+                actionLabel={t("courseReport.tryAgain")}
                 onAction={() => void refetchAssessments()}
               />
             </div>
