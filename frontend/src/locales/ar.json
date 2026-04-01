@@ -939,5 +939,11 @@
     "inProgress": "قيد التقدم",
     "completed": "مكتملة",
     "certificationsEarned": "الشهادات المكتسبة"
+  },
+  "exportButton": {
+    "exportCsv": "تصدير CSV",
+    "noDataToExport": "لا توجد بيانات للتصدير",
+    "csvExportedSuccessfully": "تم تصدير CSV بنجاح"
   }
 }
+

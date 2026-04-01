@@ -947,5 +947,11 @@
     "inProgress": "En cours",
     "completed": "Terminé",
     "certificationsEarned": "Certifications obtenues"
+  },
+  "exportButton": {
+    "exportCsv": "Exporter CSV",
+    "noDataToExport": "Aucune donnée à exporter",
+    "csvExportedSuccessfully": "CSV exporté avec succès"
   }
 }
+
