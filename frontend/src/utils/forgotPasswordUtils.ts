@@ -87,7 +87,11 @@ export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
 export const handleMobileRedirect = (): void => {
     if (isMobileApp()) {
         clearMobileContext();
-        window.close();
+        // Navigate to about:blank to trigger InAppBrowser's browserPageLoaded event.
+        // The mobile app detects this and closes the browser.
+        // We can't use window.close() (blocked: window not opened by script)
+        // or navigate to redirect_uri (server intercepts it, shows "OK" page).
+        window.location.href = 'about:blank';
     } else {
         window.location.href = getSafeRedirectUrl();
     }
