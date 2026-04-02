@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useToast } from "@/hooks/useToast";
@@ -24,8 +24,14 @@ const SignUp: React.FC = () => {
     const signupService = useMemo(() => new SignupService(), []);
 
     useImpression({ type: 'view', pageid: 'signup' });
-    persistMobileContext();
     const telemetry = useTelemetry();
+
+    // Persist mobile context to sessionStorage on mount (only for mobile app)
+    useEffect(() => {
+        if (isMobileApp()) {
+            persistMobileContext();
+        }
+    }, []);
 
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [firstName, setFirstName] = useState('');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useLearnerFuzzySearch, useResetPassword } from '@/hooks/useUser';
 import { useGenerateOtp, useVerifyOtp } from '@/hooks/useOtp';
@@ -21,8 +21,12 @@ const ForgotPassword: React.FC = () => {
 
   useImpression({ type: 'view', pageid: 'forgot-password' });
 
-  // Persist mobile context to sessionStorage so it survives Keycloak redirects
-  persistMobileContext();
+  // Persist mobile context to sessionStorage on mount (only for mobile app)
+  useEffect(() => {
+    if (isMobileApp()) {
+      persistMobileContext();
+    }
+  }, []);
 
   const [step, setStep] = useState<Step>(1);
   const [validIdentifiers, setValidIdentifiers] = useState<OtpIdentifier[]>([]);
