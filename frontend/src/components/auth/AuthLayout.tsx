@@ -7,11 +7,10 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 interface AuthLayoutProps {
   children: React.ReactNode;
   onClose?: () => void;
-  isOtpPage?: boolean;
   hideClose?: boolean;
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage, hideClose }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, hideClose }) => {
   const navigate = useNavigate();
   const { t } = useAppI18n();
 
@@ -53,7 +52,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage, h
                   <img
                     src={sunbirdLogo}
                     alt={t("authLayout.logoAlt")}
-                    className={`logo-image ${isOtpPage ? '-translate-y-10' : ''}`}
+                    className={`logo-image`}
                   />
                 </a>
               </div>
