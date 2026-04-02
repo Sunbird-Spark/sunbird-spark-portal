@@ -85,8 +85,7 @@ export const VerifyOTP: React.FC<VerifyOTPProps> = ({
             });
 
             if (resetRes?.data?.link) {
-                const enhancedLink = appendMobileParams(resetRes.data.link);
-                window.location.href = enhancedLink;
+                window.location.href = appendMobileParams(resetRes.data.link);
                 return;
             }
 
