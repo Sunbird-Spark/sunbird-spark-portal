@@ -4,7 +4,7 @@
 }
 
 .home-main-content {
-    @apply flex-1 bg-white relative;
+    @apply flex-1 min-w-0 bg-white relative overflow-x-hidden;
     box-shadow: inset 0 0.25rem 0.625rem rgba(0, 0, 0, 0.05);
 }
 
@@ -96,11 +96,11 @@
 }
 
 .home-stat-icon-wrapper {
-    @apply absolute top-4 right-4 w-[2.875rem] h-[2.875rem] flex items-center justify-center rounded-[0.5rem];
+    @apply absolute top-3 right-3 md:top-4 md:right-4 w-[2.25rem] h-[2.25rem] md:w-[2.875rem] md:h-[2.875rem] flex items-center justify-center rounded-[0.5rem];
 }
 
 .home-stat-value {
-    @apply font-rubik font-semibold text-[2.5rem] leading-[2.375rem] mb-1;
+    @apply font-rubik font-semibold text-[2.25rem] md:text-[2.5rem] leading-tight mb-1;
     letter-spacing: 0%;
 }
 

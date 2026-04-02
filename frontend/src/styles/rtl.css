@@ -178,14 +178,16 @@
   }
 }
 
-[dir="rtl"] .profile-content-wrapper {
-  padding-right: 1.625rem;
-  padding-left: 6.25rem;
-}
+@media (min-width: 1024px) {
+  [dir="rtl"] .profile-content-wrapper {
+    padding-right: 1.625rem;
+    padding-left: 6.25rem;
+  }
 
-[dir="ltr"] .profile-content-wrapper {
-  padding-left: 1.625rem;
-  padding-right: 6.25rem;
+  [dir="ltr"] .profile-content-wrapper {
+    padding-left: 1.625rem;
+    padding-right: 6.25rem;
+  }
 }
 
 /* Notification Badge RTL */

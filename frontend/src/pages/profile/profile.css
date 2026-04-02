@@ -4,11 +4,11 @@
 }
 
 .profile-main-content {
-    @apply flex-1 bg-sunbird-gray-f3 relative;
+    @apply flex-1 min-w-0 bg-sunbird-gray-f3 relative overflow-x-hidden;
 }
 
 .profile-content-wrapper {
-    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+    @apply p-4 w-full md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
 }
 
 /* Profile Header */
@@ -81,6 +81,7 @@
         padding: 0.75rem;
         position: fixed !important;
         top: 1.2rem !important;
+        right: 1rem !important;
     }
 
     .notification-popover-header {
@@ -94,6 +95,7 @@
         padding: 1rem;
         position: fixed !important;
         top: 1.2rem !important;
+        right: 1rem !important;
     }
 
     .notification-popover-header {
@@ -107,6 +109,7 @@
         padding: 1rem;
         position: fixed !important;
         top: 1.2rem !important;
+        right: 0.5rem !important;
     }
 }
 

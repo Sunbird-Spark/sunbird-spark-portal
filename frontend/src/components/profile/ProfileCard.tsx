@@ -50,7 +50,7 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
             {roles.length > 0 && (
                 <div className="profile-roles-container mt-4 flex flex-col items-center gap-1 w-full">
                     {roleChunks.map((chunk) => (
-                        <div key={chunk.join("|")} className="flex items-center justify-center gap-1 text-[0.875rem] text-sunbird-gray-75 w-full">
+                        <div key={chunk.join("|")} className="flex flex-wrap items-center justify-center gap-1 text-[0.875rem] text-sunbird-gray-75 w-full text-center">
                             {chunk.map((role, j) => (
                                 <div key={role} className="flex items-center">
                                     <span className="font-rubik">{role}</span>
