@@ -71,6 +71,81 @@ describe('forgotPasswordUtils', () => {
                 redirectUri: 'org.sunbird.app://oauth2callback'
             });
         });
+
+        // Security tests
+        it('should NOT persist javascript: protocol redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=javascript:alert(1)',
+            });
+
+            persistMobileContext();
+
+            expect(sessionStorage.getItem('sunbird_mobile_context')).toBeNull();
+        });
+
+        it('should NOT persist data: protocol redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=data:text/html,<script>alert(1)</script>',
+            });
+
+            persistMobileContext();
+
+            expect(sessionStorage.getItem('sunbird_mobile_context')).toBeNull();
+        });
+
+        it('should NOT persist tel: protocol redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=tel://1234567890',
+            });
+
+            persistMobileContext();
+
+            expect(sessionStorage.getItem('sunbird_mobile_context')).toBeNull();
+        });
+
+        it('should NOT persist file: protocol redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=file:///etc/passwd',
+            });
+
+            persistMobileContext();
+
+            expect(sessionStorage.getItem('sunbird_mobile_context')).toBeNull();
+        });
+
+        it('should NOT persist blob: protocol redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=blob:https://example.com/abc-123',
+            });
+
+            persistMobileContext();
+
+            expect(sessionStorage.getItem('sunbird_mobile_context')).toBeNull();
+        });
+
+        it('should persist http: protocol redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=http://localhost:3000/callback',
+            });
+
+            persistMobileContext();
+
+            const stored = sessionStorage.getItem('sunbird_mobile_context');
+            expect(stored).toBeTruthy();
+            expect(JSON.parse(stored!).redirectUri).toBe('http://localhost:3000/callback');
+        });
+
+        it('should persist https: protocol redirect_uri', () => {
+            vi.stubGlobal('location', {
+                search: '?client=mobileApp&redirect_uri=https://example.com/callback',
+            });
+
+            persistMobileContext();
+
+            const stored = sessionStorage.getItem('sunbird_mobile_context');
+            expect(stored).toBeTruthy();
+            expect(JSON.parse(stored!).redirectUri).toBe('https://example.com/callback');
+        });
     });
 
     describe('clearMobileContext', () => {

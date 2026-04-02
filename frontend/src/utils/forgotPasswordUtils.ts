@@ -8,16 +8,70 @@ interface MobileContext {
     redirectUri: string;
 }
 
+const ALLOWED_PROTOCOLS = ['http:', 'https:'];
+
+const isSafeUrl = (url: string, allowedAppScheme?: string): boolean => {
+    try {
+        const parsed = new URL(url);
+        if (ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
+            return true;
+        }
+        // Allow the specific app scheme if provided (e.g., 'org.sunbird.app:')
+        if (allowedAppScheme && parsed.protocol === allowedAppScheme) {
+            return true;
+        }
+        return false;
+    } catch {
+        return false;
+    }
+};
+
+/**
+ * Extracts the app scheme from the redirect_uri to use as an allowed protocol.
+ * Only allowed when client=mobileApp is present (trusted mobile context).
+ * e.g., 'org.sunbird.app://mobileApp' → 'org.sunbird.app:'
+ */
+const getAppSchemeFromRedirectUri = (): string | undefined => {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        // Only trust custom schemes when the request comes from the mobile app
+        if (params.get('client') !== 'mobileApp') return undefined;
+        const redirectUri = params.get('redirect_uri');
+        if (!redirectUri) return undefined;
+        const parsed = new URL(redirectUri);
+        // App ID schemes contain dots (e.g., org.sunbird.app:)
+        // This rejects single-word protocols like javascript:, data:, blob:
+        if (!ALLOWED_PROTOCOLS.includes(parsed.protocol) && parsed.protocol.includes('.')) {
+            return parsed.protocol;
+        }
+    } catch {
+        // invalid URL
+    }
+    return undefined;
+};
+
 /**
  * Persists mobile context (client + redirect_uri) to sessionStorage.
  * Called when auth pages load with client=mobileApp so the context
  * survives external redirects (e.g., Keycloak password reset flow).
+ * 
+ * SECURITY: Validates redirect_uri before persisting to prevent storing
+ * malicious URLs (e.g., tel://, javascript:, etc.).
  */
 export const persistMobileContext = (): void => {
     const params = new URLSearchParams(window.location.search);
     const client = params.get('client');
     const redirectUri = params.get('redirect_uri');
+    
+    // Only persist if client is mobileApp and redirect_uri is present and valid
     if (client === 'mobileApp' && redirectUri) {
+        // Validate redirect_uri using the same security logic as getSafeRedirectUrl
+        const appScheme = getAppSchemeFromRedirectUri();
+        if (!isSafeUrl(redirectUri, appScheme)) {
+            console.warn('persistMobileContext: invalid redirect_uri, not persisting', redirectUri);
+            return;
+        }
+        
         try {
             sessionStorage.setItem(MOBILE_CONTEXT_KEY, JSON.stringify({ client, redirectUri }));
         } catch (error) {
@@ -52,24 +106,6 @@ export const clearMobileContext = (): void => {
     }
 };
 
-const ALLOWED_PROTOCOLS = ['http:', 'https:'];
-
-const isSafeUrl = (url: string, allowedAppScheme?: string): boolean => {
-    try {
-        const parsed = new URL(url);
-        if (ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
-            return true;
-        }
-        // Allow the specific app scheme if provided (e.g., 'org.sunbird.app:')
-        if (allowedAppScheme && parsed.protocol === allowedAppScheme) {
-            return true;
-        }
-        return false;
-    } catch {
-        return false;
-    }
-};
-
 /**
  * Converts a custom scheme URL to an Android intent:// URL.
  * e.g., org.sunbird.app://oauth2callback → intent://oauth2callback#Intent;scheme=org.sunbird.app;package=org.sunbird.app;end
@@ -87,30 +123,6 @@ const toIntentUrl = (url: string): string => {
     } catch {
         return url;
     }
-};
-
-/**
- * Extracts the app scheme from the redirect_uri to use as an allowed protocol.
- * Only allowed when client=mobileApp is present (trusted mobile context).
- * e.g., 'org.sunbird.app://mobileApp' → 'org.sunbird.app:'
- */
-const getAppSchemeFromRedirectUri = (): string | undefined => {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        // Only trust custom schemes when the request comes from the mobile app
-        if (params.get('client') !== 'mobileApp') return undefined;
-        const redirectUri = params.get('redirect_uri');
-        if (!redirectUri) return undefined;
-        const parsed = new URL(redirectUri);
-        // App ID schemes contain dots (e.g., org.sunbird.app:)
-        // This rejects single-word protocols like javascript:, data:, blob:
-        if (!ALLOWED_PROTOCOLS.includes(parsed.protocol) && parsed.protocol.includes('.')) {
-            return parsed.protocol;
-        }
-    } catch {
-        // invalid URL
-    }
-    return undefined;
 };
 
 export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
