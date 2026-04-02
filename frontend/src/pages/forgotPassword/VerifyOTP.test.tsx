@@ -101,7 +101,7 @@ describe('VerifyOTP', () => {
         await waitFor(() => {
             expect(mockVerifyOtp).toHaveBeenCalled();
             expect(mockResetPassword).toHaveBeenCalled();
-            expect(window.location.href).toBe('http://success');
+            expect(window.location.href).toBe('http://success/');
         });
     });
 

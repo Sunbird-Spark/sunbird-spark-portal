@@ -207,7 +207,7 @@ describe('BatchCard - Modals', () => {
   /* ── Edit batch modal ── */
   it('opens the edit modal when edit button is clicked on a batch', () => {
     mockUseBatchList.mockReturnValue({
-      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-04-01', endDate: '2026-06-01' }],
+      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2027-01-01', endDate: '2027-06-01' }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
@@ -217,7 +217,7 @@ describe('BatchCard - Modals', () => {
 
   it('closes the edit modal when onOpenChange(false) is called', () => {
     mockUseBatchList.mockReturnValue({
-      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-04-01', endDate: '2026-06-01' }],
+      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2027-01-01', endDate: '2027-06-01' }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
