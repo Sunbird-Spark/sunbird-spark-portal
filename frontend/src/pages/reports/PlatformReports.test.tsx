@@ -138,7 +138,7 @@ describe('PlatformReports', () => {
 
   it('renders export button for course summary', () => {
     renderPage();
-    expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /exportButton\.exportCsv/i })).toBeInTheDocument();
   });
 
   it('filters courses by search text', () => {
