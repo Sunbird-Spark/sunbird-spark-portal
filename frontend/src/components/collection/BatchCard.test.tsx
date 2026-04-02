@@ -26,6 +26,16 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'certificate.certificateUnavailable': 'Certificate Unavailable',
         'certificate.editCertificate': 'Edit Certificate',
         'certificate.addCertificate': 'Add Certificate',
+        'batch.manageBatches': 'Manage batches for this course',
+        'batch.failedToLoadBatches': 'Failed to load batches.',
+        'batch.noTabBatches': 'No {{tab}} batches',
+        'batch.termsAccepted': 'Terms accepted',
+        'batch.canViewBatchReports': 'You can now view batch reports.',
+        'batch.failedToAcceptTerms': 'Failed to accept Terms',
+        'batch.pleaseRetry': 'Please try again.',
+        'batch.toViewBatchReports': 'to view batch reports.',
+        'tncCheckbox.termsLink': 'Terms & Conditions',
+        'tncCheckbox.forCreatingBatch': 'for creating this batch.',
       };
       let result = translations[key] || key;
       if (data) {
@@ -189,7 +199,7 @@ describe('BatchCard', () => {
 
   it('shows "No ongoing batches" when there are no batches in the selected tab', () => {
     render(<BatchCard {...defaultProps} />);
-    expect(screen.getByText('No ongoing batches')).toBeInTheDocument();
+    expect(screen.getByText('No Ongoing batches')).toBeInTheDocument();
   });
 
   /* ── Loading state ── */

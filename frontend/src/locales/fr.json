@@ -363,7 +363,8 @@
     "notFound": "Collection introuvable.",
     "contentPlaylist": "Liste de lecture de contenu",
     "digitalTextbook": "Manuel numérique",
-    "questionPaper": "Sujet d'examen"
+    "questionPaper": "Sujet d'examen",
+    "viewCourseDashboard": "Voir le tableau de bord du cours"
   },
   "homePage": {
     "hiUser": "Bonjour {{name}}",
@@ -431,11 +432,6 @@
   "common": {
     "notifications": "Notifications",
     "language": "Langue",
-    "manage": "Gérer",
-    "backTo": "Retour à {{page}}",
-    "upcomingBatches": "Lots à venir",
-    "learningProgress": "Progression de l'apprentissage",
-    "downloadCertificate": "Télécharger le certificat",
     "manage": "Gérer",
     "backTo": "Retour à {{page}}",
     "upcomingBatches": "Lots à venir",
@@ -572,10 +568,7 @@
       "publishWarningText": "Vous avez soumis des commentaires/suggestions de révision, ils seront perdus si le contenu est publié.",
       "publishWarningQuestion": "Voulez-vous publier ?",
       "processing": "Traitement en cours..."
-    },
-    "collectionType": "Type de collection",
-    "description": "Description",
-    "creating": "Création en cours..."
+    }
   },
   "homeComponents": {
     "openMenu": "Ouvrir le menu",
@@ -735,7 +728,50 @@
     "enrolmentEndDate": "Date de fin d'inscription",
     "mustBeAfterEnrolmentEnd": "Doit être à la date de fin d'inscription ou après",
     "betweenStartDate": "Entre la date de début",
-    "betweenStartAndEndDate": "Entre la date de début et de fin"
+    "betweenStartAndEndDate": "Entre la date de début et de fin",
+    "manageBatches": "Gérer les groupes pour ce cours",
+    "failedToLoadBatches": "Échec du chargement des groupes.",
+    "noTabBatches": "Aucun groupe {{tab}}",
+    "termsAccepted": "Conditions acceptées",
+    "canViewBatchReports": "Vous pouvez maintenant consulter les rapports des groupes.",
+    "failedToAcceptTerms": "Échec de l'acceptation des conditions",
+    "pleaseRetry": "Veuillez réessayer.",
+    "toViewBatchReports": "pour consulter les rapports des groupes."
+  },
+  "createBatch": {
+    "viewTitle": "Voir les détails du groupe",
+    "editTitle": "Modifier le groupe",
+    "createTitle": "Créer un groupe",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "issueCertificate": "Émettre un certificat",
+    "batchType": "Type de groupe",
+    "batchTypeOpen": "Ouvert",
+    "saving": "Enregistrement\u2026",
+    "creating": "Création en cours\u2026",
+    "saveChanges": "Enregistrer les modifications",
+    "create": "Créer un groupe",
+    "failedToUpdate": "Échec de la mise à jour du groupe. Veuillez réessayer.",
+    "failedToCreate": "Échec de la création du groupe. Veuillez réessayer."
+  },
+  "mentorSection": {
+    "title": "Mentors dans le groupe",
+    "searchPlaceholder": "Rechercher des mentors par nom ou e-mail\u2026",
+    "noMentorsFound": "Aucun mentor trouvé dans votre organisation.",
+    "removeMentor": "Supprimer {{name}}"
+  },
+  "tncCheckbox": {
+    "iAccept": "J'accepte les",
+    "termsLink": "Conditions générales",
+    "forCreatingBatch": "pour créer ce groupe."
+  },
+  "batchesTab": {
+    "loading": "Chargement des groupes\u2026",
+    "failed": "Échec du chargement des groupes.",
+    "selectBatch": "Sélectionner un groupe",
+    "noBatchesFound": "Aucun groupe trouvé.",
+    "chooseToViewReport": "Choisissez un groupe pour voir son rapport\u2026",
+    "selectFromDropdown": "Sélectionnez un groupe dans la liste déroulante ci-dessus pour voir le rapport du cours."
   },
   "resourceForm": {
     "failedToLoadForm": "Impossible de charger la configuration du formulaire. Veuillez réessayer."
@@ -787,9 +823,61 @@
     "reissue": "Réémettre",
     "reissueCertificate": "Réémettre le certificat",
     "reissueConfirmation": "Réémettre le certificat pour <strong>{{userName}}</strong> dans le lot <strong>{{batchName}}</strong> ?",
-    "reissuing": "Réémission en cours…",
+    "reissuing": "Réémission en cours\u2026",
     "reissuedSuccessfully": "Certificat réémis avec succès.",
-    "reissueFailed": "Échec de la réémission du certificat."
+    "reissueFailed": "Échec de la réémission du certificat.",
+    "createTemplateTitle": "Créer un modèle de certificat",
+    "certificateTitle": "Certificat",
+    "back": "\u2190 Retour",
+    "cancelButton": "Annuler",
+    "rules": "Règles du certificat",
+    "issueTo": "Émettre le certificat à",
+    "issueToAll": "Tous",
+    "issueToOrg": "Utilisateurs de mon organisation",
+    "progressRule": "Règle de progression (%)",
+    "addScoreRule": "+ Ajouter une condition de règle de score",
+    "scoreRule": "Règle de score",
+    "removeScoreRule": "Supprimer la règle de score",
+    "bestAttemptedScore": "Meilleur score obtenu",
+    "condition": "Condition",
+    "rulesConsent": "Tous les éléments et attributs ont été soigneusement vérifiés et j'accepte d'émettre le certificat conformément aux règles définies ci-dessus.",
+    "selectedTemplate": "Modèle sélectionné",
+    "noPreview": "Aucun aperçu",
+    "selectFromPanel": "Sélectionnez un modèle dans le panneau de droite",
+    "templateTitle": "Modèle de certificat",
+    "createNewTemplateButton": "Créer un nouveau modèle",
+    "noTemplatesAvailable": "Aucun modèle disponible.",
+    "templateCreatedTitle": "Modèle créé avec succès !",
+    "templateCreatedDesc": "Le modèle a été créé avec succès. L'aperçu du nouveau modèle sera disponible dans environ 30 minutes. Cliquez sur Actualiser si le modèle ne s'affiche pas.",
+    "refresh": "Actualiser",
+    "proceedAnyway": "Continuer quand même",
+    "certificateAddedTitle": "Certificat ajouté !",
+    "certificateAddedDesc": "Le modèle de certificat a été attaché avec succès à ce groupe.",
+    "done": "Terminé",
+    "somethingWentWrong": "Quelque chose s'est mal passé",
+    "cancelButton2": "Annuler",
+    "tryAgain": "Réessayer",
+    "closePreview": "Fermer l'aperçu",
+    "closeButton": "Fermer",
+    "selectButton": "Sélectionner"
+  },
+  "createTemplate": {
+    "description": "Remplissez les détails ci-dessous pour créer un nouveau modèle de certificat pour votre organisation.",
+    "certificateTitle": "Titre du certificat",
+    "titlePlaceholder": "ex. Certificat d'achèvement",
+    "brandName": "Nom de la marque",
+    "brandNamePlaceholder": "ex. Nom complet du signataire",
+    "brandLogo1": "Logo de marque 1",
+    "brandLogo2": "Logo de marque 2",
+    "signature1": "Signature 1",
+    "signatory1Designation": "Désignation du signataire 1",
+    "signatory1Placeholder": "ex. Directeur",
+    "signature2": "Signature 2",
+    "signatory2Designation": "Désignation du signataire 2",
+    "signatory2Placeholder": "ex. PDG",
+    "consent": "Je confirme que tous les éléments de ce certificat que j'ai fournis sont corrects et appropriés, et que je suis autorisé(e) par les signataires et les propriétaires de logos à les fournir.",
+    "cancel": "Annuler",
+    "saveTemplate": "Enregistrer le modèle"
   },
   "batchRow": {
     "enrolmentEnds": "Inscription jusqu'au {{date}}",
@@ -836,10 +924,135 @@
     "course2": "Cours 2"
   },
   "courseDashboard": {
-    "title": "Tableau de bord du cours"
+    "title": "Tableau de bord du cours",
+    "backToCoursePage": "Retour à la page du cours",
+    "checkingPermissions": "Vérification des permissions\u2026",
+    "failedToLoad": "Échec du chargement du cours.",
+    "manageDashboard": "Gérer le tableau de bord de ce cours"
+  },
+  "batchStatus": {
+    "upcoming": "À venir",
+    "ongoing": "En cours",
+    "expired": "Expiré"
   },
   "userManagement": {
-    "addRole": "Ajouter un rôle"
+    "addRole": "Ajouter un rôle",
+    "pageTitle": "Gestion des utilisateurs",
+    "tabs": {
+      "changeUserRoles": "Modifier les rôles des utilisateurs",
+      "userConsent": "Consentement des utilisateurs"
+    },
+    "disclaimer": {
+      "intro": "En utilisant les fonctionnalités de gestion des utilisateurs, vous reconnaissez et acceptez les",
+      "termsLink": "Conditions générales",
+      "outro": "."
+    },
+    "toast": {
+      "failedToLoadRoles": "Échec du chargement des rôles",
+      "rolesCouldNotBeLoaded": "Impossible de charger les rôles.",
+      "termsAccepted": "Conditions acceptées",
+      "termsAcceptedDesc": "Vous pouvez maintenant utiliser les fonctionnalités de gestion des utilisateurs.",
+      "failedToAcceptTerms": "Échec de l'acceptation des conditions",
+      "pleaseRetry": "Veuillez réessayer."
+    },
+    "roleManagement": {
+      "searchPlaceholder": "Rechercher un utilisateur par identifiant Sunbird",
+      "searching": "Recherche...",
+      "search": "Rechercher",
+      "searchingUsers": "Recherche des utilisateurs...",
+      "initialHint": "Entrez un identifiant Sunbird ci-dessus et cliquez sur Rechercher",
+      "enterUsername": "Entrez un nom d'utilisateur",
+      "enterUsernameDesc": "Veuillez entrer un nom d'utilisateur pour la recherche.",
+      "refreshFailed": "Échec de l'actualisation",
+      "refreshFailedDesc": "Impossible d'actualiser les résultats de recherche.",
+      "searchFailed": "Échec de la recherche",
+      "searchFailedDesc": "Impossible de récupérer les données utilisateur.",
+      "selectRole": "Sélectionner un rôle",
+      "selectRoleDesc": "Veuillez choisir un rôle.",
+      "enterOrgId": "Entrer l'ID de l'organisation",
+      "enterOrgIdDesc": "Veuillez entrer un ID d'organisation.",
+      "operationFailed": "Opération échouée",
+      "couldNotSaveRole": "Impossible d'enregistrer le rôle.",
+      "roleAdded": "Rôle ajouté",
+      "roleUpdated": "Rôle mis à jour",
+      "roleAddedDesc": "Le rôle {{role}} a été ajouté avec succès.",
+      "roleUpdatedDesc": "Le rôle {{role}} a été mis à jour avec succès.",
+      "deleteFailed": "Échec de la suppression",
+      "couldNotRemoveRole": "Impossible de supprimer le rôle.",
+      "roleRemoved": "Rôle supprimé",
+      "roleRemovedDesc": "Le rôle {{role}} a été supprimé."
+    },
+    "roleDialog": {
+      "addTitle": "Ajouter un nouveau rôle",
+      "editTitle": "Modifier le rôle",
+      "close": "Fermer",
+      "roleLabel": "Rôle",
+      "orgLabel": "Nom de l'organisation",
+      "selectRole": "Sélectionner un rôle",
+      "selectOrg": "Sélectionner une organisation",
+      "noOrgs": "Aucune organisation disponible",
+      "noOrgHint": "Veuillez vous assurer que l'utilisateur a au moins une organisation.",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "add": "Ajouter",
+      "save": "Enregistrer"
+    },
+    "deleteRoleDialog": {
+      "title": "Supprimer le rôle",
+      "confirmDesc": "Êtes-vous sûr de vouloir supprimer le rôle \"{{role}}\" ? Cette action est irréversible.",
+      "confirmDescFallback": "Êtes-vous sûr de vouloir supprimer ce rôle ?",
+      "remove": "Supprimer"
+    },
+    "userRoleTable": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "noUsersFound": "Aucun utilisateur trouvé pour \"{{query}}\"",
+      "colNumber": "#",
+      "colName": "Nom",
+      "colEmail": "Email",
+      "colUsername": "Nom d'utilisateur",
+      "colStatus": "Statut",
+      "colCurrentRoles": "Rôles actuels",
+      "colActions": "Actions",
+      "noRolesAssigned": "Aucun rôle attribué",
+      "removeRole": "Supprimer le rôle",
+      "removeRoleAriaLabel": "Supprimer le rôle {{role}}",
+      "addNewRole": "Ajouter un nouveau rôle"
+    },
+    "consentTab": {
+      "loading": "Chargement des données de consentement\u2026",
+      "loadFailed": "Échec du chargement des données de consentement. Veuillez réessayer.",
+      "totalUsers": "Total des utilisateurs",
+      "consentGranted": "Consentement accordé",
+      "consentRevoked": "Consentement révoqué",
+      "filterLabel": "Statut du consentement",
+      "filterGranted": "Accordé",
+      "filterRevoked": "Révoqué",
+      "searchPlaceholder": "Rechercher par nom ou email\u2026",
+      "noUsersMatch": "Aucun utilisateur ne correspond aux filtres actuels.",
+      "revokeTitle": "Révoquer le consentement",
+      "reissueTitle": "Réémettre le consentement",
+      "revokeTitleBulk": "Révoquer le consentement ({{count}} utilisateurs)",
+      "reissueTitleBulk": "Réémettre le consentement ({{count}} utilisateurs)",
+      "revokeDesc": "Ceci révoquera le consentement PII des utilisateurs sélectionnés. Ils ne partageront plus de données avec les organisations consommatrices.",
+      "reissueDesc": "Ceci réémettra le consentement PII des utilisateurs sélectionnés, réactivant le partage de données.",
+      "revokedToast": "Consentement révoqué pour {{count}} utilisateur(s)",
+      "reissuedToast": "Consentement réémis pour {{count}} utilisateur(s)"
+    },
+    "consentColumns": {
+      "selectedCount": "{{count}} utilisateur(s) sélectionné(s)",
+      "selectAll": "Tout sélectionner ({{count}})",
+      "clear": "Effacer",
+      "reissueConsent": "Réémettre le consentement",
+      "revokeConsent": "Révoquer le consentement",
+      "selectUser": "Sélectionner {{name}}",
+      "colUserName": "Nom d'utilisateur",
+      "colEmail": "Email",
+      "colPiiStatus": "Statut de consentement PII",
+      "colCourse": "Cours",
+      "colConsentGivenOn": "Consentement donné le",
+      "colExpiry": "Expiration"
+    }
   },
   "formFields": {
     "select": "Sélectionner {{field}}"
@@ -932,7 +1145,64 @@
     "learnerProgress": "Progression des apprenants",
     "assessments": "Évaluations",
     "detailedLearnerProgress": "Progression détaillée des apprenants",
-    "detailedAssessments": "Évaluations détaillées"
+    "detailedAssessments": "Évaluations détaillées",
+    "loadingLearners": "Chargement des données des apprenants\u2026",
+    "loadingAssessments": "Chargement des données d'évaluation\u2026",
+    "somethingWentWrong": "Une erreur s'est produite",
+    "failedLearnerProgress": "Échec du chargement de la progression. Veuillez réessayer.",
+    "failedAssessmentData": "Échec du chargement des évaluations. Veuillez réessayer.",
+    "tryAgain": "Réessayer",
+    "searchLearners": "Rechercher des apprenants\u2026",
+    "progress025": "0\u201325%",
+    "progress2550": "25\u201350%",
+    "progress5075": "50\u201375%",
+    "progress75100": "75\u2013100%",
+    "progressFilter": "Progression",
+    "colLearnerName": "Nom de l'apprenant",
+    "colProgress": "Progression",
+    "colStatus": "Statut",
+    "colLastActive": "Dernière activité",
+    "colCertificate": "Certificat",
+    "colAttempt": "Tentative n°",
+    "colScore": "Score",
+    "colMaxScore": "Score max",
+    "colPercent": "%",
+    "colDate": "Date",
+    "learnersTooltip": "{{value}} apprenants"
+  },
+  "platformReport": {
+    "title": "Rapports de plateforme",
+    "contentOverview": "Aperçu du contenu",
+    "contentByStatus": "Contenu par statut",
+    "contentByType": "Contenu par type",
+    "top5Creators": "Top 5 créateurs",
+    "mostPopularContent": "Contenu le plus populaire",
+    "userAnalytics": "Analyses des utilisateurs",
+    "totalUsers": "Total des utilisateurs",
+    "userGrowthTrend": "Tendance de croissance des utilisateurs",
+    "users": "Utilisateurs",
+    "adminCourseSummary": "Résumé des cours administrateur",
+    "colCourseName": "Nom du cours",
+    "colEnrolled": "Inscrits",
+    "colCompleted": "Terminés",
+    "colCompletionPct": "Taux de complétion %",
+    "colCertificates": "Certificats",
+    "failedUserGrowth": "Échec du chargement des données de croissance. Veuillez réessayer.",
+    "failedCourseSummary": "Échec du chargement du résumé des cours. Veuillez réessayer.",
+    "searchCourses": "Rechercher des cours\u2026"
+  },
+  "dataTable": {
+    "noData": "Aucune donnée disponible.",
+    "showing": "Affichage {{from}}\u2013{{to}} sur {{total}}",
+    "pageIndicator": "{{page}} / {{total}}",
+    "firstPage": "Première page",
+    "prevPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "lastPage": "Dernière page"
+  },
+  "filterPanel": {
+    "searchPlaceholder": "Rechercher\u2026",
+    "allOption": "Tous {{label}}"
   },
   "editors": {
     "errorTitle": "Erreur de l'éditeur",

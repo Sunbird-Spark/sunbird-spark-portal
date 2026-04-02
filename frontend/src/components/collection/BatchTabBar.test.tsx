@@ -2,6 +2,19 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { TabBar, ActiveTab } from './BatchTabBar';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const m: Record<string, string> = {
+        'batchTabs.ongoing': 'Ongoing',
+        'batchTabs.upcoming': 'Upcoming',
+        'batchTabs.expired': 'Expired',
+      };
+      return m[key] ?? key;
+    },
+  }),
+}));
+
 describe('BatchTabBar', () => {
   const defaultCounts: Record<ActiveTab, number> = {
     Ongoing: 0,

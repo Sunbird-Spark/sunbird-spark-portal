@@ -1,6 +1,7 @@
 import React from "react";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { UserRoleInfo } from "@/services/UserManagementService";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface DeleteDialogState {
   open: boolean;
@@ -21,19 +22,21 @@ export const DeleteRoleDialog = ({
   onClose,
   onConfirm,
 }: DeleteRoleDialogProps) => {
+  const { t } = useAppI18n();
+
   return (
     <ConfirmDialog
       open={dialogState.open}
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isDeletingRole}
-      title="Remove Role"
+      title={t("userManagement.deleteRoleDialog.title")}
       description={
         dialogState.roleInfo
-          ? `Are you sure you want to remove the role "${dialogState.roleInfo.role}"? This action cannot be undone.`
-          : "Are you sure you want to remove this role?"
+          ? t("userManagement.deleteRoleDialog.confirmDesc", { role: dialogState.roleInfo.role })
+          : t("userManagement.deleteRoleDialog.confirmDescFallback")
       }
-      confirmLabel="Remove"
+      confirmLabel={t("userManagement.deleteRoleDialog.remove")}
       confirmVariant="destructive"
     />
   );

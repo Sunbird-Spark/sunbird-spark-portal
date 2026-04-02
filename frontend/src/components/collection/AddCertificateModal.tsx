@@ -9,6 +9,7 @@ import { CertificateTemplatesPanel } from "./certificate/CertificateTemplatesPan
 import { CreateTemplatePanel } from "./certificate/CreateTemplatePanel";
 import { TemplatePreviewModal } from "./certificate/TemplatePreviewModal";
 import { ModalStatusOverlay } from "./certificate/ModalStatusOverlay";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const AddCertificateModal = ({
   open,
@@ -19,6 +20,7 @@ const AddCertificateModal = ({
   existingCertTemplates = {},
 }: AddCertificateModalProps) => {
   const state = useCertificateModalState(courseId, batchId, existingCertTemplates, onOpenChange);
+  const { t } = useAppI18n();
 
   return (
     <>
@@ -36,7 +38,7 @@ const AddCertificateModal = ({
               <div className="flex items-center gap-2">
                 <FiAward className="w-5 h-5 text-sunbird-brick" />
                 <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-rubik">
-                  {state.view === "createTemplate" ? "Create Certificate Template" : "Certificate"}
+                  {state.view === "createTemplate" ? t('certificate.createTemplateTitle') : t('certificate.certificateTitle')}
                 </Dialog.Title>
               </div>
               {state.view === "createTemplate" ? (
@@ -47,7 +49,7 @@ const AddCertificateModal = ({
                   data-edataid="cert-modal-back"
                   data-pageid="course-consumption"
                 >
-                  ← Back
+                  {t('certificate.back')}
                 </button>
               ) : (
                 <Dialog.Close asChild>
@@ -95,7 +97,7 @@ const AddCertificateModal = ({
                               : "text-muted-foreground hover:text-foreground"
                           )}
                         >
-                          {tab === "current" ? "Current Certificate" : "Change Certificate"}
+                          {tab === "current" ? t('certificate.currentCertificate') : t('certificate.changeCertificate')}
                           {state.certTab === tab && (
                             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
                           )}
@@ -150,7 +152,7 @@ const AddCertificateModal = ({
                     data-edataid="cert-modal-cancel"
                     data-pageid="course-consumption"
                   >
-                    Cancel
+                    {t('certificate.cancelButton')}
                   </button>
                   <button
                     type="button"
@@ -167,7 +169,7 @@ const AddCertificateModal = ({
                     )}
                   >
                     <FiAward className="w-4 h-4" />
-                    Add Certificate
+                    {t('certificate.addCertificate')}
                   </button>
                 </div>
               </>

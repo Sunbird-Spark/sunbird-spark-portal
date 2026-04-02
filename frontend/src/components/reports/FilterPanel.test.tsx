@@ -2,6 +2,24 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import FilterPanel from './FilterPanel';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'filterPanel.searchPlaceholder': 'Search…',
+        'filterPanel.allOption': 'All {{label}}',
+      };
+      return map[key] ?? key;
+    },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
+
 const filters = [
   {
     key: 'progress',

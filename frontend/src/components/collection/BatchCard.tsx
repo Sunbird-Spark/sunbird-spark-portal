@@ -54,9 +54,9 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
         tncType: "reportViewerTnc",
       });
       setReviewerTncAccepted(true);
-      toast({ title: "Terms accepted", description: "You can now view batch reports.", variant: "success" });
+      toast({ title: t('batch.termsAccepted'), description: t('batch.canViewBatchReports'), variant: "success" });
     } catch {
-      toast({ title: "Failed to accept Terms", description: "Please try again.", variant: "destructive" });
+      toast({ title: t('batch.failedToAcceptTerms'), description: t('batch.pleaseRetry'), variant: "destructive" });
     }
   };
 
@@ -104,7 +104,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <p className="text-sm font-semibold text-foreground font-rubik">
-            Manage batches for this course
+            {t('batch.manageBatches')}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -141,7 +141,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
                 checked={reviewerTncChecked}
                 onCheckedChange={(v) => setReviewerTncChecked(!!v)}
                 settingKey="reportViewerTnc"
-                label="to view batch reports."
+                label={t('batch.toViewBatchReports')}
               />
               <div className="flex justify-end">
                 <button
@@ -188,7 +188,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
         {/* ── Error ── */}
         {!isLoading && isError && (
           <p className="text-xs text-red-500 font-rubik px-5 py-4">
-            Failed to load batches.
+            {t('batch.failedToLoadBatches')}
           </p>
         )}
 
@@ -199,7 +199,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
               <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
                 <FiCalendar className="w-7 h-7" />
                 <p className="text-xs font-rubik">
-                  No {activeTab.toLowerCase()} batches
+                  {t('batch.noTabBatches', { tab: t(`batchTabs.${activeTab.toLowerCase()}`) })}
                 </p>
               </div>
             ) : (

@@ -48,6 +48,71 @@ vi.mock('@/hooks/useConsentSummary', () => ({
 
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (k: string, opts?: Record<string, unknown>) => {
+      const map: Record<string, string> = {
+        'exportButton.exportCsv': 'Export CSV',
+        'exportButton.noDataToExport': 'No data to export',
+        'exportButton.csvExportedSuccessfully': 'CSV exported successfully',
+        'userManagement.consentTab.loading': 'Loading consent data…',
+        'userManagement.consentTab.loadFailed': 'Failed to load consent data. Please try again later.',
+        'userManagement.consentTab.totalUsers': 'Total Users',
+        'userManagement.consentTab.consentGranted': 'Consent Granted',
+        'userManagement.consentTab.consentRevoked': 'Consent Revoked',
+        'userManagement.consentTab.filterLabel': 'Consent Status',
+        'userManagement.consentTab.filterGranted': 'Granted',
+        'userManagement.consentTab.filterRevoked': 'Revoked',
+        'userManagement.consentTab.searchPlaceholder': 'Search by name or email…',
+        'userManagement.consentTab.noUsersMatch': 'No users match the current filters.',
+        'userManagement.consentTab.revokeTitle': 'Revoke Consent',
+        'userManagement.consentTab.reissueTitle': 'Reissue Consent',
+        'userManagement.consentTab.revokeTitleBulk': 'Revoke Consent ({{count}} users)',
+        'userManagement.consentTab.reissueTitleBulk': 'Reissue Consent ({{count}} users)',
+        'userManagement.consentTab.revokeDesc': 'This will revoke PII consent.',
+        'userManagement.consentTab.reissueDesc': 'This will reissue PII consent.',
+        'userManagement.consentTab.revokedToast': 'Consent revoked for {{count}} user(s)',
+        'userManagement.consentTab.reissuedToast': 'Consent reissued for {{count}} user(s)',
+        'userManagement.consentColumns.selectedCount': '{{count}} user(s) selected',
+        'userManagement.consentColumns.selectAll': 'Select All ({{count}})',
+        'userManagement.consentColumns.clear': 'Clear',
+        'userManagement.consentColumns.reissueConsent': 'Reissue Consent',
+        'userManagement.consentColumns.revokeConsent': 'Revoke Consent',
+        'userManagement.consentColumns.selectUser': 'Select {{name}}',
+        'userManagement.consentColumns.colUserName': 'User Name',
+        'userManagement.consentColumns.colEmail': 'Email',
+        'userManagement.consentColumns.colPiiStatus': 'PII Consent Status',
+        'userManagement.consentColumns.colCourse': 'Course',
+        'userManagement.consentColumns.colConsentGivenOn': 'Consent Given On',
+        'userManagement.consentColumns.colExpiry': 'Expiry',
+        'userManagement.consentColumns.bulkActions': 'Bulk actions',
+        'dataTable.noData': 'No data available.',
+        'dataTable.showing': 'Showing {{from}}–{{to}} of {{total}}',
+        'dataTable.pageIndicator': '{{page}} / {{total}}',
+        'dataTable.firstPage': 'First page',
+        'dataTable.prevPage': 'Previous page',
+        'dataTable.nextPage': 'Next page',
+        'dataTable.lastPage': 'Last page',
+        'filterPanel.searchPlaceholder': 'Search…',
+        'filterPanel.allOption': 'All {{label}}',
+      };
+      let str = map[k] ?? k;
+      if (opts) {
+        for (const [key, v] of Object.entries(opts)) {
+          str = str.replace(`{{${key}}}`, String(v));
+        }
+      }
+      return str;
+    },
+    languages: [],
+    currentCode: 'en',
+    currentLanguage: { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+    changeLanguage: vi.fn(),
+    isRTL: false,
+    dir: 'ltr',
+  }),
+}));
+
 vi.mock('@/components/common/ConfirmDialog', () => ({
   default: ({ open, title, onConfirm, onClose }: any) =>
     open ? (
