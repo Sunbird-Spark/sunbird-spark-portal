@@ -26,7 +26,7 @@ describe('EcmlPlayer', () => {
 
   const mockConfig = {
     context: { mode: 'play', contentId: 'test-ecml-123' },
-    config: { apislug: '/action'},
+    config: { apislug: '/action' },
     metadata: mockMetadata,
     data: {},
   };

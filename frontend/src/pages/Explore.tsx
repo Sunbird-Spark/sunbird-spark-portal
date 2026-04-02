@@ -45,10 +45,14 @@ const Explore = () => {
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
   
-  const [sortLabelKey, setSortLabelKey] = useState(() => searchParams.get('sort') ?? 'newest');
+  const [sortLabelKey, setSortLabelKey] = useState(() => {
+    const raw = searchParams.get('sort') ?? 'newest';
+    return SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
+  });
   const [sortBy, setSortBy] = useState<any>(() => {
-    const key = searchParams.get('sort') ?? 'newest';
-    return SORT_OPTIONS.find(opt => opt.key === key)?.value ?? { lastUpdatedOn: 'desc' };
+    const raw = searchParams.get('sort') ?? 'newest';
+    const key = SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
+    return SORT_OPTIONS.find(opt => opt.key === key)!.value;
   });
 
   const handleFilterChange: Dispatch<SetStateAction<FilterState>> = (value) => {
@@ -74,6 +78,14 @@ const Explore = () => {
   useEffect(() => {
     const q = searchParams.get('q') ?? '';
     setSearchQuery(q);
+  }, [searchParams]);
+
+  // Re-sync sort state when the URL changes (e.g. browser back/forward)
+  useEffect(() => {
+    const raw = searchParams.get('sort') ?? 'newest';
+    const key = SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
+    setSortLabelKey(key);
+    setSortBy(SORT_OPTIONS.find(opt => opt.key === key)!.value);
   }, [searchParams]);
 
   // Keep a ref to setSearchParams so the effect below doesn't re-fire when
