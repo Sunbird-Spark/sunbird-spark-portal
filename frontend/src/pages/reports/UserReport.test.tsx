@@ -333,7 +333,7 @@ describe('UserReport', () => {
 
   it('renders export buttons', () => {
     renderWithRoute();
-    const exportBtns = screen.getAllByRole('button', { name: /exportButton\.exportCsv/i });
+    const exportBtns = screen.getAllByRole('button', { name: /export csv/i });
     expect(exportBtns.length).toBeGreaterThanOrEqual(1);
   });
 });
