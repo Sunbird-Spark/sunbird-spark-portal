@@ -66,7 +66,7 @@ export const SignUpOtpVerification = ({ otp, setOtp, isOtpValid, handleVerifyOtp
                         pattern="^[0-9]*$"
                         containerClassName="otp-input-container"
                     >
-                        <InputOTPGroup className="gap-3">
+                        <InputOTPGroup className="gap-3 flex items-center">
                             {[0, 1, 2, 3, 4, 5].map((i) => (
                                 <InputOTPSlot key={i} index={i} className="otp-input" />
                             ))}
