@@ -209,6 +209,14 @@ describe("CourseProgressSection", () => {
         "false"
       );
     });
+
+    it("hides leave course option when batch has ended", () => {
+      render(<CourseProgressSection {...baseProps} isBatchEnded />);
+      expect(screen.getByTestId("course-progress-card")).toHaveAttribute(
+        "data-show-unenroll-option",
+        "false"
+      );
+    });
   });
 
   describe("Confirm dialog flow", () => {

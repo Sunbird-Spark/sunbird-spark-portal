@@ -14,6 +14,7 @@ interface CourseProgressSectionProps {
   isTrackable: boolean;
   contentBlocked: boolean;
   upcomingBatchBlocked?: boolean;
+  isBatchEnded?: boolean;
   contentCreatorPrivilege: boolean;
   hasBatchInRoute: boolean;
   isEnrolledInCurrentBatch: boolean;
@@ -30,6 +31,7 @@ export default function CourseProgressSection({
   isTrackable,
   contentBlocked,
   upcomingBatchBlocked = false,
+  isBatchEnded = false,
   contentCreatorPrivilege,
   hasBatchInRoute,
   isEnrolledInCurrentBatch,
@@ -57,6 +59,7 @@ export default function CourseProgressSection({
 
   const canShowUnenrol =
     isTrackable &&
+    !isBatchEnded &&
     (!contentBlocked || upcomingBatchBlocked) &&
     !contentCreatorPrivilege &&
     hasBatchInRoute &&

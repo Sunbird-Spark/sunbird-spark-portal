@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollectionPageData } from "@/hooks/useCollectionPageData";
 import { useUserRead } from "@/hooks/useUserRead";
@@ -24,6 +24,7 @@ import "./collection.css";
 
 const CollectionDetailPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
   useImpression({ type: 'view', pageid: 'collection-detail', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const backTo = useCollectionBackNavigation(collectionId);
@@ -75,8 +76,8 @@ const CollectionDetailPage = () => {
   useEffect(() => {
     if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
     const batchId = enrollment.enrollmentForCollection?.batchId;
-    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true });
-  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate]);
+    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true, state: location.state });
+  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate, location.state]);
 
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
 
@@ -198,7 +199,7 @@ const CollectionDetailPage = () => {
     () =>
       buildCollectionDetailContentArea({
         displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
-        contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading,
+        contentBlocked, upcomingBatchBlocked, isBatchEnded, batchStartDateForOverview, playerMetadata, playerIsLoading,
         playerError: playerError ?? null, handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded,
         cdata: collectionCdata, objectRollup: collectionObjectRollup,
         courseProgressProps, contentStatusMap, contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId,
@@ -210,7 +211,7 @@ const CollectionDetailPage = () => {
       }),
     [
       displayCollectionData, contentId, isTrackable, isAuthenticated, hasBatchInRoute, isEnrolledInCurrentBatch,
-      contentBlocked, upcomingBatchBlocked, batchStartDateForOverview, playerMetadata, playerIsLoading, playerError,
+      contentBlocked, upcomingBatchBlocked, isBatchEnded, batchStartDateForOverview, playerMetadata, playerIsLoading, playerError,
       handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded, collectionCdata, collectionObjectRollup,
       courseProgressProps, contentStatusMap,
       contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId, handleJoinCourse, batchListLoading,

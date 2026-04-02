@@ -119,7 +119,7 @@ const ContentPlayerPage = () => {
       <main className="content-player-container">
         {/* Go Back Link */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(backTo)}
           className="content-player-go-back"
         >
           <FiArrowLeft className="content-player-back-arrow" />

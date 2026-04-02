@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { TrackableCollection } from "@/types/TrackableCollections";
 import { FiBookOpen } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
@@ -12,10 +12,12 @@ interface TrackableCollectionCardProps {
 
 const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps) => {
   const { t } = useAppI18n();
-  
+  const location = useLocation();
+
   return (
     <Link
       to={`/collection/${course.collectionId}`}
+      state={{ from: location.pathname + location.search }}
       className="block"
       data-edataid="trackable-collection-card-click"
       data-objectid={course.collectionId}

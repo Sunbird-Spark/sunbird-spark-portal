@@ -206,6 +206,7 @@ describe('BatchCard - Modals', () => {
 
   /* ── Edit batch modal ── */
   it('opens the edit modal when edit button is clicked on a batch', () => {
+    const tomorrow = '2026-05-01';
     mockUseBatchList.mockReturnValue({
       data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2027-01-01', endDate: '2027-06-01' }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
@@ -216,6 +217,7 @@ describe('BatchCard - Modals', () => {
   });
 
   it('closes the edit modal when onOpenChange(false) is called', () => {
+    const tomorrow = '2026-05-01';
     mockUseBatchList.mockReturnValue({
       data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2027-01-01', endDate: '2027-06-01' }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,

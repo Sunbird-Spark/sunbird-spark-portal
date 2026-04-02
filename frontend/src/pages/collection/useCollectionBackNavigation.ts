@@ -3,25 +3,17 @@ import { useLocation } from "react-router-dom";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 
 /**
- * Resolves a stable "back" destination for the collection detail page.
+ * Resolves the "back" destination for the collection detail page.
+ * Reads location.state.from set by the incoming navigation.
  * Rejects /collection/ and /content/ paths to prevent multi-hop back chains.
  * Falls back to /explore, which is safe for both authenticated and anonymous users.
  */
-export function useCollectionBackNavigation(collectionId: string | undefined): string {
+export function useCollectionBackNavigation(_collectionId: string | undefined): string {
   const location = useLocation();
   const stateFrom = (location.state as { from?: string } | null)?.from ?? '';
-
-  const resolveBackTo = (from: string) =>
-    from && !from.startsWith('/collection/') && !from.startsWith('/content/') ? from : '/explore';
-
-  const backToRef = useRef<string>(resolveBackTo(stateFrom));
-  const capturedCollectionIdRef = useRef<string | undefined>(collectionId);
-  if (capturedCollectionIdRef.current !== collectionId) {
-    capturedCollectionIdRef.current = collectionId;
-    backToRef.current = resolveBackTo(stateFrom);
-  }
-
-  return backToRef.current;
+  return stateFrom && !stateFrom.startsWith('/collection/') && !stateFrom.startsWith('/content/')
+    ? stateFrom
+    : '/explore';
 }
 
 /**
