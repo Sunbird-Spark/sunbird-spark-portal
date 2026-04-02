@@ -214,8 +214,12 @@ const SignUp: React.FC = () => {
 
     const isMobileRedirect = isMobileApp();
 
+    const handleClose = () => {
+        window.location.href = isMobileRedirect ? getSafeRedirectUrl() : '/portal/login?prompt=none';
+    };
+
     return (
-        <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect}>
+        <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect} onClose={handleClose}>
             <TelemetryTracker 
                 startEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
                 endEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
