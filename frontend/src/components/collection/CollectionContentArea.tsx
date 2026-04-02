@@ -27,6 +27,7 @@ export default function CollectionContentArea({
     isEnrolledInCurrentBatch,
     contentBlocked,
     upcomingBatchBlocked,
+    isBatchEnded,
     batchStartDateForOverview,
   } = access;
   const {
@@ -121,6 +122,7 @@ export default function CollectionContentArea({
               isTrackable={isTrackable}
               contentBlocked={contentBlocked}
               upcomingBatchBlocked={upcomingBatchBlocked}
+              isBatchEnded={isBatchEnded}
               contentCreatorPrivilege={contentCreatorPrivilege}
               hasBatchInRoute={hasBatchInRoute}
               isEnrolledInCurrentBatch={isEnrolledInCurrentBatch}

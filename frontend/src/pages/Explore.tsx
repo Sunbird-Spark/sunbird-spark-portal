@@ -35,7 +35,7 @@ const Explore = () => {
   const [filters, setFilters] = useState<FilterState>(() => {
     const initial: FilterState = {};
     searchParams.forEach((value, key) => {
-      if (key === 'q') return;
+      if (key === 'q' || key === 'sort') return;
       if (!initial[key]) initial[key] = [];
       initial[key].push(value);
     });
@@ -44,8 +44,12 @@ const Explore = () => {
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
-  const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
-  const [sortLabelKey, setSortLabelKey] = useState('newest');
+  
+  const [sortLabelKey, setSortLabelKey] = useState(() => searchParams.get('sort') ?? 'newest');
+  const [sortBy, setSortBy] = useState<any>(() => {
+    const key = searchParams.get('sort') ?? 'newest';
+    return SORT_OPTIONS.find(opt => opt.key === key)?.value ?? { lastUpdatedOn: 'desc' };
+  });
 
   const handleFilterChange: Dispatch<SetStateAction<FilterState>> = (value) => {
     const resolved = typeof value === 'function' ? value(filters) : value;
@@ -99,8 +103,11 @@ const Explore = () => {
     Object.entries(filters).forEach(([code, values]) => {
       values.forEach((value) => next.append(code, value));
     });
+    if (sortLabelKey !== 'newest') {
+      next.set('sort', sortLabelKey);
+    }
     setSearchParamsRef.current(next, { replace: true });
-  }, [filters, debouncedSearchQuery]);
+  }, [filters, debouncedSearchQuery, sortLabelKey]);
 
   return (
     <main className="flex-1 bg-white relative md:h-[calc(100vh-4.5rem)] overflow-hidden">

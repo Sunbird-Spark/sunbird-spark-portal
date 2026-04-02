@@ -2,7 +2,7 @@
 // 1. Redirects unenrolled users to their batch URL when no batch is in the route.
 // 2. Auto-navigates to the first leaf content item when no contentId is in the URL.
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
 
 interface UseCollectionAutoNavigateProps {
@@ -27,12 +27,13 @@ export const useCollectionAutoNavigate = ({
   enrollment,
 }: UseCollectionAutoNavigateProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   // Redirect to batch if needed
   useEffect(() => {
     if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
     const batchId = enrollment.enrollmentForCollection?.batchId;
-    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true });
-  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate]);
+    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true, state: location.state });
+  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate, location.state]);
 
   // Auto-navigate to first content when collection loads without a selected contentId
   useEffect(() => {

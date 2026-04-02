@@ -1,5 +1,5 @@
 import { FiUser } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
@@ -11,13 +11,14 @@ interface ContentCardProps {
 
 const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const { t } = useAppI18n();
+  const location = useLocation();
   const lessons = item.leafNodesCount || 0;
   const creator = item.creator ?? item.createdBy ?? 'Unknown';
 
   return (
     <Link
       to={`/collection/${item.identifier}`}
-      state={linkState}
+      state={{ from: location.pathname + location.search, ...linkState }}
       className="related-resource-card-link"
       data-edataid="collection-card-click"
       data-objectid={item.identifier}

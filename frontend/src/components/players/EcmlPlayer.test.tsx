@@ -26,14 +26,14 @@ describe('EcmlPlayer', () => {
 
   const mockConfig = {
     context: { mode: 'play', contentId: 'test-ecml-123' },
-    config: { apislug: '/action' },
+    config: { apislug: '/action', buildNumber: 'test-build-hash' },
     metadata: mockMetadata,
     data: {},
   };
 
   beforeEach(() => {
     mockCreateConfig.mockResolvedValue(mockConfig);
-    mockBuildPlayerUrl.mockReturnValue('/content/preview/preview.html?webview=true');
+    mockBuildPlayerUrl.mockReturnValue('/content/preview/preview.html?webview=true&buildNumber=test-build-hash');
   });
 
   afterEach(() => {
@@ -90,6 +90,15 @@ describe('EcmlPlayer', () => {
     await waitFor(() => {
       const iframe = container.querySelector('iframe');
       expect(iframe?.src).toContain('/content/preview/preview.html?webview=true');
+      expect(iframe?.src).toContain('buildNumber=');
+    });
+  });
+
+  it('should pass config.buildNumber to buildPlayerUrl', async () => {
+    render(<EcmlPlayer metadata={mockMetadata} />);
+
+    await waitFor(() => {
+      expect(mockBuildPlayerUrl).toHaveBeenCalledWith('test-build-hash');
     });
   });
 
