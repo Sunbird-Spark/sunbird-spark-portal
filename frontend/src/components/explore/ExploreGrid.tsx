@@ -23,7 +23,10 @@ interface ExploreGridProps {
 const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
     const { t } = useAppI18n();
     const location = useLocation();
-    const linkState = { from: location.pathname + location.search };
+    const linkState = useMemo(
+        () => ({ from: location.pathname + location.search }),
+        [location.pathname, location.search]
+    );
     const [displayItems, setDisplayItems] = useState<ContentSearchItem[]>([]);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
