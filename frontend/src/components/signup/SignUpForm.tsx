@@ -1,8 +1,6 @@
 import React from "react";
-import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/ForgotPasswordComponents";
-import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 import { useAppI18n } from "@/hooks/useAppI18n";
@@ -49,21 +47,6 @@ export const SignUpForm = ({
         />
 
         <div className="space-y-3">
-            <Button
-                variant="outline"
-                className="secondary-outline-button"
-                onClick={() => { window.location.href = "/google/auth" }}
-            >
-                <FcGoogle className="w-5 h-5" />
-                {t("signUp.signInWithGoogle")}
-            </Button>
-
-            <div className="form-divider-container">
-                <div className="form-divider-line"></div>
-                <span className="form-divider-text">{t("signUp.or")}</span>
-                <div className="form-divider-line"></div>
-            </div>
-
             <div className="space-y-1">
                 <div className="form-group relative pb-3">
                     <InputLabel htmlFor="firstName" required>{t("signUp.firstName")}</InputLabel>
