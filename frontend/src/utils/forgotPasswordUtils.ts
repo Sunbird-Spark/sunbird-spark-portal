@@ -20,8 +20,8 @@ export const persistMobileContext = (): void => {
     if (client === 'mobileApp' && redirectUri) {
         try {
             sessionStorage.setItem(MOBILE_CONTEXT_KEY, JSON.stringify({ client, redirectUri }));
-        } catch {
-            // sessionStorage unavailable — ignore
+        } catch (error) {
+            console.warn('persistMobileContext: failed to save to sessionStorage', error);
         }
     }
 };
@@ -35,8 +35,8 @@ const getMobileContext = (): MobileContext | null => {
         if (stored) {
             return JSON.parse(stored) as MobileContext;
         }
-    } catch {
-        // sessionStorage unavailable or invalid JSON — ignore
+    } catch (error) {
+        console.warn('getMobileContext: failed to read from sessionStorage', error);
     }
     return null;
 };
@@ -47,17 +47,24 @@ const getMobileContext = (): MobileContext | null => {
 export const clearMobileContext = (): void => {
     try {
         sessionStorage.removeItem(MOBILE_CONTEXT_KEY);
-    } catch {
-        // sessionStorage unavailable — ignore
+    } catch (error) {
+        console.warn('clearMobileContext: failed to clear sessionStorage', error);
     }
 };
 
-const BLOCKED_PROTOCOLS = ['javascript:', 'data:', 'vbscript:', 'blob:'];
+const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 
-const isSafeUrl = (url: string): boolean => {
+const isSafeUrl = (url: string, allowedAppScheme?: string): boolean => {
     try {
         const parsed = new URL(url);
-        return !BLOCKED_PROTOCOLS.includes(parsed.protocol);
+        if (ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
+            return true;
+        }
+        // Allow the specific app scheme if provided (e.g., 'org.sunbird.app:')
+        if (allowedAppScheme && parsed.protocol === allowedAppScheme) {
+            return true;
+        }
+        return false;
     } catch {
         return false;
     }
@@ -82,12 +89,33 @@ const toIntentUrl = (url: string): string => {
     }
 };
 
+/**
+ * Extracts the app scheme from the redirect_uri to use as an allowed protocol.
+ * Only returns schemes that look like app IDs (contain a dot, e.g., 'org.sunbird.app:').
+ * This ensures dangerous protocols (javascript:, data:, etc.) are never allowed.
+ */
+const getAppSchemeFromRedirectUri = (): string | undefined => {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const redirectUri = params.get('redirect_uri');
+        if (!redirectUri) return undefined;
+        const parsed = new URL(redirectUri);
+        // App ID schemes always contain dots (e.g., org.sunbird.app:)
+        // Dangerous protocols (javascript:, data:, vbscript:, blob:) never do
+        if (!ALLOWED_PROTOCOLS.includes(parsed.protocol) && parsed.protocol.includes('.')) {
+            return parsed.protocol;
+        }
+    } catch {
+        // invalid URL
+    }
+    return undefined;
+};
+
 export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     const params = new URLSearchParams(window.location.search);
-    console.log('params', params);
     const redirectUri = params.get('redirect_uri');
-    console.log('redirectUri',redirectUri);
-    if (redirectUri && isSafeUrl(redirectUri)) {
+    const appScheme = getAppSchemeFromRedirectUri();
+    if (redirectUri && isSafeUrl(redirectUri, appScheme)) {
         return toIntentUrl(redirectUri);
     }
     if (redirectUri) {
@@ -95,8 +123,7 @@ export const getSafeRedirectUrl = (fallback = DEFAULT_LOGIN_URL): string => {
     }
     // Fallback to sessionStorage (survives Keycloak redirects)
     const ctx = getMobileContext();
-    console.log('mobile context', ctx);
-    if (ctx?.redirectUri && isSafeUrl(ctx.redirectUri)) {
+    if (ctx?.redirectUri && isSafeUrl(ctx.redirectUri, appScheme || ctx.redirectUri.split('://')[0] + ':')) {
         return toIntentUrl(ctx.redirectUri);
     }
     return fallback;
@@ -147,7 +174,7 @@ export const appendMobileParams = (link: string): string => {
     const client = params.get('client');
     try {
         const linkUrl = new URL(link, window.location.origin);
-        if (redirectUri && isSafeUrl(redirectUri)) {
+        if (redirectUri && isSafeUrl(redirectUri, getAppSchemeFromRedirectUri())) {
             linkUrl.searchParams.set('redirect_uri', redirectUri);
         }
         if (client) {
