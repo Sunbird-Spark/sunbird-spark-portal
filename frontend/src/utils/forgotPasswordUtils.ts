@@ -91,17 +91,19 @@ const toIntentUrl = (url: string): string => {
 
 /**
  * Extracts the app scheme from the redirect_uri to use as an allowed protocol.
- * Only returns schemes that look like app IDs (contain a dot, e.g., 'org.sunbird.app:').
- * This ensures dangerous protocols (javascript:, data:, etc.) are never allowed.
+ * Only allowed when client=mobileApp is present (trusted mobile context).
+ * e.g., 'org.sunbird.app://mobileApp' → 'org.sunbird.app:'
  */
 const getAppSchemeFromRedirectUri = (): string | undefined => {
     try {
         const params = new URLSearchParams(window.location.search);
+        // Only trust custom schemes when the request comes from the mobile app
+        if (params.get('client') !== 'mobileApp') return undefined;
         const redirectUri = params.get('redirect_uri');
         if (!redirectUri) return undefined;
         const parsed = new URL(redirectUri);
-        // App ID schemes always contain dots (e.g., org.sunbird.app:)
-        // Dangerous protocols (javascript:, data:, vbscript:, blob:) never do
+        // App ID schemes contain dots (e.g., org.sunbird.app:)
+        // This rejects single-word protocols like javascript:, data:, blob:
         if (!ALLOWED_PROTOCOLS.includes(parsed.protocol) && parsed.protocol.includes('.')) {
             return parsed.protocol;
         }

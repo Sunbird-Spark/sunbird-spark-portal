@@ -192,12 +192,20 @@ describe('forgotPasswordUtils', () => {
             expect(getSafeRedirectUrl()).toBe('/portal/login?prompt=none');
         });
 
-        it('should convert custom app scheme redirect_uri to intent URL', () => {
+        it('should convert custom app scheme redirect_uri to intent URL when client=mobileApp', () => {
+            vi.stubGlobal('location', {
+                search: '?redirect_uri=org.sunbird.app://oauth2callback&client=mobileApp',
+            });
+
+            expect(getSafeRedirectUrl()).toBe('intent://oauth2callback#Intent;scheme=org.sunbird.app;package=org.sunbird.app;end');
+        });
+
+        it('should reject custom app scheme redirect_uri without client=mobileApp', () => {
             vi.stubGlobal('location', {
                 search: '?redirect_uri=org.sunbird.app://oauth2callback',
             });
 
-            expect(getSafeRedirectUrl()).toBe('intent://oauth2callback#Intent;scheme=org.sunbird.app;package=org.sunbird.app;end');
+            expect(getSafeRedirectUrl()).toBe('/portal/login?prompt=none');
         });
 
         it('should return http/https redirect_uri as-is', () => {
