@@ -178,14 +178,16 @@
   }
 }
 
-[dir="rtl"] .profile-content-wrapper {
-  padding-right: 1.625rem;
-  padding-left: 6.25rem;
-}
+@media (min-width: 1024px) {
+  [dir="rtl"] .profile-content-wrapper {
+    padding-right: 1.625rem;
+    padding-left: 6.25rem;
+  }
 
-[dir="ltr"] .profile-content-wrapper {
-  padding-left: 1.625rem;
-  padding-right: 6.25rem;
+  [dir="ltr"] .profile-content-wrapper {
+    padding-left: 1.625rem;
+    padding-right: 6.25rem;
+  }
 }
 
 /* Notification Badge RTL */
@@ -201,47 +203,47 @@
 
 /* Notification Popover RTL */
 [dir="rtl"] .notification-popover-content {
-  right: auto !important;
-  left: -10.5rem !important;
+  right: auto;
+  left: -10.5rem;
 }
 
 [dir="ltr"] .notification-popover-content {
-  left: auto !important;
-  right: -10.5rem !important;
+  left: auto;
+  right: -10.5rem;
 }
 
 [dir="rtl"] .notification-popover-arrow {
-  right: auto !important;
-  left: 3.25rem !important;
+  right: auto;
+  left: 3.25rem;
 }
 
 [dir="ltr"] .notification-popover-arrow {
-  left: auto !important;
-  right: 3.25rem !important;
+  left: auto;
+  right: 3.25rem;
 }
 
 
-@media (max-width: 1023px) {
+@media (max-width: 63.9375rem) {
   [dir="rtl"] .notification-popover-content {
-    right: auto !important;
-    left: -6rem !important;
+    right: auto;
+    left: -6rem;
   }
 
   [dir="ltr"] .notification-popover-content {
-    left: auto !important;
-    right: -6rem !important;
+    left: auto;
+    right: -6rem;
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 47.9375rem) {
   [dir="rtl"] .notification-popover-content {
-    right: auto !important;
-    left: -5.75rem !important;
+    right: auto;
+    left: -5.75rem;
   }
 
   [dir="ltr"] .notification-popover-content {
-    left: auto !important;
-    right: -5.75rem !important;
+    left: auto;
+    right: -5.75rem;
   }
 }
 
