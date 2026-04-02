@@ -315,7 +315,7 @@ describe('CourseReportContent', () => {
 
   it('renders Export CSV button for learner progress', () => {
     render(<CourseReportContent />);
-    expect(screen.getAllByRole('button', { name: /export csv/i })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /exportButton\.exportCsv/i })[0]).toBeInTheDocument();
   });
 
   it('accepts courseId and batchId props without crashing', () => {
