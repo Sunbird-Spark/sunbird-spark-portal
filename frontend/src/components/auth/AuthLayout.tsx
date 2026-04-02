@@ -53,7 +53,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage, h
                   <img
                     src={sunbirdLogo}
                     alt={t("authLayout.logoAlt")}
-                    className={`logo-image ${isOtpPage ? '-translate-y-10' : ''}`}
+                    className={`logo-image`}
                   />
                 </a>
               </div>
