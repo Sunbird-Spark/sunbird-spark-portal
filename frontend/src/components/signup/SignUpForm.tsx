@@ -1,11 +1,10 @@
 import React from "react";
-import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { Header, InputLabel, PrimaryButton } from "../../pages/forgotPassword/ForgotPasswordComponents";
-import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IDENTIFIER_REGEX, PASSWORD_REGEX } from "@/utils/ValidationUtils";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { isMobileApp, getSafeRedirectUrl } from "@/utils/forgotPasswordUtils";
 
 interface Step1Props {
     firstName: string;
@@ -38,6 +37,8 @@ export const SignUpForm = ({
 }: Step1Props) => {
     const { t } = useAppI18n();
 
+    const isMobile = isMobileApp();
+
     return (
     <>
         <Header
@@ -46,21 +47,6 @@ export const SignUpForm = ({
         />
 
         <div className="space-y-3">
-            <Button
-                variant="outline"
-                className="secondary-outline-button"
-                onClick={() => { window.location.href = "/google/auth" }}
-            >
-                <FcGoogle className="w-5 h-5" />
-                {t("signUp.signInWithGoogle")}
-            </Button>
-
-            <div className="form-divider-container">
-                <div className="form-divider-line"></div>
-                <span className="form-divider-text">{t("signUp.or")}</span>
-                <div className="form-divider-line"></div>
-            </div>
-
             <div className="space-y-1">
                 <div className="form-group relative pb-3">
                     <InputLabel htmlFor="firstName" required>{t("signUp.firstName")}</InputLabel>
@@ -167,7 +153,7 @@ export const SignUpForm = ({
                 </PrimaryButton>
 
                 <div className="text-center mt-3 text-[0.75rem] text-sunbird-charcoal font-medium">
-                    {t("signUp.alreadyHaveAccount")} <a href="/login" className="themed-link no-underline hover:underline">{t("login")}</a>
+                    {t("signUp.alreadyHaveAccount")} <a href={isMobile ? getSafeRedirectUrl() : "/portal/login?prompt=none"} className="themed-link no-underline hover:underline">{t("login")}</a>
                 </div>
             </div>
         </div>
