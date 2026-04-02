@@ -169,7 +169,7 @@ describe('UserConsentTab', () => {
   describe('layout', () => {
     it('renders the Export CSV button', () => {
       renderTab();
-      expect(screen.getByRole('button', { name: /exportButton\.exportCsv/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument();
     });
 
     it('renders summary card labels', () => {
