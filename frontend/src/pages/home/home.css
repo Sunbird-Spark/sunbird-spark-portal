@@ -111,7 +111,7 @@
 
 /* Continue Learning */
 .home-continue-learning-card {
-    @apply w-full max-w-[42.8125rem] min-h-[14.625rem] rounded-[1.25rem] bg-white flex flex-col lg:flex-row gap-5 p-[30px];
+    @apply w-full max-w-[42.8125rem] min-h-[14.625rem] rounded-[1.25rem] bg-white flex flex-col lg:flex-row gap-5 p-5 md:p-[30px];
     box-shadow: 0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09);
 }
 
@@ -153,12 +153,12 @@
 }
 
 .home-continue-learning-title {
-    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] text-foreground line-clamp-2 whitespace-pre-wrap;
+    @apply font-rubik font-medium text-[1.125rem] md:text-[1.25rem] leading-snug md:leading-[1.75rem] text-foreground line-clamp-2 whitespace-pre-wrap;
     letter-spacing: 0%;
 }
 
 .home-continue-learning-btn {
-    @apply w-[310px] h-10 rounded-[10px] bg-sunbird-brick hover:bg-sunbird-brick/90 text-white text-[1.25rem] leading-[1.75rem] transition-all flex items-center justify-center font-rubik font-medium;
+    @apply w-full md:w-[310px] h-10 rounded-[10px] bg-sunbird-brick hover:bg-sunbird-brick/90 text-white text-[1.1rem] md:text-[1.25rem] leading-[1.75rem] transition-all flex items-center justify-center font-rubik font-medium;
 }
 
 /* In Progress Grid */
