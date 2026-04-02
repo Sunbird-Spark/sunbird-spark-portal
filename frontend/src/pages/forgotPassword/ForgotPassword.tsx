@@ -52,7 +52,7 @@ const ForgotPassword: React.FC = () => {
   return (
     <AuthLayout onClose={() => {
       window.location.href = getSafeRedirectUrl();
-    }} isOtpPage={step === 3} hideClose={isMobileRedirect}>
+    }} hideClose={isMobileRedirect}>
       <TelemetryTracker 
         startEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
         endEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}

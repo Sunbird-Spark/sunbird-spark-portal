@@ -7,11 +7,10 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 interface AuthLayoutProps {
   children: React.ReactNode;
   onClose?: () => void;
-  isOtpPage?: boolean;
   hideClose?: boolean;
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, isOtpPage, hideClose }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, hideClose }) => {
   const navigate = useNavigate();
   const { t } = useAppI18n();
 

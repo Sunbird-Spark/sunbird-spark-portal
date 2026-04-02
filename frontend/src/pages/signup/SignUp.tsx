@@ -219,7 +219,7 @@ const SignUp: React.FC = () => {
     };
 
     return (
-        <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect} onClose={handleClose}>
+        <AuthLayout hideClose={isMobileRedirect} onClose={handleClose}>
             <TelemetryTracker 
                 startEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
                 endEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
