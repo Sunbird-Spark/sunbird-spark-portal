@@ -3,7 +3,26 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ImageUploadTab } from './ImageUploadTab';
 
-const LICENSE_STATEMENT = 'All resources uploaded shall be available for free and public use.';
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'imageUpload.dragDropText': 'Choose or drag and drop your image here',
+        'imageUpload.supportedFormats': 'PNG, JPG, SVG supported',
+        'imageUpload.copyrightsAndLicense': 'Copyrights and License',
+        'imageUpload.fileName': 'File name',
+        'imageUpload.fileNamePlaceholder': 'File name',
+        'imageUpload.creator': 'Creator',
+        'imageUpload.creatorLoading': 'Loading…',
+        'imageUpload.back': '← Back',
+        'imageUpload.cancel': 'Cancel',
+        'imageUpload.uploadAndUse': 'Upload & Use',
+        'imageUpload.licenseStatement': 'All resources uploaded shall be available for free and public use.',
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
 
 const defaultProps = {
   dragging: false,
@@ -19,7 +38,6 @@ const defaultProps = {
   handleCancel: vi.fn(),
   handleUploadAndUse: vi.fn(),
   uploadFile: null,
-  LICENSE_STATEMENT,
 };
 
 describe('ImageUploadTab', () => {
@@ -30,7 +48,7 @@ describe('ImageUploadTab', () => {
 
   it('renders license statement', () => {
     render(<ImageUploadTab {...defaultProps} />);
-    expect(screen.getByText(LICENSE_STATEMENT)).toBeInTheDocument();
+    expect(screen.getByText('All resources uploaded shall be available for free and public use.')).toBeInTheDocument();
   });
 
   it('renders file name input', () => {

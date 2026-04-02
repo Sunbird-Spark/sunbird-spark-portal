@@ -5,8 +5,6 @@ import { useMyImages, useAllImages } from "@/hooks/useCertificate";
 import { cn } from "@/lib/utils";
 import { ImageGallery } from "@/components/collection/ImageGallery";
 import { ImageUploadTab } from "@/components/collection/ImageUploadTab";
-import { userService } from "@/services/UserService";
-import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import { resolveUserAndOrg } from "@/utils/userUtils";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
@@ -29,8 +27,6 @@ const labelClass =
 const inputClass =
   "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
 
-const LICENSE_STATEMENT =
-  "I understand and confirm that all resources and assets created through the content editor or uploaded on the platform shall be available for free and public use without limitations on the platform (web portal, applications and any other end-user interface that the platform would enable) as per platform policy guidelines. In doing so, I confirm that the copyright and license of the original author are not infringed.";
 
 interface ImagePickerProps {
   label: string;
@@ -238,7 +234,6 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                   handleCancel={() => setOpen(false)}
                   handleUploadAndUse={handleUploadAndUse}
                   uploadFile={uploadFile}
-                  LICENSE_STATEMENT={LICENSE_STATEMENT}
                   labelClass={labelClass}
                   inputClass={inputClass}
                 />
