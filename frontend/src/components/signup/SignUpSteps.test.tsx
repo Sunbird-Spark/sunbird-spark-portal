@@ -150,7 +150,6 @@ describe('SignUpForm', () => {
     it('renders Step 1 correctly', () => {
         renderWithProviders(<SignUpForm {...defaultProps} />);
         expect(screen.getByText('Welcome to Sunbird!')).toBeInTheDocument();
-        expect(screen.getByText('Sign in with Google')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter First Name')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter Email ID / Mobile Number')).toBeInTheDocument();
     });
@@ -195,11 +194,11 @@ describe('SignUpForm', () => {
         renderWithProviders(<SignUpForm {...defaultProps} setShowPassword={setShowPassword} setShowConfirmPassword={setShowConfirmPassword} />);
 
         const eyeButtons = screen.getAllByRole('button');
-        // Index 0 is Google Sign In, indices 1 and 2 are eye buttons
-        if (eyeButtons[1]) fireEvent.click(eyeButtons[1]);
+        // Indices 0 and 1 are eye buttons (Google button removed)
+        if (eyeButtons[0]) fireEvent.click(eyeButtons[0]);
         expect(setShowPassword).toHaveBeenCalled();
 
-        if (eyeButtons[2]) fireEvent.click(eyeButtons[2]);
+        if (eyeButtons[1]) fireEvent.click(eyeButtons[1]);
         expect(setShowConfirmPassword).toHaveBeenCalled();
     });
 

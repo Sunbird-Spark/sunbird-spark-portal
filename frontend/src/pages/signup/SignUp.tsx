@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useToast } from "@/hooks/useToast";
@@ -10,7 +10,7 @@ import { useSignup } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
-import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
@@ -25,6 +25,13 @@ const SignUp: React.FC = () => {
 
     useImpression({ type: 'view', pageid: 'signup' });
     const telemetry = useTelemetry();
+
+    // Persist mobile context to sessionStorage on mount (only for mobile app)
+    useEffect(() => {
+        if (isMobileApp()) {
+            persistMobileContext();
+        }
+    }, []);
 
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [firstName, setFirstName] = useState('');
@@ -211,10 +218,14 @@ const SignUp: React.FC = () => {
         window.location.href = getSafeRedirectUrl();
     };
 
-    const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+    const isMobileRedirect = isMobileApp();
+
+    const handleClose = () => {
+        window.location.href = isMobileRedirect ? getSafeRedirectUrl() : '/portal/login?prompt=none';
+    };
 
     return (
-        <AuthLayout isOtpPage={step === 2} hideClose={isMobileRedirect}>
+        <AuthLayout hideClose={isMobileRedirect} onClose={handleClose}>
             <TelemetryTracker 
                 startEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}
                 endEventInput={{ type: 'workflow', mode: 'signup', pageid: 'signup-page' }}

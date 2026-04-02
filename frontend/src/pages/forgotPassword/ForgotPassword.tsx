@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useLearnerFuzzySearch, useResetPassword } from '@/hooks/useUser';
 import { useGenerateOtp, useVerifyOtp } from '@/hooks/useOtp';
@@ -7,7 +7,7 @@ import { IdentifyUser } from './IdentifyUser';
 import { SelectOTPDelivery } from './SelectOTPDelivery';
 import { VerifyOTP } from './VerifyOTP';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
-import { getSafeRedirectUrl } from '@/utils/forgotPasswordUtils';
+import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -20,6 +20,13 @@ const ForgotPassword: React.FC = () => {
   const telemetry = useTelemetry();
 
   useImpression({ type: 'view', pageid: 'forgot-password' });
+
+  // Persist mobile context to sessionStorage on mount (only for mobile app)
+  useEffect(() => {
+    if (isMobileApp()) {
+      persistMobileContext();
+    }
+  }, []);
 
   const [step, setStep] = useState<Step>(1);
   const [validIdentifiers, setValidIdentifiers] = useState<OtpIdentifier[]>([]);
@@ -44,12 +51,12 @@ const ForgotPassword: React.FC = () => {
     setStep(3);
   };
 
-  const isMobileRedirect = !!new URLSearchParams(window.location.search).get('redirect_uri');
+  const isMobileRedirect = isMobileApp();
 
   return (
     <AuthLayout onClose={() => {
       window.location.href = getSafeRedirectUrl();
-    }} isOtpPage={step === 3} hideClose={isMobileRedirect}>
+    }} hideClose={isMobileRedirect}>
       <TelemetryTracker 
         startEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
         endEventInput={{ type: 'workflow', mode: 'password-reset', pageid: 'forgot-password-page' }}
