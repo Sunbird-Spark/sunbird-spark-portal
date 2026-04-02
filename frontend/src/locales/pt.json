@@ -802,6 +802,19 @@
     "cancel": "Cancelar",
     "uploadNew": "Enviar novo"
   },
+  "imageUpload": {
+    "dragDropText": "Escolha ou arraste e solte sua imagem aqui",
+    "supportedFormats": "PNG, JPG, SVG suportados",
+    "copyrightsAndLicense": "Direitos autorais e licença",
+    "fileName": "Nome do arquivo",
+    "fileNamePlaceholder": "Nome do arquivo",
+    "creator": "Criador",
+    "creatorLoading": "Carregando…",
+    "back": "← Voltar",
+    "cancel": "Cancelar",
+    "uploadAndUse": "Enviar e usar",
+    "licenseStatement": "Entendo e confirmo que todos os recursos e ativos criados por meio do editor de conteúdo ou enviados para a plataforma estarão disponíveis para uso gratuito e público sem limitações na plataforma (portal web, aplicativos e qualquer outra interface de usuário final habilitada pela plataforma) de acordo com as diretrizes de política da plataforma. Ao fazer isso, confirmo que os direitos autorais e a licença do autor original não são infringidos."
+  },
   "certificate": {
     "attachedTemplate": "Modelo de certificado anexado",
     "editCertificate": "Editar certificado",

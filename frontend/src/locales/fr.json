@@ -802,6 +802,19 @@
     "cancel": "Annuler",
     "uploadNew": "Télécharger nouveau"
   },
+  "imageUpload": {
+    "dragDropText": "Choisissez ou faites glisser et déposez votre image ici",
+    "supportedFormats": "PNG, JPG, SVG supportés",
+    "copyrightsAndLicense": "Droits d'auteur et licence",
+    "fileName": "Nom du fichier",
+    "fileNamePlaceholder": "Nom du fichier",
+    "creator": "Créateur",
+    "creatorLoading": "Chargement…",
+    "back": "← Retour",
+    "cancel": "Annuler",
+    "uploadAndUse": "Télécharger et utiliser",
+    "licenseStatement": "Je comprends et confirme que toutes les ressources et actifs créés via l'éditeur de contenu ou téléchargés sur la plateforme seront disponibles pour un usage gratuit et public sans limitations sur la plateforme (portail web, applications et toute autre interface utilisateur finale activée par la plateforme) conformément aux directives de politique de la plateforme. Ce faisant, je confirme que les droits d'auteur et la licence de l'auteur original ne sont pas enfreints."
+  },
   "certificate": {
     "attachedTemplate": "Modèle de certificat attaché",
     "editCertificate": "Modifier le certificat",
