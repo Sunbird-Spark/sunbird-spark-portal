@@ -1279,10 +1279,10 @@
     "content": "أنواع المحتوى",
     "video": "فيديو",
     "audio": "صوت",
-    "pdf": "PDF",
-    "epub": "Epub",
+    "pdf": "بي دي إف",
+    "epub": "إي بوب",
     "youtube": "يوتيوب",
-    "html": "HTML",
+    "html": "إتش تي إم إل",
     "interactive": "تفاعلي"
   }
 }
