@@ -112,9 +112,9 @@ const WorkspaceToolbar = ({
 
       {/* Segmented Control Bar */}
       <div className="bg-white rounded-2xl shadow-sm border border-border p-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Main Segments */}
-          <div className="flex bg-gray-100 rounded-xl p-1 flex-1 max-w-xl min-w-0">
+          <div className="flex bg-gray-100 rounded-xl p-1 w-full md:w-auto md:max-w-xl min-w-0 overflow-x-auto scrollbar-hide">
             {segments.map((segment) => (
               <button
                 key={segment.id}
@@ -126,7 +126,7 @@ const WorkspaceToolbar = ({
                     : "text-foreground hover:text-sunbird-brick"
                 )}
               >
-                <span>{segment.label}</span>
+                <span>{t(segment.label)}</span>
                 {segment.count !== undefined && (
                   <Badge
                     variant="secondary"
@@ -145,7 +145,7 @@ const WorkspaceToolbar = ({
           </div>
 
           {/* Search + Secondary Actions + Filters */}
-          <div className="flex items-center gap-3 ml-4 min-w-0">
+          <div className="flex items-center gap-3 w-full md:w-auto min-w-0 flex-wrap md:flex-nowrap justify-between md:justify-end">
             <WorkspaceSearch query={searchQuery} onChange={onSearchChange} />
 
             {/* Secondary Dropdown */}
@@ -164,7 +164,7 @@ const WorkspaceToolbar = ({
                       onClick={() => onViewChange(action.id)}
                       className="font-rubik"
                     >
-                      {action.label}
+                      {t(action.label)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -179,7 +179,7 @@ const WorkspaceToolbar = ({
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" className="font-rubik rounded-xl flex-shrink-0">
-                        {typeFilter === 'all' ? t('allTypes') : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
+                        {t(`workspace.typeFilters.${typeFilter}`)}
                         <FiChevronDown className="w-4 h-4 ml-1" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -190,7 +190,7 @@ const WorkspaceToolbar = ({
                           onClick={() => onTypeFilterChange(type)}
                           className="font-rubik"
                         >
-                          {type === 'all' ? t('allTypes') : type.charAt(0).toUpperCase() + type.slice(1)}
+                          {t(`workspace.typeFilters.${type}`)}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>

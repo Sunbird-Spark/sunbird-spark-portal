@@ -33,7 +33,7 @@ const WorkspaceSearch = ({ query, onChange }: WorkspaceSearchProps) => {
   }
 
   return (
-    <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-3 h-9 transition-all border border-transparent min-w-0 w-56">
+    <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-3 h-9 transition-all border border-transparent min-w-0 flex-1 md:w-56">
       <FiSearch className="w-4 h-4 text-muted-foreground flex-shrink-0" />
       <input
         ref={inputRef} type="text" value={query}

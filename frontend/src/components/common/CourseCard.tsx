@@ -50,9 +50,9 @@ export const CourseCard = ({ course }: CourseCardProps) => {
                 <div className="px-[1.25rem] pt-[1.25rem] pb-5 flex flex-col flex-grow">
                     {/* Badge below image */}
                     <Badge
-                        className={`inline-flex items-center justify-center p-0 rounded-[2.25rem] mb-[1.25rem] ${course.type === 'Textbook' ? 'w-[5.875rem]' : 'w-[4.875rem]'} h-[1.875rem] ${getBadgeStyle()}`}
+                        className={`inline-flex items-center justify-center p-0 rounded-[2.25rem] mb-[1.25rem] min-w-[4.875rem] max-w-[10rem] h-[1.875rem] px-3 ${getBadgeStyle()}`}
                     >
-                        {t(`contentTypes.${course.type.toLowerCase()}`, { defaultValue: course.type })}
+                        <span className="truncate">{t(`contentTypes.${course.type.toLowerCase()}`, { defaultValue: course.type })}</span>
                     </Badge>
 
                     {/* Title */}

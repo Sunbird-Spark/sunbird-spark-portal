@@ -8,6 +8,13 @@ const HomeInProgressGrid = () => {
     const { t } = useAppI18n();
     const { data, isLoading } = useUserEnrolledCollections();
 
+    // Translate primaryCategory badge
+    const getCategoryLabel = (category: string | undefined) => {
+        if (!category) return t('contentTypes.course', { defaultValue: 'Course' });
+        const key = category.toLowerCase().replace(/\s+/g, '');
+        return t(`contentTypes.${key}`, { defaultValue: category });
+    };
+
     if (isLoading) {
         return (
             <section className="mb-8">
@@ -50,7 +57,7 @@ const HomeInProgressGrid = () => {
                             <div>
                                 <div className="flex-1 min-w-0">
                                     <span className="home-inprogress-badge">
-                                        {course.content?.primaryCategory || "Course"}
+                                        {getCategoryLabel(course.content?.primaryCategory)}
                                     </span>
                                     <h4 className="home-inprogress-card-title">
                                         {course.courseName || course.content?.name || "Untitled Course"}

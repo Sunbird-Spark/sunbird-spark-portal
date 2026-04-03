@@ -13,6 +13,13 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const { t } = useAppI18n();
   const lessons = item.leafNodesCount || 0;
   const creator = item.creator ?? item.createdBy ?? 'Unknown';
+  
+  // Translate primaryCategory badge
+  const getCategoryLabel = (category: string | undefined) => {
+    if (!category) return t('contentTypes.collection', { defaultValue: 'Collection' });
+    const key = category.toLowerCase().replace(/\s+/g, '');
+    return t(`contentTypes.${key}`, { defaultValue: category });
+  };
 
   return (
     <Link
@@ -39,9 +46,9 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
         <div className="related-resource-card-content-wrapper">
           {/* Badge below image */}
           <div
-            className={`related-resource-card-badge`}
+            className={`related-resource-card-badge truncate max-w-[10rem]`}
           >
-            {item.primaryCategory || 'Collection'}
+            {getCategoryLabel(item.primaryCategory)}
           </div>
 
           {/* Title */}

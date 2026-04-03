@@ -9,11 +9,12 @@ import DynamicContentSection from "@/components/landing/DynamicContentSection";
 import DynamicCategorySection from "@/components/landing/DynamicCategorySection";
 import DynamicResourceSection from "@/components/landing/DynamicResourceSection";
 import { FormSection } from "@/types/formTypes";
+import { resolveTitleText } from "@/utils/i18nUtils";
 import useImpression from "@/hooks/useImpression";
 import "./landing.css";
 
 const Index = () => {
-  const { t } = useAppI18n();
+  const { t, currentCode } = useAppI18n();
   useImpression({ type: 'view', pageid: 'landing', env: 'public' });
 
   const { data: formData, isLoading, error, refetch } = useFormRead({
@@ -31,28 +32,34 @@ const Index = () => {
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
 
   const renderSection = (section: FormSection) => {
+    const sectionTitle = resolveTitleText(section.title, currentCode);
     switch (section.type) {
       case 'content':
         return (
           <DynamicContentSection
             key={section.id}
-            title={section.title}
+            title={sectionTitle}
             criteria={section.criteria}
           />
         );
-      case 'categories':
+      case 'categories': {
+        const resolvedList = section.list?.map(item => ({
+          ...item,
+          title: resolveTitleText(item.title, currentCode),
+        }));
         return (
           <DynamicCategorySection
             key={section.id}
-            title={section.title}
-            list={section.list}
+            title={sectionTitle}
+            list={resolvedList}
           />
         );
+      }
       case 'resources':
         return (
           <DynamicResourceSection
             key={section.id}
-            title={section.title}
+            title={sectionTitle}
             sectionLabel="resource.header"
             criteria={section.criteria}
             useCustomHeights={true}
