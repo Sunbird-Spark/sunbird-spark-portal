@@ -42,19 +42,14 @@ const Index = () => {
             criteria={section.criteria}
           />
         );
-      case 'categories': {
-        const resolvedList = section.list?.map(item => ({
-          ...item,
-          title: resolveTitleText(item.title, currentCode),
-        }));
+      case 'categories':
         return (
           <DynamicCategorySection
             key={section.id}
             title={sectionTitle}
-            list={resolvedList}
+            list={section.list}
           />
         );
-      }
       case 'resources':
         return (
           <DynamicResourceSection

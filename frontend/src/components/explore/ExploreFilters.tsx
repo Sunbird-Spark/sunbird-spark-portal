@@ -28,19 +28,27 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
         },
     });
 
-    // Helper function to get label for current language
+    // Helper function to get label for current language with i18n support
     const getTranslatedLabel = React.useCallback((item: any): string => {
         const label = item?.label;
         
         // If label is an object with language codes
         if (typeof label === 'object' && label !== null && !Array.isArray(label)) {
-            // Return translation for current language, fallback to English, then first available
             return label[currentCode] || label['en'] || Object.values(label)[0] || '';
         }
         
-        // If label is a string, return it directly
-        return label || item?.name || '';
-    }, [currentCode]);
+        // If label is a string, try to translate it (handles i18n keys like "exploreFilters.collection")
+        if (typeof label === 'string' && label.length > 0) {
+            return t(label, { defaultValue: label });
+        }
+        
+        // Fallback to name field
+        if (typeof item?.name === 'string' && item.name.length > 0) {
+            return t(item.name, { defaultValue: item.name });
+        }
+        
+        return '';
+    }, [currentCode, t]);
 
     // Scenario 1: sort groups by index and apply translations
     const rawGroups = (formData?.data as any)?.form?.data?.filters;

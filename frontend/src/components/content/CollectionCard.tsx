@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ContentSearchItem } from "@/types/workspaceTypes";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
+import { getCategoryLabel } from "@/utils/i18nUtils";
 
 interface ContentCardProps {
   item: ContentSearchItem;
@@ -14,14 +15,8 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   const location = useLocation();
   const lessons = item.leafNodesCount || 0;
   const creator = item.creator ?? item.createdBy ?? 'Unknown';
+  const categoryLabel = getCategoryLabel(item.primaryCategory, t, 'Collection');
   
-  // Translate primaryCategory badge
-  const getCategoryLabel = (category: string | undefined) => {
-    if (!category) return t('contentTypes.collection', { defaultValue: 'Collection' });
-    const key = category.toLowerCase().replace(/\s+/g, '');
-    return t(`contentTypes.${key}`, { defaultValue: category });
-  };
-
   return (
     <Link
       to={`/collection/${item.identifier}`}
@@ -49,7 +44,7 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
           <div
             className={`related-resource-card-badge truncate max-w-[10rem]`}
           >
-            {getCategoryLabel(item.primaryCategory)}
+            {categoryLabel}
           </div>
 
           {/* Title */}

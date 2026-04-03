@@ -51,20 +51,15 @@ const HomeDiscoverSections = () => {
             innerClassName="home-discover-inner"
           />
         );
-      case "categories": {
-        const resolvedList = section.list?.map(item => ({
-          ...item,
-          title: resolveTitleText(item.title, currentCode),
-        }));
+      case "categories":
         return (
           <DynamicCategorySection
             key={section.id}
             title={sectionTitle}
-            list={resolvedList}
+            list={section.list}
             innerClassName="home-discover-inner"
           />
         );
-      }
       case "resources":
         return (
           <DynamicResourceSection
