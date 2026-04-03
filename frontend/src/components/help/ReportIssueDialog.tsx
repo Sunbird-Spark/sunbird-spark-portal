@@ -18,6 +18,8 @@ import { Textarea } from "@/components/common/TextArea";
 import { toast } from "@/hooks/useToast";
 import { FormService } from "@/services/FormService";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { resolveTitleText } from "@/utils/i18nUtils";
+import { useSystemSetting } from "@/hooks/useSystemSetting";
 
 interface ReportIssueDialogProps {
   open: boolean;
@@ -28,11 +30,14 @@ const formService = new FormService();
 
 interface Option {
   value: string;
-  label: string;
+  label: string | Record<string, string>;
 }
 
 const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
-  const { t } = useAppI18n();
+  const { t, currentCode } = useAppI18n();
+  const { data: appNameSetting } = useSystemSetting("sunbird");
+  const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || t("reportIssueDialog.thisApplication");
+  
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
   const [description, setDescription] = useState("");
@@ -135,7 +140,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
             <SelectContent className="bg-white z-[100]">
               {categoryOptions.map((cat) => (
                 <SelectItem key={cat.value} value={cat.value} className="font-rubik font-normal text-[1rem] leading-[1.25rem] focus:bg-sunbird-ginger focus:text-white">
-                  {cat.label}
+                  {resolveTitleText(cat.label, currentCode)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -149,7 +154,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
               <SelectContent className="bg-white z-[100]">
                 {currentSubcategoryOptions.map((sub) => (
                   <SelectItem key={sub.value} value={sub.value} className="font-rubik font-normal text-[1rem] leading-[1.25rem] focus:bg-sunbird-ginger focus:text-white">
-                    {sub.label}
+                    {resolveTitleText(sub.label, currentCode)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -169,7 +174,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
           <div className="absolute top-[2.25rem] left-[4.125rem] right-[4.125rem] flex items-start gap-3 bg-sunbird-success-message-bg border-l-4 border-sunbird-success-message rounded-[0.625rem] px-4 py-3 z-10">
             <span className="text-sunbird-success-message text-lg mt-0.5">✓</span>
             <p className="font-rubik text-[0.875rem] leading-[1.4] text-foreground">
-              {t("reportIssueDialog.feedbackSuccess", { appName: (import.meta as any).env?.VITE_APP_NAME || "this application" })}
+              {t("reportIssueDialog.feedbackSuccess", { appName })}
             </p>
           </div>
         )}

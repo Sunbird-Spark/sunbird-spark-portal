@@ -3,6 +3,7 @@ import { useUserEnrolledCollections } from "../../hooks/useUserEnrolledCollectio
 import type { TrackableCollection } from "../../types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { getPlaceholderImage } from '@/utils/getPlaceholderImage';
+import { getCategoryLabel } from '@/utils/i18nUtils';
 
 const HomeInProgressGrid = () => {
     const { t } = useAppI18n();
@@ -50,7 +51,7 @@ const HomeInProgressGrid = () => {
                             <div>
                                 <div className="flex-1 min-w-0">
                                     <span className="home-inprogress-badge">
-                                        {course.content?.primaryCategory || "Course"}
+                                        {getCategoryLabel(course.content?.primaryCategory, t, 'Course')}
                                     </span>
                                     <h4 className="home-inprogress-card-title">
                                         {course.courseName || course.content?.name || "Untitled Course"}

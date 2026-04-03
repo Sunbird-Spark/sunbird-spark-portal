@@ -172,7 +172,7 @@
 }
 
 .home-inprogress-badge {
-    @apply inline-block mb-3 text-[0.625rem] px-3 py-1 rounded-full bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian;
+    @apply inline-block mb-3 text-[0.625rem] px-3 py-1 rounded-full bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian max-w-[10rem] truncate;
 }
 
 .home-inprogress-card-title {

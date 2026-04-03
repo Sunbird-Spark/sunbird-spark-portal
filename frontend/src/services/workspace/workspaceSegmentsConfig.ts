@@ -8,28 +8,28 @@ import type {
 
 export function getCreatorSegments(counts: WorkspaceSidebarCounts): WorkspaceSegment[] {
   return [
-    { id: 'all', label: 'All', count: counts.all },
-    { id: 'drafts', label: 'Drafts', count: counts.drafts },
-    { id: 'review', label: 'Review', count: counts.review },
-    { id: 'published', label: 'Published', count: counts.published },
+    { id: 'all', label: 'workspace.segments.all', count: counts.all },
+    { id: 'drafts', label: 'workspace.segments.drafts', count: counts.drafts },
+    { id: 'review', label: 'workspace.segments.review', count: counts.review },
+    { id: 'published', label: 'workspace.segments.published', count: counts.published },
   ];
 }
 
 export function getReviewerSegments(counts: WorkspaceSidebarCounts): WorkspaceSegment[] {
   return [
-    { id: 'pending-review', label: 'Pending', count: counts.pendingReview ?? 0 },
-    { id: 'my-published', label: 'Published', count: counts.published },
+    { id: 'pending-review', label: 'workspace.segments.pending', count: counts.pendingReview ?? 0 },
+    { id: 'my-published', label: 'workspace.segments.published', count: counts.published },
   ];
 }
 
 export function getSecondaryActions(userRole: UserRole, isBookCreatorOnly = false): WorkspaceSecondaryAction[] {
   if (userRole !== 'creator') return [];
   if (isBookCreatorOnly) {
-    return [{ id: 'collaborations', label: 'Collaborations' }];
+    return [{ id: 'collaborations', label: 'workspace.secondaryActions.collaborations' }];
   }
   return [
-    { id: 'uploads', label: 'Uploads' },
-    { id: 'collaborations', label: 'Collaborations' },
+    { id: 'uploads', label: 'workspace.secondaryActions.uploads' },
+    { id: 'collaborations', label: 'workspace.secondaryActions.collaborations' },
   ];
 }
 

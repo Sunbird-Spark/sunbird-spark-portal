@@ -25,7 +25,7 @@ export interface FormReadResponse {
 export interface FormSection {
   id: string;
   index: number;
-  title: string;
+  title: string | Record<string, string>;
   type: 'content' | 'categories' | 'resources';
   criteria?: {
     request: ContentSearchRequest;
@@ -36,7 +36,7 @@ export interface FormSection {
 export interface CategoryItem {
   id: string;
   index: number;
-  title: string;
+  title: string | Record<string, string>;
   code: string;
   value: string;
 }
@@ -60,7 +60,7 @@ export interface UseFormReadOptions {
 export interface ExploreFilterOption {
   id: string;
   index: number;
-  label: string;
+  label: string | Record<string, string>; // Can be a string or object with language codes
   code: string;
   value: string | string[];
 }
@@ -68,7 +68,7 @@ export interface ExploreFilterOption {
 export interface ExploreFilterGroup {
   id: string;
   index: number;
-  label: string;
+  label: string | Record<string, string>; // Can be a string or object with language codes
   options?: ExploreFilterOption[];
   list?: ExploreFilterOption[];
 }
@@ -76,13 +76,13 @@ export interface ExploreFilterGroup {
 export interface OnboardingField {
   id: string;
   index: number;
-  label: string;
+  label: string | Record<string, string>;
   nextScreenId?: string;
   requiresTextInput?: boolean;
 }
 
 export interface OnboardingScreen {
-  title: string;
+  title: string | Record<string, string>;
   selectionType: "single" | "multiple";
   nextScreenId?: string;
   fields: OnboardingField[];

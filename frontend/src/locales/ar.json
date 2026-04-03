@@ -63,14 +63,23 @@
   "contentTypes": {
     "video": "فيديو",
     "audio": "صوت",
-    "pdf": "PDF",
-    "epub": "Epub",
+    "pdf": "بي دي إف",
+    "epub": "إي بَب",
     "youtube": "يوتيوب",
-    "html": "HTML",
+    "html": "إتش تي إم إل",
     "interactive": "تفاعلي",
     "course": "دورة",
     "textbook": "كتاب مدرسي",
-    "skills": "مهارات"
+    "skills": "مهارات",
+    "collection": "مجموعة",
+    "resource": "مورد",
+    "contentplaylist": "قائمة تشغيل المحتوى",
+    "digitaltextbook": "كتاب مدرسي رقمي",
+    "questionpaper": "ورقة الأسئلة",
+    "ecml": "إي سي إم إل",
+    "h5p": "إتش فايف بي",
+    "practicequestionset": "مجموعة أسئلة تدريبية",
+    "questionset": "مجموعة أسئلة"
   },
   "categoriesList": {
     "ai-ml": "الذكاء الاصطناعي / تعلم الآلة",
@@ -297,11 +306,11 @@
     "readTextbook": "اعرض الكتاب المدرسي",
     "seeCaseStudy": "انظر دراسة الحالة",
     "videoBadge": "فيديو",
-    "epubBadge": "EPUB",
-    "htmlBadge": "HTML",
-    "pdfBadge": "PDF",
-    "ecmlBadge": "ECML",
-    "h5pBadge": "H5P"
+    "epubBadge": "إي بَب",
+    "htmlBadge": "إتش تي إم إل",
+    "pdfBadge": "بي دي إف",
+    "ecmlBadge": "إي سي إم إل",
+    "h5pBadge": "إتش فايف بي"
   },
   "trending": {
     "mostViewed": "المحتوى الأكثر مشاهدة",
@@ -495,6 +504,24 @@
     "startingEditor": "بدء المحرر",
     "launchingEditor": "تشغيل محرر {{name}}...",
     "enterContentName": "أدخل اسم المحتوى",
+    "typeFilters": {
+      "all": "جميع الأنواع",
+      "course": "دورة",
+      "content": "محتوى",
+      "quiz": "اختبار",
+      "collection": "مجموعة"
+    },
+    "segments": {
+      "all": "الكل",
+      "drafts": "مسودات",
+      "review": "مراجعة",
+      "published": "منشور",
+      "pending": "معلق"
+    },
+    "secondaryActions": {
+      "uploads": "التحميلات",
+      "collaborations": "التعاونات"
+    },
     "editorOptions": {
       "quiz": "اختبار وتقييم",
       "story": "قصة ولعبة",
@@ -604,7 +631,8 @@
     "feedbackSuccess": "شكراً على ملاحظاتك. قد لا نستطيع الرد على كل اقتراح، لكن ملاحظاتك تساعد في تحسين {{appName}} للجميع.",
     "submitFeedback": "إرسال الملاحظات",
     "loadError": "فشل تحميل خيارات الإبلاغ عن المشكلة",
-    "description": "أبلغ عن مشكلة عن طريق تحديد فئة ووصف المشكلة"
+    "description": "أبلغ عن مشكلة عن طريق تحديد فئة ووصف المشكلة",
+    "thisApplication": "هذا التطبيق"
   },
   "confirmDialog": {
     "pleaseWait": "يرجى الانتظار..."
@@ -1236,6 +1264,26 @@
     "exportCsv": "تصدير CSV",
     "noDataToExport": "لا توجد بيانات للتصدير",
     "csvExportedSuccessfully": "تم تصدير CSV بنجاح"
+  },
+  "exploreFilters": {
+    "collection": "المجموعات",
+    "course": "الدورات",
+    "content_playlist": "قائمة المحتوى",
+    "digital_textbook": "كتاب رقمي",
+    "categories": "الفئات",
+    "usf_industry_it": "تكنولوجيا المعلومات",
+    "usf_industry_dsai": "علم البيانات والذكاء الاصطناعي",
+    "usf_industry_bm": "الأعمال والإدارة",
+    "usf_industry_fa": "المالية والمحاسبة",
+    "usf_industry_edu": "التعليم",
+    "content": "أنواع المحتوى",
+    "video": "فيديو",
+    "audio": "صوت",
+    "pdf": "بي دي إف",
+    "epub": "إي بوب",
+    "youtube": "يوتيوب",
+    "html": "إتش تي إم إل",
+    "interactive": "تفاعلي"
   }
 }
 
