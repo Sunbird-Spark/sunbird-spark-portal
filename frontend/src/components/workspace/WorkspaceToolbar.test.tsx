@@ -25,6 +25,18 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'course': 'Course',
         'workspace.showingItems': `Showing ${data?.count} items`,
         'workspace.showingItemsOf': `Showing ${data?.count} items of ${data?.total}`,
+        'workspace.segments.all': 'All',
+        'workspace.segments.drafts': 'Drafts',
+        'workspace.segments.review': 'Review',
+        'workspace.segments.published': 'Published',
+        'workspace.segments.pending': 'Pending',
+        'workspace.secondaryActions.uploads': 'Uploads',
+        'workspace.secondaryActions.collaborations': 'Collaborations',
+        'workspace.typeFilters.all': 'All Types',
+        'workspace.typeFilters.course': 'Course',
+        'workspace.typeFilters.content': 'Content',
+        'workspace.typeFilters.quiz': 'Quiz',
+        'workspace.typeFilters.collection': 'Collection',
       };
       return translations[key] || key;
     },

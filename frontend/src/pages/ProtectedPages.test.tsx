@@ -67,11 +67,35 @@ vi.mock('@/hooks/useSidebarState', () => ({
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => key,
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'workspace.segments.all': 'All',
+        'workspace.segments.drafts': 'Drafts',
+        'workspace.segments.review': 'Review',
+        'workspace.segments.published': 'Published',
+        'workspace.segments.pending': 'Pending',
+        'reports.title': 'reports.title',
+        'reports.accessInfo': 'reports.accessInfo',
+        'createContent': 'createContent',
+        'content.accessRestricted': 'content.accessRestricted',
+      };
+      return translations[key] || key;
+    },
     languages: [],
     currentCode: 'en',
     changeLanguage: vi.fn(),
   }),
+}));
+
+vi.mock('@/hooks/useTelemetry', () => ({
+  useTelemetry: () => ({
+    trackEvent: vi.fn(),
+    impression: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useImpression', () => ({
+  default: () => null,
 }));
 
 vi.mock('@/hooks/useWorkspace', () => ({

@@ -17,6 +17,7 @@ import {
 } from "@/services/workspace";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import CardThumbnailBackground from "./CardThumbnailBackground";
+import { getCategoryLabel } from "@/utils/i18nUtils";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
@@ -59,6 +60,7 @@ const WorkspaceContentList = ({
           const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
           const isLocked = !!lockInfo;
           const hasActions = showView || canEdit || showDelete;
+          const categoryLabel = getCategoryLabel(item.primaryCategory, t, item.type);
 
           return (
             <div
@@ -79,17 +81,17 @@ const WorkspaceContentList = ({
                     {item.title}
                   </h4>
                   <p className="text-xs text-muted-foreground font-rubik truncate sm:hidden">
-                    {item.primaryCategory || item.type}
+                    {categoryLabel}
                   </p>
                 </div>
               </div>
 
               {/* Type */}
               <div className="col-span-2 hidden sm:flex items-center gap-2">
-                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", CONTENT_TYPE_COLORS[item.type])}>
+                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", CONTENT_TYPE_COLORS[item.type])}>
                   <TypeIcon className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-sm text-foreground font-rubik">{item.primaryCategory || item.type}</span>
+                <span className="text-sm text-foreground font-rubik truncate">{categoryLabel}</span>
               </div>
 
               {/* Status */}

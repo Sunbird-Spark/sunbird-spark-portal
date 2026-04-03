@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent } from "react";
+import React, { BaseSyntheticEvent, useMemo } from "react";
 import { Checkbox } from "../common/CheckBox";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import type { FilterState } from "../../pages/Explore";
@@ -17,7 +17,7 @@ interface ExploreFiltersProps {
 }
 
 const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
-    const { t } = useAppI18n();
+    const { t, currentCode } = useAppI18n();
 
     const { data: formData, isLoading, isError } = useFormRead({
         request: {
@@ -28,15 +28,49 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
         },
     });
 
-    // Scenario 1: sort groups by index (spread to avoid mutating original)
+    // Helper function to get label for current language with i18n support
+    const getTranslatedLabel = React.useCallback((item: any): string => {
+        const label = item?.label;
+        
+        // If label is an object with language codes
+        if (typeof label === 'object' && label !== null && !Array.isArray(label)) {
+            return label[currentCode] || label['en'] || Object.values(label)[0] || '';
+        }
+        
+        // If label is a string, try to translate it (handles i18n keys like "exploreFilters.collection")
+        if (typeof label === 'string' && label.length > 0) {
+            return t(label, { defaultValue: label });
+        }
+        
+        // Fallback to name field
+        if (typeof item?.name === 'string' && item.name.length > 0) {
+            return t(item.name, { defaultValue: item.name });
+        }
+        
+        return '';
+    }, [currentCode, t]);
+
+    // Scenario 1: sort groups by index and apply translations
     const rawGroups = (formData?.data as any)?.form?.data?.filters;
-    const filterGroups: ExploreFilterGroup[] = Array.isArray(rawGroups)
-        ? [...rawGroups].sort((a, b) => a.index - b.index)
-        : [];
+    const filterGroups = useMemo(() => {
+        if (!Array.isArray(rawGroups)) return [];
+        
+        return [...rawGroups]
+            .sort((a, b) => a.index - b.index)
+            .map(group => ({
+                ...group,
+                label: getTranslatedLabel(group) as string
+            }));
+    }, [rawGroups, getTranslatedLabel]);
 
     // Scenario 2: option value may be a string or string[] — normalise to string[]
-    const getItems = (group: ExploreFilterGroup): ExploreFilterOption[] =>
-        [...(group.options ?? group.list ?? [])].sort((a, b) => a.index - b.index);
+    const getItems = React.useCallback((group: any) =>
+        [...(group.options ?? group.list ?? [])]
+            .sort((a: any, b: any) => a.index - b.index)
+            .map((option: any) => ({
+                ...option,
+                label: getTranslatedLabel(option) as string
+            })), [getTranslatedLabel]);
 
     const getValues = (option: ExploreFilterOption): string[] =>
         Array.isArray(option.value)

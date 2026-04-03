@@ -695,8 +695,11 @@
   }
 
   .resource-card-badge {
-    @apply flex items-center justify-center bg-white text-black font-medium text-[1rem] px-3 w-[4.875rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide;
+    @apply flex items-center justify-center bg-white text-black font-medium text-[1rem] px-3 min-w-[4.875rem] max-w-[10rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .resource-card-content {

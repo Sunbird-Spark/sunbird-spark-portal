@@ -70,7 +70,16 @@
     "interactive": "Interactif",
     "course": "Cours",
     "textbook": "Manuel",
-    "skills": "Compétences"
+    "skills": "Compétences",
+    "collection": "Collection",
+    "resource": "Ressource",
+    "contentplaylist": "Liste de lecture de contenu",
+    "digitaltextbook": "Manuel numérique",
+    "questionpaper": "Sujet d'examen",
+    "ecml": "ECML",
+    "h5p": "H5P",
+    "practicequestionset": "Ensemble de questions pratiques",
+    "questionset": "Ensemble de questions"
   },
   "categoriesList": {
     "ai-ml": "IA/ML",
@@ -495,6 +504,24 @@
     "startingEditor": "Démarrage de l'éditeur",
     "launchingEditor": "Lancement de l'éditeur {{name}}...",
     "enterContentName": "Saisir le nom du contenu",
+    "typeFilters": {
+      "all": "Tous les Types",
+      "course": "Cours",
+      "content": "Contenu",
+      "quiz": "Quiz",
+      "collection": "Collection"
+    },
+    "segments": {
+      "all": "Tous",
+      "drafts": "Brouillons",
+      "review": "Révision",
+      "published": "Publié",
+      "pending": "En attente"
+    },
+    "secondaryActions": {
+      "uploads": "Téléchargements",
+      "collaborations": "Collaborations"
+    },
     "editorOptions": {
       "quiz": "Quiz et évaluation",
       "story": "Histoire et jeu",
@@ -604,7 +631,8 @@
     "feedbackSuccess": "Merci pour votre retour. Nous ne pouvons pas répondre à chaque suggestion, mais votre avis aide à améliorer {{appName}} pour tout le monde.",
     "submitFeedback": "Soumettre un avis",
     "loadError": "Impossible de charger les options de signalement",
-    "description": "Signalez un problème en sélectionnant une catégorie et en décrivant le problème"
+    "description": "Signalez un problème en sélectionnant une catégorie et en décrivant le problème",
+    "thisApplication": "cette application"
   },
   "confirmDialog": {
     "pleaseWait": "Veuillez patienter..."
@@ -1235,6 +1263,26 @@
     "exportCsv": "Exporter CSV",
     "noDataToExport": "Aucune donnée à exporter",
     "csvExportedSuccessfully": "CSV exporté avec succès"
+  },
+  "exploreFilters": {
+    "collection": "Collections",
+    "course": "Cours",
+    "content_playlist": "Liste de Contenu",
+    "digital_textbook": "Manuel Numérique",
+    "categories": "Catégories",
+    "usf_industry_it": "Technologie de l'Information",
+    "usf_industry_dsai": "Science des Données et IA",
+    "usf_industry_bm": "Affaires et Gestion",
+    "usf_industry_fa": "Finance et Comptabilité",
+    "usf_industry_edu": "Éducation",
+    "content": "Types de Contenu",
+    "video": "Vidéo",
+    "audio": "Audio",
+    "pdf": "PDF",
+    "epub": "Epub",
+    "youtube": "YouTube",
+    "html": "HTML",
+    "interactive": "Interactif"
   }
 }
 

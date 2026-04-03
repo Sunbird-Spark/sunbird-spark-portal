@@ -70,7 +70,16 @@
     "interactive": "Interactive",
     "course": "Course",
     "textbook": "Textbook",
-    "skills": "Skills"
+    "skills": "Skills",
+    "collection": "Collection",
+    "resource": "Resource",
+    "contentplaylist": "Content Playlist",
+    "digitaltextbook": "Digital Textbook",
+    "questionpaper": "Question Paper",
+    "ecml": "ECML",
+    "h5p": "H5P",
+    "practicequestionset": "Practice Question Set",
+    "questionset": "Question Set"
   },
   "categoriesList": {
     "ai-ml": "AI/ML",
@@ -495,6 +504,24 @@
     "startingEditor": "Starting Editor",
     "launchingEditor": "Launching {{name}} editor...",
     "enterContentName": "Enter content name",
+    "typeFilters": {
+      "all": "All Types",
+      "course": "Course",
+      "content": "Content",
+      "quiz": "Quiz",
+      "collection": "Collection"
+    },
+    "segments": {
+      "all": "All",
+      "drafts": "Drafts",
+      "review": "Review",
+      "published": "Published",
+      "pending": "Pending"
+    },
+    "secondaryActions": {
+      "uploads": "Uploads",
+      "collaborations": "Collaborations"
+    },
     "editorOptions": {
       "quiz": "Quiz & Assessment",
       "story": "Story & Game",
@@ -604,7 +631,8 @@
     "feedbackSuccess": "Thanks for your feedback. We may not be able to respond to every suggestion, but your feedback helps make {{appName}} better for everyone.",
     "submitFeedback": "Submit Feedback",
     "loadError": "Failed to load report issue options",
-    "description": "Report an issue by selecting a category and describing the problem"
+    "description": "Report an issue by selecting a category and describing the problem",
+    "thisApplication": "this application"
   },
   "confirmDialog": {
     "pleaseWait": "Please wait..."
@@ -1237,6 +1265,26 @@
     "exportCsv": "Export CSV",
     "noDataToExport": "No data to export",
     "csvExportedSuccessfully": "CSV exported successfully"
+  },
+  "exploreFilters": {
+    "collection": "Collections",
+    "course": "Courses",
+    "content_playlist": "Content Playlist",
+    "digital_textbook": "Digital Textbook",
+    "categories": "Categories",
+    "usf_industry_it": "Information Technology",
+    "usf_industry_dsai": "Data Science and AI",
+    "usf_industry_bm": "Business and Management",
+    "usf_industry_fa": "Finance and Accounting",
+    "usf_industry_edu": "Education",
+    "content": "Content Types",
+    "video": "Video",
+    "audio": "Audio",
+    "pdf": "PDF",
+    "epub": "Epub",
+    "youtube": "YouTube",
+    "html": "HTML",
+    "interactive": "Interactive"
   }
 }
 

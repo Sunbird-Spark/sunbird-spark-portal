@@ -70,7 +70,16 @@
     "interactive": "Interativo",
     "course": "Curso",
     "textbook": "Livro Didático",
-    "skills": "Habilidades"
+    "skills": "Habilidades",
+    "collection": "Coleção",
+    "resource": "Recurso",
+    "contentplaylist": "Lista de reprodução de conteúdo",
+    "digitaltextbook": "Livro didático digital",
+    "questionpaper": "Prova de questões",
+    "ecml": "ECML",
+    "h5p": "H5P",
+    "practicequestionset": "Conjunto de questões práticas",
+    "questionset": "Conjunto de questões"
   },
   "categoriesList": {
     "ai-ml": "IA/ML",
@@ -495,6 +504,24 @@
     "startingEditor": "Iniciando editor",
     "launchingEditor": "Abrindo editor {{name}}...",
     "enterContentName": "Inserir nome do conteúdo",
+    "typeFilters": {
+      "all": "Todos os Tipos",
+      "course": "Curso",
+      "content": "Conteúdo",
+      "quiz": "Quiz",
+      "collection": "Coleção"
+    },
+    "segments": {
+      "all": "Todos",
+      "drafts": "Rascunhos",
+      "review": "Revisão",
+      "published": "Publicado",
+      "pending": "Pendente"
+    },
+    "secondaryActions": {
+      "uploads": "Uploads",
+      "collaborations": "Colaborações"
+    },
     "editorOptions": {
       "quiz": "Quiz e avaliação",
       "story": "História e jogo",
@@ -604,7 +631,8 @@
     "feedbackSuccess": "Obrigado pelo seu feedback. Talvez não possamos responder a cada sugestão, mas seu feedback ajuda a melhorar o {{appName}} para todos.",
     "submitFeedback": "Enviar feedback",
     "loadError": "Falha ao carregar opções de relato de problema",
-    "description": "Relate um problema selecionando uma categoria e descrevendo o problema"
+    "description": "Relate um problema selecionando uma categoria e descrevendo o problema",
+    "thisApplication": "esta aplicação"
   },
   "confirmDialog": {
     "pleaseWait": "Aguarde..."
@@ -1235,6 +1263,26 @@
     "exportCsv": "Exportar CSV",
     "noDataToExport": "Nenhum dado para exportar",
     "csvExportedSuccessfully": "CSV exportado com sucesso"
+  },
+  "exploreFilters": {
+    "collection": "Coleções",
+    "course": "Cursos",
+    "content_playlist": "Lista de Conteúdo",
+    "digital_textbook": "Livro Didático Digital",
+    "categories": "Categorias",
+    "usf_industry_it": "Tecnologia da Informação",
+    "usf_industry_dsai": "Ciência de Dados e IA",
+    "usf_industry_bm": "Negócios e Gestão",
+    "usf_industry_fa": "Finanças e Contabilidade",
+    "usf_industry_edu": "Educação",
+    "content": "Tipos de Conteúdo",
+    "video": "Vídeo",
+    "audio": "Áudio",
+    "pdf": "PDF",
+    "epub": "Epub",
+    "youtube": "YouTube",
+    "html": "HTML",
+    "interactive": "Interativo"
   }
 }
 

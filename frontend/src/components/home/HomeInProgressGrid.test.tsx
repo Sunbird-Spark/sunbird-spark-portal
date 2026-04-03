@@ -5,13 +5,13 @@ import HomeInProgressGrid from './HomeInProgressGrid';
 
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
-        t: (key: string) => {
+        t: (key: string, options?: any) => {
             const translations: Record<string, string> = {
                 'homeComponents.inProgress': 'In Progress',
                 'loading': 'Loading...',
                 'homeComponents.noCoursesInProgress': 'No courses in progress',
             };
-            return translations[key] || key;
+            return translations[key] || (options?.defaultValue || key);
         },
     }),
 }));
