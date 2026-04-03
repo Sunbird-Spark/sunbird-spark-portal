@@ -44,24 +44,24 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
 
     // Scenario 1: sort groups by index and apply translations
     const rawGroups = (formData?.data as any)?.form?.data?.filters;
-    const filterGroups: ExploreFilterGroup[] = useMemo(() => {
+    const filterGroups = useMemo(() => {
         if (!Array.isArray(rawGroups)) return [];
         
         return [...rawGroups]
             .sort((a, b) => a.index - b.index)
             .map(group => ({
                 ...group,
-                label: getTranslatedLabel(group)
+                label: getTranslatedLabel(group) as string
             }));
     }, [rawGroups, getTranslatedLabel]);
 
     // Scenario 2: option value may be a string or string[] — normalise to string[]
-    const getItems = React.useCallback((group: ExploreFilterGroup): ExploreFilterOption[] =>
+    const getItems = React.useCallback((group: any) =>
         [...(group.options ?? group.list ?? [])]
-            .sort((a, b) => a.index - b.index)
-            .map(option => ({
+            .sort((a: any, b: any) => a.index - b.index)
+            .map((option: any) => ({
                 ...option,
-                label: getTranslatedLabel(option)
+                label: getTranslatedLabel(option) as string
             })), [getTranslatedLabel]);
 
     const getValues = (option: ExploreFilterOption): string[] =>

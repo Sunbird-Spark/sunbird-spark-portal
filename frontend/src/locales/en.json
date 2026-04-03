@@ -631,7 +631,8 @@
     "feedbackSuccess": "Thanks for your feedback. We may not be able to respond to every suggestion, but your feedback helps make {{appName}} better for everyone.",
     "submitFeedback": "Submit Feedback",
     "loadError": "Failed to load report issue options",
-    "description": "Report an issue by selecting a category and describing the problem"
+    "description": "Report an issue by selecting a category and describing the problem",
+    "thisApplication": "this application"
   },
   "confirmDialog": {
     "pleaseWait": "Please wait..."
