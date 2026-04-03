@@ -11,6 +11,7 @@ export interface BuildContentAreaArgs {
   isEnrolledInCurrentBatch: boolean;
   contentBlocked: boolean;
   upcomingBatchBlocked: boolean;
+  isBatchEnded?: boolean;
   batchStartDateForOverview: string | undefined;
   playerMetadata: unknown;
   playerIsLoading: boolean;
@@ -62,6 +63,7 @@ export function buildCollectionDetailContentArea(
       isEnrolledInCurrentBatch: args.isEnrolledInCurrentBatch,
       contentBlocked: args.contentBlocked,
       upcomingBatchBlocked: args.upcomingBatchBlocked,
+      isBatchEnded: args.isBatchEnded,
       batchStartDateForOverview: args.batchStartDateForOverview,
     },
     player: {

@@ -10,6 +10,7 @@ const mockRefetchEnrollments = vi.fn();
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ state: null, pathname: '/collection/col_1', search: '' }),
 }));
 
 vi.mock('@tanstack/react-query', () => ({

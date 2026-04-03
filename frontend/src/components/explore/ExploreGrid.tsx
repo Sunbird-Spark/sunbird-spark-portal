@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import { FilterState } from "../../pages/Explore";
 import { useContentSearch } from "../../hooks/useContent";
@@ -21,6 +22,11 @@ interface ExploreGridProps {
 
 const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
     const { t } = useAppI18n();
+    const location = useLocation();
+    const linkState = useMemo(
+        () => ({ from: location.pathname + location.search }),
+        [location.pathname, location.search]
+    );
     const [displayItems, setDisplayItems] = useState<ContentSearchItem[]>([]);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
@@ -159,9 +165,9 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-fr">
                 {displayItems.map((item) => {
                     return item.mimeType === COLLECTION_MIME_TYPE ? (
-                        <CollectionCard key={item.identifier} item={item} />
+                        <CollectionCard key={item.identifier} item={item} linkState={linkState} />
                     ) : (
-                        <ResourceCard key={item.identifier} item={item} />
+                        <ResourceCard key={item.identifier} item={item} linkState={linkState} />
                     );
                 })}
                 

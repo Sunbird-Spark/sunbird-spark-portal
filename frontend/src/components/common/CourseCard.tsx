@@ -1,6 +1,6 @@
 import { FiUser } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 export interface ContentCourse {
@@ -19,6 +19,7 @@ interface CourseCardProps {
 
 export const CourseCard = ({ course }: CourseCardProps) => {
     const { t } = useAppI18n();
+    const location = useLocation();
 
     const getBadgeStyle = () => {
         return "bg-sunbird-beige-light text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-sunbird-status-ongoing-border border-[0.0625rem]";
@@ -27,6 +28,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     return (
         <Link
           to={`/collection/${course.id}`}
+          state={{ from: location.pathname + location.search }}
           className="flex justify-center"
           data-edataid="course-card-click"
           data-objectid={course.id}

@@ -8,6 +8,7 @@ export interface CollectionContentAreaAccessProps {
   isEnrolledInCurrentBatch: boolean;
   contentBlocked: boolean;
   upcomingBatchBlocked: boolean;
+  isBatchEnded?: boolean;
   batchStartDateForOverview?: string;
 }
 

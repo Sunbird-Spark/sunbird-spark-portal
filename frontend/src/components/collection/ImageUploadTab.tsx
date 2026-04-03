@@ -1,6 +1,7 @@
 import React from "react";
 import { FiUpload } from "react-icons/fi";
 import { cn } from "@/lib/utils";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface ImageUploadTabProps {
   dragging: boolean;
@@ -16,7 +17,6 @@ interface ImageUploadTabProps {
   handleCancel: () => void;
   handleUploadAndUse: () => void;
   uploadFile: File | null;
-  LICENSE_STATEMENT: string;
   labelClass?: string;
   inputClass?: string;
 }
@@ -35,10 +35,10 @@ export function ImageUploadTab({
   handleCancel,
   handleUploadAndUse,
   uploadFile,
-  LICENSE_STATEMENT,
   labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik",
   inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
 }: ImageUploadTabProps) {
+  const { t } = useAppI18n();
   return (
     <div className="p-5 space-y-4">
       {/* Drag & drop zone */}
@@ -67,10 +67,10 @@ export function ImageUploadTab({
           <>
             <FiUpload className="w-6 h-6 text-muted-foreground" />
             <p className="text-sm text-muted-foreground font-rubik text-center">
-              Choose or drag and drop your image here
+              {t('imageUpload.dragDropText')}
             </p>
             <p className="text-xs text-muted-foreground font-rubik">
-              PNG, JPG, SVG supported
+              {t('imageUpload.supportedFormats')}
             </p>
           </>
         )}
@@ -86,11 +86,11 @@ export function ImageUploadTab({
       {/* Copyrights and License */}
       <div>
         <label className={labelClass}>
-          Copyrights and License <span className="text-red-500">*</span>
+          {t('imageUpload.copyrightsAndLicense')} <span className="text-red-500">*</span>
         </label>
         <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
           <p className="text-xs text-amber-800 font-rubik leading-relaxed">
-            {LICENSE_STATEMENT}
+            {t('imageUpload.licenseStatement')}
           </p>
         </div>
       </div>
@@ -98,12 +98,12 @@ export function ImageUploadTab({
       {/* File Name */}
       <div>
         <label className={labelClass}>
-          File name <span className="text-red-500">*</span>
+          {t('imageUpload.fileName')} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           className={inputClass}
-          placeholder="File name"
+          placeholder={t('imageUpload.fileNamePlaceholder')}
           value={uploadFileName}
           onChange={(e) => setUploadFileName(e.target.value)}
         />
@@ -111,13 +111,13 @@ export function ImageUploadTab({
 
       {/* Creator */}
       <div>
-        <label className={labelClass}>Creator</label>
+        <label className={labelClass}>{t('imageUpload.creator')}</label>
         <input
           type="text"
           className={cn(inputClass, "bg-gray-50 text-muted-foreground cursor-default")}
           readOnly
           value={uploadCreator}
-          placeholder="Loading…"
+          placeholder={t('imageUpload.creatorLoading')}
         />
       </div>
 
@@ -129,7 +129,7 @@ export function ImageUploadTab({
           data-edataid="cert-image-upload-back"
           data-pageid="course-consumption"
         >
-          ← Back
+          {t('imageUpload.back')}
         </button>
         <button
           type="button"
@@ -138,7 +138,7 @@ export function ImageUploadTab({
           data-edataid="cert-image-upload-cancel"
           data-pageid="course-consumption"
         >
-          Cancel
+          {t('imageUpload.cancel')}
         </button>
         <button
           type="button"
@@ -155,7 +155,7 @@ export function ImageUploadTab({
           )}
         >
           <FiUpload className="w-4 h-4" />
-          Upload &amp; Use
+          {t('imageUpload.uploadAndUse')}
         </button>
       </div>
     </div>
