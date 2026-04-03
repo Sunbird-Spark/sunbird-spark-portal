@@ -88,7 +88,7 @@ describe('buildTelemetryContext', () => {
     expect(context.sid).toBe('test-session-id');
     expect(context.uid).toBe('test-user-id');
     expect(context.did).toBe('test-device-id');
-    expect(context.channel).toBe('test-channel');
+    expect(context.channel).toBe('test-hash-tag');
     expect(context.pdata).toEqual({ id: 'test.portal', ver: '1.0', pid: 'test.portal' });
     expect(context.userData).toEqual({ firstName: 'John', lastName: 'Doe' });
     expect(typeof context.timeDiff).toBe('number');
@@ -115,7 +115,7 @@ describe('buildTelemetryContext', () => {
   it('should set app from channel', async () => {
     const context = await buildTelemetryContext();
 
-    expect(context.app).toEqual(['test-channel']);
+    expect(context.app).toEqual(['test-hash-tag']);
   });
 
   it('should set partner to empty array', async () => {
@@ -313,7 +313,7 @@ describe('buildTelemetryContext', () => {
     const context = await buildTelemetryContext();
 
     // Should still build context successfully with fallback slug
-    expect(context.channel).toBe('test-channel');
+    expect(context.channel).toBe('test-hash-tag');
     expect(mockOrgSearch).toHaveBeenCalledWith({ filters: { isTenant: true, slug: 'sunbird' } });
     expect(consoleSpy).toHaveBeenCalledWith('Failed to read default_channel system setting, using fallback:', expect.any(Error));
 
@@ -333,7 +333,7 @@ describe('buildTelemetryContext', () => {
     const context = await buildTelemetryContext();
 
     expect(mockOrgSearch).toHaveBeenCalledWith({ filters: { isTenant: true, slug: 'custom-channel' } });
-    expect(context.channel).toBe('test-channel');
+    expect(context.channel).toBe('test-hash-tag');
   });
 
   it('should append courseId and batchId to dims when cdata contains course and batch', async () => {
@@ -357,6 +357,26 @@ describe('buildTelemetryContext', () => {
     const context = await buildTelemetryContext({ cdata: [{ id: 'dial-1', type: 'DialCode' }] });
 
     expect(context.dims).toEqual(['org-hash-1', 'org-hash-2']);
+  });
+
+  it('should prefer hashTagId over channel for context.channel and context.app', async () => {
+    // org has both channel (slug) and hashTagId (actual ID) — hashTagId must win
+    const context = await buildTelemetryContext();
+
+    expect(context.channel).toBe('test-hash-tag');
+    expect(context.app).toEqual(['test-hash-tag']);
+  });
+
+  it('should fall back to org.channel when hashTagId is absent', async () => {
+    mockOrgSearch.mockResolvedValueOnce({
+      data: { response: { content: [{ channel: 'test-channel' }] } },
+      headers: {},
+    });
+
+    const context = await buildTelemetryContext();
+
+    expect(context.channel).toBe('test-channel');
+    expect(context.app).toEqual(['test-channel']);
   });
 
   it('should set contextRollup to empty when anonymous and no hashTagId', async () => {
