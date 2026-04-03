@@ -133,7 +133,7 @@ describe('EcmlPlayerService', () => {
       expect(result.config.plugins).toHaveLength(2);
       expect(result.config.showStartPage).toBe(true);
       expect(result.config.enableTelemetryValidation).toBe(false);
-      expect(result.config.buildNumber).toBe('test-build-hash');
+      expect(result.config.build_number).toBe('test-build-hash');
     });
 
     it('should include body data from metadata', async () => {
@@ -159,13 +159,13 @@ describe('EcmlPlayerService', () => {
   });
 
   describe('buildPlayerUrl', () => {
-    it('should return the preview URL without buildNumber when not provided', () => {
+    it('should return the preview URL without build_number when not provided', () => {
       expect(service.buildPlayerUrl()).toBe('/content/preview/preview.html?webview=true');
     });
 
-    it('should append buildNumber query param when provided', () => {
+    it('should append build_number query param when provided', () => {
       expect(service.buildPlayerUrl('test-hash')).toBe(
-        '/content/preview/preview.html?webview=true&buildNumber=test-hash'
+        '/content/preview/preview.html?webview=true&build_number=test-hash'
       );
     });
   });

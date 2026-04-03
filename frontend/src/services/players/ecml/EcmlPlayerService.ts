@@ -40,7 +40,7 @@ export class EcmlPlayerService {
         showReplay: true,
       },
       enableTelemetryValidation: false,
-      buildNumber: buildHash,
+      build_number: buildHash,
     };
 
     return {
@@ -52,7 +52,7 @@ export class EcmlPlayerService {
   }
 
   buildPlayerUrl(buildHash?: string): string {
-    if (buildHash) return `${PREVIEW_URL}&buildNumber=${buildHash}`;
+    if (buildHash) return `${PREVIEW_URL}&build_number=${buildHash}`;
     return PREVIEW_URL;
   }
 }
