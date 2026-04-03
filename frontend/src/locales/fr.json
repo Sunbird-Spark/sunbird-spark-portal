@@ -631,7 +631,8 @@
     "feedbackSuccess": "Merci pour votre retour. Nous ne pouvons pas répondre à chaque suggestion, mais votre avis aide à améliorer {{appName}} pour tout le monde.",
     "submitFeedback": "Soumettre un avis",
     "loadError": "Impossible de charger les options de signalement",
-    "description": "Signalez un problème en sélectionnant une catégorie et en décrivant le problème"
+    "description": "Signalez un problème en sélectionnant une catégorie et en décrivant le problème",
+    "thisApplication": "cette application"
   },
   "confirmDialog": {
     "pleaseWait": "Veuillez patienter..."

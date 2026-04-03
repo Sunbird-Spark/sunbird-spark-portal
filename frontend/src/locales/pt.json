@@ -631,7 +631,8 @@
     "feedbackSuccess": "Obrigado pelo seu feedback. Talvez não possamos responder a cada sugestão, mas seu feedback ajuda a melhorar o {{appName}} para todos.",
     "submitFeedback": "Enviar feedback",
     "loadError": "Falha ao carregar opções de relato de problema",
-    "description": "Relate um problema selecionando uma categoria e descrevendo o problema"
+    "description": "Relate um problema selecionando uma categoria e descrevendo o problema",
+    "thisApplication": "esta aplicação"
   },
   "confirmDialog": {
     "pleaseWait": "Aguarde..."
