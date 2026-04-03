@@ -46,6 +46,13 @@ const WorkspaceContentCard = ({
   const isLocked = !!lockInfo;
   const hasActions = showView || canEdit || showDelete;
 
+  // Translate primaryCategory badge
+  const getCategoryLabel = (category: string | undefined, type: string) => {
+    if (!category) return type;
+    const key = category.toLowerCase().replace(/\s+/g, '');
+    return t(`contentTypes.${key}`, { defaultValue: category });
+  };
+
   return (
     <div className="bg-card rounded-2xl shadow-sm group hover:shadow-md transition-all duration-300 border border-border">
       {/* Thumbnail wrapper — no overflow-hidden so the lock tooltip can escape */}
@@ -101,9 +108,9 @@ const WorkspaceContentCard = ({
 
         {/* Type Badge */}
         <div className="absolute top-3 right-3 z-20">
-          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-surface/90 backdrop-blur-sm shadow-sm", colors.text)}>
-            <TypeIcon className="w-3 h-3" />
-            <span>{item.primaryCategory || item.type}</span>
+          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-surface/90 backdrop-blur-sm shadow-sm whitespace-nowrap", colors.text)}>
+            <TypeIcon className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate max-w-[8rem]">{getCategoryLabel(item.primaryCategory, item.type)}</span>
           </div>
         </div>
 

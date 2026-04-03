@@ -37,6 +37,13 @@ const WorkspaceContentList = ({
 }: WorkspaceContentListProps) => {
   const { t } = useAppI18n();
   
+  // Translate primaryCategory badge
+  const getCategoryLabel = (category: string | undefined, type: string) => {
+    if (!category) return type;
+    const key = category.toLowerCase().replace(/\s+/g, '');
+    return t(`contentTypes.${key}`, { defaultValue: category });
+  };
+  
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border">
       {/* Table Header */}
@@ -79,17 +86,17 @@ const WorkspaceContentList = ({
                     {item.title}
                   </h4>
                   <p className="text-xs text-muted-foreground font-rubik truncate sm:hidden">
-                    {item.primaryCategory || item.type}
+                    {getCategoryLabel(item.primaryCategory, item.type)}
                   </p>
                 </div>
               </div>
 
               {/* Type */}
               <div className="col-span-2 hidden sm:flex items-center gap-2">
-                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", CONTENT_TYPE_COLORS[item.type])}>
+                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", CONTENT_TYPE_COLORS[item.type])}>
                   <TypeIcon className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-sm text-foreground font-rubik">{item.primaryCategory || item.type}</span>
+                <span className="text-sm text-foreground font-rubik truncate">{getCategoryLabel(item.primaryCategory, item.type)}</span>
               </div>
 
               {/* Status */}

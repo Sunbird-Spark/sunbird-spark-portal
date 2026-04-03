@@ -5,6 +5,7 @@ import { Input } from "@/components/common/Input";
 import sunbirdLogo from "../../../src/assets/sunbird-logo.svg";
 import onboardingImage from "../../../src/assets/onboarding-image.svg";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { resolveTitleText } from "@/utils/i18nUtils";
 import { useFormRead } from "@/hooks/useForm";
 import { OnboardingFormData } from '@/types/formTypes';
 import { computeTotalSteps } from './utils';
@@ -18,7 +19,7 @@ import { toast } from "@/hooks/useToast";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 const Onboarding = () => {
-  const { t } = useAppI18n();
+  const { t, currentCode } = useAppI18n();
   useImpression({ type: 'view', pageid: 'onboarding', env: 'onboarding' });
   const navigate = useNavigate();
   const telemetry = useTelemetry();
@@ -185,7 +186,7 @@ const Onboarding = () => {
                     isFirstScreen ? "text-2xl font-medium mb-6" : "text-base font-semibold mb-4"
                   } text-foreground`}
                 >
-                  {currentScreen.title}
+                  {resolveTitleText(currentScreen.title, currentCode)}
                 </h2>             
                 {!showOtherInput ? (
                   <div className={isFirstScreen ? "onboarding-grid" : "grid grid-cols-3 gap-3 max-w-md"}>

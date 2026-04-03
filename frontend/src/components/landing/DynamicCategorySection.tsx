@@ -1,10 +1,8 @@
 import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { CategoryItem } from "@/types/formTypes";
-import uiuxIcon from "@/assets/uiux-icon.svg";
-import devIcon from "@/assets/dev-icon.svg"
-import marketingIcon from "@/assets/marketing-icon.svg";
-import entrepreneurIcon from "@/assets/entrepreneur-icon.svg";
+import { useAppI18n } from "@/hooks/useAppI18n";
+import { resolveTitleText } from "@/utils/i18nUtils";
 import "./landing.css";
 
 interface DynamicCategorySectionProps {
@@ -22,6 +20,8 @@ const backgroundMap = [
 ];
 
 const DynamicCategorySection = ({ title, list, innerClassName = "landing-section-inner" }: DynamicCategorySectionProps) => {
+  const { currentCode } = useAppI18n();
+  
   if (!list || list.length === 0) return null;
 
   // Sort by index
@@ -36,19 +36,22 @@ const DynamicCategorySection = ({ title, list, innerClassName = "landing-section
 
         <div className="category-section-cards-row">
           <div className="category-section-cards-group">
-            {sortedCategories.map((category, idx) => (
-              <Link key={`${category.id}-${idx}`} to="/explore" className="group">
-                <div
-                  className="category-card"
-                  style={{ background: backgroundMap[idx % backgroundMap.length] }}
-                >
-                  <div className="category-card-bar" />
-                  <div className="category-card-body">
-                    <p className="category-card-title">{category.title}</p>
+            {sortedCategories.map((category, idx) => {
+              const categoryTitle = resolveTitleText(category.title, currentCode);
+              return (
+                <Link key={`${category.id}-${idx}`} to="/explore" className="group">
+                  <div
+                    className="category-card"
+                    style={{ background: backgroundMap[idx % backgroundMap.length] }}
+                  >
+                    <div className="category-card-bar" />
+                    <div className="category-card-body">
+                      <p className="category-card-title">{categoryTitle}</p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
 
           <Link
