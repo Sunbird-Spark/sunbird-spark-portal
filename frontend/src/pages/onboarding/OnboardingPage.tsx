@@ -39,7 +39,6 @@ const Onboarding = () => {
   });
   const onboardingData: OnboardingFormData | undefined =
     (formApiData?.data as { form?: { data?: OnboardingFormData } })?.form?.data;
-  
   useOnboardingRedirect();
 
   useEffect(() => {
@@ -79,7 +78,7 @@ const Onboarding = () => {
     const screen = onboardingData.screens[currentScreenId];
     if (!screen) return;
     const selectedFieldId = selections[currentScreenId];
-    if (selectedFieldId && LANGUAGE_MAP[selectedFieldId as LanguageCode]) {
+    if (selectedFieldId && selectedFieldId in LANGUAGE_MAP) {
       void changeLanguage(selectedFieldId as LanguageCode);
     }
     const selectedField = screen.fields.find(f => f.id === selectedFieldId);
