@@ -104,6 +104,7 @@ export function getContentAttemptInfoMap(contentList: ContentStateItem[]): Recor
 
 export interface CourseProgressProps {
   batchStartDate?: string;
+  batchEndDate?: string;
   totalContentCount: number;
   completedContentCount: number;
 }
@@ -130,6 +131,7 @@ export function getCourseProgressProps(
           : 0;
   return {
     batchStartDate: enrollment.batch?.startDate,
+    batchEndDate: enrollment.batch?.endDate,
     totalContentCount: total,
     completedContentCount: completed,
   };

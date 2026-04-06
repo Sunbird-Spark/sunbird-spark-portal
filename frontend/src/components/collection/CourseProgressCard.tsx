@@ -28,6 +28,7 @@ function getCompletedCount(
 
 export interface CourseProgressCardProps {
   batchStartDate?: string;
+  batchEndDate?: string;
   isBatchUpcoming?: boolean;
   totalContentCount: number;
   completedContentCount?: number;
@@ -43,6 +44,7 @@ export interface CourseProgressCardProps {
 
 const CourseProgressCard = ({
   batchStartDate,
+  batchEndDate,
   isBatchUpcoming = false,
   totalContentCount,
   completedContentCount: completedContentCountProp,
@@ -67,6 +69,7 @@ const CourseProgressCard = ({
       : 0;
 
   const displayDate = batchStartDate ? formatBatchDisplayDate(batchStartDate) : null;
+  const displayEndDate = batchEndDate ? formatBatchDisplayDate(batchEndDate) : null;
 
   const showMenu = (showForceSyncButton && !!onForceSync) || (showUnenrollOption && !!onUnenroll);
   const isLoading = showUnenrollOption ? isUnenrolling : isForceSyncing;
@@ -119,6 +122,11 @@ const CourseProgressCard = ({
       {displayDate && (
         <p className="font-rubik font-normal text-[0.8125rem] leading-[100%] text-muted-foreground">
           {t(isBatchUpcoming ? "courseDetails.batchStartingOn" : "courseDetails.batchStartedOn")}: {displayDate}
+        </p>
+      )}
+      {displayEndDate && (
+        <p className="font-rubik font-normal text-[0.8125rem] leading-[100%] text-muted-foreground">
+          {t("courseDetails.batchEndsOn")}: {displayEndDate}
         </p>
       )}
       <div className="flex items-center gap-2">

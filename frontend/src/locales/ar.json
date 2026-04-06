@@ -253,6 +253,7 @@
     "courseProgress": "تقدم الدورة",
     "batchStartingOn": "ستبدأ الدفعة في",
     "batchStartedOn": "بدأت الدفعة في",
+    "batchEndsOn": "تنتهي الدفعة في",
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
     "contentStatusNotViewed": "لم تتم المشاهدة",
@@ -271,7 +272,11 @@
     "unenrolSuccess": "تم إلغاء تسجيل المستخدم من الدفعة بنجاح",
     "courseCompletionMessage": "لقد أكملت هذه الدورة بنجاح",
     "courseCompletionNoCertificateNote": "ملاحظة: لا تحتوي هذه الدورة على شهادة",
-    "courseCompletionCertificateNote": "يمكنك تنزيل شهادة الدورة من صفحة ملفك الشخصي بعد إنشائها"
+    "courseCompletionCertificateNote": "يمكنك تنزيل شهادة الدورة من صفحة ملفك الشخصي بعد إنشائها",
+    "batchEndedTitle": "انتهت الدفعة",
+    "batchExpiredProgressWarning": "لن يتم احتساب التقدم لهذه الدورة لأن الدفعة قد انتهت.",
+    "batchExpiringSoonTitle": "الدورة ستنتهي قريبًا",
+    "batchExpiringSoonWarning": "ستنتهي دورتك في {{date}}. أكملها قريبًا!"
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",
