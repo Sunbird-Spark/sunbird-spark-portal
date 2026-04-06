@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import dayjs from "dayjs";
 import { FiAlertTriangle, FiClock } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { formatBatchDisplayDate } from "@/services/collection/enrollmentMapper";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/common/Dialog";
+
+const SESSION_KEY_PREFIX = "batch-expiry-dialog-shown:";
 
 interface BatchExpiryDialogProps {
   isBatchEnded: boolean;
@@ -29,12 +31,12 @@ export default function BatchExpiryDialog({
 }: BatchExpiryDialogProps) {
   const { t } = useAppI18n();
   const [open, setOpen] = useState(false);
-  const shownForCollectionIdsRef = useRef<Set<string>>(new Set());
   const lastCollectionIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!collectionId) {
       lastCollectionIdRef.current = undefined;
+      setOpen(false);
       return;
     }
     if (collectionId !== lastCollectionIdRef.current) {
@@ -46,13 +48,15 @@ export default function BatchExpiryDialog({
   useEffect(() => {
     if (!collectionId || !isEnrolledInCurrentBatch || contentCreatorPrivilege) return;
     if (!isBatchEnded && !isBatchExpiringSoon) return;
-    if (shownForCollectionIdsRef.current.has(collectionId)) return;
 
-    shownForCollectionIdsRef.current.add(collectionId);
+    const sessionKey = `${SESSION_KEY_PREFIX}${collectionId}`;
+    if (sessionStorage.getItem(sessionKey)) return;
+
+    sessionStorage.setItem(sessionKey, "1");
     setOpen(true);
   }, [collectionId, isEnrolledInCurrentBatch, contentCreatorPrivilege, isBatchEnded, isBatchExpiringSoon]);
 
-  const formattedDate = batchEndDate ? dayjs(batchEndDate).format("D MMMM YYYY") : "";
+  const formattedDate = formatBatchDisplayDate(batchEndDate);
 
   return (
     <Dialog
