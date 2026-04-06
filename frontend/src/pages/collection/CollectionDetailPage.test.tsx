@@ -425,10 +425,22 @@ describe('CollectionDetailPage', () => {
 
   /* ─── Navigation ─── */
   describe('Navigation', () => {
-    it('navigates back when Go Back button is clicked', () => {
+    it('navigates back when Go Back button is clicked (default)', () => {
       renderWithProviders(<CollectionDetailPage />);
       fireEvent.click(screen.getByRole('button', { name: /button\.goBack/i }));
       expect(mockNavigate).toHaveBeenCalledWith('/explore');
+    });
+
+    it('navigates to state.from when Go Back button is clicked', () => {
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <MemoryRouter initialEntries={[{ pathname: '/collection/col-123', state: { from: '/search?q=math' } }]}>
+            <CollectionDetailPage />
+          </MemoryRouter>
+        </QueryClientProvider>
+      );
+      fireEvent.click(screen.getByRole('button', { name: /button\.goBack/i }));
+      expect(mockNavigate).toHaveBeenCalledWith('/search?q=math');
     });
   });
 

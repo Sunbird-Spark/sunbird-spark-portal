@@ -1,5 +1,5 @@
 import { FiArrowRight } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import resourceRobotHand from "@/assets/resource-robot-hand.svg";
 import resourceVR from "@/assets/resource-vr.svg"
@@ -102,6 +102,7 @@ const ResourceCardComponent = ({
     heightClass,
 }: ResourceCardProps) => {
     const { t } = useAppI18n();
+    const location = useLocation();
 
     const getViewLabel = (type: string) => {
         switch (type) {
@@ -114,7 +115,11 @@ const ResourceCardComponent = ({
     };
 
     return (
-        <Link to={`/collection/${id}`} className="block group w-full max-w-[22.5rem] mx-auto md:mx-0">
+        <Link 
+          to={`/collection/${id}`} 
+          state={{ from: location.pathname + location.search }}
+          className="block group w-full max-w-[22.5rem] mx-auto md:mx-0"
+        >
             <div className={`relative w-full ${heightClass} rounded-[1.25rem] overflow-hidden`}>
                 {/* Background Image Container */}
                 <div className="absolute inset-0">

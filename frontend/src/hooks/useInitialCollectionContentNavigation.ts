@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getFirstLeafContentIdFromHierarchy, getLeafContentIdsFromHierarchy } from "@/services/collection/hierarchyTree";
 import type { CollectionData } from "@/types/collectionTypes";
 
@@ -30,6 +30,7 @@ export function useInitialCollectionContentNavigation({
   contentStateFetched,
 }: UseInitialCollectionContentNavigationParams): void {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!collectionData?.hierarchyRoot || contentId) return;
@@ -38,7 +39,7 @@ export function useInitialCollectionContentNavigation({
     if (!isTrackable || contentCreatorPrivilege) {
       const firstContentId = getFirstLeafContentIdFromHierarchy(collectionData.hierarchyRoot);
       if (!firstContentId || !collectionId) return;
-      navigate(`/collection/${collectionId}/content/${firstContentId}`, { replace: true });
+      navigate(`/collection/${collectionId}/content/${firstContentId}`, { replace: true, state: location.state });
       return;
     }
 
@@ -53,7 +54,7 @@ export function useInitialCollectionContentNavigation({
     const isCompleted = (id: string) => contentStatusMap[id] === 2;
     const firstUnconsumedId = leafIds.find((id) => !isCompleted(id));
     const targetContentId = firstUnconsumedId ?? leafIds[0];
-    navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${targetContentId}`, { replace: true });
+    navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${targetContentId}`, { replace: true, state: location.state });
   }, [
     collectionData?.hierarchyRoot,
     contentId,
@@ -65,6 +66,7 @@ export function useInitialCollectionContentNavigation({
     contentStatusMap,
     contentStateFetched,
     collectionId,
+    location.state,
     navigate,
   ]);
 }

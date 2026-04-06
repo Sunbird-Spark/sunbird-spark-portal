@@ -90,8 +90,8 @@ export async function buildTelemetryContext(
   try {
     const orgResponse = await orgService.search({ filters: { isTenant: true, slug: slug } });
     const org = orgResponse?.data?.response?.content?.[0];
-    if (org?.channel) channel = org.channel;
-    if (org?.hashTagId) hashTagId = org.hashTagId;
+    channel = org?.hashTagId || org?.channel || '';
+    hashTagId = org?.hashTagId || '';
     // Compute clock skew from response Date header: (serverTime - clientTime) / 1000
     // Same as old portal's DataService.getDateDiff()
     timeDiff = getDateDiff(orgResponse?.headers?.['date'] as string);

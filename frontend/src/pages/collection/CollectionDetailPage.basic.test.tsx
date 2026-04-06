@@ -104,12 +104,15 @@ vi.mock('@/hooks/useUserRead', () => ({
 }));
 const mockNavigate = vi.fn();
 const mockUseParams = vi.fn();
+const mockLocation = { state: null };
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
     useParams: () => mockUseParams(),
     useNavigate: () => mockNavigate,
+    useLocation: () => mockLocation,
   };
 });
 vi.mock('@/components/home/Header', () => ({ default: () => <header data-testid="header">Header</header> }));
@@ -304,7 +307,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     it('auto-navigates to first non-collection lesson when no contentId in URL', () => {
       mockUseParams.mockReturnValue({ collectionId: 'col-123', contentId: undefined });
       renderWithProviders(<CollectionDetailPage />);
-      expect(mockNavigate).toHaveBeenCalledWith('/collection/col-123/content/l1', { replace: true });
+      expect(mockNavigate).toHaveBeenCalledWith('/collection/col-123/content/l1', { replace: true, state: null });
     });
 
     it('does not auto-navigate when contentId is already present in URL', () => {
@@ -393,7 +396,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
       renderWithProviders(<CollectionDetailPage />);
       expect(mockNavigate).toHaveBeenCalledWith(
         '/collection/col-123/batch/batch-1/content/l3',
-        { replace: true }
+        { replace: true, state: null }
       );
     });
   });

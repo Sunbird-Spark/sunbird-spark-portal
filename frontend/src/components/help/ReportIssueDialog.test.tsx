@@ -13,6 +13,37 @@ vi.mock('@/hooks/useToast', () => ({
   toast: vi.fn(),
 }));
 
+// Mock useAppI18n
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string, options?: any) => {
+      const translations: Record<string, string> = {
+        'reportIssueDialog.title': 'reportIssueDialog.title',
+        'reportIssueDialog.description': 'reportIssueDialog.description',
+        'reportIssueDialog.selectCategory': 'reportIssueDialog.selectCategory',
+        'reportIssueDialog.selectSubcategory': 'reportIssueDialog.selectSubcategory',
+        'reportIssueDialog.tellUsMore': 'reportIssueDialog.tellUsMore',
+        'reportIssueDialog.submitFeedback': 'reportIssueDialog.submitFeedback',
+        'reportIssueDialog.feedbackSuccess': 'reportIssueDialog.feedbackSuccess',
+        'reportIssueDialog.loadError': 'reportIssueDialog.loadError',
+        'reportIssueDialog.thisApplication': 'this application',
+        'loading': 'loading',
+        'error': 'error',
+      };
+      return translations[key] || (options?.defaultValue || key);
+    },
+    currentCode: 'en',
+  }),
+}));
+
+// Mock useSystemSetting
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: () => ({
+    data: { data: { response: { value: 'Test App' } } },
+    isLoading: false,
+  }),
+}));
+
 const mockFormRead = vi.spyOn(FormService.prototype, 'formRead');
 
 const mockFormResponse = {

@@ -5,9 +5,10 @@ import DynamicResourceSection from "@/components/landing/DynamicResourceSection"
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useFormRead } from "@/hooks/useForm";
 import { FormSection } from "@/types/formTypes";
+import { resolveTitleText } from "@/utils/i18nUtils";
 
 const HomeDiscoverSections = () => {
-  const { t } = useAppI18n();
+  const { t, currentCode } = useAppI18n();
   const { data: formData, isLoading, error, refetch } = useFormRead({
     request: {
       type: "page",
@@ -38,12 +39,13 @@ const HomeDiscoverSections = () => {
   const sortedSections = [...sections].sort((a, b) => a.index - b.index);
 
   const renderSection = (section: FormSection) => {
+    const sectionTitle = resolveTitleText(section.title, currentCode);
     switch (section.type) {
       case "content":
         return (
           <DynamicContentSection
             key={section.id}
-            title={section.title}
+            title={sectionTitle}
             criteria={section.criteria}
             sectionClassName="content-section-home"
             innerClassName="home-discover-inner"
@@ -53,7 +55,7 @@ const HomeDiscoverSections = () => {
         return (
           <DynamicCategorySection
             key={section.id}
-            title={section.title}
+            title={sectionTitle}
             list={section.list}
             innerClassName="home-discover-inner"
           />
@@ -62,7 +64,7 @@ const HomeDiscoverSections = () => {
         return (
           <DynamicResourceSection
             key={section.id}
-            title={section.title}
+            title={sectionTitle}
             sectionLabel="resource.header"
             criteria={section.criteria}
             sectionClassName="resource-section-home"

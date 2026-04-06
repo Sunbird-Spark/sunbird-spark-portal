@@ -17,6 +17,7 @@ import {
 } from "@/services/workspace";
 import CardThumbnailBackground from "./CardThumbnailBackground";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { getCategoryLabel } from "@/utils/i18nUtils";
 
 interface WorkspaceContentCardProps {
   item: WorkspaceItem;
@@ -45,6 +46,8 @@ const WorkspaceContentCard = ({
   const { showView, showEdit: canEdit, showDelete } = getWorkspaceItemActionVisibility(item.status, userRole);
   const isLocked = !!lockInfo;
   const hasActions = showView || canEdit || showDelete;
+
+  const categoryLabel = getCategoryLabel(item.primaryCategory, t, item.type);
 
   return (
     <div className="bg-card rounded-2xl shadow-sm group hover:shadow-md transition-all duration-300 border border-border">
@@ -101,9 +104,9 @@ const WorkspaceContentCard = ({
 
         {/* Type Badge */}
         <div className="absolute top-3 right-3 z-20">
-          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-surface/90 backdrop-blur-sm shadow-sm", colors.text)}>
-            <TypeIcon className="w-3 h-3" />
-            <span>{item.primaryCategory || item.type}</span>
+          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-rubik bg-surface/90 backdrop-blur-sm shadow-sm whitespace-nowrap", colors.text)}>
+            <TypeIcon className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate max-w-[8rem]">{categoryLabel}</span>
           </div>
         </div>
 

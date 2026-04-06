@@ -4,9 +4,11 @@ import { useInitialCollectionContentNavigation } from './useInitialCollectionCon
 import type { CollectionData } from '@/types/collectionTypes';
 
 const mockNavigate = vi.fn();
+const mockLocation = { state: { from: '/explore' } };
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => mockLocation,
 }));
 
 const COLLECTION_MIME = 'application/vnd.ekstep.content-collection';
@@ -110,7 +112,7 @@ describe('useInitialCollectionContentNavigation', () => {
           isTrackable: false,
         }),
       );
-      expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/content/l1', { replace: true });
+      expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/content/l1', { replace: true, state: mockLocation.state });
     });
 
     it('navigates to first leaf when contentCreatorPrivilege and no contentId', () => {
@@ -120,7 +122,7 @@ describe('useInitialCollectionContentNavigation', () => {
           contentCreatorPrivilege: true,
         }),
       );
-      expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/content/l1', { replace: true });
+      expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/content/l1', { replace: true, state: mockLocation.state });
     });
 
     it('does not navigate when collectionId is missing', () => {
@@ -195,6 +197,7 @@ describe('useInitialCollectionContentNavigation', () => {
       );
       expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/batch/batch-1/content/l2', {
         replace: true,
+        state: mockLocation.state,
       });
     });
 
@@ -207,6 +210,7 @@ describe('useInitialCollectionContentNavigation', () => {
       );
       expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/batch/batch-1/content/l1', {
         replace: true,
+        state: mockLocation.state,
       });
     });
 
@@ -223,6 +227,7 @@ describe('useInitialCollectionContentNavigation', () => {
       );
       expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/batch/batch-1/content/l3', {
         replace: true,
+        state: mockLocation.state,
       });
     });
 
@@ -235,6 +240,7 @@ describe('useInitialCollectionContentNavigation', () => {
       );
       expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/batch/batch-1/content/l2', {
         replace: true,
+        state: mockLocation.state,
       });
     });
   });

@@ -35,7 +35,7 @@ const Explore = () => {
   const [filters, setFilters] = useState<FilterState>(() => {
     const initial: FilterState = {};
     searchParams.forEach((value, key) => {
-      if (key === 'q') return;
+      if (key === 'q' || key === 'sort') return;
       if (!initial[key]) initial[key] = [];
       initial[key].push(value);
     });
@@ -44,8 +44,16 @@ const Explore = () => {
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
-  const [sortBy, setSortBy] = useState<any>({ lastUpdatedOn: 'desc' });
-  const [sortLabelKey, setSortLabelKey] = useState('newest');
+  
+  const [sortLabelKey, setSortLabelKey] = useState(() => {
+    const raw = searchParams.get('sort') ?? 'newest';
+    return SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
+  });
+  const [sortBy, setSortBy] = useState<any>(() => {
+    const raw = searchParams.get('sort') ?? 'newest';
+    const key = SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
+    return SORT_OPTIONS.find(opt => opt.key === key)!.value;
+  });
 
   const handleFilterChange: Dispatch<SetStateAction<FilterState>> = (value) => {
     const resolved = typeof value === 'function' ? value(filters) : value;
@@ -70,6 +78,14 @@ const Explore = () => {
   useEffect(() => {
     const q = searchParams.get('q') ?? '';
     setSearchQuery(q);
+  }, [searchParams]);
+
+  // Re-sync sort state when the URL changes (e.g. browser back/forward)
+  useEffect(() => {
+    const raw = searchParams.get('sort') ?? 'newest';
+    const key = SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
+    setSortLabelKey(key);
+    setSortBy(SORT_OPTIONS.find(opt => opt.key === key)!.value);
   }, [searchParams]);
 
   // Keep a ref to setSearchParams so the effect below doesn't re-fire when
@@ -99,8 +115,11 @@ const Explore = () => {
     Object.entries(filters).forEach(([code, values]) => {
       values.forEach((value) => next.append(code, value));
     });
+    if (sortLabelKey !== 'newest') {
+      next.set('sort', sortLabelKey);
+    }
     setSearchParamsRef.current(next, { replace: true });
-  }, [filters, debouncedSearchQuery]);
+  }, [filters, debouncedSearchQuery, sortLabelKey]);
 
   return (
     <main className="flex-1 bg-white relative md:h-[calc(100vh-4.5rem)] overflow-hidden">

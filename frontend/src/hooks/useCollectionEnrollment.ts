@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatchListForLearner, useBatchListForMentor, useBatchRead, useContentState, useEnrol } from './useBatch';
 import { useIsMentor } from './useUser';
@@ -27,6 +27,7 @@ export function useCollectionEnrollment(
   isAuthenticated: boolean,
 ) {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { t } = useAppI18n();
   const { toast } = useToast();
@@ -162,7 +163,7 @@ export function useCollectionEnrollment(
         },
         object: { id: collectionId, type: 'Collection' },
       });
-      navigate(`/collection/${collectionId}/batch/${selectedBatchId}`);
+      navigate(`/collection/${collectionId}/batch/${selectedBatchId}`, { state: location.state });
     } catch {
       // Error is exposed via joinErrorMutation
     }

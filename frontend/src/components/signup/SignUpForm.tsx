@@ -89,13 +89,13 @@ export const SignUpForm = ({
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder={t("signUp.enterPassword")}
-                            className="login-input-field h-10 pr-10 px-3"
+                            className="login-input-field h-10 pe-10 ps-3"
                         />
                         <button
                             aria-label={showPassword ? t("signUp.hidePassword") : t("signUp.showPassword")}
                             type="button"
                             onClick={() => setShowPassword((v) => !v)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
+                            className="absolute end-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
                             {showPassword ? (
                                 <FiEyeOff className="w-4 h-4" aria-hidden="true" />
@@ -120,13 +120,13 @@ export const SignUpForm = ({
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder={t("signUp.reenterPassword")}
-                            className="login-input-field h-10 pr-10 px-3"
+                            className="login-input-field h-10 pe-10 ps-3"
                         />
                         <button
                             aria-label={showConfirmPassword ? t("signUp.hideConfirmPassword") : t("signUp.showConfirmPassword")}
                             type="button"
                             onClick={() => setShowConfirmPassword((v) => !v)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
+                            className="absolute end-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 hover:text-sunbird-charcoal p-1"
                         >
                             {showConfirmPassword ? (
                                 <FiEyeOff className="w-4 h-4" aria-hidden="true" />

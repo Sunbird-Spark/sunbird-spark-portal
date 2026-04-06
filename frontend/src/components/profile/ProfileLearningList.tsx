@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FiChevronDown, FiDownload } from "react-icons/fi";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
 import { TrackableCollection } from "@/types/TrackableCollections";
@@ -33,6 +33,7 @@ interface CourseRowProps {
 }
 
 const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId, t }: CourseRowProps) => {
+    const location = useLocation();
     const status = getCompletionStatus(course.status);
     const progress = course.completionPercentage ?? 0;
     const thumbnail = course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId);
@@ -44,6 +45,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
         <div className="profile-learning-item relative">
             <Link
                 to={`/collection/${course.collectionId}`}
+                state={{ from: location.pathname + location.search }}
                 className="absolute inset-0"
                 aria-label={title}
                 data-edataid="profile-learning-card-click"
