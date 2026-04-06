@@ -42,6 +42,17 @@ app.use('/mobile', mobileRoutes);
 
 // Portal Authentication Routes (Login, Callback, Logout) — registered first to bypass anonymous middleware
 app.use('/portal', portalAuthRoutes);
+
+// DIAL code redirect — works for both anonymous and authenticated users
+app.get('/dial/:id', sessionMiddleware, ...anonymousMiddlewares, (req, res) => {
+    const dialCode = req.params.id as string;
+    if (!dialCode) {
+        res.status(400).json({ message: 'Missing dial code' });
+        return;
+    }
+    const frontendBase = envConfig.DEVELOPMENT_REACT_APP_URL || '';
+    res.redirect(`${frontendBase}/explore?dialcodes=${encodeURIComponent(dialCode)}`);
+});
 // Portal Anonymous Routes
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousProxyRoutes)
 
