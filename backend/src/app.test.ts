@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import request from 'supertest';
+import { envConfig } from './config/env.js';
 
 vi.mock('./auth/oidcMiddleware.js', () => ({
   oidcSession: () => (_req: any, _res: any, next: any) => next(),
@@ -36,7 +37,8 @@ vi.mock('./config/env.js', () => ({
     PORTAL_AUTH_SERVER_CLIENT: 'portal',
     LEARN_BASE_URL: 'http://localhost:9000',
     OIDC_ISSUER_URL: '',
-    SUNBIRD_PORTAL_SESSION_STORE: 'memory'
+    SUNBIRD_PORTAL_SESSION_STORE: 'memory',
+    DEVELOPMENT_REACT_APP_URL: undefined,
   }
 }));
 
@@ -230,5 +232,47 @@ describe('Express App', () => {
       .expect(200);
 
     expect(response.text).toBe('mock-knowlg-response');
+  });
+});
+
+describe('GET /dial/:id — dial code redirect', () => {
+  afterEach(() => {
+    (envConfig as any).DEVELOPMENT_REACT_APP_URL = undefined;
+  });
+
+  it('redirects to /explore?dialcodes=<id> when DEVELOPMENT_REACT_APP_URL is not set', async () => {
+    const { app } = await import('./app.js');
+    const res = await request(app).get('/dial/H3A2E6');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/explore?dialcodes=H3A2E6');
+  });
+
+  it('works for any alphanumeric dial code', async () => {
+    const { app } = await import('./app.js');
+    const res = await request(app).get('/dial/ABC123');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/explore?dialcodes=ABC123');
+  });
+
+  it('URL-encodes special characters in the dial code', async () => {
+    // Express decodes %20 → space in req.params, then encodeURIComponent re-encodes it → %20
+    const { app } = await import('./app.js');
+    const res = await request(app).get('/dial/H3%20A2E6');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/explore?dialcodes=H3%20A2E6');
+  });
+
+  it('prefixes the redirect with DEVELOPMENT_REACT_APP_URL when set', async () => {
+    (envConfig as any).DEVELOPMENT_REACT_APP_URL = 'http://localhost:5173';
+    const { app } = await import('./app.js');
+    const res = await request(app).get('/dial/H3A2E6');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('http://localhost:5173/explore?dialcodes=H3A2E6');
+  });
+
+  it('does not handle POST /dial/:id (returns 404)', async () => {
+    const { app } = await import('./app.js');
+    const res = await request(app).post('/dial/H3A2E6');
+    expect(res.status).toBe(404);
   });
 });
