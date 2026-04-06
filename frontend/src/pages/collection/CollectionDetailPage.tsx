@@ -55,6 +55,8 @@ const CollectionDetailPage = () => {
     handleJoinCourse,
     effectiveBatchId,
     isBatchEnded,
+    isBatchExpiringSoon,
+    batchEndDateFromRead,
     isBatchUpcoming,
     batchStartDateFromRead,
     isMentorOfAnyBatchInCourse,
@@ -242,6 +244,7 @@ const CollectionDetailPage = () => {
         certificateModal={{ certificatePreviewOpen, certificatePreviewUrl, certificatePreviewDetails, setCertificatePreviewUrl, setCertificatePreviewOpen }}
         relatedContent={{ searchError, searchErrorObj: searchErrorObj ?? null, searchFetching, relatedContentItems, searchRefetch }}
         courseCompletion={{ courseProgressProps, isEnrolledInCurrentBatch, collectionId, hasCertificate }}
+        batchExpiry={{ isBatchEnded, isBatchExpiringSoon, batchEndDate: batchEndDateFromRead, isEnrolledInCurrentBatch, collectionId, contentCreatorPrivilege }}
       />
     </>
   );

@@ -19,6 +19,7 @@ import type {
 } from "@/types/collectionContentAreaTypes";
 import CertificatePreviewModal, { type CertificatePreviewDetails } from "@/components/collection/CertificatePreviewModal";
 import CourseCompletionDialog from "@/components/collection/CourseCompletionDialog";
+import BatchExpiryDialog from "@/components/collection/BatchExpiryDialog";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
 import type { CollectionData } from "@/types/collectionTypes";
 
@@ -74,6 +75,16 @@ export interface CollectionDetailLayoutRelatedContentProps {
   searchRefetch: () => void;
 }
 
+/** Batch expiry dialog props. */
+export interface CollectionDetailLayoutBatchExpiryProps {
+  isBatchEnded: boolean;
+  isBatchExpiringSoon: boolean;
+  batchEndDate: string | undefined;
+  isEnrolledInCurrentBatch: boolean;
+  collectionId: string | undefined;
+  contentCreatorPrivilege: boolean;
+}
+
 /** Course completion dialog props. */
 export interface CollectionDetailLayoutCourseCompletionProps {
   courseProgressProps: CourseProgressCardProps | null | undefined;
@@ -90,6 +101,7 @@ export interface CollectionDetailLayoutProps {
   certificateModal: CollectionDetailLayoutCertificateModalProps;
   relatedContent: CollectionDetailLayoutRelatedContentProps;
   courseCompletion: CollectionDetailLayoutCourseCompletionProps;
+  batchExpiry: CollectionDetailLayoutBatchExpiryProps;
 }
 
 const CollectionDetailLayout = ({
@@ -100,6 +112,7 @@ const CollectionDetailLayout = ({
   certificateModal,
   relatedContent,
   courseCompletion,
+  batchExpiry,
 }: CollectionDetailLayoutProps) => {
   const { t: tLayout } = useAppI18n();
   const isMobile = useIsMobile();
@@ -189,6 +202,7 @@ const CollectionDetailLayout = ({
         collectionId={collectionId}
         hasCertificate={hasCertificate}
       />
+      <BatchExpiryDialog {...batchExpiry} />
       <Footer />
     </div>
   );

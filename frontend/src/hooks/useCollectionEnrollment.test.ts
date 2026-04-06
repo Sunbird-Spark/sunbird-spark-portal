@@ -135,6 +135,100 @@ describe('useCollectionEnrollment', () => {
     });
   });
 
+  describe('isBatchExpiringSoon', () => {
+    const FIXED_NOW = new Date('2025-06-15T12:00:00');
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(FIXED_NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('is false when there is no endDate', () => {
+      mockUseBatchRead.mockReturnValue({ data: { data: { response: {} } } });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(false);
+    });
+
+    it('is false when batch read response is undefined', () => {
+      mockUseBatchRead.mockReturnValue({ data: undefined });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(false);
+    });
+
+    it('is false when endDate has already passed (isBatchEnded takes priority)', () => {
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { endDate: '2020-01-01T00:00:00.000Z' } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(false);
+    });
+
+    it('is true when endDate is today (0 days left)', () => {
+      // Use end-of-day so isBatchEnded is false but dayjs diff is 0
+      const today = '2025-06-15T23:59:59.999Z';
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { endDate: today } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(true);
+    });
+
+    it('is true when endDate is 1 day away', () => {
+      const tomorrow = '2025-06-16';
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { endDate: tomorrow } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(true);
+    });
+
+    it('is true when endDate is 2 days away', () => {
+      const dayAfterTomorrow = '2025-06-17';
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { endDate: dayAfterTomorrow } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(true);
+    });
+
+    it('is false when endDate is 3 days away', () => {
+      const threeDaysAway = '2025-06-18';
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { endDate: threeDaysAway } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(false);
+    });
+
+    it('is false when endDate is far in the future', () => {
+      mockUseBatchRead.mockReturnValue({
+        data: { data: { response: { endDate: '2099-12-31' } } },
+      });
+      const { result } = renderHook(() =>
+        useCollectionEnrollment('col_1', 'batch_1', minimalCollectionData, true)
+      );
+      expect(result.current.isBatchExpiringSoon).toBe(false);
+    });
+  });
+
   describe('isBatchUpcoming', () => {
     const FIXED_NOW = new Date('2025-06-15T12:00:00');
 

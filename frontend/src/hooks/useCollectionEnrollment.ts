@@ -124,12 +124,19 @@ export function useCollectionEnrollment(
   );
   const hasCertificate = !!firstCertPreviewUrl;
 
+  const batchEndDateFromRead = batchReadResponse?.data?.response?.endDate;
+
   const isBatchEnded = useMemo(() => {
-    const endDateStr = batchReadResponse?.data?.response?.endDate;
-    if (!endDateStr) return false;
-    const endMs = new Date(endDateStr).getTime();
+    if (!batchEndDateFromRead) return false;
+    const endMs = new Date(batchEndDateFromRead).getTime();
     return Number.isFinite(endMs) && endMs < Date.now();
-  }, [batchReadResponse?.data?.response?.endDate]);
+  }, [batchEndDateFromRead]);
+
+  const isBatchExpiringSoon = useMemo(() => {
+    if (!batchEndDateFromRead || isBatchEnded) return false;
+    const daysLeft = dayjs(batchEndDateFromRead).startOf('day').diff(dayjs().startOf('day'), 'day');
+    return daysLeft >= 0 && daysLeft <= 2;
+  }, [batchEndDateFromRead, isBatchEnded]);
 
   const isBatchUpcoming = useMemo(() => {
     const startDateStr = batchReadResponse?.data?.response?.startDate;
@@ -175,6 +182,8 @@ export function useCollectionEnrollment(
     isEnrolledInCurrentBatch,
     effectiveBatchId,
     isBatchEnded,
+    isBatchExpiringSoon,
+    batchEndDateFromRead,
     isBatchUpcoming,
     contentStatusMap,
     contentStateFetched: contentStateFetched,
