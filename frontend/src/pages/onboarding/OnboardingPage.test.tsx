@@ -12,7 +12,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
       const translations: Record<string, string> = {
         'onboarding.failedToLoad': 'Failed to load onboarding',
         'onboarding.skip': 'Skip',
-        'onboarding.personalizeWelcome': 'We would love to help you personalize your experience!',
+        'onboarding.welcomeMessage': 'We would love to help you personalize your experience!',
         'onboarding.saveAndProceed': 'Save and Proceed',
         'onboarding.submit': 'Submit',
         'onboarding.saving': 'Saving...',
@@ -24,6 +24,8 @@ vi.mock('@/hooks/useAppI18n', () => ({
       };
       return translations[key] || key;
     },
+    currentCode: 'en',
+    changeLanguage: vi.fn(),
   }),
 }));
 
