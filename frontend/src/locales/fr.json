@@ -1222,6 +1222,11 @@
     "exportCsv": "Exporter CSV",
     "noDataToExport": "Aucune donnée à exporter",
     "csvExportedSuccessfully": "CSV exporté avec succès"
+  },
+  "passwordReset": {
+    "congratulations": "Félicitations !",
+    "successMessage": "Votre mot de passe a été réinitialisé avec succès.",
+    "proceedToLogin": "Passer à la connexion"
   }
 }
 

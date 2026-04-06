@@ -11,6 +11,8 @@ import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/f
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
+import { LANGUAGE_STORAGE_KEY } from '@/configs/languages';
+import i18n from '@/configs/i18n';
 
 const ForgotPassword: React.FC = () => {
   const { mutateAsync: searchUser } = useLearnerFuzzySearch();
@@ -21,10 +23,17 @@ const ForgotPassword: React.FC = () => {
 
   useImpression({ type: 'view', pageid: 'forgot-password' });
 
-  // Persist mobile context to sessionStorage on mount (only for mobile app)
+  // Persist mobile context and language to sessionStorage on mount
   useEffect(() => {
     if (isMobileApp()) {
       persistMobileContext();
+    }
+    // Read lang from URL param (passed by mobile app) and persist to sessionStorage
+    const params = new URLSearchParams(window.location.search);
+    const lang = params.get('lang');
+    if (lang) {
+      try { sessionStorage.setItem(LANGUAGE_STORAGE_KEY, lang); } catch { /* storage unavailable */ }
+      i18n.changeLanguage(lang);
     }
   }, []);
 

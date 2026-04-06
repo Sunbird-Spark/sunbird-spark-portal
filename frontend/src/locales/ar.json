@@ -1223,6 +1223,11 @@
     "exportCsv": "تصدير CSV",
     "noDataToExport": "لا توجد بيانات للتصدير",
     "csvExportedSuccessfully": "تم تصدير CSV بنجاح"
+  },
+  "passwordReset": {
+    "congratulations": "تهانينا!",
+    "successMessage": "تم إعادة تعيين كلمة المرور بنجاح.",
+    "proceedToLogin": "المتابعة إلى تسجيل الدخول"
   }
 }
 
