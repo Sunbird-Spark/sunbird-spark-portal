@@ -321,6 +321,21 @@
     @apply h-10 w-auto mx-auto;
   }
 
+  /* Global Sunbird Logo Height - Change here to update all logos */
+  .sunbird-logo {
+    height: 3rem; /* Base height for layout calculation */
+    width: auto;
+    display: block;
+    object-fit: contain;
+    transform: scale(2); /* Scale to 4rem visually (2 * 2rem = 4rem) */
+    transform-origin: left center; /* Scale from left edge to prevent shift */
+  }
+
+  /* RTL support for logo scaling */
+  [dir="rtl"] .sunbird-logo {
+    transform-origin: right center; /* Scale from right edge in RTL */
+  }
+
   /* Header & Labels */
   .login-header-title {
     @apply !font-rubik text-[1.875rem] font-semibold text-sunbird-obsidian leading-[1.875rem] mb-2;
@@ -960,12 +975,6 @@
 
   .home-inprogress-thumbnail-placeholder {
     @apply w-full h-full bg-black;
-  }
-
-  /* Onboarding Page Styles */
-  .onboarding-logo {
-    height: 1.75rem;
-    width: auto;
   }
 
   .onboarding-title {

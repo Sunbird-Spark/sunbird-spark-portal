@@ -459,7 +459,12 @@
     "altSunbird": "Sunbird",
     "otherPreferencePlaceholder": "Please type your preference here",
     "altImage": "Onboarding Image",
-    "goBack": "Go back"
+    "goBack": "Go back",
+    "welcomeMessage": "We would love to help you personalize your experience!",
+    "saveAndProceed": "Save and Proceed",
+    "submit": "Submit",
+    "saving": "Saving...",
+    "skipOnboarding": "Skip Onboarding"
   },
   "profilePage": {
     "loading": "Loading your profile...",

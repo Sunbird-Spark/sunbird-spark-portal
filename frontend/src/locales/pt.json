@@ -459,7 +459,12 @@
     "altSunbird": "Sunbird",
     "otherPreferencePlaceholder": "Por favor, digite sua preferência aqui",
     "altImage": "Imagem de integração",
-    "goBack": "Voltar"
+    "goBack": "Voltar",
+    "welcomeMessage": "Adoraríamos ajudá-lo a personalizar sua experiência!",
+    "saveAndProceed": "Salvar e Continuar",
+    "submit": "Enviar",
+    "saving": "Salvando...",
+    "skipOnboarding": "Pular Integração"
   },
   "profilePage": {
     "loading": "Carregando seu perfil...",

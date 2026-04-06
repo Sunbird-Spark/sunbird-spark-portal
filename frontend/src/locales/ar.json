@@ -459,7 +459,12 @@
     "altSunbird": "صن بيرد",
     "otherPreferencePlaceholder": "يرجى كتابة تفضيلك هنا",
     "altImage": "صورة الإعداد",
-    "goBack": "رجوع"
+    "goBack": "رجوع",
+    "welcomeMessage": "نود مساعدتك في تخصيص تجربتك!",
+    "saveAndProceed": "حفظ ومتابعة",
+    "submit": "إرسال",
+    "saving": "جارٍ الحفظ...",
+    "skipOnboarding": "تخطي الإعداد"
   },
   "profilePage": {
     "loading": "جارٍ تحميل ملفك الشخصي...",

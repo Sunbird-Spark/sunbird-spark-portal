@@ -52,7 +52,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, hideClose })
                   <img
                     src={sunbirdLogo}
                     alt={t("authLayout.logoAlt")}
-                    className={`logo-image`}
+                    className="sunbird-logo"
                   />
                 </a>
               </div>
