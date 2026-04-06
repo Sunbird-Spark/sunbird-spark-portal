@@ -33,12 +33,13 @@ vi.mock('@/hooks/useCertificate', () => ({
 }));
 
 const mockCourses = [
-    { courseId: 'course-1', status: 1 }, // in progress
-    { courseId: 'course-2', status: 2 }, // completed
+    { courseId: 'course-1', status: 0 }, // not started
+    { courseId: 'course-2', status: 1 }, // in progress
     { courseId: 'course-3', status: 2 }, // completed
+    { courseId: 'course-4', status: 2 }, // completed
 ];
 
-// Expected: totalCourses=3, inProgress=1, completed=2
+// Expected: totalCourses=4, inProgress=2 (status 0 + status 1), completed=2
 
 describe('HomeStatsCards', () => {
     beforeEach(() => {
@@ -56,15 +57,15 @@ describe('HomeStatsCards', () => {
     it('renders all four stats cards with correct labels and values', () => {
         render(<HomeStatsCards />);
 
-        // Total Courses: 3 courses enrolled
+        // Total Courses: 4 courses enrolled
         const totalCard = screen.getByText('Total Courses').closest('.home-stat-card');
         expect(totalCard).toBeInTheDocument();
-        expect(totalCard!.querySelector('.home-stat-value')!.textContent).toBe('03');
+        expect(totalCard!.querySelector('.home-stat-value')!.textContent).toBe('04');
 
-        // Courses in Progress: status === 1 => 1
+        // Courses in Progress: status === 0 or status === 1 => 2
         const progressCard = screen.getByText('In Progress').closest('.home-stat-card');
         expect(progressCard).toBeInTheDocument();
-        expect(progressCard!.querySelector('.home-stat-value')!.textContent).toBe('01');
+        expect(progressCard!.querySelector('.home-stat-value')!.textContent).toBe('02');
 
         // Courses Completed: status === 2 => 2
         const completedCard = screen.getByText('Completed').closest('.home-stat-card');
