@@ -77,6 +77,23 @@ describe('CourseProgressCard', () => {
     expect(screen.queryByText(/courseDetails\.batchStartedOn/)).not.toBeInTheDocument();
   });
 
+  it('renders batch end date when batchEndDate is provided', () => {
+    render(
+      <CourseProgressCard
+        totalContentCount={5}
+        batchEndDate="2025-12-31T00:00:00.000Z"
+      />
+    );
+    const endDateText = screen.getByText(/courseDetails\.batchEndsOn/);
+    expect(endDateText).toBeInTheDocument();
+    expect(endDateText.textContent).toMatch(/2025/);
+  });
+
+  it('does not render batch end date when batchEndDate is not provided', () => {
+    render(<CourseProgressCard totalContentCount={5} />);
+    expect(screen.queryByText(/courseDetails\.batchEndsOn/)).not.toBeInTheDocument();
+  });
+
   it('computes completed count from contentStatus when completedContentCount not provided', () => {
     const contentStatus = { c1: 2, c2: 2, c3: 1 };
     render(

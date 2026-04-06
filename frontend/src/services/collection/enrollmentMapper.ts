@@ -131,7 +131,7 @@ export function getCourseProgressProps(
           : 0;
   return {
     batchStartDate: enrollment.batch?.startDate,
-    batchEndDate: enrollment.batch?.endDate,
+    ...(enrollment.batch?.endDate !== undefined ? { batchEndDate: enrollment.batch.endDate } : {}),
     totalContentCount: total,
     completedContentCount: completed,
   };
