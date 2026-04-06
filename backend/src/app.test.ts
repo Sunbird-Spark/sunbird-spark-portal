@@ -270,6 +270,13 @@ describe('GET /dial/:id — dial code redirect', () => {
     expect(res.headers.location).toBe('http://localhost:5173/explore?dialcodes=H3A2E6');
   });
 
+  it('returns 400 when no dial code is provided (GET /dial)', async () => {
+    const { app } = await import('./app.js');
+    const res = await request(app).get('/dial');
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe('Missing dial code');
+  });
+
   it('does not handle POST /dial/:id (returns 404)', async () => {
     const { app } = await import('./app.js');
     const res = await request(app).post('/dial/H3A2E6');
