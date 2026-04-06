@@ -4,7 +4,7 @@ import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import sunbirdLogo from "../../../src/assets/sunbird-logo.svg";
 import onboardingImage from "../../../src/assets/onboarding-image.svg";
-import { useAppI18n } from "@/hooks/useAppI18n";
+import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import { resolveTitleText } from "@/utils/i18nUtils";
 import { useFormRead } from "@/hooks/useForm";
 import { OnboardingFormData } from '@/types/formTypes';
@@ -16,10 +16,11 @@ import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useCurrentUserId } from "@/hooks/useUser";
 import { useOnboardingRedirect } from './useOnboardingRedirect';
 import { toast } from "@/hooks/useToast";
+import { LANGUAGE_MAP } from "@/configs/languages";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 
 const Onboarding = () => {
-  const { t, currentCode } = useAppI18n();
+  const { t, currentCode, changeLanguage } = useAppI18n();
   useImpression({ type: 'view', pageid: 'onboarding', env: 'onboarding' });
   const navigate = useNavigate();
   const telemetry = useTelemetry();
@@ -77,6 +78,9 @@ const Onboarding = () => {
     const screen = onboardingData.screens[currentScreenId];
     if (!screen) return;
     const selectedFieldId = selections[currentScreenId];
+    if (selectedFieldId && selectedFieldId in LANGUAGE_MAP) {
+      void changeLanguage(selectedFieldId as LanguageCode);
+    }
     const selectedField = screen.fields.find(f => f.id === selectedFieldId);
     const nextId = screen.nextScreenId ?? selectedField?.nextScreenId;
     if (nextId) {
@@ -164,11 +168,11 @@ const Onboarding = () => {
       <div className="flex w-full max-w-7xl h-full max-h-[calc(100vh-4rem)] gap-6">
         <div className="w-full lg:w-1/2 p-8 md:p-10 lg:p-12 flex flex-col bg-white rounded-3xl overflow-y-auto">
           <div className="mb-6">
-            <img src={sunbirdLogo} alt={t('onboarding.altSunbird')} className="onboarding-logo" />
+            <img src={sunbirdLogo} alt={t('onboarding.altSunbird')} className="sunbird-logo" />
           </div>
           <div className="mb-8">
             <h1 className="onboarding-title">
-              We would love to help you personalize your experience!
+              {t('onboarding.welcomeMessage')}
             </h1>
           </div>
           <div className="flex-1">
@@ -182,6 +186,7 @@ const Onboarding = () => {
               />           
               <div>
                 <h2
+                  key={`title-${currentCode}`}
                   className={`${
                     isFirstScreen ? "text-2xl font-medium mb-6" : "text-base font-semibold mb-4"
                   } text-foreground`}
@@ -189,10 +194,10 @@ const Onboarding = () => {
                   {resolveTitleText(currentScreen.title, currentCode)}
                 </h2>             
                 {!showOtherInput ? (
-                  <div className={isFirstScreen ? "onboarding-grid" : "grid grid-cols-3 gap-3 max-w-md"}>
+                  <div key={`fields-${currentCode}`} className={isFirstScreen ? "onboarding-grid" : "grid grid-cols-3 gap-3 max-w-md"}>
                     {sortedFields.map(field => (
                       <OptionChip
-                        key={field.id} field={field} isSelected={selectedFieldId === field.id}
+                        key={`${field.id}-${currentCode}`} field={field} isSelected={selectedFieldId === field.id}
                         onClick={() => handleSelect(field.id)}
                         data-edataid={`onboarding-select-${field.id}`}
                         data-pageid="onboarding"
@@ -211,7 +216,7 @@ const Onboarding = () => {
               </div>
               {showNextButton ? (
                 <Button  onClick={handleNext} className={isFirstScreen ? "onboarding-button" : "onboarding-button-rounded"}  disabled={!selectedFieldId} >
-                  Save and Proceed
+                  {t('onboarding.saveAndProceed')}
                 </Button>
               ) : (
                 <Button onClick={handleSubmit} className="onboarding-button-rounded"
@@ -220,10 +225,10 @@ const Onboarding = () => {
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
                       <span className="onboarding-spinner" />
-                      Saving...
+                      {t('onboarding.saving')}
                     </span>
                   ) : (
-                    "Submit"
+                    t('onboarding.submit')
                   )}
                 </Button>
               )}
@@ -232,7 +237,7 @@ const Onboarding = () => {
           <div className="mt-6">
             <button type="button" onClick={handleSkip} disabled={isSubmitting || userId === undefined} className="text-primary hover:text-primary/80 font-medium transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Skip Onboarding
+              {t('onboarding.skipOnboarding')}
             </button>
           </div>
         </div>

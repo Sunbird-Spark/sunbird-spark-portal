@@ -36,8 +36,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                                 <img
                                     src={sunbirdLogo}
                                     alt={t("onboarding.altSunbird")}
-                                    className="h-[2.4375rem] w-auto"
-                                    style={{ height: '2.4375rem' }}
+                                    className="sunbird-logo"
                                 />
                             </Link>
                         </div>

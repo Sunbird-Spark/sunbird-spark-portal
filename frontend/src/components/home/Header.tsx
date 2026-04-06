@@ -65,14 +65,13 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
     <>
       <header className="sticky top-0 z-50 bg-white shadow-sunbird-md">
         <div className="container mx-auto px-0">
-          <div className="flex items-center justify-between h-16 md:h-[4.5rem] px-4 lg:pl-[3.75rem] lg:pr-[7.9375rem]">
+          <div className="flex items-center justify-between h-16 md:h-[4.5rem] px-4 lg:pl-[7.5rem] lg:pr-[7.9375rem]">
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <img
                 src={sunbirdLogo}
                 alt="Sunbird"
-                className="h-8 w-auto md:w-[13.1875rem]"
-                style={{ paddingRight: 0 }}
+                className="sunbird-logo"
               />
             </Link>
 

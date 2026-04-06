@@ -35,7 +35,7 @@ const Footer = () => {
               <img
                 src={sunbirdLogo}
                 alt={t("onboarding.altSunbird")}
-                className="h-8 w-auto md:w-[12.25rem] h-[2.4375rem] pr-0 lg:pr-[5rem]"
+                className="sunbird-logo pr-0 lg:pr-[5rem]"
               />
             </Link>
           </div>
