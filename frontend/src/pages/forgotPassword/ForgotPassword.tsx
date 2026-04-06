@@ -23,16 +23,16 @@ const ForgotPassword: React.FC = () => {
 
   useImpression({ type: 'view', pageid: 'forgot-password' });
 
-  // Persist mobile context and language to sessionStorage on mount
+  // Persist mobile context and language on mount
   useEffect(() => {
     if (isMobileApp()) {
       persistMobileContext();
     }
-    // Read lang from URL param (passed by mobile app) and persist to sessionStorage
+    // Read lang from URL param (passed by mobile app) and persist to localStorage
     const params = new URLSearchParams(window.location.search);
     const lang = params.get('lang');
     if (lang) {
-      try { sessionStorage.setItem(LANGUAGE_STORAGE_KEY, lang); } catch { /* storage unavailable */ }
+      try { localStorage.setItem(LANGUAGE_STORAGE_KEY, lang); } catch { /* storage unavailable */ }
       i18n.changeLanguage(lang);
     }
   }, []);

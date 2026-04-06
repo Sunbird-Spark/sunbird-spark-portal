@@ -16,9 +16,8 @@ export function useAppI18n() {
     await i18n.changeLanguage(code);
     try {
       localStorage.setItem(LANGUAGE_STORAGE_KEY, code);
-      sessionStorage.setItem(LANGUAGE_STORAGE_KEY, code);
     } catch {
-      // storage unavailable
+      // localStorage unavailable
     }
   };
 

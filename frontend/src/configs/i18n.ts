@@ -10,24 +10,15 @@ import { DEFAULT_LANGUAGE, LANGUAGE_MAP, LANGUAGE_STORAGE_KEY, SupportedLanguage
 
 function getInitialLanguage(): SupportedLanguage {
   try {
-    // sessionStorage: set by portal on language change, or by mobile ?lang= param
-    const session = sessionStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (session && LANGUAGE_MAP[session as SupportedLanguage]) {
-      return session as SupportedLanguage;
-    }
-    // localStorage: persisted across sessions
     const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (saved && LANGUAGE_MAP[saved as SupportedLanguage]) {
       return saved as SupportedLanguage;
     }
   } catch {
-    // storage unavailable (e.g. SSR or private-browsing restrictions)
+    // localStorage unavailable (e.g. SSR or private-browsing restrictions)
   }
   return DEFAULT_LANGUAGE;
 }
-
-const initialLang = getInitialLanguage();
-try { sessionStorage.setItem(LANGUAGE_STORAGE_KEY, initialLang); } catch { /* storage unavailable */ }
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -36,7 +27,7 @@ i18n.use(initReactI18next).init({
     pt: { translation: pt },
     ar: { translation: ar },
   },
-  lng: initialLang,
+  lng: getInitialLanguage(),
   fallbackLng: DEFAULT_LANGUAGE,
   interpolation: { escapeValue: false },
   react: { useSuspense: false },
