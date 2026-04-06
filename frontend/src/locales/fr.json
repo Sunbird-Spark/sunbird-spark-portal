@@ -253,6 +253,7 @@
     "courseProgress": "Progression du cours",
     "batchStartingOn": "Lot commence le",
     "batchStartedOn": "Lot commencé le",
+    "batchEndsOn": "Lot se termine le",
     "contentStatusCompleted": "Terminé",
     "contentStatusInProgress": "En cours",
     "contentStatusNotViewed": "Non consulté",
@@ -271,7 +272,11 @@
     "unenrolSuccess": "Désinscription du lot réussie",
     "courseCompletionMessage": "Vous avez terminé le cours avec succès",
     "courseCompletionNoCertificateNote": "Remarque : ce cours n'a pas de certificat",
-    "courseCompletionCertificateNote": "Vous pouvez télécharger votre certificat de cours depuis votre page de profil une fois qu'il est généré"
+    "courseCompletionCertificateNote": "Vous pouvez télécharger votre certificat de cours depuis votre page de profil une fois qu'il est généré",
+    "batchEndedTitle": "Session terminée",
+    "batchExpiredProgressWarning": "La progression ne sera pas calculée pour ce cours car la session est terminée.",
+    "batchExpiringSoonTitle": "Le cours expire bientôt",
+    "batchExpiringSoonWarning": "Votre cours expire le {{date}}. Terminez-le bientôt !"
   },
   "profileDataSharing": {
     "cardTitle": "Partage des données de profil",

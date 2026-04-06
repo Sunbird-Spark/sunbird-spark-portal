@@ -253,6 +253,7 @@
     "courseProgress": "Progresso do Curso",
     "batchStartingOn": "Turma começa em",
     "batchStartedOn": "Turma iniciada em",
+    "batchEndsOn": "Turma encerra em",
     "contentStatusCompleted": "Concluído",
     "contentStatusInProgress": "Em andamento",
     "contentStatusNotViewed": "Não visualizado",
@@ -271,7 +272,11 @@
     "unenrolSuccess": "Cancelamento de inscrição da turma realizado com sucesso",
     "courseCompletionMessage": "Você concluiu o curso com sucesso",
     "courseCompletionNoCertificateNote": "Observação: este curso não possui certificado",
-    "courseCompletionCertificateNote": "Você pode baixar o certificado do curso na sua página de perfil após ele ser gerado"
+    "courseCompletionCertificateNote": "Você pode baixar o certificado do curso na sua página de perfil após ele ser gerado",
+    "batchEndedTitle": "Lote Encerrado",
+    "batchExpiredProgressWarning": "O progresso não será calculado para este curso pois o lote encerrou.",
+    "batchExpiringSoonTitle": "Curso Expirando em Breve",
+    "batchExpiringSoonWarning": "Seu curso expirará em {{date}}. Conclua em breve!"
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",

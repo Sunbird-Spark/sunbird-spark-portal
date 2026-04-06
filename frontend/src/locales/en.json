@@ -253,6 +253,7 @@
     "courseProgress": "Course Progress",
     "batchStartingOn": "Batch starting on",
     "batchStartedOn": "Batch started on",
+    "batchEndsOn": "Batch ends on",
     "contentStatusCompleted": "Completed",
     "contentStatusInProgress": "In Progress",
     "contentStatusNotViewed": "Not viewed",
@@ -271,7 +272,11 @@
     "unenrolSuccess": "User unenroled from the batch successfully",
     "courseCompletionMessage": "You have successfully completed the course",
     "courseCompletionNoCertificateNote": "Note: This course does not have a certificate",
-    "courseCompletionCertificateNote": "You can download your course certificate from your Profile page once it is generated"
+    "courseCompletionCertificateNote": "You can download your course certificate from your Profile page once it is generated",
+    "batchEndedTitle": "Batch Ended",
+    "batchExpiredProgressWarning": "Progress won't be calculated for this course as the batch has ended.",
+    "batchExpiringSoonTitle": "Course Expiring Soon",
+    "batchExpiringSoonWarning": "Your course will expire on {{date}}. Complete it soon!"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
