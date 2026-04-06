@@ -44,14 +44,13 @@ app.use('/mobile', mobileRoutes);
 app.use('/portal', portalAuthRoutes);
 
 // DIAL code redirect — works for both anonymous and authenticated users
+// Separate routes: one for missing id (400), one for valid id (redirect)
+app.get('/dial', sessionMiddleware, ...anonymousMiddlewares, (_req, res) => {
+    res.status(400).json({ message: 'Missing dial code' });
+});
 app.get('/dial/:id', sessionMiddleware, ...anonymousMiddlewares, (req, res) => {
-    const dialCode = req.params.id as string;
-    if (!dialCode) {
-        res.status(400).json({ message: 'Missing dial code' });
-        return;
-    }
     const frontendBase = envConfig.DEVELOPMENT_REACT_APP_URL || '';
-    res.redirect(`${frontendBase}/explore?dialcodes=${encodeURIComponent(dialCode)}`);
+    res.redirect(`${frontendBase}/explore?dialcodes=${encodeURIComponent(req.params.id as string)}`);
 });
 // Portal Anonymous Routes
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousProxyRoutes)
