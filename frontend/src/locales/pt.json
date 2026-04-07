@@ -1274,6 +1274,11 @@
     "noDataToExport": "Nenhum dado para exportar",
     "csvExportedSuccessfully": "CSV exportado com sucesso"
   },
+  "passwordReset": {
+    "congratulations": "Parabéns!",
+    "successMessage": "Sua senha foi redefinida com sucesso.",
+    "proceedToLogin": "Ir para o Login"
+  },
   "exploreFilters": {
     "collection": "Coleções",
     "course": "Cursos",

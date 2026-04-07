@@ -3,20 +3,22 @@ import { FiCheck } from 'react-icons/fi';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
 import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
-
-const onProceedToLogin = () => {
-    window.location.href = getSafeRedirectUrl();
-};
+import { useAppI18n } from '@/hooks/useAppI18n';
 
 const PasswordResetSuccess: React.FC = () => {
+    const { t } = useAppI18n();
     const isMobileRedirect = isMobileApp();
+
+    const onProceedToLogin = () => {
+        window.location.href = getSafeRedirectUrl();
+    };
 
     return (
         <AuthLayout onClose={() => { window.location.href = getSafeRedirectUrl(); }} hideClose={isMobileRedirect}>
             <div className="flex flex-col items-center">
                 <Header
-                    title="Congratulations!"
-                    subtitle="Your password has been successfully reset."
+                    title={t('passwordReset.congratulations', { defaultValue: 'Congratulations!' })}
+                    subtitle={t('passwordReset.successMessage', { defaultValue: 'Your password has been successfully reset.' })}
                 />
 
                 <div className="flex justify-center mb-10">
@@ -26,7 +28,7 @@ const PasswordResetSuccess: React.FC = () => {
                 </div>
 
                 <PrimaryButton onClick={onProceedToLogin}>
-                    Proceed to Login
+                    {t('passwordReset.proceedToLogin', { defaultValue: 'Proceed to Login' })}
                 </PrimaryButton>
             </div>
         </AuthLayout>
