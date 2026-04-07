@@ -11,7 +11,7 @@ import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/f
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
-import { LANGUAGE_STORAGE_KEY } from '@/configs/languages';
+import { LANGUAGE_STORAGE_KEY, LANGUAGE_MAP, type SupportedLanguage } from '@/configs/languages';
 import i18n from '@/configs/i18n';
 
 const ForgotPassword: React.FC = () => {
@@ -31,9 +31,9 @@ const ForgotPassword: React.FC = () => {
     // Read lang from URL param (passed by mobile app) and persist to localStorage
     const params = new URLSearchParams(window.location.search);
     const lang = params.get('lang');
-    if (lang) {
+    if (lang && LANGUAGE_MAP[lang as SupportedLanguage]) {
       try { localStorage.setItem(LANGUAGE_STORAGE_KEY, lang); } catch { /* storage unavailable */ }
-      i18n.changeLanguage(lang);
+      void i18n.changeLanguage(lang).catch((err) => { console.error('Failed to change language to', lang, err); });
     }
   }, []);
 
