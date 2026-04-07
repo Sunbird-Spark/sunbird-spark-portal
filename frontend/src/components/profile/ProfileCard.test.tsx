@@ -1,7 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ProfileCard from './ProfileCard';
 import { UserProfile } from '@/types/userTypes';
+
+vi.mock('react-i18next', () => ({
+    useTranslation: () => ({
+        t: (key: string) => {
+            const translations: Record<string, string> = {
+                'profileCard.sunbirdId': 'Sunbird ID'
+            };
+            return translations[key] || key;
+        },
+        i18n: { language: 'en' }
+    })
+}));
 
 describe('ProfileCard', () => {
     const mockUser: UserProfile = {

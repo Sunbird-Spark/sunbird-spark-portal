@@ -49,6 +49,18 @@ vi.mock('@/hooks/useTnc', () => ({
     useAcceptTnc: () => ({ mutateAsync: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useTelemetry', () => ({
+    useTelemetry: () => ({
+        impression: vi.fn(),
+        interact: vi.fn(),
+        error: vi.fn(),
+    }),
+}));
+
+vi.mock('@/hooks/useImpression', () => ({
+    default: vi.fn(),
+}));
+
 vi.mock('@/services/userAuthInfoService/userAuthInfoService', () => ({
     default: {
         getUserId: () => 'test-user-id',

@@ -6,9 +6,16 @@ import { useContentSearch } from '../../hooks/useContent';
 import type { FilterState } from '../../pages/Explore';
 
 // Mock dependencies
-vi.mock('@/hooks/useAppI18n', () => ({
+vi.mock('../../hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => key,
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'loading': 'Loading...',
+        'exploreGrid.noContentFound': 'No content found',
+        'exploreGrid.noMoreContent': 'No more content to show'
+      };
+      return translations[key] || key;
+    },
   }),
 }));
 

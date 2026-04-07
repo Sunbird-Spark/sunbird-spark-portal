@@ -3,6 +3,18 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import DynamicCategorySection from './DynamicCategorySection';
 
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'viewAll': 'View All'
+      };
+      return translations[key] || key;
+    },
+    currentCode: 'en'
+  }),
+}));
+
 describe('DynamicCategorySection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
