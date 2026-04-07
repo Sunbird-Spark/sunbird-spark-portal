@@ -11,11 +11,14 @@ import {
 } from "@/hooks/useNotification";
 import { NotificationFeed } from "@/types/notificationTypes";
 import dayjs from "dayjs";
+import 'dayjs/locale/ar';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/pt';
 import React from 'react';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 export const NotificationPopover = () => {
-    const { t } = useAppI18n();
+    const { t, currentCode } = useAppI18n();
     const [isOpen, setIsOpen] = useState(false);
     const { notifications: allNotifications, refetch } = useNotificationRead();
     const { deleteNotification, deleteAll, filterDeleted } = useNotificationDelete();
@@ -28,7 +31,7 @@ export const NotificationPopover = () => {
     const hasNotifications = groupedNotifications.length > 0;
 
     const formatTimestamp = (timestamp: string) => {
-        return dayjs(timestamp).format('ddd, DD MMMM, hh:mm a');
+        return dayjs(timestamp).locale(currentCode).format('ddd, DD MMMM, hh:mm a');
     };
 
     // ── Notification click ──────────────────────────────────────────────────
@@ -105,7 +108,7 @@ export const NotificationPopover = () => {
                             groupedNotifications.map((g, index) => (
                                 <div key={g.group}>
                                     <div className="notification-group-label-wrapper">
-                                        <span className="notification-group-label">{g.group}</span>
+                                        <span className="notification-group-label">{t(g.group.toLowerCase())}</span>
                                         {index === 0 && (
                                             <button onClick={handleDeleteAll} className="notification-delete-all-btn">
                                                 {t("notifications.deleteAll")}
