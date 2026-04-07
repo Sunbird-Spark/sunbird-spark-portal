@@ -74,6 +74,7 @@ export class ContentEditorService {
       },
       sid,
       contentId: metadata.identifier,
+      contentVer: metadata.versionKey || '',
       pdata,
       channel,
       framework,
