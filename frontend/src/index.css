@@ -297,6 +297,11 @@
     @apply !font-rubik text-[1.875rem] font-semibold text-white leading-[2.625rem];
   }
 
+  /* RTL support for left panel title */
+  [dir="rtl"] .left-panel-title {
+    @apply text-right;
+  }
+
   .login-card {
     @apply flex-[0.85] p-6 md:p-10 relative flex flex-col justify-start md:justify-center md:pt-8 pt-6 overflow-y-auto;
   }
@@ -305,16 +310,47 @@
     @apply absolute top-5 right-5 p-2 text-sunbird-charcoal hover:opacity-70 transition-opacity z-20;
   }
 
+  /* RTL support for close button */
+  [dir="rtl"] .close-button {
+    @apply right-auto left-5;
+  }
+
   .login-inner-container {
     @apply mx-auto w-full max-w-sm flex flex-col justify-start;
   }
 
   .logo-container {
-    @apply text-center;
+    @apply text-center flex justify-center;
   }
 
   .sunbird-logo-wrapper {
-    @apply mb-2;
+    @apply mb-2 flex justify-center;
+  }
+
+  /* Auth layout specific logo alignment */
+  .auth-logo-wrapper {
+    @apply mb-8 flex items-center justify-center;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .auth-logo-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 50px;
+  }
+
+  /* RTL support for auth logo */
+  [dir="rtl"] .auth-logo-inner {
+    margin-right: 0;
+    margin-left: 50px;
+  }
+
+  .auth-logo-inner .sunbird-logo {
+    height: 3rem;
+    width: auto;
   }
 
   .logo-image {
