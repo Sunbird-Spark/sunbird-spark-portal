@@ -17,7 +17,6 @@ export interface ContentEditorWindowContext {
   };
   sid: string | null;
   contentId: string;
-  contentVer?: string;
   pdata: {
     id: string;
     ver: string;
