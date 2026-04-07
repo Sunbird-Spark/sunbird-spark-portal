@@ -247,17 +247,6 @@
   }
 }
 
-/* Notification Item Indicator RTL */
-[dir="rtl"] .notification-item::before {
-  left: auto;
-  right: -4px;
-}
-
-[dir="ltr"] .notification-item::before {
-  right: auto;
-  left: -4px;
-}
-
 /* Profile Info Accent RTL */
 [dir="rtl"] .personal-info-accent {
   left: auto;
