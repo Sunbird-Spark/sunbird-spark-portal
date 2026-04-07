@@ -50,7 +50,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
      return (
         <div className="bg-white rounded-2xl p-6 shadow-sunbird-sm">
             <h3 className="text-[1.25rem] font-bold text-sunbird-obsidian mb-6 font-rubik">{t('common.upcomingBatches')}</h3>
-            <div className="text-gray-500 text-sm">No upcoming batches scheduled.</div>
+            <div className="text-gray-500 text-sm">{t('myLearning.noUpcomingBatches')}</div>
         </div>
      )
   }
@@ -84,7 +84,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
                     <div className="flex items-center gap-6 text-[0.875rem] text-gray-500 font-rubik">
                       <div className="flex items-center gap-1.5">
                         <FiBookOpen className="text-sunbird-brick w-[0.875rem] h-[0.875rem]" />
-                        <span className="font-light">{batchItem.lessons} Lessons</span>
+                        <span className="font-light">{batchItem.lessons} {t('contentStats.lessons')}</span>
                       </div>
                     </div>
                   </div>
