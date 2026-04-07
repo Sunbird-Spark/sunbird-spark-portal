@@ -54,7 +54,7 @@ const ContentPlayerSection: React.FC<ContentPlayerSectionProps> = React.memo(({
             <div className="content-review-player-sidebar">
               <CommentSection
                 contentId={contentId}
-                contentVer={contentVer}
+                contentVer={contentVer || '0'}
                 contentType={contentType || 'application/vnd.ekstep.ecml-archive'}
                 isReviewMode={isReviewMode}
               />
