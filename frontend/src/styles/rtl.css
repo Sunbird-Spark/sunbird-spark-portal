@@ -247,8 +247,6 @@
   }
 }
 
-/* Notification Item Indicator RTL */
-
 /* Profile Info Accent RTL */
 [dir="rtl"] .personal-info-accent {
   left: auto;
