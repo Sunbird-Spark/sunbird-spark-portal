@@ -17,7 +17,7 @@ interface CommentSectionProps {
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   contentId,
-  contentVer,
+  contentVer = '0',
   contentType = 'application/vnd.ekstep.ecml-archive',
   stageId,
   isReviewMode = false
@@ -34,7 +34,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     isCreatingComment,
   } = useReviewComment({
     contentId,
-    contentVer: contentVer || '',
+    contentVer,
     contentType,
     stageId,
     enabled: true,

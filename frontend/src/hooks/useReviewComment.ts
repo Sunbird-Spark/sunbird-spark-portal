@@ -43,7 +43,7 @@ export const useReviewComment = (options: UseReviewCommentOptions) => {
       const response = await reviewCommentService.readComments(contextDetails);
       return response.comments || [];
     },
-    enabled: enabled && !!contentVer,
+    enabled,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false,
   });
