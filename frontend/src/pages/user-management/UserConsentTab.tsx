@@ -1,46 +1,26 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { FiUsers, FiUserCheck, FiUserX } from "react-icons/fi";
 import SummaryCard from "@/components/reports/SummaryCard";
 import FilterPanel from "@/components/reports/FilterPanel";
 import DataTableWrapper from "@/components/reports/DataTableWrapper";
 import ExportButton from "@/components/reports/ExportButton";
-import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { useConsentSummary } from "@/hooks/useConsentSummary";
-import type { UserConsentRecord } from "@/types/reports";
-import { useToast } from "@/hooks/useToast";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import {
-  type ConfirmState,
-  CLOSED_CONFIRM,
-  getExportColumns,
-  BulkActionsBar,
-  buildColumns,
-} from "./userConsentColumns";
+import { getExportColumns, buildColumns } from "./userConsentColumns";
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 
 const UserConsentTab = () => {
   const { t } = useAppI18n();
-  const { toast } = useToast();
   const { data: apiData, isLoading, isError } = useConsentSummary();
 
-  const [localOverrides, setLocalOverrides] = useState<Map<string, Partial<UserConsentRecord>>>(new Map());
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [confirm, setConfirm] = useState<ConfirmState>(CLOSED_CONFIRM);
-
-  /* ── Merge API data with local overrides ───────────────────────────────── */
-
-  const data = useMemo<UserConsentRecord[]>(
-    () => apiData.map((r) => ({ ...r, ...localOverrides.get(r.id) })),
-    [apiData, localOverrides],
-  );
 
   /* ── Derived data ──────────────────────────────────────────────────────── */
 
   const filteredData = useMemo(() => {
-    let result = data;
+    let result = apiData;
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -49,106 +29,20 @@ const UserConsentTab = () => {
     }
     if (statusFilter !== "all") result = result.filter((r) => r.consentStatus === statusFilter);
     return result;
-  }, [data, search, statusFilter]);
+  }, [apiData, search, statusFilter]);
 
   const stats = useMemo(
     () => ({
-      total: data.length,
-      granted: data.filter((r) => r.consentStatus === "Granted").length,
-      revoked: data.filter((r) => r.consentStatus === "Revoked").length,
+      total: apiData.length,
+      granted: apiData.filter((r) => r.consentStatus === "Granted").length,
+      revoked: apiData.filter((r) => r.consentStatus === "Revoked").length,
     }),
-    [data]
+    [apiData]
   );
-
-  /* ── Selection handlers ────────────────────────────────────────────────── */
-
-  const handleToggle = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const handleSelectAll = useCallback(
-    () => setSelectedIds(new Set(filteredData.map((r) => r.id))),
-    [filteredData]
-  );
-
-  const handleClearSelection = useCallback(() => setSelectedIds(new Set()), []);
-
-  /* ── Dialog openers ────────────────────────────────────────────────────── */
-
-  const openBulkRevoke = useCallback(
-    () => setConfirm({ open: true, type: "revoke", isBulk: true, targetId: null, isLoading: false }),
-    []
-  );
-
-  const openBulkReissue = useCallback(
-    () => setConfirm({ open: true, type: "reissue", isBulk: true, targetId: null, isLoading: false }),
-    []
-  );
-
-  const closeConfirm = useCallback(
-    () => setConfirm((prev) => ({ ...prev, open: false })),
-    []
-  );
-
-  /* ── Confirm action ────────────────────────────────────────────────────── */
-
-  const handleConfirm = useCallback(() => {
-    const { type, isBulk, targetId } = confirm;
-    setConfirm((prev) => ({ ...prev, isLoading: true }));
-
-    setTimeout(() => {
-      const idsToUpdate = isBulk ? [...selectedIds] : targetId ? [targetId] : [];
-      const newStatus: UserConsentRecord["consentStatus"] = type === "revoke" ? "Revoked" : "Granted";
-      const today = new Date().toISOString().split("T")[0]!;
-
-      setLocalOverrides((prev) => {
-        const next = new Map(prev);
-        for (const id of idsToUpdate) {
-          next.set(id, {
-            ...next.get(id),
-            consentStatus: newStatus,
-            consentGivenOn: newStatus === "Granted" ? today : null,
-          });
-        }
-        return next;
-      });
-
-      if (isBulk) setSelectedIds(new Set());
-      toast({
-        title:
-          type === "revoke"
-            ? t("userManagement.consentTab.revokedToast", { count: idsToUpdate.length })
-            : t("userManagement.consentTab.reissuedToast", { count: idsToUpdate.length }),
-      });
-      setConfirm(CLOSED_CONFIRM);
-    }, 600);
-  }, [confirm, selectedIds, toast, t]);
 
   /* ── Table columns ─────────────────────────────────────────────────────── */
 
-  const columns = useMemo(
-    () => buildColumns(selectedIds, handleToggle, t),
-    [selectedIds, handleToggle, t]
-  );
-
-  /* ── Confirm dialog text ───────────────────────────────────────────────── */
-
-  const confirmTitle = confirm.type === "revoke"
-    ? (confirm.isBulk
-        ? t("userManagement.consentTab.revokeTitleBulk", { count: selectedIds.size })
-        : t("userManagement.consentTab.revokeTitle"))
-    : (confirm.isBulk
-        ? t("userManagement.consentTab.reissueTitleBulk", { count: selectedIds.size })
-        : t("userManagement.consentTab.reissueTitle"));
-
-  const confirmDescription = confirm.type === "revoke"
-    ? t("userManagement.consentTab.revokeDesc")
-    : t("userManagement.consentTab.reissueDesc");
+  const columns = useMemo(() => buildColumns(t), [t]);
 
   /* ── Render ────────────────────────────────────────────────────────────── */
 
@@ -184,16 +78,6 @@ const UserConsentTab = () => {
         <SummaryCard label={t("userManagement.consentTab.consentRevoked")} value={stats.revoked} colorClass="bg-sunbird-lavender" icon={<FiUserX className="w-4 h-4" />} />
       </div>
 
-      <BulkActionsBar
-        selectedCount={selectedIds.size}
-        filteredCount={filteredData.length}
-        onSelectAll={handleSelectAll}
-        onClear={handleClearSelection}
-        onBulkRevoke={openBulkRevoke}
-        onBulkReissue={openBulkReissue}
-        t={t}
-      />
-
       <FilterPanel
         filters={[
           {
@@ -208,13 +92,9 @@ const UserConsentTab = () => {
         values={{ status: statusFilter }}
         onChange={(key, value) => {
           if (key === "status") setStatusFilter(value);
-          setSelectedIds(new Set());
         }}
         searchValue={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setSelectedIds(new Set());
-        }}
+        onSearchChange={(v) => setSearch(v)}
         searchPlaceholder={t("userManagement.consentTab.searchPlaceholder")}
       />
 
@@ -224,21 +104,6 @@ const UserConsentTab = () => {
         keyExtractor={(r) => r.id}
         pageSize={10}
         emptyMessage={t("userManagement.consentTab.noUsersMatch")}
-      />
-
-      <ConfirmDialog
-        open={confirm.open}
-        onClose={closeConfirm}
-        onConfirm={handleConfirm}
-        title={confirmTitle}
-        description={confirmDescription}
-        confirmLabel={confirm.type === "revoke" ? t("userManagement.consentTab.revokeTitle") : t("userManagement.consentTab.reissueTitle")}
-        confirmVariant={confirm.type === "revoke" ? "destructive" : "default"}
-        isLoading={confirm.isLoading}
-        confirmButtonProps={{
-          'data-edataid': confirm.type === 'revoke' ? 'um-consent-bulk-revoke-confirm' : 'um-consent-bulk-reissue-confirm',
-          'data-pageid': 'user-management',
-        }}
       />
     </>
   );
