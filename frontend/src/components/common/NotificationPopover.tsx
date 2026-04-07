@@ -115,7 +115,7 @@ export const NotificationPopover = () => {
                                     {g.items.map(item => (
                                         <div
                                             key={item.id}
-                                            className="notification-item cursor-pointer"
+                                            className={`notification-item cursor-pointer ${item.status === 'unread' ? 'notification-item--unread' : ''}`}
                                             onClick={() => handleNotificationClick(item)}
                                         >
                                             <div className="notification-item-body">
