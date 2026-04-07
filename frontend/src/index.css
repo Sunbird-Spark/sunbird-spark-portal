@@ -339,13 +339,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 3.125rem;
+    margin-right: 0;
+    margin-left: 0;
   }
 
   /* RTL support for auth logo */
   [dir="rtl"] .auth-logo-inner {
     margin-right: 0;
-    margin-left: 3.125rem;
+    margin-left: 0;
+  }
+
+  @media (min-width: 768px) {
+    .auth-logo-inner {
+      margin-right: 3.125rem;
+    }
+
+    [dir="rtl"] .auth-logo-inner {
+      margin-right: 0;
+      margin-left: 3.125rem;
+    }
   }
 
   .auth-logo-inner .sunbird-logo {
