@@ -16,11 +16,12 @@ const MyLearningProgress = ({
   const { t } = useAppI18n();
   const totalHours = lessonsVisited;
 
-  const formatCompact = (n: number): string => {
-    if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${+(n / 1_000).toFixed(1)}k`;
-    return String(n);
-  };
+  const compactNumberFormatter = new Intl.NumberFormat(undefined, {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  });
+
+  const formatCompact = (n: number): string => compactNumberFormatter.format(n);
 
   const displayHours = formatCompact(totalHours);
   const centerFontSize = displayHours.length <= 3 ? '1.5rem' : displayHours.length <= 4 ? '1.1rem' : '0.875rem';
