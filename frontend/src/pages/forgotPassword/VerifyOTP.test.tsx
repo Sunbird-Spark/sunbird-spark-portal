@@ -40,8 +40,8 @@ vi.mock('@/utils/ValidationUtils', () => ({ OTP_REGEX: /^\d{6}$/ }));
 const mockRedirectWithError = vi.fn().mockReturnValue(false);
 const mockAppendMobileParams = vi.fn((url: string) => url + '/');
 vi.mock('../../utils/forgotPasswordUtils', () => ({
-    redirectWithError: (...args: any[]) => mockRedirectWithError(...args),
-    appendMobileParams: (...args: any[]) => mockAppendMobileParams(...args),
+    redirectWithError: (msg: string) => mockRedirectWithError(msg),
+    appendMobileParams: (url: string) => mockAppendMobileParams(url),
 }));
 
 vi.mock('@/components/telemetry/TelemetryTracker', () => ({
