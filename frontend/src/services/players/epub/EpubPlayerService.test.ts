@@ -337,5 +337,141 @@ describe('EpubPlayerService', () => {
       expect(() => service.removeEventListeners(element)).not.toThrow();
     });
   });
+
+  describe('CSS injection and rewriting', () => {
+    it('should inject scoped style element when CSS is non-empty', async () => {
+      const mockCss = ':root { --color: red; } html { font-size: 16px; } body { margin: 0; }';
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(mockCss),
+      }));
+
+      (EpubPlayerService as any).cachedCss = null;
+      (EpubPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+      const element = await service.createElement(config);
+
+      const styleEl = element.querySelector('style[data-epub-player-styles]');
+      expect(styleEl).not.toBeNull();
+      expect(styleEl?.textContent).toContain('@scope');
+    });
+
+    it('should rewrite :root to :scope in injected CSS', async () => {
+      const mockCss = ':root { --primary: blue; }';
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(mockCss),
+      }));
+
+      (EpubPlayerService as any).cachedCss = null;
+      (EpubPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+      const element = await service.createElement(config);
+
+      const styleEl = element.querySelector('style[data-epub-player-styles]');
+      expect(styleEl?.textContent).toContain(':scope');
+      expect(styleEl?.textContent).not.toContain(':root');
+    });
+
+    it('should rewrite html and body selectors to :scope', async () => {
+      const mockCss = 'html { font-size: 16px; } body { margin: 0; }';
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(mockCss),
+      }));
+
+      (EpubPlayerService as any).cachedCss = null;
+      (EpubPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+      const element = await service.createElement(config);
+
+      const styleEl = element.querySelector('style[data-epub-player-styles]');
+      expect(styleEl?.textContent).not.toContain('html {');
+      expect(styleEl?.textContent).not.toContain('body {');
+    });
+
+    it('should not inject style element when CSS is empty', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(''),
+      }));
+
+      (EpubPlayerService as any).cachedCss = null;
+
+      const config = await service.createConfig(mockMetadata);
+      const element = await service.createElement(config);
+
+      const styleEl = element.querySelector('style[data-epub-player-styles]');
+      expect(styleEl).toBeNull();
+    });
+
+    it('should fall back to empty CSS when fetch response is not ok', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: () => Promise.resolve(''),
+      }));
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      (EpubPlayerService as any).cachedCss = null;
+      (EpubPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+      const element = await service.createElement(config);
+
+      expect(element).toBeTruthy();
+    });
+
+    it('should return cached CSS on second createElement call', async () => {
+      const mockCss = 'body { margin: 0; }';
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(mockCss),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      (EpubPlayerService as any).cachedCss = null;
+      (EpubPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+      await service.createElement(config);
+      await service.createElement(config);
+
+      // fetch should only be called once (cached after first call)
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reuse in-flight CSS promise for concurrent calls', async () => {
+      let resolveFetch!: (value: string) => void;
+      const fetchPromise = new Promise<string>(resolve => { resolveFetch = resolve; });
+      const mockFetch = vi.fn().mockReturnValue(
+        Promise.resolve({ ok: true, text: () => fetchPromise })
+      );
+      vi.stubGlobal('fetch', mockFetch);
+
+      (EpubPlayerService as any).cachedCss = null;
+      (EpubPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+
+      // Start two createElement calls concurrently — both should share the same fetch
+      const p1 = service.createElement(config);
+      const p2 = service.createElement(config);
+
+      resolveFetch('body { margin: 0; }');
+      await Promise.all([p1, p2]);
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('unloadStyles', () => {
+    it('should be callable without throwing', () => {
+      expect(() => EpubPlayerService.unloadStyles()).not.toThrow();
+    });
+  });
 });
 

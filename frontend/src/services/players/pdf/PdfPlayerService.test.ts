@@ -256,6 +256,46 @@ describe('PdfPlayerService', () => {
       const styleEl = element.querySelector('style[data-pdf-player-styles="true"]');
       expect(styleEl).toBeNull();
     });
+
+    it('should not create style tag when response is not ok', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: () => Promise.resolve(''),
+      } as any);
+      (PdfPlayerService as any).cachedCss = null;
+      (PdfPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+      const element = await service.createElement(config);
+
+      expect(element).toBeTruthy();
+      const styleEl = element.querySelector('style[data-pdf-player-styles="true"]');
+      expect(styleEl).toBeNull();
+    });
+
+    it('should reuse in-flight CSS promise for concurrent calls', async () => {
+      let resolveFetch!: (value: string) => void;
+      const fetchPromise = new Promise<string>(resolve => { resolveFetch = resolve; });
+      const mockFetchFn = vi.fn().mockReturnValue(
+        Promise.resolve({ ok: true, text: () => fetchPromise })
+      );
+      globalThis.fetch = mockFetchFn as any;
+
+      (PdfPlayerService as any).cachedCss = null;
+      (PdfPlayerService as any).cssLoading = undefined;
+
+      const config = await service.createConfig(mockMetadata);
+
+      const p1 = service.createElement(config);
+      const p2 = service.createElement(config);
+
+      resolveFetch('body { margin: 0; }');
+      await Promise.all([p1, p2]);
+
+      expect(mockFetchFn).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('attachEventListeners', () => {

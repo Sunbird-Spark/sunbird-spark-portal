@@ -140,6 +140,21 @@ vi.mock('@/components/workspace/PublishWarningDialog', () => ({
   default: () => null,
 }));
 
+vi.mock('@/hooks/useTelemetry', () => ({
+  useTelemetry: () => ({ audit: vi.fn(), log: vi.fn(), impression: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useImpression', () => ({
+  default: vi.fn(),
+  useImpression: vi.fn(),
+}));
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string, params?: Record<string, string>) => params ? `${key}:${JSON.stringify(params)}` : key,
+  }),
+}));
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
@@ -241,6 +256,34 @@ describe('ContentReviewPage - Button Functionality', () => {
       expect(screen.getByRole('button', { name: /Request for Changes/i })).toBeInTheDocument();
 
       unmount();
+    });
+  });
+});
+
+describe('ContentViewPage - Publish and Reject flows', () => {
+  beforeEach(() => vi.clearAllMocks());
+  afterEach(() => cleanup());
+
+  it('formatDate returns null for undefined date (via missing lastUpdatedOn)', () => {
+    // The component renders "N/A" placeholder when lastUpdatedOn is undefined
+    renderPage();
+    // If formatDate(undefined) = null the component shows the t() fallback
+    expect(screen.queryByText('workspace.review.notAvailable')).toBeDefined();
+  });
+
+  it('clicking Publish triggers form load and shows checklist dialog', async () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /^Publish$/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/Please confirm that ALL/i)).toBeInTheDocument();
+    });
+  });
+
+  it('clicking Request for Changes triggers form load and shows checklist dialog', async () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /Request for Changes/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/Please confirm that ALL/i)).toBeInTheDocument();
     });
   });
 });

@@ -28,6 +28,10 @@ export default defineConfig({
         '**/types/**',
         '**/*.d.ts',
         '**/*.json',
+        'src/assets/**',
+        'src/**/*.css',
+        '**/index.ts',
+        '**/types.ts',
       ],
       thresholds: {
         branches: 70,

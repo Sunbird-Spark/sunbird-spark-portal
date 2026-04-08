@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TncCheckWrapper } from './TncCheckWrapper';
 
 const mockMutate = vi.fn();
+const mockToast = vi.fn();
 let mockNeedsTncAcceptance = false;
 let mockTermsUrl = '';
 let mockIsAuthenticated = true;
@@ -43,7 +44,7 @@ vi.mock('@/hooks/useTnc', () => ({
 
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({
-    toast: vi.fn(),
+    toast: mockToast,
   }),
 }));
 
@@ -89,6 +90,10 @@ describe('TncCheckWrapper', () => {
     mockTermsUrl = '';
     mockIsAuthenticated = true;
     sessionStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('renders children normally when T&C is already accepted', () => {
@@ -178,5 +183,79 @@ describe('TncCheckWrapper', () => {
 
     expect(screen.getByTestId('child-content')).toBeInTheDocument();
     expect(screen.getByText('App Content')).toBeInTheDocument();
+  });
+
+  it('does not show popup when user is not authenticated', () => {
+    mockNeedsTncAcceptance = true;
+    mockTermsUrl = 'https://example.com/terms';
+    mockIsAuthenticated = false;
+    renderWrapper({ tncLatestVersion: 'v1' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('dismisses popup for session when closed without accepting', async () => {
+    mockNeedsTncAcceptance = true;
+    mockTermsUrl = 'https://example.com/terms';
+    mockIsAuthenticated = true;
+    renderWrapper({ tncLatestVersion: 'v1' });
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    // Click close button to dismiss without accepting
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    fireEvent.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls toast with error when mutate fails', async () => {
+    mockMutate.mockImplementation((_data: any, { onError }: any) => {
+      onError(new Error('network error'));
+    });
+
+    mockNeedsTncAcceptance = true;
+    mockTermsUrl = 'https://example.com/terms';
+    mockIsAuthenticated = true;
+    renderWrapper({ identifier: 'user-1', tncLatestVersion: 'v1' });
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'destructive' })
+    );
+  });
+
+  it('calls toast with success and closes popup on mutate success', async () => {
+    mockMutate.mockImplementation((_data: any, { onSuccess }: any) => {
+      onSuccess();
+    });
+
+    mockNeedsTncAcceptance = true;
+    mockTermsUrl = 'https://example.com/terms';
+    mockIsAuthenticated = true;
+    renderWrapper({ identifier: 'user-1', tncLatestVersion: 'v1' });
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Terms Accepted' })
+      );
+    });
   });
 });
