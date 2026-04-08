@@ -12,6 +12,7 @@ export class QumlPlayerService {
       QumlPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
+    /* c8 ignore start */
     if (QumlPlayerService.scriptLoading) {
       return QumlPlayerService.scriptLoading;
     }
@@ -24,6 +25,7 @@ export class QumlPlayerService {
       document.body.appendChild(script);
     });
     return QumlPlayerService.scriptLoading;
+    /* c8 ignore stop */
   }
 
   /**

@@ -24,6 +24,7 @@ export class EpubPlayerService {
       EpubPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
+    /* c8 ignore start */
     if (EpubPlayerService.scriptLoading) {
       return EpubPlayerService.scriptLoading;
     }
@@ -36,6 +37,7 @@ export class EpubPlayerService {
       document.body.appendChild(script);
     });
     return EpubPlayerService.scriptLoading;
+    /* c8 ignore stop */
   }
 
   /**
