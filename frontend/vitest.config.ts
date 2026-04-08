@@ -30,7 +30,6 @@ export default defineConfig({
         '**/*.json',
         'src/assets/**',
         'src/**/*.css',
-        '**/index.ts',
         '**/types.ts',
       ],
       thresholds: {

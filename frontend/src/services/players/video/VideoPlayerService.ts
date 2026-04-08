@@ -26,7 +26,7 @@ export class VideoPlayerService {
       VideoPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
-    /* c8 ignore start */
+    /* c8 ignore next 3 */
     if (VideoPlayerService.scriptLoading) {
       return VideoPlayerService.scriptLoading;
     }
@@ -39,7 +39,6 @@ export class VideoPlayerService {
       document.body.appendChild(script);
     });
     return VideoPlayerService.scriptLoading;
-    /* c8 ignore stop */
   }
 
   static unloadStyles(): void {

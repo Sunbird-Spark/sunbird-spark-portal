@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PdfPlayerService } from './PdfPlayerService';
 import type { PdfPlayerMetadata } from './types';
 import { buildTelemetryContext } from '../telemetryContextBuilder';
@@ -72,6 +72,11 @@ describe('PdfPlayerService', () => {
     }
 
     service = new PdfPlayerService();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   describe('createConfig', () => {
@@ -214,10 +219,10 @@ describe('PdfPlayerService', () => {
 
     it('should inject scoped styles on createElement call', async () => {
       // Mock fetch to simulate CSS loading
-      globalThis.fetch = vi.fn().mockResolvedValue({
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: true,
         text: () => Promise.resolve('.test { color: red; }'),
-      } as any);
+      } as any));
       (PdfPlayerService as any).cachedCss = null;
 
       const config = await service.createConfig(mockMetadata);
@@ -230,10 +235,10 @@ describe('PdfPlayerService', () => {
     });
 
     it('should not fetch styles multiple times (caching behavior)', async () => {
-      globalThis.fetch = vi.fn().mockResolvedValue({
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: true,
         text: () => Promise.resolve('.test { color: red; }'),
-      } as any);
+      } as any));
       (PdfPlayerService as any).cachedCss = null;
 
       const config = await service.createConfig(mockMetadata);
@@ -247,7 +252,7 @@ describe('PdfPlayerService', () => {
     });
 
     it('should not create style tag if fetch fails', async () => {
-      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
       (PdfPlayerService as any).cachedCss = null;
 
       const config = await service.createConfig(mockMetadata);
@@ -259,11 +264,11 @@ describe('PdfPlayerService', () => {
 
     it('should not create style tag when response is not ok', async () => {
       vi.spyOn(console, 'error').mockImplementation(() => {});
-      globalThis.fetch = vi.fn().mockResolvedValue({
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: false,
         status: 404,
         text: () => Promise.resolve(''),
-      } as any);
+      } as any));
       (PdfPlayerService as any).cachedCss = null;
       (PdfPlayerService as any).cssLoading = undefined;
 
@@ -281,7 +286,7 @@ describe('PdfPlayerService', () => {
       const mockFetchFn = vi.fn().mockReturnValue(
         Promise.resolve({ ok: true, text: () => fetchPromise })
       );
-      globalThis.fetch = mockFetchFn as any;
+      vi.stubGlobal('fetch', mockFetchFn as any);
 
       (PdfPlayerService as any).cachedCss = null;
       (PdfPlayerService as any).cssLoading = undefined;

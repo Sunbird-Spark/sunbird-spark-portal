@@ -23,7 +23,7 @@ export class PdfPlayerService {
       PdfPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
-    /* c8 ignore start */
+    /* c8 ignore next 3 */
     if (PdfPlayerService.scriptLoading) {
       return PdfPlayerService.scriptLoading;
     }
@@ -36,7 +36,6 @@ export class PdfPlayerService {
       document.body.appendChild(script);
     });
     return PdfPlayerService.scriptLoading;
-    /* c8 ignore stop */
   }
 
   /**

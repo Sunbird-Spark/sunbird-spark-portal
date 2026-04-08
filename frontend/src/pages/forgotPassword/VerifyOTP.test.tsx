@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { VerifyOTP } from './VerifyOTP';
 
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -34,7 +34,6 @@ vi.mock('react-google-recaptcha', () => ({
         return <div />;
     })
 }));
-vi.mock('@/utils/validation-utils', () => ({ OTP_REGEX: /^\d{6}$/ }));
 vi.mock('@/utils/ValidationUtils', () => ({ OTP_REGEX: /^\d{6}$/ }));
 
 const mockRedirectWithError = vi.fn().mockReturnValue(false);
@@ -85,6 +84,7 @@ describe('VerifyOTP', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.useFakeTimers({ shouldAdvanceTime: true });
         vi.stubGlobal('location', {
             href: 'http://test.com/forgot-password',
             search: '',
@@ -95,6 +95,8 @@ describe('VerifyOTP', () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+        vi.runOnlyPendingTimers();
+        vi.useRealTimers();
     });
 
     it('handles successful verification', async () => {
@@ -208,11 +210,30 @@ describe('VerifyOTP', () => {
 
         // Wait for countdown to enable resend button
         const resendBtn = screen.getByText(/Resend OTP/i).closest('button')!;
-        // Force enable by firing click when button is enabled initially (before interval fires)
-        // Reset disable state via hack: counter starts at 20 but button is disabled
-        // We need to wait for counter to reach 0, but that takes 20s with real timers
-        // Instead check button is disabled initially
         expect(resendBtn).toBeDisabled();
+
+        // Advance 21 seconds to bypass the OTP resend cooldown lock
+        act(() => {
+            vi.advanceTimersByTime(21000);
+        });
+        
+        await waitFor(() => {
+            expect(resendBtn).not.toBeDisabled();
+        });
+
+        fireEvent.click(resendBtn);
+
+        await waitFor(() => expect(mockGenerateOtp).toHaveBeenCalledWith({
+            request: {
+                request: {
+                    type: selectedIdentifier.type,
+                    key: selectedIdentifier.value,
+                    userId: selectedIdentifier.id,
+                    templateId: 'resetPasswordWithOtp'
+                }
+            },
+            captchaResponse: ''
+        }));
     });
 
     it('resend OTP shows max retry error after 4 resends', async () => {
@@ -228,12 +249,25 @@ describe('VerifyOTP', () => {
             />
         );
 
-        // Get the resend button
         const resendBtn = screen.getByText(/Resend OTP/i).closest('button')!;
-        expect(resendBtn).toBeDisabled();
+        
+        // Simulate 4 resends
+        for(let i=0; i<4; i++) {
+            act(() => { vi.advanceTimersByTime(21000); });
+            await waitFor(() => expect(resendBtn).not.toBeDisabled());
+            
+            fireEvent.click(resendBtn);
 
-        // The button starts disabled due to countdown; we verify the component renders
-        expect(screen.getByTestId('submit-btn')).toBeInTheDocument();
+            if (i < 3) {
+                 // Wait for the interval to be restarted
+                 await waitFor(() => expect(screen.getByText(/Resend OTP \(20\)/i)).toBeInTheDocument());
+            }
+        }
+
+        // Wait for the errors to trigger
+        await waitFor(() => {
+            expect(screen.getByText(/forgotPasswordPage.errorResendMaxReached/i)).toBeInTheDocument();
+        });
     });
 
     it('shows error when resetPassword returns no link', async () => {

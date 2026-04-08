@@ -264,11 +264,10 @@ describe('ContentViewPage - Publish and Reject flows', () => {
   beforeEach(() => vi.clearAllMocks());
   afterEach(() => cleanup());
 
-  it('formatDate returns null for undefined date (via missing lastUpdatedOn)', () => {
-    // The component renders "N/A" placeholder when lastUpdatedOn is undefined
+  it('renders formatted dates correctly instead of fallback text', () => {
     renderPage();
-    // If formatDate(undefined) = null the component shows the t() fallback
-    expect(screen.queryByText('workspace.review.notAvailable')).toBeDefined();
+    // The mocked data provides '2024-01-01' which formats to 'January 1, 2024'
+    expect(screen.getAllByText('January 1, 2024').length).toBeGreaterThan(0);
   });
 
   it('clicking Publish triggers form load and shows checklist dialog', async () => {

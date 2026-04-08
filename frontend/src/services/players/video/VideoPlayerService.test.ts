@@ -87,6 +87,7 @@ describe('VideoPlayerService', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   describe('createConfig', () => {

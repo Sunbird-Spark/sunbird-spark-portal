@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EpubPlayerService } from './EpubPlayerService';
 import type { EpubPlayerMetadata } from './types';
 import { buildTelemetryContext } from '../telemetryContextBuilder';
@@ -84,6 +84,11 @@ describe('EpubPlayerService', () => {
     }
 
     service = new EpubPlayerService();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   describe('createConfig', () => {
