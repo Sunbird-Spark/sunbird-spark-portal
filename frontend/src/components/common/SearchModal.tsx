@@ -107,8 +107,8 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
       aria-label={t("search_for_content_placeholder")}
     >
       {/* White search panel */}
-      <div className="bg-white shadow-sunbird-sm">
-        <div className="container mx-auto px-4 lg:px-[3.75rem] pt-5 pb-6">
+      <div className="bg-white shadow-sunbird-sm flex flex-col max-h-[55vh] md:max-h-[85vh]">
+        <div className="flex-shrink-0 container mx-auto px-4 lg:px-[3.75rem] pt-5 pb-6">
           {/* Search bar row */}
           <div className="flex items-center gap-4">
             <div className="flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3">
