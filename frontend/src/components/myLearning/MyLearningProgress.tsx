@@ -23,9 +23,13 @@ const MyLearningProgress = ({
 
   const formatCompact = (n: number): string => compactNumberFormatter.format(n);
 
+  const getCenterFontSize = (hoursDisplay: string): string => {
+    if (hoursDisplay.length <= 3) return '1.5rem';
+    if (hoursDisplay.length <= 4) return '1.1rem';
+    return '0.875rem';
+  };
   const displayHours = formatCompact(totalHours);
-  const centerFontSize = displayHours.length <= 3 ? '1.5rem' : displayHours.length <= 4 ? '1.1rem' : '0.875rem';
-
+  const centerFontSize = getCenterFontSize(displayHours);
   // SVG Donut chart calculations
   const size = 140; 
   const center = size / 2;
