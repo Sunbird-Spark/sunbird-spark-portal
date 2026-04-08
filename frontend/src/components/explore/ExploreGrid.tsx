@@ -174,7 +174,7 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
                 {!isLoading && displayItems.length === 0 && !error && (
                      <div className="col-span-full">
                         <EmptyState
-                            title="No content found"
+                            title={t('exploreGrid.noContentFound')}
                             description=""
                             icon={FiSearch}
                         />
@@ -187,7 +187,7 @@ const ExploreGrid = ({ filters, query, sortBy }: ExploreGridProps) => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sunbird-brick"></div>
                 )}
                 {!hasMore && !isFetchingMore && displayItems.length > 0 && (
-                    <p className="text-muted-foreground text-sm">No more content to show</p>
+                    <p className="text-muted-foreground text-sm">{t('exploreGrid.noMoreContent')}</p>
                 )}
             </div>
         </div>

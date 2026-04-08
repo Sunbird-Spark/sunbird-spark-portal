@@ -16,8 +16,8 @@ const Footer = () => {
 
   const productLinks = [
     { label: t("courses"), href: "/explore" },
-    { label: t("footer.resources"), href: "#" },
-    { label: t("footer.videos"), href: "#" },
+    { label: t("footer.resources"), href: "/explore" },
+    { label: t("footer.videos"), href: "/explore" },
   ];
 
   const companyLinks = [

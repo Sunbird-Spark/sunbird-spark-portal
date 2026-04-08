@@ -30,7 +30,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, hideClose })
           {/* The visible white frame inset */}
           <div className="login-left-panel-container"></div>
           <div className="left-panel-content">
-            <h2 className="left-panel-title">
+            <h2 className="left-panel-title whitespace-pre-line">
               {t("authLayout.empowerTitle")}
             </h2>
           </div>
@@ -47,14 +47,16 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, onClose, hideClose })
 
           <div className="login-inner-container">
             <div className="logo-container">
-              <div className="sunbird-logo-wrapper">
-                <a href="/">
-                  <img
-                    src={sunbirdLogo}
-                    alt={t("authLayout.logoAlt")}
-                    className="sunbird-logo"
-                  />
-                </a>
+              <div className="auth-logo-wrapper">
+                <div className="auth-logo-inner">
+                  <a href="/">
+                    <img
+                      src={sunbirdLogo}
+                      alt={t("authLayout.logoAlt")}
+                      className="sunbird-logo"
+                    />
+                  </a>
+                </div>
               </div>
             </div>
 

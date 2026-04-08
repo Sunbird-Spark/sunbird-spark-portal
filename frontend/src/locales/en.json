@@ -79,7 +79,13 @@
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Practice Question Set",
-    "questionset": "Question Set"
+    "questionset": "Question Set",
+    "learningresource": "Learning Resource",
+    "explanationcontent": "Explanation Content",
+    "teacherresource": "Teacher Resource",
+    "etextbook": "eTextbook",
+    "courseassessment": "Course Assessment",
+    "examquestion": "Exam Question"
   },
   "categoriesList": {
     "ai-ml": "AI/ML",
@@ -459,18 +465,22 @@
     "mainNavigation": "Main Navigation",
     "learningProgress": "Learning Progress",
     "lessonVisited": "Lesson visited",
-    "contentsCompleted": "Contents completed"
+    "contentsCompleted": "Contents completed",
+    "noUpcomingBatches": "No upcoming batches scheduled."
   },
   "onboarding": {
     "altSunbird": "Sunbird",
     "otherPreferencePlaceholder": "Please type your preference here",
     "altImage": "Onboarding Image",
     "goBack": "Go back",
+    "goToHome": "Go to Home",
     "welcomeMessage": "We would love to help you personalize your experience!",
     "saveAndProceed": "Save and Proceed",
     "submit": "Submit",
     "saving": "Saving...",
-    "skipOnboarding": "Skip Onboarding"
+    "skipOnboarding": "Skip Onboarding",
+    "failedToLoad": "Failed to load onboarding.",
+    "skip": "Skip"
   },
   "profilePage": {
     "loading": "Loading your profile...",
@@ -674,7 +684,7 @@
     "dec": "Dec"
   },
   "authLayout": {
-    "empowerTitle": "Empower your future through learning.",
+    "empowerTitle": "Empower your future\nthrough learning.",
     "logoAlt": "Sunbird Logo"
   },
   "signUp": {
@@ -731,6 +741,9 @@
     "mobileNumber": "Mobile Number",
     "emailId": "Email ID",
     "alternateEmailId": "Alternate Email ID"
+  },
+  "profileCard": {
+    "sunbirdId": "Sunbird ID"
   },
   "editProfile": {
     "title": "Edit Personal Information",
@@ -1125,9 +1138,6 @@
   "formFields": {
     "select": "Select {{field}}"
   },
-  "exploreGrid": {
-    "noContentFound": "No content found"
-  },
   "status": {
     "draft": "Draft",
     "inReview": "In Review",
@@ -1154,7 +1164,8 @@
     "noFilteredCourses": "No {{filter}} courses found.",
     "downloading": "Downloading...",
     "myLearning": "My Learning",
-    "filter": "Filter"
+    "filter": "Filter",
+    "untitledCourse": "Untitled Course"
   },
 
   "trackableCollection": {
@@ -1301,6 +1312,10 @@
     "youtube": "YouTube",
     "html": "HTML",
     "interactive": "Interactive"
+  },
+  "exploreGrid": {
+    "noContentFound": "No content found",
+    "noMoreContent": "No more content to show"
   }
 }
 

@@ -1,12 +1,14 @@
 import Avatar from "react-avatar";
 import _ from 'lodash';
 import { UserProfile } from "@/types/userTypes";
+import { useTranslation } from "react-i18next";
 
 interface ProfileCardProps {
     user: UserProfile;
 }
 
 const ProfileCard = ({ user }: ProfileCardProps) => {
+    const { t } = useTranslation();
     const fullName = [_.get(user, 'firstName'), _.get(user, 'lastName')].filter(Boolean).join(' ');
     const displayId = _.get(user, 'userName', '');
 
@@ -43,7 +45,7 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
 
             {/* Sunbird ID */}
             <p className="profile-id-text">
-                Sunbird ID : {displayId}
+                {t('profileCard.sunbirdId')} : {displayId}
             </p>
 
             {/* Roles */}
