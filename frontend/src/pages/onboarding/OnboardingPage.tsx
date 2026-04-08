@@ -131,8 +131,8 @@ const Onboarding = () => {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
         <p className="text-muted-foreground">
-          Failed to load onboarding.{" "}
-          <button type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline">Skip</button>
+          {t('onboarding.failedToLoad')}{" "}
+          <button type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline">{t('onboarding.skip')}</button>
         </p>
       </div>
     );
@@ -142,8 +142,8 @@ const Onboarding = () => {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
         <p className="text-muted-foreground">
-          Something went wrong.{" "}
-          <button type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline">Go to Home</button>
+          {t('somethingWentWrong')}{" "}
+          <button type="button" onClick={() => navigate("/home", { replace: true })} className="text-primary underline">{t('onboarding.goToHome')}</button>
         </p>
       </div>
     );

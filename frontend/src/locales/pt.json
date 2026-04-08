@@ -79,7 +79,13 @@
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Conjunto de questões práticas",
-    "questionset": "Conjunto de questões"
+    "questionset": "Conjunto de questões",
+    "learningresource": "Recurso de aprendizagem",
+    "explanationcontent": "Conteúdo explicativo",
+    "teacherresource": "Recurso para professores",
+    "etextbook": "Livro eletrônico",
+    "courseassessment": "Avaliação do curso",
+    "examquestion": "Questão de exame"
   },
   "categoriesList": {
     "ai-ml": "IA/ML",
@@ -459,18 +465,22 @@
     "mainNavigation": "Navegação principal",
     "learningProgress": "Progresso de aprendizado",
     "lessonVisited": "Lição visitada",
-    "contentsCompleted": "Conteúdos concluídos"
+    "contentsCompleted": "Conteúdos concluídos",
+    "noUpcomingBatches": "Nenhuma turma próxima agendada."
   },
   "onboarding": {
     "altSunbird": "Sunbird",
     "otherPreferencePlaceholder": "Por favor, digite sua preferência aqui",
     "altImage": "Imagem de integração",
     "goBack": "Voltar",
+    "goToHome": "Ir para o início",
     "welcomeMessage": "Adoraríamos ajudá-lo a personalizar sua experiência!",
     "saveAndProceed": "Salvar e Continuar",
     "submit": "Enviar",
     "saving": "Salvando...",
-    "skipOnboarding": "Pular Integração"
+    "skipOnboarding": "Pular Integração",
+    "failedToLoad": "Falha ao carregar integração.",
+    "skip": "Pular"
   },
   "profilePage": {
     "loading": "Carregando seu perfil...",
@@ -674,7 +684,7 @@
     "dec": "Dez"
   },
   "authLayout": {
-    "empowerTitle": "Impulsione seu futuro através do aprendizado.",
+    "empowerTitle": "Impulsione seu futuro\natravés do aprendizado.",
     "logoAlt": "Logo Sunbird"
   },
   "signUp": {
@@ -731,6 +741,9 @@
     "mobileNumber": "Número de celular",
     "emailId": "E-mail",
     "alternateEmailId": "E-mail alternativo"
+  },
+  "profileCard": {
+    "sunbirdId": "Identificação Sunbird"
   },
   "editProfile": {
     "title": "Editar informações pessoais",
@@ -1109,9 +1122,6 @@
   "formFields": {
     "select": "Selecionar {{field}}"
   },
-  "exploreGrid": {
-    "noContentFound": "Nenhum conteúdo encontrado"
-  },
   "status": {
     "draft": "Rascunho",
     "inReview": "Em revisão",
@@ -1138,7 +1148,8 @@
     "noFilteredCourses": "Nenhum curso {{filter}} encontrado.",
     "downloading": "Baixando...",
     "myLearning": "Meu aprendizado",
-    "filter": "Filtro"
+    "filter": "Filtro",
+    "untitledCourse": "Curso sem título"
   },
   "tncPopup": {
     "title": "Termos e Condições Atualizados",
@@ -1299,6 +1310,10 @@
     "youtube": "YouTube",
     "html": "HTML",
     "interactive": "Interativo"
+  },
+  "exploreGrid": {
+    "noContentFound": "Nenhum conteúdo encontrado",
+    "noMoreContent": "Não há mais conteúdo para mostrar"
   }
 }
 

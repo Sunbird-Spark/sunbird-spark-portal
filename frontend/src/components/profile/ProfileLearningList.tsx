@@ -37,7 +37,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
     const status = getCompletionStatus(course.status);
     const progress = course.completionPercentage ?? 0;
     const thumbnail = course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId);
-    const title = course.courseName || course.content?.name || "Untitled Course";
+    const title = course.courseName || course.content?.name || t('profileLearning.untitledCourse');
 
     const isDownloading = downloadingCourseId === course.courseId;
 
