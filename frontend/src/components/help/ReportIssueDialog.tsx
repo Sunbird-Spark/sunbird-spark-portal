@@ -20,6 +20,7 @@ import { FormService } from "@/services/FormService";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { resolveTitleText } from "@/utils/i18nUtils";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 interface ReportIssueDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
   const { t, currentCode } = useAppI18n();
   const { data: appNameSetting } = useSystemSetting("sunbird");
   const appName = appNameSetting?.data?.response?.value || appNameSetting?.data?.value || t("reportIssueDialog.thisApplication");
+  const telemetry = useTelemetry();
   
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
@@ -110,6 +112,32 @@ const ReportIssueDialog = ({ open, onOpenChange }: ReportIssueDialogProps) => {
   const currentSubcategoryOptions = subcategoryOptionsMap[category] || [];
 
   const handleSubmit = () => {
+    const params = [
+      { category },
+      ...(subcategory ? [{ subcategory }] : []),
+      ...(description ? [{ description }] : []),
+    ];
+
+    telemetry.log({
+      edata: {
+        level: 'INFO',
+        message: 'faq-report-issue',
+        params,
+        pageid: 'help-support',
+      },
+      context: { env: 'portal', cdata: [] },
+    });
+
+    telemetry.interact({
+      edata: {
+        id: 'submit-clicked',
+        type: 'support',
+        subtype: '',
+        pageid: 'help-support',
+      },
+      context: { env: 'portal', cdata: [] },
+    });
+
     setSubmitted(true);
     submitTimerRef.current = setTimeout(() => {
       submitTimerRef.current = null;
