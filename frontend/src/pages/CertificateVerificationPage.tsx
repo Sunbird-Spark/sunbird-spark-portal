@@ -80,6 +80,7 @@ const CertificateVerificationPage: React.FC = () => {
       return;
     }
 
+    let cancelled = false;
     const dataParam = searchParams.get('data');
 
     const run = async () => {
@@ -90,6 +91,8 @@ const CertificateVerificationPage: React.FC = () => {
 
         const result = await verifyCertificate(signedVC);
 
+        if (cancelled) return;
+
         if (result.verified && result.certificateData) {
           setCertificate(result.certificateData);
           setStatus('verified');
@@ -97,11 +100,12 @@ const CertificateVerificationPage: React.FC = () => {
           setStatus('failed');
         }
       } catch {
-        setStatus('failed');
+        if (!cancelled) setStatus('failed');
       }
     };
 
     run();
+    return () => { cancelled = true; };
   }, [certificateId, searchParams]);
 
   // ── Verifying ─────────────────────────────────────────────────────────
