@@ -27,6 +27,8 @@ vi.mock("@/hooks/useAppI18n", () => ({
             if (key === 'help.failedToLoadFaq') return 'Something went wrong';
             if (key === 'help.assistPrompt') return 'How can we assist you today?';
             if (key === 'somethingWentWrong') return 'Something went wrong';
+            if (key === 'help.reportIssueBtn') return 'Report Issue';
+            if (key === 'help.reportAppIssue') return 'Report App Issue';
             return key;
         },
     }),
@@ -35,6 +37,22 @@ vi.mock("@/hooks/useAppI18n", () => ({
 const mockUseHelpFaqData = vi.fn();
 vi.mock("@/hooks/useFaqData", () => ({
     useHelpFaqData: (...args: any[]) => mockUseHelpFaqData(...args),
+}));
+
+// Mock HelpSupportService so we can control buildHelpCategories in specific tests
+const mockBuildHelpCategories = vi.fn();
+vi.mock("../../services/HelpSupportService", () => ({
+    buildHelpCategories: (...args: any[]) => mockBuildHelpCategories(...args),
+}));
+
+// Mock ReportIssueDialog to keep rendering simple
+vi.mock("@/components/help/ReportIssueDialog", () => ({
+    default: ({ open }: { open: boolean; onOpenChange: (v: boolean) => void }) =>
+        open ? <div data-testid="report-issue-dialog">ReportIssueDialog</div> : null,
+}));
+
+vi.mock("@/hooks/useImpression", () => ({
+    default: vi.fn(),
 }));
 
 const mockCategories = [
@@ -79,6 +97,15 @@ describe('HelpSupport', () => {
             data: { data: { response: { value: 'Test App' } } },
             isLoading: false,
         } as any);
+        // Default: buildHelpCategories returns well-shaped category objects
+        mockBuildHelpCategories.mockImplementation((cats: any[]) =>
+            cats.map((cat: any) => ({
+                title: cat.name || '',
+                description: cat.description || '',
+                faqCount: Array.isArray(cat.faqs) ? cat.faqs.length : 0,
+                slug: cat.id || cat.name?.toLowerCase(),
+            }))
+        );
     });
 
     it('renders the help & support page with dynamic categories and replaces app name', () => {
@@ -89,6 +116,9 @@ describe('HelpSupport', () => {
             }
         ];
         mockUseHelpFaqData.mockReturnValue({ categories: categoriesWithPlaceholder, loading: false, error: null });
+        mockBuildHelpCategories.mockReturnValue([
+            { title: 'About {{APP_NAME}}', description: '', faqCount: 1, slug: 'about' }
+        ]);
 
         render(
             <MemoryRouter initialEntries={['/help-support']}>
@@ -164,5 +194,59 @@ describe('HelpSupport', () => {
         const categoryCard = screen.getByText('Login');
         fireEvent.click(categoryCard);
         expect(mockNavigate).toHaveBeenCalledWith('/help-support/login');
+    });
+
+    // --- New tests for previously uncovered lines ---
+
+    it('opens ReportIssueDialog when Report Issue button is clicked (covers line 57)', () => {
+        // Line 57: onClick={() => setIsReportIssueOpen(true)}
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HelpSupport />
+            </MemoryRouter>
+        );
+
+        // Dialog should not be visible initially
+        expect(screen.queryByTestId('report-issue-dialog')).not.toBeInTheDocument();
+
+        // Click the Report Issue button
+        const reportBtn = screen.getByRole('button', { name: /report/i });
+        fireEvent.click(reportBtn);
+
+        // Dialog should now be open
+        expect(screen.getByTestId('report-issue-dialog')).toBeInTheDocument();
+    });
+
+    it('logs error and re-throws when buildHelpCategories throws (covers lines 40-41)', () => {
+        // Lines 39-41: the catch block inside useMemo logs with console.error then re-throws.
+        // React (without an ErrorBoundary) catches the error at the root, so we assert that
+        // console.error was called with the expected message, which proves the catch branch ran.
+        const buildError = new Error('buildHelpCategories exploded');
+        mockBuildHelpCategories.mockImplementationOnce(() => { throw buildError; });
+
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        // React catches the error thrown inside useMemo; the render itself will throw or
+        // React will swallow it; either way the catch block must have executed.
+        try {
+            render(
+                <MemoryRouter initialEntries={['/help-support']}>
+                    <HelpSupport />
+                </MemoryRouter>
+            );
+        } catch {
+            // intentionally ignored — we only care that the catch block ran
+        }
+
+        // console.error should have been called with the message from the catch block
+        const errorCalls = consoleSpy.mock.calls;
+        const matchingCall = errorCalls.some(
+            (args) =>
+                String(args[0]).includes('Error processing help categories') ||
+                args.some((a: any) => a === buildError)
+        );
+        expect(matchingCall).toBe(true);
+
+        consoleSpy.mockRestore();
     });
 });

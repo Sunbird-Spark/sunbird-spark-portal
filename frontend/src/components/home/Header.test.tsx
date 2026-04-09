@@ -15,6 +15,8 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+const mockChangeLanguage = vi.fn();
+
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (key: string) => {
@@ -36,8 +38,9 @@ vi.mock('@/hooks/useAppI18n', () => ({
       { code: 'fr', label: 'Français' },
     ],
     currentCode: 'en',
-    changeLanguage: vi.fn(),
+    changeLanguage: mockChangeLanguage,
     dir: 'ltr',
+    isRTL: false,
   }),
 }));
 
@@ -193,6 +196,56 @@ describe('Header', () => {
     it('renders language options', () => {
       renderHeader();
       expect(screen.getByAltText('Language')).toBeInTheDocument();
+    });
+  });
+
+  describe('mobile menu — nav link click closes menu (line 168)', () => {
+    it('closes the mobile menu when a nav link is clicked', () => {
+      renderHeader();
+      fireEvent.click(screen.getByLabelText('Open menu'));
+      expect(screen.getByLabelText('Close menu')).toBeInTheDocument();
+
+      // Mobile nav links render inside the mobile menu panel.
+      // There are two "Home" links (desktop + mobile); the mobile one closes the menu.
+      const homeLinks = screen.getAllByText('Home');
+      // Click the last one which is inside the mobile menu panel
+      fireEvent.click(homeLinks[homeLinks.length - 1]);
+      expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Open menu')).toBeInTheDocument();
+    });
+  });
+
+  describe('mobile language select — changeLanguage (line 195)', () => {
+    it('calls changeLanguage when the mobile language select changes', () => {
+      renderHeader();
+
+      // Open mobile menu to reveal the language select
+      fireEvent.click(screen.getByLabelText('Open menu'));
+
+      const select = screen.getByDisplayValue('English') as HTMLSelectElement;
+      fireEvent.change(select, { target: { value: 'fr' } });
+      expect(mockChangeLanguage).toHaveBeenCalledWith('fr');
+    });
+  });
+
+  describe('mobile login button (lines 210-212)', () => {
+    it('closes the mobile menu and redirects to login when mobile login button is clicked', () => {
+      delete (window as any).location;
+      window.location = { href: '' } as any;
+
+      renderHeader();
+      fireEvent.click(screen.getByLabelText('Open menu'));
+      expect(screen.getByLabelText('Close menu')).toBeInTheDocument();
+
+      // There are two login buttons — desktop (hidden md) and mobile (visible in mobile panel)
+      const loginButtons = screen.getAllByText('login');
+      // The last one is inside the mobile menu
+      fireEvent.click(loginButtons[loginButtons.length - 1]);
+
+      // Menu is now closed
+      expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
+      // Redirect happened
+      expect(window.location.href).toBe('/portal/login?prompt=none');
     });
   });
 });

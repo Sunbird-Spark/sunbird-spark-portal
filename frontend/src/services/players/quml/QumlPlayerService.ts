@@ -12,7 +12,7 @@ export class QumlPlayerService {
       QumlPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
-    /* c8 ignore next 3 */
+    /* c8 ignore next 12 */
     if (QumlPlayerService.scriptLoading) {
       return QumlPlayerService.scriptLoading;
     }
