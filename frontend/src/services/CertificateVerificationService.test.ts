@@ -38,6 +38,7 @@ const mockDocumentLoader = vi.fn();
 
 afterEach(() => {
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
 });
 
 beforeEach(() => {
