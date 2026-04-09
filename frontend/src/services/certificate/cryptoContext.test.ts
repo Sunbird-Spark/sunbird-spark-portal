@@ -18,6 +18,7 @@ vi.mock('security-context', () => ({
 
 afterEach(() => {
   vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 // ── buildDocumentLoader ───────────────────────────────────────────────────
