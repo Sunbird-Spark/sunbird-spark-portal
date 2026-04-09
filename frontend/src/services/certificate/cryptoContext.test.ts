@@ -61,8 +61,11 @@ describe('buildDocumentLoader', () => {
 // ── prefetchContexts ──────────────────────────────────────────────────────
 
 describe('prefetchContexts', () => {
+  const TRUSTED_URL = 'https://w3id.org/security/v2';
+  const UNTRUSTED_URL = 'https://attacker.example/ctx';
+
   const mockVC = {
-    '@context': ['https://www.w3.org/2018/credentials/v1', 'https://new.example/ctx'],
+    '@context': ['https://www.w3.org/2018/credentials/v1', TRUSTED_URL],
   } as Parameters<typeof prefetchContexts>[0];
 
   it('skips URLs already present in staticContexts', async () => {
@@ -76,7 +79,7 @@ describe('prefetchContexts', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('fetches and stores unknown context URLs', async () => {
+  it('fetches and stores unknown context URLs from trusted domains', async () => {
     const fetchedCtx = { '@context': 'new' };
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
@@ -86,15 +89,28 @@ describe('prefetchContexts', () => {
     const staticContexts: Record<string, unknown> = {};
     await prefetchContexts(mockVC, staticContexts);
 
-    expect(staticContexts['https://new.example/ctx']).toEqual(fetchedCtx);
+    expect(staticContexts[TRUSTED_URL]).toEqual(fetchedCtx);
   });
 
-  it('silently ignores fetch failures', async () => {
+  it('never fetches URLs from untrusted domains', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+
+    const staticContexts: Record<string, unknown> = {};
+    await prefetchContexts(
+      { ...mockVC, '@context': UNTRUSTED_URL },
+      staticContexts,
+    );
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(staticContexts[UNTRUSTED_URL]).toBeUndefined();
+  });
+
+  it('silently ignores fetch failures on trusted domains', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
 
     const staticContexts: Record<string, unknown> = {};
     await expect(prefetchContexts(mockVC, staticContexts)).resolves.not.toThrow();
-    expect(staticContexts['https://new.example/ctx']).toBeUndefined();
+    expect(staticContexts[TRUSTED_URL]).toBeUndefined();
   });
 
   it('skips non-string context entries', async () => {
@@ -116,11 +132,11 @@ describe('prefetchContexts', () => {
 
     const staticContexts: Record<string, unknown> = {};
     await prefetchContexts(
-      { ...mockVC, '@context': 'https://new.example/ctx' },
+      { ...mockVC, '@context': TRUSTED_URL },
       staticContexts,
     );
 
-    expect(staticContexts['https://new.example/ctx']).toBeDefined();
+    expect(staticContexts[TRUSTED_URL]).toBeDefined();
   });
 });
 
