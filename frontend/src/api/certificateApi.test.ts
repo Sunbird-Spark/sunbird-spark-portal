@@ -23,7 +23,7 @@ describe('getCertificateDetails', () => {
     expect(result._osSignedData).toBe('{"type":"VerifiableCredential"}');
   });
 
-  it('encodes the certificate id in the URL', async () => {
+  it('includes the certificate id in the URL', async () => {
     mockGet.mockResolvedValue({ data: { _osSignedData: '{}' } });
 
     await getCertificateDetails('abc-def-456');
