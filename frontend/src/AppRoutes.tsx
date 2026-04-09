@@ -42,6 +42,7 @@ import GenericEditorPage from './pages/workspace/editors/GenericEditorPage';
 import QumlEditorPage from './pages/content/QumlEditorPage';
 import ContentViewPage from './pages/workspace/ContentViewPage';
 import Onboarding from './pages/onboarding/OnboardingPage';
+import CertificateVerificationPage from './pages/CertificateVerificationPage';
 import OnboardingGuard from './rbac/OnboardingGuard';
 import CourseDashboardPage from './pages/courseDashboard/CourseDashboardPage';
 import UserManagementPage from './pages/user-management/UserManagementPage';
@@ -62,6 +63,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
+        <Route path="/certs/:certificateId" element={<CertificateVerificationPage />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="collection">
           <Route path=":collectionId" element={<CollectionDetailPage />}>
