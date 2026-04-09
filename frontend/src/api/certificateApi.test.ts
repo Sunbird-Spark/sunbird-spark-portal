@@ -3,12 +3,14 @@ import { getCertificateDetails, getPublicKey } from './certificateApi';
 
 const mockGet = vi.fn();
 
-vi.spyOn(httpClient, 'getClient').mockReturnValue({
-  get: mockGet,
-} as unknown as ReturnType<typeof httpClient.getClient>);
+beforeEach(() => {
+  vi.spyOn(httpClient, 'getClient').mockReturnValue({
+    get: mockGet,
+  } as unknown as ReturnType<typeof httpClient.getClient>);
+});
 
 afterEach(() => {
-  vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 // ── getCertificateDetails ─────────────────────────────────────────────────
