@@ -147,5 +147,175 @@ describe('QumlPlayerService', () => {
       expect(element.tagName.toLowerCase()).toBe('sunbird-quml-player');
       expect(element.getAttribute('data-player-id')).toBe('do_123');
     });
+
+    it('should set questionListUrl on window', () => {
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      service.createElement(config);
+      expect((window as any).questionListUrl).toBe('/action/question/v2/list');
+    });
+
+    it('should append styles link on first createElement call', () => {
+      (QumlPlayerService as any).stylesLoaded = false;
+      document.querySelectorAll('[data-quml-player-styles]').forEach(el => el.remove());
+
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      service.createElement(config);
+
+      const link = document.querySelector('[data-quml-player-styles]');
+      expect(link).not.toBeNull();
+      expect(link?.getAttribute('href')).toBe('/assets/quml-player/styles.css');
+    });
+
+    it('should not append duplicate styles link on second call', () => {
+      (QumlPlayerService as any).stylesLoaded = false;
+      document.querySelectorAll('[data-quml-player-styles]').forEach(el => el.remove());
+
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      service.createElement(config);
+      service.createElement(config);
+
+      const links = document.querySelectorAll('[data-quml-player-styles]');
+      expect(links.length).toBe(1);
+    });
+  });
+
+  describe('unloadStyles', () => {
+    it('should remove style link from DOM', () => {
+      // Clean up any links left from previous tests first
+      document.querySelectorAll('[data-quml-player-styles]').forEach(el => el.remove());
+      (QumlPlayerService as any).stylesLoaded = false;
+
+      const link = document.createElement('link');
+      link.setAttribute('data-quml-player-styles', 'true');
+      document.head.appendChild(link);
+
+      QumlPlayerService.unloadStyles();
+
+      expect(document.querySelector('[data-quml-player-styles]')).toBeNull();
+    });
+
+    it('should reset stylesLoaded flag', () => {
+      (QumlPlayerService as any).stylesLoaded = true;
+      QumlPlayerService.unloadStyles();
+      expect((QumlPlayerService as any).stylesLoaded).toBe(false);
+    });
+
+    it('should not throw when no styles link exists', () => {
+      document.querySelectorAll('[data-quml-player-styles]').forEach(el => el.remove());
+      (QumlPlayerService as any).stylesLoaded = false;
+      expect(() => QumlPlayerService.unloadStyles()).not.toThrow();
+    });
+  });
+
+  describe('attachEventListeners', () => {
+    it('should attach playerEvent listener and fire callback', () => {
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      const element = service.createElement(config);
+      const callback = vi.fn();
+
+      service.attachEventListeners(element, callback);
+
+      element.dispatchEvent(new CustomEvent('playerEvent', { detail: { eid: 'START' } }));
+
+      expect(callback).toHaveBeenCalled();
+      expect(callback.mock.calls[0]?.[0].type).toBe('START');
+    });
+
+    it('should attach telemetryEvent listener and fire callback', () => {
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      const element = service.createElement(config);
+      const telemetryCallback = vi.fn();
+
+      service.attachEventListeners(element, undefined, telemetryCallback);
+
+      element.dispatchEvent(new CustomEvent('telemetryEvent', { detail: { event: 'IMPRESSION' } }));
+
+      expect(telemetryCallback).toHaveBeenCalledWith({ event: 'IMPRESSION' });
+    });
+
+    it('should use "unknown" type when event has no eid', () => {
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      const element = service.createElement(config);
+      const callback = vi.fn();
+
+      service.attachEventListeners(element, callback);
+      element.dispatchEvent(new CustomEvent('playerEvent', { detail: {} }));
+
+      expect(callback.mock.calls[0]?.[0].type).toBe('unknown');
+    });
+
+    it('should be idempotent — multiple calls do not duplicate listeners', () => {
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      const element = service.createElement(config);
+      const callback = vi.fn();
+
+      service.attachEventListeners(element, callback);
+      service.attachEventListeners(element, callback);
+      service.attachEventListeners(element, callback);
+
+      element.dispatchEvent(new CustomEvent('playerEvent', { detail: { eid: 'START' } }));
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeEventListeners', () => {
+    it('should prevent callbacks from firing after removal', () => {
+      const config = {
+        context: { sid: 'test' } as any,
+        config: {},
+        metadata: mockMetadata,
+        data: {},
+      };
+      const element = service.createElement(config);
+      const callback = vi.fn();
+
+      service.attachEventListeners(element, callback);
+      service.removeEventListeners(element);
+
+      element.dispatchEvent(new CustomEvent('playerEvent', { detail: { eid: 'START' } }));
+
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should not throw when called on element without listeners', () => {
+      const element = document.createElement('div');
+      expect(() => service.removeEventListeners(element)).not.toThrow();
+    });
   });
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import BatchCard from './BatchCard';
 
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -96,16 +96,20 @@ vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+const mockToast = vi.fn();
 vi.mock('@/hooks/useToast', () => ({
-  useToast: () => ({ toast: vi.fn() }),
+  useToast: () => ({ toast: mockToast }),
 }));
 
+const mockUseSystemSetting = vi.fn(() => ({ data: null as any, isSuccess: false }));
 vi.mock('@/hooks/useSystemSetting', () => ({
-  useSystemSetting: () => ({ data: null, isSuccess: false }),
+  useSystemSetting: () => mockUseSystemSetting(),
 }));
 
+const mockAcceptTncMutateAsync = vi.fn();
+const mockUseAcceptTnc = vi.fn(() => ({ mutateAsync: mockAcceptTncMutateAsync, isPending: false }));
 vi.mock('@/hooks/useTnc', () => ({
-  useAcceptTnc: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useAcceptTnc: () => mockUseAcceptTnc(),
   useGetTncUrl: () => ({ data: null }),
 }));
 
@@ -128,13 +132,14 @@ vi.mock('@/hooks/useUser', () => ({
   useIsMentor: () => mockUseIsMentor(),
 }));
 
+const mockHasAnyRole = vi.fn((_roles: string[]) => false);
 vi.mock('@/hooks/usePermission', () => ({
   usePermissions: () => ({
     roles: ['PUBLIC'],
     isLoading: false,
     isAuthenticated: false,
     error: null,
-    hasAnyRole: vi.fn(() => false),
+    hasAnyRole: mockHasAnyRole,
     canAccessFeature: vi.fn(() => false),
     refetch: vi.fn(),
   }),
@@ -164,13 +169,17 @@ describe('BatchCard', () => {
       refetch: mockRefetch,
       isFetching: false,
     });
-    
+
     // We import these hooks at the top already, so we can mock them here if needed.
     // However, the test file uses `mockUseBatchList` directly. We need to tell the vi.mock
     // to actually map useBatchListForCreator to mockUseBatchList and mergeBatches.
-    
+
     mockUseIsContentCreator.mockReturnValue(true); // Default to creator
     mockUseIsMentor.mockReturnValue(false); // Default to not mentor
+    mockHasAnyRole.mockReturnValue(false);
+    mockAcceptTncMutateAsync.mockResolvedValue(undefined);
+    mockUseSystemSetting.mockReturnValue({ data: null, isSuccess: false });
+    mockUseAcceptTnc.mockReturnValue({ mutateAsync: mockAcceptTncMutateAsync, isPending: false });
   });
 
   /* ── Rendering ── */
@@ -417,6 +426,97 @@ describe('BatchCard', () => {
     expect(screen.queryByText(/Accept & Continue/i)).not.toBeInTheDocument();
   });
 
+  /* ── Reviewer TnC error path (lines 50-59) ── */
+
+  it('shows destructive toast when acceptTncMutation rejects', async () => {
+    // Set up: user is a reviewer (not a creator) with TnC data loaded
+    mockUseIsContentCreator.mockReturnValue(false);
+    mockHasAnyRole.mockImplementation((roles: string[]) => roles.includes('CONTENT_REVIEWER'));
+    const tncConfig = { version: '1.0', url: 'https://example.com/tnc' };
+    mockUseSystemSetting.mockReturnValue({ data: tncConfig, isSuccess: true });
+    mockAcceptTncMutateAsync.mockRejectedValue(new Error('Network error'));
+    mockUseAcceptTnc.mockReturnValue({ mutateAsync: mockAcceptTncMutateAsync, isPending: false });
+
+    render(<BatchCard {...defaultProps} />);
+
+    // The TnC section should be visible
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
+
+    const acceptBtn = screen.getByRole('button', { name: /accept/i });
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Failed to accept Terms',
+          variant: 'destructive',
+        })
+      );
+    });
+  });
+
+  it('does NOT show destructive toast when acceptTncMutation resolves', async () => {
+    // Set up: user is a reviewer with TnC data loaded
+    mockUseIsContentCreator.mockReturnValue(false);
+    mockHasAnyRole.mockImplementation((roles: string[]) => roles.includes('CONTENT_REVIEWER'));
+    const tncConfig = { version: '1.0', url: 'https://example.com/tnc' };
+    mockUseSystemSetting.mockReturnValue({ data: tncConfig, isSuccess: true });
+    mockAcceptTncMutateAsync.mockResolvedValue(undefined);
+    mockUseAcceptTnc.mockReturnValue({ mutateAsync: mockAcceptTncMutateAsync, isPending: false });
+
+    render(<BatchCard {...defaultProps} />);
+
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
+
+    const acceptBtn = screen.getByRole('button', { name: /accept/i });
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Terms accepted',
+          variant: 'success',
+        })
+      );
+    });
+    expect(mockToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'destructive' })
+    );
+  });
+
+  /* ── AddCertificateModal onOpenChange(false) clears certBatch (line 142) ── */
+
+  it('closes AddCertificateModal and clears certBatch when onOpenChange(false) is called', async () => {
+    mockUseBatchList.mockReturnValue({
+      data: [{ id: 'b1', name: 'Cert Batch', status: '1', startDate: '2026-01-01', endDate: '2026-06-01' }],
+      isLoading: false,
+      isError: false,
+      refetch: mockRefetch,
+      isFetching: false,
+    });
+    render(<BatchCard {...defaultProps} />);
+
+    // Click "Add Certificate" to open the modal (sets certBatch)
+    const addCertBtn = screen.getByRole('button', { name: /add certificate/i });
+    fireEvent.click(addCertBtn);
+
+    // Modal should now be visible
+    await waitFor(() => {
+      expect(screen.getByTestId('add-certificate-modal')).toBeInTheDocument();
+    });
+
+    // Click the close button inside the mock modal (calls onOpenChange(false))
+    const closeModalBtn = screen.getByRole('button', { name: /close certificate modal/i });
+    fireEvent.click(closeModalBtn);
+
+    // Modal should be gone (certBatch is null)
+    await waitFor(() => {
+      expect(screen.queryByTestId('add-certificate-modal')).not.toBeInTheDocument();
+    });
+  });
+
   /* ── Mentor Specific Logic ── */
 
   it('hides Create batch button for mentor-only users', () => {
@@ -450,7 +550,7 @@ describe('BatchCard', () => {
       data: [mockBatch],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
     });
-    
+
     render(<BatchCard {...defaultProps} />);
     const batchElements = screen.getAllByText('Duplicate Batch');
     expect(batchElements).toHaveLength(1);

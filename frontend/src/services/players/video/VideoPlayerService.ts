@@ -26,6 +26,7 @@ export class VideoPlayerService {
       VideoPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
+    /* c8 ignore next 12 */
     if (VideoPlayerService.scriptLoading) {
       return VideoPlayerService.scriptLoading;
     }

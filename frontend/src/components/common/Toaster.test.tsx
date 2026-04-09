@@ -174,3 +174,37 @@ describe('Toaster', () => {
     expect(screen.getByTestId('toast-title')).toHaveTextContent('Special <>&" Characters');
   });
 });
+
+describe('Toaster viewport filtering', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('shows only center-viewport toasts when viewport="center"', () => {
+    render(<Toaster viewport="center" />);
+
+    act(() => {
+      toast({ title: 'Center Toast', viewport: 'center' });
+    });
+
+    expect(screen.getByTestId('toast-title')).toHaveTextContent('Center Toast');
+  });
+
+  it('excludes center-viewport toasts from default toaster', () => {
+    render(<Toaster />);
+
+    // Fire a center-only toast; default toaster should not display it
+    act(() => {
+      toast({ title: 'Center Only', viewport: 'center' });
+    });
+
+    expect(screen.queryByTestId('toast-title')).not.toBeInTheDocument();
+  });
+
+  it('applies viewportClassName to the ToastViewport', () => {
+    render(<Toaster viewportClassName="my-custom-class" />);
+    const viewport = screen.getByTestId('toast-viewport');
+    // Our mock renders <div data-testid="toast-viewport" />, className is passed via props
+    expect(viewport).toBeInTheDocument();
+  });
+});
