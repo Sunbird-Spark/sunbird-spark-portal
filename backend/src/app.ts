@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { oidcSession } from './auth/oidcMiddleware.js';
+import { oidcSession, requireAuth } from './auth/oidcMiddleware.js';
 import formRoutes from './routes/formsRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
@@ -20,7 +20,7 @@ import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
 import anonymousActionRoutes from './routes/anonymousActionRoutes.js';
 import mobileRoutes from './routes/mobileRoutes.js';
-
+import reviewCommentRoutes from './routes/reviewCommentRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,6 +54,9 @@ app.get('/dial/:id', sessionMiddleware, ...anonymousMiddlewares, (req, res) => {
 });
 // Portal Anonymous Routes
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousProxyRoutes)
+
+// Review comment routes
+app.use('/portal/review/comment/v1', sessionMiddleware, oidcSession(), requireAuth(), reviewCommentRoutes);
 
 // Apply anonymous session middleware to API routes (once per route tree)
 
