@@ -93,7 +93,9 @@ export function requireAuth() {
         // XHR/API requests must receive 401 — not a redirect — to prevent
         // the browser from following the 302 with the original method (e.g. PATCH),
         // which would miss the GET-only /login route and loop back here indefinitely.
-        const isApiRequest = req.xhr || req.headers.accept?.includes('application/json');
+        const xRequestedWith = req.headers['x-requested-with'];
+        const isXhr = (Array.isArray(xRequestedWith) ? xRequestedWith[0] : xRequestedWith)?.toLowerCase() === 'xmlhttprequest';
+        const isApiRequest = isXhr || req.headers.accept?.includes('application/json');
         if (isApiRequest) {
             return res.status(401).json({ message: 'Unauthorized' });
         }

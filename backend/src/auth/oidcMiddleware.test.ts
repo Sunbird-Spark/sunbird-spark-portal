@@ -181,9 +181,9 @@ describe('oidcMiddleware', () => {
             expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login?prompt=none');
         });
 
-        it('should return 401 JSON when unauthenticated XHR request (req.xhr)', () => {
+        it('should return 401 JSON when unauthenticated XHR request (X-Requested-With header)', () => {
             mockReq.oidc = { isAuthenticated: false };
-            mockReq.xhr = true;
+            mockReq.headers = { 'x-requested-with': 'XMLHttpRequest' };
 
             const middleware = requireAuth();
             middleware(mockReq as Request, mockRes as Response, mockNext);
