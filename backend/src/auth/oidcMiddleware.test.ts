@@ -37,10 +37,13 @@ describe('oidcMiddleware', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockReq = {
-            session: {} as any
+            session: {} as any,
+            headers: {}
         };
         mockRes = {
-            redirect: vi.fn()
+            redirect: vi.fn(),
+            status: vi.fn().mockReturnThis(),
+            json: vi.fn()
         };
         mockNext = vi.fn();
     });
@@ -158,8 +161,9 @@ describe('oidcMiddleware', () => {
             expect(mockRes.redirect).not.toHaveBeenCalled();
         });
 
-        it('should redirect to login when user is not authenticated', () => {
+        it('should redirect to login when user is not authenticated (browser request)', () => {
             mockReq.oidc = { isAuthenticated: false };
+            mockReq.headers = { accept: 'text/html' };
 
             const middleware = requireAuth();
             middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -168,11 +172,39 @@ describe('oidcMiddleware', () => {
             expect(mockNext).not.toHaveBeenCalled();
         });
 
-        it('should redirect to login when oidc is not set', () => {
+        it('should redirect to login when oidc is not set (browser request)', () => {
+            mockReq.headers = { accept: 'text/html' };
+
             const middleware = requireAuth();
             middleware(mockReq as Request, mockRes as Response, mockNext);
 
             expect(mockRes.redirect).toHaveBeenCalledWith('/portal/login?prompt=none');
+        });
+
+        it('should return 401 JSON when unauthenticated XHR request (req.xhr)', () => {
+            mockReq.oidc = { isAuthenticated: false };
+            mockReq.xhr = true;
+
+            const middleware = requireAuth();
+            middleware(mockReq as Request, mockRes as Response, mockNext);
+
+            expect(mockRes.status).toHaveBeenCalledWith(401);
+            expect(mockRes.json).toHaveBeenCalledWith({ message: 'Unauthorized' });
+            expect(mockRes.redirect).not.toHaveBeenCalled();
+            expect(mockNext).not.toHaveBeenCalled();
+        });
+
+        it('should return 401 JSON when unauthenticated API request (Accept: application/json)', () => {
+            mockReq.oidc = { isAuthenticated: false };
+            mockReq.headers = { accept: 'application/json, text/plain, */*' };
+
+            const middleware = requireAuth();
+            middleware(mockReq as Request, mockRes as Response, mockNext);
+
+            expect(mockRes.status).toHaveBeenCalledWith(401);
+            expect(mockRes.json).toHaveBeenCalledWith({ message: 'Unauthorized' });
+            expect(mockRes.redirect).not.toHaveBeenCalled();
+            expect(mockNext).not.toHaveBeenCalled();
         });
     });
 });
