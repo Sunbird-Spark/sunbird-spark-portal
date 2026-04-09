@@ -939,7 +939,20 @@
     "tryAgain": "Try Again",
     "closePreview": "Close preview",
     "closeButton": "Close",
-    "selectButton": "Select"
+    "selectButton": "Select",
+    "verifying": "Verifying certificate...",
+    "verified": "Certificate Verified",
+    "verificationFailed": "Verification Failed",
+    "issuedTo": "Issued to",
+    "course": "Course",
+    "issuedOn": "Issue Date",
+    "backToHome": "Back to Home",
+    "couldNotVerify": "This certificate could not be verified",
+    "status": "Status",
+    "activeAndValid": "Active & Valid",
+    "invalid": "Invalid",
+    "credentialHolder": "Credential Holder",
+    "certificationProgram": "Certification Program"
   },
   "createTemplate": {
     "description": "Fill in the details below to create a new certificate template for your organisation.",
