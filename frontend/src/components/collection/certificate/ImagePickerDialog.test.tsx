@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ImagePickerDialog } from './ImagePickerDialog';
@@ -41,13 +42,28 @@ vi.mock('@/components/collection/ImageGallery', () => ({
 }));
 
 vi.mock('@/components/collection/ImageUploadTab', () => ({
-  ImageUploadTab: ({ handleBack, handleCancel, handleUploadAndUse, uploadFile }: {
+  ImageUploadTab: ({ handleBack, handleCancel, handleUploadAndUse, uploadFile, handleDrop, setDragging, fileInputRef, handleFileInput }: {
     handleBack: () => void;
     handleCancel: () => void;
     handleUploadAndUse: () => void;
     uploadFile: File | null;
+    handleDrop: (e: React.DragEvent) => void;
+    setDragging: (v: boolean) => void;
+    fileInputRef: React.RefObject<HTMLInputElement>;
+    handleFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
   }) => (
-    <div data-testid="upload-tab">
+    <div
+      data-testid="upload-tab"
+      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      onDrop={handleDrop}
+    >
+      <input
+        data-testid="file-input"
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileInput}
+        accept="image/*"
+      />
       <button onClick={handleBack}>Back</button>
       <button onClick={handleCancel}>Cancel Upload</button>
       <button onClick={handleUploadAndUse} disabled={!uploadFile}>Upload &amp; Use</button>
@@ -194,5 +210,102 @@ describe('ImagePickerDialog', () => {
     fireEvent.click(screen.getByText('Select Image'));
     fireEvent.click(screen.getByText('Cancel'));
     expect(screen.queryByText('My Images')).not.toBeInTheDocument();
+  });
+
+  describe('handleFileInput and applyFile (line 52, 62)', () => {
+    beforeEach(() => {
+      vi.stubGlobal('FileReader', class {
+        onload: ((ev: { target: { result: string } }) => void) | undefined;
+        readAsDataURL() {
+          this.onload?.({ target: { result: 'data:image/png;base64,abc' } });
+        }
+      });
+    });
+
+    it('handleFileInput — selecting a file enables Upload & Use button', async () => {
+      render(<ImagePickerDialog {...defaultProps} />);
+      fireEvent.click(screen.getByText('Select Image'));
+      fireEvent.click(screen.getByText('Upload New'));
+
+      const fileInput = screen.getByTestId('file-input');
+      const mockFile = new File(['img'], 'test.png', { type: 'image/png' });
+
+      fireEvent.change(fileInput, { target: { files: [mockFile] } });
+
+      await waitFor(() => {
+        expect(screen.getByText('Upload & Use')).not.toBeDisabled();
+      });
+    });
+
+    it('handleUploadAndUse — calls onChange with preview, null artifactUrl, and file; closes dialog', async () => {
+      const onChange = vi.fn();
+      render(<ImagePickerDialog {...defaultProps} onChange={onChange} />);
+      fireEvent.click(screen.getByText('Select Image'));
+      fireEvent.click(screen.getByText('Upload New'));
+
+      const fileInput = screen.getByTestId('file-input');
+      const mockFile = new File(['img'], 'upload.png', { type: 'image/png' });
+
+      fireEvent.change(fileInput, { target: { files: [mockFile] } });
+
+      await waitFor(() => {
+        expect(screen.getByText('Upload & Use')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByText('Upload & Use'));
+
+      expect(onChange).toHaveBeenCalledWith({
+        preview: 'data:image/png;base64,abc',
+        artifactUrl: null,
+        file: mockFile,
+      });
+      expect(screen.queryByTestId('upload-tab')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('handleDrop (lines 66-69)', () => {
+    beforeEach(() => {
+      vi.stubGlobal('FileReader', class {
+        onload: ((ev: { target: { result: string } }) => void) | undefined;
+        readAsDataURL() {
+          this.onload?.({ target: { result: 'data:image/png;base64,drop' } });
+        }
+      });
+    });
+
+    it('handleDrop with image file — enables Upload & Use button', async () => {
+      render(<ImagePickerDialog {...defaultProps} />);
+      fireEvent.click(screen.getByText('Select Image'));
+      fireEvent.click(screen.getByText('Upload New'));
+
+      const uploadTab = screen.getByTestId('upload-tab');
+      const mockFile = new File(['img'], 'dropped.png', { type: 'image/png' });
+
+      fireEvent.dragOver(uploadTab);
+      fireEvent.drop(uploadTab, {
+        dataTransfer: { files: [mockFile] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Upload & Use')).not.toBeDisabled();
+      });
+    });
+
+    it('handleDrop with non-image file — Upload & Use button stays disabled', async () => {
+      render(<ImagePickerDialog {...defaultProps} />);
+      fireEvent.click(screen.getByText('Select Image'));
+      fireEvent.click(screen.getByText('Upload New'));
+
+      const uploadTab = screen.getByTestId('upload-tab');
+      const textFile = new File(['hello'], 'notes.txt', { type: 'text/plain' });
+
+      fireEvent.dragOver(uploadTab);
+      fireEvent.drop(uploadTab, {
+        dataTransfer: { files: [textFile] },
+      });
+
+      // uploadFile should remain null because type is not image/*
+      expect(screen.getByText('Upload & Use')).toBeDisabled();
+    });
   });
 });
