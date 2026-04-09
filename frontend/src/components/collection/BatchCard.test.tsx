@@ -101,9 +101,9 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: mockToast }),
 }));
 
-const mockUseSystemSetting = vi.fn(() => ({ data: null, isSuccess: false }));
+const mockUseSystemSetting = vi.fn(() => ({ data: null as any, isSuccess: false }));
 vi.mock('@/hooks/useSystemSetting', () => ({
-  useSystemSetting: (...args: any[]) => mockUseSystemSetting(...args),
+  useSystemSetting: () => mockUseSystemSetting(),
 }));
 
 const mockAcceptTncMutateAsync = vi.fn();
@@ -132,7 +132,7 @@ vi.mock('@/hooks/useUser', () => ({
   useIsMentor: () => mockUseIsMentor(),
 }));
 
-const mockHasAnyRole = vi.fn(() => false);
+const mockHasAnyRole = vi.fn((_roles: string[]) => false);
 vi.mock('@/hooks/usePermission', () => ({
   usePermissions: () => ({
     roles: ['PUBLIC'],

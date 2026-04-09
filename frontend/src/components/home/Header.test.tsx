@@ -209,7 +209,7 @@ describe('Header', () => {
       // There are two "Home" links (desktop + mobile); the mobile one closes the menu.
       const homeLinks = screen.getAllByText('Home');
       // Click the last one which is inside the mobile menu panel
-      fireEvent.click(homeLinks[homeLinks.length - 1]);
+      fireEvent.click(homeLinks[homeLinks.length - 1]!);
       expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
       expect(screen.getByLabelText('Open menu')).toBeInTheDocument();
     });
@@ -240,7 +240,7 @@ describe('Header', () => {
       // There are two login buttons — desktop (hidden md) and mobile (visible in mobile panel)
       const loginButtons = screen.getAllByText('login');
       // The last one is inside the mobile menu
-      fireEvent.click(loginButtons[loginButtons.length - 1]);
+      fireEvent.click(loginButtons[loginButtons.length - 1]!);
 
       // Menu is now closed
       expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();

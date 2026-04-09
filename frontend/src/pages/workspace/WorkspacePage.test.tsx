@@ -572,7 +572,7 @@ describe('WorkspacePage', () => {
     });
 
     const textbookDialog = screen.getAllByRole('dialog')[0];
-    fireEvent.click(within(textbookDialog).getByRole('button', { name: 'Create Story & Game' }));
+    fireEvent.click(within(textbookDialog!).getByRole('button', { name: 'Create Story & Game' }));
 
     await waitFor(() => {
       expect(mockContentCreate).toHaveBeenCalledWith(
