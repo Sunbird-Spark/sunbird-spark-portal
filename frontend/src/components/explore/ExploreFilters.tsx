@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent, useMemo, useState, useEffect, useRef, useCallback } from "react";
+import React, { BaseSyntheticEvent, useMemo, useState, useEffect, useCallback } from "react";
 import { Checkbox } from "../common/CheckBox";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import type { FilterState } from "../../pages/Explore";
@@ -38,8 +38,6 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
 
     // State for managing open accordion sections - must be before early returns
     const [openSections, setOpenSections] = useState<string[]>([]);
-    // Guard so we only initialise the first section open once (not on every filter change)
-    const firstSectionInitialized = useRef(false);
 
     // Helper function to get label for current language with i18n support
     const getTranslatedLabel = React.useCallback((item: any): string => {
@@ -107,30 +105,52 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
         e.stopPropagation();
     };
 
-    // Initialize and update open sections based on filters
-    useEffect(() => {
-        setOpenSections((prev) => {
-            const next = [...prev];
+    // Compute which sections should be open based on filters
+    const requiredOpenSections = useMemo(() => {
+        const sectionsToOpen: string[] = [];
 
-            // Open the first section only once when filter groups first load
-            if (!firstSectionInitialized.current && filterGroups[0]?.id) {
-                if (!next.includes(filterGroups[0].id)) {
-                    next.push(filterGroups[0].id);
-                }
-                firstSectionInitialized.current = true;
-            }
+        // Always include the first section
+        if (filterGroups[0]?.id) {
+            sectionsToOpen.push(filterGroups[0].id);
+        }
 
-            // Add sections that have active filters — never forcibly remove any section
-            filterGroups.forEach((group) => {
-                const hasSelected = getItems(group).some((opt) => isChecked(opt));
-                if (hasSelected && !next.includes(group.id)) {
-                    next.push(group.id);
-                }
+        // Add sections that have selected filters
+        filterGroups.forEach((group) => {
+            const groupOptions = [...(group.options ?? group.list ?? [])]
+                .sort((a: any, b: any) => a.index - b.index)
+                .map((option: any) => ({
+                    ...option,
+                    label: getTranslatedLabel(option) as string
+                }));
+
+            const hasSelectedFilter = groupOptions.some((option) => {
+                const values = getValues(option);
+                const current = filters[option.code] ?? [];
+                return values.length > 0 && values.every((v) => current.includes(v));
             });
 
-            return next;
+            if (hasSelectedFilter && !sectionsToOpen.includes(group.id)) {
+                sectionsToOpen.push(group.id);
+            }
         });
-    }, [filterGroups, filters, getItems, isChecked]);
+
+        return sectionsToOpen;
+    }, [filterGroups, filters, getTranslatedLabel]);
+
+    // Sync required sections with accordion state
+    useEffect(() => {
+        setOpenSections((prev) => {
+            // Merge: keep user's manually opened sections + auto-open required sections
+            const merged = [...new Set([...prev, ...requiredOpenSections])];
+            
+            // Only update if something changed
+            if (merged.length === prev.length && merged.every(id => prev.includes(id))) {
+                return prev;
+            }
+            
+            return merged;
+        });
+    }, [requiredOpenSections]);
 
     if (isLoading) {
         return (
