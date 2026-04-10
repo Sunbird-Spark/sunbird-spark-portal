@@ -20,7 +20,7 @@ export default function App() {
     setIsLoading(true);
     setError(null);
     try {
-      await portalInitializer();
+      await portalInitializer(queryClient);
     } catch (err) {
       console.error('Portal initialization failed:', err);
       setError(err instanceof Error ? err.message : 'Portal initialization failed');

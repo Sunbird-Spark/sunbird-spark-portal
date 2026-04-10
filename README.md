@@ -331,6 +331,55 @@ The project includes a GitHub Actions workflow ([.github/workflows/pull-request.
 - [Express.js Documentation](https://expressjs.com/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 
+## Internationalization (i18n)
+
+### Supported Languages
+| Language | Code | Direction | Font |
+|---|---|---|---|
+| English | `en` | LTR | Rubik |
+| French | `fr` | LTR | Rubik |
+| Portuguese | `pt` | LTR | Rubik |
+| Arabic | `ar` | RTL | Noto Sans Arabic |
+
+### Architecture
+
+- **Library**: i18next + react-i18next
+- **Config**: `frontend/src/configs/i18n.ts`
+- **Language config**: `frontend/src/configs/languages.ts` (codes, labels, direction, fonts)
+- **Locale files**: `frontend/src/locales/{en,fr,pt,ar}.json`
+- **Hook**: `useAppI18n()` in `frontend/src/hooks/useAppI18n.ts` — provides `t()`, `changeLanguage()`, `isRTL`, `dir`
+- **Storage**: `localStorage('app-language')`
+
+### RTL (Arabic) Support
+
+- `I18nDirectionProvider` (`frontend/src/providers/I18nDirectionProvider.tsx`) sets `dir` attribute on `<html>` and `<body>`, and applies the Arabic font via CSS variable
+- RTL-specific CSS overrides are in `frontend/src/styles/rtl.css`
+
+### Keycloak Login Page Integration
+
+Portal and Keycloak share the same origin in production, so they share `localStorage`. The Keycloak theme (`sunbird`) reads `localStorage('app-language')` on page load and sets the `KEYCLOAK_LOCALE` cookie to render login/password pages in the user's selected language.
+
+Key files:
+- `useAppI18n.ts` — writes language to `localStorage` on change
+- `i18n.ts` — reads language from `localStorage` on init
+- Keycloak `template.ftl` — reads `localStorage`, sets `KEYCLOAK_LOCALE` cookie, reloads once
+
+### Mobile App Language Sync
+
+The mobile app opens portal pages (signup, forgot-password) in InAppBrowser, which has a separate `localStorage`. To pass the language:
+1. Mobile `AuthWebviewService.ts` appends `?lang=XX` to the URL
+2. Portal's `ForgotPassword.tsx` reads the `lang` param on mount and writes to `localStorage`
+3. Keycloak `template.ftl` reads `localStorage` and applies the locale
+
+### Adding a New Language
+1. Add config to `frontend/src/configs/languages.ts`
+2. Create `frontend/src/locales/XX.json` with all translated keys
+3. Import and register in `frontend/src/configs/i18n.ts`
+4. If RTL, add overrides to `frontend/src/styles/rtl.css`
+5. Add mapping in Keycloak `template.ftl` locale JS and create `messages_XX.properties`
+
+---
+
 ## Troubleshooting
 
 ### Common Issues

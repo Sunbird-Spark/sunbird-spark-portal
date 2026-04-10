@@ -186,6 +186,7 @@
   "updated": "محدث",
   "today": "اليوم",
   "yesterday": "أمس",
+  "older": "أقدم",
   "daysAgo": "أيام مضت",
   "trustedByProfessionals": "موثوق به من قبل المتخصصين في جميع أنحاء العالم",
   "joinThousands": "انضم إلى آلاف المحترفين الذين طوروا حياتهم المهنية من خلال برامجنا التدريبية الشاملة.",
@@ -259,6 +260,7 @@
     "courseProgress": "تقدم الدورة",
     "batchStartingOn": "ستبدأ الدفعة في",
     "batchStartedOn": "بدأت الدفعة في",
+    "batchEndsOn": "تنتهي الدفعة في",
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
     "contentStatusNotViewed": "لم تتم المشاهدة",
@@ -277,7 +279,11 @@
     "unenrolSuccess": "تم إلغاء تسجيل المستخدم من الدفعة بنجاح",
     "courseCompletionMessage": "لقد أكملت هذه الدورة بنجاح",
     "courseCompletionNoCertificateNote": "ملاحظة: لا تحتوي هذه الدورة على شهادة",
-    "courseCompletionCertificateNote": "يمكنك تنزيل شهادة الدورة من صفحة ملفك الشخصي بعد إنشائها"
+    "courseCompletionCertificateNote": "يمكنك تنزيل شهادة الدورة من صفحة ملفك الشخصي بعد إنشائها",
+    "batchEndedTitle": "انتهت الدفعة",
+    "batchExpiredProgressWarning": "لن يتم احتساب التقدم لهذه الدورة لأن الدفعة قد انتهت.",
+    "batchExpiringSoonTitle": "الدورة ستنتهي قريبًا",
+    "batchExpiringSoonWarning": "ستنتهي دورتك في {{date}}. أكملها قريبًا!"
   },
   "profileDataSharing": {
     "cardTitle": "مشاركة بيانات الملف الشخصي",
@@ -1280,6 +1286,11 @@
     "exportCsv": "تصدير CSV",
     "noDataToExport": "لا توجد بيانات للتصدير",
     "csvExportedSuccessfully": "تم تصدير CSV بنجاح"
+  },
+  "passwordReset": {
+    "congratulations": "تهانينا!",
+    "successMessage": "تم إعادة تعيين كلمة المرور بنجاح.",
+    "proceedToLogin": "المتابعة إلى تسجيل الدخول"
   },
   "exploreFilters": {
     "collection": "المجموعات",

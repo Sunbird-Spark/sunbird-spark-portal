@@ -65,27 +65,12 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'userManagement.consentTab.filterRevoked': 'Revoked',
         'userManagement.consentTab.searchPlaceholder': 'Search by name or email…',
         'userManagement.consentTab.noUsersMatch': 'No users match the current filters.',
-        'userManagement.consentTab.revokeTitle': 'Revoke Consent',
-        'userManagement.consentTab.reissueTitle': 'Reissue Consent',
-        'userManagement.consentTab.revokeTitleBulk': 'Revoke Consent ({{count}} users)',
-        'userManagement.consentTab.reissueTitleBulk': 'Reissue Consent ({{count}} users)',
-        'userManagement.consentTab.revokeDesc': 'This will revoke PII consent.',
-        'userManagement.consentTab.reissueDesc': 'This will reissue PII consent.',
-        'userManagement.consentTab.revokedToast': 'Consent revoked for {{count}} user(s)',
-        'userManagement.consentTab.reissuedToast': 'Consent reissued for {{count}} user(s)',
-        'userManagement.consentColumns.selectedCount': '{{count}} user(s) selected',
-        'userManagement.consentColumns.selectAll': 'Select All ({{count}})',
-        'userManagement.consentColumns.clear': 'Clear',
-        'userManagement.consentColumns.reissueConsent': 'Reissue Consent',
-        'userManagement.consentColumns.revokeConsent': 'Revoke Consent',
-        'userManagement.consentColumns.selectUser': 'Select {{name}}',
         'userManagement.consentColumns.colUserName': 'User Name',
         'userManagement.consentColumns.colEmail': 'Email',
         'userManagement.consentColumns.colPiiStatus': 'PII Consent Status',
         'userManagement.consentColumns.colCourse': 'Course',
         'userManagement.consentColumns.colConsentGivenOn': 'Consent Given On',
         'userManagement.consentColumns.colExpiry': 'Expiry',
-        'userManagement.consentColumns.bulkActions': 'Bulk actions',
         'dataTable.noData': 'No data available.',
         'dataTable.showing': 'Showing {{from}}–{{to}} of {{total}}',
         'dataTable.pageIndicator': '{{page}} / {{total}}',
@@ -111,17 +96,6 @@ vi.mock('@/hooks/useAppI18n', () => ({
     isRTL: false,
     dir: 'ltr',
   }),
-}));
-
-vi.mock('@/components/common/ConfirmDialog', () => ({
-  default: ({ open, title, onConfirm, onClose }: any) =>
-    open ? (
-      <div data-testid="confirm-dialog">
-        <span data-testid="confirm-title">{title}</span>
-        <button onClick={onConfirm}>Confirm</button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
-    ) : null,
 }));
 
 // Radix Select → plain <select> so fireEvent.change works.
@@ -210,9 +184,9 @@ describe('UserConsentTab', () => {
       expect(screen.queryByText('Consumer Org(s)')).not.toBeInTheDocument();
     });
 
-    it('does not show the bulk actions toolbar by default', () => {
+    it('does not render checkboxes in the table', () => {
       renderTab();
-      expect(screen.queryByRole('toolbar', { name: /bulk actions/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     });
   });
 
@@ -250,102 +224,6 @@ describe('UserConsentTab', () => {
 
       await waitFor(() => {
         expect(screen.getByText('No users match the current filters.')).toBeInTheDocument();
-      });
-    });
-  });
-
-  /* ── Row selection ── */
-  describe('row selection', () => {
-    it('shows the bulk actions toolbar when a row is checked', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      expect(screen.getByRole('toolbar', { name: /bulk actions/i })).toBeInTheDocument();
-      expect(screen.getByText(/1 user\(s\) selected/)).toBeInTheDocument();
-    });
-
-    it('increments selected count when multiple rows are checked', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      fireEvent.click(screen.getByLabelText('Select Priya Sharma'));
-      expect(screen.getByText(/2 user\(s\) selected/)).toBeInTheDocument();
-    });
-
-    it('deselects a row when its checkbox is clicked again', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      expect(screen.queryByRole('toolbar', { name: /bulk actions/i })).not.toBeInTheDocument();
-    });
-
-    it('hides the bulk actions toolbar after clicking Clear', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      fireEvent.click(screen.getByRole('button', { name: /clear/i }));
-      expect(screen.queryByRole('toolbar', { name: /bulk actions/i })).not.toBeInTheDocument();
-    });
-
-    it('selects all filtered rows when "Select All" is clicked', async () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      fireEvent.click(screen.getByRole('button', { name: /select all/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText(new RegExp(`${MOCK_DATA.length} user\\(s\\) selected`))).toBeInTheDocument();
-      });
-    });
-
-    it('clears selection when search input changes', async () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      expect(screen.getByText(/1 user\(s\) selected/)).toBeInTheDocument();
-
-      fireEvent.change(screen.getByPlaceholderText('Search by name or email…'), {
-        target: { value: 'something' },
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByRole('toolbar', { name: /bulk actions/i })).not.toBeInTheDocument();
-      });
-    });
-  });
-
-  /* ── Bulk actions ── */
-  describe('bulk actions toolbar', () => {
-    it('shows "Revoke Consent" bulk button in the toolbar', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      expect(screen.getByRole('button', { name: /^revoke consent$/i })).toBeInTheDocument();
-    });
-
-    it('shows "Reissue Consent" bulk button in the toolbar', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      expect(screen.getByRole('button', { name: /reissue consent/i })).toBeInTheDocument();
-    });
-
-    it('bulk Revoke Consent dialog title includes user count', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      fireEvent.click(screen.getByLabelText('Select Priya Sharma'));
-      fireEvent.click(screen.getByRole('button', { name: /^revoke consent$/i }));
-      expect(screen.getByTestId('confirm-title')).toHaveTextContent('Revoke Consent (2 users)');
-    });
-
-    it('bulk Reissue Consent dialog title includes user count', () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      fireEvent.click(screen.getByRole('button', { name: /reissue consent/i }));
-      expect(screen.getByTestId('confirm-title')).toHaveTextContent('Reissue Consent (1 users)');
-    });
-
-    it('clears selection after confirming bulk revoke', async () => {
-      renderTab();
-      fireEvent.click(screen.getByLabelText('Select Aarav Mehta'));
-      fireEvent.click(screen.getByRole('button', { name: /^revoke consent$/i }));
-      fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }));
-
-      await waitFor(() => {
-        expect(screen.queryByRole('toolbar', { name: /bulk actions/i })).not.toBeInTheDocument();
       });
     });
   });

@@ -186,6 +186,7 @@
   "updated": "Updated",
   "today": "Today",
   "yesterday": "Yesterday",
+  "older": "Older",
   "daysAgo": "days ago",
   "trustedByProfessionals": "Trusted by Professionals Worldwide",
   "joinThousands": "Join thousands of professionals who have advanced their careers with our comprehensive training programs.",
@@ -259,6 +260,7 @@
     "courseProgress": "Course Progress",
     "batchStartingOn": "Batch starting on",
     "batchStartedOn": "Batch started on",
+    "batchEndsOn": "Batch ends on",
     "contentStatusCompleted": "Completed",
     "contentStatusInProgress": "In Progress",
     "contentStatusNotViewed": "Not viewed",
@@ -277,7 +279,11 @@
     "unenrolSuccess": "User unenroled from the batch successfully",
     "courseCompletionMessage": "You have successfully completed the course",
     "courseCompletionNoCertificateNote": "Note: This course does not have a certificate",
-    "courseCompletionCertificateNote": "You can download your course certificate from your Profile page once it is generated"
+    "courseCompletionCertificateNote": "You can download your course certificate from your Profile page once it is generated",
+    "batchEndedTitle": "Batch Ended",
+    "batchExpiredProgressWarning": "Progress won't be calculated for this course as the batch has ended.",
+    "batchExpiringSoonTitle": "Course Expiring Soon",
+    "batchExpiringSoonWarning": "Your course will expire on {{date}}. Complete it soon!"
   },
   "profileDataSharing": {
     "cardTitle": "Profile Data Sharing",
@@ -933,7 +939,20 @@
     "tryAgain": "Try Again",
     "closePreview": "Close preview",
     "closeButton": "Close",
-    "selectButton": "Select"
+    "selectButton": "Select",
+    "verifying": "Verifying certificate...",
+    "verified": "Certificate Verified",
+    "verificationFailed": "Verification Failed",
+    "issuedTo": "Issued to",
+    "course": "Course",
+    "issuedOn": "Issue Date",
+    "backToHome": "Back to Home",
+    "couldNotVerify": "This certificate could not be verified",
+    "status": "Status",
+    "activeAndValid": "Active & Valid",
+    "invalid": "Invalid",
+    "credentialHolder": "Credential Holder",
+    "certificationProgram": "Certification Program"
   },
   "createTemplate": {
     "description": "Fill in the details below to create a new certificate template for your organisation.",
@@ -1281,6 +1300,11 @@
     "exportCsv": "Export CSV",
     "noDataToExport": "No data to export",
     "csvExportedSuccessfully": "CSV exported successfully"
+  },
+  "passwordReset": {
+    "congratulations": "Congratulations!",
+    "successMessage": "Your password has been successfully reset.",
+    "proceedToLogin": "Proceed to Login"
   },
   "exploreFilters": {
     "collection": "Collections",

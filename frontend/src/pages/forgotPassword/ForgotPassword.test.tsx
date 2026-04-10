@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import ForgotPassword from './ForgotPassword';
 
@@ -53,9 +53,43 @@ vi.mock('./VerifyOTP', () => ({
     VerifyOTP: () => <div data-testid="verify-otp-comp">Verify OTP</div>
 }));
 
+// Mock i18n module — vi.hoisted ensures the variable is available when vi.mock is hoisted
+const { mockChangeLanguage } = vi.hoisted(() => ({
+    mockChangeLanguage: vi.fn(() => Promise.resolve()),
+}));
+vi.mock('@/configs/i18n', () => ({
+    default: { changeLanguage: mockChangeLanguage },
+}));
+
+// Mock forgotPasswordUtils
+vi.mock('@/utils/forgotPasswordUtils', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@/utils/forgotPasswordUtils')>();
+    return {
+        ...actual,
+        isMobileApp: vi.fn(() => false),
+        persistMobileContext: vi.fn(),
+    };
+});
+
+// Mock TelemetryTracker
+vi.mock('@/components/telemetry/TelemetryTracker', () => ({
+    TelemetryTracker: () => null,
+}));
+
+// Mock useImpression
+vi.mock('@/hooks/useImpression', () => ({
+    default: vi.fn(),
+}));
+
+// Mock useTelemetry
+vi.mock('@/hooks/useTelemetry', () => ({
+    useTelemetry: () => ({ log: vi.fn() }),
+}));
+
 describe('ForgotPassword', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        localStorage.clear();
     });
 
     it('renders IdentifyUser on step 1', () => {
@@ -110,5 +144,47 @@ describe('ForgotPassword', () => {
         render(<ForgotPassword />);
 
         expect(screen.getByTestId('identify-btn')).toBeInTheDocument();
+    });
+
+    describe('language param handling', () => {
+        const originalLocation = window.location;
+
+        beforeEach(() => {
+            Object.defineProperty(window, 'location', {
+                value: { ...originalLocation, search: '' },
+                writable: true,
+            });
+        });
+
+        afterEach(() => {
+            Object.defineProperty(window, 'location', {
+                value: originalLocation,
+                writable: true,
+            });
+        });
+
+        it('persists supported lang param to localStorage and changes language', () => {
+            window.location.search = '?lang=fr';
+            render(<ForgotPassword />);
+
+            expect(localStorage.getItem('app-language')).toBe('fr');
+            expect(mockChangeLanguage).toHaveBeenCalledWith('fr');
+        });
+
+        it('ignores unsupported lang param', () => {
+            window.location.search = '?lang=xx';
+            render(<ForgotPassword />);
+
+            expect(localStorage.getItem('app-language')).toBeNull();
+            expect(mockChangeLanguage).not.toHaveBeenCalled();
+        });
+
+        it('does nothing when no lang param is present', () => {
+            window.location.search = '';
+            render(<ForgotPassword />);
+
+            expect(localStorage.getItem('app-language')).toBeNull();
+            expect(mockChangeLanguage).not.toHaveBeenCalled();
+        });
     });
 });

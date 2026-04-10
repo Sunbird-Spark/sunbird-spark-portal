@@ -171,14 +171,14 @@ describe('useBatch hooks test', () => {
     it('sets up create batch mutation with onSuccess invalidation', () => {
       (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
       const mutationParams = useCreateBatch();
-      
+
       expect(useMutation).toHaveBeenCalled();
       expect(typeof (mutationParams as any).onSuccess).toBe('function');
 
       vi.useFakeTimers();
       // call onSuccess (requires a dummy response and variables to satisfy signature)
       (mutationParams as any).onSuccess({ data: { batchId: 'b1' } }, { courseId: 'course_123' });
-      
+
       expect(mockQueryClient.setQueryData).toHaveBeenCalledWith(
         ['batchList', 'course_123', true],
         expect.any(Function)
@@ -190,20 +190,126 @@ describe('useBatch hooks test', () => {
       });
       vi.useRealTimers();
     });
+
+    it('mutationFn resolves user/org and calls createBatch with correct request', async () => {
+      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user_abc');
+      vi.mocked(userService.userRead).mockResolvedValue({
+        data: { response: { rootOrgId: 'org_xyz', firstName: 'Test', lastName: 'User' } },
+      } as any);
+      vi.mocked(creatorBatchService.createBatch).mockResolvedValue({ data: { batchId: 'new-batch' } } as any);
+
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useCreateBatch();
+
+      const formData = {
+        courseId: 'course_123',
+        name: 'My Batch',
+        startDate: '2026-01-01',
+        endDate: '2026-06-30',
+        tandc: true,
+        description: 'A test batch',
+        mentors: ['mentor_1'],
+        enrollmentEndDate: '2026-05-31',
+        issueCertificate: true,
+      };
+
+      await (mutationParams as any).mutationFn(formData);
+
+      expect(creatorBatchService.createBatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          courseId: 'course_123',
+          name: 'My Batch',
+          createdBy: 'user_abc',
+          createdFor: ['org_xyz'],
+          description: 'A test batch',
+          mentors: ['mentor_1'],
+          enrollmentEndDate: '2026-05-31',
+          issueCertificate: true,
+        }),
+        expect.objectContaining({
+          'X-User-ID': 'user_abc',
+          'X-Channel-Id': 'org_xyz',
+        })
+      );
+    });
+
+    it('mutationFn omits optional fields when not provided', async () => {
+      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user_abc');
+      vi.mocked(userService.userRead).mockResolvedValue({
+        data: { response: { rootOrgId: 'org_xyz' } },
+      } as any);
+      vi.mocked(creatorBatchService.createBatch).mockResolvedValue({ data: { batchId: 'b2' } } as any);
+
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useCreateBatch();
+
+      const formData = {
+        courseId: 'course_123',
+        name: 'Minimal Batch',
+        startDate: '2026-01-01',
+        endDate: '2026-06-30',
+        tandc: false,
+      };
+
+      await (mutationParams as any).mutationFn(formData);
+
+      const callArgs = vi.mocked(creatorBatchService.createBatch).mock.calls[0]?.[0];
+      expect(callArgs).not.toHaveProperty('description');
+      expect(callArgs).not.toHaveProperty('mentors');
+      expect(callArgs).not.toHaveProperty('enrollmentEndDate');
+    });
+
+    it('onSuccess setQueryData updater prepends new batch to existing list', () => {
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useCreateBatch();
+      vi.useFakeTimers();
+
+      const existingBatch = { id: 'old-batch', courseId: 'course_123', name: 'Old Batch' };
+      mockQueryClient.setQueryData.mockImplementation((_key: unknown, updater: (old: unknown) => unknown) => {
+        const result = updater([existingBatch]);
+        expect((result as any[])[0]).toMatchObject({ courseId: 'course_123', name: 'New Batch' });
+        expect((result as any[])[1]).toBe(existingBatch);
+      });
+
+      (mutationParams as any).onSuccess(
+        { data: { batchId: 'new-batch-id' } },
+        { courseId: 'course_123', name: 'New Batch', startDate: '2026-01-01', endDate: '2026-06-30', tandc: true }
+      );
+
+      vi.useRealTimers();
+    });
+
+    it('onSuccess setQueryData updater returns undefined when old is undefined', () => {
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useCreateBatch();
+      vi.useFakeTimers();
+
+      mockQueryClient.setQueryData.mockImplementation((_key: unknown, updater: (old: unknown) => unknown) => {
+        const result = updater(undefined);
+        expect(result).toBeUndefined();
+      });
+
+      (mutationParams as any).onSuccess(
+        { data: { batchId: 'x' } },
+        { courseId: 'course_123', name: 'B', startDate: '', endDate: '', tandc: false }
+      );
+
+      vi.useRealTimers();
+    });
   });
 
   describe('useUpdateBatch', () => {
     it('sets up update batch mutation with onSuccess invalidation', () => {
       (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
       const mutationParams = useUpdateBatch();
-      
+
       expect(useMutation).toHaveBeenCalled();
       expect(typeof (mutationParams as any).onSuccess).toBe('function');
 
       vi.useFakeTimers();
       // Call onSuccess to verify it invalidates
       (mutationParams as any).onSuccess(null, { courseId: 'course_123', batchId: 'b2' });
-      
+
       expect(mockQueryClient.setQueryData).toHaveBeenCalledWith(
         ['batchList', 'course_123', true],
         expect.any(Function)
@@ -213,6 +319,81 @@ describe('useBatch hooks test', () => {
       expect(mockQueryClient.invalidateQueries).toHaveBeenCalledWith({
         queryKey: ['batchList', 'course_123', true]
       });
+      vi.useRealTimers();
+    });
+
+    it('mutationFn resolves user/org and calls updateBatch with correct request', async () => {
+      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user_abc');
+      vi.mocked(userService.userRead).mockResolvedValue({
+        data: { response: { rootOrgId: 'org_xyz' } },
+      } as any);
+      vi.mocked(creatorBatchService.updateBatch).mockResolvedValue({ data: {} } as any);
+
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useUpdateBatch();
+
+      const formData = {
+        batchId: 'batch_001',
+        courseId: 'course_123',
+        name: 'Updated Batch',
+        startDate: '2026-01-01',
+        endDate: '2026-06-30',
+        mentors: ['mentor_2'],
+        description: 'Updated desc',
+        enrollmentEndDate: '2026-05-01',
+        issueCertificate: false,
+      };
+
+      await (mutationParams as any).mutationFn(formData);
+
+      expect(creatorBatchService.updateBatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'batch_001',
+          courseId: 'course_123',
+          name: 'Updated Batch',
+          createdFor: ['org_xyz'],
+          mentors: ['mentor_2'],
+          description: 'Updated desc',
+          enrollmentEndDate: '2026-05-01',
+          issueCertificate: false,
+        }),
+        expect.objectContaining({
+          'X-User-ID': 'user_abc',
+          'X-Channel-Id': 'org_xyz',
+          'X-Org-code': 'org_xyz',
+        })
+      );
+    });
+
+    it('onSuccess setQueryData updater merges updated batch into existing list', () => {
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useUpdateBatch();
+      vi.useFakeTimers();
+
+      const existing = [
+        { id: 'b1', courseId: 'c1', name: 'Old Name' },
+        { id: 'b2', courseId: 'c1', name: 'Other Batch' },
+      ];
+      mockQueryClient.setQueryData.mockImplementation((_key: unknown, updater: (old: unknown) => unknown) => {
+        const result = updater(existing) as any[];
+        expect(result[0]).toMatchObject({ id: 'b1', name: 'New Name' });
+        expect(result[1]).toBe(existing[1]);
+      });
+
+      (mutationParams as any).onSuccess(null, { courseId: 'c1', batchId: 'b1', name: 'New Name', startDate: '', endDate: '' });
+      vi.useRealTimers();
+    });
+
+    it('onSuccess setQueryData updater returns undefined when old is undefined', () => {
+      (useMutation as import('vitest').Mock).mockImplementation((opts) => opts);
+      const mutationParams = useUpdateBatch();
+      vi.useFakeTimers();
+
+      mockQueryClient.setQueryData.mockImplementation((_key: unknown, updater: (old: unknown) => unknown) => {
+        expect(updater(undefined)).toBeUndefined();
+      });
+
+      (mutationParams as any).onSuccess(null, { courseId: 'c1', batchId: 'b1', name: 'N', startDate: '', endDate: '' });
       vi.useRealTimers();
     });
   });

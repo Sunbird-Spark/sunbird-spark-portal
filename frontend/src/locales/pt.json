@@ -186,6 +186,7 @@
   "updated": "Atualizado",
   "today": "Hoje",
   "yesterday": "Ontem",
+  "older": "Mais antigo",
   "daysAgo": "dias atrás",
   "trustedByProfessionals": "Aprovado por profissionais em todo o mundo",
   "joinThousands": "Junte-se a milhares de profissionais que avançaram em suas carreiras com nossos programas de treinamento abrangentes.",
@@ -259,6 +260,7 @@
     "courseProgress": "Progresso do Curso",
     "batchStartingOn": "Turma começa em",
     "batchStartedOn": "Turma iniciada em",
+    "batchEndsOn": "Turma encerra em",
     "contentStatusCompleted": "Concluído",
     "contentStatusInProgress": "Em andamento",
     "contentStatusNotViewed": "Não visualizado",
@@ -277,7 +279,11 @@
     "unenrolSuccess": "Cancelamento de inscrição da turma realizado com sucesso",
     "courseCompletionMessage": "Você concluiu o curso com sucesso",
     "courseCompletionNoCertificateNote": "Observação: este curso não possui certificado",
-    "courseCompletionCertificateNote": "Você pode baixar o certificado do curso na sua página de perfil após ele ser gerado"
+    "courseCompletionCertificateNote": "Você pode baixar o certificado do curso na sua página de perfil após ele ser gerado",
+    "batchEndedTitle": "Lote Encerrado",
+    "batchExpiredProgressWarning": "O progresso não será calculado para este curso pois o lote encerrou.",
+    "batchExpiringSoonTitle": "Curso Expirando em Breve",
+    "batchExpiringSoonWarning": "Seu curso expirará em {{date}}. Conclua em breve!"
   },
   "profileDataSharing": {
     "cardTitle": "Compartilhamento de dados do perfil",
@@ -1279,6 +1285,11 @@
     "exportCsv": "Exportar CSV",
     "noDataToExport": "Nenhum dado para exportar",
     "csvExportedSuccessfully": "CSV exportado com sucesso"
+  },
+  "passwordReset": {
+    "congratulations": "Parabéns!",
+    "successMessage": "Sua senha foi redefinida com sucesso.",
+    "proceedToLogin": "Ir para o Login"
   },
   "exploreFilters": {
     "collection": "Coleções",

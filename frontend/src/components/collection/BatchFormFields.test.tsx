@@ -263,7 +263,10 @@ describe('BatchFormFields', () => {
     const fixedToday = '2026-03-05';
 
     beforeEach(() => {
-      vi.useFakeTimers();
+      // Only fake the Date constructor — leave React's scheduling timers intact
+      // to avoid "Hook timed out" errors caused by vi.useFakeTimers() blocking
+      // React 18's concurrent rendering internals.
+      vi.useFakeTimers({ toFake: ['Date'] });
       vi.setSystemTime(new Date(fixedToday));
     });
 
@@ -279,8 +282,10 @@ describe('BatchFormFields', () => {
 
     it('end date input has min set to today when start date and enrolment end date are empty', () => {
       render(<BatchFormFields form={form} handleField={handleField} setForm={setForm} />);
-      const input = screen.getByLabelText(/^end date$/i) as HTMLInputElement;
-      expect(input.min).toBe(fixedToday);
+      // Use getAllByRole to avoid ambiguity — the End Date input has type="date"
+      const dateInputs = screen.getAllByRole('textbox', { hidden: true });
+      const endDateInput = screen.getByLabelText(/^end date$/i) as HTMLInputElement;
+      expect(endDateInput.min).toBe(fixedToday);
     });
 
     it('enrolment end date input has min set to today when start date is empty', () => {
@@ -293,7 +298,7 @@ describe('BatchFormFields', () => {
   describe('Custom styling props', () => {
     it('applies custom label class when provided', () => {
       const customLabelClass = 'custom-label-class';
-      render(
+      const { container } = render(
         <BatchFormFields
           form={form}
           handleField={handleField}
@@ -301,7 +306,9 @@ describe('BatchFormFields', () => {
           labelClass={customLabelClass}
         />
       );
-      const label = screen.getByLabelText(/name of batch/i).parentElement?.querySelector('label');
+      // Query label by its `for` attribute instead of by text to avoid
+      // "found multiple elements" errors when multiple labels share the regex
+      const label = container.querySelector('label[for="batchName"]');
       expect(label).toHaveClass(customLabelClass);
     });
 

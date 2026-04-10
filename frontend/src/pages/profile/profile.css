@@ -197,26 +197,8 @@ body .notification-popover-arrow {
     border-radius: 14px;
 }
 
-.notification-item::before {
-    content: '';
-    position: absolute;
-    left: -4px;
-    top: 30%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    background: hsl(var(--sunbird-ginger));
-    border-radius: 50%;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.notification-item:hover {
+.notification-item--unread {
     border: 1px solid hsl(var(--sunbird-ginger));
-}
-
-.notification-item:hover::before {
-    opacity: 1;
 }
 
 .notification-item-body {

@@ -14,5 +14,7 @@ router.post('/composite/v1/search', kongProxy);
 router.post('/data/v1/form/read', validateReadAPI, read);
 router.get('/questionset/v2/hierarchy/*rest', kongProxy);
 router.post('/question/v2/list', kongProxy);
+router.get('/rc/certificate/v1/download/:id', kongProxy);
+router.get('/rc/certificate/v1/key/:id', kongProxy);
 
 export default router;
