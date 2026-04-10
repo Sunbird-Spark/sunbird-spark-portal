@@ -167,4 +167,85 @@ describe('WorkspacePageContent', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     expect(onEdit).toHaveBeenCalledWith('item-1');
   });
+
+  it('renders error state when isError is true (line 68)', () => {
+    render(
+      <WorkspacePageContent
+        {...defaultProps}
+        isError={true}
+        error={new Error('Something broke')}
+      />
+    );
+    expect(screen.getByText('somethingWentWrong')).toBeInTheDocument();
+    expect(screen.getByText('Something broke')).toBeInTheDocument();
+  });
+
+  it('renders error state with fallback message when error is null (line 73)', () => {
+    render(
+      <WorkspacePageContent {...defaultProps} isError={true} error={null} />
+    );
+    expect(screen.getByText('failedToLoadContent')).toBeInTheDocument();
+  });
+
+  it('calls onRetry when retry button clicked in error state', () => {
+    const onRetry = vi.fn();
+    render(<WorkspacePageContent {...defaultProps} isError={true} error={null} onRetry={onRetry} />);
+    fireEvent.click(screen.getByText('retry'));
+    expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('renders loading state (PageLoader) when isLoading is true (line 88)', () => {
+    render(<WorkspacePageContent {...defaultProps} isLoading={true} />);
+    expect(screen.getByText('loadingContent')).toBeInTheDocument();
+  });
+
+  it('renders pending-review empty state title (line 92)', () => {
+    render(<WorkspacePageContent {...defaultProps} activeView="pending-review" filteredItems={[]} />);
+    expect(screen.getByTestId('empty-title')).toHaveTextContent('workspace.noContentsToReview');
+  });
+
+  it('renders my-published empty state title (line 93)', () => {
+    render(<WorkspacePageContent {...defaultProps} activeView="my-published" filteredItems={[]} />);
+    expect(screen.getByTestId('empty-title')).toHaveTextContent('workspace.noPublishedContents');
+  });
+
+  it('shows loadingMore spinner in InfiniteScrollSentinel when isLoadingMore=true (lines 199-200)', () => {
+    render(
+      <WorkspacePageContent
+        {...defaultProps}
+        activeView="all"
+        filteredItems={[mockItem]}
+        hasMore={true}
+        isLoadingMore={true}
+      />
+    );
+    expect(screen.getByText('loadingMore')).toBeInTheDocument();
+  });
+
+  it('hides loadingMore spinner when hasMore=false and isLoadingMore=false (line 203)', () => {
+    render(
+      <WorkspacePageContent
+        {...defaultProps}
+        activeView="all"
+        filteredItems={[mockItem]}
+        hasMore={false}
+        isLoadingMore={false}
+      />
+    );
+    expect(screen.queryByText('loadingMore')).not.toBeInTheDocument();
+  });
+
+  it('shows sentinel div when hasMore=true and isLoadingMore=false', () => {
+    render(
+      <WorkspacePageContent
+        {...defaultProps}
+        activeView="all"
+        filteredItems={[mockItem]}
+        hasMore={true}
+        isLoadingMore={false}
+      />
+    );
+    // Sentinel div renders but loading spinner is not shown
+    expect(screen.queryByText('loadingMore')).not.toBeInTheDocument();
+  });
 });
