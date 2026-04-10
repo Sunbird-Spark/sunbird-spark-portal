@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent, useMemo } from "react";
+import React, { BaseSyntheticEvent, useMemo, useState, useEffect } from "react";
 import { Checkbox } from "../common/CheckBox";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import type { FilterState } from "../../pages/Explore";
@@ -27,6 +27,9 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
             component: 'portal',
         },
     });
+
+    // State for managing open accordion sections - must be before early returns
+    const [openSections, setOpenSections] = useState<string[]>([]);
 
     // Helper function to get label for current language with i18n support
     const getTranslatedLabel = React.useCallback((item: any): string => {
@@ -101,6 +104,28 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
         e.stopPropagation();
     };
 
+    // Initialize and update open sections based on filters
+    useEffect(() => {
+        const sectionsToOpen: string[] = [];
+        
+        // Always include the first section
+        if (filterGroups[0]?.id) {
+            sectionsToOpen.push(filterGroups[0].id);
+        }
+        
+        // Add sections that have selected filters
+        filterGroups.forEach((group) => {
+            const groupOptions = getItems(group);
+            const hasSelectedFilter = groupOptions.some((option) => isChecked(option));
+            
+            if (hasSelectedFilter && !sectionsToOpen.includes(group.id)) {
+                sectionsToOpen.push(group.id);
+            }
+        });
+        
+        setOpenSections(sectionsToOpen);
+    }, [filterGroups, filters, getItems]);
+
     if (isLoading) {
         return (
             <div className="bg-sunbird-gray-f3 rounded-[1.375rem] p-5">
@@ -119,9 +144,6 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
         return null;
     }
 
-    // Scenario 4: only open the first section by default
-    const defaultOpenId = filterGroups[0]?.id;
-
     return (
         <div data-testid="explore-filters" className="bg-sunbird-gray-f3 rounded-[1.375rem] p-5">
             {/* Filters Title */}
@@ -129,7 +151,8 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
 
             <Accordion
                 type="multiple"
-                defaultValue={defaultOpenId ? [defaultOpenId] : []}
+                value={openSections}
+                onValueChange={setOpenSections}
                 className="w-full space-y-3"
             >
                 {/* Scenario 1: groups already sorted above */}
