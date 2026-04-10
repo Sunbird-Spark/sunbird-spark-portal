@@ -9,7 +9,7 @@ import {
     AccordionTrigger,
 } from "../landing/Accordion";
 import { useFormRead } from "../../hooks/useForm";
-import type { ExploreFilterGroup, ExploreFilterOption } from "../../types/formTypes";
+import type { ExploreFilterOption } from "../../types/formTypes";
 
 // Pure helper — no component state, safe at module scope
 const getValues = (option: ExploreFilterOption): string[] =>
