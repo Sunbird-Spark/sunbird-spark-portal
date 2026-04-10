@@ -1,8 +1,6 @@
 import { EcmlPlayerContextProps, EcmlPlayerMetadata } from './types';
 import { buildTelemetryContext } from '../telemetryContextBuilder';
 
-const PREVIEW_URL = '/content/preview/preview.html?webview=true';
-
 export class EcmlPlayerService {
   async createConfig(
     metadata: EcmlPlayerMetadata,
@@ -11,7 +9,6 @@ export class EcmlPlayerService {
     const context = await buildTelemetryContext(contextProps, { contentId: metadata.identifier });
 
     const config = {
-      build_number: import.meta.env.VITE_BUILD_NUMBER || '1.0',
       showEndPage: false,
       endPage: [{ template: 'assessment', contentType: ['SelfAssess'] }],
       showStartPage: true,
@@ -48,6 +45,7 @@ export class EcmlPlayerService {
   }
 
   buildPlayerUrl(): string {
-    return PREVIEW_URL;
+    const buildNumber = import.meta.env.VITE_BUILD_NUMBER || '1.0';
+    return `/content/preview/preview.html?webview=true&build_number=${buildNumber}`;
   }
 }
