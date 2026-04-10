@@ -11,6 +11,7 @@ export class EcmlPlayerService {
     const context = await buildTelemetryContext(contextProps, { contentId: metadata.identifier });
 
     const config = {
+      build_number: import.meta.env.VITE_BUILD_NUMBER || '1.0',
       showEndPage: false,
       endPage: [{ template: 'assessment', contentType: ['SelfAssess'] }],
       showStartPage: true,
