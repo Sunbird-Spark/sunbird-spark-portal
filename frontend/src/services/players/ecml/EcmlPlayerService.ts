@@ -1,6 +1,8 @@
 import { EcmlPlayerContextProps, EcmlPlayerMetadata } from './types';
 import { buildTelemetryContext } from '../telemetryContextBuilder';
 
+const PREVIEW_URL = '/content/preview/preview.html?webview=true';
+
 export class EcmlPlayerService {
   async createConfig(
     metadata: EcmlPlayerMetadata,
@@ -46,7 +48,6 @@ export class EcmlPlayerService {
   }
 
   buildPlayerUrl(): string {
-    const buildNumber = import.meta.env.VITE_BUILD_NUMBER || '1.0';
-    return `/content/preview/preview.html?webview=true&build_number=${buildNumber}`;
+    return PREVIEW_URL;
   }
 }

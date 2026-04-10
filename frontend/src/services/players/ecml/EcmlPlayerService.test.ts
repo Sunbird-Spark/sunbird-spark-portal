@@ -149,10 +149,8 @@ describe('EcmlPlayerService', () => {
   });
 
   describe('buildPlayerUrl', () => {
-    it('should return the preview URL with build_number query param', () => {
-      const url = service.buildPlayerUrl();
-      expect(url).toContain('/content/preview/preview.html?webview=true');
-      expect(url).toContain('build_number=');
+    it('should return the preview URL', () => {
+      expect(service.buildPlayerUrl()).toBe('/content/preview/preview.html?webview=true');
     });
   });
 });
