@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent, useMemo, useState, useEffect } from "react";
+import React, { BaseSyntheticEvent, useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { Checkbox } from "../common/CheckBox";
 import { useAppI18n } from "../../hooks/useAppI18n";
 import type { FilterState } from "../../pages/Explore";
@@ -10,6 +10,14 @@ import {
 } from "../landing/Accordion";
 import { useFormRead } from "../../hooks/useForm";
 import type { ExploreFilterGroup, ExploreFilterOption } from "../../types/formTypes";
+
+// Pure helper — no component state, safe at module scope
+const getValues = (option: ExploreFilterOption): string[] =>
+    Array.isArray(option.value)
+        ? option.value
+        : option.value
+            ? [option.value]
+            : [];
 
 interface ExploreFiltersProps {
     filters: FilterState;
@@ -30,6 +38,8 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
 
     // State for managing open accordion sections - must be before early returns
     const [openSections, setOpenSections] = useState<string[]>([]);
+    // Guard so we only initialise the first section open once (not on every filter change)
+    const firstSectionInitialized = useRef(false);
 
     // Helper function to get label for current language with i18n support
     const getTranslatedLabel = React.useCallback((item: any): string => {
@@ -75,18 +85,11 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
                 label: getTranslatedLabel(option) as string
             })), [getTranslatedLabel]);
 
-    const getValues = (option: ExploreFilterOption): string[] =>
-        Array.isArray(option.value)
-            ? option.value
-            : option.value
-                ? [option.value]
-                : [];
-
-    const isChecked = (option: ExploreFilterOption): boolean => {
+    const isChecked = useCallback((option: ExploreFilterOption): boolean => {
         const values = getValues(option);
         const current = filters[option.code] ?? [];
         return values.every((v) => current.includes(v));
-    };
+    }, [filters]);
 
     // Scenario 2: key = option.code, value = option.value (string | string[])
     const handleCheckboxChange = (option: ExploreFilterOption, checked: boolean) => {
@@ -106,25 +109,28 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
 
     // Initialize and update open sections based on filters
     useEffect(() => {
-        const sectionsToOpen: string[] = [];
-        
-        // Always include the first section
-        if (filterGroups[0]?.id) {
-            sectionsToOpen.push(filterGroups[0].id);
-        }
-        
-        // Add sections that have selected filters
-        filterGroups.forEach((group) => {
-            const groupOptions = getItems(group);
-            const hasSelectedFilter = groupOptions.some((option) => isChecked(option));
-            
-            if (hasSelectedFilter && !sectionsToOpen.includes(group.id)) {
-                sectionsToOpen.push(group.id);
+        setOpenSections((prev) => {
+            const next = [...prev];
+
+            // Open the first section only once when filter groups first load
+            if (!firstSectionInitialized.current && filterGroups[0]?.id) {
+                if (!next.includes(filterGroups[0].id)) {
+                    next.push(filterGroups[0].id);
+                }
+                firstSectionInitialized.current = true;
             }
+
+            // Add sections that have active filters — never forcibly remove any section
+            filterGroups.forEach((group) => {
+                const hasSelected = getItems(group).some((opt) => isChecked(opt));
+                if (hasSelected && !next.includes(group.id)) {
+                    next.push(group.id);
+                }
+            });
+
+            return next;
         });
-        
-        setOpenSections(sectionsToOpen);
-    }, [filterGroups, filters, getItems]);
+    }, [filterGroups, filters, getItems, isChecked]);
 
     if (isLoading) {
         return (
