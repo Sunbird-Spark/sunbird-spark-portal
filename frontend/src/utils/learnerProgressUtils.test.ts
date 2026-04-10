@@ -248,6 +248,11 @@ describe('mapApiItemToLearnerProgress', () => {
     expect(mapApiItemToLearnerProgress(makeItem({ status: 1, issued_certificates: null })).certificateStatus).toBe('N/A');
   });
 
+  it('falls back to "Not Started" for unknown status codes (line 126 ?? branch)', () => {
+    // status 99 is not in STATUS_MAP → ?? "Not Started" branch
+    expect(mapApiItemToLearnerProgress(makeItem({ status: 99 as any })).status).toBe('Not Started');
+  });
+
   it('extracts date-only from ISO datetime strings', () => {
     const item = makeItem({
       enrolled_date: '2026-03-04T14:14:46.351+00:00',

@@ -44,4 +44,15 @@ describe('HttpService', () => {
     expect(HttpService.isCancel(cancelError)).toBe(true);
     expect(axios.isCancel).toHaveBeenCalledWith(cancelError);
   });
+
+  it('does not call console.error when error is a cancellation (line 15 false branch)', async () => {
+    const cancelError = new Error('canceled');
+    vi.mocked(axios.isCancel).mockReturnValue(true);
+    (axios.get as Mock).mockRejectedValue(cancelError);
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(httpService.get('http://example.com/data')).rejects.toThrow('canceled');
+    expect(errorSpy).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
 });

@@ -94,12 +94,26 @@ describe('createOptionsConfig', () => {
 
     it('should maintain story option description consistency', () => {
       const categories = getEditorCategories();
-      
+
       const storyOption = categories
         .flatMap(category => category.options)
         .find(option => option.id === 'story');
-      
+
       expect(storyOption?.description).toBe('Design interactive stories and gamified learning experiences.');
+    });
+
+    it('includes textbook option when forBookCreator is true (line 24 true branch)', () => {
+      const categories = getEditorCategories(true);
+      const allOptions = categories.flatMap(c => c.options);
+      expect(allOptions.find(o => o.id === 'textbook')).toBeDefined();
+      expect(allOptions.find(o => o.id === 'collection')).toBeUndefined();
+    });
+
+    it('includes collection option when forBookCreator is false (line 28 false branch)', () => {
+      const categories = getEditorCategories(false);
+      const allOptions = categories.flatMap(c => c.options);
+      expect(allOptions.find(o => o.id === 'collection')).toBeDefined();
+      expect(allOptions.find(o => o.id === 'textbook')).toBeUndefined();
     });
   });
 });

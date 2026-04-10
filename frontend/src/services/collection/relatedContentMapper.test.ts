@@ -97,5 +97,33 @@ describe('relatedContentMapper', () => {
       expect(result[1]!.creator).toBe('bob-id');
       expect(result[2]!.creator).toBe('Unknown');
     });
+
+    it('treats undefined visibility as non-root (line 6 ?? branch — filters out)', () => {
+      const items: RelatedContentSearchItem[] = [
+        { identifier: 'a', name: 'A' }, // visibility undefined → '' → not 'default' → filtered
+      ];
+      expect(mapSearchContentToRelatedContentItems(items)).toHaveLength(0);
+    });
+
+    it('falls back appIcon to posterImage when appIcon is absent (line 29)', () => {
+      const items: RelatedContentSearchItem[] = [
+        { identifier: 'a', name: 'A', visibility: 'Default', posterImage: 'https://poster.png' },
+      ];
+      expect(mapSearchContentToRelatedContentItems(items)[0]!.appIcon).toBe('https://poster.png');
+    });
+
+    it('falls back appIcon to thumbnail when appIcon and posterImage are absent', () => {
+      const items: RelatedContentSearchItem[] = [
+        { identifier: 'a', name: 'A', visibility: 'Default', thumbnail: 'https://thumb.png' },
+      ];
+      expect(mapSearchContentToRelatedContentItems(items)[0]!.appIcon).toBe('https://thumb.png');
+    });
+
+    it('falls back appIcon to empty string when all image fields are absent', () => {
+      const items: RelatedContentSearchItem[] = [
+        { identifier: 'a', name: 'A', visibility: 'Default' },
+      ];
+      expect(mapSearchContentToRelatedContentItems(items)[0]!.appIcon).toBe('');
+    });
   });
 });

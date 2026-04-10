@@ -102,6 +102,10 @@ describe('mapApiItemToUserCourseProgress', () => {
     expect(mapApiItemToUserCourseProgress(makeItem({ status: 2 })).status).toBe('Completed');
   });
 
+  it('falls back to "Not Started" for unknown status codes (line 21 ?? branch)', () => {
+    expect(mapApiItemToUserCourseProgress(makeItem({ status: 99 as any })).status).toBe('Not Started');
+  });
+
   it('maps enrolled_date to date-only string', () => {
     expect(mapApiItemToUserCourseProgress(makeItem({})).enrollmentDate).toBe('2026-03-04');
   });

@@ -84,4 +84,28 @@ describe('useRatingTimer', () => {
     expect(onOpen).not.toHaveBeenCalled();
     vi.useRealTimers();
   });
+
+  it('onContentStart does nothing when no timer is pending (line 22 false branch)', () => {
+    vi.useFakeTimers();
+    const onOpen = vi.fn();
+    const { result } = renderHook(() => useRatingTimer(onOpen, 5000));
+
+    // Call onContentStart without first calling onContentEnd — timerRef is null
+    act(() => { result.current.onContentStart(); });
+    act(() => { vi.advanceTimersByTime(10000); });
+    expect(onOpen).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('unmount cleanup skips clearTimeout when no timer was started (line 24 false branch)', () => {
+    vi.useFakeTimers();
+    const onOpen = vi.fn();
+    const { unmount } = renderHook(() => useRatingTimer(onOpen, 5000));
+
+    // Never call onContentEnd — timerRef.current stays null
+    unmount();
+    act(() => { vi.advanceTimersByTime(10000); });
+    expect(onOpen).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
 });
