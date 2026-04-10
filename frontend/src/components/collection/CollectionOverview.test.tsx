@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import CollectionOverview from './CollectionOverview';
 import type { CollectionData } from '@/types/collectionTypes';
 
@@ -20,9 +20,10 @@ vi.mock('@/components/players', () => ({
 }));
 
 vi.mock('@/components/common/PageLoader', () => ({
-  default: ({ message, error }: { message?: string; error?: string }) => (
+  default: ({ message, error, onRetry }: { message?: string; error?: string; onRetry?: () => void }) => (
     <div data-testid="page-loader" data-error={error ?? ''}>
       {message || error}
+      {onRetry && <button data-testid="retry-btn" onClick={onRetry}>Retry</button>}
     </div>
   ),
 }));
@@ -266,6 +267,24 @@ describe('CollectionOverview', () => {
       render(<CollectionOverview collectionData={mockCollectionData} />);
       expect(screen.getByText('courseDetails.collectionOverview')).toBeInTheDocument();
       expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
+    });
+  });
+
+  describe('retry button (line 110)', () => {
+    it('calls window.location.reload when retry button is clicked in no-contentId error state', () => {
+      const reloadMock = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: { ...window.location, reload: reloadMock },
+        writable: true,
+      });
+
+      render(<CollectionOverview collectionData={mockCollectionData} />);
+
+      const retryBtn = screen.getByTestId('retry-btn');
+      expect(retryBtn).toBeInTheDocument();
+      fireEvent.click(retryBtn);
+
+      expect(reloadMock).toHaveBeenCalledTimes(1);
     });
   });
 });

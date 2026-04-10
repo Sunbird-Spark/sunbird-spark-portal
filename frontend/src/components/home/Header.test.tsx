@@ -7,11 +7,13 @@ import Header from '../home/Header';
 // Mocks
 // --------------------
 
+const { mockPathname } = vi.hoisted(() => ({ mockPathname: { value: '/' } }));
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useLocation: () => ({ pathname: '/' }),
+    useLocation: () => ({ pathname: mockPathname.value }),
   };
 });
 
@@ -44,16 +46,20 @@ vi.mock('@/hooks/useAppI18n', () => ({
   }),
 }));
 
-vi.mock('@/hooks/usePermission', () => ({
-  usePermissions: vi.fn(() => ({
+const { mockPermissions } = vi.hoisted(() => ({
+  mockPermissions: {
     isAuthenticated: false,
     isLoading: false,
-    roles: ['PUBLIC'],
+    roles: ['PUBLIC'] as string[],
     error: null,
     hasAnyRole: vi.fn(),
     canAccessFeature: vi.fn(),
     refetch: vi.fn(),
-  })),
+  },
+}));
+
+vi.mock('@/hooks/usePermission', () => ({
+  usePermissions: vi.fn(() => mockPermissions),
 }));
 
 // Mock AuthenticatedHeader so Header can import it without side effects
@@ -89,6 +95,9 @@ const renderHeader = () =>
 describe('Header', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPathname.value = '/';
+    mockPermissions.isAuthenticated = false;
+    mockPermissions.isLoading = false;
   });
 
   describe('static rendering', () => {
@@ -246,6 +255,67 @@ describe('Header', () => {
       expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
       // Redirect happened
       expect(window.location.href).toBe('/portal/login?prompt=none');
+    });
+  });
+
+  describe('loading state (line 32–34)', () => {
+    it('renders skeleton div when isLoading and pathname is not /', () => {
+      mockPermissions.isLoading = true;
+      mockPermissions.isAuthenticated = false;
+      mockPathname.value = '/home';
+
+      const { container } = renderHeader();
+      const skeleton = container.querySelector('.sticky.top-0');
+      expect(skeleton).toBeInTheDocument();
+      expect(screen.queryByAltText('Sunbird')).not.toBeInTheDocument();
+    });
+
+    it('renders normally when isLoading but pathname is /', () => {
+      mockPermissions.isLoading = true;
+      mockPermissions.isAuthenticated = false;
+      mockPathname.value = '/';
+
+      renderHeader();
+      // The logo should still be visible
+      expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
+    });
+  });
+
+  describe('authenticated header (line 45–47)', () => {
+    it('renders AuthenticatedHeader when authenticated at non-root path', () => {
+      mockPermissions.isAuthenticated = true;
+      mockPermissions.isLoading = false;
+      mockPathname.value = '/home';
+
+      renderHeader();
+      expect(screen.getByTestId('authenticated-header')).toBeInTheDocument();
+    });
+
+    it('does not render AuthenticatedHeader at root path even when authenticated', () => {
+      mockPermissions.isAuthenticated = true;
+      mockPermissions.isLoading = false;
+      mockPathname.value = '/';
+
+      renderHeader();
+      expect(screen.queryByTestId('authenticated-header')).not.toBeInTheDocument();
+      expect(screen.getByAltText('Sunbird')).toBeInTheDocument();
+    });
+  });
+
+  describe('console.warn for missing sidebar handler (lines 36–43)', () => {
+    it('calls console.warn when authenticated at non-root path without onToggleSidebar', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockPermissions.isAuthenticated = true;
+      mockPermissions.isLoading = false;
+      mockPathname.value = '/explore';
+
+      renderHeader();
+
+      // In test env, import.meta.env.MODE is 'test' (not 'production'), so warn fires
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('onToggleSidebar was not provided')
+      );
+      warnSpy.mockRestore();
     });
   });
 });

@@ -335,4 +335,33 @@ describe('ContentService', () => {
       expect(callArgs.request.content).toHaveProperty('primaryCategory', 'Course Assessment');
     });
   });
+
+  describe('contentRead with mode param (line 39)', () => {
+    it('appends mode to query string when mode is provided', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+      await service.contentRead('do_123', undefined, 'edit');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+      expect(callUrl).toContain('mode=edit');
+    });
+
+    it('does not append mode when mode is not provided', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+      await service.contentRead('do_123');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+      expect(callUrl).not.toContain('mode=');
+    });
+  });
+
+  describe('contentRetire (line 44)', () => {
+    it('calls client.delete with the retire endpoint and content IDs', async () => {
+      mockClient.delete = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
+      await service.contentRetire(['do_123', 'do_456']);
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        '/content/v1/retire',
+        { request: { contentIds: ['do_123', 'do_456'] } }
+      );
+    });
+  });
 });

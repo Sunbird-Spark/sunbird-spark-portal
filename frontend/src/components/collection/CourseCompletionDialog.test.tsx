@@ -170,6 +170,55 @@ describe("CourseCompletionDialog", () => {
     expect(screen.queryByText("congratulations")).toBeNull();
   });
 
+  it("skips progress check when totalContentCount is 0 (line 51)", () => {
+    const { rerender } = renderWithQuery(
+      <CourseCompletionDialog
+        courseProgressProps={{ batchStartDate: undefined, totalContentCount: 0, completedContentCount: 0 }}
+        isEnrolledInCurrentBatch
+        collectionId="col-1"
+        hasCertificate={false}
+      />,
+    );
+
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <CourseCompletionDialog
+          courseProgressProps={{ batchStartDate: undefined, totalContentCount: 0, completedContentCount: 0 }}
+          isEnrolledInCurrentBatch
+          collectionId="col-1"
+          hasCertificate={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    // No dialog should open when totalContentCount is 0
+    expect(screen.queryByText("congratulations")).toBeNull();
+  });
+
+  it("resets state when collectionId is undefined (line 34)", () => {
+    const { rerender } = renderWithQuery(
+      <CourseCompletionDialog
+        courseProgressProps={baseProgress}
+        isEnrolledInCurrentBatch
+        collectionId={undefined}
+        hasCertificate={false}
+      />,
+    );
+
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <CourseCompletionDialog
+          courseProgressProps={{ ...baseProgress, completedContentCount: 10 }}
+          isEnrolledInCurrentBatch
+          collectionId={undefined}
+          hasCertificate={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.queryByText("congratulations")).toBeNull();
+  });
+
   it("opens dialog only once per collection when progress fluctuates 90→100→90→100", () => {
     const { rerender } = renderWithQuery(
       <CourseCompletionDialog

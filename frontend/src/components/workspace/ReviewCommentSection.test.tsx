@@ -211,4 +211,42 @@ describe('CommentSection', () => {
     expect(screen.queryByPlaceholderText('Add a comment...')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /add comment/i })).not.toBeInTheDocument();
   });
+
+  it('sets Anonymous userName when userRead throws (loadUserInfo catch block, line 56–59)', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    vi.mocked(UserService).mockImplementation(function(this: any) {
+      this.userRead = vi.fn().mockRejectedValue(new Error('Network error'));
+      return this;
+    } as any);
+
+    render(<CommentSection contentId="test-content-id" isReviewMode={true} />, { wrapper });
+
+    const textarea = await screen.findByPlaceholderText('Add a comment...');
+    expect(textarea).toBeInTheDocument();
+
+    errorSpy.mockRestore();
+  });
+
+  it('handles createComment throwing (handleSubmitComment catch block, line 76–78)', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    mockComments = [];
+    mockCreateComment.mockRejectedValue(new Error('Submit failed'));
+
+    const user = userEvent.setup();
+    render(<CommentSection contentId="test-content-id" isReviewMode={true} />, { wrapper });
+
+    const textarea = await screen.findByPlaceholderText('Add a comment...');
+    const submitButton = screen.getByRole('button', { name: /add comment/i });
+
+    await user.type(textarea, 'Test comment');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(errorSpy).toHaveBeenCalledWith('Failed to submit comment:', expect.any(Error));
+    });
+
+    errorSpy.mockRestore();
+  });
 });

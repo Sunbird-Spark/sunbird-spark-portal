@@ -96,7 +96,7 @@ describe("forceSyncStorage", () => {
   describe("clearForceSyncUsed", () => {
     it("removes the storage key", () => {
       markForceSyncUsed("u1", "c1", "b1");
-      
+
       expect(mockStorage[STORAGE_KEY]).toBeDefined();
       clearForceSyncUsed();
       expect(mockStorage[STORAGE_KEY]).toBeUndefined();
@@ -106,6 +106,34 @@ describe("forceSyncStorage", () => {
       markForceSyncUsed("u1", "c1", "b1");
       expect(canUseForceSync("u1", "c1", "b1")).toBe(false);
       clearForceSyncUsed();
+      expect(canUseForceSync("u1", "c1", "b1")).toBe(true);
+    });
+  });
+
+  describe("error/catch branches (lines 5, 13, 19, 54)", () => {
+    it("canUseForceSync returns true when localStorage.getItem throws (line 13)", () => {
+      (window.localStorage.getItem as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        throw new Error("Storage error");
+      });
+      expect(canUseForceSync("u1", "c1", "b1")).toBe(true);
+    });
+
+    it("markForceSyncUsed does not throw when localStorage.setItem throws (line 19)", () => {
+      (window.localStorage.setItem as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        throw new Error("QuotaExceededError");
+      });
+      expect(() => markForceSyncUsed("u1", "c1", "b1")).not.toThrow();
+    });
+
+    it("clearForceSyncUsed does not throw when localStorage.removeItem throws (line 54)", () => {
+      (window.localStorage.removeItem as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        throw new Error("Storage error");
+      });
+      expect(() => clearForceSyncUsed()).not.toThrow();
+    });
+
+    it("getStorage returns {} when localStorage returns invalid JSON (line 13)", () => {
+      mockStorage[STORAGE_KEY] = "not-valid-json{{{";
       expect(canUseForceSync("u1", "c1", "b1")).toBe(true);
     });
   });
