@@ -63,7 +63,7 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
 
     const headers = {
         'x-msgid': uuidv4(),
-        ts: dayjs(new Date()).format('yyyy-mm-dd HH:MM:ss:lo'),
+        ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
         'Content-Type': 'application/json',
         accept: 'application/json',
         Authorization: `Bearer ${getBearerToken(req)}`,
