@@ -40,8 +40,10 @@ const CertificateVerificationPage: React.FC = () => {
       return;
     }
 
-    // Wait for system setting to load before starting verification
-    if (isSettingLoading || !certContextSetting?.data?.response) {
+    // Wait only for the system setting query to finish loading.
+    // Extra trusted origins are optional, so continue with an empty list
+    // when the setting is absent or does not contain a value.
+    if (isSettingLoading) {
       return;
     }
 
