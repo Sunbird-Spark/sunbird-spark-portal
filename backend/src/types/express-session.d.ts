@@ -18,6 +18,7 @@ declare module 'express-session' {
         };
         count?: number;
         kongToken?: string;
+        kongTokenType?: 'anonymous' | 'logged-in';
         userAccessToken?: string;
         roles?: string[];
         permissions?: string[];

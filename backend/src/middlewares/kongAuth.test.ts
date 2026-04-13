@@ -302,5 +302,72 @@ describe('kongAuth middleware', () => {
             );
             expect(mockRequest.session?.kongToken).toBe('fallback-token');
         });
+
+        it('should upgrade anonymous kong token to logged-in when userId is set', async () => {
+            const extendedEnvConfig = {
+                ...mockEnvConfig,
+                KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'loggedin-bearer-token',
+                KONG_LOGGEDIN_FALLBACK_TOKEN: 'loggedin-fallback-token'
+            };
+            vi.doMock('../config/env.js', () => ({ envConfig: extendedEnvConfig }));
+            const { registerDeviceWithKong } = await import('./kongAuth.js');
+            const logger = (await import('../utils/logger.js')).default;
+
+            (axios.post as ReturnType<typeof vi.fn>).mockResolvedValue({
+                data: { params: { status: 'successful' }, result: { token: 'loggedin-kong-token' } }
+            });
+
+            if (mockRequest.session) {
+                mockRequest.session.kongToken = 'anonymous-token';
+                mockRequest.session.kongTokenType = 'anonymous';
+                mockRequest.session.userId = 'user-123';
+                mockRequest.session.cookie.expires = new Date(Date.now() + 60000);
+                mockRequest.session.cookie.maxAge = 120000;
+            }
+
+            await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
+
+            expect(logger.info).toHaveBeenCalledWith(
+                'KONG_TOKEN_UPGRADE :: authenticated user with anonymous token, upgrading to logged-in token'
+            );
+            expect(logger.info).toHaveBeenCalledWith(
+                'KONG_TOKEN_UPGRADE :: successfully upgraded to logged-in Kong token'
+            );
+            expect(mockRequest.session?.kongToken).toBe('loggedin-kong-token');
+            expect(mockRequest.session?.kongTokenType).toBe('logged-in');
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should continue with logged-in fallback token if Kong API config is missing during upgrade', async () => {
+            const extendedEnvConfig = {
+                ...mockEnvConfig,
+                KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: '',   // triggers internal error in generateLoggedInKongToken
+                KONG_LOGGEDIN_FALLBACK_TOKEN: 'loggedin-fallback-token'
+            };
+            vi.doMock('../config/env.js', () => ({ envConfig: extendedEnvConfig }));
+            const { registerDeviceWithKong } = await import('./kongAuth.js');
+            const logger = (await import('../utils/logger.js')).default;
+
+            if (mockRequest.session) {
+                mockRequest.session.kongToken = 'anonymous-token';
+                mockRequest.session.kongTokenType = 'anonymous';
+                mockRequest.session.userId = 'user-123';
+                mockRequest.session.cookie.expires = new Date(Date.now() + 60000);
+                mockRequest.session.cookie.maxAge = 120000;
+            }
+
+            await registerDeviceWithKong()(mockRequest as Request, mockResponse as Response, mockNext);
+
+            // generateLoggedInKongToken catches the config error internally and logs its own message
+            expect(logger.error).toHaveBeenCalledWith(
+                'LOGGEDIN_KONG_TOKEN :: token generation failed for session test-session-id',
+                expect.any(Error)
+            );
+            // It returns KONG_LOGGEDIN_FALLBACK_TOKEN after internal failure, so the session is updated
+            expect(mockRequest.session?.kongToken).toBe('loggedin-fallback-token');
+            expect(mockRequest.session?.kongTokenType).toBe('logged-in');
+            // Request should still proceed
+            expect(mockNext).toHaveBeenCalled();
+        });
     });
 });
