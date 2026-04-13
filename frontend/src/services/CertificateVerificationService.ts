@@ -65,7 +65,8 @@ export async function decodePathBData(dataParam: string): Promise<SignedVC> {
 export async function fetchPathCData(certificateId: string): Promise<SignedVC> {
   const details = await getCertificateDetails(certificateId);
   try {
-    return JSON.parse(details._osSignedData) as SignedVC;
+    const vc = JSON.parse(details._osSignedData) as SignedVC;
+    return vc;
   } catch {
     throw new Error('Certificate registry returned invalid data');
   }
@@ -73,7 +74,7 @@ export async function fetchPathCData(certificateId: string): Promise<SignedVC> {
 
 // ── Main verify function ───────────────────────────────────────────────────
 
-export async function verifyCertificate(signedVC: SignedVC): Promise<VerificationResult> {
+export async function verifyCertificate(signedVC: SignedVC, extraTrustedOrigins?: string[]): Promise<VerificationResult> {
   try {
     const { jsigs, baseContexts } = await getCryptoModules();
     const { RsaSignature2018 } = jsigs.suites;
@@ -82,7 +83,7 @@ export async function verifyCertificate(signedVC: SignedVC): Promise<Verificatio
     // Per-call shallow copy so baseContexts are never mutated across calls
     const staticContexts: Record<string, unknown> = { ...baseContexts };
 
-    await prefetchContexts(signedVC, staticContexts);
+    await prefetchContexts(signedVC, staticContexts, extraTrustedOrigins);
 
     const issuer = signedVC.issuer;
     const issuerId = typeof issuer === 'string' ? issuer : (issuer.id ?? '');
