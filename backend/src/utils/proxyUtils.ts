@@ -3,6 +3,7 @@ import * as http from 'http';
 import { envConfig } from '../config/env.js';
 
 const fallbackToken = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
+const loggedInFallbackToken = envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
 const appId = envConfig.APPID;
 
 export const getUserToken = (req: any): string => {
@@ -10,7 +11,10 @@ export const getUserToken = (req: any): string => {
 };
 
 export const getBearerToken = (req: Request): string => {
-    return req.session?.kongToken || fallbackToken;
+    if (req.session?.kongToken) return req.session.kongToken;
+    return req.session?.userId
+        ? loggedInFallbackToken
+        : fallbackToken;
 };
 
 export const decorateRequestHeaders = (proxyReq: http.ClientRequest, req: Request): void => {

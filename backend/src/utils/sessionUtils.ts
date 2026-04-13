@@ -45,6 +45,7 @@ export const regenerateSession = (req: Request): Promise<void> => {
                     }
                     const newKongToken = await generateLoggedInKongToken(req);
                     req.session.kongToken = newKongToken;
+                    req.session.kongTokenType = 'logged-in';
 
                     req.session.save((saveErr) => {
                         if (saveErr) {
@@ -83,6 +84,7 @@ export const regenerateAnonymousSession = (req: Request): Promise<void> => {
                         token = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
                     }
                     req.session.kongToken = token;
+                    req.session.kongTokenType = 'anonymous';
                     req.session.roles = ['ANONYMOUS'];
 
                     req.session.save((saveErr) => {

@@ -7,24 +7,10 @@ import dayjs from 'dayjs';
 import logger from '../utils/logger.js';
 import { UserApiResponse } from '../types/user.js';
 import { saveSession } from '../utils/sessionUtils.js';
+import { getBearerToken } from '../utils/proxyUtils.js';
 
-const {
-    KONG_URL,
-    KONG_LOGGEDIN_FALLBACK_TOKEN,
-    KONG_ANONYMOUS_FALLBACK_TOKEN
-} = envConfig;
+const { KONG_URL } = envConfig;
 
-const getOidcAccessToken = (req: Request): string | undefined =>
-    req.oidc?.accessToken;
-
-const resolveKongBearerToken = (req: Request): string => {
-    const kongDeviceToken = _.get(req, 'session.kongToken');
-    if (kongDeviceToken) return kongDeviceToken;
-
-    return req.session?.userId
-        ? KONG_LOGGEDIN_FALLBACK_TOKEN
-        : KONG_ANONYMOUS_FALLBACK_TOKEN;
-};
 
 export const setUserSession = async (req: Request, userApiResponse: UserApiResponse): Promise<void> => {
     try {
@@ -80,8 +66,8 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
         ts: dayjs(new Date()).format('yyyy-mm-dd HH:MM:ss:lo'),
         'Content-Type': 'application/json',
         accept: 'application/json',
-        Authorization: `Bearer ${resolveKongBearerToken(req)}`,
-        'x-authenticated-user-token': getOidcAccessToken(req)
+        Authorization: `Bearer ${getBearerToken(req)}`,
+        'x-authenticated-user-token': req.oidc?.accessToken
     };
 
     const response = await axios.get(url, { headers });
@@ -101,7 +87,7 @@ export const getUserByEmail = async (emailId: string, req: Request): Promise<boo
         ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
         'Content-Type': 'application/json',
         accept: 'application/json',
-        Authorization: `Bearer ${resolveKongBearerToken(req)}`,
+        Authorization: `Bearer ${getBearerToken(req)}`,
     };
     if (deviceId) headers['x-device-id'] = deviceId;
 
@@ -136,7 +122,7 @@ export const createUserWithEmail = async (googleUser: any, client_id: string, re
         ts: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss:SSS'),
         'Content-Type': 'application/json',
         accept: 'application/json',
-        Authorization: `Bearer ${resolveKongBearerToken(req)}`,
+        Authorization: `Bearer ${getBearerToken(req)}`,
     };
 
     const response = await axios.post(url, {

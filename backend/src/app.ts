@@ -79,7 +79,7 @@ app.use('/action', sessionMiddleware, ...anonymousMiddlewares, anonymousActionRo
 app.use('/', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), knowlgMwProxyRoutes);
 
 // Portal Proxy Routes (authenticated — oidcSession populates req.oidc for requireAuth)
-app.use('/portal', oidcSession(), portalProxyRoutes);
+app.use('/portal', sessionMiddleware, oidcSession(), portalProxyRoutes);
 
 app.get('/:tenantName', redirectTenant);
 
