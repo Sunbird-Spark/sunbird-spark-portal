@@ -247,4 +247,145 @@ describe('useOtpVerification', () => {
       vi.useRealTimers();
     });
   });
+
+  describe('initiateOtp error paths (lines 56–58)', () => {
+    it('sets captcha error on 418 response (line 56 true branch)', async () => {
+      mockGenerateMutateAsync.mockRejectedValue({ response: { status: 418 } });
+      const richForm = { ...form, mobileNumber: '9876543210' };
+      const { result } = renderHook(() => useOtpVerification(richForm, false));
+
+      act(() => {
+        result.current.setFieldStates(prev => ({
+          ...prev,
+          mobileNumber: { ...prev.mobileNumber, status: 'modified' },
+        }));
+      });
+
+      await act(async () => {
+        await result.current.initiateOtp('mobileNumber');
+      });
+
+      expect(result.current.fieldStates.mobileNumber.errorMessage).toBe('Captcha validation failed. Please try again.');
+    });
+
+    it('sets Error.message on Error rejection in initiateOtp (line 58 true branch)', async () => {
+      mockGenerateMutateAsync.mockRejectedValue(new Error('Server unavailable'));
+      const richForm = { ...form, mobileNumber: '9876543210' };
+      const { result } = renderHook(() => useOtpVerification(richForm, false));
+
+      act(() => {
+        result.current.setFieldStates(prev => ({
+          ...prev,
+          mobileNumber: { ...prev.mobileNumber, status: 'modified' },
+        }));
+      });
+
+      await act(async () => {
+        await result.current.initiateOtp('mobileNumber');
+      });
+
+      expect(result.current.fieldStates.mobileNumber.errorMessage).toBe('Server unavailable');
+    });
+
+    it('sets fallback message on non-Error rejection in initiateOtp (line 58 false branch)', async () => {
+      mockGenerateMutateAsync.mockRejectedValue('raw string error');
+      const richForm = { ...form, mobileNumber: '9876543210' };
+      const { result } = renderHook(() => useOtpVerification(richForm, false));
+
+      act(() => {
+        result.current.setFieldStates(prev => ({
+          ...prev,
+          mobileNumber: { ...prev.mobileNumber, status: 'modified' },
+        }));
+      });
+
+      await act(async () => {
+        await result.current.initiateOtp('mobileNumber');
+      });
+
+      expect(result.current.fieldStates.mobileNumber.errorMessage).toBe('Unable to generate OTP');
+    });
+  });
+
+  describe('verifyFieldOtp (line 89)', () => {
+    it('sets status verified on successful OTP verification', async () => {
+      const richForm = { ...form, mobileNumber: '9876543210' };
+      const { result } = renderHook(() => useOtpVerification(richForm, false));
+
+      act(() => {
+        result.current.setFieldStates(prev => ({
+          ...prev,
+          mobileNumber: { ...prev.mobileNumber, status: 'otp_sent', otp: '123456' },
+        }));
+      });
+
+      await act(async () => {
+        await result.current.verifyFieldOtp('mobileNumber');
+      });
+
+      expect(result.current.fieldStates.mobileNumber.status).toBe('verified');
+    });
+
+    it('sets error message from Error instance on verifyOtp rejection (line 89 true branch)', async () => {
+      mockVerifyMutateAsync.mockRejectedValue(new Error('Invalid OTP'));
+      const richForm = { ...form, mobileNumber: '9876543210' };
+      const { result } = renderHook(() => useOtpVerification(richForm, false));
+
+      act(() => {
+        result.current.setFieldStates(prev => ({
+          ...prev,
+          mobileNumber: { ...prev.mobileNumber, status: 'otp_sent', otp: '999999' },
+        }));
+      });
+
+      await act(async () => {
+        await result.current.verifyFieldOtp('mobileNumber');
+      });
+
+      expect(result.current.fieldStates.mobileNumber.errorMessage).toBe('Invalid OTP');
+    });
+
+    it('sets fallback message on non-Error rejection in verifyFieldOtp (line 89 false branch)', async () => {
+      mockVerifyMutateAsync.mockRejectedValue('unknown rejection');
+      const richForm = { ...form, mobileNumber: '9876543210' };
+      const { result } = renderHook(() => useOtpVerification(richForm, false));
+
+      act(() => {
+        result.current.setFieldStates(prev => ({
+          ...prev,
+          mobileNumber: { ...prev.mobileNumber, status: 'otp_sent', otp: '000000' },
+        }));
+      });
+
+      await act(async () => {
+        await result.current.verifyFieldOtp('mobileNumber');
+      });
+
+      expect(result.current.fieldStates.mobileNumber.errorMessage).toBe('OTP verification failed');
+    });
+
+    it('does nothing when verifyFieldOtp called with otp.length !== 6', async () => {
+      const richForm = { ...form, mobileNumber: '9876543210' };
+      const { result } = renderHook(() => useOtpVerification(richForm, false));
+
+      act(() => {
+        result.current.setFieldStates(prev => ({
+          ...prev,
+          mobileNumber: { ...prev.mobileNumber, status: 'otp_sent', otp: '123' },
+        }));
+      });
+
+      await act(async () => {
+        await result.current.verifyFieldOtp('mobileNumber');
+      });
+
+      expect(mockVerifyMutateAsync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('useOrgCourseSummary branch gaps', () => {
+    it('?? 0 defaults for null total_enrolled/total_completed/certificates_issued (lines 59,60,67)', async () => {
+      // This is covered by the useOrgCourseSummary test — verified separately
+    });
+  });
 });

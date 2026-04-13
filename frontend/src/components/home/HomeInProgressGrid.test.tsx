@@ -154,4 +154,67 @@ describe('HomeInProgressGrid', () => {
 
         expect(screen.getByText('No courses in progress')).toBeInTheDocument();
     });
+
+    it('uses ?? [] fallback when courses is undefined (line 21 ?? branch)', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: { data: {} }, // no courses field → undefined → ?? []
+            isLoading: false,
+        });
+
+        renderComponent();
+
+        expect(screen.getByText('No courses in progress')).toBeInTheDocument();
+    });
+
+    it('falls back to "Untitled Course" when both courseName and content.name are absent (line 78)', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [{
+                        courseId: 'c-noname',
+                        courseName: '',
+                        collectionId: 'col-noname',
+                        contentId: 'cnt-noname',
+                        batchId: 'b1',
+                        completionPercentage: 30,
+                        lastReadContentId: null,
+                        courseLogoUrl: '',
+                        content: { primaryCategory: 'Course', name: '', appIcon: '' },
+                    }],
+                },
+            },
+            isLoading: false,
+        });
+
+        renderComponent();
+
+        const imgs = screen.getAllByRole('img');
+        // The alt text should fall back to "Untitled Course"
+        expect(imgs[0]).toHaveAttribute('alt', 'Untitled Course');
+    });
+
+    it('uses content.posterImage for thumbnail when available (line 77 first || branch)', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [{
+                        courseId: 'c-poster',
+                        courseName: 'Poster Course',
+                        collectionId: 'col-p',
+                        contentId: 'cnt-p',
+                        batchId: 'b1',
+                        completionPercentage: 50,
+                        lastReadContentId: null,
+                        courseLogoUrl: '',
+                        content: { primaryCategory: 'Course', name: 'Poster Course', appIcon: '', posterImage: 'https://poster.png' },
+                    }],
+                },
+            },
+            isLoading: false,
+        });
+
+        renderComponent();
+
+        expect(screen.getByAltText('Poster Course')).toHaveAttribute('src', 'https://poster.png');
+    });
 });

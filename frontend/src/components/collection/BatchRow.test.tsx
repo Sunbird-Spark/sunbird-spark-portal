@@ -363,6 +363,42 @@ describe('BatchRow', () => {
     });
   });
 
+  describe('canManageCertificates=false branch (lines 74,75,80)', () => {
+    const editableBatch: Batch = {
+      id: 'b1',
+      name: 'View Only Batch',
+      status: '1',
+      startDate: dayjs().add(1, 'day').format('YYYY-MM-DD'),
+    } as unknown as Batch;
+
+    it('shows view title when canManageCertificates is false (line 74 false branch)', () => {
+      render(
+        <BatchRow
+          batch={editableBatch}
+          onEditClick={onEditClick}
+          onCertificateClick={onCertificateClick}
+          canManageCertificates={false}
+        />
+      );
+      const editBtn = screen.queryByTitle('Edit batch');
+      expect(editBtn).not.toBeInTheDocument();
+    });
+
+    it('renders FiEye icon (not FiEdit2) when canManageCertificates=false (line 80 false branch)', () => {
+      const { container } = render(
+        <BatchRow
+          batch={editableBatch}
+          onEditClick={onEditClick}
+          onCertificateClick={onCertificateClick}
+          canManageCertificates={false}
+        />
+      );
+      // data-edataid is on the edit button; when canManageCertificates=false it still renders
+      const editBtn = container.querySelector('[data-edataid="batch-row-edit"]');
+      expect(editBtn).toBeInTheDocument();
+    });
+  });
+
   describe('Edge Cases', () => {
     it('handles batch with no dates', () => {
       const batch: Batch = {

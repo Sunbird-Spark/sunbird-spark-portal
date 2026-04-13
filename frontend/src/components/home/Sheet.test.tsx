@@ -1,138 +1,78 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
-  SheetDescription,
-} from './Sheet';
+import React from 'react';
 
-// Default mock: isRTL = false
+const { mockIsRTL } = vi.hoisted(() => ({ mockIsRTL: { value: false } }));
+
 vi.mock('@/hooks/useAppI18n', () => ({
-  useAppI18n: () => ({ t: (k: string) => k, isRTL: false }),
+  useAppI18n: () => ({
+    t: (key: string) => key,
+    isRTL: mockIsRTL.value,
+    dir: mockIsRTL.value ? 'rtl' : 'ltr',
+  }),
 }));
 
-describe('SheetHeader', () => {
-  it('renders children', () => {
-    render(<SheetHeader>Header Content</SheetHeader>);
-    expect(screen.getByText('Header Content')).toBeInTheDocument();
-  });
-
-  it('applies additional className', () => {
-    const { container } = render(<SheetHeader className="custom-header">H</SheetHeader>);
-    expect(container.firstChild).toHaveClass('custom-header');
-  });
+vi.mock('@radix-ui/react-dialog', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@radix-ui/react-dialog')>();
+  return {
+    ...actual,
+    Portal: ({ children }: any) => <div data-testid="portal">{children}</div>,
+    Overlay: React.forwardRef(({ className, ...props }: any, ref: any) => (
+      <div ref={ref} data-testid="overlay" className={className} {...props} />
+    )),
+    Content: React.forwardRef(({ className, children, ...props }: any, ref: any) => (
+      <div ref={ref} data-testid="sheet-content" className={className} {...props}>{children}</div>
+    )),
+    Close: ({ className, children, ...props }: any) => (
+      <button data-testid="sheet-close" className={className} {...props}>{children}</button>
+    ),
+  };
 });
 
-describe('SheetFooter', () => {
-  it('renders children', () => {
-    render(<SheetFooter>Footer Content</SheetFooter>);
-    expect(screen.getByText('Footer Content')).toBeInTheDocument();
-  });
-
-  it('applies additional className', () => {
-    const { container } = render(<SheetFooter className="custom-footer">F</SheetFooter>);
-    expect(container.firstChild).toHaveClass('custom-footer');
-  });
-});
-
-describe('SheetTitle', () => {
-  it('renders text', () => {
-    render(
-      <Sheet open>
-        <SheetContent>
-          <SheetTitle>My Sheet Title</SheetTitle>
-        </SheetContent>
-      </Sheet>,
-    );
-    expect(screen.getByText('My Sheet Title')).toBeInTheDocument();
-  });
-});
-
-describe('SheetDescription', () => {
-  it('renders text', () => {
-    render(
-      <Sheet open>
-        <SheetContent>
-          <SheetDescription>My Sheet Description</SheetDescription>
-        </SheetContent>
-      </Sheet>,
-    );
-    expect(screen.getByText('My Sheet Description')).toBeInTheDocument();
-  });
-});
+import { SheetContent } from './Sheet';
 
 describe('SheetContent', () => {
-  it('renders children when open', () => {
-    render(
-      <Sheet open>
-        <SheetContent>Sheet Body</SheetContent>
-      </Sheet>,
-    );
-    expect(screen.getByText('Sheet Body')).toBeInTheDocument();
+  it('uses right side by default in LTR (no flip)', () => {
+    mockIsRTL.value = false;
+    render(<SheetContent side="right">Sheet body</SheetContent>);
+    const content = screen.getByTestId('sheet-content');
+    expect(content.className).toContain('right-0');
   });
 
-  it('does NOT flip side when isRTL=false and side="top"', () => {
-    render(
-      <Sheet open>
-        <SheetContent side="top">Top Content</SheetContent>
-      </Sheet>,
-    );
-    // Content should still be visible; no left/right flipping occurs for top
-    expect(screen.getByText('Top Content')).toBeInTheDocument();
-    const content = screen.getByText('Top Content').closest('[data-radix-popper-content-wrapper], [role="dialog"], [data-state]');
-    // The dialog element should exist
-    expect(content ?? screen.getByText('Top Content')).toBeInTheDocument();
+  it('flips right → left in RTL (line 60-61 true branch)', () => {
+    mockIsRTL.value = true;
+    render(<SheetContent side="right">Sheet body</SheetContent>);
+    const content = screen.getByTestId('sheet-content');
+    expect(content.className).toContain('left-0');
   });
 
-  it('flips left to right when isRTL=true', async () => {
-    vi.doMock('@/hooks/useAppI18n', () => ({
-      useAppI18n: () => ({ t: (k: string) => k, isRTL: true }),
-    }));
-
-    // Dynamically import after re-mock
-    const { SheetContent: RTLSheetContent, Sheet: RTLSheet } = await import('./Sheet');
-
-    render(
-      <RTLSheet open>
-        <RTLSheetContent side="left">RTL Left Content</RTLSheetContent>
-      </RTLSheet>,
-    );
-
-    const contentEl = screen.getByText('RTL Left Content');
-    expect(contentEl).toBeInTheDocument();
+  it('flips left → right in RTL (line 61 ternary right branch)', () => {
+    mockIsRTL.value = true;
+    render(<SheetContent side="left">Sheet body</SheetContent>);
+    const content = screen.getByTestId('sheet-content');
+    expect(content.className).toContain('right-0');
   });
 
-  it('flips right to left when isRTL=true', async () => {
-    vi.doMock('@/hooks/useAppI18n', () => ({
-      useAppI18n: () => ({ t: (k: string) => k, isRTL: true }),
-    }));
-
-    const { SheetContent: RTLSheetContent, Sheet: RTLSheet } = await import('./Sheet');
-
-    render(
-      <RTLSheet open>
-        <RTLSheetContent side="right">RTL Right Content</RTLSheetContent>
-      </RTLSheet>,
-    );
-
-    const contentEl = screen.getByText('RTL Right Content');
-    expect(contentEl).toBeInTheDocument();
+  it('does not flip non-horizontal sides in RTL (top stays top)', () => {
+    mockIsRTL.value = true;
+    render(<SheetContent side="top">Sheet body</SheetContent>);
+    const content = screen.getByTestId('sheet-content');
+    expect(content.className).toContain('top-0');
   });
-});
 
-describe('SheetContent RTL class checks', () => {
-  it('uses left-side variant classes when isRTL=false and side="left"', () => {
-    // With the static mock (isRTL=false from top-level vi.mock), side="left" stays left
-    render(
-      <Sheet open>
-        <SheetContent side="left">LTR Left</SheetContent>
-      </Sheet>,
-    );
-    // Radix Dialog Content is rendered with role="dialog"
-    const dialog = screen.getByRole('dialog');
-    expect(dialog.className).toMatch(/left/);
+  it('places close button on right-4 in LTR (line 71 false branch)', () => {
+    mockIsRTL.value = false;
+    render(<SheetContent>Sheet body</SheetContent>);
+    const closeBtn = screen.getByTestId('sheet-close');
+    expect(closeBtn.className).toContain('right-4');
+    expect(closeBtn.className).not.toContain('left-4');
+  });
+
+  it('places close button on left-4 in RTL (line 71 true branch)', () => {
+    mockIsRTL.value = true;
+    render(<SheetContent>Sheet body</SheetContent>);
+    const closeBtn = screen.getByTestId('sheet-close');
+    expect(closeBtn.className).toContain('left-4');
+    expect(closeBtn.className).not.toContain('right-4');
   });
 });

@@ -134,4 +134,18 @@ describe('ContentPlayer', () => {
     act(() => { capturedOnTelemetry?.({ type: 'end' }); });
     expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
   });
+
+  it('falls back to EcmlPlayer for unknown mimeType (line 58 || EcmlPlayer branch)', () => {
+    render(<ContentPlayer {...defaultProps} mimeType="application/unknown-type" />);
+    // EcmlPlayer mock is rendered as the fallback
+    expect(screen.getByTestId('ecml-player')).toBeInTheDocument();
+  });
+
+  it('uses empty string when all eid fields are absent (line 52 ?? "" branch)', () => {
+    render(<ContentPlayer {...defaultProps} />);
+    // Pass an event with no eid/data.eid/type — should not throw and not trigger onContentEnd
+    act(() => { capturedOnTelemetry?.({}); });
+    // Rating dialog should not open (no END event)
+    expect(screen.queryByTestId('rating-dialog')).not.toBeInTheDocument();
+  });
 });

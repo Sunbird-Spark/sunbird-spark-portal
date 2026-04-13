@@ -235,4 +235,31 @@ describe('useConsent', () => {
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
     expect(call.enabled).toBe(false);
   });
+
+  it('returns null error when error is not an Error instance (line 76 false branch)', () => {
+    vi.mocked(useQuery).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: true,
+      error: 'string error',   // not an Error instance → should be mapped to null
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useQuery>);
+
+    const { result } = renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
+    expect(result.current.error).toBeNull();
+  });
+
+  it('returns Error instance when error is an Error (line 76 true branch)', () => {
+    const err = new Error('test error');
+    vi.mocked(useQuery).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: true,
+      error: err,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useQuery>);
+
+    const { result } = renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
+    expect(result.current.error).toBe(err);
+  });
 });

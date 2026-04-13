@@ -116,6 +116,20 @@ describe('CollectionOverview', () => {
       expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
       expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
     });
+
+    it('shows batchNotStartedYet with date when batchStartDate is provided (line 61 true branch)', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentAccessBlocked={false}
+          upcomingBatchBlocked={true}
+          batchStartDate="2025-06-01"
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.batchNotStartedYet')).toBeInTheDocument();
+    });
   });
 
   describe('player area — when no contentId is provided', () => {
@@ -286,5 +300,13 @@ describe('CollectionOverview', () => {
 
       expect(reloadMock).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('shows 0 units when collectionData.children is undefined (line 133 ?? 0 branch)', () => {
+    const dataNoChildren = { ...mockCollectionData, children: undefined };
+    render(<CollectionOverview collectionData={dataNoChildren as any} />);
+    // The children stat should display 0
+    const statValues = document.querySelectorAll('.collection-stat-value');
+    expect(statValues[0]?.textContent).toBe('0');
   });
 });

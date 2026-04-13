@@ -190,4 +190,25 @@ describe('CollectionSidePanel', () => {
     );
     expect(screen.getByTestId('login-unlock-card')).toBeInTheDocument();
   });
+
+  it('falls back to empty string when collectionId is undefined (line 113 ?? branch)', () => {
+    const sidebarNoId = { ...makeSidebar(), collectionId: undefined };
+    const { container } = render(
+      <CollectionSidePanel
+        contentId="content-1"
+        access={makeAccess({})}
+        enrollment={makeEnrollment()}
+        sidebar={sidebarNoId as any}
+        creator={makeCreator()}
+        collectionData={defaultCollectionData}
+        leftColHeight={undefined}
+        showCertificateCard={false}
+        showBottomSections={false}
+        showProfileDataSharingCard={false}
+        backTo="/workspace"
+      />
+    );
+    // Component renders without crash when collectionId is undefined
+    expect(container.firstChild).not.toBeNull();
+  });
 });

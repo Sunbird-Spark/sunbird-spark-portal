@@ -165,4 +165,29 @@ describe('useOrgCourseSummary', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.isError).toBe(true);
   });
+
+  it('defaults null total_enrolled/total_completed/certificates_issued to 0 (lines 59,60,67 ?? 0 branch)', async () => {
+    mockObservabilityService.getOrgCourseEnrolmentSummary.mockResolvedValue({
+      data: [
+        {
+          courseid: 'do_null',
+          collectionDetails: { name: 'Null Course', identifier: 'do_null', contentType: 'Course' },
+          total_enrolled: null,
+          total_completed: null,
+          certificates_issued: null,
+        },
+      ],
+      count: 1,
+    });
+
+    const { result } = renderHook(() => useOrgCourseSummary(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.data[0]).toMatchObject({
+      totalEnrolled: 0,
+      totalCompleted: 0,
+      completionPercent: 0,
+      certificatesIssued: 0,
+    });
+  });
 });
