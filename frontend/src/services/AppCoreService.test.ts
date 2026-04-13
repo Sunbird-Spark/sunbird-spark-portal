@@ -31,8 +31,7 @@ describe('AppCoreService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         appCoreService.clearDeviceId();
-        (appCoreService as any).appInfoCache = null;
-        (appCoreService as any).pDataCache = null;
+        appCoreService.clearCaches();
         (httpClient.getClient as any).mockReturnValue({
             updateHeaders: vi.fn()
         });
