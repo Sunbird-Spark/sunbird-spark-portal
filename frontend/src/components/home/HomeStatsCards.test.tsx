@@ -33,13 +33,14 @@ vi.mock('@/hooks/useCertificate', () => ({
 }));
 
 const mockCourses = [
-    { courseId: 'course-1', status: 0 }, // not started
-    { courseId: 'course-2', status: 1 }, // in progress
-    { courseId: 'course-3', status: 2 }, // completed
-    { courseId: 'course-4', status: 2 }, // completed
+    { courseId: 'course-1', status: 0, completionPercentage: 0 },   // not started
+    { courseId: 'course-2', status: 1, completionPercentage: 50 },  // in progress
+    { courseId: 'course-3', status: 2, completionPercentage: 100 }, // completed
+    { courseId: 'course-4', status: 2, completionPercentage: 100 }, // completed
+    { courseId: 'course-5', status: 1, completionPercentage: 100 }, // status lag: counts as completed
 ];
 
-// Expected: totalCourses=4, inProgress=1 (status 1 only), completed=2
+// Expected: totalCourses=5, inProgress=1 (status 1 but not completionPercentage>=100), completed=3
 
 describe('HomeStatsCards', () => {
     beforeEach(() => {
@@ -57,20 +58,20 @@ describe('HomeStatsCards', () => {
     it('renders all four stats cards with correct labels and values', () => {
         render(<HomeStatsCards />);
 
-        // Total Courses: 4 courses enrolled
+        // Total Courses: 5 courses enrolled
         const totalCard = screen.getByText('Total Courses').closest('.home-stat-card');
         expect(totalCard).toBeInTheDocument();
-        expect(totalCard!.querySelector('.home-stat-value')!.textContent).toBe('04');
+        expect(totalCard!.querySelector('.home-stat-value')!.textContent).toBe('05');
 
-        // Courses in Progress: status === 1 => 1
+        // Courses in Progress: status === 1 && completionPercentage < 100 => 1
         const progressCard = screen.getByText('In Progress').closest('.home-stat-card');
         expect(progressCard).toBeInTheDocument();
         expect(progressCard!.querySelector('.home-stat-value')!.textContent).toBe('01');
 
-        // Courses Completed: status === 2 => 2
+        // Courses Completed: status === 2 (x2) + completionPercentage >= 100 with status lag (x1) => 3
         const completedCard = screen.getByText('Completed').closest('.home-stat-card');
         expect(completedCard).toBeInTheDocument();
-        expect(completedCard!.querySelector('.home-stat-value')!.textContent).toBe('02');
+        expect(completedCard!.querySelector('.home-stat-value')!.textContent).toBe('03');
 
         // Certifications Earned: 2 certificates
         const certsCard = screen.getByText('Certifications Earned').closest('.home-stat-card');

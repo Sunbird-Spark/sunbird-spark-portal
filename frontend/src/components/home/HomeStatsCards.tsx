@@ -50,7 +50,7 @@ const HomeStatsCards = () => {
 
     // Course-level stats using course status (1 = in progress, 2 = completed)
     const totalCourses = courses.length;
-    const coursesInProgress = courses.filter(course => course.status === 1).length;
+    const coursesInProgress = courses.filter(course => course.status === 1 && !(course.completionPercentage >= 100)).length;
     const coursesCompleted = courses.filter(course => course.status === 2 || course.completionPercentage >= 100).length;
 
     // Get certificate count from the certificate search API

@@ -19,8 +19,8 @@ type FilterType = "all" | "not-started" | "ongoing" | "completed";
 
 const VIEW_LIMIT = 6;
 
-const getCompletionStatus = (status: number): "not-started" | "ongoing" | "completed" => {
-    if (status === 2) return "completed";
+const getCompletionStatus = (status: number, completionPercentage: number): "not-started" | "ongoing" | "completed" => {
+    if (status === 2 || completionPercentage >= 100) return "completed";
     if (status === 1) return "ongoing";
     return "not-started";
 };
@@ -37,7 +37,7 @@ interface CourseRowProps {
 
 const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId, t }: CourseRowProps) => {
     const location = useLocation();
-    const status = getCompletionStatus(course.status);
+    const status = getCompletionStatus(course.status, course.completionPercentage ?? 0);
     const progress = course.completionPercentage ?? 0;
     const thumbnail = course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId);
     const title = course.courseName || course.content?.name || "Untitled Course";
@@ -143,7 +143,7 @@ const ProfileLearningList = () => {
 
     const filteredCourses = courses.filter((course) => {
         if (filter === "all") return true;
-        return getCompletionStatus(course.status) === filter;
+        return getCompletionStatus(course.status, course.completionPercentage ?? 0) === filter;
     });
 
     const hasMore = filteredCourses.length > VIEW_LIMIT;
@@ -236,7 +236,8 @@ const ProfileLearningList = () => {
                         <p className="text-sunbird-gray-75 text-sm">
                             {filter === "all"
                                 ? t('profileLearning.noCoursesEnrolled')
-                                : t('profileLearning.noFilteredCourses', { filter })}
+                                : t('profileLearning.noFilteredCourses', { filter: filter === 'ongoing' ? t('status.ongoing')
+                                        : filter === 'not-started' ? t('status.notStarted') : t('status.completed') })}
                         </p>
                     </div>
                 ) : (
