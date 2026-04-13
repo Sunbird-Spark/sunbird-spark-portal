@@ -6,7 +6,7 @@ const fallbackToken = envConfig.KONG_ANONYMOUS_FALLBACK_TOKEN;
 const loggedInFallbackToken = envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
 const appId = envConfig.APPID;
 
-export const getUserToken = (req: any): string => {
+export const getUserToken = (req: Request): string | undefined => {
     return req.oidc?.accessToken;
 };
 
