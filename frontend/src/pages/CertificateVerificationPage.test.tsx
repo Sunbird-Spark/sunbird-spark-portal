@@ -6,6 +6,7 @@ import {
   fetchPathCData,
   verifyCertificate,
 } from '@/services/CertificateVerificationService';
+import { useSystemSetting } from '@/hooks/useSystemSetting';
 import type { SignedVC } from '@/types/certificateVerification';
 
 // ── Module mocks ──────────────────────────────────────────────────────────
@@ -29,6 +30,10 @@ vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (key: string) => key }),
 }));
 
+vi.mock('@/hooks/useSystemSetting', () => ({
+  useSystemSetting: vi.fn(),
+}));
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 const mockVC = {} as SignedVC;
@@ -39,13 +44,19 @@ const mockCertificate = {
   issuanceDate: '2024-03-15T00:00:00Z',
 };
 
-function setupParams(certificateId: string | undefined, dataParam?: string) {
-  vi.mocked(useParams).mockReturnValue({ certificateId });
-  vi.mocked(useSearchParams).mockReturnValue([
-    new URLSearchParams(dataParam ? { data: dataParam } : {}),
-    vi.fn(),
-  ]);
-}
+const defaultSystemSetting = {
+  data: {
+    data: {
+      response: {
+        id: 'certContextOrigins',
+        field: 'certContextOrigins',
+        value: 'https://downloadableartifacts.blob.core.windows.net',
+      },
+    },
+    status: 200,
+  },
+  isLoading: false,
+};
 
 // Wrap with MemoryRouter — required because the page renders <Link>
 function renderPage() {
@@ -63,12 +74,20 @@ afterEach(() => {
 // ── Loading state ─────────────────────────────────────────────────────────
 
 describe('loading state', () => {
-  it('shows the loading spinner while verifying', () => {
-    setupParams('cert-123');
+  beforeEach(() => {
+    vi.mocked(useSystemSetting).mockReturnValue(defaultSystemSetting as any);
+    vi.mocked(useParams).mockReturnValue({ certificateId: 'cert-123' } as any);
+    vi.mocked(useSearchParams).mockReturnValue([
+      new URLSearchParams({}),
+      vi.fn(),
+    ] as any);
     vi.mocked(fetchPathCData).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(decodePathBData).mockResolvedValue(mockVC);
+    vi.mocked(verifyCertificate).mockResolvedValue({ verified: true, certificateData: mockCertificate });
+  });
 
+  it('shows the loading spinner while verifying', () => {
     renderPage();
-
     expect(screen.getByText('certificate.verifying')).toBeInTheDocument();
   });
 });
@@ -77,19 +96,20 @@ describe('loading state', () => {
 
 describe('verified state', () => {
   beforeEach(() => {
-    setupParams('cert-123');
+    vi.mocked(useSystemSetting).mockReturnValue(defaultSystemSetting as any);
+    vi.mocked(useParams).mockReturnValue({ certificateId: 'cert-123' } as any);
+    vi.mocked(useSearchParams).mockReturnValue([
+      new URLSearchParams({}),
+      vi.fn(),
+    ] as any);
     vi.mocked(fetchPathCData).mockResolvedValue(mockVC);
-    vi.mocked(verifyCertificate).mockResolvedValue({
-      verified: true,
-      certificateData: mockCertificate,
-    });
+    vi.mocked(decodePathBData).mockResolvedValue(mockVC);
+    vi.mocked(verifyCertificate).mockResolvedValue({ verified: true, certificateData: mockCertificate });
   });
 
   it('shows the verified heading', async () => {
     renderPage();
-    await waitFor(() =>
-      expect(screen.getByText('certificate.verified')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('certificate.verified')).toBeInTheDocument());
   });
 
   it('renders the credential holder name', async () => {
@@ -99,9 +119,7 @@ describe('verified state', () => {
 
   it('renders the certification program name', async () => {
     renderPage();
-    await waitFor(() =>
-      expect(screen.getByText('Advanced TypeScript')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('Advanced TypeScript')).toBeInTheDocument());
   });
 
   it('shows credential holder and program labels', async () => {
@@ -124,87 +142,89 @@ describe('verified state', () => {
 // ── Service routing ───────────────────────────────────────────────────────
 
 describe('service routing', () => {
-  it('calls fetchPathCData when no ?data param is present', async () => {
-    setupParams('cert-123');
+  beforeEach(() => {
+    vi.mocked(useSystemSetting).mockReturnValue(defaultSystemSetting as any);
+    vi.mocked(decodePathBData).mockResolvedValue(mockVC);
     vi.mocked(fetchPathCData).mockResolvedValue(mockVC);
     vi.mocked(verifyCertificate).mockResolvedValue({ verified: true, certificateData: mockCertificate });
+  });
+
+  it('calls fetchPathCData when no ?data param is present', async () => {
+    vi.mocked(useParams).mockReturnValue({ certificateId: 'cert-123' } as any);
+    vi.mocked(useSearchParams).mockReturnValue([
+      new URLSearchParams({}),
+      vi.fn(),
+    ] as any);
 
     renderPage();
-    await waitFor(() => expect(fetchPathCData).toHaveBeenCalledWith('cert-123'));
-    expect(decodePathBData).not.toHaveBeenCalled();
+    await waitFor(() => expect(vi.mocked(fetchPathCData)).toHaveBeenCalledWith('cert-123'));
+    expect(vi.mocked(decodePathBData)).not.toHaveBeenCalled();
   });
 
   it('calls decodePathBData when ?data param is present', async () => {
-    setupParams('cert-123', 'base64encodeddata');
-    vi.mocked(decodePathBData).mockResolvedValue(mockVC);
-    vi.mocked(verifyCertificate).mockResolvedValue({ verified: true, certificateData: mockCertificate });
+    vi.mocked(useParams).mockReturnValue({ certificateId: 'cert-123' } as any);
+    vi.mocked(useSearchParams).mockReturnValue([
+      new URLSearchParams({ data: 'base64encodeddata' }),
+      vi.fn(),
+    ] as any);
 
     renderPage();
-    await waitFor(() => expect(decodePathBData).toHaveBeenCalledWith('base64encodeddata'));
-    expect(fetchPathCData).not.toHaveBeenCalled();
+    await waitFor(() => expect(vi.mocked(decodePathBData)).toHaveBeenCalledWith('base64encodeddata'));
+    expect(vi.mocked(fetchPathCData)).not.toHaveBeenCalled();
   });
 });
 
 // ── Failed state ──────────────────────────────────────────────────────────
 
 describe('failed state', () => {
-  it('shows failed heading when verifyCertificate returns verified: false', async () => {
-    setupParams('cert-123');
+  beforeEach(() => {
+    vi.mocked(useSystemSetting).mockReturnValue(defaultSystemSetting as any);
+    vi.mocked(useParams).mockReturnValue({ certificateId: 'cert-123' } as any);
+    vi.mocked(useSearchParams).mockReturnValue([
+      new URLSearchParams({}),
+      vi.fn(),
+    ] as any);
     vi.mocked(fetchPathCData).mockResolvedValue(mockVC);
+    vi.mocked(decodePathBData).mockResolvedValue(mockVC);
+    vi.mocked(verifyCertificate).mockResolvedValue({ verified: true, certificateData: mockCertificate });
+  });
+
+  it('shows failed heading when verifyCertificate returns verified: false', async () => {
     vi.mocked(verifyCertificate).mockResolvedValue({ verified: false, error: 'Signature mismatch' });
 
     renderPage();
-
-    await waitFor(() =>
-      expect(screen.getByText('certificate.verificationFailed')).toBeInTheDocument(),
-    );
-    // Raw error details are not exposed to the user — only the generic message is shown
+    await waitFor(() => expect(screen.getByText('certificate.verificationFailed')).toBeInTheDocument());
     expect(screen.getByText('certificate.couldNotVerify')).toBeInTheDocument();
     expect(screen.queryByText('Signature mismatch')).not.toBeInTheDocument();
   });
 
   it('shows failed state when fetchPathCData throws', async () => {
-    setupParams('cert-123');
     vi.mocked(fetchPathCData).mockRejectedValue(new Error('Registry unavailable'));
 
     renderPage();
-
-    await waitFor(() =>
-      expect(screen.getByText('certificate.verificationFailed')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('certificate.verificationFailed')).toBeInTheDocument());
     expect(screen.queryByText('Registry unavailable')).not.toBeInTheDocument();
   });
 
   it('shows failed state immediately when certificateId is missing', async () => {
-    setupParams(undefined);
+    vi.mocked(useParams).mockReturnValue({} as any);
 
     renderPage();
-
-    await waitFor(() =>
-      expect(screen.getByText('certificate.verificationFailed')).toBeInTheDocument(),
-    );
-    expect(fetchPathCData).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByText('certificate.verificationFailed')).toBeInTheDocument());
+    expect(vi.mocked(fetchPathCData)).not.toHaveBeenCalled();
   });
 
   it('shows the invalid status badge in the failed state', async () => {
-    setupParams('cert-123');
     vi.mocked(fetchPathCData).mockRejectedValue(new Error('error'));
 
     renderPage();
-
-    await waitFor(() =>
-      expect(screen.getByText('certificate.invalid')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('certificate.invalid')).toBeInTheDocument());
   });
 
   it('renders back-to-home link in failed state', async () => {
-    setupParams('cert-123');
     vi.mocked(fetchPathCData).mockRejectedValue(new Error('error'));
 
     renderPage();
-
-    await waitFor(() =>
-      expect(screen.getByText('certificate.backToHome')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('certificate.backToHome')).toBeInTheDocument());
   });
 });
