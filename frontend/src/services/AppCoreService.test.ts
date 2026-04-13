@@ -31,6 +31,8 @@ describe('AppCoreService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         appCoreService.clearDeviceId();
+        (appCoreService as any).appInfoCache = null;
+        (appCoreService as any).pDataCache = null;
         (httpClient.getClient as any).mockReturnValue({
             updateHeaders: vi.fn()
         });
@@ -186,16 +188,9 @@ describe('AppCoreService', () => {
         });
 
         it('should return fallback values if app info endpoint returns empty data', async () => {
-            // Clear the pData cache to ensure fresh API call
-            (appCoreService as any).pDataCache = null;
-            
             const mockClient = {
                 get: vi.fn().mockResolvedValue({
-                    data: {
-                        appId: undefined,
-                        version: undefined,
-                        buildHash: undefined
-                    }
+                    data: null
                 })
             };
             (httpClient.getClient as any).mockReturnValue(mockClient);
@@ -207,6 +202,50 @@ describe('AppCoreService', () => {
                 ver: '',
                 pid: ''
             });
+        });
+    });
+
+    describe('getBuildHash', () => {
+        it('should fetch buildHash from app info endpoint', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: { appId: 'test.portal', version: '1.0.0', buildHash: 'cdfc32a' }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            const hash = await appCoreService.getBuildHash();
+
+            expect(mockClient.get).toHaveBeenCalledWith('/app/v1/info');
+            expect(hash).toBe('cdfc32a');
+        });
+
+        it('should share the same API call as getPData', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: { appId: 'test.portal', version: '1.0.0', buildHash: 'cdfc32a' }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            await appCoreService.getPData();
+            await appCoreService.getBuildHash();
+
+            // Both methods share fetchAppInfo — only one network call total
+            expect(mockClient.get).toHaveBeenCalledTimes(1);
+        });
+
+        it('should fall back to "1.0" when buildHash is missing', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: { appId: 'test.portal', version: '1.0.0', buildHash: undefined }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            const hash = await appCoreService.getBuildHash();
+
+            expect(hash).toBe('1.0');
         });
     });
 });

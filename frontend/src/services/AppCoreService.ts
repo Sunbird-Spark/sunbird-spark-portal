@@ -2,9 +2,16 @@ import { DeviceService, $t } from '@project-sunbird/telemetry-sdk';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storage';
 import { getClient } from '../lib/http-client';
 
+interface AppInfo {
+    appId: string;
+    version: string;
+    buildHash: string;
+}
+
 class AppCoreService {
     private static instance: AppCoreService;
     private deviceId: string | null = null;
+    private appInfoCache: AppInfo | null = null;
     private pDataCache: { id: string; ver: string; pid: string } | null = null;
 
     private constructor() {
@@ -16,6 +23,13 @@ class AppCoreService {
             AppCoreService.instance = new AppCoreService();
         }
         return AppCoreService.instance;
+    }
+
+    private async fetchAppInfo(): Promise<AppInfo> {
+        if (this.appInfoCache) return this.appInfoCache;
+        const response = await getClient().get<AppInfo>('/app/v1/info');
+        this.appInfoCache = response.data ?? { appId: '', version: '', buildHash: '1.0' };
+        return this.appInfoCache;
     }
 
     async getDeviceId(): Promise<string> {
@@ -68,23 +82,20 @@ class AppCoreService {
         return getStorageItem('deviceId') !== null;
     }
 
-    async getPData(): Promise<{ id: string; ver: string; pid: string }> {
-        // Return cached pData if available
-        if (this.pDataCache) {
-            return this.pDataCache;
-        }
+    async getBuildHash(): Promise<string> {
+        const info = await this.fetchAppInfo();
+        return info.buildHash || '1.0';
+    }
 
-        const response = await getClient().get<{
-            appId: string;
-            version: string;
-            buildHash: string;
-        }>('/app/v1/info');
-        const data = response.data;
+    async getPData(): Promise<{ id: string; ver: string; pid: string }> {
+        if (this.pDataCache) return this.pDataCache;
+
+        const info = await this.fetchAppInfo();
 
         this.pDataCache = {
-            id: data?.appId || "",
-            ver: data?.version || "",
-            pid: data?.appId || "",
+            id: info.appId || '',
+            ver: info.version || '',
+            pid: info.appId || '',
         };
 
         return this.pDataCache;
