@@ -1,6 +1,6 @@
 import { EcmlPlayerContextProps, EcmlPlayerMetadata } from './types';
 import { buildTelemetryContext } from '../telemetryContextBuilder';
-import AppCoreService from '../../AppCoreService';
+import appCoreService from '../../AppCoreService';
 
 const PREVIEW_URL = '/content/preview/preview.html?webview=true';
 
@@ -12,7 +12,7 @@ export class EcmlPlayerService {
     const context = await buildTelemetryContext(contextProps, { contentId: metadata.identifier });
 
     const config = {
-      version: await AppCoreService.getBuildHash(),
+      version: await appCoreService.getBuildHash(),
       showEndPage: false,
       endPage: [{ template: 'assessment', contentType: ['SelfAssess'] }],
       showStartPage: true,

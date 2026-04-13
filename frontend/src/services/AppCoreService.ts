@@ -82,6 +82,11 @@ class AppCoreService {
         return getStorageItem('deviceId') !== null;
     }
 
+    clearCaches(): void {
+        this.appInfoCache = null;
+        this.pDataCache = null;
+    }
+
     async getBuildHash(): Promise<string> {
         const info = await this.fetchAppInfo();
         return info.buildHash || '1.0';
