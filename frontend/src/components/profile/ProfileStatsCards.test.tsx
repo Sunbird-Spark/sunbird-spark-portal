@@ -47,7 +47,7 @@ const mockCourses = [
     { courseId: 'course-4', status: 2 }, // completed
 ];
 
-// Expected: totalCourses=4, inProgress=2 (status 0 + status 1), completed=2
+// Expected: totalCourses=4, inProgress=1 (status 1 only), completed=2
 
 describe('ProfileStatsCards', () => {
     beforeEach(() => {
@@ -70,10 +70,10 @@ describe('ProfileStatsCards', () => {
         expect(totalCard).toBeInTheDocument();
         expect(totalCard!.querySelector('.stat-value')!.textContent).toBe('04');
 
-        // Courses in Progress: status === 0 or status === 1 => 2
+        // Courses in Progress: status === 1 => 1
         const progressCard = screen.getByText('In Progress').closest('.stat-card');
         expect(progressCard).toBeInTheDocument();
-        expect(progressCard!.querySelector('.stat-value')!.textContent).toBe('02');
+        expect(progressCard!.querySelector('.stat-value')!.textContent).toBe('01');
 
         // Courses Completed: status === 2 => 2
         const completedCard = screen.getByText('Completed').closest('.stat-card');
