@@ -1130,6 +1130,7 @@
     "inactive": "Inactive",
     "completed": "Completed",
     "ongoing": "Ongoing",
+    "notStarted": "Not Started",
     "upcoming": "Upcoming",
     "processing": "Processing"
   },
