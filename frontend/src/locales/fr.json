@@ -1114,6 +1114,7 @@
     "inactive": "Inactif",
     "completed": "Terminé",
     "ongoing": "En cours",
+    "notStarted": "Pas commencé",
     "upcoming": "À venir",
     "processing": "En cours de traitement"
   },

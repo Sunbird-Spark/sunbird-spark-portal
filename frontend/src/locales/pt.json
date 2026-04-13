@@ -1114,6 +1114,7 @@
     "inactive": "Inativo",
     "completed": "Concluído",
     "ongoing": "Em andamento",
+    "notStarted": "Não iniciado",
     "upcoming": "Próximos",
     "processing": "Em processamento"
   },
