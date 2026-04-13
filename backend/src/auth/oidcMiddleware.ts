@@ -82,13 +82,22 @@ export function oidcSession() {
 
 /**
  * Middleware that requires the user to be authenticated.
- * Redirects to the login page if not authenticated.
+ * - XHR/API requests (req.xhr or Accept contains application/json): returns 401 JSON
+ *   to prevent redirect loops when the browser re-issues non-GET methods.
+ * - Browser navigations: redirects to /portal/login?prompt=none.
  * This replaces keycloak.protect().
  */
 export function requireAuth() {
     return (req: Request, res: Response, next: NextFunction) => {
         if (req.oidc?.isAuthenticated) {
             return next();
+        }
+        // XHR/API requests must receive 401 — not a redirect — to prevent
+        // the browser from following the 302 with the original method (e.g. PATCH),
+        // which would miss the GET-only /login route and loop back here indefinitely.
+        const isApiRequest = req.xhr || Boolean(req.accepts('json'));
+        if (isApiRequest) {
+            return res.status(401).json({ message: 'Unauthorized' });
         }
         res.redirect('/portal/login?prompt=none');
     };
