@@ -174,6 +174,116 @@ describe('service routing', () => {
   });
 });
 
+// ── Multi-Origin Trust Support ────────────────────────────────────────────
+
+describe('multi-origin trust support', () => {
+  beforeEach(() => {
+    vi.mocked(useParams).mockReturnValue({ certificateId: 'cert-123' } as any);
+    vi.mocked(useSearchParams).mockReturnValue([
+      new URLSearchParams({}),
+      vi.fn(),
+    ] as any);
+    vi.mocked(fetchPathCData).mockResolvedValue(mockVC);
+    vi.mocked(verifyCertificate).mockResolvedValue({
+      verified: true,
+      certificateData: mockCertificate,
+    });
+  });
+
+  it('passes single trusted origin to verifyCertificate', async () => {
+    vi.mocked(useSystemSetting).mockReturnValue({
+      data: {
+        data: {
+          response: {
+            id: 'certContextOrigins',
+            field: 'certContextOrigins',
+            value: 'https://downloadableartifacts.blob.core.windows.net',
+          },
+        },
+        status: 200,
+      },
+      isLoading: false,
+    } as any);
+
+    renderPage();
+    await waitFor(() =>
+      expect(vi.mocked(verifyCertificate)).toHaveBeenCalledWith(
+        mockVC,
+        ['https://downloadableartifacts.blob.core.windows.net'],
+      ),
+    );
+  });
+
+  it('parses comma-separated trusted origins and passes them to verifyCertificate', async () => {
+    vi.mocked(useSystemSetting).mockReturnValue({
+      data: {
+        data: {
+          response: {
+            id: 'certContextOrigins',
+            field: 'certContextOrigins',
+            value: 'https://url1.com,https://url2.com,https://url3.com',
+          },
+        },
+        status: 200,
+      },
+      isLoading: false,
+    } as any);
+
+    renderPage();
+    await waitFor(() =>
+      expect(vi.mocked(verifyCertificate)).toHaveBeenCalledWith(
+        mockVC,
+        ['https://url1.com', 'https://url2.com', 'https://url3.com'],
+      ),
+    );
+  });
+
+  it('ignores invalid URLs and passes only valid origins', async () => {
+    vi.mocked(useSystemSetting).mockReturnValue({
+      data: {
+        data: {
+          response: {
+            id: 'certContextOrigins',
+            field: 'certContextOrigins',
+            value: 'https://valid.com,invalid-url,https://another-valid.com',
+          },
+        },
+        status: 200,
+      },
+      isLoading: false,
+    } as any);
+
+    renderPage();
+    await waitFor(() =>
+      expect(vi.mocked(verifyCertificate)).toHaveBeenCalledWith(
+        mockVC,
+        ['https://valid.com', 'https://another-valid.com'],
+      ),
+    );
+  });
+
+  it('passes empty array when system setting has no value', async () => {
+    vi.mocked(useSystemSetting).mockReturnValue({
+      data: {
+        data: {
+          response: {
+            id: 'certContextOrigins',
+            field: 'certContextOrigins',
+            value: undefined,
+          },
+        },
+        status: 200,
+      },
+      isLoading: false,
+    } as any);
+
+    renderPage();
+    await waitFor(() =>
+      expect(vi.mocked(verifyCertificate)).toHaveBeenCalledWith(mockVC, []),
+    );
+  });
+});
+
 // ── Failed state ──────────────────────────────────────────────────────────
 
 describe('failed state', () => {
