@@ -25,19 +25,21 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
     { id: "upcoming", label: t('status.upcoming') },
   ];
 
+  const isCompleted = (c: TrackableCollection) => c.status === 2 || c.completionPercentage >= 100;
+
   const getFilteredCourses = () => {
     switch (activeTab) {
       case "active":
         return courses.filter(c => {
-          if (c.completionPercentage >= 100) return false;
+          if (isCompleted(c)) return false;
           if (c.batch?.startDate && dayjs(c.batch.startDate).isAfter(dayjs(), 'day')) return false;
           return true;
         });
       case "completed":
-        return courses.filter(c => c.completionPercentage === 100);
+        return courses.filter(c => isCompleted(c));
       case "upcoming":
         return courses.filter(c => {
-          if (c.completionPercentage > 0) return false;
+          if (c.status !== 0 || c.completionPercentage > 0) return false;
           if (c.batch?.startDate) {
             return dayjs(c.batch.startDate).isAfter(dayjs(), 'day');
           }

@@ -1131,6 +1131,7 @@
     "inactive": "غير نشط",
     "completed": "مكتمل",
     "ongoing": "جارية",
+    "notStarted": "لم يبدأ",
     "upcoming": "قادمة",
     "processing": "قيد المعالجة"
   },

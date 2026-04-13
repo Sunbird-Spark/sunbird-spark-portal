@@ -15,12 +15,15 @@ import {
     DropdownMenuTrigger,
 } from "@/components/common/DropdownMenu";
 
-type FilterType = "all" | "ongoing" | "completed";
+type FilterType = "all" | "not-started" | "ongoing" | "completed";
 
 const VIEW_LIMIT = 6;
 
-const getCompletionStatus = (status: number): "ongoing" | "completed" =>
-    status === 2 ? "completed" : "ongoing";
+const getCompletionStatus = (status: number, completionPercentage: number): "not-started" | "ongoing" | "completed" => {
+    if (status === 2 || completionPercentage >= 100) return "completed";
+    if (status === 1) return "ongoing";
+    return "not-started";
+};
 
 
 
@@ -34,7 +37,7 @@ interface CourseRowProps {
 
 const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCourseId, t }: CourseRowProps) => {
     const location = useLocation();
-    const status = getCompletionStatus(course.status);
+    const status = getCompletionStatus(course.status, course.completionPercentage ?? 0);
     const progress = course.completionPercentage ?? 0;
     const thumbnail = course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId);
     const title = course.courseName || course.content?.name || t('profileLearning.untitledCourse');
@@ -83,13 +86,20 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                 {/* Status Badge */}
                 <div className="profile-learning-status">
                     <div
-                        className={`px-4 md:px-5 py-1.5 rounded-full border ${status === "completed"
-                            ? "bg-sunbird-status-completed-bg border-sunbird-status-completed-border text-sunbird-status-completed-text"
-                            : "bg-sunbird-status-ongoing-bg border-sunbird-status-ongoing-border text-sunbird-status-ongoing-text"
-                            }`}
+                        className={`px-4 md:px-5 py-1.5 rounded-full border ${
+                            status === "completed"
+                                ? "bg-sunbird-status-completed-bg border-sunbird-status-completed-border text-sunbird-status-completed-text"
+                                : status === "ongoing"
+                                    ? "bg-sunbird-status-ongoing-bg border-sunbird-status-ongoing-border text-sunbird-status-ongoing-text"
+                                    : "bg-gray-100 border-gray-300 text-gray-500"
+                        }`}
                     >
                         <span className="text-[0.875rem] font-medium leading-[1.125rem]">
-                            {status === "completed" ? t('status.completed') : t('status.ongoing')}
+                            {status === "completed"
+                                ? t('status.completed')
+                                : status === "ongoing"
+                                    ? t('status.ongoing')
+                                    : t('status.notStarted')}
                         </span>
                     </div>
                 </div>
@@ -133,7 +143,7 @@ const ProfileLearningList = () => {
 
     const filteredCourses = courses.filter((course) => {
         if (filter === "all") return true;
-        return getCompletionStatus(course.status) === filter;
+        return getCompletionStatus(course.status, course.completionPercentage ?? 0) === filter;
     });
 
     const hasMore = filteredCourses.length > VIEW_LIMIT;
@@ -158,7 +168,13 @@ const ProfileLearningList = () => {
                                 aria-label="Filter courses by status"
                             >
                                 <span className="capitalize">
-                                    {filter === 'all' ? t('tabs.all') : filter === 'ongoing' ? t('status.ongoing') : t('status.completed')}
+                                    {filter === 'all'
+                                        ? t('tabs.all')
+                                        : filter === 'ongoing'
+                                            ? t('status.ongoing')
+                                            : filter === 'not-started'
+                                                ? t('status.notStarted')
+                                                : t('status.completed')}
                                 </span>
                                 <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
                             </button>
@@ -172,6 +188,15 @@ const ProfileLearningList = () => {
                                 }}
                             >
                                 {t('tabs.all')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="cursor-pointer hover:bg-sunbird-ginger/10 hover:text-sunbird-ginger"
+                                onClick={() => {
+                                    setFilter("not-started");
+                                    setShowAll(false);
+                                }}
+                            >
+                                {t('status.notStarted')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="cursor-pointer hover:bg-sunbird-ginger/10 hover:text-sunbird-ginger"
@@ -211,7 +236,8 @@ const ProfileLearningList = () => {
                         <p className="text-sunbird-gray-75 text-sm">
                             {filter === "all"
                                 ? t('profileLearning.noCoursesEnrolled')
-                                : t('profileLearning.noFilteredCourses', { filter })}
+                                : t('profileLearning.noFilteredCourses', { filter: filter === 'ongoing' ? t('status.ongoing')
+                                        : filter === 'not-started' ? t('status.notStarted') : t('status.completed') })}
                         </p>
                     </div>
                 ) : (
