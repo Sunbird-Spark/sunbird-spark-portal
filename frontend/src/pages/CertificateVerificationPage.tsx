@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { split } from 'lodash';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { useSystemSetting } from '@/hooks/useSystemSetting';
+import sunbirdLogo from '@/assets/sunbird-logo.svg';
 import {
   decodePathBData,
   fetchPathCData,
   verifyCertificate,
   type CertificateData,
 } from '@/services/CertificateVerificationService';
+import {
+  VerifiedBadgeIcon,
+  SmallCheckIcon,
+  XIcon,
+  FailedBadgeIcon,
+} from './CertificateVerificationIcons';
 
 type VerificationStatus = 'verifying' | 'verified' | 'failed';
 
@@ -14,62 +23,13 @@ type VerificationStatus = 'verifying' | 'verified' | 'failed';
 
 const LABEL_CLS = 'text-xs font-semibold tracking-widest uppercase text-gray-400 mb-1';
 
-// ── Sub-components ────────────────────────────────────────────────────────
-
-function VerifiedBadgeIcon() {
-  return (
-    <svg
-      className="w-6 h-6 text-gray-800"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M12 1l2.753 3.978 4.8-1.259-1.26 4.8L22 12l-3.707 3.481 1.26 4.8-4.8-1.26L12 23l-2.753-3.979-4.8 1.26 1.26-4.8L2 12l3.707-3.481-1.26-4.8 4.8 1.26L12 1z" />
-      <path
-        d="M9 12l2 2 4-4"
-        stroke="white"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    </svg>
-  );
-}
-
-function SmallCheckIcon() {
-  return (
-    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path
-        d="M2.5 6l2.5 2.5 4.5-5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function XIcon() {
-  return (
-    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path
-        d="M2 2l8 8M10 2l-8 8"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 // ── Page ──────────────────────────────────────────────────────────────────
 
 const CertificateVerificationPage: React.FC = () => {
   const { certificateId } = useParams<{ certificateId: string }>();
   const [searchParams] = useSearchParams();
   const { t } = useAppI18n();
+  const { data: certContextSetting, isLoading: isSettingLoading } = useSystemSetting('certContextOrigins');
 
   const [status, setStatus] = useState<VerificationStatus>('verifying');
   const [certificate, setCertificate] = useState<CertificateData | null>(null);
@@ -80,16 +40,60 @@ const CertificateVerificationPage: React.FC = () => {
       return;
     }
 
+    // Wait only for the system setting query to finish loading.
+    // Extra trusted origins are optional, so continue with an empty list
+    // when the setting is absent or does not contain a value.
+    if (isSettingLoading) {
+      return;
+    }
+
     let cancelled = false;
     const dataParam = searchParams.get('data');
 
     const run = async () => {
       try {
+        // Extract and parse trusted context origins from system settings
+        // Hook response structure: { data: { response: { value } }, status, headers }
+        // Value can be: single URL or comma-separated URLs
+        // e.g., "https://url1.com" or "https://url1.com,https://url2.com,https://url3.com"
+        const rawValue = certContextSetting?.data?.response?.value;
+        let extraTrustedOrigins: string[] = [];
+        if (rawValue) {
+          try {
+            // Try to parse as JSON first
+            const parsed = JSON.parse(rawValue) as string;
+            // Split by comma and process each URL
+            const urls = split(parsed, ',').map(url => url.trim()).filter(Boolean);
+            for (const urlStr of urls) {
+              try {
+                // Extract origin (protocol + domain) from each URL
+                const urlObj = new URL(urlStr);
+                extraTrustedOrigins.push(urlObj.origin);
+              } catch {
+                // Skip invalid URLs
+              }
+            }
+          } catch {
+            // If JSON parsing fails, try regex extraction for comma-separated URLs
+            const urlMatches = rawValue.match(/https?:\/\/[^,}]+/g);
+            if (urlMatches) {
+              for (const urlStr of urlMatches) {
+                try {
+                  const urlObj = new URL(urlStr.trim());
+                  extraTrustedOrigins.push(urlObj.origin);
+                } catch {
+                  // Skip invalid URLs
+                }
+              }
+            }
+          }
+        }
+
         const signedVC = dataParam
           ? await decodePathBData(dataParam)
           : await fetchPathCData(certificateId);
 
-        const result = await verifyCertificate(signedVC);
+        const result = await verifyCertificate(signedVC, extraTrustedOrigins);
 
         if (cancelled) return;
 
@@ -97,7 +101,7 @@ const CertificateVerificationPage: React.FC = () => {
           setCertificate(result.certificateData);
           setStatus('verified');
         } else {
-          setStatus('failed');
+          if (!cancelled) setStatus('failed');
         }
       } catch {
         if (!cancelled) setStatus('failed');
@@ -106,41 +110,43 @@ const CertificateVerificationPage: React.FC = () => {
 
     run();
     return () => { cancelled = true; };
-  }, [certificateId, searchParams]);
+  }, [certificateId, searchParams, isSettingLoading, certContextSetting]);
 
-  // ── Verifying ─────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────
 
-  if (status === 'verifying') {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center bg-stone-50"
-        role="status"
-        aria-live="polite"
-      >
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-11 h-11 rounded-full border-4 border-sunbird-brick border-t-transparent animate-spin" />
-          <p className="font-rubik text-sm font-medium text-gray-500 tracking-wide">
-            {t('certificate.verifying')}
-          </p>
+  return (
+    <div className="min-h-screen flex flex-col bg-stone-50">
+      {/* Header with Sunbird logo */}
+      <header className="bg-white shadow-sunbird-md">
+        <div className="h-16 px-4 lg:px-[7.5rem] flex items-center">
+          <img src={sunbirdLogo} alt="Sunbird" className="sunbird-logo" />
         </div>
-      </div>
-    );
-  }
+      </header>
 
-  // ── Verified ──────────────────────────────────────────────────────────
+      {/* Content area */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        {/* Verifying state */}
+        {status === 'verifying' && (
+          <div className="flex flex-col items-center gap-4" role="status" aria-live="polite">
+            <div className="w-11 h-11 rounded-full border-4 border-sunbird-brick border-t-transparent animate-spin" />
+            <p className="font-rubik text-sm font-medium text-gray-500 tracking-wide">
+              {t('certificate.verifying')}
+            </p>
+          </div>
+        )}
 
-  if (status === 'verified' && certificate) {
-    const formattedDate = certificate.issuanceDate
-      ? new Date(certificate.issuanceDate).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
-      : '—';
+        {/* Verified state */}
+        {status === 'verified' && certificate && (() => {
+          const formattedDate = certificate.issuanceDate
+            ? new Date(certificate.issuanceDate).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            : '—';
 
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6">
-        <div className="w-full max-w-sm">
+          return (
+            <div className="w-full max-w-sm">
           {/* Icon + title */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-green-100 rounded-2xl p-3 mb-4 shadow-sm">
@@ -193,34 +199,17 @@ const CertificateVerificationPage: React.FC = () => {
             {/* Bottom accent */}
             <div className="h-1 bg-sunbird-brick" />
           </div>
-        </div>
-      </div>
-    );
-  }
+            </div>
+          );
+        })()}
 
-  // ── Failed ────────────────────────────────────────────────────────────
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6">
-      <div className="w-full max-w-sm">
+        {/* Failed state */}
+        {status === 'failed' && (
+          <div className="w-full max-w-sm">
         {/* Icon + title */}
         <div className="flex flex-col items-center mb-8">
           <div className="bg-red-100 rounded-2xl p-3 mb-4 shadow-sm">
-            <svg
-              className="w-6 h-6 text-red-700"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M12 1l2.753 3.978 4.8-1.259-1.26 4.8L22 12l-3.707 3.481 1.26 4.8-4.8-1.26L12 23l-2.753-3.979-4.8 1.26 1.26-4.8L2 12l3.707-3.481-1.26-4.8 4.8 1.26L12 1z" />
-              <path
-                d="M9 9l6 6M15 9l-6 6"
-                stroke="white"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                fill="none"
-              />
-            </svg>
+            <FailedBadgeIcon />
           </div>
           <h1 className="font-rubik text-2xl font-bold text-gray-900">
             {t('certificate.verificationFailed')}
@@ -257,6 +246,8 @@ const CertificateVerificationPage: React.FC = () => {
           {/* Bottom accent */}
           <div className="h-1 bg-sunbird-brick" />
         </div>
+          </div>
+        )}
       </div>
     </div>
   );

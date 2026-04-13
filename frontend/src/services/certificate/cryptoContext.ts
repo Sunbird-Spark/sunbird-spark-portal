@@ -66,44 +66,59 @@ export function getCryptoModules(): Promise<CryptoModules> {
 
 // ── Context pre-fetch ──────────────────────────────────────────────────────
 
-// Only fetch contexts from these trusted domains — prevents IP leakage to
-// attacker-controlled hosts via crafted @context URLs in malicious QR payloads.
-const TRUSTED_CONTEXT_ORIGINS = new Set([
-  'https://www.w3.org',
-  'https://w3id.org',
-  'https://schema.org',
-]);
-
-function isTrustedContextUrl(url: string): boolean {
-  try {
-    const { protocol, origin } = new URL(url);
-    return protocol === 'https:' && TRUSTED_CONTEXT_ORIGINS.has(origin);
-  } catch {
-    return false;
-  }
-}
-
 /**
  * Fetches any JSON-LD context URLs in the VC that are not already in staticContexts.
- * Only URLs from trusted W3C context domains are fetched.
+ * Only URLs from trusted W3C context domains or the provided extra origins are fetched.
  * Failures are silently ignored — jsonld-signatures may still verify with bundled contexts.
+ *
+ * @param vc - The signed verifiable credential
+ * @param staticContexts - Map of known contexts (will be mutated with fetched contexts)
+ * @param extraTrustedOrigins - Additional trusted origins (e.g., Azure blob storage) from system settings
  */
 export async function prefetchContexts(
   vc: SignedVC,
   staticContexts: Record<string, unknown>,
+  extraTrustedOrigins?: string[],
 ): Promise<void> {
+  // W3C and schema.org are always trusted (standards bodies)
+  const alwaysTrustedOrigins = new Set(['https://www.w3.org', 'https://w3id.org', 'https://schema.org']);
+
+  // Add extra trusted origins from system settings if provided
+  if (extraTrustedOrigins && extraTrustedOrigins.length > 0) {
+    for (const origin of extraTrustedOrigins) {
+      try {
+        const { origin: parsedOrigin } = new URL(origin);
+        alwaysTrustedOrigins.add(parsedOrigin);
+      } catch {
+        // Ignore invalid URLs
+      }
+    }
+  }
+
+  function isTrustedContextUrl(url: string): boolean {
+    try {
+      const { protocol, origin } = new URL(url);
+      return protocol === 'https:' && alwaysTrustedOrigins.has(origin);
+    } catch {
+      return false;
+    }
+  }
+
   const contexts = Array.isArray(vc['@context']) ? vc['@context'] : [vc['@context']];
   await Promise.all(
     contexts.map(async (url) => {
       if (typeof url !== 'string' || staticContexts[url]) return;
-      if (!isTrustedContextUrl(url)) return;
+      if (!isTrustedContextUrl(url)) {
+        return;
+      }
       try {
         const res = await fetch(url);
         if (res.ok) {
-          staticContexts[url] = await res.json();
+          const json = await res.json();
+          staticContexts[url] = json;
         }
       } catch {
-        // Intentionally ignored — see JSDoc above
+        // Silently ignore fetch errors — jsonld-signatures may still verify with bundled contexts
       }
     }),
   );
