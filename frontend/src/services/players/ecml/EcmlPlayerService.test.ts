@@ -3,6 +3,12 @@ import { EcmlPlayerService } from './EcmlPlayerService';
 import type { EcmlPlayerMetadata } from './types';
 import { buildTelemetryContext } from '../telemetryContextBuilder';
 
+vi.mock('../../AppCoreService', () => ({
+  default: {
+    getBuildHash: vi.fn().mockResolvedValue('test-build-hash'),
+  },
+}));
+
 vi.mock('../telemetryContextBuilder', () => ({
   buildTelemetryContext: vi.fn().mockResolvedValue({
     mode: 'play',
@@ -119,6 +125,7 @@ describe('EcmlPlayerService', () => {
     it('should include ECML-specific config fields', async () => {
       const result = await service.createConfig(mockMetadata);
 
+      expect(result.config.version).toBe('test-build-hash');
       expect(result.config.apislug).toBe('/action');
       expect(result.config.repos).toEqual(['/content-plugins/renderer']);
       expect(result.config.plugins).toHaveLength(2);
