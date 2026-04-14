@@ -218,7 +218,7 @@ sunbird-portal/
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Sunbird-Spark/sunbird-spark-portal.git
 cd sunbird-portal
 ```
 
@@ -236,12 +236,6 @@ npm install
 ```bash
 # Start development server (http://localhost:5173)
 npm run dev
-
-# Build for production (type-check + Vite build → dist/)
-npm run build
-
-# Preview production build
-npm run preview
 
 # Run tests
 npm run test            # Vitest in watch mode
@@ -416,7 +410,7 @@ NEW_REQUIRED_CONFIG=your-value-here
 
 | Variable | Description | Required | Default |
 |---|---|---|---|
-| `LEARN_BASE_URL` | Base URL for the Learner/UserOrg service | No | `http://userorg-service:9000` |
+| `LEARN_BASE_URL` | Base URL for the Learner service | No | `http://userorg-service:9000` |
 | `KNOWLG_MW_BASE_URL` | Base URL for the Knowledge middleware service | No | `http://knowledge-mw-service:5000` |
 
 #### Available Backend Scripts
@@ -424,13 +418,6 @@ NEW_REQUIRED_CONFIG=your-value-here
 ```bash
 # Start development server with hot reload (http://localhost:3000)
 npm run dev
-
-# Build
-npm run build           # TypeScript compile → dist/
-npm run build:full      # Build backend + copy frontend dist to dist/public/
-
-# Production start
-npm run start           # Build + run (full build in production, standard build otherwise)
 
 # Run tests
 npm run test            # Vitest in watch mode
@@ -462,16 +449,6 @@ Open two terminals:
    ```
 
 The Vite dev server proxies API requests (e.g., `/api`, `/portal`, `/action`) to the backend automatically. Access the application at **http://localhost:5173**.
-
-### 5. Full Production Build
-
-```bash
-cd frontend && npm run build
-cd ../backend && npm run build:full
-node backend/dist/server.js
-```
-
-In production, the backend serves both the API and the frontend static files from `dist/public/` on port 3000.
 
 ## Application URLs
 
