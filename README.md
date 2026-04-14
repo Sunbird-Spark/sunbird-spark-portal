@@ -696,6 +696,98 @@ The mobile app opens portal pages (signup, forgot-password) in InAppBrowser, whi
 
 ---
 
+## Mobile App Integration
+
+The portal serves as both a standalone web application and a backend for the **Sunbird mobile app**. Mobile integration spans two patterns:
+
+1. **Native API endpoints** — Token-based authentication with no server-side sessions, called directly from mobile native code
+2. **InAppBrowser pages** — Portal pages (signup, forgot-password) opened inside the mobile app's WebView
+
+### Backend Mobile API Routes
+
+All mobile routes are mounted at `/mobile` (defined in `backend/src/routes/mobileRoutes.ts`, registered in `backend/src/app.ts`):
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/mobile/keycloak/login` | POST | Native username/password login via Keycloak ROPC grant |
+| `/mobile/google/auth/android` | POST | Google Sign-In for Android/iOS using native SDK ID token |
+| `/mobile/auth/v1/refresh/token` | POST | Token refresh for whitelisted mobile Keycloak clients |
+
+Key backend files:
+
+| File | Purpose |
+|---|---|
+| `backend/src/routes/mobileRoutes.ts` | Route definitions |
+| `backend/src/controllers/mobileKeycloakController.ts` | Handles native Keycloak username/password login |
+| `backend/src/controllers/mobileGoogleController.ts` | Handles Google Sign-In (verifies ID token, finds/creates user) |
+| `backend/src/controllers/mobileTokenRefreshController.ts` | Validates client whitelist and refreshes tokens |
+| `backend/src/services/mobileAuthService.ts` | Core mobile auth logic (token verification, user management, Keycloak ROPC) |
+
+### Authentication Flows
+
+**Native Login (Keycloak ROPC):**
+1. Mobile app sends `emailId` + `password` to `/mobile/keycloak/login`
+2. Backend authenticates via Keycloak Resource Owner Password Credentials grant using the Android client
+3. Returns `access_token` + `refresh_token` directly (no server session)
+
+**Google Sign-In:**
+1. Mobile app authenticates with Google natively and obtains an ID token
+2. Mobile app sends the ID token (via `X-GOOGLE-ID-TOKEN` header) + `emailId` to `/mobile/google/auth/android`
+3. Backend verifies the Google token with the platform-specific client ID (`GOOGLE_OAUTH_CLIENT_ID` for Android, `GOOGLE_OAUTH_CLIENT_ID_IOS` for iOS)
+4. Backend finds or creates the Sunbird user, then creates a Keycloak session via the Google Android client
+5. Returns `access_token` + `refresh_token` with `offline_access` scope
+
+**Token Refresh:**
+1. Mobile app sends `refresh_token` in the request body to `/mobile/auth/v1/refresh/token`
+2. Backend decodes the JWT to identify the issuing Keycloak client and validates it against a whitelist
+3. Verifies the caller's bearer token against the echo API
+4. Returns new `access_token` + `refresh_token`
+
+### InAppBrowser Pages
+
+The mobile app opens these portal pages inside an InAppBrowser (WebView):
+
+| Page | URL | Purpose |
+|---|---|---|
+| Sign Up | `/signup` | New user registration |
+| Forgot Password | `/forgot-password` | Password reset flow |
+
+**Query parameters** passed by the mobile app:
+
+| Parameter | Example | Purpose |
+|---|---|---|
+| `client` | `mobileApp` | Signals the request originates from the mobile app |
+| `redirect_uri` | `org.sunbird.app://oauth2callback` | App-scheme URL to redirect after success |
+| `error_callback` | `<url>` | Redirect target on error |
+| `lang` | `fr` | Language code for i18n sync (see [Mobile App Language Sync](#mobile-app-language-sync)) |
+
+**How it works:**
+1. Mobile app opens the portal URL with params: `?client=mobileApp&redirect_uri=<app-scheme>&lang=<code>`
+2. Portal calls `persistMobileContext()` to save context to `sessionStorage` (survives Keycloak redirects)
+3. After the flow completes, portal redirects to the `redirect_uri` (converted to Android `intent://` URL if needed)
+4. The `lang` param is applied to i18n on mount so the page renders in the mobile app's language
+
+Key frontend files:
+
+| File | Purpose |
+|---|---|
+| `frontend/src/utils/forgotPasswordUtils.ts` | Mobile context utilities: `isMobileApp()`, `persistMobileContext()`, `getSafeRedirectUrl()`, `toIntentUrl()` |
+| `frontend/src/pages/forgotPassword/ForgotPassword.tsx` | Forgot password page with mobile language sync and redirect handling |
+| `frontend/src/pages/forgotPassword/PasswordResetSuccess.tsx` | Success page with mobile-aware redirect |
+| `frontend/src/pages/signup/SignUp.tsx` | Sign up page with mobile context persistence |
+| `frontend/src/components/signup/SignUpForm.tsx` | Sign up form with mobile-aware "Already have account?" link |
+
+### Mobile Environment Variables
+
+Mobile auth requires the following environment variables (see [Environment Variables Reference](#environment-variables-reference) for full details):
+
+- `KEYCLOAK_ANDROID_CLIENT_ID` / `KEYCLOAK_ANDROID_CLIENT_SECRET` — Android native Keycloak client
+- `KEYCLOAK_GOOGLE_ANDROID_CLIENT_ID` / `KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET` — Google Sign-In Keycloak client
+- `GOOGLE_OAUTH_CLIENT_ID` — Google OAuth client ID (Android)
+- `GOOGLE_OAUTH_CLIENT_ID_IOS` — Google OAuth client ID (iOS)
+
+---
+
 ## Troubleshooting
 
 ### Common Issues
