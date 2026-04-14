@@ -734,8 +734,8 @@
     "verificationFailed": "Verification Failed",
     "invalidOtp": "Invalid OTP. Please try again.",
     "verificationError": "An error occurred during verification. Please try again.",
-    "emailAlreadyRegistered": "This email address is already registered. Please log in instead.",
-    "phoneAlreadyRegistered": "This mobile number is already registered. Please log in instead."
+    "emailAlreadyRegistered": "This email address is already registered.",
+    "phoneAlreadyRegistered": "This mobile number is already registered."
   },
   "personalInfo": {
     "title": "Personal Information",

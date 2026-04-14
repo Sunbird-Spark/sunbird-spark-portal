@@ -734,8 +734,8 @@
     "verificationFailed": "فشل التحقق",
     "invalidOtp": "OTP غير صحيح. يرجى المحاولة مرة أخرى.",
     "verificationError": "حدث خطأ أثناء التحقق. يرجى المحاولة مرة أخرى.",
-    "emailAlreadyRegistered": "عنوان البريد الإلكتروني هذا مسجل بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.",
-    "phoneAlreadyRegistered": "رقم الهاتف هذا مسجل بالفعل. يرجى تسجيل الدخول بدلاً من ذلك."
+    "emailAlreadyRegistered": "عنوان البريد الإلكتروني هذا مسجل بالفعل",
+    "phoneAlreadyRegistered": "رقم الهاتف المحمول هذا مسجل بالفعل"
   },
   "personalInfo": {
     "title": "المعلومات الشخصية",
