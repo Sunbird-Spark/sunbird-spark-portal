@@ -226,5 +226,24 @@ describe('UserConsentTab', () => {
         expect(screen.getByText('No users match the current filters.')).toBeInTheDocument();
       });
     });
+
+    it('does not crash when a record has no email and a search is active', async () => {
+      vi.spyOn(useConsentSummaryModule, 'useConsentSummary').mockReturnValueOnce({
+        data: [
+          { ...MOCK_DATA[0]!, email: undefined as unknown as string },
+          MOCK_DATA[1]!,
+        ],
+        isLoading: false,
+        isError: false,
+      });
+      renderTab();
+      fireEvent.change(screen.getByPlaceholderText('Search by name or email…'), {
+        target: { value: 'Aarav' },
+      });
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Aarav Mehta').length).toBeGreaterThan(0);
+      });
+    });
   });
 });
