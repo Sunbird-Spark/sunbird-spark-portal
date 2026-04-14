@@ -8,7 +8,7 @@ import "./home.css";
 
 const Home = () => {
     const { t } = useAppI18n();
-    const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead({ refetchOnMount: 'always' });
+    const { data: userReadData, isLoading: userLoading, error, refetch } = useUserRead();
     const userProfile = userReadData?.data?.response;
     const {
         data: enrolledCollections,
