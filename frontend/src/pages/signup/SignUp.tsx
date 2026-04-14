@@ -14,6 +14,7 @@ import { SignupService } from '@/services/SignupService';
 import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+import useDebounce from '@/hooks/useDebounce';
 
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -49,6 +50,7 @@ const SignUp: React.FC = () => {
     const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
 
     const [userExists, setUserExists] = useState(false);
+    const debouncedIdentifier = useDebounce(emailOrMobile, 100);
 
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
@@ -62,8 +64,8 @@ const SignUp: React.FC = () => {
 
     useEffect(() => { setUserExists(false); }, [emailOrMobile]);
 
-    const handleCheckExistence = () => {
-        if (!IDENTIFIER_REGEX.test(emailOrMobile)) return;
+    useEffect(() => {
+        if (!IDENTIFIER_REGEX.test(debouncedIdentifier)) return;
         captchaActionRef.current = 'checkExistence';
         if (googleCaptchaSiteKey) {
             captchaRef.current?.reset();
@@ -71,7 +73,7 @@ const SignUp: React.FC = () => {
         } else {
             handleExistenceResult();
         }
-    };
+    }, [debouncedIdentifier]);
 
     const handleExistenceResult = (captchaResponse?: string) => {
         checkUserExistsMutation.mutate(
@@ -261,7 +263,6 @@ const SignUp: React.FC = () => {
                         handleContinue={handleContinue}
                         isStep1Valid={isStep1Valid && !userExists}
                         isLoading={isLoading}
-                        onEmailMobileBlur={handleCheckExistence}
                         userExists={userExists}
                         isCheckingUser={isCheckingUser}
                     />

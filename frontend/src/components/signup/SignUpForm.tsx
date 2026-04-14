@@ -22,7 +22,6 @@ interface Step1Props {
     handleContinue: () => void;
     isStep1Valid: boolean;
     isLoading?: boolean;
-    onEmailMobileBlur?: () => void;
     userExists?: boolean;
     isCheckingUser?: boolean;
 }
@@ -37,7 +36,6 @@ export const SignUpForm = ({
     handleContinue,
     isStep1Valid,
     isLoading = false,
-    onEmailMobileBlur,
     userExists = false,
     isCheckingUser = false
 }: Step1Props) => {
@@ -76,7 +74,6 @@ export const SignUpForm = ({
                         id="emailOrMobile"
                         value={emailOrMobile}
                         onChange={(e) => setEmailOrMobile(e.target.value)}
-                        onBlur={onEmailMobileBlur}
                         placeholder={t("signUp.enterEmailOrMobile")}
                         className="login-input-field h-10 px-3"
                     />
