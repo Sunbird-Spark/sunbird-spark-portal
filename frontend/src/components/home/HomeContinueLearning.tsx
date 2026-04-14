@@ -1,0 +1,122 @@
+import { useNavigate } from "react-router-dom";
+import { FiArrowRight } from "react-icons/fi";
+import { Button } from "@/components/common/Button";
+import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
+import { useCollection } from "@/hooks/useCollection";
+import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
+import type { TrackableCollection } from "@/types/TrackableCollections";
+import { useAppI18n } from '@/hooks/useAppI18n';
+import { getPlaceholderImage } from '@/utils/getPlaceholderImage';
+
+// Circular progress component
+const CircularProgress = ({ progress }: { progress: number }) => {
+    const size = 24;
+    const strokeWidth = 4;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (progress / 100) * circumference;
+
+    return (
+        <svg width={size} height={size} className="transform -rotate-90">
+            {/* Background circle (non-completed) */}
+            <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                className="stroke-sunbird-ginger/40"
+                strokeWidth={strokeWidth}
+            />
+            {/* Progress circle (completed) */}
+            <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                className="stroke-sunbird-brick"
+                strokeWidth={strokeWidth}
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                strokeLinecap="round"
+            />
+        </svg>
+    );
+};
+
+const HomeContinueLearning = () => {
+    const { t } = useAppI18n();
+    const navigate = useNavigate();
+    const { data, isLoading } = useUserEnrolledCollections();
+
+    const lastAccessedCourse: TrackableCollection | undefined = (data?.data?.courses ?? [])
+        .filter((c: TrackableCollection) => c.completionPercentage < 100)
+        .sort((a: TrackableCollection, b: TrackableCollection) =>
+            (b.lastContentAccessTime ?? 0) - (a.lastContentAccessTime ?? 0)
+        )[0];
+
+    const { data: collectionData } = useCollection(lastAccessedCourse?.collectionId);
+
+    if (isLoading || !lastAccessedCourse) return null;
+
+    // Determine the content ID to navigate to
+    const contentId = lastAccessedCourse?.lastReadContentId
+        ?? getFirstLeafContentIdFromHierarchy(collectionData?.hierarchyRoot ?? null);
+
+    if (!contentId) return null;
+
+    const continueTo = `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
+
+    const thumbnail = lastAccessedCourse.content?.posterImage || lastAccessedCourse.content?.appIcon || lastAccessedCourse.courseLogoUrl;
+    const title = lastAccessedCourse.courseName || lastAccessedCourse.content?.name || "Untitled Course";
+
+    return (
+        <div className="home-continue-section">
+            <h3 className="home-continue-section-title">{t('homeComponents.continueLearning')}</h3>
+            <div className="home-continue-grid">
+                <div className="w-full lg:w-[65%]">
+                    <div className="home-continue-learning-card">
+                        <div className="home-continue-learning-inner">
+                            {/* Thumbnail */}
+                            <div className="home-continue-learning-thumbnail">
+                                <img
+                                    src={thumbnail || getPlaceholderImage(lastAccessedCourse.collectionId)}
+                                    alt={title}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+
+                            {/* Content */}
+                            <div className="home-continue-learning-content">
+                                <div>
+                                    <h4 className="home-continue-learning-title">
+                                        {title}
+                                    </h4>
+                                </div>
+                                {/* Progress */}
+                                <div className="home-continue-learning-progress">
+                                    <CircularProgress progress={lastAccessedCourse.completionPercentage} />
+                                    <span className="home-continue-learning-progress-label">
+                                        {t("courseDetails.contentStatusCompleted")} : {lastAccessedCourse.completionPercentage}%
+                                    </span>
+                                </div>
+
+                                {/* CTA Button */}
+                                <div className="home-continue-learning-cta">
+                                    <Button
+                                        onClick={() => navigate(continueTo, { state: { from: '/home' } })}
+                                        className="home-continue-learning-btn group"
+                                    >
+                                        {t("homeComponents.continueLearning")}
+                                        <FiArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default HomeContinueLearning;

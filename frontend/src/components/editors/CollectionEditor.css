@@ -1,0 +1,58 @@
+.collection-editor-loader-wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 1000 !important;
+  background: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.collection-editor-loader-wrapper .flex {
+  height: auto !important;
+}
+
+/* Prevent global .content-player-wrapper styles from breaking the
+   third-party collection editor's internal player elements. */
+#collection-editor-wrapper .content-player-wrapper {
+  overflow: visible !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#collection-editor-wrapper .content-player-embed,
+#collection-editor-wrapper iframe.content-player-embed {
+  height: 100% !important;
+}
+
+/* Video player: override the global height:auto rules so the player
+   has concrete dimensions inside the collection editor. */
+#collection-editor-wrapper div.content-player-embed {
+  min-height: 41.3125rem !important;
+}
+
+#collection-editor-wrapper [data-video-player-wrapper] {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#collection-editor-wrapper sunbird-video-player {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#collection-editor-wrapper sunbird-video-player video-player {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#collection-editor-wrapper .sunbird-video-player-container {
+  height: 100% !important;
+}

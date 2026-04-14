@@ -1,0 +1,160 @@
+/* ── Shared layout ──────────────────────────────────────────── */
+.landing-section-padding {
+    @apply pt-[1.875rem] pb-[1.875rem];
+}
+
+.landing-section-inner {
+    @apply w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem];
+}
+
+/* Used when Dynamic sections are rendered inside the home page layout.
+   The layout provides base horizontal padding; this adds extra right padding. */
+.home-discover-inner {
+    @apply w-full pr-[2.5rem];
+}
+
+/* Inner wrapper for the full-bleed resource section on the home page */
+.home-discover-resource-inner {
+    @apply w-full px-4 lg:pr-[7.9375rem] lg:pl-[2rem] pr-[2.5rem];
+}
+
+/* ── DynamicResourceSection ─────────────────────────────────── */
+.resource-section {
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light;
+}
+
+/* Full-bleed variant: overrides home-content-wrapper's horizontal padding */
+.resource-section-home {
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light;
+    margin-left: calc(-1 * var(--hcw-pl, 1rem));
+    margin-right: calc(-1 * var(--hcw-pr, 1rem));
+}
+
+.resource-section-skeleton {
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light animate-pulse;
+}
+
+.resource-section-skeleton-home {
+    @apply pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light animate-pulse;
+    margin-left: calc(-1 * var(--hcw-pl, 1rem));
+    margin-right: calc(-1 * var(--hcw-pr, 1rem));
+}
+
+.resource-section-skeleton-title {
+    @apply h-6 w-48 bg-gray-200 mx-auto mb-4 rounded;
+}
+
+.resource-section-skeleton-subtitle {
+    @apply h-8 w-96 bg-gray-300 mx-auto mb-8 rounded;
+}
+
+.resource-section-skeleton-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+}
+
+.resource-section-skeleton-card {
+    @apply h-[48rem] bg-gray-100 rounded-[1.25rem];
+}
+
+.resource-section-label-row {
+    @apply flex items-center justify-center gap-4 mb-[1rem];
+}
+
+.resource-section-label-line {
+    height: 0;
+    border: 0.0625rem solid hsl(var(--foreground));
+    width: 13.5rem;
+}
+
+.resource-section-label {
+    @apply font-rubik font-normal text-sunbird-charcoal whitespace-nowrap text-center;
+    font-size: 1.25rem;
+    line-height: 2.875rem;
+    letter-spacing: 0%;
+}
+
+.resource-section-title {
+    @apply font-rubik font-medium text-[2.875rem] leading-[2.875rem] tracking-normal text-sunbird-charcoal text-center mb-[1.25rem];
+}
+
+.resource-section-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+}
+
+.resource-section-column {
+    @apply flex flex-col gap-2;
+}
+
+/* ── DynamicCategorySection ─────────────────────────────────── */
+.category-section {
+    @apply pt-[3rem] pb-8 bg-white;
+}
+
+.category-section-header {
+    @apply mb-8;
+}
+
+.category-section-title {
+    @apply font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground;
+}
+
+.category-section-cards-row {
+    @apply flex items-center gap-6 pb-[1.875rem] flex-wrap justify-center lg:justify-between;
+}
+
+.category-section-cards-group {
+    @apply flex items-center gap-4 flex-wrap justify-center lg:flex-nowrap;
+}
+
+.category-card {
+    @apply flex flex-col justify-between transition-transform hover:scale-[1.02] p-7 w-[14rem] h-[12.125rem] rounded-[1.25rem];
+}
+
+.category-card-bar {
+    @apply w-9 h-[0.1875rem] bg-white/90 rounded-full;
+}
+
+.category-card-body {
+    @apply flex flex-col gap-3;
+}
+
+.category-card-title {
+    @apply text-[1.0625rem] font-bold text-white leading-tight;
+}
+
+.category-view-all-link {
+    @apply flex flex-col items-center justify-center gap-3;
+}
+
+.category-view-all-circle {
+    @apply rounded-full text-white flex items-center justify-center transition-transform hover:scale-105 w-[3.6875rem] h-[3.6875rem] bg-sunbird-brick;
+}
+
+.category-view-all-icon {
+    @apply w-6 h-6;
+}
+
+.category-view-all-label {
+    @apply text-[0.875rem] font-bold text-foreground;
+}
+
+/* ── DynamicContentSection ──────────────────────────────────── */
+.content-section {
+    @apply pt-1 pb-8 bg-white;
+}
+
+.content-section-home {
+    @apply pb-8 bg-white;
+}
+
+.content-section-skeleton-title {
+    @apply h-8 w-64 bg-gray-200 animate-pulse mb-6 rounded;
+}
+
+.content-section-skeleton-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5;
+}
+
+.content-section-skeleton-card {
+    @apply h-64 bg-gray-100 animate-pulse rounded-[1.25rem];
+}

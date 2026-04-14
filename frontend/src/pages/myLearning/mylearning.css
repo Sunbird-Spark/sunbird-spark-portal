@@ -1,0 +1,56 @@
+/* Shared Page Layout Styles */
+
+.page-container {
+    @apply min-h-screen bg-sunbird-gray-f3 flex flex-col;
+}
+
+.page-main-content {
+    @apply flex-1 bg-sunbird-gray-f3 relative;
+}
+
+.page-content-wrapper {
+    @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+}
+
+/* My Learning Component Refinements */
+.mylearning-progress-bar-container {
+    @apply w-full h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden mb-2;
+}
+
+.mylearning-progress-bar-fill {
+    @apply h-full bg-sunbird-brick transition-all duration-500;
+}
+
+.mylearning-tab-active {
+    @apply bg-sunbird-brick text-white shadow-sm;
+}
+
+.mylearning-tab-inactive {
+    @apply bg-white border border-gray-300 text-sunbird-obsidian hover:border-sunbird-brick hover:text-sunbird-brick transition-colors;
+}
+
+/* Upcoming Batches Colors */
+.mylearning-batch-bg-light {
+    @apply bg-sunbird-orange-light;
+}
+
+.mylearning-batch-bg-alt {
+    @apply bg-sunbird-gray-f3;
+}
+
+/* Donut Chart Styles */
+.mylearning-donut-container {
+    @apply bg-sunbird-status-ongoing-bg rounded-2xl p-6;
+}
+
+.mylearning-donut-ring-bg {
+    stroke: hsl(var(--sunbird-white));
+}
+
+.mylearning-donut-ring-outer {
+    stroke: hsl(var(--sunbird-ginger));
+}
+
+.mylearning-donut-ring-inner {
+    stroke: hsl(var(--sunbird-brown-dark));
+}

@@ -1,0 +1,3 @@
+/* Anonymous Home Page (Index) specific card styles */
+/* On the landing page, all cards use the default height (22.5rem) */
+/* Resource center cards in ResourceCenter.tsx can override with custom heights via heightClass prop */

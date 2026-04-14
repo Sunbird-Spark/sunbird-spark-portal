@@ -1,0 +1,53 @@
+import { useCallback, useEffect, useState } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { useAppI18n } from '@/hooks/useAppI18n';
+import AppRoutes from './AppRoutes';
+import PageLoader from '@/components/common/PageLoader';
+import { Toaster } from '@/components/common/Toaster';
+import { portalInitializer } from './utils/portalInitializer';
+import { TncCheckWrapper } from '@/components/termsAndCondition/TncCheckWrapper';
+import { createQueryClient } from './queryClient';
+
+const queryClient = createQueryClient();
+
+export default function App() {
+  const { t } = useAppI18n();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const initPortal = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await portalInitializer(queryClient);
+    } catch (err) {
+      console.error('Portal initialization failed:', err);
+      setError(err instanceof Error ? err.message : 'Portal initialization failed');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    initPortal();
+  }, [initPortal]);
+
+  if (isLoading) {
+    return <PageLoader message={t("loading")} fullPage={true} />;
+  }
+
+  if (error) {
+    return <PageLoader error={error} onRetry={initPortal} fullPage={true} />;
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TncCheckWrapper />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+      <Toaster />
+    </QueryClientProvider>
+  );
+}

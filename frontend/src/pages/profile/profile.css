@@ -1,0 +1,462 @@
+/* Profile Container */
+.profile-container {
+    @apply min-h-screen bg-sunbird-gray-f3 flex flex-col;
+}
+
+.profile-main-content {
+    @apply flex-1 min-w-0 bg-sunbird-gray-f3 relative overflow-x-hidden;
+}
+
+.profile-content-wrapper {
+    @apply p-4 w-full md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+}
+
+/* Profile Header */
+.profile-header {
+    @apply bg-white border-b border-gray-100 px-4 py-3 md:px-6 md:py-4 z-30 sticky top-0 lg:pr-[6.25rem];
+    box-shadow: var(--sunbird-shadow-md);
+}
+
+.profile-header.mobile {
+    @apply z-20;
+    box-shadow: var(--sunbird-shadow-sm);
+}
+
+.profile-header-container {
+    @apply flex items-center justify-between;
+}
+
+.profile-logo-container {
+    @apply flex items-center gap-4;
+}
+
+.sidebar-toggle-btn {
+    @apply text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1;
+}
+
+.profile-header-actions {
+    @apply flex items-center gap-4;
+}
+
+.profile-search-container {
+    @apply relative w-[25rem] cursor-pointer;
+}
+
+.profile-search-btn-mobile {
+    @apply p-2 text-sunbird-brick;
+}
+
+.profile-action-btn {
+    @apply p-2 hover:bg-gray-100 rounded-lg transition-colors;
+}
+
+.profile-action-icon {
+    @apply w-5 h-5 text-sunbird-brick;
+}
+
+.profile-lang-btn {
+    @apply flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors;
+}
+
+/* Notification Popover */
+.notification-badge {
+    @apply absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white;
+}
+
+body .notification-popover-content {
+    @apply z-50 p-0 rounded-md shadow-md outline-none;
+    width: 28rem;
+    background: hsl(var(--sunbird-gray-f1));
+    border: 0.09375rem solid hsl(var(--sunbird-gray-d9));
+    padding: 1.5rem;
+    position: fixed;
+    top: 1.2rem;
+    right: -10rem;
+    margin: 0 0.5rem;
+}
+
+@media (max-width: 63.9375rem) {
+    body .notification-popover-content {
+        width: 19.5rem;
+        padding: 0.75rem;
+        position: fixed;
+        top: 1.2rem;
+        right: 1rem;
+    }
+
+    body .notification-popover-header {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+@media (max-width: 48rem) {
+    body .notification-popover-content {
+        width: 19rem;
+        padding: 1rem;
+        position: fixed;
+        top: 1.2rem;
+        right: 1rem;
+    }
+
+    body .notification-popover-header {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+@media (max-width: 26.5625rem) {
+    body .notification-popover-content {
+        width: 18.5rem;
+        padding: 1rem;
+        position: fixed;
+        top: 1.2rem;
+        right: 0.5rem;
+    }
+}
+
+.notification-popover-content[data-state=open] {
+    @apply animate-in fade-in-0 zoom-in-95;
+}
+
+.notification-popover-content[data-state=closed] {
+    @apply animate-out fade-out-0 zoom-out-95;
+}
+
+.notification-popover-content[data-side=bottom] {
+    @apply slide-in-from-top-2;
+}
+
+.notification-popover-content[data-side=left] {
+    @apply slide-in-from-right-2;
+}
+
+.notification-popover-content[data-side=right] {
+    @apply slide-in-from-left-2;
+}
+
+.notification-popover-content[data-side=top] {
+    @apply slide-in-from-bottom-2;
+}
+
+body .notification-popover-arrow {
+    fill: hsl(var(--sunbird-gray-f1));
+    position: absolute;
+    right: 3.25rem;
+}
+
+.notification-popover-arrow polygon {
+    stroke: hsl(var(--sunbird-gray-d9));
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    /*
+     * Radix Arrow: viewBox="0 0 30 10", polygon="0,0 30,0 15,10"
+     * For side="bottom" the SVG is rotated 180deg, so:
+     *   Edge 1  0,0→30,0  (length 30)  = visual base   → no stroke
+     *   Edge 2  30,0→15,10 (≈18.03)   = right side     → stroke
+     *   Edge 3  15,10→0,0  (≈18.03)   = left side      → stroke
+     * stroke-dashoffset: 36.06 shifts the gap to land on edge 1 (base).
+     */
+    stroke-dasharray: 36.06 30;
+    stroke-dashoffset: 36.06;
+}
+
+.notification-popover-header {
+    @apply flex items-center justify-between px-4 py-3 border-gray-100;
+}
+
+.notification-popover-title {
+    @apply text-base font-semibold text-[hsl(var(--sunbird-obsidian))];
+}
+
+.notification-delete-all-btn {
+    @apply text-sm text-sunbird-brick;
+    font-size: 12px;
+}
+
+.notification-list {
+    max-height: min(400px, 60vh);
+    overflow-y: auto;
+}
+
+.notification-empty {
+    @apply px-4 py-8 text-center text-sm text-gray-400;
+}
+
+.notification-group-label-wrapper {
+    @apply px-4 pt-3 pb-1 flex items-center justify-between;
+}
+
+.notification-group-label {
+    @apply text-xs text-muted-foreground font-medium;
+}
+
+.notification-item {
+    @apply flex items-start gap-3 px-4 py-4 transition-colors mx-4 mb-3 relative;
+    background: hsl(var(--sunbird-white));
+    border: 1px solid transparent;
+    box-shadow: var(--sunbird-shadow-md);
+    border-radius: 14px;
+}
+
+.notification-item--unread {
+    border: 1px solid hsl(var(--sunbird-ginger));
+}
+
+.notification-item-body {
+    @apply flex-1 min-w-0;
+}
+
+.notification-item-message {
+    @apply text-sm font-medium text-[hsl(var(--sunbird-obsidian))] leading-snug;
+}
+
+.notification-item-timestamp {
+    @apply text-xs text-gray-400 mt-0.5 mb-0;
+}
+
+.notification-item-delete-btn {
+    @apply text-sunbird-brick hover:text-sunbird-brick/80 shrink-0 self-center;
+}
+
+/* Stats Cards Grid */
+.profile-stats-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
+}
+
+.stat-card {
+    @apply rounded-[1.25rem] p-5 pl-[1.875rem] text-white relative h-[9.0625rem] flex flex-col justify-end;
+    box-shadow: var(--sunbird-shadow-lg);
+}
+
+.stat-card-time-spent {
+    @apply bg-sunbird-blue-light;
+}
+
+.stat-card-time-spent .stat-icon-container {
+    @apply bg-sunbird-blue-medium;
+}
+
+.stat-card-badges {
+    @apply bg-sunbird-ginger;
+}
+
+.stat-card-badges .stat-icon-container {
+    @apply bg-sunbird-brown-dark;
+}
+
+.stat-card-completed {
+    @apply bg-sunbird-moss;
+}
+
+.stat-card-completed .stat-icon-container {
+    @apply bg-sunbird-green-dark;
+}
+
+.stat-card-certs {
+    @apply bg-sunbird-lavender;
+}
+
+.stat-card-certs .stat-icon-container {
+    @apply bg-sunbird-purple-dark;
+}
+
+.stat-icon-container {
+    @apply absolute top-4 right-4 w-[2.875rem] h-[2.875rem] flex items-center justify-center rounded-[0.5rem];
+}
+
+.stat-value {
+    @apply font-rubik font-semibold text-[2.5rem] leading-[2.375rem] mb-1;
+    letter-spacing: 0%;
+}
+
+.stat-label {
+    @apply text-sm text-white/90 whitespace-pre-line leading-tight;
+}
+
+/* Profile Card */
+.profile-card {
+    @apply bg-white rounded-[1.25rem] p-4 flex flex-col items-center;
+}
+
+.profile-avatar-wrapper {
+    @apply relative mb-8;
+}
+
+.profile-avatar-ring {
+    @apply w-[9rem] h-[9rem] rounded-full border-4 border-sunbird-ginger p-0.5 flex items-center justify-center overflow-hidden;
+}
+
+.profile-update-photo-btn {
+    @apply font-rubik font-medium text-[0.875rem] leading-[0.875rem] text-sunbird-brick hover:text-sunbird-brick/90 mb-4 transition-colors text-center w-full;
+    letter-spacing: 0%;
+}
+
+.profile-name {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-foreground mb-1 text-center w-full;
+    letter-spacing: 0%;
+}
+
+.profile-id-text {
+    @apply font-rubik font-normal text-[0.875rem] leading-[1.25rem] text-muted-foreground text-center w-full;
+    letter-spacing: 0%;
+}
+
+/* Personal Information */
+.personal-info-card {
+    @apply bg-white rounded-[1.25rem] p-4;
+}
+
+.personal-info-header {
+    @apply flex items-center justify-between mb-6 relative;
+}
+
+.personal-info-title-wrapper {
+    @apply flex items-center;
+}
+
+.personal-info-accent {
+    @apply absolute -left-4 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-ginger hidden md:block;
+}
+
+.personal-info-title {
+    @apply font-rubik font-medium text-[1.5rem] leading-[1.25rem] text-foreground ml-0 md:ml-2;
+    letter-spacing: 0%;
+}
+
+.personal-info-edit-btn {
+    @apply flex items-center gap-1 text-base font-medium text-sunbird-brick hover:text-sunbird-brick/90 transition-colors;
+}
+
+.personal-info-grid {
+    @apply grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-5;
+}
+
+.personal-info-field {
+    @apply flex flex-col;
+}
+
+.personal-info-label {
+    @apply block font-rubik font-normal text-[0.875rem] leading-[1.25rem] text-sunbird-gray-75 mb-2;
+    letter-spacing: 0%;
+}
+
+.personal-info-value-container {
+    @apply border border-border rounded-[10px] px-4 py-2.5 h-10 flex items-center;
+}
+
+.personal-info-value {
+    @apply font-rubik font-medium text-[1rem] leading-[1.25rem] text-foreground;
+    letter-spacing: 0%;
+}
+
+/* Learning List Extra Styles */
+.learning-list-card {
+    @apply bg-white rounded-[1.25rem] p-6;
+}
+
+.learning-header {
+    @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-6 relative;
+}
+
+.learning-title-wrapper {
+    @apply flex items-center;
+}
+
+.learning-title-accent {
+    @apply absolute -left-6 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-ginger;
+}
+
+.learning-title {
+    @apply text-[1.375rem] font-medium text-foreground ml-2;
+}
+
+.learning-filter-container {
+    @apply flex items-center gap-2 pr-2;
+}
+
+.learning-filter-label {
+    @apply text-sm font-medium text-foreground;
+}
+
+
+
+.learning-list-container {
+    @apply space-y-3;
+}
+
+.learning-view-more-container {
+    @apply text-center mt-6;
+}
+
+.learning-view-more-link {
+    @apply text-sm font-medium text-sunbird-brick hover:opacity-80 transition-opacity;
+}
+
+/* Dropdown Styles */
+.profile-dropdown-content {
+    @apply bg-white p-2 border border-sunbird-gray-d0 rounded-xl shadow-xl;
+}
+
+.profile-dropdown-item {
+    @apply flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-sunbird-gray-f3 transition-colors;
+}
+
+.profile-dropdown-item.active {
+    @apply text-sunbird-brick font-medium bg-sunbird-gray-f3;
+}
+
+.profile-dropdown-item.logout {
+    @apply text-destructive hover:bg-destructive/10;
+}
+
+.profile-dropdown-icon-wrapper {
+    @apply w-8 h-8 rounded-full flex items-center justify-center;
+}
+
+.profile-dropdown-icon-wrapper.primary {
+    @apply bg-sunbird-brick/10 text-sunbird-brick;
+}
+
+.profile-dropdown-icon-wrapper.danger {
+    @apply bg-destructive/10 text-destructive;
+}
+
+.profile-dropdown-indicator {
+    @apply w-1.5 h-1.5 rounded-full bg-sunbird-brick;
+}
+
+/* Custom list items for ProfileLearningList */
+.profile-learning-item {
+    @apply flex flex-col xl:flex-row items-stretch xl:items-center p-4 md:p-5 bg-white border border-gray-100 rounded-[1.25rem] shadow-sm gap-4 xl:gap-0 xl:justify-start;
+}
+
+.profile-learning-info {
+    @apply flex items-center gap-4 xl:w-[48%] xl:flex-none min-w-0;
+}
+
+.profile-learning-details {
+    @apply flex-1 min-w-0;
+}
+
+.profile-learning-title {
+    @apply text-[0.9375rem] md:text-[1.0625rem] font-medium text-foreground leading-snug mb-1 whitespace-pre-line;
+}
+
+.profile-learning-meta {
+    @apply font-rubik font-normal text-[0.75rem] md:text-[0.875rem] text-sunbird-gray-75;
+}
+
+.profile-learning-stats-badge-row {
+    @apply flex items-center justify-between xl:contents;
+}
+
+.profile-learning-stats {
+    @apply flex items-center gap-2 xl:w-24 justify-start shrink-0;
+}
+
+.profile-learning-actions {
+    @apply flex items-center justify-start xl:justify-end gap-2 xl:w-48 xl:flex-none;
+}
+
+.profile-learning-status {
+    @apply flex justify-start xl:flex-1 xl:justify-center;
+}

@@ -1,0 +1,52 @@
+// Handles two URL-redirect side effects for CollectionDetailPage:
+// 1. Redirects unenrolled users to their batch URL when no batch is in the route.
+// 2. Auto-navigates to the first leaf content item when no contentId is in the URL.
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierarchyTree";
+
+interface UseCollectionAutoNavigateProps {
+  collectionId: string | undefined;
+  contentId: string | undefined;
+  collectionData: any;
+  hasBatchInRoute: boolean;
+  batchIdParam: string | undefined;
+  isTrackable: boolean;
+  contentCreatorPrivilege: boolean;
+  enrollment: any;
+}
+
+export const useCollectionAutoNavigate = ({
+  collectionId,
+  contentId,
+  collectionData,
+  hasBatchInRoute,
+  batchIdParam,
+  isTrackable,
+  contentCreatorPrivilege,
+  enrollment,
+}: UseCollectionAutoNavigateProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  // Redirect to batch if needed
+  useEffect(() => {
+    if (!collectionId || hasBatchInRoute || contentCreatorPrivilege) return;
+    const batchId = enrollment.enrollmentForCollection?.batchId;
+    if (batchId) navigate(`/collection/${collectionId}/batch/${batchId}`, { replace: true, state: location.state });
+  }, [collectionId, hasBatchInRoute, contentCreatorPrivilege, enrollment.enrollmentForCollection?.batchId, navigate, location.state]);
+
+  // Auto-navigate to first content when collection loads without a selected contentId
+  useEffect(() => {
+    if (!collectionData?.hierarchyRoot || contentId) return;
+    const firstContentId = getFirstLeafContentIdFromHierarchy(collectionData.hierarchyRoot);
+    if (!firstContentId) return;
+    if (!isTrackable || contentCreatorPrivilege) {
+      navigate(`/collection/${collectionId}/content/${firstContentId}`, { replace: true });
+      return;
+    }
+    if (hasBatchInRoute && batchIdParam) {
+      navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${firstContentId}`, { replace: true });
+    }
+  }, [contentId, collectionData?.hierarchyRoot, collectionId, navigate, isTrackable, contentCreatorPrivilege, hasBatchInRoute, batchIdParam]);
+
+};

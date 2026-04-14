@@ -1,0 +1,21 @@
+/* Workspace Container - same pattern as profile */
+.workspace-container {
+  @apply min-h-screen bg-sunbird-gray-f3 flex flex-col;
+}
+
+.workspace-main-content {
+  @apply flex-1 overflow-y-auto bg-sunbird-gray-f3 relative;
+}
+
+.workspace-content-wrapper {
+  @apply p-4 md:p-6 lg:p-8 transition-all lg:pr-[6.25rem] lg:pl-[1.625rem];
+}
+
+/* Scrollbar utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

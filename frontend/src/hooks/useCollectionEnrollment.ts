@@ -1,0 +1,206 @@
+import { useMemo } from 'react';
+import dayjs from 'dayjs';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useBatchListForLearner, useBatchListForMentor, useBatchRead, useContentState, useEnrol } from './useBatch';
+import { useIsMentor } from './useUser';
+import { useUserEnrolledCollections } from './useUserEnrolledCollections';
+import { useAppI18n } from './useAppI18n';
+import { useToast } from './useToast';
+import { useTelemetry } from './useTelemetry';
+import {
+  getEnrollmentForCollection,
+  getLeafContentIds,
+  getContentStatusMap,
+  getContentAttemptInfoMap,
+  getCourseProgressProps,
+  getFirstCertPreviewUrl,
+  getEnrollableBatches,
+} from '../services/collection/enrollmentMapper';
+import { useUserId } from './useAuthInfo';
+import type { CollectionData } from '../types/collectionTypes';
+
+export function useCollectionEnrollment(
+  collectionId: string | undefined,
+  batchIdParam: string | undefined,
+  collectionData: CollectionData | null,
+  isAuthenticated: boolean,
+) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
+  const { t } = useAppI18n();
+  const { toast } = useToast();
+  const userId = useUserId();
+  const telemetry = useTelemetry();
+  const { data: enrollmentsResponse, refetch: refetchEnrollments } = useUserEnrolledCollections({
+    enabled: isAuthenticated,
+  });
+
+  const isMentorRole = useIsMentor();
+  const isTrackableForBatch = (collectionData?.trackable?.enabled?.toLowerCase() ?? '') === 'yes';
+
+  const { data: mentorBatches } = useBatchListForMentor(collectionId, {
+    enabled: isAuthenticated && isTrackableForBatch && isMentorRole,
+  });
+
+  const enrollmentForCollection = useMemo(
+    () => getEnrollmentForCollection(enrollmentsResponse?.data?.courses, collectionId),
+    [collectionId, enrollmentsResponse?.data?.courses],
+  );
+
+  const isMentorOfCurrentBatch = useMemo(
+    () => !!batchIdParam && (mentorBatches?.some((b) => b.id === batchIdParam) ?? false),
+    [batchIdParam, mentorBatches],
+  );
+
+  const hasBatchInRoute = !!batchIdParam;
+  const isEnrolledInCurrentBatch =
+    (!!enrollmentForCollection &&
+      (!hasBatchInRoute || enrollmentForCollection.batchId === batchIdParam)) ||
+    isMentorOfCurrentBatch;
+
+  const effectiveBatchId =
+    batchIdParam ?? enrollmentForCollection?.batchId ?? mentorBatches?.[0]?.id;
+
+  const isMentorOfAnyBatchInCourse = (mentorBatches?.length ?? 0) > 0;
+
+
+  const leafContentIds = useMemo(() => getLeafContentIds(collectionData), [collectionData]);
+  const contentStateRequest = useMemo(() => {
+    if (!collectionId || !effectiveBatchId || leafContentIds.length === 0) return null;
+    if (!userId) return null;
+    return {
+      userId,
+      courseId: collectionId,
+      batchId: effectiveBatchId,
+      contentIds: leafContentIds,
+      fields: ['progress', 'score', 'status'],
+    };
+  }, [collectionId, effectiveBatchId, leafContentIds, userId]);
+
+  const { data: contentStateResponse, isFetched: contentStateFetched } = useContentState(contentStateRequest, {
+    enabled: isEnrolledInCurrentBatch && contentStateRequest !== null,
+  });
+  const contentList = contentStateResponse?.data?.contentList ?? [];
+  const contentStatusMap = useMemo(() => getContentStatusMap(contentList), [contentList]);
+  const contentAttemptInfoMap = useMemo(() => getContentAttemptInfoMap(contentList), [contentList]);
+  const completedFromState = contentList.filter((c) => c.status === 2).length;
+  const stateIsAuthoritative = contentStateResponse !== undefined;
+  const totalFromState = stateIsAuthoritative ? leafContentIds.length : 0;
+
+  const courseProgressProps = useMemo(
+    () =>
+      getCourseProgressProps(
+        enrollmentForCollection,
+        collectionData,
+        totalFromState,
+        completedFromState,
+      ),
+    [enrollmentForCollection, collectionData, totalFromState, completedFromState],
+  );
+
+  const {
+    data: batchListResponse,
+    isLoading: batchListLoading,
+    error: batchListError,
+  } = useBatchListForLearner(collectionId, {
+    enabled: isAuthenticated && isTrackableForBatch && !enrollmentForCollection,
+  });
+  const rawContent = batchListResponse?.data?.response?.content ?? [];
+  const batches = useMemo(
+    () => getEnrollableBatches(rawContent, new Date()),
+    [rawContent],
+  );
+
+  const { data: batchReadResponse } = useBatchRead(
+    isEnrolledInCurrentBatch ? effectiveBatchId : undefined,
+    { enabled: isEnrolledInCurrentBatch && !!effectiveBatchId },
+  );
+  const batchEnrollmentType = batchReadResponse?.data?.response?.enrollmentType;
+  const firstCertPreviewUrl = useMemo(
+    () => getFirstCertPreviewUrl(batchReadResponse?.data?.response?.cert_templates),
+    [batchReadResponse?.data?.response?.cert_templates],
+  );
+  const hasCertificate = !!firstCertPreviewUrl;
+
+  const batchEndDateFromRead = batchReadResponse?.data?.response?.endDate;
+
+  const isBatchEnded = useMemo(() => {
+    if (!batchEndDateFromRead) return false;
+    const endMs = new Date(batchEndDateFromRead).getTime();
+    return Number.isFinite(endMs) && endMs < Date.now();
+  }, [batchEndDateFromRead]);
+
+  const isBatchExpiringSoon = useMemo(() => {
+    if (!batchEndDateFromRead || isBatchEnded) return false;
+    const daysLeft = dayjs(batchEndDateFromRead).startOf('day').diff(dayjs().startOf('day'), 'day');
+    return daysLeft >= 0 && daysLeft <= 2;
+  }, [batchEndDateFromRead, isBatchEnded]);
+
+  const isBatchUpcoming = useMemo(() => {
+    const startDateStr = batchReadResponse?.data?.response?.startDate;
+    if (!startDateStr) {
+      return false;
+    }
+    return dayjs(startDateStr).isAfter(dayjs(), 'day');
+  }, [batchReadResponse?.data?.response?.startDate]);
+
+  const batchStartDateFromRead = batchReadResponse?.data?.response?.startDate;
+
+  const { mutateAsync: enrol, isPending: joinLoading, error: joinErrorMutation, reset: resetEnrol } = useEnrol();
+  const handleJoinCourse = async (selectedBatchId: string) => {
+    if (!collectionId || !selectedBatchId) return;
+    if (!userId) return;
+    resetEnrol();
+    try {
+      await enrol({ courseId: collectionId, userId: userId, batchId: selectedBatchId });
+      await queryClient.invalidateQueries({ queryKey: ['userEnrollments'] });
+      refetchEnrollments();
+      toast({
+        title: t('success'),
+        description: t('courseDetails.enrolSuccess'),
+        variant: 'success',
+      });
+      telemetry.audit({
+        edata: {
+          props: ['enrollment'],
+          prevstate: 'NotEnrolled',
+          state: 'Enrolled',
+        },
+        object: { id: collectionId, type: 'Collection' },
+      });
+      navigate(`/collection/${collectionId}/batch/${selectedBatchId}`, { state: location.state });
+    } catch {
+      // Error is exposed via joinErrorMutation
+    }
+  };
+  const joinError = joinErrorMutation?.message ?? '';
+
+  return {
+    enrollmentForCollection,
+    isEnrolledInCurrentBatch,
+    effectiveBatchId,
+    isBatchEnded,
+    isBatchExpiringSoon,
+    batchEndDateFromRead,
+    isBatchUpcoming,
+    contentStatusMap,
+    contentStateFetched: contentStateFetched,
+    contentAttemptInfoMap,
+    courseProgressProps,
+    batches,
+    batchListLoading,
+    batchListError: batchListError?.message,
+    firstCertPreviewUrl,
+    hasCertificate,
+    joinLoading,
+    joinError,
+    handleJoinCourse,
+    batchEnrollmentType,
+    batchStartDateFromRead,
+    isMentorOfAnyBatchInCourse,
+    isMentorOfCurrentBatch,
+    mentorBatches,
+  };
+}

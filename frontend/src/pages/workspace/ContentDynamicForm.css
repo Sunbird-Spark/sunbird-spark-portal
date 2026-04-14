@@ -1,0 +1,123 @@
+/* Content Dynamic Form Dialog Styles */
+.content-form-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid hsl(var(--primary-foreground) / 0.3);
+  border-top-color: hsl(var(--primary-foreground));
+  border-radius: 9999px;
+  animation: spin 1s linear infinite;
+}
+
+/* Loading Text */
+.loading-text {
+  font-size: 0.875rem;
+  color: white;
+  font-family: var(--app-font-family);
+}
+
+.content-form-container {
+  background-color: white;
+  border-radius: 1rem;
+  max-width: 56rem;
+  width: 100%;
+  padding: 1.5rem;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.content-form-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  font-family: var(--app-font-family);
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.content-form-subtitle {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1rem;
+  font-family: var(--app-font-family);
+}
+
+.content-form-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  gap: 0.75rem;
+}
+
+.content-form-error-text {
+  font-size: 0.875rem;
+  color: hsl(var(--destructive));
+  font-family: var(--app-font-family);
+}
+
+.content-form-fields {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.content-field-col-twelve {
+  grid-column: span 12;
+}
+
+.content-field-col-six {
+  grid-column: span 6;
+}
+
+.content-field-col-four {
+  grid-column: span 4;
+}
+
+.content-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Spin Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

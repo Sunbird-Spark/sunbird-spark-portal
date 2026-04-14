@@ -1,0 +1,272 @@
+import { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { ContentService } from '@/services/ContentService';
+import { mapContentToWorkspaceItem } from '@/services/workspace';
+import type {
+  WorkspaceView,
+  SortOption,
+  ContentTypeFilter,
+  WorkspaceCounts,
+  WorkspaceItem,
+  UseWorkspaceReturn,
+  ContentSearchResponse,
+} from '@/types/workspaceTypes';
+import type { ApiResponse } from '@/lib/http-client';
+import {
+  WORKSPACE_STATUS_FILTER,
+  WORKSPACE_PRIMARY_CATEGORY_FILTER,
+  WORKSPACE_PAGE_LIMIT,
+  getStatusFilterForTab,
+  getPrimaryCategoryForTypeFilter,
+} from '@/pages/workspace/workspaceConstants';
+
+const contentService = new ContentService();
+
+/** Derive the `sort_by` object from a UI sort option. */
+function buildSortBy(sortBy: SortOption): Record<string, string> {
+  switch (sortBy) {
+    case 'updated':
+      return { lastUpdatedOn: 'desc' };
+    case 'created':
+      return { createdOn: 'desc' };
+    case 'title':
+      return { name: 'asc' };
+    default:
+      return { lastUpdatedOn: 'desc' };
+  }
+}
+
+interface UseWorkspaceOptions {
+  userId: string | null;
+  activeTab: WorkspaceView;
+  sortBy: SortOption;
+  typeFilter: ContentTypeFilter;
+  userRole?: 'creator' | 'reviewer';
+  /** Organisation channel ID — used to scope reviewer content to the same org. */
+  orgId?: string;
+  /** Search query string to filter content by name. */
+  searchQuery?: string;
+  enabled?: boolean;
+  /** When true, restrict primaryCategory to Digital Textbook only (BOOK_CREATOR without CONTENT_CREATOR). */
+  isBookCreatorOnly?: boolean;
+  /** When true, restrict primaryCategory to Digital Textbook only (BOOK_REVIEWER without CONTENT_REVIEWER). */
+  isBookReviewerOnly?: boolean;
+}
+
+/**
+ * Custom hook that provides workspace content with server-side filtering,
+ * facet-driven tab counts, and infinite-scroll pagination.
+ *
+ * Two separate queries:
+ * 1. **Counts query** — fetches facet counts across all statuses (limit=1).
+ *    In reviewer mode, uses `createdBy != userId` to exclude the reviewer's
+ *    own content directly at the API level.
+ * 2. **Content query** — `useInfiniteQuery` that fetches pages of 20 items
+ *    filtered by the active tab's status values.
+ */
+export function useWorkspace({
+  userId,
+  activeTab,
+  sortBy,
+  typeFilter,
+  userRole = 'creator',
+  orgId,
+  searchQuery = '',
+  enabled = true,
+  isBookCreatorOnly = false,
+  isBookReviewerOnly = false,
+}: UseWorkspaceOptions): UseWorkspaceReturn {
+  const queryClient = useQueryClient();
+  const isContentTab = !['create'].includes(activeTab);
+  const queryEnabled = enabled && !!userId && isContentTab;
+
+  // Whether the user is operating in reviewer mode (affects counts & content filters).
+  const isReviewerMode = userRole === 'reviewer';
+
+  // Whether this specific tab shows the current user's own content.
+  // Reviewer tabs (pending-review, my-published) show other people's content.
+  const isReviewerTab = isReviewerMode && ['pending-review', 'my-published'].includes(activeTab);
+
+  // Derive primaryCategory filter from typeFilter (shared by both counts and content queries).
+  // Book-only creators/reviewers can only see Digital Textbook content regardless of type filter.
+  const isBookRoleOnly = isBookCreatorOnly || isBookReviewerOnly;
+  const primaryCategoryFilter = isBookRoleOnly
+    ? ['Digital Textbook']
+    : getPrimaryCategoryForTypeFilter(typeFilter) ?? [...WORKSPACE_PRIMARY_CATEGORY_FILTER];
+
+  // ── Counts query (per role + typeFilter, shared across tabs) ───────────
+  // Both modes use facets (limit=1) for lightweight counting.
+  // Creator mode: scoped to the user's own content.
+  // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
+  // typeFilter is included so tab badges and stats update when a type is selected.
+  const countsQuery = useQuery({
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery],
+    queryFn: () =>
+      contentService.contentSearch({
+        filters: {
+          createdBy: isReviewerMode ? { '!=': userId ?? '' } : (userId ?? ''),
+          ...(isReviewerMode && orgId ? { createdFor: [orgId] } : {}),
+          status: [...WORKSPACE_STATUS_FILTER],
+          primaryCategory: primaryCategoryFilter,
+        },
+        query: searchQuery,
+        facets: ['status'],
+        limit: 1,
+        offset: 0,
+      }),
+    enabled: queryEnabled,
+    staleTime: 0,
+  });
+
+  const counts: WorkspaceCounts = useMemo(() => {
+    const facets = countsQuery.data?.data?.facets;
+    const statusFacet = facets?.find((f) => f.name === 'status');
+    const getFacetCount = (name: string) =>
+      statusFacet?.values.find((v) => v.name === name)?.count ?? 0;
+
+    const drafts = isReviewerMode ? 0 : getFacetCount('draft') + getFacetCount('flagdraft');
+    const review = getFacetCount('review') + getFacetCount('processing') + getFacetCount('flagreview');
+    const published = getFacetCount('live') + getFacetCount('unlisted');
+    const all = isReviewerMode ? review + published : (countsQuery.data?.data?.count ?? 0);
+
+    return { all, drafts, review, published, pendingReview: review };
+  }, [countsQuery.data, isReviewerMode]);
+
+  // ── Content query (per tab, paginated) ────────────────────────────────
+  const statusFilter = getStatusFilterForTab(activeTab);
+
+  // Special filters for uploads and collaborations tabs
+  const getFiltersForTab = useCallback(() => {
+    const baseFilters: Record<string, unknown> = {
+      createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
+      ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
+      status: statusFilter,
+      primaryCategory: primaryCategoryFilter,
+    };
+
+    if (activeTab === 'uploads') {
+      return {
+        ...baseFilters,
+        createdBy: userId ?? '',
+        status: ['Draft'],
+        mimeType: [
+          'application/pdf',
+          'video/x-youtube',
+          'application/vnd.ekstep.html-archive',
+          'application/epub',
+          'application/vnd.ekstep.h5p-archive',
+          'video/mp4',
+          'video/webm',
+          'text/x-url',
+        ],
+      };
+    }
+
+    if (activeTab === 'collaborations') {
+      return {
+        status: ['Draft', 'FlagDraft', 'Review', 'Processing', 'Live', 'Unlisted', 'FlagReview'],
+        collaborators: [userId ?? ''],
+        primaryCategory: primaryCategoryFilter,
+        objectType: 'Content',
+      };
+    }
+
+    return baseFilters;
+  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, activeTab]);
+
+  const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery],
+    queryFn: ({ pageParam }) =>
+      contentService.contentSearch({
+        filters: getFiltersForTab(),
+        query: searchQuery,
+        limit: WORKSPACE_PAGE_LIMIT,
+        offset: pageParam as number,
+        sort_by: buildSortBy(sortBy),
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const totalLoaded = allPages.length * WORKSPACE_PAGE_LIMIT;
+      const total = lastPage.data?.count ?? 0;
+      return totalLoaded < total ? totalLoaded : undefined;
+    },
+    enabled: queryEnabled,
+  });
+
+  // Flatten all pages into a single items array
+  const contents: WorkspaceItem[] = useMemo(() => {
+    if (!contentQuery.data?.pages) return [];
+    return contentQuery.data.pages.flatMap((page) => {
+      const content = page.data?.content ?? [];
+      const questionSets = page.data?.QuestionSet ?? [];
+      return [...content, ...questionSets].map(mapContentToWorkspaceItem);
+    });
+  }, [contentQuery.data]);
+
+  const totalCount = contentQuery.data?.pages[0]?.data?.count ?? 0;
+
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = contentQuery;
+
+  // Track which tab the last completed fetch (initial or paginating) belongs to.
+  // This prevents stale cached data from a previous tab visit being shown
+  // while fresh data is loading — which will prevent tabs caching issue. We only show the content once the API has responded for
+  // the current tab; infinite-scroll "load more" is excluded by the
+  // isLoadingCurrentTab guard (which checks !isFetchingNextPage).
+  const lastFetchedTabRef = useRef<WorkspaceView | null>(null);
+
+  useEffect(() => {
+    if (!contentQuery.isFetching && contentQuery.isSuccess) {
+      lastFetchedTabRef.current = activeTab;
+    }
+  }, [contentQuery.isFetching, contentQuery.isSuccess, activeTab]);
+
+  // True when:
+  //   1. Initial load — no data in cache yet
+  //   2. Tab changed — a background refetch is in progress and we haven't
+  //      received a fresh response for the current tab yet (prevents stale
+  //      cached data from a different tab visit being rendered)
+  // NOT true for:
+  //   - Infinite-scroll "load more" (isFetchingNextPage guards it out)
+  //   - Same-tab background refreshes after delete/create
+  //     (lastFetchedTabRef already equals activeTab → condition is false)
+  const isLoadingCurrentTab =
+    contentQuery.isLoading ||
+    (contentQuery.isFetching && !isFetchingNextPage && lastFetchedTabRef.current !== activeTab);
+
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const refetchCounts = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] });
+    await queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' });
+  }, [queryClient, userId]);
+
+  const refetchAll = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['workspace-counts', userId] }),
+      queryClient.invalidateQueries({ queryKey: ['workspace-content', userId] }),
+    ]);
+    await Promise.all([
+      queryClient.refetchQueries({ queryKey: ['workspace-counts', userId], type: 'active' }),
+      queryClient.refetchQueries({ queryKey: ['workspace-content', userId], type: 'active' }),
+    ]);
+  }, [queryClient, userId]);
+
+  return {
+    contents,
+    counts,
+    totalCount,
+    isLoading: isLoadingCurrentTab,
+    isLoadingMore: isFetchingNextPage,
+    isCountsLoading: countsQuery.isLoading,
+    isRefreshing: contentQuery.isRefetching && !contentQuery.isLoading && !isFetchingNextPage,
+    error: contentQuery.error,
+    hasMore: !!hasNextPage,
+    loadMore,
+    refetchCounts,
+    refetchAll,
+  };
+}

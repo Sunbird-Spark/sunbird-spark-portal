@@ -1,0 +1,1321 @@
+@import './fonts.css';
+
+/* Sunbird Joyful Design System - Professional Training LMS */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --app-font-family: 'Rubik', sans-serif;
+    /* Sunbird Joyful Theme Colors */
+    --background: 48 23% 91%;
+    /* #E9E8D9 - Body background */
+    --foreground: 0 0% 13%;
+    /* #222222 - Text */
+    --surface: 0 0% 100%;
+    /* White surface */
+
+    --card: 60 24% 93%;
+    /* #F3F3E5 - Card background */
+    --card-foreground: 0 0% 20%;
+    /* #333333 */
+
+    --popover: 60 24% 93%;
+    --popover-foreground: 0 0% 20%;
+
+    --primary: 12 50% 45%;
+    /* #AC5139 - Sunbird Terracotta */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 100% 66%;
+    /* #FFD954 - Primary Yellow */
+    --secondary-foreground: 0 0% 20%;
+
+    --muted: 205 47% 95%;
+    /* #EDF4F9 - Light Blue */
+    --muted-foreground: 210 11% 45%;
+
+    --accent: 45 100% 66%;
+    /* #FFD954 - Yellow accent */
+    --accent-foreground: 0 0% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 25% 80%;
+    --input: 210 25% 85%;
+    --ring: 12 50% 45%;
+
+    --radius: 1rem;
+
+    /* Custom Sunbird colors */
+    --sunbird-primary: 12 50% 45%;
+    /* #AC5139 */
+    --sunbird-dark-blue: 207 100% 16%;
+    /* #002E50 */
+    --sunbird-yellow: 45 100% 66%;
+    /* #FFD954 */
+    --sunbird-light-blue: 205 47% 95%;
+    /* #EDF4F9 */
+    --sunbird-medium-blue: 210 40% 65%;
+    /* #80A7CE */
+
+    --sunbird-ginger: 28 57% 54%;
+    /* #cc8545 */
+    --sunbird-brick: 15 51% 44%;
+    /* #a85236 */
+    --sunbird-sunflower: 45 100% 73%;
+    /* #ffdb73 */
+    --sunbird-ivory: 55 100% 98%;
+    /* #fffef4 */
+    --sunbird-ink: 193 35% 33%;
+    /* #376673 */
+    --sunbird-wave: 158 78% 68%;
+    /* #70edbf */
+    --sunbird-leaf: 62 96% 33%;
+    /* #a1a603 */
+    --sunbird-forest: 95 26% 53%;
+    /* #82a668 */
+    --sunbird-moss: 146 26% 53%;
+    /* #66a682 */
+    --sunbird-jamun: 322 70% 19%;
+    /* #540f3b */
+    --sunbird-lavender: 322 17% 52%;
+    /* #99708a */
+    --sunbird-theme-teal: 180 31% 42%;
+    /* #4A8C8C */
+    --sunbird-charcoal: 0 0% 20%;
+    /* #333333 */
+    --sunbird-obsidian: 0 0% 13%;
+    /* #222222 */
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 12 50% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 100% 66%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 12 50% 45%;
+
+    /* Additional Sunbird Grays & System Colors */
+    --sunbird-gray-75: 0 0% 46%;
+    /* #757575 */
+    --sunbird-gray-82: 0 0% 51%;
+    /* #828282 */
+    --sunbird-gray-b2: 0 0% 70%;
+    /* #B2B2B2 */
+    --sunbird-gray-4a: 218 17% 35%;
+    /* #4A5568 */
+    --sunbird-gray-d0: 214 15% 84%;
+    /* #D0D5DD */
+    --sunbird-gray-34: 221 23% 27%;
+    /* #344054 */
+    --sunbird-success-green: 145 63% 49%;
+    /* #2ECC71 */
+    --sunbird-orange-light: 13 100% 97%;
+    /* #FFF5F2 */
+    --sunbird-white: 0 0% 100%;
+    /* #FFFFFF */
+    --sunbird-gray-77: 0 0% 47%;
+    /* #777777 */
+    --sunbird-gray-d9: 0 0% 85%;
+    /* #D9D9D9 */
+    --sunbird-beige-light: 45 100% 89%;
+    /* #FFF1C7 */
+    --sunbird-gray-f1: 0 0% 95%;
+    /* #F1F1F1 */
+    --sunbird-blue-light: 194 36% 59%;
+    /* #70ADBF */
+    --sunbird-blue-medium: 194 47% 45%;
+    /* #3D8FA7 */
+    --sunbird-brown-dark: 28 66% 42%;
+    /* #B06624 */
+    --sunbird-green-dark: 146 47% 36%;
+    /* #318656 */
+    --sunbird-purple-dark: 322 21% 38%;
+    /* #744C65 */
+    --sunbird-gray-e5: 210 5% 90%;
+    /* #E5E7EB */
+    --sunbird-gray-f3: 210 5% 96%;
+    /* #F3F4F6 */
+    --sunbird-footer-bg: 0 0% 11%;
+    /* #1C1C1C */
+    --sunbird-gray-ef: 0 0% 93.7%;
+    /* #EFEFEF */
+
+    --sunbird-success-message: 122 39% 49%;
+    /* #4CAF50 */
+    --sunbird-success-message-bg: 120 16% 95%;
+    /* #F0F4F0 */
+
+    /* Theme Colors for Content Cards */
+    --theme-wave-bg-light: 194 47% 95%;
+    --theme-wave-bg-lighter: 194 47% 97%;
+    --theme-wave-accent: 194 36% 59%;
+    --theme-wave-accent-dark: 193 35% 33%;
+    --theme-wave-icon: 193 35% 33%;
+
+    --theme-sunflower-bg-light: 45 100% 94%;
+    --theme-sunflower-bg-lighter: 45 100% 97%;
+    --theme-sunflower-accent: 45 100% 73%;
+    --theme-sunflower-accent-dark: 28 57% 54%;
+    --theme-sunflower-icon: 15 51% 44%;
+
+    --theme-ginger-bg-light: 28 66% 95%;
+    --theme-ginger-bg-lighter: 28 66% 97%;
+    --theme-ginger-accent: 28 57% 54%;
+    --theme-ginger-accent-dark: 15 51% 44%;
+    --theme-ginger-icon: 15 51% 44%;
+
+    --theme-forest-bg-light: 95 26% 93%;
+    --theme-forest-bg-lighter: 95 26% 96%;
+    --theme-forest-accent: 95 26% 53%;
+    --theme-forest-accent-dark: 146 26% 53%;
+    --theme-forest-icon: 95 26% 40%;
+
+    /* Category Card Gradients */
+    --category-gradient-1: linear-gradient(to right, #45C0ED, #8E46C5);
+    --category-gradient-2: linear-gradient(to right, #D55E1D, #F6C35C);
+    --category-gradient-3: linear-gradient(to right, #1D79D5, #6ED97B);
+    --category-gradient-4: linear-gradient(to right, #F59C84, #D655E7);
+
+    /* Box Shadows */
+    --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
+    --sunbird-shadow-sm: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-md: 0 0.875rem 0.875rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-lg: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
+    --sunbird-text-shadow-strong: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.55);
+    --sunbird-text-shadow-light: 0 0.0625rem 0.375rem rgba(0, 0, 0, 0.45);
+
+    /* Component Specific Colors */
+    --sunbird-progress-bg: 39 77% 76%;
+    /* #F0CE94 */
+
+    --sunbird-status-completed-bg: 95 33% 81%;
+    /* #CAE5B6 */
+    --sunbird-status-completed-border: 95 26% 53%;
+    /* #82A668 */
+    --sunbird-status-completed-text: 95 26% 30%;
+    /* Dark green for completed status */
+
+    --sunbird-status-ongoing-bg: 45 100% 89%;
+    /* #FFF1C7 */
+    --sunbird-status-ongoing-border: 28 57% 54%;
+    /* #CC8545 */
+    --sunbird-status-ongoing-text: 0 0% 0%;
+    /* #000000 */
+  }
+
+  .dark {
+    --background: 207 100% 16%;
+    /* Dark blue background */
+    --foreground: 210 40% 98%;
+    --surface: 210 40% 12%;
+
+    --card: 210 40% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 210 40% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 45 100% 66%;
+    /* Yellow as primary in dark mode */
+    --primary-foreground: 0 0% 20%;
+
+    --secondary: 213 95% 31%;
+    /* Blue as secondary */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 45 100% 66%;
+    --accent-foreground: 0 0% 20%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 45 100% 66%;
+
+    --sidebar-background: 207 100% 16%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 45 100% 66%;
+    --sidebar-primary-foreground: 0 0% 20%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 45 100% 66%;
+  }
+
+}
+
+@layer components {
+  .login-wrapper {
+    @apply font-rubik min-h-screen w-full flex items-center justify-center relative bg-sunbird-theme-teal auth-bg-wave overflow-x-hidden;
+  }
+
+  /* Mobile: full screen white, no rounded corners, no wave background visible */
+  @media (max-width: 767px) {
+    .login-wrapper {
+      @apply bg-white items-start;
+      background-image: none !important;
+    }
+  }
+
+  .login-split-container {
+    @apply flex flex-col md:flex-row bg-white relative z-10 overflow-hidden
+      w-full min-h-screen rounded-none p-0 m-0 shadow-none
+      md:w-[67.375rem] md:h-[41.625rem] md:min-h-[41.625rem] md:rounded-[4rem] md:p-[0.375rem] md:m-auto md:shadow-2xl;
+  }
+
+  /* Tablet view responsiveness */
+  @media (min-width: 640px) and (max-width: 1024px) {
+    .login-split-container {
+      margin: 1.5rem !important;
+    }
+  }
+
+  .login-left-panel {
+    @apply hidden md:flex flex-1 relative items-center justify-center overflow-hidden rounded-[3.5rem] auth-bg-wave;
+  }
+
+  .login-left-panel-container {
+    @apply absolute inset-0 z-[3] border-0 rounded-[3.5rem];
+    box-shadow: 0 0 0 2rem hsl(var(--sunbird-white) / 0.05);
+  }
+
+  .left-panel-content {
+    @apply absolute z-[2] left-10 bottom-10 max-w-[calc(100%-5rem)];
+  }
+
+  .left-panel-title {
+    @apply !font-rubik text-[1.875rem] font-semibold text-white leading-[2.625rem];
+  }
+
+  /* RTL support for left panel title */
+  [dir="rtl"] .left-panel-title {
+    @apply text-right;
+  }
+
+  .login-card {
+    @apply flex-[0.85] p-6 md:p-10 relative flex flex-col justify-start md:justify-center md:pt-8 pt-6 overflow-y-auto;
+  }
+
+  .close-button {
+    @apply absolute top-5 right-5 p-2 text-sunbird-charcoal hover:opacity-70 transition-opacity z-20;
+  }
+
+  /* RTL support for close button */
+  [dir="rtl"] .close-button {
+    @apply right-auto left-5;
+  }
+
+  .login-inner-container {
+    @apply mx-auto w-full max-w-sm flex flex-col justify-start;
+  }
+
+  .logo-container {
+    @apply text-center flex justify-center;
+  }
+
+  .sunbird-logo-wrapper {
+    @apply mb-2 flex justify-center;
+  }
+
+  /* Auth layout specific logo alignment */
+  .auth-logo-wrapper {
+    @apply mb-8 flex items-center justify-center;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .auth-logo-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  /* RTL support for auth logo */
+  [dir="rtl"] .auth-logo-inner {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  @media (min-width: 768px) {
+    .auth-logo-inner {
+      margin-right: 3.125rem;
+    }
+
+    [dir="rtl"] .auth-logo-inner {
+      margin-right: 0;
+      margin-left: 3.125rem;
+    }
+  }
+
+  .auth-logo-inner .sunbird-logo {
+    height: 3rem;
+    width: auto;
+  }
+
+  .logo-image {
+    @apply h-10 w-auto mx-auto;
+  }
+
+  /* Global Sunbird Logo Height - Change here to update all logos */
+  .sunbird-logo {
+    height: 3rem; /* Base height for layout calculation */
+    width: auto;
+    display: block;
+    object-fit: contain;
+    transform: scale(2); /* Scale to 4rem visually (2 * 2rem = 4rem) */
+    transform-origin: left center; /* Scale from left edge to prevent shift */
+  }
+
+  /* RTL support for logo scaling */
+  [dir="rtl"] .sunbird-logo {
+    transform-origin: right center; /* Scale from right edge in RTL */
+  }
+
+  /* Header & Labels */
+  .login-header-title {
+    @apply !font-rubik text-[1.875rem] font-semibold text-sunbird-obsidian leading-[1.875rem] mb-2;
+  }
+
+  .login-header-subtitle {
+    @apply text-[0.875rem] font-normal text-sunbird-gray-75 leading-relaxed mx-auto;
+  }
+
+  .login-input-label {
+    @apply block text-[0.875rem] font-normal text-sunbird-gray-75 mb-2;
+  }
+
+  /* Buttons */
+  .login-primary-button {
+    @apply w-full h-13 bg-sunbird-brick !bg-sunbird-brick text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all px-4 py-2;
+  }
+
+  /* Global Signup/Auth Styles */
+  .secondary-outline-button {
+    @apply w-full !h-10 !bg-white border font-medium flex items-center justify-center gap-2 hover:bg-gray-50 mb-0 text-[0.875rem];
+    border-color: hsl(var(--sunbird-gray-d0)) !important;
+    color: hsl(var(--sunbird-gray-34)) !important;
+    border-radius: 0.5rem !important;
+  }
+
+  .form-divider-container {
+    @apply flex items-center gap-4 my-1;
+  }
+
+  .form-divider-line {
+    @apply h-[0.0625rem] flex-1 bg-gray-200;
+  }
+
+  .form-divider-text {
+    @apply text-gray-500 text-[0.75rem] font-medium;
+  }
+
+  .form-error-absolute {
+    @apply text-[0.75rem] text-red-500 absolute left-0 leading-tight;
+  }
+
+  .form-error-offset-8 {
+    @apply bottom-[-0.5rem];
+  }
+
+  .form-error-offset-4 {
+    @apply bottom-[-0.25rem];
+  }
+
+  .form-error-offset-2 {
+    @apply bottom-[-0.125rem];
+  }
+
+  .themed-checkbox {
+    @apply w-4 h-4;
+    border-color: hsl(var(--sunbird-gray-82)) !important;
+    border-radius: 0.25rem !important;
+  }
+
+  .themed-checkbox[data-state="checked"] {
+    background-color: hsl(var(--sunbird-brick)) !important;
+    border-color: hsl(var(--sunbird-brick)) !important;
+  }
+
+  .themed-link {
+    @apply font-bold text-sunbird-brick underline hover:underline-offset-2;
+  }
+
+  .required-asterisk {
+    @apply text-sunbird-gray-75 ml-1;
+  }
+
+  /* OTP Input */
+  .otp-input-container {
+    @apply flex justify-between gap-1 md:gap-2 max-w-full md:max-w-100 mx-auto;
+  }
+
+  .otp-digit-input {
+    @apply w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-semibold border border-sunbird-brick rounded-[0.25rem] focus:border-sunbird-brick focus:ring-1 focus:ring-sunbird-brick outline-none transition-all;
+  }
+
+  .otp-digit-input:focus {
+    @apply w-11 h-11 md:w-13 md:h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1rem] md:text-[1.25rem] focus:outline-none;
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
+  /* Form Elements */
+  .login-input-field {
+    @apply h-[2.5rem] !bg-white !rounded-xs border-sunbird-gray-82 focus:border-sunbird-brick focus:ring-0 px-4 text-[0.875rem] placeholder:text-sunbird-gray-b2;
+  }
+
+  .login-input-field:focus {
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
+  .login-form-instruction {
+    @apply text-[0.75rem] text-sunbird-gray-75 mt-1;
+  }
+
+  .login-error-message {
+    @apply text-red-600 text-sm mt-2;
+  }
+
+  /* Success Icon */
+  .success-icon-container {
+    @apply w-18 h-18 rounded-full bg-sunbird-success-green flex items-center justify-center shadow-md;
+  }
+
+  .success-icon-check {
+    @apply text-white text-4xl;
+  }
+
+  /* Delivery Selection */
+  .delivery-prompt {
+    @apply text-[0.875rem] font-medium text-center text-sunbird-obsidian;
+  }
+
+  .delivery-option {
+    @apply flex items-center gap-3 p-4 border rounded-xs cursor-pointer border-sunbird-gray-82 bg-sunbird-base-white;
+  }
+
+  .delivery-option-selected {
+    @apply border-sunbird-brick bg-sunbird-orange-light;
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
+  .delivery-radio {
+    @apply w-4 h-4 accent-sunbird-brick;
+  }
+
+  .delivery-text {
+    @apply text-[0.875rem] font-medium text-sunbird-gray-4a;
+  }
+
+  /* OTP Verification Extra */
+  .otp-validity-info {
+    @apply text-center text-[0.85rem] text-sunbird-gray-4a;
+  }
+
+  .resend-otp-btn {
+    @apply text-sunbird-brick font-semibold ml-1 hover:underline;
+  }
+
+  .resend-otp-btn:disabled {
+    @apply opacity-50 cursor-not-allowed no-underline;
+  }
+
+  /* EPUB Player Styles */
+  .epub-player-container {
+    @apply w-full h-full block relative;
+  }
+
+  .epub-player-loading {
+    @apply absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center text-sunbird-gray-75 text-base bg-sunbird-light-blue;
+  }
+
+  .content-player-container {
+    @apply w-full px-4 sm:px-6 lg:px-8 mx-auto py-6 max-w-[78.125rem];
+  }
+
+  .content-player-resource-title {
+    @apply font-rubik font-medium text-[1.625rem] leading-[2.375rem] tracking-normal text-white font-semibold mb-2;
+    text-shadow: var(--sunbird-text-shadow-strong);
+  }
+
+  .content-player-resource-subtitle {
+    text-shadow: var(--sunbird-text-shadow-light);
+  }
+
+
+  /* Content Player Component Styles */
+  .content-player-background {
+    @apply min-h-screen bg-gray-100;
+  }
+
+  .content-player-go-back {
+    @apply flex items-center gap-1.5 font-rubik font-medium text-[1rem] leading-[1.625rem] tracking-normal text-sunbird-brick mb-6 hover:opacity-80 transition-opacity;
+  }
+
+  .content-player-back-arrow {
+    width: 1.125rem;
+    height: 0.686rem;
+  }
+
+  .content-player-title-row {
+    @apply flex items-start justify-between mb-4;
+  }
+
+  .content-player-title {
+    @apply font-rubik font-semibold text-[1.625rem] leading-[2.375rem] tracking-normal text-foreground;
+  }
+
+  .content-player-share-btn {
+    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity font-rubik mx-2;
+  }
+
+  .content-player-share-icon {
+    @apply w-4 h-4;
+  }
+
+  .content-player-stats-row {
+    @apply flex items-center gap-2 text-sm text-muted-foreground mb-8 font-rubik;
+  }
+
+  .content-player-rating-container {
+    @apply flex items-center gap-1;
+  }
+
+  .content-player-star-icon {
+    @apply w-3.5 h-3.5 text-sunbird-brick fill-sunbird-brick;
+  }
+
+  .content-player-stats-separator {
+    @apply text-gray-300;
+  }
+
+  .content-player-video-container {
+    @apply w-full max-w-[74.125rem] p-5 rounded-[1.25rem] bg-white overflow-hidden;
+  }
+
+  .content-player-wrapper {
+    @apply w-full overflow-hidden rounded-[1.25rem] relative shadow-sm;
+  }
+
+  .content-player-embed {
+    @apply w-full;
+  }
+
+  div.content-player-embed:empty {
+    min-height: 41.3125rem;
+  }
+
+  iframe.content-player-embed {
+    height: 41.3125rem;
+  }
+
+  .content-player-video-thumbnail {
+    @apply aspect-video bg-gradient-to-br from-slate-700 to-slate-900 relative;
+  }
+
+  .content-player-video-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .content-player-play-button {
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg;
+  }
+
+  .content-player-play-icon {
+    @apply w-6 h-6 text-sunbird-brick ml-1 fill-sunbird-brick;
+  }
+
+  .content-player-related-header {
+    @apply flex items-center gap-3 mb-4 mt-12;
+  }
+
+  .content-player-related-title {
+    @apply font-rubik font-medium text-[1.625rem] leading-[1.625rem] tracking-normal text-foreground my-2;
+  }
+
+  .content-player-related-arrow {
+    @apply w-5 h-5 text-sunbird-brick;
+  }
+
+  .content-player-related-grid {
+    @apply grid grid-cols-1 gap-5 auto-rows-fr;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .content-player-related-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .content-player-related-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.375rem;
+    }
+  }
+
+
+
+  .related-resource-card-subtitle {
+    @apply font-rubik font-medium text-[1rem] leading-[1.5rem] tracking-normal text-[#FFFFFF] text-center;
+  }
+
+  .related-resource-card-link {
+    @apply flex justify-center;
+  }
+
+  .related-resource-card-container {
+    @apply bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[22.5rem] flex flex-col;
+    box-shadow: var(--sunbird-shadow-md);
+  }
+
+  .related-resource-card-image-wrapper {
+    @apply px-[1.25rem] pt-[1.25rem] w-full;
+  }
+
+  .related-resource-card-image-inner {
+    @apply relative overflow-hidden rounded-[1.25rem] h-[10.125rem] w-full;
+  }
+
+  .related-resource-card-image {
+    @apply absolute inset-0 w-full h-full rounded-[1.25rem];
+    object-fit: cover;
+    -o-object-fit: cover;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+    transition-duration: .5s;
+    animation-duration: .5s;
+  }
+
+  .group:hover .related-resource-card-image {
+    @apply scale-105;
+  }
+
+  .related-resource-card-content-wrapper {
+    @apply px-[1.25rem] pt-[1.25rem] pb-5 flex flex-col flex-grow;
+  }
+
+  .related-resource-card-badge {
+    @apply inline-flex items-center justify-center px-3 rounded-[2.25rem] mb-[1.25rem] h-[1.875rem] bg-sunbird-beige-light text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-[#CC8545] border-[0.0625rem] w-fit;
+  }
+
+  .related-resource-card-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] tracking-normal bg-transparent border-0 text-foreground mb-[1.25rem] min-h-[3.5rem];
+  }
+
+  .related-resource-card-stats {
+    @apply flex items-center gap-1.5 text-xs text-muted-foreground pt-[0.125rem] mt-auto;
+  }
+
+  .related-resource-card-rating {
+    @apply font-medium text-foreground;
+  }
+
+  .related-resource-card-star {
+    @apply w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick -translate-y-[0.0625rem];
+  }
+
+  .related-resource-card-separator {
+    @apply mx-0.5;
+  }
+
+  /* Resource Card Styles - Based on ResourceCenter Template */
+  .resource-card-link {
+    @apply block w-full;
+  }
+
+  .resource-card-container {
+    @apply relative w-full h-[22.5rem] rounded-[1.25rem] overflow-hidden;
+  }
+
+  .resource-card-image-wrapper {
+    @apply absolute inset-0;
+  }
+
+  .resource-card-image {
+    @apply w-full h-full object-cover transition-transform duration-700 ease-out rounded-[1.25rem];
+  }
+
+  .group:hover .resource-card-image {
+    @apply scale-105;
+  }
+
+  .resource-card-badge-wrapper {
+    @apply absolute top-[2.75rem] left-[2.125rem] z-[5];
+  }
+
+  .resource-card-badge {
+    @apply flex items-center justify-center bg-white text-black font-medium text-[1rem] px-3 min-w-[4.875rem] max-w-[10rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .resource-card-content {
+    @apply absolute bottom-[3.875rem] left-[2.125rem] right-[1.5rem] z-10 flex flex-col items-start gap-1.5;
+  }
+
+  .resource-card-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] tracking-normal text-white;
+    text-wrap: balance;
+  }
+
+  .resource-card-action {
+    @apply flex items-center gap-2 text-white/95 font-semibold text-[0.875rem] transition-all;
+  }
+
+  .group:hover .resource-card-action {
+    @apply underline;
+  }
+
+  .resource-card-arrow {
+    @apply w-4 h-4;
+  }
+
+  .card-mask-custom {
+    -webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
+    mask-image: radial-gradient(circle at 100% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
+  }
+
+  [dir="rtl"] .card-mask-custom {
+    -webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
+    mask-image: radial-gradient(circle at 0% 100%, transparent 4.75rem, black calc(4.75rem + 0.0625rem));
+  }
+
+  /* Terms and Conditions Popover Close Button */
+  .tnc-close-icon {
+    color: hsl(var(--sunbird-brick));
+  }
+
+  /* Terms and Conditions Popover Styles */
+  .tnc-dialog-overlay {
+    @apply fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+  }
+
+  .tnc-dialog-content {
+    @apply fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2;
+    @apply rounded-[1.875rem] border bg-white shadow-lg outline-none;
+    @apply w-[90vw] h-[85vh] max-w-[50rem] max-h-[35rem];
+    @apply md:w-[80vw] md:h-[80vh];
+    @apply lg:w-[50rem] lg:h-[35rem];
+    @apply data-[state=open]:animate-in data-[state=closed]:animate-out;
+    @apply data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+    @apply data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95;
+  }
+
+  .tnc-dialog-header {
+    @apply flex items-center justify-between p-4;
+  }
+
+  .tnc-dialog-title {
+    @apply text-lg font-semibold text-popover-foreground;
+  }
+
+  .tnc-close-button {
+    @apply h-8 w-8 rounded-full;
+  }
+
+  .tnc-close-button:hover {
+    background-color: hsl(var(--sunbird-gray-d0)) !important;
+  }
+
+  .tnc-iframe-container {
+    @apply flex-1 overflow-hidden p-4;
+  }
+
+  .tnc-iframe {
+    @apply w-full h-full border-0 rounded;
+  }
+
+  /* Sunbird Player Styles */
+
+  /* Video player: height is managed by Video.js based on actual video dimensions */
+  sunbird-video-player {
+    display: block;
+    width: 100%;
+  }
+
+  /* PDF, EPUB, QUML: no intrinsic video dimensions, use fixed responsive heights */
+  sunbird-pdf-player,
+  sunbird-epub-player,
+  sunbird-quml-player {
+    display: block;
+    width: 100%;
+    height: 41.3125rem;
+  }
+
+  @media (max-width: 1024px) {
+    sunbird-pdf-player,
+    sunbird-epub-player,
+    sunbird-quml-player {
+      height: 28rem;
+    }
+
+    iframe.content-player-embed {
+      height: 28rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    sunbird-pdf-player,
+    sunbird-epub-player,
+    sunbird-quml-player {
+      height: 22rem;
+    }
+
+    iframe.content-player-embed {
+      height: 22rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    sunbird-pdf-player,
+    sunbird-epub-player,
+    sunbird-quml-player {
+      height: 18rem;
+    }
+
+    iframe.content-player-embed {
+      height: 18rem;
+    }
+  }
+
+  /* Collection Overview Styles */
+  .collection-overview-container {
+    @apply space-y-6;
+  }
+
+  .collection-player-card {
+    @apply bg-white rounded-xl overflow-hidden border border-gray-100;
+  }
+
+  .collection-player-wrapper {
+    @apply p-4 relative;
+  }
+
+  .collection-player-loading {
+    @apply flex items-center justify-center bg-gray-100;
+    min-height: 41.3125rem;
+    border-radius: 1.125rem;
+  }
+
+  .collection-player-error {
+    @apply flex items-center justify-center bg-gray-100;
+    min-height: 41.3125rem;
+  }
+
+  .collection-player-error-text {
+    @apply text-sm text-red-500;
+  }
+
+  @media (max-width: 1024px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 28rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 22rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .collection-player-loading,
+    .collection-player-error {
+      min-height: 18rem;
+    }
+  }
+
+  .collection-overview-section {
+    @apply px-6 pb-6 pt-0;
+  }
+
+  .collection-overview-title {
+    @apply text-xl font-bold text-foreground mb-4;
+  }
+
+  .collection-stats-container {
+    @apply flex items-center gap-4 text-sm text-muted-foreground mb-4;
+  }
+
+  .collection-stat-item {
+    @apply flex items-center gap-2;
+  }
+
+  .collection-stat-icon {
+    @apply text-sunbird-brick;
+  }
+
+  .collection-stat-value {
+    @apply text-black font-bold;
+  }
+
+  .collection-description {
+    @apply text-base leading-relaxed mb-6;
+    color: hsl(var(--foreground));
+  }
+
+  .collection-suited-title {
+    @apply text-lg font-semibold text-foreground mb-3;
+  }
+
+  .collection-audience-list {
+    @apply space-y-3;
+  }
+
+  .collection-audience-item {
+    @apply flex items-start gap-2 text-base text-muted-foreground;
+  }
+
+  /* Home In Progress Styles */
+  .home-inprogress-content {
+    @apply flex-1 min-w-0 flex flex-col justify-between h-full py-1;
+  }
+
+  .home-inprogress-card-title {
+    @apply text-base font-medium text-foreground mb-2 line-clamp-2;
+  }
+
+  .home-inprogress-progress-container {
+    @apply flex items-center gap-3 mt-auto;
+  }
+
+  .home-inprogress-progress-bar-wrapper {
+    @apply flex-1;
+  }
+
+  .home-inprogress-progress-bar-bg {
+    @apply w-full h-1.5 bg-sunbird-gray-f1 rounded-full overflow-hidden;
+  }
+
+  .home-inprogress-progress-bar-fill {
+    @apply h-full bg-sunbird-brick rounded-full;
+  }
+
+  .home-inprogress-progress-text {
+    @apply text-[0.625rem] font-medium text-sunbird-gray-77 shrink-0;
+  }
+
+  .home-inprogress-thumbnail {
+    @apply w-[4.371rem] h-[4.438rem] rounded-2xl overflow-hidden shrink-0;
+  }
+
+  .home-inprogress-thumbnail-img {
+    @apply w-full h-full object-cover;
+  }
+
+  .home-inprogress-thumbnail-placeholder {
+    @apply w-full h-full bg-black;
+  }
+
+  .onboarding-title {
+    font-size: 1.625rem;
+    font-weight: 500;
+    color: hsl(var(--foreground));
+    line-height: 2.125rem;
+  }
+
+  .progress-dot {
+    height: 0.1875rem;
+    width: 0.8125rem;
+    border-radius: 9999px;
+  }
+
+  .option-chip {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.875rem;
+    transition: all 0.3s;
+    width: 7rem;
+    height: 5.125rem;
+    text-align: center;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .option-chip-selected {
+    background-color: hsl(var(--sunbird-ink));
+    color: white;
+    border: 0;
+  }
+
+  .option-chip-default {
+    background-color: white;
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--primary));
+  }
+
+  .option-chip-default:hover {
+    background-color: hsl(var(--primary) / 0.05);
+  }
+
+  .option-chip-checkmark {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+  }
+
+  .onboarding-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    width: 22.5rem;
+  }
+
+  .onboarding-button {
+    height: 2.875rem;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    font-weight: 500;
+    font-size: 1.125rem;
+    border-radius: 0.75rem;
+    width: 22.5rem;
+  }
+
+  .onboarding-button:hover {
+    background-color: hsl(var(--primary) / 0.9);
+  }
+
+  .onboarding-button-rounded {
+    width: 100%;
+    max-width: 28rem;
+    height: 2.75rem;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    font-weight: 500;
+    border-radius: 9999px;
+  }
+
+  .onboarding-button-rounded:hover {
+    background-color: hsl(var(--primary) / 0.9);
+  }
+
+  .onboarding-input {
+    height: 2.75rem;
+    background-color: white;
+    border-color: hsl(var(--border));
+    border-radius: 0.5rem;
+  }
+
+  .onboarding-input:focus {
+    border-color: hsl(var(--primary));
+  }
+
+  .onboarding-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid hsl(var(--primary-foreground) / 0.3);
+    border-top-color: hsl(var(--primary-foreground));
+    border-radius: 9999px;
+    animation: spin 1s linear infinite;
+  }
+
+  .onboarding-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6.1875rem 0 0 6.1875rem;
+    margin-left: 2.5rem;
+  }
+
+  .onboarding-image-reduced {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 1.5rem;
+  }
+
+  .onboarding-container {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .onboarding-curve-top {
+    position: absolute;
+    left: -0.5rem;
+    top: -0.75rem;
+  }
+
+  .onboarding-curve-bottom {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .input-otp-container {
+    @apply flex justify-center items-center gap-2 md:gap-3;
+  }
+
+  .otp-input {
+    @apply !w-[2.5rem] !h-[2.5rem] md:!w-[3.125rem] md:!h-[3.125rem] text-center text-base md:text-lg font-semibold !border !border-sunbird-brick !rounded-[0.25rem] focus:border-sunbird-brick focus:ring-1 focus:ring-sunbird-brick outline-none transition-all;
+  }
+
+  @media (max-width: 320px) {
+    .otp-input {
+      width: 2rem !important;
+      height: 2rem !important;
+      font-size: 0.875rem !important;
+    }
+    
+    .input-otp-container {
+      gap: 0.375rem !important;
+    }
+  }
+
+  .otp-input:focus {
+    @apply !border-2 !border-sunbird-brick !bg-white rounded-xxs text-center text-base md:text-[1rem] focus:outline-none;
+    box-shadow: var(--sunbird-focus-ring-shadow);
+  }
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--app-font-family);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--app-font-family);
+    font-weight: 600;
+  }
+
+  .auth-bg-wave {
+    background-image: url('./assets/auth-wave-bg.svg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+  /* Rating Dialog */
+  .rating-dialog-overlay {
+    @apply absolute inset-0 z-10 flex items-center justify-center bg-black/50 rounded-xl;
+  }
+
+  .rating-dialog-card {
+    @apply bg-[#FFFFFF] rounded-[1rem] flex flex-col items-center justify-center text-center w-full h-full relative;
+    @apply p-4 sm:p-6 md:p-8 lg:p-10;
+    box-shadow: 2px 2px 30px 0px #00000014;
+  }
+
+  .rating-dialog-close-btn {
+    @apply absolute top-3 right-3 sm:top-4 sm:right-4 md:top-5 md:right-5;
+    @apply text-sunbird-brick hover:opacity-70 transition-opacity;
+  }
+
+  .rating-dialog-close-icon {
+    @apply w-4 h-4 sm:w-5 sm:h-5;
+  }
+
+  .rating-dialog-badge {
+    @apply w-12 h-12 sm:w-16 sm:h-16 md:w-[6.875rem] md:h-[6.875rem] mx-auto mb-3 sm:mb-4 md:mb-6;
+  }
+
+  .rating-dialog-title {
+    @apply font-rubik font-medium text-[1rem] sm:text-[1.25rem] md:text-[1.5rem];
+    @apply leading-snug tracking-[0px] text-center text-[#222222] mb-1 sm:mb-2;
+  }
+
+  .rating-dialog-subtitle {
+    @apply font-rubik font-normal text-[0.75rem] sm:text-[0.875rem] md:text-[1rem];
+    @apply leading-[1.5rem] tracking-[0px] text-center text-[#222222] mb-4 sm:mb-5 md:mb-6;
+  }
+
+  .rating-dialog-stars {
+    @apply flex gap-1 sm:gap-2 mb-6 sm:mb-10 md:mb-16;
+  }
+
+  .rating-dialog-star-btn {
+    @apply focus:outline-none transition-transform hover:scale-110;
+  }
+
+  .rating-dialog-submit-btn {
+    @apply bg-sunbird-brick text-white font-rubik font-medium;
+    @apply text-[0.875rem] sm:text-[1rem];
+    @apply px-8 sm:px-10 md:px-14 py-2 sm:py-2.5 md:py-3;
+    @apply rounded-lg hover:opacity-90 transition-opacity;
+    @apply disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* Hide Google reCAPTCHA Badge */
+  .grecaptcha-badge {
+    visibility: hidden !important;
+  }
+
+  /* Hide Video.js Big Play Button only within the Sunbird video player wrapper */
+  [data-video-player-wrapper] .vjs-big-play-button {
+    display: none !important;
+  }
+  .sunbird-video-player-container {
+    border-radius: 1.25rem;
+  }
+
+  /* Video player internal tag: auto height so Video.js drives dimensions */
+  sunbird-video-player video-player {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Override VideoPlayerService inline height: 100% on its wrapper div */
+  [data-video-player-wrapper] {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  [data-video-player-wrapper] .video-js {
+    background-color: transparent !important;
+  }
+
+  /* Ensure control bar is always visible and interactive when video is paused */
+  [data-video-player-wrapper] .vjs-control-bar {
+    z-index: 3 !important;
+    pointer-events: auto !important;
+  }
+
+  [data-video-player-wrapper] .vjs-paused .vjs-control-bar,
+  [data-video-player-wrapper] .vjs-paused.vjs-user-inactive .vjs-control-bar {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}

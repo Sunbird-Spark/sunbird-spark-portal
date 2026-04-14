@@ -1,0 +1,219 @@
+/* Home Container */
+.home-container {
+    @apply min-h-screen bg-white flex flex-col;
+}
+
+.home-main-content {
+    @apply flex-1 min-w-0 bg-white relative overflow-x-hidden;
+    box-shadow: inset 0 0.25rem 0.625rem rgba(0, 0, 0, 0.05);
+}
+
+.home-content-wrapper {
+    /* Single source of truth for horizontal padding - used for both padding and full-bleed calculations */
+    --hcw-pl: 1rem;
+    --hcw-pr: 1rem;
+    @apply py-4 transition-all;
+    padding-left: var(--hcw-pl);
+    padding-right: var(--hcw-pr);
+}
+
+@media (min-width: 768px) {
+    .home-content-wrapper {
+        --hcw-pl: 1.5rem;
+        --hcw-pr: 1.5rem;
+        @apply py-6;
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-content-wrapper {
+        --hcw-pl: 1.625rem;
+        --hcw-pr: 6.25rem;
+        @apply py-8;
+    }
+}
+
+.home-welcome-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian mb-2;
+    letter-spacing: 0%;
+}
+
+.home-welcome-subtitle {
+    @apply font-rubik font-normal text-[0.875rem] leading-[1.25rem] text-sunbird-gray-75;
+    letter-spacing: 0%;
+}
+
+/* Header */
+.home-header {
+    @apply bg-white border-b border-gray-100 z-30 sticky top-0 transition-all px-6 py-4 shadow-sm lg:pr-[6.25rem];
+}
+
+.home-header-mobile {
+    @apply bg-white border-b border-gray-100 z-30 sticky top-0 transition-all px-4 py-3 shadow-sm;
+}
+
+/* Search */
+.home-search-container {
+    @apply relative;
+}
+
+.home-search-input {
+    @apply w-full pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-[0.625rem] font-rubik font-normal text-[1rem] leading-[1rem] text-sunbird-obsidian focus:outline-none focus:ring-1 focus:ring-sunbird-brick transition-all bg-transparent;
+    letter-spacing: 0px;
+}
+
+.home-search-input::placeholder {
+    color: hsl(var(--foreground)) !important;
+    opacity: 1;
+}
+
+/* Section Titles */
+.home-section-title {
+    @apply text-lg font-semibold text-sunbird-obsidian mb-4;
+}
+
+.home-continue-section-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian mb-4;
+}
+
+.home-section-title-large {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian;
+}
+
+.home-inprogress-section-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.25rem] text-sunbird-obsidian mb-6;
+    letter-spacing: 0%;
+}
+
+/* Stats Cards */
+.home-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
+}
+
+.home-stat-card {
+    @apply rounded-[1.25rem] pt-5 pb-5 pr-5 pl-[1.5625rem] text-white relative h-[9.0625rem] flex flex-col justify-end;
+    box-shadow: var(--sunbird-shadow-lg);
+}
+
+.home-stat-icon-wrapper {
+    @apply absolute top-3 right-3 md:top-4 md:right-4 w-[2.25rem] h-[2.25rem] md:w-[2.875rem] md:h-[2.875rem] flex items-center justify-center rounded-[0.5rem];
+}
+
+.home-stat-value {
+    @apply font-rubik font-semibold text-[2.25rem] md:text-[2.5rem] leading-tight mb-1;
+    letter-spacing: 0%;
+}
+
+.home-stat-label {
+    @apply font-rubik font-normal text-[1.125rem] leading-[1.75rem] text-white/90 whitespace-pre-line;
+    letter-spacing: 0%;
+}
+
+/* Continue Learning */
+.home-continue-learning-card {
+    @apply w-full max-w-[42.8125rem] min-h-[14.625rem] rounded-[1.25rem] bg-white flex flex-col lg:flex-row gap-5 p-5 md:p-[30px];
+    box-shadow: 0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09);
+}
+
+.home-continue-learning-inner {
+    @apply flex flex-col lg:flex-row gap-5 w-full;
+}
+
+.home-continue-learning-content {
+    @apply flex-1 flex flex-col justify-between;
+}
+
+.home-continue-learning-progress {
+    @apply flex items-center gap-2;
+}
+
+.home-continue-learning-progress-label {
+    @apply text-sm text-muted-foreground;
+}
+
+.home-continue-learning-cta {
+    @apply mt-6 lg:mt-0;
+}
+
+.home-performance-chart {
+    @apply bg-white rounded-[1.25rem] p-6 border border-gray-100 flex flex-col;
+    box-shadow: var(--sunbird-shadow-lg);
+}
+
+.home-continue-section {
+    @apply pt-2 mb-8 md:mb-12;
+}
+
+.home-continue-grid {
+    @apply flex flex-col lg:flex-row gap-6 h-auto lg:h-[234px];
+}
+
+.home-continue-learning-thumbnail {
+    @apply w-full h-48 lg:w-[10.875rem] lg:h-[10.875rem] rounded-2xl overflow-hidden shrink-0;
+}
+
+.home-continue-learning-title {
+    @apply font-rubik font-medium text-[1.125rem] md:text-[1.25rem] leading-snug md:leading-[1.75rem] text-foreground line-clamp-2 whitespace-pre-wrap;
+    letter-spacing: 0%;
+}
+
+.home-continue-learning-btn {
+    @apply w-full md:w-[310px] h-10 rounded-[10px] bg-sunbird-brick hover:bg-sunbird-brick/90 text-white text-[1.1rem] md:text-[1.25rem] leading-[1.75rem] transition-all flex items-center justify-center font-rubik font-medium;
+}
+
+/* In Progress Grid */
+.home-inprogress-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6;
+}
+
+.home-inprogress-card {
+    @apply bg-white flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-all w-full lg:w-[20.75rem] h-auto lg:h-[9.25rem];
+    box-shadow: 0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09);
+}
+
+.home-inprogress-badge {
+    @apply inline-block mb-3 text-[0.625rem] px-3 py-1 rounded-full bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian max-w-[10rem] truncate;
+}
+
+.home-inprogress-card-title {
+    @apply font-rubik font-medium text-[1rem] leading-[1.5rem] text-sunbird-obsidian mb-3 line-clamp-2;
+    letter-spacing: 0%;
+}
+
+/* Recommended Section */
+.home-recommended-card-title {
+    @apply font-rubik font-medium text-[1.25rem] leading-[1.75rem] text-sunbird-obsidian mb-auto;
+    letter-spacing: 0%;
+}
+
+.home-recommended-card-video-title {
+    @apply font-rubik font-medium text-[1.75rem] leading-tight mb-4 text-white;
+    letter-spacing: -0.02em;
+}
+
+.home-recommended-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6;
+}
+
+.home-recommended-card-video {
+    @apply relative rounded-[1.25rem] overflow-hidden cursor-pointer h-[22.5rem];
+    box-shadow: var(--sunbird-shadow-lg);
+}
+
+.home-recommended-card-standard {
+    @apply bg-white rounded-[1.25rem] overflow-hidden border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[22.5rem] flex flex-col;
+    box-shadow: var(--sunbird-shadow-lg);
+}
+
+.home-recommended-badge-video {
+    @apply flex items-center justify-center text-[0.6875rem] font-bold w-[3.375rem] h-[1.5rem] rounded-[0.25rem] bg-white text-sunbird-obsidian;
+}
+
+.home-recommended-badge-standard {
+    @apply flex items-center justify-center text-[0.625rem] font-bold w-[4.875rem] h-[1.875rem] rounded-[2.25rem] bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian;
+}
+
+/* Footer */
+.sunbird-footer {
+    @apply bg-sunbird-footer-bg font-rubik !pr-[3.75rem];
+}

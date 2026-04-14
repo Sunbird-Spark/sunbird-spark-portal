@@ -1,0 +1,179 @@
+.review-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.review-dialog {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 56rem;
+  margin: 1rem;
+  box-shadow: var(--sunbird-shadow-lg);
+}
+
+.review-dialog-main-title {
+  font-family: var(--app-font-family);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: hsl(var(--foreground));
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.review-dialog-subtitle-text {
+  font-family: var(--app-font-family);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.review-dialog-section-title {
+  font-family: var(--app-font-family);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.75rem;
+  margin-top: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-dialog-sections-container {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.review-dialog-section-column {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.review-dialog-section {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.review-dialog-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0;
+  cursor: pointer;
+  font-family: var(--app-font-family);
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  line-height: 1.5;
+}
+
+.review-dialog-checkbox-label:hover {
+  opacity: 0.8;
+}
+
+.review-dialog-checkbox {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: hsl(var(--sunbird-brick));
+}
+
+.review-dialog-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.review-dialog-textarea {
+  width: 100%;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--app-font-family);
+  resize: vertical;
+  margin-top: 0.75rem;
+}
+
+.review-dialog-textarea:focus {
+  outline: none;
+  border-color: hsl(var(--sunbird-brick));
+  box-shadow: 0 0 0 3px hsl(var(--sunbird-brick) / 0.1);
+}
+
+.review-dialog-textarea:disabled {
+  background-color: hsl(var(--muted));
+  cursor: not-allowed;
+}
+
+.review-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.review-dialog-btn-cancel {
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: var(--app-font-family);
+  color: hsl(var(--muted-foreground));
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.review-dialog-btn-cancel:hover:not(:disabled) {
+  background-color: hsl(var(--muted));
+}
+
+.review-dialog-btn-cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.review-dialog-btn-primary {
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: var(--app-font-family);
+  color: white;
+  background-color: hsl(var(--sunbird-brick));
+  border: 1px solid hsl(var(--sunbird-brick));
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.review-dialog-btn-primary:hover:not(:disabled) {
+  background-color: hsl(var(--sunbird-brick) / 0.85);
+  border-color: hsl(var(--sunbird-brick) / 0.85);
+}
+
+.review-dialog-btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background-color: hsl(var(--sunbird-gray-d0));
+  border-color: hsl(var(--sunbird-gray-d0));
+}

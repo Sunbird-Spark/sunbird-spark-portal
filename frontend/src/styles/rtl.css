@@ -1,0 +1,363 @@
+/**
+ * RTL-specific styles and overrides
+ * This file contains CSS rules that adapt the UI for right-to-left languages
+ * IMPORTANT: Prefer RTL-specific overrides using [dir="rtl"]; use [dir="ltr"] rules only when necessary
+ * to avoid changing LTR defaults unless explicitly required for visual consistency.
+ * 
+ * NOTE: Some [dir="ltr"] rules are included to explicitly define LTR behavior for components
+ * that have corresponding RTL rules, ensuring visual consistency and preventing unintended
+ * style inheritance in mixed-direction contexts.
+ */
+
+/* RTL Direction Support */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+}
+
+/* Text Alignment - Only override for RTL */
+[dir="rtl"] .text-start {
+  text-align: right;
+}
+
+[dir="rtl"] .text-end {
+  text-align: left;
+}
+
+/* Transform for RTL */
+[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+/* Margin and Padding Logical Properties - Only override for RTL */
+[dir="rtl"] .ms-auto {
+  margin-right: auto;
+  margin-left: unset;
+}
+
+[dir="rtl"] .me-auto {
+  margin-left: auto;
+  margin-right: unset;
+}
+
+/* Border Radius for RTL - Only override for RTL */
+[dir="rtl"] .rounded-s {
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+[dir="rtl"] .rounded-e {
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Dropdown and Select Positioning - Only override for RTL */
+[dir="rtl"] .dropdown-content {
+  left: auto;
+  right: 0;
+}
+
+/* Icon Rotation for RTL */
+[dir="rtl"] .icon-arrow-right {
+  transform: rotate(180deg);
+}
+
+/* Fix for absolute positioned elements in RTL */
+[dir="rtl"] .absolute.right-0 {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .absolute.left-0 {
+  left: auto;
+  right: 0;
+}
+
+/* Sidebar positioning for RTL */
+[dir="rtl"] .sidebar {
+  left: auto;
+  right: 0;
+}
+
+/* Sidebar shadow for RTL - flip the shadow direction */
+[dir="rtl"] aside[data-testid="home-sidebar"] {
+  box-shadow: -0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09) !important;
+}
+
+[dir="ltr"] aside[data-testid="home-sidebar"] {
+  box-shadow: 0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09) !important;
+}
+
+/* Toast/Notification positioning */
+[dir="rtl"] .toast-container {
+  left: auto;
+  right: 1rem;
+}
+
+[dir="ltr"] .toast-container {
+  right: auto;
+  left: 1rem;
+}
+
+/* Chevron icons in RTL */
+[dir="rtl"] .chevron-right {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .chevron-left {
+  transform: rotate(180deg);
+}
+
+/* Progress bars maintain LTR direction */
+[dir="rtl"] .progress-bar,
+[dir="rtl"] [role="progressbar"] {
+  direction: ltr;
+}
+
+/* Ensure numeric content stays LTR */
+[dir="rtl"] .numeric-content {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Card layouts in RTL */
+[dir="rtl"] .card-grid {
+  direction: rtl;
+}
+
+/* Fix for modal close buttons */
+[dir="rtl"] .modal-close {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="ltr"] .modal-close {
+  left: auto;
+  right: 1rem;
+}
+
+/* Ensure proper text overflow for RTL */
+[dir="rtl"] .truncate {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Badge positioning */
+[dir="rtl"] .badge-end {
+  left: 0;
+  right: auto;
+}
+
+[dir="ltr"] .badge-end {
+  right: 0;
+  left: auto;
+}
+
+/* Fix for decorative elements */
+[dir="rtl"] .decorative-element {
+  transform: scaleX(-1);
+}
+
+/* Profile Header RTL Support */
+[dir="rtl"] .profile-header {
+  padding-right: 1rem;
+  padding-left: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  [dir="rtl"] .profile-header {
+    padding-left: 6.25rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  [dir="rtl"] .profile-content-wrapper {
+    padding-right: 1.625rem;
+    padding-left: 6.25rem;
+  }
+
+  [dir="ltr"] .profile-content-wrapper {
+    padding-left: 1.625rem;
+    padding-right: 6.25rem;
+  }
+}
+
+/* Notification Badge RTL */
+[dir="rtl"] .notification-badge {
+  right: auto;
+  left: -0.125rem;
+}
+
+[dir="ltr"] .notification-badge {
+  left: auto;
+  right: -0.125rem;
+}
+
+/* Notification Popover RTL */
+[dir="rtl"] .notification-popover-content {
+  right: auto;
+  left: -10.5rem;
+}
+
+[dir="ltr"] .notification-popover-content {
+  left: auto;
+  right: -10.5rem;
+}
+
+[dir="rtl"] .notification-popover-arrow {
+  right: auto;
+  left: 3.25rem;
+}
+
+[dir="ltr"] .notification-popover-arrow {
+  left: auto;
+  right: 3.25rem;
+}
+
+
+@media (max-width: 63.9375rem) {
+  [dir="rtl"] .notification-popover-content {
+    right: auto;
+    left: -6rem;
+  }
+
+  [dir="ltr"] .notification-popover-content {
+    left: auto;
+    right: -6rem;
+  }
+}
+
+@media (max-width: 47.9375rem) {
+  [dir="rtl"] .notification-popover-content {
+    right: auto;
+    left: -5.75rem;
+  }
+
+  [dir="ltr"] .notification-popover-content {
+    left: auto;
+    right: -5.75rem;
+  }
+}
+
+/* Profile Info Accent RTL */
+[dir="rtl"] .personal-info-accent {
+  left: auto;
+  right: -1rem;
+}
+
+[dir="ltr"] .personal-info-accent {
+  right: auto;
+  left: -1rem;
+}
+
+[dir="rtl"] .learning-title-accent {
+  left: auto;
+  right: -1.5rem;
+}
+
+[dir="ltr"] .learning-title-accent {
+  right: auto;
+  left: -1.5rem;
+}
+
+/* Stat Icon Container RTL */
+[dir="rtl"] .stat-icon-container {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="ltr"] .stat-icon-container {
+  left: auto;
+  right: 1rem;
+}
+
+/* Stat Card Padding RTL */
+[dir="rtl"] .stat-card {
+  padding-left: 1.25rem;
+  padding-right: 1.875rem;
+}
+
+[dir="ltr"] .stat-card {
+  padding-right: 1.25rem;
+  padding-left: 1.875rem;
+}
+
+/* Home Page Content Wrapper RTL */
+@media (min-width: 1024px) {
+  [dir="rtl"] .home-content-wrapper {
+    --hcw-pl: 6.25rem;
+    --hcw-pr: 1.625rem;
+  }
+
+  [dir="ltr"] .home-content-wrapper {
+    --hcw-pl: 1.625rem;
+    --hcw-pr: 6.25rem;
+  }
+}
+
+/* Home Stat Card RTL */
+[dir="rtl"] .home-stat-card {
+  padding-left: 1.25rem;
+  padding-right: 1.5625rem;
+}
+
+[dir="ltr"] .home-stat-card {
+  padding-right: 1.25rem;
+  padding-left: 1.5625rem;
+}
+
+[dir="rtl"] .home-stat-icon-wrapper {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="ltr"] .home-stat-icon-wrapper {
+  left: auto;
+  right: 1rem;
+}
+
+/* Home Header RTL */
+@media (min-width: 1024px) {
+  [dir="rtl"] .home-header {
+    padding-left: 6.25rem;
+    padding-right: 1.5rem;
+  }
+
+  [dir="ltr"] .home-header {
+    padding-right: 6.25rem;
+    padding-left: 1.5rem;
+  }
+}
+
+/* Footer RTL */
+[dir="rtl"] .sunbird-footer {
+  padding-right: 1rem !important;
+  padding-left: 3.75rem !important;
+}
+
+[dir="ltr"] .sunbird-footer {
+  padding-left: 1rem !important;
+  padding-right: 3.75rem !important;
+}
+
+/* Accordion RTL - Chevron on left side, text on right side */
+/* Handled via Tailwind arbitrary selector in Accordion component */
+
+/* Accordion content region RTL */
+[dir="rtl"] div[role="region"][data-state] {
+  direction: rtl;
+}
+
+/* Text alignment for RTL */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
