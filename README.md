@@ -69,6 +69,29 @@ In development, the following paths are proxied from Vite (port 5173) to the bac
 
 `/portal`, `/content/preview`, `/assets/public`, `/content-plugins`, `/content-editor`, `/action`, `/plugins`, `/api`, `/generic-editor`
 
+### Authentication & Authorization
+
+**Backend** handles authentication via OIDC/Keycloak and Google OAuth. Once authenticated, user data is passed to the frontend.
+
+**Frontend** manages auth state via React Context:
+
+- `AuthContext` (`src/auth/AuthContext.tsx`) provides `user`, `isAuthenticated`, `login()`, `logout()`
+- `useAuth()` hook — access auth state from any component
+- User object contains `id`, `name`, and `roles`
+
+**RBAC Roles** (defined in `AuthContext`):
+
+`CONTENT_CREATOR` | `CONTENT_REVIEWER` | `BOOK_CREATOR` | `BOOK_REVIEWER` | `PUBLIC` | `ORG_ADMIN` | `COURSE_MENTOR`
+
+**RBAC layer** (`src/rbac/`) provides route-level and component-level access control:
+
+| Component | Purpose |
+|---|---|
+| `ProtectedRoute` | Wraps routes that require authentication |
+| `PermissionGate` | Conditionally renders children based on user roles |
+| `OnboardingGuard` | Ensures users complete onboarding before accessing the app |
+| `AccessControl` | General-purpose access control wrapper |
+
 ## Tech Stack
 
 ### Frontend
@@ -88,6 +111,20 @@ In development, the following paths are proxied from Vite (port 5173) to the bac
 | DayJS | 1.x | Date utilities |
 | jsPDF | 4.x | PDF generation |
 | DOMPurify | 3.x | HTML sanitization |
+
+#### Sunbird Web Components
+
+| Package | Version | Purpose |
+|---|---|---|
+| @project-sunbird/sunbird-pdf-player-web-component | 2.x | PDF content player |
+| @project-sunbird/sunbird-video-player-web-component | 2.x | Video content player |
+| @project-sunbird/sunbird-epub-player-web-component | 2.x | ePub content player |
+| @project-sunbird/sunbird-quml-player-web-component | 6.x | QUML question player |
+| @project-sunbird/sunbird-questionset-editor-web-component | 6.x | QuestionSet editor |
+| @project-sunbird/sunbird-collection-editor-web-component | 2.x | Collection/course editor |
+| @project-sunbird/telemetry-sdk | 2.x | Telemetry instrumentation |
+
+> These web components require their static assets to be available at `public/assets/`. This is handled automatically by the `copy-assets.js` postinstall script (see [Frontend Setup](#2-frontend-setup)).
 
 ### Backend
 
@@ -230,6 +267,8 @@ Navigate to the frontend directory and install dependencies:
 cd frontend
 npm install
 ```
+
+> **Note**: `npm install` triggers a **postinstall script** (`copy-assets.js`) that copies Sunbird web component assets (content players, editors, icons) from `node_modules` into `public/assets/`. This runs automatically and is required for content players (PDF, video, ePub, QUML, ECML) to render correctly.
 
 #### Available Frontend Scripts
 
@@ -514,6 +553,27 @@ This project enforces strict code quality standards:
 - TypeScript-first linting configuration
 - Prettier integration for consistent formatting
 
+### Theming (Tailwind CSS + Sunbird Design Tokens)
+
+All styling uses Tailwind CSS utility classes. Custom Sunbird design tokens are defined as CSS variables in `src/index.css` and mapped in `tailwind.config.ts`.
+
+**Colors** — Use `sunbird-*` classes (e.g., `text-sunbird-dark-blue`, `bg-sunbird-yellow`):
+
+| Category | Example tokens |
+|---|---|
+| Brand | `sunbird-dark-blue`, `sunbird-yellow`, `sunbird-light-blue`, `sunbird-medium-blue` |
+| Accent | `sunbird-ginger`, `sunbird-brick`, `sunbird-sunflower`, `sunbird-ivory` |
+| Nature | `sunbird-leaf`, `sunbird-forest`, `sunbird-moss`, `sunbird-wave` |
+| Dark | `sunbird-ink`, `sunbird-charcoal`, `sunbird-obsidian`, `sunbird-jamun` |
+| Status | `sunbird-success-green`, `sunbird-status-completed-*`, `sunbird-status-ongoing-*` |
+| Grays | `sunbird-gray-75`, `sunbird-gray-82`, `sunbird-gray-b2`, `sunbird-gray-d0`, etc. |
+
+**Shadows** — `shadow-sunbird-sm`, `shadow-sunbird-md`, `shadow-sunbird-lg`
+
+**Font** — `font-rubik` for Sunbird-branded text
+
+**Dark mode** — Enabled via `class` strategy (add `dark` class to root element)
+
 ### Pre-commit Quality Checks
 ```bash
 # Frontend
@@ -557,7 +617,14 @@ Runs on every pull request against Node.js 24.12.0:
 
 ### Docker Image Push ([.github/workflows/image-push.yml](.github/workflows/image-push.yml))
 
-Builds and pushes the production Docker image.
+Triggers on **git tag pushes** (any tag). Builds the Docker image and pushes it to a container registry.
+
+- **Image tag format**: `tagname_commitsha` (lowercase)
+- **Supported registries** (configured via `vars.REGISTRY_PROVIDER`):
+  - `gcp` — GCP Artifact Registry
+  - `azure` — Azure Container Registry
+  - `dockerhub` — Docker Hub
+  - Default — GitHub Container Registry (ghcr.io)
 
 ### SonarQube
 
