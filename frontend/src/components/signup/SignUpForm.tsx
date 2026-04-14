@@ -22,6 +22,9 @@ interface Step1Props {
     handleContinue: () => void;
     isStep1Valid: boolean;
     isLoading?: boolean;
+    onEmailMobileBlur?: () => void;
+    userExists?: boolean;
+    isCheckingUser?: boolean;
 }
 
 export const SignUpForm = ({
@@ -33,7 +36,10 @@ export const SignUpForm = ({
     showConfirmPassword, setShowConfirmPassword,
     handleContinue,
     isStep1Valid,
-    isLoading = false
+    isLoading = false,
+    onEmailMobileBlur,
+    userExists = false,
+    isCheckingUser = false
 }: Step1Props) => {
     const { t } = useAppI18n();
 
@@ -70,12 +76,20 @@ export const SignUpForm = ({
                         id="emailOrMobile"
                         value={emailOrMobile}
                         onChange={(e) => setEmailOrMobile(e.target.value)}
+                        onBlur={onEmailMobileBlur}
                         placeholder={t("signUp.enterEmailOrMobile")}
                         className="login-input-field h-10 px-3"
                     />
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
                         <p className="form-error-absolute form-error-offset-8">
                             {t("signUp.invalidEmailOrMobile")}
+                        </p>
+                    )}
+                    {userExists && IDENTIFIER_REGEX.test(emailOrMobile) && (
+                        <p className="form-error-absolute form-error-offset-8">
+                            {emailOrMobile.includes('@')
+                                ? t("signUpPage.emailAlreadyRegistered")
+                                : t("signUpPage.phoneAlreadyRegistered")}
                         </p>
                     )}
                 </div>
@@ -143,7 +157,7 @@ export const SignUpForm = ({
                 </div>
 
                 <PrimaryButton
-                    disabled={!isStep1Valid || isLoading}
+                    disabled={!isStep1Valid || isLoading || userExists || isCheckingUser}
                     onClick={handleContinue}
                     className="mt-4 h-[3rem]"
                     data-edataid="signup-continue-btn"

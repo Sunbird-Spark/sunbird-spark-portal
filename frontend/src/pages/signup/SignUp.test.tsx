@@ -52,6 +52,12 @@ vi.mock('@/hooks/useUser', () => ({
     useSignup: () => ({
         mutate: signupMutateImpl,
         isPending: false
+    }),
+    useCheckUserExists: () => ({
+        mutate: vi.fn((_variables, options) => {
+            options?.onSuccess?.({ data: { exists: false } });
+        }),
+        isPending: false
     })
 }));
 

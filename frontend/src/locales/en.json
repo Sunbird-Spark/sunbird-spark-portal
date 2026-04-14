@@ -733,7 +733,9 @@
     "otpButFailed": "OTP verified but account creation failed. Please try again.",
     "verificationFailed": "Verification Failed",
     "invalidOtp": "Invalid OTP. Please try again.",
-    "verificationError": "An error occurred during verification. Please try again."
+    "verificationError": "An error occurred during verification. Please try again.",
+    "emailAlreadyRegistered": "This email address is already registered. Please log in instead.",
+    "phoneAlreadyRegistered": "This mobile number is already registered. Please log in instead."
   },
   "personalInfo": {
     "title": "Personal Information",
