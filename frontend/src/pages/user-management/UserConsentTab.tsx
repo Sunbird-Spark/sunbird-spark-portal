@@ -24,7 +24,7 @@ const UserConsentTab = () => {
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
-        (r) => r.userName.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)
+        (r) => r.userName.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
       );
     }
     if (statusFilter !== "all") result = result.filter((r) => r.consentStatus === statusFilter);
