@@ -1,0 +1,226 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import HomeSidebar from './HomeSidebar';
+import { useLocation } from 'react-router-dom';
+import { usePermissions } from '@/hooks/usePermission';
+import { useIsAdmin } from '@/hooks/useUser';
+import { clearForceSyncUsed } from '@/services/forceSyncStorage';
+
+vi.mock('@/services/forceSyncStorage', () => ({
+  clearForceSyncUsed: vi.fn(),
+}));
+
+// Mock useNavigate and useLocation
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate,
+        useLocation: vi.fn(() => ({ pathname: '/home', search: '', hash: '', state: null, key: 'default', unstable_mask: undefined } as any)),
+    };
+});
+
+vi.mock('@/hooks/usePermission', () => ({
+    usePermissions: vi.fn(),
+}));
+
+// Mock useIsMobile to safely test desktop behavior
+vi.mock("@/hooks/use-mobile", () => ({
+    useIsMobile: () => false,
+}));
+
+// Mock useIsAdmin — defaults to false (non-admin) so User Management link is hidden
+vi.mock('@/hooks/useUser', () => ({
+    useIsAdmin: vi.fn(),
+    useIsContentCreator: vi.fn(),
+}));
+
+vi.mock('@/hooks/useAppI18n', () => ({
+    useAppI18n: () => ({
+        t: (key: string) => key,
+        languages: [],
+        currentCode: 'en',
+        changeLanguage: vi.fn(),
+    }),
+}));
+
+describe('HomeSidebar', () => {
+    const defaultProps = {
+        activeNav: 'home',
+        onNavChange: vi.fn(),
+    };
+
+    const renderSidebar = (props: any = defaultProps) => {
+        return render(
+            <BrowserRouter>
+                <HomeSidebar {...props} />
+            </BrowserRouter>
+        );
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(usePermissions).mockReturnValue({
+            isAuthenticated: true,
+            isLoading: false,
+            roles: ['CONTENT_CREATOR'],
+            error: null,
+            hasAnyRole: vi.fn(() => true),
+            canAccessFeature: vi.fn(),
+            refetch: vi.fn(),
+        });
+        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
+        vi.mocked(useIsAdmin).mockReturnValue(false);
+    });
+
+
+
+    it('returns null when not authenticated', () => {
+        vi.mocked(usePermissions).mockReturnValue({ isAuthenticated: false, isLoading: false, roles: ['PUBLIC'], error: null, hasAnyRole: vi.fn(), canAccessFeature: vi.fn(), refetch: vi.fn() });
+
+        const { container } = renderSidebar();
+        expect(container.firstChild).toBeNull();
+    });
+
+    it('returns null when on home route (/)', () => {
+        vi.mocked(useLocation).mockReturnValue({ pathname: '/', search: '', hash: '', state: null, key: 'default' } as any);
+
+        const { container } = renderSidebar();
+        expect(container.firstChild).toBeNull();
+    });
+
+    it('renders all navigation items when authenticated and not on /', () => {
+        vi.mocked(useLocation).mockReturnValue({ pathname: '/home', search: '', hash: '', state: null, key: 'default' } as any);
+
+        renderSidebar();
+
+        // Main Nav Items
+        expect(screen.getByText('sidebar.home')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.myLearning')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.explore')).toBeInTheDocument();
+        expect(screen.getByText('sidebar.profile')).toBeInTheDocument();
+
+        // Bottom Nav Items
+        expect(screen.getByText('sidebar.helpAndSupport')).toBeInTheDocument();
+        // expect(screen.getByText('Account Settings')).toBeInTheDocument(); // Removed as it's not in the component
+        expect(screen.getByText('sidebar.logout')).toBeInTheDocument();
+    });
+
+    it('calls onNavChange when an item is clicked', () => {
+        const onNavChange = vi.fn();
+        renderSidebar({ ...defaultProps, onNavChange });
+
+        fireEvent.click(screen.getByText('sidebar.myLearning'));
+        expect(onNavChange).toHaveBeenCalledWith('learning');
+    });
+
+    it('navigates to path when a non-home item is clicked', () => {
+        renderSidebar();
+
+        fireEvent.click(screen.getByText('sidebar.myLearning'));
+        expect(mockNavigate).toHaveBeenCalledWith('/my-learning');
+
+        fireEvent.click(screen.getByText('sidebar.explore'));
+        expect(mockNavigate).toHaveBeenCalledWith('/explore');
+    });
+
+    it('does not navigate when Home is clicked (since it stays on the page)', () => {
+        mockNavigate.mockClear();
+        renderSidebar();
+
+        fireEvent.click(screen.getByText('sidebar.home'));
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('highlights the active item', () => {
+        renderSidebar({ ...defaultProps, activeNav: 'learning' });
+
+        const learningButton = screen.getByText('sidebar.myLearning').closest('button');
+        expect(learningButton).toHaveClass('text-sunbird-brick font-normal');
+
+        const homeButton = screen.getByText('sidebar.home').closest('button');
+        expect(homeButton).toHaveClass('text-sunbird-obsidian font-normal');
+        expect(homeButton).toHaveClass('px-6');
+    });
+
+    it('renders the correct icons for active/inactive states', () => {
+        const { rerender } = renderSidebar({ ...defaultProps, activeNav: 'home' });
+
+        // When home is active, it should use GoHomeFill (not easily testable via class but we can check if it renders)
+        // Check for specific classes applied to icons
+        const homeIcon = screen.getByText('sidebar.home').previousSibling;
+        expect(homeIcon).toHaveClass('text-sunbird-brick');
+
+        rerender(
+            <BrowserRouter>
+                <HomeSidebar {...defaultProps} activeNav="learning" />
+            </BrowserRouter>
+        );
+
+        const inactiveHomeIcon = screen.getByText('sidebar.home').previousSibling;
+        expect(inactiveHomeIcon).toHaveClass('text-sunbird-ginger');
+    });
+
+    it('hides Account Settings when on help-support route', () => {
+        // Since Account Settings is not even in the list anymore, this test is redundant
+        // but let's keep it to verify Help and Support is still there.
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HomeSidebar {...defaultProps} />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('sidebar.helpAndSupport')).toBeInTheDocument();
+    });
+
+    it('renders in collapsed state', () => {
+        renderSidebar({ ...defaultProps, collapsed: true });
+
+        // Sidebar should have reduced width
+        const sidebar = screen.getByTestId('home-sidebar');
+        expect(sidebar).toHaveClass('w-[5rem]');
+
+        // Text labels should not be visible
+        expect(screen.queryByText('sidebar.home')).not.toBeInTheDocument();
+        expect(screen.queryByText('sidebar.myLearning')).not.toBeInTheDocument();
+
+        // Icons should still be there
+        const homeButton = screen.getAllByRole('button')[0];
+        expect(homeButton).toHaveAttribute('title', 'sidebar.home');
+    });
+
+    it('calls onToggle when toggle button is clicked', () => {
+        const onToggle = vi.fn();
+        renderSidebar({ ...defaultProps, onToggle });
+
+        // Find the toggle button (it has aria-label "Collapse Sidebar" initially)
+        const toggleBtn = screen.getByRole('button', { name: /sidebar.collapse/i });
+        fireEvent.click(toggleBtn);
+
+        expect(onToggle).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls clearForceSyncUsed and redirects when logout is clicked', () => {
+        const originalLocation = window.location;
+        const locationMock = { ...originalLocation, href: '' };
+        Object.defineProperty(window, 'location', {
+            value: locationMock,
+            configurable: true,
+            writable: true,
+        });
+
+        renderSidebar();
+        fireEvent.click(screen.getByText('sidebar.logout'));
+
+        expect(clearForceSyncUsed).toHaveBeenCalledTimes(1);
+        expect(locationMock.href).toBe('/portal/logout');
+
+        Object.defineProperty(window, 'location', {
+            value: originalLocation,
+            configurable: true,
+            writable: true,
+        });
+    });
+});

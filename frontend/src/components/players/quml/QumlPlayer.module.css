@@ -1,0 +1,16 @@
+
+.qumlPlayerContainer :global(.quml-option) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.qumlPlayerContainer :global(.quml-option .container) {
+  flex: 0 0 10% !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+}
+
+.qumlPlayerContainer :global(.quml-option .option p) {
+  margin: 0 !important;
+}

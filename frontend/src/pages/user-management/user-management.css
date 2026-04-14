@@ -1,0 +1,227 @@
+/* ─── Search Row (inside right panel) ───────────────────────────────── */
+.um-tab-search-row {
+  @apply flex gap-3 items-center;
+}
+
+/* ─── Page Header ────────────────────────────────────────────────────── */
+.um-page-header {
+  @apply mb-4;
+}
+
+.um-page-title {
+  @apply font-rubik font-medium text-[1.5rem] leading-[1.75rem] text-sunbird-obsidian;
+}
+
+.um-page-subtitle {
+  @apply font-rubik font-normal text-[0.875rem] leading-[1.25rem] text-sunbird-gray-75 mt-1;
+}
+
+/* ─── Search Card ────────────────────────────────────────────────────── */
+.um-search-card {
+  @apply bg-white rounded-2xl p-6 mb-6;
+  box-shadow: var(--sunbird-shadow-sm);
+}
+
+.um-search-label {
+  @apply block font-rubik font-medium text-[0.9375rem] text-sunbird-obsidian mb-3;
+}
+
+.um-search-row {
+  @apply flex gap-3 items-center;
+}
+
+.um-search-input-wrapper {
+  @apply relative flex-1;
+}
+
+.um-search-icon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2 text-sunbird-gray-75 w-4 h-4;
+}
+
+.um-search-input {
+  @apply font-rubik;
+  padding-left: 2.25rem !important; /* 36px — space for the search icon */
+}
+
+.um-search-btn {
+  @apply bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik font-medium shrink-0 px-6;
+}
+
+/* ─── Results Card ───────────────────────────────────────────────────── */
+.um-results-card {
+  @apply bg-white rounded-2xl overflow-hidden;
+  box-shadow: var(--sunbird-shadow-sm);
+}
+
+/* ─── Table ──────────────────────────────────────────────────────────── */
+.um-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.um-table {
+  @apply w-full border-collapse;
+}
+
+.um-table-head-row {
+  @apply bg-sunbird-gray-f3 border-b border-gray-200;
+}
+
+.um-th {
+  @apply px-4 py-3 text-left font-rubik font-medium text-[0.8125rem] text-sunbird-obsidian whitespace-nowrap;
+}
+
+.um-th-narrow {
+  @apply w-16;
+}
+
+.um-th-actions {
+  @apply w-36;
+}
+
+.um-table-row {
+  @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+}
+
+.um-table-row:last-child {
+  @apply border-b-0;
+}
+
+.um-td {
+  @apply px-4 py-4 font-rubik text-[0.875rem] text-sunbird-obsidian align-top;
+}
+
+.um-td-narrow {
+  @apply w-16;
+}
+
+.um-td-muted {
+  @apply text-sunbird-gray-75;
+}
+
+.um-td-name {
+  @apply font-medium;
+}
+
+.um-td-email {
+  @apply text-sunbird-gray-75 text-[0.8125rem];
+}
+
+.um-td-actions {
+  @apply w-36;
+}
+
+/* ─── Status Badge ───────────────────────────────────────────────────── */
+.um-status-badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded-full text-[0.75rem] font-rubik font-medium;
+}
+
+.um-status-active {
+  @apply bg-green-100 text-green-700;
+}
+
+.um-status-inactive {
+  @apply bg-red-100 text-red-700;
+}
+
+/* ─── Roles List ─────────────────────────────────────────────────────── */
+.um-roles-list {
+  @apply flex flex-col gap-2;
+}
+
+.um-role-chip {
+  @apply inline-flex items-center gap-1.5 bg-sunbird-gray-f3 border border-gray-200 rounded-lg px-2.5 py-1 max-w-fit;
+}
+
+.um-role-label {
+  @apply font-rubik text-[0.75rem] font-medium text-sunbird-obsidian leading-none;
+}
+
+.um-role-action-btn {
+  @apply p-0.5 rounded transition-colors leading-none;
+}
+
+.um-role-delete-btn {
+  @apply text-red-500 hover:bg-red-50;
+}
+
+/* ─── Add Role Button ────────────────────────────────────────────────── */
+.um-add-role-btn {
+  @apply bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik font-medium text-[0.8125rem] gap-1 px-3;
+}
+
+/* ─── No Roles ───────────────────────────────────────────────────────── */
+.um-no-roles {
+  @apply text-sunbird-gray-75 text-[0.8125rem] italic;
+}
+
+/* ─── Empty / Initial State ──────────────────────────────────────────── */
+.um-empty-state {
+  @apply py-16 text-center;
+}
+
+.um-empty-text {
+  @apply font-rubik text-sunbird-gray-75 text-[0.9375rem];
+}
+
+.um-initial-state {
+  @apply flex flex-col items-center justify-center py-20 gap-4;
+}
+
+.um-initial-icon {
+  @apply w-12 h-12 text-sunbird-gray-d0;
+}
+
+.um-initial-text {
+  @apply font-rubik font-normal text-[0.9375rem] text-sunbird-gray-75 text-center;
+}
+
+/* ─── Dialog Overlay ─────────────────────────────────────────────────── */
+.um-dialog-overlay {
+  @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4;
+}
+
+.um-dialog-panel {
+  @apply bg-white rounded-2xl w-full max-w-md flex flex-col;
+  box-shadow: var(--sunbird-shadow-lg);
+}
+
+.um-dialog-header {
+  @apply flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100;
+}
+
+.um-dialog-title {
+  @apply font-rubik font-semibold text-[1.125rem] text-sunbird-obsidian;
+}
+
+.um-dialog-close-btn {
+  @apply p-1.5 rounded-md text-sunbird-gray-75 hover:bg-gray-100 hover:text-sunbird-obsidian transition-colors;
+}
+
+.um-dialog-body {
+  @apply px-6 py-5 flex flex-col gap-5;
+}
+
+.um-dialog-footer {
+  @apply flex justify-end gap-3 px-6 pb-6 pt-2;
+}
+
+/* ─── Form Fields ────────────────────────────────────────────────────── */
+.um-form-field {
+  @apply flex flex-col gap-2;
+}
+
+.um-form-label {
+  @apply font-rubik font-medium text-[0.9375rem] text-sunbird-obsidian;
+}
+
+.um-required {
+  @apply text-red-500;
+}
+
+.um-select-trigger {
+  @apply font-rubik h-12;
+}
+
+.um-save-btn {
+  @apply bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik font-medium min-w-[4.5rem];
+}
