@@ -334,6 +334,91 @@ NEW_REQUIRED_CONFIG=your-value-here
 ```
 3. Add to your `.env` and notify team members
 
+#### Environment Variables Reference
+
+##### Server Configuration
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `ENVIRONMENT` | Runtime environment (`local`, `test`, `production`) | Yes | `''` |
+| `PORT` | Backend server port | No | `3000` |
+| `DOMAIN_URL` | Public-facing domain URL of the portal | Yes | `''` |
+| `SERVER_URL` | Internal server URL (used for OIDC callbacks, etc.) | Yes | `''` |
+| `DEVELOPMENT_REACT_APP_URL` | Frontend dev server URL (used in local/dev mode only) | Yes | `''` |
+| `SUNBIRD_PORTAL_LOG_LEVEL` | Winston log level (`debug`, `info`, `warn`, `error`) | No | `debug` |
+
+##### Session Configuration
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `SUNBIRD_SESSION_SECRET` | Secret key used to sign session cookies | Yes | `default_secret` |
+| `SUNBIRD_ANONYMOUS_SESSION_TTL` | Anonymous session time-to-live in milliseconds | No | `60000` |
+| `SUNBIRD_PORTAL_SESSION_STORE` | Session store type (`in-memory` or `postgresql`) | No | `in-memory` |
+
+##### Kong API Gateway
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `KONG_URL` | Base URL of the Kong API gateway | Yes | `''` |
+| `KONG_ANONYMOUS_FALLBACK_TOKEN` | API token for anonymous (unauthenticated) requests | Yes | `''` |
+| `KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN` | API token for anonymous device registration | Yes | `''` |
+| `KONG_LOGGEDIN_FALLBACK_TOKEN` | API token for authenticated user requests | Yes | `''` |
+| `KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN` | API token for authenticated device registration | Yes | `''` |
+
+##### Keycloak / OIDC Authentication
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `PORTAL_REALM` | Keycloak realm name | Yes | `''` |
+| `PORTAL_AUTH_SERVER_CLIENT` | Keycloak client ID for the portal | Yes | `''` |
+| `OIDC_ISSUER_URL` | OIDC issuer URL (Keycloak realm endpoint) | Yes | `''` |
+
+##### Google OAuth
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `GOOGLE_OAUTH_CLIENT_ID` | Google OAuth client ID (web) | Yes | `''` |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth client secret (web) | Yes | `''` |
+| `GOOGLE_OAUTH_CLIENT_ID_IOS` | Google OAuth client ID (iOS app) | Yes | `''` |
+| `KEYCLOAK_GOOGLE_CLIENT_ID` | Keycloak Google identity provider client ID | Yes | `''` |
+| `KEYCLOAK_GOOGLE_CLIENT_SECRET` | Keycloak Google identity provider client secret | Yes | `''` |
+
+##### Mobile Authentication
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `KEYCLOAK_ANDROID_CLIENT_ID` | Keycloak confidential client ID for Android native auth | Yes | `''` |
+| `KEYCLOAK_ANDROID_CLIENT_SECRET` | Keycloak confidential client secret for Android | Yes | `''` |
+| `KEYCLOAK_GOOGLE_ANDROID_CLIENT_ID` | Keycloak client ID for Google Sign-In on Android | Yes | `''` |
+| `KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET` | Keycloak client secret for Google Sign-In on Android | Yes | `''` |
+
+##### Database (YugabyteDB)
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `SUNBIRD_YUGABYTE_HOST` | YugabyteDB host address | Yes | `''` |
+| `SUNBIRD_YUGABYTE_PORT` | YugabyteDB YSQL port | No | `5433` |
+| `SUNBIRD_YUGABYTE_YCQL_PORT` | YugabyteDB YCQL (Cassandra-compatible) port | No | `9042` |
+| `SUNBIRD_YUGABYTE_DATABASE` | YugabyteDB database name | No | `portal` |
+| `SUNBIRD_YUGABYTE_USER` | YugabyteDB username | No | `''` |
+| `SUNBIRD_YUGABYTE_PASSWORD` | YugabyteDB password | No | `''` |
+| `FORMS_DB_NAME` | Cassandra keyspace for forms data | Yes | `''` |
+| `CONTENT_REVIEW_COMMENT_DB_NAME` | Cassandra keyspace for review comments | Yes | `''` |
+
+##### Google reCAPTCHA
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `GOOGLE_RECAPTCHA_SECRET` | Server-side reCAPTCHA secret key | No | `''` |
+| `GOOGLE_RECAPTCHA_VERIFY_URL` | reCAPTCHA verification endpoint | No | `https://www.google.com/recaptcha/api/siteverify` |
+
+##### Upstream Services
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `LEARN_BASE_URL` | Base URL for the Learner/UserOrg service | No | `http://userorg-service:9000` |
+| `KNOWLG_MW_BASE_URL` | Base URL for the Knowledge middleware service | No | `http://knowledge-mw-service:5000` |
+
 #### Available Backend Scripts
 
 ```bash
