@@ -219,8 +219,11 @@ describe('Home Page', () => {
         expect(screen.getByTestId('dashboard-content')).toHaveAttribute('data-enrolled', '2');
     });
 
-    it('calls useUserRead with refetchOnMount: always to always get fresh user data', () => {
+    it('calls useUserRead without refetchOnMount to use cached data from OnboardingGuard', () => {
         renderHome();
-        expect(mockUseUserRead).toHaveBeenCalledWith({ refetchOnMount: 'always' });
+        expect(mockUseUserRead).toHaveBeenCalled();
+        // Verify no refetchOnMount option is passed (second argument undefined or not provided)
+        const calls = (mockUseUserRead as any).mock.calls;
+        expect(calls[0][0]).toBeUndefined();
     });
 });
