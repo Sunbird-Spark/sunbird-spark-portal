@@ -2,30 +2,130 @@
 
 A modern, scalable educational platform built with React and Node.js, designed for national-scale deployment.Sunbird is a next-generation scalable open-source learning solution for teachers and tutors. Built for the 21st century with state-of-the-art technology, Sunbird runs natively in cloud/mobile environments. The open-source governance of Sunbird allows a massive community of nation-builders to co-create and extend the solution in novel ways.
 
+## Architecture Overview
+
+This is a **monorepo** containing two independent applications:
+
+- **`frontend/`** — React 19 + TypeScript + Vite single-page application (Sunbird Ed Portal UI)
+- **`backend/`** — Express 5 + TypeScript + Node.js API server
+
+In **production**, the backend serves the frontend's static build from `dist/public/`. In **development**, Vite runs on port 5173 and proxies API/content requests to the backend on port 3000.
+
+### Frontend Architecture
+
+- **Routing**: React Router 7
+- **Server state**: TanStack Query v5
+- **Styling**: Tailwind CSS with custom Sunbird design tokens
+- **UI primitives**: Radix UI components
+- **i18n**: i18next + react-i18next
+- **Path alias**: `@/` maps to `frontend/src/`
+
+Key frontend layers:
+
+| Directory | Purpose |
+|---|---|
+| `src/api/` | Axios-based API client functions |
+| `src/auth/` | Authentication context (AuthContext) |
+| `src/services/` | Business logic, display config (icons, colors per content type) |
+| `src/providers/` | React context providers (i18n direction, telemetry) |
+| `src/rbac/` | Role-based access control (ProtectedRoute, PermissionGate, OnboardingGuard) |
+| `src/hooks/` | Custom React hooks |
+| `src/components/` | Reusable UI components |
+| `src/pages/` | Route-level page components |
+| `src/utils/` | Shared utility functions |
+| `src/types/` | TypeScript type definitions |
+| `src/configs/` | App configuration (i18n, languages) |
+
+### Backend Architecture
+
+- **Framework**: Express 5 with TypeScript (ESM)
+- **Auth**: OIDC/Keycloak (openid-client), Google OAuth, mobile Keycloak redirect
+- **Databases**: YugabyteDB (via `pg`)
+- **Sessions**: express-session with connect-pg-simple
+- **Proxy**: http-proxy-middleware routes content/plugin requests to upstream Sunbird services
+- **Logging**: winston
+- **Security**: helmet
+- **Validation**: ajv
+
+Key backend layers:
+
+| Directory | Purpose |
+|---|---|
+| `src/routes/` | Express route definitions |
+| `src/controllers/` | Request handlers |
+| `src/services/` | Business logic (user, org, tenant, telemetry, forms, auth) |
+| `src/auth/` | OIDC provider and middleware |
+| `src/middlewares/` | Express middleware (auth, session, validation) |
+| `src/proxies/` | Upstream service proxy config (Kong, Knowlg, user) |
+| `src/databases/` | Database access (forms, review comments) |
+| `src/config/` | Typed environment variable access (`env.ts`) |
+| `src/utils/` | Logger, session store, proxy utilities |
+| `src/models/` | Data models |
+| `src/types/` | TypeScript type definitions and declaration files |
+
+### Vite Dev Proxy
+
+In development, the following paths are proxied from Vite (port 5173) to the backend (port 3000):
+
+`/portal`, `/content/preview`, `/assets/public`, `/content-plugins`, `/content-editor`, `/action`, `/plugins`, `/api`, `/generic-editor`
+
 ## Tech Stack
 
 ### Frontend
-- **React**: 19.2.1
-- **TypeScript**: 5.9.3
-- **Vite**: 7.3.1
-- **Testing**: Vitest
-- **HTTP Client**: Axios 1.13.2
+
+| Technology | Version | Purpose |
+|---|---|---|
+| React | 19.2.1 | UI library |
+| TypeScript | 5.9.3 | Type safety |
+| Vite | 7.3.1 | Build tool & dev server |
+| React Router | 7.x | Client-side routing |
+| TanStack Query | 5.x | Server state management |
+| Tailwind CSS | 3.4.x | Utility-first styling |
+| Radix UI | Latest | Accessible UI primitives |
+| Axios | 1.13.2 | HTTP client |
+| i18next | 25.x | Internationalization |
+| Recharts | 3.x | Charting |
+| DayJS | 1.x | Date utilities |
+| jsPDF | 4.x | PDF generation |
+| DOMPurify | 3.x | HTML sanitization |
 
 ### Backend
-- **Node.js**: 24.12.0
-- **Express**: 5.2.1
-- **TypeScript**: 5.9.3
-- **CORS**: 2.8.5
 
-### Development Tools
-- **ESLint**: 9.39.2 with TypeScript support
-- **Prettier**: 3.7.4
-- **SonarQube**: Integrated code quality analysis
-- **GitHub Actions**: Automated CI/CD pipeline
+| Technology | Version | Purpose |
+|---|---|---|
+| Node.js | 24.12.0 | Runtime |
+| Express | 5.2.1 | Web framework |
+| TypeScript | 5.9.3 | Type safety |
+| openid-client | 6.x | OIDC/Keycloak authentication |
+| google-auth-library | 10.x | Google OAuth |
+| pg | 8.x | PostgreSQL client |
+| @yugabytedb/pg | 8.x | YugabyteDB client |
+| cassandra-driver | 4.x | Cassandra client |
+| express-session | 1.x | Session management |
+| connect-pg-simple | 10.x | PostgreSQL session store |
+| http-proxy-middleware | 3.x | Upstream service proxying |
+| helmet | 8.x | Security headers |
+| winston | 3.x | Logging |
+| ajv | 8.x | JSON schema validation |
+| CORS | 2.8.5 | Cross-origin resource sharing |
+
+### Development & Testing Tools
+
+| Tool | Purpose |
+|---|---|
+| ESLint 9.x | Linting with TypeScript support |
+| Prettier 3.x | Code formatting |
+| Vitest 4.x | Unit & integration testing (frontend + backend) |
+| @testing-library/react | React component testing |
+| happy-dom | DOM environment for frontend tests |
+| supertest | HTTP integration testing (backend) |
+| tsx | TypeScript execution with hot reload (backend dev) |
+| SonarQube | Code quality analysis |
+| GitHub Actions | CI/CD pipeline |
 
 ## Prerequisites
 
-- **Node.js**: 24.12.0 
+- **Node.js**: 24.12.0
 - **npm**: Latest version
 - **Git**: For version control
 
@@ -40,51 +140,80 @@ nvm use 24.12.0
 ## Project Structure
 
 ```
-SunbirdEd-portal/
-├── .github/                    # CI/CD workflows & GitHub config
-│   ├── copilot-instructions.md
+sunbird-portal/
+├── .github/                        # CI/CD workflows & GitHub config
 │   └── workflows/
-│       └── pull-request.yml
-├── frontend/                   # React application
-│   ├── public/
+│       ├── pull-requests.yml       # PR quality checks
+│       └── image-push.yml          # Docker image build & push
+├── frontend/                       # React application
+│   ├── public/                     # Static assets
 │   ├── src/
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   └── components/
-│   │   └── configs/
-│   │   └── hooks/
-│   │   └── locales/
-│   │   └── pages/
-│   │   └── styles/
-│   │   └── api/
-│   │   └── types/
-│   ├── .prettierrc            # Prettier configuration
-│   ├── eslint.config.js       # ESLint configuration
-│   ├── vitest.config.ts       # Vitest configuration
-│   ├── package.json
-│   ├── tsconfig.json          # TypeScript configuration
-│   ├── tsconfig.node.json     # Node TypeScript config
-│   └── vite.config.ts         # Vite build configuration
-├── backend/                   # Express API server
+│   │   ├── api/                    # Axios API client & config
+│   │   ├── assets/                 # Images, icons, static resources
+│   │   ├── auth/                   # AuthContext provider
+│   │   ├── components/             # Reusable UI components
+│   │   │   ├── auth/               # Auth-related components
+│   │   │   ├── collection/         # Collection/course components
+│   │   │   ├── common/             # Shared components
+│   │   │   ├── content/            # Content display components
+│   │   │   ├── content-player/     # Content player wrapper
+│   │   │   ├── editors/            # Content editors
+│   │   │   ├── explore/            # Explore/search components
+│   │   │   ├── home/               # Home page components
+│   │   │   ├── landing/            # Landing page components
+│   │   │   ├── layout/             # App layout (header, sidebar)
+│   │   │   ├── players/            # Media players
+│   │   │   ├── profile/            # User profile components
+│   │   │   ├── reports/            # Report components
+│   │   │   ├── signup/             # Signup flow components
+│   │   │   ├── telemetry/          # Telemetry components
+│   │   │   ├── ui/                 # Base UI primitives (Radix wrappers)
+│   │   │   └── workspace/          # Workspace/content management
+│   │   ├── configs/                # App config (i18n, languages)
+│   │   ├── data/                   # Static/mock data
+│   │   ├── hooks/                  # Custom React hooks
+│   │   ├── lib/                    # Shared libraries & HTTP client
+│   │   ├── locales/                # i18n translation files (en, fr, pt, ar)
+│   │   ├── pages/                  # Route-level page components
+│   │   ├── providers/              # Context providers (i18n, telemetry)
+│   │   ├── rbac/                   # Role-based access control
+│   │   ├── services/               # Business logic & API services
+│   │   ├── styles/                 # Global styles & RTL overrides
+│   │   ├── test/                   # Test utilities & setup
+│   │   ├── types/                  # TypeScript type definitions
+│   │   └── utils/                  # Utility functions
+│   ├── eslint.config.js
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── package.json
+├── backend/                        # Express API server
 │   ├── src/
-│   │   ├── app.ts
-│   │   └── server.ts
-│   │   └── controllers
-│   │   └── middlewares
-│   │   └── proxies
-│   │   └── routes
-│   │   └── services
-│   │   └── types
-│   ├── .prettierrc            # Prettier configuration
-│   ├── eslint.config.js       # ESLint configuration
-│   ├── package.json
-│   ├── tsconfig.json          # TypeScript configuration
-├── .gitignore                 # Git ignore rules
-├── README.md                  # This file
-└── sonar-project.properties   # SonarQube configuration
+│   │   ├── auth/                   # OIDC provider & middleware
+│   │   ├── config/                 # Environment config (env.ts)
+│   │   ├── controllers/            # Request handlers
+│   │   ├── databases/              # Database access layer
+│   │   ├── middlewares/             # Express middleware
+│   │   ├── models/                 # Data models
+│   │   ├── proxies/                # Upstream service proxies
+│   │   ├── routes/                 # Route definitions
+│   │   ├── services/               # Business logic services
+│   │   ├── types/                  # TypeScript types & declarations
+│   │   ├── utils/                  # Logger, session store, utilities
+│   │   ├── app.ts                  # Express app setup
+│   │   └── server.ts               # Server entry point
+│   ├── .envExample                 # Environment variable template
+│   ├── eslint.config.js
+│   ├── tsconfig.json
+│   └── package.json
+├── docs/                           # Documentation
+├── Dockerfile                      # Multi-stage production build
+├── sonar-project.properties        # SonarQube configuration
+├── CLAUDE.md                       # Claude Code instructions
+└── README.md                       # This file
 ```
 
-##  Getting Started
+## Getting Started
 
 ### 1. Clone the Repository
 
@@ -105,24 +234,31 @@ npm install
 #### Available Frontend Scripts
 
 ```bash
-
-# Build for production
-npm run build
-
 # Start development server (http://localhost:5173)
 npm run dev
+
+# Build for production (type-check + Vite build → dist/)
+npm run build
 
 # Preview production build
 npm run preview
 
 # Run tests
-npm run test
-npm run test:coverage  # With coverage report
+npm run test            # Vitest in watch mode
+npm run test:run        # Single test run
+npm run test:coverage   # Coverage report (70% thresholds)
 
 # Code quality
-npm run lint          # Check for linting errors
-npm run lint:fix      # Auto-fix linting errors
-npm run type-check    # TypeScript type checking
+npm run lint            # Check for linting errors
+npm run lint:fix        # Auto-fix linting errors
+npm run type-check      # TypeScript type checking (no emit)
+npm run format          # Prettier format all files
+npm run format:check    # Check formatting (CI)
+```
+
+Run a single test file:
+```bash
+npx vitest run src/path/to/file.test.tsx
 ```
 
 ### 3. Backend Setup
@@ -133,6 +269,7 @@ Open a new terminal, navigate to the backend directory and install dependencies:
 cd backend
 npm install
 ```
+
 #### i. Configure Environment Variables
 
 **Before running the backend**, you must create and configure your `.env` file:
@@ -200,22 +337,37 @@ NEW_REQUIRED_CONFIG=your-value-here
 #### Available Backend Scripts
 
 ```bash
+# Start development server with hot reload (http://localhost:3000)
+npm run dev
 
-# Start server
-npm run start
+# Build
+npm run build           # TypeScript compile → dist/
+npm run build:full      # Build backend + copy frontend dist to dist/public/
+
+# Production start
+npm run start           # Build + run (full build in production, standard build otherwise)
+
+# Run tests
+npm run test            # Vitest in watch mode
+npm run test:run        # Single test run
+npm run test:coverage   # Coverage report
 
 # Code quality
-npm run lint          # Check for linting errors
-npm run lint:fix      # Auto-fix linting errors
+npm run lint            # Check for linting errors
+npm run lint:fix        # Auto-fix linting errors
+npm run type-check      # TypeScript type checking (no emit)
+npm run format          # Prettier format all files
+npm run format:check    # Check formatting (CI)
 ```
 
-### 4. Running Both Services
+### 4. Running Both Services (Development)
 
-#### Option 1: Separate Terminals
+Open two terminals:
+
 1. **Terminal 1 (Backend)**:
    ```bash
    cd backend
-   npm run start
+   npm run dev
    ```
 
 2. **Terminal 2 (Frontend)**:
@@ -224,30 +376,66 @@ npm run lint:fix      # Auto-fix linting errors
    npm run dev
    ```
 
+The Vite dev server proxies API requests (e.g., `/api`, `/portal`, `/action`) to the backend automatically. Access the application at **http://localhost:5173**.
+
+### 5. Full Production Build
+
+```bash
+cd frontend && npm run build
+cd ../backend && npm run build:full
+node backend/dist/server.js
+```
+
+In production, the backend serves both the API and the frontend static files from `dist/public/` on port 3000.
 
 ## Application URLs
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3000
+| Environment | Frontend | Backend API |
+|---|---|---|
+| Development | http://localhost:5173 | http://localhost:3000 |
+| Production | Served by backend | http://localhost:3000 |
+
+## Docker
+
+A multi-stage `Dockerfile` is provided for production deployments:
+
+```bash
+# Build the Docker image (COMMIT_HASH is required)
+docker build --build-arg COMMIT_HASH=$(git rev-parse --short HEAD) -t sunbird-portal .
+
+# Run the container
+docker run -p 3000:3000 --env-file backend/.env sunbird-portal
+```
+
+The Dockerfile performs three stages:
+1. **Frontend build** — Installs dependencies and builds the React app
+2. **Backend build** — Compiles TypeScript and stamps the build hash
+3. **Production image** — Copies built assets with production-only dependencies, runs as non-root user
 
 ## Testing
 
+Both frontend and backend use **Vitest** as the test framework with a **70% coverage threshold** across branches, functions, lines, and statements.
+
 ### Frontend Testing
-The frontend uses vitest with React Testing Library:
+
+Uses Vitest + happy-dom + @testing-library/react:
 
 ```bash
 cd frontend
-npm run test           # Run all tests
-npm run test:coverage  # Generate coverage report
+npm run test            # Watch mode
+npm run test:run        # Single run
+npm run test:coverage   # With coverage report
 ```
 
 ### Backend Testing
-Backend testing setup is ready but tests need to be implemented:
+
+Uses Vitest + supertest for integration tests:
 
 ```bash
-cd backend 
-npm run test           # Run all tests
-npm run test:coverage  # Generate coverage report
+cd backend
+npm run test            # Watch mode
+npm run test:run        # Single run
+npm run test:coverage   # With coverage report
 ```
 
 ## Code Quality
@@ -256,7 +444,9 @@ This project enforces strict code quality standards:
 
 ### TypeScript Configuration
 - **Strict mode enabled** across both frontend and backend
-- **Comprehensive type checking** with `noUncheckedIndexedAccess`
+- **`noUncheckedIndexedAccess`** — always handle potentially-undefined array/object access
+- **`noUnusedLocals: true`** in backend
+- **Max file length** — 250 lines per file (500 for test files)
 
 ### ESLint Rules
 - TypeScript-first linting configuration
@@ -268,10 +458,11 @@ This project enforces strict code quality standards:
 cd frontend
 npm run lint && npm run type-check
 
-# Backend  
+# Backend
 cd backend
 npm run lint && npm run type-check
 ```
+
 ## Code Formatting (Prettier)
 
 This repository uses Prettier to enforce consistent code formatting.
@@ -287,49 +478,45 @@ cd backend
 npm run format       # formats files
 npm run format:check # checks formatting (CI)
 ```
-### Build
-
-#### Frontend
-```bash
-cd frontend
-npm run build
-# Output: frontend/dist/
-```
-
-#### Backend
-```bash
-cd backend
-npm run start
-# Output: backend/dist/
-```
 
 ## CI/CD Pipeline
 
-The project includes a GitHub Actions workflow ([.github/workflows/pull-request.yml](.github/workflows/pull-request.yml)) that runs on every pull request:
+The project includes GitHub Actions workflows:
 
--  **Linting** (ESLint)
--  **Type checking** (TypeScript)
--  **Testing** (Vitest)
--  **SonarQube analysis** (Code quality & security)
+### Pull Request Checks ([.github/workflows/pull-requests.yml](.github/workflows/pull-requests.yml))
+
+Runs on every pull request against Node.js 24.12.0:
+
+| Check | Frontend | Backend |
+|---|---|---|
+| Lint (ESLint) | Yes | Yes |
+| Build | Yes | Yes |
+| Test with coverage | Yes | Yes |
+
+### Docker Image Push ([.github/workflows/image-push.yml](.github/workflows/image-push.yml))
+
+Builds and pushes the production Docker image.
+
+### SonarQube
+
+Code quality analysis is configured via `sonar-project.properties`. Coverage reports from both frontend and backend are aggregated for analysis.
 
 ## Development Workflow
 
 1. **Create feature branch**: `git checkout -b feature/your-feature-name`
 2. **Make changes** following TypeScript strict guidelines
-3. **Run quality checks**: 
+3. **Run quality checks**:
    ```bash
    cd frontend && npm run lint && npm run type-check
    cd ../backend && npm run lint && npm run type-check
    ```
-4. **Commit changes**: Follow conventional commit format
-5. **Create pull request**: CI pipeline will run automatically
-
-## Additional Resources
-
-- [React 19.2.1 Documentation](https://react.dev/)
-- [Vite 7+ Guide](https://vite.dev/)
-- [Express.js Documentation](https://expressjs.com/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+4. **Run tests**:
+   ```bash
+   cd frontend && npm run test:run
+   cd ../backend && npm run test:run
+   ```
+5. **Commit changes**: Follow conventional commit format (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`)
+6. **Create pull request**: CI pipeline will run automatically
 
 ## Internationalization (i18n)
 
@@ -388,20 +575,31 @@ The mobile app opens portal pages (signup, forgot-password) in InAppBrowser, whi
    ```bash
    nvm install 24.12.0
    nvm use 24.12.0
-
    ```
 
-2. **Port conflicts**: 
+2. **Port conflicts**:
    - Frontend (5173) and Backend (3000) ports should be available
    - Change ports in [vite.config.ts](frontend/vite.config.ts) or [server.ts](backend/src/server.ts) if needed
 
 3. **TypeScript errors**: Run type check to identify issues
    ```bash
-   npm run type-check
+   cd frontend && npm run type-check
+   cd ../backend && npm run type-check
    ```
+
+4. **Backend won't start**: Ensure you've created `backend/.env` from `.envExample` and set `ENVIRONMENT=local`
+
+## Additional Resources
+
+- [React Documentation](https://react.dev/)
+- [Vite Guide](https://vite.dev/)
+- [Express.js Documentation](https://expressjs.com/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [TanStack Query](https://tanstack.com/query)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Radix UI](https://www.radix-ui.com/)
+- [Vitest](https://vitest.dev/)
 
 ## License
 
 MIT License - see LICENSE file for details.
-
----
