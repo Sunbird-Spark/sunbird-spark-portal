@@ -256,7 +256,7 @@ sunbird-portal/
 
 ```bash
 git clone https://github.com/Sunbird-Spark/sunbird-spark-portal.git
-cd sunbird-portal
+cd sunbird-spark-portal
 ```
 
 ### 2. Frontend Setup
@@ -268,7 +268,7 @@ cd frontend
 npm install
 ```
 
-> **Note**: `npm install` triggers a **postinstall script** (`copy-assets.js`) that copies Sunbird web component assets (content players, editors, icons) from `node_modules` into `public/assets/`. This runs automatically and is required for content players (PDF, video, ePub, QUML, ECML) to render correctly.
+> **Note**: `npm install` triggers a **postinstall script** (`copy-assets.js`) that copies Sunbird web component assets (content players, editors, icons) from `node_modules` into `public/assets/`. This runs automatically and is required for content players (PDF, video, ePub, QUML) to render correctly.
 
 #### Available Frontend Scripts
 
@@ -386,7 +386,7 @@ NEW_REQUIRED_CONFIG=your-value-here
 |---|---|---|---|
 | `SUNBIRD_SESSION_SECRET` | Secret key used to sign session cookies | Yes | `default_secret` |
 | `SUNBIRD_ANONYMOUS_SESSION_TTL` | Anonymous session time-to-live in milliseconds | No | `60000` |
-| `SUNBIRD_PORTAL_SESSION_STORE` | Session store type (`in-memory` or `postgresql`) | No | `in-memory` |
+| `SUNBIRD_PORTAL_SESSION_STORE` | Session store type (`in-memory` or `yugabyte`) | No | `in-memory` |
 
 ##### Kong API Gateway
 
@@ -771,7 +771,7 @@ Key frontend files:
 
 | File | Purpose |
 |---|---|
-| `frontend/src/utils/forgotPasswordUtils.ts` | Mobile context utilities: `isMobileApp()`, `persistMobileContext()`, `getSafeRedirectUrl()`, `toIntentUrl()` |
+| `frontend/src/utils/forgotPasswordUtils.ts` | Mobile context utilities: `isMobileApp()`, `persistMobileContext()`, `getSafeRedirectUrl()` |
 | `frontend/src/pages/forgotPassword/ForgotPassword.tsx` | Forgot password page with mobile language sync and redirect handling |
 | `frontend/src/pages/forgotPassword/PasswordResetSuccess.tsx` | Success page with mobile-aware redirect |
 | `frontend/src/pages/signup/SignUp.tsx` | Sign up page with mobile context persistence |
