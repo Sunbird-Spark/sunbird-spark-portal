@@ -3,12 +3,12 @@ import { isNewTemplateValid, buildCreateAssetRequest, getBase64Image, generateMo
 
 // ── Mock HttpService ──────────────────────────────────────────────────────────
 
-const mockGet = vi.fn();
+const mockGet = vi.hoisted(() => vi.fn());
 
 vi.mock('@/services/HttpService', () => ({
-  HttpService: vi.fn().mockImplementation(() => ({
-    get: mockGet,
-  })),
+  HttpService: vi.fn(function() {
+    return { get: mockGet };
+  }),
 }));
 
 const baseForm = {
