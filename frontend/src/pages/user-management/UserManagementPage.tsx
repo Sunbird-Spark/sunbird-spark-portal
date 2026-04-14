@@ -50,15 +50,15 @@ const UserManagementPage = () => {
   const [tncDialogOpen, setTncDialogOpen] = useState(false);
 
   /* ── Fetch orgAdminTnc; fall back to tncConfig if no URL is found ── */
-  const { data: orgAdminTncConfig, isSuccess: isOrgTncSuccess } = useSystemSetting('orgAdminTnc');
-  const { data: fallbackTncConfig, isSuccess: isFallbackSuccess } = useSystemSetting('tncConfig');
+  const { data: orgAdminTncConfig, isSuccess: isOrgTncSuccess } = useSystemSetting('orgAdminTncs');
+  const { data: fallbackTncConfig, isSuccess: isFallbackSuccess } = useSystemSetting('tncConfigs');
 
   const { data: orgAdminTncUrl } = useGetTncUrl(isOrgTncSuccess ? orgAdminTncConfig : null);
   const { data: fallbackTncUrl } = useGetTncUrl(isFallbackSuccess ? fallbackTncConfig : null);
 
   const termsUrl = orgAdminTncUrl || fallbackTncUrl || '';
   const activeTncConfig = orgAdminTncUrl ? orgAdminTncConfig : fallbackTncConfig;
-  const activeTncType = orgAdminTncUrl ? 'orgAdminTnc' : 'tncConfig';
+  const activeTncType = orgAdminTncUrl ? 'orgAdminTncs' : 'tncConfigs';
 
   const acceptTncMutation = useAcceptTnc();
   const { data: userRes, refetch: refetchUser } = useUserRead();
