@@ -51,16 +51,37 @@ const checkUserExistsMutateImpl = vi.fn((_variables: any, options: any) => {
 });
 
 // Mock user hooks
-vi.mock('@/hooks/useUser', () => ({
-    useSignup: () => ({
-        mutate: signupMutateImpl,
-        isPending: false
-    }),
-    useCheckUserExists: () => ({
-        mutate: checkUserExistsMutateImpl,
-        isPending: false
-    })
-}));
+vi.mock('@/hooks/useUser', async () => {
+    const { useState } = await import('react');
+    return {
+        useSignup: () => ({
+            mutate: signupMutateImpl,
+            isPending: false
+        }),
+        useCheckUserExists: () => {
+            const [state, setState] = useState<{ isPending: boolean; isError: boolean; data: any }>({
+                isPending: false, isError: false, data: undefined,
+            });
+            return {
+                ...state,
+                mutate: (variables: any, options: any) => {
+                    setState({ isPending: true, isError: false, data: undefined });
+                    checkUserExistsMutateImpl(variables, {
+                        onSuccess: (response: any) => {
+                            setState({ isPending: false, isError: false, data: response });
+                            options?.onSuccess?.(response);
+                        },
+                        onError: (error: any) => {
+                            setState({ isPending: false, isError: true, data: undefined });
+                            options?.onError?.(error);
+                        },
+                    });
+                },
+                reset: () => setState({ isPending: false, isError: false, data: undefined }),
+            };
+        },
+    };
+});
 
 // Mock OTP hooks
 vi.mock('@/hooks/useOtp', () => ({
@@ -100,9 +121,9 @@ vi.mock('@/hooks/useSystemSetting', () => ({
 
 // Mock individual step components to control the flow in the Page test
 vi.mock('@/components/signup/SignUpForm', () => ({
-    SignUpForm: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword, isStep1Valid, userExists, isCheckingUser }: any) => (
+    SignUpForm: ({ handleContinue, setFirstName, setEmailOrMobile, setPassword, setConfirmPassword, isStep1Valid, userExists }: any) => (
         <div>
-            <button data-testid="continue-btn" onClick={handleContinue} data-step1valid={isStep1Valid ? 'true' : 'false'} data-checking={isCheckingUser ? 'true' : 'false'}>Continue</button>
+            <button data-testid="continue-btn" onClick={handleContinue} data-step1valid={isStep1Valid ? 'true' : 'false'}>Continue</button>
             <input data-testid="firstname-input" onChange={(e) => setFirstName(e.target.value)} />
             <input data-testid="email-input" onChange={(e) => setEmailOrMobile(e.target.value)} />
             <input data-testid="pass-input" onChange={(e) => setPassword(e.target.value)} />
@@ -429,7 +450,7 @@ describe('SignUp Page', () => {
 
     // ── User existence check — checking (in-flight) ───────────────────────────
     it('disables Continue while existence check is in flight', async () => {
-        // Never resolve — keeps component in 'checking' state
+        // Never resolve — mock's internal state stays isPending=true
         checkUserExistsMutateImpl.mockImplementation(() => {});
 
         renderWithProviders(<SignUp />);
@@ -439,9 +460,8 @@ describe('SignUp Page', () => {
         fireEvent.change(screen.getByTestId('conf-input'), { target: { value: 'Pass123!' } });
 
         await waitFor(() => {
-            expect(screen.getByTestId('continue-btn')).toHaveAttribute('data-checking', 'true');
+            expect(screen.getByTestId('continue-btn')).toHaveAttribute('data-step1valid', 'false');
         });
-        expect(screen.getByTestId('continue-btn')).toHaveAttribute('data-step1valid', 'false');
     });
 
     // ── User existence check — exists: true ─────────────────────────────────────
@@ -463,9 +483,9 @@ describe('SignUp Page', () => {
     });
 
     // ── User existence check — API error ────────────────────────────────────────
-    it('blocks Continue and shows captcha failed toast when existence check errors', async () => {
+    it('blocks Continue and shows API error message in toast when existence check errors', async () => {
         checkUserExistsMutateImpl.mockImplementation((_variables: any, options: any) => {
-            options?.onError?.(new Error('Request failed'));
+            options?.onError?.(new Error('Service unavailable'));
         });
 
         renderWithProviders(<SignUp />);
@@ -476,7 +496,8 @@ describe('SignUp Page', () => {
 
         await waitFor(() => {
             expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-                title: 'signUpPage.captchaFailed',
+                title: 'error',
+                description: 'Service unavailable',
                 variant: 'destructive',
             }));
         });

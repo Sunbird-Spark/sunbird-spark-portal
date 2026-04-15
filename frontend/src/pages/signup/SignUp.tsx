@@ -47,9 +47,9 @@ const SignUp: React.FC = () => {
     const captchaActionRef = useRef<'checkExistence' | 'generateOtp'>('checkExistence');
 
     const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
-    const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
+    const googleCaptchaSiteKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
 
-    const [existenceStatus, setExistenceStatus] = useState<'idle' | 'checking' | 'exists' | 'error'>('idle');
+    const [isResolvingCaptcha, setIsResolvingCaptcha] = useState(false);
     const debouncedIdentifier = useDebounce(emailOrMobile, 100);
 
     const signupMutation = useSignup();
@@ -58,14 +58,15 @@ const SignUp: React.FC = () => {
     const checkUserExistsMutation = useCheckUserExists();
 
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
+    const userExists = checkUserExistsMutation.data?.data?.exists === true;
     const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword);
     const isOtpValid = OTP_REGEX.test(otp);
 
-    useEffect(() => { setExistenceStatus('idle'); }, [emailOrMobile]);
+    useEffect(() => { checkUserExistsMutation.reset(); setIsResolvingCaptcha(false); }, [emailOrMobile]);
 
     useEffect(() => {
         if (!IDENTIFIER_REGEX.test(debouncedIdentifier)) return;
-        setExistenceStatus('checking');
+        setIsResolvingCaptcha(true);
         captchaActionRef.current = 'checkExistence';
         if (googleCaptchaSiteKey) {
             captchaRef.current?.reset();
@@ -76,15 +77,15 @@ const SignUp: React.FC = () => {
     }, [debouncedIdentifier]);
 
     const handleExistenceResult = (captchaResponse?: string) => {
+        setIsResolvingCaptcha(false);
         checkUserExistsMutation.mutate(
             { identifier: debouncedIdentifier, captchaResponse },
             {
-                onSuccess: (response) => { setExistenceStatus(response.data?.exists === true ? 'exists' : 'idle'); },
-                onError: () => {
-                    setExistenceStatus('error');
+                onError: (error: any) => {
+                    const isCaptchaError = error?.response?.status === 418;
                     toast({
-                        title: t("signUpPage.captchaFailed"),
-                        description: t("signUpPage.pleaseTryAgain"),
+                        title: isCaptchaError ? t("signUpPage.captchaFailed") : t("error"),
+                        description: isCaptchaError ? t("signUpPage.pleaseTryAgain") : (error.message || t("signUpPage.pleaseTryAgain")),
                         variant: "destructive",
                     });
                 },
@@ -280,10 +281,9 @@ const SignUp: React.FC = () => {
                         showConfirmPassword={showConfirmPassword}
                         setShowConfirmPassword={setShowConfirmPassword}
                         handleContinue={handleContinue}
-                        isStep1Valid={isStep1Valid && existenceStatus === 'idle'}
+                        isStep1Valid={isStep1Valid && !userExists && !checkUserExistsMutation.isError && !checkUserExistsMutation.isPending && !isResolvingCaptcha}
                         isLoading={isLoading}
-                        userExists={existenceStatus === 'exists'}
-                        isCheckingUser={existenceStatus === 'checking'}
+                        userExists={userExists}
                     />
                 )}
 

@@ -23,7 +23,6 @@ interface Step1Props {
     isStep1Valid: boolean;
     isLoading?: boolean;
     userExists?: boolean;
-    isCheckingUser?: boolean;
 }
 
 export const SignUpForm = ({
@@ -36,8 +35,7 @@ export const SignUpForm = ({
     handleContinue,
     isStep1Valid,
     isLoading = false,
-    userExists = false,
-    isCheckingUser = false
+    userExists = false
 }: Step1Props) => {
     const { t } = useAppI18n();
 
@@ -154,7 +152,7 @@ export const SignUpForm = ({
                 </div>
 
                 <PrimaryButton
-                    disabled={!isStep1Valid || isLoading || isCheckingUser}
+                    disabled={!isStep1Valid || isLoading}
                     onClick={handleContinue}
                     className="mt-4 h-[3rem]"
                     data-edataid="signup-continue-btn"
