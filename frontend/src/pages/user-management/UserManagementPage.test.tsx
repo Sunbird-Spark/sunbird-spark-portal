@@ -205,6 +205,7 @@ vi.mock('@/services/UserManagementService', () => ({
 const MOCK_ROLES = [
   { id: 'CONTENT_CREATOR', name: 'Content Creator', actionGroups: [] },
   { id: 'ORG_ADMIN', name: 'Org Admin', actionGroups: [] },
+  { id: 'COURSE_MENTOR', name: 'Course Mentor', actionGroups: [] },
 ];
 
 const MOCK_USER = {
@@ -427,7 +428,7 @@ describe('UserManagementPage', () => {
       const roleSelect = screen.getByLabelText(/role/i, { selector: 'select' });
       const orgSelect = screen.getByLabelText(/organisation name/i, { selector: 'select' });
 
-      fireEvent.change(roleSelect, { target: { value: 'ORG_ADMIN' } });
+      fireEvent.change(roleSelect, { target: { value: 'COURSE_MENTOR' } });
       fireEvent.change(orgSelect, { target: { value: 'org1' } });
 
       // Click Add (exact match to avoid "Add Role" button)
@@ -436,7 +437,7 @@ describe('UserManagementPage', () => {
       await waitFor(() => {
         expect(mockAssignRole).toHaveBeenCalledWith(
           'user1',
-          'ORG_ADMIN',
+          'COURSE_MENTOR',
           'org1',
           'add'
         );
