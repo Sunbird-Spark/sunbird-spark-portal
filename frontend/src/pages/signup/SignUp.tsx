@@ -74,7 +74,7 @@ const SignUp: React.FC = () => {
         } else {
             handleExistenceResult();
         }
-    }, [debouncedIdentifier]);
+    }, [debouncedIdentifier, googleCaptchaSiteKey]);
 
     const handleExistenceResult = (captchaResponse?: string) => {
         setIsResolvingCaptcha(false);
@@ -301,7 +301,19 @@ const SignUp: React.FC = () => {
                         size="invisible"
                         onChange={token => token && handleCaptchaResolved(token)}
                         onLoad={() => console.log('ReCAPTCHA API loaded successfully')}
-                        onErrored={() => console.error('ReCAPTCHA error occurred')}
+                        onErrored={() => {
+                            setIsResolvingCaptcha(false);
+                            console.error('ReCAPTCHA error occurred');
+                            toast({
+                                title: 'Captcha verification failed',
+                                description: 'Please try again.',
+                                variant: 'destructive',
+                            });
+                        }}
+                        onExpired={() => {
+                            setIsResolvingCaptcha(false);
+                            console.warn('ReCAPTCHA expired before resolution');
+                        }}
                     />
                 )}
             </div>
