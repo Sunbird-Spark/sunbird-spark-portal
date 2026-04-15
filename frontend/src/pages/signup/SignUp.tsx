@@ -47,7 +47,7 @@ const SignUp: React.FC = () => {
     const captchaActionRef = useRef<'checkExistence' | 'generateOtp'>('checkExistence');
 
     const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
-    const googleCaptchaSiteKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+    const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
 
     const [isResolvingCaptcha, setIsResolvingCaptcha] = useState(false);
     const debouncedIdentifier = useDebounce(emailOrMobile, 100);
