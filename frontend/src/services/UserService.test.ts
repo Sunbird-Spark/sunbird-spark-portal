@@ -145,6 +145,49 @@ describe('UserService', () => {
         });
     });
 
+    describe('checkUserExists', () => {
+        it('should check existence by email', async () => {
+            mockClient.get = vi.fn().mockResolvedValue({ data: { exists: true } });
+
+            const result = await userService.checkUserExists('test@example.com');
+
+            expect(mockClient.get).toHaveBeenCalledWith(
+                '/user/v1/exists/email/test%40example.com'
+            );
+            expect(result).toEqual({ data: { exists: true } });
+        });
+
+        it('should check existence by phone', async () => {
+            mockClient.get = vi.fn().mockResolvedValue({ data: { exists: false } });
+
+            const result = await userService.checkUserExists('9876543210');
+
+            expect(mockClient.get).toHaveBeenCalledWith(
+                '/user/v1/exists/phone/9876543210'
+            );
+            expect(result).toEqual({ data: { exists: false } });
+        });
+
+        it('should append captchaResponse query param when provided', async () => {
+            mockClient.get = vi.fn().mockResolvedValue({ data: { exists: false } });
+
+            await userService.checkUserExists('test@example.com', 'captcha-token-123');
+
+            expect(mockClient.get).toHaveBeenCalledWith(
+                '/user/v1/exists/email/test%40example.com?captchaResponse=captcha-token-123'
+            );
+        });
+
+        it('should not append query param when captchaResponse is undefined', async () => {
+            mockClient.get = vi.fn().mockResolvedValue({ data: { exists: false } });
+
+            await userService.checkUserExists('9876543210');
+
+            const calledUrl: string = mockClient.get.mock.calls[0][0];
+            expect(calledUrl).not.toContain('captchaResponse');
+        });
+    });
+
     describe('resetPassword', () => {
         it('should reset password', async () => {
             const mockResponse = {

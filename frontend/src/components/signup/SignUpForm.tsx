@@ -154,7 +154,7 @@ export const SignUpForm = ({
                 </div>
 
                 <PrimaryButton
-                    disabled={!isStep1Valid || isLoading || userExists || isCheckingUser}
+                    disabled={!isStep1Valid || isLoading || isCheckingUser}
                     onClick={handleContinue}
                     className="mt-4 h-[3rem]"
                     data-edataid="signup-continue-btn"
