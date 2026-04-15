@@ -17,7 +17,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
 }));
 
 // Mock useUserEnrolledCollections
-const mockUseUserEnrolledCollections = vi.fn();
+const mockUseUserEnrolledCollections = vi.hoisted(() => vi.fn());
 vi.mock('../../hooks/useUserEnrolledCollections', () => ({
     useUserEnrolledCollections: () => mockUseUserEnrolledCollections(),
 }));
