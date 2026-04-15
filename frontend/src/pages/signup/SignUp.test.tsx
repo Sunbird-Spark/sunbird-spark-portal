@@ -483,7 +483,7 @@ describe('SignUp Page', () => {
     });
 
     // ── User existence check — API error ────────────────────────────────────────
-    it('blocks Continue and shows API error message in toast when existence check errors', async () => {
+    it('blocks Continue when existence check errors', async () => {
         checkUserExistsMutateImpl.mockImplementation((_variables: any, options: any) => {
             options?.onError?.(new Error('Service unavailable'));
         });
@@ -495,12 +495,7 @@ describe('SignUp Page', () => {
         fireEvent.change(screen.getByTestId('conf-input'), { target: { value: 'Pass123!' } });
 
         await waitFor(() => {
-            expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-                title: 'error',
-                description: 'Service unavailable',
-                variant: 'destructive',
-            }));
+            expect(screen.getByTestId('continue-btn')).toHaveAttribute('data-step1valid', 'false');
         });
-        expect(screen.getByTestId('continue-btn')).toHaveAttribute('data-step1valid', 'false');
     });
 });

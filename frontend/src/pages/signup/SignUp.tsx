@@ -79,17 +79,7 @@ const SignUp: React.FC = () => {
     const handleExistenceResult = (captchaResponse?: string) => {
         setIsResolvingCaptcha(false);
         checkUserExistsMutation.mutate(
-            { identifier: debouncedIdentifier, captchaResponse },
-            {
-                onError: (error: any) => {
-                    const isCaptchaError = error?.response?.status === 418;
-                    toast({
-                        title: isCaptchaError ? t("signUpPage.captchaFailed") : t("error"),
-                        description: isCaptchaError ? t("signUpPage.pleaseTryAgain") : (error.message || t("signUpPage.pleaseTryAgain")),
-                        variant: "destructive",
-                    });
-                },
-            }
+            { identifier: debouncedIdentifier, captchaResponse }
         );
     };
 
