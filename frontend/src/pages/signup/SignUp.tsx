@@ -50,6 +50,8 @@ const SignUp: React.FC = () => {
     const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
 
     const [userExists, setUserExists] = useState(false);
+    const [existenceCheckFailed, setExistenceCheckFailed] = useState(false);
+    const [isCheckingExistence, setIsCheckingExistence] = useState(false);
     const debouncedIdentifier = useDebounce(emailOrMobile, 100);
 
     const signupMutation = useSignup();
@@ -58,14 +60,15 @@ const SignUp: React.FC = () => {
     const checkUserExistsMutation = useCheckUserExists();
 
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
-    const isCheckingUser = checkUserExistsMutation.isPending;
+    const isCheckingUser = isCheckingExistence;
     const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword);
     const isOtpValid = OTP_REGEX.test(otp);
 
-    useEffect(() => { setUserExists(false); }, [emailOrMobile]);
+    useEffect(() => { setUserExists(false); setExistenceCheckFailed(false); setIsCheckingExistence(false); }, [emailOrMobile]);
 
     useEffect(() => {
         if (!IDENTIFIER_REGEX.test(debouncedIdentifier)) return;
+        setIsCheckingExistence(true);
         captchaActionRef.current = 'checkExistence';
         if (googleCaptchaSiteKey) {
             captchaRef.current?.reset();
@@ -79,8 +82,16 @@ const SignUp: React.FC = () => {
         checkUserExistsMutation.mutate(
             { identifier: emailOrMobile, captchaResponse },
             {
-                onSuccess: (response) => { setUserExists(response.data?.exists === true); },
-                onError: () => { setUserExists(false); },
+                onSuccess: (response) => { setUserExists(response.data?.exists === true); setIsCheckingExistence(false); },
+                onError: () => {
+                    setIsCheckingExistence(false);
+                    setExistenceCheckFailed(true);
+                    toast({
+                        title: t("signUpPage.captchaFailed"),
+                        description: t("signUpPage.pleaseTryAgain"),
+                        variant: "destructive",
+                    });
+                },
             }
         );
     };
@@ -261,7 +272,7 @@ const SignUp: React.FC = () => {
                         showConfirmPassword={showConfirmPassword}
                         setShowConfirmPassword={setShowConfirmPassword}
                         handleContinue={handleContinue}
-                        isStep1Valid={isStep1Valid && !userExists}
+                        isStep1Valid={isStep1Valid && !userExists && !existenceCheckFailed}
                         isLoading={isLoading}
                         userExists={userExists}
                         isCheckingUser={isCheckingUser}
