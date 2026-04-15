@@ -203,6 +203,14 @@ const SignUp: React.FC = () => {
         setStep(3);
     };
 
+    const handleSignupError = (error: any) => {
+        toast({
+            title: t("signUpPage.signupFailed"),
+            description: error.message || t("signUpPage.otpButFailed"),
+            variant: "destructive",
+        });
+    };
+
     const handleOtpVerificationSuccess = (response: any) => {
         if (response.status !== 200) {
             toast({ title: t("signUpPage.verificationFailed"), description: t("signUpPage.invalidOtp"), variant: "destructive" });
@@ -216,9 +224,15 @@ const SignUp: React.FC = () => {
             firstName, identifier: emailOrMobile, password: signupService.encodePassword(password), deviceId
         }, {
             onSuccess: handleSignupSuccess,
-            onError: (error: any) => {
-                toast({ title: t("signUpPage.signupFailed"), description: error.message || t("signUpPage.otpButFailed"), variant: "destructive" });
-            }
+            onError: handleSignupError
+        });
+    };
+
+    const handleOtpVerificationError = (error: any) => {
+        toast({
+            title: t("signUpPage.verificationFailed"),
+            description: error.message || t("signUpPage.verificationError"),
+            variant: "destructive",
         });
     };
 
@@ -226,9 +240,7 @@ const SignUp: React.FC = () => {
         const request = signupService.createOtpVerificationRequest(emailOrMobile, otp);
         verifyOtpMutation.mutate({ request }, {
             onSuccess: handleOtpVerificationSuccess,
-            onError: (error: any) => {
-                toast({ title: t("signUpPage.verificationFailed"), description: error.message || t("signUpPage.verificationError"), variant: "destructive" });
-            }
+            onError: handleOtpVerificationError
         });
     };
 
