@@ -27,6 +27,17 @@ export const useResetPassword = (): UseMutationResult<
   });
 };
 
+export const useCheckUserExists = (): UseMutationResult<
+  ApiResponse<{ exists: boolean }>,
+  Error,
+  { identifier: string; captchaResponse?: string }
+> => {
+  return useMutation({
+    mutationFn: (variables: { identifier: string; captchaResponse?: string }) =>
+      userService.checkUserExists(variables.identifier, variables.captchaResponse),
+  });
+};
+
 export const useSignup = (): UseMutationResult<
   ApiResponse<{ userId: string; }>,
   Error,

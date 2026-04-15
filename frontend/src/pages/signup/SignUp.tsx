@@ -1,18 +1,20 @@
+/* eslint-disable max-lines */
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { useToast } from "@/hooks/useToast";
-import { OTP_REGEX } from '@/utils/ValidationUtils';
+import { IDENTIFIER_REGEX, OTP_REGEX } from '@/utils/ValidationUtils';
 import { SignUpForm } from '@/components/signup/SignUpForm';
 import { SignUpOtpVerification } from '@/components/signup/SignUpOtpVerification';
 import { SignUpSuccess } from '@/components/signup/SignUpSuccess';
-import { useSignup } from '@/hooks/useUser';
+import { useSignup, useCheckUserExists } from '@/hooks/useUser';
 import { useVerifyOtp, useGenerateOtp } from '@/hooks/useOtp';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import { SignupService } from '@/services/SignupService';
 import { getSafeRedirectUrl, isMobileApp, persistMobileContext } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
+import useDebounce from '@/hooks/useDebounce';
 
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -42,16 +44,52 @@ const SignUp: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const captchaActionRef = useRef<'checkExistence' | 'generateOtp'>('checkExistence');
+
     const { data: captchaSiteKeyData } = useSystemSetting('portal_google_recaptcha_site_key');
     const googleCaptchaSiteKey = (captchaSiteKeyData?.data as any)?.response?.value || '';
+
+    const [isResolvingCaptcha, setIsResolvingCaptcha] = useState(false);
+    const debouncedIdentifier = useDebounce(emailOrMobile, 100);
 
     const signupMutation = useSignup();
     const verifyOtpMutation = useVerifyOtp();
     const generateOtpMutation = useGenerateOtp();
+    const checkUserExistsMutation = useCheckUserExists();
 
     const isLoading = signupMutation.isPending || verifyOtpMutation.isPending || generateOtpMutation.isPending;
+    const userExists = checkUserExistsMutation.data?.data?.exists === true;
     const isStep1Valid = !!(firstName.trim() && emailOrMobile.trim() && password && confirmPassword && password === confirmPassword);
     const isOtpValid = OTP_REGEX.test(otp);
+
+    useEffect(() => { checkUserExistsMutation.reset(); setIsResolvingCaptcha(false); }, [emailOrMobile]);
+
+    useEffect(() => {
+        if (!IDENTIFIER_REGEX.test(debouncedIdentifier)) return;
+        setIsResolvingCaptcha(true);
+        captchaActionRef.current = 'checkExistence';
+        if (googleCaptchaSiteKey) {
+            captchaRef.current?.reset();
+            captchaRef.current?.execute();
+        } else {
+            handleExistenceResult();
+        }
+    }, [debouncedIdentifier, googleCaptchaSiteKey]);
+
+    const handleExistenceResult = (captchaResponse?: string) => {
+        setIsResolvingCaptcha(false);
+        checkUserExistsMutation.mutate(
+            { identifier: debouncedIdentifier, captchaResponse }
+        );
+    };
+
+    const handleCaptchaResolved = (token: string) => {
+        if (captchaActionRef.current === 'checkExistence') {
+            handleExistenceResult(token);
+        } else {
+            handleOtpMutation(token, step === 2);
+        }
+    };
 
     const handleOtpSuccess = (response: any, isResend = false) => {
         captchaRef.current?.reset();
@@ -125,7 +163,13 @@ const SignUp: React.FC = () => {
             return;
         }
 
-        googleCaptchaSiteKey ? captchaRef.current?.execute() : handleOtpMutation();
+        captchaActionRef.current = 'generateOtp';
+        if (googleCaptchaSiteKey) {
+            captchaRef.current?.reset();
+            captchaRef.current?.execute();
+        } else {
+            handleOtpMutation();
+        }
     };
 
     const handleSignupSuccess = (signupResponse: any) => {
@@ -160,30 +204,15 @@ const SignUp: React.FC = () => {
 
     const handleOtpVerificationSuccess = (response: any) => {
         if (response.status !== 200) {
-            toast({
-                title: t("signUpPage.verificationFailed"),
-                description: t("signUpPage.invalidOtp"),
-                variant: "destructive",
-            });
+            toast({ title: t("signUpPage.verificationFailed"), description: t("signUpPage.invalidOtp"), variant: "destructive" });
             return;
         }
 
-        telemetry.log({
-            edata: {
-                type: 'api',
-                level: 'INFO',
-                message: 'OTP verified successfully',
-                pageid: 'signup',
-            },
-        });
+        telemetry.log({ edata: { type: 'api', level: 'INFO', message: 'OTP verified successfully', pageid: 'signup' } });
 
         const deviceId = localStorage.getItem('deviceId') || undefined;
-
         signupMutation.mutate({
-            firstName,
-            identifier: emailOrMobile,
-            password: signupService.encodePassword(password),
-            deviceId
+            firstName, identifier: emailOrMobile, password: signupService.encodePassword(password), deviceId
         }, {
             onSuccess: handleSignupSuccess,
             onError: handleSignupError
@@ -200,14 +229,10 @@ const SignUp: React.FC = () => {
 
     const handleVerifyOtp = () => {
         const request = signupService.createOtpVerificationRequest(emailOrMobile, otp);
-
-        verifyOtpMutation.mutate(
-            { request },
-            {
-                onSuccess: handleOtpVerificationSuccess,
-                onError: handleOtpVerificationError
-            }
-        );
+        verifyOtpMutation.mutate({ request }, {
+            onSuccess: handleOtpVerificationSuccess,
+            onError: handleOtpVerificationError
+        });
     };
 
     const handleResendOtp = () => {
@@ -246,8 +271,9 @@ const SignUp: React.FC = () => {
                         showConfirmPassword={showConfirmPassword}
                         setShowConfirmPassword={setShowConfirmPassword}
                         handleContinue={handleContinue}
-                        isStep1Valid={isStep1Valid}
+                        isStep1Valid={isStep1Valid && !userExists && !checkUserExistsMutation.isError && !checkUserExistsMutation.isPending && !isResolvingCaptcha}
                         isLoading={isLoading}
+                        userExists={userExists}
                     />
                 )}
 
@@ -273,9 +299,21 @@ const SignUp: React.FC = () => {
                         ref={captchaRef}
                         sitekey={googleCaptchaSiteKey}
                         size="invisible"
-                        onChange={token => token && handleOtpMutation(token, step === 2)}
+                        onChange={token => token && handleCaptchaResolved(token)}
                         onLoad={() => console.log('ReCAPTCHA API loaded successfully')}
-                        onErrored={() => console.error('ReCAPTCHA error occurred')}
+                        onErrored={() => {
+                            setIsResolvingCaptcha(false);
+                            console.error('ReCAPTCHA error occurred');
+                            toast({
+                                title: 'Captcha verification failed',
+                                description: 'Please try again.',
+                                variant: 'destructive',
+                            });
+                        }}
+                        onExpired={() => {
+                            setIsResolvingCaptcha(false);
+                            console.warn('ReCAPTCHA expired before resolution');
+                        }}
                     />
                 )}
             </div>

@@ -119,6 +119,17 @@ export class UserService {
         return _.includes(identifier, '@');
     }
 
+    public async checkUserExists(
+        identifier: string,
+        captchaResponse?: string
+    ): Promise<ApiResponse<{ exists: boolean }>> {
+        const type = this.isEmail(identifier) ? 'email' : 'phone';
+        const query = captchaResponse ? `?captchaResponse=${encodeURIComponent(captchaResponse)}` : '';
+        return getClient().get<{ exists: boolean }>(
+            `/user/v1/exists/${type}/${encodeURIComponent(identifier)}${query}`
+        );
+    }
+
     public async signup(
         firstName: string,
         identifier: string,

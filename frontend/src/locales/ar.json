@@ -733,7 +733,9 @@
     "otpButFailed": "تم التحقق من OTP لكن فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.",
     "verificationFailed": "فشل التحقق",
     "invalidOtp": "OTP غير صحيح. يرجى المحاولة مرة أخرى.",
-    "verificationError": "حدث خطأ أثناء التحقق. يرجى المحاولة مرة أخرى."
+    "verificationError": "حدث خطأ أثناء التحقق. يرجى المحاولة مرة أخرى.",
+    "emailAlreadyRegistered": "عنوان البريد الإلكتروني هذا مسجل بالفعل",
+    "phoneAlreadyRegistered": "رقم الهاتف المحمول هذا مسجل بالفعل"
   },
   "personalInfo": {
     "title": "المعلومات الشخصية",

@@ -22,6 +22,7 @@ interface Step1Props {
     handleContinue: () => void;
     isStep1Valid: boolean;
     isLoading?: boolean;
+    userExists?: boolean;
 }
 
 export const SignUpForm = ({
@@ -33,7 +34,8 @@ export const SignUpForm = ({
     showConfirmPassword, setShowConfirmPassword,
     handleContinue,
     isStep1Valid,
-    isLoading = false
+    isLoading = false,
+    userExists = false
 }: Step1Props) => {
     const { t } = useAppI18n();
 
@@ -76,6 +78,13 @@ export const SignUpForm = ({
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
                         <p className="form-error-absolute form-error-offset-8">
                             {t("signUp.invalidEmailOrMobile")}
+                        </p>
+                    )}
+                    {userExists && IDENTIFIER_REGEX.test(emailOrMobile) && (
+                        <p className="form-error-absolute form-error-offset-8">
+                            {emailOrMobile.includes('@')
+                                ? t("signUpPage.emailAlreadyRegistered")
+                                : t("signUpPage.phoneAlreadyRegistered")}
                         </p>
                     )}
                 </div>

@@ -733,7 +733,9 @@
     "otpButFailed": "OTP verificado mas falha na criação da conta. Tente novamente.",
     "verificationFailed": "Falha na verificação",
     "invalidOtp": "OTP inválido. Tente novamente.",
-    "verificationError": "Ocorreu um erro durante a verificação. Tente novamente."
+    "verificationError": "Ocorreu um erro durante a verificação. Tente novamente.",
+    "emailAlreadyRegistered": "Este endereço de e-mail já está registrado.",
+    "phoneAlreadyRegistered": "Este número de telefone já está registrado."
   },
   "personalInfo": {
     "title": "Informações pessoais",
