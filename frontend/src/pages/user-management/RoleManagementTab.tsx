@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
+import { useUserId } from "@/hooks/useAuthInfo";
 import { FiSearch } from "react-icons/fi";
 import PageLoader from "@/components/common/PageLoader";
 // ConfirmDialog moved out
@@ -28,10 +29,11 @@ interface RoleManagementTabProps {
   userOrganisations: OrganisationOption[];
 }
 
-const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations }: RoleManagementTabProps) => {
+const RoleManagementTab = ({ availableRoles, userOrganisations }: RoleManagementTabProps) => {
   const { t } = useAppI18n();
   const { toast } = useToast();
   const telemetry = useTelemetry();
+  const currentUserId = useUserId();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
@@ -44,6 +46,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
   });
   const [selectedRole, setSelectedRole] = useState("");
   const [organisationId, setOrganisationId] = useState("");
+  const [existingRoleIds, setExistingRoleIds] = useState<string[]>([]);
   const [isSavingRole, setIsSavingRole] = useState(false);
 
   const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>({
@@ -52,17 +55,6 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
     roleInfo: null,
   });
   const [isDeletingRole, setIsDeletingRole] = useState(false);
-
-  const refreshResults = useCallback(async (query: string) => {
-    if (!query.trim()) return;
-    try {
-      const response = await userManagementService.searchUser(query.trim());
-      setSearchResults(response.data?.response?.content ?? []);
-      onRefreshSearch();
-    } catch {
-      toast({ title: t("userManagement.roleManagement.refreshFailed"), description: t("userManagement.roleManagement.refreshFailedDesc"), variant: "destructive" });
-    }
-  }, [onRefreshSearch, toast, t]);
 
   const handleSearch = async () => {
     const query = searchQuery.trim();
@@ -88,9 +80,10 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
     if (e.key === "Enter") handleSearch();
   };
 
-  const openAddRoleDialog = (userId: string) => {
+  const openAddRoleDialog = (userId: string, roleIds: string[]) => {
     setSelectedRole("");
     setOrganisationId("");
+    setExistingRoleIds(roleIds);
     setRoleDialog({ open: true, userId, operation: "add" });
   };
 
@@ -99,6 +92,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
     setRoleDialog((prev) => ({ ...prev, open: false }));
     setSelectedRole("");
     setOrganisationId("");
+    setExistingRoleIds([]);
   };
 
   const handleSaveRole = async () => {
@@ -140,7 +134,6 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
         })
       );
       closeRoleDialog();
-      refreshResults(searchQuery); // background sync — no await
     } catch (err) {
       toast({ title: t("userManagement.roleManagement.operationFailed"), description: (err as Error).message || t("userManagement.roleManagement.couldNotSaveRole"), variant: "destructive" });
     } finally {
@@ -183,7 +176,6 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
         })
       );
       closeDeleteDialog();
-      refreshResults(searchQuery); // background sync — no await
     } catch (err) {
       toast({ title: t("userManagement.roleManagement.deleteFailed"), description: (err as Error).message || t("userManagement.roleManagement.couldNotRemoveRole"), variant: "destructive" });
     } finally {
@@ -220,6 +212,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
           <UserRoleTable
             searchResults={searchResults}
             searchQuery={searchQuery}
+            currentUserId={currentUserId}
             onOpenDeleteDialog={openDeleteDialog}
             onOpenAddRoleDialog={openAddRoleDialog}
           />
@@ -237,6 +230,7 @@ const RoleManagementTab = ({ availableRoles, onRefreshSearch, userOrganisations 
       <RoleDialog
         dialogState={roleDialog}
         availableRoles={availableRoles}
+        existingRoleIds={existingRoleIds}
         selectedRole={selectedRole}
         organisationId={organisationId}
         isSavingRole={isSavingRole}
