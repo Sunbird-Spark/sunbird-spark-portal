@@ -47,12 +47,14 @@ export const IdentifyUser: React.FC<IdentifyUserProps> = ({
             if (response.status === 418) {
                 setIdentifierStatus('VALIDATING_FAILED');
                 captchaRef.current?.reset();
+                setLoading(false);
                 return;
             }
 
             if (!identifiers.length) {
                 setIdentifierStatus('NOT_MATCHED');
                 captchaRef.current?.reset();
+                setLoading(false);
                 return;
             }
 
