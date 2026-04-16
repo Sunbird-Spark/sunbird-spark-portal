@@ -23,6 +23,8 @@ interface Step1Props {
     isStep1Valid: boolean;
     isLoading?: boolean;
     userExists?: boolean;
+    isAvailable?: boolean;
+    isCheckingUser?: boolean;
 }
 
 export const SignUpForm = ({
@@ -35,7 +37,9 @@ export const SignUpForm = ({
     handleContinue,
     isStep1Valid,
     isLoading = false,
-    userExists = false
+    userExists = false,
+    isAvailable = false,
+    isCheckingUser = false
 }: Step1Props) => {
     const { t } = useAppI18n();
 
@@ -68,13 +72,20 @@ export const SignUpForm = ({
 
                 <div className="form-group relative pb-3">
                     <InputLabel htmlFor="emailOrMobile" required>{t("signUp.emailOrMobileLabel")}</InputLabel>
-                    <Input
-                        id="emailOrMobile"
-                        value={emailOrMobile}
-                        onChange={(e) => setEmailOrMobile(e.target.value)}
-                        placeholder={t("signUp.enterEmailOrMobile")}
-                        className="login-input-field h-10 px-3"
-                    />
+                    <div className="relative">
+                        <Input
+                            id="emailOrMobile"
+                            value={emailOrMobile}
+                            onChange={(e) => setEmailOrMobile(e.target.value)}
+                            placeholder={t("signUp.enterEmailOrMobile")}
+                            className="login-input-field h-10 pe-10 ps-3"
+                        />
+                        {isCheckingUser && IDENTIFIER_REGEX.test(emailOrMobile) && (
+                            <div className="absolute end-3 top-1/2 -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-sunbird-gray-75/30 border-t-sunbird-gray-75 rounded-full animate-spin" />
+                            </div>
+                        )}
+                    </div>
                     {emailOrMobile && !IDENTIFIER_REGEX.test(emailOrMobile) && (
                         <p className="form-error-absolute form-error-offset-8">
                             {t("signUp.invalidEmailOrMobile")}
@@ -85,6 +96,13 @@ export const SignUpForm = ({
                             {emailOrMobile.includes('@')
                                 ? t("signUpPage.emailAlreadyRegistered")
                                 : t("signUpPage.phoneAlreadyRegistered")}
+                        </p>
+                    )}
+                    {isAvailable && IDENTIFIER_REGEX.test(emailOrMobile) && (
+                        <p className="form-error-absolute form-error-offset-8 text-green-600">
+                            {emailOrMobile.includes('@')
+                                ? t("signUpPage.emailAvailable")
+                                : t("signUpPage.phoneAvailable")}
                         </p>
                     )}
                 </div>
