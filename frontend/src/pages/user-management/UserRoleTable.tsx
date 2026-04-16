@@ -1,4 +1,3 @@
-import React from "react";
 import { FiTrash2, FiPlus } from "react-icons/fi";
 import { Button } from "@/components/common/Button";
 import { UserSearchResult, UserRoleInfo } from "@/services/UserManagementService";
@@ -8,13 +7,15 @@ import "./user-management.css";
 interface UserRoleTableProps {
   searchResults: UserSearchResult[];
   searchQuery: string;
+  currentUserId: string | null;
   onOpenDeleteDialog: (userId: string, roleInfo: UserRoleInfo) => void;
-  onOpenAddRoleDialog: (userId: string) => void;
+  onOpenAddRoleDialog: (userId: string, existingRoleIds: string[]) => void;
 }
 
 export const UserRoleTable = ({
   searchResults,
   searchQuery,
+  currentUserId,
   onOpenDeleteDialog,
   onOpenAddRoleDialog,
 }: UserRoleTableProps) => {
@@ -51,6 +52,7 @@ export const UserRoleTable = ({
         <tbody>
           {searchResults.map((user, idx) => {
             const userId = user.userId || user.id;
+            const isSelf = !!(currentUserId && userId === currentUserId);
             return (
             <tr key={userId} className="um-table-row">
               <td className="um-td um-td-narrow um-td-muted">{idx + 1}</td>
@@ -69,28 +71,43 @@ export const UserRoleTable = ({
               <td className="um-td">
                 {user.roles && user.roles.length > 0 ? (
                   <div className="um-roles-list">
-                    {user.roles.map((roleInfo) => (
-                      <div key={`${roleInfo.role}-${roleInfo.scope?.[0]?.organisationId}`} className="um-role-chip">
-                        <span className="um-role-label">{roleInfo.role}</span>
-                        {roleInfo.role !== 'PUBLIC' && (
-                          <button
-                            className="um-role-action-btn um-role-delete-btn"
-                            title={t("userManagement.userRoleTable.removeRole")}
-                            onClick={() => onOpenDeleteDialog(userId, roleInfo)}
-                            aria-label={t("userManagement.userRoleTable.removeRoleAriaLabel").replace("{{role}}", roleInfo.role)}
-                          >
-                            <FiTrash2 size={12} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                    {user.roles.map((roleInfo) => {
+                      const isDeletable = !isSelf && roleInfo.role !== 'PUBLIC' && user.roles.length > 1;
+                      const deleteTitle = isSelf
+                        ? t("userManagement.userRoleTable.cannotEditOwnRole")
+                        : user.roles.length <= 1
+                          ? t("userManagement.userRoleTable.atLeastOneRole")
+                          : t("userManagement.userRoleTable.removeRole");
+                      return (
+                        <div key={`${roleInfo.role}-${roleInfo.scope?.[0]?.organisationId}`} className="um-role-chip">
+                          <span className="um-role-label">{roleInfo.role}</span>
+                          {roleInfo.role !== 'PUBLIC' && (
+                            <button
+                              className="um-role-action-btn um-role-delete-btn"
+                              title={deleteTitle}
+                              onClick={() => isDeletable && onOpenDeleteDialog(userId, roleInfo)}
+                              disabled={!isDeletable}
+                              aria-label={t("userManagement.userRoleTable.removeRoleAriaLabel").replace("{{role}}", roleInfo.role)}
+                            >
+                              <FiTrash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <span className="um-no-roles">{t("userManagement.userRoleTable.noRolesAssigned")}</span>
                 )}
               </td>
               <td className="um-td um-td-actions">
-                <Button size="sm" onClick={() => onOpenAddRoleDialog(userId)} className="um-add-role-btn" title={t("userManagement.userRoleTable.addNewRole")}>
+                <Button
+                  size="sm"
+                  onClick={() => !isSelf && onOpenAddRoleDialog(userId, user.roles.map((r) => r.role))}
+                  className="um-add-role-btn"
+                  title={isSelf ? t("userManagement.userRoleTable.cannotEditOwnRole") : t("userManagement.userRoleTable.addNewRole")}
+                  disabled={isSelf}
+                >
                   <FiPlus size={14} />
                   <span>{t("userManagement.addRole")}</span>
                 </Button>

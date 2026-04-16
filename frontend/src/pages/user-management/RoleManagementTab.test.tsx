@@ -9,6 +9,13 @@ import RoleManagementTab from './RoleManagementTab';
 
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
+vi.mock('@/hooks/useAuthInfo', () => ({
+  useAuthInfo: () => ({ data: null }),
+  useUserId: () => null,
+  useIsAuthenticated: () => ({ isAuthenticated: false, isLoading: false }),
+  useSessionId: () => null,
+}));
+
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
     t: (k: string) => {
@@ -97,7 +104,10 @@ const MOCK_USER = {
   maskedPhone: null,
   status: 1,
   isDeleted: false,
-  roles: [{ role: 'CONTENT_CREATOR', scope: [{ organisationId: 'org1' }], createdDate: '', updatedDate: null, userId: 'user1' }],
+  roles: [
+    { role: 'CONTENT_CREATOR', scope: [{ organisationId: 'org1' }], createdDate: '', updatedDate: null, userId: 'user1' },
+    { role: 'ORG_ADMIN', scope: [{ organisationId: 'org1' }], createdDate: '', updatedDate: null, userId: 'user1' },
+  ],
   rootOrgName: 'Test Org',
   rootOrgId: 'org1',
   channel: 'test',

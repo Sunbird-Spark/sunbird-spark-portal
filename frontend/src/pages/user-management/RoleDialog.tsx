@@ -23,6 +23,7 @@ export interface RoleDialogState {
 interface RoleDialogProps {
   dialogState: RoleDialogState;
   availableRoles: RoleItem[];
+  existingRoleIds: string[];
   selectedRole: string;
   organisationId: string;
   isSavingRole: boolean;
@@ -36,6 +37,7 @@ interface RoleDialogProps {
 export const RoleDialog = ({
   dialogState,
   availableRoles,
+  existingRoleIds,
   selectedRole,
   organisationId,
   isSavingRole,
@@ -45,6 +47,7 @@ export const RoleDialog = ({
   onOrganisationIdChange,
   userOrganisations,
 }: RoleDialogProps) => {
+  const selectableRoles = availableRoles.filter((r) => !existingRoleIds.includes(r.id));
   const { t } = useAppI18n();
 
   useEffect(() => {
@@ -99,7 +102,7 @@ export const RoleDialog = ({
                 <SelectValue placeholder={t("userManagement.roleDialog.selectRole")} />
               </SelectTrigger>
               <SelectContent>
-                {availableRoles.map((role) => (
+                {selectableRoles.map((role) => (
                   <SelectItem key={role.id} value={role.id}>
                     {role.name}
                   </SelectItem>
