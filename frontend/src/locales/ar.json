@@ -734,8 +734,10 @@
     "verificationFailed": "فشل التحقق",
     "invalidOtp": "OTP غير صحيح. يرجى المحاولة مرة أخرى.",
     "verificationError": "حدث خطأ أثناء التحقق. يرجى المحاولة مرة أخرى.",
-    "emailAlreadyRegistered": "عنوان البريد الإلكتروني هذا مسجل بالفعل",
-    "phoneAlreadyRegistered": "رقم الهاتف المحمول هذا مسجل بالفعل"
+    "emailAlreadyRegistered": "هذا البريد الإلكتروني مستخدم بالفعل.",
+    "phoneAlreadyRegistered": "رقم الهاتف المحمول هذا مستخدم بالفعل.",
+    "emailAvailable": "عنوان البريد الإلكتروني هذا متاح.",
+    "phoneAvailable": "رقم الهاتف المحمول هذا متاح."
   },
   "personalInfo": {
     "title": "المعلومات الشخصية",
