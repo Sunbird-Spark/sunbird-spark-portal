@@ -1,0 +1,104 @@
+---
+name: frontend-ui-engineering
+description: Use when building or modifying React components, pages, or hooks in the Sunbird Spark Portal frontend. Enforces React 19 patterns, Tailwind CSS with Sunbird design tokens, Radix UI primitives, and TanStack Query v5 for server state.
+---
+
+## Overview
+
+The frontend is a React 19 SPA built with Vite 7, styled with Tailwind CSS 3 using custom `sunbird-*` color tokens, and composed from Radix UI headless primitives. Server state lives exclusively in TanStack Query v5 hooks. The `font-rubik` utility class is used for Sunbird-branded text. This skill encodes the component and data-fetching conventions that keep the UI consistent and maintainable.
+
+## When to Use
+
+**Use when:**
+- Building a new page component under `src/pages/`
+- Building a reusable UI component under `src/components/`
+- Writing a custom hook that fetches or mutates data
+- Migrating a class component or old pattern to React 19 conventions
+
+**Exclude when:**
+- Modifying Vite config, Tailwind config, or ESLint config (tooling changes only)
+- Adding locale strings to `src/locales/en.json`
+
+## Core Process
+
+1. **Determine component scope**:
+   - Route-level page → `src/pages/<feature>/<FeatureName>Page.tsx`
+   - Reusable across features → `src/components/<category>/<ComponentName>.tsx`
+   - Feature-specific, not reusable → co-locate with the page
+
+2. **Define the props interface first** — TypeScript interface before JSX:
+   ```typescript
+   interface SkillChipProps {
+     label: string;
+     selected: boolean;
+     onToggle: (label: string) => void;
+   }
+   ```
+
+3. **Use Radix UI primitives** for interactive widgets — never build custom dialogs, dropdowns, popovers, or tabs from scratch:
+   - Dialog → `@radix-ui/react-dialog`
+   - Dropdown → `@radix-ui/react-dropdown-menu`
+   - Tabs → `@radix-ui/react-tabs`
+   - Select → `@radix-ui/react-select`
+
+4. **Style with Tailwind only** — no `style={{}}` props or custom CSS files. Use `sunbird-*` color tokens defined in `tailwind.config.ts`. Use `font-rubik` for Sunbird-branded headings.
+
+5. **Server state via TanStack Query v5** — keep fetch/mutation logic out of components:
+   ```typescript
+   // src/hooks/useSkills.ts
+   export const useSkills = () =>
+     useQuery({ queryKey: ['skills'], queryFn: fetchSkills });
+
+   export const useUpdateSkills = () =>
+     useMutation({
+       mutationFn: updateSkills,
+       onSuccess: () => queryClient.invalidateQueries({ queryKey: ['skills'] }),
+     });
+   ```
+
+6. **Handle all query states** in the component:
+   ```tsx
+   const { data, isLoading, isError } = useSkills();
+   if (isLoading) return <Skeleton />;
+   if (isError) return <ErrorMessage />;
+   ```
+
+7. **Add i18n keys** for all user-visible strings — never hardcode English strings in JSX:
+   ```tsx
+   const { t } = useTranslation();
+   <h2>{t('skills.title')}</h2>
+   ```
+   Add the key to `src/locales/en.json`.
+
+8. **Write a test** covering the rendered output, loading state, and error state:
+   ```bash
+   cd frontend && npx vitest run src/components/skills/SkillsSection.test.tsx
+   ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "I'll use `useState` + `useEffect` for this API call — it's simpler" | TanStack Query handles caching, deduplication, and background refresh; `useEffect` fetching creates race conditions and stale data |
+| "I'll use inline `style={{}}` — Tailwind classes are too verbose" | Inline styles bypass Tailwind's purging and dark mode; use `cn()` (clsx + tailwind-merge) for conditional classes |
+| "I'll build a custom dialog — Radix is overkill" | Custom dialogs miss focus trapping and ARIA; Radix provides WCAG 2.1 AA compliance out of the box |
+| "I'll hardcode the English string — i18n can be added later" | Retrofitting i18n after the fact requires touching every component; add the key now |
+
+## Red Flags
+
+Watch for:
+- `useEffect(() => { fetch(...) }, [])` pattern — replace with TanStack Query
+- `<div onClick={...}>` without `role` and `tabIndex` — use a `<button>` or Radix primitive
+- Tailwind class strings built by string interpolation (`"bg-" + color`) — Tailwind cannot purge dynamic class names; use a lookup object
+- A component file exceeding 250 lines — split into smaller components or extract logic to a hook
+- Missing loading and error state handling in a component that calls a TanStack Query hook
+
+## Verification
+
+□ Props interface defined with TypeScript (no `any`)  
+□ All Tailwind classes use `sunbird-*` tokens or standard Tailwind utilities — no inline styles  
+□ Interactive widgets use Radix UI primitives  
+□ Data fetching lives in a `src/hooks/use<Feature>.ts` hook, not in the component body  
+□ All user-visible strings reference i18n keys from `src/locales/en.json`  
+□ Loading, error, and success states are all handled in JSX  
+□ `cd frontend && npm run lint && npm run type-check && npm run test:run` all exit 0
