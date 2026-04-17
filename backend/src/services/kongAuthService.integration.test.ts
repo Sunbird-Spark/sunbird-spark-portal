@@ -294,5 +294,43 @@ describe('Kong Auth Service', () => {
 
             await expect(getKongAccessToken(mockRequest as Request)).rejects.toThrow('Network error');
         });
+
+        it('should omit expiresIn when expires_in is non-numeric', async () => {
+            mockRequest.session!['oidc-tokens'] = {
+                access_token: 'test-token',
+                refresh_token: 'test-refresh-token'
+            } as any;
+            mockRequest.session!.kongToken = 'bearer-token';
+
+            mockedAxiosPost.mockResolvedValue({
+                data: {
+                    params: { status: 'successful' },
+                    result: { access_token: 'kong-access-token', expires_in: 'not-a-number' }
+                }
+            });
+
+            const result = await getKongAccessToken(mockRequest as Request);
+
+            expect(result).toEqual({ accessToken: 'kong-access-token' });
+        });
+
+        it('should omit expiresIn when expires_in is missing', async () => {
+            mockRequest.session!['oidc-tokens'] = {
+                access_token: 'test-token',
+                refresh_token: 'test-refresh-token'
+            } as any;
+            mockRequest.session!.kongToken = 'bearer-token';
+
+            mockedAxiosPost.mockResolvedValue({
+                data: {
+                    params: { status: 'successful' },
+                    result: { access_token: 'kong-access-token' }
+                }
+            });
+
+            const result = await getKongAccessToken(mockRequest as Request);
+
+            expect(result).toEqual({ accessToken: 'kong-access-token' });
+        });
     });
 });

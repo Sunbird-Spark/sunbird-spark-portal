@@ -3,7 +3,6 @@ import * as oidcClient from 'openid-client';
 import { getPortalOIDCConfig, decodeJwtPayload } from '../auth/oidcProvider.js';
 import logger from '../utils/logger.js';
 import { regenerateSession, destroySession, saveSession } from '../utils/sessionUtils.js';
-import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
 import { envConfig } from '../config/env.js';
 import { sessionMiddleware } from '../middlewares/conditionalSession.js';
@@ -146,9 +145,10 @@ router.get('/auth/callback',
             logger.info('OIDC authenticated successfully');
 
             if (req.session) {
-                // Regenerate session to prevent session fixation attacks
+                // Regenerate session to prevent session fixation attacks.
+                // regenerateSession sets cookie TTL from Kong access token's expires_in,
+                // falling back to OIDC token claims when Kong TTL is unavailable.
                 await regenerateSession(req);
-                setSessionTTLFromToken(req);
 
                 // Initialize user session from token subject
                 const tokenSubject = req.oidc?.tokenClaims?.sub;

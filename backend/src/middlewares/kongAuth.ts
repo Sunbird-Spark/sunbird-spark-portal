@@ -17,15 +17,19 @@ export const registerDeviceWithKong = () => {
                 req.session.kongTokenType = 'logged-in';
 
                 const result = await getKongAccessToken(req);
+                let kongTTLApplied = false;
                 if (result) {
                     req.session.userAccessToken = result.accessToken;
                     if (result.expiresIn) {
                         req.session.cookie.maxAge = result.expiresIn * 1000;
                         req.session.cookie.expires = new Date(Date.now() + result.expiresIn * 1000);
+                        kongTTLApplied = true;
                     }
                 }
 
-                refreshSessionTTL(req);
+                if (!kongTTLApplied) {
+                    refreshSessionTTL(req);
+                }
                 await saveSession(req);
                 logger.info('KONG_TOKEN_UPGRADE :: successfully upgraded to logged-in Kong token');
             } catch (err) {

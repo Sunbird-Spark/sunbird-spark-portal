@@ -150,14 +150,16 @@ export const getKongAccessToken = async (req: Request): Promise<{ accessToken: s
 
     const status = _.get(response.data, 'params.status');
     const accessToken = _.get(response.data, 'result.access_token');
-    const expiresIn = _.get(response.data, 'result.expires_in');
+    const rawExpiresIn = _.get(response.data, 'result.expires_in');
+    const parsedExpiresIn = Number(rawExpiresIn);
+    const expiresIn = Number.isFinite(parsedExpiresIn) ? parsedExpiresIn : undefined;
 
     if (status !== 'successful' || !accessToken) {
         throw new Error('KONG_REFRESH_TOKEN :: Kong access token refresh failed');
     }
 
     logger.info(`KONG_REFRESH_TOKEN :: successfully generated Kong access token for session ${req.sessionID}`);
-    return { accessToken, expiresIn };
+    return expiresIn === undefined ? { accessToken } : { accessToken, expiresIn };
 };
 
 export const saveKongTokenToSession = async (req: Request, token: string): Promise<void> => {

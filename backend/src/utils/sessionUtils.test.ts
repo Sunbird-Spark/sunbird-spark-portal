@@ -6,6 +6,7 @@ vi.mock('./logger.js', () => ({
     default: {
         info: vi.fn(),
         error: vi.fn(),
+        warn: vi.fn(),
         debug: vi.fn(),
     }
 }));
@@ -14,6 +15,10 @@ vi.mock('../services/kongAuthService.js', () => ({
     generateLoggedInKongToken: vi.fn(),
     generateKongToken: vi.fn(),
     getKongAccessToken: vi.fn(),
+}));
+
+vi.mock('./sessionTTLUtil.js', () => ({
+    setSessionTTLFromToken: vi.fn(),
 }));
 
 vi.mock('../config/env.js', () => ({
@@ -123,6 +128,18 @@ describe('sessionUtils', () => {
             );
             expect(mockSession.kongToken).toBe('new-kong-token');
             expect(mockSession.save).toHaveBeenCalled();
+        });
+
+        it('should fall back to setSessionTTLFromToken when Kong has no expiresIn', async () => {
+            const { setSessionTTLFromToken } = await import('./sessionTTLUtil.js');
+            mockSession['oidc-tokens'] = { access_token: 'test-token', refresh_token: 'test-refresh' };
+            (generateLoggedInKongToken as Mock).mockResolvedValue('new-kong-token');
+            (getKongAccessToken as Mock).mockResolvedValue({ accessToken: 'kong-access-token' });
+
+            await regenerateSession(mockReq);
+
+            expect(mockSession.userAccessToken).toBe('kong-access-token');
+            expect(setSessionTTLFromToken).toHaveBeenCalledWith(mockReq);
         });
 
         it('should reject if session.regenerate fails', async () => {
