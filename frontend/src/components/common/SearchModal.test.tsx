@@ -154,7 +154,7 @@ describe('SearchModal', () => {
     it('shows a loading spinner while the API is fetching', () => {
       mockUseContentSearch.mockReturnValue(loadingResponse);
       const { container } = renderModal();
-      expect(container.querySelector('.animate-spin')).toBeInTheDocument();
+      expect(container.querySelector('[data-testid="page-loader"]')).toBeInTheDocument();
     });
 
     it('shows "No results found." when the API returns an empty array', () => {
