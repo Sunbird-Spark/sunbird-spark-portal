@@ -274,6 +274,8 @@ const SignUp: React.FC = () => {
                         isStep1Valid={isStep1Valid && !userExists && !checkUserExistsMutation.isError && !checkUserExistsMutation.isPending && !isResolvingCaptcha}
                         isLoading={isLoading}
                         userExists={userExists}
+                        isAvailable={checkUserExistsMutation.isSuccess && !userExists}
+                        isCheckingUser={isResolvingCaptcha || checkUserExistsMutation.isPending}
                     />
                 )}
 
