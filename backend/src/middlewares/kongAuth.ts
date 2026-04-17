@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
-import { generateKongToken, generateLoggedInKongToken, refreshSessionTTL, isSessionNearExpiry } from '../services/kongAuthService.js';
+import { generateKongToken, generateLoggedInKongToken, getKongAccessToken, refreshSessionTTL, isSessionNearExpiry } from '../services/kongAuthService.js';
 import { saveSession } from '../utils/sessionUtils.js';
 
 export const registerDeviceWithKong = () => {
@@ -15,7 +15,21 @@ export const registerDeviceWithKong = () => {
                 const token = await generateLoggedInKongToken(req);
                 req.session.kongToken = token;
                 req.session.kongTokenType = 'logged-in';
-                refreshSessionTTL(req);
+
+                const result = await getKongAccessToken(req);
+                let kongTTLApplied = false;
+                if (result) {
+                    req.session.userAccessToken = result.accessToken;
+                    if (result.expiresIn) {
+                        req.session.cookie.maxAge = result.expiresIn * 1000;
+                        req.session.cookie.expires = new Date(Date.now() + result.expiresIn * 1000);
+                        kongTTLApplied = true;
+                    }
+                }
+
+                if (!kongTTLApplied) {
+                    refreshSessionTTL(req);
+                }
                 await saveSession(req);
                 logger.info('KONG_TOKEN_UPGRADE :: successfully upgraded to logged-in Kong token');
             } catch (err) {

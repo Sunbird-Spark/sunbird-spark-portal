@@ -48,9 +48,10 @@ describe('UserService', () => {
   });
 
   describe('fetchUserById', () => {
-    it('fetches user by ID with kong token', async () => {
+    it('fetches user by ID using userAccessToken from session', async () => {
       mockRequest.session.userId = 'test-user-id';
       mockRequest.session.kongToken = 'test-kong-token';
+      mockRequest.session.userAccessToken = 'kong-access-token';
       mockRequest.oidc = {
         isAuthenticated: true,
         accessToken: 'test-auth-token',
@@ -72,11 +73,35 @@ describe('UserService', () => {
           'Content-Type': 'application/json',
           accept: 'application/json',
           Authorization: 'Bearer test-kong-token',
-          'x-authenticated-user-token': 'test-auth-token',
+          'x-authenticated-user-token': 'kong-access-token',
         },
       });
 
       expect(result).toEqual(mockUserData);
+    });
+
+    it('falls back to OIDC accessToken when userAccessToken is not set', async () => {
+      mockRequest.session.userId = 'test-user-id';
+      mockRequest.session.kongToken = 'test-kong-token';
+      mockRequest.oidc = {
+        isAuthenticated: true,
+        accessToken: 'test-auth-token',
+      };
+
+      const mockUserData = {
+        responseCode: 'OK',
+        result: { response: { id: 'test-user-id', userName: 'testuser' } },
+      };
+
+      (mockAxios.get as any).mockResolvedValue({ data: mockUserData });
+
+      await fetchUserById('test-user-id', mockRequest as Request);
+
+      expect(mockAxios.get).toHaveBeenCalledWith(expect.any(String), {
+        headers: expect.objectContaining({
+          'x-authenticated-user-token': 'test-auth-token',
+        }),
+      });
     });
 
     it('uses logged-in fallback token when kong token missing', async () => {

@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import logger from '../utils/logger.js';
 import { UserApiResponse } from '../types/user.js';
 import { saveSession } from '../utils/sessionUtils.js';
-import { getBearerToken } from '../utils/proxyUtils.js';
+import { getBearerToken, getUserToken } from '../utils/proxyUtils.js';
 
 const { KONG_URL } = envConfig;
 
@@ -67,7 +67,7 @@ export const fetchUserById = async (userId: string | number, req: Request): Prom
         'Content-Type': 'application/json',
         accept: 'application/json',
         Authorization: `Bearer ${getBearerToken(req)}`,
-        'x-authenticated-user-token': req.oidc?.accessToken
+        'x-authenticated-user-token': getUserToken(req)
     };
 
     const response = await axios.get(url, { headers });

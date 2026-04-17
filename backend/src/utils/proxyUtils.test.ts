@@ -30,9 +30,21 @@ describe('proxyUtils', () => {
     };
 
     describe('getUserToken', () => {
-        it('should return OIDC access token when available', async () => {
+        it('should return Kong-issued userAccessToken when available', async () => {
             const { getUserToken } = await importProxyUtils();
             const mockReq = {
+                session: { userAccessToken: 'kong-access-token' },
+                oidc: { isAuthenticated: true, accessToken: 'oidc-token' }
+            } as any;
+
+            const result = getUserToken(mockReq as Request);
+            expect(result).toBe('kong-access-token');
+        });
+
+        it('should fall back to OIDC access token when userAccessToken is not set', async () => {
+            const { getUserToken } = await importProxyUtils();
+            const mockReq = {
+                session: {},
                 oidc: {
                     isAuthenticated: true,
                     accessToken: 'oidc-token'

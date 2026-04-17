@@ -7,6 +7,9 @@ const loggedInFallbackToken = envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
 const appId = envConfig.APPID;
 
 export const getUserToken = (req: Request): string | undefined => {
+    if (req.session?.userAccessToken) {
+        return req.session.userAccessToken;
+    }
     return req.oidc?.accessToken;
 };
 

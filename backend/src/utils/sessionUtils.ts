@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import logger from './logger.js';
-import { generateLoggedInKongToken, generateKongToken } from '../services/kongAuthService.js';
+import { generateLoggedInKongToken, generateKongToken, getKongAccessToken } from '../services/kongAuthService.js';
+import { setSessionTTLFromToken } from './sessionTTLUtil.js';
 import { envConfig } from '../config/env.js';
 
 export const saveSession = (req: Request): Promise<void> => {
@@ -46,6 +47,25 @@ export const regenerateSession = (req: Request): Promise<void> => {
                     const newKongToken = await generateLoggedInKongToken(req);
                     req.session.kongToken = newKongToken;
                     req.session.kongTokenType = 'logged-in';
+
+                    let kongTTLApplied = false;
+                    try {
+                        const result = await getKongAccessToken(req);
+                        if (result) {
+                            req.session.userAccessToken = result.accessToken;
+                            if (result.expiresIn) {
+                                req.session.cookie.maxAge = result.expiresIn * 1000;
+                                req.session.cookie.expires = new Date(Date.now() + result.expiresIn * 1000);
+                                kongTTLApplied = true;
+                            }
+                        }
+                    } catch (err) {
+                        logger.error('Error getting Kong access token during session regeneration:', err);
+                    }
+
+                    if (!kongTTLApplied) {
+                        setSessionTTLFromToken(req);
+                    }
 
                     req.session.save((saveErr) => {
                         if (saveErr) {

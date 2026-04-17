@@ -11,7 +11,6 @@ import {
     createKeycloakGoogleSession,
 } from '../services/googleAuthService.js';
 import { regenerateSession, saveSession } from '../utils/sessionUtils.js';
-import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
 import { envConfig } from '../config/env.js';
 import { Request, Response } from 'express';
@@ -96,7 +95,6 @@ export const handleGoogleAuthCallback = async (req: Request, res: Response) => {
         };
 
         await regenerateSession(req);
-        setSessionTTLFromToken(req);
 
         const tokenSubject = tokens.tokenClaims?.sub as string | undefined;
         if (tokenSubject) {
