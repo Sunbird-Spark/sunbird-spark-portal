@@ -13,6 +13,7 @@ vi.mock('./logger.js', () => ({
 vi.mock('../services/kongAuthService.js', () => ({
     generateLoggedInKongToken: vi.fn(),
     generateKongToken: vi.fn(),
+    getKongAccessToken: vi.fn(),
 }));
 
 vi.mock('../config/env.js', () => ({
@@ -22,7 +23,7 @@ vi.mock('../config/env.js', () => ({
 }));
 
 import logger from './logger.js';
-import { generateLoggedInKongToken, generateKongToken } from '../services/kongAuthService.js';
+import { generateLoggedInKongToken, generateKongToken, getKongAccessToken } from '../services/kongAuthService.js';
 
 describe('sessionUtils', () => {
     let mockReq: Request;
@@ -94,6 +95,34 @@ describe('sessionUtils', () => {
 
             expect(mockSession.save).toHaveBeenCalled();
             expect(logger.info).toHaveBeenCalledWith('Regenerated session saved successfully');
+        });
+
+        it('should call getKongAccessToken and store result in session', async () => {
+            mockSession['oidc-tokens'] = { access_token: 'test-token', refresh_token: 'test-refresh' };
+            (generateLoggedInKongToken as Mock).mockResolvedValue('new-kong-token');
+            (getKongAccessToken as Mock).mockResolvedValue({ accessToken: 'kong-access-token', expiresIn: 3600 });
+
+            await regenerateSession(mockReq);
+
+            expect(getKongAccessToken).toHaveBeenCalledWith(mockReq);
+            expect(mockSession.userAccessToken).toBe('kong-access-token');
+            expect(mockSession.cookie.maxAge).toBe(3600000);
+            expect(mockSession.cookie.expires).toBeInstanceOf(Date);
+        });
+
+        it('should not fail regenerateSession if getKongAccessToken throws', async () => {
+            mockSession['oidc-tokens'] = { access_token: 'test-token', refresh_token: 'test-refresh' };
+            (generateLoggedInKongToken as Mock).mockResolvedValue('new-kong-token');
+            (getKongAccessToken as Mock).mockRejectedValue(new Error('Kong refresh API down'));
+
+            await regenerateSession(mockReq);
+
+            expect(logger.error).toHaveBeenCalledWith(
+                'Error getting Kong access token during session regeneration:',
+                expect.any(Error)
+            );
+            expect(mockSession.kongToken).toBe('new-kong-token');
+            expect(mockSession.save).toHaveBeenCalled();
         });
 
         it('should reject if session.regenerate fails', async () => {

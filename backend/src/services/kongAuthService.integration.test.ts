@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import { Request } from 'express';
-import { refreshSessionTTL, generateKongToken, generateLoggedInKongToken, saveKongTokenToSession, isSessionNearExpiry } from './kongAuthService.js';
+import { refreshSessionTTL, generateKongToken, generateLoggedInKongToken, saveKongTokenToSession, isSessionNearExpiry, getKongAccessToken } from './kongAuthService.js';
 import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 
 vi.mock('axios');
@@ -194,6 +194,105 @@ describe('Kong Auth Service', () => {
 
             expect(mockRequest.session!.kongToken).toBe(token);
             expect(setSessionTTLFromToken).toHaveBeenCalledWith(mockRequest);
+        });
+    });
+
+    describe('getKongAccessToken', () => {
+        it('should return null when DOMAIN_URL is not configured', async () => {
+            vi.resetModules();
+            vi.doMock('../config/env.js', () => ({
+                envConfig: {
+                    KONG_URL: 'http://localhost:8000',
+                    DOMAIN_URL: '',
+                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'fallback-anonymous-token',
+                    SUNBIRD_ANONYMOUS_SESSION_TTL: 60000,
+                }
+            }));
+            vi.doMock('../utils/sessionUtils.js', () => ({
+                saveSession: vi.fn().mockResolvedValue(undefined)
+            }));
+
+            const { getKongAccessToken: getToken } = await import('./kongAuthService.js');
+            const result = await getToken(mockRequest as Request);
+            expect(result).toBeNull();
+        });
+
+        it('should return null when no OIDC refresh token in session', async () => {
+            mockRequest.session!['oidc-tokens'] = { access_token: 'test-token' } as any;
+            const result = await getKongAccessToken(mockRequest as Request);
+            expect(result).toBeNull();
+        });
+
+        it('should return null when no Kong bearer token in session', async () => {
+            mockRequest.session!['oidc-tokens'] = {
+                access_token: 'test-token',
+                refresh_token: 'test-refresh-token'
+            } as any;
+            mockRequest.session!.kongToken = undefined;
+            const result = await getKongAccessToken(mockRequest as Request);
+            expect(result).toBeNull();
+        });
+
+        it('should successfully exchange refresh token for Kong access token', async () => {
+            mockRequest.session!['oidc-tokens'] = {
+                access_token: 'test-token',
+                refresh_token: 'test-refresh-token'
+            } as any;
+            mockRequest.session!.kongToken = 'bearer-token';
+
+            mockedAxiosPost.mockResolvedValue({
+                data: {
+                    params: { status: 'successful' },
+                    result: { access_token: 'kong-access-token', expires_in: 3600 }
+                }
+            });
+
+            const result = await getKongAccessToken(mockRequest as Request);
+
+            expect(result).toEqual({ accessToken: 'kong-access-token', expiresIn: 3600 });
+            expect(mockRequest.session!.userAccessToken).toBeUndefined();
+            expect(mockRequest.session!.cookie.maxAge).toBeUndefined();
+            expect(mockedAxiosPost).toHaveBeenCalledWith(
+                'http://localhost:8080/auth/v1/refresh/token',
+                expect.any(URLSearchParams),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        Authorization: 'Bearer bearer-token'
+                    }
+                }
+            );
+        });
+
+        it('should throw when Kong API returns non-successful status', async () => {
+            mockRequest.session!['oidc-tokens'] = {
+                access_token: 'test-token',
+                refresh_token: 'test-refresh-token'
+            } as any;
+            mockRequest.session!.kongToken = 'bearer-token';
+
+            mockedAxiosPost.mockResolvedValue({
+                data: {
+                    params: { status: 'failed' },
+                    result: {}
+                }
+            });
+
+            await expect(getKongAccessToken(mockRequest as Request)).rejects.toThrow(
+                'KONG_REFRESH_TOKEN :: Kong access token refresh failed'
+            );
+        });
+
+        it('should throw when Kong API request fails', async () => {
+            mockRequest.session!['oidc-tokens'] = {
+                access_token: 'test-token',
+                refresh_token: 'test-refresh-token'
+            } as any;
+            mockRequest.session!.kongToken = 'bearer-token';
+
+            mockedAxiosPost.mockRejectedValue(new Error('Network error'));
+
+            await expect(getKongAccessToken(mockRequest as Request)).rejects.toThrow('Network error');
         });
     });
 });

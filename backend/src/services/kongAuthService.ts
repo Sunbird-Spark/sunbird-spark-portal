@@ -114,6 +114,52 @@ export const generateLoggedInKongToken = async (req: Request): Promise<string> =
     return envConfig.KONG_LOGGEDIN_FALLBACK_TOKEN;
 };
 
+const KONG_REFRESH_TOKEN_API = '/auth/v1/refresh/token';
+
+export const getKongAccessToken = async (req: Request): Promise<{ accessToken: string; expiresIn?: number } | null> => {
+    if (!envConfig.DOMAIN_URL) {
+        logger.info('KONG_REFRESH_TOKEN :: DOMAIN_URL not configured, skipping');
+        return null;
+    }
+
+    const refreshToken = req.session?.['oidc-tokens']?.refresh_token;
+    if (!refreshToken) {
+        logger.warn('KONG_REFRESH_TOKEN :: No OIDC refresh token available');
+        return null;
+    }
+
+    const bearerToken = req.session?.kongToken;
+    if (!bearerToken) {
+        logger.warn('KONG_REFRESH_TOKEN :: No Kong bearer token in session');
+        return null;
+    }
+
+    const apiEndpoint = `${envConfig.DOMAIN_URL}${KONG_REFRESH_TOKEN_API}`;
+    logger.info(`KONG_REFRESH_TOKEN :: requesting Kong access token for session ${req.sessionID}`);
+
+    const response = await axios.post(
+        apiEndpoint,
+        new URLSearchParams({ refresh_token: refreshToken }),
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Authorization: `Bearer ${bearerToken}`,
+            },
+        }
+    );
+
+    const status = _.get(response.data, 'params.status');
+    const accessToken = _.get(response.data, 'result.access_token');
+    const expiresIn = _.get(response.data, 'result.expires_in');
+
+    if (status !== 'successful' || !accessToken) {
+        throw new Error('KONG_REFRESH_TOKEN :: Kong access token refresh failed');
+    }
+
+    logger.info(`KONG_REFRESH_TOKEN :: successfully generated Kong access token for session ${req.sessionID}`);
+    return { accessToken, expiresIn };
+};
+
 export const saveKongTokenToSession = async (req: Request, token: string): Promise<void> => {
     req.session.kongToken = token;
     refreshSessionTTL(req);
