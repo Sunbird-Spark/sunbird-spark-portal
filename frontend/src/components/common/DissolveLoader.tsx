@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GhostLogo, MainLogo } from './dissolveLogo';
 import {
-  SubVariant,
   DissolveLoaderProps,
   CYCLE,
   Particle,
