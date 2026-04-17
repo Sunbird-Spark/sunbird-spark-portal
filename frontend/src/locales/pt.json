@@ -734,8 +734,10 @@
     "verificationFailed": "Falha na verificação",
     "invalidOtp": "OTP inválido. Tente novamente.",
     "verificationError": "Ocorreu um erro durante a verificação. Tente novamente.",
-    "emailAlreadyRegistered": "Este endereço de e-mail já está registrado.",
-    "phoneAlreadyRegistered": "Este número de telefone já está registrado."
+    "emailAlreadyRegistered": "Este e-mail já está em uso.",
+    "phoneAlreadyRegistered": "Este número de telefone já está em uso.",
+    "emailAvailable": "Este endereço de e-mail está disponível.",
+    "phoneAvailable": "Este número de telefone está disponível."
   },
   "personalInfo": {
     "title": "Informações pessoais",
