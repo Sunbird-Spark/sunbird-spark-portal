@@ -50,7 +50,7 @@ describe('GenericEditor', () => {
   it('should render loading state initially', () => {
     setHookReturn({ isLoading: true, isEditorReady: false });
 
-    const { getByText, getByTestId } = render(
+    const { getByTestId } = render(
       <TestWrapper>
         <GenericEditor contentId="do_123" />
       </TestWrapper>
