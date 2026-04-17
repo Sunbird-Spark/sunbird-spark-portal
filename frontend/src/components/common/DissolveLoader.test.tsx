@@ -5,7 +5,7 @@ import { DissolveLoader } from './DissolveLoader';
 describe('DissolveLoader', () => {
   beforeEach(() => {
     // Mock requestAnimationFrame / cancelAnimationFrame for the animation loop
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: (time: number) => void) => {
       // Use standard setTimeout to prevent blocking and allow component logic to run once slowly
       return setTimeout(() => cb(performance.now()), 16) as unknown as number;
     });
