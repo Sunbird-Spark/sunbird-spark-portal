@@ -12,6 +12,7 @@ import React, { useEffect, useCallback } from 'react';
 import { useGenericEditor } from '@/hooks/useGenericEditor';
 import type { GenericEditorRouteParams, GenericEditorQueryParams } from '@/services/editors/generic-editor';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import PageLoader from '@/components/common/PageLoader';
 
 export interface GenericEditorComponentProps {
   contentId?: string;
@@ -99,19 +100,7 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
 
   // Loading state
   if (isLoading || !isEditorReady) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-sunbird-ginger/30 border-t-sunbird-ginger rounded-full animate-spin mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-gray-700 font-rubik">
-            {t('editors.loading')}
-          </h2>
-          <p className="text-sm text-gray-500 font-rubik mt-1">
-            {t('editors.preparing')}
-          </p>
-        </div>
-      </div>
-    );
+    return <PageLoader message={t('editors.loading')} />;
   }
 
   // Editor iframe - fullscreen like the Angular iziModal with openFullscreen: true
