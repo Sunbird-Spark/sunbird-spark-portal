@@ -160,7 +160,7 @@ describe('HelpSupport', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        expect(screen.getByTestId('page-loader')).toBeInTheDocument();
     });
 
     it('shows error state when fetch fails', () => {
