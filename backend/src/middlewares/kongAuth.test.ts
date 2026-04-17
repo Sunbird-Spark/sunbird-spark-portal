@@ -307,20 +307,29 @@ describe('kongAuth middleware', () => {
             const extendedEnvConfig = {
                 ...mockEnvConfig,
                 KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN: 'loggedin-bearer-token',
-                KONG_LOGGEDIN_FALLBACK_TOKEN: 'loggedin-fallback-token'
+                KONG_LOGGEDIN_FALLBACK_TOKEN: 'loggedin-fallback-token',
+                DOMAIN_URL: 'http://localhost:8080'
             };
             vi.doMock('../config/env.js', () => ({ envConfig: extendedEnvConfig }));
+            vi.doMock('../utils/sessionUtils.js', () => ({
+                saveSession: vi.fn().mockResolvedValue(undefined)
+            }));
             const { registerDeviceWithKong } = await import('./kongAuth.js');
             const logger = (await import('../utils/logger.js')).default;
 
-            (axios.post as ReturnType<typeof vi.fn>).mockResolvedValue({
-                data: { params: { status: 'successful' }, result: { token: 'loggedin-kong-token' } }
-            });
+            (axios.post as ReturnType<typeof vi.fn>)
+                .mockResolvedValueOnce({
+                    data: { params: { status: 'successful' }, result: { token: 'loggedin-kong-token' } }
+                })
+                .mockResolvedValueOnce({
+                    data: { params: { status: 'successful' }, result: { access_token: 'kong-access-token', expires_in: 3600 } }
+                });
 
             if (mockRequest.session) {
                 mockRequest.session.kongToken = 'anonymous-token';
                 mockRequest.session.kongTokenType = 'anonymous';
                 mockRequest.session.userId = 'user-123';
+                mockRequest.session['oidc-tokens'] = { refresh_token: 'test-refresh-token' } as any;
                 mockRequest.session.cookie.expires = new Date(Date.now() + 60000);
                 mockRequest.session.cookie.maxAge = 120000;
             }
@@ -335,6 +344,7 @@ describe('kongAuth middleware', () => {
             );
             expect(mockRequest.session?.kongToken).toBe('loggedin-kong-token');
             expect(mockRequest.session?.kongTokenType).toBe('logged-in');
+            expect(mockRequest.session?.userAccessToken).toBe('kong-access-token');
             expect(mockNext).toHaveBeenCalled();
         });
 
