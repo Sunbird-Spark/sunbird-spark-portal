@@ -170,7 +170,7 @@ describe('HelpCategoryDetail', () => {
     it('shows loading state', () => {
         mockUseHelpFaqData.mockReturnValue({ categories: [], loading: true, error: null });
         render(<MemoryRouter><HelpCategoryDetail /></MemoryRouter>);
-        expect(screen.getByText('loading')).toBeInTheDocument();
+        expect(screen.getByTestId('page-loader')).toBeInTheDocument();
     });
 
     it('shows error state when fetch fails', () => {
