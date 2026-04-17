@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import CollectionOverview from './CollectionOverview';
 import type { CollectionData } from '@/types/collectionTypes';
 
@@ -20,9 +20,10 @@ vi.mock('@/components/players', () => ({
 }));
 
 vi.mock('@/components/common/PageLoader', () => ({
-  default: ({ message, error }: { message?: string; error?: string }) => (
+  default: ({ message, error, onRetry }: { message?: string; error?: string; onRetry?: () => void }) => (
     <div data-testid="page-loader" data-error={error ?? ''}>
       {message || error}
+      {onRetry && <button data-testid="retry-btn" onClick={onRetry}>Retry</button>}
     </div>
   ),
 }));
@@ -114,6 +115,20 @@ describe('CollectionOverview', () => {
       expect(screen.getByText('courseDetails.batchNotStartedYetNoDate')).toBeInTheDocument();
       expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
       expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+    });
+
+    it('shows batchNotStartedYet with date when batchStartDate is provided (line 61 true branch)', () => {
+      render(
+        <CollectionOverview
+          collectionData={mockCollectionData}
+          contentAccessBlocked={false}
+          upcomingBatchBlocked={true}
+          batchStartDate="2025-06-01"
+          contentId="content-1"
+          playerMetadata={mockPlayerMetadata}
+        />
+      );
+      expect(screen.getByText('courseDetails.batchNotStartedYet')).toBeInTheDocument();
     });
   });
 
@@ -267,5 +282,31 @@ describe('CollectionOverview', () => {
       expect(screen.getByText('courseDetails.collectionOverview')).toBeInTheDocument();
       expect(screen.getByText(mockCollectionData.description)).toBeInTheDocument();
     });
+  });
+
+  describe('retry button (line 110)', () => {
+    it('calls window.location.reload when retry button is clicked in no-contentId error state', () => {
+      const reloadMock = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: { ...window.location, reload: reloadMock },
+        writable: true,
+      });
+
+      render(<CollectionOverview collectionData={mockCollectionData} />);
+
+      const retryBtn = screen.getByTestId('retry-btn');
+      expect(retryBtn).toBeInTheDocument();
+      fireEvent.click(retryBtn);
+
+      expect(reloadMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('shows 0 units when collectionData.children is undefined (line 133 ?? 0 branch)', () => {
+    const dataNoChildren = { ...mockCollectionData, children: undefined };
+    render(<CollectionOverview collectionData={dataNoChildren as any} />);
+    // The children stat should display 0
+    const statValues = document.querySelectorAll('.collection-stat-value');
+    expect(statValues[0]?.textContent).toBe('0');
   });
 });

@@ -1,11 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import PasswordResetSuccess from './PasswordResetSuccess';
 
-// Mock AuthLayout
+// Mock AuthLayout — expose onClose via a test button
 vi.mock('@/components/auth/AuthLayout', () => ({
-    AuthLayout: ({ children }: any) => <div data-testid="auth-layout">{children}</div>,
+    AuthLayout: ({ children, onClose }: any) => (
+        <div data-testid="auth-layout">
+            <button data-testid="close-btn" onClick={onClose}>Close</button>
+            {children}
+        </div>
+    ),
 }));
 
 // Mock ForgotPasswordComponents
@@ -46,6 +51,14 @@ vi.mock('@/hooks/useAppI18n', () => ({
 }));
 
 describe('PasswordResetSuccess', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        Object.defineProperty(window, 'location', {
+            value: { href: '' },
+            writable: true,
+        });
+    });
+
     it('renders translated strings via t()', () => {
         render(<PasswordResetSuccess />);
 
@@ -60,5 +73,18 @@ describe('PasswordResetSuccess', () => {
         expect(mockT).toHaveBeenCalledWith('passwordReset.congratulations', expect.any(Object));
         expect(mockT).toHaveBeenCalledWith('passwordReset.successMessage', expect.any(Object));
         expect(mockT).toHaveBeenCalledWith('passwordReset.proceedToLogin', expect.any(Object));
+    });
+
+    it('clicking Proceed to Login sets window.location.href (line 13)', () => {
+        render(<PasswordResetSuccess />);
+        fireEvent.click(screen.getByTestId('primary-button'));
+        // getSafeRedirectUrl is mocked to return '/portal/login?prompt=none'
+        expect(window.location.href).toBe('/portal/login?prompt=none');
+    });
+
+    it('AuthLayout onClose sets window.location.href (line 17)', () => {
+        render(<PasswordResetSuccess />);
+        fireEvent.click(screen.getByTestId('close-btn'));
+        expect(window.location.href).toBe('/portal/login?prompt=none');
     });
 });

@@ -73,4 +73,12 @@ describe('ExportButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /export csv/i }));
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
+
+  it('uses empty string when cell value is null/undefined (line 26 ?? branch)', () => {
+    const dataWithNull = [{ name: null, score: undefined }] as any;
+    render(<ExportButton data={dataWithNull} columns={columns} />);
+    fireEvent.click(screen.getByRole('button', { name: /export csv/i }));
+    // Should not throw and should still create a blob
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
 });

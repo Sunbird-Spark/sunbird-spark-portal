@@ -195,6 +195,84 @@ describe('useCertificateDownload', () => {
     expect(result.current.error).toBe('No certificate SVG received from server.');
   });
 
+  it('falls back to token when identifier is absent (line 39 || token branch)', async () => {
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
+    vi.mocked(convertSvgToOutput).mockResolvedValue(undefined);
+    vi.mocked(certificateService.downloadCertificate).mockResolvedValue({
+      data: '<svg>cert</svg>',
+      status: 200,
+      headers: {},
+    });
+
+    const certWithToken: IssuedCertificate = {
+      identifier: '',  // no identifier
+      lastIssuedOn: '2024-01-01',
+      name: 'Test',
+      templateUrl: 'http://example.com/template.svg',
+      token: 'token-fallback',  // only token available
+      type: 'course',
+    };
+
+    const { result } = renderHook(() => useCertificateDownload());
+    await act(async () => {
+      await result.current.downloadCertificate('course-1', 'batch-1', 'Course', [certWithToken]);
+    });
+    // Uses token-fallback as certId
+    expect(certificateService.downloadCertificate).toHaveBeenCalledWith('token-fallback', expect.anything());
+    expect(result.current.error).toBeNull();
+  });
+
+  it('falls back to empty array when searchResponse.data is not an array (line 45 false branch)', async () => {
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
+    vi.mocked(certificateService.searchCertificates).mockResolvedValue({
+      data: 'not-an-array' as any,
+      status: 200,
+      headers: {},
+    });
+
+    const { result } = renderHook(() => useCertificateDownload());
+    await act(async () => {
+      await result.current.downloadCertificate('course-1', 'batch-1', 'Course');
+    });
+    expect(result.current.error).toBe('Certificate is not yet generated or available for this course.');
+  });
+
+  it('uses "certificate" as filename when courseName is empty (line 66 || branch)', async () => {
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
+    vi.mocked(convertSvgToOutput).mockResolvedValue(undefined);
+    vi.mocked(certificateService.downloadCertificate).mockResolvedValue({
+      data: '<svg>cert</svg>',
+      status: 200,
+      headers: {},
+    });
+
+    const cert: IssuedCertificate = {
+      identifier: 'cert-id',
+      lastIssuedOn: '2024-01-01',
+      name: 'Test',
+      templateUrl: 'http://example.com/template.svg',
+      token: '',
+      type: 'course',
+    };
+
+    const { result } = renderHook(() => useCertificateDownload());
+    await act(async () => {
+      await result.current.downloadCertificate('course-1', 'batch-1', '', [cert]);
+    });
+    expect(convertSvgToOutput).toHaveBeenCalledWith(expect.any(String), { fileName: 'certificate' });
+  });
+
+  it('stringifies non-Error thrown value (line 70 else branch)', async () => {
+    vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
+    vi.mocked(certificateService.searchCertificates).mockRejectedValue('plain string error');
+
+    const { result } = renderHook(() => useCertificateDownload());
+    await act(async () => {
+      await result.current.downloadCertificate('course-1', 'batch-1', 'Course');
+    });
+    expect(result.current.error).toBe('plain string error');
+  });
+
   it('clears downloading state after completion', async () => {
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
     vi.mocked(convertSvgToOutput).mockResolvedValue(undefined);

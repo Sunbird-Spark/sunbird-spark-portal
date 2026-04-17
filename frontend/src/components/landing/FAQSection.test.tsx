@@ -198,4 +198,16 @@ describe('FAQSection', () => {
       expect(mockInteract).not.toHaveBeenCalled();
     });
   });
+
+  it('falls back to "en" when currentCode is falsy (line 33 || "en" branch)', () => {
+    (useAppI18n as Mock).mockReturnValue({ t: mockT, currentCode: '' });
+    (useSystemSetting as Mock).mockReturnValue({
+      data: { data: { response: { value: 'http://example.com/faq' } } },
+    });
+    (useFaqData as Mock).mockReturnValue({ data: null, loading: false, error: null });
+
+    render(<FAQSection />);
+    // useFaqData should have been called with 'en' as the language fallback
+    expect(useFaqData).toHaveBeenCalledWith(expect.any(String), 'en');
+  });
 });

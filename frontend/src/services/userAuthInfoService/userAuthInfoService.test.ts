@@ -182,6 +182,48 @@ describe('userAuthInfoService', () => {
         });
     });
 
+    describe('request generation staleness (line 48 false branch)', () => {
+        it('does not update state when a newer request has been started (stale generation)', async () => {
+            // Simulate: first request starts, then clearAuth increments generation,
+            // then first request resolves — its generation check fails → state not updated
+            let resolveFirst!: (v: any) => void;
+            const firstPromise = new Promise(r => { resolveFirst = r; });
+            mockGet.mockReturnValueOnce(firstPromise);
+
+            const p = userAuthInfoService.getAuthInfo();
+            // Invalidate by clearing auth, which bumps requestGeneration
+            userAuthInfoService.clearAuth();
+            // Now resolve the first request with valid data
+            resolveFirst({
+                data: { sid: 'stale-sid', uid: 'stale-uid', isAuthenticated: true },
+                status: 200,
+                headers: {}
+            });
+
+            await p.catch(() => {});
+            // State should NOT have been updated (stale generation)
+            expect(userAuthInfoService.getSessionId()).toBeNull();
+        });
+    });
+
+    describe('error logging — httpError.response?.data falsy (line 61 false branch)', () => {
+        it('logs undefined when error.response has no data', async () => {
+            const httpError = { response: { status: 500 } }; // no data property
+            mockGet.mockRejectedValue(httpError);
+
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            try {
+                await userAuthInfoService.getAuthInfo();
+            } catch {
+                // expected
+            }
+
+            expect(consoleSpy).toHaveBeenCalledWith('Response:', undefined);
+            consoleSpy.mockRestore();
+        });
+    });
+
     describe('State Management', () => {
         it('should return null for initial getters', () => {
             expect(userAuthInfoService.getSessionId()).toBeNull();

@@ -51,6 +51,13 @@ vi.mock('@/components/common/NotificationPopover', () => ({
     NotificationPopover: () => <button aria-label="Notifications" />,
 }));
 
+vi.mock('@/components/common/DropdownMenu', () => ({
+    DropdownMenu: ({ children }: any) => <div>{children}</div>,
+    DropdownMenuTrigger: ({ children }: any) => <div>{children}</div>,
+    DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
+    DropdownMenuItem: ({ children, onSelect }: any) => <button onClick={onSelect}>{children}</button>,
+}));
+
 describe('AuthenticatedHeader', () => {
     const mockOnToggleSidebar = vi.fn();
 
@@ -198,6 +205,29 @@ describe('AuthenticatedHeader', () => {
 
             const header = container.querySelector('header');
             expect(header).toHaveClass('mobile');
+        });
+
+        it('closes search modal when onClose is called (line 104)', () => {
+            render(
+                <MemoryRouter>
+                    <AuthenticatedHeader isSidebarOpen={true} onToggleSidebar={mockOnToggleSidebar} />
+                </MemoryRouter>
+            );
+            fireEvent.click(screen.getByLabelText('Search'));
+            expect(screen.getByTestId('search-modal')).toBeInTheDocument();
+            fireEvent.click(screen.getByText('Close'));
+            expect(screen.queryByTestId('search-modal')).not.toBeInTheDocument();
+        });
+
+        it('selects language and calls changeLanguage (line 90)', () => {
+            render(
+                <MemoryRouter>
+                    <AuthenticatedHeader isSidebarOpen={true} onToggleSidebar={mockOnToggleSidebar} />
+                </MemoryRouter>
+            );
+            // DropdownMenuItem mock renders items as buttons with onSelect as onClick
+            fireEvent.click(screen.getByText('हिंदी'));
+            expect(mockChangeLanguage).toHaveBeenCalledWith('hi');
         });
 
         it('does not apply mobile class when on desktop', () => {

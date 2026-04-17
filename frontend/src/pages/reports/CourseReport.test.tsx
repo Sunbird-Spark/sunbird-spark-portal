@@ -76,6 +76,10 @@ const renderWithRoute = (courseId = 'course-1') =>
     </MemoryRouter>
   );
 
+vi.mock('@/hooks/useImpression', () => ({
+  default: vi.fn(),
+}));
+
 describe('CourseReport', () => {
   it('renders without crashing', () => {
     renderWithRoute();
@@ -97,5 +101,20 @@ describe('CourseReport', () => {
   it('renders learner progress tab', () => {
     renderWithRoute();
     expect(screen.getByRole('tab', { name: /learner progress/i })).toBeInTheDocument();
+  });
+
+  it('uses empty string when courseId is undefined (line 9 || branch)', async () => {
+    const { default: useImpression } = await import('@/hooks/useImpression');
+    render(
+      <MemoryRouter initialEntries={['/reports/course']}>
+        <Routes>
+          <Route path="/reports/course" element={<CourseReport />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    // useImpression should be called with id: '' when courseId is undefined
+    expect(useImpression).toHaveBeenCalledWith(
+      expect.objectContaining({ object: expect.objectContaining({ id: '' }) })
+    );
   });
 });

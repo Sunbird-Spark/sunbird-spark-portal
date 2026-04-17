@@ -84,6 +84,21 @@ describe('useFancytreeGuard', () => {
     expect((globalThis as any).$.version).toBe('2');
   });
 
+  it('falls back to incoming when fancytreeJQueryRef is null at write time (line 72 ?? branch)', () => {
+    // Start with NO fancytree jQuery on the global — so fancytreeJQueryRef stays null
+    delete (globalThis as any).$;
+    delete (globalThis as any).jQuery;
+
+    renderHook(() => useFancytreeGuard(true));
+
+    // Now write a plain jQuery (no fancytree) — fancytreeJQueryRef is null → falls back to incoming
+    const plainJQuery = { fn: {} };
+    (globalThis as any).$ = plainJQuery;
+
+    // Since fancytreeJQueryRef is null, it keeps the incoming value
+    expect((globalThis as any).$).toBe(plainJQuery);
+  });
+
   it('should restore original descriptors on unmount', () => {
     const fakeJQuery = { fn: { fancytree: true } };
     (globalThis as any).$ = fakeJQuery;

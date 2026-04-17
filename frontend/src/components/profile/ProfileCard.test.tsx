@@ -115,4 +115,11 @@ describe('ProfileCard', () => {
         render(<ProfileCard user={userEmptyRole} />);
         // Should not render empty string or crash
     });
+
+    it('handles null roles (_.get returns null, falls to || [] branch)', () => {
+        // When roles is null, _.get returns null (not undefined), so || [] kicks in
+        const userNullRoles = { ...mockUser, roles: null as any };
+        render(<ProfileCard user={userNullRoles} />);
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
 });

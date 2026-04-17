@@ -23,7 +23,12 @@ vi.mock('@/hooks/useAppI18n', () => ({
 // Mock the common components
 vi.mock('@/components/common/Dialog', () => ({
     Dialog: ({ children, open, onOpenChange }: any) =>
-        open ? <div data-testid="dialog">{children}</div> : null,
+        open ? (
+            <div data-testid="dialog">
+                <button data-testid="dialog-overlay-close" onClick={() => onOpenChange?.(false)} />
+                {children}
+            </div>
+        ) : null,
     DialogContent: ({ children, className }: any) => <div className={className}>{children}</div>,
     DialogTitle: ({ children, className }: any) => <h2 className={className}>{children}</h2>,
 }));
@@ -151,9 +156,14 @@ describe('VerifyOtpDialog', () => {
     it('calls onClose when close button is clicked', () => {
         render(<VerifyOtpDialog {...defaultProps} />);
 
-        // The close button has the MdOutlineClose icon
-        const closeBtn = screen.getByRole('button', { name: '' }); // It doesn't have a label in the component, but it's the only other button besides Submit and Resend
-        fireEvent.click(closeBtn);
+        // The close button has the MdOutlineClose icon — select all unlabelled buttons
+        // and pick the one that is NOT the dialog-overlay-close (which has testid)
+        const allButtons = screen.getAllByRole('button');
+        const closeBtn = allButtons.find(
+            (b) => !b.dataset['testid'] && b.getAttribute('aria-label') === null
+                && !b.textContent?.trim()
+        );
+        fireEvent.click(closeBtn!);
 
         expect(defaultProps.onClose).toHaveBeenCalled();
     });
@@ -165,5 +175,15 @@ describe('VerifyOtpDialog', () => {
         rerender(<VerifyOtpDialog {...defaultProps} fieldState={verifiedState} />);
 
         expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    it('calls onClose via Dialog onOpenChange when dialog is dismissed (line 51)', () => {
+        const onClose = vi.fn();
+        render(<VerifyOtpDialog {...defaultProps} onClose={onClose} />);
+
+        const overlayCloseBtn = screen.getByTestId('dialog-overlay-close');
+        fireEvent.click(overlayCloseBtn);
+
+        expect(onClose).toHaveBeenCalled();
     });
 });

@@ -3,6 +3,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IdentifyUser } from './IdentifyUser';
 
+const { mockRedirectWithError } = vi.hoisted(() => ({
+    mockRedirectWithError: vi.fn(() => false),
+}));
+
+vi.mock('@/utils/forgotPasswordUtils', async () => {
+    const actual = await vi.importActual('@/utils/forgotPasswordUtils') as any;
+    return { ...actual, redirectWithError: mockRedirectWithError };
+});
+
 vi.mock('@/hooks/useAppI18n', () => ({
     useAppI18n: () => ({
         t: (key: string) => {
@@ -187,6 +196,64 @@ describe('IdentifyUser', () => {
         await waitFor(() => {
             expect(screen.getByText('Email / mobile number or name does not match')).toBeInTheDocument();
         });
+    });
+
+    it('calls initiateFuzzySearch directly when no captcha key (line 36)', async () => {
+        mockSearchUser.mockResolvedValue({
+            data: { response: { content: [{ id: 'u1', phone: '9876543210' }] } },
+        });
+        render(<IdentifyUser googleCaptchaSiteKey="" searchUser={mockSearchUser} onSuccess={mockOnSuccess} />);
+        fireEvent.change(screen.getByPlaceholderText('Enter Email ID / Mobile Number'), { target: { value: '9876543210' } });
+        fireEvent.change(screen.getByPlaceholderText('Enter name'), { target: { value: 'Test User' } });
+        fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        await waitFor(() => {
+            expect(mockSearchUser).toHaveBeenCalledWith({ identifier: '9876543210', name: 'Test User', captchaResponse: undefined });
+        });
+    });
+
+    it('catch block: sets VALIDATING_FAILED when rejection has 418 status (lines 63–65)', async () => {
+        mockSearchUser.mockRejectedValue({ response: { status: 418 } });
+        render(<IdentifyUser googleCaptchaSiteKey={googleCaptchaSiteKey} searchUser={mockSearchUser} onSuccess={mockOnSuccess} />);
+        fireEvent.change(screen.getByPlaceholderText('Enter Email ID / Mobile Number'), { target: { value: '9876543210' } });
+        fireEvent.change(screen.getByPlaceholderText('Enter name'), { target: { value: 'Test User' } });
+        fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        await waitFor(() => expect(screen.getByText('Captcha validation failed')).toBeInTheDocument());
+    });
+
+    it('catch block: sets NOT_MATCHED for non-418 rejection (lines 66–67)', async () => {
+        mockSearchUser.mockRejectedValue(new Error('Network error'));
+        render(<IdentifyUser googleCaptchaSiteKey={googleCaptchaSiteKey} searchUser={mockSearchUser} onSuccess={mockOnSuccess} />);
+        fireEvent.change(screen.getByPlaceholderText('Enter Email ID / Mobile Number'), { target: { value: '9876543210' } });
+        fireEvent.change(screen.getByPlaceholderText('Enter name'), { target: { value: 'Test User' } });
+        fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        await waitFor(() => expect(screen.getByText('Email / mobile number or name does not match')).toBeInTheDocument());
+    });
+
+    it('catch block: second error triggers redirectWithError (lines 72–76)', async () => {
+        mockSearchUser.mockRejectedValue(new Error('fail'));
+        render(<IdentifyUser googleCaptchaSiteKey={googleCaptchaSiteKey} searchUser={mockSearchUser} onSuccess={mockOnSuccess} />);
+        fireEvent.change(screen.getByPlaceholderText('Enter Email ID / Mobile Number'), { target: { value: '9876543210' } });
+        fireEvent.change(screen.getByPlaceholderText('Enter name'), { target: { value: 'Test User' } });
+        // First error
+        fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        await waitFor(() => expect(screen.getByText('Email / mobile number or name does not match')).toBeInTheDocument());
+        // Second error
+        fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        await waitFor(() => expect(mockRedirectWithError).toHaveBeenCalledOnce());
+    });
+
+    it('catch block: loading stays when redirectWithError returns true (line 75 skipped, 77 covered)', async () => {
+        mockRedirectWithError.mockReturnValue(true);
+        mockSearchUser.mockRejectedValue(new Error('fail'));
+        render(<IdentifyUser googleCaptchaSiteKey={googleCaptchaSiteKey} searchUser={mockSearchUser} onSuccess={mockOnSuccess} />);
+        fireEvent.change(screen.getByPlaceholderText('Enter Email ID / Mobile Number'), { target: { value: '9876543210' } });
+        fireEvent.change(screen.getByPlaceholderText('Enter name'), { target: { value: 'Test User' } });
+        // First error to increment errorCount to 1
+        fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        await waitFor(() => expect(screen.getByText('Email / mobile number or name does not match')).toBeInTheDocument());
+        // Second error → redirectWithError returns true → setLoading(false) NOT called
+        fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        await waitFor(() => expect(mockRedirectWithError).toHaveBeenCalledOnce());
     });
 
     it('handles captcha validation failure (418 status)', async () => {

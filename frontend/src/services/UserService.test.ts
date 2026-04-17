@@ -301,4 +301,20 @@ describe('UserService', () => {
             expect(calledUrl).toContain('orgdetails');
         });
     });
+
+    describe('fuzzyUserSearch — captchaResponse branch', () => {
+        it('includes captchaResponse query param when provided (line 75 true branch)', async () => {
+            mockClient.post = vi.fn().mockResolvedValue({ data: {} });
+            await userService.fuzzyUserSearch({ request: {} }, 'token-abc');
+            const calledUrl: string = mockClient.post.mock.calls[0][0];
+            expect(calledUrl).toContain('?captchaResponse=token-abc');
+        });
+
+        it('omits query param when captchaResponse is absent (line 75 false branch)', async () => {
+            mockClient.post = vi.fn().mockResolvedValue({ data: {} });
+            await userService.fuzzyUserSearch({ request: {} });
+            const calledUrl: string = mockClient.post.mock.calls[0][0];
+            expect(calledUrl).toBe('/user/v1/fuzzy/search');
+        });
+    });
 });

@@ -143,6 +143,31 @@ describe("useForceSync", () => {
     });
   });
 
+  it("uses t('error') as description when error message is empty (line 66 false branch)", async () => {
+    mockForceSyncActivityAgg.mockRejectedValue(new Error(""));
+    const { result } = renderHook(() =>
+      useForceSync("u1", "c1", "b1", courseProgressProps100)
+    );
+
+    await act(async () => {
+      await result.current.handleForceSync();
+    });
+
+    expect(mockToast).toHaveBeenCalledWith({
+      title: "error",
+      description: "error",
+      variant: "destructive",
+    });
+  });
+
+  it("uses 0 when completedContentCount is undefined (line 23 ?? 0 branch)", () => {
+    const { result } = renderHook(() =>
+      useForceSync("u1", "c1", "b1", { totalContentCount: 10 })
+    );
+    // completedContentCount is undefined → 0/10 = 0% → showForceSyncButton false
+    expect(result.current.showForceSyncButton).toBe(false);
+  });
+
   it("sets isForceSyncing during API call", async () => {
     let resolvePromise: () => void;
     mockForceSyncActivityAgg.mockReturnValue(

@@ -51,4 +51,13 @@ describe('DynamicContentSection', () => {
     const { container } = render(<DynamicContentSection title="Fail" />);
     expect(container.firstChild).toBeNull();
   });
+
+  it('renders course-grid with empty array when content is an empty array (line 40 truthy branch)', () => {
+    (useContentSearch as any).mockReturnValue({
+      data: { data: { content: [] } },
+      isLoading: false,
+    });
+    render(<DynamicContentSection title="Empty Content" criteria={{ request: {} } as any} />);
+    expect(screen.getByTestId('course-grid')).toBeInTheDocument();
+  });
 });

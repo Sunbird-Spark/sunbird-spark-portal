@@ -230,4 +230,16 @@ describe('HomeDiscoverSections', () => {
       },
     });
   });
+
+  it('falls back to [] when formData sections is null/undefined (line 38 ?? [] branch)', () => {
+    (useFormRead as any).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: { data: { form: { data: {} } } }, // no sections key
+    });
+
+    const { container } = render(<HomeDiscoverSections />);
+    // Should render empty (no sections), no crash
+    expect(container.querySelector('[data-testid="dynamic-content-section"]')).toBeNull();
+  });
 });

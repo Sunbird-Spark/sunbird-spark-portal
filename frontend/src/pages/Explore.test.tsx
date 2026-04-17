@@ -385,4 +385,19 @@ describe('Explore Page', () => {
       expect(screen.getByTestId('explore-grid')).toHaveTextContent('Grid Query: dogs');
     });
   });
+
+  describe('sort key fallback (line 50/54/86 ?? "newest" branch)', () => {
+    it('falls back to newest sort when sort param is an unknown key', () => {
+      render(
+        <MemoryRouter initialEntries={['/explore?sort=invalid-key']}>
+          <Routes>
+            <Route path="/explore" element={<Explore />} />
+          </Routes>
+        </MemoryRouter>
+      );
+      // sortBy passed to ExploreGrid falls back to newest's value: { lastUpdatedOn: 'desc' }
+      const grid = screen.getByTestId('explore-grid');
+      expect(grid.textContent).toContain('lastUpdatedOn');
+    });
+  });
 });

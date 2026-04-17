@@ -106,4 +106,24 @@ describe('Profile Page', () => {
         renderProfile();
         expect(mockUseUserRead).toHaveBeenCalledWith({ refetchOnMount: 'always' });
     });
+
+    it('shows loading when isLoading is true (line 21 true branch)', () => {
+        mockUseUserRead.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+        renderProfile();
+        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        expect(screen.queryByTestId('profile-card')).not.toBeInTheDocument();
+    });
+
+    it('shows error when isError is true (line 23 true branch)', () => {
+        mockUseUserRead.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+        renderProfile();
+        expect(screen.getByText('Loading...')).toBeInTheDocument(); // PageLoader mock
+        expect(screen.queryByTestId('profile-card')).not.toBeInTheDocument();
+    });
+
+    it('shows error when userData is null (line 23 !userData branch)', () => {
+        mockUseUserRead.mockReturnValue({ data: null, isLoading: false, isError: false });
+        renderProfile();
+        expect(screen.queryByTestId('profile-card')).not.toBeInTheDocument();
+    });
 });

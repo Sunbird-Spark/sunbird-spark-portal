@@ -478,5 +478,38 @@ describe('EpubPlayerService', () => {
       expect(() => EpubPlayerService.unloadStyles()).not.toThrow();
     });
   });
+
+  describe('getPlayerElement — || element fallback (line 159)', () => {
+    it('falls back to wrapper element when sunbird-epub-player child is absent', async () => {
+      const plainDiv = document.createElement('div');
+      const callback = vi.fn();
+
+      // attachEventListeners calls getPlayerElement internally
+      // When querySelector returns null, it uses `element` itself as the playerEl
+      service.attachEventListeners(plainDiv, callback);
+
+      const event = new CustomEvent('playerEvent', {
+        detail: { eid: 'START' },
+      });
+      plainDiv.dispatchEvent(event);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback.mock.calls[0]?.[0].type).toBe('START');
+    });
+
+    it('uses "epub-player" when playerEl has no data-player-id (line 181 || branch)', async () => {
+      const plainDiv = document.createElement('div');
+      const callback = vi.fn();
+
+      service.attachEventListeners(plainDiv, callback);
+
+      const event = new CustomEvent('playerEvent', {
+        detail: { eid: 'START' },
+      });
+      plainDiv.dispatchEvent(event);
+
+      expect(callback.mock.calls[0]?.[0].playerId).toBe('epub-player');
+    });
+  });
 });
 

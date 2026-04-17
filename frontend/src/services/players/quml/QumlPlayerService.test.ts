@@ -292,6 +292,34 @@ describe('QumlPlayerService', () => {
 
       expect(callback).toHaveBeenCalledTimes(1);
     });
+
+    it('does NOT call onPlayerEvent when no onPlayerEvent passed (line 116 false branch)', () => {
+      const config = { context: { sid: 'test' } as any, config: {}, metadata: mockMetadata, data: {} };
+      const element = service.createElement(config);
+      const telemetryCallback = vi.fn();
+      service.attachEventListeners(element, undefined, telemetryCallback);
+      element.dispatchEvent(new CustomEvent('playerEvent', { detail: { eid: 'START' } }));
+      expect(telemetryCallback).not.toHaveBeenCalled();
+    });
+
+    it('does NOT call onTelemetryEvent when no callback provided (line 129 false branch)', () => {
+      const config = { context: { sid: 'test' } as any, config: {}, metadata: mockMetadata, data: {} };
+      const element = service.createElement(config);
+      const playerCallback = vi.fn();
+      service.attachEventListeners(element, playerCallback, undefined);
+      element.dispatchEvent(new CustomEvent('telemetryEvent', { detail: { eid: 'IMPRESSION' } }));
+      expect(playerCallback).not.toHaveBeenCalled();
+    });
+
+    it('uses "quml-player" when data-player-id attribute is absent (line 120 || branch)', () => {
+      const config = { context: { sid: 'test' } as any, config: {}, metadata: mockMetadata, data: {} };
+      const element = service.createElement(config);
+      element.removeAttribute('data-player-id');
+      const callback = vi.fn();
+      service.attachEventListeners(element, callback);
+      element.dispatchEvent(new CustomEvent('playerEvent', { detail: { eid: 'START' } }));
+      expect(callback.mock.calls[0]?.[0].playerId).toBe('quml-player');
+    });
   });
 
   describe('removeEventListeners', () => {

@@ -117,16 +117,39 @@ vi.mock('@/components/workspace/ReviewPlayerSection', () => ({
 }));
 
 vi.mock('@/components/workspace/ChecklistDialog', () => ({
-  default: ({ isOpen, formFields }: any) =>
+  default: ({ isOpen, formFields, onPublish, onRequestChanges }: any) =>
     isOpen ? (
       <div data-testid="checklist-dialog">
         {formFields[0]?.title && <div>{formFields[0].title}</div>}
+        {onPublish && (
+          <button data-testid="confirm-publish" onClick={() => onPublish()}>
+            Confirm Publish
+          </button>
+        )}
+        {onRequestChanges && (
+          <button
+            data-testid="confirm-reject"
+            onClick={() => onRequestChanges(['reason1'], 'test comment')}
+          >
+            Confirm Changes
+          </button>
+        )}
       </div>
     ) : null,
 }));
 
 vi.mock('@/components/workspace/PublishWarningDialog', () => ({
-  default: () => null,
+  default: ({ isOpen, onConfirm, onClose }: any) =>
+    isOpen ? (
+      <div data-testid="publish-warning-dialog">
+        <button data-testid="warning-confirm" onClick={onConfirm}>
+          Proceed Anyway
+        </button>
+        <button data-testid="warning-close" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
 }));
 
 vi.mock('@/hooks/useTelemetry', () => ({
@@ -282,7 +305,6 @@ describe('ContentViewPage - Publish and Reject flows', () => {
 
   it('renders formatted dates correctly instead of fallback text', () => {
     renderPage();
-    // The mocked data provides '2024-01-01' which formats to 'January 1, 2024'
     expect(screen.getAllByText('January 1, 2024').length).toBeGreaterThan(0);
   });
 
@@ -303,8 +325,6 @@ describe('ContentViewPage - Publish and Reject flows', () => {
   });
 });
 
-// --- New tests for previously uncovered lines ---
-
 describe('ContentViewPage - formatDate null path and navigation guard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -312,8 +332,7 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
   });
   afterEach(() => cleanup());
 
-  it('shows notAvailable fallback when content has no dates (covers formatDate returning null, line 229)', () => {
-    // Override useContentRead to return content with null/undefined date fields
+  it('shows notAvailable fallback when content has no dates', () => {
     mockUseContentRead.mockReturnValue({
       data: {
         data: {
@@ -341,13 +360,11 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
       </QueryClientProvider>
     );
 
-    // Both date fields should fall back to the i18n key for 'not available'
     const notAvailableElements = screen.getAllByText('workspace.review.notAvailable');
     expect(notAvailableElements.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('navigates to /workspace with replace:true when in review mode and status is not Review (covers lines 166-167)', () => {
-    // Override useContentRead to return a content with status 'Draft' (not 'Review')
+  it('navigates to /workspace with replace:true when in review mode and status is not Review', () => {
     mockUseContentRead.mockReturnValue({
       data: {
         data: {
@@ -372,13 +389,11 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <BrowserRouter>
-          {/* mode="review" triggers the isReviewMode === true path */}
           <ContentViewPage mode="review" />
         </BrowserRouter>
       </QueryClientProvider>
     );
 
-    // The component should call navigate('/workspace', { replace: true }) and return null
     expect(mockNavigate).toHaveBeenCalledWith('/workspace', { replace: true });
   });
 });

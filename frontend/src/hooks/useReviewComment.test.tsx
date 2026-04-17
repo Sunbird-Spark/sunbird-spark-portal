@@ -213,6 +213,22 @@ describe('useReviewComment', () => {
     });
   });
 
+  describe('readComments — null fallback branch', () => {
+    it('returns [] when response.comments is null/undefined (line 44 || [] branch)', async () => {
+      vi.mocked(reviewCommentService.readComments).mockResolvedValue({
+        comments: undefined as any,
+      });
+
+      const { result } = renderHook(() => useReviewComment(mockOptions), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoadingComments).toBe(false);
+      });
+
+      expect(result.current.comments).toEqual([]);
+    });
+  });
+
   describe('without stageId', () => {
     it('should work without stageId', async () => {
       const optionsWithoutStage = {
