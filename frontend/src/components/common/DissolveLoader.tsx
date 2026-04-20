@@ -84,7 +84,7 @@ export function DissolveLoader({ message, subVariant = 'classic' }: DissolveLoad
     <div className="flex flex-col items-center justify-center gap-12 w-full h-full relative" data-testid="dissolve-loader">
       <div className="absolute inset-0 pointer-events-none blur-[2.5rem] animate-pulse opacity-40" 
            style={{ background: 'radial-gradient(ellipse 40% 40% at 50% 50%, rgba(220,119,39,0.3) 0%, transparent 80%)' }} />
-      <div ref={wrapRef} className="relative w-[min(25rem,80vw)] aspect-[1110/580]">
+      <div ref={wrapRef} className="relative w-[min(12.5rem,80vw)] aspect-[1110/580]">
         <GhostLogo />
         <div style={logoStyle} className="absolute inset-0 w-full h-full">
             <MainLogo />
