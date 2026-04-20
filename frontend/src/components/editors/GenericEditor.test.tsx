@@ -50,7 +50,7 @@ describe('GenericEditor', () => {
   it('should render loading state initially', () => {
     setHookReturn({ isLoading: true, isEditorReady: false });
 
-    const { getByText, getByTestId } = render(
+    const { getByTestId } = render(
       <TestWrapper>
         <GenericEditor contentId="do_123" />
       </TestWrapper>
@@ -62,7 +62,7 @@ describe('GenericEditor', () => {
   it('should render loading state when isEditorReady is false even if not isLoading', () => {
     setHookReturn({ isLoading: false, isEditorReady: false });
 
-    const { getByText, getByTestId } = render(
+    const { getByTestId } = render(
       <TestWrapper>
         <GenericEditor contentId="do_123" />
       </TestWrapper>
