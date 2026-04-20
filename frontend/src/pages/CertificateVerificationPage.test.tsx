@@ -88,7 +88,7 @@ describe('loading state', () => {
 
   it('shows the loading spinner while verifying', () => {
     renderPage();
-    expect(screen.getByText('certificate.verifying')).toBeInTheDocument();
+    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
   });
 });
 

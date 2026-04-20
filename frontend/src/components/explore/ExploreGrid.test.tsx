@@ -129,7 +129,7 @@ describe('ExploreGrid', () => {
         error: null,
     } as any);
     renderComponent();
-    expect(document.querySelector('.animate-spin')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="page-loader"]')).toBeInTheDocument();
   });
 
   it('handles error state', async () => {

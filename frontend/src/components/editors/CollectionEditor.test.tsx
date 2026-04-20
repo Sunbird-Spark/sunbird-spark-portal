@@ -92,7 +92,7 @@ describe('CollectionEditor - Basic Rendering', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
   });
 
   it('handles initialization error gracefully', async () => {

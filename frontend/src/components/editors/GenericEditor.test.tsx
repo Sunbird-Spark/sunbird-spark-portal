@@ -50,26 +50,25 @@ describe('GenericEditor', () => {
   it('should render loading state initially', () => {
     setHookReturn({ isLoading: true, isEditorReady: false });
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <TestWrapper>
         <GenericEditor contentId="do_123" />
       </TestWrapper>
     );
 
-    expect(getByText('Loading Editor...')).toBeInTheDocument();
-    expect(getByText('Preparing the editor environment...')).toBeInTheDocument();
+    expect(getByTestId('page-loader')).toBeInTheDocument();
   });
 
   it('should render loading state when isEditorReady is false even if not isLoading', () => {
     setHookReturn({ isLoading: false, isEditorReady: false });
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <TestWrapper>
         <GenericEditor contentId="do_123" />
       </TestWrapper>
     );
 
-    expect(getByText('Loading Editor...')).toBeInTheDocument();
+    expect(getByTestId('page-loader')).toBeInTheDocument();
   });
 
   it('should show error message when error occurs', () => {

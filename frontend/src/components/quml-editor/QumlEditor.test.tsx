@@ -204,7 +204,7 @@ describe('QumlEditor', () => {
         </BrowserRouter>
       </TestWrapper>
     );
-    expect(container.textContent).toContain('Loading Editor...');
+    expect(container.querySelector('[data-testid="page-loader"]')).toBeInTheDocument();
   });
 
   it('does not initialize without metadata', async () => {
