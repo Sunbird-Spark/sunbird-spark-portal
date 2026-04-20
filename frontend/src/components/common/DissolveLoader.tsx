@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { GhostLogo, MainLogo } from './dissolveLogo';
 import {
   DissolveLoaderProps,
@@ -15,7 +15,7 @@ export function DissolveLoader({ message, subVariant = 'classic' }: DissolveLoad
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef<{ t: number; lastTs: number; particles: Particle[]; raf: number }>({ t: 0, lastTs: 0, particles: [], raf: 0 });
-  const [logoStyle, setLogoStyle] = useState<React.CSSProperties>({});
+  const logoRef = useRef<HTMLDivElement>(null);
   
   // Track previous variant so we can reset arrays cleanly
   const lastVariant = useRef(subVariant);
@@ -27,7 +27,7 @@ export function DissolveLoader({ message, subVariant = 'classic' }: DissolveLoad
     if (lastVariant.current !== subVariant) {
         state.particles = [];
         lastVariant.current = subVariant;
-        setLogoStyle({});
+        if (logoRef.current) logoRef.current.removeAttribute('style');
     }
     
     if (state.lastTs === 0) {
@@ -61,7 +61,14 @@ export function DissolveLoader({ message, subVariant = 'classic' }: DissolveLoad
       state.t = (state.t + dt / CYCLE) % 1;
       const t = state.t;
       
-      setLogoStyle(applyLogoState(t, subVariant));
+      const styles = applyLogoState(t, subVariant);
+      if (logoRef.current) {
+        const el = logoRef.current;
+        el.style.opacity = styles.opacity !== undefined ? String(styles.opacity) : '';
+        el.style.filter = styles.filter !== undefined ? String(styles.filter) : '';
+        el.style.transform = styles.transform !== undefined ? String(styles.transform) : '';
+        el.style.mixBlendMode = styles.mixBlendMode !== undefined ? String(styles.mixBlendMode) : '';
+      }
       
       const canvas = canvasRef.current;
       if (canvas && wrapRef.current) {
@@ -86,15 +93,11 @@ export function DissolveLoader({ message, subVariant = 'classic' }: DissolveLoad
            style={{ background: 'radial-gradient(ellipse 40% 40% at 50% 50%, rgba(220,119,39,0.3) 0%, transparent 80%)' }} />
       <div ref={wrapRef} className="relative w-[min(12.5rem,80vw)] aspect-[1110/580]">
         <GhostLogo />
-        <div style={logoStyle} className="absolute inset-0 w-full h-full">
+        <div ref={logoRef} className="absolute inset-0 w-full h-full">
             <MainLogo />
         </div>
         <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
       </div>
-      {/* 
-        Intentionally omitting \`message\` here because it was likely left out from the 
-        original implementation, but we preserve it in Props for future compatibility. 
-      */}
     </div>
   );
 }
