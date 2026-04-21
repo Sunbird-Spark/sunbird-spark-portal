@@ -4,6 +4,7 @@ import { split } from 'lodash';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
 import sunbirdLogo from '@/assets/sunbird-logo.svg';
+import PageLoader from '@/components/common/PageLoader';
 import {
   decodePathBData,
   fetchPathCData,
@@ -127,12 +128,7 @@ const CertificateVerificationPage: React.FC = () => {
       <div className="flex-1 flex items-center justify-center p-6">
         {/* Verifying state */}
         {status === 'verifying' && (
-          <div className="flex flex-col items-center gap-4" role="status" aria-live="polite">
-            <div className="w-11 h-11 rounded-full border-4 border-sunbird-brick border-t-transparent animate-spin" />
-            <p className="font-rubik text-sm font-medium text-gray-500 tracking-wide">
-              {t('certificate.verifying')}
-            </p>
-          </div>
+          <PageLoader message={t('certificate.verifying')} fullPage={false} />
         )}
 
         {/* Verified state */}
