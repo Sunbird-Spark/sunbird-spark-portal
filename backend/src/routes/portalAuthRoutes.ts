@@ -34,6 +34,14 @@ router.get('/login',
             // Store PKCE verifier and state in session for callback validation
             req.session.oidcCodeVerifier = codeVerifier;
             req.session.oidcState = state;
+
+            // Preserve the page to return to after login (only safe relative paths)
+            const rawReturnTo = req.query.returnTo as string | undefined;
+            const safeReturnTo = rawReturnTo?.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : undefined;
+            if (safeReturnTo && !req.session.auth_redirect_uri) {
+                req.session.auth_redirect_uri = safeReturnTo;
+            }
+
             await saveSession(req);
 
             // Build authorization URL using OIDC Discovery endpoints
@@ -179,14 +187,20 @@ router.get('/auth/callback',
                     logger.error('Failed to generate START telemetry event', telemetryErr);
                 }
 
-                logger.info('Session setup complete, redirecting to /home');
                 // Use HTML redirect instead of 302 to break the POST redirect chain.
                 // When Keycloak redirects back via POST, a 302 keeps the chain alive
                 // and the browser may cancel the navigation. An HTML page forces a
                 // fresh GET navigation, preventing the cancellation.
                 const homeUrl = envConfig.DEVELOPMENT_REACT_APP_URL + '/home';
+                const returnPath = req.session.auth_redirect_uri;
+                const destination = returnPath
+                    ? envConfig.DEVELOPMENT_REACT_APP_URL + returnPath
+                    : homeUrl;
+                delete req.session.auth_redirect_uri;
+                await saveSession(req);
+                logger.info(`Session setup complete, redirecting to ${destination}`);
                 res.setHeader('Content-Type', 'text/html');
-                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${homeUrl}"></head><body><script>window.location.replace("${homeUrl}");</script></body></html>`);
+                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${destination}"></head><body><script>window.location.replace("${destination}");</script></body></html>`);
             } else {
                 logger.error('No session found after OIDC callback');
                 res.redirect('/');

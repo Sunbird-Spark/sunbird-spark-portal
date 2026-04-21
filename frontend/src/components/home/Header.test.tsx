@@ -11,7 +11,7 @@ vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useLocation: () => ({ pathname: '/' }),
+    useLocation: () => ({ pathname: '/', search: '' }),
   };
 });
 
@@ -244,8 +244,8 @@ describe('Header', () => {
 
       // Menu is now closed
       expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
-      // Redirect happened
-      expect(window.location.href).toBe('/portal/login?prompt=none');
+      // Redirect happened (returnTo encodes the mocked pathname '/')
+      expect(window.location.href).toBe('/portal/login?prompt=none&returnTo=%2F');
     });
   });
 });
