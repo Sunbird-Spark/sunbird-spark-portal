@@ -36,9 +36,10 @@ router.get('/login',
             req.session.oidcState = state;
 
             // Preserve the page to return to after login (only safe relative paths)
-            const rawReturnTo = req.query.returnTo as string | undefined;
+            const returnToQueryParam = req.query.returnTo;
+            const rawReturnTo = typeof returnToQueryParam === 'string' ? returnToQueryParam : undefined;
             const safeReturnTo = rawReturnTo?.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : undefined;
-            if (safeReturnTo && !req.session.auth_redirect_uri) {
+            if (safeReturnTo) {
                 req.session.auth_redirect_uri = safeReturnTo;
             }
 
@@ -199,8 +200,9 @@ router.get('/auth/callback',
                 delete req.session.auth_redirect_uri;
                 await saveSession(req);
                 logger.info(`Session setup complete, redirecting to ${destination}`);
+                const htmlEncode = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 res.setHeader('Content-Type', 'text/html');
-                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${destination}"></head><body><script>window.location.replace("${destination}");</script></body></html>`);
+                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${htmlEncode(destination)}"></head><body><script>window.location.replace(${JSON.stringify(destination)});</script></body></html>`);
             } else {
                 logger.error('No session found after OIDC callback');
                 res.redirect('/');
