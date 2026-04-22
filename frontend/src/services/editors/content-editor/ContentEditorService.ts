@@ -52,7 +52,7 @@ export class ContentEditorService {
         console.warn('Failed to fetch channel framework:', error);
       }
     }
-    
+
     let contentFields: any = [];
     let fwCategoryDetails: any = {};
     try {
@@ -92,7 +92,7 @@ export class ContentEditorService {
       pluginRepo: '/content-plugins',
       aws_s3_urls: [],
       plugins: [
-        { id: 'org.ekstep.sunbirdcommonheader', ver: '1.9', type: 'plugin' },
+        { id: 'org.ekstep.sunbirdcommonheader', ver: '2.0', type: 'plugin' },
         { id: 'org.ekstep.sunbirdmetadata', ver: '1.1', type: 'plugin' },
         { id: 'org.ekstep.metadata', ver: '1.5', type: 'plugin' },
         { id: 'org.ekstep.questionset', ver: '1.0', type: 'plugin' },
