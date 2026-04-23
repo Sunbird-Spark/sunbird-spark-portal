@@ -39,7 +39,7 @@ router.get('/login',
             const returnToQueryParam = req.query.returnTo;
             const rawReturnTo = typeof returnToQueryParam === 'string' ? returnToQueryParam : undefined;
             const safeReturnTo = rawReturnTo?.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : undefined;
-            if (safeReturnTo) {
+            if (safeReturnTo && safeReturnTo !== '/') {
                 req.session.auth_redirect_uri = safeReturnTo;
             }
 
