@@ -1,0 +1,100 @@
+---
+description: Use when adding or modifying Express 5 routes, controllers, or services in the Sunbird Spark Portal backend. Enforces the routes → controllers → services layering, typed request/response interfaces, and consistent error handling.
+---
+
+
+## Overview
+
+The backend is an Express 5 ESM server that acts as an authenticated proxy and session manager for upstream Sunbird/Kong services. New endpoints follow a strict three-layer architecture: routes define the HTTP contract, controllers parse and validate requests then shape responses, services contain business logic and upstream API calls. All layers are TypeScript-strict.
+
+## When to Use
+
+**Use when:**
+- Adding a new REST endpoint to the portal backend
+- Modifying an existing route, controller, or service
+- Adding a new proxy route to upstream Sunbird services
+
+**Exclude when:**
+- Modifying the Vite dev proxy config (`vite.config.ts`) — that is a frontend concern
+- Adding environment variables only (update `env.ts` and `.envExample`)
+
+## Core Process
+
+1. **Define the TypeScript interfaces first** — request body, response body, and any domain objects:
+   ```typescript
+   // Inline in the controller or in src/types/ if shared
+   interface SkillsRequest { userId: string; skills: string[] }
+   interface SkillsResponse { result: { skills: string[] } }
+   ```
+
+2. **Create the route file** (`src/routes/<feature>Routes.ts`):
+   - Use Express 5 async handlers (errors propagate to `next` automatically)
+   - Apply `requireSession` middleware for any authenticated endpoint
+   - Validate the request shape before calling the controller
+   ```typescript
+   router.post('/portal/user/v1/skills', requireSession, skillsController.update);
+   ```
+
+3. **Register the route** in `src/app.ts` with the correct mount prefix.
+
+4. **Create the controller** (`src/controllers/<feature>Controller.ts`):
+   - Parse and validate `req.body` — reject invalid input with `res.status(400).json({ message })`
+   - Delegate all business logic to the service
+   - Forward errors with `next(err)` — never swallow
+   ```typescript
+   export const update = async (req: Request, res: Response, next: NextFunction) => {
+     const body = req.body as SkillsRequest;
+     if (!body.userId) return res.status(400).json({ message: 'userId required' });
+     try {
+       const result = await skillsService.update(body);
+       res.json({ result });
+     } catch (err) {
+       next(err);
+     }
+   };
+   ```
+
+5. **Create the service** (`src/services/<feature>Service.ts`):
+   - All upstream HTTP calls, database queries, and business logic live here
+   - Use the axios instance from the existing pattern (see `src/services/UserService.ts`)
+   - Return typed results — never `any`
+
+6. **Read env vars only from `src/config/env.ts`** — never from `process.env` directly in controllers or services.
+
+7. **Write a test** using Supertest:
+   ```bash
+   cd backend && npx vitest run src/controllers/skillsController.test.ts
+   ```
+
+8. **Run lint and type-check**:
+   ```bash
+   cd backend && npm run lint && npm run type-check
+   ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "I'll put the upstream API call directly in the route handler — it's one file" | Business logic in routes cannot be unit-tested without spinning up Express; services are independently testable |
+| "I'll read `process.env.SKILLS_URL` directly — `env.ts` is boilerplate" | `env.ts` provides typed defaults and central documentation of all env vars; direct `process.env` access is untracked |
+| "Input validation is the frontend's job" | The backend is a separate service; malformed requests from any client must be rejected at the controller boundary |
+| "Express 5 async errors propagate automatically, no need for try/catch" | Express 5 propagates rejections from async route handlers but not from callbacks; explicit `try/catch` + `next(err)` is still needed for mixed async/callback code |
+
+## Red Flags
+
+Watch for:
+- A controller function that makes HTTP calls or database queries directly (belongs in service)
+- A route file that validates request body fields (belongs in controller)
+- `process.env.SOME_VAR` read outside of `src/config/env.ts`
+- A new authenticated endpoint missing the `requireSession` middleware
+- `res.json(anything as any)` — the response shape must be typed
+
+## Verification
+
+□ Route, controller, and service are in separate files following the naming convention  
+□ Route is registered in `src/app.ts`  
+□ Input validation returns 400 with a descriptive message for missing/invalid fields  
+□ Env vars accessed via `env.ts` — no raw `process.env` in controllers or services  
+□ Authenticated endpoints apply `requireSession`  
+□ Supertest test covers happy path and at least one invalid-input case  
+□ `cd backend && npm run lint && npm run type-check && npm run test:run` all exit 0

@@ -1,0 +1,78 @@
+---
+name: sunbird-content-authoring
+description: Use when creating, editing, publishing, or managing learning content in the Sunbird Spark Portal — including collections, question sets, PDFs, EPUBs, and video resources. Covers the lifecycle from draft to published state and the web-component editor integration.
+---
+
+## Overview
+
+Sunbird content is managed through web-component editors embedded in the portal: `sunbird-collection-editor` for courses and collections, `sunbird-questionset-editor` for assessments, and content players for PDF, EPUB, and video. Content flows through a state machine: Draft → Review → Publish. The portal proxies all content API calls to the upstream knowledge-mw-service via Kong. Telemetry events are emitted at each lifecycle stage via the Sunbird Telemetry SDK.
+
+## When to Use
+
+**Use when:**
+- Adding or modifying a content creation or editing flow in the Workspace
+- Working on the Collection, Question Set, or Content Editor pages
+- Integrating a new content type or player web component
+- Implementing content status transitions (submit for review, publish, reject)
+
+**Exclude when:**
+- Working on the content player pages for learners (consumption side only)
+- Modifying telemetry event schemas without understanding the upstream pipeline
+
+## Core Process
+
+1. **Understand the content type** before writing code:
+   - `Collection` — a course or learning path containing other content; edited via `sunbird-collection-editor-web-component`
+   - `QuestionSet` — an assessment; edited via `sunbird-questionset-editor-web-component` (QUML format)
+   - `Resource` — a leaf content item (PDF, EPUB, Video); consumed via the respective player web component
+   - Content type metadata (icon, color, label) is defined in `src/services/contentDisplayConfig.ts` — update this when adding a new type
+
+2. **Check RBAC before exposing authoring UI**:
+   - Content creation requires `CONTENT_CREATOR` role
+   - Content review requires `CONTENT_REVIEWER` role
+   - Wrap authoring pages with `ProtectedRoute` and pass the required role
+   - Read roles from the user session via the `useAuth` provider
+
+3. **Route content API calls through the portal backend proxy**:
+   - Content CRUD → `/action/*rest` (proxied to knowledge-mw-service)
+   - Collection export/import → `/action/collection/v1/export/*rest` and `/action/collection/v1/import/*rest`
+   - Form configuration for editor → `/action/data/v1/form/read`
+   - Never call the upstream Sunbird API directly from the frontend — all calls go through the portal backend
+
+4. **Handle content state transitions** explicitly:
+   - The editor web component emits events for save, submit, and publish actions
+   - Listen to the custom events from the web component and call the appropriate upstream API via the portal proxy
+   - Confirm the response status reflects the new content state before updating the UI
+
+5. **Emit telemetry** at key lifecycle points using `@project-sunbird/telemetry-sdk`:
+   - Content open, save, submit, and publish events must include `contentId`, `contentType`, `userId`, and `sessionId`
+   - Follow the existing telemetry call patterns in `ContentEditorPage.tsx`
+
+6. **Test with a realistic content payload** — use the existing test fixtures that mirror the Sunbird API response shape.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "I'll call the upstream Sunbird API directly from the frontend to skip the proxy" | The proxy adds authentication headers, session context, and rate limiting; direct calls will fail or bypass security |
+| "Content type metadata is just cosmetic — I'll add it later" | `contentDisplayConfig.ts` drives icons, colors, and labels across the workspace, explore, and player pages; missing entries cause blank UI |
+| "The editor web component handles save — I don't need to handle the event" | The portal must persist the save result and update content state; unhandled events leave the UI out of sync with the backend |
+| "Telemetry is optional — I'll skip it for now" | Telemetry drives learning analytics dashboards used by admins and org managers; missing events cause data gaps in reports |
+
+## Red Flags
+
+Watch for:
+- A new content type not registered in `src/services/contentDisplayConfig.ts`
+- A content authoring page accessible without a `ProtectedRoute` checking `CONTENT_CREATOR` role
+- Frontend code making direct `axios` calls to `sunbird.org` or upstream service URLs instead of `/action/*` routes
+- Editor web component mounted without an event listener for save/submit/publish events
+- A content state transition (publish, reject) implemented without an API call to confirm the new state
+
+## Verification
+
+□ New content type registered in `contentDisplayConfig.ts` with icon, color, and label  
+□ Authoring page wrapped in `ProtectedRoute` with the correct role  
+□ All content API calls route through `/action/*` or `/portal/*` portal proxy paths  
+□ Editor web component events (save, submit, publish) are handled with API confirmation  
+□ Telemetry events emitted at content open, save, and publish  
+□ `cd frontend && npm run lint && npm run type-check && npm run test:run` all exit 0
