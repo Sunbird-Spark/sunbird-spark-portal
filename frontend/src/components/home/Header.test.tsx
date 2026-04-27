@@ -244,8 +244,8 @@ describe('Header', () => {
 
       // Menu is now closed
       expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument();
-      // Redirect happened (returnTo encodes the mocked pathname '/')
-      expect(window.location.href).toBe('/portal/login?prompt=none&returnTo=%2F');
+      // Redirect happened (returnTo encodes the mocked pathname '/', which resolves to targetPath '/home')
+      expect(window.location.href).toBe('/portal/login?prompt=none&returnTo=%2Fhome');
     });
   });
 });
