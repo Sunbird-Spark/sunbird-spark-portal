@@ -19,14 +19,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm install
 
       - name: Generate SPDX SBOM (frontend)
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.24.0
         with:
           path: frontend
           format: spdx-json
@@ -47,14 +47,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install backend dependencies
         working-directory: backend
         run: npm install
 
       - name: Generate SPDX SBOM (backend)
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.24.0
         with:
           path: backend
           format: spdx-json
