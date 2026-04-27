@@ -1,0 +1,67 @@
+name: Dependency Submission
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+jobs:
+  dependency-submission-frontend:
+    name: Submit Frontend npm Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Generate SPDX SBOM (frontend)
+        uses: anchore/sbom-action@v0
+        with:
+          path: frontend
+          format: spdx-json
+          output-file: frontend-sbom.spdx.json
+
+      - name: Submit frontend npm Dependencies
+        uses: advanced-security/spdx-dependency-submission-action@v0.2.0
+        with:
+          filePath: .
+          filePattern: frontend-sbom.spdx.json
+
+  dependency-submission-backend:
+    name: Submit Backend npm Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Generate SPDX SBOM (backend)
+        uses: anchore/sbom-action@v0
+        with:
+          path: backend
+          format: spdx-json
+          output-file: backend-sbom.spdx.json
+
+      - name: Submit backend npm Dependencies
+        uses: advanced-security/spdx-dependency-submission-action@v0.2.0
+        with:
+          filePath: .
+          filePattern: backend-sbom.spdx.json
