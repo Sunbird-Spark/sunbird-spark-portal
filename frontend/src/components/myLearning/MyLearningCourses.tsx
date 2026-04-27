@@ -89,9 +89,9 @@ const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
         {currentCourses.length > 0 ? (
           <>
             {currentCourses.map((course, index) => (
-              <TrackableCollectionCard 
-                key={course.courseId || index} 
-                course={course} 
+              <TrackableCollectionCard
+                key={course.batchId ? `${course.courseId}-${course.batchId}` : course.courseId || index}
+                course={course}
                 index={index}
               />
             ))}

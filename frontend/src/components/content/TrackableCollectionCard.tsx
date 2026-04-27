@@ -16,7 +16,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
 
   return (
     <Link
-      to={`/collection/${course.collectionId}`}
+      to={course.batchId ? `/collection/${course.collectionId}/batch/${course.batchId}` : `/collection/${course.collectionId}`}
       state={{ from: location.pathname + location.search }}
       className="block"
       data-edataid="trackable-collection-card-click"
