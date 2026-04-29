@@ -945,7 +945,7 @@
     "closeButton": "Close",
     "selectButton": "Select",
     "verifying": "Verifying certificate...",
-    "verified": "Certificate Verified",
+    "verified": "Certificate Details",
     "verificationFailed": "Verification Failed",
     "issuedTo": "Issued to",
     "course": "Course",

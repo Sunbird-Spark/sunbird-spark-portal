@@ -928,7 +928,20 @@
     "tryAgain": "حاول مجدداً",
     "closePreview": "إغلاق المعاينة",
     "closeButton": "إغلاق",
-    "selectButton": "اختر"
+    "selectButton": "اختر",
+    "verifying": "جارٍ التحقق من الشهادة...",
+    "verified": "تفاصيل الشهادة",
+    "verificationFailed": "فشل التحقق",
+    "issuedTo": "صادر إلى",
+    "course": "الدورة",
+    "issuedOn": "تاريخ الإصدار",
+    "backToHome": "العودة إلى الرئيسية",
+    "couldNotVerify": "تعذّر التحقق من هذه الشهادة",
+    "status": "الحالة",
+    "activeAndValid": "نشطة وصالحة",
+    "invalid": "غير صالحة",
+    "credentialHolder": "صاحب الاعتماد",
+    "certificationProgram": "برنامج الشهادة"
   },
   "createTemplate": {
     "description": "أدخل التفاصيل أدناه لإنشاء قالب شهادة جديد لمؤسستك.",
