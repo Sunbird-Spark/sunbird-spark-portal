@@ -15,8 +15,6 @@ router.post('/user/v2/signup', handlePassword, kongProxy);
 const recaptchaProtectedRoutes: string[] = [
     '/user/v1/exists/email/:emailId',
     '/user/v1/exists/phone/:phoneNumber',
-    '/user/v1/get/phone/*rest',
-    '/user/v1/get/email/*rest',
     '/otp/v1/generate',
 ];
 
