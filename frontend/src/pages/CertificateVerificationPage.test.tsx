@@ -34,6 +34,10 @@ vi.mock('@/hooks/useSystemSetting', () => ({
   useSystemSetting: vi.fn(),
 }));
 
+vi.mock('@/components/home/Header', () => ({
+  default: () => <header data-testid="app-header" />,
+}));
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 const mockVC = {} as SignedVC;

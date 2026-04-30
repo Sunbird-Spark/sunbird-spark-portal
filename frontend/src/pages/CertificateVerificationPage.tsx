@@ -3,8 +3,8 @@ import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { split } from 'lodash';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
-import sunbirdLogo from '@/assets/sunbird-logo.svg';
 import PageLoader from '@/components/common/PageLoader';
+import Header from '@/components/home/Header';
 import {
   decodePathBData,
   fetchPathCData,
@@ -117,12 +117,7 @@ const CertificateVerificationPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50">
-      {/* Header with Sunbird logo */}
-      <header className="bg-white shadow-sunbird-md">
-        <div className="h-16 px-4 lg:px-[7.5rem] flex items-center">
-          <img src={sunbirdLogo} alt="Sunbird" className="sunbird-logo" />
-        </div>
-      </header>
+      <Header forcePublic />
 
       {/* Content area */}
       <div className="flex-1 flex items-center justify-center p-6">

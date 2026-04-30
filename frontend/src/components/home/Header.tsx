@@ -18,11 +18,12 @@ import SearchModal from "@/components/common/SearchModal";
 interface HeaderProps {
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
+  forcePublic?: boolean;
 }
 
 const defaultToggleSidebar = () => { };
 
-const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar }: HeaderProps) => {
+const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar, forcePublic = false }: HeaderProps) => {
   const { isAuthenticated, isLoading } = usePermissions();
   const location = useLocation();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
@@ -33,7 +34,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
     return <div className="sticky top-0 z-50 bg-white shadow-sunbird-md h-16 md:h-[4.5rem]" />;
   }
 
-  if (!isLoading && isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
+  if (!isLoading && isAuthenticated && location.pathname !== "/" && !forcePublic && onToggleSidebar === defaultToggleSidebar) {
     if (import.meta.env.MODE !== "production") {
       // Warn when authenticated header is rendered without a real sidebar toggle handler.
       console.warn(
@@ -42,7 +43,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
     }
   }
 
-  if (!isLoading && isAuthenticated && location.pathname !== "/") {
+  if (!isLoading && isAuthenticated && location.pathname !== "/" && !forcePublic) {
     return <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />;
   }
 
