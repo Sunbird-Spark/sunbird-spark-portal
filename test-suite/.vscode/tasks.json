@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Playwright: Run tests",
+      "type": "shell",
+      "command": "npm test",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "Playwright: Debug tests",
+      "type": "shell",
+      "command": "npm run test:debug",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": { "reveal": "always", "panel": "shared" }
+    }
+  ]
+}

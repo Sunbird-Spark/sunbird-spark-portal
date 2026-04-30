@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+app/
+.vscode/
+testcases/
+testing_ED/
+testing_Spark_web/
+testcase_56.txt
+starter_code.md
+image.png

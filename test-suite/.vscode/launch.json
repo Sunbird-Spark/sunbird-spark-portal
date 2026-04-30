@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Playwright Test (current file)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["playwright", "test", "${file}", "--project=chromium"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Playwright Test (current file)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["playwright", "test", "${file}", "--project=chromium"],
+      "env": { "PWDEBUG": "1" },
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
