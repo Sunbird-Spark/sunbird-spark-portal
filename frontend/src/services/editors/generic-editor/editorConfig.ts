@@ -17,7 +17,7 @@ export const GENERIC_EDITOR_WINDOW_CONFIG = {
     provider: 'azure',
   },
   plugins: [
-    { id: 'org.ekstep.sunbirdcommonheader', ver: '2.0', type: 'plugin' },
+    { id: 'org.ekstep.sunbirdcommonheader', ver: '1.9', type: 'plugin' },
     { id: 'org.ekstep.sunbirdmetadata', ver: '1.1', type: 'plugin' },
     { id: 'org.ekstep.metadata', ver: '1.5', type: 'plugin' },
   ],
