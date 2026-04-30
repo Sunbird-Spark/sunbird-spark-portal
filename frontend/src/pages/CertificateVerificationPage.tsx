@@ -117,7 +117,7 @@ const CertificateVerificationPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50">
-      <Header />
+      <Header forcePublic />
 
       {/* Content area */}
       <div className="flex-1 flex items-center justify-center p-6">
