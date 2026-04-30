@@ -42,7 +42,7 @@
     "openid-client": "^6.8.2",
     "pg": "^8.16.3",
     "snyk": "^1.1301.2",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {
