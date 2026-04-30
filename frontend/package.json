@@ -72,7 +72,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^3.4.17",
     "tree-model": "^1.0.7",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -108,7 +108,7 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vite-plugin-node-polyfills": "^0.26.0",
+    "vite-plugin-node-polyfills": "^0.2.0",
     "vitest": "^4.0.16"
   }
 }
