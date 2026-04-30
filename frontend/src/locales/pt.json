@@ -928,7 +928,20 @@
     "tryAgain": "Tentar novamente",
     "closePreview": "Fechar visualização",
     "closeButton": "Fechar",
-    "selectButton": "Selecionar"
+    "selectButton": "Selecionar",
+    "verifying": "A verificar o certificado...",
+    "verified": "Detalhes do certificado",
+    "verificationFailed": "Falha na verificação",
+    "issuedTo": "Emitido para",
+    "course": "Curso",
+    "issuedOn": "Data de emissão",
+    "backToHome": "Voltar ao início",
+    "couldNotVerify": "Não foi possível verificar este certificado",
+    "status": "Estado",
+    "activeAndValid": "Ativo e válido",
+    "invalid": "Inválido",
+    "credentialHolder": "Titular da credencial",
+    "certificationProgram": "Programa de certificação"
   },
   "createTemplate": {
     "description": "Preencha os detalhes abaixo para criar um novo modelo de certificado para sua organização.",
