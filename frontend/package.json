@@ -50,7 +50,7 @@
     "html-to-image": "^1.11.13",
     "i18next": "^25.7.4",
     "input-otp": "^1.4.2",
-    "jquery": "^3.7.1",
+    "jquery": "^4.0.0",
     "jquery-ui-dist": "^1.13.3",
     "jquery.fancytree": "^2.38.3",
     "jsonld-signatures": "5.2.0",
