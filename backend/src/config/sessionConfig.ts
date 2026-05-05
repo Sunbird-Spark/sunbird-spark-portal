@@ -5,10 +5,6 @@ import { sessionStore } from '../utils/sessionStore.js';
 
 const isLocal = envConfig.ENVIRONMENT === 'local';
 
-if (!envConfig.SUNBIRD_SESSION_SECRET) {
-    throw new Error('SUNBIRD_SESSION_SECRET is required');
-}
-
 export const sessionConfig: session.SessionOptions = {
     name: 'connect.sid',
     store: sessionStore,
