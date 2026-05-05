@@ -120,6 +120,22 @@ describe('pathTraversalGuard', () => {
         });
     });
 
+    describe('decode iteration cap', () => {
+        // %2525252541 is 5 nested layers of percent-encoding around 'A':
+        // %2525252541 → %25252541 → %252541 → %2541 → %41 → 'A'
+        // Exactly MAX_DECODE_ITERATIONS (5) transitions to stabilize.
+        it('accepts a payload requiring exactly MAX_DECODE_ITERATIONS transitions', () => {
+            run('/portal/content/v1/read/%2525252541');
+            expectPassed();
+        });
+
+        // %252525252541 is 6 nested layers — one transition more than the cap allows.
+        it('rejects a payload requiring more than MAX_DECODE_ITERATIONS transitions', () => {
+            run('/portal/content/v1/read/%252525252541');
+            expectRejected();
+        });
+    });
+
     describe('passes legitimate paths through', () => {
         it('passes nested percent-encoded payload that decodes to a safe segment', () => {
             run('/portal/content/v1/read/%25434fe23');

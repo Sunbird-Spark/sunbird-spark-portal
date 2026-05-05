@@ -46,7 +46,7 @@ export const pathTraversalGuard = (req: Request, res: Response, next: NextFuncti
         }
         decoded = nextDecoded;
         iterations += 1;
-        if (iterations >= MAX_DECODE_ITERATIONS) {
+        if (iterations > MAX_DECODE_ITERATIONS) {
             sendInvalidPath(req, res, 'decode loop did not stabilize');
             return;
         }
