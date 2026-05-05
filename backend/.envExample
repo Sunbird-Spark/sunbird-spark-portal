@@ -15,6 +15,7 @@ FORMS_DB_NAME=forms
 
 # Session Configuration
 SUNBIRD_ANONYMOUS_SESSION_TTL=60000
+SUNBIRD_SESSION_SECRET=test_session_secret
 SUNBIRD_PORTAL_SESSION_STORE=in-memory
 
 # Kong Configuration (test tokens)
