@@ -15,6 +15,7 @@ import helmet from 'helmet';
 import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
+import { pathTraversalGuard } from './middlewares/pathTraversalGuard.js';
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
@@ -28,6 +29,7 @@ const __dirname = path.dirname(__filename);
 export const app = express();
 app.set('trust proxy', true);
 app.use(helmet({ contentSecurityPolicy: false }));
+app.use(pathTraversalGuard);
 
 loadTenants();
 app.use(cors());
