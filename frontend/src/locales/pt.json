@@ -79,7 +79,13 @@
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Conjunto de questões práticas",
-    "questionset": "Conjunto de questões"
+    "questionset": "Conjunto de questões",
+    "learningresource": "Recurso de aprendizagem",
+    "explanationcontent": "Conteúdo explicativo",
+    "teacherresource": "Recurso para professores",
+    "etextbook": "Livro eletrônico",
+    "courseassessment": "Avaliação do curso",
+    "examquestion": "Questão de exame"
   },
   "categoriesList": {
     "ai-ml": "IA/ML",
@@ -180,6 +186,7 @@
   "updated": "Atualizado",
   "today": "Hoje",
   "yesterday": "Ontem",
+  "older": "Mais antigo",
   "daysAgo": "dias atrás",
   "trustedByProfessionals": "Aprovado por profissionais em todo o mundo",
   "joinThousands": "Junte-se a milhares de profissionais que avançaram em suas carreiras com nossos programas de treinamento abrangentes.",
@@ -458,18 +465,22 @@
     "mainNavigation": "Navegação principal",
     "learningProgress": "Progresso de aprendizado",
     "lessonVisited": "Lição visitada",
-    "contentsCompleted": "Conteúdos concluídos"
+    "contentsCompleted": "Conteúdos concluídos",
+    "noUpcomingBatches": "Nenhuma turma próxima agendada."
   },
   "onboarding": {
     "altSunbird": "Sunbird",
     "otherPreferencePlaceholder": "Por favor, digite sua preferência aqui",
     "altImage": "Imagem de integração",
     "goBack": "Voltar",
+    "goToHome": "Ir para o início",
     "welcomeMessage": "Adoraríamos ajudá-lo a personalizar sua experiência!",
     "saveAndProceed": "Salvar e Continuar",
     "submit": "Enviar",
     "saving": "Salvando...",
-    "skipOnboarding": "Pular Integração"
+    "skipOnboarding": "Pular Integração",
+    "failedToLoad": "Falha ao carregar integração.",
+    "skip": "Pular"
   },
   "profilePage": {
     "loading": "Carregando seu perfil...",
@@ -673,7 +684,7 @@
     "dec": "Dez"
   },
   "authLayout": {
-    "empowerTitle": "Impulsione seu futuro através do aprendizado.",
+    "empowerTitle": "Impulsione seu futuro\natravés do aprendizado.",
     "logoAlt": "Logo Sunbird"
   },
   "signUp": {
@@ -722,7 +733,11 @@
     "otpButFailed": "OTP verificado mas falha na criação da conta. Tente novamente.",
     "verificationFailed": "Falha na verificação",
     "invalidOtp": "OTP inválido. Tente novamente.",
-    "verificationError": "Ocorreu um erro durante a verificação. Tente novamente."
+    "verificationError": "Ocorreu um erro durante a verificação. Tente novamente.",
+    "emailAlreadyRegistered": "Este e-mail já está em uso.",
+    "phoneAlreadyRegistered": "Este número de telefone já está em uso.",
+    "emailAvailable": "Este endereço de e-mail está disponível.",
+    "phoneAvailable": "Este número de telefone está disponível."
   },
   "personalInfo": {
     "title": "Informações pessoais",
@@ -730,6 +745,9 @@
     "mobileNumber": "Número de celular",
     "emailId": "E-mail",
     "alternateEmailId": "E-mail alternativo"
+  },
+  "profileCard": {
+    "sunbirdId": "Identificação Sunbird"
   },
   "editProfile": {
     "title": "Editar informações pessoais",
@@ -910,7 +928,20 @@
     "tryAgain": "Tentar novamente",
     "closePreview": "Fechar visualização",
     "closeButton": "Fechar",
-    "selectButton": "Selecionar"
+    "selectButton": "Selecionar",
+    "verifying": "A verificar o certificado...",
+    "verified": "Detalhes do certificado",
+    "verificationFailed": "Falha na verificação",
+    "issuedTo": "Emitido para",
+    "course": "Curso",
+    "issuedOn": "Data de emissão",
+    "backToHome": "Voltar ao início",
+    "couldNotVerify": "Não foi possível verificar este certificado",
+    "status": "Estado",
+    "activeAndValid": "Ativo e válido",
+    "invalid": "Inválido",
+    "credentialHolder": "Titular da credencial",
+    "certificationProgram": "Programa de certificação"
   },
   "createTemplate": {
     "description": "Preencha os detalhes abaixo para criar um novo modelo de certificado para sua organização.",
@@ -1108,9 +1139,6 @@
   "formFields": {
     "select": "Selecionar {{field}}"
   },
-  "exploreGrid": {
-    "noContentFound": "Nenhum conteúdo encontrado"
-  },
   "status": {
     "draft": "Rascunho",
     "inReview": "Em revisão",
@@ -1119,6 +1147,7 @@
     "inactive": "Inativo",
     "completed": "Concluído",
     "ongoing": "Em andamento",
+    "notStarted": "Não iniciado",
     "upcoming": "Próximos",
     "processing": "Em processamento"
   },
@@ -1137,7 +1166,8 @@
     "noFilteredCourses": "Nenhum curso {{filter}} encontrado.",
     "downloading": "Baixando...",
     "myLearning": "Meu aprendizado",
-    "filter": "Filtro"
+    "filter": "Filtro",
+    "untitledCourse": "Curso sem título"
   },
   "tncPopup": {
     "title": "Termos e Condições Atualizados",
@@ -1298,6 +1328,10 @@
     "youtube": "YouTube",
     "html": "HTML",
     "interactive": "Interativo"
+  },
+  "exploreGrid": {
+    "noContentFound": "Nenhum conteúdo encontrado",
+    "noMoreContent": "Não há mais conteúdo para mostrar"
   }
 }
 

@@ -145,4 +145,94 @@ describe('useConsent', () => {
 
     await expect(result.current.updateConsent('REVOKED')).rejects.toThrow('API error');
   });
+
+  it('queryFn calls consentService.read and extracts status and lastUpdatedOn', async () => {
+    vi.mocked(useQuery).mockImplementation((opts) => opts as unknown as ReturnType<typeof useQuery>);
+
+    const { result } = renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
+
+    vi.mocked(consentService.read).mockResolvedValue({
+      data: {
+        consents: [
+          { status: 'ACTIVE' as const, lastUpdatedOn: '2026-01-01T00:00:00Z', userId: 'user-123', consumerId: 'ch-1', objectId: 'col-1' },
+        ],
+      },
+    } as any);
+
+    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
+    const data = await (call.queryFn as () => Promise<unknown>)();
+
+    expect(consentService.read).toHaveBeenCalledWith({
+      userId: 'user-123',
+      consumerId: 'ch-1',
+      objectId: 'col-1',
+    });
+    expect(data).toEqual({ status: 'ACTIVE', lastUpdatedOn: '2026-01-01T00:00:00Z' });
+  });
+
+  it('queryFn returns null status when consents array is empty', async () => {
+    vi.mocked(useQuery).mockImplementation((opts) => opts as unknown as ReturnType<typeof useQuery>);
+
+    renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
+
+    vi.mocked(consentService.read).mockResolvedValue({ data: { consents: [] } } as any);
+
+    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
+    const data = await (call.queryFn as () => Promise<unknown>)();
+
+    expect(data).toEqual({ status: null, lastUpdatedOn: undefined });
+  });
+
+  it('queryFn returns early with null status when userId is missing', async () => {
+    vi.mocked(useUserId).mockReturnValue(null);
+    vi.mocked(useQuery).mockImplementation((opts) => opts as unknown as ReturnType<typeof useQuery>);
+
+    renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
+
+    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
+    const data = await (call.queryFn as () => Promise<unknown>)();
+
+    expect(consentService.read).not.toHaveBeenCalled();
+    expect(data).toEqual({ status: null, lastUpdatedOn: undefined });
+  });
+
+  it('updateConsent mutationFn skips update when userId is missing', async () => {
+    vi.mocked(useUserId).mockReturnValue(null);
+    vi.mocked(useQuery).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useQuery>);
+    vi.mocked(useMutation).mockImplementation((opts) => ({
+      mutateAsync: opts.mutationFn,
+      isPending: false,
+    } as unknown as ReturnType<typeof useMutation>));
+
+    const { result } = renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
+    await result.current.updateConsent('ACTIVE');
+    expect(consentService.update).not.toHaveBeenCalled();
+  });
+
+  it('returns defaults when query data is null', () => {
+    vi.mocked(useQuery).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useQuery>);
+
+    const { result } = renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1' }));
+    expect(result.current.status).toBeNull();
+    expect(result.current.lastUpdatedOn).toBeUndefined();
+  });
+
+  it('enabled is false when enabled option is false', () => {
+    vi.mocked(useQuery).mockImplementation((opts) => opts as unknown as ReturnType<typeof useQuery>);
+    renderHook(() => useConsent({ collectionId: 'col-1', channel: 'ch-1', enabled: false }));
+    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
+    expect(call.enabled).toBe(false);
+  });
 });

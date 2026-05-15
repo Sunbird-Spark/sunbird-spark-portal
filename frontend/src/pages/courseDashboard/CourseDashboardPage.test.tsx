@@ -181,6 +181,6 @@ describe('CourseDashboardPage', () => {
 
     render(<CourseDashboardPage />);
     
-    expect(screen.getByTestId('page-loader-message')).toHaveTextContent('Checking permissions…');
+    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
   });
 });

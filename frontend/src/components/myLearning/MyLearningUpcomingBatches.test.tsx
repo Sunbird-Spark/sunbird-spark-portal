@@ -4,7 +4,16 @@ import MyLearningUpcomingBatches from './MyLearningUpcomingBatches';
 import { TrackableCollection, Batch } from '@/types/TrackableCollections';
 
 vi.mock('@/hooks/useAppI18n', () => ({
-  useAppI18n: () => ({ t: (key: string) => key }),
+  useAppI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'common.upcomingBatches': 'Upcoming Batches',
+        'myLearning.noUpcomingBatches': 'No upcoming batches scheduled.',
+        'contentStats.lessons': 'Lessons'
+      };
+      return translations[key] || key;
+    }
+  }),
 }));
 
 // Mock Course Data
@@ -63,7 +72,7 @@ const mockBatches: TrackableCollection[] = [
 describe('MyLearningUpcomingBatches', () => {
   it('renders the title correctly', () => {
     render(<MyLearningUpcomingBatches upcomingBatches={[]} />);
-    expect(screen.getByText('common.upcomingBatches')).toBeInTheDocument();
+    expect(screen.getByText('Upcoming Batches')).toBeInTheDocument();
   });
 
   it('renders "No upcoming batches" message when list is empty', () => {

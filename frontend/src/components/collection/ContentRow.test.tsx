@@ -72,12 +72,20 @@ describe('ContentRow', () => {
     expect(link).toHaveClass('border-sunbird-brick');
   });
 
-  it('shows status label when contentStatusMap is provided', () => {
+  it('shows status label when contentStatusMap is provided with status=2 (completed)', () => {
     renderContentRow({
       ...defaultProps,
       contentStatusMap: { 'content-1': 2 },
     });
     expect(screen.getByText('courseDetails.contentStatusCompleted')).toBeInTheDocument();
+  });
+
+  it('shows "courseDetails.contentStatusInProgress" when status=1 (line 19)', () => {
+    renderContentRow({
+      ...defaultProps,
+      contentStatusMap: { 'content-1': 1 },
+    });
+    expect(screen.getByText('courseDetails.contentStatusInProgress')).toBeInTheDocument();
   });
 
   it('uses "Untitled" when node has no name', () => {
@@ -166,6 +174,35 @@ describe('ContentRow', () => {
       });
       expect(screen.getByText('3/4')).toBeInTheDocument();
       expect(screen.getByText('Quiz')).toBeInTheDocument();
+    });
+
+    it('renders as button and navigates to href when isLastAttempt=true (line 129-130)', () => {
+      // isLastAttempt condition: isSelfAssess && maxAttempts != null &&
+      //   maxAttempts - attemptCount === 1 && !isDisabledByAttempts
+      // With maxAttempts=3, attemptCount=2 → remaining=1 → isLastAttempt=true
+      // isDisabledByAttempts: attemptCount >= maxAttempts → 2 >= 3 → false
+      renderContentRow({
+        ...defaultProps,
+        node: {
+          identifier: 'quiz-last',
+          name: 'Last Attempt Quiz',
+          mimeType: 'application/vnd.ekstep.quiz',
+          contentType: 'SelfAssess',
+          maxAttempts: 3,
+        },
+        href: '/collection/col-1/content/quiz-last',
+        contentAttemptInfoMap: { 'quiz-last': { attemptCount: 2 } },
+      });
+
+      // Should render as a button (not a link), because it's the last attempt
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      const btn = screen.getByRole('button', { name: /Last Attempt Quiz/i });
+      expect(btn).toBeInTheDocument();
+
+      // Clicking should navigate to the href without showing a toast
+      fireEvent.click(btn);
+      expect(mockNavigate).toHaveBeenCalledWith('/collection/col-1/content/quiz-last');
+      expect(mockToast).not.toHaveBeenCalled();
     });
   });
 });

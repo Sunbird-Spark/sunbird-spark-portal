@@ -37,6 +37,33 @@ const BATCH_DETAILS_FIELDS = [
 ] as const;
 
 export class UserService {
+    private static userReadCache: Map<string, Promise<any>> = new Map();
+
+    public async userRead(
+        id: string
+    ): Promise<ApiResponse<UserReadResponse>> {
+        // Return cached promise if request is already in flight for this userId
+        if (UserService.userReadCache.has(id)) {
+            return UserService.userReadCache.get(id)!;
+        }
+
+        const fields = 'organisations,roles,locations,declarations,externalIds,framework';
+        const promise = getClient().get<UserReadResponse>(
+            `/user/v5/read/${id}?fields=${encodeURIComponent(fields)}`
+        );
+
+        // Cache the promise while request is in flight
+        UserService.userReadCache.set(id, promise);
+
+        try {
+            const result = await promise;
+            return result;
+        } finally {
+            // Clear cache after request completes
+            UserService.userReadCache.delete(id);
+        }
+    }
+
     public async searchUser(
         identifier: string,
         name: string,
@@ -92,6 +119,17 @@ export class UserService {
         return _.includes(identifier, '@');
     }
 
+    public async checkUserExists(
+        identifier: string,
+        captchaResponse?: string
+    ): Promise<ApiResponse<{ exists: boolean }>> {
+        const type = this.isEmail(identifier) ? 'email' : 'phone';
+        const query = captchaResponse ? `?captchaResponse=${encodeURIComponent(captchaResponse)}` : '';
+        return getClient().get<{ exists: boolean }>(
+            `/user/v1/exists/${type}/${encodeURIComponent(identifier)}${query}`
+        );
+    }
+
     public async signup(
         firstName: string,
         identifier: string,
@@ -125,15 +163,6 @@ export class UserService {
             `/user/v2/signup`,
             requestBody,
             headers
-        );
-    }
-
-    public async userRead(
-        id: string
-    ): Promise<ApiResponse<UserReadResponse>> {
-        const fields = 'organisations,roles,locations,declarations,externalIds,framework';
-        return getClient().get<UserReadResponse>(
-            `/user/v5/read/${id}?fields=${encodeURIComponent(fields)}`
         );
     }
 

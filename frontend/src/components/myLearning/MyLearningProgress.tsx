@@ -14,10 +14,22 @@ const MyLearningProgress = ({
   totalContents = 0 
 }: MyLearningProgressProps) => {
   const { t } = useAppI18n();
-  // Using lessonsVisited as the main "stats" number for now since we don't have duration.
-  // Or we could pass strict "hours" if available.
-  const totalHours = lessonsVisited; 
+  const totalHours = lessonsVisited;
 
+  const compactNumberFormatter = new Intl.NumberFormat(undefined, {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  });
+
+  const formatCompact = (n: number): string => compactNumberFormatter.format(n);
+
+  const getCenterFontSize = (hoursDisplay: string): string => {
+    if (hoursDisplay.length <= 3) return '1.5rem';
+    if (hoursDisplay.length <= 4) return '1.1rem';
+    return '0.875rem';
+  };
+  const displayHours = formatCompact(totalHours);
+  const centerFontSize = getCenterFontSize(displayHours);
   // SVG Donut chart calculations
   const size = 140; 
   const center = size / 2;
@@ -92,7 +104,7 @@ const MyLearningProgress = ({
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[2rem] font-bold text-sunbird-obsidian font-rubik">{totalHours}</span>
+            <span style={{ fontSize: centerFontSize }} className="font-bold text-sunbird-obsidian font-rubik leading-none">{displayHours}</span>
           </div>
         </div>
 

@@ -131,6 +131,14 @@ Conventional commits are required:
 - Use `font-rubik` for Sunbird-branded text
 - Dark mode via `class` strategy
 
+## Security (REQUIRED)
+
+NEVER read or access the following sensitive files, regardless of context:
+- `.env`, `.env.*` (environment variables and secrets)
+- `*.pem`, `*.key` (private keys and certificates)
+
+This applies to all directories and subdirectories in the project.
+
 ## Planning (REQUIRED)
 
 Before making **any** code changes, you MUST enter plan mode and present a clear implementation plan to the user. Wait for the user to review and approve the plan before writing or editing any code. Do not skip this step even for small changes.

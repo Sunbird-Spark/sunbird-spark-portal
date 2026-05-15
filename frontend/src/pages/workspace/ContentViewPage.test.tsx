@@ -7,6 +7,11 @@ import ContentViewPage from './ContentViewPage';
 const mockNavigate = vi.fn();
 const mockToast = vi.fn();
 
+// Hoist useContentRead mock so it can be overridden per test
+const { mockUseContentRead } = vi.hoisted(() => ({
+  mockUseContentRead: vi.fn(),
+}));
+
 vi.mock('@/hooks/useContentPlayer', () => ({
   useContentPlayer: () => ({
     handlePlayerEvent: vi.fn(),
@@ -14,25 +19,9 @@ vi.mock('@/hooks/useContentPlayer', () => ({
   }),
 }));
 
+// Default mock: content with status 'Review' and valid dates
 vi.mock('@/hooks/useContent', () => ({
-  useContentRead: () => ({
-    data: {
-      data: {
-        content: {
-          name: 'Test Content',
-          description: 'Test Description',
-          creator: 'Test Creator',
-          lastUpdatedOn: '2024-01-01',
-          createdOn: '2024-01-01',
-          primaryCategory: 'Resource',
-          mimeType: 'application/pdf',
-          status: 'Review',
-        },
-      },
-    },
-    isLoading: false,
-    error: null,
-  }),
+  useContentRead: (...args: any[]) => mockUseContentRead(...args),
 }));
 
 vi.mock('@/hooks/useQumlContent', () => ({
@@ -140,6 +129,21 @@ vi.mock('@/components/workspace/PublishWarningDialog', () => ({
   default: () => null,
 }));
 
+vi.mock('@/hooks/useTelemetry', () => ({
+  useTelemetry: () => ({ audit: vi.fn(), log: vi.fn(), impression: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useImpression', () => ({
+  default: vi.fn(),
+  useImpression: vi.fn(),
+}));
+
+vi.mock('@/hooks/useAppI18n', () => ({
+  useAppI18n: () => ({
+    t: (key: string, params?: Record<string, string>) => params ? `${key}:${JSON.stringify(params)}` : key,
+  }),
+}));
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
@@ -159,8 +163,31 @@ const renderPage = () =>
     </QueryClientProvider>
   );
 
+// Default content response used by most tests
+const defaultContentResponse = {
+  data: {
+    data: {
+      content: {
+        name: 'Test Content',
+        description: 'Test Description',
+        creator: 'Test Creator',
+        lastUpdatedOn: '2024-01-01',
+        createdOn: '2024-01-01',
+        primaryCategory: 'Resource',
+        mimeType: 'application/pdf',
+        status: 'Review',
+      },
+    },
+  },
+  isLoading: false,
+  error: null,
+};
+
 describe('ContentViewPage - Layout', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseContentRead.mockReturnValue(defaultContentResponse);
+  });
   afterEach(() => cleanup());
 
   it('should arrange buttons horizontally with flexbox layout', () => {
@@ -188,6 +215,7 @@ describe('ContentViewPage - Layout', () => {
 describe('ContentReviewPage - Button Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseContentRead.mockReturnValue(defaultContentResponse);
     mockNavigate.mockClear();
     mockToast.mockClear();
   });
@@ -242,5 +270,115 @@ describe('ContentReviewPage - Button Functionality', () => {
 
       unmount();
     });
+  });
+});
+
+describe('ContentViewPage - Publish and Reject flows', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseContentRead.mockReturnValue(defaultContentResponse);
+  });
+  afterEach(() => cleanup());
+
+  it('renders formatted dates correctly instead of fallback text', () => {
+    renderPage();
+    // The mocked data provides '2024-01-01' which formats to 'January 1, 2024'
+    expect(screen.getAllByText('January 1, 2024').length).toBeGreaterThan(0);
+  });
+
+  it('clicking Publish triggers form load and shows checklist dialog', async () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /^Publish$/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/Please confirm that ALL/i)).toBeInTheDocument();
+    });
+  });
+
+  it('clicking Request for Changes triggers form load and shows checklist dialog', async () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /Request for Changes/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/Please confirm that ALL/i)).toBeInTheDocument();
+    });
+  });
+});
+
+// --- New tests for previously uncovered lines ---
+
+describe('ContentViewPage - formatDate null path and navigation guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseContentRead.mockReturnValue(defaultContentResponse);
+  });
+  afterEach(() => cleanup());
+
+  it('shows notAvailable fallback when content has no dates (covers formatDate returning null, line 229)', () => {
+    // Override useContentRead to return content with null/undefined date fields
+    mockUseContentRead.mockReturnValue({
+      data: {
+        data: {
+          content: {
+            name: 'No-Date Content',
+            description: 'Desc',
+            creator: 'Author',
+            lastUpdatedOn: undefined,
+            createdOn: undefined,
+            primaryCategory: 'Resource',
+            mimeType: 'application/pdf',
+            status: 'Review',
+          },
+        },
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <BrowserRouter>
+          <ContentViewPage mode="review" />
+        </BrowserRouter>
+      </QueryClientProvider>
+    );
+
+    // Both date fields should fall back to the i18n key for 'not available'
+    const notAvailableElements = screen.getAllByText('workspace.review.notAvailable');
+    expect(notAvailableElements.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('navigates to /workspace with replace:true when in review mode and status is not Review (covers lines 166-167)', () => {
+    // Override useContentRead to return a content with status 'Draft' (not 'Review')
+    mockUseContentRead.mockReturnValue({
+      data: {
+        data: {
+          content: {
+            name: 'Draft Content',
+            description: 'Desc',
+            creator: 'Author',
+            lastUpdatedOn: '2024-01-01',
+            createdOn: '2024-01-01',
+            primaryCategory: 'Resource',
+            mimeType: 'application/pdf',
+            status: 'Draft',
+          },
+        },
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    mockNavigate.mockClear();
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <BrowserRouter>
+          {/* mode="review" triggers the isReviewMode === true path */}
+          <ContentViewPage mode="review" />
+        </BrowserRouter>
+      </QueryClientProvider>
+    );
+
+    // The component should call navigate('/workspace', { replace: true }) and return null
+    expect(mockNavigate).toHaveBeenCalledWith('/workspace', { replace: true });
   });
 });

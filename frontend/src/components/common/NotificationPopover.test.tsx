@@ -19,9 +19,13 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'common.notifications': 'Notifications',
         'notifications.empty': 'No notifications',
         'notifications.deleteAll': 'Delete All',
+        'today': 'Today',
+        'yesterday': 'Yesterday',
+        'older': 'Older',
       };
       return translations[key] || key;
     },
+    currentCode: 'en',
   }),
 }));
 

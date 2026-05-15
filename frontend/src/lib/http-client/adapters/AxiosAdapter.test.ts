@@ -185,4 +185,84 @@ describe('AxiosAdapter', () => {
     expect(mockAxiosInstance.defaults.headers.common['Authorization']).toBeUndefined();
     expect(mockAxiosInstance.defaults.headers.common['X-Custom-Header']).toBe('CustomValue');
   });
+
+  it('should call _post via public post and return correct response', async () => {
+    const mockResult = { created: true };
+    const mockResponse = {
+      data: { result: mockResult },
+      status: 201,
+      headers: {},
+    };
+    mockAxiosInstance.post.mockResolvedValue(mockResponse);
+
+    const result = await adapter.post('/test', { key: 'value' });
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/test', { key: 'value' }, { headers: undefined });
+    expect(result.data).toEqual(mockResult);
+    expect(result.status).toBe(201);
+  });
+
+  it('should call _put via public put and return correct response', async () => {
+    const mockResult = { updated: true };
+    const mockResponse = {
+      data: { result: mockResult },
+      status: 200,
+      headers: {},
+    };
+    mockAxiosInstance.put.mockResolvedValue(mockResponse);
+
+    const result = await adapter.put('/test', { key: 'value' });
+    expect(mockAxiosInstance.put).toHaveBeenCalledWith('/test', { key: 'value' }, { headers: undefined });
+    expect(result.data).toEqual(mockResult);
+    expect(result.status).toBe(200);
+  });
+
+  it('should call _patch via public patch and return correct response', async () => {
+    const mockResult = { patched: true };
+    const mockResponse = {
+      data: { result: mockResult },
+      status: 200,
+      headers: {},
+    };
+    mockAxiosInstance.patch.mockResolvedValue(mockResponse);
+
+    const result = await adapter.patch('/test', { key: 'value' });
+    expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/test', { key: 'value' }, { headers: undefined });
+    expect(result.data).toEqual(mockResult);
+    expect(result.status).toBe(200);
+  });
+
+  it('should call _delete via public delete and return correct response', async () => {
+    const mockResponse = {
+      data: {},
+      status: 204,
+      headers: {},
+    };
+    mockAxiosInstance.delete.mockResolvedValue(mockResponse);
+
+    const result = await adapter.delete('/test');
+    expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/test', { headers: undefined, data: undefined });
+    expect(result.status).toBe(204);
+  });
+
+  it('should invoke onResponse handler for 401 responses', async () => {
+    const handler = vi.fn();
+    adapter = new AxiosAdapter({
+      baseURL: 'http://test.com',
+      statusHandlers: { 401: handler },
+    });
+
+    const mockResponse = { data: null, status: 401, headers: {} };
+    const error: any = new Error('Unauthorized');
+    error.isAxiosError = true;
+    error.response = mockResponse;
+
+    mockAxiosInstance.get.mockRejectedValue(error);
+
+    await expect(adapter.get('/test')).rejects.toThrow('Unauthorized');
+    expect(handler).toHaveBeenCalledWith({
+      data: null,
+      status: 401,
+      headers: {},
+    });
+  });
 });

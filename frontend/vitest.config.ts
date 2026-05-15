@@ -28,6 +28,9 @@ export default defineConfig({
         '**/types/**',
         '**/*.d.ts',
         '**/*.json',
+        'src/assets/**',
+        'src/**/*.css',
+        '**/types.ts',
       ],
       thresholds: {
         branches: 70,

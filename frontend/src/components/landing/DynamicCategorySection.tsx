@@ -20,7 +20,7 @@ const backgroundMap = [
 ];
 
 const DynamicCategorySection = ({ title, list, innerClassName = "landing-section-inner" }: DynamicCategorySectionProps) => {
-  const { currentCode } = useAppI18n();
+  const { currentCode, t } = useAppI18n();
   
   if (!list || list.length === 0) return null;
 
@@ -62,7 +62,7 @@ const DynamicCategorySection = ({ title, list, innerClassName = "landing-section
             <div className="category-view-all-circle">
               <FiArrowRight className="category-view-all-icon" />
             </div>
-            <span className="category-view-all-label">View All</span>
+            <span className="category-view-all-label">{t('viewAll')}</span>
           </Link>
         </div>
       </div>

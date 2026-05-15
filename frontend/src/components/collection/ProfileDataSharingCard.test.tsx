@@ -14,7 +14,6 @@ vi.mock('./ProfileDataSharingModal', () => ({
     onClose,
     onAgree,
     onDisagree,
-    userProfile,
   }: {
     open: boolean;
     onClose: () => void;
@@ -23,17 +22,10 @@ vi.mock('./ProfileDataSharingModal', () => ({
     userProfile: Record<string, unknown> | null | undefined;
   }) =>
     open ? (
-      <div data-testid="profile-data-sharing-modal" role="dialog">
-        <button type="button" onClick={onClose} aria-label="close-modal">
-          Close
-        </button>
-        <button type="button" onClick={() => onAgree()} data-testid="modal-agree">
-          Share
-        </button>
-        <button type="button" onClick={() => onDisagree()} data-testid="modal-disagree">
-          Don't Share
-        </button>
-        <span data-testid="modal-user-profile">{userProfile ? 'has-profile' : 'no-profile'}</span>
+      <div data-testid="sharing-modal">
+        <button type="button" onClick={onAgree}>Agree</button>
+        <button type="button" onClick={onDisagree}>Disagree</button>
+        <button type="button" onClick={onClose}>Close</button>
       </div>
     ) : null,
 }));
@@ -48,64 +40,69 @@ describe('ProfileDataSharingCard', () => {
     userProfile: null as Record<string, unknown> | null | undefined,
   };
 
-  it('renders card with test id', () => {
+  it("renders card with testid 'profile-data-sharing-card'", () => {
     render(<ProfileDataSharingCard {...defaultProps} />);
     expect(screen.getByTestId('profile-data-sharing-card')).toBeInTheDocument();
   });
 
-  it('shows status Off when status is not ACTIVE', () => {
-    render(<ProfileDataSharingCard {...defaultProps} status={null} />);
-    expect(screen.getByText('profileDataSharing.cardTitle')).toBeInTheDocument();
-    expect(screen.getByText('profileDataSharing.statusOff')).toBeInTheDocument();
-  });
-
-  it('shows status On when status is ACTIVE', () => {
+  it('shows "profileDataSharing.statusOn" text when status is ACTIVE', () => {
     render(<ProfileDataSharingCard {...defaultProps} status="ACTIVE" />);
     expect(screen.getByText('profileDataSharing.statusOn')).toBeInTheDocument();
   });
 
-  it('shows last updated date when lastUpdatedOn is provided', () => {
+  it('shows "profileDataSharing.statusOff" text when status is REVOKED', () => {
+    render(<ProfileDataSharingCard {...defaultProps} status="REVOKED" />);
+    expect(screen.getByText('profileDataSharing.statusOff')).toBeInTheDocument();
+  });
+
+  it('shows "profileDataSharing.statusOff" text when status is null', () => {
+    render(<ProfileDataSharingCard {...defaultProps} status={null} />);
+    expect(screen.getByText('profileDataSharing.statusOff')).toBeInTheDocument();
+  });
+
+  it('shows formatted last updated date "15/03/2026" when lastUpdatedOn="2026-03-15T10:30:00.000Z"', () => {
     render(
       <ProfileDataSharingCard
         {...defaultProps}
-        lastUpdatedOn="2026-02-26T10:00:00.000Z"
+        lastUpdatedOn="2026-03-15T10:30:00.000Z"
       />
     );
-    expect(screen.getByText(/profileDataSharing\.lastUpdatedOn/)).toBeInTheDocument();
-    expect(screen.getByText(/26\/02\/2026/)).toBeInTheDocument();
+    expect(screen.getByText(/15\/03\/2026/)).toBeInTheDocument();
   });
 
-  it('does not show last updated when lastUpdatedOn is undefined', () => {
+  it('does NOT show last updated span when lastUpdatedOn is undefined', () => {
     render(<ProfileDataSharingCard {...defaultProps} lastUpdatedOn={undefined} />);
-    expect(screen.queryByText(/26\/02\/2026/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/profileDataSharing\.lastUpdatedOn/)).not.toBeInTheDocument();
   });
 
-  it('does not open modal by default', () => {
-    render(<ProfileDataSharingCard {...defaultProps} status={null} />);
-    expect(screen.queryByTestId('profile-data-sharing-modal')).not.toBeInTheDocument();
-  });
-
-  it('opens modal when Update button is clicked', () => {
+  it('clicking "Update" button opens the modal', () => {
     render(<ProfileDataSharingCard {...defaultProps} />);
-    expect(screen.queryByTestId('profile-data-sharing-modal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sharing-modal')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'profileDataSharing.update' }));
-    expect(screen.getByTestId('profile-data-sharing-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('sharing-modal')).toBeInTheDocument();
   });
 
-  it('closes modal when modal close is triggered', () => {
+  it("modal closes when modal's onClose is triggered", () => {
     render(<ProfileDataSharingCard {...defaultProps} />);
     fireEvent.click(screen.getByRole('button', { name: 'profileDataSharing.update' }));
-    expect(screen.getByTestId('profile-data-sharing-modal')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'close-modal' }));
-    expect(screen.queryByTestId('profile-data-sharing-modal')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sharing-modal')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByTestId('sharing-modal')).not.toBeInTheDocument();
   });
 
-  it('passes userProfile to modal when provided', () => {
-    const userProfile = { firstName: 'Test', lastName: 'User', id: 'u1' };
-    render(
-      <ProfileDataSharingCard {...defaultProps} userProfile={userProfile} />
-    );
+  it("calls onAgree when modal's Agree button is clicked", () => {
+    const onAgree = vi.fn().mockResolvedValue(undefined);
+    render(<ProfileDataSharingCard {...defaultProps} onAgree={onAgree} />);
     fireEvent.click(screen.getByRole('button', { name: 'profileDataSharing.update' }));
-    expect(screen.getByTestId('modal-user-profile')).toHaveTextContent('has-profile');
+    fireEvent.click(screen.getByRole('button', { name: 'Agree' }));
+    expect(onAgree).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onDisagree when modal's Disagree button is clicked", () => {
+    const onDisagree = vi.fn().mockResolvedValue(undefined);
+    render(<ProfileDataSharingCard {...defaultProps} onDisagree={onDisagree} />);
+    fireEvent.click(screen.getByRole('button', { name: 'profileDataSharing.update' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Disagree' }));
+    expect(onDisagree).toHaveBeenCalledTimes(1);
   });
 });

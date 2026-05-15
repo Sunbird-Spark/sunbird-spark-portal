@@ -79,7 +79,13 @@
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Practice Question Set",
-    "questionset": "Question Set"
+    "questionset": "Question Set",
+    "learningresource": "Learning Resource",
+    "explanationcontent": "Explanation Content",
+    "teacherresource": "Teacher Resource",
+    "etextbook": "eTextbook",
+    "courseassessment": "Course Assessment",
+    "examquestion": "Exam Question"
   },
   "categoriesList": {
     "ai-ml": "AI/ML",
@@ -180,6 +186,7 @@
   "updated": "Updated",
   "today": "Today",
   "yesterday": "Yesterday",
+  "older": "Older",
   "daysAgo": "days ago",
   "trustedByProfessionals": "Trusted by Professionals Worldwide",
   "joinThousands": "Join thousands of professionals who have advanced their careers with our comprehensive training programs.",
@@ -458,18 +465,22 @@
     "mainNavigation": "Main Navigation",
     "learningProgress": "Learning Progress",
     "lessonVisited": "Lesson visited",
-    "contentsCompleted": "Contents completed"
+    "contentsCompleted": "Contents completed",
+    "noUpcomingBatches": "No upcoming batches scheduled."
   },
   "onboarding": {
     "altSunbird": "Sunbird",
     "otherPreferencePlaceholder": "Please type your preference here",
     "altImage": "Onboarding Image",
     "goBack": "Go back",
+    "goToHome": "Go to Home",
     "welcomeMessage": "We would love to help you personalize your experience!",
     "saveAndProceed": "Save and Proceed",
     "submit": "Submit",
     "saving": "Saving...",
-    "skipOnboarding": "Skip Onboarding"
+    "skipOnboarding": "Skip Onboarding",
+    "failedToLoad": "Failed to load onboarding.",
+    "skip": "Skip"
   },
   "profilePage": {
     "loading": "Loading your profile...",
@@ -673,7 +684,7 @@
     "dec": "Dec"
   },
   "authLayout": {
-    "empowerTitle": "Empower your future through learning.",
+    "empowerTitle": "Empower your future\nthrough learning.",
     "logoAlt": "Sunbird Logo"
   },
   "signUp": {
@@ -722,7 +733,11 @@
     "otpButFailed": "OTP verified but account creation failed. Please try again.",
     "verificationFailed": "Verification Failed",
     "invalidOtp": "Invalid OTP. Please try again.",
-    "verificationError": "An error occurred during verification. Please try again."
+    "verificationError": "An error occurred during verification. Please try again.",
+    "emailAlreadyRegistered": "This email is already in use.",
+    "phoneAlreadyRegistered": "This mobile number is already in use.",
+    "emailAvailable": "This email address is available.",
+    "phoneAvailable": "This mobile number is available."
   },
   "personalInfo": {
     "title": "Personal Information",
@@ -730,6 +745,9 @@
     "mobileNumber": "Mobile Number",
     "emailId": "Email ID",
     "alternateEmailId": "Alternate Email ID"
+  },
+  "profileCard": {
+    "sunbirdId": "Sunbird ID"
   },
   "editProfile": {
     "title": "Edit Personal Information",
@@ -925,7 +943,20 @@
     "tryAgain": "Try Again",
     "closePreview": "Close preview",
     "closeButton": "Close",
-    "selectButton": "Select"
+    "selectButton": "Select",
+    "verifying": "Verifying certificate...",
+    "verified": "Certificate Details",
+    "verificationFailed": "Verification Failed",
+    "issuedTo": "Issued to",
+    "course": "Course",
+    "issuedOn": "Issue Date",
+    "backToHome": "Back to Home",
+    "couldNotVerify": "This certificate could not be verified",
+    "status": "Status",
+    "activeAndValid": "Active & Valid",
+    "invalid": "Invalid",
+    "credentialHolder": "Credential Holder",
+    "certificationProgram": "Certification Program"
   },
   "createTemplate": {
     "description": "Fill in the details below to create a new certificate template for your organisation.",
@@ -1124,9 +1155,6 @@
   "formFields": {
     "select": "Select {{field}}"
   },
-  "exploreGrid": {
-    "noContentFound": "No content found"
-  },
   "status": {
     "draft": "Draft",
     "inReview": "In Review",
@@ -1135,6 +1163,7 @@
     "inactive": "Inactive",
     "completed": "Completed",
     "ongoing": "Ongoing",
+    "notStarted": "Not Started",
     "upcoming": "Upcoming",
     "processing": "Processing"
   },
@@ -1153,7 +1182,8 @@
     "noFilteredCourses": "No {{filter}} courses found.",
     "downloading": "Downloading...",
     "myLearning": "My Learning",
-    "filter": "Filter"
+    "filter": "Filter",
+    "untitledCourse": "Untitled Course"
   },
 
   "trackableCollection": {
@@ -1300,6 +1330,10 @@
     "youtube": "YouTube",
     "html": "HTML",
     "interactive": "Interactive"
+  },
+  "exploreGrid": {
+    "noContentFound": "No content found",
+    "noMoreContent": "No more content to show"
   }
 }
 

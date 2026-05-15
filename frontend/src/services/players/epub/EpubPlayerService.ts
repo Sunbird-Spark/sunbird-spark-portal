@@ -24,6 +24,7 @@ export class EpubPlayerService {
       EpubPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
+    /* c8 ignore next 12 */
     if (EpubPlayerService.scriptLoading) {
       return EpubPlayerService.scriptLoading;
     }

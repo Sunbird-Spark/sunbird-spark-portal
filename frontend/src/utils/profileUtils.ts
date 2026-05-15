@@ -26,8 +26,8 @@ export const createInitialForm = (): EditProfileFormData => ({
 });
 
 export const buildOriginalData = (u: UserProfile): EditProfileFormData => {
-    const firstName = _.get(u, 'firstName', '');
-    const lastName = _.get(u, 'lastName', '');
+    const firstName = _.get(u, 'firstName', '') || '';
+    const lastName = _.get(u, 'lastName', '') || '';
     return {
         fullName: _.trim(`${firstName} ${lastName}`),
         mobileNumber: _.get(u, 'phone', '') || '',

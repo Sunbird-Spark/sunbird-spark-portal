@@ -19,7 +19,7 @@ const HomeInProgressGrid = () => {
     }
 
     const inProgressCourses: TrackableCollection[] = (data?.data?.courses ?? [])
-        .filter((course: TrackableCollection) => course.completionPercentage < 100);
+        .filter((course: TrackableCollection) => course.status === 1 && course.completionPercentage < 100);
 
     if (inProgressCourses.length === 0) {
         return (

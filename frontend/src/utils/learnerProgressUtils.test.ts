@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { buildEnrollmentVsCompletion, buildProgressBuckets, mapApiItemToLearnerProgress } from './learnerProgressUtils';
-import type { LearnerProgressApiItem } from '@/types/reports';
+import { buildEnrollmentVsCompletion, buildProgressBuckets, buildScoreDistribution, mapApiItemToAssessmentRecord, mapApiItemToLearnerProgress } from './learnerProgressUtils';
+import type { AssessmentApiItem, LearnerProgressApiItem } from '@/types/reports';
 
 const makeItem = (overrides: Partial<LearnerProgressApiItem>): LearnerProgressApiItem => ({
   userid: 'u-1',
@@ -140,6 +140,73 @@ describe('buildProgressBuckets', () => {
     expect(result[1]!.count).toBe(1);
     expect(result[2]!.count).toBe(1);
     expect(result[3]!.count).toBe(2);
+  });
+});
+
+const makeAssessmentItem = (overrides: Partial<AssessmentApiItem> = {}): AssessmentApiItem => ({
+  user_id: 'u-1',
+  attempt_count: 1,
+  total_score: 80,
+  total_max_score: 100,
+  userDetails: { firstName: 'Jane', lastName: 'Doe' },
+  last_attempted_on: '2026-03-04T08:00:00.000+00:00',
+  ...overrides,
+});
+
+describe('buildScoreDistribution', () => {
+  it('places records in correct score buckets', () => {
+    const records = [
+      { id: '1', learnerName: 'A', attemptNumber: 1, score: 10, maxScore: 100, percentage: 10, attemptDate: '2024-01-01' },
+      { id: '2', learnerName: 'B', attemptNumber: 1, score: 30, maxScore: 100, percentage: 30, attemptDate: '2024-01-01' },
+      { id: '3', learnerName: 'C', attemptNumber: 1, score: 50, maxScore: 100, percentage: 50, attemptDate: '2024-01-01' },
+      { id: '4', learnerName: 'D', attemptNumber: 1, score: 70, maxScore: 100, percentage: 70, attemptDate: '2024-01-01' },
+      { id: '5', learnerName: 'E', attemptNumber: 1, score: 90, maxScore: 100, percentage: 90, attemptDate: '2024-01-01' },
+    ];
+    const result = buildScoreDistribution(records);
+    expect(result).toHaveLength(5);
+    expect(result[0]!.count).toBe(1); // ≤20
+    expect(result[1]!.count).toBe(1); // ≤40
+    expect(result[2]!.count).toBe(1); // ≤60
+    expect(result[3]!.count).toBe(1); // ≤80
+    expect(result[4]!.count).toBe(1); // >80
+  });
+
+  it('returns all zeros for empty records', () => {
+    const result = buildScoreDistribution([]);
+    expect(result.every(b => b.count === 0)).toBe(true);
+  });
+});
+
+describe('mapApiItemToAssessmentRecord', () => {
+  it('maps item with score and max score', () => {
+    const item = makeAssessmentItem({ total_score: 80, total_max_score: 100 });
+    const result = mapApiItemToAssessmentRecord(item);
+    expect(result.score).toBe(80);
+    expect(result.maxScore).toBe(100);
+    expect(result.percentage).toBe(80);
+  });
+
+  it('returns 0 percentage when maxScore is 0', () => {
+    const item = makeAssessmentItem({ total_score: 0, total_max_score: 0 });
+    const result = mapApiItemToAssessmentRecord(item);
+    expect(result.percentage).toBe(0);
+  });
+
+  it('returns 0 for null score/maxScore', () => {
+    const item = makeAssessmentItem({ total_score: null, total_max_score: null });
+    const result = mapApiItemToAssessmentRecord(item);
+    expect(result.score).toBe(0);
+    expect(result.maxScore).toBe(0);
+  });
+
+  it('constructs learnerName from firstName and lastName', () => {
+    const item = makeAssessmentItem({ userDetails: { firstName: 'Alice', lastName: 'Smith' } });
+    expect(mapApiItemToAssessmentRecord(item).learnerName).toBe('Alice Smith');
+  });
+
+  it('handles missing lastName', () => {
+    const item = makeAssessmentItem({ userDetails: { firstName: 'Alice' } });
+    expect(mapApiItemToAssessmentRecord(item).learnerName).toBe('Alice');
   });
 });
 

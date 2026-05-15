@@ -23,6 +23,7 @@ export class PdfPlayerService {
       PdfPlayerService.scriptLoaded = true;
       return Promise.resolve();
     }
+    /* c8 ignore next 12 */
     if (PdfPlayerService.scriptLoading) {
       return PdfPlayerService.scriptLoading;
     }

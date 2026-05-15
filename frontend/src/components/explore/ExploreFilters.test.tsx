@@ -15,10 +15,17 @@ vi.mock('../../hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (key: string) => key }),
 }));
 
-// Mock Accordion so we can inspect defaultValue and render content unconditionally
+// Mock Accordion so we can inspect the controlled value and render content unconditionally
 vi.mock('../landing/Accordion', () => ({
-  Accordion: ({ children, defaultValue }: { children: React.ReactNode; defaultValue: string[] }) => (
-    <div data-testid="accordion" data-default-value={JSON.stringify(defaultValue)}>
+  Accordion: ({
+    children,
+    value,
+  }: {
+    children: React.ReactNode;
+    value: string[];
+    onValueChange: (val: string[]) => void;
+  }) => (
+    <div data-testid="accordion" data-value={JSON.stringify(value)}>
       {children}
     </div>
   ),
@@ -151,7 +158,7 @@ describe('ExploreFilters', () => {
   });
 
   describe('scenario 4 — open only the first section by default', () => {
-    it('sets defaultValue to only the first group id (sorted by index)', () => {
+    it('sets value to only the first group id (sorted by index) on initial load', () => {
       vi.mocked(useFormRead).mockReturnValue({
         isLoading: false,
         isError: false,
@@ -160,7 +167,23 @@ describe('ExploreFilters', () => {
       renderComponent();
       // First group sorted by index is 'collection' (index 1)
       const accordion = screen.getByTestId('accordion');
-      expect(accordion).toHaveAttribute('data-default-value', '["collection"]');
+      expect(accordion).toHaveAttribute('data-value', '["collection"]');
+    });
+  });
+
+  describe('scenario 5 — sections with active filters stay open', () => {
+    it('keeps a section open when it has selected filters', () => {
+      vi.mocked(useFormRead).mockReturnValue({
+        isLoading: false,
+        isError: false,
+        data: mockFormData,
+      } as any);
+      // mimeType values belong to the 'content' group (index 2)
+      renderComponent({ mimeType: ['video/mp4', 'video/webm'] });
+      const accordion = screen.getByTestId('accordion');
+      const openSections = JSON.parse(accordion.getAttribute('data-value') ?? '[]') as string[];
+      expect(openSections).toContain('collection'); // first section always opens initially
+      expect(openSections).toContain('content');    // has an active filter
     });
   });
 

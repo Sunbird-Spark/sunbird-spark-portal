@@ -18,11 +18,12 @@ import SearchModal from "@/components/common/SearchModal";
 interface HeaderProps {
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
+  forcePublic?: boolean;
 }
 
 const defaultToggleSidebar = () => { };
 
-const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar }: HeaderProps) => {
+const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar, forcePublic = false }: HeaderProps) => {
   const { isAuthenticated, isLoading } = usePermissions();
   const location = useLocation();
   const { t, languages, currentCode, changeLanguage } = useAppI18n();
@@ -33,7 +34,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
     return <div className="sticky top-0 z-50 bg-white shadow-sunbird-md h-16 md:h-[4.5rem]" />;
   }
 
-  if (!isLoading && isAuthenticated && location.pathname !== "/" && onToggleSidebar === defaultToggleSidebar) {
+  if (!isLoading && isAuthenticated && location.pathname !== "/" && !forcePublic && onToggleSidebar === defaultToggleSidebar) {
     if (import.meta.env.MODE !== "production") {
       // Warn when authenticated header is rendered without a real sidebar toggle handler.
       console.warn(
@@ -42,7 +43,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
     }
   }
 
-  if (!isLoading && isAuthenticated && location.pathname !== "/") {
+  if (!isLoading && isAuthenticated && location.pathname !== "/" && !forcePublic) {
     return <AuthenticatedHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />;
   }
 
@@ -137,7 +138,11 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
 
               {/* Login Button */}
               <Button
-                onClick={() => window.location.href = "/portal/login?prompt=none"}
+                onClick={() => {
+                  const targetPath = location.pathname === "/" ? "/home" : location.pathname + location.search;
+                  const returnTo = encodeURIComponent(targetPath);
+                  window.location.href = `/portal/login?prompt=none&returnTo=${returnTo}`;
+                }}
                 className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal min-w-[4.5rem] h-[1.875rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center px-4 py-0"
               >
                 {t("login")}
@@ -209,7 +214,9 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar 
               <Button
                 onClick={() => {
                   setIsMenuOpen(false);
-                  window.location.href = "/portal/login?prompt=none";
+                  const targetPath = location.pathname === "/" ? "/home" : location.pathname + location.search;
+                  const returnTo = encodeURIComponent(targetPath);
+                  window.location.href = `/portal/login?prompt=none&returnTo=${returnTo}`;
                 }}
                 className="block w-full text-center bg-sunbird-brick text-white px-4 py-2 rounded-lg text-sm font-medium"
               >
