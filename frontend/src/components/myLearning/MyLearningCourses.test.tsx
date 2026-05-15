@@ -43,7 +43,7 @@ const createMockCourse = (
   userId: 'user_123',
   addedBy: 'admin_123',
   active: true,
-  status: 2,
+  status: percentage === 100 ? 2 : percentage > 0 ? 1 : 0,
   completionPercentage: percentage,
   progress: percentage === 100 ? 5 : percentage > 0 ? 1 : 0,
   leafNodesCount: 5,

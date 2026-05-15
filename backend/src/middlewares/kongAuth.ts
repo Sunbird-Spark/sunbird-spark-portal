@@ -1,12 +1,43 @@
 import { Request, Response, NextFunction } from 'express';
 import { envConfig } from '../config/env.js';
 import logger from '../utils/logger.js';
-import { generateKongToken, refreshSessionTTL, isSessionNearExpiry } from '../services/kongAuthService.js';
+import { generateKongToken, generateLoggedInKongToken, getKongAccessToken, refreshSessionTTL, isSessionNearExpiry } from '../services/kongAuthService.js';
 import { saveSession } from '../utils/sessionUtils.js';
 
 export const registerDeviceWithKong = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
         logger.info(`registerDeviceWithKong :: ${req.method} ${req.originalUrl}`);
+
+        // If user is authenticated but still holding an anonymous Kong token, upgrade it
+        if (req.session.kongToken && req.session.userId && req.session.kongTokenType === 'anonymous') {
+            logger.info('KONG_TOKEN_UPGRADE :: authenticated user with anonymous token, upgrading to logged-in token');
+            try {
+                const token = await generateLoggedInKongToken(req);
+                req.session.kongToken = token;
+                req.session.kongTokenType = 'logged-in';
+
+                const result = await getKongAccessToken(req);
+                let kongTTLApplied = false;
+                if (result) {
+                    req.session.userAccessToken = result.accessToken;
+                    if (result.expiresIn) {
+                        req.session.cookie.maxAge = result.expiresIn * 1000;
+                        req.session.cookie.expires = new Date(Date.now() + result.expiresIn * 1000);
+                        kongTTLApplied = true;
+                    }
+                }
+
+                if (!kongTTLApplied) {
+                    refreshSessionTTL(req);
+                }
+                await saveSession(req);
+                logger.info('KONG_TOKEN_UPGRADE :: successfully upgraded to logged-in Kong token');
+            } catch (err) {
+                logger.error('KONG_TOKEN_UPGRADE :: failed to upgrade token', err);
+            }
+            return next();
+        }
+
         // Reuse existing token — only refresh if session is near expiry
         if (req.session.kongToken) {
             const isAnonymous = !req.session.userId;
@@ -58,6 +89,7 @@ export const registerDeviceWithKong = () => {
             }
 
             req.session.kongToken = token;
+            req.session.kongTokenType = 'anonymous';
             refreshSessionTTL(req);
             req.session['roles'] = [];
             req.session.roles = ['ANONYMOUS'];

@@ -3,23 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ModalStatusOverlay } from './ModalStatusOverlay';
 
 vi.mock('@/hooks/useAppI18n', () => ({
-  useAppI18n: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'certificate.templateCreatedTitle': 'Template Created Successfully!',
-        'certificate.templateCreatedDesc': 'You have created the template...',
-        'certificate.refresh': 'Refresh',
-        'certificate.proceedAnyway': 'Proceed Anyway',
-        'certificate.certificateAddedTitle': 'Certificate Added!',
-        'certificate.certificateAddedDesc': 'The certificate template has been...',
-        'certificate.done': 'Done',
-        'certificate.somethingWentWrong': 'Something went wrong',
-        'certificate.cancelButton2': 'Cancel',
-        'certificate.tryAgain': 'Try Again',
-      };
-      return translations[key] || key;
-    },
-  }),
+  useAppI18n: () => ({ t: (key: string) => key }),
 }));
 
 const defaultProps = {
@@ -34,24 +18,26 @@ const defaultProps = {
 };
 
 describe('ModalStatusOverlay', () => {
-  it('returns null when step is idle', () => {
+  it('returns null when step="idle"', () => {
     const { container } = render(<ModalStatusOverlay {...defaultProps} step="idle" />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('shows loader with stepLabel when step is submitting', () => {
+  it('renders spinner and stepLabel when step="submitting"', () => {
     render(
       <ModalStatusOverlay {...defaultProps} step="submitting" stepLabel="Attaching certificate…" />
     );
     expect(screen.getByText('Attaching certificate…')).toBeInTheDocument();
   });
 
-  it('shows "Template Created Successfully!" when step is templateCreated', () => {
+  it('renders templateCreated success view with two buttons when step="templateCreated"', () => {
     render(<ModalStatusOverlay {...defaultProps} step="templateCreated" />);
-    expect(screen.getByText('Template Created Successfully!')).toBeInTheDocument();
+    expect(screen.getByText('certificate.templateCreatedTitle')).toBeInTheDocument();
+    expect(screen.getByText('certificate.refresh')).toBeInTheDocument();
+    expect(screen.getByText('certificate.proceedAnyway')).toBeInTheDocument();
   });
 
-  it('Refresh button calls handleRefreshTemplates, setStep, setView when step is templateCreated', async () => {
+  it('Refresh button calls handleRefreshTemplates, then setStep("idle"), then setView("main")', async () => {
     const handleRefreshTemplates = vi.fn().mockResolvedValue(undefined);
     const setStep = vi.fn();
     const setView = vi.fn();
@@ -64,7 +50,7 @@ describe('ModalStatusOverlay', () => {
         setView={setView}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
+    fireEvent.click(screen.getByText('certificate.refresh'));
     await vi.waitFor(() => {
       expect(handleRefreshTemplates).toHaveBeenCalledTimes(1);
       expect(setStep).toHaveBeenCalledWith('idle');
@@ -72,50 +58,51 @@ describe('ModalStatusOverlay', () => {
     });
   });
 
-  it('"Proceed Anyway" button calls setStep and setView when step is templateCreated', () => {
+  it('"Proceed Anyway" button calls setStep("idle") and setView("main")', () => {
     const setStep = vi.fn();
     const setView = vi.fn();
     render(
       <ModalStatusOverlay {...defaultProps} step="templateCreated" setStep={setStep} setView={setView} />
     );
-    fireEvent.click(screen.getByText('Proceed Anyway'));
+    fireEvent.click(screen.getByText('certificate.proceedAnyway'));
     expect(setStep).toHaveBeenCalledWith('idle');
     expect(setView).toHaveBeenCalledWith('main');
   });
 
-  it('shows "Certificate Added!" when step is done', () => {
+  it('renders done view when step="done"', () => {
     render(<ModalStatusOverlay {...defaultProps} step="done" />);
-    expect(screen.getByText('Certificate Added!')).toBeInTheDocument();
+    expect(screen.getByText('certificate.certificateAddedTitle')).toBeInTheDocument();
+    expect(screen.getByText('certificate.done')).toBeInTheDocument();
   });
 
-  it('calls handleClose when Done button is clicked', () => {
+  it('Done button calls handleClose', () => {
     const handleClose = vi.fn();
     render(<ModalStatusOverlay {...defaultProps} step="done" handleClose={handleClose} />);
-    fireEvent.click(screen.getByText('Done'));
+    fireEvent.click(screen.getByText('certificate.done'));
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
-  it('shows "Something went wrong" when step is error', () => {
+  it('renders error view with errorMsg when step="error"', () => {
     render(<ModalStatusOverlay {...defaultProps} step="error" errorMsg="Network error" />);
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByText('certificate.somethingWentWrong')).toBeInTheDocument();
     expect(screen.getByText('Network error')).toBeInTheDocument();
   });
 
-  it('calls handleClose when Cancel is clicked on error step', () => {
+  it('Cancel button in error view calls handleClose', () => {
     const handleClose = vi.fn();
     render(
       <ModalStatusOverlay {...defaultProps} step="error" errorMsg="Error" handleClose={handleClose} />
     );
-    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByText('certificate.cancelButton2'));
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls setStep("idle") when "Try Again" is clicked on error step', () => {
+  it('Try Again button in error view calls setStep("idle")', () => {
     const setStep = vi.fn();
     render(
       <ModalStatusOverlay {...defaultProps} step="error" errorMsg="Error" setStep={setStep} />
     );
-    fireEvent.click(screen.getByText('Try Again'));
+    fireEvent.click(screen.getByText('certificate.tryAgain'));
     expect(setStep).toHaveBeenCalledWith('idle');
   });
 });

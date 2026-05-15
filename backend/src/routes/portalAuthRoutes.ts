@@ -3,7 +3,6 @@ import * as oidcClient from 'openid-client';
 import { getPortalOIDCConfig, decodeJwtPayload } from '../auth/oidcProvider.js';
 import logger from '../utils/logger.js';
 import { regenerateSession, destroySession, saveSession } from '../utils/sessionUtils.js';
-import { setSessionTTLFromToken } from '../utils/sessionTTLUtil.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
 import { envConfig } from '../config/env.js';
 import { sessionMiddleware } from '../middlewares/conditionalSession.js';
@@ -35,6 +34,15 @@ router.get('/login',
             // Store PKCE verifier and state in session for callback validation
             req.session.oidcCodeVerifier = codeVerifier;
             req.session.oidcState = state;
+
+            // Preserve the page to return to after login (only safe relative paths)
+            const returnToQueryParam = req.query.returnTo;
+            const rawReturnTo = typeof returnToQueryParam === 'string' ? returnToQueryParam : undefined;
+            const safeReturnTo = rawReturnTo?.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : undefined;
+            if (safeReturnTo && safeReturnTo !== '/') {
+                req.session.auth_redirect_uri = safeReturnTo;
+            }
+
             await saveSession(req);
 
             // Build authorization URL using OIDC Discovery endpoints
@@ -146,9 +154,10 @@ router.get('/auth/callback',
             logger.info('OIDC authenticated successfully');
 
             if (req.session) {
-                // Regenerate session to prevent session fixation attacks
+                // Regenerate session to prevent session fixation attacks.
+                // regenerateSession sets cookie TTL from Kong access token's expires_in,
+                // falling back to OIDC token claims when Kong TTL is unavailable.
                 await regenerateSession(req);
-                setSessionTTLFromToken(req);
 
                 // Initialize user session from token subject
                 const tokenSubject = req.oidc?.tokenClaims?.sub;
@@ -179,14 +188,21 @@ router.get('/auth/callback',
                     logger.error('Failed to generate START telemetry event', telemetryErr);
                 }
 
-                logger.info('Session setup complete, redirecting to /home');
                 // Use HTML redirect instead of 302 to break the POST redirect chain.
                 // When Keycloak redirects back via POST, a 302 keeps the chain alive
                 // and the browser may cancel the navigation. An HTML page forces a
                 // fresh GET navigation, preventing the cancellation.
                 const homeUrl = envConfig.DEVELOPMENT_REACT_APP_URL + '/home';
+                const returnPath = req.session.auth_redirect_uri;
+                const destination = returnPath
+                    ? envConfig.DEVELOPMENT_REACT_APP_URL + returnPath
+                    : homeUrl;
+                delete req.session.auth_redirect_uri;
+                await saveSession(req);
+                logger.info(`Session setup complete, redirecting to ${destination}`);
+                const htmlEncode = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 res.setHeader('Content-Type', 'text/html');
-                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${homeUrl}"></head><body><script>window.location.replace("${homeUrl}");</script></body></html>`);
+                res.send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${htmlEncode(destination)}"></head><body><script>window.location.replace(${JSON.stringify(destination)});</script></body></html>`);
             } else {
                 logger.error('No session found after OIDC callback');
                 res.redirect('/');

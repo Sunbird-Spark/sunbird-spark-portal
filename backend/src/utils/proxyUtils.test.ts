@@ -30,9 +30,21 @@ describe('proxyUtils', () => {
     };
 
     describe('getUserToken', () => {
-        it('should return OIDC access token when available', async () => {
+        it('should return Kong-issued userAccessToken when available', async () => {
             const { getUserToken } = await importProxyUtils();
             const mockReq = {
+                session: { userAccessToken: 'kong-access-token' },
+                oidc: { isAuthenticated: true, accessToken: 'oidc-token' }
+            } as any;
+
+            const result = getUserToken(mockReq as Request);
+            expect(result).toBe('kong-access-token');
+        });
+
+        it('should fall back to OIDC access token when userAccessToken is not set', async () => {
+            const { getUserToken } = await importProxyUtils();
+            const mockReq = {
+                session: {},
                 oidc: {
                     isAuthenticated: true,
                     accessToken: 'oidc-token'
@@ -83,7 +95,7 @@ describe('proxyUtils', () => {
             expect(result).toBe('bearer-token');
         });
 
-        it('should return fallback token when session token is missing', async () => {
+        it('should return anonymous fallback token when session token is missing and user is not authenticated', async () => {
             const { getBearerToken } = await importProxyUtils();
             const mockReq = {
                 session: {}
@@ -91,6 +103,23 @@ describe('proxyUtils', () => {
 
             const result = getBearerToken(mockReq as Request);
             expect(result).toBe('fallback-token');
+        });
+
+        it('should return logged-in fallback token when session token is missing but user is authenticated', async () => {
+            vi.doMock('../config/env.js', () => ({
+                envConfig: {
+                    KONG_ANONYMOUS_FALLBACK_TOKEN: 'anon-fallback',
+                    KONG_LOGGEDIN_FALLBACK_TOKEN: 'loggedin-fallback',
+                    APPID: 'test-app-id'
+                }
+            }));
+            const { getBearerToken } = await import('./proxyUtils.js');
+            const mockReq = {
+                session: { userId: 'user-123' }
+            } as Partial<Request>;
+
+            const result = getBearerToken(mockReq as Request);
+            expect(result).toBe('loggedin-fallback');
         });
     });
 

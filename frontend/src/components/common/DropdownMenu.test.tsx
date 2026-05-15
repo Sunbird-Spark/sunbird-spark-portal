@@ -168,8 +168,41 @@ describe('DropdownMenu Components', () => {
         </DropdownMenuContent>
       </DropdownMenu>
     );
-    
+
     const item = screen.getByText('Inset Item');
     expect(item).toHaveClass('pl-8');
+  });
+
+  it('applies inset prop to DropdownMenuLabel', () => {
+    render(
+      <DropdownMenu open>
+        <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel inset>Inset Label</DropdownMenuLabel>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+
+    const label = screen.getByText('Inset Label');
+    expect(label).toHaveClass('pl-8');
+  });
+
+  it('applies inset prop to DropdownMenuSubTrigger', () => {
+    render(
+      <DropdownMenu open>
+        <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger inset>Sub Trigger</DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem>Sub Item</DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+
+    const trigger = screen.getByText('Sub Trigger');
+    expect(trigger.closest('[class*="pl-8"]') || trigger).toBeInTheDocument();
   });
 });

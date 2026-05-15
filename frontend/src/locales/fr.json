@@ -79,7 +79,13 @@
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Ensemble de questions pratiques",
-    "questionset": "Ensemble de questions"
+    "questionset": "Ensemble de questions",
+    "learningresource": "Ressource d'apprentissage",
+    "explanationcontent": "Contenu explicatif",
+    "teacherresource": "Ressource pour enseignants",
+    "etextbook": "Manuel électronique",
+    "courseassessment": "Évaluation du cours",
+    "examquestion": "Question d'examen"
   },
   "categoriesList": {
     "ai-ml": "IA/ML",
@@ -180,6 +186,7 @@
   "updated": "Mis à jour",
   "today": "Aujourd'hui",
   "yesterday": "Hier",
+  "older": "Plus ancien",
   "daysAgo": "jours passés",
   "trustedByProfessionals": "Approuvé par les professionnels du monde entier",
   "joinThousands": "Rejoignez des milliers de professionnels qui ont fait progresser leur carrière grâce à nos programmes de formation complets.",
@@ -458,18 +465,22 @@
     "mainNavigation": "Navigation principale",
     "learningProgress": "Progression de l'apprentissage",
     "lessonVisited": "Leçon visitée",
-    "contentsCompleted": "Contenus terminés"
+    "contentsCompleted": "Contenus terminés",
+    "noUpcomingBatches": "Aucun lot à venir programmé."
   },
   "onboarding": {
     "altSunbird": "Sunbird",
     "otherPreferencePlaceholder": "Veuillez saisir votre préférence ici",
     "altImage": "Image d'intégration",
     "goBack": "Retour",
+    "goToHome": "Aller à l'accueil",
     "welcomeMessage": "Nous aimerions vous aider à personnaliser votre expérience !",
     "saveAndProceed": "Enregistrer et Continuer",
     "submit": "Soumettre",
     "saving": "Enregistrement...",
-    "skipOnboarding": "Ignorer l'intégration"
+    "skipOnboarding": "Ignorer l'intégration",
+    "failedToLoad": "Échec du chargement de l'intégration.",
+    "skip": "Ignorer"
   },
   "profilePage": {
     "loading": "Chargement de votre profil...",
@@ -673,7 +684,7 @@
     "dec": "Déc"
   },
   "authLayout": {
-    "empowerTitle": "Boostez votre avenir grâce à l'apprentissage.",
+    "empowerTitle": "Boostez votre avenir\ngrâce à l'apprentissage.",
     "logoAlt": "Logo Sunbird"
   },
   "signUp": {
@@ -722,7 +733,11 @@
     "otpButFailed": "OTP vérifié mais échec de la création du compte. Veuillez réessayer.",
     "verificationFailed": "Échec de la vérification",
     "invalidOtp": "OTP invalide. Veuillez réessayer.",
-    "verificationError": "Une erreur s'est produite lors de la vérification. Veuillez réessayer."
+    "verificationError": "Une erreur s'est produite lors de la vérification. Veuillez réessayer.",
+    "emailAlreadyRegistered": "Cet email est déjà utilisé.",
+    "phoneAlreadyRegistered": "Ce numéro de mobile est déjà utilisé.",
+    "emailAvailable": "Cette adresse email est disponible.",
+    "phoneAvailable": "Ce numéro de mobile est disponible."
   },
   "personalInfo": {
     "title": "Informations personnelles",
@@ -730,6 +745,9 @@
     "mobileNumber": "Numéro de téléphone",
     "emailId": "Adresse e-mail",
     "alternateEmailId": "Adresse e-mail secondaire"
+  },
+  "profileCard": {
+    "sunbirdId": "Identifiant Sunbird"
   },
   "editProfile": {
     "title": "Modifier les informations personnelles",
@@ -910,7 +928,20 @@
     "tryAgain": "Réessayer",
     "closePreview": "Fermer l'aperçu",
     "closeButton": "Fermer",
-    "selectButton": "Sélectionner"
+    "selectButton": "Sélectionner",
+    "verifying": "Vérification du certificat...",
+    "verified": "Détails du certificat",
+    "verificationFailed": "Échec de la vérification",
+    "issuedTo": "Délivré à",
+    "course": "Cours",
+    "issuedOn": "Date d'émission",
+    "backToHome": "Retour à l'accueil",
+    "couldNotVerify": "Ce certificat n'a pas pu être vérifié",
+    "status": "Statut",
+    "activeAndValid": "Actif et valide",
+    "invalid": "Invalide",
+    "credentialHolder": "Titulaire de la certification",
+    "certificationProgram": "Programme de certification"
   },
   "createTemplate": {
     "description": "Remplissez les détails ci-dessous pour créer un nouveau modèle de certificat pour votre organisation.",
@@ -1108,9 +1139,6 @@
   "formFields": {
     "select": "Sélectionner {{field}}"
   },
-  "exploreGrid": {
-    "noContentFound": "Aucun contenu trouvé"
-  },
   "status": {
     "draft": "Brouillon",
     "inReview": "En révision",
@@ -1119,6 +1147,7 @@
     "inactive": "Inactif",
     "completed": "Terminé",
     "ongoing": "En cours",
+    "notStarted": "Pas commencé",
     "upcoming": "À venir",
     "processing": "En cours de traitement"
   },
@@ -1137,7 +1166,8 @@
     "noFilteredCourses": "Aucun cours {{filter}} trouvé.",
     "downloading": "Téléchargement...",
     "myLearning": "Mon apprentissage",
-    "filter": "Filtre"
+    "filter": "Filtre",
+    "untitledCourse": "Cours sans titre"
   },
   "tncPopup": {
     "title": "Termes et Conditions Mis à Jour",
@@ -1298,6 +1328,10 @@
     "youtube": "YouTube",
     "html": "HTML",
     "interactive": "Interactif"
+  },
+  "exploreGrid": {
+    "noContentFound": "Aucun contenu trouvé",
+    "noMoreContent": "Plus de contenu à afficher"
   }
 }
 

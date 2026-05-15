@@ -1,10 +1,13 @@
+import { useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 const LoginToUnlockCard = () => {
   const { t } = useAppI18n();
+  const location = useLocation();
 
   const handleLogin = () => {
-    window.location.href = "/portal/login?prompt=none";
+    const returnTo = encodeURIComponent(location.pathname + location.search);
+    window.location.href = `/portal/login?prompt=none&returnTo=${returnTo}`;
   };
 
   return (

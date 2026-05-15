@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { oidcSession } from './auth/oidcMiddleware.js';
+import { oidcSession, requireAuth } from './auth/oidcMiddleware.js';
 import formRoutes from './routes/formsRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
@@ -15,12 +15,13 @@ import helmet from 'helmet';
 import authRoutes from './routes/userAuthInfoRoutes.js';
 import { getAppInfo } from './controllers/appInfoController.js';
 import { sessionMiddleware, anonymousMiddlewares } from './middlewares/conditionalSession.js';
+import { pathTraversalGuard } from './middlewares/pathTraversalGuard.js';
 import { envConfig } from './config/env.js';
 import portalAnonymousProxyRoutes from './routes/portalAnonymousProxyRoutes.js';
 import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
 import anonymousActionRoutes from './routes/anonymousActionRoutes.js';
 import mobileRoutes from './routes/mobileRoutes.js';
-
+import reviewCommentRoutes from './routes/reviewCommentRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +29,7 @@ const __dirname = path.dirname(__filename);
 export const app = express();
 app.set('trust proxy', true);
 app.use(helmet({ contentSecurityPolicy: false }));
+app.use(pathTraversalGuard);
 
 loadTenants();
 app.use(cors());
@@ -55,6 +57,9 @@ app.get('/dial/:id', sessionMiddleware, ...anonymousMiddlewares, (req, res) => {
 // Portal Anonymous Routes
 app.use('/portal', sessionMiddleware, ...anonymousMiddlewares, portalAnonymousProxyRoutes)
 
+// Review comment routes
+app.use('/portal/review/comment/v1', sessionMiddleware, oidcSession(), requireAuth(), reviewCommentRoutes);
+
 // Apply anonymous session middleware to API routes (once per route tree)
 
 app.use('/data/v1/form', formRoutes);
@@ -76,7 +81,7 @@ app.use('/action', sessionMiddleware, ...anonymousMiddlewares, anonymousActionRo
 app.use('/', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), knowlgMwProxyRoutes);
 
 // Portal Proxy Routes (authenticated — oidcSession populates req.oidc for requireAuth)
-app.use('/portal', oidcSession(), portalProxyRoutes);
+app.use('/portal', sessionMiddleware, oidcSession(), portalProxyRoutes);
 
 app.get('/:tenantName', redirectTenant);
 

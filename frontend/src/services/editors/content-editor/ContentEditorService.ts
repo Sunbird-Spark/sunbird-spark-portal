@@ -52,7 +52,7 @@ export class ContentEditorService {
         console.warn('Failed to fetch channel framework:', error);
       }
     }
-    
+
     let contentFields: any = [];
     let fwCategoryDetails: any = {};
     try {

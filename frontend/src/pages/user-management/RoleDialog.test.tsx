@@ -82,6 +82,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={{ ...mockStateAdd, open: false }}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole=""
         organisationId=""
         isSavingRole={false}
@@ -100,6 +101,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={mockStateAdd}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole=""
         organisationId=""
         isSavingRole={false}
@@ -119,6 +121,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={mockStateUpdate}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole=""
         organisationId=""
         isSavingRole={false}
@@ -139,6 +142,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={mockStateAdd}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole=""
         organisationId=""
         isSavingRole={false}
@@ -160,6 +164,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={mockStateAdd}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole="ROLE_1"
         organisationId="org123"
         isSavingRole={false}
@@ -181,6 +186,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={mockStateAdd}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole=""
         organisationId=""
         isSavingRole={false}
@@ -200,6 +206,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={mockStateAdd}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole=""
         organisationId=""
         isSavingRole={true}
@@ -222,6 +229,7 @@ describe('RoleDialog', () => {
       <RoleDialog
         dialogState={mockStateAdd}
         availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
         selectedRole="ROLE_1"
         organisationId=""
         isSavingRole={false}

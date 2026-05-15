@@ -79,7 +79,13 @@
     "ecml": "إي سي إم إل",
     "h5p": "إتش فايف بي",
     "practicequestionset": "مجموعة أسئلة تدريبية",
-    "questionset": "مجموعة أسئلة"
+    "questionset": "مجموعة أسئلة",
+    "learningresource": "مورد تعليمي",
+    "explanationcontent": "محتوى توضيحي",
+    "teacherresource": "مورد للمعلمين",
+    "etextbook": "كتاب إلكتروني",
+    "courseassessment": "تقييم الدورة",
+    "examquestion": "سؤال امتحان"
   },
   "categoriesList": {
     "ai-ml": "الذكاء الاصطناعي / تعلم الآلة",
@@ -180,6 +186,7 @@
   "updated": "محدث",
   "today": "اليوم",
   "yesterday": "أمس",
+  "older": "أقدم",
   "daysAgo": "أيام مضت",
   "trustedByProfessionals": "موثوق به من قبل المتخصصين في جميع أنحاء العالم",
   "joinThousands": "انضم إلى آلاف المحترفين الذين طوروا حياتهم المهنية من خلال برامجنا التدريبية الشاملة.",
@@ -458,18 +465,22 @@
     "mainNavigation": "التنقل الرئيسي",
     "learningProgress": "تقدم التعلم",
     "lessonVisited": "الدروس المزارة",
-    "contentsCompleted": "المحتويات المكتملة"
+    "contentsCompleted": "المحتويات المكتملة",
+    "noUpcomingBatches": "لا توجد دفعات قادمة مجدولة."
   },
   "onboarding": {
     "altSunbird": "صن بيرد",
     "otherPreferencePlaceholder": "يرجى كتابة تفضيلك هنا",
     "altImage": "صورة الإعداد",
     "goBack": "رجوع",
+    "goToHome": "الذهاب للرئيسية",
     "welcomeMessage": "نود مساعدتك في تخصيص تجربتك!",
     "saveAndProceed": "حفظ ومتابعة",
     "submit": "إرسال",
     "saving": "جارٍ الحفظ...",
-    "skipOnboarding": "تخطي الإعداد"
+    "skipOnboarding": "تخطي الإعداد",
+    "failedToLoad": "فشل تحميل الإعداد.",
+    "skip": "تخطي"
   },
   "profilePage": {
     "loading": "جارٍ تحميل ملفك الشخصي...",
@@ -673,7 +684,7 @@
     "dec": "ديسمبر"
   },
   "authLayout": {
-    "empowerTitle": "مكّن مستقبلك من خلال التعلم.",
+    "empowerTitle": "مكّن مستقبلك\nمن خلال التعلم.",
     "logoAlt": "شعار Sunbird"
   },
   "signUp": {
@@ -722,7 +733,11 @@
     "otpButFailed": "تم التحقق من OTP لكن فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.",
     "verificationFailed": "فشل التحقق",
     "invalidOtp": "OTP غير صحيح. يرجى المحاولة مرة أخرى.",
-    "verificationError": "حدث خطأ أثناء التحقق. يرجى المحاولة مرة أخرى."
+    "verificationError": "حدث خطأ أثناء التحقق. يرجى المحاولة مرة أخرى.",
+    "emailAlreadyRegistered": "هذا البريد الإلكتروني مستخدم بالفعل.",
+    "phoneAlreadyRegistered": "رقم الهاتف المحمول هذا مستخدم بالفعل.",
+    "emailAvailable": "عنوان البريد الإلكتروني هذا متاح.",
+    "phoneAvailable": "رقم الهاتف المحمول هذا متاح."
   },
   "personalInfo": {
     "title": "المعلومات الشخصية",
@@ -730,6 +745,9 @@
     "mobileNumber": "رقم الجوال",
     "emailId": "البريد الإلكتروني",
     "alternateEmailId": "البريد الإلكتروني البديل"
+  },
+  "profileCard": {
+    "sunbirdId": "معرف سنبيرد"
   },
   "editProfile": {
     "title": "تعديل المعلومات الشخصية",
@@ -910,7 +928,20 @@
     "tryAgain": "حاول مجدداً",
     "closePreview": "إغلاق المعاينة",
     "closeButton": "إغلاق",
-    "selectButton": "اختر"
+    "selectButton": "اختر",
+    "verifying": "جارٍ التحقق من الشهادة...",
+    "verified": "تفاصيل الشهادة",
+    "verificationFailed": "فشل التحقق",
+    "issuedTo": "صادر إلى",
+    "course": "الدورة",
+    "issuedOn": "تاريخ الإصدار",
+    "backToHome": "العودة إلى الرئيسية",
+    "couldNotVerify": "تعذّر التحقق من هذه الشهادة",
+    "status": "الحالة",
+    "activeAndValid": "نشطة وصالحة",
+    "invalid": "غير صالحة",
+    "credentialHolder": "صاحب الاعتماد",
+    "certificationProgram": "برنامج الشهادة"
   },
   "createTemplate": {
     "description": "أدخل التفاصيل أدناه لإنشاء قالب شهادة جديد لمؤسستك.",
@@ -1109,9 +1140,6 @@
   "formFields": {
     "select": "اختر {{field}}"
   },
-  "exploreGrid": {
-    "noContentFound": "لم يتم العثور على محتوى"
-  },
   "status": {
     "draft": "مسودة",
     "inReview": "قيد المراجعة",
@@ -1120,6 +1148,7 @@
     "inactive": "غير نشط",
     "completed": "مكتمل",
     "ongoing": "جارية",
+    "notStarted": "لم يبدأ",
     "upcoming": "قادمة",
     "processing": "قيد المعالجة"
   },
@@ -1138,7 +1167,8 @@
     "noFilteredCourses": "لم يتم العثور على دورات {{filter}}.",
     "downloading": "جارٍ التنزيل...",
     "myLearning": "تعلّمي",
-    "filter": "تصفية"
+    "filter": "تصفية",
+    "untitledCourse": "دورة بدون عنوان"
   },
   "tncPopup": {
     "title": "تحديث الشروط والأحكام",
@@ -1299,6 +1329,10 @@
     "youtube": "يوتيوب",
     "html": "إتش تي إم إل",
     "interactive": "تفاعلي"
+  },
+  "exploreGrid": {
+    "noContentFound": "لم يتم العثور على محتوى",
+    "noMoreContent": "لا يوجد المزيد من المحتوى لعرضه"
   }
 }
 

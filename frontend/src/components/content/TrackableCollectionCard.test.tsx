@@ -88,8 +88,16 @@ describe('TrackableCollectionCard', () => {
     expect(img.getAttribute('src')).toBeTruthy();
   });
 
-  it('links to the correct content page', () => {
+  it('links to the batch-specific content page when batchId is present', () => {
     renderComponent(mockCourse);
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', '/collection/do_12345/batch/012345');
+  });
+
+  it('falls back to the collection page when batchId is missing', () => {
+    const courseWithoutBatch: TrackableCollection = { ...mockCourse, batchId: '' };
+    renderComponent(courseWithoutBatch);
 
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/collection/do_12345');
