@@ -38,7 +38,7 @@ router.get('/login',
             await saveSession(req);
 
             // Build authorization URL using OIDC Discovery endpoints
-            const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
+            const callbackUrl = `${envConfig.SERVER_URL}/portal/auth/callback`;
             const rawPrompt = req.query.prompt as string | undefined;
             const allowedPrompts = ['none', 'login', 'consent', 'select_account'];
             // Default to prompt=none for silent re-auth when Keycloak SSO session is active.
@@ -110,7 +110,7 @@ router.get('/auth/callback',
             );
 
             // Exchange the authorization code for tokens
-            const callbackUrl = `${envConfig.DOMAIN_URL}/portal/auth/callback`;
+            const callbackUrl = `${envConfig.SERVER_URL}/portal/auth/callback`;
             const tokens = await oidcClient.authorizationCodeGrant(config, currentUrl, {
                 pkceCodeVerifier: req.session.oidcCodeVerifier,
                 expectedState: req.session.oidcState,
@@ -249,7 +249,7 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
         res.redirect(logoutUrl.href);
     } catch {
         // Fallback: construct logout URL from known OIDC issuer pattern
-        const logoutUrl = `${envConfig.DOMAIN_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(redirectUri)}`;
+        const logoutUrl = `${envConfig.SERVER_URL}/auth/realms/${envConfig.PORTAL_REALM}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(redirectUri)}`;
         res.redirect(logoutUrl);
     }
 });

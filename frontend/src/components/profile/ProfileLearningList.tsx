@@ -1,4 +1,5 @@
 import { useState } from "react";
+import orderBy from "lodash/orderBy";
 import { Link, useLocation } from "react-router-dom";
 import { FiChevronDown, FiDownload } from "react-icons/fi";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
@@ -21,8 +22,6 @@ const VIEW_LIMIT = 6;
 
 const getCompletionStatus = (status: number): "ongoing" | "completed" =>
     status === 2 ? "completed" : "ongoing";
-
-
 
 interface CourseRowProps {
     course: TrackableCollection;
@@ -127,7 +126,12 @@ const ProfileLearningList = () => {
     const [showAll, setShowAll] = useState(false);
 
     const { data, isLoading, isError, refetch } = useUserEnrolledCollections();
-    const courses = data?.data?.courses ?? [];
+   
+    const courses = orderBy(
+        data?.data?.courses ?? [],
+        [(course) => course.lastContentAccessTime ?? ""],
+        ["desc"]
+    );
 
     const { downloadCertificate, hasCertificate, downloadingCourseId } = useCertificateDownload();
 
@@ -140,6 +144,8 @@ const ProfileLearningList = () => {
     const visibleCourses = hasMore && !showAll
         ? filteredCourses.slice(0, VIEW_LIMIT)
         : filteredCourses;
+
+    console.log("Visible courses:", visibleCourses);
 
     return (
         <div className="learning-list-card">
