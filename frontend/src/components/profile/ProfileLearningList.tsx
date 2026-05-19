@@ -137,11 +137,7 @@ const ProfileLearningList = () => {
 
     const { data, isLoading, isError, refetch } = useUserEnrolledCollections();
    
-    const courses = orderBy(
-        data?.data?.courses ?? [],
-        [(course) => course.lastContentAccessTime ?? ""],
-        ["desc"]
-    );
+    const courses = data?.data?.courses ?? [];
 
     const { downloadCertificate, hasCertificate, downloadingCourseId } = useCertificateDownload();
 
@@ -154,8 +150,6 @@ const ProfileLearningList = () => {
     const visibleCourses = hasMore && !showAll
         ? filteredCourses.slice(0, VIEW_LIMIT)
         : filteredCourses;
-
-    console.log("Visible courses:", visibleCourses);
 
     return (
         <div className="learning-list-card">
