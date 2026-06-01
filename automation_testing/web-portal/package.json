@@ -7,7 +7,10 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:anonymous": "playwright test --project e2e-1-home --project e2e-2-explore",
+    "test:enrolled": "playwright test --project e2e-7-certificate",
+    "test:e2e": "npm run test:anonymous && npm run test:enrolled"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +20,8 @@
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.7.0",
     "dotenv": "^17.4.2",
+    "jimp": "0.22.12",
+    "jsqr": "^1.4.0",
     "typescript": "^6.0.3"
   }
 }

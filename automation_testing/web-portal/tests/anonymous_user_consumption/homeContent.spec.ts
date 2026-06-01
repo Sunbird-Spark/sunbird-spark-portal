@@ -1,58 +1,140 @@
 import { test, expect } from '@playwright/test';
 import { urls } from '../../data/urls';
-import { collectCards, consumeContent } from '../helpers/contentHelper';
+import { consumeContent } from '../helpers/contentHelper';
 
-test.use({ launchOptions: { slowMo: 1000 } });
+test.describe.configure({ mode: 'serial' });
 test.setTimeout(300000);
 
-test.describe('Anonymous User - Home Page Content Consumption', () => {
-  test('Verify that an anonymous user can consume all available content types', async ({ page }) => {
+// Each section on the home page, keyed by its <h2> text.
+// Sections whose cards are all Courses verify the anonymous-user gate.
+// Sections with consumable content (PDF etc.) are fully consumed.
+const HOME_SECTIONS: { displayName: string; sectionHeading: RegExp }[] = [
+  { displayName: 'Most Popular Contents', sectionHeading: /most popular contents/i },
+  { displayName: 'Resource Center',       sectionHeading: /stay ahead/i },
+  { displayName: 'Most Viewed Content',   sectionHeading: /most viewed content/i },
+  { displayName: 'Trending Content',      sectionHeading: /trending content/i },
+];
 
-    // 1. Go to home page and scroll to collect one card URL per content type
-    await page.goto(urls.main);
+// ── Flow 1: No filter sidebar ─────────────────────────────────────────────────
+
+test.describe('Anonymous User - Home Page Has No Filters', () => {
+  test('Verify the home page has no filter sidebar', async ({ page }) => {
+    await page.goto(urls.main, { waitUntil: 'load' });
     await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+    await page.waitForTimeout(2000);
 
-    for (let i = 0; i < 5; i++) {
-      await page.evaluate(() => window.scrollBy(0, 600));
-      await page.waitForTimeout(300);
-    }
-
-    const cardsToConsume = await collectCards(page);
-    await test.info().attach('Cards to consume', {
-      body: JSON.stringify(cardsToConsume, null, 2),
-      contentType: 'application/json',
+    // The Explore page has "Content Types" / "Collections" filter accordion buttons;
+    // the home page must not have them.
+    const filterBtn = page.locator(
+      'button:has-text("Content Types"), button:has-text("Collections"), [class*="filter-sidebar"]'
+    );
+    await expect(filterBtn, 'Home page must not have a filter sidebar').toHaveCount(0, {
+      timeout: 5000,
     });
-    expect(cardsToConsume.length).toBeGreaterThan(0);
 
-    // 2. For each type: go to home → click card → consume → "Go back" lands on home
-    for (const { type, href } of cardsToConsume) {
-      await test.step(`Consume ${type}`, async () => {
-        await page.goto(urls.main);
+    // Content sections must be present
+    const firstSectionHeading = page.getByRole('heading', {
+      name: HOME_SECTIONS[0].sectionHeading,
+      level: 2,
+    });
+    await expect(firstSectionHeading, '"Most Popular Contents" section should be visible').toBeVisible({
+      timeout: 15000,
+    });
+    console.log('  Home page: no filter sidebar ✓, content sections present ✓');
+  });
+});
+
+// ── Flow 2: One card per section ──────────────────────────────────────────────
+
+test.describe('Anonymous User - Home Page Section Consumption', () => {
+  test('Select one card from each section and consume or verify access gate', async ({ page }) => {
+    for (const { displayName, sectionHeading } of HOME_SECTIONS) {
+      await test.step(displayName, async () => {
+        // Return to home before each section so state is clean
+        await page.goto(urls.main, { waitUntil: 'load' });
         await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
 
-        const cardId = href.split('/').pop()!;
-        const card = page.locator(`a[href*="${cardId}"]`).first();
+        // Scroll until the section heading comes into view
+        const heading = page.getByRole('heading', { name: sectionHeading, level: 2 });
+        await heading.scrollIntoViewIfNeeded();
+        await expect(heading, `${displayName} heading should be visible`).toBeVisible({ timeout: 10000 });
 
-        for (let i = 0; i < 8; i++) {
-          if (await card.isVisible({ timeout: 1000 }).catch(() => false)) break;
-          await page.evaluate(() => window.scrollBy(0, 400));
-          await page.waitForTimeout(200);
+        // The section root is whichever direct child of <main> contains this heading
+        const sectionRoot = page.locator('main > *').filter({ has: heading }).first();
+        const firstCard = sectionRoot
+          .locator('a[href*="/collection/"], a[href*="/content/"]')
+          .first();
+        await expect(firstCard, `${displayName} — first card should be visible`).toBeVisible({
+          timeout: 8000,
+        });
+
+        const href = (await firstCard.getAttribute('href')) ?? '';
+        const isCourse = href.includes('/collection/');
+        const cardTitle = ((await firstCard.textContent()) ?? '').trim().slice(0, 60);
+        console.log(`  [${displayName}] Clicking: "${cardTitle}" (${isCourse ? 'Course' : 'Content'})`);
+
+        await firstCard.scrollIntoViewIfNeeded();
+        await firstCard.click();
+
+        if (isCourse) {
+          // ── Course: anonymous users must hit the login gate ───────────────
+          await page.waitForURL((url) => url.pathname.includes('/collection/'), { timeout: 15000 });
+          await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+          await page.waitForTimeout(2000);
+
+          const joinMessage = page.getByText(
+            /you must join the course to get complete access to content/i
+          );
+          await expect(
+            joinMessage,
+            `${displayName} — "You must join the course" gate should be visible`
+          ).toBeVisible({ timeout: 10000 });
+
+          const unlockPanel = page.getByText(/unlock your learning/i).first();
+          await expect(
+            unlockPanel,
+            `${displayName} — "Unlock your learning" panel should be visible`
+          ).toBeVisible({ timeout: 5000 });
+
+          const loginBtn = page
+            .getByRole('button', { name: /^login$/i })
+            .or(page.getByRole('link', { name: /^login$/i }))
+            .last();
+          await expect(loginBtn, `${displayName} — Login button should be visible`).toBeVisible({
+            timeout: 5000,
+          });
+          console.log(`  [${displayName}] Course access gate verified ✓`);
+        } else {
+          // ── Consumable content: detect player type and consume ─────────────
+          await page.waitForURL((url) => url.pathname.includes('/content/'), { timeout: 15000 });
+          await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+
+          // Detect content type in parallel to avoid sequential 3 s waits per check
+          const [hasPdf, hasQuml, hasYt, hasVideo, hasEcml] = await Promise.all([
+            page.locator('sunbird-pdf-player').isVisible({ timeout: 3000 }).catch(() => false),
+            page.locator('sunbird-quml-player').isVisible({ timeout: 3000 }).catch(() => false),
+            page
+              .locator('iframe[src*="youtube"]')
+              .isVisible({ timeout: 1000 })
+              .catch(() => page.frames().some((f) => f.url().includes('youtube.com'))),
+            page.locator('video').first().isVisible({ timeout: 1500 }).catch(() => false),
+            page
+              .locator('iframe[name="contentPlayer"], iframe#contentPlayer')
+              .isVisible({ timeout: 2000 })
+              .catch(() => false),
+          ]);
+
+          let contentType = 'unknown';
+          if (hasPdf) contentType = 'pdf';
+          else if (hasQuml) contentType = 'quml';
+          else if (hasYt) contentType = 'youtube';
+          else if (hasVideo) contentType = 'video';
+          else if (hasEcml) contentType = 'ecml';
+
+          console.log(`  [${displayName}] Content type detected: ${contentType}`);
+          await consumeContent(page, contentType);
+          console.log(`  [${displayName}] Content consumed ✓`);
         }
-
-        if (!(await card.isVisible({ timeout: 3000 }).catch(() => false))) {
-          console.warn(`  Card not found for ${type}, skipping`);
-          return;
-        }
-
-        await card.scrollIntoViewIfNeeded();
-        await card.click();
-        await page.waitForURL(
-          (url) => url.pathname.includes('/content/') || url.pathname.includes('/collection/'),
-          { timeout: 15000 }
-        );
-        await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-
-        await consumeContent(page, type);
       });
     }
   });
