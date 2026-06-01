@@ -71,6 +71,19 @@ export async function loginAsUser(page: Page, email: string, password: string) {
   await submitBtn.waitFor({ state: 'visible', timeout: 10000 });
   await submitBtn.click();
 
+  // ── Step 4b: Detect Keycloak / portal login errors early ─────────────────
+  // If credentials are wrong, the form stays on the login page with an error
+  // message. Detect this before the 30 s redirect timeout fires.
+  await page.waitForTimeout(2000);
+  const kcError = page.locator(
+    '#kc-feedback-text, #kc-error-message, [class*="alert-error"], [class*="error-message"], ' +
+    '[class*="login-error"], .alert.alert-danger'
+  ).filter({ visible: true }).first();
+  if (await kcError.isVisible({ timeout: 1000 }).catch(() => false)) {
+    const errText = (await kcError.innerText().catch(() => '')).trim();
+    throw new Error(`Login failed for ${email} — Keycloak error: "${errText}"`);
+  }
+
   // ── Step 5: Wait for the portal to finish the post-login redirect ──────────
   // The callback sets up the session and redirects to home/dashboard.
   // We wait until the URL is no longer an auth/login page.
@@ -87,13 +100,22 @@ export async function loginAsUser(page: Page, email: string, password: string) {
     .first();
 
   if (await secondLogInBtn.isVisible({ timeout: 4000 }).catch(() => false)) {
-    await secondLogInBtn.click();
-    await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-    await page.waitForTimeout(1500);
+    await Promise.all([
+      page.waitForLoadState('domcontentloaded', { timeout: 30000 }),
+      secondLogInBtn.click(),
+    ]);
+    // Wait for any OIDC redirect chain to complete before checking session state.
+    await page.waitForURL(
+      (url) => !url.pathname.includes('/login') && !url.pathname.includes('/auth/callback'),
+      { timeout: 30000 }
+    ).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
   }
 
   // ── Step 7: Confirm login succeeded ──────────────────────────────────────
   const loginBtn = page.getByRole('button', { name: /^log.?in$/i })
     .or(page.getByRole('link', { name: /^log.?in$/i }));
-  await expect(loginBtn.first()).not.toBeVisible({ timeout: 10000 });
+  await expect(loginBtn.first()).not.toBeVisible({ timeout: 15000 });
+  // Let the SPA finish any post-login API calls before the test navigates.
+  await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
 }
