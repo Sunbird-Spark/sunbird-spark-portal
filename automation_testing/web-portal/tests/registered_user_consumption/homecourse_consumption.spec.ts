@@ -39,7 +39,8 @@ test.describe('Registered User - Home Page Course Consumption', () => {
         await page.goto(urls.main);
         await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
 
-        const cardId = href.split('/').pop()!;
+        const cardId = href.split('/').pop();
+        if (!cardId) { console.warn(`Skipping card with unparseable href: ${href}`); return; }
         const card = page.locator(`a[href*="${cardId}"]`).first();
 
         for (let i = 0; i < 8; i++) {

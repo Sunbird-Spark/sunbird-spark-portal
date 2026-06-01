@@ -120,36 +120,11 @@ export class LoginPage {
     }
   }
 
-  // Types text character by character with a different random delay before each keystroke,
-  // mimicking the natural variance in human typing speed.
-  private async typeHumanLike(text: string) {
-    for (const char of text) {
-      await this.page.keyboard.type(char);
-      await this.page.waitForTimeout(Math.floor(Math.random() * 150 + 80)); // 80–230 ms per character
-    }
-  }
-
   async fillSignupForm(name: string, contact: string, password: string) {
-    const fieldPause = () => Math.floor(Math.random() * 500 + 400); // 400–900 ms between fields
-
-    await this.nameInput.click();
-    await this.page.waitForTimeout(fieldPause());
-    await this.typeHumanLike(name);
-
-    await this.page.waitForTimeout(fieldPause());
-    await this.contactInput.click();
-    await this.page.waitForTimeout(Math.floor(Math.random() * 300 + 200));
-    await this.typeHumanLike(contact);
-
-    await this.page.waitForTimeout(fieldPause());
-    await this.passwordInput.click();
-    await this.page.waitForTimeout(Math.floor(Math.random() * 300 + 200));
-    await this.typeHumanLike(password);
-
-    await this.page.waitForTimeout(fieldPause());
-    await this.confirmPasswordInput.click();
-    await this.page.waitForTimeout(Math.floor(Math.random() * 300 + 200));
-    await this.typeHumanLike(password);
+    await this.nameInput.fill(name);
+    await this.contactInput.fill(contact);
+    await this.passwordInput.fill(password);
+    await this.confirmPasswordInput.fill(password);
 
     if (await this.termsCheckbox.isVisible()) {
       await this.termsCheckbox.check().catch(() => {});
@@ -179,7 +154,7 @@ export class LoginPage {
   // Call stopCaptchaWatcher() when the test ends.
   startCaptchaWatcher() {
     this.captchaWatcherActive = true;
-    void this.runCaptchaWatcher();
+    this.runCaptchaWatcher().catch(() => { /* watcher stopped */ });
   }
 
   stopCaptchaWatcher() {

@@ -6,8 +6,8 @@ function requireEnv(name: string): string {
 
 export const users = {
   contentCreator: {
-    email: process.env.CONTENT_CREATOR_EMAIL ?? '',
-    password: process.env.CONTENT_CREATOR_PASSWORD ?? '',
+    get email() { return requireEnv('CONTENT_CREATOR_EMAIL'); },
+    get password() { return requireEnv('CONTENT_CREATOR_PASSWORD'); },
   },
   registeredUser: {
     get email() { return requireEnv('REGISTERED_USER_EMAIL'); },

@@ -2,13 +2,12 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../pages/loginPage';
 import { OnboardingPage } from '../../pages/onboardingPage';
 import { urls } from '../../data/urls';
-
-const authFile = '.auth/googleUser.json';
+import { authPaths } from '../../data/authPaths';
 
 // Restore the full Google session (cookies + localStorage) before each test.
 // The setup file only visits accounts.google.com, so this file contains no
 // portal cookies — the test still starts with the user unauthenticated on the portal.
-test.use({ storageState: authFile });
+test.use({ storageState: authPaths.googleUser });
 
 test.describe('Google Sign-In Flow', () => {
   test('Verify that a registered user can sign in using Google', async ({ page }) => {

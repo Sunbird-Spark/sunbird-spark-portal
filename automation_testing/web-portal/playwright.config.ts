@@ -15,9 +15,6 @@ export default defineConfig({
   use: {
     baseURL: process.env.BASE_URL ?? 'https://test.sunbirded.org',
     trace: 'on-first-retry',
-    launchOptions: {
-      slowMo: 500,
-    },
   },
   projects: [
     // ── Setup: Google auth (only needed for googleLogin.spec.ts) ──────────────

@@ -4,10 +4,6 @@ import path from 'path';
 import { authPaths } from '../../data/authPaths';
 
 setup('authenticate with Google', async ({ page }) => {
-  if (fs.existsSync(authPaths.googleUser)) {
-    return;
-  }
-
   fs.mkdirSync(path.dirname(authPaths.googleUser), { recursive: true });
 
   // Go directly to Google — this captures only Google session cookies,

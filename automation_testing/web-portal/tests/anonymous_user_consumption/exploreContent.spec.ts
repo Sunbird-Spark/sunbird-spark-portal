@@ -35,24 +35,23 @@ async function findFilterItems(page: Page) {
   // components — their underlying <input> is hidden but the component itself
   // is interactive. We check visibility per-item in the loop instead.
   const candidates = [
-    { sel: 'mat-checkbox',                       label: 'mat-checkbox' },
-    { sel: 'sb-checkbox',                        label: 'sb-checkbox' },
-    { sel: 'label:has(input[type="checkbox"])',  label: 'label>checkbox' },
-    { sel: 'input[type="checkbox"]',             label: 'input[checkbox]' },
-    { sel: '[role="checkbox"]',                  label: '[role=checkbox]' },
-    { sel: '[class*="filter"] [class*="item"]',  label: 'filter-item' },
-    { sel: '[class*="filter"] [class*="option"]',label: 'filter-option' },
-    { sel: '[class*="facet"] label',             label: 'facet-label' },
-    { sel: '[class*="filter"] label',            label: 'filter-label' },
+    'mat-checkbox',
+    'sb-checkbox',
+    'label:has(input[type="checkbox"])',
+    'input[type="checkbox"]',
+    '[role="checkbox"]',
+    '[class*="filter"] [class*="item"]',
+    '[class*="filter"] [class*="option"]',
+    '[class*="facet"] label',
+    '[class*="filter"] label',
   ];
 
-  for (const { sel, label } of candidates) {
+  for (const sel of candidates) {
     const loc = page.locator(sel);
     const count = await loc.count().catch(() => 0);
     if (count > 0) {
       return loc;
     }
-    void label; // consumed only for selector-loop bookkeeping
   }
 
   // Diagnostic: dump all tags + classes near text "Filters" to help identify the right selector
@@ -67,7 +66,7 @@ async function findFilterItems(page: Page) {
       .slice(0, 10)
       .map(el => `<${el.tagName.toLowerCase()} class="${el.className}" role="${el.getAttribute('role')}">`);
   });
-  void dump;
+  console.log('DOM dump:', dump);
 
   return null;
 }
@@ -184,9 +183,9 @@ test.describe('Anonymous User - Course Access Gate', () => {
 
     const box = await loginBtn.boundingBox();
     const viewportWidth = page.viewportSize()?.width ?? 1280;
-    expect(box, 'Login button bounding box must be measurable').not.toBeNull();
+    if (!box) throw new Error('Login button bounding box is null');
     expect(
-      box!.x + box!.width / 2,
+      box.x + box.width / 2,
       'Login button should be positioned on the right side of the page'
     ).toBeGreaterThan(viewportWidth / 2);
   });
@@ -213,7 +212,8 @@ test.describe('Anonymous User - Explore Page Content Consumption', () => {
         await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
         await scrollToLoadAll(page);
 
-        const cardId = href.split('/').pop()!;
+        const cardId = href.split('/').pop();
+        if (!cardId) { console.warn(`Skipping card with unparseable href: ${href}`); return; }
         const card = page.locator(`a[href*="${cardId}"]`).first();
 
         for (let i = 0; i < 8; i++) {
