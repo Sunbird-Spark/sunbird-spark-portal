@@ -61,3 +61,81 @@ jobs:
       - name: Backend tests
         working-directory: backend
         run: npm run test:coverage
+
+  e2e-anonymous:
+    name: E2E Anonymous User Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-checks, backend-checks]
+    defaults:
+      run:
+        working-directory: automation_testing/web-portal
+    env:
+      BASE_URL: ${{ vars.E2E_BASE_URL || 'https://test.sunbirded.org' }}
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Run anonymous E2E tests
+        run: npm run test:anonymous
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-anonymous-report
+          path: automation_testing/web-portal/playwright-report/
+          retention-days: 7
+
+  e2e-enrolled:
+    name: E2E Enrolled User Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-checks, backend-checks]
+    defaults:
+      run:
+        working-directory: automation_testing/web-portal
+    env:
+      BASE_URL: ${{ vars.E2E_BASE_URL || 'https://test.sunbirded.org' }}
+      REGISTERED_USER_EMAIL: user1@yopmail.com
+      REGISTERED_USER_PASSWORD: User1@123
+      USER2_EMAIL: user2@yopmail.com
+      USER2_PASSWORD: User2@123
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Run enrolled E2E tests
+        run: npm run test:enrolled
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-enrolled-report
+          path: automation_testing/web-portal/playwright-report/
+          retention-days: 7

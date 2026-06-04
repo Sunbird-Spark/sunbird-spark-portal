@@ -1,4 +1,5 @@
 import { useState } from "react";
+import orderBy from "lodash/orderBy";
 import { Link, useLocation } from "react-router-dom";
 import { FiChevronDown, FiDownload } from "react-icons/fi";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
@@ -24,8 +25,6 @@ const getCompletionStatus = (status: number, completionPercentage: number): "not
     if (status === 1) return "ongoing";
     return "not-started";
 };
-
-
 
 interface CourseRowProps {
     course: TrackableCollection;
@@ -137,6 +136,7 @@ const ProfileLearningList = () => {
     const [showAll, setShowAll] = useState(false);
 
     const { data, isLoading, isError, refetch } = useUserEnrolledCollections();
+   
     const courses = data?.data?.courses ?? [];
 
     const { downloadCertificate, hasCertificate, downloadingCourseId } = useCertificateDownload();
