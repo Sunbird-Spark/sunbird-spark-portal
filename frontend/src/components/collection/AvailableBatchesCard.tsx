@@ -55,7 +55,7 @@ const AvailableBatchesCard = ({
 
   return (
     <div
-      className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col gap-3"
+      className="font-rubik w-full rounded-xl border border-sunbird-status-ongoing-border bg-sunbird-status-ongoing-bg p-5 flex flex-col gap-3"
       data-testid="available-batches-card"
     >
       <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] text-sunbird-status-ongoing-text">
@@ -81,7 +81,7 @@ const AvailableBatchesCard = ({
             disabled={isLoading || batches.length === 0}
           >
             <SelectTrigger
-              className="font-rubik w-full rounded-[0.375rem] border-sunbird-status-ongoing-border bg-white px-4 py-2.5 text-[0.875rem] text-foreground focus:ring-sunbird-status-ongoing-border/50 text-left disabled:opacity-60 [&>svg]:relative [&>svg]:right-0"
+              className="font-rubik w-full rounded-xs border-sunbird-status-ongoing-border bg-white px-4 py-2.5 text-[0.875rem] text-foreground focus:ring-sunbird-status-ongoing-border/50 text-left disabled:opacity-60 [&>svg]:relative [&>svg]:right-0"
               data-testid="batch-select"
               aria-label={t("courseDetails.selectBatch")}
             >
@@ -95,7 +95,7 @@ const AvailableBatchesCard = ({
                 <SelectItem
                   key={batch.identifier}
                   value={batch.identifier}
-                  className="pl-4 pr-2 focus:bg-gray-50 focus:text-foreground hover:bg-gray-50"
+                  className="pl-4 pr-2 focus:bg-muted focus:text-foreground hover:bg-muted"
                 >
                   <BatchOptionLabel batch={batch} />
                 </SelectItem>
@@ -111,7 +111,7 @@ const AvailableBatchesCard = ({
             type="button"
             onClick={onJoinCourse}
             disabled={!selectedBatchId || joinLoading}
-            className="font-rubik font-medium text-[1rem] leading-normal w-full h-[2.25rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center"
+            className="font-rubik font-medium text-[1rem] leading-normal w-full h-[2.25rem] rounded-xs bg-sunbird-brick text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center"
             data-edataid="join-course-btn"
             data-pageid="collection-detail"
           >

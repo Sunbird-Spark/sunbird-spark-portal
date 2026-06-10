@@ -1,4 +1,5 @@
 import type { BatchListItem } from "@/types/collectionTypes";
+import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
 
 /** Access and blocking state for the collection detail view. */
 export interface CollectionContentAreaAccessProps {
@@ -26,7 +27,7 @@ export interface CollectionContentAreaPlayerProps {
 
 /** Enrollment, progress, batch list and certificate state. */
 export interface CollectionContentAreaEnrollmentProps {
-  courseProgressProps: any;
+  courseProgressProps: CourseProgressCardProps | null | undefined;
   contentStatusMap: any;
   contentAttemptInfoMap?: Record<string, { attemptCount: number }>;
   batches: BatchListItem[] | undefined;
@@ -41,6 +42,11 @@ export interface CollectionContentAreaEnrollmentProps {
   firstCertPreviewUrl: string | undefined;
   setCertificatePreviewUrl: (url: string) => void;
   setCertificatePreviewOpen: (open: boolean) => void;
+  /** When the user enrolled in this course. Sunbird returns this as epoch ms or an ISO string. */
+  enrolledDate?: number | string;
+  /** True once /content/state/read has returned at least once. Until then, client-side completion
+   *  counts derive from the stale `contentStatus` map and shouldn't drive the "course updated" banner. */
+  contentStateFetched?: boolean;
 }
 
 /** Sidebar UI state and route identifiers. */

@@ -30,7 +30,7 @@ export function ModalStatusOverlay({
       {/* Submitting */}
       {step === "submitting" && (
         <div className="flex flex-col items-center justify-center gap-4 py-16">
-          <FiLoader className="w-8 h-8 text-sunbird-brick animate-spin" />
+          <FiLoader className="w-8 h-8 text-sunbird-theme-accent animate-spin" />
           <p className="text-sm text-muted-foreground font-rubik">{stepLabel}</p>
         </div>
       )}
@@ -55,7 +55,7 @@ export function ModalStatusOverlay({
                 setStep("idle");
                 setView("main");
               }}
-              className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-rubik"
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-theme-accent hover:bg-opacity-90 transition-colors font-rubik"
               data-edataid="cert-status-continue"
               data-pageid="course-consumption"
             >
@@ -90,7 +90,7 @@ export function ModalStatusOverlay({
           <button
             type="button"
             onClick={handleClose}
-            className="mt-2 rounded-lg px-6 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-rubik"
+            className="mt-2 rounded-lg px-6 py-2 text-sm font-medium text-white bg-sunbird-theme-accent hover:bg-opacity-90 transition-colors font-rubik"
             data-edataid="cert-status-close"
             data-pageid="course-consumption"
           >
@@ -122,7 +122,7 @@ export function ModalStatusOverlay({
             <button
               type="button"
               onClick={() => setStep("idle")}
-              className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-rubik"
+              className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-theme-accent hover:bg-opacity-90 transition-colors font-rubik"
               data-edataid="cert-status-retry"
               data-pageid="course-consumption"
             >

@@ -7,6 +7,7 @@ import { useForceSync } from "@/hooks/useForceSync";
 import type { CourseProgressCardProps } from "@/components/collection/CourseProgressCard";
 import CourseProgressSection from "@/components/collection/CourseProgressSection";
 import CollectionSidePanel from "@/components/collection/CollectionSidePanel";
+import CourseUpdatedBanner, { shouldShowCourseUpdatedBanner } from "@/components/collection/CourseUpdatedBanner";
 import type { CollectionContentAreaProps } from "@/types/collectionContentAreaTypes";
 
 
@@ -40,7 +41,7 @@ export default function CollectionContentArea({
     cdata,
     objectRollup,
   } = player;
-  const { courseProgressProps } = enrollment;
+  const { courseProgressProps, enrolledDate, contentStateFetched } = enrollment;
   const { collectionId, batchIdParam } = sidebar;
   const {
     isCreatorViewingOwnCollection = false,
@@ -56,7 +57,7 @@ export default function CollectionContentArea({
     userId,
     collectionId,
     batchIdParam,
-    courseProgressProps as CourseProgressCardProps | null | undefined
+    courseProgressProps
   );
 
   const showProfileDataSharingCard =
@@ -69,6 +70,25 @@ export default function CollectionContentArea({
 
   const showCourseProgress =
     isTrackable && (!contentBlocked || upcomingBatchBlocked) && !contentCreatorPrivilege && hasBatchInRoute && isEnrolledInCurrentBatch && !!courseProgressProps;
+
+  const total = courseProgressProps?.totalContentCount;
+  // We must know the totals before deciding to show the banner — otherwise we'd briefly flash
+  // it on every refresh while the enrollment API is in flight and `total` is still undefined.
+  const hasCompletionData = typeof total === "number" && total > 0;
+
+  // We show the banner whenever the course was republished after the user enrolled — regardless
+  // of whether they are currently at 100% or partial. The banner's purpose is to explain
+  // "your progress was recalculated because the course changed" — that explanation is equally
+  // valid when content was added (drop in percentage) AND when content was deleted (jump to 100%).
+  // Suppressing it only at 100% would create inconsistent UX between those two scenarios.
+  const showCourseUpdatedBanner =
+    isTrackable &&
+    hasBatchInRoute &&
+    isEnrolledInCurrentBatch &&
+    !contentCreatorPrivilege &&
+    contentStateFetched === true &&
+    hasCompletionData &&
+    shouldShowCourseUpdatedBanner(enrolledDate, collectionData?.lastPublishedOn);
 
   const showCertificateCard = hasBatchInRoute && isEnrolledInCurrentBatch;
   const showBottomSections =
@@ -101,7 +121,7 @@ export default function CollectionContentArea({
         <div className="min-w-0 pb-4">
           <button
             onClick={() => navigate(backTo)}
-            className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-3 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 text-sunbird-theme-accent text-sm font-medium mb-3 hover:opacity-80 transition-opacity"
           >
             <FiArrowLeft className="w-4 h-4" />
             {t("button.goBack")}
@@ -175,6 +195,12 @@ export default function CollectionContentArea({
           backTo={backTo}
         />
       </div>
+      {showCourseUpdatedBanner && (
+        <CourseUpdatedBanner
+          lastPublishedOn={collectionData.lastPublishedOn}
+          collectionId={collectionId}
+        />
+      )}
     </>
   );
 }

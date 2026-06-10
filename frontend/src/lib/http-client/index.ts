@@ -1,16 +1,28 @@
 import { IHttpClient } from './types';
 
-let globalClient: IHttpClient | null = null;
+let portalClient: IHttpClient | null = null;
+let apiClient: IHttpClient | null = null;
 
 export const init = (client: IHttpClient): void => {
-  globalClient = client;
+  portalClient = client;
+};
+
+export const initApiClient = (client: IHttpClient): void => {
+  apiClient = client;
 };
 
 export const getClient = (): IHttpClient => {
-  if (!globalClient) {
+  if (!portalClient) {
     throw new Error('HttpClient not initialized. Call init() with an adapter instance first.');
   }
-  return globalClient;
+  return portalClient;
+};
+
+export const getApiClient = (): IHttpClient => {
+  if (!apiClient) {
+    throw new Error('API HttpClient not initialized. Call initApiClient() with an adapter instance first.');
+  }
+  return apiClient;
 };
 
 export * from './types';

@@ -64,6 +64,30 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
 
+        // Navbar surface (Top/Bottom nav) — theme-reactive per template
+        nav: {
+          DEFAULT: "hsl(var(--nav-bg))",
+          foreground: "hsl(var(--nav-fg))",
+        },
+
+        // Workspace content-card type badges — theme-reactive (hue-rotated)
+        "ws-course": {
+          bg: "hsl(var(--ws-card-course-bg))",
+          fg: "hsl(var(--ws-card-course-text))",
+        },
+        "ws-content": {
+          bg: "hsl(var(--ws-card-content-bg))",
+          fg: "hsl(var(--ws-card-content-text))",
+        },
+        "ws-quiz": {
+          bg: "hsl(var(--ws-card-quiz-bg))",
+          fg: "hsl(var(--ws-card-quiz-text))",
+        },
+        "ws-collection": {
+          bg: "hsl(var(--ws-card-collection-bg))",
+          fg: "hsl(var(--ws-card-collection-text))",
+        },
+
         // Sunbird custom colors
         sunbird: {
           "dark-blue": "hsl(var(--sunbird-dark-blue))",
@@ -72,6 +96,9 @@ export default {
           "medium-blue": "hsl(var(--sunbird-medium-blue))",
           ginger: "hsl(var(--sunbird-ginger))",
           brick: "hsl(var(--sunbird-brick))",
+          "theme-accent": "hsl(var(--sunbird-theme-accent))",
+          "theme-accent-muted": "hsl(var(--sunbird-theme-accent-muted))",
+          "theme-tint": "hsl(var(--sunbird-theme-tint))",
           sunflower: "hsl(var(--sunbird-sunflower))",
           ivory: "hsl(var(--sunbird-ivory))",
           ink: "hsl(var(--sunbird-ink))",
@@ -122,8 +149,9 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 0.125rem)",
         sm: "calc(var(--radius) - 0.25rem)",
-        xs: "0.625rem",
-        xxs: "0.25rem",
+        xs: "var(--r-xs)",
+        xxs: "var(--r-xxs)",
+        pill: "var(--r-pill)",
         xl: "calc(var(--radius) + 0.25rem)",
         "2xl": "calc(var(--radius) + 0.5rem)",
       },
@@ -136,6 +164,16 @@ export default {
         'sunbird-sm': 'var(--sunbird-shadow-sm)',
         'sunbird-md': 'var(--sunbird-shadow-md)',
         'sunbird-lg': 'var(--sunbird-shadow-lg)',
+        // Route Tailwind's default shadow utilities through the Sunbird tokens
+        // so .shadow-sm/.shadow/.shadow-md/... follow the active template
+        // (classic :root defaults, modern overrides) with zero per-element
+        // selectors. New components using shadow-* are template-aware for free.
+        sm: 'var(--sunbird-shadow-sm)',
+        DEFAULT: 'var(--sunbird-shadow-md)',
+        md: 'var(--sunbird-shadow-md)',
+        lg: 'var(--sunbird-shadow-lg)',
+        xl: 'var(--sunbird-shadow-lg)',
+        '2xl': 'var(--sunbird-shadow-lg)',
       },
       dropShadow: {
         'sunbird-sm': '0 0.125rem 0.625rem rgba(0, 0, 0, 0.05)',

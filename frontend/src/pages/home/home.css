@@ -58,7 +58,7 @@
 }
 
 .home-search-input {
-    @apply w-full pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-[0.625rem] font-rubik font-normal text-[1rem] leading-[1rem] text-sunbird-obsidian focus:outline-none focus:ring-1 focus:ring-sunbird-brick transition-all bg-transparent;
+    @apply w-full pl-4 pr-10 py-2 border border-sunbird-gray-d0 rounded-xs font-rubik font-normal text-[1rem] leading-[1rem] text-sunbird-obsidian focus:outline-none focus:ring-1 focus:ring-sunbird-theme-accent transition-all bg-transparent;
     letter-spacing: 0px;
 }
 
@@ -91,7 +91,7 @@
 }
 
 .home-stat-card {
-    @apply rounded-[1.25rem] pt-5 pb-5 pr-5 pl-[1.5625rem] text-white relative h-[9.0625rem] flex flex-col justify-end;
+    @apply rounded-xl pt-5 pb-5 pr-5 pl-[1.5625rem] text-white relative h-[9.0625rem] flex flex-col justify-end;
     box-shadow: var(--sunbird-shadow-lg);
 }
 
@@ -111,7 +111,7 @@
 
 /* Continue Learning */
 .home-continue-learning-card {
-    @apply w-full max-w-[42.8125rem] min-h-[14.625rem] rounded-[1.25rem] bg-white flex flex-col lg:flex-row gap-5 p-5 md:p-[30px];
+    @apply w-full max-w-[42.8125rem] min-h-[14.625rem] rounded-xl bg-white flex flex-col lg:flex-row gap-5 p-5 md:p-[30px];
     box-shadow: 0.125rem 0.125rem 1.25rem 0 rgba(0, 0, 0, 0.09);
 }
 
@@ -136,7 +136,7 @@
 }
 
 .home-performance-chart {
-    @apply bg-white rounded-[1.25rem] p-6 border border-gray-100 flex flex-col;
+    @apply bg-white rounded-xl p-6 border border-gray-100 flex flex-col;
     box-shadow: var(--sunbird-shadow-lg);
 }
 
@@ -158,7 +158,7 @@
 }
 
 .home-continue-learning-btn {
-    @apply w-full md:w-[310px] h-10 rounded-[10px] bg-sunbird-brick hover:bg-sunbird-brick/90 text-white text-[1.1rem] md:text-[1.25rem] leading-[1.75rem] transition-all flex items-center justify-center font-rubik font-medium;
+    @apply w-full md:w-[310px] h-10 rounded-[10px] bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white text-[1.1rem] md:text-[1.25rem] leading-[1.75rem] transition-all flex items-center justify-center font-rubik font-medium;
 }
 
 /* In Progress Grid */
@@ -172,7 +172,8 @@
 }
 
 .home-inprogress-badge {
-    @apply inline-block mb-3 text-[0.625rem] px-3 py-1 rounded-full bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian max-w-[10rem] truncate;
+    @apply inline-block mb-3 text-[0.625rem] px-3 py-1 bg-sunbird-theme-tint border border-sunbird-theme-accent-muted text-sunbird-obsidian max-w-[10rem] truncate;
+    border-radius: var(--r-pill);
 }
 
 .home-inprogress-card-title {
@@ -196,12 +197,12 @@
 }
 
 .home-recommended-card-video {
-    @apply relative rounded-[1.25rem] overflow-hidden cursor-pointer h-[22.5rem];
+    @apply relative rounded-xl overflow-hidden cursor-pointer h-[22.5rem];
     box-shadow: var(--sunbird-shadow-lg);
 }
 
 .home-recommended-card-standard {
-    @apply bg-white rounded-[1.25rem] overflow-hidden border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[22.5rem] flex flex-col;
+    @apply bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all cursor-pointer h-[22.5rem] flex flex-col;
     box-shadow: var(--sunbird-shadow-lg);
 }
 
@@ -210,7 +211,8 @@
 }
 
 .home-recommended-badge-standard {
-    @apply flex items-center justify-center text-[0.625rem] font-bold w-[4.875rem] h-[1.875rem] rounded-[2.25rem] bg-sunbird-beige-light border border-sunbird-ginger text-sunbird-obsidian;
+    @apply flex items-center justify-center text-[0.625rem] font-bold w-[4.875rem] h-[1.875rem] bg-sunbird-theme-tint border border-sunbird-theme-accent-muted text-sunbird-obsidian;
+    border-radius: var(--r-pill);
 }
 
 /* Footer */

@@ -31,8 +31,12 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
   const [uploadCreator, setUploadCreator] = useState("");
   const [dragging, setDragging] = useState(false);
 
-  const { data: myImages = [], isLoading: loadingMy } = useMyImages();
-  const { data: allImages = [], isLoading: loadingAll } = useAllImages();
+  const { data: myImages = [], isLoading: loadingMy } = useMyImages({
+    enabled: open && tab === "myImages",
+  });
+  const { data: allImages = [], isLoading: loadingAll } = useAllImages({
+    enabled: open && tab === "allImages",
+  });
 
   /* ── Resolve creator name once when upload tab opens ── */
   const initUploadTab = async () => {
@@ -93,12 +97,12 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
       onClick={() => handleTabChange(t)}
       className={cn(
         "flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors",
-        tab === t ? "text-sunbird-brick" : "text-muted-foreground hover:text-foreground"
+        tab === t ? "text-sunbird-theme-accent" : "text-muted-foreground hover:text-foreground"
       )}
     >
       {txt}
       {tab === t && (
-        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-theme-accent rounded-t-full" />
       )}
     </button>
   );
@@ -115,8 +119,8 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "w-full rounded-lg border border-dashed border-border py-3 flex items-center justify-center gap-2 text-sm font-rubik transition-colors hover:border-sunbird-brick hover:text-sunbird-brick",
-          value.preview ? "text-sunbird-brick border-sunbird-brick/40" : "text-muted-foreground"
+          "w-full rounded-lg border border-dashed border-border py-3 flex items-center justify-center gap-2 text-sm font-rubik transition-colors hover:border-sunbird-theme-accent hover:text-sunbird-theme-accent",
+          value.preview ? "text-sunbird-theme-accent border-sunbird-theme-accent/40" : "text-muted-foreground"
         )}
       >
         {value.preview ? (
@@ -220,7 +224,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                   uploadFile={uploadFile}
                   handleUploadAndUse={handleUploadAndUse}
                   labelClass={labelClass}
-                  inputClass="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik"
+                  inputClass="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40 focus:border-sunbird-theme-accent bg-white font-rubik"
                 />
               )}
             </div>
@@ -239,7 +243,7 @@ export function ImagePickerDialog({ label, required, value, onChange }: ImagePic
                 <button
                   type="button"
                   onClick={() => handleTabChange("upload")}
-                  className="rounded-lg px-5 py-2 text-sm font-medium text-sunbird-brick border border-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors font-rubik inline-flex items-center gap-2"
+                  className="rounded-lg px-5 py-2 text-sm font-medium text-sunbird-theme-accent border border-sunbird-theme-accent hover:bg-sunbird-theme-accent hover:text-white transition-colors font-rubik inline-flex items-center gap-2"
                 >
                   <FiUpload className="w-4 h-4" />
                   {t('imagePicker.uploadNew')}

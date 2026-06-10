@@ -138,10 +138,10 @@ describe('Express App', () => {
     expect(response.text).toBe('mock-kong-response');
   });
 
-  it('should handle /portal/data/v1/form/read via formsController', async () => {
+  it('should handle /data/v1/form/read via formsController', async () => {
     const { app } = await import('./app.js');
     const response = await request(app)
-      .post('/portal/data/v1/form/read')
+      .post('/data/v1/form/read')
       .expect(200);
 
     expect(response.body).toEqual({ result: 'mock-read-response' });

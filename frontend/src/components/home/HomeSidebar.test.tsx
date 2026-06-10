@@ -138,7 +138,7 @@ describe('HomeSidebar', () => {
         renderSidebar({ ...defaultProps, activeNav: 'learning' });
 
         const learningButton = screen.getByText('sidebar.myLearning').closest('button');
-        expect(learningButton).toHaveClass('text-sunbird-brick font-normal');
+        expect(learningButton).toHaveClass('text-sunbird-theme-accent font-normal');
 
         const homeButton = screen.getByText('sidebar.home').closest('button');
         expect(homeButton).toHaveClass('text-sunbird-obsidian font-normal');
@@ -151,7 +151,7 @@ describe('HomeSidebar', () => {
         // When home is active, it should use GoHomeFill (not easily testable via class but we can check if it renders)
         // Check for specific classes applied to icons
         const homeIcon = screen.getByText('sidebar.home').previousSibling;
-        expect(homeIcon).toHaveClass('text-sunbird-brick');
+        expect(homeIcon).toHaveClass('text-sunbird-theme-accent');
 
         rerender(
             <BrowserRouter>
@@ -160,7 +160,7 @@ describe('HomeSidebar', () => {
         );
 
         const inactiveHomeIcon = screen.getByText('sidebar.home').previousSibling;
-        expect(inactiveHomeIcon).toHaveClass('text-sunbird-ginger');
+        expect(inactiveHomeIcon).toHaveClass('text-sunbird-theme-accent-muted');
     });
 
     it('hides Account Settings when on help-support route', () => {

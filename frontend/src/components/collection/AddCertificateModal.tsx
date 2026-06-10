@@ -36,7 +36,7 @@ const AddCertificateModal = ({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white sticky top-0 z-10">
               <div className="flex items-center gap-2">
-                <FiAward className="w-5 h-5 text-sunbird-brick" />
+                <FiAward className="w-5 h-5 text-sunbird-theme-accent" />
                 <Dialog.Title className="text-lg font-semibold text-sunbird-obsidian font-rubik">
                   {state.view === "createTemplate" ? t('certificate.createTemplateTitle') : t('certificate.certificateTitle')}
                 </Dialog.Title>
@@ -45,7 +45,7 @@ const AddCertificateModal = ({
                 <button
                   type="button"
                   onClick={() => { state.setView("main"); state.setErrorMsg(""); }}
-                  className="text-sm text-sunbird-brick hover:underline font-rubik"
+                  className="text-sm text-sunbird-theme-accent hover:underline font-rubik"
                   data-edataid="cert-modal-back"
                   data-pageid="course-consumption"
                 >
@@ -93,13 +93,13 @@ const AddCertificateModal = ({
                           className={cn(
                             "flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors",
                             state.certTab === tab
-                              ? "text-sunbird-brick"
+                              ? "text-sunbird-theme-accent"
                               : "text-muted-foreground hover:text-foreground"
                           )}
                         >
                           {tab === "current" ? t('certificate.currentCertificate') : t('certificate.changeCertificate')}
                           {state.certTab === tab && (
-                            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+                            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-theme-accent rounded-t-full" />
                           )}
                         </button>
                       ))}
@@ -164,8 +164,8 @@ const AddCertificateModal = ({
                     className={cn(
                       "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik",
                       !state.isAddCertEnabled
-                        ? "bg-sunbird-brick/40 cursor-not-allowed"
-                        : "bg-sunbird-brick hover:bg-opacity-90"
+                        ? "bg-sunbird-theme-accent/40 cursor-not-allowed"
+                        : "bg-sunbird-theme-accent hover:bg-opacity-90"
                     )}
                   >
                     <FiAward className="w-4 h-4" />

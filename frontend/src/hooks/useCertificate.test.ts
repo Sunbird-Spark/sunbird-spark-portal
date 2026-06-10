@@ -65,13 +65,29 @@ describe('useCertificate hooks test', () => {
   });
 
   describe('useMyImages', () => {
-    it('sets up myImages query correctly', () => {
+    it('sets up myImages query correctly with a per-user query key', () => {
+      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user_123');
       (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
       const queryParams = useMyImages();
-      
+
       expect(useQuery).toHaveBeenCalled();
-      expect((queryParams as any).queryKey).toEqual(['myImages']);
+      expect((queryParams as any).queryKey).toEqual(['myImages', 'user_123']);
       expect((queryParams as any).staleTime).toBe(2 * 60 * 1000);
+      expect((queryParams as any).enabled).toBe(true);
+    });
+
+    it('falls back to a null userId in the query key when none is resolved', () => {
+      vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
+      (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
+      const queryParams = useMyImages();
+
+      expect((queryParams as any).queryKey).toEqual(['myImages', null]);
+    });
+
+    it('respects enabled: false option', () => {
+      (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
+      const queryParams = useMyImages({ enabled: false });
+      expect((queryParams as any).enabled).toBe(false);
     });
   });
 
@@ -83,6 +99,13 @@ describe('useCertificate hooks test', () => {
       expect(useQuery).toHaveBeenCalled();
       expect((queryParams as any).queryKey).toEqual(['allImages']);
       expect((queryParams as any).staleTime).toBe(2 * 60 * 1000);
+      expect((queryParams as any).enabled).toBe(true);
+    });
+
+    it('respects enabled: false option', () => {
+      (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
+      const queryParams = useAllImages({ enabled: false });
+      expect((queryParams as any).enabled).toBe(false);
     });
   });
 
@@ -135,7 +158,7 @@ describe('useCertificate hooks test', () => {
   });
 
   describe('useMyImages queryFn', () => {
-    it('returns empty array when resolveChannel returns null', async () => {
+    it('returns empty array when userId cannot be resolved', async () => {
       vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
       vi.mocked(userAuthInfoService.getAuthInfo).mockResolvedValue({ uid: null } as any);
 
@@ -143,13 +166,11 @@ describe('useCertificate hooks test', () => {
       const queryParams = useMyImages();
       const result = await (queryParams as any).queryFn();
       expect(result).toEqual([]);
+      expect(certificateService.searchLogos).not.toHaveBeenCalled();
     });
 
-    it('returns mapped images when service returns content', async () => {
+    it('returns mapped images and calls searchLogos with userId', async () => {
       vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user_123');
-      vi.mocked(userService.userRead).mockResolvedValue({
-        data: { response: { rootOrgId: 'org_abc' } },
-      } as any);
       vi.mocked(certificateService.searchLogos).mockResolvedValue({
         data: { content: [{ identifier: 'img-1', name: 'Logo', artifactUrl: 'https://img.com/logo.png' }] },
       } as any);
@@ -158,27 +179,13 @@ describe('useCertificate hooks test', () => {
       const queryParams = useMyImages();
       const result = await (queryParams as any).queryFn();
 
-      expect(certificateService.searchLogos).toHaveBeenCalledWith('org_abc', 'user_123');
+      expect(certificateService.searchLogos).toHaveBeenCalledWith('user_123');
       expect(result).toEqual([{ identifier: 'img-1', name: 'Logo', url: 'https://img.com/logo.png' }]);
     });
   });
 
   describe('useAllImages queryFn', () => {
-    it('returns empty array when resolveChannel returns null', async () => {
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue(null);
-      vi.mocked(userAuthInfoService.getAuthInfo).mockResolvedValue({ uid: null } as any);
-
-      (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
-      const queryParams = useAllImages();
-      const result = await (queryParams as any).queryFn();
-      expect(result).toEqual([]);
-    });
-
-    it('calls searchLogos without userId for all images', async () => {
-      vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user_123');
-      vi.mocked(userService.userRead).mockResolvedValue({
-        data: { response: { rootOrgId: 'org_abc' } },
-      } as any);
+    it('calls searchLogos with no arguments for all images', async () => {
       vi.mocked(certificateService.searchLogos).mockResolvedValue({
         data: { content: [] },
       } as any);
@@ -187,7 +194,19 @@ describe('useCertificate hooks test', () => {
       const queryParams = useAllImages();
       await (queryParams as any).queryFn();
 
-      expect(certificateService.searchLogos).toHaveBeenCalledWith('org_abc');
+      expect(certificateService.searchLogos).toHaveBeenCalledWith();
+    });
+
+    it('maps returned content into ImageAsset shape', async () => {
+      vi.mocked(certificateService.searchLogos).mockResolvedValue({
+        data: { content: [{ identifier: 'img-2', name: 'Sig', artifactUrl: 'https://img.com/sig.png' }] },
+      } as any);
+
+      (useQuery as import('vitest').Mock).mockImplementation((opts) => opts);
+      const queryParams = useAllImages();
+      const result = await (queryParams as any).queryFn();
+
+      expect(result).toEqual([{ identifier: 'img-2', name: 'Sig', url: 'https://img.com/sig.png' }]);
     });
   });
 

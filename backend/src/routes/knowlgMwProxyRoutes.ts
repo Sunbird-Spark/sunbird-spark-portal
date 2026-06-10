@@ -12,12 +12,13 @@ import {
     // contentUploadProxy,
     contentActionProxy,
 } from '../proxies/knowlgMwProxy.js';
+import { requireAuth } from '../auth/oidcMiddleware.js';
 
 const router = express.Router();
 
 // ─── Action catch-all ─────────────────────────────────────────────────────────
 // Handles all remaining /action/* routes (content CRUD, read, hierarchy, etc.)
-router.all('/portal/lock/*rest', express.json({ limit: '50mb' }), contentActionProxy)
-router.all('/action/*rest', express.json({ limit: '50mb' }), contentActionProxy);
+router.all('/portal/lock/*rest', requireAuth(), express.json({ limit: '50mb' }), contentActionProxy)
+router.all('/action/*rest', requireAuth(), express.json({ limit: '50mb' }), contentActionProxy);
 
 export default router;

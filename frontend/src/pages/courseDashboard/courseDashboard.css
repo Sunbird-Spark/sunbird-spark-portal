@@ -19,8 +19,8 @@
 }
 
 .dashboard-tab.active {
-  color: hsl(var(--sunbird-brick));
-  border-bottom-color: hsl(var(--sunbird-brick));
+  color: hsl(var(--sunbird-theme-accent));
+  border-bottom-color: hsl(var(--sunbird-theme-accent));
   font-weight: 600;
 }
 
@@ -71,7 +71,7 @@
 .batch-sidebar-item.active {
   background: var(--accent);
   font-weight: 600;
-  color: hsl(var(--sunbird-brick));
+  color: hsl(var(--sunbird-theme-accent));
 }
 
 .batches-main {
@@ -113,7 +113,7 @@
 }
 
 .certs-search-input:focus {
-  border-color: hsl(var(--sunbird-brick));
+  border-color: hsl(var(--sunbird-theme-accent));
 }
 
 .certs-search-btn {
@@ -121,7 +121,7 @@
   border-radius: 0.375rem;
   font-size: 0.9375rem;
   font-weight: 500;
-  background: hsl(var(--sunbird-brick));
+  background: hsl(var(--sunbird-theme-accent));
   color: hsl(var(--primary-foreground));
   border: none;
   cursor: pointer;
@@ -199,7 +199,7 @@
 }
 
 .reissue-link {
-  color: hsl(var(--sunbird-brick));
+  color: hsl(var(--sunbird-theme-accent));
   font-weight: 500;
   cursor: pointer;
   background: none;
@@ -268,7 +268,7 @@
   border-radius: 0.375rem;
   font-size: 0.9375rem;
   font-weight: 500;
-  background: hsl(var(--sunbird-brick));
+  background: hsl(var(--sunbird-theme-accent));
   color: hsl(var(--primary-foreground));
   border: none;
   cursor: pointer;

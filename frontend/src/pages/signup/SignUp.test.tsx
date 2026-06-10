@@ -25,6 +25,9 @@ vi.mock("@/hooks/useToast", () => ({
 vi.mock('@/hooks/useImpression', () => ({ default: vi.fn() }));
 vi.mock('@/hooks/useTelemetry', () => ({ useTelemetry: () => ({ log: vi.fn() }) }));
 vi.mock('@/components/telemetry/TelemetryTracker', () => ({ TelemetryTracker: () => null }));
+vi.mock('@/providers/ThemeProvider', () => ({
+  useTheme: () => ({ setTheme: vi.fn(), setFont: vi.fn(), setTemplate: vi.fn() }),
+}));
 
 // Auth layout mock
 vi.mock('@/components/auth/AuthLayout', () => ({

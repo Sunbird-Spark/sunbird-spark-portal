@@ -87,6 +87,8 @@ export interface Facet {
   values: FacetValue[];
 }
 
+export type SearchMode = 'keyword' | 'semantic';
+
 export interface ContentSearchRequest {
   filters?: Record<string, unknown>;
   facets?: string[];
@@ -95,6 +97,8 @@ export interface ContentSearchRequest {
   query?: string;
   sort_by?: Record<string, string>;
   fields?: string[];
+  search_mode?: 'semantic';
+  semantic?: { k: number; min_score: number };
 }
 
 export interface ContentSearchItem {
@@ -127,6 +131,7 @@ export interface ContentSearchResponse {
 export interface UseContentSearchOptions {
   request?: ContentSearchRequest;
   enabled?: boolean;
+  searchMode?: SearchMode;
 }
 
 /** Aggregated counts for workspace tabs, derived from API facets. */

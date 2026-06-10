@@ -1,4 +1,5 @@
 @import './fonts.css';
+@import './styles/template-overrides.css';
 
 /* Sunbird Joyful Design System - Professional Training LMS */
 
@@ -7,8 +8,18 @@
 @tailwind utilities;
 
 @layer base {
+  /* Hide TopNavBar while search overlay is open (Top Layout only) */
+  html[data-search-open] nav[aria-label="Primary navigation"] { display: none; }
+
   :root {
     --app-font-family: 'Rubik', sans-serif;
+
+    /* First-paint defaults — ThemeProvider overrides these on mount from localStorage.
+       Non-default themes flash briefly on repeat visits; this is an acceptable trade-off. */
+    --sunbird-spark-theme-primary-h: 12;  --sunbird-spark-theme-primary-s: 50%;  --sunbird-spark-theme-primary-l: 45%;
+       --sunbird-spark-theme-chip-h: 45;     --sunbird-spark-theme-chip-s: 100%;
+       --sunbird-spark-theme-icon-h: 28;
+
     /* Sunbird Joyful Theme Colors */
     --background: 48 23% 91%;
     /* #E9E8D9 - Body background */
@@ -17,59 +28,69 @@
     --surface: 0 0% 100%;
     /* White surface */
 
-    --card: 60 24% 93%;
-    /* #F3F3E5 - Card background */
+    --card: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 97%;
+    /* Card background — chip-seed tinted (warm cream on terracotta, light blue on blue) */
     --card-foreground: 0 0% 20%;
     /* #333333 */
 
-    --popover: 60 24% 93%;
+    --popover: 0 0% 100%;
+    /* White — popover/dropdown panels stay neutral white across all themes */
     --popover-foreground: 0 0% 20%;
 
-    --primary: 12 50% 45%;
-    /* #AC5139 - Sunbird Terracotta */
+    --primary: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l);
+    /* Sunbird brand color — derived from seed */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 100% 66%;
-    /* #FFD954 - Primary Yellow */
+    --secondary: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 66%;
+    /* chip/secondary tint — derived from chip seed */
     --secondary-foreground: 0 0% 20%;
 
-    --muted: 205 47% 95%;
-    /* #EDF4F9 - Light Blue */
+    --muted: 210 20% 96%;
+    /* Neutral light gray — muted surfaces stay neutral so status badges and table rows don't tint */
     --muted-foreground: 210 11% 45%;
 
-    --accent: 45 100% 66%;
-    /* #FFD954 - Yellow accent */
+    --accent: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 66%;
+    /* chip color — dropdown hover, ghost button background */
     --accent-foreground: 0 0% 20%;
+    /* dark text on accent hover */
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 210 25% 80%;
     --input: 210 25% 85%;
-    --ring: 12 50% 45%;
+    --ring: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l);
 
     --radius: 1rem;
 
     /* Custom Sunbird colors */
-    --sunbird-primary: 12 50% 45%;
-    /* #AC5139 */
+    --sunbird-primary: var(--primary);
+    /* mirrors --primary — cascades to editors via hsl(var(--sunbird-primary)) */
     --sunbird-dark-blue: 207 100% 16%;
     /* #002E50 */
-    --sunbird-yellow: 45 100% 66%;
-    /* #FFD954 */
+    --sunbird-yellow: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 66%;
+    /* chip brand color */
     --sunbird-light-blue: 205 47% 95%;
     /* #EDF4F9 */
     --sunbird-medium-blue: 210 40% 65%;
     /* #80A7CE */
 
     --sunbird-ginger: 28 57% 54%;
-    /* #cc8545 */
-    --sunbird-brick: 15 51% 44%;
-    /* #a85236 */
-    --sunbird-sunflower: 45 100% 73%;
-    /* #ffdb73 */
+    /* fixed amber-gold — #CC8545 */
+    --sunbird-brick: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l);
+    /* theme-reactive CTA — matches sunbird-theme-accent */
+
+    /* ---- Theme-reactive accent vars (derived from seeds) ---- */
+    --sunbird-theme-accent: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l);
+    /* CTA buttons, active links, progress fill */
+    --sunbird-theme-accent-muted: var(--sunbird-spark-theme-icon-h) var(--sunbird-spark-theme-primary-s) 54%;
+    /* icons, inactive sidebar, chart dots, focus rings */
+    --sunbird-theme-tint: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 93%;
+    /* chip/badge backgrounds — lightness locked at 93%, always readable */
+    --sunbird-sunflower: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 73%;
+    /* lighter chip tint */
     --sunbird-ivory: 55 100% 98%;
-    /* #fffef4 */
+    /* #fffef4 — warm off-white, always fixed */
     --sunbird-ink: 193 35% 33%;
     /* #376673 */
     --sunbird-wave: 158 78% 68%;
@@ -93,12 +114,13 @@
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 12 50% 45%;
+    --sidebar-primary: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l);
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 100% 66%;
-    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-accent: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) 92%;
+    /* brand tint — sidebar item hover */
+    --sidebar-accent-foreground: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) 25%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 12 50% 45%;
+    --sidebar-ring: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l);
 
     /* Additional Sunbird Grays & System Colors */
     --sunbird-gray-75: 0 0% 46%;
@@ -115,24 +137,24 @@
     /* #344054 */
     --sunbird-success-green: 145 63% 49%;
     /* #2ECC71 */
-    --sunbird-orange-light: 13 100% 97%;
-    /* #FFF5F2 */
+    --sunbird-orange-light: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) 97%;
+    /* ultra-light primary tint — theme-reactive highlight bg */
     --sunbird-white: 0 0% 100%;
     /* #FFFFFF */
     --sunbird-gray-77: 0 0% 47%;
     /* #777777 */
     --sunbird-gray-d9: 0 0% 85%;
     /* #D9D9D9 */
-    --sunbird-beige-light: 45 100% 89%;
-    /* #FFF1C7 */
+    --sunbird-beige-light: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 89%;
+    /* very light chip tint — tag bg, section bg */
     --sunbird-gray-f1: 0 0% 95%;
     /* #F1F1F1 */
     --sunbird-blue-light: 194 36% 59%;
     /* #70ADBF */
     --sunbird-blue-medium: 194 47% 45%;
     /* #3D8FA7 */
-    --sunbird-brown-dark: 28 66% 42%;
-    /* #B06624 */
+    --sunbird-brown-dark: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 42%;
+    /* chip-hue dark shade — theme-reactive icon bg */
     --sunbird-green-dark: 146 47% 36%;
     /* #318656 */
     --sunbird-purple-dark: 322 21% 38%;
@@ -158,11 +180,11 @@
     --theme-wave-accent-dark: 193 35% 33%;
     --theme-wave-icon: 193 35% 33%;
 
-    --theme-sunflower-bg-light: 45 100% 94%;
-    --theme-sunflower-bg-lighter: 45 100% 97%;
-    --theme-sunflower-accent: 45 100% 73%;
-    --theme-sunflower-accent-dark: 28 57% 54%;
-    --theme-sunflower-icon: 15 51% 44%;
+    --theme-sunflower-bg-light: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 94%;
+    --theme-sunflower-bg-lighter: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 97%;
+    --theme-sunflower-accent: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 73%;
+    --theme-sunflower-accent-dark: var(--sunbird-spark-theme-icon-h) var(--sunbird-spark-theme-primary-s) 54%;
+    --theme-sunflower-icon: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l);
 
     --theme-ginger-bg-light: 28 66% 95%;
     --theme-ginger-bg-lighter: 28 66% 97%;
@@ -176,23 +198,97 @@
     --theme-forest-accent-dark: 146 26% 53%;
     --theme-forest-icon: 95 26% 40%;
 
+    /* Category Card Gradient Stops — decorative, not brand-reactive */
+    --gradient-1-from: #45C0ED;
+    --gradient-1-to:   #8E46C5;
+    --gradient-2-from: #D55E1D;
+    --gradient-2-to:   #F6C35C;
+    --gradient-3-from: #1D79D5;
+    --gradient-3-to:   #6ED97B;
+    --gradient-4-from: #F59C84;
+    --gradient-4-to:   #D655E7;
+
     /* Category Card Gradients */
-    --category-gradient-1: linear-gradient(to right, #45C0ED, #8E46C5);
-    --category-gradient-2: linear-gradient(to right, #D55E1D, #F6C35C);
-    --category-gradient-3: linear-gradient(to right, #1D79D5, #6ED97B);
-    --category-gradient-4: linear-gradient(to right, #F59C84, #D655E7);
+    --category-gradient-1: linear-gradient(to right, var(--gradient-1-from), var(--gradient-1-to));
+    --category-gradient-2: linear-gradient(to right, var(--gradient-2-from), var(--gradient-2-to));
+    --category-gradient-3: linear-gradient(to right, var(--gradient-3-from), var(--gradient-3-to));
+    --category-gradient-4: linear-gradient(to right, var(--gradient-4-from), var(--gradient-4-to));
 
     /* Box Shadows */
-    --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-brick));
+    --sunbird-focus-ring-shadow: 0 0 0 0.125rem hsl(var(--sunbird-white)), 0 0 0 0.25rem hsl(var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l));
     --sunbird-shadow-sm: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
     --sunbird-shadow-md: 0 0.875rem 0.875rem rgba(0, 0, 0, 0.05);
     --sunbird-shadow-lg: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
     --sunbird-text-shadow-strong: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.55);
     --sunbird-text-shadow-light: 0 0.0625rem 0.375rem rgba(0, 0, 0, 0.45);
 
+    /* Top / Bottom navbar background — theme-reactive. Overridden per
+       template in template-overrides.css (Classic = soft chip tint, Modern =
+       deeper primary tint for stronger separation). */
+    --nav-bg: var(--sunbird-spark-theme-chip-h) 50% 95%;
+    --nav-fg: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) 22%;
+
+    /* Workspace thumbnail-pattern palettes — six hue offsets from primary.
+       Each PRIMARY_CATEGORY family maps to one of these, so a theme switch
+       cascades through every workspace card thumbnail. */
+    --ws-pat-1-h: var(--sunbird-spark-theme-primary-h);
+    --ws-pat-2-h: calc(var(--sunbird-spark-theme-primary-h) + 40);
+    --ws-pat-3-h: calc(var(--sunbird-spark-theme-primary-h) + 80);
+    --ws-pat-4-h: calc(var(--sunbird-spark-theme-primary-h) + 130);
+    --ws-pat-5-h: calc(var(--sunbird-spark-theme-primary-h) + 180);
+    --ws-pat-6-h: calc(var(--sunbird-spark-theme-primary-h) + 230);
+
+    --ws-pat-1-bg-light:    hsl(var(--ws-pat-1-h) 40% 94%);
+    --ws-pat-1-bg-lighter:  hsl(var(--ws-pat-1-h) 40% 97%);
+    --ws-pat-1-accent:      hsl(var(--ws-pat-1-h) 45% 58%);
+    --ws-pat-1-accent-dark: hsl(var(--ws-pat-1-h) 50% 32%);
+    --ws-pat-1-icon:        hsl(var(--ws-pat-1-h) 50% 32%);
+
+    --ws-pat-2-bg-light:    hsl(var(--ws-pat-2-h) 40% 94%);
+    --ws-pat-2-bg-lighter:  hsl(var(--ws-pat-2-h) 40% 97%);
+    --ws-pat-2-accent:      hsl(var(--ws-pat-2-h) 45% 58%);
+    --ws-pat-2-accent-dark: hsl(var(--ws-pat-2-h) 50% 32%);
+    --ws-pat-2-icon:        hsl(var(--ws-pat-2-h) 50% 32%);
+
+    --ws-pat-3-bg-light:    hsl(var(--ws-pat-3-h) 40% 94%);
+    --ws-pat-3-bg-lighter:  hsl(var(--ws-pat-3-h) 40% 97%);
+    --ws-pat-3-accent:      hsl(var(--ws-pat-3-h) 45% 58%);
+    --ws-pat-3-accent-dark: hsl(var(--ws-pat-3-h) 50% 32%);
+    --ws-pat-3-icon:        hsl(var(--ws-pat-3-h) 50% 32%);
+
+    --ws-pat-4-bg-light:    hsl(var(--ws-pat-4-h) 40% 94%);
+    --ws-pat-4-bg-lighter:  hsl(var(--ws-pat-4-h) 40% 97%);
+    --ws-pat-4-accent:      hsl(var(--ws-pat-4-h) 45% 58%);
+    --ws-pat-4-accent-dark: hsl(var(--ws-pat-4-h) 50% 32%);
+    --ws-pat-4-icon:        hsl(var(--ws-pat-4-h) 50% 32%);
+
+    --ws-pat-5-bg-light:    hsl(var(--ws-pat-5-h) 40% 94%);
+    --ws-pat-5-bg-lighter:  hsl(var(--ws-pat-5-h) 40% 97%);
+    --ws-pat-5-accent:      hsl(var(--ws-pat-5-h) 45% 58%);
+    --ws-pat-5-accent-dark: hsl(var(--ws-pat-5-h) 50% 32%);
+    --ws-pat-5-icon:        hsl(var(--ws-pat-5-h) 50% 32%);
+
+    --ws-pat-6-bg-light:    hsl(var(--ws-pat-6-h) 40% 94%);
+    --ws-pat-6-bg-lighter:  hsl(var(--ws-pat-6-h) 40% 97%);
+    --ws-pat-6-accent:      hsl(var(--ws-pat-6-h) 45% 58%);
+    --ws-pat-6-accent-dark: hsl(var(--ws-pat-6-h) 50% 32%);
+    --ws-pat-6-icon:        hsl(var(--ws-pat-6-h) 50% 32%);
+
+    /* Workspace content-card type badges — hue-derived from primary so they
+       shift with theme switch. Each type rotates around the colour wheel for
+       visual distinction. */
+    --ws-card-course-bg:     var(--sunbird-spark-theme-primary-h) 40% 95%;
+    --ws-card-course-text:   var(--sunbird-spark-theme-primary-h) 45% 32%;
+    --ws-card-content-bg:    calc(var(--sunbird-spark-theme-primary-h) + 40) 55% 95%;
+    --ws-card-content-text:  calc(var(--sunbird-spark-theme-primary-h) + 40) 50% 35%;
+    --ws-card-quiz-bg:       calc(var(--sunbird-spark-theme-primary-h) + 90) 45% 95%;
+    --ws-card-quiz-text:     calc(var(--sunbird-spark-theme-primary-h) + 90) 45% 35%;
+    --ws-card-collection-bg: calc(var(--sunbird-spark-theme-primary-h) + 150) 40% 95%;
+    --ws-card-collection-text: calc(var(--sunbird-spark-theme-primary-h) + 150) 45% 32%;
+
     /* Component Specific Colors */
-    --sunbird-progress-bg: 39 77% 76%;
-    /* #F0CE94 */
+    --sunbird-progress-bg: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 88%;
+    /* light brand tint — progress ring track background */
 
     --sunbird-status-completed-bg: 95 33% 81%;
     /* #CAE5B6 */
@@ -201,12 +297,28 @@
     --sunbird-status-completed-text: 95 26% 30%;
     /* Dark green for completed status */
 
-    --sunbird-status-ongoing-bg: 45 100% 89%;
-    /* #FFF1C7 */
-    --sunbird-status-ongoing-border: 28 57% 54%;
-    /* #CC8545 */
+    --sunbird-status-ongoing-bg: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 93%;
+    /* light chip tint — theme-reactive card backgrounds */
+    --sunbird-status-ongoing-border: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 54%;
+    /* chip mid-tone — theme-reactive border/icon color */
     --sunbird-status-ongoing-text: 0 0% 0%;
-    /* #000000 */
+    /* #000000 — always black, readable on any light tint */
+
+    /* Learning Progress donut chart ring colors — theme-reactive */
+    --sunbird-learning-outer: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 54%;
+    /* chip mid-tone — outer ring legend dot */
+    --sunbird-learning-inner: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) 35%;
+    /* primary dark shade — inner ring + contents-completed value text */
+
+    /* Learning Progress card surface — fixed warm cream */
+    --sunbird-learning-bg: 45 100% 92%;
+
+    /* Warning / caution amber — for locked badges, info boxes, alert dialogs.
+       Fixed amber hue (38°) — semantically "caution", not brand-reactive. */
+    --sunbird-warning-bg:     38 100% 94%;
+    --sunbird-warning-border: 38 80%  70%;
+    --sunbird-warning-text:   32 90%  35%;
+    --sunbird-warning-icon:   32 85%  45%;
   }
 
   .dark {
@@ -270,7 +382,7 @@
   .login-split-container {
     @apply flex flex-col md:flex-row bg-white relative z-10 overflow-hidden
       w-full min-h-screen rounded-none p-0 m-0 shadow-none
-      md:w-[67.375rem] md:h-[41.625rem] md:min-h-[41.625rem] md:rounded-[4rem] md:p-[0.375rem] md:m-auto md:shadow-2xl;
+      md:w-[67.375rem] md:h-[41.625rem] md:min-h-[41.625rem] md:rounded-[var(--r-auth-frame)] md:p-[0.375rem] md:m-auto md:shadow-2xl;
   }
 
   /* Tablet view responsiveness */
@@ -281,11 +393,11 @@
   }
 
   .login-left-panel {
-    @apply hidden md:flex flex-1 relative items-center justify-center overflow-hidden rounded-[3.5rem] auth-bg-wave;
+    @apply hidden md:flex flex-1 relative items-center justify-center overflow-hidden rounded-[var(--r-auth-panel)] auth-bg-wave;
   }
 
   .login-left-panel-container {
-    @apply absolute inset-0 z-[3] border-0 rounded-[3.5rem];
+    @apply absolute inset-0 z-[3] border-0 rounded-[var(--r-auth-panel)];
     box-shadow: 0 0 0 2rem hsl(var(--sunbird-white) / 0.05);
   }
 
@@ -399,7 +511,7 @@
 
   /* Buttons */
   .login-primary-button {
-    @apply w-full h-13 bg-sunbird-brick !bg-sunbird-brick text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all px-4 py-2;
+    @apply w-full h-13 bg-sunbird-theme-accent !bg-sunbird-theme-accent text-white text-[1rem] font-medium rounded-xs shadow-none border-none transition-all px-4 py-2;
   }
 
   /* Global Signup/Auth Styles */
@@ -445,12 +557,12 @@
   }
 
   .themed-checkbox[data-state="checked"] {
-    background-color: hsl(var(--sunbird-brick)) !important;
-    border-color: hsl(var(--sunbird-brick)) !important;
+    background-color: hsl(var(--sunbird-theme-accent)) !important;
+    border-color: hsl(var(--sunbird-theme-accent)) !important;
   }
 
   .themed-link {
-    @apply font-bold text-sunbird-brick underline hover:underline-offset-2;
+    @apply font-bold text-sunbird-theme-accent underline hover:underline-offset-2;
   }
 
   .required-asterisk {
@@ -463,17 +575,17 @@
   }
 
   .otp-digit-input {
-    @apply w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-semibold border border-sunbird-brick rounded-[0.25rem] focus:border-sunbird-brick focus:ring-1 focus:ring-sunbird-brick outline-none transition-all;
+    @apply w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-semibold border border-sunbird-theme-accent rounded-[0.25rem] focus:border-sunbird-theme-accent focus:ring-1 focus:ring-sunbird-theme-accent outline-none transition-all;
   }
 
   .otp-digit-input:focus {
-    @apply w-11 h-11 md:w-13 md:h-13 border-2 border-sunbird-brick !bg-white rounded-xxs text-center text-[1rem] md:text-[1.25rem] focus:outline-none;
+    @apply w-11 h-11 md:w-13 md:h-13 border-2 border-sunbird-theme-accent !bg-white rounded-xxs text-center text-[1rem] md:text-[1.25rem] focus:outline-none;
     box-shadow: var(--sunbird-focus-ring-shadow);
   }
 
   /* Form Elements */
   .login-input-field {
-    @apply h-[2.5rem] !bg-white !rounded-xs border-sunbird-gray-82 focus:border-sunbird-brick focus:ring-0 px-4 text-[0.875rem] placeholder:text-sunbird-gray-b2;
+    @apply h-[2.5rem] !bg-white !rounded-xs border-sunbird-gray-82 focus:border-sunbird-theme-accent focus:ring-0 px-4 text-[0.875rem] placeholder:text-sunbird-gray-b2;
   }
 
   .login-input-field:focus {
@@ -507,12 +619,12 @@
   }
 
   .delivery-option-selected {
-    @apply border-sunbird-brick bg-sunbird-orange-light;
+    @apply border-sunbird-theme-accent bg-sunbird-orange-light;
     box-shadow: var(--sunbird-focus-ring-shadow);
   }
 
   .delivery-radio {
-    @apply w-4 h-4 accent-sunbird-brick;
+    @apply w-4 h-4 accent-sunbird-theme-accent;
   }
 
   .delivery-text {
@@ -525,7 +637,7 @@
   }
 
   .resend-otp-btn {
-    @apply text-sunbird-brick font-semibold ml-1 hover:underline;
+    @apply text-sunbird-theme-accent font-semibold ml-1 hover:underline;
   }
 
   .resend-otp-btn:disabled {
@@ -561,7 +673,7 @@
   }
 
   .content-player-go-back {
-    @apply flex items-center gap-1.5 font-rubik font-medium text-[1rem] leading-[1.625rem] tracking-normal text-sunbird-brick mb-6 hover:opacity-80 transition-opacity;
+    @apply flex items-center gap-1.5 font-rubik font-medium text-[1rem] leading-[1.625rem] tracking-normal text-sunbird-theme-accent mb-6 hover:opacity-80 transition-opacity;
   }
 
   .content-player-back-arrow {
@@ -578,7 +690,7 @@
   }
 
   .content-player-share-btn {
-    @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity font-rubik mx-2;
+    @apply flex items-center gap-2 text-sunbird-theme-accent text-sm font-medium hover:opacity-80 transition-opacity font-rubik mx-2;
   }
 
   .content-player-share-icon {
@@ -594,7 +706,7 @@
   }
 
   .content-player-star-icon {
-    @apply w-3.5 h-3.5 text-sunbird-brick fill-sunbird-brick;
+    @apply w-3.5 h-3.5 text-sunbird-theme-accent fill-sunbird-theme-accent;
   }
 
   .content-player-stats-separator {
@@ -602,11 +714,11 @@
   }
 
   .content-player-video-container {
-    @apply w-full max-w-[74.125rem] p-5 rounded-[1.25rem] bg-white overflow-hidden;
+    @apply w-full max-w-[74.125rem] p-5 rounded-xl bg-white overflow-hidden;
   }
 
   .content-player-wrapper {
-    @apply w-full overflow-hidden rounded-[1.25rem] relative shadow-sm;
+    @apply w-full overflow-hidden rounded-xl relative shadow-sm;
   }
 
   .content-player-embed {
@@ -634,7 +746,7 @@
   }
 
   .content-player-play-icon {
-    @apply w-6 h-6 text-sunbird-brick ml-1 fill-sunbird-brick;
+    @apply w-6 h-6 text-sunbird-theme-accent ml-1 fill-sunbird-theme-accent;
   }
 
   .content-player-related-header {
@@ -646,7 +758,7 @@
   }
 
   .content-player-related-arrow {
-    @apply w-5 h-5 text-sunbird-brick;
+    @apply w-5 h-5 text-sunbird-theme-accent;
   }
 
   .content-player-related-grid {
@@ -670,7 +782,7 @@
 
 
   .related-resource-card-subtitle {
-    @apply font-rubik font-medium text-[1rem] leading-[1.5rem] tracking-normal text-[#FFFFFF] text-center;
+    @apply font-rubik font-medium text-[1rem] leading-[1.5rem] tracking-normal text-white text-center;
   }
 
   .related-resource-card-link {
@@ -678,7 +790,7 @@
   }
 
   .related-resource-card-container {
-    @apply bg-white rounded-[1.25rem] overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[22.5rem] flex flex-col;
+    @apply bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg w-[23.125rem] h-[22.5rem] flex flex-col;
     box-shadow: var(--sunbird-shadow-md);
   }
 
@@ -687,11 +799,11 @@
   }
 
   .related-resource-card-image-inner {
-    @apply relative overflow-hidden rounded-[1.25rem] h-[10.125rem] w-full;
+    @apply relative overflow-hidden rounded-xl h-[10.125rem] w-full;
   }
 
   .related-resource-card-image {
-    @apply absolute inset-0 w-full h-full rounded-[1.25rem];
+    @apply absolute inset-0 w-full h-full rounded-xl;
     object-fit: cover;
     -o-object-fit: cover;
     transition-property: transform;
@@ -709,7 +821,8 @@
   }
 
   .related-resource-card-badge {
-    @apply inline-flex items-center justify-center px-3 rounded-[2.25rem] mb-[1.25rem] h-[1.875rem] bg-sunbird-beige-light text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-[#CC8545] border-[0.0625rem] w-fit;
+    @apply inline-flex items-center justify-center px-3 mb-[1.25rem] h-[1.875rem] bg-sunbird-theme-tint text-foreground font-rubik font-medium text-[0.875rem] leading-[1.125rem] border-sunbird-theme-accent-muted border-[0.0625rem] w-fit;
+    border-radius: var(--r-pill);
   }
 
   .related-resource-card-title {
@@ -725,7 +838,7 @@
   }
 
   .related-resource-card-star {
-    @apply w-3.5 h-3.5 fill-sunbird-brick text-sunbird-brick -translate-y-[0.0625rem];
+    @apply w-3.5 h-3.5 fill-sunbird-theme-accent text-sunbird-theme-accent -translate-y-[0.0625rem];
   }
 
   .related-resource-card-separator {
@@ -738,7 +851,7 @@
   }
 
   .resource-card-container {
-    @apply relative w-full h-[22.5rem] rounded-[1.25rem] overflow-hidden;
+    @apply relative w-full h-[22.5rem] rounded-xl overflow-hidden;
   }
 
   .resource-card-image-wrapper {
@@ -746,7 +859,7 @@
   }
 
   .resource-card-image {
-    @apply w-full h-full object-cover transition-transform duration-700 ease-out rounded-[1.25rem];
+    @apply w-full h-full object-cover transition-transform duration-700 ease-out rounded-xl;
   }
 
   .group:hover .resource-card-image {
@@ -798,7 +911,7 @@
 
   /* Terms and Conditions Popover Close Button */
   .tnc-close-icon {
-    color: hsl(var(--sunbird-brick));
+    color: hsl(var(--sunbird-theme-accent));
   }
 
   /* Terms and Conditions Popover Styles */
@@ -960,7 +1073,7 @@
   }
 
   .collection-stat-icon {
-    @apply text-sunbird-brick;
+    @apply text-sunbird-theme-accent;
   }
 
   .collection-stat-value {
@@ -1006,7 +1119,7 @@
   }
 
   .home-inprogress-progress-bar-fill {
-    @apply h-full bg-sunbird-brick rounded-full;
+    @apply h-full bg-sunbird-theme-accent rounded-full;
   }
 
   .home-inprogress-progress-text {
@@ -1177,7 +1290,7 @@
   }
 
   .otp-input {
-    @apply !w-[2.5rem] !h-[2.5rem] md:!w-[3.125rem] md:!h-[3.125rem] text-center text-base md:text-lg font-semibold !border !border-sunbird-brick !rounded-[0.25rem] focus:border-sunbird-brick focus:ring-1 focus:ring-sunbird-brick outline-none transition-all;
+    @apply !w-[2.5rem] !h-[2.5rem] md:!w-[3.125rem] md:!h-[3.125rem] text-center text-base md:text-lg font-semibold !border !border-sunbird-theme-accent !rounded-[0.25rem] focus:border-sunbird-theme-accent focus:ring-1 focus:ring-sunbird-theme-accent outline-none transition-all;
   }
 
   @media (max-width: 320px) {
@@ -1193,7 +1306,7 @@
   }
 
   .otp-input:focus {
-    @apply !border-2 !border-sunbird-brick !bg-white rounded-xxs text-center text-base md:text-[1rem] focus:outline-none;
+    @apply !border-2 !border-sunbird-theme-accent !bg-white rounded-xxs text-center text-base md:text-[1rem] focus:outline-none;
     box-shadow: var(--sunbird-focus-ring-shadow);
   }
 
@@ -1232,14 +1345,14 @@
   }
 
   .rating-dialog-card {
-    @apply bg-[#FFFFFF] rounded-[1rem] flex flex-col items-center justify-center text-center w-full h-full relative;
+    @apply bg-white rounded-[1rem] flex flex-col items-center justify-center text-center w-full h-full relative;
     @apply p-4 sm:p-6 md:p-8 lg:p-10;
-    box-shadow: 2px 2px 30px 0px #00000014;
+    box-shadow: 2px 2px 30px 0px rgba(0, 0, 0, 0.08);
   }
 
   .rating-dialog-close-btn {
     @apply absolute top-3 right-3 sm:top-4 sm:right-4 md:top-5 md:right-5;
-    @apply text-sunbird-brick hover:opacity-70 transition-opacity;
+    @apply text-sunbird-theme-accent hover:opacity-70 transition-opacity;
   }
 
   .rating-dialog-close-icon {
@@ -1269,7 +1382,7 @@
   }
 
   .rating-dialog-submit-btn {
-    @apply bg-sunbird-brick text-white font-rubik font-medium;
+    @apply bg-sunbird-theme-accent text-white font-rubik font-medium;
     @apply text-[0.875rem] sm:text-[1rem];
     @apply px-8 sm:px-10 md:px-14 py-2 sm:py-2.5 md:py-3;
     @apply rounded-lg hover:opacity-90 transition-opacity;

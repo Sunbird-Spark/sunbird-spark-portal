@@ -18,15 +18,15 @@
 }
 
 .mylearning-progress-bar-fill {
-    @apply h-full bg-sunbird-brick transition-all duration-500;
+    @apply h-full bg-sunbird-theme-accent transition-all duration-500;
 }
 
 .mylearning-tab-active {
-    @apply bg-sunbird-brick text-white shadow-sm;
+    @apply bg-sunbird-theme-accent text-white shadow-sm;
 }
 
 .mylearning-tab-inactive {
-    @apply bg-white border border-gray-300 text-sunbird-obsidian hover:border-sunbird-brick hover:text-sunbird-brick transition-colors;
+    @apply bg-white border border-gray-300 text-sunbird-obsidian hover:border-sunbird-theme-accent hover:text-sunbird-theme-accent transition-colors;
 }
 
 /* Upcoming Batches Colors */
@@ -48,7 +48,7 @@
 }
 
 .mylearning-donut-ring-outer {
-    stroke: hsl(var(--sunbird-ginger));
+    stroke: hsl(var(--sunbird-theme-accent-muted));
 }
 
 .mylearning-donut-ring-inner {

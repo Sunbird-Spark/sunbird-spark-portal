@@ -25,13 +25,13 @@ const HeroWithStats = () => {
 
                 {/* Decorative dots - positioned conditionally based on direction */}
                 <div
-                    className={`absolute w-8 h-8 rounded-full hidden lg:block bg-sunbird-brick top-[-3%] ${isRTL ? 'left-[38%]' : 'right-[27%]'}`}
+                    className={`absolute w-8 h-8 rounded-full hidden lg:block bg-sunbird-theme-accent top-[-3%] ${isRTL ? 'left-[38%]' : 'right-[27%]'}`}
                 />
                 <div
                     className={`absolute w-10 h-10 rounded-full hidden lg:block bg-sunbird-yellow top-[25.71%] ${isRTL ? 'left-[48%]' : 'right-[32%]'}`}
                 />
                 <div
-                    className={`absolute w-4 h-4 rounded-full hidden lg:block bg-sunbird-brick top-[21.73%] ${isRTL ? 'left-[98%]' : 'right-[14%]'}`}
+                    className={`absolute w-4 h-4 rounded-full hidden lg:block bg-sunbird-theme-accent top-[21.73%] ${isRTL ? 'left-[98%]' : 'right-[14%]'}`}
                 />
 
                 <div className="w-full relative z-10 px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
@@ -57,7 +57,7 @@ const HeroWithStats = () => {
                             <Link to="/explore" data-edataid="hero-explore-cta" data-pageid="landing">
                                 <Button
                                     size="lg"
-                                    className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-white w-auto lg:w-auto h-[3.75rem] px-6 rounded-[0.75rem] shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-brick"
+                                    className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-normal text-white w-auto lg:w-auto h-[3.75rem] px-6 rounded-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center bg-sunbird-theme-accent"
                                 >
                                     {t("hero.cta")}
                                     {isRTL ? (

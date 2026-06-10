@@ -225,25 +225,40 @@ describe('CertificateService', () => {
 
   /* ── searchLogos ── */
   describe('searchLogos', () => {
-    it('calls post with createdBy filter when provided', async () => {
+    it('calls post to /action/composite/v3/search with createdBy filter when provided', async () => {
       mockPost.mockResolvedValue({ data: { count: 0, content: [] }, status: 200, headers: {} });
-      await service.searchLogos('org-1', 'user-1');
-      const call = mockPost.mock.calls[0] as any[];
-      expect(call[1].request.filters.createdBy).toBe('user-1');
+      await service.searchLogos('user-1');
+      expect(mockPost).toHaveBeenCalledWith('/action/composite/v3/search', {
+        request: {
+          filters: {
+            contentType: 'Asset',
+            compatibilityLevel: { min: 1, max: 2 },
+            status: ['Live'],
+            mediaType: ['image'],
+            createdBy: 'user-1',
+          },
+          limit: 50,
+          offset: 0,
+        },
+      });
     });
 
-    it('calls post without createdBy when not provided', async () => {
+    it('omits createdBy when not provided', async () => {
       mockPost.mockResolvedValue({ data: { count: 0, content: [] }, status: 200, headers: {} });
-      await service.searchLogos('org-1');
+      await service.searchLogos();
       const call = mockPost.mock.calls[0] as any[];
+      expect(call[0]).toBe('/action/composite/v3/search');
       expect(call[1].request.filters.createdBy).toBeUndefined();
+      expect(call[1].request.filters.contentType).toBe('Asset');
     });
 
-    it('passes correct channel filter', async () => {
+    it('does not include channel, primaryCategory or sort_by', async () => {
       mockPost.mockResolvedValue({ data: { count: 0, content: [] }, status: 200, headers: {} });
-      await service.searchLogos('org-abc');
+      await service.searchLogos('user-1');
       const call = mockPost.mock.calls[0] as any[];
-      expect(call[1].request.filters.channel).toBe('org-abc');
+      expect(call[1].request.filters.channel).toBeUndefined();
+      expect(call[1].request.filters.primaryCategory).toBeUndefined();
+      expect(call[1].request.sort_by).toBeUndefined();
     });
   });
 

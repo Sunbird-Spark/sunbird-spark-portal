@@ -74,7 +74,7 @@ export const CertResultsTable: React.FC<CertResultsTableProps> = ({
                       {showIndicator && (
                         <span title={hasCertificate ? t('certificatesTab.certificateIssued') : t('certificatesTab.courseCompleted')}>
                           {hasCertificate ? (
-                            <FiAward className="w-4 h-4 text-sunbird-brick" />
+                            <FiAward className="w-4 h-4 text-sunbird-theme-accent" />
                           ) : (
                             <FiCheckCircle className="w-4 h-4 text-green-500" />
                           )}
@@ -96,7 +96,7 @@ export const CertResultsTable: React.FC<CertResultsTableProps> = ({
                         size="sm"
                         className={cn(
                           "h-auto p-0 transition-colors",
-                          criteriaMet === t('certificatesTab.yes') ? "text-sunbird-brick" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
+                          criteriaMet === t('certificatesTab.yes') ? "text-sunbird-theme-accent" : "text-muted-foreground/50 cursor-not-allowed hover:no-underline"
                         )}
                         data-testid={`reissue-btn-${idx}`}
                         data-edataid="certificate-reissue-open"

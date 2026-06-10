@@ -85,3 +85,22 @@ export const BarChartIconFill = ({ className }: { className?: string }) => (
         <rect x="4" y="13" width="3" height="8" rx="1" />
     </svg>
 );
+
+export const HomeIcon = ({ className }: { className?: string }) => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <path d="M1 7.5L9 1L17 7.5V16.5C17 17.0523 16.5523 17.5 16 17.5H12V12.5H6V17.5H2C1.44772 17.5 1 17.0523 1 16.5V7.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+const HomeSidebarIcons = {
+    Home: HomeIcon,
+    Explore: ExploreIcon,
+    Learning: MyLearningIcon,
+    Workspace: WorkspaceIconFill,
+    Reports: BarChartIconFill,
+    Users: UsersIconFill,
+    Help: HelpSupportIcon,
+    Profile: ProfileIconFill,
+};
+
+export default HomeSidebarIcons;

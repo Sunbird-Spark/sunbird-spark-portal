@@ -18,8 +18,8 @@ export function TemplateThumbnail({ name, previewUrl, selected, onClick }: Templ
       className={cn(
         "rounded-lg border-2 overflow-hidden transition-all text-left w-full",
         selected
-          ? "border-sunbird-brick shadow-md"
-          : "border-border hover:border-sunbird-brick/50"
+          ? "border-sunbird-theme-accent shadow-md"
+          : "border-border hover:border-sunbird-theme-accent/50"
       )}
     >
       <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center relative overflow-hidden">
@@ -32,7 +32,7 @@ export function TemplateThumbnail({ name, previewUrl, selected, onClick }: Templ
           </div>
         )}
         {selected && (
-          <div className="absolute top-1 right-1 bg-sunbird-brick text-white rounded-full p-0.5">
+          <div className="absolute top-1 right-1 bg-sunbird-theme-accent text-white rounded-full p-0.5">
             <FiCheck className="w-3 h-3" />
           </div>
         )}

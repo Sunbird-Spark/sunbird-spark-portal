@@ -117,16 +117,16 @@
 }
 
 .publish-warning-btn-yes {
-  background-color: hsl(var(--sunbird-brick));
+  background-color: hsl(var(--sunbird-theme-accent));
   color: hsl(var(--sunbird-white));
 }
 
 .publish-warning-btn-yes:hover:not(:disabled) {
-  background-color: hsl(var(--sunbird-brick) / 0.85);
+  background-color: hsl(var(--sunbird-theme-accent) / 0.85);
 }
 
 .publish-warning-btn-yes:active:not(:disabled) {
-  background-color: hsl(var(--sunbird-brick) / 0.75);
+  background-color: hsl(var(--sunbird-theme-accent) / 0.75);
 }
 
 .publish-warning-btn:disabled {

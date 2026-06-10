@@ -17,7 +17,7 @@ export const CheckboxRow = ({ id, checked, onCheckedChange, label, required }: C
       checked={checked}
       onCheckedChange={onCheckedChange}
       required={required}
-      className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-brick data-[state=checked]:bg-sunbird-brick data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40"
+      className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-theme-accent data-[state=checked]:bg-sunbird-theme-accent data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40"
     >
       <Checkbox.Indicator>
         <FiCheck className="w-3 h-3" />

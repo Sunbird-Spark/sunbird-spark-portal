@@ -139,8 +139,8 @@ describe('CardThumbnailBackground', () => {
             );
             const iconEl = container.querySelector('.relative.z-10') as HTMLElement;
             expect(iconEl).toBeTruthy();
-            // Course uses THEME_WAVE, whose iconColor is the wave-icon CSS variable
-            expect(iconEl.style.color).toBe('hsl(var(--theme-wave-icon))');
+            // Course uses THEME_WAVE which is hue-derived from primary theme.
+            expect(iconEl.style.color).toBe('var(--ws-pat-1-icon)');
         });
 
         it('applies opacity and drop-shadow filter to icon', () => {

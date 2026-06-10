@@ -38,6 +38,17 @@ export const useCheckUserExists = (): UseMutationResult<
   });
 };
 
+export const useDeleteUser = (): UseMutationResult<
+  ApiResponse<any>,
+  Error,
+  { userId: string }
+> => {
+  return useMutation({
+    mutationFn: (variables: { userId: string }) =>
+      userService.deleteUser(variables.userId),
+  });
+};
+
 export const useSignup = (): UseMutationResult<
   ApiResponse<{ userId: string; }>,
   Error,

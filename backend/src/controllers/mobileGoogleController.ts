@@ -48,8 +48,15 @@ export const handleMobileGoogleLogin = async (req: Request, res: Response): Prom
         let payload: { email: string; name?: string; sub: string };
         try {
             payload = await verifyGoogleIdToken(idToken, googleClientId);
-        } catch (err) {
+        } catch (err: any) {
             logger.error('handleMobileGoogleLogin: Google token verification failed', err);
+            if (err?.message === 'GOOGLE_EMAIL_NOT_VERIFIED') {
+                res.status(401).json({
+                    msg: 'Google account email is not verified',
+                    error: 'ERR_GOOGLE_EMAIL_NOT_VERIFIED',
+                });
+                return;
+            }
             res.status(400).json({ msg: 'Invalid Google ID token' });
             return;
         }

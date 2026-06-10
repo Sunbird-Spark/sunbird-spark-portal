@@ -77,7 +77,7 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
 
             {/* Acceptance Footer — only rendered when onAccept is provided */}
             {onAccept && (
-              <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-border bg-gray-50/60 rounded-b-[1.875rem]">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-border bg-gray-50/60 rounded-b-2xl">
                 <label
                   htmlFor="tnc-accept-check"
                   className="flex items-center gap-2.5 cursor-pointer select-none"
@@ -86,7 +86,7 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
                     id="tnc-accept-check"
                     checked={tncChecked}
                     onCheckedChange={(v) => setTncChecked(!!v)}
-                    className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-brick data-[state=checked]:bg-sunbird-brick data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40"
+                    className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-theme-accent data-[state=checked]:bg-sunbird-theme-accent data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40"
                   >
                     <Checkbox.Indicator>
                       <FiCheck className="w-3 h-3" />
@@ -104,8 +104,8 @@ export const TermsAndConditionsDialog: React.FC<TermsAndConditionsDialogProps> =
                   className={cn(
                     "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white font-rubik transition-colors shrink-0 min-w-[120px]",
                     !tncChecked || accepting
-                      ? "bg-sunbird-brick/40 cursor-not-allowed"
-                      : "bg-sunbird-brick hover:bg-opacity-90"
+                      ? "bg-sunbird-theme-accent/40 cursor-not-allowed"
+                      : "bg-sunbird-theme-accent hover:bg-opacity-90"
                   )}
                 >
                   {accepting && <FiLoader className="w-4 h-4 animate-spin" />}

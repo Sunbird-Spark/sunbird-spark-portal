@@ -69,7 +69,7 @@ describe('ContentRow', () => {
   it('applies active border class when isActive is true', () => {
     renderContentRow({ ...defaultProps, isActive: true });
     const link = screen.getByRole('link', { name: /Test Lesson/i });
-    expect(link).toHaveClass('border-sunbird-brick');
+    expect(link).toHaveClass('border-sunbird-theme-accent');
   });
 
   it('shows status label when contentStatusMap is provided with status=2 (completed)', () => {

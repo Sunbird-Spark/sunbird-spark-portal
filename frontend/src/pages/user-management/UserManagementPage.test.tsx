@@ -499,7 +499,7 @@ describe('UserManagementPage', () => {
   it('has the "Change User Roles" tab active by default', () => {
     renderPage();
     const tab = screen.getByText('Change User Roles');
-    expect(tab.closest('button')).toHaveClass('border-sunbird-brick', 'text-sunbird-brick');
+    expect(tab.closest('button')).toHaveClass('border-sunbird-theme-accent', 'text-sunbird-theme-accent');
   });
 
   /* ── User Consent tab ── */
@@ -514,7 +514,7 @@ describe('UserManagementPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
       expect(
         screen.getByRole('button', { name: /user consent/i })
-      ).toHaveClass('border-sunbird-brick', 'text-sunbird-brick');
+      ).toHaveClass('border-sunbird-theme-accent', 'text-sunbird-theme-accent');
     });
 
     it('"Change User Roles" tab becomes inactive when "User Consent" is clicked', () => {
@@ -522,7 +522,7 @@ describe('UserManagementPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /user consent/i }));
       expect(
         screen.getByRole('button', { name: /change user roles/i })
-      ).not.toHaveClass('border-sunbird-brick');
+      ).not.toHaveClass('border-sunbird-theme-accent');
     });
 
     it('clicking "User Consent" renders the consent summary cards', async () => {

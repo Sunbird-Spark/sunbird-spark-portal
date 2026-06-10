@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import BatchCard from './BatchCard';
 
@@ -155,6 +155,12 @@ describe('BatchCard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Freeze the clock (Date only — keep real timers so waitFor works) so the
+    // date-dependent batch logic (cert lock / batch-editable, which compare
+    // batch dates against "today") behaves deterministically regardless of when
+    // the suite runs. The test fixtures are authored relative to early 2026.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-04-01T00:00:00Z'));
     mockUseBatchList.mockReturnValue({
       data: [],
       isLoading: false,
@@ -180,6 +186,10 @@ describe('BatchCard', () => {
     mockAcceptTncMutateAsync.mockResolvedValue(undefined);
     mockUseSystemSetting.mockReturnValue({ data: null, isSuccess: false });
     mockUseAcceptTnc.mockReturnValue({ mutateAsync: mockAcceptTncMutateAsync, isPending: false });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   /* ── Rendering ── */

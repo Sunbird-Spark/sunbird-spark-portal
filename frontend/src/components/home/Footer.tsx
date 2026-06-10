@@ -91,25 +91,25 @@ const Footer = () => {
               <TermsAndConditionsDialog termsUrl={termsUrl} title={t("footer.terms")}>
                 <button
                   type="button"
-                  className="hover:opacity-80 transition-opacity text-sunbird-brick"
+                  className="hover:opacity-80 transition-opacity text-sunbird-theme-accent"
                 >
                   {t("footer.terms")}
                 </button>
               </TermsAndConditionsDialog>
             ) : (
-              <span className="text-sunbird-brick">{t("footer.terms")}</span>
+              <span className="text-sunbird-theme-accent">{t("footer.terms")}</span>
             )}
             {(privacyUrl || termsUrl) ? (
               <TermsAndConditionsDialog termsUrl={(privacyUrl || termsUrl)!} title={t("footer.privacy")}>
                 <button
                   type="button"
-                  className="hover:opacity-80 transition-opacity text-sunbird-brick"
+                  className="hover:opacity-80 transition-opacity text-sunbird-theme-accent"
                 >
                   {t("footer.privacy")}
                 </button>
               </TermsAndConditionsDialog>
             ) : (
-              <span className="text-sunbird-brick">{t("footer.privacy")}</span>
+              <span className="text-sunbird-theme-accent">{t("footer.privacy")}</span>
             )}
           </div>
         </div>

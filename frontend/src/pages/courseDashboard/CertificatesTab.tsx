@@ -104,7 +104,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({ collectionId, canReis
         />
         <Button
           type="submit"
-          className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik transition-colors"
+          className="bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-rubik transition-colors"
           disabled={searching || !uniqueId.trim()}
           data-testid="search-btn"
           data-edataid="certificate-user-search"

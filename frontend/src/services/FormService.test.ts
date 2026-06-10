@@ -1,16 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FormService } from './FormService';
-import { IHttpClient, init } from '../lib/http-client';
+import { IHttpClient, initApiClient } from '../lib/http-client';
 
 describe('FormService', () => {
   let mockClient: IHttpClient;
   let service: FormService;
 
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks();
 
-    // Create a mock client
     mockClient = {
       get: vi.fn(),
       post: vi.fn(),
@@ -20,15 +18,13 @@ describe('FormService', () => {
       updateHeaders: vi.fn(),
     };
 
-    // Initialize the singleton with our mock
-    init(mockClient);
+    initApiClient(mockClient);
 
-    // Instantiate service
     service = new FormService();
   });
 
   it('should call client.post for formRead with correct request body', async () => {
-    mockClient.post = vi.fn().mockResolvedValue({ data: { result: { form: {} } }, status: 200, headers: {} });
+    mockClient.post = vi.fn().mockResolvedValue({ data: { form: {} }, status: 200, headers: {} });
 
     const request = {
       type: 'content',
@@ -57,7 +53,7 @@ describe('FormService', () => {
   });
 
   it('should use default values for optional fields', async () => {
-    mockClient.post = vi.fn().mockResolvedValue({ data: { result: { form: {} } }, status: 200, headers: {} });
+    mockClient.post = vi.fn().mockResolvedValue({ data: { form: {} }, status: 200, headers: {} });
 
     const request = {
       type: 'content',

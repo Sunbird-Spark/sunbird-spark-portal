@@ -20,8 +20,8 @@ export const SwitchToggle = ({
     disabled={disabled}
     onClick={() => !disabled && onChange(!checked)}
     className={cn(
-      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-sunbird-brick/30 focus:ring-offset-2",
-      checked ? "bg-sunbird-brick" : "bg-gray-300",
+      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/30 focus:ring-offset-2",
+      checked ? "bg-sunbird-theme-accent" : "bg-gray-300",
       disabled && "opacity-50 cursor-not-allowed"
     )}
   >
@@ -53,7 +53,7 @@ export const SwitchRow = ({ id, checked, onChange, label, valueLabel, disabled }
         <span
           className={cn(
             "text-xs font-medium font-rubik transition-colors",
-            checked ? "text-sunbird-brick" : "text-muted-foreground"
+            checked ? "text-sunbird-theme-accent" : "text-muted-foreground"
           )}
         >
           {valueLabel}

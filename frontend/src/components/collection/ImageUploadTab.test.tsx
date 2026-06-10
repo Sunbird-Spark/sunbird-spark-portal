@@ -158,7 +158,7 @@ describe('ImageUploadTab', () => {
   it('applies dragging styling when dragging is true', () => {
     render(<ImageUploadTab {...defaultProps} dragging={true} />);
     const dropZone = screen.getByText('Choose or drag and drop your image here').closest('div');
-    expect(dropZone?.className).toContain('border-sunbird-brick');
+    expect(dropZone?.className).toContain('border-sunbird-theme-accent');
   });
 
   it('calls handleFileInput when file input changes', () => {

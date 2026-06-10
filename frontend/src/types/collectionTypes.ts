@@ -34,6 +34,8 @@ export interface CollectionData {
   primaryCategory?: string;
   /** Package version from the course hierarchy API. Used for telemetry `object.ver`. */
   pkgVersion?: number | string;
+  /** ISO timestamp of the course's most recent publish. Used to flag "course updated after enrolment". */
+  lastPublishedOn?: string;
 }
 
 export interface HierarchyContentNode {
@@ -56,6 +58,8 @@ export interface HierarchyContentNode {
   userConsent?: TrackableEnabled;
   contentType?: string;
   maxAttempts?: number;
+  /** ISO timestamp of the course's most recent publish (from /course/v1/hierarchy). */
+  lastPublishedOn?: string;
 }
 
 export interface CourseHierarchyResponse {

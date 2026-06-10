@@ -38,6 +38,11 @@ vi.mock("./rbac/OnboardingGuard", () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+vi.mock("./providers/ThemeProvider", () => ({
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useTheme: () => ({ activeTheme: { id: 'terracotta', name: 'Sunbird Spark', seeds: {} }, setTheme: vi.fn(), themes: [], activeFont: { id: 'poppins', name: 'Poppins', value: "'Poppins', sans-serif" }, setFont: vi.fn(), fonts: [], activeLayout: { id: 'sidebar-left', name: 'Left Sidebar' }, setLayout: vi.fn(), layouts: [], activeTemplate: { id: 'classic', name: 'Classic', description: 'Warm, rounded' }, setTemplate: vi.fn(), templates: [] }),
+}));
+
 // --------------------
 // Mock AuthContext
 // --------------------

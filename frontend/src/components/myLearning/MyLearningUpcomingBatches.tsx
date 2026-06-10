@@ -83,7 +83,7 @@ const MyLearningUpcomingBatches = ({ upcomingBatches = [] }: MyLearningUpcomingB
                     </h4>
                     <div className="flex items-center gap-6 text-[0.875rem] text-gray-500 font-rubik">
                       <div className="flex items-center gap-1.5">
-                        <FiBookOpen className="text-sunbird-brick w-[0.875rem] h-[0.875rem]" />
+                        <FiBookOpen className="text-sunbird-theme-accent w-[0.875rem] h-[0.875rem]" />
                         <span className="font-light">{batchItem.lessons} {t('contentStats.lessons')}</span>
                       </div>
                     </div>

@@ -30,8 +30,8 @@
 }
 
 .content-field-input:focus {
-  box-shadow: 0 0 0 2px hsl(var(--sunbird-brick) / 0.4);
-  border-color: hsl(var(--sunbird-brick));
+  box-shadow: 0 0 0 2px hsl(var(--sunbird-theme-accent) / 0.4);
+  border-color: hsl(var(--sunbird-theme-accent));
 }
 
 .content-field-input:disabled {
@@ -61,7 +61,7 @@
   gap: 0.25rem;
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
-  background-color: hsl(var(--sunbird-brick) / 0.1);
+  background-color: hsl(var(--sunbird-theme-accent) / 0.1);
   color: hsl(var(--sunbird-ink));
   font-size: 0.75rem;
   font-family: var(--app-font-family);
@@ -123,11 +123,11 @@
 }
 
 .content-field-dropdown-option:hover {
-  background-color: hsl(var(--sunbird-brick) / 0.05);
+  background-color: hsl(var(--sunbird-theme-accent) / 0.05);
 }
 
 .content-field-dropdown-option.selected {
-  background-color: hsl(var(--sunbird-brick) / 0.1);
+  background-color: hsl(var(--sunbird-theme-accent) / 0.1);
   color: hsl(var(--sunbird-ink));
 }
 
@@ -143,8 +143,8 @@
 }
 
 .content-field-checkbox.checked {
-  background-color: hsl(var(--sunbird-brick));
-  border-color: hsl(var(--sunbird-brick));
+  background-color: hsl(var(--sunbird-theme-accent));
+  border-color: hsl(var(--sunbird-theme-accent));
   color: white;
 }
 

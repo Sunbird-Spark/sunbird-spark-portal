@@ -5,13 +5,11 @@ import { useCollection } from "@/hooks/useCollection";
 import { useUserRead } from "@/hooks/useUserRead";
 import { useCollectionEnrollment } from "@/hooks/useCollectionEnrollment";
 import { usePermissions } from "@/hooks/usePermission";
-import { useIsContentCreator } from "@/hooks/useUser";
 import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
 import defaultCollectionImage from "@/assets/resource-robot-hand.svg";
 
 export const useCollectionPageData = (collectionId: string | undefined, batchIdParam: string | undefined) => {
   const { isAuthenticated } = usePermissions();
-  const isContentCreator = useIsContentCreator();
   const { data: collectionDataFromApi, isLoading, isFetching, isError, error, refetch } = useCollection(collectionId);
   const collectionData = collectionDataFromApi ?? null;
   const { data: userReadData } = useUserRead();
@@ -26,7 +24,9 @@ export const useCollectionPageData = (collectionId: string | undefined, batchIdP
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
     
-  const contentCreatorPrivilege = isCreatorViewingOwnCollection || !!isContentCreator;
+  // Only the actual course creator previews without enrolling; merely holding the
+  // CONTENT_CREATOR role does not exempt a user from the learner enrollment flow.
+  const contentCreatorPrivilege = isCreatorViewingOwnCollection;
   const isTrackable = (collectionDataFromApi?.trackable?.enabled?.toLowerCase() ?? "") === "yes";
   const contentBlocked = isTrackable && (
     !isAuthenticated

@@ -42,7 +42,7 @@ export const CertReissueModal: React.FC<CertReissueModalProps> = ({
             {t('certificatesTab.no')}
           </Button>
           <Button
-            className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik transition-colors"
+            className="bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-rubik transition-colors"
             onClick={onConfirm}
             data-testid="modal-yes-btn"
             data-edataid="certificate-reissue-confirm"

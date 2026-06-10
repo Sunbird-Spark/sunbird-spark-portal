@@ -50,7 +50,7 @@ describe('TemplateThumbnail', () => {
       <TemplateThumbnail name="My Certificate" selected={true} onClick={vi.fn()} />
     );
     const button = container.querySelector('button');
-    expect(button?.className).toContain('border-sunbird-brick');
+    expect(button?.className).toContain('border-sunbird-theme-accent');
   });
 
   it('applies default border class when selected is false', () => {

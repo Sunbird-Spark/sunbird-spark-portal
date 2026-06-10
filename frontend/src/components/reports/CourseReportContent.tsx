@@ -100,7 +100,7 @@ const CourseReportContent = ({ courseId, batchId, batchStartDate }: CourseReport
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <SummaryCard label={t('courseReport.totalEnrolled')} value={summaryTotalEnrolled} colorClass="bg-sunbird-ink" />
         <SummaryCard label={t('courseReport.totalCompleted')} value={summaryCompleted} colorClass="bg-sunbird-moss" />
-        <SummaryCard label={t('courseReport.certificatesIssued')} value={summaryCerts} colorClass="bg-sunbird-ginger" />
+        <SummaryCard label={t('courseReport.certificatesIssued')} value={summaryCerts} colorClass="bg-sunbird-theme-accent-muted" />
         <SummaryCard label={t('courseReport.avgScore')} value={summaryAvgScore} colorClass="bg-sunbird-lavender" />
       </div>
 

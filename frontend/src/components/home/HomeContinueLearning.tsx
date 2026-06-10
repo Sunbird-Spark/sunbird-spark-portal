@@ -24,7 +24,7 @@ const CircularProgress = ({ progress }: { progress: number }) => {
                 cy={size / 2}
                 r={radius}
                 fill="none"
-                className="stroke-sunbird-ginger/40"
+                className="stroke-sunbird-theme-accent-muted/40"
                 strokeWidth={strokeWidth}
             />
             {/* Progress circle (completed) */}
@@ -33,7 +33,7 @@ const CircularProgress = ({ progress }: { progress: number }) => {
                 cy={size / 2}
                 r={radius}
                 fill="none"
-                className="stroke-sunbird-brick"
+                className="stroke-sunbird-theme-accent"
                 strokeWidth={strokeWidth}
                 strokeDasharray={circumference}
                 strokeDashoffset={offset}

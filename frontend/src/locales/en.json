@@ -113,6 +113,21 @@
   "signup": "Sign Up",
   "searchPlaceholder": "Search courses...",
   "search_for_content_placeholder": "Search for content...",
+  "search": {
+    "keywordMode": "Keyword",
+    "semanticMode": "AI Search",
+    "modeToggleLabel": "Search mode",
+    "semanticSuggestTitle": "Try AI Search",
+    "semanticSuggestSubtitle": "Ask in natural language — or pick a suggestion below",
+    "suggestions": [
+      "How to teach fractions to beginners?",
+      "Creative writing activities for students",
+      "Science experiments for kids at home",
+      "Learn programming basics step by step",
+      "History of ancient civilizations",
+      "Mathematics problem solving strategies"
+    ]
+  },
   "recommended": "Recommended",
   "results_for": "Results for \"{{query}}\"",
   "view_all_results": "View All Results",
@@ -385,7 +400,9 @@
     "contentPlaylist": "Content Playlist",
     "digitalTextbook": "Digital Textbook",
     "questionPaper": "Question Paper",
-    "viewCourseDashboard": "View Course Dashboard"
+    "viewCourseDashboard": "View Course Dashboard",
+    "courseUpdatedTitle": "Course Updated",
+    "courseUpdatedOnMessage": "This course was updated on {{date}}. Your progress has been recalculated based on the latest course content."
   },
   "homePage": {
     "hiUser": "Hi {{name}}",
@@ -485,6 +502,60 @@
   "profilePage": {
     "loading": "Loading your profile...",
     "errorLoading": "Error loading profile..."
+  },
+  "accountManagement": {
+    "title": "Account Management",
+    "subtitle": "Manage how your Sunbird Spark account is stored.",
+    "deleteTitle": "Delete Account",
+    "deleteDescription": "Permanently delete your account and remove all personal information and login access. Your learning records and platform activity may be retained for reporting and verification purposes. This action cannot be undone",
+    "deleteCta": "Delete Account"
+  },
+  "deleteAccount": {
+    "entryLink": "Delete my account",
+    "title": "Delete your account",
+    "subtitle": "Please review what will happen to your data, access, and contributions before continuing.",
+    "acknowledged": "Acknowledged",
+    "warning": "This action is permanent and cannot be undone.",
+    "consentIntro": "Before proceeding, please note:",
+    "emailLabel": "OTP will be sent to",
+    "otpDelivery": "OTP will be sent to",
+    "sections": {
+      "data": "Your Data & Privacy",
+      "access": "Access & Sign-In",
+      "content": "Content You Created",
+      "proceed": "Before You Proceed"
+    },
+    "sendOtp": "Delete account",
+    "sending": "Sending OTP",
+    "otpPrompt": "An OTP has been sent to your registered email. Enter it below to confirm deletion.",
+    "otpTitle": "Verify it's you",
+    "otpSubtitle": "We sent a 6-digit code to {{email}}",
+    "otpLabel": "Enter verification code",
+    "codeExpires": "Code expires in",
+    "resend": "Resend OTP",
+    "confirm": "Confirm account deletion",
+    "deleting": "Deleting...",
+    "conditions": {
+      "permanent": "Your personal information, profile, and activity history will be permanently deleted and cannot be recovered.",
+      "featureLoss": "For certificate verification purposes, only your name will be retained.",
+      "ssoNoRecreate": "You will lose access to all features and services; any subscriptions or memberships may be terminated.",
+      "contentLoss": "If you use Single Sign-On (SSO), signing in again will create a new account with no historical data.",
+      "dataRetention": "Any content or resources you created will remain accessible to other users. You will lose management rights over them.",
+      "noRestore": "Usage reports will retain location data you declared.",
+      "understand": "Please back up important data and download your certificates before confirming deletion."
+    },
+    "error": {
+      "missingEmail": "We could not find your email on file. Please add one to your profile first.",
+      "otpSendFailed": "Could not send the verification code. Please try again.",
+      "rateLimited": "OTP request limit reached. Please try again later.",
+      "invalidOtp": "The code you entered is invalid or has expired.",
+      "deleteFailed": "We could not delete your account right now. Please try again."
+    }
+  },
+  "deleteAccountLanding": {
+    "title": "Sign in to delete your account",
+    "message": "You need to be signed in to delete your Sunbird account. Please log in to continue.",
+    "loginCta": "Login to continue"
   },
   "reports": {
     "title": "Reports",

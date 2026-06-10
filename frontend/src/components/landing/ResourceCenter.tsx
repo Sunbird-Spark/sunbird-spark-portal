@@ -20,7 +20,7 @@ const ResourceCenter = () => {
     const { t } = useAppI18n();
 
     return (
-        <section className="pt-[1.875rem] pb-[1.875rem] bg-sunbird-beige-light">
+        <section className="pt-[1.875rem] pb-[1.875rem] bg-sunbird-theme-tint">
             <div className="w-full px-4 lg:pl-[7.9375rem] lg:pr-[7.9375rem]">
 
                 <div className="flex items-center justify-center gap-4 mb-[1.25rem]">
@@ -120,19 +120,19 @@ const ResourceCardComponent = ({
           state={{ from: location.pathname + location.search }}
           className="block group w-full max-w-[22.5rem] mx-auto md:mx-0"
         >
-            <div className={`relative w-full ${heightClass} rounded-[1.25rem] overflow-hidden`}>
+            <div className={`relative w-full ${heightClass} rounded-xl overflow-hidden`}>
                 {/* Background Image Container */}
                 <div className="absolute inset-0">
                     <img
                         src={image}
                         alt={title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 rounded-[1.25rem]"
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 rounded-xl"
                     />
                 </div>
 
                 {/* Top-left Badge - Exact 44x38 dimensions */}
                 <div className="absolute top-[2.75rem] left-[2.125rem] z-[5]">
-                    <span className="flex items-center justify-center bg-white text-black font-medium text-[1rem] px-3 w-[4.875rem] h-[2.25rem] rounded-[0.25rem] shadow-sm tracking-wide">
+                    <span className="flex items-center justify-center bg-white text-black font-medium text-[1rem] px-3 w-[4.875rem] h-[2.25rem] rounded-xxs shadow-sm tracking-wide">
                         {type}
                     </span>
                 </div>

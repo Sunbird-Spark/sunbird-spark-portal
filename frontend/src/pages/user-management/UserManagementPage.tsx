@@ -168,7 +168,7 @@ const UserManagementPage = () => {
                         type="button"
                         data-edataid="um-tnc-open"
                         data-pageid="user-management"
-                        className="underline text-sunbird-brick hover:opacity-80 font-medium"
+                        className="underline text-sunbird-theme-accent hover:opacity-80 font-medium"
                       >
                         {t("userManagement.disclaimer.termsLink")}
                       </button>
@@ -198,7 +198,7 @@ const UserManagementPage = () => {
                           }}
                           className={`flex items-center gap-2 pb-3 px-1 border-b-2 text-[0.9375rem] font-medium transition-colors ${
                             isActive
-                              ? "border-sunbird-brick text-sunbird-brick"
+                              ? "border-sunbird-theme-accent text-sunbird-theme-accent"
                               : "border-transparent text-sunbird-gray-75 hover:text-sunbird-obsidian hover:border-gray-300"
                           }`}
                         >

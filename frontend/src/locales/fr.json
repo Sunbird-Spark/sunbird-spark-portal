@@ -113,6 +113,21 @@
   "signup": "S'inscrire",
   "searchPlaceholder": "Rechercher des cours...",
   "search_for_content_placeholder": "Rechercher du contenu...",
+  "search": {
+    "keywordMode": "Mot-clé",
+    "semanticMode": "Recherche IA",
+    "modeToggleLabel": "Mode de recherche",
+    "semanticSuggestTitle": "Essayez la Recherche IA",
+    "semanticSuggestSubtitle": "Posez une question en langage naturel — ou choisissez une suggestion",
+    "suggestions": [
+      "Comment enseigner les fractions aux débutants ?",
+      "Activités d'écriture créative pour les élèves",
+      "Expériences scientifiques pour enfants à la maison",
+      "Apprendre les bases de la programmation étape par étape",
+      "Histoire des civilisations anciennes",
+      "Stratégies de résolution de problèmes mathématiques"
+    ]
+  },
   "recommended": "Recommandé",
   "results_for": "Résultats pour \"{{query}}\"",
   "view_all_results": "Voir tous les résultats",
@@ -385,7 +400,9 @@
     "contentPlaylist": "Liste de lecture de contenu",
     "digitalTextbook": "Manuel numérique",
     "questionPaper": "Sujet d'examen",
-    "viewCourseDashboard": "Voir le tableau de bord du cours"
+    "viewCourseDashboard": "Voir le tableau de bord du cours",
+    "courseUpdatedTitle": "Cours mis à jour",
+    "courseUpdatedOnMessage": "Ce cours a été mis à jour le {{date}}. Votre progression a été recalculée en fonction du contenu le plus récent du cours."
   },
   "homePage": {
     "hiUser": "Bonjour {{name}}",
@@ -485,6 +502,60 @@
   "profilePage": {
     "loading": "Chargement de votre profil...",
     "errorLoading": "Erreur lors du chargement du profil..."
+  },
+  "accountManagement": {
+    "title": "Gestion du compte",
+    "subtitle": "Gérez la manière dont votre compte Sunbird Spark est conservé.",
+    "deleteTitle": "Supprimer le compte",
+    "deleteDescription": "Supprimez définitivement votre compte et toutes vos informations personnelles ainsi que votre accès. Vos relevés d'apprentissage et votre activité sur la plateforme peuvent être conservés à des fins de rapport et de vérification. Cette action est irréversible.",
+    "deleteCta": "Supprimer le compte"
+  },
+  "deleteAccount": {
+    "entryLink": "Supprimer mon compte",
+    "title": "Supprimer votre compte",
+    "subtitle": "Veuillez examiner ce qui adviendra de vos données, de votre accès et de vos contributions avant de continuer.",
+    "acknowledged": "Confirmé",
+    "warning": "Cette action est définitive et ne peut pas être annulée.",
+    "consentIntro": "Avant de continuer, veuillez noter :",
+    "emailLabel": "Le code OTP sera envoyé à",
+    "otpDelivery": "Le code OTP sera envoyé à",
+    "sections": {
+      "data": "Vos données et votre vie privée",
+      "access": "Accès et connexion",
+      "content": "Contenus que vous avez créés",
+      "proceed": "Avant de continuer"
+    },
+    "sendOtp": "Supprimer le compte",
+    "sending": "Envoi du code OTP",
+    "otpPrompt": "Un code OTP a été envoyé à votre adresse e-mail enregistrée. Saisissez-le ci-dessous pour confirmer la suppression.",
+    "otpTitle": "Vérifions que c'est bien vous",
+    "otpSubtitle": "Nous avons envoyé un code à 6 chiffres à {{email}}",
+    "otpLabel": "Saisissez le code de vérification",
+    "codeExpires": "Le code expire dans",
+    "resend": "Renvoyer le code OTP",
+    "confirm": "Confirmer la suppression du compte",
+    "deleting": "Suppression...",
+    "conditions": {
+      "permanent": "Vos informations personnelles, votre profil et votre historique d'activité seront définitivement supprimés et ne pourront pas être récupérés.",
+      "featureLoss": "Pour la vérification des certificats, seul votre nom sera conservé.",
+      "ssoNoRecreate": "Vous perdrez l'accès à toutes les fonctionnalités et services ; tout abonnement ou adhésion pourra être résilié.",
+      "contentLoss": "Si vous utilisez l'authentification unique (SSO), une nouvelle connexion créera un nouveau compte sans aucune donnée historique.",
+      "dataRetention": "Tout contenu ou ressource que vous avez créé restera accessible aux autres utilisateurs. Vous en perdrez les droits de gestion.",
+      "noRestore": "Les rapports d'utilisation conserveront les données de localisation que vous avez déclarées.",
+      "understand": "Veuillez sauvegarder les données importantes et télécharger vos certificats avant de confirmer la suppression."
+    },
+    "error": {
+      "missingEmail": "Nous n'avons pas trouvé votre adresse e-mail. Veuillez en ajouter une à votre profil.",
+      "otpSendFailed": "Impossible d'envoyer le code de vérification. Veuillez réessayer.",
+      "rateLimited": "Limite de demandes OTP atteinte. Veuillez réessayer plus tard.",
+      "invalidOtp": "Le code saisi est invalide ou a expiré.",
+      "deleteFailed": "Nous ne pouvons pas supprimer votre compte pour le moment. Veuillez réessayer."
+    }
+  },
+  "deleteAccountLanding": {
+    "title": "Connectez-vous pour supprimer votre compte",
+    "message": "Vous devez être connecté pour supprimer votre compte Sunbird. Veuillez vous connecter pour continuer.",
+    "loginCta": "Se connecter pour continuer"
   },
   "reports": {
     "title": "Rapports",

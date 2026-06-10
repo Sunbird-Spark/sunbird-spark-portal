@@ -113,6 +113,21 @@
   "signup": "Cadastrar",
   "searchPlaceholder": "Buscar cursos...",
   "search_for_content_placeholder": "Buscar conteúdo...",
+  "search": {
+    "keywordMode": "Palavra-chave",
+    "semanticMode": "Pesquisa IA",
+    "modeToggleLabel": "Modo de pesquisa",
+    "semanticSuggestTitle": "Experimente a Pesquisa IA",
+    "semanticSuggestSubtitle": "Pergunte em linguagem natural — ou escolha uma sugestão abaixo",
+    "suggestions": [
+      "Como ensinar frações para iniciantes?",
+      "Atividades de escrita criativa para alunos",
+      "Experimentos científicos para crianças em casa",
+      "Aprenda noções básicas de programação passo a passo",
+      "História das civilizações antigas",
+      "Estratégias de resolução de problemas matemáticos"
+    ]
+  },
   "recommended": "Recomendado",
   "results_for": "Resultados para \"{{query}}\"",
   "view_all_results": "Ver todos os resultados",
@@ -385,7 +400,9 @@
     "contentPlaylist": "Lista de reprodução de conteúdo",
     "digitalTextbook": "Livro didático digital",
     "questionPaper": "Prova de questões",
-    "viewCourseDashboard": "Ver painel do curso"
+    "viewCourseDashboard": "Ver painel do curso",
+    "courseUpdatedTitle": "Curso atualizado",
+    "courseUpdatedOnMessage": "Este curso foi atualizado em {{date}}. Seu progresso foi recalculado com base no conteúdo mais recente do curso."
   },
   "homePage": {
     "hiUser": "Olá {{name}}",
@@ -485,6 +502,60 @@
   "profilePage": {
     "loading": "Carregando seu perfil...",
     "errorLoading": "Erro ao carregar perfil..."
+  },
+  "accountManagement": {
+    "title": "Gerenciamento da conta",
+    "subtitle": "Gerencie como sua conta Sunbird Spark é armazenada.",
+    "deleteTitle": "Excluir conta",
+    "deleteDescription": "Exclua permanentemente sua conta e remova todas as informações pessoais e o acesso de login. Seus registros de aprendizagem e atividade na plataforma poderão ser mantidos para fins de relatório e verificação. Esta ação não pode ser desfeita.",
+    "deleteCta": "Excluir conta"
+  },
+  "deleteAccount": {
+    "entryLink": "Excluir minha conta",
+    "title": "Excluir sua conta",
+    "subtitle": "Revise o que acontecerá com seus dados, acesso e contribuições antes de continuar.",
+    "acknowledged": "Confirmado",
+    "warning": "Esta ação é permanente e não pode ser desfeita.",
+    "consentIntro": "Antes de continuar, observe:",
+    "emailLabel": "O OTP será enviado para",
+    "otpDelivery": "O OTP será enviado para",
+    "sections": {
+      "data": "Seus dados e privacidade",
+      "access": "Acesso e login",
+      "content": "Conteúdo que você criou",
+      "proceed": "Antes de continuar"
+    },
+    "sendOtp": "Excluir conta",
+    "sending": "Enviando OTP",
+    "otpPrompt": "Um OTP foi enviado para o seu e-mail registrado. Digite-o abaixo para confirmar a exclusão.",
+    "otpTitle": "Confirme que é você",
+    "otpSubtitle": "Enviamos um código de 6 dígitos para {{email}}",
+    "otpLabel": "Digite o código de verificação",
+    "codeExpires": "O código expira em",
+    "resend": "Reenviar OTP",
+    "confirm": "Confirmar exclusão da conta",
+    "deleting": "Excluindo...",
+    "conditions": {
+      "permanent": "Suas informações pessoais, perfil e histórico de atividades serão excluídos permanentemente e não poderão ser recuperados.",
+      "featureLoss": "Para fins de verificação de certificados, apenas o seu nome será retido.",
+      "ssoNoRecreate": "Você perderá o acesso a todos os recursos e serviços; assinaturas ou associações poderão ser encerradas.",
+      "contentLoss": "Se você usa Single Sign-On (SSO), entrar novamente criará uma nova conta sem dados históricos.",
+      "dataRetention": "Qualquer conteúdo ou recurso que você criou continuará acessível a outros usuários. Você perderá os direitos de gestão sobre eles.",
+      "noRestore": "Os relatórios de uso manterão os dados de localização que você declarou.",
+      "understand": "Faça backup dos dados importantes e baixe seus certificados antes de confirmar a exclusão."
+    },
+    "error": {
+      "missingEmail": "Não encontramos seu e-mail no cadastro. Adicione um ao seu perfil primeiro.",
+      "otpSendFailed": "Não foi possível enviar o código de verificação. Tente novamente.",
+      "rateLimited": "Limite de solicitações de OTP atingido. Tente novamente mais tarde.",
+      "invalidOtp": "O código informado é inválido ou expirou.",
+      "deleteFailed": "Não foi possível excluir sua conta agora. Tente novamente."
+    }
+  },
+  "deleteAccountLanding": {
+    "title": "Entre para excluir sua conta",
+    "message": "Você precisa estar conectado para excluir sua conta Sunbird. Faça login para continuar.",
+    "loginCta": "Entrar para continuar"
   },
   "reports": {
     "title": "Relatórios",

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useLearnerFuzzySearch, useResetPassword, useSignup, useIsContentCreator } from './useUser';
+import { useLearnerFuzzySearch, useResetPassword, useSignup, useIsContentCreator, useDeleteUser, useIsAdmin } from './useUser';
 import React from 'react';
 
 const { mockUserService, mockUseAuthInfo } = vi.hoisted(() => ({
@@ -10,6 +10,7 @@ const { mockUserService, mockUseAuthInfo } = vi.hoisted(() => ({
     resetPassword: vi.fn(),
     signup: vi.fn(),
     getUserRoles: vi.fn(),
+    deleteUser: vi.fn(),
   },
   mockUseAuthInfo: vi.fn(),
 }));
@@ -222,6 +223,53 @@ describe('useUser hooks', () => {
         'Password123!',
         undefined
       );
+    });
+  });
+
+  /* ── useDeleteUser ── */
+  describe('useDeleteUser', () => {
+    it('calls deleteUser with the given userId', async () => {
+      mockUserService.deleteUser.mockResolvedValue({ data: 'success' });
+
+      const { result } = renderHook(() => useDeleteUser(), { wrapper: createWrapper() });
+      await result.current.mutateAsync({ userId: 'user-xyz' });
+
+      expect(mockUserService.deleteUser).toHaveBeenCalledWith('user-xyz');
+    });
+
+    it('propagates errors from deleteUser', async () => {
+      mockUserService.deleteUser.mockRejectedValue(new Error('boom'));
+
+      const { result } = renderHook(() => useDeleteUser(), { wrapper: createWrapper() });
+      await expect(result.current.mutateAsync({ userId: 'user-xyz' })).rejects.toThrow('boom');
+    });
+  });
+
+  /* ── useIsAdmin ── */
+  describe('useIsAdmin', () => {
+    it('returns true when ORG_ADMIN is present in roles', async () => {
+      mockUserService.getUserRoles.mockResolvedValue({
+        data: { response: { roles: [{ role: 'ORG_ADMIN' }, { role: 'PUBLIC' }] } },
+      });
+
+      const { result } = renderHook(() => useIsAdmin(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current).toBe(true);
+      });
+    });
+
+    it('returns false when ORG_ADMIN is not present', async () => {
+      mockUserService.getUserRoles.mockResolvedValue({
+        data: { response: { roles: [{ role: 'PUBLIC' }] } },
+      });
+
+      const { result } = renderHook(() => useIsAdmin(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(mockUserService.getUserRoles).toHaveBeenCalled();
+      });
+      expect(result.current).toBe(false);
     });
   });
 });

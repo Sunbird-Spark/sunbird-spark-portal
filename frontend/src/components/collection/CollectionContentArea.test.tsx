@@ -432,4 +432,106 @@ describe('CollectionContentArea', () => {
       expect(screen.queryByTestId('profile-data-sharing-card')).not.toBeInTheDocument();
     });
   });
+
+  describe('Course updated banner', () => {
+    const enrolledEarly = new Date('2026-01-01T00:00:00Z').getTime();
+    const enrolledLate = new Date('2026-04-01T00:00:00Z').getTime();
+    const publishedMid = '2026-03-15T10:30:00.000Z';
+    const partialProgress = { totalContentCount: 5, completedContentCount: 3 };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const renderArea = (overrides: { access?: any; collectionData?: any; enrollment?: any }) =>
+      render(
+        <CollectionContentArea
+          {...learnerWithBatchProps}
+          access={{ ...learnerWithBatchProps.access, ...(overrides.access ?? {}) }}
+          collectionData={{ ...defaultProps.collectionData, ...(overrides.collectionData ?? {}) }}
+          enrollment={{ ...defaultEnrollment, courseProgressProps: partialProgress, contentStateFetched: true, ...(overrides.enrollment ?? {}) }}
+        />
+      );
+    const banner = () => screen.queryByText(/collection\.courseUpdatedTitle/);
+
+    it('renders when enrolled and course was republished after enrolment', () => {
+      renderArea({ collectionData: { lastPublishedOn: publishedMid }, enrollment: { enrolledDate: enrolledEarly } });
+      expect(banner()).toBeInTheDocument();
+    });
+
+    it('hides when learner enrolled after the most recent publish', () => {
+      renderArea({ collectionData: { lastPublishedOn: publishedMid }, enrollment: { enrolledDate: enrolledLate } });
+      expect(banner()).not.toBeInTheDocument();
+    });
+
+    it('hides when learner is not enrolled in the current batch', () => {
+      renderArea({ access: { isEnrolledInCurrentBatch: false }, collectionData: { lastPublishedOn: publishedMid }, enrollment: { enrolledDate: enrolledEarly } });
+      expect(banner()).not.toBeInTheDocument();
+    });
+
+    it('hides when lastPublishedOn is missing', () => {
+      renderArea({ enrollment: { enrolledDate: enrolledEarly } });
+      expect(banner()).not.toBeInTheDocument();
+    });
+
+    it('still shows when the learner is fully complete — the banner explains the recalculation regardless of current %', () => {
+      // Banner shows whenever the course was republished after enrolment, even if the learner
+      // happens to be at 100% (e.g. deletion-causes-100% or re-completion after update). Hiding
+      // it only at 100% would silently leave deletion/re-completion cases unexplained.
+      renderArea({ collectionData: { lastPublishedOn: publishedMid }, enrollment: { enrolledDate: enrolledEarly, courseProgressProps: { totalContentCount: 5, completedContentCount: 5 } } });
+      expect(banner()).toBeInTheDocument();
+    });
+
+    it('hides while completion data has not loaded yet (totalContentCount missing)', () => {
+      // Guards against the refresh flash: until the enrollment API returns totals, the
+      // gate cannot tell whether the user is complete, so the banner must stay hidden.
+      renderArea({ collectionData: { lastPublishedOn: publishedMid }, enrollment: { enrolledDate: enrolledEarly, courseProgressProps: { progress: 50 } } });
+      expect(banner()).not.toBeInTheDocument();
+    });
+
+    it('still shows when the server reports completionPercentage === 100 (deletion-causes-100 case)', () => {
+      // After a content deletion that pushes the learner to 100%, the banner must still explain
+      // that progress was recalculated. Hiding it here would leave the silent jump unexplained.
+      renderArea({
+        collectionData: { lastPublishedOn: publishedMid },
+        enrollment: {
+          enrolledDate: enrolledEarly,
+          courseProgressProps: { totalContentCount: 12, completedContentCount: 12 },
+        },
+      });
+      expect(banner()).toBeInTheDocument();
+    });
+
+    it('hides while content/state/read has not yet returned (avoids 1s flash on refresh)', () => {
+      // Before contentStateFetched is true, the client-side count derives from the stale
+      // enrollment.contentStatus map. We must hold the banner until /content/state/read returns.
+      renderArea({
+        collectionData: { lastPublishedOn: publishedMid },
+        enrollment: { enrolledDate: enrolledEarly, contentStateFetched: false },
+      });
+      expect(banner()).not.toBeInTheDocument();
+    });
+
+    it('hides when hasBatchInRoute is false (transient state before auto-redirect)', () => {
+      // useCollectionEnrollment can briefly report isEnrolledInCurrentBatch=true while
+      // hasBatchInRoute=false (the batch-id redirect hasn't fired yet). Every sibling
+      // learner gate requires hasBatchInRoute — the banner must follow the same convention.
+      renderArea({
+        access: { hasBatchInRoute: false },
+        collectionData: { lastPublishedOn: publishedMid },
+        enrollment: { enrolledDate: enrolledEarly },
+      });
+      expect(banner()).not.toBeInTheDocument();
+    });
+
+    it('still renders when sidebar.collectionId is undefined', () => {
+      // collectionId is typed string | undefined; the banner's internal dialogKey must
+      // tolerate a missing id (falls back to "unknown:<date>") so the modal still opens.
+      render(
+        <CollectionContentArea
+          {...learnerWithBatchProps}
+          collectionData={{ ...defaultProps.collectionData, lastPublishedOn: publishedMid }}
+          enrollment={{ ...defaultEnrollment, courseProgressProps: partialProgress, contentStateFetched: true, enrolledDate: enrolledEarly }}
+          sidebar={{ ...defaultSidebar, collectionId: undefined }}
+        />
+      );
+      expect(banner()).toBeInTheDocument();
+    });
+  });
 });

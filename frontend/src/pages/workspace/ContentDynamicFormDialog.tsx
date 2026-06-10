@@ -73,7 +73,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
   return (
     <div className="content-form-error-state">
       <p className="content-form-error-text">{error}</p>
-      <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white">{t('retry')}</Button>
+      <Button type="button" size="sm" onClick={onRetry} className="bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white">{t('retry')}</Button>
     </div>
   );
 };
@@ -242,7 +242,7 @@ export default function ContentDynamicFormDialog({
             </div>
             <div className="content-form-actions">
               <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>{t('cancel')}</Button>
-              <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white" {...submitButtonProps}>{isLoading ? t('workspace.creating') : t('create')}</Button>
+              <Button type="submit" size="sm" disabled={!canSubmit || isLoading} className="bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white" {...submitButtonProps}>{isLoading ? t('workspace.creating') : t('create')}</Button>
             </div>
           </form>
         )}

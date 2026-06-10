@@ -5,7 +5,7 @@ import {
 import ChartCard from "@/components/reports/ChartCard";
 import type { ProgressBucket } from "@/types/reports";
 
-const donutColors = ["hsl(var(--sunbird-ginger))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
+const donutColors = ["hsl(var(--sunbird-theme-accent-muted))", "hsl(var(--sunbird-moss))", "hsl(var(--sunbird-ink))", "hsl(var(--sunbird-lavender))"];
 
 interface CourseReportChartsProps {
   enrollmentChartData: { label: string; enrolled: number; completed: number }[];

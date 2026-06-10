@@ -1,0 +1,97 @@
+@layer base {
+
+  /* Radius tokens — initialized to Classic values so existing CSS is unaffected. */
+  :root {
+    --r-sm: 0.5rem;
+    --r-md: 0.875rem;
+    --r-lg: 1.25rem;
+    --r-xl: 1.75rem;
+    --r-xs: 0.625rem;
+    --r-xxs: 0.25rem;
+    --r-pill: 9999px;
+    /* Auth split-screen panel radius (login / signup / forgot-pwd / reset).
+       AuthLayout consumes these, so template overrides flow automatically. */
+    --r-auth-frame: 4rem;
+    --r-auth-panel: 3.5rem;
+  }
+
+  /* Modern template — applied when <html data-template="modern"> */
+  /* KEEP IN SYNC WITH classic block below — every property added here must be restored there */
+  html[data-template="modern"] {
+    /* Form — sharp corners */
+    --r-sm: 2px;
+    --r-md: 4px;
+    --r-lg: 6px;
+    --r-xl: 8px;
+    --r-xs: 0.25rem;
+    --r-xxs: 0.125rem;
+    --r-pill: 0.5rem;
+    --radius: 0.375rem;
+    /* Sharp auth panels — match the Keycloak login page. */
+    --r-auth-frame: 8px;
+    --r-auth-panel: 8px;
+
+    /* Surfaces — neutral page background (NOT theme-tinted, so workspace
+       category thumbnails keep their own colours). Cards remain white and
+       lift off the page via shadows + border. */
+    --background: 210 16% 96%;
+    --card: 0 0% 100%;
+    --sunbird-status-ongoing-bg: 0 0% 100%;
+    --sunbird-beige-light: 210 14% 95%;
+    --sunbird-theme-tint: var(--sunbird-spark-theme-primary-h) 28% 94%;
+
+    /* Tighter borders */
+    --border: 215 18% 86%;
+
+    /* Real layered shadows — match the visual weight of Classic shadows. */
+    --sunbird-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+    --sunbird-shadow-md: 0 4px 10px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
+    --sunbird-shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.06);
+
+    /* Soft primary-tinted nav — light shade with just enough hue to feel
+       theme-aware. Theme switch drives the hue. */
+    --nav-bg: var(--sunbird-spark-theme-primary-h) 30% 96%;
+    --nav-fg: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) 22%;
+  }
+
+  /* Classic template — explicit restore of every property Modern overrides */
+  /* KEEP IN SYNC WITH modern block above — every property added there must be restored here */
+  html[data-template="classic"] {
+    --r-sm: 0.5rem;
+    --r-md: 0.875rem;
+    --r-lg: 1.25rem;
+    --r-xl: 1.75rem;
+    --r-xs: 0.625rem;
+    --r-xxs: 0.25rem;
+    --r-pill: 9999px;
+    --radius: 1rem;
+    --r-auth-frame: 4rem;
+    --r-auth-panel: 3.5rem;
+
+    --background: 48 23% 91%;
+    --card: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 97%;
+    --sunbird-status-ongoing-bg: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 93%;
+    --sunbird-beige-light: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 89%;
+    --sunbird-theme-tint: var(--sunbird-spark-theme-chip-h) var(--sunbird-spark-theme-chip-s) 93%;
+
+    --border: 210 25% 80%;
+
+    --sunbird-shadow-sm: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-md: 0 0.875rem 0.875rem rgba(0, 0, 0, 0.05);
+    --sunbird-shadow-lg: 0 0.25rem 1.25rem 0 rgba(0, 0, 0, 0.1);
+
+    /* Chip-tinted nav — light shade so it blends with the warm cream page
+       but still reads as theme-reactive. */
+    --nav-bg: var(--sunbird-spark-theme-chip-h) 50% 95%;
+    --nav-fg: var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) 22%;
+  }
+
+  /* Typographic confidence in Modern */
+  html[data-template="modern"] h1,
+  html[data-template="modern"] h2,
+  html[data-template="modern"] h3,
+  html[data-template="modern"] h4 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}

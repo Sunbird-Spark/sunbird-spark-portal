@@ -60,7 +60,7 @@ const HelpCategoryDetail = () => {
     const sanitizedFaqs = useMemo(
         () => (category?.faqs ?? []).map((faq) => ({
             ...faq,
-            answer: sanitizeHtml(faq.answer).replace(/{{APP_NAME}}/g, appName)
+            answer: sanitizeHtml(faq.answer.replace(/{{APP_NAME}}/g, appName))
         })),
         [category, appName]
     );
@@ -121,7 +121,7 @@ const HelpCategoryDetail = () => {
                 <div className="flex items-center justify-between mb-[2rem]">
                     <button
                         onClick={() => { if (navigationHelperService.shouldProcessNavigationClick()) navigate("/help-support"); }}
-                        className="flex items-center gap-[0.5rem] text-sunbird-brick font-medium font-rubik text-sm hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-[0.5rem] text-sunbird-theme-accent font-medium font-rubik text-sm hover:opacity-80 transition-opacity"
                         data-edataid="help-category-go-back"
                         data-pageid="help-category-detail"
                     >
@@ -130,7 +130,7 @@ const HelpCategoryDetail = () => {
                     </button>
                     <button
                         onClick={() => setIsReportIssueOpen(true)}
-                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-rubik rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center"
+                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-theme-accent text-sunbird-base-white text-sm font-medium font-rubik rounded-xs hover:opacity-90 transition-opacity flex items-center justify-center"
                         aria-label={t('help.reportContentIssue')}
                         data-edataid="help-report-issue-open"
                         data-pageid="help-category-detail"
@@ -168,9 +168,9 @@ const HelpCategoryDetail = () => {
 
                         <Accordion type="single" collapsible value={openValue} onValueChange={handleAccordionChange} className="space-y-[0.75rem]">
                             {sanitizedFaqs.map((faq, index) => (
-                                <AccordionItem key={index} value={`item-${index}`} className="rounded-[0.625rem] bg-sunbird-base-white border-b-0">
+                                <AccordionItem key={index} value={`item-${index}`} className="rounded-xs bg-sunbird-base-white border-b-0">
                                     <AccordionTrigger
-                                        className="text-left font-rubik font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-brick"
+                                        className="text-left font-rubik font-medium text-[1.125rem] leading-[100%] tracking-[0%] hover:no-underline py-[1rem] px-[1.25rem] text-foreground [&>svg]:text-sunbird-theme-accent"
                                     >
                                         {faq.question}
                                     </AccordionTrigger>
@@ -178,7 +178,7 @@ const HelpCategoryDetail = () => {
                                         <div className="mb-[1rem] px-[1.25rem]" dangerouslySetInnerHTML={{ __html: faq.answer }} />
                                         <div className="py-[0.625rem] border-sunbird-gray-e5 shadow-sunbird-sm px-[1.25rem]">
                                             {(feedback[index] === "yes" || feedback[index] === "submitted") ? (
-                                                <p className="text-sm font-medium text-sunbird-brick font-rubik py-[0.5rem]">
+                                                <p className="text-sm font-medium text-sunbird-theme-accent font-rubik py-[0.5rem]">
                                                     {t('help.feedbackThanks')}
                                                 </p>
                                             ) : feedback[index] === "no" ? (
@@ -189,7 +189,7 @@ const HelpCategoryDetail = () => {
                                                         placeholder={t('help.typeHere')}
                                                         value={feedbackText[index] || ""}
                                                         onChange={(e) => setFeedbackText((prev) => ({ ...prev, [index]: e.target.value }))}
-                                                        className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-rubik resize-none h-[5rem] focus:outline-none focus:border-sunbird-brick"
+                                                        className="w-full border border-sunbird-gray-d9 rounded-lg p-[0.75rem] text-sm font-rubik resize-none h-[5rem] focus:outline-none focus:border-sunbird-theme-accent"
                                                         aria-label={t('help.additionalFeedback')}
                                                         aria-required="true"
                                                     />
@@ -207,9 +207,9 @@ const HelpCategoryDetail = () => {
                                                             disabled={!feedbackText[index]?.trim()}
                                                             data-edataid="faq-feedback-submit"
                                                             data-pageid="help-category-detail"
-                                                            className={`text-sunbird-base-white text-sm font-medium font-rubik px-[1.25rem] py-[0.5rem] rounded-[0.625rem] transition-all ${!feedbackText[index]?.trim()
+                                                            className={`text-sunbird-base-white text-sm font-medium font-rubik px-[1.25rem] py-[0.5rem] rounded-xs transition-all ${!feedbackText[index]?.trim()
                                                                 ? "bg-sunbird-gray-75 opacity-50 cursor-not-allowed"
-                                                                : "bg-sunbird-brick hover:opacity-90"
+                                                                : "bg-sunbird-theme-accent hover:opacity-90"
                                                                 }`}
                                                         >
                                                             {t('help.submitFeedback')}
@@ -221,7 +221,7 @@ const HelpCategoryDetail = () => {
                                                     <span className="text-sm text-muted-foreground font-rubik">{t('help.didThisHelp')}</span>
                                                     <button
                                                         onClick={() => handleFeedback(index, "no")}
-                                                        className="text-sm font-medium font-rubik text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                        className="text-sm font-medium font-rubik text-sunbird-theme-accent hover:opacity-80 transition-opacity"
                                                         data-edataid="faq-feedback-no"
                                                         data-pageid="help-category-detail"
                                                         data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}
@@ -230,7 +230,7 @@ const HelpCategoryDetail = () => {
                                                     </button>
                                                     <button
                                                         onClick={() => handleFeedback(index, "yes")}
-                                                        className="text-sm font-medium font-rubik text-sunbird-brick hover:opacity-80 transition-opacity"
+                                                        className="text-sm font-medium font-rubik text-sunbird-theme-accent hover:opacity-80 transition-opacity"
                                                         data-edataid="faq-feedback-yes"
                                                         data-pageid="help-category-detail"
                                                         data-cdata={JSON.stringify([{ id: String(index), type: 'FAQIndex' }])}

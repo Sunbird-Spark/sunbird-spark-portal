@@ -23,18 +23,19 @@ const ForgotPassword: React.FC = () => {
 
   useImpression({ type: 'view', pageid: 'forgot-password' });
 
-  // Persist mobile context and language on mount
+  // Persist mobile context, language, and theme prefs on mount
   useEffect(() => {
     if (isMobileApp()) {
       persistMobileContext();
     }
-    // Read lang from URL param (passed by mobile app) and persist to localStorage
     const params = new URLSearchParams(window.location.search);
     const lang = params.get('lang');
     if (lang && LANGUAGE_MAP[lang as SupportedLanguage]) {
       try { localStorage.setItem(LANGUAGE_STORAGE_KEY, lang); } catch { /* storage unavailable */ }
       void i18n.changeLanguage(lang).catch((err) => { console.error('Failed to change language to', lang, err); });
     }
+    // Theme / font / template are consumed by ThemeProvider with direct
+    // state setters (no cascade). Don't duplicate here.
   }, []);
 
   const [step, setStep] = useState<Step>(1);

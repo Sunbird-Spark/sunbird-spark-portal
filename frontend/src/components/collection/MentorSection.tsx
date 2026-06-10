@@ -25,7 +25,7 @@ export function MentorSection({
   selectedMentorIds,
   toggleMentor,
   labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik",
-  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
+  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40 focus:border-sunbird-theme-accent bg-white font-rubik",
   disabled = false,
 }: MentorSectionProps) {
   const { t } = useAppI18n();
@@ -76,13 +76,13 @@ export function MentorSection({
                 key={user.identifier}
                 className={cn(
                   "flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors",
-                  isSelected && "bg-sunbird-brick/5"
+                  isSelected && "bg-sunbird-theme-accent/5"
                 )}
               >
                 <Checkbox.Root
                   checked={isSelected}
                   onCheckedChange={() => toggleMentor(user.identifier)}
-                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-brick data-[state=checked]:bg-sunbird-brick data-[state=checked]:text-white focus:outline-none"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-theme-accent data-[state=checked]:bg-sunbird-theme-accent data-[state=checked]:text-white focus:outline-none"
                 >
                   <Checkbox.Indicator>
                     <FiCheck className="w-3 h-3" />
@@ -113,7 +113,7 @@ export function MentorSection({
             return (
               <span
                 key={id}
-                className="inline-flex items-center gap-1 text-xs bg-sunbird-brick/10 text-sunbird-brick rounded-full px-2.5 py-0.5 font-rubik"
+                className="inline-flex items-center gap-1 text-xs bg-sunbird-theme-accent/10 text-sunbird-theme-accent rounded-full px-2.5 py-0.5 font-rubik"
               >
                 {name}
                 {!disabled && (

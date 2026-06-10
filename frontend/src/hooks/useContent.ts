@@ -42,10 +42,12 @@ export const useContentSearch = (
 ): UseQueryResult<ApiResponse<ContentSearchResponse>, Error> => {
   const request = options?.request;
   const enabled = options?.enabled ?? true;
+  const searchMode = options?.searchMode ?? 'keyword';
 
-  // Inject the primaryCategory fallback when the user hasn't selected any category filter.
+  // Inject the primaryCategory fallback for keyword search when no category is selected.
   const effectiveRequest = useMemo(() => {
     if (!request) return request;
+    if (searchMode === 'semantic') return request;
     const hasPrimaryCategory = Array.isArray(request.filters?.primaryCategory)
       ? request.filters.primaryCategory.length > 0
       : !!request.filters?.primaryCategory;
@@ -57,22 +59,30 @@ export const useContentSearch = (
         primaryCategory: DEFAULT_PRIMARY_CATEGORIES,
       },
     };
-  }, [request]);
+  }, [request, searchMode]);
 
   // Build a stable queryKey from individual fields so property order never affects caching
   const queryKey = useMemo(() => [
     'content-search',
+    searchMode,
     effectiveRequest?.query,
     effectiveRequest?.offset,
     effectiveRequest?.limit,
     JSON.stringify(effectiveRequest?.sort_by),
     JSON.stringify(effectiveRequest?.filters),
-  ], [effectiveRequest]);
+  ], [effectiveRequest, searchMode]);
+
+  // Semantic search requires a non-empty query — disable it when blank so callers
+  // can show an empty-state prompt rather than silently falling back to keyword results.
+  const semanticBlocked = searchMode === 'semantic' && !effectiveRequest?.query?.trim();
 
   return useQuery({
     queryKey,
-    queryFn: () => contentService.contentSearch(effectiveRequest),
-    enabled,
+    queryFn: () =>
+      searchMode === 'semantic'
+        ? contentService.semanticSearch(effectiveRequest)
+        : contentService.contentSearch(effectiveRequest),
+    enabled: enabled && !semanticBlocked,
     staleTime: 60 * 60 * 1000,
   });
 };

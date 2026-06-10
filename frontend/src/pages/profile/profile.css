@@ -31,7 +31,7 @@
 }
 
 .sidebar-toggle-btn {
-    @apply text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1;
+    @apply text-sunbird-theme-accent hover:text-sunbird-theme-accent/90 transition-colors p-1;
 }
 
 .profile-header-actions {
@@ -43,7 +43,7 @@
 }
 
 .profile-search-btn-mobile {
-    @apply p-2 text-sunbird-brick;
+    @apply p-2 text-sunbird-theme-accent;
 }
 
 .profile-action-btn {
@@ -51,7 +51,7 @@
 }
 
 .profile-action-icon {
-    @apply w-5 h-5 text-sunbird-brick;
+    @apply w-5 h-5 text-sunbird-theme-accent;
 }
 
 .profile-lang-btn {
@@ -168,7 +168,7 @@ body .notification-popover-arrow {
 }
 
 .notification-delete-all-btn {
-    @apply text-sm text-sunbird-brick;
+    @apply text-sm text-sunbird-theme-accent;
     font-size: 12px;
 }
 
@@ -194,11 +194,11 @@ body .notification-popover-arrow {
     background: hsl(var(--sunbird-white));
     border: 1px solid transparent;
     box-shadow: var(--sunbird-shadow-md);
-    border-radius: 14px;
+    border-radius: var(--r-md);
 }
 
 .notification-item--unread {
-    border: 1px solid hsl(var(--sunbird-ginger));
+    border: 1px solid hsl(var(--sunbird-theme-accent-muted));
 }
 
 .notification-item-body {
@@ -214,7 +214,7 @@ body .notification-popover-arrow {
 }
 
 .notification-item-delete-btn {
-    @apply text-sunbird-brick hover:text-sunbird-brick/80 shrink-0 self-center;
+    @apply text-sunbird-theme-accent hover:text-sunbird-theme-accent/80 shrink-0 self-center;
 }
 
 /* Stats Cards Grid */
@@ -223,7 +223,7 @@ body .notification-popover-arrow {
 }
 
 .stat-card {
-    @apply rounded-[1.25rem] p-5 pl-[1.875rem] text-white relative h-[9.0625rem] flex flex-col justify-end;
+    @apply rounded-xl p-5 pl-[1.875rem] text-white relative h-[9.0625rem] flex flex-col justify-end;
     box-shadow: var(--sunbird-shadow-lg);
 }
 
@@ -240,7 +240,7 @@ body .notification-popover-arrow {
 }
 
 .stat-card-badges .stat-icon-container {
-    @apply bg-sunbird-brown-dark;
+    background-color: hsla(28, 53%, 38%, 1.00);
 }
 
 .stat-card-completed {
@@ -274,7 +274,7 @@ body .notification-popover-arrow {
 
 /* Profile Card */
 .profile-card {
-    @apply bg-white rounded-[1.25rem] p-4 flex flex-col items-center;
+    @apply bg-white rounded-xl p-4 flex flex-col items-center;
 }
 
 .profile-avatar-wrapper {
@@ -282,11 +282,11 @@ body .notification-popover-arrow {
 }
 
 .profile-avatar-ring {
-    @apply w-[9rem] h-[9rem] rounded-full border-4 border-sunbird-ginger p-0.5 flex items-center justify-center overflow-hidden;
+    @apply w-[9rem] h-[9rem] rounded-full border-4 border-sunbird-theme-accent-muted p-0.5 flex items-center justify-center overflow-hidden;
 }
 
 .profile-update-photo-btn {
-    @apply font-rubik font-medium text-[0.875rem] leading-[0.875rem] text-sunbird-brick hover:text-sunbird-brick/90 mb-4 transition-colors text-center w-full;
+    @apply font-rubik font-medium text-[0.875rem] leading-[0.875rem] text-sunbird-theme-accent hover:text-sunbird-theme-accent/90 mb-4 transition-colors text-center w-full;
     letter-spacing: 0%;
 }
 
@@ -302,7 +302,7 @@ body .notification-popover-arrow {
 
 /* Personal Information */
 .personal-info-card {
-    @apply bg-white rounded-[1.25rem] p-4;
+    @apply bg-white rounded-xl p-4;
 }
 
 .personal-info-header {
@@ -314,7 +314,7 @@ body .notification-popover-arrow {
 }
 
 .personal-info-accent {
-    @apply absolute -left-4 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-ginger hidden md:block;
+    @apply absolute -left-4 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-theme-accent-muted hidden md:block;
 }
 
 .personal-info-title {
@@ -323,7 +323,7 @@ body .notification-popover-arrow {
 }
 
 .personal-info-edit-btn {
-    @apply flex items-center gap-1 text-base font-medium text-sunbird-brick hover:text-sunbird-brick/90 transition-colors;
+    @apply flex items-center gap-1 text-base font-medium text-sunbird-theme-accent hover:text-sunbird-theme-accent/90 transition-colors;
 }
 
 .personal-info-grid {
@@ -350,7 +350,7 @@ body .notification-popover-arrow {
 
 /* Learning List Extra Styles */
 .learning-list-card {
-    @apply bg-white rounded-[1.25rem] p-6;
+    @apply bg-white rounded-xl p-6;
 }
 
 .learning-header {
@@ -362,7 +362,7 @@ body .notification-popover-arrow {
 }
 
 .learning-title-accent {
-    @apply absolute -left-6 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-ginger;
+    @apply absolute -left-6 top-1/2 -translate-y-1/2 w-[0.3125rem] h-5 bg-sunbird-theme-accent-muted;
 }
 
 .learning-title {
@@ -388,7 +388,7 @@ body .notification-popover-arrow {
 }
 
 .learning-view-more-link {
-    @apply text-sm font-medium text-sunbird-brick hover:opacity-80 transition-opacity;
+    @apply text-sm font-medium text-sunbird-theme-accent hover:opacity-80 transition-opacity;
 }
 
 /* Dropdown Styles */
@@ -401,7 +401,7 @@ body .notification-popover-arrow {
 }
 
 .profile-dropdown-item.active {
-    @apply text-sunbird-brick font-medium bg-sunbird-gray-f3;
+    @apply text-sunbird-theme-accent font-medium bg-sunbird-gray-f3;
 }
 
 .profile-dropdown-item.logout {
@@ -413,7 +413,7 @@ body .notification-popover-arrow {
 }
 
 .profile-dropdown-icon-wrapper.primary {
-    @apply bg-sunbird-brick/10 text-sunbird-brick;
+    @apply bg-sunbird-theme-accent/10 text-sunbird-theme-accent;
 }
 
 .profile-dropdown-icon-wrapper.danger {
@@ -421,12 +421,12 @@ body .notification-popover-arrow {
 }
 
 .profile-dropdown-indicator {
-    @apply w-1.5 h-1.5 rounded-full bg-sunbird-brick;
+    @apply w-1.5 h-1.5 rounded-full bg-sunbird-theme-accent;
 }
 
 /* Custom list items for ProfileLearningList */
 .profile-learning-item {
-    @apply flex flex-col xl:flex-row items-stretch xl:items-center p-4 md:p-5 bg-white border border-gray-100 rounded-[1.25rem] shadow-sm gap-4 xl:gap-0 xl:justify-start;
+    @apply flex flex-col xl:flex-row items-stretch xl:items-center p-4 md:p-5 bg-white border border-gray-100 rounded-xl shadow-sm gap-4 xl:gap-0 xl:justify-start;
 }
 
 .profile-learning-info {
@@ -459,4 +459,90 @@ body .notification-popover-arrow {
 
 .profile-learning-status {
     @apply flex justify-start xl:flex-1 xl:justify-center;
+}
+
+/* Account Management */
+.account-management-card {
+    @apply bg-white rounded-[1.25rem] p-6 mt-8;
+}
+
+.account-management-header {
+    @apply flex items-center justify-between relative;
+}
+
+.account-management-title {
+    @apply text-[1.375rem] font-medium text-foreground;
+}
+
+.account-management-subtitle {
+    @apply text-sm text-sunbird-gray-4a font-rubik mb-4;
+}
+
+.account-management-danger-banner {
+    @apply flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl border border-red-200 bg-red-50 p-3 sm:p-4;
+}
+
+.account-management-danger-content {
+    @apply flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0;
+}
+
+.account-management-danger-icon {
+    @apply flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-white border border-red-200 text-red-600 shrink-0 [&_svg]:h-4 [&_svg]:w-4 sm:[&_svg]:h-5 sm:[&_svg]:w-5;
+}
+
+.account-management-danger-title {
+    @apply font-rubik font-semibold text-sm sm:text-base text-red-600;
+}
+
+.account-management-danger-description {
+    @apply text-xs sm:text-sm font-rubik text-sunbird-gray-4a;
+}
+
+.account-management-danger-cta {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-rubik font-medium text-xs sm:text-sm px-3 py-2 sm:px-4 w-full sm:w-auto self-stretch sm:self-center shrink-0 [&_svg]:h-3.5 [&_svg]:w-3.5 sm:[&_svg]:h-4 sm:[&_svg]:w-4;
+}
+
+/* Delete Account Page */
+.delete-account-main {
+    @apply flex items-center justify-center min-h-screen py-8 px-4;
+}
+
+.delete-account-page {
+    @apply w-full max-w-2xl p-6 bg-white rounded-[1.25rem] shadow-sunbird-md mb-16;
+}
+
+.delete-account-title {
+    @apply font-rubik font-medium text-[1.5rem] text-foreground mb-2;
+}
+
+.delete-account-warning {
+    @apply text-base text-red-700 bg-red-50 border border-red-200 rounded-md p-3 mb-6 font-rubik;
+}
+
+.delete-account-container {
+    @apply flex flex-col items-center w-full max-w-2xl;
+}
+
+.delete-account-logo {
+    @apply h-20 w-auto block object-contain mb-6;
+}
+
+.delete-account-icon-wrapper {
+    @apply flex justify-center mb-4;
+}
+
+.delete-account-icon-badge {
+    @apply flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600;
+}
+
+.delete-account-icon {
+    @apply h-6 w-6;
+}
+
+.delete-account-message {
+    @apply text-base font-rubik text-sunbird-gray-4a mb-6;
+}
+
+.delete-account-login-btn {
+    @apply font-rubik font-medium text-base leading-normal h-10 px-6 rounded-md bg-sunbird-brick text-white hover:opacity-90 transition-opacity inline-flex items-center justify-center;
 }

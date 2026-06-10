@@ -21,6 +21,7 @@ export function mapApiItemToUserCourseProgress(
     status: STATUS_MAP[item.status] ?? 'Not Started',
     enrollmentDate: dayjs(item.enrolled_date).format('YYYY-MM-DD'),
     lastAccessed: toRelativeTime(item.datetime),
+    lastAccessedTs: dayjs(item.datetime).valueOf() ?? 0,
   };
 }
 
@@ -38,5 +39,6 @@ export function mapApiItemToUserAssessmentHistory(
     maxScore,
     percentage,
     attemptDate: dayjs.utc(item.last_attempted_on).format('YYYY-MM-DD HH:mm'),
+    attemptDateTs: dayjs.utc(item.last_attempted_on).valueOf() ?? 0,
   };
 }

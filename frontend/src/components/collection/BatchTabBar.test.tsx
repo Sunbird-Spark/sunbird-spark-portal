@@ -63,7 +63,7 @@ describe('BatchTabBar', () => {
     render(<TabBar activeTab="Upcoming" counts={{ Ongoing: 0, Upcoming: 10, Expired: 0 }} onChange={vi.fn()} />);
 
     const upcomingBtn = screen.getByRole('button', { name: /Upcoming/i });
-    expect(upcomingBtn.className).toMatch(/text-sunbird-brick/);
+    expect(upcomingBtn.className).toMatch(/text-sunbird-theme-accent/);
     
     // inactive tab
     const ongoingBtn = screen.getByRole('button', { name: /Ongoing/i });

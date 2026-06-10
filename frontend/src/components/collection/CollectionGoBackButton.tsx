@@ -17,7 +17,7 @@ export const CollectionGoBackButton: React.FC<CollectionGoBackButtonProps> = ({ 
   return (
     <button
       onClick={() => navigate(backToRef.current)}
-      className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
+      className="flex items-center gap-2 text-sunbird-theme-accent text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
       data-edataid="collection-go-back"
       data-pageid={batchIdParam ? 'course-consumption' : 'collection-detail'}
     >

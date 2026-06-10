@@ -176,13 +176,13 @@ const CollectionSidebar = ({
                   {isExpanded ? (
                     <FiChevronUp
                       className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                        contentBlocked ? "text-muted-foreground" : "text-sunbird-brick"
+                        contentBlocked ? "text-muted-foreground" : "text-sunbird-theme-accent"
                       }`}
                     />
                   ) : (
                     <FiChevronDown
                       className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                        contentBlocked ? "text-muted-foreground" : "text-sunbird-brick"
+                        contentBlocked ? "text-muted-foreground" : "text-sunbird-theme-accent"
                       }`}
                     />
                   )}

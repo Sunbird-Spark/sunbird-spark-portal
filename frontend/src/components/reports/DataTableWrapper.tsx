@@ -113,8 +113,8 @@ function DataTableWrapper<T>({
                 </TableCell>
               </TableRow>
             ) : (
-              paged.map((row) => (
-                <TableRow key={keyExtractor(row)} className="hover:bg-muted/20 transition-colors">
+              paged.map((row, idx) => (
+                <TableRow key={`${keyExtractor(row)}_${idx}`} className="hover:bg-muted/20 transition-colors">
                   {columns.map((col) => (
                     <TableCell key={col.key} className={`text-sm ${col.className ?? ""}`}>
                       {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? "")}

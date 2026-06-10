@@ -17,6 +17,10 @@ vi.mock('@/components/auth/AuthLayout', () => ({
     AuthLayout: ({ children }: any) => <div data-testid="auth-layout">{children}</div>
 }));
 
+vi.mock('@/providers/ThemeProvider', () => ({
+    useTheme: () => ({ setTheme: vi.fn(), setFont: vi.fn(), setTemplate: vi.fn() }),
+}));
+
 // Mock hooks
 vi.mock('@/hooks/useUser', () => ({
     useLearnerFuzzySearch: vi.fn(() => ({ mutateAsync: vi.fn() })),

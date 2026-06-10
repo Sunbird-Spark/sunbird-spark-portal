@@ -13,9 +13,9 @@ const STATUS_MAP: Record<string, BatchStatus> = {
 };
 
 const STATUS_STYLES: Record<BatchStatus, string> = {
-  Upcoming: "bg-yellow-100 text-yellow-700",
+  Upcoming: "bg-[hsl(var(--sunbird-status-ongoing-bg))] text-[hsl(var(--sunbird-brown-dark))]",
   Ongoing:  "bg-green-100 text-green-700",
-  Expired:  "bg-gray-100  text-gray-500",
+  Expired:  "bg-muted  text-muted-foreground",
 };
 
 export function getBatchStatus(status: string): BatchStatus {
@@ -73,7 +73,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
               onClick={() => onEditClick(batch)}
               title={canManageCertificates ? t('batchRow.editBatch') : t('batchRow.viewBatch')}
               aria-label={canManageCertificates ? t('batchRow.editBatch') : t('batchRow.viewBatch')}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-sunbird-theme-accent hover:bg-sunbird-theme-accent/8 transition-colors"
               data-edataid="batch-row-edit"
               data-pageid="course-consumption"
             >
@@ -92,7 +92,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
 
       {/* Dates */}
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-rubik">
-        <FiCalendar className="w-3 h-3 shrink-0 text-sunbird-brick/70" />
+        <FiCalendar className="w-3 h-3 shrink-0 text-sunbird-theme-accent/70" />
         <span>
           {formatDate(batch.startDate)} – {formatDate(batch.endDate)}
         </span>
@@ -107,7 +107,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
       {/* Certificate action */}
       {canManageCertificates && (
         <div className="flex items-center gap-1.5 pt-0.5 border-t border-border/60">
-          <FiAward className="w-3.5 h-3.5 text-sunbird-brick shrink-0" />
+          <FiAward className="w-3.5 h-3.5 text-sunbird-theme-accent shrink-0" />
           {certLocked ? (
             <span
               className="flex items-center gap-1 text-xs text-muted-foreground font-rubik cursor-not-allowed"
@@ -120,7 +120,7 @@ export const BatchRow = ({ batch, onEditClick, onCertificateClick, canManageCert
             <button
               type="button"
               onClick={() => onCertificateClick(batch)}
-              className="text-xs text-sunbird-brick font-medium font-rubik hover:underline"
+              className="text-xs text-sunbird-theme-accent font-medium font-rubik hover:underline"
               data-edataid="batch-row-certificate"
               data-pageid="course-consumption"
             >

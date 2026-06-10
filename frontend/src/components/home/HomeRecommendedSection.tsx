@@ -49,7 +49,7 @@ const HomeRecommendedSection = ({ creatorIds = [], enrolledCourseIds = [] }: Hom
         <section className="mb-8">
             <div className="flex items-center gap-2 mb-4">
                 <h3 className="home-section-title-large">{t('homeComponents.recommendedContents')}</h3>
-                <Link to="/explore" className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors">
+                <Link to="/explore" className="text-sunbird-theme-accent hover:text-sunbird-theme-accent/90 transition-colors">
                     <FiArrowRight className="w-5 h-5 stroke-[0.1875rem]" />
                 </Link>
             </div>

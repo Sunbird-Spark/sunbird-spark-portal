@@ -1,7 +1,7 @@
-/* Collection page styles - scrollbar uses sunbird-brick */
+/* Collection page styles - scrollbar uses sunbird-theme-accent */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--sunbird-brick)) hsl(var(--sunbird-brick) / 0.1);
+  scrollbar-color: hsl(var(--sunbird-theme-accent)) hsl(var(--sunbird-theme-accent) / 0.1);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -10,18 +10,18 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: hsl(var(--sunbird-brick) / 0.1);
+  background: hsl(var(--sunbird-theme-accent) / 0.1);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--sunbird-brick));
+  background-color: hsl(var(--sunbird-theme-accent));
   border-radius: 3px;
   min-height: 30px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--sunbird-brick) / 0.85);
+  background-color: hsl(var(--sunbird-theme-accent) / 0.85);
 }
 
 /* Collection player: fixed 33.5rem, all inner players fill the container */

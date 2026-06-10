@@ -89,7 +89,7 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
           <p className="text-gray-600 mb-6 font-rubik">{error}</p>
           <button
             onClick={handleClose}
-            className="w-full px-4 py-2.5 bg-sunbird-brick text-white rounded-lg font-rubik font-medium hover:opacity-90 transition-opacity"
+            className="w-full px-4 py-2.5 bg-sunbird-theme-accent text-white rounded-lg font-rubik font-medium hover:opacity-90 transition-opacity"
           >
             {t('editors.goBack')}
           </button>

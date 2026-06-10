@@ -44,12 +44,12 @@
 
 .comment-input {
   @apply w-full border border-gray-200 rounded-lg p-3 text-sm font-rubik resize-none
-    focus:outline-none focus:ring-2 focus:ring-sunbird-brick/30 focus:border-sunbird-brick mb-2;
+    focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/30 focus:border-sunbird-theme-accent mb-2;
 }
 
 .comment-submit-btn {
   @apply w-full px-4 py-2 rounded-lg text-sm font-medium font-rubik transition-colors
-    bg-sunbird-brick text-white hover:bg-sunbird-brick/90 disabled:opacity-50 disabled:cursor-not-allowed;
+    bg-sunbird-theme-accent text-white hover:bg-sunbird-theme-accent/90 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .no-comments-message {

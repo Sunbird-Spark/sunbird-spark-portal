@@ -166,6 +166,13 @@ export class UserService {
         );
     }
 
+    public async deleteUser(userId: string): Promise<ApiResponse<any>> {
+        return getClient().post(
+            `/user/v1/delete`,
+            { request: { userId } }
+        );
+    }
+
     public async getUserRoles(userId: string): Promise<ApiResponse<UserReadResponse>> {
         return getClient().get<UserReadResponse>(
             `/user/v5/read/${userId}?fields=roles`

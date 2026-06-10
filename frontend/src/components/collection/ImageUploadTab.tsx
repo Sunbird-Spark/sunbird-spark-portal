@@ -36,7 +36,7 @@ export function ImageUploadTab({
   handleUploadAndUse,
   uploadFile,
   labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik",
-  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
+  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40 focus:border-sunbird-theme-accent bg-white font-rubik",
 }: ImageUploadTabProps) {
   const { t } = useAppI18n();
   return (
@@ -53,8 +53,8 @@ export function ImageUploadTab({
         className={cn(
           "rounded-xl border-2 border-dashed cursor-pointer transition-colors flex flex-col items-center justify-center gap-2 py-8 px-4",
           dragging
-            ? "border-sunbird-brick bg-sunbird-brick/5"
-            : "border-border hover:border-sunbird-brick hover:bg-gray-50"
+            ? "border-sunbird-theme-accent bg-sunbird-theme-accent/5"
+            : "border-border hover:border-sunbird-theme-accent hover:bg-gray-50"
         )}
       >
         {uploadPreview ? (
@@ -88,8 +88,8 @@ export function ImageUploadTab({
         <label className={labelClass}>
           {t('imageUpload.copyrightsAndLicense')} <span className="text-red-500">*</span>
         </label>
-        <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
-          <p className="text-xs text-amber-800 font-rubik leading-relaxed">
+        <div className="rounded-lg bg-[hsl(var(--sunbird-status-ongoing-bg))] border border-[hsl(var(--sunbird-status-ongoing-border))] px-4 py-3">
+          <p className="text-xs text-[hsl(var(--sunbird-theme-accent))] font-rubik leading-relaxed">
             {t('imageUpload.licenseStatement')}
           </p>
         </div>
@@ -150,8 +150,8 @@ export function ImageUploadTab({
           className={cn(
             "ml-auto rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik inline-flex items-center gap-2",
             !uploadFile || !uploadFileName.trim()
-              ? "bg-sunbird-brick/40 cursor-not-allowed"
-              : "bg-sunbird-brick hover:bg-opacity-90"
+              ? "bg-sunbird-theme-accent/40 cursor-not-allowed"
+              : "bg-sunbird-theme-accent hover:bg-opacity-90"
           )}
         >
           <FiUpload className="w-4 h-4" />

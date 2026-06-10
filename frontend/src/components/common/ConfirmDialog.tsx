@@ -47,8 +47,8 @@ export default function ConfirmDialog({
 
   const confirmButtonClass =
     confirmVariant === "destructive"
-      ? "bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik"
-      : "bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik";
+      ? "bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-rubik"
+      : "bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-rubik";
 
       return createPortal(
         <div

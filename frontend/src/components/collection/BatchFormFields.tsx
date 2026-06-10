@@ -29,7 +29,7 @@ export function BatchFormFields({
   handleField,
   setForm,
   labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik",
-  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik",
+  inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40 focus:border-sunbird-theme-accent bg-white font-rubik",
   disabledFields = [],
 }: BatchFormFieldsProps) {
   const { t } = useAppI18n();

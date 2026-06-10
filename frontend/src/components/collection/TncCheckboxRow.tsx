@@ -47,7 +47,7 @@ export const TncCheckboxRow = ({
         checked={checked}
         onCheckedChange={onCheckedChange}
         required
-        className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-brick data-[state=checked]:bg-sunbird-brick data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40"
+        className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-sunbird-theme-accent data-[state=checked]:bg-sunbird-theme-accent data-[state=checked]:text-white focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40"
       >
         <Checkbox.Indicator>
           <FiCheck className="w-3 h-3" />
@@ -65,7 +65,7 @@ export const TncCheckboxRow = ({
               type="button"
               aria-label={t('tncCheckbox.termsLink')}
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); onTermsClick(); }}
-              className="underline text-sunbird-brick hover:opacity-80 font-medium"
+              className="underline text-sunbird-theme-accent hover:opacity-80 font-medium"
             >
               {t('tncCheckbox.termsLink')}
             </button>
@@ -74,7 +74,7 @@ export const TncCheckboxRow = ({
               <button
                 type="button"
                 aria-label={t('tncCheckbox.termsLink')}
-                className="underline text-sunbird-brick hover:opacity-80 font-medium"
+                className="underline text-sunbird-theme-accent hover:opacity-80 font-medium"
               >
                 {t('tncCheckbox.termsLink')}
               </button>

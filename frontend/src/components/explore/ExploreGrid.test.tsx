@@ -79,7 +79,7 @@ describe('ExploreGrid', () => {
   const defaultProps = {
     filters: {} as FilterState,
     query: '',
-    sortBy: { lastUpdatedOn: 'desc' }
+    sortBy: { lastUpdatedOn: 'desc' as const }
   };
 
   beforeEach(() => {

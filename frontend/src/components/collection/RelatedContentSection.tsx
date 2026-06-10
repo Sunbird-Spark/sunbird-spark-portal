@@ -29,12 +29,12 @@ export default function RelatedContentSection({
         </div>
       )}
       {searchError && searchErrorObj && (
-        <div className="min-h-[24.5rem] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
+        <div className="min-h-[24.5rem] flex items-center justify-center rounded-xl border border-border bg-white/50 px-6">
           <PageLoader error={searchErrorObj.message} onRetry={() => searchRefetch()} fullPage={false} />
         </div>
       )}
       {!searchError && searchFetching && relatedContentItems.length === 0 && (
-        <div className="min-h-[24.5rem] flex items-center justify-center rounded-[1.25rem] border border-border bg-white/50 px-6">
+        <div className="min-h-[24.5rem] flex items-center justify-center rounded-xl border border-border bg-white/50 px-6">
           <PageLoader message={t("loading")} fullPage={false} />
         </div>
       )}

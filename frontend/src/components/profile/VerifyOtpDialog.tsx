@@ -51,7 +51,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                 if (!open) onClose();
             }}
         >
-            <DialogContent hideCloseButton className="fixed left-1/2 top-1/2 z-50 w-full max-w-[720px] h-[472px] -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-white px-10 pb-10 pt-8 shadow-lg flex flex-col">
+            <DialogContent hideCloseButton className="fixed left-1/2 top-1/2 z-50 w-full max-w-[720px] h-[472px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white px-10 pb-10 pt-8 shadow-lg flex flex-col">
                 <div className="relative flex items-center justify-center mb-4">
                     <DialogTitle className="text-[22px] font-medium text-[hsl(var(--sunbird-obsidian))] font-rubik text-center">
                         {t("forgotPasswordPage.enterCode")}
@@ -60,7 +60,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                         onClick={onClose}
                         className="absolute right-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors"
                     >
-                        <MdOutlineClose className="w-6 h-6 text-[hsl(var(--sunbird-brick))]" />
+                        <MdOutlineClose className="w-6 h-6 text-[hsl(var(--sunbird-theme-accent))]" />
                     </button>
                 </div>
                 <p className="text-[13px] text-[hsl(var(--sunbird-gray-75))] font-rubik text-center mb-6">
@@ -84,7 +84,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                                 <InputOTPSlot
                                     key={index}
                                     index={index}
-                                    className="w-[50px] h-[50px] text-[18px] font-semibold border border-[hsl(var(--sunbird-gray-d9))] rounded-[10px] font-rubik focus:border-[hsl(var(--sunbird-ginger))] focus:ring-1 focus:ring-[hsl(var(--sunbird-ginger))]"
+                                    className="w-[50px] h-[50px] text-[18px] font-semibold border border-[hsl(var(--sunbird-gray-d9))] rounded-md font-rubik focus:border-[hsl(var(--sunbird-theme-accent-muted))] focus:ring-1 focus:ring-[hsl(var(--sunbird-theme-accent-muted))]"
                                 />
                             ))}
                         </InputOTPGroup>
@@ -106,7 +106,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                             fieldState.resendTimer > 0 ||
                             fieldState.resendCount >= fieldState.maxResendAttempts
                         }
-                        className="text-[hsl(var(--sunbird-brick))] hover:text-[hsl(var(--sunbird-brick)/0.8)] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-[hsl(var(--sunbird-theme-accent))] hover:text-[hsl(var(--sunbird-theme-accent)/0.8)] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {t("forgotPasswordPage.resendOtp")}
                     </button>
@@ -121,7 +121,7 @@ const VerifyOtpDialog: React.FC<VerifyOtpDialogProps> = ({
                         fieldState.otp.length !== 6 ||
                         fieldState.status === 'otp_verifying'
                     }
-                    className="mt-auto w-[360px] h-[46px] mx-auto rounded-[12px] bg-[hsl(var(--sunbird-brick))] text-white text-[16px] font-medium font-rubik hover:opacity-90 transition-opacity disabled:opacity-50"
+                    className="mt-auto w-[360px] h-[46px] mx-auto rounded-md bg-[hsl(var(--sunbird-theme-accent))] text-white text-[16px] font-medium font-rubik hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                     {fieldState.status === 'otp_verifying' ? t("editProfile.submitting") : t("signUp.submit")}
                 </button>

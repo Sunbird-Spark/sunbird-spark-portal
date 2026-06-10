@@ -35,7 +35,7 @@ export interface TrackableCollection {
   description: string;
   courseLogoUrl: string;
   dateTime: number;
-  enrolledDate: number;
+  enrolledDate: number | string;
   completedOn?: number;
   lastReadContentId?: string;
   lastReadContentStatus?: number;

@@ -27,6 +27,10 @@ vi.mock('@/utils/forgotPasswordUtils', () => ({
     isMobileApp: vi.fn(() => false),
 }));
 
+vi.mock('@/providers/ThemeProvider', () => ({
+    useTheme: () => ({ setTheme: vi.fn(), setFont: vi.fn(), setTemplate: vi.fn() }),
+}));
+
 // Mock useAppI18n with translated strings
 const mockT = vi.fn((key: string, opts?: { defaultValue?: string }) => {
     const translations: Record<string, string> = {
