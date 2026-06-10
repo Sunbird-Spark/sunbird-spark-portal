@@ -11,6 +11,8 @@ import { useAppI18n, LanguageCode } from "@/hooks/useAppI18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 import SearchModal from "@/components/common/SearchModal";
 import { NotificationPopover } from "@/components/common/NotificationPopover";
+import { ThemeSelector } from "@/components/common/ThemeSelector";
+import { ENABLE_THEME_SELECTOR } from "@/configs/featureFlags";
 
 import sunbirdLogo from "@/assets/sunbird-logo.svg";
 import translationIcon from "@/assets/translation_icon.svg";
@@ -45,7 +47,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                     {isMobile && (
                         <button
                             onClick={onToggleSidebar}
-                            className="text-sunbird-brick hover:text-sunbird-brick/90 transition-colors p-1"
+                            className="text-sunbird-theme-accent hover:text-sunbird-theme-accent/90 transition-colors p-1"
                             aria-label={t("homeComponents.openMenu")}
                             data-edataid="mobile-sidebar-toggle"
                             data-pageid="header"
@@ -74,12 +76,15 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
                     {/* Notifications */}
                     <NotificationPopover />
 
+                    {/* Theme Selector */}
+                    {ENABLE_THEME_SELECTOR && <ThemeSelector />}
+
                     {/* Language Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="profile-lang-btn" data-edataid="language-dropdown-btn" data-edatatype="CLICK">
                                 <img src={translationIcon} alt={t("changeLanguage")} className="profile-action-icon" />
-                                <FiChevronDown className="w-4 h-4 text-sunbird-brick" />
+                                <FiChevronDown className="w-4 h-4 text-sunbird-theme-accent" />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="profile-dropdown-content w-40">

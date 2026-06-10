@@ -125,6 +125,10 @@ export const verifyGoogleIdToken = async (
         throw new Error('GOOGLE_TOKEN_PAYLOAD_INVALID');
     }
 
+    if (payload.email_verified !== true) {
+        throw new Error('GOOGLE_EMAIL_NOT_VERIFIED');
+    }
+
     return { email: payload.email, name: payload.name, sub: payload.sub };
 };
 

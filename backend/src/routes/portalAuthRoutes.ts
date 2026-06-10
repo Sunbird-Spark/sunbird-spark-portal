@@ -247,7 +247,7 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
         path: '/',
         httpOnly: true,
         secure: !isLocal,
-        sameSite: isLocal ? 'lax' : 'none',
+        sameSite: 'lax',
     });
 
     // Redirect to OIDC provider logout

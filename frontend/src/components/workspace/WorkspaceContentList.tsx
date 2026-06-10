@@ -41,7 +41,7 @@ const WorkspaceContentList = ({
   return (
     <div className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border">
       {/* Table Header */}
-      <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-muted/50 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide font-rubik">
+      <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-card border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide font-rubik">
         <div className="col-span-5 sm:col-span-4">{t('workspace.tableHeaders.title')}</div>
         <div className="col-span-2 hidden sm:block">{t('workspace.tableHeaders.type')}</div>
         <div className="col-span-2">{t('workspace.tableHeaders.status')}</div>
@@ -65,11 +65,11 @@ const WorkspaceContentList = ({
           return (
             <div
               key={item.id}
-              className="grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
+              className="grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-muted/40 transition-colors group"
             >
               {/* Title with thumbnail */}
               <div className="col-span-5 sm:col-span-4 flex items-center gap-3 min-w-0">
-                <div className="w-12 h-9 rounded-lg bg-muted overflow-hidden shrink-0">
+                <div className="w-12 h-9 rounded-lg bg-gray-100 overflow-hidden shrink-0">
                   {item.thumbnail ? (
                     <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -96,7 +96,7 @@ const WorkspaceContentList = ({
 
               {/* Status */}
               <div className="col-span-2">
-                <span className={cn("inline-flex px-2.5 py-1 rounded-full text-xs font-medium font-rubik", status.bg, status.text)}>
+                <span className={cn("inline-flex px-2.5 py-1 rounded-pill text-xs font-medium font-rubik", status.bg, status.text)}>
                   {status.label}
                 </span>
               </div>
@@ -122,7 +122,7 @@ const WorkspaceContentList = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-sunbird-wave opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 text-muted-foreground hover:text-sunbird-wave hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => onView(item.id)}
                       >
                         <FiEye className="w-4 h-4" />
@@ -132,7 +132,7 @@ const WorkspaceContentList = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-sunbird-ginger opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 text-muted-foreground hover:text-sunbird-theme-accent-muted hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => onEdit(item.id)}
                       >
                         <FiEdit className="w-4 h-4" />
@@ -144,7 +144,7 @@ const WorkspaceContentList = ({
                           <FiMoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44 bg-card rounded-xl shadow-lg border border-border">
+                      <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-lg border border-border">
                         {showView && (
                           <DropdownMenuItem onClick={() => onView(item.id)} className="font-rubik cursor-pointer gap-2">
                             <FiEye className="w-4 h-4" /> {t('workspaceCard.view')}

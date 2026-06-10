@@ -100,7 +100,7 @@ export default function ContentNameDialog({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t('workspace.enterName', { type: optionTitle?.toLowerCase() || "content" })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick mb-4"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-rubik focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40 focus:border-sunbird-theme-accent mb-4"
             autoFocus
             disabled={isLoading}
           />
@@ -135,7 +135,7 @@ export default function ContentNameDialog({
               type="submit"
               size="sm"
               disabled={!canSubmit || isLoading}
-              className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white"
+              className="bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white"
               {...submitButtonProps}
               data-cdata={submitCdata}
             >

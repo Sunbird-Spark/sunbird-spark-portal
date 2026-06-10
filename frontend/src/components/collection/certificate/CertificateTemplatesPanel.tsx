@@ -39,7 +39,7 @@ export function CertificateTemplatesPanel({
             onClick={handleRefreshTemplates}
             disabled={templatesRefreshing}
             title={t('certificate.refreshTemplates')}
-            className="p-1.5 rounded-lg border border-border bg-white text-muted-foreground hover:text-sunbird-brick hover:bg-sunbird-brick/8 transition-colors shadow-sm"
+            className="p-1.5 rounded-lg border border-border bg-white text-muted-foreground hover:text-sunbird-theme-accent hover:bg-sunbird-theme-accent/8 transition-colors shadow-sm"
             data-edataid="cert-templates-refresh"
             data-pageid="course-consumption"
           >
@@ -49,7 +49,7 @@ export function CertificateTemplatesPanel({
             type="button"
             onClick={() => { setView("createTemplate"); setErrorMsg(""); }}
             title={t('certificate.createNewTemplate')}
-            className="p-1.5 rounded-lg border border-border bg-white text-sunbird-brick hover:bg-sunbird-brick hover:text-white transition-colors shadow-sm"
+            className="p-1.5 rounded-lg border border-border bg-white text-sunbird-theme-accent hover:bg-sunbird-theme-accent hover:text-white transition-colors shadow-sm"
             data-edataid="cert-templates-create"
             data-pageid="course-consumption"
           >
@@ -71,7 +71,7 @@ export function CertificateTemplatesPanel({
           <button
             type="button"
             onClick={() => { setView("createTemplate"); setErrorMsg(""); }}
-            className="mt-2 text-xs text-sunbird-brick hover:underline font-rubik"
+            className="mt-2 text-xs text-sunbird-theme-accent hover:underline font-rubik"
           >
             {t('certificate.createNewTemplateButton')}
           </button>

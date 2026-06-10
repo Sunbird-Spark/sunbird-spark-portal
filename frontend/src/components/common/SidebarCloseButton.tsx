@@ -3,29 +3,32 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 interface SidebarCloseButtonProps {
     onClick: () => void;
     collapsed?: boolean;
+    isRight?: boolean;
 }
 
 /**
  * A small circular button with a chevron, used to toggle
  * the desktop sidebar.
  */
-const SidebarCloseButton = ({ onClick, collapsed = false }: SidebarCloseButtonProps) => {
+const SidebarCloseButton = ({ onClick, collapsed = false, isRight = false }: SidebarCloseButtonProps) => {
     const { t, dir } = useAppI18n();
-    
-    // Determine rotation based on collapsed state and text direction
+
     const getRotation = () => {
-        if (dir === 'rtl') {
-            return collapsed ? 'rotate-0' : 'rotate-180';
-        }
-        return collapsed ? 'rotate-180' : 'rotate-0';
+        const isRtl = dir === 'rtl';
+        const flipped = isRight ? !isRtl : isRtl;
+        return (flipped ? !collapsed : collapsed) ? 'rotate-180' : 'rotate-0';
     };
-    
+
+    const positionClass = isRight
+        ? 'ltr:-left-[0.75rem] rtl:-right-[0.75rem]'
+        : 'ltr:-right-[0.75rem] rtl:-left-[0.75rem]';
+
     return (
-        <div className={`absolute top-[0.5rem] z-[20] transition-all duration-300 ltr:-right-[0.75rem] rtl:-left-[0.75rem]`}>
+        <div className={`absolute top-[0.5rem] z-[20] transition-all duration-300 ${positionClass}`}>
             <button
                 onClick={onClick}
                 aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
-                className="w-[1.5rem] h-[1.5rem] bg-sunbird-gray-ef rounded-full flex items-center justify-center shadow-sm text-sunbird-brick hover:opacity-80 transition-opacity"
+                className="w-[1.5rem] h-[1.5rem] bg-sunbird-gray-ef rounded-full flex items-center justify-center shadow-sm text-sunbird-theme-accent hover:opacity-80 transition-opacity"
             >
                 <svg
                     width="6"

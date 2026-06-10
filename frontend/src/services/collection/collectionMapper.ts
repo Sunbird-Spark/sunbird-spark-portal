@@ -21,5 +21,6 @@ export function mapToCollectionData(content: HierarchyContentNode): CollectionDa
     primaryCategory: content.primaryCategory,
     channel: content.channel,
     userConsent: content.userConsent,
+    lastPublishedOn: content.lastPublishedOn,
   };
 }

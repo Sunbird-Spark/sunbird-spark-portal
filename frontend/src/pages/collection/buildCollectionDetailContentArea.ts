@@ -36,6 +36,8 @@ export interface BuildContentAreaArgs {
   firstCertPreviewUrl: string | undefined;
   setCertificatePreviewUrl: (url: string) => void;
   setCertificatePreviewOpen: (open: boolean) => void;
+  enrolledDate?: number | string;
+  contentStateFetched?: boolean;
   expandedModules: string[];
   toggleModule: (moduleId: string) => void;
   collectionId: string | undefined;
@@ -92,6 +94,8 @@ export function buildCollectionDetailContentArea(
       firstCertPreviewUrl: args.firstCertPreviewUrl,
       setCertificatePreviewUrl: args.setCertificatePreviewUrl,
       setCertificatePreviewOpen: args.setCertificatePreviewOpen,
+      enrolledDate: args.enrolledDate,
+      contentStateFetched: args.contentStateFetched,
     },
     sidebar: {
       expandedModules: args.expandedModules,

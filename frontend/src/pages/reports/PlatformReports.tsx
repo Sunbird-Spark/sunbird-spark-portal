@@ -17,9 +17,23 @@ import { useOrgCourseSummary } from "@/hooks/useOrgCourseSummary";
 import { useContentStatusSummary } from "@/hooks/useContentStatusSummary";
 import { useUserCreationCount } from "@/hooks/useUserCreationCount";
 
+const TopCreatorsTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
+  if (!active || !payload?.length) return null;
+  const entry = payload[0];
+  if (!entry) return null;
+  const { name } = entry.payload;
+  const count = entry.value;
+  return (
+    <div className="rounded border bg-background px-3 py-2 text-sm shadow">
+      <p className="font-medium">{name}</p>
+      <p className="text-muted-foreground">Count: {count}</p>
+    </div>
+  );
+};
+
 const PIE_COLORS = [
   "hsl(var(--sunbird-ink))",
-  "hsl(var(--sunbird-ginger))",
+  "hsl(var(--sunbird-theme-accent-muted))",
   "hsl(var(--sunbird-moss))",
   "hsl(var(--sunbird-lavender))",
 ];
@@ -111,8 +125,8 @@ const PlatformReports = () => {
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="hsl(var(--sunbird-ginger))" radius={[0, 6, 6, 0]} barSize={20} />
+                  <Tooltip content={<TopCreatorsTooltip />} />
+                  <Bar dataKey="count" fill="hsl(var(--sunbird-theme-accent-muted))" radius={[0, 6, 6, 0]} barSize={20} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -141,7 +155,7 @@ const PlatformReports = () => {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="userCount" stroke="hsl(var(--sunbird-ginger))" strokeWidth={2.5} dot={{ r: 3 }} name={t("platformReport.users")} />
+                <Line type="monotone" dataKey="userCount" stroke="hsl(var(--sunbird-theme-accent-muted))" strokeWidth={2.5} dot={{ r: 3 }} name={t("platformReport.users")} />
               </LineChart>
             </ResponsiveContainer>
           </div>

@@ -153,7 +153,7 @@ const CertificateVerificationPage: React.FC = () => {
             {/* Status header */}
             <div className="bg-green-50 px-6 py-3 flex items-center justify-between">
               <span className={LABEL_CLS}>{t('certificate.status')}</span>
-              <span className="inline-flex items-center gap-1.5 bg-sunbird-moss text-white text-xs font-semibold px-3 py-1.5 rounded-full tracking-wide">
+              <span className="inline-flex items-center gap-1.5 bg-sunbird-moss text-white text-xs font-semibold px-3 py-1.5 rounded-pill tracking-wide">
                 <SmallCheckIcon />
                 {t('certificate.activeAndValid')}
               </span>
@@ -172,7 +172,7 @@ const CertificateVerificationPage: React.FC = () => {
 
               <div className="py-5">
                 <p className={LABEL_CLS}>{t('certificate.certificationProgram')}</p>
-                <p className="font-rubik text-lg font-semibold text-sunbird-brick leading-tight">
+                <p className="font-rubik text-lg font-semibold text-sunbird-theme-accent leading-tight">
                   {certificate.trainingName}
                 </p>
               </div>
@@ -188,7 +188,7 @@ const CertificateVerificationPage: React.FC = () => {
             </div>
 
             {/* Bottom accent */}
-            <div className="h-1 bg-sunbird-brick" />
+            <div className="h-1 bg-sunbird-theme-accent" />
           </div>
             </div>
           );
@@ -212,7 +212,7 @@ const CertificateVerificationPage: React.FC = () => {
           {/* Status header */}
           <div className="bg-red-50 px-6 py-3 flex items-center justify-between">
             <span className={LABEL_CLS}>{t('certificate.status')}</span>
-            <span className="inline-flex items-center gap-1.5 bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full tracking-wide">
+            <span className="inline-flex items-center gap-1.5 bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-pill tracking-wide">
               <XIcon />
               {t('certificate.invalid')}
             </span>
@@ -228,14 +228,14 @@ const CertificateVerificationPage: React.FC = () => {
           <div className="px-6 pb-6">
             <Link
               to="/"
-              className="block w-full text-center font-rubik bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+              className="block w-full text-center font-rubik bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
             >
               {t('certificate.backToHome')}
             </Link>
           </div>
 
           {/* Bottom accent */}
-          <div className="h-1 bg-sunbird-brick" />
+          <div className="h-1 bg-sunbird-theme-accent" />
         </div>
           </div>
         )}

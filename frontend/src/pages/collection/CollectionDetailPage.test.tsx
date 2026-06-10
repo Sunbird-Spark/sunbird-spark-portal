@@ -668,6 +668,29 @@ describe('CollectionDetailPage', () => {
     });
   });
 
+  /* ─── Content creator viewing ANOTHER creator's course (treated as learner) ─── */
+  describe('Content creator viewing another creators course', () => {
+    it('blocks content (learner gating) for a content creator who is not the course owner', () => {
+      mockAuthState.isAuthenticated = true;
+      mockIsContentCreator = true; // user holds the CONTENT_CREATOR role
+      mockGetUserId.mockReturnValue('content-creator-user');
+      mockCollectionData.createdBy = 'some-other-creator'; // not the owner
+      mockUseCollection.mockReturnValue({
+        data: { ...mockCollectionData, createdBy: 'some-other-creator', trackable: { enabled: 'Yes' } },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      });
+
+      renderWithProviders(<CollectionDetailPage />);
+
+      const contentArea = screen.getByTestId('collection-content-area');
+      // Role alone must NOT bypass enrollment: content is blocked until the user enrolls.
+      expect(contentArea).toHaveAttribute('data-content-blocked', 'true');
+      expect(contentArea).toHaveAttribute('data-is-creator-viewing-own', 'false');
+    });
+  });
+
   describe('Certificate preview details', () => {
     it('passes recipientName (firstName + lastName) to CertificatePreviewModal', () => {
       mockUserReadData = {

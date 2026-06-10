@@ -27,14 +27,14 @@ export function CurrentCertificatePanel({
         <button
           type="button"
           onClick={() => setCertTab("change")}
-          className="text-sm font-medium text-sunbird-brick hover:underline font-rubik"
+          className="text-sm font-medium text-sunbird-theme-accent hover:underline font-rubik"
         >
           {t('certificate.editCertificate')}
         </button>
       </div>
 
       <div className="max-w-md">
-        <div className="rounded-xl border-2 border-sunbird-brick/40 overflow-hidden bg-white shadow-sm">
+        <div className="rounded-xl border-2 border-sunbird-theme-accent/40 overflow-hidden bg-white shadow-sm">
           <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center relative overflow-hidden">
             {preview ? (
               <img src={preview} alt={name} className="object-cover w-full h-full" />

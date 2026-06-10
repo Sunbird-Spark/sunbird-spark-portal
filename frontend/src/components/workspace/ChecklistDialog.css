@@ -91,7 +91,7 @@
   margin-top: 0.125rem;
   flex-shrink: 0;
   cursor: pointer;
-  accent-color: hsl(var(--sunbird-brick));
+  accent-color: hsl(var(--sunbird-theme-accent));
 }
 
 .review-dialog-checkbox:disabled {
@@ -112,8 +112,8 @@
 
 .review-dialog-textarea:focus {
   outline: none;
-  border-color: hsl(var(--sunbird-brick));
-  box-shadow: 0 0 0 3px hsl(var(--sunbird-brick) / 0.1);
+  border-color: hsl(var(--sunbird-theme-accent));
+  box-shadow: 0 0 0 3px hsl(var(--sunbird-theme-accent) / 0.1);
 }
 
 .review-dialog-textarea:disabled {
@@ -160,15 +160,15 @@
   font-weight: 500;
   font-family: var(--app-font-family);
   color: white;
-  background-color: hsl(var(--sunbird-brick));
-  border: 1px solid hsl(var(--sunbird-brick));
+  background-color: hsl(var(--sunbird-theme-accent));
+  border: 1px solid hsl(var(--sunbird-theme-accent));
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
 .review-dialog-btn-primary:hover:not(:disabled) {
-  background-color: hsl(var(--sunbird-brick) / 0.85);
-  border-color: hsl(var(--sunbird-brick) / 0.85);
+  background-color: hsl(var(--sunbird-theme-accent) / 0.85);
+  border-color: hsl(var(--sunbird-theme-accent) / 0.85);
 }
 
 .review-dialog-btn-primary:disabled {

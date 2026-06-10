@@ -52,7 +52,7 @@ export const categories: Category[] = [
     name: "Design",
     icon: FiFeather,
     courseCount: 52,
-    color: "hsl(var(--sunbird-ginger))",
+    color: "hsl(var(--sunbird-theme-accent-muted))",
   },
   {
     id: "7",

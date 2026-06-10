@@ -58,7 +58,7 @@ const HelpSupport = () => {
                         aria-label={t('help.reportAppIssue')}
                         data-edataid="help-report-issue-open"
                         data-pageid="help-support"
-                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-brick text-sunbird-base-white text-sm font-medium font-rubik rounded-[0.625rem] hover:opacity-90 transition-opacity flex items-center justify-center">
+                        className="w-[9.375rem] h-[2.25rem] bg-sunbird-theme-accent text-sunbird-base-white text-sm font-medium font-rubik rounded-xs hover:opacity-90 transition-opacity flex items-center justify-center">
                         {t('help.reportIssueBtn')}
                     </button>
                 </div>
@@ -85,13 +85,13 @@ const HelpSupport = () => {
                             <div
                                 key={cat.slug}
                                 onClick={() => navigate(`/help-support/${cat.slug}`)}
-                                className="bg-sunbird-base-white rounded-[0.625rem] overflow-hidden flex flex-col shadow-sunbird-md hover:shadow-md transition-shadow cursor-pointer"
+                                className="bg-sunbird-base-white rounded-xs overflow-hidden flex flex-col shadow-sunbird-md hover:shadow-md transition-shadow cursor-pointer"
                                 data-edataid="help-category-click"
                                 data-pageid="help-support"
                                 data-objectid={cat.slug}
                                 data-objecttype="HelpCategory"
                             >
-                                <div className="w-[2rem] h-[0.75rem] bg-sunbird-ginger ml-[1.875rem]" />
+                                <div className="w-[2rem] h-[0.75rem] bg-sunbird-theme-accent-muted ml-[1.875rem]" />
                                 <div className="px-[1.25rem] pb-[1.25rem] pt-[1.5rem] flex flex-col flex-1">
                                     <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] tracking-[0%] text-foreground mb-[0.5rem]">{cat.title}</h3>
                                     <p className="text-base text-foreground font-rubik leading-relaxed mb-[1rem]">
@@ -99,7 +99,7 @@ const HelpSupport = () => {
                                     </p>
                                     <div className="flex items-center justify-between mt-auto">
                                         <span className="font-rubik font-normal text-[0.875rem] leading-[1.625rem] tracking-[0%] text-sunbird-gray-75">{t('help.faqCount', { count: cat.faqCount })}</span>
-                                        <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-brick" />
+                                        <FaArrowRightLong className="w-[1.25rem] h-[1.25rem] text-sunbird-theme-accent" />
                                     </div>
                                 </div>
                             </div>

@@ -48,6 +48,7 @@ import { buildGoogleAuthUrl, exchangeGoogleCode, createKeycloakGoogleSession } f
 const DEFAULT_PAYLOAD = {
     sub: 'google-user-id',
     email: 'test@example.com',
+    email_verified: true,
     name: 'Test User',
     given_name: 'Test',
     family_name: 'User',
@@ -102,6 +103,7 @@ describe('GoogleAuthService - direct Google OAuth flow', () => {
                 getPayload: () => ({
                     sub: 'google-user-id',
                     email: 'user@example.com',
+                    email_verified: true,
                     given_name: 'Jane',
                     family_name: 'Doe',
                 }),
@@ -110,6 +112,28 @@ describe('GoogleAuthService - direct Google OAuth flow', () => {
             const result = await exchangeGoogleCode('test-code', 'test-verifier');
 
             expect(result).toEqual({ emailId: 'user@example.com', name: 'Jane Doe' });
+        });
+
+        it('should throw GOOGLE_EMAIL_NOT_VERIFIED when email_verified is false', async () => {
+            mockVerifyIdToken.mockResolvedValueOnce({
+                getPayload: () => ({ ...DEFAULT_PAYLOAD, email_verified: false }),
+            });
+
+            await expect(
+                exchangeGoogleCode('test-code', 'test-verifier')
+            ).rejects.toThrow('GOOGLE_EMAIL_NOT_VERIFIED');
+        });
+
+        it('should throw GOOGLE_EMAIL_NOT_VERIFIED when email_verified is missing', async () => {
+            const payload: Partial<typeof DEFAULT_PAYLOAD> = { ...DEFAULT_PAYLOAD };
+            delete payload.email_verified;
+            mockVerifyIdToken.mockResolvedValueOnce({
+                getPayload: () => payload,
+            });
+
+            await expect(
+                exchangeGoogleCode('test-code', 'test-verifier')
+            ).rejects.toThrow('GOOGLE_EMAIL_NOT_VERIFIED');
         });
 
         it('should throw GOOGLE_ID_TOKEN_MISSING when no id_token is returned', async () => {
@@ -130,7 +154,7 @@ describe('GoogleAuthService - direct Google OAuth flow', () => {
 
         it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when payload has no email', async () => {
             mockVerifyIdToken.mockResolvedValueOnce({
-                getPayload: () => ({ sub: 'google-user-id' }),
+                getPayload: () => ({ sub: 'google-user-id', email_verified: true }),
             });
 
             await expect(
@@ -140,7 +164,7 @@ describe('GoogleAuthService - direct Google OAuth flow', () => {
 
         it('should throw GOOGLE_EMAIL_INVALID_OR_MASKED when payload has a masked email', async () => {
             mockVerifyIdToken.mockResolvedValueOnce({
-                getPayload: () => ({ sub: 'google-user-id', email: 'ha****@sanketika.in' }),
+                getPayload: () => ({ sub: 'google-user-id', email: 'ha****@sanketika.in', email_verified: true }),
             });
 
             await expect(

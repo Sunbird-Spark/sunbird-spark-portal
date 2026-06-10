@@ -274,6 +274,7 @@ export interface UserCourseProgress {
   status: "In Progress" | "Completed" | "Not Started";
   enrollmentDate: string;
   lastAccessed: string;
+  lastAccessedTs: number;
 }
 
 export interface UserCertificate {
@@ -291,6 +292,7 @@ export interface UserAssessmentHistory {
   maxScore: number;
   percentage: number;
   attemptDate: string;
+  attemptDateTs: number;
 }
 
 /* ---------- User Creation Count (user-creation-count report) ---------- */

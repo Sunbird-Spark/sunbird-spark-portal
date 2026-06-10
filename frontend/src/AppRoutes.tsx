@@ -23,6 +23,7 @@ import PageLayout from './components/layout/PageLayout';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
+import DeleteAccountGate from './pages/profile/DeleteAccountGate';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';
@@ -62,6 +63,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile/delete" element={<DeleteAccountGate />} />
         <Route path="/content/:contentId" element={<ContentPlayerPage />} />
         <Route path="/certs/:certificateId" element={<CertificateVerificationPage />} />
         <Route path="/onboarding" element={<Onboarding />} />

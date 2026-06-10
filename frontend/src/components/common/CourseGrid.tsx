@@ -26,7 +26,7 @@ export const CourseGrid = ({ title, courses, className = "mb-12" }: CourseGridPr
                 <Link to="/explore">
                     <Button
                         variant="ghost"
-                        className="p-0 h-auto hover:bg-transparent text-sunbird-brick"
+                        className="p-0 h-auto hover:bg-transparent text-sunbird-theme-accent"
                         aria-label={t("courseGrid.viewAll")}
                     >
                         <FiArrowRight className="w-5 h-3" />

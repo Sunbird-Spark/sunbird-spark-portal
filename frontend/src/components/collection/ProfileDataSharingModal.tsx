@@ -153,7 +153,7 @@ export default function ProfileDataSharingModal({
             type="button"
             onClick={handleShare}
             disabled={!tncAgreed || isSubmitting}
-            className="font-rubik bg-sunbird-brick text-white hover:opacity-90"
+            className="font-rubik bg-sunbird-theme-accent text-white hover:opacity-90"
             data-edataid="profile-sharing-share"
             data-pageid="collection-detail"
           >

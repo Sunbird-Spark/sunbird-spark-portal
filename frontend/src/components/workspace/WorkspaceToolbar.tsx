@@ -73,7 +73,7 @@ const WorkspaceToolbar = ({
                   className={cn(
                     "px-3 py-1.5 rounded-lg transition-all",
                     userRole === 'creator'
-                      ? "text-sunbird-brick font-semibold"
+                      ? "text-sunbird-theme-accent font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -89,7 +89,7 @@ const WorkspaceToolbar = ({
                   className={cn(
                     "px-3 py-1.5 rounded-lg transition-all",
                     userRole === 'reviewer'
-                      ? "text-sunbird-brick font-semibold"
+                      ? "text-sunbird-theme-accent font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -102,7 +102,7 @@ const WorkspaceToolbar = ({
 
         <div className="flex items-center gap-3 sm:ml-auto">
           {userRole === 'creator' && (
-            <Button onClick={onCreateClick} size="lg" className="bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik rounded-2xl shadow-lg px-6">
+            <Button onClick={onCreateClick} size="lg" className="bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-rubik rounded-2xl shadow-lg px-6">
               <FiPlus className="w-5 h-5 mr-2" />
               {t('createNew')}
             </Button>
@@ -122,8 +122,8 @@ const WorkspaceToolbar = ({
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium font-rubik transition-all",
                   activeView === segment.id
-                    ? "bg-white text-sunbird-brick shadow-sm"
-                    : "text-foreground hover:text-sunbird-brick"
+                    ? "bg-white text-sunbird-theme-accent shadow-sm"
+                    : "text-foreground hover:text-sunbird-theme-accent"
                 )}
               >
                 <span>{t(segment.label)}</span>
@@ -133,7 +133,7 @@ const WorkspaceToolbar = ({
                     className={cn(
                       "min-w-[20px] justify-center text-xs",
                       activeView === segment.id
-                        ? "bg-sunbird-ginger/20 text-sunbird-brick border-transparent"
+                        ? "bg-sunbird-theme-accent-muted/20 text-sunbird-theme-accent border-transparent"
                         : "bg-gray-200/70 text-foreground border-transparent"
                     )}
                   >
@@ -204,7 +204,7 @@ const WorkspaceToolbar = ({
                     aria-label={t('workspace.gridView')}
                     className={cn(
                       "p-2 rounded-md transition-colors",
-                      viewMode === 'grid' ? "bg-white text-sunbird-brick shadow-sm" : "text-muted-foreground"
+                      viewMode === 'grid' ? "bg-white text-sunbird-theme-accent shadow-sm" : "text-muted-foreground"
                     )}
                   >
                     <FiGrid className="w-4 h-4" />
@@ -214,7 +214,7 @@ const WorkspaceToolbar = ({
                     aria-label={t('workspace.listView')}
                     className={cn(
                       "p-2 rounded-md transition-colors",
-                      viewMode === 'list' ? "bg-white text-sunbird-brick shadow-sm" : "text-muted-foreground"
+                      viewMode === 'list' ? "bg-white text-sunbird-theme-accent shadow-sm" : "text-muted-foreground"
                     )}
                   >
                     <FiList className="w-4 h-4" />

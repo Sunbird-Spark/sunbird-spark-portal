@@ -183,6 +183,7 @@ describe('mobileAuthService', () => {
             mockVerifyIdToken.mockResolvedValue({
                 getPayload: () => ({
                     email: 'user@example.com',
+                    email_verified: true,
                     name: 'Test User',
                     sub: 'google-sub-123',
                 }),
@@ -201,6 +202,33 @@ describe('mobileAuthService', () => {
 
             await expect(verifyGoogleIdToken('bad-token', 'client-id')).rejects.toThrow(
                 'GOOGLE_TOKEN_PAYLOAD_INVALID'
+            );
+        });
+
+        it('throws GOOGLE_EMAIL_NOT_VERIFIED when email_verified is false', async () => {
+            mockVerifyIdToken.mockResolvedValue({
+                getPayload: () => ({
+                    email: 'user@example.com',
+                    email_verified: false,
+                    sub: 'google-sub-123',
+                }),
+            });
+
+            await expect(verifyGoogleIdToken('id-token', 'client-id')).rejects.toThrow(
+                'GOOGLE_EMAIL_NOT_VERIFIED'
+            );
+        });
+
+        it('throws GOOGLE_EMAIL_NOT_VERIFIED when email_verified is missing', async () => {
+            mockVerifyIdToken.mockResolvedValue({
+                getPayload: () => ({
+                    email: 'user@example.com',
+                    sub: 'google-sub-123',
+                }),
+            });
+
+            await expect(verifyGoogleIdToken('id-token', 'client-id')).rejects.toThrow(
+                'GOOGLE_EMAIL_NOT_VERIFIED'
             );
         });
     });

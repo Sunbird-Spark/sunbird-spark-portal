@@ -11,6 +11,9 @@ env:
 jobs:
   docker-build-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,12 +43,14 @@ jobs:
             gcloud auth activate-service-account --key-file=$HOME/gcloud-key.json
             gcloud auth configure-docker ${{ secrets.REGISTRY_NAME }}
             REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            IMAGE_REF="${REGISTRY_URL}/${IMAGE_NAME}"
             ;;
           "azure")
             # Azure ACR: registry host only, image repo handled by IMAGE_NAME
             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ secrets.REGISTRY_NAME }}" \
               --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
             REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            IMAGE_REF="${REGISTRY_URL}/${IMAGE_NAME}"
             ;;
           "dockerhub")
             # Docker Hub: login without host and use username/image for IMAGE_NAME
@@ -53,18 +58,22 @@ jobs:
             IMAGE_NAME="${{ secrets.REGISTRY_USERNAME }}/$IMAGE_NAME"
             echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
             REGISTRY_URL="docker.io"
+            IMAGE_REF="${REGISTRY_URL}/${IMAGE_NAME}"
             ;;
           *)
+            # GHCR: repository path already ends in the image name, so push to it directly
             REPO_NAME_LOWERCASE=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             REGISTRY_URL="ghcr.io/$REPO_NAME_LOWERCASE"
+            IMAGE_REF="${REGISTRY_URL}"
             ;;
           esac
           echo "REGISTRY_URL=${REGISTRY_URL}" >> $GITHUB_ENV
+          echo "IMAGE_REF=${IMAGE_REF}" >> $GITHUB_ENV
 
       - name: Push Docker image
         if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
         run: |
-          docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
-          docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
-          echo "Docker image pushed successfully: ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}"
+          docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_REF}:${IMAGE_TAG}
+          docker push ${IMAGE_REF}:${IMAGE_TAG}
+          echo "Docker image pushed successfully: ${IMAGE_REF}:${IMAGE_TAG}"

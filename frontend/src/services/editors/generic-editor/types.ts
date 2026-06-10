@@ -119,6 +119,7 @@ export const GENERIC_EDITOR_MIME_TYPES = [
   'video/x-youtube',
   'video/youtube',
   'application/vnd.ekstep.html-archive',
+  'application/vnd.ekstep.scorm-archive',
   'application/epub',
   'application/vnd.ekstep.h5p-archive',
   'video/webm',

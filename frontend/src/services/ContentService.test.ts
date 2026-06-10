@@ -45,6 +45,40 @@ describe('ContentService', () => {
     );
   });
 
+  describe('semanticSearch', () => {
+    it('posts to /composite/v1/search with search_mode: semantic', async () => {
+      mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
+      await service.semanticSearch({ query: 'fractions', limit: 10 });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/composite/v1/search',
+        expect.objectContaining({
+          request: expect.objectContaining({
+            search_mode: 'semantic',
+            semantic: { k: 50, min_score: 0.6 },
+            query: 'fractions',
+            limit: 10,
+          }),
+        })
+      );
+    });
+
+    it('uses default query and limit when not provided', async () => {
+      mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
+      await service.semanticSearch();
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/composite/v1/search',
+        expect.objectContaining({
+          request: expect.objectContaining({
+            query: '',
+            limit: 20,
+            search_mode: 'semantic',
+            semantic: { k: 50, min_score: 0.6 },
+          }),
+        })
+      );
+    });
+  });
+
   it('should call contentRead with default fields when no fields provided', async () => {
     mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
     await service.contentRead('do_123');

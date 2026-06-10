@@ -113,14 +113,14 @@ describe('CollectionSidebar', () => {
     renderSidebar({ ...defaultProps, activeContentId: 'lesson-2' });
 
     const activeLink = screen.getByRole('link', { name: /Document Lesson/ });
-    expect(activeLink).toHaveClass('border-sunbird-brick');
+    expect(activeLink).toHaveClass('border-sunbird-theme-accent');
   });
 
   it('highlights the first content when activeContentId matches lesson-1', () => {
     renderSidebar({ ...defaultProps, activeContentId: 'lesson-1' });
 
     const activeLink = screen.getByRole('link', { name: /Video Lesson/ });
-    expect(activeLink).toHaveClass('border-sunbird-brick');
+    expect(activeLink).toHaveClass('border-sunbird-theme-accent');
   });
 
   it('does not highlight any content when activeContentId is null', () => {
@@ -128,8 +128,8 @@ describe('CollectionSidebar', () => {
 
     const videoLink = screen.getByRole('link', { name: /Video Lesson/ });
     const documentLink = screen.getByRole('link', { name: /Document Lesson/ });
-    expect(videoLink).not.toHaveClass('border-sunbird-brick');
-    expect(documentLink).not.toHaveClass('border-sunbird-brick');
+    expect(videoLink).not.toHaveClass('border-sunbird-theme-accent');
+    expect(documentLink).not.toHaveClass('border-sunbird-theme-accent');
   });
 
   it('renders expand/collapse chevron for each main unit', () => {
@@ -169,7 +169,7 @@ describe('CollectionSidebar', () => {
       renderSidebar({ ...defaultProps, contentBlocked: true, activeContentId: 'lesson-1' });
 
       const videoRow = screen.getByText('Video Lesson').closest('div');
-      expect(videoRow).not.toHaveClass('border-sunbird-brick');
+      expect(videoRow).not.toHaveClass('border-sunbird-theme-accent');
     });
   });
 

@@ -45,7 +45,7 @@ const HomeStatsCards = () => {
     const { data: enrolledCollections, isLoading: enrollmentsLoading } = useUserEnrolledCollections();
     const { data: certificatesData, isLoading: certificatesLoading } = useUserCertificates();
     const courses = enrolledCollections?.data?.courses || [];
-    
+
     const isLoading = enrollmentsLoading || certificatesLoading;
 
     // Course-level stats using course status (1 = in progress, 2 = completed)
@@ -73,7 +73,7 @@ const HomeStatsCards = () => {
             value: coursesInProgress === 0 ? '0' : coursesInProgress.toString().padStart(2, '0'),
             label: t("statsCards.inProgress"),
             bgColor: "bg-sunbird-ginger",
-            iconBg: "hsl(var(--sunbird-brown-dark))",
+            iconBg: "hsl(28 53% 38%)",
             icon: InProgressIcon,
         },
         {

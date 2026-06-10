@@ -44,7 +44,7 @@ const MyLearning = () => {
           <p className="text-gray-600 mb-4">{t('myLearning.errorLoading')}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-sunbird-brick text-white rounded-md hover:opacity-90 transition-opacity"
+            className="px-4 py-2 bg-sunbird-theme-accent text-white rounded-md hover:opacity-90 transition-opacity"
           >
             {t('retry')}
           </button>

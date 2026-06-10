@@ -81,7 +81,7 @@ export function TemplatePreviewModal({
                 setSelectedTemplateId(tmpl.identifier);
                 setPreviewTemplate(null);
               }}
-              className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-brick hover:bg-opacity-90 transition-colors font-rubik inline-flex items-center gap-2"
+              className="rounded-lg px-5 py-2 text-sm font-medium text-white bg-sunbird-theme-accent hover:bg-opacity-90 transition-colors font-rubik inline-flex items-center gap-2"
             >
               <FiCheck className="w-4 h-4" />
               {t('certificate.selectButton')}

@@ -51,6 +51,10 @@ vi.mock('@/components/common/NotificationPopover', () => ({
     NotificationPopover: () => <button aria-label="Notifications" />,
 }));
 
+vi.mock('@/components/common/ThemeSelector', () => ({
+    ThemeSelector: () => <button aria-label="Change theme" />,
+}));
+
 describe('AuthenticatedHeader', () => {
     const mockOnToggleSidebar = vi.fn();
 

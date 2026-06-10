@@ -78,7 +78,7 @@ export const useCertUserSearch = (): UseMutationResult<
           issuedCertificates: issuedCertificates,
           batch: enr.batch ? { batchId: enr.batch.batchId, name: enr.batch.name, createdBy: enr.batch.createdBy } : undefined,
           completedOn: enr.completedOn,
-          enrolledDate: enr.enrolledDate,
+          enrolledDate: enr.enrolledDate != null ? new Date(enr.enrolledDate).getTime() : undefined,
         };
       });
 

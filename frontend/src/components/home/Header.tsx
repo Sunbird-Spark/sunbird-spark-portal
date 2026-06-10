@@ -14,6 +14,8 @@ import translationIcon from "@/assets/translation_icon.svg";
 import { Link, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import SearchModal from "@/components/common/SearchModal";
+import { ThemeSelector } from "@/components/common/ThemeSelector";
+import { ENABLE_THEME_SELECTOR } from "@/configs/featureFlags";
 
 interface HeaderProps {
   isSidebarOpen?: boolean;
@@ -84,7 +86,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
                   to={link.href}
                   className={`font-rubik text-[1.125rem] leading-[1.625rem] tracking-normal transition-colors
                   ${isActive(link.href)
-                      ? "font-medium text-sunbird-brick"
+                      ? "font-medium text-sunbird-theme-accent"
                       : "font-normal text-gray-600 hover:text-gray-900"
                     }`}
                 >
@@ -100,7 +102,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
               <div className="flex items-center gap-1">
                 {/* Search */}
                 <button
-                  className="p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors"
+                  className="p-2.5 text-sunbird-theme-accent hover:bg-gray-50 rounded-lg transition-colors"
                   onClick={() => setIsSearchOpen(true)}
                   aria-label={t("header.search")}
                   data-edataid="search-btn"
@@ -111,10 +113,18 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
 
 
 
+                {/* Theme Selector */}
+                {ENABLE_THEME_SELECTOR && (
+                  <ThemeSelector
+                    buttonClassName="p-2.5 text-sunbird-theme-accent hover:bg-gray-50 rounded-lg transition-colors"
+                    iconClassName="w-[1.125rem] h-[1.125rem] stroke-[2]"
+                  />
+                )}
+
                 {/* Language Selector */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-1 p-2.5 text-sunbird-brick hover:bg-gray-50 rounded-lg transition-colors" data-edataid="language-dropdown-btn" data-edatatype="CLICK">
+                    <button className="flex items-center gap-1 p-2.5 text-sunbird-theme-accent hover:bg-gray-50 rounded-lg transition-colors" data-edataid="language-dropdown-btn" data-edatatype="CLICK">
                       <img src={translationIcon} alt="Language" width={21} height={21} />
                       <FiChevronDown className="w-3.5 h-3.5" />
                     </button>
@@ -123,7 +133,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
                     {languages.map((lang) => (
                       <DropdownMenuItem
                         key={lang.code}
-                        className={`cursor-pointer hover:bg-gray-50 ${currentCode === lang.code ? 'font-medium text-sunbird-brick' : ''
+                        className={`cursor-pointer hover:bg-gray-50 ${currentCode === lang.code ? 'font-medium text-sunbird-theme-accent' : ''
                           }`}
                         onClick={() => changeLanguage(lang.code)}
                         data-edataid={`lang-select-${lang.code}`}
@@ -143,7 +153,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
                   const returnTo = encodeURIComponent(targetPath);
                   window.location.href = `/portal/login?prompt=none&returnTo=${returnTo}`;
                 }}
-                className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal min-w-[4.5rem] h-[1.875rem] rounded-[0.375rem] bg-sunbird-brick text-white hover:bg-opacity-90 flex items-center justify-center px-4 py-0"
+                className="font-rubik font-medium text-[1rem] leading-[1rem] tracking-normal min-w-[4.5rem] h-[1.875rem] rounded-xs bg-sunbird-theme-accent text-white hover:bg-opacity-90 flex items-center justify-center px-4 py-0"
               >
                 {t("login")}
               </Button>
@@ -151,7 +161,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 text-sunbird-brick"
+              className="md:hidden p-2 text-sunbird-theme-accent"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? t("header.closeMenu") : t("header.openMenu")}
             >
@@ -168,7 +178,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`block text-sm font-medium ${isActive(link.href) ? 'text-sunbird-brick' : 'text-gray-600'
+                  className={`block text-sm font-medium ${isActive(link.href) ? 'text-sunbird-theme-accent' : 'text-gray-600'
                     }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -179,7 +189,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
               <div className="pt-2 flex flex-col gap-4">
                 {/* Search */}
                 <button
-                  className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-sunbird-brick"
+                  className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-sunbird-theme-accent"
                   onClick={() => {
                     setIsSearchOpen(true);
                     setIsMenuOpen(false);
@@ -218,7 +228,7 @@ const Header = ({ isSidebarOpen = false, onToggleSidebar = defaultToggleSidebar,
                   const returnTo = encodeURIComponent(targetPath);
                   window.location.href = `/portal/login?prompt=none&returnTo=${returnTo}`;
                 }}
-                className="block w-full text-center bg-sunbird-brick text-white px-4 py-2 rounded-lg text-sm font-medium"
+                className="block w-full text-center bg-sunbird-theme-accent text-white px-4 py-2 rounded-lg text-sm font-medium"
               >
                 {t("login")}
               </Button>

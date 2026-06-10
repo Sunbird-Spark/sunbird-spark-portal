@@ -13,7 +13,7 @@
 }
 
 .content-review-go-back {
-  @apply flex items-center gap-2 text-sunbird-brick text-sm font-medium hover:opacity-80 transition-opacity font-rubik;
+  @apply flex items-center gap-2 text-sunbird-theme-accent text-sm font-medium hover:opacity-80 transition-opacity font-rubik;
 }
 
 .content-review-player-section {
@@ -96,12 +96,12 @@
 
 .content-review-btn-publish {
   @apply px-6 py-2.5 rounded-lg text-sm font-medium font-rubik transition-colors
-    bg-sunbird-brick text-white hover:bg-sunbird-brick/90 disabled:opacity-50 disabled:cursor-not-allowed;
+    bg-sunbird-theme-accent text-white hover:bg-sunbird-theme-accent/90 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .content-review-btn-reject {
   @apply px-6 py-2.5 rounded-lg text-sm font-medium font-rubik transition-colors
-    bg-white text-sunbird-brick border border-sunbird-brick hover:bg-sunbird-brick/5 disabled:opacity-50 disabled:cursor-not-allowed;
+    bg-white text-sunbird-theme-accent border border-sunbird-theme-accent hover:bg-sunbird-theme-accent/5 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 /* Reject Dialog Overlay */
@@ -119,7 +119,7 @@
 
 .content-review-reject-dialog textarea {
   @apply w-full border border-gray-200 rounded-lg p-3 text-sm font-rubik resize-none
-    focus:outline-none focus:ring-2 focus:ring-sunbird-brick/30 focus:border-sunbird-brick;
+    focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/30 focus:border-sunbird-theme-accent;
 }
 
 .content-review-reject-dialog-actions {

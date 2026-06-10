@@ -139,30 +139,26 @@ export class CertificateService {
     );
   }
 
-  /** Search for image assets (logos/signatures already uploaded) in the org.
+  /** Search for image assets (logos/signatures already uploaded).
    *  Pass `createdBy` to filter to the current user's own uploads (My Images tab).
-   *  Omit it to get all org images (All Images tab).
+   *  Omit it to get all images (All Images tab).
    */
   async searchLogos(
-    channel: string,
     createdBy?: string
   ): Promise<ApiResponse<{ count: number; content: unknown[] }>> {
     const filters: Record<string, unknown> = {
-      mediaType: ['image'],
-      contentType: ['Asset'],
+      contentType: 'Asset',
       compatibilityLevel: { min: 1, max: 2 },
       status: ['Live'],
-      primaryCategory: 'Asset',
-      channel,
+      mediaType: ['image'],
     };
     if (createdBy) filters.createdBy = createdBy;
 
     return getClient().post<{ count: number; content: unknown[] }>(
-      '/content/v1/search',
+      '/action/composite/v3/search',
       {
         request: {
           filters,
-          sort_by: { lastUpdatedOn: 'desc' },
           limit: 50,
           offset: 0,
         },

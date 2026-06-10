@@ -1,0 +1,213 @@
+/* ── Shared step elements (consent + otp) ───────────────────────────────── */
+
+.delete-step-header-row {
+    @apply flex items-start gap-3 sm:gap-4;
+}
+
+.delete-step-header-icon {
+    @apply flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-lg bg-red-50 text-sunbird-brick;
+}
+
+.delete-step-header-icon-svg {
+    @apply h-4 w-4 sm:h-5 sm:w-5;
+}
+
+.delete-step-title-block {
+    @apply min-w-0;
+}
+
+.delete-step-title {
+    @apply font-rubik font-medium text-base sm:text-lg text-foreground leading-tight;
+}
+
+.delete-step-subtitle {
+    @apply font-rubik text-xs sm:text-sm text-sunbird-gray-4a mt-1 break-words;
+}
+
+.delete-step-warning {
+    @apply flex items-center gap-2 sm:gap-3 rounded-lg border border-red-200 bg-red-50 px-2.5 py-2 sm:px-3 sm:py-2.5;
+}
+
+.delete-step-warning-icon {
+    @apply flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full bg-white text-red-600;
+}
+
+.delete-step-warning-icon-svg {
+    @apply h-3 w-3 sm:h-3.5 sm:w-3.5;
+}
+
+.delete-step-warning-text {
+    @apply font-rubik text-xs sm:text-sm text-red-600;
+}
+
+.delete-step-divider {
+    @apply border-t border-[hsl(var(--sunbird-gray-d9))];
+}
+
+.delete-step-actions {
+    @apply flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3;
+}
+
+.delete-step-btn-outline {
+    @apply w-full sm:w-auto h-9 px-3 text-xs sm:h-12 sm:px-4 sm:text-sm font-rubik;
+}
+
+.delete-step-btn-primary {
+    @apply w-full sm:w-auto h-9 px-3 text-xs sm:h-12 sm:px-4 sm:text-sm bg-sunbird-brick hover:bg-sunbird-brick/90 text-white font-rubik;
+}
+
+.delete-step-btn-icon {
+    @apply h-3.5 w-3.5 sm:h-4 sm:w-4;
+}
+
+.delete-step-error {
+    @apply font-rubik text-xs sm:text-sm text-red-600;
+}
+
+/* ── Consent step ────────────────────────────────────────────────────────── */
+
+.consent-step-root {
+    @apply space-y-6;
+}
+
+.consent-step-header {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4;
+}
+
+.consent-step-header-main {
+    @apply flex items-start gap-3 sm:gap-4 flex-1 min-w-0;
+}
+
+.consent-step-counter {
+    @apply flex items-baseline justify-between gap-2 sm:flex-col sm:items-end sm:justify-start sm:text-right sm:shrink-0;
+}
+
+.consent-step-counter-label {
+    @apply font-rubik text-[11px] font-semibold uppercase tracking-wide text-sunbird-gray-4a;
+}
+
+.consent-step-counter-value {
+    @apply font-rubik text-lg sm:text-xl font-semibold text-sunbird-gray-4a leading-tight sm:mt-1;
+}
+
+.consent-step-counter-num {
+    @apply text-sunbird-brick;
+}
+
+.consent-step-counter-total {
+    @apply text-sunbird-gray-4a/60;
+}
+
+.consent-step-progress {
+    @apply mt-4 h-1 rounded-full bg-red-50 overflow-hidden;
+}
+
+.consent-step-progress-fill {
+    @apply h-full bg-sunbird-brick transition-[width] duration-200;
+}
+
+.consent-step-section {
+    @apply space-y-3;
+}
+
+.consent-step-section-header {
+    @apply flex items-center gap-2 sm:gap-3;
+}
+
+.consent-step-section-icon {
+    @apply flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-sm;
+}
+
+.consent-step-section-icon-svg {
+    @apply h-3 w-3 sm:h-4 sm:w-4;
+}
+
+.consent-step-section-title {
+    @apply font-rubik font-semibold text-[11px] sm:text-xs uppercase tracking-wide text-sunbird-obsidian;
+}
+
+.consent-step-section-line {
+    @apply flex-1 h-px bg-[hsl(var(--sunbird-gray-d9))];
+}
+
+.consent-step-list {
+    @apply space-y-2 pl-6 sm:pl-11;
+}
+
+.consent-step-list-item {
+    @apply flex items-center gap-2 py-0.5 sm:gap-3 sm:py-1 cursor-pointer;
+}
+
+.consent-step-checkbox {
+    @apply h-3.5 w-3.5 sm:h-4 sm:w-4 rounded accent-sunbird-brick cursor-pointer shrink-0;
+}
+
+.consent-step-list-text {
+    @apply font-rubik text-xs sm:text-sm text-sunbird-obsidian leading-snug;
+}
+
+.consent-step-footer {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+}
+
+.consent-step-otp-delivery {
+    @apply flex items-center gap-1.5 sm:gap-2 font-rubik text-xs sm:text-sm text-sunbird-gray-4a min-w-0;
+}
+
+.consent-step-otp-delivery-icon {
+    @apply h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0;
+}
+
+.consent-step-otp-delivery-text {
+    @apply truncate;
+}
+
+.consent-step-otp-delivery-email {
+    @apply text-sunbird-obsidian;
+}
+
+.consent-step-footer-actions {
+    @apply flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:shrink-0;
+}
+
+/* ── OTP step ────────────────────────────────────────────────────────────── */
+
+.otp-step-root {
+    @apply space-y-5 sm:space-y-6;
+}
+
+.otp-step-input-section {
+    @apply space-y-2 sm:space-y-3;
+}
+
+.otp-step-input-label {
+    @apply font-rubik font-semibold text-xs sm:text-sm text-sunbird-obsidian;
+}
+
+.otp-step-slot-group {
+    @apply gap-1.5 sm:gap-2;
+}
+
+.otp-step-slot {
+    @apply w-9 h-10 text-sm sm:w-11 sm:h-11 sm:text-base md:w-12 md:h-12 md:text-lg font-semibold border border-[hsl(var(--sunbird-gray-d9))] rounded-md font-rubik focus:border-[hsl(var(--sunbird-ginger))] focus:ring-1 focus:ring-[hsl(var(--sunbird-ginger))];
+}
+
+.otp-step-meta {
+    @apply flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-rubik;
+}
+
+.otp-step-meta-timer {
+    @apply flex items-center gap-1.5 sm:gap-2 text-sunbird-gray-4a;
+}
+
+.otp-step-meta-timer-icon {
+    @apply h-3.5 w-3.5 sm:h-4 sm:w-4;
+}
+
+.otp-step-meta-timer-value {
+    @apply font-semibold text-sunbird-obsidian;
+}
+
+.otp-step-resend {
+    @apply font-medium text-sunbird-brick hover:text-sunbird-brick/80 transition-colors disabled:text-sunbird-gray-4a/60 disabled:cursor-not-allowed;
+}

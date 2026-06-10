@@ -18,7 +18,7 @@ const HeroBanner = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="text-center lg:text-start">
-            <div className="inline-flex items-center gap-2 bg-secondary/20 text-secondary px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-secondary/20 text-secondary px-4 py-2 rounded-pill text-sm font-medium mb-6">
               <FiAward className="w-4 h-4" />
               <span>{t("certifiedProfessionals")}</span>
             </div>

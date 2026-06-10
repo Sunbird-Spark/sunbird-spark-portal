@@ -20,7 +20,7 @@ const CreateOptions = ({ onOptionSelect, isBookCreator = false }: CreateOptionsP
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-br from-sunbird-ginger/10 via-sunbird-wave/10 to-sunbird-moss/10 rounded-[1.25rem] p-6 md:p-8 border border-sunbird-ginger/20">
+      <div className="bg-gradient-to-br from-sunbird-theme-accent-muted/10 via-sunbird-wave/10 to-sunbird-moss/10 rounded-xl p-6 md:p-8 border border-sunbird-theme-accent-muted/20">
         <h2 className="text-xl md:text-2xl font-semibold text-foreground font-rubik mb-2">
           {t("createOptions.title")}
         </h2>
@@ -34,7 +34,7 @@ const CreateOptions = ({ onOptionSelect, isBookCreator = false }: CreateOptionsP
         {editorCategories.map((category) => (
           <div
             key={category.id}
-            className={`bg-white rounded-[1.25rem] border-2 ${category.borderColor} shadow-md overflow-hidden`}
+            className={`bg-white rounded-xl border-2 ${category.borderColor} shadow-md overflow-hidden`}
           >
             {/* Category Header */}
             <div className={`${category.accentColor} px-5 py-4`} style={category.headerStyle}>
@@ -68,7 +68,7 @@ const CreateOptions = ({ onOptionSelect, isBookCreator = false }: CreateOptionsP
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className={`font-medium text-sm font-rubik mb-0.5 transition-colors ${
-                            disabled ? 'text-gray-400' : 'text-foreground group-hover:text-sunbird-brick'
+                            disabled ? 'text-gray-400' : 'text-foreground group-hover:text-sunbird-theme-accent'
                           }`}>
                             {option.title}
                           </h4>

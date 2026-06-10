@@ -287,7 +287,7 @@ describe('SearchModal', () => {
         target: { value: 'machine learning' },
       });
       fireEvent.click(screen.getByText('View All Results'));
-      expect(mockNavigate).toHaveBeenCalledWith('/explore?q=machine%20learning');
+      expect(mockNavigate).toHaveBeenCalledWith('/explore?q=machine+learning');
     });
 
     it('calls onClose when "View All Results" is clicked', () => {

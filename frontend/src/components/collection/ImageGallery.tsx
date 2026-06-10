@@ -47,7 +47,7 @@ export function ImageGallery({ loading, images, emptyMessage, selectedUrl, onSel
           className={cn(
             "aspect-square rounded-lg overflow-hidden border-2 transition-colors",
             selectedUrl === img.url
-              ? "border-sunbird-brick"
+              ? "border-sunbird-theme-accent"
               : "border-transparent hover:border-border"
           )}
         >

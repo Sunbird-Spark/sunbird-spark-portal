@@ -132,14 +132,14 @@ describe('RatingDialog', () => {
 
         // Hover over star 3 — first three icons should be highlighted
         fireEvent.mouseEnter(screen.getByRole('button', { name: 'Rate 3 stars' }));
-        expect(starIcons[0]).toHaveClass('fill-sunbird-brick');
-        expect(starIcons[2]).toHaveClass('fill-sunbird-brick');
-        expect(starIcons[3]).not.toHaveClass('fill-sunbird-brick');
+        expect(starIcons[0]).toHaveClass('fill-sunbird-theme-accent');
+        expect(starIcons[2]).toHaveClass('fill-sunbird-theme-accent');
+        expect(starIcons[3]).not.toHaveClass('fill-sunbird-theme-accent');
 
         // Mouse leaves the container — all hover highlights should clear
         fireEvent.mouseLeave(starContainer);
-        expect(starIcons[0]).not.toHaveClass('fill-sunbird-brick');
-        expect(starIcons[2]).not.toHaveClass('fill-sunbird-brick');
+        expect(starIcons[0]).not.toHaveClass('fill-sunbird-theme-accent');
+        expect(starIcons[2]).not.toHaveClass('fill-sunbird-theme-accent');
     });
 
     // ── Close behaviour ──────────────────────────────────────────────────────

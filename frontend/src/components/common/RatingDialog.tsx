@@ -96,7 +96,7 @@ const RatingDialog = ({ open, onClose, onSubmit, playerMetadata }: RatingDialogP
                                 style={{ width: "clamp(18px, 3vw, 27px)", height: "clamp(18px, 3vw, 27px)" }}
                                 className={`transition-colors ${
                                     star <= (hovered || rating)
-                                        ? "fill-sunbird-brick text-sunbird-brick"
+                                        ? "fill-sunbird-theme-accent text-sunbird-theme-accent"
                                         : "fill-sunbird-gray-d0 text-sunbird-gray-d0"
                                 }`}
                             />

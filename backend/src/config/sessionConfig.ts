@@ -15,6 +15,6 @@ export const sessionConfig: session.SessionOptions = {
         httpOnly: true,
         secure: !isLocal,
         maxAge: envConfig.SUNBIRD_ANONYMOUS_SESSION_TTL,
-        sameSite: isLocal ? 'lax' : 'none'
+        sameSite: 'lax'
     } as session.SessionOptions['cookie']
 };

@@ -57,6 +57,10 @@ export const exchangeGoogleCode = async (
         throw new Error('GOOGLE_TOKEN_PAYLOAD_MISSING');
     }
 
+    if (payload.email_verified !== true) {
+        throw new Error('GOOGLE_EMAIL_NOT_VERIFIED');
+    }
+
     logger.info(`exchangeGoogleCode: email=${payload.email} name=${payload.name} sub=${payload.sub}`);
 
     const email = payload.email;

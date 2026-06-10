@@ -133,7 +133,7 @@ export const RoleDialog = ({
               </SelectContent>
             </Select>
             {userOrganisations.length === 0 && (
-              <p className="text-[0.8125rem] text-sunbird-brick mt-1.5 font-medium">
+              <p className="text-[0.8125rem] text-sunbird-theme-accent mt-1.5 font-medium">
                 {t("userManagement.roleDialog.noOrgHint")}
               </p>
             )}

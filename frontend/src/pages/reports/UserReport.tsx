@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { orderBy } from "lodash";
 import { useParams } from "react-router-dom";
 import ReportLayout from "@/components/reports/ReportLayout";
 import useImpression from "@/hooks/useImpression";
@@ -54,7 +55,12 @@ const UserReport = () => {
     : String(apiCourses.filter((c) => c.issued_certificates != null).length);
 
   const courseProgressData = useMemo(
-    () => apiCourses.map(mapApiItemToUserCourseProgress),
+    () =>
+      orderBy(
+        apiCourses,
+        [(c) => (c.datetime ? new Date(c.datetime).getTime() : 0)],
+        ["desc"]
+      ).map(mapApiItemToUserCourseProgress),
     [apiCourses]
   );
 
@@ -65,7 +71,12 @@ const UserReport = () => {
   } = useUserAssessmentHistory();
 
   const assessmentHistoryData = useMemo(
-    () => (assessmentResult?.data ?? []).map(mapApiItemToUserAssessmentHistory),
+    () =>
+      orderBy(
+        (assessmentResult?.data ?? []),
+        [(a) => (a.last_attempted_on ? new Date(a.last_attempted_on).getTime() : 0)],
+        ["desc"]
+      ).map(mapApiItemToUserAssessmentHistory),
     [assessmentResult]
   );
 
@@ -92,7 +103,7 @@ const UserReport = () => {
       render: (row) => <Badge variant={statusColor[row.status] as "default"} className="text-xs">{row.status}</Badge>,
     },
     { key: "enrollmentDate", header: t('userReport.enrolled'), sortable: true },
-    { key: "lastAccessed", header: t('userReport.lastAccessed'), sortable: true },
+    { key: "lastAccessedTs", header: t('userReport.lastAccessed'), sortable: true, render: (r) => r.lastAccessed },
   ];
 
   const assessColumns: Column<UserAssessmentHistory>[] = [
@@ -101,7 +112,7 @@ const UserReport = () => {
     { key: "score", header: t('userReport.score'), sortable: true, className: "text-right" },
     { key: "maxScore", header: t('userReport.max'), className: "text-right" },
     { key: "percentage", header: "%", sortable: true, className: "text-right", render: (r) => `${r.percentage}%` },
-    { key: "attemptDate", header: t('userReport.dateTime'), sortable: true },
+    { key: "attemptDateTs", header: t('userReport.dateTime'), sortable: true, render: (r) => r.attemptDate },
   ];
 
   return (
@@ -113,7 +124,7 @@ const UserReport = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
         <SummaryCard label={t('userReport.totalCourses')} value={summaryTotalCourses} colorClass="bg-sunbird-wave" />
         <SummaryCard label={t('userReport.coursesCompleted')} value={summaryCoursesCompleted} colorClass="bg-sunbird-moss" />
-        <SummaryCard label={t('userReport.coursesPending')} value={summaryCoursesPending} colorClass="bg-sunbird-ginger" />
+        <SummaryCard label={t('userReport.coursesPending')} value={summaryCoursesPending} colorClass="bg-sunbird-theme-accent-muted" />
         <SummaryCard label={t('userReport.certificatesIssued')} value={summaryCertsIssued} colorClass="bg-sunbird-ink" />
         <SummaryCard label={t('userReport.assessmentsCompleted')} value={summaryAssessmentsCompleted} colorClass="bg-sunbird-lavender" />
       </div>

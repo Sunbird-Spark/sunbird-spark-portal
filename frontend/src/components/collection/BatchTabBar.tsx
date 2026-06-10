@@ -23,7 +23,7 @@ export function TabBar({ activeTab, counts, onChange }: TabBarProps) {
           className={cn(
             "flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors",
             activeTab === tab
-              ? "text-sunbird-brick"
+              ? "text-sunbird-theme-accent"
               : "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -33,7 +33,7 @@ export function TabBar({ activeTab, counts, onChange }: TabBarProps) {
               className={cn(
                 "ml-1.5 inline-flex items-center justify-center rounded-full text-xs w-4 h-4 font-rubik",
                 activeTab === tab
-                  ? "bg-sunbird-brick text-white"
+                  ? "bg-sunbird-theme-accent text-white"
                   : "bg-gray-100 text-gray-500"
               )}
             >
@@ -42,7 +42,7 @@ export function TabBar({ activeTab, counts, onChange }: TabBarProps) {
           )}
           {/* active indicator */}
           {activeTab === tab && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-theme-accent rounded-t-full" />
           )}
         </button>
       ))}

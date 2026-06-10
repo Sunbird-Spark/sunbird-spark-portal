@@ -1,3 +1,14 @@
+/**
+ * @vitest-environment jsdom
+ *
+ * These tests assert DOMPurify's exact tag-preservation behaviour. DOMPurify relies on
+ * the environment's DOM/DOMParser, and happy-dom (the suite-wide default) parses HTML
+ * unreliably on the Linux CI runners — it drops the first element of the parsed body,
+ * so sanitizeHtml appears to strip safe tags (e.g. "<b>Bold</b>" -> "Bold"). The same
+ * code passes on macOS, making it a happy-dom/platform parser bug. jsdom is the
+ * reference DOM DOMPurify is tested against and parses correctly, so we pin these
+ * DOM-sanitisation tests to jsdom.
+ */
 import { describe, it, expect } from 'vitest';
 import { sanitizeHtml } from './sanitizeHtml';
 

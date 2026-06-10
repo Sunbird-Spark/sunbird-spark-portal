@@ -55,7 +55,7 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
           {/* Stats: Creator and Lessons */}
           <div className="related-resource-card-stats">
             <div className="flex items-center gap-1">
-              <FiUser className="w-3 h-3 text-sunbird-brick -translate-y-0.5" />
+              <FiUser className="w-3 h-3 text-sunbird-theme-accent -translate-y-0.5" />
               <span className="text-xs text-muted-foreground">{creator}</span>
             </div>
             <span className="related-resource-card-separator">•</span>

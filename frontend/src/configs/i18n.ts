@@ -29,7 +29,6 @@ i18n.use(initReactI18next).init({
   },
   lng: getInitialLanguage(),
   fallbackLng: DEFAULT_LANGUAGE,
-  interpolation: { escapeValue: false },
   react: { useSuspense: false },
   debug: import.meta.env.DEV,
 });

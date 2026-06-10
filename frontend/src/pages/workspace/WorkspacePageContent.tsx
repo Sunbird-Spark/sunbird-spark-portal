@@ -57,7 +57,7 @@ export default function WorkspacePageContent({
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
-      <div className="bg-white rounded-[1.25rem] p-6 shadow-sm border border-border">
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
         <CreateOptions onOptionSelect={onCreateOption} />
       </div>
     );
@@ -206,7 +206,7 @@ function InfiniteScrollSentinel({
     <div ref={sentinelRef} className="flex justify-center py-8">
       {isLoadingMore && (
         <div className="flex items-center gap-2">
-          <FiLoader className="w-5 h-5 animate-spin text-sunbird-brick" />
+          <FiLoader className="w-5 h-5 animate-spin text-sunbird-theme-accent" />
           <span className="text-sm text-muted-foreground font-rubik">{t('loadingMore')}</span>
         </div>
       )}

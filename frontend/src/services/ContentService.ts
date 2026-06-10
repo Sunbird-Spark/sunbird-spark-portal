@@ -13,6 +13,7 @@ const DEFAULT_CONTENT_FIELDS = [
   'questions', 'resourceType', 'scoreDisplayConfig', 'status', 'streamingUrl',
   'template', 'templateId', 'totalQuestions', 'totalScore', 'versionKey', 'visibility',
   'year', 'primaryCategory', 'additionalCategories', 'interceptionPoints', 'interceptionType',
+  'scoList', 'launchFile',
 ];
 
 export class ContentService {
@@ -28,6 +29,25 @@ export class ContentService {
         query: request.query ?? '',
         sort_by: request.sort_by ?? { lastUpdatedOn: 'desc' },
         ...(request.fields ? { fields: request.fields } : {}),
+      },
+    });
+  }
+
+  public async semanticSearch(
+    request: ContentSearchRequest = {}
+  ): Promise<ApiResponse<ContentSearchResponse>> {
+    return getClient().post<ContentSearchResponse>('/composite/v1/search', {
+      request: {
+        query: request.query ?? '',
+        filters: request.filters ?? {},
+        fields: request.fields ?? [
+          'identifier', 'name', 'description', 'subject',
+          'primaryCategory', 'objectType', 'mimeType', 'appIcon',
+          'creator', 'lastUpdatedOn',
+        ],
+        limit: request.limit ?? 20,
+        search_mode: 'semantic',
+        semantic: { k: 50, min_score: 0.6 },
       },
     });
   }

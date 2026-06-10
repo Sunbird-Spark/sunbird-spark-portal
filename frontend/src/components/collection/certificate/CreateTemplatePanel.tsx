@@ -5,7 +5,7 @@ import { ImagePickerDialog } from "./ImagePickerDialog";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 const labelClass = "block text-sm font-medium text-sunbird-obsidian mb-1 font-rubik";
-const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-brick/40 focus:border-sunbird-brick bg-white font-rubik";
+const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sunbird-theme-accent/40 focus:border-sunbird-theme-accent bg-white font-rubik";
 
 interface CreateTemplatePanelProps {
   newTmpl: NewTemplateForm;
@@ -128,15 +128,15 @@ export function CreateTemplatePanel({
         </div>
 
         {/* Terms */}
-        <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
+        <div className="rounded-lg bg-[hsl(var(--sunbird-status-ongoing-bg))] border border-[hsl(var(--sunbird-status-ongoing-border))] px-4 py-3">
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={newTmpl.termsAccepted}
               onChange={(e) => handleNewTmplField("termsAccepted", e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-amber-400 accent-sunbird-brick cursor-pointer"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[hsl(var(--sunbird-status-ongoing-border))] accent-sunbird-theme-accent cursor-pointer"
             />
-            <span className="text-xs text-amber-800 font-rubik leading-relaxed">
+            <span className="text-xs text-[hsl(var(--sunbird-theme-accent))] font-rubik leading-relaxed">
               {t('createTemplate.consent')}
             </span>
           </label>
@@ -168,8 +168,8 @@ export function CreateTemplatePanel({
           className={cn(
             "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors font-rubik",
             !isNewTmplValid || createLoading
-              ? "bg-sunbird-brick/40 cursor-not-allowed"
-              : "bg-sunbird-brick hover:bg-opacity-90"
+              ? "bg-sunbird-theme-accent/40 cursor-not-allowed"
+              : "bg-sunbird-theme-accent hover:bg-opacity-90"
           )}
         >
           {createLoading && <FiLoader className="w-4 h-4 animate-spin" />}

@@ -122,6 +122,17 @@ describe('handleMobileGoogleLogin', () => {
         );
     });
 
+    it('returns 401 when Google email is not verified', async () => {
+        mockVerifyGoogleIdToken.mockRejectedValue(new Error('GOOGLE_EMAIL_NOT_VERIFIED'));
+
+        await handleMobileGoogleLogin(makeReq() as Request, res as Response);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({ error: 'ERR_GOOGLE_EMAIL_NOT_VERIFIED' })
+        );
+    });
+
     it('returns 400 with USER_NAME_NOT_PRESENT message when name is missing', async () => {
         mockFindOrCreateGoogleUser.mockRejectedValue(new Error('USER_NAME_NOT_PRESENT'));
 

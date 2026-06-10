@@ -85,7 +85,7 @@ export const ProgressRing = ({ progress }: { progress: number }) => {
                 cy="13"
                 r={radius}
                 fill="none"
-                stroke="hsl(var(--sunbird-brick))"
+                stroke="hsl(var(--sunbird-theme-accent))"
                 strokeWidth="3"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}

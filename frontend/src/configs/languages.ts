@@ -6,13 +6,14 @@ export interface LanguageConfig {
   dir: Direction;
   index: number;
   font: string;
+  forceFont?: boolean;
 }
 
 export const LANGUAGES: readonly LanguageConfig[] = [
-  { code: 'en', label: 'English',   dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
-  { code: 'fr', label: 'Français',  dir: 'ltr', index: 2, font: "'Rubik', sans-serif" },
+  { code: 'en', label: 'English', dir: 'ltr', index: 1, font: "'Rubik', sans-serif" },
+  { code: 'fr', label: 'Français', dir: 'ltr', index: 2, font: "'Rubik', sans-serif" },
   { code: 'pt', label: 'Português', dir: 'ltr', index: 3, font: "'Rubik', sans-serif" },
-  { code: 'ar', label: 'العربية',   dir: 'rtl', index: 4, font: "'Noto Sans Arabic', sans-serif" },
+  { code: 'ar', label: 'العربية', dir: 'rtl', index: 4, font: "'Noto Sans Arabic', sans-serif", forceFont: true },
 ] as const;
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]['code'];

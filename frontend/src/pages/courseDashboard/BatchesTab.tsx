@@ -17,7 +17,7 @@ import useInteract from '@/hooks/useInteract';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 const STATUS_STYLES: Record<string, string> = {
-  Upcoming: "bg-yellow-100 text-yellow-700",
+  Upcoming: "bg-[hsl(var(--sunbird-status-ongoing-bg))] text-[hsl(var(--sunbird-brown-dark))]",
   Ongoing:  "bg-green-100 text-green-700",
   Expired:  "bg-gray-100  text-gray-500",
 };
@@ -82,7 +82,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
         ) : (
           <Select onValueChange={handleBatchSelect}>
             <SelectTrigger
-              className="w-full max-w-md bg-white border-border focus:ring-sunbird-brick"
+              className="w-full max-w-md bg-white border-border focus:ring-sunbird-theme-accent"
               data-testid="batch-select-trigger"
             >
               <SelectValue placeholder={t('batchesTab.chooseToViewReport')} />
@@ -96,7 +96,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
                       <span className="font-medium">{batch.name}</span>
                       <span
                         className={cn(
-                          "inline-flex items-center text-[0.625rem] font-medium rounded-full px-2 py-0.5",
+                          "inline-flex items-center text-[0.625rem] font-medium rounded-pill px-2 py-0.5",
                           STATUS_STYLES[status]
                         )}
                       >

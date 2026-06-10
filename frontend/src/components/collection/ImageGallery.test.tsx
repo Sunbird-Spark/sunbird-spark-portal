@@ -89,7 +89,7 @@ describe('ImageGallery', () => {
       />
     );
     const selectedBtn = screen.getByTitle('Logo Two');
-    expect(selectedBtn.className).toContain('border-sunbird-brick');
+    expect(selectedBtn.className).toContain('border-sunbird-theme-accent');
   });
 
   it('does not apply selected class to non-selected images', () => {

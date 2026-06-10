@@ -81,7 +81,7 @@ const CourseDashboardPage: React.FC = () => {
       <main className="flex-1 container mx-auto px-4 py-6">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sunbird-brick text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 text-sunbird-theme-accent text-sm font-medium mb-6 hover:opacity-80 transition-opacity"
           data-testid="back-to-course-btn"
         >
           <FiArrowLeft className="w-4 h-4" />
@@ -128,7 +128,7 @@ const CourseDashboardPage: React.FC = () => {
               <button
                 className={`flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors ${
                   activeTab === 'batches'
-                    ? 'text-sunbird-brick'
+                    ? 'text-sunbird-theme-accent'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
                 onClick={() => switchTab('batches')}
@@ -136,13 +136,13 @@ const CourseDashboardPage: React.FC = () => {
               >
                 {t('tabs.batches')}
                 {activeTab === 'batches' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-theme-accent rounded-t-full" />
                 )}
               </button>
               <button
                 className={`flex-1 py-2.5 text-sm font-rubik font-medium relative transition-colors ${
                   activeTab === 'certificates'
-                    ? 'text-sunbird-brick'
+                    ? 'text-sunbird-theme-accent'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
                 onClick={() => switchTab('certificates')}
@@ -150,7 +150,7 @@ const CourseDashboardPage: React.FC = () => {
               >
                 {t('tabs.reissueCertificate')}
                 {activeTab === 'certificates' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-brick rounded-t-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sunbird-theme-accent rounded-t-full" />
                 )}
               </button>
             </div>

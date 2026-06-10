@@ -66,17 +66,27 @@ export const useCertTemplates = (): UseQueryResult<CertTemplateSummary[], Error>
 
 export type ImageAsset = { identifier: string; name: string; url: string };
 
+export interface ImageQueryOptions {
+  enabled?: boolean;
+}
+
 /**
  * Fetches only the current user's uploaded image assets (My Images tab).
+ * Pass `enabled: false` to defer the request until the tab is active.
  */
-export const useMyImages = (): UseQueryResult<ImageAsset[], Error> => {
+export const useMyImages = (
+  options: ImageQueryOptions = {}
+): UseQueryResult<ImageAsset[], Error> => {
+  // Key the cache per-user so a session that switches accounts (SSO edge case)
+  // doesn't serve the previous user's images from cache.
+  const userId = userAuthInfoService.getUserId() ?? null;
   return useQuery({
-    queryKey: ['myImages'],
+    queryKey: ['myImages', userId],
     queryFn: async () => {
-      const ctx = await resolveChannel();
-      if (!ctx) return [];
+      const resolvedUserId = await resolveUserId();
+      if (!resolvedUserId) return [];
 
-      const response = await certificateService.searchLogos(ctx.channel, ctx.userId);
+      const response = await certificateService.searchLogos(resolvedUserId);
       const content: any[] = response?.data?.content ?? [];
       return content.map((item) => ({
         identifier: item.identifier ?? '',
@@ -86,20 +96,21 @@ export const useMyImages = (): UseQueryResult<ImageAsset[], Error> => {
     },
     staleTime: 2 * 60 * 1000,
     retry: 1,
+    enabled: options.enabled ?? true,
   });
 };
 
 /**
- * Fetches all org image assets (All Images tab — no user filter).
+ * Fetches all image assets (All Images tab — no user filter).
+ * Pass `enabled: false` to defer the request until the tab is active.
  */
-export const useAllImages = (): UseQueryResult<ImageAsset[], Error> => {
+export const useAllImages = (
+  options: ImageQueryOptions = {}
+): UseQueryResult<ImageAsset[], Error> => {
   return useQuery({
     queryKey: ['allImages'],
     queryFn: async () => {
-      const ctx = await resolveChannel();
-      if (!ctx) return [];
-
-      const response = await certificateService.searchLogos(ctx.channel);
+      const response = await certificateService.searchLogos();
       const content: any[] = response?.data?.content ?? [];
       return content.map((item) => ({
         identifier: item.identifier ?? '',
@@ -109,6 +120,7 @@ export const useAllImages = (): UseQueryResult<ImageAsset[], Error> => {
     },
     staleTime: 2 * 60 * 1000,
     retry: 1,
+    enabled: options.enabled ?? true,
   });
 };
 

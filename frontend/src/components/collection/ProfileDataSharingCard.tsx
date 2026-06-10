@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import type { ConsentStatus } from "@/types/consentTypes";
+import { formatDayMonthYear } from "@/utils/dateUtils";
 import ProfileDataSharingModal from "./ProfileDataSharingModal";
 
 export interface ProfileDataSharingCardProps {
@@ -12,20 +13,6 @@ export interface ProfileDataSharingCardProps {
   isUpdating: boolean;
   /** User profile for the modal PII list. */
   userProfile: Record<string, unknown> | null | undefined;
-}
-
-function formatLastUpdated(isoDate: string | undefined): string {
-  if (!isoDate) return "";
-  try {
-    const d = new Date(isoDate);
-    if (Number.isNaN(d.getTime())) return "";
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-  } catch {
-    return "";
-  }
 }
 
 export default function ProfileDataSharingCard({
@@ -40,7 +27,7 @@ export default function ProfileDataSharingCard({
   const [modalOpen, setModalOpen] = useState(false);
 
   const isOn = status === "ACTIVE";
-  const lastUpdatedStr = formatLastUpdated(lastUpdatedOn);
+  const lastUpdatedStr = formatDayMonthYear(lastUpdatedOn);
 
   const handleUpdateClick = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
@@ -48,7 +35,7 @@ export default function ProfileDataSharingCard({
   return (
     <>
       <div
-        className="font-rubik w-full rounded-[1.25rem] border border-sunbird-status-ongoing-border bg-white p-5 flex flex-col gap-4 shadow-sunbird-sm"
+        className="font-rubik w-full rounded-xl border border-sunbird-status-ongoing-border bg-white p-5 flex flex-col gap-4 shadow-sunbird-sm"
         data-testid="profile-data-sharing-card"
       >
         <h3 className="font-rubik font-medium text-[1.125rem] leading-[100%] text-foreground">
@@ -68,7 +55,7 @@ export default function ProfileDataSharingCard({
           <button
             type="button"
             onClick={handleUpdateClick}
-            className="font-rubik font-medium text-[0.8125rem] text-sunbird-brick hover:underline ml-auto"
+            className="font-rubik font-medium text-[0.8125rem] text-sunbird-theme-accent hover:underline ml-auto"
           >
             {t("profileDataSharing.update")}
           </button>

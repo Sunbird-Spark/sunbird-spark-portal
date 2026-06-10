@@ -1,3 +1,12 @@
+/**
+ * @vitest-environment jsdom
+ *
+ * FAQ answers are rendered through sanitizeHtml (DOMPurify). happy-dom (the suite-wide
+ * default) parses HTML unreliably on the Linux CI runners — it drops the first element
+ * of the parsed body, so sanitized markup like "<p>A2</p>" collapses to "A2" and the
+ * sanitize assertions fail (passes on macOS — a happy-dom/platform parser bug). jsdom is
+ * the reference DOM DOMPurify is tested against, so pin this file to jsdom.
+ */
 import { render, screen, act } from '@testing-library/react';
 import FAQSection from './FAQSection';
 import { useSystemSetting } from '@/hooks/useSystemSetting';
