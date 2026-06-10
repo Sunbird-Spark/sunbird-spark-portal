@@ -16,6 +16,7 @@ import useImpression from '../hooks/useImpression';
 import useInteract from '../hooks/useInteract';
 import SearchModeToggle from '../components/common/SearchModeToggle';
 import { SearchMode } from '../types/workspaceTypes';
+import { useAiSearchEnabled } from '../hooks/useAiSearchEnabled';
 
 // Keys are the API `code` field (e.g. "primaryCategory", "mimeType"), values are selected option values
 export type FilterState = Record<string, string[]>;
@@ -48,6 +49,14 @@ const Explore = () => {
   const [searchMode, setSearchMode] = useState<SearchMode>(
     () => (searchParams.get('mode') === 'semantic' ? 'semantic' : 'keyword')
   );
+
+  // AI (semantic) search is gated by a backend env flag, surfaced via app-info.
+  const aiSearchEnabled = useAiSearchEnabled();
+
+  // If AI search is disabled (incl. a stale ?mode=semantic deep link), force keyword.
+  useEffect(() => {
+    if (!aiSearchEnabled && searchMode === 'semantic') setSearchMode('keyword');
+  }, [aiSearchEnabled, searchMode]);
 
   const [sortLabelKey, setSortLabelKey] = useState(() => {
     const raw = searchParams.get('sort') ?? 'newest';
@@ -155,6 +164,7 @@ const Explore = () => {
                     searchMode={searchMode}
                     onModeChange={setSearchMode}
                     placeholder={t('searchPlaceholder')}
+                    enableAiSearch={aiSearchEnabled}
                   />
                 </div>
 

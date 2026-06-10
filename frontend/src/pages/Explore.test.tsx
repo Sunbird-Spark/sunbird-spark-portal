@@ -80,6 +80,11 @@ vi.mock('@/hooks/useDebounce', () => ({
   default: (value: string) => value, // Return value immediately for testing
 }));
 
+// AI search gating reads app-info (a useQuery); mock the hook so no QueryClient is needed.
+vi.mock('../hooks/useAiSearchEnabled', () => ({
+  useAiSearchEnabled: () => true,
+}));
+
 // Mock useFormRead — controls whether the filter sidebar is shown.
 // Default: returns one filter group so showFilters = true and ExploreFilters renders.
 vi.mock('../hooks/useForm');

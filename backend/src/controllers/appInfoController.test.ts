@@ -42,7 +42,8 @@ describe('GET /app/v1/info', () => {
         expect(response.body.result).toEqual({
             version: '9.9.9',
             buildHash: 'mocked-hash',
-            appId: 'mock.app.id'
+            appId: 'mock.app.id',
+            enableAiSearch: 'true'
         });
     });
 });

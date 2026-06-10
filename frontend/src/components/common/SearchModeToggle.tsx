@@ -11,10 +11,12 @@ interface SearchModeToggleProps {
   onModeChange: (mode: SearchMode) => void;
   placeholder?: string;
   className?: string;
+  /** Show the keyword/AI mode pills. Defaults to true. */
+  enableAiSearch?: boolean;
 }
 
 const SearchModeToggle = forwardRef<HTMLInputElement, SearchModeToggleProps>(
-  ({ query, onQueryChange, searchMode, onModeChange, placeholder, className = "" }, ref) => {
+  ({ query, onQueryChange, searchMode, onModeChange, placeholder, className = "", enableAiSearch = true }, ref) => {
     const { t } = useAppI18n();
     const localRef = useRef<HTMLInputElement>(null);
     useImperativeHandle(ref, () => localRef.current!);
@@ -57,6 +59,7 @@ const SearchModeToggle = forwardRef<HTMLInputElement, SearchModeToggleProps>(
         )}
 
         {/* Mode toggle pills */}
+        {enableAiSearch && (
         <div
           role="group"
           aria-label={t("search.modeToggleLabel")}
@@ -89,6 +92,7 @@ const SearchModeToggle = forwardRef<HTMLInputElement, SearchModeToggleProps>(
             {t("search.semanticMode")}
           </button>
         </div>
+        )}
 
       </div>
     );
