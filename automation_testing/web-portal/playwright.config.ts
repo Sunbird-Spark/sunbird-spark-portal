@@ -11,7 +11,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : 2,
-  reporter: 'html',
+  reporter: process.env.CI ? 'html' : [['html', { open: 'always' }]],
   use: {
     baseURL: process.env.BASE_URL ?? 'https://sandbox.sunbirded.org',
     trace: 'on-first-retry',
@@ -73,11 +73,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    // ── E2E flow: 7 phases chained via dependencies ────────────────────────────
-    // Run the entire flow with: npx playwright test --project e2e-7-certificate
-    // Playwright resolves the dependency chain and executes every phase in order:
-    //   home → explore → login → user2-setup → enrollment → explore-enrollment → certificate
-    //
+    // ── E2E projects — each runs independently (no inter-test dependencies). ────
     // retries: 0 on every E2E project — these tests mutate real state (enrollment,
     // course progress, certificates). Retrying after a failure re-runs against
     // already-modified state, wastes time, and can produce misleading results.
@@ -90,11 +86,10 @@ export default defineConfig({
     {
       name: 'e2e-2-explore',
       testMatch: /anonymous_user_consumption\/exploreContent\.spec\.ts/,
-      dependencies: ['e2e-1-home'],
       retries: 0,
       use: { ...devices['Desktop Chrome'] },
     },
-   
+
     {
       name: 'e2e-5-enrollment',
       testMatch: /specs\/enrollment\.spec\.ts/,
@@ -105,14 +100,14 @@ export default defineConfig({
     {
       name: 'e2e-6-explore-enrollment',
       testMatch: /specs\/explore_enrollment\.spec\.ts/,
-      dependencies: ['e2e-5-enrollment'],
+      dependencies: ['user2Setup'],
       retries: 0,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'e2e-7-certificate',
       testMatch: /specs\/certificate_download\.spec\.ts/,
-      dependencies: ['e2e-6-explore-enrollment'],
+      dependencies: ['user2Setup'],
       retries: 0,
       use: { ...devices['Desktop Chrome'] },
     },

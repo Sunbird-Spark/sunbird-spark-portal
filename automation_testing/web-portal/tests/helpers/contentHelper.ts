@@ -75,7 +75,6 @@ const RIGHT_ARROW_SELECTORS = [
   'button:has-text("Next")',
   'button:has-text("NEXT")',
   // ECML content player — AngularJS uses <a> tags for navigation, not <button>
-  'a.nav-next',
   'a[class*="nav-next"]:not([class*="nav-disable"])',
   '.nav-icon.nav-next',
 ];
@@ -134,7 +133,7 @@ export async function clickRightArrow(page: Page): Promise<boolean> {
     if (await ecmlIframe.isVisible({ timeout: 300 }).catch(() => false)) {
       const frame = page.frames().find((f) => f.name() === 'contentPlayer');
       if (frame) {
-        for (const sel of ['a.nav-next', 'a[class*="nav-next"]:not([class*="nav-disable"])', '.nav-icon.nav-next']) {
+        for (const sel of ['a.nav-next:not([class*="nav-disable"])', 'a[class*="nav-next"]:not([class*="nav-disable"])', '.nav-icon.nav-next']) {
           const el = frame.locator(sel).first();
           if (await el.isVisible({ timeout: 300 }).catch(() => false)) {
             await el.click();
@@ -146,14 +145,17 @@ export async function clickRightArrow(page: Page): Promise<boolean> {
   } catch { /* not an ECML page — fall through to Strategy 1 */ }
 
   // Strategy 0: sunbird-pdf-player web component (light DOM, no shadow DOM).
-  // For PDFs with > 20 pages, jump directly to the last page via the page-number
-  // input (confirmed via MCP: input[type="number"] with max="<totalPages>").
-  // For small PDFs or when already at the last page, click the confirmed Next button.
+  // For PDFs with > 20 pages, jump near the end via the page-number input, then
+  // click the confirmed Next button for the final step.
+  // IMPORTANT: a direct fill() to totalPages fires only IMPRESSION/INTERACT events —
+  // NOT the END telemetry event that records completion. Only clicking the next button
+  // from page (totalPages-1) → totalPages triggers the END event in sunbird-pdf-player.
+  // So we jump to totalPages-1, then let the next loop iteration click next once.
   try {
-    const player = page.locator('sunbird-pdf-player').first();
+    const player = page.locator('sunbird-pdf-player, sunbird-epub-player').first();
     if (await player.isVisible({ timeout: 2000 }).catch(() => false)) {
       await player.hover();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(800);
 
       // Read total pages and current page from the page-number input.
       const pageInput = page.locator('sunbird-pdf-player input[type="number"]').first();
@@ -163,10 +165,50 @@ export async function clickRightArrow(page: Page): Promise<boolean> {
       if (totalPages > 20) {
         const currentVal = await pageInput.inputValue().catch(() => '1');
         const currentPage = parseInt(currentVal, 10) || 1;
-        if (currentPage < totalPages) {
-          console.log(`    Large PDF: jumping from page ${currentPage} to ${totalPages}`);
+        console.log(`    PDF: totalPages=${totalPages} currentPage=${currentPage}`);
+
+        if (currentPage >= totalPages) {
+          // On the last page — click next to fire the END event.
+          // sunbird-pdf-player fires END when next is clicked FROM the last page,
+          // not simply when the last page is reached via fill().
+          const nextBtn = page.locator(
+            'sunbird-pdf-player button[aria-label="navigation-arrows-nextIcon"], ' +
+            'sunbird-epub-player button[aria-label="navigation-arrows-nextIcon"], ' +
+            'sunbird-pdf-player button.player-nextIcon, ' +
+            'sunbird-epub-player button.player-nextIcon'
+          ).first();
+          if (await nextBtn.isVisible({ timeout: 800 }).catch(() => false)) {
+            console.log(`    Large PDF: on last page ${currentPage}/${totalPages}, clicking next to fire END event`);
+            await nextBtn.click();
+            return true;
+          }
+          console.log(`    Large PDF: on last page ${currentPage}/${totalPages}, next button not visible — END may have already fired`);
+          return true;
+        }
+
+        if (currentPage === totalPages - 1) {
+          // One page before last: click the next button to reach totalPages.
+          // This is the only navigation method that fires the END event.
+          const nextBtn = page.locator(
+            'sunbird-pdf-player button[aria-label="navigation-arrows-nextIcon"], ' +
+            'sunbird-epub-player button[aria-label="navigation-arrows-nextIcon"], ' +
+            'sunbird-pdf-player button.player-nextIcon, ' +
+            'sunbird-epub-player button.player-nextIcon'
+          ).first();
+          if (await nextBtn.isVisible({ timeout: 800 }).catch(() => false)) {
+            console.log(`    Large PDF: clicking next ${currentPage} → ${totalPages} (fires END event)`);
+            await nextBtn.click();
+            return true;
+          }
+        }
+
+        if (currentPage < totalPages - 1) {
+          // Jump to second-to-last page via the page input. Stopping one page short
+          // so the next iteration can use the next button (which fires END).
+          const targetPage = totalPages - 1;
+          console.log(`    Large PDF: jumping from page ${currentPage} to ${targetPage}`);
           await pageInput.click({ clickCount: 3 });
-          await pageInput.fill(String(totalPages));
+          await pageInput.fill(String(targetPage));
           // Click the "Go to page" span (black arrow next to the input).
           // It is a <span role="button" class="focus-arrow">, NOT a <button>.
           const goToPageBtn = page.locator('sunbird-pdf-player span[aria-label="Go to page"], sunbird-pdf-player .focus-arrow').first();
@@ -183,7 +225,9 @@ export async function clickRightArrow(page: Page): Promise<boolean> {
       // Confirmed next-page button (MCP-verified: aria-label="navigation-arrows-nextIcon")
       const nextBtn = page.locator(
         'sunbird-pdf-player button[aria-label="navigation-arrows-nextIcon"], ' +
-        'sunbird-pdf-player button.player-nextIcon'
+        'sunbird-epub-player button[aria-label="navigation-arrows-nextIcon"], ' +
+        'sunbird-pdf-player button.player-nextIcon, ' +
+        'sunbird-epub-player button.player-nextIcon'
       ).first();
       if (await nextBtn.isVisible({ timeout: 800 }).catch(() => false)) {
         await nextBtn.click();
@@ -428,6 +472,7 @@ async function consumeAnonymousCollection(page: Page): Promise<void> {
 
 export async function consumeContent(page: Page, type: string, opts: { navigateBack?: boolean } = {}) {
   const lowerType = type.toLowerCase();
+  console.log(`[consumeContent] type=${type} url=...${page.url().split('/content/').pop()?.slice(0, 50) ?? page.url().slice(-50)}`);
   const completionBanner = page.getByText(/you just completed|we would love to hear from you/i);
 
   // Anonymous users cannot access course/collection content — skip gracefully.
@@ -463,141 +508,340 @@ export async function consumeContent(page: Page, type: string, opts: { navigateB
   const isYouTube = lowerType === 'youtube'
     || await page.locator('iframe[src*="youtube"]').isVisible({ timeout: 3000 }).catch(() => false)
     || page.frames().some((f) => f.url().includes('youtube.com'));
+  console.log(`[consumeContent] isYouTube=${isYouTube}`);
 
   if (isYouTube) {
     await page.waitForTimeout(5000); // Let ECML iframe chain initialize
 
-    // Confirmed frame chain (via DOM inspection):
-    // main page → iframe#contentPlayer → iframe#org.ekstep.youtuberenderer → iframe#youtubeIframe
-    const ytFrameLocator = page
-      .frameLocator('iframe#contentPlayer')
-      .frameLocator('[id="org.ekstep.youtuberenderer"]')
-      .frameLocator('iframe');
-
-    // One level up — locator (not frameLocator) so we can call .boundingBox(),
-    // which returns page-absolute coordinates.
+    // Quick presence check — confirms the iframe chain is fully rendered.
     const ytIframeEl = page
       .frameLocator('iframe#contentPlayer')
       .frameLocator('[id="org.ekstep.youtuberenderer"]')
       .locator('iframe');
-
-    // Resolve the iframe's position in the viewport before any interaction.
-    // All subsequent mouse operations use these coordinates so they stay correct
-    // regardless of scroll position.
     const ibox = await ytIframeEl.boundingBox().catch(() => null);
+
     if (!ibox) {
-      console.log('  YouTube — iframe not found after 5 s, skipping');
+      console.log('  YouTube — iframe not found after 10 s, skipping');
     } else {
-      // Step 1: Start the video.
-      // • On fresh page load the YouTube thumbnail overlay is in the initial state —
-      //   it is NOT exposed in the accessibility tree, so getByRole won't find it.
-      //   Clicking the iframe centre triggers the overlay (large red play button).
-      // • After a video has ended the REPLAY button IS accessible (aria-label="Play
-      //   video"). Check for it first; if not present, fall back to centre click.
-      const playBtn = ytFrameLocator.getByRole('button', { name: /play video/i });
-      if (await playBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await playBtn.click({ timeout: 5000 }).catch(() => {});
-        console.log('  YouTube — clicked replay button');
-      } else {
-        // Initial state: click the centre of the YouTube iframe to start playback
-        await page.mouse.click(
-          Math.round(ibox.x + ibox.width * 0.5),
-          Math.round(ibox.y + ibox.height * 0.5),
-        );
-        console.log('  YouTube — clicked iframe centre to start playback');
-      }
+      // Always click the centre of the YouTube iframe first to ensure the video
+      // starts playing. Without a user-gesture click the browser may block autoplay,
+      // causing getDuration() to return 0 and the seek to silently fail.
+      console.log('  YouTube — clicking centre to start playback');
+      await page.mouse.click(
+        Math.round(ibox.x + ibox.width * 0.5),
+        Math.round(ibox.y + ibox.height * 0.5),
+      );
       await page.waitForTimeout(2000);
 
-      // Step 2: Seek to near end via CDP frame evaluation.
-      // Clicking the progress bar is intercepted by YouTube's player-controls-background
-      // overlay. Directly setting video.currentTime inside the cross-origin iframe via
-      // ytFrame.evaluate() bypasses this and triggers the natural 'ended' event which
-      // ECML's onStateChange(0) handler uses to record completion.
-      const ytFrame = page.frames().find((f) => f.url().includes('youtube.com/embed'));
-      if (ytFrame) {
-        await ytFrame.evaluate(function () {
-          const v = document.querySelector('video');
-          if (v && v.duration) {
-            v.currentTime = v.duration - 3;
-            v.play();
-          }
-        });
-        console.log('  YouTube — seeked to near end via evaluate()');
-      } else {
-        console.log('  YouTube — cross-origin frame not found; video plays from current position');
+      // Seek near the end using the YT IFrame API player object in youtube.html's context.
+      // youtube.html is same-origin so window.player is accessible via page.evaluate().
+      // CRITICAL: directly setting video.currentTime in the cross-origin YouTube embed
+      // does NOT fire onStateChange() callbacks — only YT IFrame API methods (seekTo,
+      // playVideo) send the postMessage that youtube.html's handler uses to emit ECML
+      // END telemetry, which is what marks the lesson complete.
+      const seekResult = await page.evaluate(() => {
+        try {
+          const cpDoc = (document.querySelector('#contentPlayer') as HTMLIFrameElement).contentDocument;
+          if (!cpDoc) return 'no-cpDoc';
+          const ytRenderer = cpDoc.querySelector('[id="org.ekstep.youtuberenderer"]') as HTMLIFrameElement;
+          if (!ytRenderer) return 'no-ytRenderer';
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const ytWin = ytRenderer.contentWindow as any;
+          const player = ytWin?.player;
+          if (!player) return 'no-player';
+          const duration: number = player.getDuration?.() ?? 0;
+          if (!duration || duration < 5) return 'no-duration';
+          player.seekTo(duration - 5, true);
+          player.playVideo();
+          return `seeked:${Math.round(duration)}`;
+        } catch (e) {
+          return `error:${String(e)}`;
+        }
+      }).catch(() => 'evaluate-error');
+
+      console.log(`  YouTube — seek via YT IFrame API: ${seekResult}`);
+
+      if (!seekResult.startsWith('seeked')) {
+        // Fallback: seek via direct video element manipulation (cross-origin CDP).
+        // Note: currentTime does not fire onStateChange, so the END event may not
+        // fire — but it is still better than doing nothing when the API is unavailable.
+        const ytFrame = page.frames().find((f) => f.url().includes('youtube.com/embed'));
+        if (ytFrame) {
+          await ytFrame.evaluate(function () {
+            const v = document.querySelector('video') as HTMLVideoElement;
+            if (v && v.duration) { v.currentTime = v.duration - 3; v.play(); }
+          }).catch(() => {});
+          console.log('  YouTube — fallback: seeked via video.currentTime');
+        }
       }
 
-      // Step 3: Wait for the video to end naturally (~3 s) then give the portal
-      // time to show the "We would love to hear from you" feedback dialog.
-      // The dialog appears AFTER the ECML player fires onStateChange(0), which
-      // can take 2–4 s after the video ends. dismissModal() runs immediately
-      // after this block, so we must wait long enough for the dialog to appear.
-      await page.waitForTimeout(6000);
-      const bannerVisible = await page.getByText(/you just completed/i)
-        .isVisible({ timeout: 3000 }).catch(() => false);
+      // Video ends ~5 s after seek; portal shows the dialog ~5 s after that.
+      await page.waitForTimeout(10000);
+      const bannerVisible = await page.getByText(/you just completed|we would love to hear from you/i)
+        .isVisible({ timeout: 5000 }).catch(() => false);
       console.log(bannerVisible
-        ? '  YouTube — "You just completed" confirmed'
-        : '  YouTube — completion inside ECML iframe (anonymous user — moving on)');
+        ? '  YouTube — "We would love to hear from you" confirmed'
+        : '  YouTube — completion dialog not seen (checking sidebar anyway)');
     }
 
   } else if (lowerType === 'quml') {
-    // QuML quiz: click through questions via "next slide" navigation
-    // (confirmed via MCP: <nav aria-label="next slide"> inside sunbird-quml-player).
-    console.log('  QuML quiz — clicking through questions');
-    const quml = page.locator('sunbird-quml-player');
-    const nextSlide = quml.getByRole('navigation', { name: /next slide/i });
-    for (let q = 0; q < 30; q++) {
+    console.log('  QuML quiz — clicking through questions via right-arrow navigation');
+    // Same circular arrow button as PDF/EPUB players (aria-label="navigation-arrows-nextIcon").
+    // The previous approach used quml.getByRole('navigation') which found nothing, and
+    // quml.boundingBox() returns null for shadow-DOM web components — breaking immediately.
+    const nextBtn = page.locator(
+      'nav[aria-label="next slide"], ' +
+      '[role="navigation"][aria-label="next slide"], ' +
+      'sunbird-quml-player button[aria-label="navigation-arrows-nextIcon"], ' +
+      'button[aria-label="navigation-arrows-nextIcon"]'
+    ).first();
+    for (let q = 0; q < 40; q++) {
       if (await completionBanner.isVisible({ timeout: 500 }).catch(() => false)) break;
-      if (await nextSlide.isVisible({ timeout: 800 }).catch(() => false)) {
-        await nextSlide.click();
+      if (await isEcmlComplete(page)) {
+        console.log('  QuML — score screen detected');
+        break;
+      }
+      if (await nextBtn.isVisible({ timeout: 800 }).catch(() => false)) {
+        await nextBtn.click();
       } else {
-        // Coordinate fallback: right edge of the player at mid-height.
-        const box = await quml.boundingBox().catch(() => null);
-        if (!box) break;
-        await page.mouse.click(Math.round(box.x + box.width * 0.95), Math.round(box.y + box.height * 0.5));
+        // Specific aria-label button not found — fall back to broader right-arrow strategies
+        // (catches the > circle button used in digital textbook players)
+        const clicked = await clickRightArrow(page);
+        if (!clicked) {
+          console.log(`  QuML — no navigation found at iteration ${q}, stopping`);
+          break;
+        }
       }
       await page.waitForTimeout(1200);
     }
-    // Anonymous users have no completion assertion for QuML.
-    console.log('  QuML — finished clicking through questions');
+    console.log('  QuML — finished');
+
+  } else if (lowerType === 'epub') {
+    console.log('  EPUB — hovering and clicking through pages via next-arrow navigation');
+    const epubPlayer = page.locator('sunbird-epub-player').first();
+    const nextBtn = page.locator(
+      'sunbird-epub-player button[aria-label="navigation-arrows-nextIcon"], ' +
+      'sunbird-epub-player button.player-nextIcon'
+    ).first();
+    const lessonStartEpub = Date.now();
+    for (let p = 0; p < 200; p++) {
+      if (Date.now() - lessonStartEpub > 30_000) {
+        console.log(`  EPUB — 30s limit reached after ${p} clicks, moving on`);
+        break;
+      }
+      if (await completionBanner.isVisible({ timeout: 500 }).catch(() => false)) {
+        console.log(`  EPUB — completion banner detected after ${p} clicks`);
+        break;
+      }
+      if (await epubPlayer.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await epubPlayer.hover();
+        await page.waitForTimeout(500);
+      }
+      if (await nextBtn.isVisible({ timeout: 800 }).catch(() => false)) {
+        await nextBtn.click();
+        await page.waitForTimeout(1200);
+      } else {
+        console.log(`  EPUB — next arrow not visible at page ${p} — end of content, waiting for completion signal`);
+        await completionBanner.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+        break;
+      }
+    }
+    console.log('  EPUB — finished');
+
+  } else if (lowerType === 'pdf') {
+    console.log('  PDF — hovering player and clicking through pages');
+    const pdfPlayer = page.locator('sunbird-pdf-player').first();
+    const nextBtn = page.locator(
+      'sunbird-pdf-player button[aria-label="navigation-arrows-nextIcon"], ' +
+      'sunbird-pdf-player button.player-nextIcon'
+    ).first();
+    const pageInput = page.locator('sunbird-pdf-player input[type="number"]').first();
+
+    // Large PDF fast-path: jump to second-to-last page via the page number input so
+    // we only need to click next once (from totalPages-1 → totalPages) to fire the
+    // END telemetry event. Jumping directly to totalPages skips the END event.
+    if (await pdfPlayer.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await pdfPlayer.hover();
+      await page.waitForTimeout(800);
+      const maxAttr = await pageInput.getAttribute('max').catch(() => null);
+      const totalPages = maxAttr ? parseInt(maxAttr, 10) : 0;
+      if (totalPages > 20) {
+        const currentVal = await pageInput.inputValue().catch(() => '1');
+        const currentPage = parseInt(currentVal, 10) || 1;
+        if (currentPage < totalPages - 1) {
+          const targetPage = totalPages - 1;
+          console.log(`  PDF large: jumping from ${currentPage} to ${targetPage}/${totalPages}`);
+          await pageInput.click({ clickCount: 3 });
+          await pageInput.fill(String(targetPage));
+          const goBtn = page.locator(
+            'sunbird-pdf-player span[aria-label="Go to page"], sunbird-pdf-player .focus-arrow'
+          ).first();
+          if (await goBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+            await goBtn.click();
+          } else {
+            await pageInput.press('Enter');
+          }
+          await page.waitForTimeout(1500);
+        }
+      }
+    }
+
+    // Page-by-page: hover to reveal the arrow, click next, repeat until last page.
+    const lessonStartPdf = Date.now();
+    for (let p = 0; p < 200; p++) {
+      if (Date.now() - lessonStartPdf > 30_000) {
+        console.log(`  PDF — 30s limit after ${p} clicks`);
+        break;
+      }
+      if (await completionBanner.isVisible({ timeout: 500 }).catch(() => false)) {
+        console.log(`  PDF — completion banner after ${p} clicks`);
+        break;
+      }
+      if (await pdfPlayer.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await pdfPlayer.hover();
+        await page.waitForTimeout(1000);
+      }
+      if (await nextBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+        await nextBtn.click();
+        await page.waitForTimeout(600);
+      } else {
+        console.log(`  PDF — next button not visible at page ${p} — end of content`);
+        await completionBanner.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+        break;
+      }
+    }
+    console.log('  PDF — finished');
 
   } else if (lowerType === 'unknown') {
     console.log('  Unknown content type — waiting 3 s then navigating back');
     await page.waitForTimeout(3000);
 
   } else if (lowerType === 'html') {
-    console.log('  HTML content — clicking a completed sidebar lesson to trigger completion tracking');
-    await page.waitForTimeout(2000);
+    console.log('  HTML/SCORM content — attempting completion');
+    await page.waitForTimeout(3000);
 
-    // Sunbird marks HTML lessons complete on in-app sidebar navigation (pushState).
-    // Prefer clicking an already-completed lesson — safe for the outer loop (it skips
-    // completed lessons) and avoids disrupting lesson order.
-    const currentContentId = page.url().split('/content/').pop()?.split(/[?#]/)[0] ?? '';
-    const allSidebarLinks = page.locator(
-      'aside a[href*="/content/"], [role="complementary"] a[href*="/content/"]'
-    );
+    // The HTML/SCORM player loads inside a nested iframe chain:
+    //   main page → outer ECML player iframe (gc-menu-btn, Replay) → inner SCORM iframe (Complete Course btn)
+    // On standalone content pages the outer iframe has no id; on course player pages it is
+    // iframe#contentPlayer. A <main class="content-player-container"> overlay blocks Playwright
+    // pointer clicks, so we use page.evaluate() to JS-click through the iframe chain directly.
 
-    // Build candidate list: completed lessons first, then any other non-current lesson.
-    const completedLinks = allSidebarLinks.filter({ hasText: /completed/i });
-    const completedCount = await completedLinks.count().catch(() => 0);
-    const candidates = completedCount > 0 ? completedLinks : allSidebarLinks;
-    const candidateCount = completedCount > 0 ? completedCount : await allSidebarLinks.count().catch(() => 0);
+    // Step 1: "Complete Course" button inside the inner SCORM iframe.
+    const step1 = await page.evaluate((): string => {
+      const ecmlIframe = (
+        document.querySelector('iframe#contentPlayer') as HTMLIFrameElement |null
+        ?? document.querySelector('iframe[name="contentPlayer"]') as HTMLIFrameElement | null
+        ?? document.querySelector('iframe') as HTMLIFrameElement | null
+      );
+      if (!ecmlIframe?.contentDocument) return 'no-ecml-iframe';
+      const scormIframe = ecmlIframe.contentDocument.querySelector('iframe') as HTMLIFrameElement | null;
+      if (!scormIframe?.contentDocument) return 'no-scorm-iframe';
+      const btn = Array.from(scormIframe.contentDocument.querySelectorAll('button'))
+        .find((b) => /complete\s*course/i.test(b.textContent ?? '')) as HTMLElement | null;
+      if (btn) { btn.click(); return 'clicked-complete-course'; }
+      return 'no-complete-button';
+    });
+    console.log(`  HTML/SCORM step1: ${step1}`);
 
-    let completionTriggered = false;
-    for (let idx = 0; idx < candidateCount && !completionTriggered; idx++) {
-      const link = candidates.nth(idx);
-      const href = (await link.getAttribute('href').catch(() => '')) ?? '';
-      if (href && !href.includes(currentContentId) && await link.isVisible({ timeout: 300 }).catch(() => false)) {
-        await link.click();
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1000);
-        completionTriggered = true;
-        console.log('  Clicked completed sidebar lesson — HTML completion event triggered');
+    if (step1 === 'clicked-complete-course') {
+      await page.waitForTimeout(3000);
+      if (await isEcmlComplete(page)) {
+        console.log('  HTML/SCORM: completion screen after "Complete Course"');
+      } else if (await completionBanner.isVisible({ timeout: 3000 }).catch(() => false)) {
+        console.log('  HTML/SCORM: completion banner after "Complete Course"');
+      } else {
+        console.log('  HTML/SCORM: no completion signal after "Complete Course" — may complete asynchronously');
       }
-    }
-    if (!completionTriggered) {
-      console.log('  No sidebar lesson found (anonymous or single-lesson course) — waiting 2s');
-      await page.waitForTimeout(2000);
+    } else {
+      // Step 2: open the sidebar via openMenu() on the AngularJS scope.
+      // Plain .click() on the gc-menu-btn does not flush Angular's digest cycle,
+      // so the sidebar never visually opens. We must call scope.openMenu() via $apply.
+      const step2 = await page.evaluate((): string => {
+        const ecmlIframe = (
+          document.querySelector('iframe#contentPlayer') as HTMLIFrameElement | null
+          ?? document.querySelector('iframe[name="contentPlayer"]') as HTMLIFrameElement | null
+          ?? document.querySelector('iframe') as HTMLIFrameElement | null
+        );
+        if (!ecmlIframe?.contentDocument) return 'no-ecml-iframe';
+        const menuBtn = ecmlIframe.contentDocument.querySelector('.gc-menu-btn') as HTMLElement | null;
+        if (!menuBtn) return 'no-sidebar-btn';
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const ng = (ecmlIframe.contentWindow as any)?.angular;
+          if (ng) {
+            const scope = ng.element(menuBtn).scope();
+            if (scope) { scope.$apply(() => scope.openMenu()); return 'opened-sidebar'; }
+          }
+        } catch { /* fall through to plain click */ }
+        menuBtn.click();
+        return 'opened-sidebar-click';
+      });
+      console.log(`  HTML/SCORM step2: ${step2}`);
+      await page.waitForTimeout(500);
+
+      // Step 3: click Replay via replayContent() on the AngularJS scope.
+      // Same reason: ng-click=replayContent() needs $apply to run.
+      const step3 = await page.evaluate((): string => {
+        const ecmlIframe = (
+          document.querySelector('iframe#contentPlayer') as HTMLIFrameElement | null
+          ?? document.querySelector('iframe[name="contentPlayer"]') as HTMLIFrameElement | null
+          ?? document.querySelector('iframe') as HTMLIFrameElement | null
+        );
+        if (!ecmlIframe?.contentDocument) return 'no-ecml-iframe';
+        const replayEl = Array.from(
+          ecmlIframe.contentDocument.querySelectorAll('[role="button"], button')
+        ).find((el) => /^replay$/i.test((el as HTMLElement).textContent?.trim() ?? '')) as HTMLElement | null;
+        if (!replayEl) return 'no-replay';
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const ng = (ecmlIframe.contentWindow as any)?.angular;
+          if (ng) {
+            const scope = ng.element(replayEl).scope();
+            if (scope) { scope.$apply(() => scope.replayContent()); return 'clicked-replay'; }
+          }
+        } catch { /* fall through to plain click */ }
+        replayEl.click();
+        return 'clicked-replay-click';
+      });
+      console.log(`  HTML/SCORM step3: ${step3}`);
+
+      if (step3.startsWith('clicked-replay')) {
+        await page.waitForTimeout(5000);
+        if (await isEcmlComplete(page)) {
+          console.log('  HTML/SCORM: completion screen after Replay');
+        } else if (await completionBanner.isVisible({ timeout: 3000 }).catch(() => false)) {
+          console.log('  HTML/SCORM: completion banner after Replay');
+        } else {
+          console.log('  HTML/SCORM: no completion signal after Replay — may complete asynchronously');
+        }
+      } else {
+        // Fallback: navigate to a completed lesson in the course sidebar.
+        console.log('  HTML/SCORM: Replay not found — falling back to sidebar navigation');
+        const currentContentId = page.url().split('/content/').pop()?.split(/[?#]/)[0] ?? '';
+        const allSidebarLinks = page.locator(
+          'aside a[href*="/content/"], [role="complementary"] a[href*="/content/"]'
+        );
+        const completedLinks = allSidebarLinks.filter({ hasText: /completed/i });
+        const completedCount = await completedLinks.count().catch(() => 0);
+        const candidates = completedCount > 0 ? completedLinks : allSidebarLinks;
+        const candidateCount = completedCount > 0 ? completedCount : await allSidebarLinks.count().catch(() => 0);
+        let completionTriggered = false;
+        for (let idx = 0; idx < candidateCount && !completionTriggered; idx++) {
+          const link = candidates.nth(idx);
+          const href = (await link.getAttribute('href').catch(() => '')) ?? '';
+          if (href && !href.includes(currentContentId) && await link.isVisible({ timeout: 300 }).catch(() => false)) {
+            await link.click();
+            await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+            await page.waitForTimeout(1000);
+            completionTriggered = true;
+            console.log('  Fallback: clicked completed sidebar lesson');
+          }
+        }
+        if (!completionTriggered) {
+          console.log('  HTML/SCORM: no fallback link found — waiting 2s');
+          await page.waitForTimeout(2000);
+        }
+      }
     }
 
   } else if (lowerType === 'video' || lowerType === 'webm') {
@@ -623,15 +867,26 @@ export async function consumeContent(page: Page, type: string, opts: { navigateB
         };
         seek();
       });
-      await page.waitForTimeout(4000);
+      // Poll until the video element reports ended (up to 15 s), instead of a fixed wait.
+      // Exit early if the completion banner appears (some players fire it before video.ended).
+      let videoEnded = false;
+      for (let t = 0; t < 30 && !videoEnded; t++) {
+        await page.waitForTimeout(500);
+        videoEnded = await ctx.evaluate(() => {
+          const v = document.querySelector('video') as HTMLVideoElement | null;
+          return !!(v && v.ended);
+        }).catch(() => false);
+        if (await completionBanner.isVisible({ timeout: 300 }).catch(() => false)) break;
+      }
+      console.log(`  Video — ended=${videoEnded}`);
   } else {
     console.log(`  ${type} — clicking → until completion screen`);
     if (lowerType === 'ecml') await dismissEcmlUserSwitcher(page);
     const MAX_CLICKS = 200;
     const lessonStart = Date.now();
     for (let i = 0; i < MAX_CLICKS; i++) {
-      if (Date.now() - lessonStart > 60_000) {
-        console.log(`  60s lesson limit reached after ${i} clicks — moving on`);
+      if (Date.now() - lessonStart > 15_000) {
+        console.log(`  15s lesson limit reached after ${i} clicks — moving on`);
         break;
       }
       if (page.isClosed()) {
@@ -719,7 +974,11 @@ export async function consumeContent(page: Page, type: string, opts: { navigateB
   }
 
   // Dismiss any post-completion overlay (e.g. feedback screen) before navigating back.
-  if (!page.isClosed()) await dismissModal(page);
+  if (!page.isClosed()) {
+    const bannerSeen = await completionBanner.isVisible({ timeout: 500 }).catch(() => false);
+    console.log(`[consumeContent] completion banner visible before nav back: ${bannerSeen}`);
+    await dismissModal(page);
+  }
 
   // Navigate back (skipped when called from consumeAnonymousCollection, which
   // handles its own inter-lesson navigation).

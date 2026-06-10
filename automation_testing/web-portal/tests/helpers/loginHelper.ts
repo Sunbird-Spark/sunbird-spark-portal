@@ -32,11 +32,26 @@ export async function loginAsUser(page: Page, email: string, password: string) {
 
   await usernameInput.waitFor({ state: 'visible', timeout: 20000 });
 
+  // Disable autocomplete so the browser dropdown doesn't swallow keystrokes mid-type.
+  await usernameInput.evaluate((el: HTMLInputElement) => {
+    el.setAttribute('autocomplete', 'off');
+  });
+
   // Triple-click to select any pre-filled text, then type character-by-character.
   // pressSequentially fires real key events (keydown → beforeinput → input → keyup)
   // which React's synthetic event system requires — fill() alone can be silently ignored.
   await usernameInput.click({ clickCount: 3 });
   await usernameInput.pressSequentially(email, { delay: 60 });
+
+  // Guard: if autocomplete still intercepted keystrokes, correct the value via fill().
+  // fill() works on plain HTML inputs (Keycloak); on React inputs the dispatchEvent
+  // below triggers the synthetic onChange so the controlled component picks up the value.
+  const typedValue = await usernameInput.inputValue().catch(() => '');
+  if (typedValue !== email) {
+    await usernameInput.click({ clickCount: 3 });
+    await usernameInput.fill(email);
+    await usernameInput.dispatchEvent('input');
+  }
 
   // ── Step 3: Fill password (may only appear after submitting the username) ──
   const passwordInput = page.locator('input[type="password"]').filter({ visible: true }).first();

@@ -1,4 +1,4 @@
-const base = process.env.BASE_URL ?? 'https://sandbox.sunbirded.org';
+const base = process.env.BASE_URL ?? 'https://test.sunbirded.org';
 
 export const urls = {
   main: base,

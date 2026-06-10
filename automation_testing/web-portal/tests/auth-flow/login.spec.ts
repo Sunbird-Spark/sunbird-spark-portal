@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../pages/loginPage';
 import { urls } from '../../data/urls';
 import { users } from '../../data/users';
-import { getTempUser } from '../../data/temp_user_util';
 
 
 test.describe('Authentication Flow - Login', () => {
@@ -12,8 +11,7 @@ test.describe('Authentication Flow - Login', () => {
     await loginPage.navigateTo(urls.main);
     await loginPage.clickLoginHeader();
 
-    const tempUser = await getTempUser();
-    const userToLogin = tempUser || users.contentCreator;
+    const userToLogin = users.user2;
 
     console.log(`Logging in with user: ${userToLogin.email}`);
 

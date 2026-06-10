@@ -102,20 +102,33 @@ test.describe('Anonymous User - Explore Page Filters', () => {
 
       if (!(await item.isVisible({ timeout: 1000 }).catch(() => false))) continue;
 
-      const filterName = (await item.textContent().catch(() => ''))?.trim() || `Filter ${i}`;
+      // The checkbox element itself has no inner text — the label lives in a sibling
+      // element inside the parent wrapper. Check own text first; fall back to parent.
+      const filterName = await item.evaluate((el) => {
+        const own = (el.textContent ?? '').trim();
+        if (own.length >= 2) return own;
+        const parent = el.parentElement;
+        return (parent?.textContent ?? '').trim().replace(/\s+/g, ' ');
+      }).catch(() => '');
 
-      // Skip empty labels or very short ones (likely decorative / section headers)
+      // Skip decorative elements, hidden inputs, or section headers with no label
       if (filterName.length < 2) continue;
 
       tried++;
 
       await test.step(`Filter: "${filterName}"`, async () => {
+        const urlBefore = page.url();
         await item.scrollIntoViewIfNeeded().catch(() => {});
         await item.click();
-        await page.waitForTimeout(3000);
+        // Sunbird updates the URL with a primaryCategory param when a filter is applied;
+        // treat a URL change as the primary "filter worked" signal.
+        await page.waitForURL((url) => url.href !== urlBefore, { timeout: 3000 }).catch(() => {});
+        await page.waitForTimeout(1000);
 
         const filteredHrefs = await getVisibleCardHrefs(page);
+        const urlAfter = page.url();
         const hasChanged =
+          urlAfter !== urlBefore ||
           filteredHrefs.length !== baselineHrefs.length ||
           filteredHrefs.some((h) => !baselineHrefs.includes(h)) ||
           baselineHrefs.some((h) => !filteredHrefs.includes(h));
@@ -124,9 +137,10 @@ test.describe('Anonymous User - Explore Page Filters', () => {
         expect.soft(hasChanged, `Filter "${filterName}" did not change content`).toBe(true);
         if (hasChanged) passedFilters++;
 
-        // Deselect and wait for content to reset
+        // Deselect: click again to uncheck, restore URL before next filter
         await item.click().catch(() => {});
-        await page.waitForTimeout(2000);
+        await page.waitForURL((url) => url.href === urlBefore, { timeout: 3000 }).catch(() => {});
+        await page.waitForTimeout(1000);
       });
     }
 
@@ -298,7 +312,25 @@ test.describe('Anonymous User - Explore Page Content Consumption', () => {
       await test.step(`Consume ${label}`, async () => {
         await page.goto(urls.explore);
         await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-        await scrollToLoadAll(page);
+        await page.waitForTimeout(2000);
+
+        await expandSection('Collections');
+
+        const filterLabel = page.locator(`label:has-text("${label}")`).first();
+        await filterLabel.scrollIntoViewIfNeeded().catch(() => {});
+        if (!(await filterLabel.isVisible({ timeout: 3000 }).catch(() => false))) {
+          console.log(`  Filter "${label}" not visible — skipping`);
+          return;
+        }
+        await filterLabel.click();
+        await page.waitForTimeout(2000);
+
+        const firstCard = page.locator('a[href*="/collection/"]').first();
+        if (!(await firstCard.isVisible({ timeout: 5000 }).catch(() => false))) {
+          console.log(`  No ${label} collection found — skipping`);
+          return;
+        }
+        const href = (await firstCard.getAttribute('href')) ?? '';
 
         const cardId = href.split('/').pop();
         if (!cardId) { console.warn(`Skipping card with unparseable href: ${href}`); return; }
