@@ -74,7 +74,6 @@ const SearchModeToggle = forwardRef<HTMLInputElement, SearchModeToggleProps>(
           </button>
         )}
       </div>
-
     );
   }
 );

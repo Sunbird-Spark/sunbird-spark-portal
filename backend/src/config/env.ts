@@ -46,5 +46,5 @@ export const envConfig = {
     APPID: (env.ENVIRONMENT || 'local') + '.' + (env.SUNBIRD_PORTAL_INSTANCE || 'sunbird') + '.portal',
     LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
     KNOWLG_MW_BASE_URL: env.KNOWLG_MW_BASE_URL || 'http://knowledge-mw-service:5000',
-    ENABLE_AI_SEARCH: env.ENABLE_AI_SEARCH || 'true'
+    ENABLE_AI_SEARCH: env.ENABLE_AI_SEARCH || 'true',
 };

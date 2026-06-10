@@ -53,11 +53,6 @@ const Explore = () => {
   // AI (semantic) search is gated by a backend env flag, surfaced via app-info.
   const aiSearchEnabled = useAiSearchEnabled();
 
-  // If AI search is disabled (incl. a stale ?mode=semantic deep link), force keyword.
-  useEffect(() => {
-    if (!aiSearchEnabled && searchMode === 'semantic') setSearchMode('keyword');
-  }, [aiSearchEnabled, searchMode]);
-
   const [sortLabelKey, setSortLabelKey] = useState(() => {
     const raw = searchParams.get('sort') ?? 'newest';
     return SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
@@ -86,13 +81,15 @@ const Explore = () => {
   const rawGroups = (formData?.data as any)?.form?.data?.filters;
   const showFilters = isFiltersLoading || (!isFiltersError && Array.isArray(rawGroups) && rawGroups.length > 0);
 
-  // Sync search state when navigating here from the search modal
+  // Sync search state when navigating here from the search modal.
+  // Folds in the AI-search gate so a stale ?mode=semantic deep link never applies
+  // 'semantic' while the flag is off — keeps a single owner of setSearchMode.
   useEffect(() => {
     const q = searchParams.get('q') ?? '';
     setSearchQuery(q);
-    const mode = searchParams.get('mode') === 'semantic' ? 'semantic' : 'keyword';
-    setSearchMode(mode);
-  }, [searchParams]);
+    const urlMode = searchParams.get('mode') === 'semantic' ? 'semantic' : 'keyword';
+    setSearchMode(!aiSearchEnabled && urlMode === 'semantic' ? 'keyword' : urlMode);
+  }, [searchParams, aiSearchEnabled]);
 
   // Re-sync sort state when the URL changes (e.g. browser back/forward)
   useEffect(() => {
