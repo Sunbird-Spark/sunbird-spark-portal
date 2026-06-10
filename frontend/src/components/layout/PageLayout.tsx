@@ -81,7 +81,7 @@ const PageLayout = ({ children }: PageLayoutProps = {}) => {
       <div className="flex flex-col min-h-screen bg-background">
         <Header isSidebarOpen={false} onToggleSidebar={() => {}} forcePublic />
         <div className="flex flex-1 relative">
-          <Outlet />
+          {children ?? <Outlet />}
         </div>
         <Footer />
       </div>
@@ -103,7 +103,7 @@ const PageLayout = ({ children }: PageLayoutProps = {}) => {
           </SheetContent>
         </Sheet>
         <div className="flex-1 flex">
-          <Outlet />
+          {children ?? <Outlet />}
         </div>
         {layoutId === 'bottom' && <BottomNavBar activeNav={activeNav} />}
         <Footer />
@@ -118,7 +118,7 @@ const PageLayout = ({ children }: PageLayoutProps = {}) => {
         <Header isSidebarOpen={false} onToggleSidebar={() => {}} />
         <TopNavBar activeNav={activeNav} />
         <div className="flex flex-1 relative">
-          <Outlet />
+          {children ?? <Outlet />}
         </div>
         <Footer />
       </div>
@@ -131,7 +131,7 @@ const PageLayout = ({ children }: PageLayoutProps = {}) => {
       <div className="flex flex-col min-h-screen bg-background">
         <Header isSidebarOpen={false} onToggleSidebar={() => {}} />
         <div className="flex flex-1 relative">
-          <Outlet />
+          {children ?? <Outlet />}
         </div>
         <BottomNavBar activeNav={activeNav} />
         <Footer />
@@ -156,7 +156,7 @@ const PageLayout = ({ children }: PageLayoutProps = {}) => {
           />
         </div>
 
-        <Outlet />
+        {children ?? <Outlet />}
       </div>
 
       <Footer />

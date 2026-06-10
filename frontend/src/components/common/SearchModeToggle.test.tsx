@@ -75,27 +75,25 @@ describe('SearchModeToggle', () => {
 
   // ── Mode pills ──────────────────────────────────────────────────────────────
 
-  it('renders Keyword and AI Search mode buttons', () => {
+  it('renders only the AI Search toggle button (no Keyword pill)', () => {
     render(<SearchModeToggle {...defaultProps} />);
-    expect(screen.getByRole('button', { name: /keyword/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /keyword/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ai search/i })).toBeInTheDocument();
   });
 
-  it('marks Keyword pill as pressed in keyword mode', () => {
+  it('marks AI Search pill as not pressed in keyword mode', () => {
     render(<SearchModeToggle {...defaultProps} searchMode="keyword" />);
-    expect(screen.getByRole('button', { name: /keyword/i })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: /ai search/i })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('marks AI Search pill as pressed in semantic mode', () => {
     render(<SearchModeToggle {...defaultProps} searchMode="semantic" />);
     expect(screen.getByRole('button', { name: /ai search/i })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: /keyword/i })).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('calls onModeChange("keyword") when Keyword pill is clicked', () => {
+  it('calls onModeChange("keyword") when AI Search is clicked while in semantic mode', () => {
     render(<SearchModeToggle {...defaultProps} searchMode="semantic" />);
-    fireEvent.click(screen.getByRole('button', { name: /keyword/i }));
+    fireEvent.click(screen.getByRole('button', { name: /ai search/i }));
     expect(defaultProps.onModeChange).toHaveBeenCalledWith('keyword');
   });
 
