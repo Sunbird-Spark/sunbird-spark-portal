@@ -4,23 +4,15 @@ import * as path from 'path';
 import Jimp from 'jimp';
 import jsQR from 'jsqr';
 import { urls } from '../../data/urls';
-import { authPaths } from '../../data/authPaths';
+import { users } from '../../data/users';
+import { loginAsUser } from '../helpers/loginHelper';
 
 test.setTimeout(300000);
 
 test.describe('Registered User - Certificate Download', () => {
-  // Restore the full browser state (cookies + localStorage tokens) saved by
-  // user2Setup. No OIDC redirect chain is needed on each test.
-  test.use({ storageState: authPaths.user2 });
-
   test.beforeEach(async ({ page }) => {
-    // Session is already hydrated — navigate and wait for all auth API calls
-    // to resolve so isAuthenticated is stable before the test interacts.
+    await loginAsUser(page, users.user2.email, users.user2.password);
     await page.goto(urls.profile, { waitUntil: 'load' });
-
-    const loginBtn = page.getByRole('button', { name: /^login$/i })
-      .or(page.getByRole('link', { name: /^login$/i }));
-    await expect(loginBtn.first()).not.toBeVisible({ timeout: 10000 });
   });
 
   test('Download certificate from My Learning on profile page', async ({ page }, testInfo) => {
@@ -198,11 +190,15 @@ test.describe('Registered User - Certificate Download', () => {
     //     a bug but do not fail the test, since it is outside the portal's control.
     console.log(`  Navigating to QR verification URL: ${qrData}`);
     await page.goto(qrData!);
-    await page.waitForLoadState('networkidle', { timeout: 30000 });
+    // Wait for the API-driven content to render before checking status.
+    // "Certificate Details" heading only appears after the registry API responds.
+    await page.getByRole('heading', { name: /certificate details/i })
+      .waitFor({ state: 'visible', timeout: 20000 })
+      .catch(() => {});
 
     // Check passed FIRST so the !verificationPassed guard below is available.
     const verificationPassed =
-      await page.getByText(/active\s*&\s*valid/i).isVisible({ timeout: 15000 }).catch(() => false)
+      await page.getByText(/active\s*&\s*valid/i).isVisible({ timeout: 5000 }).catch(() => false)
       || await page.getByRole('heading', { name: /verification successful/i }).isVisible({ timeout: 1000 }).catch(() => false)
       || await page.getByText(/certificate is valid/i).isVisible({ timeout: 1000 }).catch(() => false);
 

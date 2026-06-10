@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { urls } from '../../data/urls';
-import { authPaths } from '../../data/authPaths';
+import { users } from '../../data/users';
+import { loginAsUser } from '../helpers/loginHelper';
 import { dismissModal } from '../helpers/contentHelper';
 import {
   SIDEBAR_LESSONS,
@@ -15,18 +16,8 @@ import {
 test.setTimeout(600000);
 
 test.describe('Registered User - Course Completion (Continue from where you left)', () => {
-  // Restore the full browser state (cookies + localStorage tokens) saved by
-  // user2Setup. No OIDC redirect chain is needed on each test.
-  test.use({ storageState: authPaths.user2 });
-
   test.beforeEach(async ({ page }) => {
-    // Session is already hydrated — just navigate and wait for all auth API
-    // calls to resolve before the test interacts with any content.
-    await page.goto(urls.home, { waitUntil: 'load' });
-
-    const loginBtn = page.getByRole('button', { name: /^login$/i })
-      .or(page.getByRole('link', { name: /^login$/i }));
-    await expect(loginBtn.first()).not.toBeVisible({ timeout: 10000 });
+    await loginAsUser(page, users.user2.email, users.user2.password);
   });
 
   test('Complete active course from Continue from where you left', async ({ page }) => {

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { urls } from '../../data/urls';
-import { authPaths } from '../../data/authPaths';
+import { users } from '../../data/users';
+import { loginAsUser } from '../helpers/loginHelper';
 import { dismissModal, consumeContent } from '../helpers/contentHelper';
 import { expandAllUnits, leaveCourse } from '../helpers/courseHelper';
 
@@ -9,18 +10,9 @@ test.setTimeout(600000);
 const SIDEBAR_LESSONS = 'aside a[href*="/content/"], [role="complementary"] a[href*="/content/"]';
 
 test.describe('Registered User - Course Enrollment from Explore Page', () => {
-  // Restore the full browser state (cookies + localStorage tokens) saved by
-  // user2Setup. No OIDC redirect chain is needed on each test.
-  test.use({ storageState: authPaths.user2 });
-
   test.beforeEach(async ({ page }) => {
-    // Session is already hydrated — just navigate and wait for all auth API
-    // calls to resolve before the test interacts with any content.
+    await loginAsUser(page, users.user2.email, users.user2.password);
     await page.goto(urls.explore, { waitUntil: 'load' });
-
-    const loginBtn = page.getByRole('button', { name: /^login$/i })
-      .or(page.getByRole('link', { name: /^login$/i }));
-    await expect(loginBtn.first()).not.toBeVisible({ timeout: 10000 });
   });
 
   test('Find a course with available batch, join it, consume all lessons', async ({ page }) => {
