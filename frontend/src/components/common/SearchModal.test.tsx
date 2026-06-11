@@ -50,6 +50,11 @@ vi.mock('@/hooks/useContent', () => ({
   useContentSearch: mockUseContentSearch,
 }));
 
+// AI search gating reads app-info (a useQuery); mock the hook so no QueryClient is needed.
+vi.mock('@/hooks/useAiSearchEnabled', () => ({
+  useAiSearchEnabled: () => true,
+}));
+
 // Mock the card components
 vi.mock('@/components/content/CollectionCard', () => ({
   default: ({ item }: { item: { name: string; primaryCategory: string } }) => (

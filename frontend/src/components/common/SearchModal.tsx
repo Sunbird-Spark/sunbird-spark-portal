@@ -9,6 +9,7 @@ import ResourceCard from "@/components/content/ResourceCard";
 import PageLoader from "@/components/common/PageLoader";
 import SearchModeToggle from "@/components/common/SearchModeToggle";
 import SemanticSuggestions from "@/components/common/SemanticSuggestions";
+import { useAiSearchEnabled } from "@/hooks/useAiSearchEnabled";
 
 const COLLECTION_MIME_TYPE = "application/vnd.ekstep.content-collection";
 
@@ -26,6 +27,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const { t } = useAppI18n();
   const navigate = useNavigate();
+  const aiSearchEnabled = useAiSearchEnabled();
 
   const { data, isLoading, error, refetch } = useContentSearch({
     request: {
@@ -131,6 +133,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                 searchMode={searchMode}
                 onModeChange={setSearchMode}
                 placeholder={t("search_for_content_placeholder")}
+                enableAiSearch={aiSearchEnabled}
               />
             </div>
             <button
