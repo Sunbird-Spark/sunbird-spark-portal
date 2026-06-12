@@ -71,10 +71,10 @@ jobs:
         working-directory: automation_testing/web-portal
     env:
       BASE_URL: ${{ vars.E2E_BASE_URL || 'https://test.sunbirded.org' }}
-      REGISTERED_USER_EMAIL: user1@yopmail.com
-      REGISTERED_USER_PASSWORD: User1@123
-      USER2_EMAIL: user2@yopmail.com
-      USER2_PASSWORD: User2@123
+      REGISTERED_USER_EMAIL: ${{ vars.E2E_REGISTERED_USER_EMAIL || 'user1@yopmail.com' }}
+      REGISTERED_USER_PASSWORD: ${{ vars.E2E_REGISTERED_USER_PASSWORD || 'User1@123' }}
+      USER2_EMAIL: ${{ vars.E2E_USER2_EMAIL || 'user2@yopmail.com' }}
+      USER2_PASSWORD: ${{ vars.E2E_USER2_PASSWORD || 'User2@123' }}
       CI: true
 
     steps:
