@@ -1,23 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { urls } from '../../data/urls';
-import { users } from '../../data/users';
-import { loginAsUser } from '../helpers/loginHelper';
-import { dismissModal } from '../helpers/contentHelper';
+import { authPaths } from '../../data/authPaths';
+import { dismissModal, registerAutoDialogHandlers } from '../helpers/contentHelper';
 import {
   SIDEBAR_LESSONS,
   expandAllUnits,
   consumeAllLessons,
   redirectToActiveBatchCourse,
   updateProfileDataSharing,
-  leaveCourse,
-  joinFreshCourse,
+  syncCourseProgress,
 } from '../helpers/courseHelper';
 
 test.setTimeout(600000);
 
 test.describe('Registered User - Course Completion (Continue from where you left)', () => {
+  test.use({ storageState: authPaths.user2 });
+
   test.beforeEach(async ({ page }) => {
-    await loginAsUser(page, users.user2.email, users.user2.password);
+    await registerAutoDialogHandlers(page);
+    await page.goto(urls.home, { waitUntil: 'load' });
   });
 
   test('Complete active course from Continue from where you left', async ({ page }) => {
@@ -57,43 +58,31 @@ test.describe('Registered User - Course Completion (Continue from where you left
       .getAttribute('aria-valuenow').catch(() => 'unknown');
     console.log(`[enrollment] Starting progress: ${startProgress}%`);
 
+    // Bug guard: if the course is already at 100% when the test starts, the user's
+    // progress was never reset between runs. There is nothing left to consume and the
+    // test cannot verify fresh completion — report it and fail visibly.
+    if (startProgress === '100') {
+      test.info().annotations.push({
+        type: 'BUG',
+        description: 'Course progress was already 100% at test start — user progress was not reset between runs. Cannot verify fresh course consumption.',
+      });
+      throw new Error('[BUG REPORT] Course progress is already 100% before consumption started. User progress was not reset between test runs.');
+    }
+
     // 5. Consume every incomplete lesson using the shared helper.
     //    consumeAllLessons handles: CSS-class-based status detection, re-expanding
     //    collapsed units between lessons, and waiting for sidebar status labels to load.
     let stuckLessons = await consumeAllLessons(page, origin, lessonAnchors);
     console.log(`[enrollment] consumeAllLessons returned. Current URL: ${page.url()}`);
 
-    // 5b. Bug-report-and-retry: if lessons could not be completed (portal bug),
-    //     log the bug, leave the broken course, and try a different course.
+    // 5b. Bug-report: if lessons could not be completed, fail the test visibly.
     if (stuckLessons.length > 0) {
-      console.log(`[BUG REPORT] ${stuckLessons.length} lesson(s) could not be completed due to a portal bug:`);
-      stuckLessons.forEach((t) => console.log(`  ⚠  "${t}"`));
-
-      // Navigate to batch root so the three-dots leave menu is accessible.
-      const brokenBatchUrl = page.url().replace(/\/content\/[^/?#]+.*$/, '');
-      await page.goto(brokenBatchUrl);
-      await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-      for (let d = 0; d < 3; d++) { await dismissModal(page); await page.waitForTimeout(400); }
-
-      // Extract the broken collection ID so joinFreshCourse can skip it and avoid re-enrollment.
-      const brokenCollectionId = page.url().match(/\/collection\/([^/?#/]+)/)?.[1] ?? '';
-      const skipIds = brokenCollectionId ? new Set([brokenCollectionId]) : new Set<string>();
-
-      console.log('[enrollment] Leaving broken course — searching for alternative on Explore...');
-      await leaveCourse(page);
-
-      const seeded = await joinFreshCourse(page, origin, skipIds);
-      if (seeded) {
-        console.log('[enrollment] Enrolled in fresh course — consuming lessons...');
-        await expandAllUnits(page);
-        const newAnchors = page.locator(SIDEBAR_LESSONS);
-        stuckLessons = await consumeAllLessons(page, origin, newAnchors);
-        if (stuckLessons.length > 0) {
-          console.log(`[BUG REPORT] Alternative course also has ${stuckLessons.length} stuck lesson(s): ${stuckLessons.join(', ')}`);
-        }
-      } else {
-        console.log('[enrollment] Could not find an alternative course — proceeding to final assertion');
-      }
+      const titles = stuckLessons.map((t) => `"${t}"`).join(', ');
+      test.info().annotations.push({
+        type: 'BUG',
+        description: `${stuckLessons.length} lesson(s) could not be completed: ${titles}`,
+      });
+      throw new Error(`[BUG REPORT] ${stuckLessons.length} lesson(s) could not be completed: ${titles}`);
     }
 
     // 6. Navigate to batch root for a fresh server-side fetch of enrollment data.
@@ -103,22 +92,29 @@ test.describe('Registered User - Course Completion (Continue from where you left
     await page.waitForTimeout(1000);
     console.log(`[enrollment] Navigated to batch root: ${page.url()}`);
 
-    // Dismiss any lingering completion dialogs on the batch page
-    for (let d = 0; d < 3; d++) {
-      await dismissModal(page);
-      await page.waitForTimeout(400);
-    }
+    // The portal's auto-continue guard can redirect from the batch root to the
+    // last-accessed lesson. When that happens skip expand/sidebar steps — the
+    // progress bar is still readable on a lesson page.
+    if (!page.url().includes('/content/')) {
+      // Dismiss any lingering completion dialogs on the batch page
+      for (let d = 0; d < 3; d++) {
+        await dismissModal(page);
+        await page.waitForTimeout(400);
+      }
 
-    // Expand all units to reveal current lesson statuses
-    await expandAllUnits(page);
+      // Expand all units to reveal current lesson statuses
+      await expandAllUnits(page);
 
-    // Soft sidebar check — log any still-incomplete lessons but do not fail the test.
-    const remainingIncomplete = page
-      .locator(SIDEBAR_LESSONS)
-      .filter({ hasText: /not viewed|in progress/i });
-    const incompleteCount = await remainingIncomplete.count();
-    if (incompleteCount > 0) {
-      console.log(`  Warning: ${incompleteCount} lesson(s) still showing incomplete in sidebar`);
+      // Soft sidebar check — log any still-incomplete lessons but do not fail the test.
+      const remainingIncomplete = page
+        .locator(SIDEBAR_LESSONS)
+        .filter({ hasText: /not viewed|in progress/i });
+      const incompleteCount = await remainingIncomplete.count();
+      if (incompleteCount > 0) {
+        console.log(`  Warning: ${incompleteCount} lesson(s) still showing incomplete in sidebar`);
+      }
+    } else {
+      console.log('[enrollment] Portal redirected to lesson — skipping expand/sidebar check');
     }
 
     // 7. Assert 100% course progress — this is the authoritative completion check.
@@ -129,5 +125,8 @@ test.describe('Registered User - Course Completion (Continue from where you left
 
     // 8. Update Profile Data Sharing consent (only available when course has userConsent="yes").
     await updateProfileDataSharing(page);
+
+    // 9. Force-sync course progress so the server-side record matches the UI.
+    await syncCourseProgress(page);
   });
 });

@@ -4,14 +4,14 @@ import * as path from 'path';
 import Jimp from 'jimp';
 import jsQR from 'jsqr';
 import { urls } from '../../data/urls';
-import { users } from '../../data/users';
-import { loginAsUser } from '../helpers/loginHelper';
+import { authPaths } from '../../data/authPaths';
 
 test.setTimeout(300000);
 
 test.describe('Registered User - Certificate Download', () => {
+  test.use({ storageState: authPaths.user2 });
+
   test.beforeEach(async ({ page }) => {
-    await loginAsUser(page, users.user2.email, users.user2.password);
     await page.goto(urls.profile, { waitUntil: 'load' });
   });
 

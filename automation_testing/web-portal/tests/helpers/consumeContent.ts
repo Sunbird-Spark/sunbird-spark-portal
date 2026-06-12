@@ -369,8 +369,8 @@ export async function consumeContent(page: Page, type: string, opts: { navigateB
     const MAX_CLICKS = 200;
     const lessonStart = Date.now();
     for (let i = 0; i < MAX_CLICKS; i++) {
-      if (Date.now() - lessonStart > 15_000) {
-        console.log(`  15s lesson limit reached after ${i} clicks — moving on`);
+      if (Date.now() - lessonStart > 30_000) {
+        console.log(`  30s lesson limit reached after ${i} clicks — moving on`);
         break;
       }
       if (page.isClosed()) {

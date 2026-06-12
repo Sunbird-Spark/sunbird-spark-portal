@@ -194,6 +194,18 @@ export async function consumeAllLessons(
     await consumeContent(page, contentType, { navigateBack: false });
     console.log(`  [${i + 1}/${lessons.length}] consumeContent returned. URL now: ${page.url()}`);
 
+    // If the course already hit 100%, skip the per-lesson sidebar wait entirely.
+    // The addLocatorHandler for "congratulations" loops indefinitely when the
+    // course-completion dialog appears, so we must exit before waitSidebarCompletion.
+    const progressNow = await page
+      .getByRole('progressbar', { name: /course progress/i })
+      .getAttribute('aria-valuenow').catch(() => null);
+    if (progressNow === '100') {
+      console.log(`  [${i + 1}/${lessons.length}] Course is 100% — exiting lesson loop.`);
+      await dismissAllModals(page);
+      break;
+    }
+
     // 2 s safety net — consumeContent already waits 6 s for the rating dialog internally.
     await dismissAllModals(page);
     // Re-expand units — Radix Collapsible may have collapsed them during consumption,
@@ -213,8 +225,15 @@ export async function consumeAllLessons(
         .catch(() => false);
       console.log(`  [${i + 1}/${lessons.length}] Sidebar status updated to Completed: ${statusChanged}`);
       if (!statusChanged) {
-        console.log(`  Warning: lesson "${title}" sidebar did not update to Completed within 20 s (authoritative check is the progress bar)`);
-        stuckLessons.push(title);
+        const pb = await page
+          .getByRole('progressbar', { name: /course progress/i })
+          .getAttribute('aria-valuenow').catch(() => null);
+        if (pb === '100') {
+          console.log(`  [${i + 1}/${lessons.length}] Sidebar stale but course is 100% — not marking as stuck`);
+        } else {
+          console.log(`  Warning: lesson "${title}" sidebar did not update to Completed within 20 s (authoritative check is the progress bar)`);
+          stuckLessons.push(title);
+        }
       }
       // The CourseCompletionDialog fires when TanStack Query refetches and the
       // progress transitions to 100% — that same refetch is what resolves the
@@ -801,6 +820,26 @@ export async function findAndSeedInProgressCourse(
 
   console.log('  findAndSeedInProgressCourse: no suitable course found on explore page');
   return false;
+}
+
+export async function syncCourseProgress(page: Page): Promise<void> {
+  const menuTrigger = page.locator('button[data-edataid="course-progress-menu-toggle"]');
+  if (!(await menuTrigger.isVisible({ timeout: 5000 }).catch(() => false))) {
+    console.log('  [syncCourseProgress] menu trigger not visible — skipping');
+    return;
+  }
+  await menuTrigger.click();
+  const syncItem = page.locator('[data-edataid="course-force-sync"]');
+  if (!(await syncItem.isVisible({ timeout: 3000 }).catch(() => false))) {
+    await page.keyboard.press('Escape');
+    console.log('  [syncCourseProgress] force-sync item not found — skipping');
+    return;
+  }
+  await syncItem.click();
+  await page.getByText(/your course progress has been updated/i)
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .catch(() => {});
+  console.log('  [syncCourseProgress] course progress synced');
 }
 
 export async function updateProfileDataSharing(page: Page): Promise<void> {

@@ -31,6 +31,13 @@ export default defineConfig({
       },
     },
 
+    // ── Setup: user2 auth (saves .auth/user2.json) ────────────────────────────
+    {
+      name: 'user2Setup',
+      testMatch: /user2Auth\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+
     // ── tests/specs/ — superseded by the E2E chain below; keeping commented out
     // to avoid running each spec file twice (specs + e2e-5/6/7 would both match).
     // {
@@ -78,18 +85,21 @@ export default defineConfig({
     {
       name: 'e2e-5-enrollment',
       testMatch: /specs\/enrollment\.spec\.ts/,
+      dependencies: ['user2Setup'],
       retries: 0,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'e2e-6-explore-enrollment',
       testMatch: /specs\/explore_enrollment\.spec\.ts/,
+      dependencies: ['user2Setup'],
       retries: 0,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'e2e-7-certificate',
       testMatch: /specs\/certificate_download\.spec\.ts/,
+      dependencies: ['user2Setup'],
       retries: 0,
       use: { ...devices['Desktop Chrome'] },
     },

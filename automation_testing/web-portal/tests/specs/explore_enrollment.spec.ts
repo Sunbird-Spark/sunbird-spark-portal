@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { urls } from '../../data/urls';
-import { users } from '../../data/users';
-import { loginAsUser } from '../helpers/loginHelper';
-import { dismissModal, consumeContent } from '../helpers/contentHelper';
+import { authPaths } from '../../data/authPaths';
+import { dismissModal, consumeContent, registerAutoDialogHandlers } from '../helpers/contentHelper';
 import { expandAllUnits, leaveCourse } from '../helpers/courseHelper';
 
 test.setTimeout(600000);
@@ -10,8 +9,10 @@ test.setTimeout(600000);
 const SIDEBAR_LESSONS = 'aside a[href*="/content/"], [role="complementary"] a[href*="/content/"]';
 
 test.describe('Registered User - Course Enrollment from Explore Page', () => {
+  test.use({ storageState: authPaths.user2 });
+
   test.beforeEach(async ({ page }) => {
-    await loginAsUser(page, users.user2.email, users.user2.password);
+    await registerAutoDialogHandlers(page);
     await page.goto(urls.explore, { waitUntil: 'load' });
   });
 
@@ -355,7 +356,22 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
       await consumeContent(page, contentType, { navigateBack: false });
 
       await dismissModal(page);
+
+      // If the course hit 100%, exit the lesson loop immediately.
+      // The sidebar may be collapsed after consumption — a stale check would
+      // falsely mark the last lesson as stuck and trigger leaveCourse().
+      const progressNow = await page
+        .getByRole('progressbar', { name: /course progress/i })
+        .getAttribute('aria-valuenow').catch(() => null);
+      if (progressNow === '100') {
+        console.log(`  [${i + 1}/${lessons.length}] Course is 100% — exiting lesson loop.`);
+        break;
+      }
+
       console.log(`  [${i + 1}/${lessons.length}] Moving to next lesson`);
+      // Re-expand all units — Radix Collapsible may have collapsed them during
+      // consumption, removing the lesson's sidebar link from the DOM.
+      await expandAllUnits(page);
       // Wait for enrollment tracking to confirm completion in the sidebar
       await page
         .locator(`aside a[href*="${contentId}"], [role="complementary"] a[href*="${contentId}"]`)
@@ -374,15 +390,20 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
     //      navigate to the batch root, leave the course so it can be rejoined
     //      fresh on the next run, and stop (100% cannot be asserted).
     if (stuckLessons.length > 0) {
-      console.log(`[BUG REPORT] ${stuckLessons.length} lesson(s) could not be completed:`);
-      stuckLessons.forEach((t) => console.log(`  ⚠  "${t}"`));
+      const titles = stuckLessons.map((t) => `"${t}"`).join(', ');
+      test.info().annotations.push({
+        type: 'BUG',
+        description: `${stuckLessons.length} lesson(s) could not be completed: ${titles}`,
+      });
 
+      // Navigate back to the batch root and leave the course so it can be rejoined fresh
+      // on the next run, then fail the test so the bug appears in the Playwright report.
       const brokenBatchUrl = page.url().replace(/\/content\/[^/?#]+.*$/, '');
       await page.goto(brokenBatchUrl);
       await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
       for (let d = 0; d < 3; d++) { await dismissModal(page); await page.waitForTimeout(400); }
       await leaveCourse(page);
-      return;
+      throw new Error(`[BUG REPORT] ${stuckLessons.length} lesson(s) could not be completed: ${titles}`);
     }
 
     // 12. Assert all lessons Completed

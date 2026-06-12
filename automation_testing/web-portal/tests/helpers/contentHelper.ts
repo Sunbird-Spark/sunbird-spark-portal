@@ -1,11 +1,22 @@
 import { Page, Frame, expect } from '@playwright/test';
 
 export async function dismissModal(page: Page, timeout = 2000) {
+  // 0. Known portal dialogs — close via the last button in the open Radix dialog.
+  const knownDialog = page.getByRole('heading', { name: /congratulations|course updated/i });
+  if (await knownDialog.isVisible({ timeout: 500 }).catch(() => false)) {
+    const closeBtn = page.locator('[role="dialog"][data-state="open"] button').last();
+    if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+      await closeBtn.click({ timeout: 2000 }).catch(() => {});
+    } else {
+      await page.keyboard.press('Escape');
+    }
+    return;
+  }
   // 1. getByRole resolves accessible names from aria-label, aria-labelledby, and
   //    text content — catches "Close rating dialog" regardless of how the name is set.
   const closeByRole = page.getByRole('button', { name: /close/i }).last();
   if (await closeByRole.isVisible({ timeout }).catch(() => false)) {
-    await closeByRole.click();
+    await closeByRole.click({ timeout: 2000 }).catch(() => {});
     return;
   }
   // 2. Fallback: dialog/modal buttons with a ✕ character as text.
@@ -13,14 +24,43 @@ export async function dismissModal(page: Page, timeout = 2000) {
     .filter({ hasText: /^[×✕x]$/i })
     .first();
   if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-    await closeBtn.click();
+    await closeBtn.click({ timeout: 2000 }).catch(() => {});
     return;
   }
   // 3. Last resort: any visible ✕ button anywhere on the page.
   const anyX = page.locator('button').filter({ hasText: /^[×✕x]$/i }).last();
   if (await anyX.isVisible({ timeout: 500 }).catch(() => false)) {
-    await anyX.click();
+    await anyX.click({ timeout: 2000 }).catch(() => {});
   }
+}
+
+// Call once in beforeEach. Playwright automatically fires each handler whenever the
+// matching dialog appears mid-test, before any subsequent interaction is attempted.
+export async function registerAutoDialogHandlers(page: Page): Promise<void> {
+  const closeTopDialog = async () => {
+    // The Dialog component (Dialog.tsx) renders the close button as the LAST
+    // button inside [role="dialog"][data-state="open"] — Radix adds both attributes.
+    const closeBtn = page.locator('[role="dialog"][data-state="open"] button').last();
+    if (await closeBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await closeBtn.click({ timeout: 2000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      return;
+    }
+    // Fallback: Escape always closes Radix Dialog.
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
+  };
+
+  await page.addLocatorHandler(
+    page.getByRole('heading', { name: /congratulations/i }),
+    closeTopDialog,
+    { times: 5 },
+  );
+  await page.addLocatorHandler(
+    page.getByRole('heading', { name: /course updated/i }),
+    closeTopDialog,
+    { times: 50 },
+  );
 }
 
 async function dismissEcmlUserSwitcher(page: Page): Promise<void> {
@@ -40,6 +80,39 @@ async function dismissEcmlUserSwitcher(page: Page): Promise<void> {
       }
     } catch { /* cross-origin or detached frame */ }
   }
+}
+
+// Click the "Submit" button whenever a "Submit to continue." prompt is visible.
+// Checks the main page first, then all child frames (ECML quiz renders inside an iframe).
+// Returns true if Submit was clicked.
+async function handleSubmitToContinue(page: Page): Promise<boolean> {
+  const submitContinueText = /submit to continue/i;
+  // Main page
+  if (await page.getByText(submitContinueText).isVisible({ timeout: 300 }).catch(() => false)) {
+    const btn = page.getByRole('button', { name: /^submit$/i }).filter({ visible: true }).first();
+    if (await btn.isVisible({ timeout: 500 }).catch(() => false)) {
+      console.log('  "Submit to continue" — clicking Submit');
+      await btn.click({ timeout: 2000 }).catch(() => {});
+      await page.waitForTimeout(1000);
+      return true;
+    }
+  }
+  // Child frames (ECML quiz player renders inside iframe#contentPlayer)
+  for (const frame of page.frames()) {
+    if (frame === page.mainFrame()) continue;
+    try {
+      if (await frame.getByText(submitContinueText).isVisible({ timeout: 300 }).catch(() => false)) {
+        const btn = frame.getByRole('button', { name: /^submit$/i }).filter({ visible: true }).first();
+        if (await btn.isVisible({ timeout: 500 }).catch(() => false)) {
+          console.log('  "Submit to continue" (in frame) — clicking Submit');
+          await btn.click({ timeout: 2000 }).catch(() => {});
+          await page.waitForTimeout(1000);
+          return true;
+        }
+      }
+    } catch { /* cross-origin or detached */ }
+  }
+  return false;
 }
 
 // Selectors to try for the "next / forward / right-arrow" button
@@ -719,129 +792,159 @@ export async function consumeContent(page: Page, type: string, opts: { navigateB
   } else if (lowerType === 'html') {
     console.log('  HTML/SCORM content — attempting completion');
     await page.waitForTimeout(3000);
+    await dismissEcmlUserSwitcher(page);
 
-    // The HTML/SCORM player loads inside a nested iframe chain:
-    //   main page → outer ECML player iframe (gc-menu-btn, Replay) → inner SCORM iframe (Complete Course btn)
-    // On standalone content pages the outer iframe has no id; on course player pages it is
-    // iframe#contentPlayer. A <main class="content-player-container"> overlay blocks Playwright
-    // pointer clicks, so we use page.evaluate() to JS-click through the iframe chain directly.
+    // Detect multi-page vs single-page.
+    // Hover over the iframe first so hover-revealed navigation controls become visible,
+    // then scan frames with RIGHT_ARROW_SELECTORS; fall back to JS evaluate for
+    // SVG/icon-font/custom elements that have no text content.
+    let hasNavArrow = false;
+    try {
+      const iframeEl = page
+        .locator('iframe#contentPlayer, iframe[name="contentPlayer"]')
+        .first()
+        .or(page.locator('iframe').first());
+      if (await iframeEl.isVisible({ timeout: 300 }).catch(() => false)) {
+        const box = await iframeEl.boundingBox();
+        if (box) {
+          await page.mouse.move(
+            Math.round(box.x + box.width * 0.5),
+            Math.round(box.y + box.height * 0.5),
+          );
+          await page.waitForTimeout(500);
+        }
+      }
+    } catch { /* ignore */ }
+    for (const frame of page.frames()) {
+      if (frame === page.mainFrame()) continue;
+      try {
+        for (const sel of RIGHT_ARROW_SELECTORS) {
+          if (await frame.locator(sel).last().isVisible({ timeout: 300 }).catch(() => false)) {
+            hasNavArrow = true;
+            break;
+          }
+        }
+      } catch { /* cross-origin or detached */ }
+      if (hasNavArrow) break;
+    }
+    if (!hasNavArrow) {
+      for (const frame of page.frames()) {
+        if (frame === page.mainFrame()) continue;
+        try {
+          hasNavArrow = await frame.evaluate((): boolean => {
+            const W = window.innerWidth;
+            const H = window.innerHeight;
+            const candidates: HTMLElement[] = [];
+            document.querySelectorAll('*').forEach((el) => {
+              const r = el.getBoundingClientRect();
+              if (r.width < 5 || r.height < 5) return;
+              if (r.right < W * 0.45) return;
+              if (r.top < 0 || r.bottom > H) return;
+              const style = window.getComputedStyle(el);
+              const tag = el.tagName.toUpperCase();
+              if (
+                style.cursor === 'pointer' || tag === 'BUTTON' || tag === 'A' ||
+                el.getAttribute('role') === 'button'
+              ) candidates.push(el as HTMLElement);
+            });
+            candidates.sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right);
+            const el = candidates.find((c) => {
+              const r = c.getBoundingClientRect();
+              return r.width < W * 0.4 && r.height < H * 0.4;
+            });
+            return !!el;
+          }).catch(() => false);
+        } catch { /* cross-origin */ }
+        if (hasNavArrow) break;
+      }
+    }
+    console.log(`  HTML/SCORM hasNavArrow=${hasNavArrow}`);
 
-    // Step 1: "Complete Course" button inside the inner SCORM iframe.
-    const step1 = await page.evaluate((): string => {
-      const ecmlIframe = (
-        document.querySelector('iframe#contentPlayer') as HTMLIFrameElement |null
-        ?? document.querySelector('iframe[name="contentPlayer"]') as HTMLIFrameElement | null
-        ?? document.querySelector('iframe') as HTMLIFrameElement | null
-      );
-      if (!ecmlIframe?.contentDocument) return 'no-ecml-iframe';
-      const scormIframe = ecmlIframe.contentDocument.querySelector('iframe') as HTMLIFrameElement | null;
-      if (!scormIframe?.contentDocument) return 'no-scorm-iframe';
-      const btn = Array.from(scormIframe.contentDocument.querySelectorAll('button'))
-        .find((b) => /complete\s*course/i.test(b.textContent ?? '')) as HTMLElement | null;
-      if (btn) { btn.click(); return 'clicked-complete-course'; }
-      return 'no-complete-button';
-    });
-    console.log(`  HTML/SCORM step1: ${step1}`);
-
-    if (step1 === 'clicked-complete-course') {
-      await page.waitForTimeout(3000);
-      if (await isEcmlComplete(page)) {
-        console.log('  HTML/SCORM: completion screen after "Complete Course"');
-      } else if (await completionBanner.isVisible({ timeout: 3000 }).catch(() => false)) {
-        console.log('  HTML/SCORM: completion banner after "Complete Course"');
-      } else {
-        console.log('  HTML/SCORM: no completion signal after "Complete Course" — may complete asynchronously');
+    if (hasNavArrow) {
+      // Multi-page: click right arrow until "Completed" — no wall-clock timeout.
+      // Same layered strategy as ECML: selector scan → JS evaluate → clickRightArrow fallback.
+      // No break on !clicked; safety exit if no navigation click for 30 continuous seconds.
+      console.log('  HTML/SCORM multi-page: clicking right arrow until Completed...');
+      const MAX_SLIDES = 500;
+      let lastClickTime = Date.now();
+      for (let i = 0; i < MAX_SLIDES; i++) {
+        // A quiz "Submit to continue" may appear at the end of the content.
+        if (await handleSubmitToContinue(page)) lastClickTime = Date.now();
+        let clicked = false;
+        for (const frame of page.frames()) {
+          if (frame === page.mainFrame()) continue;
+          try {
+            for (const sel of RIGHT_ARROW_SELECTORS) {
+              const el = frame.locator(sel).last();
+              if (await el.isVisible({ timeout: 300 }).catch(() => false)) {
+                await el.click().catch(() => {});
+                clicked = true;
+                break;
+              }
+            }
+          } catch { /* cross-origin or detached */ }
+          if (clicked) break;
+        }
+        if (!clicked) {
+          for (const frame of page.frames()) {
+            if (frame === page.mainFrame()) continue;
+            try {
+              const jsClicked = await frame.evaluate((): boolean => {
+                const W = window.innerWidth;
+                const H = window.innerHeight;
+                const candidates: HTMLElement[] = [];
+                document.querySelectorAll('*').forEach((el) => {
+                  const r = el.getBoundingClientRect();
+                  if (r.width < 5 || r.height < 5) return;
+                  if (r.right < W * 0.45) return;
+                  if (r.top < 0 || r.bottom > H) return;
+                  const style = window.getComputedStyle(el);
+                  const tag = el.tagName.toUpperCase();
+                  if (
+                    style.cursor === 'pointer' || tag === 'BUTTON' || tag === 'A' ||
+                    el.getAttribute('role') === 'button'
+                  ) candidates.push(el as HTMLElement);
+                });
+                candidates.sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right);
+                const el = candidates.find((c) => {
+                  const r = c.getBoundingClientRect();
+                  return r.width < W * 0.4 && r.height < H * 0.4;
+                });
+                if (el) { (el as HTMLElement).click(); return true; }
+                return false;
+              }).catch(() => false);
+              if (jsClicked) { clicked = true; break; }
+            } catch { /* cross-origin */ }
+          }
+        }
+        if (!clicked) {
+          await clickRightArrow(page);
+        } else {
+          lastClickTime = Date.now();
+        }
+        await page.waitForTimeout(400);
+        if (await completionBanner.isVisible({ timeout: 500 }).catch(() => false)) {
+          console.log(`  HTML/SCORM multi-page: completion banner after ${i + 1} iterations`);
+          break;
+        }
+        if (await isEcmlComplete(page)) {
+          console.log(`  HTML/SCORM multi-page: completion screen after ${i + 1} iterations`);
+          break;
+        }
+        if (!clicked) {
+          if (Date.now() - lastClickTime > 30_000) {
+            console.log('  HTML/SCORM multi-page: no nav button for 30 s — moving on');
+            break;
+          }
+          if (i % 25 === 0) {
+            console.log(`  HTML/SCORM multi-page: no nav button (iteration ${i}) — waiting`);
+          }
+        }
       }
     } else {
-      // Step 2: open the sidebar via openMenu() on the AngularJS scope.
-      // Plain .click() on the gc-menu-btn does not flush Angular's digest cycle,
-      // so the sidebar never visually opens. We must call scope.openMenu() via $apply.
-      const step2 = await page.evaluate((): string => {
-        const ecmlIframe = (
-          document.querySelector('iframe#contentPlayer') as HTMLIFrameElement | null
-          ?? document.querySelector('iframe[name="contentPlayer"]') as HTMLIFrameElement | null
-          ?? document.querySelector('iframe') as HTMLIFrameElement | null
-        );
-        if (!ecmlIframe?.contentDocument) return 'no-ecml-iframe';
-        const menuBtn = ecmlIframe.contentDocument.querySelector('.gc-menu-btn') as HTMLElement | null;
-        if (!menuBtn) return 'no-sidebar-btn';
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const ng = (ecmlIframe.contentWindow as any)?.angular;
-          if (ng) {
-            const scope = ng.element(menuBtn).scope();
-            if (scope) { scope.$apply(() => scope.openMenu()); return 'opened-sidebar'; }
-          }
-        } catch { /* fall through to plain click */ }
-        menuBtn.click();
-        return 'opened-sidebar-click';
-      });
-      console.log(`  HTML/SCORM step2: ${step2}`);
-      await page.waitForTimeout(500);
-
-      // Step 3: click Replay via replayContent() on the AngularJS scope.
-      // Same reason: ng-click=replayContent() needs $apply to run.
-      const step3 = await page.evaluate((): string => {
-        const ecmlIframe = (
-          document.querySelector('iframe#contentPlayer') as HTMLIFrameElement | null
-          ?? document.querySelector('iframe[name="contentPlayer"]') as HTMLIFrameElement | null
-          ?? document.querySelector('iframe') as HTMLIFrameElement | null
-        );
-        if (!ecmlIframe?.contentDocument) return 'no-ecml-iframe';
-        const replayEl = Array.from(
-          ecmlIframe.contentDocument.querySelectorAll('[role="button"], button')
-        ).find((el) => /^replay$/i.test((el as HTMLElement).textContent?.trim() ?? '')) as HTMLElement | null;
-        if (!replayEl) return 'no-replay';
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const ng = (ecmlIframe.contentWindow as any)?.angular;
-          if (ng) {
-            const scope = ng.element(replayEl).scope();
-            if (scope) { scope.$apply(() => scope.replayContent()); return 'clicked-replay'; }
-          }
-        } catch { /* fall through to plain click */ }
-        replayEl.click();
-        return 'clicked-replay-click';
-      });
-      console.log(`  HTML/SCORM step3: ${step3}`);
-
-      if (step3.startsWith('clicked-replay')) {
-        await page.waitForTimeout(5000);
-        if (await isEcmlComplete(page)) {
-          console.log('  HTML/SCORM: completion screen after Replay');
-        } else if (await completionBanner.isVisible({ timeout: 3000 }).catch(() => false)) {
-          console.log('  HTML/SCORM: completion banner after Replay');
-        } else {
-          console.log('  HTML/SCORM: no completion signal after Replay — may complete asynchronously');
-        }
-      } else {
-        // Fallback: navigate to a completed lesson in the course sidebar.
-        console.log('  HTML/SCORM: Replay not found — falling back to sidebar navigation');
-        const currentContentId = page.url().split('/content/').pop()?.split(/[?#]/)[0] ?? '';
-        const allSidebarLinks = page.locator(
-          'aside a[href*="/content/"], [role="complementary"] a[href*="/content/"]'
-        );
-        const completedLinks = allSidebarLinks.filter({ hasText: /completed/i });
-        const completedCount = await completedLinks.count().catch(() => 0);
-        const candidates = completedCount > 0 ? completedLinks : allSidebarLinks;
-        const candidateCount = completedCount > 0 ? completedCount : await allSidebarLinks.count().catch(() => 0);
-        let completionTriggered = false;
-        for (let idx = 0; idx < candidateCount && !completionTriggered; idx++) {
-          const link = candidates.nth(idx);
-          const href = (await link.getAttribute('href').catch(() => '')) ?? '';
-          if (href && !href.includes(currentContentId) && await link.isVisible({ timeout: 300 }).catch(() => false)) {
-            await link.click();
-            await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-            await page.waitForTimeout(1000);
-            completionTriggered = true;
-            console.log('  Fallback: clicked completed sidebar lesson');
-          }
-        }
-        if (!completionTriggered) {
-          console.log('  HTML/SCORM: no fallback link found — waiting 2s');
-          await page.waitForTimeout(2000);
-        }
-      }
+      // Single-page: no navigation arrows — wait 15 s for content to register as viewed.
+      console.log('  HTML/SCORM single-page: waiting 15 s');
+      await page.waitForTimeout(15_000);
     }
 
   } else if (lowerType === 'video' || lowerType === 'webm') {
@@ -879,77 +982,315 @@ export async function consumeContent(page: Page, type: string, opts: { navigateB
         if (await completionBanner.isVisible({ timeout: 300 }).catch(() => false)) break;
       }
       console.log(`  Video — ended=${videoEnded}`);
+  } else if (lowerType === 'ecml') {
+    console.log('  ECML — attempting completion');
+    // Initial 5 s warm-up already applied above via waitMs before this branch.
+    await dismissEcmlUserSwitcher(page);
+
+    // Pre-check: click "Submit to continue" if a quiz shows it immediately on load.
+    await handleSubmitToContinue(page);
+
+    // Step 1: Check for SCORM "Complete Course" button.
+    // SCORM content (zip) loads inside iframe#contentPlayer and is detected as 'ecml'.
+    // The button may be in the outer contentPlayer doc or in a nested inner SCORM iframe.
+    const completeCourseResult = await page.evaluate((): string => {
+      const ecmlIframe = (
+        document.querySelector('iframe#contentPlayer') as HTMLIFrameElement | null
+        ?? document.querySelector('iframe[name="contentPlayer"]') as HTMLIFrameElement | null
+      );
+      if (!ecmlIframe?.contentDocument) return 'no-iframe';
+      const outerBtn = Array.from(ecmlIframe.contentDocument.querySelectorAll('button'))
+        .find((b) => /complete\s*course/i.test(b.textContent ?? '')) as HTMLElement | null;
+      if (outerBtn) { outerBtn.click(); return 'clicked'; }
+      const scormIframe = ecmlIframe.contentDocument.querySelector('iframe') as HTMLIFrameElement | null;
+      if (!scormIframe?.contentDocument) return 'no-inner';
+      const innerBtn = Array.from(scormIframe.contentDocument.querySelectorAll('button'))
+        .find((b) => /complete\s*course/i.test(b.textContent ?? '')) as HTMLElement | null;
+      if (innerBtn) { innerBtn.click(); return 'clicked-inner'; }
+      return 'not-found';
+    });
+    console.log(`  ECML step1 (Complete Course): ${completeCourseResult}`);
+
+    if (completeCourseResult === 'clicked' || completeCourseResult === 'clicked-inner') {
+      await page.waitForTimeout(3000);
+      if (await isEcmlComplete(page)) {
+        console.log('  ECML (SCORM): completion screen after "Complete Course"');
+      } else if (await completionBanner.isVisible({ timeout: 3000 }).catch(() => false)) {
+        console.log('  ECML (SCORM): completion banner after "Complete Course"');
+      } else {
+        console.log('  ECML (SCORM): no completion signal after "Complete Course" — may complete asynchronously');
+      }
+    } else {
+      // Step 2: Detect multi-page content.
+      // First check for ECML nav-next in the contentPlayer frame (standard AngularJS ECML).
+      // Then fall back to checking ALL child frames for generic "Next" buttons — this
+      // covers SCORM multi-SCO content whose navigation lives in a nested SCO iframe.
+      const cpFrame = page.frames().find((f) => f.name() === 'contentPlayer');
+      const navNextSelectors = [
+        'a.nav-next:not([class*="nav-disable"])',
+        'a[class*="nav-next"]:not([class*="nav-disable"])',
+        '.nav-icon.nav-next',
+      ];
+      let navNextFound = false;
+      if (cpFrame) {
+        for (const sel of navNextSelectors) {
+          const el = cpFrame.locator(sel).first();
+          if (await el.isVisible({ timeout: 300 }).catch(() => false)) {
+            navNextFound = true;
+            break;
+          }
+        }
+      }
+
+      // If ECML nav-next not found, check all nested frames using the full RIGHT_ARROW_SELECTORS
+      // list (covers →, chevron_right, Next, NEXT, and more).
+      // Wait 2 s first — SCORM players initialise the first SCO asynchronously after load.
+      // Then hover over the contentPlayer so hover-revealed navigation controls become visible.
+      if (!navNextFound) {
+        await page.waitForTimeout(2000);
+        try {
+          const iframeEl = page.locator('iframe#contentPlayer, iframe[name="contentPlayer"]').first();
+          if (await iframeEl.isVisible({ timeout: 300 }).catch(() => false)) {
+            const box = await iframeEl.boundingBox();
+            if (box) {
+              await page.mouse.move(
+                Math.round(box.x + box.width * 0.5),
+                Math.round(box.y + box.height * 0.5),
+              );
+              await page.waitForTimeout(500);
+            }
+          }
+        } catch { /* ignore */ }
+        for (const frame of page.frames()) {
+          if (frame === page.mainFrame()) continue;
+          try {
+            for (const sel of RIGHT_ARROW_SELECTORS) {
+              if (await frame.locator(sel).last().isVisible({ timeout: 300 }).catch(() => false)) {
+                navNextFound = true;
+                break;
+              }
+            }
+          } catch { /* cross-origin or detached frame */ }
+          if (navNextFound) break;
+        }
+      }
+
+      // Final fallback: deeply nested iframes (contentPlayer → SCO iframe) mean SCORM multi-SCO.
+      // Some SCORM players auto-advance through SCOs without any visible "Next" button.
+      // Still treat as multi-page so we wait for the completion banner instead of hitting
+      // the 30 s single-page timeout.
+      if (!navNextFound) {
+        const hasDeepNesting = page.frames().some((f) => {
+          if (f === page.mainFrame()) return false;
+          const parent = f.parentFrame();
+          return parent !== null && parent !== page.mainFrame();
+        });
+        if (hasDeepNesting) {
+          console.log('  Deep iframe nesting detected — treating as SCORM multi-page');
+          navNextFound = true;
+        }
+      }
+
+      console.log(`  ECML navNextFound=${navNextFound} totalFrames=${page.frames().length}`);
+
+      if (navNextFound) {
+        // Multi-page ECML or SCORM: click navigation until Completed — no wall-clock timeout.
+        // SCORM auto-advancing content may have no clickable "Next" button; in that case we
+        // keep the loop alive (no break on !clicked) and wait for the completion banner.
+        console.log('  ECML/SCORM multi-page: clicking until Completed...');
+        const MAX_SLIDES = 500;
+        let lastClickTime = Date.now();
+        for (let i = 0; i < MAX_SLIDES; i++) {
+          // A quiz "Submit to continue" may appear after the last slide — click it.
+          if (await handleSubmitToContinue(page)) lastClickTime = Date.now();
+          let clicked = false;
+          // ECML: prefer direct nav-next in contentPlayer frame
+          if (cpFrame) {
+            for (const sel of navNextSelectors) {
+              const el = cpFrame.locator(sel).first();
+              if (await el.isVisible({ timeout: 300 }).catch(() => false)) {
+                await el.click().catch(() => {});
+                clicked = true;
+                break;
+              }
+            }
+          }
+          // SCORM / generic: scan all frames using the full RIGHT_ARROW_SELECTORS list
+          // (covers →, chevron_right, Next, NEXT, aria-label variants, etc).
+          if (!clicked) {
+            for (const frame of page.frames()) {
+              if (frame === page.mainFrame()) continue;
+              try {
+                for (const sel of RIGHT_ARROW_SELECTORS) {
+                  const el = frame.locator(sel).last();
+                  if (await el.isVisible({ timeout: 300 }).catch(() => false)) {
+                    await el.click().catch(() => {});
+                    clicked = true;
+                    break;
+                  }
+                }
+              } catch { /* cross-origin or detached */ }
+              if (clicked) break;
+            }
+          }
+          // JS-evaluate fallback: selector-agnostic — finds the rightmost cursor:pointer
+          // element in the right half of each frame and fires a JS click on it. Handles
+          // SVG icons, icon-font buttons, and custom elements that have no text content.
+          if (!clicked) {
+            for (const frame of page.frames()) {
+              if (frame === page.mainFrame()) continue;
+              try {
+                const jsClicked = await frame.evaluate((): boolean => {
+                  const W = window.innerWidth;
+                  const H = window.innerHeight;
+                  const candidates: HTMLElement[] = [];
+                  document.querySelectorAll('*').forEach((el) => {
+                    const r = el.getBoundingClientRect();
+                    if (r.width < 5 || r.height < 5) return;
+                    if (r.right < W * 0.45) return; // must be in right half
+                    if (r.top < 0 || r.bottom > H) return; // must be in viewport
+                    const style = window.getComputedStyle(el);
+                    const tag = el.tagName.toUpperCase();
+                    if (
+                      style.cursor === 'pointer' ||
+                      tag === 'BUTTON' ||
+                      tag === 'A' ||
+                      el.getAttribute('role') === 'button'
+                    ) {
+                      candidates.push(el as HTMLElement);
+                    }
+                  });
+                  // Sort rightmost first, prefer smaller elements (navigation icons)
+                  candidates.sort((a, b) => {
+                    const ra = a.getBoundingClientRect();
+                    const rb = b.getBoundingClientRect();
+                    return rb.right - ra.right;
+                  });
+                  // Skip huge elements (the whole frame body, large containers)
+                  const el = candidates.find((c) => {
+                    const r = c.getBoundingClientRect();
+                    return r.width < W * 0.4 && r.height < H * 0.4;
+                  });
+                  if (el) { el.click(); return true; }
+                  return false;
+                }).catch(() => false);
+                if (jsClicked) { clicked = true; break; }
+              } catch { /* cross-origin or detached */ }
+            }
+          }
+          // Last resort: hover over the contentPlayer, then coordinate-click right-centre.
+          // Reveals hover-hidden controls and uses approximate position as final attempt.
+          if (!clicked) {
+            await clickRightArrow(page);
+          } else {
+            lastClickTime = Date.now();
+          }
+          await page.waitForTimeout(400);
+          if (await completionBanner.isVisible({ timeout: 500 }).catch(() => false)) {
+            console.log(`  ECML/SCORM multi-page: completion banner after ${i + 1} iterations`);
+            break;
+          }
+          if (await isEcmlComplete(page)) {
+            console.log(`  ECML/SCORM multi-page: completion screen after ${i + 1} iterations`);
+            break;
+          }
+          if (!clicked) {
+            if (Date.now() - lastClickTime > 30_000) {
+              console.log(`  ECML/SCORM multi-page: no nav button for 30 s — moving on`);
+              break;
+            }
+            if (i % 25 === 0) {
+              console.log(`  ECML/SCORM multi-page: no nav button (iteration ${i}) — waiting`);
+            }
+          }
+        }
+      } else {
+        // Single-page ECML (quiz/assessment): 15 s timeout then move on.
+        const MAX_CLICKS = 200;
+        const lessonStart = Date.now();
+        for (let i = 0; i < MAX_CLICKS; i++) {
+          if (Date.now() - lessonStart > 15_000) {
+            console.log(`  15s lesson limit reached after ${i} clicks — moving on`);
+            break;
+          }
+          if (page.isClosed()) {
+            console.log('  Page was closed — treating as content complete');
+            break;
+          }
+          if (await completionBanner.isVisible({ timeout: 500 }).catch(() => false)) {
+            console.log(`  Completion detected after ${i} clicks`);
+            break;
+          }
+          if (await isEcmlComplete(page)) {
+            console.log(`  ECML score screen detected after ${i} clicks — content complete`);
+            break;
+          }
+          // Handle the "Submit to continue" dialog in ECML assessments.
+          if (await handleSubmitToContinue(page)) continue;
+          await dismissModal(page, 300);
+          await dismissEcmlUserSwitcher(page);
+          let clicked = false;
+          for (let a = 0; a < 3 && !clicked; a++) {
+            clicked = await clickNextButton(page);
+            if (clicked) break;
+            clicked = await clickRightArrow(page);
+            if (clicked) break;
+            if (page.isClosed()) break;
+            await page.waitForTimeout(200);
+          }
+          if (!clicked) {
+            console.log('  No navigation found after retries — content may already be complete or in an unhandled state');
+            break;
+          }
+          try {
+            await page.waitForTimeout(300);
+          } catch {
+            console.log('  Page closed during wait — treating as content complete');
+            break;
+          }
+        }
+        // Post-loop poll: accept score screen or portal completion banner.
+        let ecmlDone = false;
+        for (let t = 0; t < 30 && !ecmlDone; t++) {
+          ecmlDone = await isEcmlComplete(page)
+            || await completionBanner.isVisible({ timeout: 500 }).catch(() => false);
+          if (!ecmlDone) await page.waitForTimeout(500);
+        }
+        if (!ecmlDone) console.log('  ECML completion screen not detected — moving on to next lesson');
+      }
+    }
+
   } else {
     console.log(`  ${type} — clicking → until completion screen`);
-    if (lowerType === 'ecml') await dismissEcmlUserSwitcher(page);
     const MAX_CLICKS = 200;
     const lessonStart = Date.now();
     for (let i = 0; i < MAX_CLICKS; i++) {
-      if (Date.now() - lessonStart > 15_000) {
-        console.log(`  15s lesson limit reached after ${i} clicks — moving on`);
+      if (Date.now() - lessonStart > 30_000) {
+        console.log(`  30s lesson limit reached after ${i} clicks — moving on`);
         break;
       }
       if (page.isClosed()) {
         console.log('  Page was closed — treating as content complete');
         break;
       }
-      // Check completion BEFORE dismissing any modal — the completion/feedback
-      // screen itself is what we're waiting for; dismissing it first causes the
-      // loop to miss the signal and run all 200 iterations.
       if (await completionBanner.isVisible({ timeout: 500 }).catch(() => false)) {
         console.log(`  Completion detected after ${i} clicks`);
         break;
       }
-      if (lowerType === 'ecml' && await isEcmlComplete(page)) {
-        console.log(`  ECML score screen detected after ${i} clicks — content complete`);
+      await dismissModal(page, 300);
+      let clicked = false;
+      for (let a = 0; a < 3 && !clicked; a++) {
+        clicked = await clickNextButton(page);
+        if (clicked) break;
+        clicked = await clickRightArrow(page);
+        if (clicked) break;
+        if (page.isClosed()) break;
+        await page.waitForTimeout(200);
+      }
+      if (!clicked) {
+        console.log('  No navigation found after retries — content may already be complete or in an unhandled state');
         break;
       }
-      // Handle the "Submit to continue" dialog that appears in ECML assessments
-      // after all questions have been skipped/answered.
-      if (lowerType === 'ecml') {
-        const submitBtn = page.getByRole('button', { name: /^submit$/i }).filter({ visible: true }).first();
-        if (await submitBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-          console.log('  ECML "Submit to continue" — clicking Submit');
-          await submitBtn.click();
-          await page.waitForTimeout(1000);
-          continue;
-        }
-        let clickedSubmit = false;
-        for (const frame of page.frames()) {
-          if (frame === page.mainFrame()) continue;
-          try {
-            const frameSubmit = frame.getByRole('button', { name: /^submit$/i }).filter({ visible: true }).first();
-            if (await frameSubmit.isVisible({ timeout: 300 }).catch(() => false)) {
-              console.log('  ECML "Submit to continue" (in frame) — clicking Submit');
-              await frameSubmit.click();
-              await page.waitForTimeout(1000);
-              clickedSubmit = true;
-              break;
-            }
-          } catch { /* cross-origin or detached frame */ }
-        }
-        if (clickedSubmit) continue;
-      }
-      // Only dismiss incidental modals (e.g. mid-content popups) after we've
-      // confirmed we are NOT on a completion screen.
-      await dismissModal(page, 300);
-      if (lowerType === 'ecml') await dismissEcmlUserSwitcher(page);
-        // Try NEXT button first (appears in ECML quiz popups after answering a question)
-        let clicked = false;
-        // Multiple small attempts to handle lazy-rendering buttons inside frames
-        for (let a = 0; a < 3 && !clicked; a++) {
-          clicked = await clickNextButton(page);
-          if (clicked) break;
-          clicked = await clickRightArrow(page);
-          if (clicked) break;
-          // wait a bit for UI to render and try again
-          if (page.isClosed()) break;
-          await page.waitForTimeout(200);
-        }
-        if (!clicked) {
-          console.log('  No navigation found after retries — content may already be complete or in an unhandled state');
-          break;
-        }
       try {
         await page.waitForTimeout(300);
       } catch {
@@ -957,20 +1298,8 @@ export async function consumeContent(page: Page, type: string, opts: { navigateB
         break;
       }
     }
-    if (lowerType === 'ecml') {
-      // Accept either the score screen (isEcmlComplete) or the portal's
-      // "You just completed" completion banner — whichever appears first.
-      let ecmlDone = false;
-      for (let t = 0; t < 30 && !ecmlDone; t++) {
-        ecmlDone = await isEcmlComplete(page)
-          || await completionBanner.isVisible({ timeout: 500 }).catch(() => false);
-        if (!ecmlDone) await page.waitForTimeout(500);
-      }
-      if (!ecmlDone) console.log('  ECML completion screen not detected — moving on to next lesson');
-    } else {
-      const bannerSeen = await completionBanner.isVisible({ timeout: 5000 }).catch(() => false);
-      if (!bannerSeen) console.log(`  ${type} — completion banner not detected, moving on`);
-    }
+    const bannerSeen = await completionBanner.isVisible({ timeout: 5000 }).catch(() => false);
+    if (!bannerSeen) console.log(`  ${type} — completion banner not detected, moving on`);
   }
 
   // Dismiss any post-completion overlay (e.g. feedback screen) before navigating back.
