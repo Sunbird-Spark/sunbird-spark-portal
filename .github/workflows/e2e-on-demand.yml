@@ -1,0 +1,79 @@
+name: E2E Tests (On Demand)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Target environment URL'
+        required: false
+        default: 'https://test.sunbirded.org'
+
+concurrency:
+  group: e2e-pages-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  e2e:
+    name: Run E2E Tests & Publish Report
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: automation_testing/web-portal
+    env:
+      BASE_URL: ${{ inputs.base_url || vars.E2E_BASE_URL || 'https://test.sunbirded.org' }}
+      REGISTERED_USER_EMAIL: ${{ vars.E2E_REGISTERED_USER_EMAIL || 'user1@yopmail.com' }}
+      REGISTERED_USER_PASSWORD: ${{ vars.E2E_REGISTERED_USER_PASSWORD || 'User1@123' }}
+      USER2_EMAIL: ${{ vars.E2E_USER2_EMAIL || 'user2@yopmail.com' }}
+      USER2_PASSWORD: ${{ vars.E2E_USER2_PASSWORD || 'User2@123' }}
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+          cache: 'npm'
+          cache-dependency-path: automation_testing/web-portal/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('automation_testing/web-portal/package-lock.json') }}
+
+      - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: automation_testing/web-portal/playwright-report
+
+      - name: Deploy report to GitHub Pages
+        if: always()
+        id: deploy
+        uses: actions/deploy-pages@v4
