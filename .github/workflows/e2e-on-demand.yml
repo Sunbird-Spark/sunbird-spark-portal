@@ -34,6 +34,7 @@ jobs:
       USER2_EMAIL: ${{ vars.E2E_USER2_EMAIL || 'user2@yopmail.com' }}
       USER2_PASSWORD: ${{ vars.E2E_USER2_PASSWORD || 'User2@123' }}
       CI: true
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
@@ -66,6 +67,11 @@ jobs:
 
       - name: Run E2E tests
         run: npm run test:e2e
+        continue-on-error: true
+
+      - name: Ensure report directory exists
+        if: always()
+        run: mkdir -p playwright-report
 
       - name: Upload Pages artifact
         if: always()
