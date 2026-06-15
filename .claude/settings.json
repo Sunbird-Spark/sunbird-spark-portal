@@ -10,12 +10,14 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Read(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ],
+    "ask": [
       "Write(*)",
       "Edit(*)",
-      "Glob(*)",
-      "Grep(*)",
-      "WebFetch(*)",
-      "WebSearch(*)"
+      "MultiEdit(*)",
+      "WebFetch(*)"
     ],
     "deny": [
       "Read(./.env)",
@@ -24,5 +26,9 @@
       "Read(*.key)",
       "Read(**/.env)"
     ]
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
   }
 }

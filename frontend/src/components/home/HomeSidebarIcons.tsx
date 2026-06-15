@@ -77,6 +77,17 @@ export const UsersIconFill = ({ className }: { className?: string }) => (
     </svg>
 );
 
+// Frameworks — filled (layered rectangles / learning path icon)
+export const FrameworksIconFill = ({ className }: { className?: string }) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <rect x="1" y="2" width="18" height="4" rx="1.5" fill="currentColor" />
+        <rect x="1" y="8" width="13" height="4" rx="1.5" fill="currentColor" />
+        <rect x="1" y="14" width="8" height="4" rx="1.5" fill="currentColor" />
+        <circle cx="16" cy="16" r="3" fill="currentColor" />
+        <path d="M14.5 16l1 1 2-2" stroke="hsl(var(--sunbird-white))" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 // Admin Reports — filled (three solid bars matching FiBarChart2)
 export const BarChartIconFill = ({ className }: { className?: string }) => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className={className}>

@@ -637,6 +637,7 @@
     "userReport": "User Report",
     "adminReports": "Admin Reports",
     "userManagement": "User Management",
+    "frameworks": "Frameworks",
     "expand": "Expand Sidebar",
     "collapse": "Collapse Sidebar"
   },
@@ -1299,7 +1300,8 @@
     "totalCourses": "Total Courses",
     "inProgress": "In Progress",
     "completed": "Completed",
-    "certificationsEarned": "Certifications Earned"
+    "certificationsEarned": "Certifications Earned",
+    "learningPaths": "Learning\nPaths"
   },
   "exportButton": {
     "exportCsv": "Export CSV",

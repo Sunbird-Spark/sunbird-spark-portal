@@ -49,6 +49,8 @@ import UserManagementPage from './pages/user-management/UserManagementPage';
 import PlatformReports from './pages/reports/PlatformReports';
 import CourseReport from './pages/reports/CourseReport';
 import UserReport from './pages/reports/UserReport';
+import FrameworksPage from './pages/frameworks/FrameworksPage';
+import CreateFrameworkPage from './pages/frameworks/CreateFrameworkPage';
 
 
 const AppRoutes: React.FC = () => {
@@ -157,6 +159,16 @@ const AppRoutes: React.FC = () => {
           <Route path="/workspace" element={
             <ProtectedRoute allowedRoles={['CONTENT_CREATOR', 'CONTENT_REVIEWER', 'BOOK_CREATOR', 'BOOK_REVIEWER']}>
               <WorkspacePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/frameworks" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <FrameworksPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/frameworks/create" element={
+            <ProtectedRoute allowedRoles={['ORG_ADMIN']}>
+              <CreateFrameworkPage />
             </ProtectedRoute>
           } />
         </Route>

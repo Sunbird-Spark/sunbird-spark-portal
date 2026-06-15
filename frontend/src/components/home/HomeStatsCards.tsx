@@ -40,6 +40,14 @@ const CertificationsIcon = () => (
     </svg>
 );
 
+const LearningPathsIcon = () => (
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="24" height="6" rx="1.5" stroke="white" strokeWidth="2" />
+        <rect x="1" y="10" width="24" height="6" rx="1.5" stroke="white" strokeWidth="2" />
+        <rect x="1" y="19" width="24" height="6" rx="1.5" stroke="white" strokeWidth="2" />
+    </svg>
+);
+
 const HomeStatsCards = () => {
     const { t } = useAppI18n();
     const { data: enrolledCollections, isLoading: enrollmentsLoading } = useUserEnrolledCollections();
@@ -91,6 +99,14 @@ const HomeStatsCards = () => {
             bgColor: "bg-sunbird-lavender",
             iconBg: "hsl(var(--sunbird-purple-dark))",
             icon: CertificationsIcon,
+        },
+        {
+            id: "learning-paths",
+            value: '02',
+            label: t("statsCards.learningPaths"),
+            bgColor: "bg-sunbird-ink",
+            iconBg: "hsl(var(--sunbird-dark-blue))",
+            icon: LearningPathsIcon,
         },
     ];
 
