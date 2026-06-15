@@ -25,24 +25,25 @@ export async function dismissModal(page: Page, timeout = 2000) {
   //    <Dialog> component that uses role="dialog" with a close button inside.
   const dialog = page.locator('[role="dialog"]').first();
   if (await dialog.isVisible({ timeout }).catch(() => false)) {
-    // 0a. Close button by accessible name (sr-only "Close" span inside Radix DialogContent)
-    const dialogClose = dialog.getByRole('button', { name: /close/i });
-    if (await dialogClose.isVisible({ timeout: 500 }).catch(() => false)) {
-      await dialogClose.click({ force: true });
-      return;
-    }
-    // 0b. Last button in dialog — DialogContent always renders the close button last
-    const dialogBtn = dialog.locator('button').last();
-    if (await dialogBtn.isVisible({ timeout: 300 }).catch(() => false)) {
-      await dialogBtn.click({ force: true });
-      return;
-    }
-    // 0c. Click the Radix overlay at the top-left corner (10, 10) — always outside
-    //     the centred dialog box. Triggers onInteractOutside → onOpenChange(false).
-    //     This is the "click anywhere on screen" fallback the user expects.
+    // 0a. Click the overlay backdrop at (10, 10) — always outside the centred dialog card.
+    //     Radix fires onInteractOutside → onOpenChange(false). Most reliable strategy.
     await page.mouse.click(10, 10).catch(() => {});
     await page.waitForTimeout(300);
     if (!(await dialog.isVisible({ timeout: 300 }).catch(() => false))) return;
+    // 0b. Close button by accessible name (sr-only "Close" span inside Radix DialogContent).
+    const dialogClose = dialog.getByRole('button', { name: /close/i });
+    if (await dialogClose.isVisible({ timeout: 500 }).catch(() => false)) {
+      await dialogClose.click({ force: true });
+      await page.waitForTimeout(300);
+      if (!(await dialog.isVisible({ timeout: 300 }).catch(() => false))) return;
+    }
+    // 0c. Last button in dialog — DialogContent always renders the close button last.
+    const dialogBtn = dialog.locator('button').last();
+    if (await dialogBtn.isVisible({ timeout: 300 }).catch(() => false)) {
+      await dialogBtn.click({ force: true });
+      await page.waitForTimeout(300);
+      if (!(await dialog.isVisible({ timeout: 300 }).catch(() => false))) return;
+    }
     // 0d. Escape key — Radix Dialog handles onKeyDown('Escape') via onOpenChange.
     await page.keyboard.press('Escape').catch(() => {});
     return;

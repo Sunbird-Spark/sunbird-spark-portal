@@ -389,14 +389,20 @@ export async function redirectToActiveBatchCourse(
   console.log(`  [redirectToActiveBatchCourse] checking batch end date on: ${page.url()}`);
   const batchEndText = await page.getByText(/Batch ends on/i).first()
     .textContent({ timeout: 3000 }).catch(() => '');
-  console.log(`  [redirectToActiveBatchCourse] batchEndText="${batchEndText?.trim()}" → redirecting=${!!batchEndText?.match(/Batch ends on[:\s]+(.+)/i)}`);
+  console.log(`  [redirectToActiveBatchCourse] batchEndText="${batchEndText?.trim()}"`);
   const endMatch = batchEndText?.match(/Batch ends on[:\s]+(.+)/i);
-  if (!endMatch) return;
+  if (!endMatch) {
+    console.log('  [redirectToActiveBatchCourse] no batch end date found — batch is open-ended, staying on current course');
+    return;
+  }
 
   const batchEndDate = new Date(endMatch[1].trim());
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  if (isNaN(batchEndDate.getTime()) || batchEndDate >= today) return;
+  if (isNaN(batchEndDate.getTime()) || batchEndDate >= today) {
+    console.log(`  [redirectToActiveBatchCourse] batch is still active (ends ${endMatch[1].trim()}) — staying on current course`);
+    return;
+  }
 
   console.log(`  Batch ended on ${endMatch[1].trim()} — finding an active-batch course on Explore`);
 

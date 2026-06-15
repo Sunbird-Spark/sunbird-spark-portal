@@ -1,52 +1,66 @@
 import { Page, Frame, expect } from '@playwright/test';
 
 export async function dismissModal(page: Page, timeout = 2000) {
-  // 0. Known portal dialogs — close via the last button in the open Radix dialog.
-  const knownDialog = page.getByRole('heading', { name: /congratulations|course updated/i });
-  if (await knownDialog.isVisible({ timeout: 500 }).catch(() => false)) {
-    const closeBtn = page.locator('[role="dialog"][data-state="open"] button').last();
-    if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-      await closeBtn.click({ timeout: 2000 }).catch(() => {});
-    } else {
-      await page.keyboard.press('Escape');
-    }
-    return;
-  }
-  // 1. getByRole resolves accessible names from aria-label, aria-labelledby, and
-  //    text content — catches "Close rating dialog" regardless of how the name is set.
+  const anyDialog = page.locator('[role="dialog"]').first();
+  if (!(await anyDialog.isVisible({ timeout }).catch(() => false))) return;
+
+  // 1. Click the overlay backdrop at (10, 10) — always outside the centred dialog card.
+  //    Radix fires onInteractOutside → onOpenChange(false). Most reliable strategy.
+  await page.mouse.click(10, 10).catch(() => {});
+  await page.waitForTimeout(300);
+  if (!(await anyDialog.isVisible({ timeout: 300 }).catch(() => false))) return;
+
+  // 2. Close button by accessible name (sr-only "Close" span in Dialog.tsx).
   const closeByRole = page.getByRole('button', { name: /close/i }).last();
-  if (await closeByRole.isVisible({ timeout }).catch(() => false)) {
-    await closeByRole.click({ timeout: 2000 }).catch(() => {});
-    return;
+  if (await closeByRole.isVisible({ timeout: 500 }).catch(() => false)) {
+    await closeByRole.click({ force: true, timeout: 2000 }).catch(() => {});
+    await page.waitForTimeout(300);
+    if (!(await anyDialog.isVisible({ timeout: 300 }).catch(() => false))) return;
   }
-  // 2. Fallback: dialog/modal buttons with a ✕ character as text.
-  const closeBtn = page.locator('[role="dialog"] button, [class*="modal"] button, [class*="overlay"] button')
-    .filter({ hasText: /^[×✕x]$/i })
-    .first();
+
+  // 3. Last button in the open dialog (close button is always last in Radix DialogContent).
+  const closeBtn = page.locator('[role="dialog"][data-state="open"] button').last();
   if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-    await closeBtn.click({ timeout: 2000 }).catch(() => {});
-    return;
+    await closeBtn.click({ force: true, timeout: 2000 }).catch(() => {});
+    await page.waitForTimeout(300);
+    if (!(await anyDialog.isVisible({ timeout: 300 }).catch(() => false))) return;
   }
-  // 3. Last resort: any visible ✕ button anywhere on the page.
-  const anyX = page.locator('button').filter({ hasText: /^[×✕x]$/i }).last();
-  if (await anyX.isVisible({ timeout: 500 }).catch(() => false)) {
-    await anyX.click({ timeout: 2000 }).catch(() => {});
-  }
+
+  // 4. Escape key.
+  await page.keyboard.press('Escape').catch(() => {});
 }
 
 // Call once in beforeEach. Playwright automatically fires each handler whenever the
 // matching dialog appears mid-test, before any subsequent interaction is attempted.
 export async function registerAutoDialogHandlers(page: Page): Promise<void> {
   const closeTopDialog = async () => {
-    // The Dialog component (Dialog.tsx) renders the close button as the LAST
-    // button inside [role="dialog"][data-state="open"] — Radix adds both attributes.
-    const closeBtn = page.locator('[role="dialog"][data-state="open"] button').last();
-    if (await closeBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await closeBtn.click({ timeout: 2000 }).catch(() => {});
+    const isStillOpen = () =>
+      page.locator('[role="dialog"][data-state="open"]').isVisible({ timeout: 300 }).catch(() => false);
+
+    // Strategy 1: click the overlay backdrop at the top-left corner — always outside
+    // the centred dialog card. Radix fires onInteractOutside → onOpenChange(false).
+    // The user confirmed this reliably closes the dialog regardless of close-button state.
+    await page.mouse.click(10, 10).catch(() => {});
+    await page.waitForTimeout(400);
+    if (!(await isStillOpen())) return;
+
+    // Strategy 2: close button by accessible name (sr-only "Close" span in Dialog.tsx).
+    const closeByName = page.getByRole('button', { name: /close/i }).last();
+    if (await closeByName.isVisible({ timeout: 500 }).catch(() => false)) {
+      await closeByName.click({ force: true, timeout: 2000 }).catch(() => {});
       await page.waitForTimeout(400);
-      return;
+      if (!(await isStillOpen())) return;
     }
-    // Fallback: Escape always closes Radix Dialog.
+
+    // Strategy 3: last button in the open dialog (close button is always last in DialogContent).
+    const closeBtn = page.locator('[role="dialog"][data-state="open"] button').last();
+    if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+      await closeBtn.click({ force: true, timeout: 2000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      if (!(await isStillOpen())) return;
+    }
+
+    // Strategy 4: Escape key.
     await page.keyboard.press('Escape');
     await page.waitForTimeout(400);
   };
@@ -54,7 +68,6 @@ export async function registerAutoDialogHandlers(page: Page): Promise<void> {
   await page.addLocatorHandler(
     page.getByRole('heading', { name: /congratulations/i }),
     closeTopDialog,
-    { times: 5 },
   );
   await page.addLocatorHandler(
     page.getByRole('heading', { name: /course updated/i }),

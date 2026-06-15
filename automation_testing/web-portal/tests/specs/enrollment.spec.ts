@@ -37,10 +37,23 @@ test.describe('Registered User - Course Completion (Continue from where you left
     await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
     console.log(`[enrollment] Landed on: ${page.url()}`);
 
-    // 3. Dismiss any lingering dialog/overlay from the previous session
+    // 3. Dismiss any lingering dialog/overlay from the previous session.
+    //    If the Congratulations dialog appears here — before any lesson is consumed —
+    //    it means the course is already 100% complete. That is a portal bug: a fully
+    //    completed course should not appear in "Continue from where you left".
+    const congratsOnLoad = page.getByRole('heading', { name: /congratulations/i });
+    const courseAlreadyComplete = await congratsOnLoad.isVisible({ timeout: 3000 }).catch(() => false);
     await dismissModal(page);
     await page.waitForTimeout(500);
     console.log(`[enrollment] Course page URL after dismissModal: ${page.url()}`);
+
+    if (courseAlreadyComplete) {
+      test.info().annotations.push({
+        type: 'BUG',
+        description: 'Congratulations dialog appeared on initial course load — course was already 100% complete yet still shown in "Continue from where you left". User progress was not reset between test runs.',
+      });
+      throw new Error('[BUG REPORT] Course was already complete when the test started. "Continue from where you left" should not surface a fully completed course.');
+    }
 
     // 3b. Guard: check batch end date before spending time consuming lessons.
     //     Navigates to Explore to find an active-batch course if the current one expired.
