@@ -1,16 +1,28 @@
 import { Page, Frame, expect } from '@playwright/test';
 
 export async function dismissModal(page: Page, timeout = 2000) {
+  // 1. RatingDialog — custom overlay div, no outside-click handler, no Escape.
+  //    Close button is the first button inside .rating-dialog-overlay and has
+  //    aria-label="Close rating dialog". Must be handled before the Radix path.
+  const ratingOverlay = page.locator('.rating-dialog-overlay');
+  if (await ratingOverlay.isVisible({ timeout: 300 }).catch(() => false)) {
+    const ratingClose = ratingOverlay.locator('button').first();
+    if (await ratingClose.isVisible({ timeout: 500 }).catch(() => false)) {
+      await ratingClose.click({ force: true }).catch(() => {});
+      await page.waitForTimeout(300);
+    }
+    return;
+  }
+
+  // 2. Radix Dialog — click backdrop at (10, 10) triggers onInteractOutside.
   const anyDialog = page.locator('[role="dialog"]').first();
   if (!(await anyDialog.isVisible({ timeout }).catch(() => false))) return;
 
-  // 1. Click the overlay backdrop at (10, 10) — always outside the centred dialog card.
-  //    Radix fires onInteractOutside → onOpenChange(false). Most reliable strategy.
   await page.mouse.click(10, 10).catch(() => {});
   await page.waitForTimeout(300);
   if (!(await anyDialog.isVisible({ timeout: 300 }).catch(() => false))) return;
 
-  // 2. Close button by accessible name (sr-only "Close" span in Dialog.tsx).
+  // 3. Close button by accessible name (sr-only "Close" span in Dialog.tsx).
   const closeByRole = page.getByRole('button', { name: /close/i }).last();
   if (await closeByRole.isVisible({ timeout: 500 }).catch(() => false)) {
     await closeByRole.click({ force: true, timeout: 2000 }).catch(() => {});
@@ -18,7 +30,7 @@ export async function dismissModal(page: Page, timeout = 2000) {
     if (!(await anyDialog.isVisible({ timeout: 300 }).catch(() => false))) return;
   }
 
-  // 3. Last button in the open dialog (close button is always last in Radix DialogContent).
+  // 4. Last button in the open dialog (close button is always last in Radix DialogContent).
   const closeBtn = page.locator('[role="dialog"][data-state="open"] button').last();
   if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
     await closeBtn.click({ force: true, timeout: 2000 }).catch(() => {});
@@ -26,7 +38,7 @@ export async function dismissModal(page: Page, timeout = 2000) {
     if (!(await anyDialog.isVisible({ timeout: 300 }).catch(() => false))) return;
   }
 
-  // 4. Escape key.
+  // 5. Escape key.
   await page.keyboard.press('Escape').catch(() => {});
 }
 
@@ -73,6 +85,22 @@ export async function registerAutoDialogHandlers(page: Page): Promise<void> {
     page.getByRole('heading', { name: /course updated/i }),
     closeTopDialog,
     { times: 50 },
+  );
+
+  // RatingDialog — "We would love to hear from you". Custom overlay with no
+  // outside-click or Escape handler. Close button is the first button inside
+  // .rating-dialog-overlay (aria-label="Close rating dialog").
+  await page.addLocatorHandler(
+    page.getByText(/we would love to hear from you/i),
+    async () => {
+      const ratingOverlay = page.locator('.rating-dialog-overlay');
+      if (!(await ratingOverlay.isVisible({ timeout: 500 }).catch(() => false))) return;
+      const closeBtn = ratingOverlay.locator('button').first();
+      if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+        await closeBtn.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(300);
+      }
+    },
   );
 }
 

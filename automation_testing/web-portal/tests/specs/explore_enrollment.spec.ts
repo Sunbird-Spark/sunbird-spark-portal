@@ -232,10 +232,12 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
     console.log(`  Initial progress after enrollment: ${initialProgress}%`);
 
     // 9. Wait for the sidebar to load (API-driven), then expand all collapsed units.
-    //    Must wait for the first lesson BEFORE expanding — the sidebar data arrives
-    //    asynchronously after domcontentloaded, so expanding earlier finds 0 buttons.
+    //    Wait for the unit toggle buttons — always in the DOM regardless of collapsed state.
+    //    Lesson anchors (SIDEBAR_LESSONS) are removed from DOM by Radix Collapsible when
+    //    collapsed, so waiting for them before expanding would time out if no unit is
+    //    auto-expanded on landing.
     const lessonAnchors = page.locator(SIDEBAR_LESSONS);
-    await expect(lessonAnchors.first()).toBeVisible({ timeout: 30000 });
+    await page.locator('aside button[data-state]').first().waitFor({ state: 'visible', timeout: 30000 });
 
     await expandAllUnits(page);
 
@@ -264,6 +266,21 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
       const rawText = await anchor.textContent() ?? '';
       const title = rawText.replace(/not viewed|in progress|completed|\d+\/\d+.*/gi, '').trim().slice(0, 60);
       lessons.push({ href, title });
+    }
+
+    // The active lesson (auto-navigated by the portal on enrollment) may be
+    // rendered in the sidebar as a non-anchor element (div/button) because the
+    // player already shows it. In that case it won't match 'aside a[href*="/content/"]'
+    // and will be missing from the snapshot above. Inject it from the current URL.
+    const currentContentMatch = page.url().match(/\/content\/([^/?#]+)/);
+    if (currentContentMatch) {
+      const currentContentId = currentContentMatch[1];
+      const alreadyListed = lessons.some((l) => l.href.includes(currentContentId));
+      if (!alreadyListed) {
+        const currentPath = new URL(page.url()).pathname;
+        lessons.unshift({ href: currentPath, title: '(current lesson — active in player)' });
+        console.log(`  Active lesson not in sidebar anchors — injected from URL: ${currentContentId}`);
+      }
     }
 
     console.log(`Course has ${lessons.length} lessons`);
@@ -353,6 +370,10 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
         else if (hasHtml) contentType = 'html';
       }
       console.log(`    Content type: ${contentType}`);
+      const progressBefore = parseInt(
+        await page.getByRole('progressbar', { name: /course progress/i })
+          .getAttribute('aria-valuenow').catch(() => '0') ?? '0', 10
+      );
       await consumeContent(page, contentType, { navigateBack: false });
 
       await dismissModal(page);
@@ -381,8 +402,20 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
         .catch(() => {});
       const afterText = (await lessonLink.textContent().catch(() => '')) ?? '';
       if (!/completed/i.test(afterText)) {
-        console.log(`  [${i + 1}/${lessons.length}] Lesson stuck (portal bug): ${title}`);
-        stuckLessons.push(title);
+        // The active lesson may render without an <a> tag in the sidebar (non-anchor style
+        // while it is the currently loaded lesson), so lessonLink finds nothing and afterText
+        // is empty even when the lesson completed. Verify via the progress bar: if the value
+        // increased since before consuming, the lesson registered as completed on the server.
+        const progressAfter = parseInt(
+          await page.getByRole('progressbar', { name: /course progress/i })
+            .getAttribute('aria-valuenow').catch(() => '0') ?? '0', 10
+        );
+        if (progressAfter > progressBefore) {
+          console.log(`  [${i + 1}/${lessons.length}] Sidebar stale (${progressBefore}→${progressAfter}%) — lesson completed`);
+        } else {
+          console.log(`  [${i + 1}/${lessons.length}] Lesson stuck (portal bug): ${title}`);
+          stuckLessons.push(title);
+        }
       }
     }
 

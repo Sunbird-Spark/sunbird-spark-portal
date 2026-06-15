@@ -70,18 +70,20 @@ export async function dismissModal(page: Page, timeout = 2000) {
   }
 }
 
-// Loops until no [role="dialog"] is visible or maxRounds is exhausted.
+// Loops until no [role="dialog"] AND no .rating-dialog-overlay is visible,
+// or maxRounds is exhausted.
 // firstTimeout: how long to wait on the first check — use 5000 after consumeAllLessons
 // so the congratulations dialog has time to appear after the server confirms 100%.
 // Subsequent rounds use 500 ms to stop quickly once the page is clear.
 export async function dismissAllModals(page: Page, firstTimeout = 2000): Promise<void> {
+  const anyOverlay = async (timeout: number) => {
+    const ratingVisible = await page.locator('.rating-dialog-overlay').isVisible({ timeout: 300 }).catch(() => false);
+    if (ratingVisible) return true;
+    return page.locator('[role="dialog"]').first().isVisible({ timeout }).catch(() => false);
+  };
   for (let i = 0; i < 8; i++) {
-    // Use 2000 ms for every round after the first so that a second dialog triggered
-    // by a different API response (e.g. BatchExpiryDialog arriving after
-    // CourseCompletionDialog was dismissed) is still caught within the window.
     const timeout = i === 0 ? firstTimeout : 2000;
-    const dialog = page.locator('[role="dialog"]').first();
-    if (!(await dialog.isVisible({ timeout }).catch(() => false))) break;
+    if (!(await anyOverlay(timeout))) break;
     await dismissModal(page, 1500);
     await page.waitForTimeout(400);
   }

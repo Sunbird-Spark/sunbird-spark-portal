@@ -62,8 +62,12 @@ test.describe('Registered User - Course Completion (Continue from where you left
     console.log(`[enrollment] After redirectToActiveBatchCourse. URL: ${page.url()}`);
 
     // 4. Wait for the sidebar to load (API-driven), then expand all collapsed units.
+    //    Wait for unit toggle buttons — always in DOM regardless of collapsed state.
+    //    Lesson anchors (SIDEBAR_LESSONS) are removed from DOM by Radix Collapsible when
+    //    a unit is collapsed, and the active lesson itself may not be an <a> element,
+    //    so waiting for anchors can time out even when the sidebar has fully loaded.
     const lessonAnchors = page.locator(SIDEBAR_LESSONS);
-    await lessonAnchors.first().waitFor({ state: 'visible', timeout: 30000 });
+    await page.locator('aside button[data-state]').first().waitFor({ state: 'visible', timeout: 30000 });
     await expandAllUnits(page);
 
     const startProgress = await page

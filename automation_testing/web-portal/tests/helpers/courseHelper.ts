@@ -122,6 +122,23 @@ export async function consumeAllLessons(
     lessons.push({ href, title, initiallyCompleted });
   }
 
+  // The active lesson (currently loaded in the player) may be rendered in the sidebar
+  // as a non-anchor element (div/button) because the user is already on it. Radix
+  // Collapsible also removes collapsed unit content from the DOM, so on the first page
+  // load after enrollment the active lesson's unit is expanded while others are collapsed.
+  // If the current URL contains a content ID not in the snapshot, inject it at the front
+  // so it gets consumed before the already-completed lessons are skipped.
+  const currentUrlMatch = page.url().match(/\/content\/([^/?#]+)/);
+  if (currentUrlMatch) {
+    const currentContentId = currentUrlMatch[1];
+    const alreadyListed = lessons.some((l) => l.href.includes(currentContentId));
+    if (!alreadyListed) {
+      const currentPath = new URL(page.url()).pathname;
+      lessons.unshift({ href: currentPath, title: '(current lesson — active in player)', initiallyCompleted: false });
+      console.log(`  Active lesson not in sidebar anchors — injected from URL: ${currentContentId}`);
+    }
+  }
+
   const remaining = lessons.filter((l) => !l.initiallyCompleted).length;
   console.log(`  Course has ${lessons.length} lessons (${remaining} incomplete)`);
 
@@ -191,6 +208,10 @@ export async function consumeAllLessons(
 
     const contentType = await detectContentType(page);
     console.log(`    Content type: ${contentType}`);
+    const progressBefore = parseInt(
+      await page.getByRole('progressbar', { name: /course progress/i })
+        .getAttribute('aria-valuenow').catch(() => '0') ?? '0', 10
+    );
     await consumeContent(page, contentType, { navigateBack: false });
     console.log(`  [${i + 1}/${lessons.length}] consumeContent returned. URL now: ${page.url()}`);
 
@@ -225,11 +246,18 @@ export async function consumeAllLessons(
         .catch(() => false);
       console.log(`  [${i + 1}/${lessons.length}] Sidebar status updated to Completed: ${statusChanged}`);
       if (!statusChanged) {
+        // The active lesson may render without an <a> tag in the sidebar (non-anchor style
+        // while it is the currently loaded lesson), so the filter finds nothing even when
+        // the lesson completed. Verify via the progress bar: if the value increased since
+        // before consuming, or if it reached 100%, the lesson registered on the server.
         const pb = await page
           .getByRole('progressbar', { name: /course progress/i })
           .getAttribute('aria-valuenow').catch(() => null);
+        const pbNum = parseInt(pb ?? '0', 10);
         if (pb === '100') {
           console.log(`  [${i + 1}/${lessons.length}] Sidebar stale but course is 100% — not marking as stuck`);
+        } else if (pbNum > progressBefore) {
+          console.log(`  [${i + 1}/${lessons.length}] Sidebar stale but progress ${progressBefore}→${pbNum}% — lesson completed`);
         } else {
           console.log(`  Warning: lesson "${title}" sidebar did not update to Completed within 20 s (authoritative check is the progress bar)`);
           stuckLessons.push(title);
