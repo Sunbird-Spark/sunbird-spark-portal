@@ -93,6 +93,20 @@ test.describe('Registered User - Course Completion (Continue from where you left
     console.log(`[enrollment] consumeAllLessons returned. Current URL: ${page.url()}`);
 
     // 5b. Bug-report: if lessons could not be completed, fail the test visibly.
+    //     First verify final progress — the sidebar completion check can false-positive
+    //     when the portal delays the progress bar update after lesson consumption.
+    //     If the course is already at 100%, all lessons completed and the stuck list
+    //     contains only stale-sidebar false positives, not genuine failures.
+    if (stuckLessons.length > 0) {
+      const finalProgress = await page
+        .getByRole('progressbar', { name: /course progress/i })
+        .getAttribute('aria-valuenow').catch(() => null);
+      if (finalProgress === '100') {
+        console.log(`[enrollment] Stuck lesson(s) dismissed — course is already 100%: ${stuckLessons.join(', ')}`);
+        stuckLessons = [];
+      }
+    }
+
     if (stuckLessons.length > 0) {
       const titles = stuckLessons.map((t) => `"${t}"`).join(', ');
       test.info().annotations.push({

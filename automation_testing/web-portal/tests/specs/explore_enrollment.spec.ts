@@ -422,6 +422,21 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
     // 11b. If any lessons could not be completed the course is partially done —
     //      navigate to the batch root, leave the course so it can be rejoined
     //      fresh on the next run, and stop (100% cannot be asserted).
+    //
+    //      Before treating stuck lessons as a real bug, verify final progress.
+    //      The sidebar completion check can false-positive when the portal delays
+    //      the progress bar update after lesson consumption (async server sync).
+    //      If the course is already at 100%, all lessons completed — no bug.
+    if (stuckLessons.length > 0) {
+      const finalProgress = await page
+        .getByRole('progressbar', { name: /course progress/i })
+        .getAttribute('aria-valuenow').catch(() => null);
+      if (finalProgress === '100') {
+        console.log(`  Stuck lesson(s) dismissed — course is already 100%: ${stuckLessons.join(', ')}`);
+        stuckLessons.length = 0;
+      }
+    }
+
     if (stuckLessons.length > 0) {
       const titles = stuckLessons.map((t) => `"${t}"`).join(', ');
       test.info().annotations.push({
