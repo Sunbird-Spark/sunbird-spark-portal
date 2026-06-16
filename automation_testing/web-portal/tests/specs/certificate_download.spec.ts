@@ -21,7 +21,6 @@ test.describe('Registered User - Certificate Download', () => {
     await expect(profileName).toBeVisible({ timeout: 15000 });
     const userName = ((await profileName.textContent()) ?? '').trim();
     expect(userName).toBeTruthy();
-    console.log(`Profile name: "${userName}"`);
 
     // 2. Scroll to My Learning section
     const myLearningHeading = page.getByRole('heading', { name: /my learning/i });
@@ -52,7 +51,6 @@ test.describe('Registered User - Certificate Download', () => {
       has: page.getByRole('button', { name: /download certificate/i }),
     }).first();
     const courseName = ((await courseRow.locator('h4.profile-learning-title').first().textContent()) ?? '').trim();
-    console.log(`Course name: "${courseName}"`);
 
     // 6. Intercept the SVG certificate API response BEFORE clicking.
     //    The PDF is image-based (SVG → PNG → jsPDF) so the SVG is the only
@@ -71,7 +69,6 @@ test.describe('Registered User - Certificate Download', () => {
 
     // 8. Click download, then wait for SVG fetch + PNG render + PDF generation to finish
     await downloadBtn.click();
-    console.log('Download button clicked — waiting for PDF to generate...');
     await page.waitForTimeout(5000);
 
     // 9. Obtain the download handle and save into the test's own output directory.
@@ -89,7 +86,6 @@ test.describe('Registered User - Certificate Download', () => {
       path: certPath,
       contentType: 'application/pdf',
     });
-    console.log('Certificate attached to test report.');
 
     // 11. Verify the downloaded file exists and is a valid PDF
     expect(fs.existsSync(certPath), 'Certificate file should exist on disk').toBe(true);
@@ -106,11 +102,9 @@ test.describe('Registered User - Certificate Download', () => {
     const svgLower = capturedSvg.toLowerCase();
 
     expect(svgLower, `SVG should contain the user name "${userName}"`).toContain(userName.toLowerCase());
-    console.log(`SVG contains user name "${userName}" `);
 
     if (courseName) {
       expect(svgLower, `SVG should contain the course name "${courseName}"`).toContain(courseName.toLowerCase());
-      console.log(`SVG contains course name "${courseName}" ✓`);
     }
 
     // 13. Decode the QR code embedded in the SVG certificate and verify it is a valid URL.
@@ -126,7 +120,6 @@ test.describe('Registered User - Certificate Download', () => {
         const buffer = Buffer.from(match[1], 'base64');
         const image = await Jimp.read(buffer);
         const { width, height } = image.bitmap;
-        console.log(`  Trying embedded image ${width}x${height}px for QR`);
 
         // Try at native resolution first
         let result = jsQR(new Uint8ClampedArray(image.bitmap.data.buffer), width, height);
@@ -166,7 +159,6 @@ test.describe('Registered User - Certificate Download', () => {
         const screenshot = await page.screenshot({ fullPage: true });
         const rendered = await Jimp.read(screenshot);
         const { width: rw, height: rh } = rendered.bitmap;
-        console.log(`  Rendered certificate screenshot: ${rw}x${rh}px — scanning for QR...`);
         const scanResult = jsQR(new Uint8ClampedArray(rendered.bitmap.data.buffer), rw, rh);
         if (scanResult) {
           qrData = scanResult.data;
@@ -181,14 +173,9 @@ test.describe('Registered User - Certificate Download', () => {
       console.log('[BUG REPORT] Could not decode or extract QR code from certificate SVG — QR may be rendered as vector paths with no href wrapper.');
       return;
     }
-    console.log(`QR code content: "${qrData}"`);
     expect(qrData, 'QR code should contain a valid URL').toMatch(/^https?:\/\//);
-    console.log('QR code verified: valid URL ✓');
 
     // 14. Navigate to the QR verification URL and check the outcome.
-    //     Verification can fail due to a backend registry issue — report it as
-    //     a bug but do not fail the test, since it is outside the portal's control.
-    console.log(`  Navigating to QR verification URL: ${qrData}`);
     await page.goto(qrData!);
     // Wait for the API-driven content to render before checking status.
     // "Certificate Details" heading only appears after the registry API responds.
@@ -208,7 +195,9 @@ test.describe('Registered User - Certificate Download', () => {
       || (!verificationPassed && await page.getByText(/\bInvalid\b/).isVisible({ timeout: 1000 }).catch(() => false));
 
     if (verificationFailed) {
-      console.log('[BUG REPORT] Certificate QR verification failed — backend registry returned "Invalid". The certificate was issued correctly but verification is broken.');
+      const bugMsg = 'Certificate QR verification failed — backend registry returned "Invalid". The certificate was issued correctly but verification is broken.';
+      test.info().annotations.push({ type: 'BUG', description: bugMsg });
+      throw new Error(`[BUG REPORT] ${bugMsg}`);
     } else if (verificationPassed) {
       console.log('Certificate QR verification passed ✓');
     } else {

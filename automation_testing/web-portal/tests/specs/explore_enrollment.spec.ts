@@ -222,8 +222,6 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
     await dismissModal(page);
     await page.waitForTimeout(500);
 
-    console.log(`  Enrolled — URL: ${page.url()}`);
-
     // 8. Confirm the progress bar rendered (Sunbird retains prior progress on re-enrollment,
     //    so the value may be > 0% — do not assert an exact starting value here).
     const progressBar = page.getByRole('progressbar', { name: /course progress/i });
@@ -252,7 +250,6 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
         if (cnt > 0 && cnt === prevCount) break;
         prevCount = cnt;
       }
-      console.log('  All course units expanded');
     }
 
     // 10. Re-count after expanding — newly revealed units may have added lesson links.
@@ -389,7 +386,6 @@ test.describe('Registered User - Course Enrollment from Explore Page', () => {
         break;
       }
 
-      console.log(`  [${i + 1}/${lessons.length}] Moving to next lesson`);
       // Re-expand all units — Radix Collapsible may have collapsed them during
       // consumption, removing the lesson's sidebar link from the DOM.
       await expandAllUnits(page);

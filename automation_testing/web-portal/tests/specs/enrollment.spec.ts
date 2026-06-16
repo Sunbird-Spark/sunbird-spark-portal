@@ -35,7 +35,6 @@ test.describe('Registered User - Course Completion (Continue from where you left
       { timeout: 20000 }
     );
     await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-    console.log(`[enrollment] Landed on: ${page.url()}`);
 
     // 3. Dismiss any lingering dialog/overlay from the previous session.
     //    If the Congratulations dialog appears here — before any lesson is consumed —
@@ -45,7 +44,6 @@ test.describe('Registered User - Course Completion (Continue from where you left
     const courseAlreadyComplete = await congratsOnLoad.isVisible({ timeout: 3000 }).catch(() => false);
     await dismissModal(page);
     await page.waitForTimeout(500);
-    console.log(`[enrollment] Course page URL after dismissModal: ${page.url()}`);
 
     if (courseAlreadyComplete) {
       test.info().annotations.push({
@@ -57,9 +55,7 @@ test.describe('Registered User - Course Completion (Continue from where you left
 
     // 3b. Guard: check batch end date before spending time consuming lessons.
     //     Navigates to Explore to find an active-batch course if the current one expired.
-    console.log('[enrollment] Checking batch expiry...');
     await redirectToActiveBatchCourse(page, urls.explore, origin);
-    console.log(`[enrollment] After redirectToActiveBatchCourse. URL: ${page.url()}`);
 
     // 4. Wait for the sidebar to load (API-driven), then expand all collapsed units.
     //    Wait for unit toggle buttons — always in DOM regardless of collapsed state.
@@ -90,7 +86,6 @@ test.describe('Registered User - Course Completion (Continue from where you left
     //    consumeAllLessons handles: CSS-class-based status detection, re-expanding
     //    collapsed units between lessons, and waiting for sidebar status labels to load.
     let stuckLessons = await consumeAllLessons(page, origin, lessonAnchors);
-    console.log(`[enrollment] consumeAllLessons returned. Current URL: ${page.url()}`);
 
     // 5b. Bug-report: if lessons could not be completed, fail the test visibly.
     //     First verify final progress — the sidebar completion check can false-positive
@@ -121,7 +116,6 @@ test.describe('Registered User - Course Completion (Continue from where you left
     await page.goto(batchRootUrl);
     await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
     await page.waitForTimeout(1000);
-    console.log(`[enrollment] Navigated to batch root: ${page.url()}`);
 
     // The portal's auto-continue guard can redirect from the batch root to the
     // last-accessed lesson. When that happens skip expand/sidebar steps — the
