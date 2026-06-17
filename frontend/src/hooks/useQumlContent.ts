@@ -90,10 +90,7 @@ export const useQumlContent = (
         metadata.outcomeDeclaration = {};
       }
       if (!_.get(metadata, 'outcomeDeclaration.maxScore')) {
-        const rawMax = _.get(metadata, 'maxScore');
-        const maxScore = (typeof rawMax === 'number' && rawMax > 0)
-          ? rawMax
-          : questionIds.length || 1;
+        const maxScore = _.get(metadata, 'maxScore', 1);
         metadata.outcomeDeclaration.maxScore = {
           cardinality: 'single',
           type: 'integer',

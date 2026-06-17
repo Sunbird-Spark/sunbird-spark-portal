@@ -73,13 +73,79 @@ After a local run, the HTML report opens automatically. To reopen it:
 npx playwright show-report
 ```
 
-## Running via GitHub Actions (no local setup needed)
+## Optional CI Integration (GitHub Actions)
 
-1. Go to the repository on GitHub
-2. Navigate to **Actions → E2E Tests (On Demand)**
-3. Click **Run workflow**
-4. Optionally enter a target URL (defaults to the configured test environment)
-5. Once the run completes, the report is published to GitHub Pages and the link appears in the job summary
+The automation suite is a self-contained add-on. CI integration is **opt-in** — ready-made workflow templates live in [`automation_testing/ci-templates/`](../ci-templates/) so you can activate them whenever you're ready, without them running automatically on every PR.
+
+There are two templates:
+
+| Template file | What it does |
+|---|---|
+| `ci-templates/e2e-on-demand.yml` | Manual trigger from GitHub Actions UI; publishes the HTML report to GitHub Pages |
+| `ci-templates/e2e-pr-job.yml` | Job snippet to add to your PR workflow; runs the full E2E suite on every pull request |
+
+---
+
+### Activating the On-Demand workflow
+
+1. Copy the template into your workflows folder:
+   ```bash
+   cp automation_testing/ci-templates/e2e-on-demand.yml .github/workflows/e2e-on-demand.yml
+   ```
+2. Set up [GitHub variables](#github-variables-setup) (or rely on the defaults).
+3. Enable GitHub Pages in **Settings → Pages → Source: GitHub Actions**.
+4. Trigger it: **Actions → E2E Tests (On Demand) → Run workflow**.
+5. Once done, the HTML report link appears in the job summary.
+
+> Only one on-demand run deploys to Pages at a time — concurrent runs queue automatically.
+
+---
+
+### Activating E2E on every Pull Request
+
+1. Copy the snippet into your PR workflow:
+   ```bash
+   cat automation_testing/ci-templates/e2e-pr-job.yml >> .github/workflows/pull-requests.yml
+   ```
+2. Set up [GitHub variables](#github-variables-setup).
+3. The `E2E All Tests` job now runs automatically on every PR after frontend and backend checks pass.
+4. Download the report from the **Artifacts** section at the bottom of the Actions run page (`playwright-all-report`, kept for 7 days).
+
+---
+
+### GitHub Variables Setup
+
+Both templates read credentials from **GitHub repository variables**. Set them once in **Settings → Secrets and variables → Actions → Variables**:
+
+| Variable | Default fallback |
+|---|---|
+| `E2E_BASE_URL` | `https://test.sunbirded.org` |
+| `E2E_REGISTERED_USER_EMAIL` | `user1@yopmail.com` |
+| `E2E_REGISTERED_USER_PASSWORD` | `User1@123` |
+| `E2E_USER2_EMAIL` | `user2@yopmail.com` |
+| `E2E_USER2_PASSWORD` | `User2@123` |
+
+The same keys are in `.env.example` — copy those values across. If a variable is missing, the workflow falls back to the default shown above.
+
+---
+
+## Adding a New Test
+
+1. **Create your spec file** under the appropriate folder:
+   - Anonymous-user flows → `tests/anonymous_user_consumption/`
+   - Authenticated flows → `tests/specs/`
+   - Auth setup/login flows → `tests/auth-flow/`
+
+2. **Register it as a Playwright project** (if it needs its own project tag) in `playwright.config.ts`. If it fits an existing project, just add the file — no config change needed.
+
+3. **Run it locally** to confirm it passes:
+   ```bash
+   npx playwright test tests/specs/your-new-spec.ts --headed
+   ```
+
+4. **Push your branch / open a PR** — the `E2E All Tests` job in the PR check will pick up the new spec automatically.
+
+---
 
 ## Test Structure
 

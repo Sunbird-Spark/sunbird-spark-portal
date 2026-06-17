@@ -1,3 +1,10 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# OPTIONAL: On-Demand E2E workflow
+#
+# To activate, copy this file to .github/workflows/e2e-on-demand.yml
+# Then follow the setup steps in automation_testing/README.md
+# ──────────────────────────────────────────────────────────────────────────────
+
 name: E2E Tests (On Demand)
 
 on:
