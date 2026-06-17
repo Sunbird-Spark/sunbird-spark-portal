@@ -26,6 +26,8 @@ const getCompletionStatus = (status: number, completionPercentage: number): "not
     return "not-started";
 };
 
+
+
 interface CourseRowProps {
     course: TrackableCollection;
     downloadCertificate: (courseId: string, batchId: string, courseName: string, issuedCertificates?: any[], completedOn?: number) => Promise<void>;
@@ -135,7 +137,6 @@ const ProfileLearningList = () => {
     const [showAll, setShowAll] = useState(false);
 
     const { data, isLoading, isError, refetch } = useUserEnrolledCollections();
-   
     const courses = data?.data?.courses ?? [];
 
     const { downloadCertificate, hasCertificate, downloadingCourseId } = useCertificateDownload();
