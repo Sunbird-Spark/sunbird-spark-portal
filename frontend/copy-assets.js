@@ -50,13 +50,6 @@ const qumlEditorWebComponentRoot = path.join(
 const qumlEditorAssetsSource = path.join(qumlEditorWebComponentRoot, 'assets/quml-editor');
 const qumlEditorFinalDest = path.join(publicRoot, 'assets/quml-editor');
 
-// Collection Editor paths
-const collectionEditorWebComponentRoot = path.join(
-    __dirname,
-    'node_modules/@project-sunbird/sunbird-collection-editor-web-component'
-);
-const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
-const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
 
 /**
  * Recursively copy directory
@@ -122,12 +115,7 @@ try {
     console.log('📦 Copying QUML player files to public/assets/quml-player/...');
     copyDirectory(qumlAssetsSource, qumlFinalDest);
    
-    console.log(`\n📂 Collection Editor Source: ${collectionEditorAssetsSource}`);
-    fs.mkdirSync(collectionEditorFinalDest, { recursive: true });
-    console.log('📦 Copying Collection Editor files to public/assets/collection-editor/...');
-    copyDirectory(collectionEditorAssetsSource, collectionEditorFinalDest);
-    
-     // 7. Copy QUML Editor assets (if package is installed)
+    // 7. Copy QUML Editor assets (if package is installed)
     if (fs.existsSync(qumlEditorWebComponentRoot)) {
         console.log(`\n📂 QUML Editor Source: ${qumlEditorAssetsSource}`);
         fs.mkdirSync(qumlEditorFinalDest, { recursive: true });
@@ -189,7 +177,6 @@ try {
     console.log(`📍 QUML Player: public/assets/quml-player/`);
     console.log(`📍 QUML Editor: public/assets/quml-editor/`);
     console.log(`📍 QUML Editor Images: public/assets/images/`);
-    console.log(`📍 Collection Editor: public/assets/collection-editor/`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {

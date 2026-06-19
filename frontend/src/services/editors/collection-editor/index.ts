@@ -1,2 +1,1 @@
-export * from './types';
-export * from './CollectionEditorService';
+export { buildCollectionEditorConfig } from './CollectionEditorConfigBuilder';

@@ -23,7 +23,7 @@
   "author": "sunbird",
   "license": "MIT",
   "dependencies": {
-    "@project-sunbird/sunbird-collection-editor-web-component": "^2.0.0",
+    "@project-sunbird/collection-editor-react": "0.1.2",
     "@project-sunbird/sunbird-epub-player-web-component": "^2.0.0",
     "@project-sunbird/sunbird-pdf-player-web-component": "^2.0.0",
     "@project-sunbird/sunbird-questionset-editor-web-component": "^6.0.2",
@@ -41,6 +41,7 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
     "@tanstack/react-query": "^5.90.20",
+    "@testing-library/dom": "^10.4.1",
     "autoprefixer": "^10.4.21",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
