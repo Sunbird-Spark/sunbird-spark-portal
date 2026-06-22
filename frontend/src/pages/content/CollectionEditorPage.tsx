@@ -77,7 +77,15 @@ const CollectionEditorPage = () => {
       cdata: [{ id: contentId || '', type: 'ContentId' }],
     });
 
-    if (action === 'back') {
+    // Back, or a successful state change (the lib performs the API call and
+    // emits these only on success) returns the user to the workspace.
+    if (
+      action === 'back' ||
+      action === 'sendForReview' ||
+      action === 'publish' ||
+      action === 'reject' ||
+      action === 'sendBackForCorrections'
+    ) {
       await retireLock();
       navigate('/workspace');
     }
