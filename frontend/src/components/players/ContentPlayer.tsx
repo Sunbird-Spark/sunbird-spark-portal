@@ -53,10 +53,10 @@ export const ContentPlayer: React.FC<ContentPlayerProps> = ({
 
   const handleTelemetry = useCallback((event: any) => {
     const eid = ((event?.eid ?? event?.data?.eid ?? event?.type) ?? '').toUpperCase();
-    if (eid === 'END') onContentEnd();
+    if (eid === 'END' && mimeType !== 'text/html') onContentEnd();
     if (eid === 'START') onContentStart();
     onTelemetryEvent?.(event);
-  }, [onContentEnd, onContentStart, onTelemetryEvent]);
+  }, [mimeType, onContentEnd, onContentStart, onTelemetryEvent]);
 
   const PlayerComponent = MIME_TYPE_PLAYERS[mimeType as SupportedMimeType] || EcmlPlayer;
 
