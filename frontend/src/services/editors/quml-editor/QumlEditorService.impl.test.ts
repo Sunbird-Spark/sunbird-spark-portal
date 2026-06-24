@@ -186,6 +186,7 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
       vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-1');
       vi.spyOn(appCoreService, 'getDeviceId').mockRejectedValue(new Error('Device error'));
       vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'portal' });
+      vi.spyOn(appCoreService, 'getCloudStorageUrls').mockResolvedValue([]);
       vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({
         data: { response: { content: [{ channel: 'test' }] } },
       });
@@ -207,6 +208,7 @@ describe('QumlEditorService - Dependencies & Element Creation', () => {
       vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-1');
       vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-1');
       vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'portal' });
+      vi.spyOn(appCoreService, 'getCloudStorageUrls').mockResolvedValue([]);
       vi.spyOn<any, any>(service['orgService'], 'search').mockRejectedValue(new Error('Org error'));
 
       const metadata = { identifier: 'do_123', primaryCategory: 'QuestionSet', objectType: 'QuestionSet' } as QuestionSetMetadata;
