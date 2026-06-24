@@ -20,6 +20,7 @@ export interface QumlEditorConfig {
     host: string;
     endpoint: string;
     timeDiff: number;
+    cloudStorageUrls: string[];
     user: {
       id: string;
       orgIds: string[];
