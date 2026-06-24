@@ -36,6 +36,7 @@ describe('QumlEditorService', () => {
     vi.mocked(userAuthInfoService.getUserId).mockReturnValue('user-123');
     vi.spyOn(appCoreService, 'getDeviceId').mockResolvedValue('device-123');
     vi.spyOn(appCoreService, 'getPData').mockResolvedValue({ id: 'sunbird.portal', ver: '1.0', pid: 'sunbird.portal' });
+    vi.spyOn(appCoreService, 'getCloudStorageUrls').mockResolvedValue(['https://example.blob.core.windows.net/container/']);
     vi.mocked(userProfileService.getChannel).mockResolvedValue('default-channel');
     // Match the structure expected by QumlEditorService: data.response.content
     vi.spyOn<any, any>(service['orgService'], 'search').mockResolvedValue({
@@ -57,5 +58,6 @@ describe('QumlEditorService', () => {
     expect(config.config.primaryCategory).toBe(metadata.primaryCategory);
     expect(config.config.objectType).toBe(metadata.objectType);
     expect(config.config.mode).toBe('edit');
+    expect(config.context.cloudStorageUrls).toEqual(['https://example.blob.core.windows.net/container/']);
   });
 });
