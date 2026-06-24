@@ -76,6 +76,7 @@ export async function buildCollectionEditorConfig(
       framework: framework ? [framework] : [],
       targetFWIds: (metadata.targetFWIds as string[]) || [],
       maxDepth: 4,
+      categoryDefinitionApiVersion: 'v1',
     },
     metadata,
   };
