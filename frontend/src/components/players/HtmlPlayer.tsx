@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 interface HtmlPlayerMetadata {
   identifier: string;
@@ -17,13 +17,19 @@ interface HtmlPlayerProps {
   onTelemetryEvent?: (event: any) => void;
 }
 
-export const HtmlPlayer: React.FC<HtmlPlayerProps> = ({ metadata }) => {
+export const HtmlPlayer: React.FC<HtmlPlayerProps> = ({ metadata, onTelemetryEvent }) => {
+  const handleLoad = useCallback(() => {
+    onTelemetryEvent?.({ eid: 'START' });
+    onTelemetryEvent?.({ eid: 'END', edata: { summary: [{ progress: 0 }] } });
+  }, [onTelemetryEvent]);
+
   return (
     <iframe
       src={metadata.artifactUrl}
       title={metadata.name}
       className="content-player-embed border-0"
       allow="fullscreen"
+      onLoad={handleLoad}
     />
   );
 };

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { HtmlPlayer } from './HtmlPlayer';
 
 const metadata = {
@@ -34,5 +34,19 @@ describe('HtmlPlayer', () => {
       />
     );
     expect(screen.getByTitle('HTML Content')).toBeInTheDocument();
+  });
+
+  it('fires START then END telemetry events when iframe loads', () => {
+    const onTelemetryEvent = vi.fn();
+    render(<HtmlPlayer metadata={metadata} onTelemetryEvent={onTelemetryEvent} />);
+    fireEvent.load(screen.getByTitle('HTML Content'));
+    expect(onTelemetryEvent).toHaveBeenCalledTimes(2);
+    expect(onTelemetryEvent).toHaveBeenNthCalledWith(1, { eid: 'START' });
+    expect(onTelemetryEvent).toHaveBeenNthCalledWith(2, { eid: 'END', edata: { summary: [{ progress: 0 }] } });
+  });
+
+  it('does not throw when onTelemetryEvent is not provided and iframe loads', () => {
+    render(<HtmlPlayer metadata={metadata} />);
+    expect(() => fireEvent.load(screen.getByTitle('HTML Content'))).not.toThrow();
   });
 });
