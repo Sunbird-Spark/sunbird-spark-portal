@@ -4,6 +4,7 @@ import { VideoPlayer } from './VideoPlayer';
 import { PdfPlayer } from '../content-player/pdf-player/PdfPlayer';
 import { EcmlPlayer } from './EcmlPlayer';
 import QumlPlayer from './quml/QumlPlayer';
+import { HtmlPlayer } from './HtmlPlayer';
 import RatingDialog from '@/components/common/RatingDialog';
 import { useRatingTimer } from '@/hooks/useRatingTimer';
 
@@ -19,7 +20,8 @@ const MIME_TYPE_PLAYERS = {
   'application/vnd.sunbird.questionset': QumlPlayer,
   'application/vnd.sunbird.question': QumlPlayer,
   'application/vnd.ekstep.html-archive': EcmlPlayer,
-  'application/vnd.ekstep.scorm-archive': EcmlPlayer
+  'application/vnd.ekstep.scorm-archive': EcmlPlayer,
+  'text/html': HtmlPlayer
 } as const;
 
 type SupportedMimeType = keyof typeof MIME_TYPE_PLAYERS;

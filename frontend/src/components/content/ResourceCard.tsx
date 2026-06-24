@@ -22,6 +22,7 @@ const ResourceCard = ({ item, heightClass, linkState }: ResourceCardProps) => {
         return t("resource.videoBadge", { defaultValue: "Video" });
       case "application/pdf":
         return t("resource.pdfBadge", { defaultValue: "PDF" });
+      case "text/html":
       case "application/vnd.ekstep.html-archive":
         return t("resource.htmlBadge", { defaultValue: "HTML" });
       case "application/epub":

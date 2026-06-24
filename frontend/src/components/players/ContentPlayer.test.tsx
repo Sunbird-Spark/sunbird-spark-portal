@@ -24,6 +24,9 @@ vi.mock('../content-player/pdf-player/PdfPlayer', () => ({
 vi.mock('./quml/QumlPlayer', () => ({
   default: () => <div data-testid="quml-player" />,
 }));
+vi.mock('./HtmlPlayer', () => ({
+  HtmlPlayer: () => <div data-testid="html-player" />,
+}));
 
 // ── RatingDialog stub ─────────────────────────────────────────────────────────
 
@@ -72,6 +75,16 @@ describe('ContentPlayer', () => {
   it('renders the correct player for the given mimeType', () => {
     render(<ContentPlayer {...defaultProps} />);
     expect(screen.getByTestId('video-player')).toBeInTheDocument();
+  });
+
+  it('renders HtmlPlayer for text/html mimeType', () => {
+    render(
+      <ContentPlayer
+        mimeType="text/html"
+        metadata={{ identifier: 'do_1', name: 'HTML Page', artifactUrl: 'https://example.com' }}
+      />
+    );
+    expect(screen.getByTestId('html-player')).toBeInTheDocument();
   });
 
   it('wraps player in a relative container', () => {

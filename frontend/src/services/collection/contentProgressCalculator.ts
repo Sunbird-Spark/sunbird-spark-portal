@@ -15,6 +15,7 @@ const PLAYBACK_MIME_TYPES = [
 const OTHER_MIME_TYPES = [
   'application/vnd.ekstep.h5p-archive',
   'application/vnd.ekstep.html-archive',
+  'text/html',
 ];
 
 export interface ConsumptionSummary {
