@@ -22,9 +22,8 @@ export const HtmlPlayer: React.FC<HtmlPlayerProps> = ({ metadata }) => {
     <iframe
       src={metadata.artifactUrl}
       title={metadata.name}
-      className="content-player-embed"
+      className="content-player-embed border-0"
       allow="fullscreen"
-      style={{ width: '100%', height: '100%', border: 'none' }}
     />
   );
 };
