@@ -18,7 +18,8 @@ export const getAppInfo = (req: Request, res: Response) => {
         version: version,
         buildHash: finalBuildHash,
         appId: appId,
-        enableAiSearch
+        enableAiSearch,
+        cloudStorageUrls: envConfig.SUNBIRD_CLOUD_STORAGE_URLS,
     };
 
     response.setResult({ data: appInfo });

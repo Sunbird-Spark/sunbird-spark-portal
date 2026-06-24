@@ -164,6 +164,7 @@ export class QumlEditorService {
     }
 
     const pdata = await appCoreService.getPData();
+    const cloudStorageUrls = await appCoreService.getCloudStorageUrls();
     const mode = contextOverrides?.mode || 'edit';
 
     const context = {
@@ -180,6 +181,7 @@ export class QumlEditorService {
       host: '',
       endpoint: '',
       timeDiff: 0,
+      cloudStorageUrls,
       user: {
         id: uid,
         orgIds: [channel],

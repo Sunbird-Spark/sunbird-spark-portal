@@ -90,7 +90,7 @@ export class ContentEditorService {
       apislug: '/action',
       build_number: '1.0',
       pluginRepo: '/content-plugins',
-      aws_s3_urls: [],
+      aws_s3_urls: await appCoreService.getCloudStorageUrls(),
       plugins: [
         { id: 'org.ekstep.sunbirdcommonheader', ver: '1.9', type: 'plugin' },
         { id: 'org.ekstep.sunbirdmetadata', ver: '1.1', type: 'plugin' },
