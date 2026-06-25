@@ -19,10 +19,7 @@ function getExtra(extra: QumlExtra[], id: string): unknown {
   return extra.find((e) => e.id === id)?.value;
 }
 
-/**
- * Normalized event shape understood by useContentStateUpdate.
- * Compatible with the existing TelemetryEvent type in that hook.
- */
+/** Normalized QUML_SUMMARY shape understood by useContentStateUpdate. */
 export interface NormalizedAssessmentCompleteEvent {
   eid: 'QUML_SUMMARY';
   /** Start timestamp from the player, used as assessmentTs fallback. */
@@ -35,11 +32,26 @@ export interface NormalizedAssessmentCompleteEvent {
   };
 }
 
+/** Synthesized ASSESS event built from a QUML player-stream ASSESS event. */
+export interface NormalizedAssessEvent {
+  eid: 'ASSESS';
+  ets?: number;
+  edata: {
+    score: number;
+    item: Record<string, unknown>;
+    resvalues: unknown[];
+    duration: number;
+  };
+}
+
 /**
  * Normalize a raw QUML playerEvent for consumption by useContentStateUpdate.
  *
- * Returns a NormalizedAssessmentCompleteEvent for QUML_SUMMARY events.
- * Returns the event unchanged for all other events (standard telemetry).
+ * - QUML_SUMMARY  → NormalizedAssessmentCompleteEvent (score + endpageseen)
+ * - QUML player ASSESS (data.item.id + numeric data.score) → NormalizedAssessEvent
+ *   These fire via the playerEvent stream when the telemetry SDK is not active.
+ *   If telemetry ASSESS events also arrive they are deduplicated server-side by questionId.
+ * - Everything else → returned unchanged.
  */
 export function normalizeQumlPlayerEvent(event: unknown): unknown {
   if (!event || typeof event !== 'object') return event;
@@ -49,29 +61,44 @@ export function normalizeQumlPlayerEvent(event: unknown): unknown {
   const detail = (e.data ?? e) as Record<string, unknown>;
   const eid = String(detail?.eid ?? e.type ?? '');
 
-  if (eid !== 'QUML_SUMMARY') return event;
+  if (eid === 'QUML_SUMMARY') {
+    const edataRaw = detail?.edata as Record<string, unknown> | undefined;
+    const extra: QumlExtra[] = Array.isArray(edataRaw?.extra) ? (edataRaw!.extra as QumlExtra[]) : [];
 
-  const edataRaw = detail?.edata as Record<string, unknown> | undefined;
-  const extra: QumlExtra[] = Array.isArray(edataRaw?.extra) ? (edataRaw!.extra as QumlExtra[]) : [];
+    const rawScore = getExtra(extra, 'score');
+    const rawEndpage = getExtra(extra, 'endpageseen');
 
-  const rawScore = getExtra(extra, 'score');
-  const rawEndpage = getExtra(extra, 'endpageseen');
+    // QUML emits extra values as strings; coerce to native types.
+    const score = typeof rawScore === 'number' ? rawScore : parseFloat(String(rawScore ?? 'NaN'));
+    const endpageseen = String(rawEndpage).toLowerCase() === 'true';
 
-  // QUML emits extra values as strings; coerce to native types.
-  const score = typeof rawScore === 'number' ? rawScore : parseFloat(String(rawScore ?? 'NaN'));
-  const endpageseen = String(rawEndpage).toLowerCase() === 'true';
+    // edata.starttime is the session start epoch ms — use as assessmentTs fallback
+    const starttime = typeof edataRaw?.starttime === 'number' ? edataRaw.starttime : undefined;
 
-  // edata.starttime is the session start epoch ms — use as assessmentTs fallback
-  const starttime = typeof edataRaw?.starttime === 'number' ? edataRaw.starttime : undefined;
+    const normalized: NormalizedAssessmentCompleteEvent = {
+      eid: 'QUML_SUMMARY',
+      ets: starttime,
+      edata: { score: Number.isNaN(score) ? undefined : score, endpageseen },
+    };
+    return normalized;
+  }
 
-  const normalized: NormalizedAssessmentCompleteEvent = {
-    eid: 'QUML_SUMMARY',
-    ets: starttime,
-    edata: {
-      score: Number.isNaN(score) ? undefined : score,
-      endpageseen,
-    },
-  };
+  // QUML player ASSESS events arrive via playerEvent (no eid, carries data.item + data.score).
+  // Convert to standard ASSESS telemetry format so useContentStateUpdate can accumulate them.
+  const item = detail.item as Record<string, unknown> | undefined;
+  if (item?.id && typeof detail.score === 'number') {
+    const assessed: NormalizedAssessEvent = {
+      eid: 'ASSESS',
+      ets: typeof e.timestamp === 'number' ? e.timestamp : undefined,
+      edata: {
+        score: detail.score,
+        item,
+        resvalues: Array.isArray(detail.resvalues) ? detail.resvalues : [],
+        duration: typeof detail.duration === 'number' ? detail.duration : 0,
+      },
+    };
+    return assessed;
+  }
 
-  return normalized;
+  return event;
 }
