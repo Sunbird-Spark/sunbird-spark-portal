@@ -163,8 +163,10 @@ export class QumlEditorService {
       console.warn('Failed to fetch channel info:', error);
     }
 
-    const pdata = await appCoreService.getPData();
-    const cloudStorageUrls = await appCoreService.getCloudStorageUrls();
+    const [pdata, cloudStorageUrls] = await Promise.all([
+      appCoreService.getPData(),
+      appCoreService.getCloudStorageUrls(),
+    ]);
     const mode = contextOverrides?.mode || 'edit';
 
     const context = {
@@ -178,7 +180,7 @@ export class QumlEditorService {
       contextRollup: contextOverrides?.contextRollup || { l1: channel },
       cdata: contextOverrides?.cdata || [],
       objectRollup: contextOverrides?.objectRollup || {},
-      host: '',
+      host: window.location.origin,
       endpoint: '',
       timeDiff: 0,
       cloudStorageUrls,

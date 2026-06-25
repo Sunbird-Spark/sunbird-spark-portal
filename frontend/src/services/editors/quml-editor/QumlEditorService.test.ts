@@ -59,5 +59,6 @@ describe('QumlEditorService', () => {
     expect(config.config.objectType).toBe(metadata.objectType);
     expect(config.config.mode).toBe('edit');
     expect(config.context.cloudStorageUrls).toEqual(['https://example.blob.core.windows.net/container/']);
+    expect(config.context.host).toBe(window.location.origin);
   });
 });
