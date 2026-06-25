@@ -377,6 +377,61 @@ describe('useQumlContent', () => {
     expect(result.current.data.children[0].body).toBe('<p>Valid question</p>');
   });
 
+  it('patches outcomeDeclaration.maxScore on questions missing it (defaults to 1)', async () => {
+    const mockHierarchy = {
+      questionset: {
+        identifier: 'qs1',
+        children: [{ identifier: 'q1', mimeType: 'application/vnd.sunbird.question' }],
+      },
+    };
+    vi.mocked(questionSetService.getHierarchy).mockResolvedValue(mockHierarchy);
+    vi.mocked(questionSetService.getQuestionList).mockResolvedValue({
+      result: { questions: [{ identifier: 'q1', body: '<p>Q1</p>' }] },
+    });
+    const { result } = renderHook(() => useQumlContent('qs1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data.children[0].outcomeDeclaration.maxScore).toEqual({
+      cardinality: 'single', type: 'integer', defaultValue: 1,
+    });
+  });
+
+  it('uses question-level maxScore field when outcomeDeclaration.maxScore is missing', async () => {
+    const mockHierarchy = {
+      questionset: {
+        identifier: 'qs1',
+        children: [{ identifier: 'q1', mimeType: 'application/vnd.sunbird.question' }],
+      },
+    };
+    vi.mocked(questionSetService.getHierarchy).mockResolvedValue(mockHierarchy);
+    vi.mocked(questionSetService.getQuestionList).mockResolvedValue({
+      result: { questions: [{ identifier: 'q1', maxScore: 3 }] },
+    });
+    const { result } = renderHook(() => useQumlContent('qs1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data.children[0].outcomeDeclaration.maxScore.defaultValue).toBe(3);
+  });
+
+  it('preserves existing outcomeDeclaration.maxScore on questions (variable marks)', async () => {
+    const mockHierarchy = {
+      questionset: {
+        identifier: 'qs1',
+        children: [{ identifier: 'q1', mimeType: 'application/vnd.sunbird.question' }],
+      },
+    };
+    vi.mocked(questionSetService.getHierarchy).mockResolvedValue(mockHierarchy);
+    vi.mocked(questionSetService.getQuestionList).mockResolvedValue({
+      result: {
+        questions: [{
+          identifier: 'q1',
+          outcomeDeclaration: { maxScore: { cardinality: 'single', type: 'integer', defaultValue: 5 } },
+        }],
+      },
+    });
+    const { result } = renderHook(() => useQumlContent('qs1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data.children[0].outcomeDeclaration.maxScore.defaultValue).toBe(5);
+  });
+
   it('should handle null or undefined nodes in hierarchy', async () => {
     const mockHierarchy = {
       questionset: {
