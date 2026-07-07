@@ -13,6 +13,8 @@ export interface QumlEditorConfig {
     did: string;
     uid: string;
     channel: string;
+    /** Framework id (e.g. NCF) — drives the Audience & Curriculum dropdowns. */
+    framework?: string;
     pdata: { id: string; ver: string; pid: string };
     contextRollup: Record<string, any>;
     cdata: any[];
@@ -37,6 +39,8 @@ export interface QumlEditorConfig {
     };
     /** Path the editor's preview loads the QuML player bundle from. */
     playerScriptUrl?: string;
+    /** Max hierarchy depth (root + sections + questions). */
+    maxDepth?: number;
   };
   metadata: QuestionSetMetadata;
 }
