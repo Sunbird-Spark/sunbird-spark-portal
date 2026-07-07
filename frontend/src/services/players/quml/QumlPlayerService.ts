@@ -51,8 +51,12 @@ export class QumlPlayerService {
    * Checks for existing style element to prevent race conditions
    */
   private loadStyles(): void {
-    // Set question list URL for the web component
-    (window as any).questionListUrl = '/action/question/v2/list';
+    // API endpoints the QuML player fetches from. This portal's gateway serves
+    // both under /portal (verified: /learner and /action return index.html here).
+    // The player reads these window globals and prefers them over its built-in
+    // defaults, which target a different gateway route.
+    (window as any).questionListUrl = '/portal/question/v2/list';
+    (window as any).questionSetHierarchyUrl = '/portal/questionset/v2/hierarchy/';
 
     // Check if styles already exist in the DOM (prevents race conditions)
     const existingStyles = document.querySelector('[data-quml-player-styles="true"]');
