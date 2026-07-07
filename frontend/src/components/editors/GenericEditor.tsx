@@ -101,10 +101,12 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
   const [context, setContext] = useState<EditorContext | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Keep onError current without making it an effect dependency (avoids re-running
-  // the context build whenever the parent recreates the callback).
+  // Keep onError / t current without making them effect dependencies — avoids re-running
+  // the content fetch + lock whenever the parent recreates the callback or the language toggles.
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
+  const tRef = useRef(t);
+  tRef.current = t;
 
   useEffect(() => {
     let cancelled = false;
@@ -123,7 +125,7 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
           // Client-side access gate (UX/defense-in-depth only, not a security boundary).
           const userId = userAuthInfoService.getUserId() || '';
           if (!svc.validateRequest(details, userId, state)) {
-            const msg = t('editors.noPermission');
+            const msg = tRef.current('editors.noPermission');
             setError(msg);
             onErrorRef.current?.(msg);
             return;
@@ -157,7 +159,7 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
         setContext(editorContext);
       } catch (e) {
         if (cancelled) return;
-        const msg = t('editors.initError');
+        const msg = tRef.current('editors.initError');
         setError(msg);
         onErrorRef.current?.(String((e as Error)?.message ?? msg));
       }
@@ -166,7 +168,7 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [contentId, state, framework, contentStatus, isLargeFileUpload, user, t]);
+  }, [contentId, state, framework, contentStatus, isLargeFileUpload, user]);
 
   const handleAsset = useCallback(
     (file: File) => uploadAsset(file, context?.user?.name, context?.user?.id),
