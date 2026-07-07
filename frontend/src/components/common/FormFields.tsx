@@ -4,20 +4,18 @@ import './FormFields.css';
 
 interface FormField {
   code: string;
-  // Everything below can be missing from the Form API response — keep optional
-  // and read defensively (field?.x) so a partial field never crashes rendering.
-  name?: string;
-  label?: string;
-  description?: string;
+  name: string;
+  label: string;
+  description: string;
   renderingHints?: {
     semanticColumnWidth?: string;
   };
-  inputType?: string;
-  required?: boolean;
-  editable?: boolean;
-  visible?: boolean;
-  placeholder?: string;
-  index?: number;
+  inputType: string;
+  required: boolean;
+  editable: boolean;
+  visible: boolean;
+  placeholder: string;
+  index: number;
   range?: { key: string; name: string }[];
 }
 
