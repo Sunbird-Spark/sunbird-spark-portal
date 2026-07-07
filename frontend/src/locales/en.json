@@ -1362,6 +1362,8 @@
     "errorTitle": "Editor Error",
     "goBack": "Go Back",
     "loading": "Loading Editor...",
+    "initError": "Failed to initialize the editor. Please try again.",
+    "noPermission": "You do not have permission to edit this content.",
     "preparing": "Preparing the editor environment...",
     "genericEditor": "Generic Editor",
     "contentEditor": "Content Editor"

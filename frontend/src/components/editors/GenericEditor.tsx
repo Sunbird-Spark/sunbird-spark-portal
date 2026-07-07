@@ -6,13 +6,14 @@
  * passes the active portal language (theme follows the portal's :root seed vars
  * automatically), forwards telemetry, and wires thumbnail/asset upload.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ContentEditor } from '@project-sunbird/generic-editor-v2';
 import type { EditorContext, EditorEventPayload, TelemetryEvent } from '@project-sunbird/generic-editor-v2';
 import '@project-sunbird/generic-editor-v2/dist/sunbird-generic-editor.css';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useAuth } from '@/auth/AuthContext';
 import { GenericEditorService, buildEditorConfig } from '@/services/editors/generic-editor';
+import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
 import PageLoader from '@/components/common/PageLoader';
 
 export interface GenericEditorComponentProps {
@@ -95,18 +96,47 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
   onClose,
   onError,
 }) => {
-  const { currentCode } = useAppI18n();
+  const { currentCode, t } = useAppI18n();
   const { user } = useAuth();
   const [context, setContext] = useState<EditorContext | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Keep onError current without making it an effect dependency (avoids re-running
+  // the context build whenever the parent recreates the callback).
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+
   useEffect(() => {
     let cancelled = false;
     const svc = new GenericEditorService();
-    svc
-      .buildEditorContext({ contentId, state, framework, contentStatus })
-      .then((c) => {
+    // Re-run resets to the loading state so a new contentId / late-resolved user
+    // never leaves a stale context mounted.
+    setError(null);
+    setContext(null);
+
+    (async () => {
+      try {
+        let details;
+        if (contentId) {
+          details = await svc.getContentDetails(contentId);
+          if (cancelled) return;
+          // Client-side access gate (UX/defense-in-depth only, not a security boundary).
+          const userId = userAuthInfoService.getUserId() || '';
+          if (!svc.validateRequest(details, userId, state)) {
+            const msg = t('editors.noPermission');
+            setError(msg);
+            onErrorRef.current?.(msg);
+            return;
+          }
+        }
+
+        const c = await svc.buildEditorContext(
+          { contentId, state, framework, contentStatus },
+          details,
+          isLargeFileUpload,
+        );
         if (cancelled) return;
+
         const orgs = c.user?.organisations ?? {};
         const editorContext: EditorContext = {
           uid: c.user?.id ?? '',
@@ -125,16 +155,18 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
           },
         };
         setContext(editorContext);
-      })
-      .catch((e) => {
-        const msg = 'Failed to initialize the editor. Please try again.';
+      } catch (e) {
+        if (cancelled) return;
+        const msg = t('editors.initError');
         setError(msg);
-        onError?.(String(e?.message ?? msg));
-      });
+        onErrorRef.current?.(String((e as Error)?.message ?? msg));
+      }
+    })();
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [contentId, state, framework, contentStatus, isLargeFileUpload, user, t]);
 
   const handleAsset = useCallback(
     (file: File) => uploadAsset(file, context?.user?.name, context?.user?.id),
@@ -150,14 +182,14 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 bg-sunbird-theme-accent text-white rounded-lg font-rubik font-medium"
           >
-            Go back
+            {t('editors.goBack')}
           </button>
         </div>
       </div>
     );
   }
 
-  if (!context) return <PageLoader message="Loading editor…" />;
+  if (!context) return <PageLoader message={t('editors.loading')} />;
 
   return (
     <div className="fixed inset-0 z-50 bg-white">

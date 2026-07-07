@@ -48,6 +48,26 @@ export const EDITOR_PREVIEW_CONFIG: Record<string, unknown> = {
   overlay: { showUser: false },
 };
 
+/** Content statuses that may be opened for editing. */
+export const VALID_CONTENT_STATUSES = [
+  'Review',
+  'Draft',
+  'Live',
+  'Unlisted',
+  'FlagDraft',
+  'FlagReview',
+] as const;
+
+/** Route states that grant access (creator/collaborator/reviewer). */
+export const VALID_CONTENT_STATES = [
+  'upForReview',
+  'review',
+  'published',
+  'limitedPublish',
+  'flagreviewer',
+  'collaborating-on',
+] as const;
+
 /** Primary categories supported by the generic editor. */
 export const DEFAULT_PRIMARY_CATEGORIES = [
   'eTextbook',

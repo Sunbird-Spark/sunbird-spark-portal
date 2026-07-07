@@ -1,9 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GenericEditorService } from './GenericEditorService';
 import type { ContentDetails } from './types';
+import { GENERIC_EDITOR_MIME_TYPES } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { DEFAULT_PRIMARY_CATEGORIES } from './editorConfig';
+
+const mockGet = vi.fn();
+
+vi.mock('../../../lib/http-client', () => ({
+  getClient: () => ({ get: mockGet }),
+}));
 
 vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
   default: {
@@ -78,6 +85,77 @@ describe('GenericEditorService', () => {
     });
 
     service = new GenericEditorService();
+  });
+
+  const mockContentDetails: ContentDetails = {
+    identifier: 'do_123',
+    name: 'Test PDF',
+    status: 'Draft',
+    mimeType: 'application/pdf',
+    createdBy: 'user-123',
+    framework: 'NCF',
+  };
+
+  describe('getContentDetails', () => {
+    it('reads content in edit mode and returns the content node', async () => {
+      mockGet.mockResolvedValue({ data: { content: mockContentDetails } });
+
+      const result = await service.getContentDetails('do_123');
+
+      expect(mockGet).toHaveBeenCalledWith('/content/v1/read/do_123?mode=edit');
+      expect(result).toEqual(mockContentDetails);
+    });
+  });
+
+  describe('validateRequest', () => {
+    it('allows the creator with valid mime + status', () => {
+      expect(service.validateRequest(mockContentDetails, 'user-123')).toBe(true);
+    });
+
+    it('allows a collaborator with a valid state', () => {
+      const content: ContentDetails = {
+        ...mockContentDetails,
+        createdBy: 'other-user',
+        collaborators: ['user-123'],
+      };
+      expect(service.validateRequest(content, 'user-123', 'collaborating-on')).toBe(true);
+    });
+
+    it('allows a valid state even if not creator/collaborator (reviewer)', () => {
+      const content: ContentDetails = { ...mockContentDetails, createdBy: 'other-user' };
+      expect(service.validateRequest(content, 'user-123', 'upForReview')).toBe(true);
+    });
+
+    it('rejects an unsupported mime type', () => {
+      const content: ContentDetails = {
+        ...mockContentDetails,
+        mimeType: 'application/vnd.ekstep.ecml-archive',
+      };
+      expect(service.validateRequest(content, 'user-123')).toBe(false);
+    });
+
+    it('rejects an invalid status', () => {
+      const content: ContentDetails = { ...mockContentDetails, status: 'Retired' };
+      expect(service.validateRequest(content, 'user-123')).toBe(false);
+    });
+
+    it('rejects a non-owner with no valid state', () => {
+      const content: ContentDetails = { ...mockContentDetails, createdBy: 'other-user' };
+      expect(service.validateRequest(content, 'user-123')).toBe(false);
+    });
+
+    it('compares status case-insensitively', () => {
+      const content: ContentDetails = { ...mockContentDetails, status: 'draft' };
+      expect(service.validateRequest(content, 'user-123')).toBe(true);
+    });
+
+    it('accepts every supported mime type for the creator', () => {
+      for (const mimeType of GENERIC_EDITOR_MIME_TYPES) {
+        expect(
+          service.validateRequest({ ...mockContentDetails, mimeType }, 'user-123')
+        ).toBe(true);
+      }
+    });
   });
 
   describe('buildEditorContext', () => {

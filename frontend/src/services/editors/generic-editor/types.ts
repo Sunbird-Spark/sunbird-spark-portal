@@ -52,3 +52,19 @@ export interface ContentDetails {
   primaryCategory?: string;
   versionKey?: string;
 }
+
+/** MIME types the generic editor can open. */
+export const GENERIC_EDITOR_MIME_TYPES = [
+  'application/pdf',
+  'video/mp4',
+  'video/x-youtube',
+  'video/youtube',
+  'application/vnd.ekstep.html-archive',
+  'application/vnd.ekstep.scorm-archive',
+  'application/epub',
+  'application/vnd.ekstep.h5p-archive',
+  'video/webm',
+  'text/x-url',
+] as const;
+
+export type GenericEditorMimeType = (typeof GENERIC_EDITOR_MIME_TYPES)[number];

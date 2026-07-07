@@ -1,9 +1,15 @@
+import { getClient } from '../../../lib/http-client';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
-import { DEFAULT_PRIMARY_CATEGORIES } from './editorConfig';
+import {
+  DEFAULT_PRIMARY_CATEGORIES,
+  VALID_CONTENT_STATUSES,
+  VALID_CONTENT_STATES,
+} from './editorConfig';
+import { GENERIC_EDITOR_MIME_TYPES } from './types';
 import type {
   GenericEditorContext,
   GenericEditorRouteParams,
@@ -18,6 +24,53 @@ import type {
 export class GenericEditorService {
   private orgService = new OrganizationService();
   private channelService = new ChannelService();
+
+  /** Read content metadata (edit mode) for the permission pre-check. */
+  async getContentDetails(contentId: string): Promise<ContentDetails> {
+    const response = await getClient().get<{ content: ContentDetails }>(
+      `/content/v1/read/${contentId}?mode=edit`
+    );
+    return response.data.content;
+  }
+
+  /**
+   * Client-side access gate mirroring the legacy editor: gates the editor UI by mime type,
+   * status and creator/collaborator/state. This is UX/defense-in-depth only — it is NOT a
+   * security boundary (a determined user can bypass it). Per-content authorization must be
+   * enforced upstream (knowledge-mw-service); the portal `/action` proxy only checks auth.
+   */
+  validateRequest(
+    contentDetails: ContentDetails,
+    userId: string,
+    routeState?: string
+  ): boolean {
+    const isGenericMime = GENERIC_EDITOR_MIME_TYPES.includes(
+      contentDetails.mimeType as never
+    );
+    const isValidStatus = VALID_CONTENT_STATUSES.some(
+      (s) => s.toLowerCase() === (contentDetails.status || '').toLowerCase()
+    );
+    const isValidState = routeState
+      ? VALID_CONTENT_STATES.includes(routeState as never)
+      : false;
+
+    if (!isGenericMime || !isValidStatus) {
+      return false;
+    }
+    // Creator always has access
+    if (contentDetails.createdBy === userId) {
+      return true;
+    }
+    // Collaborator with a valid state
+    if (isValidState && contentDetails.collaborators?.includes(userId)) {
+      return true;
+    }
+    // Valid state allows access (e.g. reviewer)
+    if (isValidState) {
+      return true;
+    }
+    return false;
+  }
 
   async buildEditorContext(
     params: GenericEditorRouteParams,
