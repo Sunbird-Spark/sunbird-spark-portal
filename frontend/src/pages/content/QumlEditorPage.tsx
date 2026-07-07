@@ -58,7 +58,9 @@ const QumlEditorPage = () => {
       cdata: [{ id: contentId || '', type: 'ContentId' }],
     });
 
-    const closeEditor = (event.data as any)?.close;
+    // React editor emits {action: 'back'}; the old Angular editor sent {close: true}.
+    const data = event.data as { action?: string; close?: boolean } | undefined;
+    const closeEditor = data?.close || data?.action === 'back';
     if (closeEditor) {
       await retireLock();
       navigate('/workspace');
