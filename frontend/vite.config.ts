@@ -15,7 +15,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+
     },
+    dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
   },
 
   server: {
@@ -28,6 +30,17 @@ export default defineConfig({
         secure: false,
       },
       '/content/preview': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/sunbird-plugins': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      // Sunbird web-component player scripts (pdf/video/epub/quml)
+      '^/assets/sunbird-.+\\.js$': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,

@@ -18,7 +18,8 @@ vi.mock('../config/env.js', async (importOriginal) => {
             ...actual.envConfig,
             APPID: 'mock.app.id',
             KONG_URL: 'http://localhost:8000',
-            ENABLE_AI_SEARCH: 'true', // Ensure this is valid URL
+            ENABLE_AI_SEARCH: 'true',
+            SUNBIRD_CLOUD_STORAGE_URLS: 'https://s3.example.com,https://cdn.example.com',
         }
     };
 });
@@ -44,7 +45,8 @@ describe('GET /app/v1/info', () => {
             version: '9.9.9',
             buildHash: 'mocked-hash',
             appId: 'mock.app.id',
-            enableAiSearch: 'true'
+            enableAiSearch: 'true',
+            cloudStorageUrls: 'https://s3.example.com,https://cdn.example.com',
         });
     });
 });

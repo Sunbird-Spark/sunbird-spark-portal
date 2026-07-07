@@ -30,7 +30,7 @@ type TelemetryEvent = {
   type?: string;
   actor?: { id?: string };
   ets?: number;
-  edata?: { summary?: ConsumptionSummary[]; score?: number; [key: string]: unknown };
+  edata?: { summary?: ConsumptionSummary[]; score?: number; endpageseen?: boolean; [key: string]: unknown };
   summary?: ConsumptionSummary | ConsumptionSummary[];
   data?: string | {
     eid?: string;
@@ -169,7 +169,8 @@ export function useContentStateUpdate({
       if (!isEnrolledInCurrentBatch || !collectionId || !contentId || !effectiveBatchId) return;
       if (isBatchEnded) return;
       const isSelfAssess = (contentTypeRef.current ?? "").toLowerCase() === "selfassess";
-      if (!isSelfAssess && currentContentStatusRef.current === 2) return;
+      const isQuestionSet = (mimeType ?? "").toLowerCase() === "application/vnd.sunbird.questionset";
+      if (!isSelfAssess && !isQuestionSet && currentContentStatusRef.current === 2) return;
 
       const rawEvent = event?.data ?? event;
       const eid = typeof rawEvent === "string" ? "" : (event?.eid ?? (event?.data as any)?.eid ?? event?.type ?? "") as string;
@@ -208,6 +209,20 @@ export function useContentStateUpdate({
       if (eidUpper === "ASSESS") {
         const rawEventData = event?.data ?? event;
         assessEventsRef.current = [...assessEventsRef.current, rawEventData ?? event];
+        return;
+      }
+
+      // QUML_SUMMARY is the QUML player's terminal assessment event.
+      // Score and endpageseen are pre-extracted by normalizeQumlPlayerEvent.
+      if (eidUpper === "QUML_SUMMARY" && isQuestionSet) {
+        const edataQ = (rawEvent as any)?.edata;
+        // edata.starttime (surfaced as ets) is a fallback if START telemetry was missed.
+        if ((rawEvent as any)?.ets != null && assessmentTsRef.current == null) assessmentTsRef.current = (rawEvent as any).ets as number;
+        if (typeof edataQ?.score === "number" && Boolean(edataQ?.endpageseen) && assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+          sendingAssessmentRef.current = true;
+          void sendAssessmentAndInvalidate();
+          lastSentStatusRef.current = null;
+        }
         return;
       }
 

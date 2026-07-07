@@ -3,4 +3,4 @@
  * Vite inlines this module-level const boolean, so ThemeSelector is
  * removed from the production bundle when false (dead-code elimination).
  */
-export const ENABLE_THEME_SELECTOR = false;
+export const ENABLE_THEME_SELECTOR = true;
