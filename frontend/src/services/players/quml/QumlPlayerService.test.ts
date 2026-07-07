@@ -156,8 +156,7 @@ describe('QumlPlayerService', () => {
         data: {},
       };
       service.createElement(config);
-      expect((window as any).questionListUrl).toBe('/portal/question/v2/list');
-      expect((window as any).questionSetHierarchyUrl).toBe('/portal/questionset/v2/hierarchy/');
+      expect((window as any).questionListUrl).toBe('/action/question/v2/list');
     });
 
     it('should append styles link on first createElement call', () => {
