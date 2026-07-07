@@ -17,6 +17,9 @@ vi.mock('../../AppCoreService', () => ({
     getPData: vi.fn(() =>
       Promise.resolve({ id: 'test.portal', ver: '1.0.0', pid: 'test.portal' })
     ),
+    getCloudStorageUrls: vi.fn(() =>
+      Promise.resolve(['https://s3.example.com', 'https://cdn.example.com'])
+    ),
   },
 }));
 
@@ -189,6 +192,7 @@ describe('ContentEditorService', () => {
       expect(result.config.dispatcher).toBe('local');
       expect(result.config.modalId).toBe('contentEditor');
       expect(result.config.enableTelemetryValidation).toBe(false);
+      expect(result.config.aws_s3_urls).toEqual(['https://s3.example.com', 'https://cdn.example.com']);
     });
 
     it('should include previewConfig with correct structure', async () => {

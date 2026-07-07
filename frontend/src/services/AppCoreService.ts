@@ -6,6 +6,7 @@ interface AppInfo {
     appId: string;
     version: string;
     buildHash: string;
+    cloudStorageUrls?: string;
 }
 
 class AppCoreService {
@@ -90,6 +91,11 @@ class AppCoreService {
     async getBuildHash(): Promise<string> {
         const info = await this.fetchAppInfo();
         return info.buildHash || '1.0';
+    }
+
+    async getCloudStorageUrls(): Promise<string[]> {
+        const info = await this.fetchAppInfo();
+        return info.cloudStorageUrls?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
     }
 
     async getPData(): Promise<{ id: string; ver: string; pid: string }> {
