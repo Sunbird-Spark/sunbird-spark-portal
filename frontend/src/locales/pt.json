@@ -1360,6 +1360,8 @@
     "errorTitle": "Erro do Editor",
     "goBack": "Voltar",
     "loading": "Carregando Editor...",
+    "initError": "Falha ao inicializar o editor. Tente novamente.",
+    "noPermission": "Você não tem permissão para editar este conteúdo.",
     "preparing": "Preparando o ambiente do editor...",
     "genericEditor": "Editor Genérico",
     "contentEditor": "Editor de Conteúdo"
