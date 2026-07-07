@@ -52,20 +52,23 @@ export default function ContentFormField({
 }: FormFieldProps) {
   const { t } = useAppI18n();
   const colClass = getColumnClass(field.renderingHints?.semanticColumnWidth);
+  // The Form API may omit label; fall back to name/code so `.toLowerCase()` never crashes
+  // and the field still shows a sensible label.
+  const labelText = field.label || field.name || field.code || '';
 
   if (field.inputType === 'text' || field.inputType === 'number') {
     return (
       <div className={colClass}>
         <div className="content-field-container">
           <label className="content-field-label">
-            {field.label}
+            {labelText}
             {field.required && <span className="content-field-required">*</span>}
           </label>
           <input
             type={field.inputType === 'number' ? 'number' : 'text'}
             value={(value as string) || ''}
             onChange={(e) => onFieldChange(field.code, e.target.value)}
-            placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+            placeholder={field.placeholder || `Enter ${labelText.toLowerCase()}`}
             className="content-field-input"
             disabled={isLoading || !field.editable}
             autoFocus={field.code === 'name'}
@@ -80,7 +83,7 @@ export default function ContentFormField({
       <div className={colClass}>
         <div className="content-field-container">
           <label className="content-field-label">
-            {field.label}
+            {labelText}
             {field.required && <span className="content-field-required">*</span>}
           </label>
           <select
@@ -89,7 +92,7 @@ export default function ContentFormField({
             className="content-field-input"
             disabled={isLoading || !field.editable}
           >
-            <option value="" disabled>{t('formFields.select', { field: field.label.toLowerCase() })}</option>
+            <option value="" disabled>{t('formFields.select', { field: labelText.toLowerCase() })}</option>
             {options.map((opt) => (
               <option key={opt.key} value={opt.key}>{opt.name}</option>
             ))}
@@ -106,7 +109,7 @@ export default function ContentFormField({
       <div className={colClass}>
         <div ref={isDropdownOpen ? dropdownRef : undefined} className="content-field-container">
           <label className="content-field-label">
-            {field.label}
+            {labelText}
             {field.required && <span className="content-field-required">*</span>}
           </label>
           <button
@@ -132,7 +135,7 @@ export default function ContentFormField({
                   </span>
                 ))
               ) : (
-                <span className="content-field-multiselect-placeholder">{t('formFields.select', { field: field.label.toLowerCase() })}</span>
+                <span className="content-field-multiselect-placeholder">{t('formFields.select', { field: labelText.toLowerCase() })}</span>
               )}
             </div>
             <svg className={`content-field-multiselect-icon ${isDropdownOpen ? 'open' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
