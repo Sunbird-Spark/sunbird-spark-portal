@@ -8,7 +8,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ContentEditor } from '@project-sunbird/generic-editor-v2';
-import type { EditorContext, EditorEventPayload, TelemetryEvent } from '@project-sunbird/generic-editor-v2';
+import type { EditorContext, EditorEventPayload } from '@project-sunbird/generic-editor-v2';
 import '@project-sunbird/generic-editor-v2/dist/sunbird-generic-editor.css';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useAuth } from '@/auth/AuthContext';
@@ -27,66 +27,6 @@ export interface GenericEditorComponentProps {
   onError?: (error: string) => void;
 }
 
-const TELEMETRY_ENDPOINT = '/action/data/v3/telemetry';
-
-/** Forward editor telemetry to the portal telemetry endpoint (best-effort). */
-function postTelemetry(event: TelemetryEvent): void {
-  try {
-    fetch(TELEMETRY_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        id: 'api.telemetry',
-        ver: '3.0',
-        ts: new Date().toISOString(),
-        events: [event],
-        params: { msgid: event.mid },
-      }),
-    }).catch(() => {});
-  } catch {
-    /* non-fatal */
-  }
-}
-
-/** Upload an image asset (thumbnail/appIcon) → returns its artifactUrl. */
-async function uploadAsset(file: File, creator?: string, createdBy?: string): Promise<string> {
-  const createResp = await fetch('/action/asset/v3/create', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      request: {
-        content: {
-          name: file.name,
-          mimeType: file.type || 'image/png',
-          mediaType: 'image',
-          contentType: 'Asset',
-          primaryCategory: 'Asset',
-          code: `asset-${Date.now()}`,
-          ...(creator ? { creator } : {}),
-          ...(createdBy ? { createdBy } : {}),
-        },
-      },
-    }),
-  });
-  const created = await createResp.json();
-  const assetId = created?.result?.identifier ?? created?.result?.node_id;
-  if (!assetId) throw new Error('Asset create failed');
-
-  const form = new FormData();
-  form.append('file', file);
-  const upResp = await fetch(`/action/asset/v3/upload/${encodeURIComponent(assetId)}`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: form,
-  });
-  const up = await upResp.json();
-  const url = up?.result?.artifactUrl ?? up?.result?.content_url;
-  if (!url) throw new Error('Asset upload failed');
-  return String(url);
-}
-
 const GenericEditor: React.FC<GenericEditorComponentProps> = ({
   contentId,
   state,
@@ -101,6 +41,10 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
   const [context, setContext] = useState<EditorContext | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // One service instance for the lifetime of the editor — backs the context build
+  // and the asset-upload / telemetry callbacks.
+  const svcRef = useRef(new GenericEditorService());
+
   // Keep onError / t current without making them effect dependencies — avoids re-running
   // the content fetch + lock whenever the parent recreates the callback or the language toggles.
   const onErrorRef = useRef(onError);
@@ -110,7 +54,7 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
 
   useEffect(() => {
     let cancelled = false;
-    const svc = new GenericEditorService();
+    const svc = svcRef.current;
     // Re-run resets to the loading state so a new contentId / late-resolved user
     // never leaves a stale context mounted.
     setError(null);
@@ -171,8 +115,14 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
   }, [contentId, state, framework, contentStatus, isLargeFileUpload, user]);
 
   const handleAsset = useCallback(
-    (file: File) => uploadAsset(file, context?.user?.name, context?.user?.id),
+    (file: File) => svcRef.current.uploadAsset(file, context?.user?.name, context?.user?.id),
     [context],
+  );
+
+  const handleTelemetry = useCallback(
+    (event: Parameters<GenericEditorService['postTelemetry']>[0]) =>
+      svcRef.current.postTelemetry(event),
+    [],
   );
 
   if (error) {
@@ -202,7 +152,7 @@ const GenericEditor: React.FC<GenericEditorComponentProps> = ({
         language={currentCode}
         onClose={onClose}
         onUploadAsset={handleAsset}
-        onTelemetryEvent={postTelemetry}
+        onTelemetryEvent={handleTelemetry}
         onEvent={(e: EditorEventPayload) => {
           if (e.eid === 'editor:closed') onClose?.();
         }}

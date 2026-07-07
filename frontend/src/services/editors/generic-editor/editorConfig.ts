@@ -26,7 +26,15 @@ export const EDITOR_PREVIEW_URL =
 
 /** Telemetry sink for editor events. */
 export const EDITOR_TELEMETRY_URL =
-  import.meta.env.VITE_EDITOR_TELEMETRY_URL || '/action/data/v3/telemetry';
+  import.meta.env.VITE_EDITOR_TELEMETRY_URL || `${EDITOR_API_SLUG}/data/v3/telemetry`;
+
+/**
+ * Asset (thumbnail/appIcon) endpoints. These go through the knowledge-mw `/action` proxy —
+ * the same route the editor library uses via `apiSlug` — not the portal `/portal` http-client.
+ */
+export const EDITOR_ASSET_CREATE_URL = `${EDITOR_API_SLUG}/asset/v3/create`;
+export const editorAssetUploadUrl = (assetId: string): string =>
+  `${EDITOR_API_SLUG}/asset/v3/upload/${encodeURIComponent(assetId)}`;
 
 /** Optional brand logo shown in the editor header (falls back to the built-in Sunbird logo). */
 export const EDITOR_HEADER_LOGO = import.meta.env.VITE_EDITOR_HEADER_LOGO || '';

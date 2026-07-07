@@ -8,6 +8,9 @@ import {
   DEFAULT_PRIMARY_CATEGORIES,
   VALID_CONTENT_STATUSES,
   VALID_CONTENT_STATES,
+  EDITOR_ASSET_CREATE_URL,
+  editorAssetUploadUrl,
+  EDITOR_TELEMETRY_URL,
 } from './editorConfig';
 import { GENERIC_EDITOR_MIME_TYPES } from './types';
 import type {
@@ -15,6 +18,7 @@ import type {
   GenericEditorRouteParams,
   ContentDetails,
 } from './types';
+import type { TelemetryEvent } from '@project-sunbird/generic-editor-v2';
 
 /**
  * Builds the editor context consumed by the native @project-sunbird/generic-editor-v2
@@ -70,6 +74,67 @@ export class GenericEditorService {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Upload an image asset (thumbnail/appIcon) and return its artifactUrl.
+   * Uses the knowledge-mw `/action` asset endpoints (create → multipart upload).
+   */
+  async uploadAsset(file: File, creator?: string, createdBy?: string): Promise<string> {
+    const createResp = await fetch(EDITOR_ASSET_CREATE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        request: {
+          content: {
+            name: file.name,
+            mimeType: file.type || 'image/png',
+            mediaType: 'image',
+            contentType: 'Asset',
+            primaryCategory: 'Asset',
+            code: `asset-${Date.now()}`,
+            ...(creator ? { creator } : {}),
+            ...(createdBy ? { createdBy } : {}),
+          },
+        },
+      }),
+    });
+    const created = await createResp.json();
+    const assetId = created?.result?.identifier ?? created?.result?.node_id;
+    if (!assetId) throw new Error('Asset create failed');
+
+    const form = new FormData();
+    form.append('file', file);
+    const upResp = await fetch(editorAssetUploadUrl(assetId), {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: form,
+    });
+    const up = await upResp.json();
+    const url = up?.result?.artifactUrl ?? up?.result?.content_url;
+    if (!url) throw new Error('Asset upload failed');
+    return String(url);
+  }
+
+  /** Forward an editor telemetry event to the portal telemetry endpoint (best-effort). */
+  postTelemetry(event: TelemetryEvent): void {
+    try {
+      fetch(EDITOR_TELEMETRY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          id: 'api.telemetry',
+          ver: '3.0',
+          ts: new Date().toISOString(),
+          events: [event],
+          params: { msgid: event.mid },
+        }),
+      }).catch(() => {});
+    } catch {
+      /* non-fatal */
+    }
   }
 
   async buildEditorContext(

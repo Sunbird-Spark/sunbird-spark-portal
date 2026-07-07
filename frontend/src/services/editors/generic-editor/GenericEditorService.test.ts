@@ -158,6 +158,50 @@ describe('GenericEditorService', () => {
     });
   });
 
+  describe('uploadAsset', () => {
+    it('creates then uploads the asset and returns the artifactUrl', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({ json: async () => ({ result: { identifier: 'asset_1' } }) })
+        .mockResolvedValueOnce({ json: async () => ({ result: { artifactUrl: 'https://cdn/x.png' } }) });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const file = new File(['x'], 'thumb.png', { type: 'image/png' });
+      const url = await service.uploadAsset(file, 'Creator', 'user-1');
+
+      expect(url).toBe('https://cdn/x.png');
+      expect(fetchMock.mock.calls[0]![0]).toContain('/asset/v3/create');
+      expect(fetchMock.mock.calls[1]![0]).toContain('/asset/v3/upload/asset_1');
+      vi.unstubAllGlobals();
+    });
+
+    it('throws when asset create returns no id', async () => {
+      const fetchMock = vi.fn().mockResolvedValueOnce({ json: async () => ({ result: {} }) });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const file = new File(['x'], 'thumb.png', { type: 'image/png' });
+      await expect(service.uploadAsset(file)).rejects.toThrow('Asset create failed');
+      vi.unstubAllGlobals();
+    });
+  });
+
+  describe('postTelemetry', () => {
+    it('posts a v3 telemetry envelope to the telemetry endpoint', () => {
+      const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({}) });
+      vi.stubGlobal('fetch', fetchMock);
+
+      service.postTelemetry({ eid: 'IMPRESSION', mid: 'm-1' } as never);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [url, init] = fetchMock.mock.calls[0]!;
+      expect(url).toContain('/data/v3/telemetry');
+      const body = JSON.parse((init as { body: string }).body);
+      expect(body.events).toHaveLength(1);
+      expect(body.params.msgid).toBe('m-1');
+      vi.unstubAllGlobals();
+    });
+  });
+
   describe('buildEditorContext', () => {
     it('should build correct context object with all fields', async () => {
       const context = await service.buildEditorContext({
