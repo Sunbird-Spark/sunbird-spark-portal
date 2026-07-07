@@ -46,6 +46,10 @@ export class QumlEditorService {
       did,
       uid,
       channel,
+      // The editor reads board/medium/class/subject terms from this
+      // framework (framework/v1/read) for the Audience & Curriculum form —
+      // sourced from the questionset read API response, no hardcoded fallback.
+      framework: metadata.framework,
       pdata,
       contextRollup: contextOverrides?.contextRollup || { l1: channel },
       cdata: contextOverrides?.cdata || [],
@@ -68,6 +72,7 @@ export class QumlEditorService {
         primaryCategory: metadata.primaryCategory,
         objectType: metadata.objectType,
         showAddCollaborator: false,
+        maxDepth: 3,
         questionSet: { maxQuestionsLimit: 500 },
         // The editor's preview loads the QuML player from this path — the
         // portal serves the player bundle under /assets/quml-player/.
