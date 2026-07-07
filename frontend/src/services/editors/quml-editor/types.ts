@@ -35,6 +35,8 @@ export interface QumlEditorConfig {
     questionSet: {
       maxQuestionsLimit: number;
     };
+    /** Path the editor's preview loads the QuML player bundle from. */
+    playerScriptUrl?: string;
   };
   metadata: QuestionSetMetadata;
 }
