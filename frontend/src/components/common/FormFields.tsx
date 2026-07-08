@@ -70,7 +70,7 @@ export default function ContentFormField({
             onChange={(e) => onFieldChange(field?.code, e.target.value)}
             placeholder={field?.placeholder || `Enter ${labelText.toLowerCase()}`}
             className="content-field-input"
-            disabled={isLoading || !field?.editable}
+            disabled={isLoading || field?.editable === false}
             autoFocus={field?.code === 'name'}
           />
         </div>
@@ -90,7 +90,7 @@ export default function ContentFormField({
             value={(value as string) || ''}
             onChange={(e) => onFieldChange(field?.code, e.target.value)}
             className="content-field-input"
-            disabled={isLoading || !field?.editable}
+            disabled={isLoading || field?.editable === false}
           >
             <option value="" disabled>{t('formFields.select', { field: labelText.toLowerCase() })}</option>
             {options.map((opt) => (
@@ -115,7 +115,7 @@ export default function ContentFormField({
           <button
             type="button"
             onClick={() => onDropdownToggle(isDropdownOpen ? null : field?.code)}
-            disabled={isLoading || !field?.editable}
+            disabled={isLoading || field?.editable === false}
             className="content-field-input content-field-multiselect-button"
           >
             <div className="content-field-multiselect-values">
