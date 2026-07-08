@@ -83,8 +83,7 @@ const CollectionEditorPage = () => {
       action === 'back' ||
       action === 'sendForReview' ||
       action === 'publish' ||
-      action === 'reject' ||
-      action === 'sendBackForCorrections'
+      action === 'reject'
     ) {
       await retireLock();
       navigate('/workspace');
