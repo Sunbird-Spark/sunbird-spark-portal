@@ -135,7 +135,7 @@ const WorkspacePage = () => {
   // Pre-fetch channel/framework data using tanstack query when org is available
   const orgChannelId = orgData?.hashTagId || orgData?.identifier || '';
   const { data: channelData } = useChannel(orgChannelId);
-  const orgFramework = channelData?.data?.channel?.frameworks?.[0]?.identifier || '';
+  const orgFramework = channelData?.data?.channel?.defaultFramework || channelData?.data?.channel?.frameworks?.[0]?.identifier || '';
 
   const { toast } = useToast();
   const { t } = useAppI18n();
