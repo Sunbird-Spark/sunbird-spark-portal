@@ -52,6 +52,17 @@ export async function buildCollectionEditorConfig(
 
   const pdata = await appCoreService.getPData();
 
+  // Current user's display name — the editor auto-fills the author field from
+  // context.user.fullName. Reuses the profile already fetched at login
+  // (userProfileService caches it), so the editor makes no extra user-read call.
+  let userFullName = '';
+  try {
+    const { firstName, lastName } = await userProfileService.getUserData();
+    userFullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+  } catch {
+    // non-fatal — the editor falls back to its own user-read
+  }
+
   return {
     context: {
       // Portal proxies all API calls through the backend; auth is handled via
@@ -68,6 +79,7 @@ export async function buildCollectionEditorConfig(
       contentId: metadata.identifier,
       framework,
       targetFWIds: (metadata.targetFWIds as string[]) || [],
+      ...(userFullName ? { user: { fullName: userFullName } } : {}),
     },
     config: {
       mode: editorMode,
