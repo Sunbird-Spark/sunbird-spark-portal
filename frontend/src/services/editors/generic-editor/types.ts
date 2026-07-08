@@ -1,6 +1,6 @@
 /**
- * Types for the Generic Editor integration.
- * Based on the SunbirdEd-portal generic editor pattern (iframe-based modal editor).
+ * Types for the generic editor integration (native @project-sunbird/generic-editor-v2).
+ * The legacy iframe window-config / lock / mime-type types were removed with the blob editor.
  */
 
 export interface GenericEditorContext {
@@ -33,64 +33,11 @@ export interface GenericEditorContext {
   };
 }
 
-export interface EditorPlugin {
-  id: string;
-  ver: string | number;
-  type: string;
-}
-
-export interface GenericEditorWindowConfig {
-  corePluginsPackaged: boolean;
-  modalId: string;
-  dispatcher: string;
-  apislug: string;
-  alertOnUnload: boolean;
-  localDispatcherEndpoint?: string;
-  headerLogo: string;
-  loadingImage: string;
-  build_number: string;
-  lock: {
-    lockKey?: string;
-    expiresAt?: string;
-    expiresIn?: string;
-  };
-  extContWhitelistedDomains: string;
-  enableTelemetryValidation: boolean;
-  videoMaxSize: string;
-  defaultContentFileSize: number;
-  cloudStorage: {
-    provider: string;
-  };
-  plugins: EditorPlugin[];
-  previewConfig: {
-    repos: string[];
-    plugins: EditorPlugin[];
-    splash: {
-      text: string;
-      icon: string;
-      bgImage: string;
-      webLink: string;
-    };
-    overlay: {
-      showUser: boolean;
-    };
-    showEndPage: boolean;
-  };
-  contentFields?: string;
-  fwCategoryDetails?: { code: string; label: string }[];
-}
-
 export interface GenericEditorRouteParams {
   contentId?: string;
   state?: string;
   framework?: string;
   contentStatus?: string;
-}
-
-export interface GenericEditorQueryParams {
-  lockKey?: string;
-  expiresAt?: string;
-  expiresIn?: string;
 }
 
 export interface ContentDetails {
@@ -106,13 +53,7 @@ export interface ContentDetails {
   versionKey?: string;
 }
 
-export interface LockContentResponse {
-  lockKey: string;
-  expiresAt: string;
-  expiresIn: string;
-}
-
-/** MIME types supported by the generic editor */
+/** MIME types the generic editor can open. */
 export const GENERIC_EDITOR_MIME_TYPES = [
   'application/pdf',
   'video/mp4',
