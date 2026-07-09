@@ -207,7 +207,7 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
                                             onCheckedChange={(checked) =>
                                                 handleCheckboxChange(option, checked as boolean)
                                             }
-                                            className="h-5 w-5 rounded border border-sunbird-theme-accent-muted data-[state=checked]:bg-sunbird-theme-accent-muted data-[state=checked]:border-sunbird-theme-accent-muted"
+                                            className="h-5 w-5 rounded border [border-style:solid] border-sunbird-theme-accent data-[state=checked]:bg-sunbird-theme-accent-muted data-[state=checked]:border-sunbird-theme-accent-muted"
                                         />
                                         <span className="text-sm text-foreground group-hover:text-primary transition-colors">
                                             {option.label}
