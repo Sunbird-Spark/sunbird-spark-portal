@@ -148,6 +148,7 @@ export function useWorkspace({
     };
 
     if (secondaryView === 'uploads') {
+      baseFilters.status = ['Draft'];
       baseFilters.mimeType = [
         'application/pdf',
         'video/x-youtube',
@@ -161,6 +162,7 @@ export function useWorkspace({
     }
 
     if (secondaryView === 'collaborations') {
+      baseFilters.status = [...WORKSPACE_STATUS_FILTER];
       delete baseFilters.createdBy;
       baseFilters.collaborators = [userId ?? ''];
       baseFilters.objectType = 'Content';

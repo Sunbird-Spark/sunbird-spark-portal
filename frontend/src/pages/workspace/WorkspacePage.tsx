@@ -239,20 +239,22 @@ const WorkspacePage = () => {
 
   // Sync typeFilter, activeView, secondaryView to URL
   useEffect(() => {
-    const next = new URLSearchParams(searchParams);
-    let changed = false;
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      let changed = false;
 
-    const newType = typeFilter !== 'all' ? typeFilter : '';
-    if (next.get('type') !== newType) { changed = true; if (newType) next.set('type', newType); else next.delete('type'); }
+      const newType = typeFilter !== 'all' ? typeFilter : '';
+      if (next.get('type') !== newType) { changed = true; if (newType) next.set('type', newType); else next.delete('type'); }
 
-    const newView = activeView !== 'all' ? activeView : '';
-    if (next.get('view') !== newView) { changed = true; if (newView) next.set('view', newView); else next.delete('view'); }
+      const newView = activeView !== 'all' ? activeView : '';
+      if (next.get('view') !== newView) { changed = true; if (newView) next.set('view', newView); else next.delete('view'); }
 
-    const newMore = secondaryView || '';
-    if (next.get('more') !== newMore) { changed = true; if (newMore) next.set('more', newMore); else next.delete('more'); }
+      const newMore = secondaryView || '';
+      if (next.get('more') !== newMore) { changed = true; if (newMore) next.set('more', newMore); else next.delete('more'); }
 
-    if (changed) setSearchParams(next, { replace: true });
-  }, [typeFilter, activeView, secondaryView, searchParams, setSearchParams]);
+      return changed ? next : prev;
+    }, { replace: true });
+  }, [typeFilter, activeView, secondaryView, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showDynamicFormDialog, setShowDynamicFormDialog] = useState(false);
