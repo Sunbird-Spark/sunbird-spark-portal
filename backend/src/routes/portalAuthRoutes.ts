@@ -271,5 +271,3 @@ router.all('/logout', sessionMiddleware, async (req: Request, res: Response) => 
 });
 
 export default router;
-
-
