@@ -51,6 +51,8 @@ interface UseWorkspaceOptions {
   isBookCreatorOnly?: boolean;
   /** When true, restrict primaryCategory to Digital Textbook only (BOOK_REVIEWER without CONTENT_REVIEWER). */
   isBookReviewerOnly?: boolean;
+  /** Secondary action view (Uploads/Collaborations) merged on top of segment tab filters. */
+  secondaryView?: WorkspaceView | null;
 }
 
 /**
@@ -75,6 +77,7 @@ export function useWorkspace({
   enabled = true,
   isBookCreatorOnly = false,
   isBookReviewerOnly = false,
+  secondaryView = null,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create'].includes(activeTab);
@@ -100,7 +103,7 @@ export function useWorkspace({
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
   // typeFilter is included so tab badges and stats update when a type is selected.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery, secondaryView],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
@@ -135,7 +138,7 @@ export function useWorkspace({
   // ── Content query (per tab, paginated) ────────────────────────────────
   const statusFilter = getStatusFilterForTab(activeTab);
 
-  // Special filters for uploads and collaborations tabs
+  // Merge secondary action filters on top of segment tab's base filters
   const getFiltersForTab = useCallback(() => {
     const baseFilters: Record<string, unknown> = {
       createdBy: isReviewerTab ? { '!=': userId ?? '' } : (userId ?? ''),
@@ -144,38 +147,32 @@ export function useWorkspace({
       primaryCategory: primaryCategoryFilter,
     };
 
-    if (activeTab === 'uploads') {
-      return {
-        ...baseFilters,
-        createdBy: userId ?? '',
-        status: ['Draft'],
-        mimeType: [
-          'application/pdf',
-          'video/x-youtube',
-          'application/vnd.ekstep.html-archive',
-          'application/epub',
-          'application/vnd.ekstep.h5p-archive',
-          'video/mp4',
-          'video/webm',
-          'text/x-url',
-        ],
-      };
+    if (secondaryView === 'uploads') {
+      baseFilters.status = ['Draft'];
+      baseFilters.mimeType = [
+        'application/pdf',
+        'video/x-youtube',
+        'application/vnd.ekstep.html-archive',
+        'application/epub',
+        'application/vnd.ekstep.h5p-archive',
+        'video/mp4',
+        'video/webm',
+        'text/x-url',
+      ];
     }
 
-    if (activeTab === 'collaborations') {
-      return {
-        status: ['Draft', 'FlagDraft', 'Review', 'Processing', 'Live', 'Unlisted', 'FlagReview'],
-        collaborators: [userId ?? ''],
-        primaryCategory: primaryCategoryFilter,
-        objectType: 'Content',
-      };
+    if (secondaryView === 'collaborations') {
+      baseFilters.status = [...WORKSPACE_STATUS_FILTER];
+      delete baseFilters.createdBy;
+      baseFilters.collaborators = [userId ?? ''];
+      baseFilters.objectType = 'Content';
     }
 
     return baseFilters;
-  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, activeTab]);
+  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: getFiltersForTab(),
