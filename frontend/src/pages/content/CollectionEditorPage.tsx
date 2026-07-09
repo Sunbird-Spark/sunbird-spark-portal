@@ -1,9 +1,9 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import type { ToolbarAction } from '@project-sunbird/collection-editor-react';
 import PageLoader from '@/components/common/PageLoader';
 import EditorErrorState from '@/components/editors/EditorErrorState';
 import CollectionEditor from '@/components/editors/CollectionEditor';
-import type { CollectionEditorEvent, CollectionEditorContextProps } from '@/services/editors/collection-editor';
 import { ContentService } from '@/services/ContentService';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { toast } from '@/hooks/useToast';
@@ -35,7 +35,7 @@ const CollectionEditorPage = () => {
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
   const { interact } = useInteract();
-  const [metadata, setMetadata] = useState<any | null>(null);
+  const [metadata, setMetadata] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -69,14 +69,7 @@ const CollectionEditorPage = () => {
     metadata,
   });
 
-  const contextProps: CollectionEditorContextProps = useMemo(() => ({
-    mode: editorMode,
-    objectType: 'Collection',
-    primaryCategory: metadata?.primaryCategory,
-  }), [editorMode, metadata?.primaryCategory]);
-
-
-  const handleEditorEvent = useCallback(async (event: CollectionEditorEvent) => {
+  const handleToolbarEvent = useCallback(async ({ action }: { action: ToolbarAction; data?: unknown }) => {
     interact({
       id: 'collection-editor-event',
       type: 'OTHER',
@@ -84,16 +77,18 @@ const CollectionEditorPage = () => {
       cdata: [{ id: contentId || '', type: 'ContentId' }],
     });
 
-    const closeEditor = (event.data as any)?.close;
-    if (closeEditor) {
+    // Back, or a successful state change (the lib performs the API call and
+    // emits these only on success) returns the user to the workspace.
+    if (
+      action === 'back' ||
+      action === 'sendForReview' ||
+      action === 'publish' ||
+      action === 'reject'
+    ) {
       await retireLock();
       navigate('/workspace');
     }
   }, [navigate, retireLock, interact, contentId]);
-
-  const handleTelemetryEvent = useCallback((_event: any) => {
-      // Direct raw telemetry feed from iframe (optional mapping)
-  }, []);
 
   if (loading || isLocking) {
     return <PageLoader message={isLocking ? t('content.acquiringLock') : t('content.loadingEditor')} />;
@@ -112,9 +107,8 @@ const CollectionEditorPage = () => {
       <CollectionEditor
         identifier={metadata.identifier}
         metadata={metadata}
-        contextProps={contextProps}
-        onEditorEvent={handleEditorEvent}
-        onTelemetryEvent={handleTelemetryEvent}
+        mode={editorMode}
+        onToolbarEvent={handleToolbarEvent}
       />
     </div>
   );

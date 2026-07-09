@@ -367,6 +367,7 @@ describe('enrollmentMapper', () => {
       ];
       expect(getContentAttemptInfoMap(list)).toEqual({ c1: { attemptCount: 0 } });
     });
+
   });
 
   describe('getCourseProgressProps', () => {

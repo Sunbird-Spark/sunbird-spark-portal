@@ -7,6 +7,7 @@ import packageJson from '../../package.json' with { type: 'json' };
 const { version, buildHash } = packageJson as { version: string; buildHash?: string };
 
 const appId = envConfig.APPID;
+const enableAiSearch = envConfig.ENABLE_AI_SEARCH;
 const finalBuildHash = buildHash || uuidv4();
 
 export const getAppInfo = (req: Request, res: Response) => {
@@ -16,7 +17,9 @@ export const getAppInfo = (req: Request, res: Response) => {
     const appInfo = {
         version: version,
         buildHash: finalBuildHash,
-        appId: appId
+        appId: appId,
+        enableAiSearch,
+        cloudStorageUrls: envConfig.SUNBIRD_CLOUD_STORAGE_URLS,
     };
 
     response.setResult({ data: appInfo });

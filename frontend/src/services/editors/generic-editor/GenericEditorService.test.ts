@@ -1,27 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GenericEditorService } from './GenericEditorService';
-import type { ContentDetails, GenericEditorQueryParams } from './types';
+import type { ContentDetails } from './types';
 import { GENERIC_EDITOR_MIME_TYPES } from './types';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
-import {
-  GENERIC_EDITOR_WINDOW_CONFIG,
-  DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
-  DEFAULT_VIDEO_MAX_SIZE,
-  DEFAULT_CONTENT_FILE_SIZE,
-  DEFAULT_PRIMARY_CATEGORIES,
-} from './editorConfig';
+import { DEFAULT_PRIMARY_CATEGORIES } from './editorConfig';
 
 const mockGet = vi.fn();
-const mockPost = vi.fn();
-const mockDelete = vi.fn();
 
 vi.mock('../../../lib/http-client', () => ({
-  getClient: () => ({
-    get: mockGet,
-    post: mockPost,
-    delete: mockDelete,
-  }),
+  getClient: () => ({ get: mockGet }),
 }));
 
 vi.mock('../../userAuthInfoService/userAuthInfoService', () => ({
@@ -57,7 +45,7 @@ vi.mock('../../ChannelService', () => ({
 }));
 
 vi.mock('../../UserProfileService', () => ({
-  default: { getChannel: vi.fn(), clearCache: vi.fn() },
+  default: { getChannel: vi.fn(), getUserData: vi.fn(), clearCache: vi.fn() },
 }));
 
 import userProfileService from '../../UserProfileService';
@@ -65,19 +53,14 @@ import userProfileService from '../../UserProfileService';
 describe('GenericEditorService', () => {
   let service: GenericEditorService;
 
-  const mockContentDetails: ContentDetails = {
-    identifier: 'do_123',
-    name: 'Test PDF',
-    status: 'Draft',
-    mimeType: 'application/pdf',
-    createdBy: 'user-123',
-    framework: 'NCF',
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
 
     vi.mocked(userProfileService.getChannel).mockResolvedValue('test-slug');
+    vi.mocked(userProfileService.getUserData).mockResolvedValue({
+      firstName: 'Test',
+      lastName: 'User',
+    } as any);
 
     mockOrgSearch.mockResolvedValue({
       data: {
@@ -104,22 +87,18 @@ describe('GenericEditorService', () => {
     service = new GenericEditorService();
   });
 
-  afterEach(() => {
-    delete (window as any).context;
-    delete (window as any).config;
-  });
-
-  describe('getEditorUrl', () => {
-    it('should return the default generic editor URL', () => {
-      expect(service.getEditorUrl()).toBe('/generic-editor/index.html');
-    });
-  });
+  const mockContentDetails: ContentDetails = {
+    identifier: 'do_123',
+    name: 'Test PDF',
+    status: 'Draft',
+    mimeType: 'application/pdf',
+    createdBy: 'user-123',
+    framework: 'NCF',
+  };
 
   describe('getContentDetails', () => {
-    it('should make correct API call and return content', async () => {
-      mockGet.mockResolvedValue({
-        data: { content: mockContentDetails },
-      });
+    it('reads content in edit mode and returns the content node', async () => {
+      mockGet.mockResolvedValue({ data: { content: mockContentDetails } });
 
       const result = await service.getContentDetails('do_123');
 
@@ -128,142 +107,98 @@ describe('GenericEditorService', () => {
     });
   });
 
-  describe('lockContent', () => {
-    it('should send correct payload and return lock response', async () => {
-      const lockResponse = {
-        lockKey: 'lock-key-1',
-        expiresAt: '2026-02-19T00:00:00Z',
-        expiresIn: '3600',
-      };
-      mockPost.mockResolvedValue({ data: lockResponse });
-
-      const result = await service.lockContent(
-        'do_123',
-        'user-123',
-        'Test User',
-        'NCF',
-        'Resource'
-      );
-
-      expect(mockPost).toHaveBeenCalledWith('/lock/v1/create', {
-        request: {
-          resourceId: 'do_123',
-          resourceType: 'Content',
-          resourceInfo: JSON.stringify({
-            contentType: 'Resource',
-            framework: 'NCF',
-            identifier: 'do_123',
-          }),
-          creatorInfo: JSON.stringify({ name: 'Test User', id: 'user-123' }),
-          createdBy: 'user-123',
-        },
-      });
-      expect(result).toEqual(lockResponse);
-    });
-
-    it('should use default values when framework and contentType are not provided', async () => {
-      mockPost.mockResolvedValue({
-        data: { lockKey: 'k', expiresAt: 'a', expiresIn: 'i' },
-      });
-
-      await service.lockContent('do_456', 'user-1', 'User');
-
-      expect(mockPost).toHaveBeenCalledWith('/lock/v1/create', {
-        request: expect.objectContaining({
-          resourceInfo: JSON.stringify({
-            contentType: 'Resource',
-            framework: '',
-            identifier: 'do_456',
-          }),
-        }),
-      });
-    });
-  });
-
-  describe('retireLock', () => {
-    it('should send correct payload to retire lock', async () => {
-      mockDelete.mockResolvedValue({ data: {} });
-
-      await service.retireLock('do_123');
-
-      expect(mockDelete).toHaveBeenCalledWith('/lock/v1/retire', {
-        request: {
-          resourceId: 'do_123',
-          resourceType: 'Content',
-        },
-      });
-    });
-  });
-
   describe('validateRequest', () => {
-    it('should return true for valid mime type, valid status, and creator', () => {
-      const result = service.validateRequest(mockContentDetails, 'user-123');
-      expect(result).toBe(true);
+    it('allows the creator with valid mime + status', () => {
+      expect(service.validateRequest(mockContentDetails, 'user-123')).toBe(true);
     });
 
-    it('should return true for collaborator with valid state', () => {
+    it('allows a collaborator with a valid state', () => {
       const content: ContentDetails = {
         ...mockContentDetails,
         createdBy: 'other-user',
         collaborators: ['user-123'],
       };
-      const result = service.validateRequest(content, 'user-123', 'collaborating-on');
-      expect(result).toBe(true);
+      expect(service.validateRequest(content, 'user-123', 'collaborating-on')).toBe(true);
     });
 
-    it('should return true for valid state even if not creator or collaborator', () => {
-      const content: ContentDetails = {
-        ...mockContentDetails,
-        createdBy: 'other-user',
-      };
-      const result = service.validateRequest(content, 'user-123', 'upForReview');
-      expect(result).toBe(true);
+    it('allows a valid state even if not creator/collaborator (reviewer)', () => {
+      const content: ContentDetails = { ...mockContentDetails, createdBy: 'other-user' };
+      expect(service.validateRequest(content, 'user-123', 'upForReview')).toBe(true);
     });
 
-    it('should return false for invalid mime type', () => {
+    it('rejects an unsupported mime type', () => {
       const content: ContentDetails = {
         ...mockContentDetails,
         mimeType: 'application/vnd.ekstep.ecml-archive',
       };
-      const result = service.validateRequest(content, 'user-123');
-      expect(result).toBe(false);
+      expect(service.validateRequest(content, 'user-123')).toBe(false);
     });
 
-    it('should return false for invalid status', () => {
-      const content: ContentDetails = {
-        ...mockContentDetails,
-        status: 'Retired',
-      };
-      const result = service.validateRequest(content, 'user-123');
-      expect(result).toBe(false);
+    it('rejects an invalid status', () => {
+      const content: ContentDetails = { ...mockContentDetails, status: 'Retired' };
+      expect(service.validateRequest(content, 'user-123')).toBe(false);
     });
 
-    it('should return false when user has no access and no valid state', () => {
-      const content: ContentDetails = {
-        ...mockContentDetails,
-        createdBy: 'other-user',
-      };
-      const result = service.validateRequest(content, 'user-123');
-      expect(result).toBe(false);
+    it('rejects a non-owner with no valid state', () => {
+      const content: ContentDetails = { ...mockContentDetails, createdBy: 'other-user' };
+      expect(service.validateRequest(content, 'user-123')).toBe(false);
     });
 
-    it('should handle case-insensitive status comparison', () => {
-      const content: ContentDetails = {
-        ...mockContentDetails,
-        status: 'draft',
-      };
-      const result = service.validateRequest(content, 'user-123');
-      expect(result).toBe(true);
+    it('compares status case-insensitively', () => {
+      const content: ContentDetails = { ...mockContentDetails, status: 'draft' };
+      expect(service.validateRequest(content, 'user-123')).toBe(true);
     });
 
-    it('should validate all supported mime types', () => {
+    it('accepts every supported mime type for the creator', () => {
       for (const mimeType of GENERIC_EDITOR_MIME_TYPES) {
-        const content: ContentDetails = {
-          ...mockContentDetails,
-          mimeType,
-        };
-        expect(service.validateRequest(content, 'user-123')).toBe(true);
+        expect(
+          service.validateRequest({ ...mockContentDetails, mimeType }, 'user-123')
+        ).toBe(true);
       }
+    });
+  });
+
+  describe('uploadAsset', () => {
+    it('creates then uploads the asset and returns the artifactUrl', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({ json: async () => ({ result: { identifier: 'asset_1' } }) })
+        .mockResolvedValueOnce({ json: async () => ({ result: { artifactUrl: 'https://cdn/x.png' } }) });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const file = new File(['x'], 'thumb.png', { type: 'image/png' });
+      const url = await service.uploadAsset(file, 'Creator', 'user-1');
+
+      expect(url).toBe('https://cdn/x.png');
+      expect(fetchMock.mock.calls[0]![0]).toContain('/asset/v3/create');
+      expect(fetchMock.mock.calls[1]![0]).toContain('/asset/v3/upload/asset_1');
+      vi.unstubAllGlobals();
+    });
+
+    it('throws when asset create returns no id', async () => {
+      const fetchMock = vi.fn().mockResolvedValueOnce({ json: async () => ({ result: {} }) });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const file = new File(['x'], 'thumb.png', { type: 'image/png' });
+      await expect(service.uploadAsset(file)).rejects.toThrow('Asset create failed');
+      vi.unstubAllGlobals();
+    });
+  });
+
+  describe('postTelemetry', () => {
+    it('posts a v3 telemetry envelope to the telemetry endpoint', () => {
+      const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({}) });
+      vi.stubGlobal('fetch', fetchMock);
+
+      service.postTelemetry({ eid: 'IMPRESSION', mid: 'm-1' } as never);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [url, init] = fetchMock.mock.calls[0]!;
+      expect(url).toContain('/data/v3/telemetry');
+      const body = JSON.parse((init as { body: string }).body);
+      expect(body.events).toHaveLength(1);
+      expect(body.params.msgid).toBe('m-1');
+      vi.unstubAllGlobals();
     });
   });
 
@@ -401,99 +336,6 @@ describe('GenericEditorService', () => {
         ver: '1.0',
         pid: 'sunbird-portal',
       });
-    });
-  });
-
-  describe('buildEditorConfig', () => {
-    it('should return correct config with lock params', async () => {
-      const lockParams: GenericEditorQueryParams = {
-        lockKey: 'key-1',
-        expiresAt: '2026-02-19T00:00:00Z',
-        expiresIn: '3600',
-      };
-
-      const config = await service.buildEditorConfig(lockParams, '/logo.png');
-
-      expect(config.corePluginsPackaged).toBe(GENERIC_EDITOR_WINDOW_CONFIG.corePluginsPackaged);
-      expect(config.build_number).toBe('1.0');
-      expect(config.headerLogo).toBe('/logo.png');
-      expect(config.lock).toEqual({
-        lockKey: 'key-1',
-        expiresAt: '2026-02-19T00:00:00Z',
-        expiresIn: '3600',
-      });
-      expect(config.extContWhitelistedDomains).toBe(DEFAULT_EXT_CONT_WHITELISTED_DOMAINS);
-      expect(config.enableTelemetryValidation).toBe(false);
-      expect(config.videoMaxSize).toBe(DEFAULT_VIDEO_MAX_SIZE);
-      expect(config.defaultContentFileSize).toBe(DEFAULT_CONTENT_FILE_SIZE);
-    });
-
-    it('should use empty string for headerLogo when not provided', async () => {
-      const config = await service.buildEditorConfig();
-      expect(config.headerLogo).toBe('');
-    });
-
-    it('should use undefined lock values when no lock params provided', async () => {
-      const config = await service.buildEditorConfig();
-      expect(config.lock).toEqual({
-        lockKey: undefined,
-        expiresAt: undefined,
-        expiresIn: undefined,
-      });
-    });
-
-    it('should populate empty contentFields and fwCategoryDetails when no framework is provided', async () => {
-      const config = await service.buildEditorConfig();
-      expect(config.contentFields).toBe('');
-      expect(config.fwCategoryDetails).toEqual([]);
-    });
-  });
-
-  describe('shouldLockContent', () => {
-    it('should return true for editable state with draft status', () => {
-      expect(service.shouldLockContent('draft', 'Draft')).toBe(true);
-    });
-
-    it('should return false when existing lock is present', () => {
-      expect(
-        service.shouldLockContent('draft', 'Draft', { lockKey: 'existing-key' })
-      ).toBe(false);
-    });
-
-    it('should return false for non-editable state', () => {
-      expect(service.shouldLockContent('upForReview', 'Draft')).toBe(false);
-    });
-
-    it('should return false for non-draft status', () => {
-      expect(service.shouldLockContent('draft', 'Review')).toBe(false);
-    });
-
-    it('should return false when state is undefined', () => {
-      expect(service.shouldLockContent(undefined, 'Draft')).toBe(false);
-    });
-  });
-
-  describe('setWindowGlobals', () => {
-    it('should set window.context and window.config', () => {
-      const context = { user: { id: 'u1' } } as any;
-      const config = { modalId: 'genericEditor' } as any;
-
-      service.setWindowGlobals(context, config);
-
-      expect((window as any).context).toBe(context);
-      expect((window as any).config).toBe(config);
-    });
-  });
-
-  describe('clearWindowGlobals', () => {
-    it('should remove window.context and window.config', () => {
-      (window as any).context = { some: 'context' };
-      (window as any).config = { some: 'config' };
-
-      service.clearWindowGlobals();
-
-      expect((window as any).context).toBeUndefined();
-      expect((window as any).config).toBeUndefined();
     });
   });
 });

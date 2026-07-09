@@ -1360,6 +1360,8 @@
     "errorTitle": "Erreur de l'éditeur",
     "goBack": "Retour",
     "loading": "Chargement de l'éditeur...",
+    "initError": "Échec de l'initialisation de l'éditeur. Veuillez réessayer.",
+    "noPermission": "Vous n'avez pas la permission de modifier ce contenu.",
     "preparing": "Préparation de l'environnement de l'éditeur...",
     "genericEditor": "Éditeur générique",
     "contentEditor": "Éditeur de contenu"

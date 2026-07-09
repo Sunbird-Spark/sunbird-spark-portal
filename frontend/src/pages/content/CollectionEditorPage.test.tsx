@@ -71,17 +71,17 @@ vi.mock('@/components/common/PageLoader', () => ({
 vi.mock('@/components/editors/CollectionEditor', () => ({
   default: ({
     identifier,
-    contextProps,
-    onEditorEvent,
+    mode,
+    onToolbarEvent,
   }: {
     identifier: string;
-    contextProps: { mode: string };
-    onEditorEvent?: (event: { data?: { close?: boolean } }) => void;
+    mode: string;
+    onToolbarEvent?: (event: { action: string; data?: unknown }) => void;
   }) => (
     <div data-testid="collection-editor">
       <span data-testid="identifier">{identifier}</span>
-      <span data-testid="editor-mode">{contextProps.mode}</span>
-      <button type="button" onClick={() => onEditorEvent?.({ data: { close: true } })}>
+      <span data-testid="editor-mode">{mode}</span>
+      <button type="button" onClick={() => onToolbarEvent?.({ action: 'back' })}>
         Close editor
       </button>
     </div>

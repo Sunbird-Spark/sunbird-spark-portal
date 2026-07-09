@@ -37,26 +37,14 @@ const epubFinalDest = path.join(publicRoot, 'assets/epub-player');
 // QUML Player paths
 const qumlWebComponentRoot = path.join(
     __dirname,
-    'node_modules/@project-sunbird/sunbird-quml-player-web-component'
+    'node_modules/@project-sunbird/sunbird-quml-player-web-component-react'
 );
 const qumlAssetsSource = path.join(qumlWebComponentRoot, 'assets/quml-player');
 const qumlFinalDest = path.join(publicRoot, 'assets/quml-player');
 
-// QUML Editor paths
-const qumlEditorWebComponentRoot = path.join(
-    __dirname,
-    'node_modules/@project-sunbird/sunbird-questionset-editor-web-component'
-);
-const qumlEditorAssetsSource = path.join(qumlEditorWebComponentRoot, 'assets/quml-editor');
-const qumlEditorFinalDest = path.join(publicRoot, 'assets/quml-editor');
+// QUML Editor — now @project-sunbird/sunbird-questionset-editor-web-component-react
+// Imported as a React library via Vite; no static asset copy required.
 
-// Collection Editor paths
-const collectionEditorWebComponentRoot = path.join(
-    __dirname,
-    'node_modules/@project-sunbird/sunbird-collection-editor-web-component'
-);
-const collectionEditorAssetsSource = path.join(collectionEditorWebComponentRoot, 'assets/collection-editor');
-const collectionEditorFinalDest = path.join(publicRoot, 'assets/collection-editor');
 
 /**
  * Recursively copy directory
@@ -121,42 +109,14 @@ try {
     fs.mkdirSync(qumlFinalDest, { recursive: true });
     console.log('📦 Copying QUML player files to public/assets/quml-player/...');
     copyDirectory(qumlAssetsSource, qumlFinalDest);
-   
-    console.log(`\n📂 Collection Editor Source: ${collectionEditorAssetsSource}`);
-    fs.mkdirSync(collectionEditorFinalDest, { recursive: true });
-    console.log('📦 Copying Collection Editor files to public/assets/collection-editor/...');
-    copyDirectory(collectionEditorAssetsSource, collectionEditorFinalDest);
-    
-     // 7. Copy QUML Editor assets (if package is installed)
-    if (fs.existsSync(qumlEditorWebComponentRoot)) {
-        console.log(`\n📂 QUML Editor Source: ${qumlEditorAssetsSource}`);
-        fs.mkdirSync(qumlEditorFinalDest, { recursive: true });
-        console.log('📦 Copying QUML editor files to public/assets/quml-editor/...');
-        copyDirectory(qumlEditorAssetsSource, qumlEditorFinalDest);
-
-        // Copy QUML editor images to public/assets/images
-        const commonAssetsDest = path.join(publicRoot, 'assets');
-        const qumlEditorImagesDest = path.join(commonAssetsDest, 'images');
-        const qumlEditorImageCandidates = [
-            path.join(qumlEditorAssetsSource, 'assets/images'), // preferred location
-            path.join(qumlEditorAssetsSource, 'images'),        // fallback location
-        ];
-        let qumlEditorImagesCopied = false;
-        for (const srcDir of qumlEditorImageCandidates) {
-            if (fs.existsSync(srcDir)) {
-                console.log(`📦 Copying QUML editor images from ${srcDir} to public/assets/images/...`);
-                copyDirectory(srcDir, qumlEditorImagesDest);
-                qumlEditorImagesCopied = true;
-                break;
-            }
-        }
-        if (!qumlEditorImagesCopied) {
-            console.log('ℹ️  No QUML editor images directory found at assets/images or images.');
-        }
-
-    } else {
-        console.log('\n⚠️ QUML Editor package not found - skipping (install @project-sunbird/sunbird-questionset-editor-web-component when available)');
+    // The QuML editor's preview requests styles as <bundle>-styles.css next
+    // to the script — expose the package's styles.css under that name too.
+    const qumlStyles = path.join(qumlFinalDest, 'styles.css');
+    if (fs.existsSync(qumlStyles)) {
+        fs.copyFileSync(qumlStyles, path.join(qumlFinalDest, 'sunbird-quml-player-styles.css'));
     }
+
+    // 7. QUML Editor — handled by Vite as a React library import, no copy needed.
 
     // 8. Copy COMMON assets (icons) to root assets folder
     // Many Sunbird components expect icons at /assets/*.svg
@@ -187,9 +147,7 @@ try {
     console.log(`📍 Video Player: public/assets/video-player/`);
     console.log(`📍 ePub Player: public/assets/epub-player/`);
     console.log(`📍 QUML Player: public/assets/quml-player/`);
-    console.log(`📍 QUML Editor: public/assets/quml-editor/`);
-    console.log(`📍 QUML Editor Images: public/assets/images/`);
-    console.log(`📍 Collection Editor: public/assets/collection-editor/`);
+    console.log(`📍 QUML Editor: bundled by Vite (no static copy)`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {
