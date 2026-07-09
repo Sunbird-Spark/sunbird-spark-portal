@@ -80,6 +80,7 @@ const baseCounts = { all: 5, drafts: 2, review: 1, published: 2, pendingReview: 
 
 const renderToolbar = (overrides?: Partial<{
   activeView: WorkspaceView;
+  secondaryView: WorkspaceView | null;
   userRole: UserRole;
   viewMode: ViewMode;
   typeFilter: ContentTypeFilter;
@@ -89,6 +90,7 @@ const renderToolbar = (overrides?: Partial<{
   hasReviewerRole: boolean;
 }>) => {
   const onViewChange = vi.fn();
+  const onSecondaryActionChange = vi.fn();
   const onRoleChange = vi.fn();
   const onViewModeChange = vi.fn();
   const onTypeFilterChange = vi.fn();
@@ -96,6 +98,7 @@ const renderToolbar = (overrides?: Partial<{
 
   const props = {
     activeView: 'all' as WorkspaceView,
+    secondaryView: null as WorkspaceView | null,
     userRole: 'creator' as UserRole,
     counts: baseCounts,
     viewMode: 'grid' as ViewMode,
@@ -104,6 +107,7 @@ const renderToolbar = (overrides?: Partial<{
     hasCreatorRole: true,
     hasReviewerRole: true,
     onViewChange,
+    onSecondaryActionChange,
     onRoleChange,
     onViewModeChange,
     onTypeFilterChange,
@@ -114,7 +118,7 @@ const renderToolbar = (overrides?: Partial<{
   };
 
   render(<WorkspaceToolbar {...props} />);
-  return { ...props, onViewChange, onRoleChange, onViewModeChange, onTypeFilterChange, onCreateClick };
+  return { ...props, onViewChange, onSecondaryActionChange, onRoleChange, onViewModeChange, onTypeFilterChange, onCreateClick };
 };
 
 describe('WorkspaceToolbar', () => {
@@ -149,15 +153,26 @@ describe('WorkspaceToolbar', () => {
     expect(onViewChange).toHaveBeenCalledWith('pending-review');
   });
 
-  it('renders secondary actions for creator and calls onViewChange from More menu', () => {
-    const { onViewChange } = renderToolbar({ userRole: 'creator' });
+  it('renders secondary actions for creator and calls onSecondaryActionChange from More menu', () => {
+    const { onSecondaryActionChange } = renderToolbar({ userRole: 'creator' });
 
     // Our DropdownMenu mock always renders content
     expect(screen.getByText('More')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Uploads' }));
-    expect(onViewChange).toHaveBeenCalledWith('uploads');
+    expect(onSecondaryActionChange).toHaveBeenCalledWith('uploads');
     fireEvent.click(screen.getByRole('button', { name: 'Collaborations' }));
-    expect(onViewChange).toHaveBeenCalledWith('collaborations');
+    expect(onSecondaryActionChange).toHaveBeenCalledWith('collaborations');
+  });
+
+  it('shows secondary action label in trigger when secondaryView is set', () => {
+    renderToolbar({ userRole: 'creator', secondaryView: 'uploads' });
+    const uploadsElements = screen.getAllByText('Uploads');
+    expect(uploadsElements.length).toBe(2);
+  });
+
+  it('shows More when secondaryView is null', () => {
+    renderToolbar({ userRole: 'creator', secondaryView: null });
+    expect(screen.getByText('More')).toBeInTheDocument();
   });
 
   it('shows type filter and view mode controls when content filters are enabled', () => {
