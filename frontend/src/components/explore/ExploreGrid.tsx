@@ -41,15 +41,24 @@ const ExploreGrid = ({ filters, query, sortBy, searchMode = 'keyword', onQueryCh
     const observerInstanceRef = useRef<IntersectionObserver | null>(null);
     const limit = 9;
 
-    // Build active filters — memoized to prevent infinite re-renders
+    // Canonical serialized key: strips empty values and sorts codes so two
+    // structurally-equal filter states always produce the same key. The parent
+    // rebuilds the `filters` object from the URL on every navigation (back/forward,
+    // filter persistence), so keying the memo on object identity would emit a new
+    // `activeFilters` reference — wiping displayItems below while React Query hands
+    // back the same cached `data` object, leaving the grid permanently empty.
+    const filtersKey = JSON.stringify(
+        Object.entries(filters)
+            .filter(([, values]) => values.length > 0)
+            .sort(([a], [b]) => a.localeCompare(b))
+    );
+
     const activeFilters = useMemo(() => {
         return {
             objectType: ['Content', 'QuestionSet'],
-            ...Object.fromEntries(
-                Object.entries(filters).filter(([, values]) => values.length > 0)
-            ),
+            ...Object.fromEntries(JSON.parse(filtersKey) as [string, string[]][]),
         };
-    }, [filters]);
+    }, [filtersKey]);
 
     // Reset when search parameters or mode changes
     useEffect(() => {
