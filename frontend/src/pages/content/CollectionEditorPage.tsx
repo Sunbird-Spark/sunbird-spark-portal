@@ -10,6 +10,7 @@ import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
 import useInteract from '@/hooks/useInteract';
+import { useEditorBackNavigation } from '@/pages/workspace/editors/useEditorBackNavigation';
 
 const COLLECTION_EDITOR_READ_FIELDS = [
   'identifier',
@@ -69,6 +70,8 @@ const CollectionEditorPage = () => {
     metadata,
   });
 
+  const backTo = useEditorBackNavigation();
+
   const handleToolbarEvent = useCallback(async ({ action }: { action: ToolbarAction; data?: unknown }) => {
     interact({
       id: 'collection-editor-event',
@@ -86,9 +89,9 @@ const CollectionEditorPage = () => {
       action === 'reject'
     ) {
       await retireLock();
-      navigate('/workspace');
+      navigate(backTo);
     }
-  }, [navigate, retireLock, interact, contentId]);
+  }, [navigate, retireLock, interact, contentId, backTo]);
 
   if (loading || isLocking) {
     return <PageLoader message={isLocking ? t('content.acquiringLock') : t('content.loadingEditor')} />;
