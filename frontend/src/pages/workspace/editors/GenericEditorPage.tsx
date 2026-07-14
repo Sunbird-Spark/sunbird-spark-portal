@@ -8,6 +8,7 @@ import React, { useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import GenericEditor from '@/components/editors/GenericEditor';
 import { useToast } from '@/hooks/useToast';
+import { useEditorBackNavigation } from './useEditorBackNavigation';
 
 const GenericEditorPage: React.FC = () => {
   const { contentId, state, framework, contentStatus } = useParams<{
@@ -21,10 +22,11 @@ const GenericEditorPage: React.FC = () => {
   const { toast } = useToast();
 
   const isLargeFileUpload = location.pathname.includes('editorforlargecontent');
+  const backTo = useEditorBackNavigation();
 
   const handleClose = useCallback(() => {
-    navigate('/workspace', { replace: true });
-  }, [navigate]);
+    navigate(backTo, { replace: true });
+  }, [navigate, backTo]);
 
   const handleError = useCallback(
     (error: string) => {
