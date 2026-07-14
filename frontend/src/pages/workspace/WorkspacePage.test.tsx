@@ -349,7 +349,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/quml-editor/do_qs_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/quml-editor/do_qs_123',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -442,7 +445,10 @@ describe('WorkspacePage', () => {
       }));
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/content-editor/do_resource_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/content-editor/do_resource_123',
+        { state: { from: '/' } }
+      );
     });
 
     // Test quiz creation with different contentType
@@ -466,7 +472,10 @@ describe('WorkspacePage', () => {
       }));
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/content-editor/do_quiz_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/content-editor/do_quiz_123',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -549,7 +558,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/collection-editor/do_collection_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/collection-editor/do_collection_123',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -585,7 +597,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/collection-editor/do_textbook_456');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/collection-editor/do_textbook_456',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -698,7 +713,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/collection-editor/do_course_new_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/collection-editor/do_course_new_123',
+        { state: { from: '/' } }
+      );
     });
   });
 
