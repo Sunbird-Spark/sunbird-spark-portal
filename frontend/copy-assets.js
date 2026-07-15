@@ -42,8 +42,18 @@ const qumlWebComponentRoot = path.join(
 const qumlAssetsSource = path.join(qumlWebComponentRoot, 'assets/quml-player');
 const qumlFinalDest = path.join(publicRoot, 'assets/quml-player');
 
-// QUML Editor — now @project-sunbird/sunbird-questionset-editor-web-component-react
-// Imported as a React library via Vite; no static asset copy required.
+// QUML Editor — @project-sunbird/sunbird-questionset-editor-web-component-react
+// Imported as a React library via Vite, but the equation-editor modal (an
+// iframe) is only reachable via a fixed root-relative path, not a JS/CSS
+// import — Vite has no way to discover and copy it automatically. Its
+// index.html also loads sibling .js/.css files by relative path, so the
+// whole mathEquation folder must be copied as-is (not just index.html).
+const qumlEditorWebComponentRoot = path.join(
+    __dirname,
+    'node_modules/@project-sunbird/sunbird-questionset-editor-web-component-react'
+);
+const mathEquationAssetsSource = path.join(qumlEditorWebComponentRoot, 'dist/assets/libs/mathEquation');
+const mathEquationFinalDest = path.join(publicRoot, 'assets/libs/mathEquation');
 
 
 /**
@@ -116,7 +126,11 @@ try {
         fs.copyFileSync(qumlStyles, path.join(qumlFinalDest, 'sunbird-quml-player-styles.css'));
     }
 
-    // 7. QUML Editor — handled by Vite as a React library import, no copy needed.
+    // 7. Copy QUML Editor's equation-modal assets
+    console.log(`\n📂 QUML Editor mathEquation Source: ${mathEquationAssetsSource}`);
+    fs.mkdirSync(mathEquationFinalDest, { recursive: true });
+    console.log('📦 Copying QUML editor equation-modal files to public/assets/libs/mathEquation/...');
+    copyDirectory(mathEquationAssetsSource, mathEquationFinalDest);
 
     // 8. Copy COMMON assets (icons) to root assets folder
     // Many Sunbird components expect icons at /assets/*.svg
@@ -147,7 +161,7 @@ try {
     console.log(`📍 Video Player: public/assets/video-player/`);
     console.log(`📍 ePub Player: public/assets/epub-player/`);
     console.log(`📍 QUML Player: public/assets/quml-player/`);
-    console.log(`📍 QUML Editor: bundled by Vite (no static copy)`);
+    console.log(`📍 QUML Editor equation modal: public/assets/libs/mathEquation/`);
     console.log(`📍 Common Icons: public/assets/*.svg`);
 
 } catch (error) {
