@@ -9,6 +9,7 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
 import useInteract from '@/hooks/useInteract';
+import { useEditorBackNavigation } from '@/pages/workspace/editors/useEditorBackNavigation';
 
 const ContentEditorPage = () => {
   const { t } = useAppI18n();
@@ -26,6 +27,8 @@ const ContentEditorPage = () => {
     metadata: contentData ?? null,
   });
 
+  const backTo = useEditorBackNavigation();
+
   // Memoize the event handler to prevent unnecessary re-renders
   const handleEditorEvent = useCallback((event: ContentEditorEvent) => {
     interact({
@@ -41,8 +44,8 @@ const ContentEditorPage = () => {
   // Memoize the close handler to prevent unnecessary re-renders
   const handleClose = useCallback(async () => {
     await retireLock();
-    navigate('/workspace');
-  }, [retireLock, navigate]);
+    navigate(backTo);
+  }, [retireLock, navigate, backTo]);
 
   // Memoize contentData to prevent unnecessary re-renders when object reference changes
   // but actual content hasn't changed

@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import useImpression from "@/hooks/useImpression";
 import useDebounce from "@/hooks/useDebounce";
 import PageLoader from "@/components/common/PageLoader";
@@ -106,6 +106,7 @@ const DEFAULT_FIELDS = {
 
 const WorkspacePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   useImpression({ type: 'view', pageid: 'workspace', env: 'workspace' });
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: userData } = useUserRead();
@@ -366,7 +367,7 @@ const WorkspacePage = () => {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
-      navigate(optionId === 'upload-content' ? '/workspace/content/edit/generic' : '/workspace/content/edit/editorforlargecontent');
+      navigate(optionId === 'upload-content' ? '/workspace/content/edit/generic' : '/workspace/content/edit/editorforlargecontent', { state: { from: location.pathname + location.search } });
       return;
     } else {
       toast({
@@ -419,7 +420,7 @@ const WorkspacePage = () => {
         }
         setShowDynamicFormDialog(false);
         setSelectedOption(null);
-        navigate(`/edit/collection-editor/${contentId}`);
+        navigate(`/edit/collection-editor/${contentId}`, { state: { from: location.pathname + location.search } });
       } else {
         // Quiz / Story: create resource-type content
         const isQuiz = selectedOption === 'quiz';
@@ -446,7 +447,7 @@ const WorkspacePage = () => {
         }
         setShowDynamicFormDialog(false);
         setSelectedOption(null);
-        navigate(`/edit/content-editor/${contentId}`);
+        navigate(`/edit/content-editor/${contentId}`, { state: { from: location.pathname + location.search } });
       }
     } catch (error) {
       console.error('Failed to create content:', error);
@@ -473,7 +474,7 @@ const WorkspacePage = () => {
       throw new Error(t("workspace.errors.unexpectedResponse"));
     }
 
-    navigate(`/edit/quml-editor/${contentId}`);
+    navigate(`/edit/quml-editor/${contentId}`, { state: { from: location.pathname + location.search } });
   };
 
   const handleContentNameSubmit = async (name: string, extra?: { description?: string }) => {
@@ -500,7 +501,7 @@ const WorkspacePage = () => {
           console.error("Course creation response missing identifier:", response);
           throw new Error(t("workspace.errors.unexpectedResponse"));
         }
-        navigate(`/edit/collection-editor/${contentId}`);
+        navigate(`/edit/collection-editor/${contentId}`, { state: { from: location.pathname + location.search } });
       } else if (selectedOption && QUML_EDITOR_OPTIONS.includes(selectedOption)) {
         await handleQuestionSetCreate(name);
       }
@@ -543,16 +544,16 @@ const WorkspacePage = () => {
 
     if (!isCollection) {
       const isReviewMode = userRole === 'reviewer' && item.status === 'review';
-      navigate(isReviewMode ? `/workspace/review/${id}` : `/workspace/view/${id}`);
+      navigate(isReviewMode ? `/workspace/review/${id}` : `/workspace/view/${id}`, { state: { from: location.pathname + location.search } });
       return;
     }
     const route = getEditorRoute(id);
-    if (route) navigate(route);
+    if (route) navigate(route, { state: { from: location.pathname + location.search } });
   };
 
   const handleEdit = (id: string) => {
     const route = getEditorRoute(id);
-    if (route) navigate(route);
+    if (route) navigate(route, { state: { from: location.pathname + location.search } });
   };
 
   const handleDelete = (id: string) => {

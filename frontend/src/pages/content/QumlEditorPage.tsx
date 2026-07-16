@@ -9,6 +9,7 @@ import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
 import useInteract from '@/hooks/useInteract';
+import { useEditorBackNavigation } from '@/pages/workspace/editors/useEditorBackNavigation';
 
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -46,6 +47,8 @@ const QumlEditorPage = () => {
     metadata,
   });
 
+  const backTo = useEditorBackNavigation();
+
   const contextOverrides: QumlEditorContextOverrides = useMemo(() => ({
     mode: editorMode,
   }), [editorMode]);
@@ -63,9 +66,9 @@ const QumlEditorPage = () => {
     const closeEditor = data?.close || data?.action === 'back';
     if (closeEditor) {
       await retireLock();
-      navigate('/workspace');
+      navigate(backTo);
     }
-  }, [navigate, retireLock, interact, contentId]);
+  }, [navigate, retireLock, interact, contentId, backTo]);
 
   const handleTelemetryEvent = useCallback((_event: any) => { }, []);
 
