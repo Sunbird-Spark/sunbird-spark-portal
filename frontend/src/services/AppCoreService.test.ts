@@ -204,6 +204,44 @@ describe('AppCoreService', () => {
         });
     });
 
+    describe('getCloudStorageUrls', () => {
+        it('should parse comma-separated URLs into an array', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: { appId: 'a', version: '1.0', buildHash: 'h', cloudStorageUrls: 'https://s3.example.com , https://cdn.example.com' }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            const urls = await appCoreService.getCloudStorageUrls();
+            expect(urls).toEqual(['https://s3.example.com', 'https://cdn.example.com']);
+        });
+
+        it('should return empty array when cloudStorageUrls is empty string', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: { appId: 'a', version: '1.0', buildHash: 'h', cloudStorageUrls: '' }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            const urls = await appCoreService.getCloudStorageUrls();
+            expect(urls).toEqual([]);
+        });
+
+        it('should return empty array when cloudStorageUrls is undefined', async () => {
+            const mockClient = {
+                get: vi.fn().mockResolvedValue({
+                    data: { appId: 'a', version: '1.0', buildHash: 'h' }
+                })
+            };
+            (httpClient.getClient as any).mockReturnValue(mockClient);
+
+            const urls = await appCoreService.getCloudStorageUrls();
+            expect(urls).toEqual([]);
+        });
+    });
+
     describe('getBuildHash', () => {
         it('should fetch buildHash from app info endpoint', async () => {
             const mockClient = {

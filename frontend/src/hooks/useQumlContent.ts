@@ -70,7 +70,16 @@ export const useQumlContent = (
         if (!node) return node;
 
         if (node.mimeType === 'application/vnd.sunbird.question' && node.identifier) {
-          return questionMap.get(node.identifier) || node;
+          const q = questionMap.get(node.identifier) || node;
+          if (!_.get(q, 'outcomeDeclaration.maxScore')) {
+            if (!q.outcomeDeclaration) q.outcomeDeclaration = {};
+            q.outcomeDeclaration.maxScore = {
+              cardinality: 'single',
+              type: 'integer',
+              defaultValue: _.get(q, 'maxScore', 1),
+            };
+          }
+          return q;
         }
 
         const children = _.get(node, 'children');

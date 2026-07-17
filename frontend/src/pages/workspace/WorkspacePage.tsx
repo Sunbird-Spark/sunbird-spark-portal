@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import useImpression from "@/hooks/useImpression";
 import useDebounce from "@/hooks/useDebounce";
 import PageLoader from "@/components/common/PageLoader";
@@ -106,6 +106,7 @@ const DEFAULT_FIELDS = {
 
 const WorkspacePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   useImpression({ type: 'view', pageid: 'workspace', env: 'workspace' });
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: userData } = useUserRead();
@@ -135,7 +136,7 @@ const WorkspacePage = () => {
   // Pre-fetch channel/framework data using tanstack query when org is available
   const orgChannelId = orgData?.hashTagId || orgData?.identifier || '';
   const { data: channelData } = useChannel(orgChannelId);
-  const orgFramework = channelData?.data?.channel?.frameworks?.[0]?.identifier || '';
+  const orgFramework = channelData?.data?.channel?.defaultFramework || channelData?.data?.channel?.frameworks?.[0]?.identifier || '';
 
   const { toast } = useToast();
   const { t } = useAppI18n();
@@ -178,10 +179,25 @@ const WorkspacePage = () => {
       return 'creator';
     });
   }, [hasCreatorRole, hasReviewerRole]);
-  const [activeView, setActiveView] = useState<WorkspaceView>('all');
+  const SEGMENT_VIEWS: WorkspaceView[] = ['all', 'drafts', 'review', 'published', 'pending-review', 'my-published'];
+
+  const [activeView, setActiveView] = useState<WorkspaceView>(() => {
+    const view = searchParams.get('view');
+    return SEGMENT_VIEWS.includes(view as WorkspaceView) ? (view as WorkspaceView) : 'all';
+  });
+  const [secondaryView, setSecondaryView] = useState<WorkspaceView | null>(() => {
+    const more = searchParams.get('more');
+    return more === 'uploads' || more === 'collaborations' ? (more as WorkspaceView) : null;
+  });
+  const effectiveView = secondaryView ?? activeView;
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy] = useState<SortOption>('updated');
-  const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>('all');
+  const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>(() => {
+    const type = searchParams.get('type');
+    return ['all', 'course', 'content', 'quiz', 'collection'].includes(type ?? '')
+      ? (type as ContentTypeFilter)
+      : 'all';
+  });
 
   // Local state for responsive typing; debounced value drives API + URL.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
@@ -207,6 +223,39 @@ const WorkspacePage = () => {
       return next;
     }, { replace: true });
   }, [debouncedSearch, setSearchParams]);
+
+  // Sync typeFilter, activeView, secondaryView from URL on back/forward
+  useEffect(() => {
+    const urlType = searchParams.get('type');
+    if (urlType && ['all', 'course', 'content', 'quiz', 'collection'].includes(urlType)) {
+      setTypeFilter(urlType as ContentTypeFilter);
+    }
+    const urlView = searchParams.get('view');
+    if (urlView && SEGMENT_VIEWS.includes(urlView as WorkspaceView)) {
+      setActiveView(urlView as WorkspaceView);
+    }
+    const urlMore = searchParams.get('more');
+    setSecondaryView(urlMore === 'uploads' || urlMore === 'collaborations' ? (urlMore as WorkspaceView) : null);
+  }, [searchParams]);
+
+  // Sync typeFilter, activeView, secondaryView to URL
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      let changed = false;
+
+      const newType = typeFilter !== 'all' ? typeFilter : '';
+      if (next.get('type') !== newType) { changed = true; if (newType) next.set('type', newType); else next.delete('type'); }
+
+      const newView = activeView !== 'all' ? activeView : '';
+      if (next.get('view') !== newView) { changed = true; if (newView) next.set('view', newView); else next.delete('view'); }
+
+      const newMore = secondaryView || '';
+      if (next.get('more') !== newMore) { changed = true; if (newMore) next.set('more', newMore); else next.delete('more'); }
+
+      return changed ? next : prev;
+    }, { replace: true });
+  }, [typeFilter, activeView, secondaryView, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showDynamicFormDialog, setShowDynamicFormDialog] = useState(false);
@@ -216,7 +265,7 @@ const WorkspacePage = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [retiredContentIds, setRetiredContentIds] = useState<string[]>([]);
 
-  const showContent = !['create'].includes(activeView);
+  const showContent = !['create'].includes(effectiveView);
   const userId = userAuthInfoService.getUserId();
 
   const {
@@ -233,6 +282,7 @@ const WorkspacePage = () => {
   } = useWorkspace({
     userId,
     activeTab: activeView,
+    secondaryView,
     sortBy,
     typeFilter,
     userRole,
@@ -293,10 +343,14 @@ const WorkspacePage = () => {
     };
   }, [userRole, visibleContentIds]); // Changed from visibleContents to visibleContentIds
 
-  // Reset view and search when role changes
+  // Reset view and search only on actual role transition (not on mount)
+  const prevUserRoleRef = useRef(userRole);
   useEffect(() => {
+    if (prevUserRoleRef.current === userRole) return;
+    prevUserRoleRef.current = userRole;
     const nextView: WorkspaceView = userRole === 'creator' ? 'all' : 'pending-review';
-    setActiveView((prev) => (prev === nextView ? prev : nextView));
+    setActiveView(nextView);
+    setSecondaryView(null);
     setSearchInput('');
   }, [userRole]);
 
@@ -313,7 +367,7 @@ const WorkspacePage = () => {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
-      navigate(optionId === 'upload-content' ? '/workspace/content/edit/generic' : '/workspace/content/edit/editorforlargecontent');
+      navigate(optionId === 'upload-content' ? '/workspace/content/edit/generic' : '/workspace/content/edit/editorforlargecontent', { state: { from: location.pathname + location.search } });
       return;
     } else {
       toast({
@@ -366,7 +420,7 @@ const WorkspacePage = () => {
         }
         setShowDynamicFormDialog(false);
         setSelectedOption(null);
-        navigate(`/edit/collection-editor/${contentId}`);
+        navigate(`/edit/collection-editor/${contentId}`, { state: { from: location.pathname + location.search } });
       } else {
         // Quiz / Story: create resource-type content
         const isQuiz = selectedOption === 'quiz';
@@ -393,7 +447,7 @@ const WorkspacePage = () => {
         }
         setShowDynamicFormDialog(false);
         setSelectedOption(null);
-        navigate(`/edit/content-editor/${contentId}`);
+        navigate(`/edit/content-editor/${contentId}`, { state: { from: location.pathname + location.search } });
       }
     } catch (error) {
       console.error('Failed to create content:', error);
@@ -420,7 +474,7 @@ const WorkspacePage = () => {
       throw new Error(t("workspace.errors.unexpectedResponse"));
     }
 
-    navigate(`/edit/quml-editor/${contentId}`);
+    navigate(`/edit/quml-editor/${contentId}`, { state: { from: location.pathname + location.search } });
   };
 
   const handleContentNameSubmit = async (name: string, extra?: { description?: string }) => {
@@ -447,7 +501,7 @@ const WorkspacePage = () => {
           console.error("Course creation response missing identifier:", response);
           throw new Error(t("workspace.errors.unexpectedResponse"));
         }
-        navigate(`/edit/collection-editor/${contentId}`);
+        navigate(`/edit/collection-editor/${contentId}`, { state: { from: location.pathname + location.search } });
       } else if (selectedOption && QUML_EDITOR_OPTIONS.includes(selectedOption)) {
         await handleQuestionSetCreate(name);
       }
@@ -490,16 +544,16 @@ const WorkspacePage = () => {
 
     if (!isCollection) {
       const isReviewMode = userRole === 'reviewer' && item.status === 'review';
-      navigate(isReviewMode ? `/workspace/review/${id}` : `/workspace/view/${id}`);
+      navigate(isReviewMode ? `/workspace/review/${id}` : `/workspace/view/${id}`, { state: { from: location.pathname + location.search } });
       return;
     }
     const route = getEditorRoute(id);
-    if (route) navigate(route);
+    if (route) navigate(route, { state: { from: location.pathname + location.search } });
   };
 
   const handleEdit = (id: string) => {
     const route = getEditorRoute(id);
-    if (route) navigate(route);
+    if (route) navigate(route, { state: { from: location.pathname + location.search } });
   };
 
   const handleDelete = (id: string) => {
@@ -555,9 +609,20 @@ const WorkspacePage = () => {
     setTypeFilter(type);
   };
 
+  const handleViewChange = (view: WorkspaceView) => {
+    setActiveView(view);
+    setSecondaryView(null);
+  };
+
+  const handleSecondaryAction = (action: WorkspaceView) => {
+    setSecondaryView((prev) => (prev === action ? null : action));
+  };
+
   const navigationProps = {
     activeView,
-    onViewChange: setActiveView,
+    secondaryView,
+    onViewChange: handleViewChange,
+    onSecondaryActionChange: handleSecondaryAction,
     userRole,
     onRoleChange: handleRoleChange,
     hasCreatorRole,
@@ -586,7 +651,7 @@ const WorkspacePage = () => {
           ) : (
             <WorkspacePageContent
               showCreateModal={showCreateModal}
-              activeView={activeView}
+              activeView={effectiveView}
               filteredItems={visibleContents}
               viewMode={viewMode}
               t={t}

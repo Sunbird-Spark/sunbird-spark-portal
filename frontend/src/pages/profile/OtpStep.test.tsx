@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 import { OtpStep } from './DeleteAccountSteps';
@@ -7,6 +8,14 @@ vi.mock('@/hooks/useAppI18n', () => ({
     t: (key: string, params?: Record<string, string>) =>
       params?.email ? `${key}:${params.email}` : key,
   }),
+}));
+
+// input-otp schedules a setTimeout that fires after happy-dom tears down.
+// Mock the wrapper so OTPInput never mounts and no timer is scheduled.
+vi.mock('@/components/common/InputOTP', () => ({
+  InputOTP: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  InputOTPGroup: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  InputOTPSlot: () => null,
 }));
 
 const renderStep = (overrides: Partial<Parameters<typeof OtpStep>[0]> = {}) =>

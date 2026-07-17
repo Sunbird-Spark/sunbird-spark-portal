@@ -10,7 +10,9 @@ import WorkspaceSearch from "./WorkspaceSearch";
 
 interface WorkspaceToolbarProps {
   activeView: WorkspaceView;
+  secondaryView: WorkspaceView | null;
   onViewChange: (view: WorkspaceView) => void;
+  onSecondaryActionChange: (action: WorkspaceView) => void;
   userRole: UserRole;
   onRoleChange: (role: UserRole) => void;
   hasCreatorRole?: boolean;
@@ -33,7 +35,9 @@ interface WorkspaceToolbarProps {
 
 const WorkspaceToolbar = ({
   activeView,
+  secondaryView,
   onViewChange,
+  onSecondaryActionChange,
   userRole,
   onRoleChange,
   hasCreatorRole = false,
@@ -58,6 +62,9 @@ const WorkspaceToolbar = ({
   const showContentFilters = shouldShowContentFilters(activeView);
   const secondaryActions = getSecondaryActions(userRole, isBookCreatorOnly);
   const showRoleSwitcher = hasCreatorRole || hasReviewerRole;
+  const selectedSecondaryAction = secondaryView
+    ? secondaryActions.find(a => a.id === secondaryView)
+    : undefined;
 
   return (
     <div className="space-y-4 mb-6">
@@ -153,7 +160,9 @@ const WorkspaceToolbar = ({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="font-rubik rounded-xl flex-shrink-0">
-                    {t('workspace.more')}
+                    {selectedSecondaryAction
+                      ? t(selectedSecondaryAction.label)
+                      : t('workspace.more')}
                     <FiChevronDown className="w-4 h-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -161,7 +170,7 @@ const WorkspaceToolbar = ({
                   {secondaryActions.map((action) => (
                     <DropdownMenuItem
                       key={action.id}
-                      onClick={() => onViewChange(action.id)}
+                      onClick={() => onSecondaryActionChange(action.id)}
                       className="font-rubik"
                     >
                       {t(action.label)}
@@ -230,10 +239,10 @@ const WorkspaceToolbar = ({
       {userRole === 'creator' && showContentFilters && (
         <div className="flex items-center gap-6 px-2">
           {/* Section titles for secondary views */}
-          {activeView === 'uploads' && (
+          {secondaryView === 'uploads' && (
             <span className="text-sm font-semibold font-rubik text-foreground">{t('workspace.stats.allUploads')}</span>
           )}
-          {activeView === 'collaborations' && (
+          {secondaryView === 'collaborations' && (
             <span className="text-sm font-semibold font-rubik text-foreground">{t('workspace.stats.myCollaborations')}</span>
           )}
           {contentCount !== undefined && (

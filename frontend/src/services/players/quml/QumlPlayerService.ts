@@ -41,7 +41,9 @@ export class QumlPlayerService {
 
     return {
       context,
-      config: {},
+      // apiSlug routes the player's API calls through the portal gateway
+      // (matches QumlEditorService); the player falls back to /api without it.
+      config: { apiSlug: '/portal' },
       metadata,
     };
   }
