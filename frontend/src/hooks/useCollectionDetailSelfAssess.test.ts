@@ -113,7 +113,7 @@ describe('useCollectionDetailSelfAssess', () => {
     expect(result.current.maxAttemptsExceeded).toBe(false);
   });
 
-  it('enriches playerMetadata with maxAttempt and currentAttempt when selfAssess and not exceeded', () => {
+  it('enriches playerMetadata with maxAttempts and currentAttempt when selfAssess and not exceeded', () => {
     const { result } = renderHook(() =>
       useCollectionDetailSelfAssess({
         ...defaultParams,
@@ -122,19 +122,23 @@ describe('useCollectionDetailSelfAssess', () => {
     );
     expect(result.current.playerMetadata).toEqual({
       mimeType: 'application/vnd.ekstep.quiz',
-      maxAttempt: 2,
+      maxAttempts: 2,
       currentAttempt: 1,
     });
   });
 
-  it('returns raw playerMetadata when maxAttemptsExceeded', () => {
+  it('still merges maxAttempts/currentAttempt into playerMetadata when maxAttemptsExceeded (the player itself gates on these)', () => {
     const { result } = renderHook(() =>
       useCollectionDetailSelfAssess({
         ...defaultParams,
         contentAttemptInfoMap: { 'quiz-1': { attemptCount: 2 } },
       })
     );
-    expect(result.current.playerMetadata).toEqual({ mimeType: 'application/vnd.ekstep.quiz' });
+    expect(result.current.playerMetadata).toEqual({
+      mimeType: 'application/vnd.ekstep.quiz',
+      maxAttempts: 2,
+      currentAttempt: 2,
+    });
   });
 
   it('returns raw playerMetadata when not selfAssessWithBatch', () => {

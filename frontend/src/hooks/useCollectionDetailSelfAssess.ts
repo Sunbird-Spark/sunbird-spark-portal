@@ -64,13 +64,16 @@ export function useCollectionDetailSelfAssess({
   const playerMetadata = useMemo((): Record<string, unknown> | undefined => {
     if (!rawPlayerMetadata) return undefined;
     const base = rawPlayerMetadata as Record<string, unknown>;
-    if (!selfAssessWithBatch || maxAttemptsExceeded) return base;
+    // Always merge in the course-level attempt info (even once exceeded) —
+    // the player itself disables its Start/Resume CTA once attemptsLeft hits
+    // 0, so it needs the true count on every mount (e.g. after a refresh).
+    if (!selfAssessWithBatch) return base;
     return {
       ...base,
-      maxAttempt: maxAttempts,
+      maxAttempts: maxAttempts,
       currentAttempt: attemptCountForPlayerRef.current,
     };
-  }, [rawPlayerMetadata, selfAssessWithBatch, maxAttemptsExceeded, maxAttempts]);
+  }, [rawPlayerMetadata, selfAssessWithBatch, maxAttempts]);
 
   const handleGoBack = useCallback(() => navigate(-1), [navigate]);
 
