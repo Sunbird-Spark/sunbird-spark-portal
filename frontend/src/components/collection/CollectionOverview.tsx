@@ -16,9 +16,10 @@ interface CollectionOverviewProps {
   batchStartDate?: string;
   /**
    * Computed by useCollectionDetailSelfAssess but not currently rendered here
-   * — the player itself now disables its Start/Resume CTA once attemptsLeft
-   * hits 0 (see StartPage.tsx), so this doesn't gate anything in this
-   * component. Kept threaded through in case a future UI needs it.
+   * — the embedded QuML player itself now disables its own Start/Resume CTA
+   * once attemptsLeft hits 0 (in the player's own repo, not this one), so
+   * this doesn't gate anything in this component. Kept threaded through in
+   * case a future UI needs it.
    */
   showMaxAttemptsExceeded?: boolean;
   playerMetadata?: any;
