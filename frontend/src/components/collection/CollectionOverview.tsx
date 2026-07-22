@@ -14,6 +14,13 @@ interface CollectionOverviewProps {
   /** When true (enrolled in upcoming batch), show batch-not-started-yet message instead of player. */
   upcomingBatchBlocked?: boolean;
   batchStartDate?: string;
+  /**
+   * Computed by useCollectionDetailSelfAssess but not currently rendered here
+   * — the embedded QuML player itself now disables its own Start/Resume CTA
+   * once attemptsLeft hits 0 (in the player's own repo, not this one), so
+   * this doesn't gate anything in this component. Kept threaded through in
+   * case a future UI needs it.
+   */
   showMaxAttemptsExceeded?: boolean;
   playerMetadata?: any;
   playerIsLoading?: boolean;
@@ -30,7 +37,6 @@ const CollectionOverview = ({
   contentAccessBlocked = false,
   upcomingBatchBlocked = false,
   batchStartDate,
-  showMaxAttemptsExceeded = false,
   playerMetadata,
   playerIsLoading,
   playerError,
@@ -63,14 +69,6 @@ const CollectionOverview = ({
                         date: dayjs(batchStartDate).format("DD MMM YYYY"),
                       })
                     : t("courseDetails.batchNotStartedYetNoDate")}
-                </p>
-              </div>
-            </div>
-          ) : showMaxAttemptsExceeded ? (
-            <div className="collection-player-wrapper">
-              <div className="collection-player-loading !h-[33.5rem] !min-h-0 flex flex-col items-center justify-center py-8 px-4">
-                <p className="text-center text-muted-foreground text-sm">
-                  {t("courseDetails.selfAssessMaxAttempt")}
                 </p>
               </div>
             </div>
