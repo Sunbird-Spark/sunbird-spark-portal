@@ -170,7 +170,8 @@ export function useContentStateUpdate({
       if (isBatchEnded) return;
       const isSelfAssess = (contentTypeRef.current ?? "").toLowerCase() === "selfassess";
       const isQuestionSet = (mimeType ?? "").toLowerCase() === "application/vnd.sunbird.questionset";
-      if (!isSelfAssess && !isQuestionSet && currentContentStatusRef.current === 2) return;
+      const isScorm = (mimeType ?? "").toLowerCase() === "application/vnd.ekstep.scorm-archive";
+      if (!isSelfAssess && !isQuestionSet && !isScorm && currentContentStatusRef.current === 2) return;
 
       const rawEvent = event?.data ?? event;
       const eid = typeof rawEvent === "string" ? "" : (event?.eid ?? (event?.data as any)?.eid ?? event?.type ?? "") as string;
@@ -228,8 +229,8 @@ export function useContentStateUpdate({
 
       if (eidUpper === "END") {
         const summary = extractSummary(event);
-        if (isSelfAssess) {
-
+        if (isSelfAssess || isScorm) {
+          
           const mergedSummary = (summary as ConsumptionSummary[]).reduce<ConsumptionSummary>((acc, s) => ({ ...acc, ...s }), {});
           const endPageSeen = Boolean(mergedSummary.endpageseen || mergedSummary.visitedcontentend);
 
@@ -237,9 +238,9 @@ export function useContentStateUpdate({
             eventHasScore(event) ||
             assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent));
 
+          // SCORM's terminal event fires once at LMSCommit with values already landed; no endpageseen flag to check.
           if (
-            hasScore &&
-            endPageSeen &&
+            (isScorm ? hasScore : hasScore && endPageSeen) &&
             assessmentTsRef.current != null &&
             !sendingAssessmentRef.current
           ) {
