@@ -46,6 +46,7 @@ export function useContentStateUpdate({
   const assessmentTsRef = useRef<number | null>(null);
   const assessEventsRef = useRef<unknown[]>([]);
   const sendingAssessmentRef = useRef(false);
+  const attemptIdRef = useRef<string | null>(null);
 
   // Use refs for values that change after content state updates to keep the
   // returned telemetry callback identity stable and avoid re-initialising players.
@@ -60,6 +61,7 @@ export function useContentStateUpdate({
     assessmentTsRef.current = null;
     assessEventsRef.current = [];
     sendingAssessmentRef.current = false;
+    attemptIdRef.current = null;
   }, [contentId]);
 
   const handleContentStateUpdate = useCallback(
@@ -90,9 +92,12 @@ export function useContentStateUpdate({
     const ts = assessmentTsRef.current;
     if (ts == null) return;
     const events = assessEventsRef.current;
-    const attemptId = typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${collectionId}-${effectiveBatchId}-${contentId}-${userId}-${Date.now()}`;
+    if (attemptIdRef.current == null) {
+      attemptIdRef.current = typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${collectionId}-${effectiveBatchId}-${contentId}-${userId}-${Date.now()}`;
+    }
+    const attemptId = attemptIdRef.current;
     try {
       await contentStateUpdate({
         userId,
@@ -117,7 +122,6 @@ export function useContentStateUpdate({
     } catch (err) {
       console.error("Assessment state update failed:", err);
     } finally {
-      assessmentTsRef.current = null;
       assessEventsRef.current = [];
       sendingAssessmentRef.current = false;
     }

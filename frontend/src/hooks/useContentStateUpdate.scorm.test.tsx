@@ -134,6 +134,44 @@ describe('useContentStateUpdate — SCORM (mimeType)', () => {
     expect(secondCall?.assessments).toHaveLength(1);
   });
 
+  it('sends every quiz score within a session (not silently dropped after the first) using the same attemptId', async () => {
+    const { result } = renderHook(() =>
+      useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })
+    );
+    result.current({ eid: 'START', ets: 1700000000000 });
+    result.current({
+      eid: 'ASSESS',
+      edata: { score: '300', item: { id: 'SCO1', maxscore: '700' }, pass: 'No' },
+    } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+    await vi.waitFor(() => {
+      // Call 0 is START's status:1 PATCH; call 1 is the first quiz's send.
+      expect(mockMutateAsync).toHaveBeenCalledTimes(2);
+    });
+    // Wait for the first send's full async chain (including its `finally`,
+    // which resets sendingAssessmentRef) to settle before firing the next
+    // quiz's ASSESS - otherwise it can arrive while still "in flight".
+    // (invalidateQueries call 1 is from START, call 2 is from this send.)
+    await vi.waitFor(() => {
+      expect(mockInvalidateQueries).toHaveBeenCalledTimes(2);
+    });
+    result.current({
+      eid: 'ASSESS',
+      edata: { score: '700', item: { id: 'SCO1', maxscore: '700' }, pass: 'Yes' },
+    } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+    await vi.waitFor(() => {
+      // Call 2 is the second quiz's send - must still fire, not be dropped.
+      expect(mockMutateAsync).toHaveBeenCalledTimes(3);
+    });
+    const firstSend = mockMutateAsync.mock.calls[1]?.[0] as
+      | { assessments?: { attemptId: string }[] }
+      | undefined;
+    const secondSend = mockMutateAsync.mock.calls[2]?.[0] as
+      | { assessments?: { attemptId: string }[] }
+      | undefined;
+    expect(firstSend?.assessments?.[0]?.attemptId).toBeDefined();
+    expect(secondSend?.assessments?.[0]?.attemptId).toBe(firstSend?.assessments?.[0]?.attemptId);
+  });
+
   it('caps status at 1 when END has no endpageseen and no score', async () => {
     const { result } = renderHook(() =>
       useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })
